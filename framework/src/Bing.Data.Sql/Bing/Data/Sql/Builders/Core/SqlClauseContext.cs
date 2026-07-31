@@ -76,4 +76,11 @@ public sealed record SqlClauseContext
         Services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
+    /// <summary>
+    /// 在修改查询 Clause 前验证统一 Builder 的操作状态。
+    /// </summary>
+    /// <param name="action">当前查询行为。</param>
+    internal void UseOperation(SqlOperationAction action) =>
+        (Builder as ISqlOperationStateManager)?.UseOperation(action);
+
 }

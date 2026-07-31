@@ -16,6 +16,24 @@ public interface ISqlExecutor : ISqlQuery, ISqlInsertExecutor, ISqlUpdateExecuto
     ISqlOutputParameterAccessor OutputParameters { get; }
 
     /// <summary>
+    /// 执行统一 Builder 生成的 Insert、Update 或 Delete 操作。
+    /// </summary>
+    /// <param name="builder">SQL Builder。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <returns>操作影响的行数。</returns>
+    int Execute(ISqlBuilder builder, int? timeout = null);
+
+    /// <summary>
+    /// 执行统一 Builder 生成的 Insert、Update 或 Delete 操作。
+    /// </summary>
+    /// <param name="builder">SQL Builder。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>操作影响的行数。</returns>
+    Task<int> ExecuteAsync(ISqlBuilder builder, int? timeout = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 执行指定的SQL语句
     /// </summary>
     /// <param name="sql">执行的SQL语句</param>

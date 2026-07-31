@@ -235,6 +235,11 @@ public class MySqlRoutingAndMappingTest
         Assert.Equal(10, builder.GetParam("_p_2"));
     }
 
+    /// <summary>
+    /// 创建绑定 reporting 数据源的测试 SQL 配置。
+    /// </summary>
+    /// <param name="databaseType">reporting 数据源使用的数据库类型。</param>
+    /// <returns>带固定数据源上下文的 SQL 配置。</returns>
     private static SqlOptions CreateSqlOptions(DatabaseType databaseType) => new SqlOptions().SetDatabaseContext(
         new DatabaseContext
         {
@@ -243,8 +248,12 @@ public class MySqlRoutingAndMappingTest
         });
 
     /// <summary>
-    /// 使用公开共享服务创建 MySQL Builder。
+    /// 组合测试所需共享服务后创建 MySQL Builder。
     /// </summary>
+    /// <param name="entityMappingResolver">可选实体映射解析器。</param>
+    /// <param name="metadataOptions">可选 SQL 元数据配置。</param>
+    /// <param name="options">可选的带数据源上下文 SQL 配置。</param>
+    /// <returns>使用给定测试服务的 MySQL Builder。</returns>
     private static MySqlBuilder CreateBuilder(IEntityMappingResolver entityMappingResolver = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null) =>
         new(new SqlBuilderServices(entityMappingResolver: entityMappingResolver,
@@ -277,6 +286,7 @@ public class MySqlRoutingAndMappingTest
     /// <summary>
     /// 创建带点物理表名的元数据配置。
     /// </summary>
+    /// <returns>用于验证带点物理表名按原子标识符渲染的实体映射配置。</returns>
     private static SqlMetadataOptions CreateDottedTableMetadataOptions()
     {
         var options = new SqlMetadataOptions();

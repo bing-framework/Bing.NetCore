@@ -2,6 +2,7 @@ using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 
@@ -109,6 +110,27 @@ public class SqlClauseContractTest
 
         // Assert
         Assert.False(exposesMutationMarker);
+    }
+
+    /// <summary>
+    /// 测试目的：完整 SQL Operation 实现必须同时提供查询和三类 Mutation Clause Accessor。
+    /// </summary>
+    [Fact]
+    public void SqlOperationImplementation_ShouldProvideCompleteClauseAccessors()
+    {
+        // Arrange
+        var builder = typeof(TestSqlBuilder);
+
+        // Act
+        var contracts = new[]
+        {
+            typeof(ISqlQueryClauseAccessor), typeof(IInsertClauseAccessor), typeof(IUpdateClauseAccessor),
+            typeof(IDeleteClauseAccessor), typeof(ISqlMutationContextAccessor)
+        };
+
+        // Assert
+        Assert.True(typeof(ISqlOperation).IsAssignableFrom(builder));
+        Assert.All(contracts, contract => Assert.True(contract.IsAssignableFrom(builder)));
     }
 
     /// <summary>

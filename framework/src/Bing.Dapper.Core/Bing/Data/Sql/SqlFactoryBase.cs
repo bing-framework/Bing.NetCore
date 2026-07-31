@@ -30,6 +30,11 @@ public abstract class SqlFactoryBase
     private readonly ISqlImplementationTypeResolver _implementationTypeResolver;
 
     /// <summary>
+    /// SQL Provider 解析器。
+    /// </summary>
+    private readonly ISqlProviderResolver _providerResolver;
+
+    /// <summary>
     /// SQL 数据源解析器。
     /// </summary>
     private readonly ISqlDataSourceResolver _dataSourceResolver;
@@ -47,18 +52,21 @@ public abstract class SqlFactoryBase
     /// <param name="metadataOptions">SQL 元数据配置。</param>
     /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
+    /// <param name="providerResolver">SQL Provider 解析器。</param>
     /// <param name="connectionStringResolver">SQL 连接字符串解析器。</param>
     protected SqlFactoryBase(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
         ISqlImplementationTypeResolver implementationTypeResolver = null,
         ISqlDataSourceResolver dataSourceResolver = null,
+        ISqlProviderResolver providerResolver = null,
         ISqlConnectionStringResolver connectionStringResolver = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _databaseContextAccessor = databaseContextAccessor;
         _metadataOptions = metadataOptions ?? new SqlMetadataOptions();
         _implementationTypeResolver = implementationTypeResolver;
+        _providerResolver = providerResolver ?? _serviceProvider.GetService<ISqlProviderResolver>();
         _dataSourceResolver = dataSourceResolver ?? new DefaultSqlDataSourceResolver(_metadataOptions);
         _connectionStringResolver = connectionStringResolver ??
                                     _serviceProvider.GetService<ISqlConnectionStringResolver>() ??
@@ -86,9 +94,9 @@ public abstract class SqlFactoryBase
     }
 
     /// <summary>
-    /// 获取当前数据库上下文。
+    /// 获取当前数据库上下文；服务类型参数仅为保持派生工厂调用签名兼容。
     /// </summary>
-    /// <param name="serviceType">服务类型。</param>
+    /// <param name="serviceType">请求服务类型；当前上下文解析不区分服务类型。</param>
     /// <returns>数据库上下文。</returns>
     protected DatabaseContext GetCurrentContext(Type serviceType)
     {
@@ -134,8 +142,8 @@ public abstract class SqlFactoryBase
     /// <returns>服务实例。</returns>
     protected TService CreateInstance<TService>(DatabaseContext context) where TService : class
     {
-        var databaseType = context?.DataSource?.DatabaseType;
-        var implementationType = GetImplementationType(typeof(TService), databaseType);
+        var providerKey = ResolveProviderKey(context);
+        var implementationType = GetImplementationType(typeof(TService), providerKey);
         var options = CreateOptions(implementationType, context);
         return (TService)ActivatorUtilities.CreateInstance(_serviceProvider, implementationType, _serviceProvider,
             options);
@@ -144,27 +152,17 @@ public abstract class SqlFactoryBase
     /// <summary>
     /// 获取实现类型。
     /// </summary>
-    /// <typeparam name="TService">服务类型。</typeparam>
-    /// <returns>实现类型。</returns>
-    protected Type GetImplementationType<TService>() where TService : class
-    {
-        return GetImplementationType(typeof(TService));
-    }
-
-    /// <summary>
-    /// 获取实现类型。
-    /// </summary>
     /// <param name="serviceType">服务类型。</param>
-    /// <param name="databaseType">数据库类型。</param>
+    /// <param name="providerKey">Provider 唯一标识。</param>
     /// <returns>实现类型。</returns>
-    protected Type GetImplementationType(Type serviceType, DatabaseType? databaseType = null)
+    protected Type GetImplementationType(Type serviceType, string providerKey)
     {
-        var implementationType = _implementationTypeResolver?.Resolve(serviceType, databaseType);
+        var implementationType = _implementationTypeResolver?.Resolve(serviceType, providerKey);
         if (implementationType != null)
             return implementationType;
         if (serviceType.IsAbstract == false && serviceType.IsInterface == false)
             return serviceType;
-        throw new InvalidOperationException($"未注册类型 {serviceType.FullName} 在数据库类型 {databaseType?.ToString() ?? "<未指定>"} 下的 SQL 实现类型");
+        throw new InvalidOperationException($"未注册类型 {serviceType.FullName} 在 Provider Key {providerKey ?? "<未指定>"} 下的 SQL 实现类型。");
     }
 
     /// <summary>
@@ -222,6 +220,16 @@ public abstract class SqlFactoryBase
             ReadPreference = readPreference,
             DataSource = dataSource
         });
+    }
+
+    /// <summary>
+    /// 从冻结上下文解析 Provider Key。
+    /// </summary>
+    private string ResolveProviderKey(DatabaseContext context)
+    {
+        if (_providerResolver == null)
+            throw new InvalidOperationException("未注册 SQL Provider 解析器，无法解析 SQL 实现类型。");
+        return _providerResolver.Resolve(context, databaseType: context?.DataSource?.DatabaseType).Key;
     }
 
     /// <summary>

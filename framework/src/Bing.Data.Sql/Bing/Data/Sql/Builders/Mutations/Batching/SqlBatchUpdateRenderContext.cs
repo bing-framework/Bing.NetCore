@@ -1,4 +1,3 @@
-using System.Reflection;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
@@ -11,8 +10,22 @@ namespace Bing.Data.Sql.Builders.Mutations.Batching;
 public sealed class SqlBatchUpdateRenderContext
 {
     /// <summary>
+    /// 当前映射解析器分区内的编译属性 Getter 缓存。
+    /// </summary>
+    private readonly SqlMutationPlanCache _planCache;
+
+    /// <summary>
     /// 初始化批量 Update 渲染上下文。
     /// </summary>
+    /// <param name="provider">当前 SQL Provider。</param>
+    /// <param name="services">Builder 共享服务。</param>
+    /// <param name="databaseContext">本批命令固定使用的数据库上下文。</param>
+    /// <param name="mapping">待更新实体的表和列映射。</param>
+    /// <param name="updateColumns">需要写入的非键列。</param>
+    /// <param name="keys">用于匹配目标行的主键列。</param>
+    /// <param name="concurrencyColumns">用于并发校验的令牌列。</param>
+    /// <param name="entities">本批待更新实体快照。</param>
+    /// <param name="options">Update 的并发与原始值选项。</param>
     public SqlBatchUpdateRenderContext(ISqlProvider provider, SqlBuilderServices services, DatabaseContext databaseContext,
         EntityMappingMetadata mapping, IReadOnlyList<ColumnMappingMetadata> updateColumns,
         IReadOnlyList<ColumnMappingMetadata> keys, IReadOnlyList<ColumnMappingMetadata> concurrencyColumns,
@@ -27,6 +40,7 @@ public sealed class SqlBatchUpdateRenderContext
         ConcurrencyColumns = concurrencyColumns ?? throw new ArgumentNullException(nameof(concurrencyColumns));
         Entities = entities?.ToArray() ?? throw new ArgumentNullException(nameof(entities));
         Options = options;
+        _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver);
     }
 
     /// <summary>当前 SQL Provider。</summary>
@@ -76,6 +90,9 @@ public sealed class SqlBatchUpdateRenderContext
     /// <summary>
     /// 尝试读取更新选项中的并发原始值。
     /// </summary>
+    /// <param name="propertyName">并发属性名称。</param>
+    /// <param name="value">读取到的显式原始值。</param>
+    /// <returns><c>true</c> 表示已配置原始值；<c>false</c> 时调用方应回退到实体当前值。</returns>
     private bool TryGetOriginalValue(string propertyName, out object value)
     {
         if (Options != null)
@@ -96,10 +113,6 @@ public sealed class SqlBatchUpdateRenderContext
             throw new ArgumentNullException(nameof(source));
         if (column == null)
             throw new ArgumentNullException(nameof(column));
-        var property = source.GetType().GetProperty(column.PropertyName,
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-        if (property == null || property.GetIndexParameters().Length != 0)
-            throw new InvalidOperationException($"原始值对象未包含属性 {column.PropertyName}。");
-        return property.GetValue(source);
+        return _planCache.GetValue(source, column);
     }
 }

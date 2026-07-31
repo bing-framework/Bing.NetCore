@@ -4,6 +4,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Oracle.ManagedDataAccess.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +27,8 @@ public static class OracleServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, CreateBuilder);
         var queryOptions = new SqlOptions<OracleSqlQuery> { DatabaseType = DatabaseType.Oracle };
         var executorOptions = new SqlOptions<OracleSqlExecutor> { DatabaseType = DatabaseType.Oracle };
         queryOptions.RegisterStringTypeHandler();
@@ -34,10 +36,10 @@ public static class OracleServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         executorOptions.RegisterGuidTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
-        services.AddSqlImplementationType<ISqlQuery, OracleSqlQuery>(DatabaseType.Oracle);
-        services.AddSqlImplementationType<ISqlExecutor, OracleSqlExecutor>(DatabaseType.Oracle);
+        services.AddSqlImplementationType<ISqlQuery, OracleSqlQuery>(OracleSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlExecutor, OracleSqlExecutor>(OracleSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlQuery, OracleSqlQuery>();
         services.TryAddTransient<ISqlExecutor, OracleSqlExecutor>();
         services.TryAddSingleton(queryOptions);
@@ -101,20 +103,21 @@ public static class OracleServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddOracleSqlQuery<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlQuery
         where TImplementation : OracleSqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Oracle };
-        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         sqlOptions.RegisterGuidTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
+        services.AddSqlImplementationType<TInterface, TImplementation>(OracleSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -178,23 +181,37 @@ public static class OracleServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddOracleSqlExecutor<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlExecutor
         where TImplementation : OracleSqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Oracle };
-        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, services => new OracleBuilder(services));
+        services.AddSqlBuilderProvider(OracleSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Oracle, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, connection => new OracleConnection(connection));
+        services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Oracle);
+        services.AddSqlImplementationType<TInterface, TImplementation>(OracleSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
     }
 
     #endregion
+    /// <summary>
+    /// 根据数据源连接字符串创建 Oracle 独立连接。
+    /// </summary>
+    /// <param name="connectionString">Oracle 数据源连接字符串。</param>
+    /// <returns>尚未打开的 Oracle 数据库连接。</returns>
+    private static OracleConnection CreateConnection(string connectionString) => new(connectionString);
+
+    /// <summary>
+    /// 使用查询级共享服务创建 Oracle SQL Builder。
+    /// </summary>
+    /// <param name="services">当前查询的共享服务。</param>
+    /// <returns>绑定该共享服务的 Oracle SQL Builder。</returns>
+    private static ISqlBuilder CreateBuilder(SqlBuilderServices services) => new OracleBuilder(services);
 }

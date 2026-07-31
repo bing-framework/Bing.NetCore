@@ -6,13 +6,11 @@ namespace Bing.Data.Sql.Builders.Mutations.Batching;
 public enum SqlBatchDeleteStrategy
 {
     /// <summary>优先使用 Provider 支持的合并删除命令。</summary>
-    Auto,
+    Auto = 0,
     /// <summary>生成单主键 IN 条件批量命令。</summary>
-    InPredicate,
+    InPredicate = 1,
     /// <summary>生成复合主键或并发列的配对条件批量命令。</summary>
-    CompositePredicate,
-    /// <summary>使用 Provider 专用批量 Delete 命令。</summary>
-    ProviderOptimized,
+    CompositePredicate = 2,
     /// <summary>为每个实体生成独立命令。</summary>
-    PerEntity
+    PerEntity = 4
 }

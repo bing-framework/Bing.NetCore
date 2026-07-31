@@ -11,7 +11,7 @@ public sealed class SqlDbConnectionFactoryRegistration
     public string ProviderKey { get; init; }
 
     /// <summary>
-    /// 连接创建委托。
+    /// 根据数据源连接字符串创建对应 Provider 独立 <see cref="IDbConnection"/> 的委托。
     /// </summary>
     public Func<string, IDbConnection> Factory { get; init; }
 }

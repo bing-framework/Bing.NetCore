@@ -30,6 +30,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendGroupBy<T>(this T source, string sql) where T : IGroupBy
     {
         if (source == null)
@@ -46,5 +47,6 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="sql">SQL 文本；方括号标识符会按当前方言解析。</param>
     /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendGroupBy<T>(this T source, string sql, bool condition) where T : IGroupBy => condition ? AppendGroupBy(source, sql) : source;
 }

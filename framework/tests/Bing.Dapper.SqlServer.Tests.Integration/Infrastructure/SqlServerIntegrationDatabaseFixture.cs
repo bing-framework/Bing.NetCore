@@ -88,6 +88,12 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     public ISqlQuery CreateQuery() => ServiceProvider.GetRequiredService<ISqlQuery>();
 
     /// <summary>
+    /// 创建 SQL Server 执行器。
+    /// </summary>
+    /// <returns>新的 SQL 执行器。</returns>
+    public ISqlExecutor CreateExecutor() => ServiceProvider.GetRequiredService<ISqlExecutor>();
+
+    /// <summary>
     /// 释放服务提供程序和 SQL Server 连接池。
     /// </summary>
     /// <returns>异步任务。</returns>

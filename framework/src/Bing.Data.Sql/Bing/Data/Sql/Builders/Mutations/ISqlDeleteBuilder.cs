@@ -7,8 +7,8 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// <summary>
 /// Delete SQL Builder。
 /// </summary>
-public interface ISqlDeleteBuilder : ISqlContent, IDelete, IDeleteClauseAccessor, ISqlMutationContextAccessor,
-    IAllowAllRowsMutationBuilder
+public interface ISqlDeleteBuilder : ISqlContent, IDelete, IDeleteClauseAccessor, IDeleteUsingClauseAccessor,
+    ISqlMutationContextAccessor, IAllowAllRowsMutationBuilder
 {
     /// <summary>
     /// 是否显式允许全表删除。

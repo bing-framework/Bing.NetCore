@@ -196,6 +196,35 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     }
 
     /// <summary>
+    /// 测试目的：批量 Update 渲染上下文重复读取同一属性时应复用编译 Getter，不能逐值反射。
+    /// </summary>
+    [Fact]
+    public void BatchUpdateRenderContext_WhenPropertyIsReadRepeatedly_ShouldReuseCompiledGetter()
+    {
+        // Arrange
+        var builder = CreateBuilder();
+        var first = new MutationSample { Id = 1, Name = "first", Version = "v1" };
+        var second = new MutationSample { Id = 2, Name = "second", Version = "v2" };
+        var context = builder.CreateUpdateRenderContext(new[] { first, second }, new SqlUpdateOptions
+        {
+            IncludeProperties = new[] { nameof(MutationSample.Name) }
+        });
+        var column = Assert.Single(context.UpdateColumns);
+        var getterCountBefore = builder.GetterCacheCount;
+
+        // Act
+        var firstValue = context.GetValue(first, column);
+        var getterCountAfterFirstRead = builder.GetterCacheCount;
+        var secondValue = context.GetValue(second, column);
+
+        // Assert
+        Assert.Equal("first", firstValue);
+        Assert.Equal("second", secondValue);
+        Assert.Equal(getterCountBefore + 1, getterCountAfterFirstRead);
+        Assert.Equal(getterCountAfterFirstRead, builder.GetterCacheCount);
+    }
+
+    /// <summary>
     /// 测试目的：不同实体映射解析器必须使用独立的 Mutation Plan 分区，避免跨服务复用元数据。
     /// </summary>
     [Fact]

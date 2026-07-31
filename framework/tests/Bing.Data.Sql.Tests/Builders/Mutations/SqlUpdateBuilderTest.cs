@@ -113,6 +113,69 @@ public sealed class SqlUpdateBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：UpdateFrom 应使用结构化来源列完成 Set 和主键关联，并按 PostgreSQL 兼容顺序输出子句。
+    /// </summary>
+    [Fact]
+    public void UpdateFrom_WhenStructuredColumnsAreConfigured_ShouldRenderExpectedSql()
+    {
+        // Arrange
+        var builder = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id");
+
+        // Assert
+        Assert.Equal("Update [samples] As [t] Set [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id]",
+            builder.ToSql());
+        Assert.Empty(builder.GetParameters());
+    }
+
+    /// <summary>
+    /// 测试目的：UpdateFrom 的来源表和来源列应随 Clone 独立复制，并在 Clear 后完整移除。
+    /// </summary>
+    [Fact]
+    public void UpdateFrom_WhenClonedAndCleared_ShouldKeepInstancesIndependent()
+    {
+        // Arrange
+        var source = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
+            .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id");
+
+        // Act
+        var clone = source.Clone();
+        source.Clear();
+
+        // Assert
+        Assert.Equal("Update [samples] As [t] Set [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id]",
+            clone.ToSql());
+        Assert.Throws<InvalidOperationException>(() => source.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：SetFrom 只接受单段结构化列名，避免把 Raw SQL 注入标识符入口。
+    /// </summary>
+    [Fact]
+    public void SetFrom_WhenColumnIsNotSingleIdentifier_ShouldThrowWithoutChangingSetClause()
+    {
+        // Arrange
+        var builder = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
+            .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" });
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => builder.SetFrom("Name", "s.Name"));
+
+        // Assert
+        Assert.Equal("sourceColumn", exception.ParamName);
+        Assert.Equal(0, builder.SetClause.Count);
+    }
+
+    /// <summary>
     /// 强类型 Fluent Mutation 的映射实体。
     /// </summary>
     [Table("typed_samples")]

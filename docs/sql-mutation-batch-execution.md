@@ -2,18 +2,33 @@
 
 ## API
 
-`ISqlInsertExecutor`、`ISqlUpdateExecutor` 和 `ISqlDeleteExecutor` 提供 `InsertBatch`、`UpdateBatch`、`DeleteBatch` 及对应异步方法。空集合直接返回 `0`，不会创建事务或执行命令。Update/Delete 直接返回数据库实际影响行数；并发不匹配不会转换为异常。
+`ISqlInsertExecutor`、`ISqlUpdateExecutor` 和 `ISqlDeleteExecutor` 提供同步与异步批量 CRUD。空集合直接返回 `0`，不会创建事务或执行命令。
+
+`ISqlExecutor.Execute(ISqlBuilder)` 与 `ExecuteAsync(ISqlBuilder)` 执行统一 Builder 生成的 `InsertValues`、`InsertSelect`、`Update` 或 `Delete`。`None`、`Select` 和未完成的 Insert 状态会在访问数据库前被拒绝；Builder 的增强参数元数据通过参数绑定器完整保留。
+
+## 策略
+
+- Insert `Auto`：Provider 支持标准多行 Values 时使用组合命令，否则逐实体执行。
+- Insert `MultiRowValues`：要求 Provider 明确支持标准多行 Values。
+- Update `Auto`：存在匹配的 Provider Renderer 时使用优化命令，否则逐实体执行。
+- Update `ProviderOptimized`：要求 Provider 注册优化 Renderer；当前 PostgreSQL 使用 `UPDATE ... FROM (VALUES ...)`。
+- Delete `Auto`：单主键且无并发列时使用 `IN`，其他情况使用按实体配对的复合条件。
+- Delete `InPredicate`：只允许无并发列的单主键实体。
+- Delete `CompositePredicate`：为每个实体保留主键与并发令牌的配对关系。
+- `PerEntity`：每个实体生成一条独立参数化命令。
+
+Insert/Delete 不公开没有实现闭环的 `ProviderOptimized` 占位策略。
 
 ## 分片
 
-`SqlMutationBatchPlanner` 根据用户 `BatchSize`、`MaxParameterCount`、`MaxSqlLength`、每实体参数数和预计 SQL 长度取最小批容量。无法容纳一个实体时抛出 `InvalidOperationException`。计划保持输入顺序，每批携带独立的 `SqlMutationCommand` 参数快照。
+组合 Insert、Combined Delete 和 Provider 优化 Update 按 `BatchSize`、Provider 参数上限和最终 SQL 长度分片。配置 `MaxSqlLength` 时，执行器通过实际渲染和二分搜索选择可容纳的最大实体数。
 
-当前第一阶段使用 `PerEntity` 策略：每个实体生成一个参数化 Mutation 命令，批次仅定义命令分组和事务边界。`Auto` 选择该安全路径；显式 `Combined` 会抛出 `NotSupportedException`，直到 Provider 实现多行 Values、单主键 IN 或复合键条件合并 Clause。
+PerEntity 不会把多条独立 SQL 的参数数或长度错误累计为一条数据库命令。它先逐命令验证 Provider 参数上限与 `MaxSqlLength`，再仅按 `BatchSize` 进行执行分组。
+
+## 影响行数
+
+单实体并发 Mutation 在 `Throw` 模式下要求实际影响 `1` 行。Combined Delete 和 Provider 优化 Update 在批次层要求实际影响行数等于该批实体数，不能对组合 SQL 套用单实体一行规则。`ReturnAffectedRows` 返回数据库实际影响行数。
 
 ## 事务与异步
 
-默认 `UseTransaction=true`。执行器通过 `ISqlTransactionScopeFactory` 创建绑定相同数据库上下文的执行器，在同一个连接和事务中按顺序执行所有命令，成功后提交，失败后回滚。`UseTransaction=false` 时逐命令使用现有执行语义。异步路径按顺序 await，不会在同一个连接上并行操作。
-
-## Provider 约束
-
-调用方可在批量选项中提供已知 Provider 参数数或 SQL 长度上限。后续 Provider 能力接入应将 SQL Server 2100、SQLite 保守限制和 Oracle 不支持标准多行 Values 映射到这些规划输入；未声明限制的 Provider 不应臆造上限。
+默认 `UseTransaction=true`。执行器通过 `ISqlTransactionScopeFactory` 在同一连接和事务中顺序执行所有命令，成功后提交，失败后回滚。异步回滚使用 `CancellationToken.None`，避免调用令牌取消后跳过回滚。`UseTransaction=false` 时不提供跨命令原子性。

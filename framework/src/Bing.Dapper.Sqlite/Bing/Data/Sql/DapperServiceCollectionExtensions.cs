@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,8 @@ public static class SqliteServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, CreateBuilder);
         var queryOptions = new SqlOptions<SqliteSqlQuery> { DatabaseType = DatabaseType.Sqlite };
         var executorOptions = new SqlOptions<SqliteSqlExecutor> { DatabaseType = DatabaseType.Sqlite };
         var multipleQueryOptions = new SqlOptions<SqliteSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.Sqlite };
@@ -33,11 +35,11 @@ public static class SqliteServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<ISqlQuery, SqliteSqlQuery>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<ISqlExecutor, SqliteSqlExecutor>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<ISqlQuery, SqliteSqlQuery>(SqliteSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlExecutor, SqliteSqlExecutor>(SqliteSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>(SqliteSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlQuery, SqliteSqlQuery>();
         services.TryAddTransient<ISqlExecutor, SqliteSqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>();
@@ -103,19 +105,20 @@ public static class SqliteServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqliteSqlQuery<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlQuery
         where TImplementation : SqliteSqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Sqlite };
-        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<TInterface, TImplementation>(SqliteSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -158,14 +161,14 @@ public static class SqliteServiceCollectionExtensions
         Action<SqlOptions> setupAction)
     {
         var sqlOptions = new SqlOptions<SqliteSqlMultipleQueryExecutor> { DatabaseType = DatabaseType.Sqlite };
-        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, serviceProvider => new SqliteBuilder(serviceProvider));
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>(SqliteSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>();
         services.TryAddSingleton(sqlOptions);
         return services;
@@ -229,23 +232,37 @@ public static class SqliteServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqliteSqlExecutor<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlExecutor
         where TImplementation : SqliteSqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.Sqlite };
-        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, services => new SqliteBuilder(services));
+        services.AddSqlBuilderProvider(SqliteSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.Sqlite, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, connection => new SqliteConnection(connection));
+        services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.Sqlite);
+        services.AddSqlImplementationType<TInterface, TImplementation>(SqliteSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
     }
 
     #endregion
+    /// <summary>
+    /// 根据数据源连接字符串创建 SQLite 独立连接。
+    /// </summary>
+    /// <param name="connectionString">SQLite 数据源连接字符串。</param>
+    /// <returns>尚未打开的 SQLite 数据库连接。</returns>
+    private static SqliteConnection CreateConnection(string connectionString) => new(connectionString);
+
+    /// <summary>
+    /// 使用查询级共享服务创建 SQLite SQL Builder。
+    /// </summary>
+    /// <param name="services">当前查询的共享服务。</param>
+    /// <returns>绑定该共享服务的 SQLite SQL Builder。</returns>
+    private static ISqlBuilder CreateBuilder(SqlBuilderServices services) => new SqliteBuilder(services);
 }

@@ -2,6 +2,7 @@
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
@@ -636,6 +637,21 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// 获取Sql语句
     /// </summary>
     protected string GetSql() => SqlBuilder.ToSql();
+
+    /// <summary>
+    /// 验证普通查询 API 不会执行缺少 Returning 的 Mutation。
+    /// </summary>
+    protected void ValidateQueryBuilder()
+    {
+        if (_sqlBuilder == null)
+            return;
+        if (_sqlBuilder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+            SqlOperationKind.Update or SqlOperationKind.Delete))
+            return;
+        if (_sqlBuilder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
+            return;
+        throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
+    }
 
     /// <summary>
     /// 获取Sql生成器

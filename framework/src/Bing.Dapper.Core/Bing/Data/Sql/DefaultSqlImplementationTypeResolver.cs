@@ -1,5 +1,3 @@
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql;
 
 /// <summary>
@@ -20,15 +18,13 @@ public sealed class DefaultSqlImplementationTypeResolver : ISqlImplementationTyp
         _options = options ?? new SqlImplementationTypeOptions();
 
     /// <inheritdoc />
-    public Type Resolve(Type serviceType, DatabaseType? databaseType = null)
+    public Type Resolve(Type serviceType, string providerKey)
     {
         if (serviceType == null)
             return null;
-        if (databaseType != null &&
-            _options.DatabaseMappings.TryGetValue(SqlImplementationTypeOptions.GetKey(serviceType, databaseType.Value),
-                out var databaseImplementationType))
-            return databaseImplementationType;
-        if (_options.Mappings.TryGetValue(serviceType, out var implementationType))
+        if (string.IsNullOrWhiteSpace(providerKey) == false &&
+            _options.ProviderMappings.TryGetValue(SqlImplementationTypeOptions.GetKey(serviceType, providerKey),
+                out var implementationType))
             return implementationType;
         if (serviceType.IsAbstract == false && serviceType.IsInterface == false)
             return serviceType;

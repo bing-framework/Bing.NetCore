@@ -1,5 +1,6 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Metadata;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Test.Shared;
 
@@ -71,8 +72,50 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：SQL Server 多行 Insert Output 应通过查询结果 API 物化全部 INSERTED 行。
+    /// </summary>
+    [IntegrationFact("SqlServer")]
+    [Trait("Category", "Integration")]
+    [Trait("Database", "SqlServer")]
+    public async Task ExecuteQueryAsync_WhenInsertOutputIsConfigured_ShouldMaterializeReturnedRows()
+    {
+        // Arrange
+        using var executor = _fixture.CreateExecutor();
+        IEnumerable<IReadOnlyList<object>> values = new IReadOnlyList<object>[]
+        {
+            new object[] { "output-first", 1m, true },
+            new object[] { "output-second", 2m, false }
+        };
+        executor.GetBuilder()
+            .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "BingSqlAggregateIntegration" })
+            .Columns("UserId", "Amount", "Enabled")
+            .Values(values)
+            .Returning<SqlServerOutputRow>(row => new { row.Id, row.UserId });
+
+        // Act
+        var rows = await executor.ExecuteQueryAsync<SqlServerOutputRow>();
+
+        // Assert
+        Assert.Equal(new[] { "output-first", "output-second" }, rows.Select(row => row.UserId));
+        Assert.All(rows, row => Assert.True(row.Id > 0));
+    }
+
+    /// <summary>
     /// 创建指向受控聚合集成测试表的查询。
     /// </summary>
     /// <returns>SQL Server 查询对象。</returns>
     private ISqlQuery CreateAggregateQuery() => _fixture.CreateQuery().From("dbo.BingSqlAggregateIntegration", "p");
+
+    /// <summary>
+    /// SQL Server Output 物化模型。
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.Table("BingSqlAggregateIntegration", Schema = "dbo")]
+    private sealed class SqlServerOutputRow
+    {
+        /// <summary>标识。</summary>
+        public int Id { get; set; }
+
+        /// <summary>用户标识。</summary>
+        public string UserId { get; set; }
+    }
 }

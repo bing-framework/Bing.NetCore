@@ -12,6 +12,11 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class GroupByClause : IGroupByClause
 {
     /// <summary>
+    /// 子句运行上下文。
+    /// </summary>
+    private readonly SqlClauseContext _context;
+
+    /// <summary>
     /// Sql方言
     /// </summary>
     private readonly IDialect _dialect;
@@ -56,6 +61,7 @@ public class GroupByClause : IGroupByClause
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
+        _context = context;
         _dialect = context.Dialect;
         _resolver = context.EntityResolver;
         _register = context.AliasRegister;
@@ -89,6 +95,7 @@ public class GroupByClause : IGroupByClause
     {
         if (string.IsNullOrWhiteSpace(columns))
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         _group.AddRange(columns.Split(',').Select(item => new SqlItem(item)));
         _having = having;
     }
@@ -116,6 +123,7 @@ public class GroupByClause : IGroupByClause
     {
         if (column == null)
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
         _having = having;
     }
@@ -128,6 +136,7 @@ public class GroupByClause : IGroupByClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         sql = Helper.ResolveSql(sql, _dialect);
         _group.Add(new SqlItem(sql, raw: true));
     }

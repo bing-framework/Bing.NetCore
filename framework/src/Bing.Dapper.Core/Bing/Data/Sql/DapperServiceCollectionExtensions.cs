@@ -36,19 +36,37 @@ public static class DapperCoreServiceCollectionExtensions
         var providerKey = provider.Key?.Trim();
         if (string.IsNullOrWhiteSpace(providerKey))
             throw new ArgumentException("SQL Provider Key 不能为空。", nameof(provider));
-        foreach (var descriptor in services)
+        var registeredProviders = services
+            .Where(descriptor => descriptor.ServiceType == typeof(ISqlProvider) &&
+                                 descriptor.ImplementationInstance is ISqlProvider registeredProvider &&
+                                 string.Equals(registeredProvider.Key?.Trim(), providerKey,
+                                     StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (registeredProviders.Count > 1)
+            throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 重复注册。");
+        if (registeredProviders.Count == 1 &&
+            ReferenceEquals((ISqlProvider)registeredProviders[0].ImplementationInstance, provider) == false)
+            throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 已注册。");
+
+        var builderRegistrations = services
+            .Where(descriptor => descriptor.ImplementationInstance is SqlBuilderFactoryRegistration registration &&
+                                 string.Equals(registration.Provider.Key?.Trim(), providerKey,
+                                     StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (builderRegistrations.Count > 1)
+            throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 的 SQL Builder 创建委托重复注册。");
+        if (builderRegistrations.Count == 1)
         {
-            if (descriptor.ServiceType != typeof(ISqlProvider) || descriptor.ImplementationInstance is not ISqlProvider registeredProvider)
-                continue;
-            if (string.Equals(registeredProvider.Key?.Trim(), providerKey, StringComparison.OrdinalIgnoreCase))
-            {
-                if (ReferenceEquals(registeredProvider, provider))
-                    return services;
-                throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 已注册。");
-            }
+            var registration = (SqlBuilderFactoryRegistration)builderRegistrations[0].ImplementationInstance;
+            if (ReferenceEquals(registration.Provider, provider) == false)
+                throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 已注册不同的 SQL Builder Provider。");
+            if (Equals(registration.Creator, creator) == false)
+                throw new InvalidOperationException($"SQL Provider Key '{providerKey}' 已注册不同的 SQL Builder 创建委托。");
         }
-        services.AddSingleton<ISqlProvider>(provider);
-        services.AddSingleton(new SqlBuilderFactoryRegistration(provider, creator));
+        else
+            services.AddSingleton(new SqlBuilderFactoryRegistration(provider, creator));
+        if (registeredProviders.Count == 0)
+            services.AddSingleton<ISqlProvider>(provider);
         return services;
     }
 
@@ -137,31 +155,38 @@ public static class DapperCoreServiceCollectionExtensions
         DatabaseType databaseType, string connectionString = null, string connectionStringName = null,
         Action<SqlDataSourceDescriptor> setupAction = null, string providerKey = null)
     {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        var requestedKey = NormalizeOptionalKey(key);
+        var normalizedProviderKey = NormalizeOptionalKey(providerKey);
+        var normalizedConnectionString = NormalizeOptionalValue(connectionString);
+        var normalizedConnectionStringName = NormalizeOptionalValue(connectionStringName);
         return services.ConfigureSqlMetadata(options =>
         {
-            var dataSourceKey = string.IsNullOrWhiteSpace(key) ? options.DataSources.DefaultDataSourceKey : key;
-            if (string.IsNullOrWhiteSpace(options.DataSources.DefaultDataSourceKey))
-                options.DataSources.DefaultDataSourceKey = dataSourceKey;
-            if (!options.DataSources.DataSources.TryGetValue(dataSourceKey, out var descriptor))
-            {
-                descriptor = new SqlDataSourceDescriptor();
-                options.DataSources.DataSources[dataSourceKey] = descriptor;
-            }
-            else if (string.IsNullOrWhiteSpace(key) && descriptor.DatabaseType != databaseType)
-            {
+            var defaultDataSourceKey = NormalizeOptionalKey(options.DataSources.DefaultDataSourceKey);
+            if (requestedKey == null && defaultDataSourceKey == null)
                 throw new InvalidOperationException(
-                    $"默认 SQL 数据源 {dataSourceKey} 已注册为 {descriptor.DatabaseType}，不能使用无键注册覆盖为 {databaseType}。多 Provider 请使用具名数据源。");
+                    $"未配置默认 SQL 数据源 Key，无法使用无键方式注册数据源。请配置 {nameof(SqlDataSourceOptions.DefaultDataSourceKey)} 或指定数据源 Key。");
+            var dataSourceKey = requestedKey ?? defaultDataSourceKey;
+            if (options.DataSources.DataSources.TryGetValue(dataSourceKey, out var descriptor))
+            {
+                ValidateExistingDataSource(descriptor, dataSourceKey, requestedKey == null, databaseType,
+                    normalizedProviderKey, normalizedConnectionString, normalizedConnectionStringName, setupAction);
+                return;
             }
-            descriptor.Key = dataSourceKey;
-            descriptor.ProviderKey = string.IsNullOrWhiteSpace(providerKey) ? null : providerKey.Trim();
-            descriptor.DatabaseType = databaseType;
+
+            descriptor = new SqlDataSourceDescriptor
+            {
+                Key = dataSourceKey,
+                ProviderKey = normalizedProviderKey,
+                DatabaseType = databaseType,
+                ConnectionString = normalizedConnectionString,
+                ConnectionStringName = normalizedConnectionStringName
+            };
             if (databaseType == DatabaseType.Doris)
                 descriptor.SupportsTransactions = false;
-            if (string.IsNullOrWhiteSpace(connectionString) == false)
-                descriptor.ConnectionString = connectionString;
-            if (string.IsNullOrWhiteSpace(connectionStringName) == false)
-                descriptor.ConnectionStringName = connectionStringName;
             setupAction?.Invoke(descriptor);
+            options.DataSources.DataSources.Add(dataSourceKey, descriptor);
         });
     }
 
@@ -180,10 +205,54 @@ public static class DapperCoreServiceCollectionExtensions
         string key, DatabaseType databaseType, string connectionStringName = null,
         Action<SqlDataSourceDescriptor> setupAction = null, string providerKey = null)
     {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
         var name = string.IsNullOrWhiteSpace(connectionStringName) ? key : connectionStringName;
         var connectionString = configuration?.GetConnectionString(name);
         return services.AddSqlDataSource(key, databaseType, connectionString, name, setupAction, providerKey);
     }
+
+    /// <summary>
+    /// 验证已有数据源是否与本次注册完全一致。
+    /// </summary>
+    /// <param name="descriptor">已注册的数据源描述。</param>
+    /// <param name="dataSourceKey">本次注册解析后的数据源唯一标识。</param>
+    /// <param name="isDefaultRegistration">是否通过无键方式注册默认数据源。</param>
+    /// <param name="databaseType">本次请求的数据库类型。</param>
+    /// <param name="providerKey">本次请求的规范化 Provider Key。</param>
+    /// <param name="connectionString">本次请求的规范化连接字符串。</param>
+    /// <param name="connectionStringName">本次请求的规范化连接字符串配置名称。</param>
+    /// <param name="setupAction">本次请求的数据源自定义配置；存在时不允许视为幂等重复注册。</param>
+    private static void ValidateExistingDataSource(SqlDataSourceDescriptor descriptor, string dataSourceKey,
+        bool isDefaultRegistration, DatabaseType databaseType, string providerKey, string connectionString,
+        string connectionStringName, Action<SqlDataSourceDescriptor> setupAction)
+    {
+        if (isDefaultRegistration && descriptor.DatabaseType != databaseType)
+            throw new InvalidOperationException(
+                $"默认 SQL 数据源 {dataSourceKey} 已注册为 {descriptor.DatabaseType}，不能使用无键注册覆盖为 {databaseType}。多 Provider 请使用具名数据源。");
+        if (descriptor.DatabaseType != databaseType ||
+            string.Equals(NormalizeOptionalKey(descriptor.ProviderKey), providerKey, StringComparison.OrdinalIgnoreCase) == false ||
+            string.Equals(NormalizeOptionalValue(descriptor.ConnectionString), connectionString, StringComparison.Ordinal) == false ||
+            string.Equals(NormalizeOptionalValue(descriptor.ConnectionStringName), connectionStringName, StringComparison.Ordinal) == false ||
+            setupAction != null)
+            throw new InvalidOperationException($"SQL 数据源 Key '{dataSourceKey}' 重复注册且配置不一致。");
+    }
+
+    /// <summary>
+    /// 规范化可选标识。
+    /// </summary>
+    /// <param name="value">可能为 null、空白或包含首尾空白的标识。</param>
+    /// <returns>空白输入返回 <see langword="null"/>；非空输入返回去除首尾空白后的标识。</returns>
+    private static string NormalizeOptionalKey(string value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    /// <summary>
+    /// 规范化可选配置值。
+    /// </summary>
+    /// <param name="value">可能为 null、空白或有效内容的配置值。</param>
+    /// <returns>空白输入返回 <see langword="null"/>；非空输入保留原始内容。</returns>
+    private static string NormalizeOptionalValue(string value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value;
 
     /// <summary>
     /// 注册默认实体模型元数据提供器。
@@ -252,9 +321,19 @@ public static class DapperCoreServiceCollectionExtensions
             throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
         if (factory == null)
             throw new ArgumentNullException(nameof(factory));
+        var normalizedProviderKey = providerKey.Trim();
+        foreach (var descriptor in services)
+        {
+            if (descriptor.ImplementationInstance is not SqlDbConnectionFactoryRegistration registration ||
+                string.Equals(registration.ProviderKey, normalizedProviderKey, StringComparison.OrdinalIgnoreCase) == false)
+                continue;
+            if (Equals(registration.Factory, factory))
+                return services;
+            throw new InvalidOperationException($"Provider Key '{normalizedProviderKey}' 的独立连接工厂重复注册。");
+        }
         services.AddSingleton(new SqlDbConnectionFactoryRegistration
         {
-            ProviderKey = providerKey.Trim(),
+            ProviderKey = normalizedProviderKey,
             Factory = factory
         });
         return services;
@@ -294,20 +373,23 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册指定数据库类型的 SQL 服务实现映射。
+    /// 注册指定 Provider 的 SQL 服务实现映射。
     /// </summary>
     /// <typeparam name="TService">服务契约类型。</typeparam>
     /// <typeparam name="TImplementation">具体实现类型。</typeparam>
     /// <param name="services">要注册服务的服务集合。</param>
-    /// <param name="databaseType">映射适用的数据库类型。</param>
+    /// <param name="providerKey">映射适用的 Provider 唯一标识。</param>
     /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqlImplementationType<TService, TImplementation>(this IServiceCollection services,
-        Bing.Data.Enums.DatabaseType databaseType)
+        string providerKey)
         where TImplementation : TService
     {
+        if (services == null)
+            throw new ArgumentNullException(nameof(services));
+        if (string.IsNullOrWhiteSpace(providerKey))
+            throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
         var options = GetOrCreateImplementationTypeOptions(services);
-        options.Map(typeof(TService), typeof(TImplementation), databaseType);
-        options.Map(typeof(TImplementation), typeof(TImplementation), databaseType);
+        options.Map(typeof(TService), typeof(TImplementation), providerKey);
         return services;
     }
 
@@ -318,11 +400,16 @@ public static class DapperCoreServiceCollectionExtensions
     /// <returns>SQL 实现类型配置</returns>
     private static SqlImplementationTypeOptions GetOrCreateImplementationTypeOptions(IServiceCollection services)
     {
-        var descriptor = services.LastOrDefault(t => t.ServiceType == typeof(SqlImplementationTypeOptions));
-        if (descriptor?.ImplementationInstance is SqlImplementationTypeOptions options)
+        var descriptors = services
+            .Where(descriptor => descriptor.ServiceType == typeof(SqlImplementationTypeOptions))
+            .ToList();
+        if (descriptors.Count > 1)
+            throw new InvalidOperationException("SQL 实现类型配置重复注册，无法确定唯一的 Provider 实现映射。");
+        if (descriptors.Count == 1 && descriptors[0].ImplementationInstance is SqlImplementationTypeOptions options)
             return options;
+        if (descriptors.Count == 1)
+            services.Remove(descriptors[0]);
         options = new SqlImplementationTypeOptions();
-        services.RemoveAll<SqlImplementationTypeOptions>();
         services.AddSingleton(options);
         return options;
     }

@@ -1,11 +1,13 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Mutations;
 
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>SQL Server SQL 提供程序。</summary>
-public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
+public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider,
+    ISqlReturningDialect
 {
     /// <summary>
     /// 可在线程间安全共享的 SQL Server Provider 单例。
@@ -43,7 +45,18 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvi
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true);
+    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true,
+        supportsMultiRowValues: true, supportsUpdateFrom: false, supportsDeleteUsing: false, supportsReturning: true);
+
+    /// <inheritdoc />
+    public SqlReturningClausePosition Position => SqlReturningClausePosition.BeforeSource;
+
+    /// <inheritdoc />
+    public string GetKeyword(SqlExecutionKind executionKind) => "Output";
+
+    /// <inheritdoc />
+    public string GetQualifier(SqlExecutionKind executionKind, string configuredQualifier) =>
+        executionKind == SqlExecutionKind.Delete ? "Deleted" : "Inserted";
 
     /// <inheritdoc />
     /// <remarks>SQL Server 单个命令最多允许 2100 个参数。</remarks>

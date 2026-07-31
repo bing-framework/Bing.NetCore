@@ -70,6 +70,39 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
+    /// 测试目的：PerEntity 应按单条数据库命令校验参数数和 SQL 长度，不能累计同一执行分组中的独立命令。
+    /// </summary>
+    [Fact]
+    public void InsertBatch_WhenPerEntityCommandsIndividuallyFitLimits_ShouldExecuteAllCommands()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false, maxParameterCount: 1);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.InsertBatch(new[]
+        {
+            new MutationSample { Name = "first" },
+            new MutationSample { Name = "second" }
+        }, new SqlBatchInsertOptions
+        {
+            BatchSize = 2,
+            MaxSqlLength = 58,
+            Strategy = SqlBatchInsertStrategy.PerEntity,
+            UseTransaction = false
+        });
+
+        // Assert
+        Assert.Equal(2, affectedRows);
+        Assert.Equal(2, executor.Commands.Count);
+        Assert.All(executor.Commands, command =>
+        {
+            Assert.Single(command.Parameters);
+            Assert.True(command.Sql.Length <= 58);
+        });
+    }
+
+    /// <summary>
     /// 测试目的：Auto DeleteBatch 应将无并发列的单主键实体合并为一条参数化 IN 删除命令。
     /// </summary>
     [Fact]
@@ -94,28 +127,54 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
-    /// 测试目的：未注册 Provider 优化 Delete 实现时，显式优化策略必须明确失败，不能静默退化为组合或逐实体命令。
+    /// 测试目的：带并发列的 Combined Delete 影响多行时应按批次实体数校验，不能套用单实体一行规则。
     /// </summary>
     [Fact]
-    public void DeleteBatch_WhenProviderOptimizedStrategyHasNoRenderer_ShouldThrowNotSupportedException()
+    public void DeleteBatch_WhenCombinedConcurrencyCommandAffectsAllRows_ShouldReturnAffectedRows()
     {
         // Arrange
         using var provider = CreateServiceProvider(supportsMultiRowValues: false);
-        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite)
+        {
+            AffectedRows = () => 2
+        };
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => executor.DeleteBatch(new[]
+        var affectedRows = executor.DeleteBatch(new[]
         {
-            new DeleteSample { Id = 1 }
-        }, new SqlBatchDeleteOptions
-        {
-            Strategy = SqlBatchDeleteStrategy.ProviderOptimized,
-            UseTransaction = false
-        }));
+            new ConcurrencyDeleteSample { Id = 1, Version = "v1" },
+            new ConcurrencyDeleteSample { Id = 2, Version = "v2" }
+        }, new SqlBatchDeleteOptions { BatchSize = 2, UseTransaction = false });
 
         // Assert
-        Assert.Equal("Provider test.mutation-batch 未实现优化批量 Delete 命令。", exception.Message);
-        Assert.Empty(executor.Commands);
+        Assert.Equal(2, affectedRows);
+        Assert.Single(executor.Commands);
+    }
+
+    /// <summary>
+    /// 测试目的：带并发列的 Combined Delete 少删一行时应在批次层抛出准确的 Delete 并发异常。
+    /// </summary>
+    [Fact]
+    public async Task DeleteBatchAsync_WhenCombinedConcurrencyCommandAffectsFewerRows_ShouldThrowConcurrencyException()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite)
+        {
+            AffectedRows = () => 1
+        };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Bing.Exceptions.ConcurrencyException>(() => executor.DeleteBatchAsync(
+            new[]
+            {
+                new ConcurrencyDeleteSample { Id = 1, Version = "v1" },
+                new ConcurrencyDeleteSample { Id = 2, Version = "v2" }
+            }, new SqlBatchDeleteOptions { BatchSize = 2, UseTransaction = false }));
+
+        // Assert
+        Assert.Contains("批量 Delete 预期影响 2 行，实际影响 1 行。", exception.Message);
+        Assert.Single(executor.Commands);
     }
 
     /// <summary>
@@ -527,6 +586,9 @@ public sealed class SqlMutationBatchStrategyTest
     /// 创建已注册测试 Provider 的服务提供程序。
     /// </summary>
     /// <param name="supportsMultiRowValues">Provider 是否支持标准多行 Values。</param>
+    /// <param name="maxParameterCount">可选的 Provider 单命令最大参数数量。</param>
+    /// <param name="transactionScopeFactory">可选的事务作用域工厂测试替身。</param>
+    /// <param name="renderer">可选的 Provider 优化批量 Update 渲染器。</param>
     /// <returns>用于执行器测试的服务提供程序。</returns>
     private static ServiceProvider CreateServiceProvider(bool supportsMultiRowValues, int? maxParameterCount = null,
         ISqlTransactionScopeFactory transactionScopeFactory = null, ISqlBatchUpdateRenderer renderer = null)
@@ -625,6 +687,7 @@ public sealed class SqlMutationBatchStrategyTest
         /// <inheritdoc />
         public string ProviderKey => "test.mutation-batch";
 
+        /// <inheritdoc />
         public bool CanRender(SqlBatchUpdateRenderContext context) => true;
 
         /// <summary>最近一次上下文中的实体数量。</summary>
@@ -698,6 +761,11 @@ public sealed class SqlMutationBatchStrategyTest
         /// </summary>
         public Exception ExecuteAsyncException { get; set; }
 
+        /// <summary>
+        /// 根据已记录命令返回模拟的实际影响行数。
+        /// </summary>
+        public Func<int> AffectedRows { get; set; }
+
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
 
@@ -707,8 +775,9 @@ public sealed class SqlMutationBatchStrategyTest
             if (ExecuteException != null)
                 throw ExecuteException;
             var parameters = (param as IEnumerable<SqlParam>)?.ToArray() ?? Array.Empty<SqlParam>();
-            Commands.Add(new RecordedCommand(sql, parameters));
-            return parameters.Length;
+            var command = new RecordedCommand(sql, parameters);
+            Commands.Add(command);
+            return AffectedRows?.Invoke() ?? parameters.Length;
         }
 
         /// <inheritdoc />
@@ -720,17 +789,18 @@ public sealed class SqlMutationBatchStrategyTest
             if (ExecuteAsyncException != null)
                 return Task.FromException<int>(ExecuteAsyncException);
             var parameters = (param as IEnumerable<SqlParam>)?.ToArray() ?? Array.Empty<SqlParam>();
-            Commands.Add(new RecordedCommand(sql, parameters));
+            var command = new RecordedCommand(sql, parameters);
+            Commands.Add(command);
             AfterExecuteAsync?.Invoke();
-            return Task.FromResult(parameters.Length);
+            return Task.FromResult(AffectedRows?.Invoke() ?? parameters.Length);
         }
     }
 
     /// <summary>
     /// 已记录的 SQL 命令快照。
     /// </summary>
-    /// <param name="sql">SQL 文本。</param>
-    /// <param name="parameters">参数快照。</param>
+    /// <param name="Sql">已执行命令的 SQL 文本。</param>
+    /// <param name="Parameters">已执行命令的参数快照。</param>
     private sealed record RecordedCommand(string Sql, IReadOnlyList<SqlParam> Parameters);
 
     /// <summary>

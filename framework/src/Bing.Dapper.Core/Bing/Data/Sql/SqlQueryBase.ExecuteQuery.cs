@@ -122,6 +122,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化动态结果列表的任务。</returns>
     public async Task<List<dynamic>> ExecuteQueryAsync(int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) =>
@@ -136,6 +137,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化实体结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<TEntity>(int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) =>
@@ -153,6 +155,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, TEntity>(Func<T1, T2, TEntity> map, int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -169,6 +172,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, TEntity>(Func<T1, T2, T3, TEntity> map, int? timeout = null,
         bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -186,6 +190,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, TEntity>(Func<T1, T2, T3, T4, TEntity> map,
         int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -204,6 +209,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, TEntity>(Func<T1, T2, T3, T4, T5, TEntity> map,
         int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -223,6 +229,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, TEntity>(Func<T1, T2, T3, T4, T5, T6, TEntity> map,
         int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -243,6 +250,7 @@ public abstract partial class SqlQueryBase
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <param name="buffered">是否缓存。默认值：true</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步读取并完整物化映射结果列表的任务。</returns>
     public async Task<List<TEntity>> ExecuteQueryAsync<T1, T2, T3, T4, T5, T6, T7, TEntity>(Func<T1, T2, T3, T4, T5, T6, T7, TEntity> map,
         int? timeout = null, bool buffered = true, CancellationToken cancellationToken = default) =>
         await InternalQueryAsync(async (conn, sql, param, transaction) => (await conn.QueryAsync(
@@ -295,6 +303,7 @@ public abstract partial class SqlQueryBase
     /// <param name="func">查询操作</param>
     protected TResult InternalQuery<TResult>(Func<IDbConnection, string, object, IDbTransaction, TResult> func)
     {
+        ValidateQueryBuilder();
         using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = default;
@@ -333,6 +342,7 @@ public abstract partial class SqlQueryBase
     /// <param name="func">查询操作</param>
     protected async Task<TResult> InternalQueryAsync<TResult>(Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> func)
     {
+        ValidateQueryBuilder();
         using var executionLease = AcquireExecutionLease();
         TResult result = default;
         DiagnosticsMessage message = default;

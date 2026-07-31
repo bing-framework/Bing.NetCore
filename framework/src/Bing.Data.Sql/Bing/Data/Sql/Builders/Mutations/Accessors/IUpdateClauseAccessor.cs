@@ -3,7 +3,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 /// <summary>
 /// 提供 Update 子句访问能力。
 /// </summary>
-public interface IUpdateClauseAccessor : IMutationWhereClauseAccessor
+public interface IUpdateClauseAccessor : IMutationWhereClauseAccessor, IUpdateFromClauseAccessor
 {
     /// <summary>
     /// Update 目标表子句。

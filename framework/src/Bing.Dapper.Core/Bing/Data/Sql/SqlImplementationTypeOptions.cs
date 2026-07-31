@@ -1,5 +1,3 @@
-using Bing.Data.Enums;
-
 namespace Bing.Data.Sql;
 
 /// <summary>
@@ -8,39 +6,66 @@ namespace Bing.Data.Sql;
 public sealed class SqlImplementationTypeOptions
 {
     /// <summary>
-    /// 服务类型到实现类型映射
+    /// Provider Key 维度的服务类型到实现类型映射。
     /// </summary>
-    public IDictionary<Type, Type> Mappings { get; } = new Dictionary<Type, Type>();
-
-    /// <summary>
-    /// 数据库类型维度的服务类型到实现类型映射
-    /// </summary>
-    public IDictionary<string, Type> DatabaseMappings { get; } = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+    public IDictionary<string, Type> ProviderMappings { get; } =
+        new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// 注册实现类型映射
     /// </summary>
     /// <param name="serviceType">服务类型</param>
     /// <param name="implementationType">实现类型</param>
-    /// <param name="databaseType">数据库类型</param>
-    public void Map(Type serviceType, Type implementationType, DatabaseType? databaseType = null)
+    /// <param name="providerKey">Provider 唯一标识。</param>
+    public void Map(Type serviceType, Type implementationType, string providerKey)
     {
-        if (serviceType == null || implementationType == null)
-            return;
-        Mappings[serviceType] = implementationType;
-        Mappings[implementationType] = implementationType;
-        if (databaseType == null)
-            return;
-        DatabaseMappings[GetKey(serviceType, databaseType.Value)] = implementationType;
-        DatabaseMappings[GetKey(implementationType, databaseType.Value)] = implementationType;
+        if (serviceType == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        if (implementationType == null)
+            throw new ArgumentNullException(nameof(implementationType));
+        var normalizedProviderKey = NormalizeProviderKey(providerKey);
+        Map(serviceType, implementationType, normalizedProviderKey, providerKey);
+        Map(implementationType, implementationType, normalizedProviderKey, providerKey);
     }
 
     /// <summary>
-    /// 获取数据库类型映射键
+    /// 根据服务类型和规范化 Provider Key 生成实现映射键。
     /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="databaseType">数据库类型</param>
-    /// <returns>映射键</returns>
-    public static string GetKey(Type serviceType, DatabaseType databaseType) =>
-        $"{serviceType?.AssemblyQualifiedName}:{databaseType}";
+    /// <param name="serviceType">待解析实现的服务契约类型。</param>
+    /// <param name="providerKey">Provider 唯一标识。</param>
+    /// <returns>大小写无关 Provider 映射字典使用的复合键。</returns>
+    public static string GetKey(Type serviceType, string providerKey) =>
+        $"{serviceType?.AssemblyQualifiedName}:{NormalizeProviderKey(providerKey)}";
+
+    /// <summary>
+    /// 添加单个映射并拒绝同一 Provider 下的不同实现。
+    /// </summary>
+    /// <param name="serviceType">服务契约或具体实现类型。</param>
+    /// <param name="implementationType">要注册的具体实现类型。</param>
+    /// <param name="normalizedProviderKey">已去除首尾空白的 Provider Key。</param>
+    /// <param name="providerKey">调用方传入的原始 Provider Key。</param>
+    private void Map(Type serviceType, Type implementationType, string normalizedProviderKey, string providerKey)
+    {
+        var key = GetKey(serviceType, normalizedProviderKey);
+        if (ProviderMappings.TryGetValue(key, out var currentImplementationType))
+        {
+            if (currentImplementationType == implementationType)
+                return;
+            throw new InvalidOperationException(
+                $"Provider Key '{normalizedProviderKey}' 已为服务类型 {serviceType.FullName} 注册实现 {currentImplementationType.FullName}，不能注册 {implementationType.FullName}。");
+        }
+        ProviderMappings.Add(key, implementationType);
+    }
+
+    /// <summary>
+    /// 规范化 Provider Key。
+    /// </summary>
+    /// <param name="providerKey">调用方提供的 Provider Key。</param>
+    /// <returns>去除首尾空白后可用于大小写无关映射的 Provider Key。</returns>
+    private static string NormalizeProviderKey(string providerKey)
+    {
+        if (string.IsNullOrWhiteSpace(providerKey))
+            throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
+        return providerKey.Trim();
+    }
 }

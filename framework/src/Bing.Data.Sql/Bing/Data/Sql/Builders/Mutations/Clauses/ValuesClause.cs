@@ -1,4 +1,5 @@
 using System.Text;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 
@@ -38,6 +39,7 @@ public sealed class ValuesClause : IValuesClause
             throw new ArgumentNullException(nameof(values));
         if (_rows.Count > 0 && values.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
+        _context.UseOperation(SqlOperationAction.Values);
         var names = new List<string>(values.Count);
         foreach (var value in values)
         {
@@ -55,6 +57,7 @@ public sealed class ValuesClause : IValuesClause
             throw new ArgumentNullException(nameof(parameters));
         if (_rows.Count > 0 && parameters.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
+        _context.UseOperation(SqlOperationAction.Values);
         var names = new List<string>(parameters.Count);
         foreach (var parameter in parameters)
         {

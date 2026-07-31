@@ -1,5 +1,5 @@
-using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Bing.Dapper.Core.Tests.Metadata;
@@ -10,40 +10,40 @@ namespace Bing.Dapper.Core.Tests.Metadata;
 public class DefaultSqlImplementationTypeResolverTest
 {
     /// <summary>
-    /// 测试目的：数据库特定映射存在时应优先于默认映射返回。
+    /// 测试目的：Provider Key 映射存在时应返回对应实现，避免相同数据库类型的 Provider 相互覆盖。
     /// </summary>
     [Fact]
     public void Resolve_WhenProviderMappingExists_ShouldPreferProviderMapping()
     {
         // Arrange
         var options = new SqlImplementationTypeOptions();
-        options.Map(typeof(ITestService), typeof(DefaultService));
-        options.DatabaseMappings[SqlImplementationTypeOptions.GetKey(typeof(ITestService), DatabaseType.SqlServer)] = typeof(SqlServerService);
+        options.Map(typeof(ITestService), typeof(DefaultService), "custom.sqlserver.first");
+        options.Map(typeof(ITestService), typeof(SqlServerService), "custom.sqlserver.second");
         var resolver = new DefaultSqlImplementationTypeResolver(options);
 
         // Act
-        var result = resolver.Resolve(typeof(ITestService), DatabaseType.SqlServer);
+        var result = resolver.Resolve(typeof(ITestService), "custom.sqlserver.second");
 
         // Assert
         Assert.Equal(typeof(SqlServerService), result);
     }
 
     /// <summary>
-    /// 测试目的：未配置当前 Provider 映射时应返回默认实现。
+    /// 测试目的：未配置当前 Provider 映射时不得回退到其他 Provider 的默认实现。
     /// </summary>
     [Fact]
     public void Resolve_WhenOnlyDefaultMappingExists_ShouldUseDefaultMapping()
     {
         // Arrange
         var options = new SqlImplementationTypeOptions();
-        options.Map(typeof(ITestService), typeof(DefaultService));
+        options.Map(typeof(ITestService), typeof(DefaultService), "custom.mysql");
         var resolver = new DefaultSqlImplementationTypeResolver(options);
 
         // Act
-        var result = resolver.Resolve(typeof(ITestService), DatabaseType.MySql);
+        var result = resolver.Resolve(typeof(ITestService), "custom.postgresql");
 
         // Assert
-        Assert.Equal(typeof(DefaultService), result);
+        Assert.Null(result);
     }
 
     /// <summary>
@@ -56,13 +56,13 @@ public class DefaultSqlImplementationTypeResolverTest
         var resolver = new DefaultSqlImplementationTypeResolver();
 
         // Act and Assert
-        Assert.Equal(typeof(ConcreteService), resolver.Resolve(typeof(ConcreteService)));
-        Assert.Null(resolver.Resolve(typeof(AbstractService)));
-        Assert.Null(resolver.Resolve(null));
+        Assert.Equal(typeof(ConcreteService), resolver.Resolve(typeof(ConcreteService), "custom.provider"));
+        Assert.Null(resolver.Resolve(typeof(AbstractService), "custom.provider"));
+        Assert.Null(resolver.Resolve(null, "custom.provider"));
     }
 
     /// <summary>
-    /// 测试目的：映射时应同时登记服务类型和实现类型，并允许后注册覆盖。
+    /// 测试目的：映射应登记服务类型和实现类型，并拒绝同一 Provider Key 下的不同实现。
     /// </summary>
     [Fact]
     public void Map_WhenCalledRepeatedly_ShouldRegisterBothTypesAndUseLatestImplementation()
@@ -71,13 +71,32 @@ public class DefaultSqlImplementationTypeResolverTest
         var options = new SqlImplementationTypeOptions();
 
         // Act
-        options.Map(typeof(ITestService), typeof(DefaultService));
-        options.Map(typeof(ITestService), typeof(SqlServerService), DatabaseType.SqlServer);
+        options.Map(typeof(ITestService), typeof(SqlServerService), "custom.sqlserver");
 
         // Assert
-        Assert.Equal(typeof(SqlServerService), options.Mappings[typeof(ITestService)]);
-        Assert.Equal(typeof(SqlServerService), options.Mappings[typeof(SqlServerService)]);
-        Assert.Equal(typeof(SqlServerService), options.DatabaseMappings[SqlImplementationTypeOptions.GetKey(typeof(ITestService), DatabaseType.SqlServer)]);
+        Assert.Equal(typeof(SqlServerService), options.ProviderMappings[
+            SqlImplementationTypeOptions.GetKey(typeof(ITestService), "CUSTOM.SQLSERVER")]);
+        Assert.Equal(typeof(SqlServerService), options.ProviderMappings[
+            SqlImplementationTypeOptions.GetKey(typeof(SqlServerService), "custom.sqlserver")]);
+        Assert.Throws<InvalidOperationException>(() =>
+            options.Map(typeof(ITestService), typeof(DefaultService), "custom.sqlserver"));
+    }
+
+    /// <summary>
+    /// 测试目的：服务集合中存在多个实现类型 Options 注册时不得依赖最后注册项，应明确拒绝歧义配置。
+    /// </summary>
+    [Fact]
+    public void AddSqlImplementationType_WhenOptionsRegisteredMultipleTimes_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+        services.AddSingleton(new SqlImplementationTypeOptions());
+        services.AddSingleton(new SqlImplementationTypeOptions());
+
+        // Act and Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlImplementationType<ITestService, DefaultService>(
+                services, "custom.provider"));
     }
 
     /// <summary>

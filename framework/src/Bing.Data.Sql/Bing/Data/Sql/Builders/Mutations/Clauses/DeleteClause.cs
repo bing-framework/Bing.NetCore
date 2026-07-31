@@ -1,4 +1,5 @@
 using System.Text;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Metadata;
 
@@ -22,7 +23,13 @@ public sealed class DeleteClause : MutationTableClauseBase, IDeleteClause
     public SqlTableReference Table { get; private set; }
 
     /// <inheritdoc />
-    public void From(SqlTableReference table) => Table = table ?? throw new ArgumentNullException(nameof(table));
+    public void From(SqlTableReference table)
+    {
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        Context.UseOperation(SqlOperationAction.DeleteFrom);
+        Table = table;
+    }
 
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
@@ -30,7 +37,11 @@ public sealed class DeleteClause : MutationTableClauseBase, IDeleteClause
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
         builder.Append("Delete From ");
-        AppendTable(builder, Table);
+        if (Context.Provider is ISqlProviderCapabilityProvider capabilityProvider &&
+            capabilityProvider.Capabilities?.SupportsDeleteUsing == true)
+            AppendAliasedTable(builder, Table);
+        else
+            AppendTable(builder, Table);
     }
 
     /// <inheritdoc />

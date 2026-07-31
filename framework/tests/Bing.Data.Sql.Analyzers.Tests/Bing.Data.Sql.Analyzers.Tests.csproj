@@ -10,5 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
     <ProjectReference Include="..\..\src\Bing.Data.Sql.Analyzers\Bing.Data.Sql.Analyzers.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
   </ItemGroup>
 </Project>

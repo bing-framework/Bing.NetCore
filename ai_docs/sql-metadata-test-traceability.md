@@ -42,6 +42,36 @@
 | `SqlMutationBatchPlanner.Plan` | `Bing.Data.Sql.Tests` | `SqlMutationBatchPlannerTest` | `Plan_WhenMultipleLimitsConfigured_ShouldUseSmallestCapacity`; `Plan_WhenEntitySetIsEmpty_ShouldReturnEmptyPlan`; `Plan_WhenNoCapacityLimitConfigured_ShouldCreateSingleBatch`; `Plan_WhenParameterLimitCannotFitOneEntity_ShouldThrowInvalidOperationException` | Unit |
 | `SqlExecutorBase.InsertBatchAsync` / `UpdateBatch` / `DeleteBatchAsync` | `Bing.Dapper.Sqlite.Tests.Integration` | `SqliteMutationExecutionIntegrationTest` | `InsertBatch_WhenEntitiesAreProvided_ShouldInsertAllEntities`; `UpdateBatch_WhenOneConcurrencyTokenDoesNotMatch_ShouldReturnActualAffectedRows`; `DeleteBatch_WhenEntitySetIsEmpty_ShouldReturnZero` | SQLite Integration |
 
+### 统一 Operation Builder 与 Mutation 正确性追溯
+
+| 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
+| --- | --- | --- | --- | --- |
+| `ISqlBuilder.OperationKind` / `SqlBuilderBase.UseOperation` / `Clear` / `New` / `Clone` | `Bing.Data.Sql.Tests` | `SqlOperationStateTest` | `Update_WhenBuilderIsSelect_ShouldThrowImmediately`; `Set_WhenBuilderIsDelete_ShouldThrowWithoutAddingParameter`; `Values_WhenBuilderIsInsertSelect_ShouldThrowWithoutAddingParameter`; `Clone_WhenBuilderIsUpdate_ShouldPreserveIndependentState`; `Clear_WhenBuilderHasOperation_ShouldResetStateAndAllowSwitch`; `New_WhenSourceHasOperation_ShouldReturnNoneState` | Unit；覆盖合法迁移、立即拒绝、无参数副作用和生命周期隔离。 |
+| `SqlBuilderBase` Insert Select 渲染与投影计数 | `Bing.Data.Sql.Tests` | `InsertSelectBuilderTest` | `InsertSelect_WhenBasicQueryIsConfigured_ShouldGenerateExpectedSql`; `InsertSelect_WhenWhereIsConfigured_ShouldGenerateParameterizedSql`; `InsertSelect_WhenProjectionCountDoesNotMatchTarget_ShouldThrow`; `InsertSelect_WhenProjectionCountIsUnknown_ShouldDeferValidationToDatabase`; `InsertSelect_WhenExistingParameterNameConflicts_ShouldGenerateDistinctParameter` | Unit；完整断言 Clause 顺序、状态、参数、Clone/Clear 和确定/未知投影。 |
+| `MySqlBuilder` / `PostgreSqlBuilder` / `SqlServerBuilder` / `OracleBuilder` / `SqliteBuilder` Insert Select | 五个对应 Provider 单元测试项目 | 各 Provider `*InsertSelectBuilderTest` | `InsertSelect_ShouldRenderMySqlSql`; `InsertSelect_ShouldRenderPostgreSqlSql`; `InsertSelect_ShouldRenderSqlServerSql`; `InsertSelect_ShouldRenderOracleSql`; `InsertSelect_ShouldRenderSqliteSql` | Unit；断言五种方言完整 SQL。 |
+| `SqlExecutorBase.Execute(ISqlBuilder)` / `ExecuteAsync(ISqlBuilder)` | `Bing.Dapper.Sqlite.Tests.Integration` | `SqliteMutationExecutionIntegrationTest` | `Execute_WhenUnifiedMutationBuildersAreConfigured_ShouldExecuteCrud`; `ExecuteAsync_WhenBuilderIsSelect_ShouldThrow` | SQLite Integration；真实执行 Insert Select、Update、Delete，并在连接前拒绝 Select。 |
+| `SqlExecutorBase` Combined Delete 影响行数校验 | `Bing.Dapper.Core.Tests`; `Bing.Dapper.Sqlite.Tests.Integration` | `SqlMutationBatchStrategyTest`; `SqliteMutationExecutionIntegrationTest` | `DeleteBatch_WhenCombinedConcurrencyCommandAffectsAllRows_ShouldReturnAffectedRows`; `DeleteBatchAsync_WhenCombinedConcurrencyCommandAffectsFewerRows_ShouldThrowConcurrencyException`; `DeleteBatch_WhenCombinedConcurrencyCommandMatchesAllRows_ShouldDeleteAllRows` | Unit + SQLite Integration；按批次实体数而非单实体一行校验。 |
+| `SqlExecutorBase` PerEntity 命令限额规划 | `Bing.Dapper.Core.Tests` | `SqlMutationBatchStrategyTest` | `InsertBatch_WhenPerEntityCommandsIndividuallyFitLimits_ShouldExecuteAllCommands` | Unit；参数数与 SQL 长度逐命令验证，执行分组不累计独立命令限制。 |
+| `SqlMutationPlanCache` / `SqlBatchUpdateRenderContext.GetValue` | `Bing.Data.Sql.Tests` | `DefaultSqlMutationBuilderPlanTest` | `BatchUpdateRenderContext_WhenPropertyIsReadRepeatedly_ShouldReuseCompiledGetter`; `GetterCache_WhenPropertyIsMissing_ShouldRemoveFailedEntry` | Unit；覆盖 Getter 编译缓存命中和失败项清理。 |
+| `SqlBatchInsertStrategy` / `SqlBatchDeleteStrategy` / `SqlProviderCapabilities` / `SqlMutationBatchPlanner` | `Bing.Data.Sql.Tests` | `SqlMutationPublicApiGovernanceTest` | `InsertStrategy_WhenPlaceholderIsRemoved_ShouldPreserveExistingValues`; `DeleteStrategy_WhenPlaceholderIsRemoved_ShouldPreserveExistingValues`; `ProviderCapabilities_WhenPublicPropertiesAreInspected_ShouldExposeConsumedCapabilities`; `BatchPlanner_WhenInterfacesAreInspected_ShouldNotExposePlaceholderSpi` | Unit；删除占位 API、只暴露已消费能力并保持有效枚举整数兼容。 |
+| `IUpdateFromClause` / `UpdateFromClause` / `IColumnSetClause` / `MutationClauseExtensions.UpdateFrom` / `SetFrom` / `WhereFrom` | `Bing.Data.Sql.Tests` | `SqlUpdateBuilderTest`; `SqlOperationStateTest` | `UpdateFrom_WhenStructuredColumnsAreConfigured_ShouldRenderExpectedSql`; `UpdateFrom_WhenClonedAndCleared_ShouldKeepInstancesIndependent`; `SetFrom_WhenColumnIsNotSingleIdentifier_ShouldThrowWithoutChangingSetClause`; `UpdateFrom_WhenBuilderHasNoUpdate_ShouldThrowWithoutChangingClause` | Unit；覆盖完整 SQL、状态即时拒绝、结构化标识符安全和 Clone/Clear 生命周期。 |
+| `SqlProviderCapabilities.SupportsUpdateFrom` / `PostgreSqlSqlProvider` / `SqlBuilderBase.AppendUpdate` | `Bing.Dapper.PostgreSql.Tests`; `Bing.Dapper.SqlServer.Tests` | `PostgreSqlMutationBuilderTest`; `SqlServerMutationBuilderTest` | `UpdateFrom_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql`; `UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException` | Provider Unit；PostgreSQL 完整 SQL和参数，未支持 Provider 在渲染前稳定拒绝。 |
+| `SqlExecutorBase.ExecuteAsync(ISqlBuilder)` PostgreSQL UpdateFrom | `Bing.Dapper.PostgreSql.Tests.Integration` | `PostgreSqlExecutorTest` | `ExecuteAsync_WhenUpdateFromBuilderIsConfigured_ShouldUpdateMatchedRow` | Gated PostgreSQL Integration；受控 fixture 创建并清空 `public.integration_product_updates`，当前环境仅编译，未配置安全 Gate 时不计为执行通过。 |
+| `MutationClauseExtensions.UpdateFrom` / `SetFrom` / `WhereFrom` 公共约束 | `Bing.Data.Sql.Analyzers.Tests` | `SqlOperationCompileContractTest` | `UpdateFromExtensions_WhenSourceIsUpdateBuilder_ShouldCompile` | Roslyn consumer compile contract；直接以 `ISqlUpdateBuilder` 消费三个 Fluent API。 |
+| `IDeleteUsingClause` / `DeleteUsingClause` / `MutationClauseExtensions.DeleteUsing` / `WhereUsing` | `Bing.Data.Sql.Tests` | `SqlDeleteBuilderTest`; `SqlOperationStateTest` | `DeleteUsing_WhenStructuredTablesAreConfigured_ShouldRenderExpectedSql`; `DeleteUsing_WhenWhereIsMissing_ShouldRejectUnconditionalDelete`; `DeleteUsing_WhenSourceAliasIsMissing_ShouldThrowInvalidOperationException`; `WhereUsing_WhenTargetAliasIsMissing_ShouldThrowWithoutChangingWhere`; `WhereUsing_WhenColumnIsNotSingleIdentifier_ShouldThrowArgumentException`; `Clone_WhenDeleteUsingIsConfigured_ShouldRemainIndependentAfterClear`; `DeleteUsing_WhenBuilderHasNoDelete_ShouldThrowWithoutChangingClause` | Unit；覆盖完整 SQL、无条件保护、Alias、标识符安全、Clone/Clear 和状态即时拒绝。 |
+| `SqlProviderCapabilities.SupportsDeleteUsing` / `PostgreSqlSqlProvider` / `SqlBuilderBase.AppendDelete` | `Bing.Data.Sql.Tests`; `Bing.Dapper.PostgreSql.Tests`; `Bing.Dapper.SqlServer.Tests` | `SqlMutationPublicApiGovernanceTest`; `PostgreSqlMutationBuilderTest`; `SqlServerMutationBuilderTest` | `ProviderCapabilities_WhenConstructorsAreInspected_ShouldPreserveLegacySignature`; `DeleteUsing_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql`; `DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException` | Core + Provider Unit；保留旧 CLR 构造签名，PostgreSQL 断言完整 SQL，未支持 Provider 在输出前拒绝。 |
+| `MutationClauseExtensions.DeleteUsing` / `WhereUsing` 公共约束 | `Bing.Data.Sql.Analyzers.Tests` | `SqlOperationCompileContractTest` | `DeleteUsingExtensions_WhenSourceIsDeleteBuilder_ShouldCompile` | Roslyn consumer compile contract；直接以 `ISqlDeleteBuilder` 消费两个 Fluent API。 |
+| `SqlExecutorBase.ExecuteAsync(ISqlBuilder)` PostgreSQL DeleteUsing | `Bing.Dapper.PostgreSql.Tests.Integration` | `PostgreSqlExecutorTest` | `ExecuteAsync_WhenDeleteUsingBuilderIsConfigured_ShouldDeleteMatchedRow` | Gated PostgreSQL Integration；仅删除来源表匹配的目标行并验证来源表保留，当前环境仅编译，未配置安全 Gate 时不计为执行通过。 |
+| `SqlReturningColumn` / `IReturningClause` / `ReturningClause` / `ISqlReturningClauseFactory` / `IReturningClauseAccessor` | `Bing.Data.Sql.Tests` | `SqlMutationClauseTest`; `SqlOperationStateTest` | `ReturningClause_WhenColumnsConfigured_ShouldRenderAndCloneIndependentProjection`; `Returning_WhenBuilderHasNoMutation_ShouldThrowWithoutChangingClause` | Unit；覆盖结构化限定列、结果 Alias、Clone/Clear、能力验证和状态即时拒绝。 |
+| `MutationClauseExtensions.Returning` / `SqlBuilderBase.AppendReturning` / `SqlProviderCapabilities.SupportsReturning` / `PostgreSqlSqlProvider` | `Bing.Dapper.PostgreSql.Tests` | `PostgreSqlMutationBuilderTest` | `Returning_WhenInsertValuesIsConfigured_ShouldRenderPostgreSqlSql`; `Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery`; `Returning_WhenUpdateFromIsConfigured_ShouldQualifyTargetColumns`; `Returning_WhenDeleteUsingIsConfigured_ShouldQualifyTargetColumns`; `Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases`; `Returning_WhenBuilderIsClonedAndCleared_ShouldKeepInstancesIndependent`; `Returning_WhenColumnIsNotSingleIdentifier_ShouldThrowArgumentException` | Provider Unit；覆盖 PostgreSQL 四种 Mutation 完整 SQL、目标 Alias、实体物理列与 CLR Alias、生命周期和标识符安全。 |
+| `ISqlReturningDialect` / `SqlReturningClausePosition` / `SqlServerSqlProvider` / `ReturningClause.AppendTo` | `Bing.Dapper.SqlServer.Tests`; `Bing.Data.Sql.Analyzers.Tests` | `SqlServerMutationBuilderTest`; `SqlOperationCompileContractTest` | `Returning_WhenInsertValuesIsConfigured_ShouldRenderOutputBeforeValues`; `Returning_WhenInsertSelectIsConfigured_ShouldRenderOutputBeforeSelect`; `Returning_WhenUpdateIsConfigured_ShouldRenderInsertedOutputBeforeWhere`; `Returning_WhenDeleteIsConfigured_ShouldRenderDeletedOutputBeforeWhere`; `Returning_WhenMappedProjectionIsConfigured_ShouldRenderOutputWithClrAliases`; `ReturningDialect_WhenImplementedByProvider_ShouldCompile` | Provider Unit + Roslyn consumer；覆盖 OUTPUT 位置、INSERTED/DELETED、实体 Alias 和第三方方言 SPI 合同。 |
+| `SqliteSqlProvider.Capabilities` / `SqlBuilderBase.AppendReturning` / `ReturningClause.AppendTo` | `Bing.Dapper.Sqlite.Tests` | `SqliteMutationBuilderTest` | `Returning_WhenInsertValuesIsConfigured_ShouldRenderSqliteSql`; `Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery`; `Returning_WhenUpdateIsConfigured_ShouldRenderAfterWhere`; `Returning_WhenDeleteIsConfigured_ShouldRenderAfterWhere`; `Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases` | Provider Unit；覆盖 SQLite 四种 Mutation 尾部 Returning 完整 SQL及实体物理列到 CLR Alias 的映射。 |
+| `MutationClauseExtensions.Returning` 公共约束 | `Bing.Data.Sql.Analyzers.Tests` | `SqlOperationCompileContractTest` | `ReturningExtensions_WhenSourceIsUnifiedBuilder_ShouldCompile` | Roslyn consumer compile contract；直接以统一 `ISqlBuilder` 消费字符串和实体表达式 Fluent API。 |
+| `SqlExecutorBase.ValidateExecutableBuilder` / `SqlQueryBase.ValidateQueryBuilder` | `Bing.Dapper.Sqlite.Tests.Integration` | `SqliteMutationExecutionIntegrationTest` | `ExecuteAsync_WhenBuilderHasReturning_ShouldRejectBeforeProviderRendering`; `ExecuteScalarAsync_WhenMutationHasNoReturning_ShouldRejectBeforeExecution` | SQLite Integration；普通执行拒绝 Returning，查询结果 API 拒绝无 Returning 的 Mutation，均在 Provider 渲染或数据库执行前失败。 |
+| `SqliteSqlProvider` / `SqlQueryBase.ExecuteQueryAsync` SQLite Returning | `Bing.Dapper.Sqlite.Tests.Integration` | `SqliteMutationExecutionIntegrationTest` | `ReturningRuntime_WhenBundledSqliteIsUsed_ShouldBeAtLeast335`; `ExecuteQueryAsync_WhenInsertValuesReturningIsConfigured_ShouldMaterializeRows`; `ExecuteQueryAsync_WhenInsertSelectReturningIsConfigured_ShouldMaterializeRows`; `ExecuteQueryAsync_WhenUpdateReturningIsConfigured_ShouldMaterializeUpdatedRow`; `ExecuteQueryAsync_WhenDeleteReturningIsConfigured_ShouldMaterializeDeletedRow` | SQLite Integration；校验本地运行时最低版本，并真实执行四种 Mutation、数据库生成标识、更新后值及删除前值的物化。 |
+| `SqlQueryBase.ExecuteQueryAsync` PostgreSQL Returning | `Bing.Dapper.PostgreSql.Tests.Integration` | `PostgreSqlExecutorTest` | `ExecuteQueryAsync_WhenInsertReturningIsConfigured_ShouldMaterializeReturnedRows` | Gated PostgreSQL Integration；多行 Insert Returning 物化结果并验证映射，当前环境仅双 TFM 编译，未配置安全 Gate 时不计为执行通过。 |
+| `SqlQueryBase.ExecuteQueryAsync` SQL Server Output | `Bing.Dapper.SqlServer.Tests.Integration` | `SqlServerQueryAggregateTest` | `ExecuteQueryAsync_WhenInsertOutputIsConfigured_ShouldMaterializeReturnedRows` | Gated SQL Server Integration；受控表多行 Insert Output 物化 `INSERTED` 行，当前环境仅双 TFM 编译，未配置安全 Gate 时不计为执行通过。 |
+
 | 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
 | --- | --- | --- | --- | --- |
 | `SqlAggregateFunction` / `SqlAggregateArgumentValidator.ValidateFunction` | `Bing.Data.Sql.Tests` | `SqlBuilderTest` | `Aggregate_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateRaw_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException`; `AggregateExpression_WhenFunctionIsUndefined_ShouldThrowArgumentOutOfRangeException` | Unit |
@@ -99,6 +129,100 @@
 | 本轮已执行范围合计 | 2734 passed，0 failed，8 skipped。 |
 | SQL Server 集成测试 | 6 skipped，0 failed；新受控 fixture 已编译并验证门控关闭原因，未配置安全外部数据库，未计入通过。 |
 | Oracle 集成测试 | 仅 Gate/Skip 合同已单测；本轮不建立 DDL/DML reset，未计入真实聚合执行通过。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+## PostgreSQL UpdateFrom 性能基线
+
+`SqlUpdateFromBenchmarks.RenderPostgreSqlUpdateFrom` 使用真实 PostgreSQL Provider，重复渲染包含目标/来源 Schema 与 Alias、一个来源列 Set、一个参数 Set 和结构化列关联条件的统一 Builder。2026-07-30 在 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）完成正式基线：Mean `661.6 ns`，Allocated `4.54 KB`，无 Gen1/Gen2。
+
+完整报告：`BenchmarkDotNet.Artifacts/sql-update-from-20260730/results/Bing.Data.Sql.Benchmarks.SqlUpdateFromBenchmarks-report-github.md`。本阶段新增独立 Clause 与结构化标识符渲染，没有修改既有 Query 或批量 Update 热路径。
+
+### UpdateFrom 阶段执行证据
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，52 条既有警告。 |
+| SQL Core / Analyzer consumer / Custom Provider | 1765 passed，0 failed，0 skipped。 |
+| PostgreSQL / SQL Server / MySQL / Oracle / SQLite Provider | 1140 passed，0 failed，0 skipped。 |
+| Dapper Core / SQLite 本地集成 | 220 passed，0 failed，0 skipped。 |
+| 本阶段执行合计 | 3125 passed，0 failed，0 skipped。 |
+| PostgreSQL 外部集成 | 项目双 TFM 编译成功；安全 Gate 未启用，真实 UpdateFrom 测试未执行且不计为通过。 |
+| UpdateFrom Benchmark | `FormalHost` 1 个场景完成：661.6 ns，4.54 KB。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+## PostgreSQL DeleteUsing 性能基线
+
+`SqlDeleteUsingBenchmarks.RenderPostgreSqlDeleteUsing` 使用真实 PostgreSQL Provider，重复渲染带目标/来源 Schema 与 Alias、结构化列关联条件的统一 Builder。2026-07-30 在 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）完成正式基线：Mean `555.3 ns`，Allocated `3.75 KB`，无 Gen1/Gen2。
+
+完整报告：`BenchmarkDotNet.Artifacts/sql-delete-using-20260730/results/Bing.Data.Sql.Benchmarks.SqlDeleteUsingBenchmarks-report-github.md`。本阶段新增独立 Clause 与结构化标识符渲染，没有修改既有 Query、批量 Delete 或未声明能力 Provider 的 Delete 输出路径。
+
+### DeleteUsing 阶段执行证据
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，52 条既有警告。 |
+| SQL Core / Analyzer consumer / Custom Provider | 1786 passed，0 failed，0 skipped。 |
+| PostgreSQL / SQL Server / MySQL / Oracle / SQLite Provider | 1144 passed，0 failed，0 skipped。 |
+| Dapper Core / SQLite 本地集成 | 220 passed，0 failed，0 skipped。 |
+| 本阶段执行合计 | 3150 passed，0 failed，0 skipped。 |
+| PostgreSQL 外部集成 | 项目双 TFM 编译成功；安全 Gate 未启用，真实 DeleteUsing 测试未执行且不计为通过。 |
+| DeleteUsing Benchmark | `FormalHost` 1 个场景完成：555.3 ns，3.75 KB。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+## PostgreSQL Returning 性能基线
+
+`SqlReturningBenchmarks.RenderPostgreSqlReturning` 使用真实 PostgreSQL Provider，重复渲染带目标/来源 Schema 与 Alias、结构化来源 Set、关联条件和两个目标返回列的统一 Builder。2026-07-30 在 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）完成正式基线：Mean `874.8 ns`，Allocated `5.62 KB`，无 Gen1/Gen2。
+
+完整报告：`BenchmarkDotNet.Artifacts/sql-returning-20260730/results/Bing.Data.Sql.Benchmarks.SqlReturningBenchmarks-report-github.md`。本阶段新增独立尾部 Clause 和执行 API 边界，没有修改无 Returning Mutation 的历史输出。
+
+### Returning 阶段执行证据
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，52 条既有警告。 |
+| SQL Core / Custom Provider / Analyzer consumer | 1791 passed，0 failed，0 skipped。 |
+| PostgreSQL / SQL Server / MySQL / Oracle / SQLite Provider | 1164 passed，0 failed，0 skipped。 |
+| Dapper Core / SQLite 本地集成 | 224 passed，0 failed，0 skipped。 |
+| 本阶段执行合计 | 3179 passed，0 failed，0 skipped。 |
+| PostgreSQL 外部集成 | 项目双 TFM 编译成功；安全 Gate 未启用，真实 Returning 测试未执行且不计为通过。 |
+| Returning Benchmark | `FormalHost` 1 个场景完成：874.8 ns，5.62 KB。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+## SQL Server Output 性能基线
+
+`SqlServerOutputBenchmarks.RenderSqlServerOutput` 使用真实 SQL Server Provider，重复渲染带两个参数、两个 `INSERTED` 返回列和 Where 条件的统一 Update Builder。2026-07-30 在 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）完成正式基线：Mean `735.3 ns`，Median `808.2 ns`，Allocated `3.72 KB`，无 Gen1/Gen2。结果分布为双峰（MValue `2.97`），仅作为首次基线，不作为优化收益结论。
+
+完整报告：`BenchmarkDotNet.Artifacts/sql-server-output-20260730/results/Bing.Data.Sql.Benchmarks.SqlServerOutputBenchmarks-report-github.md`。本阶段通过可选方言 SPI 复用 Returning 投影和执行边界，不新增第二套 Fluent API，也不支持 `OUTPUT INTO`。
+
+### SQL Server Output 阶段执行证据
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，52 条既有警告。 |
+| SQL Core / Custom Provider / Analyzer consumer | 1792 passed，0 failed，0 skipped。 |
+| PostgreSQL / SQL Server / MySQL / Oracle / SQLite Provider | 1172 passed，0 failed，0 skipped。 |
+| Dapper Core / SQLite 本地集成 | 224 passed，0 failed，0 skipped。 |
+| 本阶段执行合计 | 3188 passed，0 failed，0 skipped。 |
+| SQL Server 外部集成 | 项目双 TFM 编译成功；安全 Gate 未启用，真实 Output 测试未执行且不计为通过。 |
+| Output Benchmark | `FormalHost` 1 个场景完成：Mean 735.3 ns，Median 808.2 ns，3.72 KB；双峰分布仅作首次基线。 |
+| Git 操作 | 未执行 commit 或 push。 |
+
+## SQLite Returning 性能基线
+
+`SqliteReturningBenchmarks.RenderSqliteReturning` 使用真实 SQLite Provider，重复渲染带两个参数、两个返回列和 Where 条件的统一 Update Builder。2026-07-30 在 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）完成正式基线：Mean `359.8 ns`，Allocated `2.54 KB`，无 Gen1/Gen2。
+
+机器可读报告：`BenchmarkDotNet.Artifacts/sqlite-returning-final-baseline/results/Bing.Data.Sql.Benchmarks.SqliteReturningBenchmarks-report-full-compressed.json`。本阶段仅启用 SQLite 已原生支持的尾部 Returning，复用现有 Fluent API、Clause 和查询结果执行边界。
+
+### SQLite Returning 阶段执行证据
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，67 条既有警告。 |
+| SQLite Provider Unit | 68 passed，0 failed，0 skipped。 |
+| SQLite 本地集成 | 128 passed，0 failed，0 skipped；`net6.0` 与 `net8.0` 均通过。 |
+| SQL Core / Analyzer / 五个 Provider / Dapper Core / SQLite Integration | 3176 passed，0 failed，0 skipped。 |
+| SQLite Returning Benchmark | `FormalHost` 1 个场景完成：359.8 ns，2.54 KB。 |
+| 外部数据库 | 未执行；本阶段不依赖外部数据库。 |
 | Git 操作 | 未执行 commit 或 push。 |
 
 依赖包漏洞告警位于未修改的 `Bing.TextTemplating.Scriban`、`Bing.AutoMapper`、`Bing.MailKit` 和 `Bing.Tests.Samples` 依赖链。本轮未进行跨模块依赖升级；这些告警不来自聚合实现，仍应单独规划兼容性验证后的升级。
@@ -266,3 +390,31 @@
 | 1000 | 4.283 us / 31,056 B | 4.275 us / 31,056 B | 28.431 us / 167,112 B |
 
 基础值快照随参数规模线性增长；增强快照额外复制 `SqlParam` 容器与元数据，时间和分配成本相应更高。完整报告：`BenchmarkDotNet.Artifacts/parameter-manager-snapshot-20260728/results/Bing.Data.Sql.Benchmarks.ParameterManagerSnapshotBenchmarks-report-github.md`。
+
+## Mutation Getter 缓存性能基线
+
+`SqlMutationBenchmarks.RenderPostgreSqlBatchUpdate` 使用真实 PostgreSQL `UPDATE ... FROM (VALUES ...)` Renderer，Setup 先完成一次渲染以预热 `SqlMutationPlanCache` 的编译 Getter。正式结果使用 .NET 8.0.27、BenchmarkDotNet 0.14.0、`FormalHost`（3 launch、6 warmup、15 iteration）。
+
+| 实体数 | Mean | Allocated | 结论 |
+| ---: | ---: | ---: | --- |
+| 10 | 9.787 us | 53.06 KB | 覆盖小批次 Getter 缓存命中、SQL 与参数完整渲染。 |
+| 100 | 82.140 us | 419.72 KB | 时间和分配随实体数近似线性增长。 |
+| 1000 | 2.393 ms | 4.05 MB | 完成大批次基线；正式结果出现多峰分布警告，后续比较应结合原始分布，不以单次均值判定回退。 |
+
+完整报告：`BenchmarkDotNet.Artifacts/sql-mutation-getter-cache/results/Bing.Data.Sql.Benchmarks.SqlMutationBenchmarks-report-github.md`。该场景验证 Getter 热路径不再逐值反射；主要分配来自完整 SQL 文本和参数快照，未在本轮引入改变命令合同的缓存或池化。
+
+## Operation 与 Mutation 收口最终执行证据
+
+2026-07-30 在 Windows 10、.NET SDK 10.0.300、.NET 6.0.36/.NET 8.0.27 环境执行：
+
+| 验收项 | 结果 |
+| --- | --- |
+| `dotnet build .\Bing.All.sln -c Release --no-restore` | 成功，79 条既有警告。 |
+| `Bing.Data.Sql.Tests` / Analyzer 消费者编译契约 | 1724 passed，0 failed，0 skipped。 |
+| MySQL、PostgreSQL、SQL Server、Oracle、SQLite、Custom Provider | 1168 passed，0 failed，0 skipped。 |
+| `Bing.Dapper.Core.Tests` / SQLite 本地集成 | 220 passed，0 failed，0 skipped；SQLite 编译保留 1 条既有 `NETSDK1206` RID 警告。 |
+| Entity Framework Core / FreeSQL 兼容 | 50 passed，0 failed，0 skipped。 |
+| 本轮最终矩阵合计 | 3162 passed，0 failed，0 skipped。 |
+| PostgreSQL Getter 正式基准 | 6 个场景完成，包含 3 个 `FormalHost` 和 3 个额外 `ShortRun` 结果；正式数据见上表。 |
+| 外部数据库集成 | 未配置安全 Gate 与数据库重置授权，未执行且不计为通过。 |
+| Git 操作 | 未执行 commit 或 push。 |

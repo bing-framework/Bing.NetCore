@@ -16,6 +16,7 @@ public abstract partial class SqlQueryBase
     public IEnumerable<TEntity> StreamQuery<TEntity>(int? timeout = null)
     {
         EnsureStreamingSupported();
+        ValidateQueryBuilder();
         return StreamQueryIterator<TEntity>(timeout);
     }
 
@@ -103,6 +104,7 @@ public abstract partial class SqlQueryBase
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureStreamingSupported();
+        ValidateQueryBuilder();
         using var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         var completed = false;

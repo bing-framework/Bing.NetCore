@@ -1,6 +1,7 @@
 using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Clauses;
 using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
@@ -22,11 +23,15 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         : base(provider, services, parameterManager, clauseFactory)
     {
         DeleteClause = ClauseFactory.CreateDelete(MutationContext);
+        DeleteUsingClause = CreateDeleteUsingClause();
         WhereClause = ClauseFactory.CreateWhere(MutationContext);
     }
 
     /// <inheritdoc />
     public IDeleteClause DeleteClause { get; private set; }
+
+    /// <inheritdoc />
+    public IDeleteUsingClause DeleteUsingClause { get; private set; }
 
     /// <inheritdoc />
     public IMutationWhereClause WhereClause { get; private set; }
@@ -44,6 +49,8 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
             throw new ArgumentNullException(nameof(builder));
         Validate();
         DeleteClause.AppendTo(builder);
+        if (DeleteUsingClause.Table != null)
+            DeleteUsingClause.AppendTo(builder);
         WhereClause.AppendTo(builder);
     }
 
@@ -62,6 +69,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     {
         var result = new SqlDeleteBuilder(Provider, MutationContext.Services, ParameterManager.Clone(), ClauseFactory);
         result.DeleteClause = DeleteClause.Clone(result.MutationContext);
+        result.DeleteUsingClause = DeleteUsingClause.Clone(result.MutationContext);
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
         return result;
@@ -71,6 +79,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     public void Clear()
     {
         DeleteClause.Clear();
+        DeleteUsingClause.Clear();
         WhereClause.Clear();
         AllowAllRows = false;
         ParameterManager.Clear();
@@ -83,7 +92,17 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     {
         var context = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows, SqlExecutionKind.Delete);
         DeleteClause.Validate(context);
+        if (DeleteUsingClause.Table != null)
+            DeleteUsingClause.Validate(context);
         WhereClause.Validate(context);
         ValidateParameterLimit();
     }
+
+    /// <summary>
+    /// 创建 Delete Using 子句，优先使用 Provider 注册的专用子句工厂。
+    /// </summary>
+    /// <returns>Provider 专用或默认的 Delete Using 子句。</returns>
+    private IDeleteUsingClause CreateDeleteUsingClause() => ClauseFactory is ISqlDeleteUsingClauseFactory factory
+        ? factory.CreateDeleteUsing(MutationContext)
+        : new DeleteUsingClause(MutationContext);
 }

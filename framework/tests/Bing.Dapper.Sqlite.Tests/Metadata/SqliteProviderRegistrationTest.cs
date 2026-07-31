@@ -36,14 +36,13 @@ public class SqliteProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：具名 SQLite 数据源应创建 SQLite 查询、执行器、方言和连接工厂实例。
+    /// 测试目的：仅注册 SQLite Provider 时应自动补齐核心服务，具名数据源可创建 SQLite 查询、执行器、方言和连接工厂实例。
     /// </summary>
     [Fact]
     public void Factories_WhenSqliteDataSourceConfigured_ShouldResolveSqliteServices()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlCore();
         services.AddSqliteProvider();
         services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=:memory:");
         using var provider = services.BuildServiceProvider();

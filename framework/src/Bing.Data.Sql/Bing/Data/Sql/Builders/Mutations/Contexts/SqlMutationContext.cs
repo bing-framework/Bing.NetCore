@@ -9,6 +9,11 @@ namespace Bing.Data.Sql.Builders.Mutations.Contexts;
 public sealed class SqlMutationContext
 {
     /// <summary>
+    /// 统一 Builder 的操作状态管理器。
+    /// </summary>
+    internal ISqlOperationStateManager OperationStateManager { get; set; }
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlMutationContext"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
@@ -48,4 +53,10 @@ public sealed class SqlMutationContext
     /// Builder 生命周期内固定的执行上下文。
     /// </summary>
     public SqlBuilderExecutionContext ExecutionContext { get; }
+
+    /// <summary>
+    /// 在修改 Mutation Clause 前验证统一 Builder 的操作状态。
+    /// </summary>
+    /// <param name="action">当前 Mutation 行为。</param>
+    internal void UseOperation(SqlOperationAction action) => OperationStateManager?.UseOperation(action);
 }

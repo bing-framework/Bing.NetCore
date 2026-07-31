@@ -8,6 +8,10 @@ namespace Bing.Data.Sql.Builders;
 /// </summary>
 public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
 {
+    /// <summary>
+    /// 可确定的查询输出列数量；通配符或无法可靠分析的原始投影返回 null。
+    /// </summary>
+    int? ProjectionCount { get; }
 
     /// <summary>
     /// 过滤重复记录

@@ -4,6 +4,10 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Clauses;
+using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -15,7 +19,7 @@ namespace Bing.Data.Sql.Builders.Core;
 /// Sql生成器基类
 /// </summary>
 public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IUnionAccessor,
-    ICteAccessor
+    ICteAccessor, ISqlOperationStateManager, IReturningClauseAccessor
 {
     #region 字段
 
@@ -53,6 +57,71 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 排序子句
     /// </summary>
     private IOrderByClause _orderByClause;
+
+    /// <summary>
+    /// 统一 Mutation 子句共享的执行上下文。
+    /// </summary>
+    private SqlMutationContext _mutationContext;
+
+    /// <summary>
+    /// 当前 Provider 的 Mutation 子句工厂缓存。
+    /// </summary>
+    private ISqlMutationClauseFactory _mutationClauseFactory;
+
+    /// <summary>
+    /// Insert 子句的延迟创建缓存。
+    /// </summary>
+    private IInsertClause _insertClause;
+
+    /// <summary>
+    /// Insert 列集合子句的延迟创建缓存。
+    /// </summary>
+    private IInsertColumnsClause _insertColumnsClause;
+
+    /// <summary>
+    /// Insert Values 子句的延迟创建缓存。
+    /// </summary>
+    private IValuesClause _valuesClause;
+
+    /// <summary>
+    /// Update 子句的延迟创建缓存。
+    /// </summary>
+    private IUpdateClause _updateClause;
+
+    /// <summary>
+    /// Update From 子句的延迟创建缓存，并在克隆时复制其来源表。
+    /// </summary>
+    private IUpdateFromClause _updateFromClause;
+
+    /// <summary>
+    /// Update Set 子句的延迟创建缓存。
+    /// </summary>
+    private ISetClause _setClause;
+
+    /// <summary>
+    /// Delete 子句的延迟创建缓存。
+    /// </summary>
+    private IDeleteClause _deleteClause;
+
+    /// <summary>
+    /// Delete Using 子句的延迟创建缓存，并在克隆时复制其来源表。
+    /// </summary>
+    private IDeleteUsingClause _deleteUsingClause;
+
+    /// <summary>
+    /// Mutation Where 子句的延迟创建缓存。
+    /// </summary>
+    private IMutationWhereClause _mutationWhereClause;
+
+    /// <summary>
+    /// Returning 子句的延迟创建缓存，并在克隆时复制返回列。
+    /// </summary>
+    private IReturningClause _returningClause;
+
+    /// <summary>
+    /// 当前 Builder 的查询或 Mutation 构造阶段，用于拒绝不兼容的 Fluent 调用。
+    /// </summary>
+    private SqlBuilderOperationState _operationState;
 
     /// <summary>
     /// 参数字面值解析器
@@ -199,6 +268,84 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public IOrderByClause OrderByClause => _orderByClause ??= CreateOrderByClause();
 
+    /// <inheritdoc />
+    public SqlOperationKind OperationKind => _operationState switch
+    {
+        SqlBuilderOperationState.Select => SqlOperationKind.Select,
+        SqlBuilderOperationState.InsertValues => SqlOperationKind.InsertValues,
+        SqlBuilderOperationState.InsertSelect => SqlOperationKind.InsertSelect,
+        SqlBuilderOperationState.Update => SqlOperationKind.Update,
+        SqlBuilderOperationState.Delete => SqlOperationKind.Delete,
+        _ => SqlOperationKind.None
+    };
+
+    /// <inheritdoc />
+    public SqlMutationContext MutationContext => _mutationContext ??= CreateMutationContext();
+
+    /// <inheritdoc />
+    public IInsertClause InsertClause => _insertClause ??= MutationClauseFactory.CreateInsert(MutationContext);
+
+    /// <inheritdoc />
+    public IInsertColumnsClause InsertColumnsClause =>
+        _insertColumnsClause ??= MutationClauseFactory.CreateInsertColumns(MutationContext);
+
+    /// <inheritdoc />
+    public IValuesClause ValuesClause => _valuesClause ??= MutationClauseFactory.CreateValues(MutationContext);
+
+    /// <inheritdoc />
+    public IUpdateClause UpdateClause => _updateClause ??= MutationClauseFactory.CreateUpdate(MutationContext);
+
+    /// <inheritdoc />
+    public IUpdateFromClause UpdateFromClause => _updateFromClause ??= CreateUpdateFromClause();
+
+    /// <inheritdoc />
+    public ISetClause SetClause => _setClause ??= MutationClauseFactory.CreateSet(MutationContext);
+
+    /// <inheritdoc />
+    public IDeleteClause DeleteClause => _deleteClause ??= MutationClauseFactory.CreateDelete(MutationContext);
+
+    /// <inheritdoc />
+    public IDeleteUsingClause DeleteUsingClause => _deleteUsingClause ??= CreateDeleteUsingClause();
+
+    /// <inheritdoc />
+    public IReturningClause ReturningClause => _returningClause ??= CreateReturningClause();
+
+    /// <inheritdoc />
+    IMutationWhereClause IMutationWhereClauseAccessor.WhereClause =>
+        _mutationWhereClause ??= MutationClauseFactory.CreateWhere(MutationContext);
+
+    /// <summary>
+    /// 是否显式允许无条件 Update/Delete。
+    /// </summary>
+    protected bool AllowAllRows { get; private set; }
+
+    private ISqlMutationClauseFactory MutationClauseFactory => _mutationClauseFactory ??=
+        (Provider as ISqlMutationClauseFactoryProvider)?.MutationClauseFactory ?? new DefaultSqlMutationClauseFactory();
+
+    /// <summary>
+    /// 创建 Update From 子句，优先使用 Provider 的可选专用工厂。
+    /// </summary>
+    /// <returns>Provider 专用或默认的 Update From 子句。</returns>
+    private IUpdateFromClause CreateUpdateFromClause() => MutationClauseFactory is ISqlUpdateFromClauseFactory factory
+        ? factory.CreateUpdateFrom(MutationContext)
+        : new UpdateFromClause(MutationContext);
+
+    /// <summary>
+    /// 创建 Delete Using 子句，优先使用 Provider 的可选专用工厂。
+    /// </summary>
+    /// <returns>Provider 专用或默认的 Delete Using 子句。</returns>
+    private IDeleteUsingClause CreateDeleteUsingClause() => MutationClauseFactory is ISqlDeleteUsingClauseFactory factory
+        ? factory.CreateDeleteUsing(MutationContext)
+        : new DeleteUsingClause(MutationContext);
+
+    /// <summary>
+    /// 创建 Returning 子句，优先使用 Provider 的可选专用工厂。
+    /// </summary>
+    /// <returns>Provider 专用或默认的 Returning 子句。</returns>
+    private IReturningClause CreateReturningClause() => MutationClauseFactory is ISqlReturningClauseFactory factory
+        ? factory.CreateReturning(MutationContext)
+        : new ReturningClause(MutationContext);
+
     /// <summary>
     /// 参数字面值解析器
     /// </summary>
@@ -279,6 +426,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         UnionItems = new List<BuilderItem>();
         CteItems = new List<BuilderItem>();
         _excludedFilters = new List<Type>();
+        _mutationContext = CreateMutationContext();
     }
 
     #endregion
@@ -336,6 +484,15 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <returns>当前运行依赖的子句上下文。</returns>
     protected SqlClauseContext CreateClauseContext() => new(this, Provider, EntityResolver, AliasRegister,
         ParameterManager, ExecutionContext, Services);
+
+    private SqlMutationContext CreateMutationContext()
+    {
+        var result = new SqlMutationContext(Provider, ParameterManager, Services, ExecutionContext)
+        {
+            OperationStateManager = this
+        };
+        return result;
+    }
 
     /// <summary>
     /// 创建Select子句
@@ -426,6 +583,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         AliasRegister = sqlBuilder.AliasRegister?.Clone() ?? new EntityAliasRegister();
         var clonedContext = CreateClauseContext();
+        _mutationClauseFactory = sqlBuilder._mutationClauseFactory;
+        _mutationContext = CreateMutationContext();
 
         // 克隆各子句
         _selectClause = sqlBuilder._selectClause?.Clone(clonedContext);
@@ -434,6 +593,18 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         _whereClause = sqlBuilder._whereClause?.Clone(clonedContext);
         _groupByClause = sqlBuilder._groupByClause?.Clone(clonedContext);
         _orderByClause = sqlBuilder._orderByClause?.Clone(clonedContext);
+        _insertClause = sqlBuilder._insertClause?.Clone(MutationContext);
+        _insertColumnsClause = sqlBuilder._insertColumnsClause?.Clone(MutationContext);
+        _valuesClause = sqlBuilder._valuesClause?.Clone(MutationContext);
+        _updateClause = sqlBuilder._updateClause?.Clone(MutationContext);
+        _updateFromClause = sqlBuilder._updateFromClause?.Clone(MutationContext);
+        _setClause = sqlBuilder._setClause?.Clone(MutationContext);
+        _deleteClause = sqlBuilder._deleteClause?.Clone(MutationContext);
+        _deleteUsingClause = sqlBuilder._deleteUsingClause?.Clone(MutationContext);
+        _mutationWhereClause = sqlBuilder._mutationWhereClause?.Clone(MutationContext);
+        _returningClause = sqlBuilder._returningClause?.Clone(MutationContext);
+        _operationState = sqlBuilder._operationState;
+        AllowAllRows = sqlBuilder.AllowAllRows;
 
         // 克隆分页信息
         Pager = new Pager(sqlBuilder.Pager.Page, sqlBuilder.Pager.PageSize, sqlBuilder.Pager.TotalCount,
@@ -607,6 +778,18 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         ClearPageParams();
         ClearUnionBuilders();
         ClearCte();
+        _insertClause?.Clear();
+        _insertColumnsClause?.Clear();
+        _valuesClause?.Clear();
+        _updateClause?.Clear();
+        _updateFromClause?.Clear();
+        _setClause?.Clear();
+        _deleteClause?.Clear();
+        _deleteUsingClause?.Clear();
+        _mutationWhereClause?.Clear();
+        _returningClause?.Clear();
+        AllowAllRows = false;
+        _operationState = SqlBuilderOperationState.None;
         return this;
     }
 
@@ -1030,13 +1213,274 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     }
 
     /// <inheritdoc />
+    public void SetAllowAllRows(bool allowAllRows)
+    {
+        UseOperation(SqlOperationAction.AllowAllRows);
+        AllowAllRows = allowAllRows;
+    }
+
+    /// <inheritdoc />
+    void ISqlOperationStateManager.UseOperation(SqlOperationAction action) => UseOperation(action);
+
+    /// <summary>
+    /// 在 Clause 修改前验证并切换当前操作状态。
+    /// </summary>
+    /// <summary>
+    /// 验证 Fluent 操作可否从当前状态迁移，并在合法时更新状态。
+    /// </summary>
+    /// <param name="action">即将执行的查询或 Mutation 操作。</param>
+    /// <exception cref="InvalidOperationException">操作会混用不兼容的查询和 Mutation 语句时抛出。</exception>
+    private void UseOperation(SqlOperationAction action)
+    {
+        var nextState = GetNextOperationState(action);
+        if (nextState.HasValue)
+        {
+            _operationState = nextState.Value;
+            return;
+        }
+        throw new InvalidOperationException($"当前 Builder 已处于 {GetOperationName(_operationState)} 状态，不能调用 {GetActionName(action)}。");
+    }
+
+    /// <summary>
+    /// 获取当前状态执行指定操作后的目标状态。
+    /// </summary>
+    /// <param name="action">即将执行的操作。</param>
+    /// <returns>合法迁移后的状态；无法迁移时返回 <see langword="null"/>。</returns>
+    private SqlBuilderOperationState? GetNextOperationState(SqlOperationAction action)
+    {
+        return _operationState switch
+        {
+            SqlBuilderOperationState.None => action switch
+            {
+                SqlOperationAction.Select or SqlOperationAction.QueryClause or SqlOperationAction.Paging =>
+                    SqlBuilderOperationState.Select,
+                SqlOperationAction.InsertInto => SqlBuilderOperationState.InsertPending,
+                SqlOperationAction.Values => SqlBuilderOperationState.InsertValues,
+                SqlOperationAction.Update or SqlOperationAction.Set => SqlBuilderOperationState.Update,
+                SqlOperationAction.DeleteFrom => SqlBuilderOperationState.Delete,
+                _ => null
+            },
+            SqlBuilderOperationState.Select when action is SqlOperationAction.Select or
+                SqlOperationAction.QueryClause or SqlOperationAction.Paging => SqlBuilderOperationState.Select,
+            SqlBuilderOperationState.InsertPending => action switch
+            {
+                SqlOperationAction.InsertInto => SqlBuilderOperationState.InsertPending,
+                SqlOperationAction.Values => SqlBuilderOperationState.InsertValues,
+                SqlOperationAction.Select or SqlOperationAction.QueryClause =>
+                    SqlBuilderOperationState.InsertSelect,
+                _ => null
+            },
+            SqlBuilderOperationState.InsertValues when action is SqlOperationAction.InsertInto or
+                SqlOperationAction.Values or SqlOperationAction.Returning => SqlBuilderOperationState.InsertValues,
+            SqlBuilderOperationState.InsertSelect when action is SqlOperationAction.InsertInto or
+                SqlOperationAction.Select or SqlOperationAction.QueryClause or SqlOperationAction.Returning =>
+                SqlBuilderOperationState.InsertSelect,
+            SqlBuilderOperationState.Update when action is SqlOperationAction.Update or SqlOperationAction.UpdateFrom or
+                SqlOperationAction.Set or
+                SqlOperationAction.MutationWhere or SqlOperationAction.Returning or
+                SqlOperationAction.AllowAllRows => SqlBuilderOperationState.Update,
+            SqlBuilderOperationState.Delete when action is SqlOperationAction.DeleteFrom or SqlOperationAction.DeleteUsing or
+                SqlOperationAction.MutationWhere or SqlOperationAction.Returning or
+                SqlOperationAction.AllowAllRows => SqlBuilderOperationState.Delete,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// 获取用于异常消息的操作状态名称。
+    /// </summary>
+    /// <param name="state">当前 Builder 操作状态。</param>
+    /// <returns>面向诊断的状态名称。</returns>
+    private static string GetOperationName(SqlBuilderOperationState state) => state switch
+    {
+        SqlBuilderOperationState.InsertPending => "Insert",
+        SqlBuilderOperationState.InsertValues => "InsertValues",
+        SqlBuilderOperationState.InsertSelect => "InsertSelect",
+        SqlBuilderOperationState.Select => "Select",
+        SqlBuilderOperationState.Update => "Update",
+        SqlBuilderOperationState.Delete => "Delete",
+        _ => "None"
+    };
+
+    /// <summary>
+    /// 获取用于异常消息的 Fluent 操作名称。
+    /// </summary>
+    /// <param name="action">当前请求的 Fluent 操作。</param>
+    /// <returns>面向诊断的操作名称。</returns>
+    private static string GetActionName(SqlOperationAction action) => action switch
+    {
+        SqlOperationAction.InsertInto => "InsertInto",
+        SqlOperationAction.Values => "Values",
+        SqlOperationAction.Update => "Update",
+        SqlOperationAction.UpdateFrom => "UpdateFrom",
+        SqlOperationAction.Set => "Set",
+        SqlOperationAction.DeleteFrom => "DeleteFrom",
+        SqlOperationAction.DeleteUsing => "DeleteUsing",
+        SqlOperationAction.MutationWhere or SqlOperationAction.QueryClause => "Where",
+        SqlOperationAction.Returning => "Returning",
+        SqlOperationAction.AllowAllRows => "AllowAllRows",
+        SqlOperationAction.Paging => "Paging",
+        _ => "Select"
+    };
+
+    private IMutationWhereClause MutationWhereClause =>
+        ((IMutationWhereClauseAccessor)this).WhereClause;
+
+    /// <summary>
+    /// 验证并按 Insert Values 语法顺序渲染目标表、列、可选返回投影和数据行。
+    /// </summary>
+    /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
+    private void AppendInsertValues(StringBuilder builder)
+    {
+        var validationContext = new SqlValidationContext(Provider, ParameterManager.Count, false,
+            SqlExecutionKind.Insert);
+        InsertClause.Validate(validationContext);
+        InsertColumnsClause.Validate(validationContext);
+        ValuesClause.Validate(validationContext);
+        if (InsertColumnsClause.Columns.Count != ValuesClause.ColumnCount)
+            throw new InvalidOperationException("Insert 列数量与 Values 列数量不一致。");
+        InsertClause.AppendTo(builder);
+        InsertColumnsClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.BeforeSource);
+        ValuesClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.End);
+    }
+
+    /// <summary>
+    /// 验证并渲染 Update、Set、可选 Update From、筛选与 Returning 子句。
+    /// </summary>
+    /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
+    private void AppendUpdate(StringBuilder builder)
+    {
+        var validationContext = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows,
+            SqlExecutionKind.Update);
+        UpdateClause.Validate(validationContext);
+        SetClause.Validate(validationContext);
+        if (UpdateFromClause.Table != null)
+            UpdateFromClause.Validate(validationContext);
+        MutationWhereClause.Validate(validationContext);
+        UpdateClause.AppendTo(builder);
+        SetClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.BeforeSource);
+        if (UpdateFromClause.Table != null)
+            UpdateFromClause.AppendTo(builder);
+        MutationWhereClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.End);
+    }
+
+    /// <summary>
+    /// 验证并渲染 Insert Select；该模式不允许同时使用 Values、Union 或 CTE。
+    /// </summary>
+    /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
+    private void AppendInsertSelect(StringBuilder builder)
+    {
+        if (ValuesClause.RowCount > 0)
+            throw new InvalidOperationException("Insert Select 不能同时包含 Values。");
+        if (UnionItems.Count > 0 || CteItems.Count > 0)
+            throw new NotSupportedException("Insert Select 当前不支持 Union 或 CTE。");
+        var validationContext = new SqlValidationContext(Provider, ParameterManager.Count, false,
+            SqlExecutionKind.Insert);
+        InsertClause.Validate(validationContext);
+        FromClause.Validate();
+        OrderByClause.Validate(false);
+        var targetColumnCount = InsertColumnsClause.Columns.Count;
+        if (targetColumnCount > 0 && SelectClause.ProjectionCount is int projectionCount &&
+            targetColumnCount != projectionCount)
+            throw new InvalidOperationException("Insert Select 的目标列数量与查询输出列数量不一致。");
+        if (_isAddFilters == false)
+            EnsureFiltersAdded();
+        InsertClause.AppendTo(builder);
+        if (targetColumnCount > 0)
+            InsertColumnsClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.BeforeSource);
+        builder.AppendLine(" ");
+        AppendSelect(builder);
+        AppendFrom(builder);
+        AppendClause(builder, JoinClause);
+        AppendClause(builder, WhereClause);
+        AppendClause(builder, GroupByClause);
+        AppendClause(builder, OrderByClause);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.End);
+    }
+
+    /// <summary>
+    /// 验证并渲染 Delete、可选 Using、筛选与 Returning 子句。
+    /// </summary>
+    /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
+    private void AppendDelete(StringBuilder builder)
+    {
+        var validationContext = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows,
+            SqlExecutionKind.Delete);
+        DeleteClause.Validate(validationContext);
+        if (DeleteUsingClause.Table != null)
+            DeleteUsingClause.Validate(validationContext);
+        MutationWhereClause.Validate(validationContext);
+        DeleteClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.BeforeSource);
+        if (DeleteUsingClause.Table != null)
+            DeleteUsingClause.AppendTo(builder);
+        MutationWhereClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.End);
+    }
+
+    /// <summary>
+    /// 在当前 Provider 要求的位置渲染 Returning 或 SQL Server Output 投影。
+    /// </summary>
+    /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
+    /// <param name="validationContext">当前 Mutation 验证上下文。</param>
+    /// <param name="position">正在渲染的 SQL 语法位置。</param>
+    private void AppendReturning(StringBuilder builder, SqlValidationContext validationContext,
+        SqlReturningClausePosition position)
+    {
+        if (ReturningClause.IsEmpty)
+            return;
+        var configuredPosition = GetReturningPosition();
+        if (configuredPosition != position)
+            return;
+        ReturningClause.Validate(validationContext);
+        TrimAppendedWhitespace(builder, 0);
+        ReturningClause.AppendTo(builder);
+    }
+
+    /// <summary>
+    /// 获取当前 Provider 的返回投影语法位置。
+    /// </summary>
+    /// <returns>语句末尾的 Returning 位置，或数据源前的 SQL Server Output 位置。</returns>
+    private SqlReturningClausePosition GetReturningPosition()
+    {
+        var position = (Provider as ISqlReturningDialect)?.Position ?? SqlReturningClausePosition.End;
+        if (position is SqlReturningClausePosition.End or SqlReturningClausePosition.BeforeSource)
+            return position;
+        throw new InvalidOperationException($"Provider {Provider.Key} 返回了无效的 Returning 子句位置。");
+    }
+
+    /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
         builder.CheckNull(nameof(builder));
         var startIndex = builder.Length;
-        Init();
-        Validate();
-        CreateSql(builder);
+        switch (_operationState)
+        {
+            case SqlBuilderOperationState.InsertValues:
+                AppendInsertValues(builder);
+                break;
+            case SqlBuilderOperationState.Update:
+                AppendUpdate(builder);
+                break;
+            case SqlBuilderOperationState.Delete:
+                AppendDelete(builder);
+                break;
+            case SqlBuilderOperationState.InsertPending:
+                throw new InvalidOperationException("InsertInto 后必须调用 Values 或 Select。");
+            case SqlBuilderOperationState.InsertSelect:
+                AppendInsertSelect(builder);
+                break;
+            default:
+                Init();
+                Validate();
+                CreateSql(builder);
+                break;
+        }
         TrimAppendedWhitespace(builder, startIndex);
     }
 
@@ -1054,6 +1498,47 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             builder.Remove(length, builder.Length - length);
     }
 
+}
+
+/// <summary>
+/// 统一 SQL Builder 的查询与 Mutation 构造状态。
+/// </summary>
+internal enum SqlBuilderOperationState
+{
+    /// <summary>
+    /// 尚未选择查询或 Mutation 操作。
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// 正在构造普通 Select 查询。
+    /// </summary>
+    Select,
+
+    /// <summary>
+    /// 已设置 Insert 目标表，尚待 Values 或 Select 数据源。
+    /// </summary>
+    InsertPending,
+
+    /// <summary>
+    /// 正在构造 Insert Values 语句。
+    /// </summary>
+    InsertValues,
+
+    /// <summary>
+    /// 正在构造 Insert Select 语句。
+    /// </summary>
+    InsertSelect,
+
+    /// <summary>
+    /// 正在构造 Update 语句。
+    /// </summary>
+    Update,
+
+    /// <summary>
+    /// 正在构造 Delete 语句。
+    /// </summary>
+    Delete
 }
 
 /// <summary>

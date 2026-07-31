@@ -61,6 +61,8 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 创建 Values 别名列表。
     /// </summary>
+    /// <param name="context">当前批量 Update 渲染上下文。</param>
+    /// <returns>按更新列、主键和并发列顺序排列的安全 SQL 别名集合。</returns>
     private static IReadOnlyList<string> CreateAliases(SqlBatchUpdateRenderContext context)
     {
         var aliases = new List<string>(context.UpdateColumns.Count + context.Keys.Count + context.ConcurrencyColumns.Count);
@@ -73,6 +75,10 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 按角色和序号添加与实体物理列名隔离的 Values 别名。
     /// </summary>
+    /// <param name="aliases">待追加别名的集合。</param>
+    /// <param name="provider">提供方言转义规则的 SQL Provider。</param>
+    /// <param name="role">别名前缀对应的列角色。</param>
+    /// <param name="count">需要追加的别名数量。</param>
     private static void AddAliases(ICollection<string> aliases, ISqlProvider provider, string role, int count)
     {
         for (var index = 0; index < count; index++)
@@ -82,6 +88,10 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 追加单个实体的 Values 参数行。
     /// </summary>
+    /// <param name="sql">用于追加 SQL 的字符串生成器。</param>
+    /// <param name="context">当前批量 Update 渲染上下文。</param>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <param name="entity">要渲染为 Values 行的实体。</param>
     private static void AppendValueRow(StringBuilder sql, SqlBatchUpdateRenderContext context,
         IParameterManager parameterManager, object entity)
     {
@@ -99,6 +109,14 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 创建并追加单个参数。
     /// </summary>
+    /// <param name="sql">用于追加 SQL 的字符串生成器。</param>
+    /// <param name="context">当前批量 Update 渲染上下文。</param>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <param name="source">提供列值的实体或原始值对象。</param>
+    /// <param name="column">要参数化的映射列。</param>
+    /// <param name="rejectNull">是否拒绝 <see langword="null"/> 条件值。</param>
+    /// <param name="first">指示当前行是否尚未追加参数，用于控制逗号分隔符。</param>
+    /// <param name="concurrency">是否读取并发原始值而非实体当前值。</param>
     private static void AppendParameter(StringBuilder sql, SqlBatchUpdateRenderContext context,
         IParameterManager parameterManager, object source, ColumnMappingMetadata column, bool rejectNull, ref bool first,
         bool concurrency = false)
@@ -118,6 +136,8 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 保存包含元数据的参数。
     /// </summary>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <param name="parameter">待写入的带元数据 SQL 参数。</param>
     private static void AddParameter(IParameterManager parameterManager, SqlParam parameter)
     {
         if (parameterManager is IAdvancedParameterManager advancedParameterManager)
@@ -129,6 +149,8 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     /// <summary>
     /// 导出可执行参数快照。
     /// </summary>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <returns>保留参数名称、值和元数据的可执行参数快照集合。</returns>
     private static IReadOnlyCollection<SqlParam> ExportParameters(IParameterManager parameterManager)
     {
         if (parameterManager is IAdvancedParameterManager advancedParameterManager)

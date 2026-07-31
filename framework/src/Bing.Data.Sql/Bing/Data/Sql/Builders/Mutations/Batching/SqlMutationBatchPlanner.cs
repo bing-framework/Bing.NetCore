@@ -3,9 +3,13 @@ namespace Bing.Data.Sql.Builders.Mutations.Batching;
 /// <summary>
 /// 默认 Mutation 批次规划器。
 /// </summary>
-public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
+public sealed class SqlMutationBatchPlanner
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 根据用户批量大小、Provider 参数上限和 SQL 长度上限计算批次计划。
+    /// </summary>
+    /// <param name="context">包含实体数量、每实体开销和批量选项的规划上下文。</param>
+    /// <returns>按三类容量中最小值分片的批次计划；实体数量为零时返回空计划。</returns>
     public SqlMutationBatchPlan Plan(SqlMutationBatchPlanContext context)
     {
         if (context == null)
@@ -31,6 +35,8 @@ public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
     /// <summary>
     /// 计算参数上限允许的实体数量。
     /// </summary>
+    /// <param name="context">批次规划上下文。</param>
+    /// <returns>参数容量允许的最大实体数；未配置参数上限时返回无界容量。</returns>
     private static int GetParameterCapacity(SqlMutationBatchPlanContext context)
     {
         if (context.MaxParameterCount == null)
@@ -41,6 +47,8 @@ public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
     /// <summary>
     /// 计算 SQL 长度上限允许的实体数量。
     /// </summary>
+    /// <param name="context">批次规划上下文。</param>
+    /// <returns>SQL 长度容量允许的最大实体数；未配置限制时返回无界容量。</returns>
     private static int GetSqlLengthCapacity(SqlMutationBatchPlanContext context)
     {
         if (context.MaxSqlLength == null || context.EstimatedSqlLengthPerEntity == 0)
@@ -67,7 +75,7 @@ public sealed class SqlMutationBatchPlanner : ISqlMutationBatchPlanner
         /// 初始化一个 <see cref="SqlMutationBatchSizeList"/> 类型的实例。
         /// </summary>
         /// <param name="entityCount">待处理实体数量。</param>
-        /// <param name="batchSize">固定批次大小。</param>
+        /// <param name="batchSize">除最后一批外的固定批次大小；最后一批可小于此值。</param>
         /// <param name="count">批次数量。</param>
         public SqlMutationBatchSizeList(int entityCount, int batchSize, int count)
         {

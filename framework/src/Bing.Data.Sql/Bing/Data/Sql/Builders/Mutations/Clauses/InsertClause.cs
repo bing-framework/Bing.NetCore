@@ -1,4 +1,5 @@
 using System.Text;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Metadata;
 
@@ -22,7 +23,13 @@ public sealed class InsertClause : MutationTableClauseBase, IInsertClause
     public SqlTableReference Table { get; private set; }
 
     /// <inheritdoc />
-    public void Into(SqlTableReference table) => Table = table ?? throw new ArgumentNullException(nameof(table));
+    public void Into(SqlTableReference table)
+    {
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        Context.UseOperation(SqlOperationAction.InsertInto);
+        Table = table;
+    }
 
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)

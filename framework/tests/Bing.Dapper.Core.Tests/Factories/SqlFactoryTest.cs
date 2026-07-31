@@ -3,6 +3,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,12 +86,14 @@ public class SqlFactoryTest
     {
         // Arrange
         var services = CreateServices();
-        services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=app;");
-        services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=app.db");
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>(DatabaseType.Sqlite);
-        services.AddSqlImplementationType<ISqlExecutor, MySqlTestExecutor>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlExecutor, SqliteTestExecutor>(DatabaseType.Sqlite);
+        AddTestProvider(services, "test.mysql", DatabaseType.MySql);
+        AddTestProvider(services, "test.sqlite", DatabaseType.Sqlite);
+        services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=app;", providerKey: "test.mysql");
+        services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=app.db", providerKey: "test.sqlite");
+        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
+        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("test.sqlite");
+        services.AddSqlImplementationType<ISqlExecutor, MySqlTestExecutor>("test.mysql");
+        services.AddSqlImplementationType<ISqlExecutor, SqliteTestExecutor>("test.sqlite");
         using var provider = services.BuildServiceProvider();
         var queryFactory = provider.GetRequiredService<ISqlQueryFactory>();
         var executorFactory = provider.GetRequiredService<ISqlExecutorFactory>();
@@ -112,6 +115,32 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：相同数据库类型的不同 Provider Key 必须解析各自的 Query 实现，不能由注册顺序覆盖。
+    /// </summary>
+    [Fact]
+    public void Create_WhenProviderKeysShareDatabaseType_ShouldUseDistinctImplementations()
+    {
+        // Arrange
+        var services = CreateServices();
+        AddTestProvider(services, "custom.sqlite.first", DatabaseType.Sqlite);
+        AddTestProvider(services, "custom.sqlite.second", DatabaseType.Sqlite);
+        services.AddSqlDataSource("first", DatabaseType.Sqlite, "Data Source=first.db", providerKey: "custom.sqlite.first");
+        services.AddSqlDataSource("second", DatabaseType.Sqlite, "Data Source=second.db", providerKey: "custom.sqlite.second");
+        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("custom.sqlite.first");
+        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("custom.sqlite.second");
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var first = factory.Create<ISqlQuery>("first");
+        var second = factory.Create<ISqlQuery>("second");
+
+        // Assert
+        Assert.IsType<MySqlTestQuery>(first);
+        Assert.IsType<SqliteTestQuery>(second);
+    }
+
+    /// <summary>
     /// 测试目的：未指定数据源 Key 时，工厂应克隆当前上下文而不是重新解析默认数据源。
     /// </summary>
     [Fact]
@@ -119,7 +148,8 @@ public class SqlFactoryTest
     {
         // Arrange
         var services = CreateServices();
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>(DatabaseType.MySql);
+        AddTestProvider(services, "test.mysql", DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
         using var provider = services.BuildServiceProvider();
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
         accessor.Current = new DatabaseContext
@@ -131,6 +161,7 @@ public class SqlFactoryTest
             DataSource = new SqlDataSourceDescriptor
             {
                 Key = "tenant-primary",
+                ProviderKey = "test.mysql",
                 DatabaseType = DatabaseType.MySql,
                 ConnectionString = "Server=tenant;Database=app;"
             }
@@ -163,8 +194,9 @@ public class SqlFactoryTest
             Connection = connection
         };
         var services = CreateServices();
-        services.AddSqlDataSource("mysql", DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>(DatabaseType.MySql);
+        AddTestProvider(services, "test.mysql", DatabaseType.MySql);
+        services.AddSqlDataSource("mysql", DatabaseType.MySql, providerKey: "test.mysql");
+        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
         services.AddSingleton(template);
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
@@ -180,6 +212,24 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：数据源指定未注册 Provider Key 时，Factory 必须在实例创建前拒绝，不能仅凭实现映射继续执行。
+    /// </summary>
+    [Fact]
+    public void Create_WhenDataSourceProviderKeyIsNotRegistered_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlDataSource("missing", DatabaseType.Sqlite, "Data Source=missing.db", providerKey: "custom.missing");
+        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("custom.missing");
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act and Assert
+        var exception = Assert.Throws<NotSupportedException>(() => factory.Create<ISqlQuery>("missing"));
+        Assert.Contains("custom.missing", exception.Message);
+    }
+
+    /// <summary>
     /// 创建核心服务集合。
     /// </summary>
     /// <returns>已注册 Dapper Core 服务的集合。</returns>
@@ -188,6 +238,56 @@ public class SqlFactoryTest
         var services = new ServiceCollection();
         services.AddSqlCore();
         return services;
+    }
+
+    /// <summary>
+    /// 注册仅用于工厂路由测试的 Provider。
+    /// </summary>
+    /// <param name="services">要注册测试 Provider 的服务集合。</param>
+    /// <param name="key">供 Factory 路由解析的 Provider Key。</param>
+    /// <param name="databaseType">该测试 Provider 代表的数据库类型。</param>
+    private static void AddTestProvider(IServiceCollection services, string key, DatabaseType databaseType) =>
+        services.AddSqlBuilderProvider(new TestSqlProvider(key, databaseType), _ => null);
+
+    /// <summary>
+    /// 仅用于 Factory Provider 路由测试的 SQL Provider。
+    /// </summary>
+    private sealed class TestSqlProvider : ISqlProvider
+    {
+        /// <summary>
+        /// 初始化测试 Provider。
+        /// </summary>
+        /// <param name="key">Provider 路由标识。</param>
+        /// <param name="databaseType">Provider 对应的数据库类型。</param>
+        public TestSqlProvider(string key, DatabaseType databaseType)
+        {
+            Key = key;
+            DatabaseType = databaseType;
+        }
+
+        /// <inheritdoc />
+        public string Key { get; }
+
+        /// <inheritdoc />
+        public DatabaseType DatabaseType { get; }
+
+        /// <inheritdoc />
+        public IDialect Dialect => null;
+
+        /// <inheritdoc />
+        public ISqlClauseFactory ClauseFactory => null;
+
+        /// <inheritdoc />
+        public ISqlTableReferenceParser TableReferenceParser => null;
+
+        /// <inheritdoc />
+        public ISqlPaginationRenderer PaginationRenderer => null;
+
+        /// <inheritdoc />
+        public IParameterManagerFactory ParameterManagerFactory => null;
+
+        /// <inheritdoc />
+        public IParamLiteralsResolver ParamLiteralsResolver => null;
     }
 
     /// <summary>

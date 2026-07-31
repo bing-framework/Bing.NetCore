@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Mutations;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -73,6 +75,108 @@ public sealed class SqliteMutationBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：SQLite Insert Values 应在语句尾部输出结构化 Returning 投影。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenInsertValuesIsConfigured_ShouldRenderSqliteSql()
+    {
+        // Arrange
+        ISqlBuilder builder = new SqliteBuilder();
+        builder.InsertInto(new SqlTableReference { TableName = "samples" })
+            .Columns("Name")
+            .Values("Bing")
+            .Returning("Id", "Name");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Insert Into `samples` (`Name`) Values (@_p_0) Returning `Id`, `Name`", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite Insert Select 应在完整查询之后输出 Returning。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery()
+    {
+        // Arrange
+        ISqlBuilder builder = new SqliteBuilder();
+        builder.InsertInto(new SqlTableReference { TableName = "samples" })
+            .Columns("Name")
+            .Select("Name")
+            .From("Orders")
+            .Returning("Id");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Insert Into `samples` (`Name`) \r\nSelect `Name` \r\nFrom `Orders` Returning `Id`", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite Update 应在 Where 后输出 Returning 并保持参数顺序。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenUpdateIsConfigured_ShouldRenderAfterWhere()
+    {
+        // Arrange
+        ISqlBuilder builder = new SqliteBuilder();
+        builder.Update(new SqlTableReference { TableName = "samples" })
+            .Set("Name", "Bing")
+            .Where("Id", 1)
+            .Returning("Id", "Name");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Update `samples` Set `Name` = @_p_0 Where `Id`=@_p_1 Returning `Id`, `Name`", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite Delete 应在 Where 后输出删除前的返回列。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenDeleteIsConfigured_ShouldRenderAfterWhere()
+    {
+        // Arrange
+        ISqlBuilder builder = new SqliteBuilder();
+        builder.DeleteFrom(new SqlTableReference { TableName = "samples" })
+            .Where("Id", 1)
+            .Returning("Id", "Name");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Delete From `samples` Where `Id`=@_p_0 Returning `Id`, `Name`", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite 实体返回投影应使用物理列并输出 CLR 属性别名。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases()
+    {
+        // Arrange
+        ISqlBuilder builder = new SqliteBuilder();
+        builder.Update(new SqlTableReference { TableName = "mapped_samples" })
+            .Set("sample_name", "Bing")
+            .Where("sample_id", 7)
+            .Returning<ReturningMutationSample>(item => new { item.Id, item.Name });
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Update `mapped_samples` Set `sample_name` = @_p_0 Where `sample_id`=@_p_1 " +
+                     "Returning `sample_id` As `Id`, `sample_name` As `Name`", sql);
+        Assert.True(SqliteSqlProvider.Instance.Capabilities.SupportsReturning);
+    }
+
+    /// <summary>
     /// 映射到 SQLite 样例表的实体。
     /// </summary>
     [Table("samples")]
@@ -95,6 +199,21 @@ public sealed class SqliteMutationBuilderTest
         /// </summary>
         [ConcurrencyCheck]
         public string Secret { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite Returning 映射样例实体。
+    /// </summary>
+    [Table("mapped_samples")]
+    private sealed class ReturningMutationSample
+    {
+        /// <summary>标识。</summary>
+        [Column("sample_id")]
+        public int Id { get; set; }
+
+        /// <summary>名称。</summary>
+        [Column("sample_name")]
+        public string Name { get; set; }
     }
 
     /// <summary>

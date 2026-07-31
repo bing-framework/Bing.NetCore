@@ -2,6 +2,8 @@ using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
 using Bing.Test.Shared;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.SqlExecutor;
 
@@ -100,6 +102,113 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：统一 Builder 的结构化 UpdateFrom 应在 PostgreSQL 中真实更新匹配行并返回实际影响行数。
+    /// </summary>
+    [IntegrationFact("PostgreSql")]
+    public async Task ExecuteAsync_WhenUpdateFromBuilderIsConfigured_ShouldUpdateMatchedRow()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        using var executor = _fixture.CreateExecutor();
+        await executor.ExecuteSqlAsync(
+            "Insert Into public.integration_products(id,code,name,amount,occurred_at) Values(@id,@code,@name,@amount,@occurredAt)",
+            new { id, code = "update-from", name = "before", amount = 1m, occurredAt = new DateTime(2026, 7, 30) });
+        await executor.ExecuteSqlAsync(
+            "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
+            new { id, name = "after" });
+        var builder = executor.GetBuilder()
+            .Update(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
+            .SetFrom("name", "name")
+            .WhereFrom("id", "id");
+
+        // Act
+        var affectedRows = await executor.ExecuteAsync(builder);
+        using var query = _fixture.CreateQuery();
+        var name = await query.Select("name").From("public.integration_products").Where("id", id)
+            .ExecuteScalarAsync<string>();
+
+        // Assert
+        Assert.Equal(1, affectedRows);
+        Assert.Equal("after", name);
+    }
+
+    /// <summary>
+    /// 测试目的：统一 Builder 的结构化 DeleteUsing 应只删除 PostgreSQL 中与来源表匹配的目标行。
+    /// </summary>
+    [IntegrationFact("PostgreSql")]
+    public async Task ExecuteAsync_WhenDeleteUsingBuilderIsConfigured_ShouldDeleteMatchedRow()
+    {
+        // Arrange
+        var matchedId = Guid.NewGuid();
+        var unmatchedId = Guid.NewGuid();
+        using var executor = _fixture.CreateExecutor();
+        await executor.ExecuteSqlAsync(
+            "Insert Into public.integration_products(id,code,name,amount,occurred_at) Values" +
+            "(@matchedId,@matchedCode,@name,@amount,@occurredAt)," +
+            "(@unmatchedId,@unmatchedCode,@name,@amount,@occurredAt)",
+            new
+            {
+                matchedId, matchedCode = "delete-using-match", unmatchedId, unmatchedCode = "delete-using-keep",
+                name = "before", amount = 1m, occurredAt = new DateTime(2026, 7, 30)
+            });
+        await executor.ExecuteSqlAsync(
+            "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
+            new { id = matchedId, name = "delete" });
+        var builder = executor.GetBuilder()
+            .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
+            .WhereUsing("id", "id");
+
+        // Act
+        var affectedRows = await executor.ExecuteAsync(builder);
+        using var matchedQuery = _fixture.CreateQuery();
+        var matchedCount = await matchedQuery.Select("Count(*)").From("public.integration_products")
+            .Where("id", matchedId).ExecuteScalarAsync<int>();
+        using var unmatchedQuery = _fixture.CreateQuery();
+        var unmatchedCount = await unmatchedQuery.Select("Count(*)").From("public.integration_products")
+            .Where("id", unmatchedId).ExecuteScalarAsync<int>();
+        using var sourceQuery = _fixture.CreateQuery();
+        var sourceCount = await sourceQuery.Select("Count(*)").From("public.integration_product_updates")
+            .Where("id", matchedId).ExecuteScalarAsync<int>();
+
+        // Assert
+        Assert.Equal(1, affectedRows);
+        Assert.Equal(0, matchedCount);
+        Assert.Equal(1, unmatchedCount);
+        Assert.Equal(1, sourceCount);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 多行 Insert Returning 应通过现有查询链完整物化全部返回行。
+    /// </summary>
+    [IntegrationFact("PostgreSql")]
+    public async Task ExecuteQueryAsync_WhenInsertReturningIsConfigured_ShouldMaterializeReturnedRows()
+    {
+        // Arrange
+        var firstId = Guid.NewGuid();
+        var secondId = Guid.NewGuid();
+        using var executor = _fixture.CreateExecutor();
+        IEnumerable<IReadOnlyList<object>> values = new IReadOnlyList<object>[]
+        {
+            new object[] { firstId, "returning-first", "first", 1m, new DateTime(2026, 7, 30) },
+            new object[] { secondId, "returning-second", "second", 2m, new DateTime(2026, 7, 30) }
+        };
+        executor.GetBuilder()
+            .InsertInto(new SqlTableReference { Schema = "public", TableName = "integration_products" })
+            .Columns("id", "code", "name", "amount", "occurred_at")
+            .Values(values)
+            .Returning("id", "name");
+
+        // Act
+        var rows = await executor.ExecuteQueryAsync<PostgreSqlReturningProduct>();
+
+        // Assert
+        Assert.Equal(new[] { firstId, secondId }, rows.Select(row => row.Id));
+        Assert.Equal(new[] { "first", "second" }, rows.Select(row => row.Name));
+    }
+
+    /// <summary>
     /// PostgreSQL 优化批量 Update 的映射实体。
     /// </summary>
     [System.ComponentModel.DataAnnotations.Schema.Table("integration_products", Schema = "public")]
@@ -130,5 +239,17 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
         [System.ComponentModel.DataAnnotations.Schema.Column("version")]
         public int Version { get; set; }
+    }
+
+    /// <summary>
+    /// PostgreSQL Returning 结果模型。
+    /// </summary>
+    private sealed class PostgreSqlReturningProduct
+    {
+        /// <summary>主键。</summary>
+        public Guid Id { get; set; }
+
+        /// <summary>名称。</summary>
+        public string Name { get; set; }
     }
 }

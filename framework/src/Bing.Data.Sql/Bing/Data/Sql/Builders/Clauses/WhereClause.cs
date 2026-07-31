@@ -118,13 +118,21 @@ public class WhereClause : IWhereClause
     /// And连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
-    public void And(ICondition condition) => _condition = new AndCondition(_condition, MergeBuilderCondition(condition));
+    public void And(ICondition condition)
+    {
+        Context.UseOperation(SqlOperationAction.QueryClause);
+        _condition = new AndCondition(_condition, MergeBuilderCondition(condition));
+    }
 
     /// <summary>
     /// Or连接条件
     /// </summary>
     /// <param name="condition">查询条件</param>
-    public void Or(ICondition condition) => _condition = new OrCondition(_condition, MergeBuilderCondition(condition));
+    public void Or(ICondition condition)
+    {
+        Context.UseOperation(SqlOperationAction.QueryClause);
+        _condition = new OrCondition(_condition, MergeBuilderCondition(condition));
+    }
 
     /// <summary>
     /// 合并作为条件使用的独立 Builder 参数。

@@ -105,6 +105,7 @@ public class FromClause : IFromClause
     /// <inheritdoc />
     public void From(string table, string alias = null)
     {
+        _context.UseOperation(SqlOperationAction.QueryClause);
         var parsedTable = ParseTableName(table, alias);
         Register?.RegisterAlias(parsedTable.Alias);
         Table = CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias);
@@ -125,6 +126,7 @@ public class FromClause : IFromClause
     /// <inheritdoc />
     public void From(SqlTableReference reference)
     {
+        _context.UseOperation(SqlOperationAction.QueryClause);
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
         if (reference.EntityType == null)

@@ -147,6 +147,32 @@ public sealed class SqlMutationClauseTest
     }
 
     /// <summary>
+    /// 测试目的：Returning 子句应按结构化限定列和结果别名渲染，并在 Clone/Clear 后保持隔离。
+    /// </summary>
+    [Fact]
+    public void ReturningClause_WhenColumnsConfigured_ShouldRenderAndCloneIndependentProjection()
+    {
+        // Arrange
+        var source = new ReturningClause(CreateContext());
+        source.AddRange(new[]
+        {
+            new SqlReturningColumn("id", "t", "Id"),
+            new SqlReturningColumn("occurred_at", alias: "OccurredAt")
+        });
+        var validationContext = new SqlValidationContext(TestMutationSqlProvider.Instance, 0, false,
+            MutationSqlExecutionKind.Update);
+
+        // Act
+        source.Validate(validationContext);
+        var clone = source.Clone(CreateContext());
+        source.Clear();
+
+        // Assert
+        Assert.True(source.IsEmpty);
+        Assert.Equal(" Returning [t].[id] As [Id], [occurred_at] As [OccurredAt]", ToSql(clone));
+    }
+
+    /// <summary>
     /// 创建使用指定 Provider 和参数管理器的 Mutation 子句上下文。
     /// </summary>
     /// <param name="provider">SQL Provider；为空时使用默认 Mutation 测试 Provider。</param>

@@ -54,25 +54,21 @@ public class DefaultSqlDbConnectionFactoryResolverTest
     }
 
     /// <summary>
-    /// 测试目的：同一 Provider 重复注册时最后一个有效工厂应生效。
+    /// 测试目的：同一 Provider Key 重复注册时必须明确失败，不能依赖注册顺序静默覆盖。
     /// </summary>
     [Fact]
-    public void Create_WhenFactoryRegisteredRepeatedly_ShouldUseLatestFactory()
+    public void Create_WhenFactoryRegisteredRepeatedly_ShouldThrowInvalidOperationException()
     {
         // Arrange
         var firstConnection = new Mock<IDbConnection>().Object;
-        var latestConnection = new Mock<IDbConnection>().Object;
-        var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
+        var duplicateConnection = new Mock<IDbConnection>().Object;
+
+        // Act and Assert
+        Assert.Throws<InvalidOperationException>(() => new DefaultSqlDbConnectionFactoryResolver(new[]
         {
             new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => firstConnection },
-            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => latestConnection }
-        });
-
-        // Act
-        var result = resolver.Create("test.mysql", "Server=localhost");
-
-        // Assert
-        Assert.Same(latestConnection, result);
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => duplicateConnection }
+        }));
     }
 
     /// <summary>

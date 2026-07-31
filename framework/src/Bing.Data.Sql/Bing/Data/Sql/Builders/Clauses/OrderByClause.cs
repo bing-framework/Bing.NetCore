@@ -13,6 +13,11 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class OrderByClause : IOrderByClause
 {
     /// <summary>
+    /// 子句运行上下文。
+    /// </summary>
+    private readonly SqlClauseContext _context;
+
+    /// <summary>
     /// 排序项列表
     /// </summary>
     private readonly List<OrderByItem> _items;
@@ -41,6 +46,7 @@ public class OrderByClause : IOrderByClause
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
+        _context = context;
         _items = items ?? new List<OrderByItem>();
         _dialect = context.Dialect;
         _resolver = context.EntityResolver;
@@ -72,6 +78,7 @@ public class OrderByClause : IOrderByClause
     {
         if (string.IsNullOrWhiteSpace(order))
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         order.Split(',').ToList().ForEach(column => AddItem(column, tableAlias: tableAlias));
     }
 
@@ -114,6 +121,7 @@ public class OrderByClause : IOrderByClause
     {
         if (column == null)
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         AddItem(_resolver.GetColumn(column), desc, typeof(TEntity));
     }
 
@@ -125,6 +133,7 @@ public class OrderByClause : IOrderByClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         sql = Helper.ResolveSql(sql, _dialect);
         _items.Add(new OrderByItem(sql, raw: true));
     }

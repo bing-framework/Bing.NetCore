@@ -12,8 +12,9 @@ public sealed class SqlMutationBatchCommand
     /// <param name="entityCount">本批命令覆盖的实体数量。</param>
     /// <param name="requiresTransaction">是否要求在单一事务中执行。</param>
     /// <param name="validateAffectedRows">是否校验实际受影响行数与实体数量一致。</param>
+    /// <param name="operationName">受影响行数校验失败时使用的操作名称。</param>
     public SqlMutationBatchCommand(IReadOnlyList<SqlMutationCommand> commands, int entityCount,
-        bool requiresTransaction, bool validateAffectedRows = false)
+        bool requiresTransaction, bool validateAffectedRows = false, string operationName = "Mutation")
     {
         Commands = commands ?? throw new ArgumentNullException(nameof(commands));
         if (entityCount < 0)
@@ -21,6 +22,7 @@ public sealed class SqlMutationBatchCommand
         EntityCount = entityCount;
         RequiresTransaction = requiresTransaction;
         ValidateAffectedRows = validateAffectedRows || Commands.Any(command => command.ValidateAffectedRows);
+        OperationName = string.IsNullOrWhiteSpace(operationName) ? "Mutation" : operationName;
     }
 
     /// <summary>
@@ -42,4 +44,9 @@ public sealed class SqlMutationBatchCommand
     /// 是否要求本批实际受影响行数与实体数量完全一致。
     /// </summary>
     public bool ValidateAffectedRows { get; }
+
+    /// <summary>
+    /// 受影响行数校验失败时使用的操作名称。
+    /// </summary>
+    public string OperationName { get; }
 }

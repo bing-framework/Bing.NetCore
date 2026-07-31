@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,8 @@ public static class SqlServerServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, CreateBuilder);
         var queryOptions = new SqlOptions<SqlServerSqlQuery>();
         var executorOptions = new SqlOptions<SqlServerSqlExecutor>();
         var multipleQueryOptions = new SqlOptions<SqlServerSqlMultipleQueryExecutor>();
@@ -33,11 +35,11 @@ public static class SqlServerServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, connection => new SqlConnection(connection));
+        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
-        services.AddSqlImplementationType<ISqlQuery, SqlServerSqlQuery>(DatabaseType.SqlServer);
-        services.AddSqlImplementationType<ISqlExecutor, SqlServerSqlExecutor>(DatabaseType.SqlServer);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>(DatabaseType.SqlServer);
+        services.AddSqlImplementationType<ISqlQuery, SqlServerSqlQuery>(SqlServerSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlExecutor, SqlServerSqlExecutor>(SqlServerSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>(SqlServerSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlQuery, SqlServerSqlQuery>();
         services.TryAddTransient<ISqlExecutor, SqlServerSqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();
@@ -103,19 +105,20 @@ public static class SqlServerServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqlServerSqlQuery<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlQuery
         where TImplementation : SqlServerSqlQueryBase, TInterface
     {
-        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, CreateBuilder);
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, connection => new SqlConnection(connection));
+        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
+        services.AddSqlImplementationType<TInterface, TImplementation>(SqlServerSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -157,16 +160,15 @@ public static class SqlServerServiceCollectionExtensions
         Action<SqlOptions> setupAction)
     {
         var sqlOptions = new SqlOptions<SqlServerSqlMultipleQueryExecutor>();
-        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance,
-            serviceProvider => new SqlServerBuilder(serviceProvider));
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, connection => new SqlConnection(connection));
+        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlImplementationType<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>(
-            DatabaseType.SqlServer);
+            SqlServerSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();
         services.TryAddSingleton(sqlOptions);
         return services;
@@ -230,19 +232,20 @@ public static class SqlServerServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddSqlServerSqlExecutor<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlExecutor
         where TImplementation : SqlServerSqlExecutorBase, TInterface
     {
-        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, services => new SqlServerBuilder(services));
+        services.AddSqlBuilderProvider(SqlServerSqlProvider.Instance, CreateBuilder);
         var sqlOptions = new SqlOptions<TImplementation>();
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.SqlServer, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, connection => new SqlConnection(connection));
+        services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.SqlServer);
+        services.AddSqlImplementationType<TInterface, TImplementation>(SqlServerSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -250,4 +253,17 @@ public static class SqlServerServiceCollectionExtensions
 
     #endregion
 
+    /// <summary>
+    /// 根据数据源连接字符串创建 SQL Server 独立连接。
+    /// </summary>
+    /// <param name="connectionString">SQL Server 数据源连接字符串。</param>
+    /// <returns>尚未打开的 SQL Server 数据库连接。</returns>
+    private static SqlConnection CreateConnection(string connectionString) => new(connectionString);
+
+    /// <summary>
+    /// 使用查询级共享服务创建 SQL Server SQL Builder。
+    /// </summary>
+    /// <param name="services">当前查询的共享服务。</param>
+    /// <returns>绑定该共享服务的 SQL Server SQL Builder。</returns>
+    private static ISqlBuilder CreateBuilder(SqlBuilderServices services) => new SqlServerBuilder(services);
 }

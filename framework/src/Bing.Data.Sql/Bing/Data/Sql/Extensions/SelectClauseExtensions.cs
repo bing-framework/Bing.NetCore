@@ -8,6 +8,20 @@ namespace Bing.Data.Sql;
 /// </summary>
 public static class SelectClauseExtensions
 {
+    /// <summary>
+    /// 为统一 Builder 添加多个查询输出列。
+    /// </summary>
+    public static ISqlBuilder Select(this ISqlBuilder source, params string[] columns)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (columns == null)
+            throw new ArgumentNullException(nameof(columns));
+        foreach (var column in columns)
+            source.SelectClause.Select(column);
+        return source;
+    }
+
     #region Select(设置列)
 
     /// <summary>

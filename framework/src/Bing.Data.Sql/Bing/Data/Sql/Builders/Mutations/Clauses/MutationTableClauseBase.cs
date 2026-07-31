@@ -36,6 +36,18 @@ public abstract class MutationTableClauseBase
     }
 
     /// <summary>
+    /// 按当前 Provider 格式化表引用并显式追加别名。
+    /// </summary>
+    /// <param name="builder">SQL 输出缓冲区。</param>
+    /// <param name="table">结构化表引用。</param>
+    protected void AppendAliasedTable(StringBuilder builder, SqlTableReference table)
+    {
+        AppendTable(builder, table with { Alias = null });
+        if (string.IsNullOrWhiteSpace(table.Alias) == false)
+            builder.Append(" As ").Append(Context.Dialect.SafeName(table.Alias));
+    }
+
+    /// <summary>
     /// 验证写操作目标表。
     /// </summary>
     /// <param name="table">结构化表引用。</param>

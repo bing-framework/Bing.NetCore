@@ -3,6 +3,7 @@ using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using MySqlConnector;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,8 @@ public static class MySqlServiceCollectionExtensions
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, CreateBuilder);
         var queryOptions = new SqlOptions<MySqlQuery> { DatabaseType = DatabaseType.MySql };
         var executorOptions = new SqlOptions<MySqlExecutor> { DatabaseType = DatabaseType.MySql };
         var multipleQueryOptions = new SqlOptions<MySqlMultipleQueryExecutor> { DatabaseType = DatabaseType.MySql };
@@ -33,15 +35,12 @@ public static class MySqlServiceCollectionExtensions
         executorOptions.RegisterStringTypeHandler();
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
-        services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(DatabaseType.Doris);
-        services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(DatabaseType.Doris);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.Doris);
+        services.AddSqlImplementationType<ISqlQuery, MySqlQuery>(MySqlSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlExecutor, MySqlExecutor>(MySqlSqlProvider.Instance.Key);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(MySqlSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlQuery, MySqlQuery>();
         services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
@@ -107,19 +106,20 @@ public static class MySqlServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddMySqlQuery<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlQuery
         where TImplementation : MySqlQueryBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.MySql };
-        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
+        services.AddSqlImplementationType<TInterface, TImplementation>(MySqlSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
@@ -160,14 +160,14 @@ public static class MySqlServiceCollectionExtensions
         Action<SqlOptions> setupAction)
     {
         var sqlOptions = new SqlOptions<MySqlMultipleQueryExecutor> { DatabaseType = DatabaseType.MySql };
-        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, serviceProvider => new MySqlBuilder(serviceProvider));
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(DatabaseType.MySql);
+        services.AddSqlImplementationType<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>(MySqlSqlProvider.Instance.Key);
         services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
         services.TryAddSingleton(sqlOptions);
         return services;
@@ -231,23 +231,37 @@ public static class MySqlServiceCollectionExtensions
     /// <typeparam name="TImplementation">实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">配置操作</param>
+    /// <returns>当前服务集合，以支持链式注册。</returns>
     public static IServiceCollection AddMySqlExecutor<TInterface, TImplementation>(this IServiceCollection services, Action<SqlOptions> setupAction)
         where TInterface : ISqlExecutor
         where TImplementation : MySqlExecutorBase, TInterface
     {
         var sqlOptions = new SqlOptions<TImplementation> { DatabaseType = DatabaseType.MySql };
-        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, services => new MySqlBuilder(services));
+        services.AddSqlBuilderProvider(MySqlSqlProvider.Instance, CreateBuilder);
         setupAction?.Invoke(sqlOptions);
         sqlOptions.RegisterStringTypeHandler();
         services.AddSqlDataSource(null, DatabaseType.MySql, sqlOptions.ConnectionString);
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
-        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, connection => new MySqlConnection(connection));
+        services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
-        services.AddSqlImplementationType<TInterface, TImplementation>(DatabaseType.MySql);
+        services.AddSqlImplementationType<TInterface, TImplementation>(MySqlSqlProvider.Instance.Key);
         services.TryAddTransient(typeof(TInterface), typeof(TImplementation));
         services.TryAddSingleton(typeof(SqlOptions<TImplementation>), _ => sqlOptions);
         return services;
     }
 
     #endregion
+    /// <summary>
+    /// 根据数据源连接字符串创建 MySQL 独立连接。
+    /// </summary>
+    /// <param name="connectionString">MySQL 数据源连接字符串。</param>
+    /// <returns>尚未打开的 MySQL 数据库连接。</returns>
+    private static MySqlConnection CreateConnection(string connectionString) => new(connectionString);
+
+    /// <summary>
+    /// 使用查询级共享服务创建 MySQL SQL Builder。
+    /// </summary>
+    /// <param name="services">当前查询的共享服务。</param>
+    /// <returns>绑定该共享服务的 MySQL SQL Builder。</returns>
+    private static ISqlBuilder CreateBuilder(SqlBuilderServices services) => new MySqlBuilder(services);
 }

@@ -274,6 +274,7 @@ public class JoinClause : IJoinClause
     /// <param name="item">表连接项</param>
     private void AddItem(JoinItem item)
     {
+        _context.UseOperation(SqlOperationAction.QueryClause);
         item.SetDependency(_helper);
         _params.Add(item);
     }

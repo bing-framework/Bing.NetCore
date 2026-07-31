@@ -190,8 +190,6 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         var canUseInPredicate = plan.Keys.Count == 1 && plan.ConcurrencyColumns.Count == 0;
         if (strategy == SqlBatchDeleteStrategy.InPredicate && canUseInPredicate == false)
             throw new NotSupportedException("InPredicate 策略仅支持不带并发令牌的单主键实体。");
-        if (strategy == SqlBatchDeleteStrategy.ProviderOptimized)
-            throw new NotSupportedException($"Provider {_provider.Key} 未实现优化批量 Delete 命令。");
         if (canUseInPredicate && strategy != SqlBatchDeleteStrategy.CompositePredicate)
             ConfigureSingleKeyInWhere(builder.WhereClause, plan, entities, builder.MutationContext.ParameterManager);
         else
@@ -279,6 +277,11 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <summary>
     /// 配置单主键的参数化 IN 条件。
     /// </summary>
+    /// <typeparam name="TEntity">待删除实体类型。</typeparam>
+    /// <param name="whereClause">待追加条件的 Mutation Where 子句。</param>
+    /// <param name="plan">包含唯一主键列的实体 Mutation 计划。</param>
+    /// <param name="entities">待删除实体集合。</param>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
     private void ConfigureSingleKeyInWhere<TEntity>(IMutationWhereClause whereClause, SqlMutationPlan plan,
         IEnumerable<TEntity> entities, IParameterManager parameterManager) where TEntity : class
     {
@@ -300,6 +303,12 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <summary>
     /// 配置复合主键或并发列的按实体配对条件。
     /// </summary>
+    /// <typeparam name="TEntity">待删除实体类型。</typeparam>
+    /// <param name="whereClause">待追加条件的 Mutation Where 子句。</param>
+    /// <param name="plan">包含主键和并发列的实体 Mutation 计划。</param>
+    /// <param name="entities">待删除实体集合。</param>
+    /// <param name="options">可选的并发原始值配置。</param>
+    /// <param name="parameterManager">当前命令参数管理器。</param>
     private void ConfigurePairedWhere<TEntity>(IMutationWhereClause whereClause, SqlMutationPlan plan,
         IEnumerable<TEntity> entities, SqlDeleteOptions options, IParameterManager parameterManager) where TEntity : class
     {
@@ -355,6 +364,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <summary>
     /// 尝试读取更新选项中的并发原始值。
     /// </summary>
+    /// <param name="options">可选的 Update 选项。</param>
+    /// <param name="propertyName">并发属性名称。</param>
+    /// <param name="value">读取到的显式原始值。</param>
+    /// <returns><c>true</c> 表示选项包含该属性的原始值；否则返回 <c>false</c>。</returns>
     private static bool TryGetOriginalValue(SqlUpdateOptions options, string propertyName, out object value)
     {
         if (options != null)
@@ -366,6 +379,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <summary>
     /// 尝试读取删除选项中的并发原始值。
     /// </summary>
+    /// <param name="options">可选的 Delete 选项。</param>
+    /// <param name="propertyName">并发属性名称。</param>
+    /// <param name="value">读取到的显式原始值。</param>
+    /// <returns><c>true</c> 表示选项包含该属性的原始值；否则返回 <c>false</c>。</returns>
     private static bool TryGetOriginalValue(SqlDeleteOptions options, string propertyName, out object value)
     {
         if (options != null)

@@ -1,4 +1,5 @@
 using System.Text;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 
 namespace Bing.Data.Sql.Builders.Mutations.Clauses;
@@ -32,6 +33,7 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     {
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentException("插入列名不能为空。", nameof(column));
+        _context.UseOperation(SqlOperationAction.InsertInto);
         _columns.Add(column);
     }
 
@@ -66,7 +68,7 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     public IInsertColumnsClause Clone(SqlMutationContext context)
     {
         var result = new InsertColumnsClause(context);
-        result.AddRange(_columns);
+        result._columns.AddRange(_columns);
         return result;
     }
 

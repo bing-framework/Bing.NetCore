@@ -16,11 +16,17 @@ public sealed class DefaultSqlDbConnectionFactoryResolver : ISqlDbConnectionFact
     /// <param name="registrations">连接工厂注册项</param>
     public DefaultSqlDbConnectionFactoryResolver(IEnumerable<SqlDbConnectionFactoryRegistration> registrations)
     {
-        _factories = (registrations ?? Array.Empty<SqlDbConnectionFactoryRegistration>())
+        var result = new Dictionary<string, Func<string, IDbConnection>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var registration in (registrations ?? Array.Empty<SqlDbConnectionFactoryRegistration>())
             .Where(registration => registration?.Factory != null &&
-                string.IsNullOrWhiteSpace(registration.ProviderKey) == false)
-            .GroupBy(registration => registration.ProviderKey.Trim(), StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.Last().Factory, StringComparer.OrdinalIgnoreCase);
+                string.IsNullOrWhiteSpace(registration.ProviderKey) == false))
+        {
+            var providerKey = registration.ProviderKey.Trim();
+            if (result.ContainsKey(providerKey))
+                throw new InvalidOperationException($"Provider Key '{providerKey}' 的独立连接工厂重复注册。");
+            result.Add(providerKey, registration.Factory);
+        }
+        _factories = result;
     }
 
     /// <inheritdoc />

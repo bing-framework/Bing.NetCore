@@ -73,7 +73,7 @@ public class DapperCoreServiceCollectionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：同一 Provider 实例重复注册应幂等，不同实例使用相同 Key 时应拒绝。
+    /// 测试目的：同一 Provider 实例和创建委托重复注册应幂等，不同实例使用相同 Key 时应拒绝。
     /// </summary>
     [Fact]
     public void AddSqlBuilderProvider_WhenKeyRepeated_ShouldBeIdempotentOrThrowForDifferentInstance()
@@ -83,12 +83,49 @@ public class DapperCoreServiceCollectionExtensionsTest
         var provider = new TestSqlProvider(" custom ");
 
         // Act
-        services.AddSqlBuilderProvider(provider, _ => null);
-        services.AddSqlBuilderProvider(provider, _ => null);
+        services.AddSqlBuilderProvider(provider, CreateTestBuilder);
+        services.AddSqlBuilderProvider(provider, CreateTestBuilder);
 
         // Assert
         Assert.Single(services.Where(item => item.ServiceType == typeof(ISqlProvider)));
-        Assert.Throws<InvalidOperationException>(() => services.AddSqlBuilderProvider(new TestSqlProvider("CUSTOM"), _ => null));
+        Assert.Single(services.Where(item => item.ImplementationInstance is SqlBuilderFactoryRegistration));
+        Assert.Throws<InvalidOperationException>(() =>
+            services.AddSqlBuilderProvider(new TestSqlProvider("CUSTOM"), CreateTestBuilder));
+    }
+
+    /// <summary>
+    /// 测试目的：同一 Provider 使用不同 Builder 创建委托时必须拒绝，不能因 Provider 已注册而忽略委托冲突。
+    /// </summary>
+    [Fact]
+    public void AddSqlBuilderProvider_WhenCreatorDiffersForSameProvider_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var provider = new TestSqlProvider("custom");
+        services.AddSqlBuilderProvider(provider, CreateTestBuilder);
+
+        // Act and Assert
+        Assert.Throws<InvalidOperationException>(() =>
+            services.AddSqlBuilderProvider(provider, CreateAlternativeTestBuilder));
+    }
+
+    /// <summary>
+    /// 测试目的：预先直接注册的同一 Provider 应可补充 Builder 创建委托，保证注册链完整。
+    /// </summary>
+    [Fact]
+    public void AddSqlBuilderProvider_WhenProviderWasRegisteredDirectly_ShouldAddOnlyBuilderRegistration()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var provider = new TestSqlProvider("custom");
+        services.AddSingleton<ISqlProvider>(provider);
+
+        // Act
+        services.AddSqlBuilderProvider(provider, CreateTestBuilder);
+
+        // Assert
+        Assert.Single(services.Where(item => item.ServiceType == typeof(ISqlProvider)));
+        Assert.Single(services.Where(item => item.ImplementationInstance is SqlBuilderFactoryRegistration));
     }
 
     /// <summary>
@@ -152,6 +189,88 @@ public class DapperCoreServiceCollectionExtensionsTest
     }
 
     /// <summary>
+    /// 测试目的：相同具名数据源以不同连接配置重复注册时必须拒绝，不能由后注册项静默覆盖。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenNamedKeyIsRepeatedWithDifferentConfiguration_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqlDataSource("reporting", DatabaseType.Sqlite, "Data Source=first.db");
+        services.AddSqlDataSource(" REPORTING ", DatabaseType.Sqlite, "Data Source=second.db");
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act and Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            provider.GetRequiredService<SqlMetadataOptions>());
+        Assert.Contains("reporting", exception.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("重复注册", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：相同具名数据源重复注册应保持幂等，避免旧注册组合产生重复配置。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenNamedConfigurationIsIdentical_ShouldRemainIdempotent()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqlDataSource("reporting", DatabaseType.Sqlite, "Data Source=reporting.db");
+        services.AddSqlDataSource(" REPORTING ", DatabaseType.Sqlite, "Data Source=reporting.db");
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var options = provider.GetRequiredService<SqlMetadataOptions>();
+
+        // Assert
+        Assert.Single(options.DataSources.DataSources);
+        Assert.Equal("reporting", options.DataSources.DataSources["reporting"].Key);
+    }
+
+    /// <summary>
+    /// 测试目的：默认 Key 被显式清空时，首个具名数据源不得隐式成为默认源，解析器只能通过唯一数据源规则回退。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenDefaultKeyIsEmptyAndNamedSourceAdded_ShouldKeepDefaultKeyEmpty()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options => options.DataSources.DefaultDataSourceKey = null);
+        services.AddSqlDataSource("reporting", DatabaseType.Sqlite, "Data Source=reporting.db");
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var options = provider.GetRequiredService<SqlMetadataOptions>();
+        var dataSource = provider.GetRequiredService<ISqlDataSourceResolver>().Resolve();
+
+        // Assert
+        Assert.Null(options.DataSources.DefaultDataSourceKey);
+        Assert.Equal("reporting", dataSource.Key);
+    }
+
+    /// <summary>
+    /// 测试目的：未配置默认 Key 时，无键数据源注册必须明确失败，避免将空键写入数据源集合。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenDefaultKeyIsEmptyAndKeyMissing_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options => options.DataSources.DefaultDataSourceKey = null);
+        services.AddSqlDataSource(null, DatabaseType.Sqlite, "Data Source=default.db");
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act and Assert
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            provider.GetRequiredService<SqlMetadataOptions>());
+        Assert.Contains(nameof(SqlDataSourceOptions.DefaultDataSourceKey), exception.Message);
+    }
+
+    /// <summary>
     /// 仅用于 Provider Key 注册测试的 SQL Provider。
     /// </summary>
     private sealed class TestSqlProvider : ISqlProvider
@@ -186,6 +305,20 @@ public class DapperCoreServiceCollectionExtensionsTest
         /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => null;
     }
+
+    /// <summary>
+    /// 创建用于验证同一委托幂等注册的占位 Builder 委托。
+    /// </summary>
+    /// <param name="services">传入创建委托的查询级共享服务。</param>
+    /// <returns>始终返回 <see langword="null"/> 的测试占位值；本测试不创建实际 Builder。</returns>
+    private static ISqlBuilder CreateTestBuilder(SqlBuilderServices services) => null;
+
+    /// <summary>
+    /// 创建用于验证不同委托冲突的备用占位 Builder 委托。
+    /// </summary>
+    /// <param name="services">传入创建委托的查询级共享服务。</param>
+    /// <returns>始终返回 <see langword="null"/> 的测试占位值；本测试不创建实际 Builder。</returns>
+    private static ISqlBuilder CreateAlternativeTestBuilder(SqlBuilderServices services) => null;
 
     /// <summary>
     /// 仅用于实体元数据注册测试的实体。

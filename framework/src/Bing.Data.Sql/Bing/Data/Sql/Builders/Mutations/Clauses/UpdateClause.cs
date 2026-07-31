@@ -1,4 +1,5 @@
 using System.Text;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Metadata;
 
@@ -22,7 +23,13 @@ public sealed class UpdateClause : MutationTableClauseBase, IUpdateClause
     public SqlTableReference Table { get; private set; }
 
     /// <inheritdoc />
-    public void UpdateTable(SqlTableReference table) => Table = table ?? throw new ArgumentNullException(nameof(table));
+    public void UpdateTable(SqlTableReference table)
+    {
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        Context.UseOperation(SqlOperationAction.Update);
+        Table = table;
+    }
 
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
@@ -30,7 +37,7 @@ public sealed class UpdateClause : MutationTableClauseBase, IUpdateClause
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
         builder.Append("Update ");
-        AppendTable(builder, Table);
+        AppendAliasedTable(builder, Table);
     }
 
     /// <inheritdoc />

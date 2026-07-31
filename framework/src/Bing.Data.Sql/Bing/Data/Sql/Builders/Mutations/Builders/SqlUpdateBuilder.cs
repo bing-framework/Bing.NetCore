@@ -1,6 +1,7 @@
 using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Clauses;
 using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
@@ -22,12 +23,16 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         : base(provider, services, parameterManager, clauseFactory)
     {
         UpdateClause = ClauseFactory.CreateUpdate(MutationContext);
+        UpdateFromClause = CreateUpdateFromClause();
         SetClause = ClauseFactory.CreateSet(MutationContext);
         WhereClause = ClauseFactory.CreateWhere(MutationContext);
     }
 
     /// <inheritdoc />
     public IUpdateClause UpdateClause { get; private set; }
+
+    /// <inheritdoc />
+    public IUpdateFromClause UpdateFromClause { get; private set; }
 
     /// <inheritdoc />
     public ISetClause SetClause { get; private set; }
@@ -49,6 +54,8 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         Validate();
         UpdateClause.AppendTo(builder);
         SetClause.AppendTo(builder);
+        if (UpdateFromClause.Table != null)
+            UpdateFromClause.AppendTo(builder);
         WhereClause.AppendTo(builder);
     }
 
@@ -67,6 +74,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     {
         var result = new SqlUpdateBuilder(Provider, MutationContext.Services, ParameterManager.Clone(), ClauseFactory);
         result.UpdateClause = UpdateClause.Clone(result.MutationContext);
+        result.UpdateFromClause = UpdateFromClause.Clone(result.MutationContext);
         result.SetClause = SetClause.Clone(result.MutationContext);
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
@@ -77,6 +85,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     public void Clear()
     {
         UpdateClause.Clear();
+        UpdateFromClause.Clear();
         SetClause.Clear();
         WhereClause.Clear();
         AllowAllRows = false;
@@ -91,7 +100,17 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         var context = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows, SqlExecutionKind.Update);
         UpdateClause.Validate(context);
         SetClause.Validate(context);
+        if (UpdateFromClause.Table != null)
+            UpdateFromClause.Validate(context);
         WhereClause.Validate(context);
         ValidateParameterLimit();
     }
+
+    /// <summary>
+    /// 创建 Update From 子句，优先使用 Provider 注册的专用子句工厂。
+    /// </summary>
+    /// <returns>Provider 专用或默认的 Update From 子句。</returns>
+    private IUpdateFromClause CreateUpdateFromClause() => ClauseFactory is ISqlUpdateFromClauseFactory factory
+        ? factory.CreateUpdateFrom(MutationContext)
+        : new UpdateFromClause(MutationContext);
 }

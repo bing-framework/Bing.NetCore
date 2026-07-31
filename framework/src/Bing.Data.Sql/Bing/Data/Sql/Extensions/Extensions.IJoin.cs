@@ -32,6 +32,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendJoin<T>(this T source, string sql) where T : IJoin
     {
         if (source == null)
@@ -48,6 +49,7 @@ public static partial class Extensions
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本。</param>
     /// <param name="condition">是否添加。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
         condition ? AppendJoin(source, sql) : source;
 
@@ -107,6 +109,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendLeftJoin<T>(this T source, string sql) where T : IJoin
     {
         if (source == null)
@@ -123,6 +126,7 @@ public static partial class Extensions
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本。</param>
     /// <param name="condition">是否添加。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendLeftJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
         condition ? AppendLeftJoin(source, sql) : source;
 
@@ -182,6 +186,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendRightJoin<T>(this T source, string sql) where T : IJoin
     {
         if (source == null)
@@ -198,6 +203,7 @@ public static partial class Extensions
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本。</param>
     /// <param name="condition">是否添加。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendRightJoin<T>(this T source, string sql, bool condition) where T : IJoin =>
         condition ? AppendRightJoin(source, sql) : source;
 
@@ -273,6 +279,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="sql">On 条件文本；方括号标识符会按当前方言解析。</param>
+    /// <returns>传入的同一个源对象。</returns>
     public static T AppendOn<T>(this T source, string sql) where T : IJoin
     {
         if (source == null)

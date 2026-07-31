@@ -44,7 +44,9 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlParameterLimitProvider
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true);
+    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true,
+        supportsMultiRowValues: true, supportsUpdateFrom: false, supportsDeleteUsing: false,
+        supportsReturning: true);
 
     /// <inheritdoc />
     /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>

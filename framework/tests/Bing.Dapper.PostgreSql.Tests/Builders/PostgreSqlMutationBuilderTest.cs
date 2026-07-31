@@ -6,6 +6,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -82,6 +83,202 @@ public sealed class PostgreSqlMutationBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：PostgreSQL 统一 Builder 应渲染结构化 Update From，并保留参数化条件的参数顺序。
+    /// </summary>
+    [Fact]
+    public void UpdateFrom_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql()
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .Set("Version", 2)
+            .WhereFrom("Id", "Id");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Update \"public\".\"samples\" As \"t\" Set \"Name\" = \"s\".\"Name\", \"Version\" = @_p_0 " +
+                     "From \"public\".\"sample_updates\" As \"s\" Where \"t\".\"Id\"=\"s\".\"Id\"",
+            sql);
+        Assert.Equal(2, builder.GetParams()["@_p_0"]);
+        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsUpdateFrom);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 统一 Builder 应渲染结构化 Delete Using 和带别名的目标表。
+    /// </summary>
+    [Fact]
+    public void DeleteUsing_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql()
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Delete From \"public\".\"samples\" As \"t\" Using \"public\".\"sample_deletes\" As \"s\" " +
+                     "Where \"t\".\"Id\"=\"s\".\"Id\"", sql);
+        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsDeleteUsing);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL Insert Values 应在语句尾部渲染结构化 Returning 投影。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenInsertValuesIsConfigured_ShouldRenderPostgreSqlSql()
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .InsertInto(new SqlTableReference { Schema = "public", TableName = "samples" })
+            .Columns("Name")
+            .Values("Bing")
+            .Returning("Id", "Name");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Insert Into \"public\".\"samples\" (\"Name\") Values (@_p_0) Returning \"Id\", \"Name\"", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL Insert Select 应在完整查询子句之后渲染 Returning。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery()
+    {
+        // Arrange
+        ISqlBuilder builder = new PostgreSqlBuilder();
+        builder.InsertInto(new SqlTableReference { Schema = "public", TableName = "archive_samples" })
+            .Columns("Id", "Name")
+            .Select("Id", "Name")
+            .From("samples")
+            .Returning("Id");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Insert Into \"public\".\"archive_samples\" (\"Id\", \"Name\") \r\n" +
+                     "Select \"Id\",\"Name\" \r\nFrom \"samples\" Returning \"Id\"", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：Update From Returning 应限定目标表别名，避免来源表同名列歧义。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenUpdateFromIsConfigured_ShouldQualifyTargetColumns()
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id")
+            .Returning("Id", "Name");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Update \"public\".\"samples\" As \"t\" Set \"Name\" = \"s\".\"Name\" " +
+                     "From \"public\".\"sample_updates\" As \"s\" Where \"t\".\"Id\"=\"s\".\"Id\" " +
+                     "Returning \"t\".\"Id\", \"t\".\"Name\"", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：Delete Using Returning 应返回删除前的目标表字段并保持 Clause 顺序。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenDeleteUsingIsConfigured_ShouldQualifyTargetColumns()
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id")
+            .Returning("Id");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Delete From \"public\".\"samples\" As \"t\" Using \"public\".\"sample_deletes\" As \"s\" " +
+                     "Where \"t\".\"Id\"=\"s\".\"Id\" Returning \"t\".\"Id\"", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：实体 Returning 投影应使用物理列并输出 CLR 属性别名，供 Dapper 稳定物化。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases()
+    {
+        // Arrange
+        ISqlBuilder builder = new PostgreSqlBuilder();
+        builder.Update(new SqlTableReference { Schema = "public", TableName = "returning_samples" })
+            .Set("sample_name", "Bing")
+            .Where("sample_id", 7)
+            .Returning<ReturningMutationSample>(item => new { item.Id, item.Name });
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Update \"public\".\"returning_samples\" Set \"sample_name\" = @_p_0 " +
+                     "Where \"sample_id\"=@_p_1 Returning \"sample_id\" As \"Id\", \"sample_name\" As \"Name\"", sql);
+        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsReturning);
+    }
+
+    /// <summary>
+    /// 测试目的：Returning 投影应随 Clone 独立复制，并在来源 Builder Clear 后完整移除。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenBuilderIsClonedAndCleared_ShouldKeepInstancesIndependent()
+    {
+        // Arrange
+        ISqlBuilder source = new PostgreSqlBuilder();
+        source.DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples" })
+            .Where("Id", 7)
+            .Returning("Id");
+
+        // Act
+        var clone = source.Clone();
+        source.Clear();
+
+        // Assert
+        Assert.Equal("Delete From \"public\".\"samples\" Where \"Id\"=@_p_0 Returning \"Id\"", clone.ToSql());
+        Assert.Equal(SqlOperationKind.None, source.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Returning 不接受通配符或表达式，避免扩大返回形状和 Raw SQL 注入面。
+    /// </summary>
+    [Theory]
+    [InlineData("*")]
+    [InlineData("Id,Name")]
+    [InlineData("Count(Id)")]
+    public void Returning_WhenColumnIsNotSingleIdentifier_ShouldThrowArgumentException(string column)
+    {
+        // Arrange
+        var builder = new PostgreSqlBuilder()
+            .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples" })
+            .AllowAllRows();
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => builder.Returning(column));
+
+        // Assert
+        Assert.Equal("columns", exception.ParamName);
+    }
+
+    /// <summary>
     /// PostgreSQL 样例实体。
     /// </summary>
     [Table("samples")]
@@ -124,5 +321,21 @@ public sealed class PostgreSqlMutationBuilderTest
         /// <summary>更新值。</summary>
         [Column("__key_Id")]
         public string Value { get; set; }
+    }
+
+    /// <summary>
+    /// Returning 实体映射样例。
+    /// </summary>
+    [Table("returning_samples", Schema = "public")]
+    private sealed class ReturningMutationSample
+    {
+        /// <summary>主键。</summary>
+        [Key]
+        [Column("sample_id")]
+        public int Id { get; set; }
+
+        /// <summary>名称。</summary>
+        [Column("sample_name")]
+        public string Name { get; set; }
     }
 }
