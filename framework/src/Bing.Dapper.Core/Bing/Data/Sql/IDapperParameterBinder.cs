@@ -6,6 +6,6 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 保留 <see cref="ISqlParameterBinder"/> 作为通用 SQL 兼容入口；Dapper 调用方可逐步迁移到此契约。
 /// </remarks>
-public interface IDapperParameterBinder : ISqlParameterContextBinder
+internal interface IDapperParameterBinder : ISqlParameterContextBinder
 {
 }

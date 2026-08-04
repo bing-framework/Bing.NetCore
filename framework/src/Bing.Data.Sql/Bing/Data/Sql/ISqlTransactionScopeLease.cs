@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 事务作用域执行租约。
 /// </summary>
-public interface ISqlTransactionScopeLease
+internal interface ISqlTransactionScopeLease
 {
     /// <summary>
     /// 事务作用域标识。

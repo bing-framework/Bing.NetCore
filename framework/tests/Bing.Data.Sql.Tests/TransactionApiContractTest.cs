@@ -28,22 +28,20 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试 - Query 执行资源仅通过公开窄 SPI 提供给执行实现。
+    /// 测试目的：资源和元数据绑定 SPI 不得重新暴露为公开契约。
     /// </summary>
     [Fact]
-    public void ExecutionResourceContracts_ShouldBePublicNarrowSpis()
+    public void RuntimeBindingContracts_ShouldNotBePublic()
     {
         // Arrange
-        var accessor = typeof(ISqlQueryExecutionResourceAccessor);
-        var binder = typeof(ISqlQueryResourceBinder);
-        var metadataBinder = typeof(ISqlQueryMetadataBinder);
-        var scopeBinder = typeof(ISqlTransactionScopeResourceBinder);
+        var publicTypeNames = typeof(ISqlQuery).Assembly.GetExportedTypes().Select(type => type.Name);
 
         // Assert
-        Assert.True(accessor.IsPublic);
-        Assert.True(binder.IsPublic);
-        Assert.True(metadataBinder.IsPublic);
-        Assert.True(scopeBinder.IsPublic);
+        Assert.DoesNotContain("ISqlQueryExecutionResourceAccessor", publicTypeNames);
+        Assert.DoesNotContain("ISqlQueryResourceBinder", publicTypeNames);
+        Assert.DoesNotContain("ISqlQueryMetadataBinder", publicTypeNames);
+        Assert.DoesNotContain("ISqlTransactionScopeResourceBinder", publicTypeNames);
+        Assert.DoesNotContain("ISqlTransactionScopeLease", publicTypeNames);
     }
 
     /// <summary>
@@ -111,45 +109,44 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：所有公开的异步列表、多映射、标量、单实体及存储过程查询入口都应在末尾提供可选取消令牌。
+    /// 测试目的：Root Query 不得重新公开异步终端执行入口，调用方必须使用独立查询描述。
     /// </summary>
     [Fact]
-    public void QueryAsyncContracts_ShouldExposeOptionalCancellationToken()
+    public void QueryContract_ShouldNotExposeLegacyAsyncTerminals()
     {
         // Arrange
-        var cancellationAwareMethods = typeof(ISqlQuery).GetMethods().Where(method => method.Name is
-            nameof(ISqlQuery.ExecuteQueryAsync) or nameof(ISqlQuery.ExecuteProcedureQueryAsync) or
-            nameof(ISqlQuery.ExecuteScalarAsync) or nameof(ISqlQuery.ExecuteProcedureScalarAsync) or
-            nameof(ISqlQuery.ExecuteSingleAsync) or nameof(ISqlQuery.ExecuteProcedureSingleAsync)).ToList();
+        var legacyMethods = new[]
+        {
+            "ExecuteQuery", "ExecuteQueryAsync", "ExecuteProcedureQuery", "ExecuteProcedureQueryAsync",
+            "ExecuteScalar", "ExecuteScalarAsync", "ExecuteProcedureScalar", "ExecuteProcedureScalarAsync",
+            "ExecuteSingle", "ExecuteSingleAsync", "ExecuteProcedureSingle", "ExecuteProcedureSingleAsync",
+            "StreamQuery", "StreamQueryAsync", "StreamAsync", "PagerQuery", "PagerQueryAsync"
+        };
+        var publicMethods = typeof(ISqlQuery).GetMethods().Select(method => method.Name);
 
         // Act and Assert
-        Assert.NotEmpty(cancellationAwareMethods);
-        Assert.All(cancellationAwareMethods, method =>
-        {
-            var parameter = method.GetParameters().Last();
-            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
-            Assert.True(parameter.HasDefaultValue);
-        });
+        Assert.DoesNotContain(publicMethods, method => legacyMethods.Contains(method));
     }
 
     /// <summary>
-    /// 测试目的：分页查询只应暴露令牌感知重载，避免旧委托入口丢失取消语义。
+    /// 测试目的：独立查询描述的异步终端均应在末尾提供可选取消令牌。
     /// </summary>
     [Fact]
-    public void PagerQueryAsyncContracts_ShouldOnlyExposeCancellationAwareCallback()
+    public void QueryDescriptionAsyncTerminals_ShouldExposeOptionalCancellationToken()
     {
         // Arrange
-        var methods = typeof(ISqlQuery).GetMethods().Where(method => method.Name == nameof(ISqlQuery.PagerQueryAsync))
-            .ToList();
-        var cancellationAwareMethod = Assert.Single(methods);
+        var methods = typeof(SqlQuery<int>).GetMethods().Where(method => method.Name is
+            "ToListAsync" or "FirstAsync" or "FirstOrDefaultAsync" or "SingleAsync" or "SingleOrDefaultAsync" or
+            "ScalarAsync" or "ToPageAsync" or "AsAsyncEnumerable").ToList();
 
         // Act
-        var cancellationToken = cancellationAwareMethod.GetParameters().Last();
-
-        // Assert
-        Assert.Equal(2, cancellationAwareMethod.GetParameters()[0].ParameterType.GetGenericArguments().Length);
-        Assert.Equal(typeof(CancellationToken), cancellationToken.ParameterType);
-        Assert.True(cancellationToken.HasDefaultValue);
+        Assert.NotEmpty(methods);
+        Assert.All(methods, method =>
+        {
+            var cancellationToken = method.GetParameters().Last();
+            Assert.Equal(typeof(CancellationToken), cancellationToken.ParameterType);
+            Assert.True(cancellationToken.HasDefaultValue);
+        });
     }
 
     /// <summary>
@@ -173,31 +170,24 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：查询 Fluent 异步扩展和分页扩展均应在末尾提供可选取消令牌。
+    /// 测试目的：旧 Query 异步扩展已移除，避免通过 Root Query 重新暴露终端执行。
     /// </summary>
     [Fact]
-    public void QueryAsyncExtensions_ShouldExposeOptionalCancellationToken()
+    public void QueryAsyncExtensions_ShouldNotExposeLegacyTerminals()
     {
         // Arrange
-        var cancellationAwareMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name is "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync")
-            .ToList();
+        var legacyMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.Name is "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync").ToList();
 
         // Act and Assert
-        Assert.NotEmpty(cancellationAwareMethods);
-        Assert.All(cancellationAwareMethods, method =>
-        {
-            var parameter = method.GetParameters().Last();
-            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
-            Assert.True(parameter.HasDefaultValue);
-        });
+        Assert.Empty(legacyMethods);
     }
 
     /// <summary>
-    /// 测试目的：所有异步标量转换扩展都应在末尾提供可选取消令牌。
+    /// 测试目的：旧 Root Query 标量转换扩展已移除，标量查询应通过描述对象执行。
     /// </summary>
     [Fact]
-    public void ScalarAsyncExtensions_ShouldExposeOptionalCancellationToken()
+    public void ScalarAsyncExtensions_ShouldNotExposeLegacyTerminals()
     {
         // Arrange
         var scalarMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
@@ -209,13 +199,7 @@ public class TransactionApiContractTest
             .ToList();
 
         // Act and Assert
-        Assert.Equal(17, scalarMethods.Count);
-        Assert.All(scalarMethods, method =>
-        {
-            var parameter = method.GetParameters().Last();
-            Assert.Equal(typeof(CancellationToken), parameter.ParameterType);
-            Assert.True(parameter.HasDefaultValue);
-        });
+        Assert.Empty(scalarMethods);
     }
 
     /// <summary>

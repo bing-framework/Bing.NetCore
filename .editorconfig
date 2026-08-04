@@ -11,6 +11,14 @@ indent_style = space
 [*.md]
 trim_trailing_whitespace = false
 
+[framework/src/Bing.Data.Sql/**.cs]
+dotnet_diagnostic.RS0016.severity = error
+dotnet_diagnostic.RS0017.severity = error
+
+[framework/src/Bing.Dapper.Core/**.cs]
+dotnet_diagnostic.RS0016.severity = error
+dotnet_diagnostic.RS0017.severity = error
+
 [*.csproj]
 end_of_line              = crlf
 

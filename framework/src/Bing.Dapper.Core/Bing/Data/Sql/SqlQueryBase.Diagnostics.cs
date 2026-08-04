@@ -52,11 +52,12 @@ public abstract partial class SqlQueryBase
     protected virtual SqlParameterDiagnosticSnapshot CreateParameterDiagnostics(object parameter,
         IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata)
     {
+        var metadata = parameterMetadata?.Where(t => t != null).ToList();
         return new SqlParameterDiagnosticSnapshot
         {
             OriginalParameterType = parameter?.GetType().FullName,
-            IsMetadataBound = parameterMetadata?.Count > 0,
-            Items = parameterMetadata?.Where(t => t != null).ToList() ?? CreateParameterDiagnosticItems(parameter).ToList()
+            IsMetadataBound = metadata?.Count > 0,
+            Items = metadata?.Count > 0 ? metadata : CreateParameterDiagnosticItems(parameter).ToList()
         };
     }
 
@@ -69,6 +70,10 @@ public abstract partial class SqlQueryBase
     {
         if (parameter == null)
             return Array.Empty<SqlParameterDiagnosticInfo>();
+        if (parameter is IReadOnlyDictionary<string, object> readOnlyDictionary)
+            return CreateParameterDiagnosticItems(readOnlyDictionary);
+        if (parameter is IDictionary<string, object> dictionary)
+            return CreateParameterDiagnosticItems(dictionary);
         return parameter.GetType()
             .GetProperties(BindingFlags.Instance | BindingFlags.Public)
             .Where(t => t.CanRead && t.GetIndexParameters().Length == 0)
@@ -85,6 +90,19 @@ public abstract partial class SqlQueryBase
             })
             .ToList();
     }
+
+    /// <summary>
+    /// 根据字典参数创建诊断项。
+    /// </summary>
+    /// <param name="parameters">参数字典。</param>
+    /// <returns>按参数名生成的诊断项集合。</returns>
+    private static IReadOnlyCollection<SqlParameterDiagnosticInfo> CreateParameterDiagnosticItems(
+        IEnumerable<KeyValuePair<string, object>> parameters) => parameters.Select(item => new SqlParameterDiagnosticInfo
+    {
+        Name = item.Key,
+        Value = IsSensitiveParameter(item.Key) ? null : item.Value,
+        IsSensitive = IsSensitiveParameter(item.Key)
+    }).ToList();
 
     /// <summary>
     /// 创建连接诊断信息

@@ -13,6 +13,9 @@ namespace Bing.Data.Sql;
 /// </summary>
 public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 {
+    /// <inheritdoc />
+    ISqlBuilder ISqlExecutor.GetBuilder() => SqlBuilder;
+
     #region 构造函数
 
     /// <summary>
@@ -26,6 +29,45 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     #endregion
+
+    /// <inheritdoc />
+    public async Task<List<TResult>> ExecuteReturningQueryAsync<TResult>(int? timeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        var builder = SqlBuilder;
+        ValidateReturningMutationBuilder(builder);
+        using var executionLease = AcquireExecutionLease();
+        List<TResult> result = default;
+        DiagnosticsMessage message = default;
+        try
+        {
+            if (ExecuteBefore() == false)
+                return default;
+            var sql = builder.ToSql();
+            var connection = GetExecutionConnection();
+            var transaction = GetQueryTransaction();
+            var dbParameters = GetDbParameters(builder, sql);
+            var parameterMetadata = GetSqlParameterDiagnostics(builder);
+            message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
+            WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
+            result = await ExecuteMaterializedQueryAsync<TResult>(connection,
+                CreateQueryCommandDefinition(sql, dbParameters, transaction, timeout, buffered: true,
+                    cancellationToken), cancellationToken);
+            CompleteQueryTransaction();
+            ExecuteAfter(message);
+            return result;
+        }
+        catch (Exception exception)
+        {
+            RollbackQueryTransaction();
+            ExecuteError(message, exception);
+            throw;
+        }
+        finally
+        {
+            ExecuteAfter(result);
+        }
+    }
 
     #region Execute(执行统一 Builder)
 
@@ -114,6 +156,21 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             SqlOperationKind.Update or SqlOperationKind.Delete)
             return;
         throw new InvalidOperationException($"ISqlExecutor 不支持执行 {builder.OperationKind} 状态的 SQL Builder。");
+    }
+
+    /// <summary>
+    /// 验证统一 Builder 是否为包含 Returning 的 Mutation。
+    /// </summary>
+    private static void ValidateReturningMutationBuilder(ISqlBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        if (builder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+            SqlOperationKind.Update or SqlOperationKind.Delete))
+            throw new InvalidOperationException($"ISqlExecutor 不支持执行 {builder.OperationKind} 状态的 SQL Builder。");
+        if (builder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
+            return;
+        throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
     }
 
     #endregion

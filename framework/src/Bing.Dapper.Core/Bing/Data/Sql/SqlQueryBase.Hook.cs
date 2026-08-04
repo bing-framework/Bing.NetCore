@@ -14,6 +14,27 @@ public partial class SqlQueryBase
     /// <param name="result">结果</param>
     protected virtual void ExecuteAfter(object result)
     {
-        Clear();
+        if (Volatile.Read(ref _queryPlanExecutionDepth) == 0)
+            Clear();
+    }
+
+    /// <summary>
+    /// 通知独立查询描述执行结束。
+    /// </summary>
+    /// <param name="result">查询执行结果。</param>
+    /// <remarks>
+    /// 保留派生类的业务钩子调用，同时禁止基类默认行为清空 Root Builder。
+    /// </remarks>
+    private void ExecuteQueryPlanAfter(object result)
+    {
+        Interlocked.Increment(ref _queryPlanExecutionDepth);
+        try
+        {
+            ExecuteAfter(result);
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _queryPlanExecutionDepth);
+        }
     }
 }

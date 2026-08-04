@@ -76,16 +76,15 @@ public abstract partial class SqlQueryBase
     /// </summary>
     /// <returns>当前事务，不存在时返回 null。</returns>
     protected IDbTransaction GetExecutionTransaction() =>
-        ((ISqlQueryExecutionResourceAccessor)this).GetCurrentTransaction();
+        GetCurrentTransaction();
 
     /// <summary>
     /// 获取当前执行事务。
     /// </summary>
     /// <returns>当前事务，不存在时返回 null。</returns>
-    IDbTransaction ISqlQueryExecutionResourceAccessor.GetCurrentTransaction()
+    private IDbTransaction GetCurrentTransaction()
     {
-        _transactionScopeLease?.EnsureActive();
-        ThrowIfTransactionScopeChildDisposed();
+        EnsureExecutionAvailable();
         if (_externalTransactionResolver != null)
         {
             var transaction = _externalTransactionResolver.Invoke();
@@ -263,7 +262,7 @@ public abstract partial class SqlQueryBase
     /// 获取当前事务诊断标识。
     /// </summary>
     /// <returns>当前事务标识，不存在时返回 null。</returns>
-    string ISqlQueryExecutionResourceAccessor.GetCurrentTransactionId()
+    private string GetCurrentTransactionId()
     {
         _transactionScopeLease?.EnsureActive();
         ThrowIfTransactionScopeChildDisposed();
@@ -281,44 +280,10 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 绑定框架自有连接。
-    /// </summary>
-    /// <param name="connection">数据库连接。</param>
-    /// <param name="source">连接来源。</param>
-    void ISqlQueryResourceBinder.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
-        BindConnection(connection, SqlResourceOwnership.Owned, source);
-
-    /// <summary>
-    /// 绑定外部连接。
-    /// </summary>
-    /// <param name="connection">数据库连接。</param>
-    /// <param name="source">连接来源。</param>
-    void ISqlQueryResourceBinder.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
-        BindConnection(connection, SqlResourceOwnership.External, source);
-
-    /// <summary>
-    /// 绑定外部事务。
-    /// </summary>
-    /// <param name="transaction">数据库事务。</param>
-    /// <param name="transactionId">诊断事务标识。</param>
-    void ISqlQueryResourceBinder.BindExternalTransaction(IDbTransaction transaction, string transactionId) =>
-        BindExternalTransaction(transaction, transactionId);
-
-    /// <summary>
     /// 绑定外部事务延迟解析器。
     /// </summary>
     /// <param name="resolver">外部事务解析器。</param>
-    void ISqlQueryResourceBinder.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+    private void BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
         _externalTransactionResolver = resolver;
-
-    /// <summary>
-    /// 绑定事务作用域上下文。
-    /// </summary>
-    /// <param name="context">固定数据库上下文。</param>
-    /// <param name="connection">事务连接。</param>
-    /// <param name="transaction">事务对象。</param>
-    /// <param name="lease">事务作用域执行租约。</param>
-    void ISqlTransactionScopeResourceBinder.BindTransactionScope(DatabaseContext context, IDbConnection connection,
-        IDbTransaction transaction, ISqlTransactionScopeLease lease) => SetTransactionContext(context, connection, transaction, lease);
 
 }

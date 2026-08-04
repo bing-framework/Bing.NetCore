@@ -118,6 +118,8 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<SqlImplementationTypeOptions>();
         services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
+        services.TryAddTransient<ISqlQuery>(provider =>
+            provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>());
         services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
         services.TryAddSingleton<ISqlMultipleQueryExecutorFactory, SqlMultipleQueryExecutorFactory>();
         services.TryAddSingleton<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();

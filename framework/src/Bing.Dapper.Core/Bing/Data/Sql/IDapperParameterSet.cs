@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Dapper 增强参数集访问器。
 /// </summary>
-public interface IDapperParameterSet
+internal interface IDapperParameterSet
 {
     /// <summary>
     /// 获取增强参数集合。

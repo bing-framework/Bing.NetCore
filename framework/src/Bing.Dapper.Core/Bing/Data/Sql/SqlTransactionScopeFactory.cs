@@ -31,7 +31,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             EnsureTransactionsSupported(context);
-            var connection = GetResourceAccessor(query).GetOrCreateConnection();
+            var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             var transaction = connection.BeginTransaction(isolationLevel);
@@ -57,7 +57,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             EnsureTransactionsSupported(context);
-            var connection = GetResourceAccessor(query).GetOrCreateConnection();
+            var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
@@ -94,15 +94,6 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     private SqlTransactionScope CreateScope(DatabaseContext context, ISqlQuery query, IDbConnection connection,
         IDbTransaction transaction) => new(context, query, connection, _queryFactory, _executorFactory, transaction);
 
-    /// <summary>
-    /// 获取 SQL 查询内部执行资源访问器。
-    /// </summary>
-    /// <param name="query">SQL 查询对象。</param>
-    /// <returns>执行资源访问器。</returns>
-    private static ISqlQueryExecutionResourceAccessor GetResourceAccessor(ISqlQuery query) =>
-        query as ISqlQueryExecutionResourceAccessor ??
-        throw new InvalidOperationException("事务查询对象未实现执行资源访问器。");
-
     private static void EnsureTransactionsSupported(DatabaseContext context)
     {
         if (context?.DataSource?.SupportsTransactions == false)
@@ -130,7 +121,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         private readonly IDbTransaction _transaction;
         private readonly ISqlQueryFactory _queryFactory;
         private readonly ISqlExecutorFactory _executorFactory;
-        private readonly List<ISqlQuery> _children = new();
+        private readonly List<IDisposable> _children = new();
         private readonly SqlTransactionScopeLease _lease;
         private readonly DatabaseContext _context;
         private SqlTransactionScopeState _state;
@@ -355,7 +346,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <typeparam name="TService">子对象类型。</typeparam>
         /// <param name="creator">子对象创建委托。</param>
         /// <returns>已绑定事务资源的子对象。</returns>
-        private TService CreateAndBindChild<TService>(Func<TService> creator) where TService : class, ISqlQuery
+        private TService CreateAndBindChild<TService>(Func<TService> creator) where TService : class, IDisposable
         {
             TService child = null;
             try
@@ -383,12 +374,11 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
-        private void BindTransactionContext(ISqlQuery query)
+        private void BindTransactionContext(IDisposable resource)
         {
-            var binder = query as ISqlTransactionScopeResourceBinder;
-            if (binder == null)
-                throw new InvalidOperationException("事务作用域创建的 Query 或 Executor 必须实现事务作用域资源绑定器，才能保证其生命周期受事务作用域管理。");
-            binder.BindTransactionScope(_context, _connection, _transaction, _lease);
+            if (resource is not ISqlQuery query)
+                throw new InvalidOperationException("SQL 事务作用域子对象不支持内部运行时资源绑定。");
+            SqlQueryRuntimeBridge.BindTransactionScope(query, _context, _connection, _transaction, _lease);
         }
 
         /// <summary>

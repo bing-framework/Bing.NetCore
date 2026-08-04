@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql 参数绑定器。
 /// </summary>
-public interface ISqlParameterBinder
+internal interface ISqlParameterBinder
 {
     /// <summary>绑定 Sql 生成器参数。</summary>
     object Bind(ISqlBuilder builder);

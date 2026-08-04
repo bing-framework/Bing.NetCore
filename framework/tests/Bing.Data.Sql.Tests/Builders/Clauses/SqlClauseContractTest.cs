@@ -97,7 +97,24 @@ public class SqlClauseContractTest
     }
 
     /// <summary>
-    /// 测试目的：实体执行器仅提供查询和实体 CRUD 操作，不得继承 Fluent Mutation 标记以暴露 Builder 专属扩展。
+    /// 测试目的：仅实现公开 Fluent 标记而未提供 Clause SPI 的外部对象必须快速失败，避免调用看似成功但未修改查询状态。
+    /// </summary>
+    [Fact]
+    public void FluentOperation_WhenClauseAccessorIsMissing_ShouldThrow()
+    {
+        // Arrange
+        var source = new SelectOnlyProxy();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => source.Distinct());
+
+        // Assert
+        Assert.Contains(nameof(ISqlQueryClauseAccessor), exception.Message);
+        Assert.Contains(typeof(SelectOnlyProxy).FullName, exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：实体执行器仅提供 Mutation 与实体 CRUD 操作，不得泄露查询或 Fluent Mutation Builder 接口。
     /// </summary>
     [Fact]
     public void SqlExecutor_ShouldNotInheritFluentMutationOperationMarker()
@@ -107,9 +124,13 @@ public class SqlClauseContractTest
 
         // Act
         var exposesMutationMarker = typeof(ISqlOperation).IsAssignableFrom(executor);
+        var exposesQuery = typeof(ISqlQuery).IsAssignableFrom(executor);
+        var returningMethod = executor.GetMethod(nameof(ISqlExecutor.ExecuteReturningQueryAsync));
 
         // Assert
         Assert.False(exposesMutationMarker);
+        Assert.False(exposesQuery);
+        Assert.NotNull(returningMethod);
     }
 
     /// <summary>
@@ -199,6 +220,13 @@ public class SqlClauseContractTest
         public IGroupByClause GroupByClause => _builder.GroupByClause;
 
         public IOrderByClause OrderByClause => _builder.OrderByClause;
+    }
+
+    /// <summary>
+    /// 仅实现 Select 标记的无效外部 Fluent 操作代理。
+    /// </summary>
+    private sealed class SelectOnlyProxy : ISelect
+    {
     }
 
     /// <summary>

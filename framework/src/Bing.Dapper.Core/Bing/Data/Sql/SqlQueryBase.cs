@@ -1,5 +1,6 @@
 ﻿using System.Runtime.ExceptionServices;
 using Bing.Data.Sql.Builders;
+using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
@@ -12,6 +13,7 @@ using Bing.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text;
 
 namespace Bing.Data.Sql;
 
@@ -21,9 +23,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IGetParameter,
-    IClearParameters, IUnionAccessor, ICteAccessor, ISqlQueryExecutionResourceAccessor,
-    ISqlTransactionScopeResourceBinder, ISqlQueryMetadataBinder
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
 {
     #region 字段
 
@@ -107,6 +107,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     private int _executionLease;
 
+    /// <summary>
+    /// 当前 Root Query 是否已释放。
+    /// </summary>
+    private int _isDisposed;
+
+    /// <summary>
+    /// 当前是否正在执行独立查询描述。
+    /// </summary>
+    /// <remarks>
+    /// 独立查询描述复用 Root Query 的连接和诊断生命周期，但不能清空 Root Builder。
+    /// </remarks>
+    private int _queryPlanExecutionDepth;
+
     #endregion
 
     #region 构造函数
@@ -125,6 +138,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
         if (_connection != null)
             _connectionOwnership = SqlResourceOwnership.External;
         ContextId = Guid.NewGuid().ToString("N");
+        SqlQueryRuntimeBridge.Register(this, new RuntimeController(this));
     }
 
     /// <summary>
@@ -216,17 +230,17 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// <summary>
     /// Sql生成器
     /// </summary>
-    public ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
+    protected ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
     /// <summary>
     /// Sql方言
     /// </summary>
-    public IDialect Dialect => ((ISqlCommonPartAccessor)SqlBuilder).Dialect;
+    protected IDialect Dialect => ((ISqlCommonPartAccessor)SqlBuilder).Dialect;
 
     /// <summary>
     /// 参数管理器
     /// </summary>
-    public IParameterManager ParameterManager => ((ISqlCommonPartAccessor)SqlBuilder).ParameterManager;
+    protected IParameterManager ParameterManager => ((ISqlCommonPartAccessor)SqlBuilder).ParameterManager;
 
     /// <summary>
     /// 参数字面值解析器
@@ -236,37 +250,37 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// <summary>
     /// Sql 参数绑定器
     /// </summary>
-    protected ISqlParameterBinder SqlParameterBinder => _sqlParameterBinder ??= CreateSqlParameterBinder();
+    private protected ISqlParameterBinder SqlParameterBinder => _sqlParameterBinder ??= CreateSqlParameterBinder();
 
     /// <summary>
     /// Select子句
     /// </summary>
-    public ISelectClause SelectClause => ((ISqlQueryClauseAccessor)SqlBuilder).SelectClause;
+    protected ISelectClause SelectClause => ((ISqlQueryClauseAccessor)SqlBuilder).SelectClause;
 
     /// <summary>
     /// From子句
     /// </summary>
-    public IFromClause FromClause => ((ISqlQueryClauseAccessor)SqlBuilder).FromClause;
+    protected IFromClause FromClause => ((ISqlQueryClauseAccessor)SqlBuilder).FromClause;
 
     /// <summary>
     /// Join子句
     /// </summary>
-    public IJoinClause JoinClause => ((ISqlQueryClauseAccessor)SqlBuilder).JoinClause;
+    protected IJoinClause JoinClause => ((ISqlQueryClauseAccessor)SqlBuilder).JoinClause;
 
     /// <summary>
     /// Where子句
     /// </summary>
-    public IWhereClause WhereClause => ((ISqlQueryClauseAccessor)SqlBuilder).WhereClause;
+    protected IWhereClause WhereClause => ((ISqlQueryClauseAccessor)SqlBuilder).WhereClause;
 
     /// <summary>
     /// GroupBy子句
     /// </summary>
-    public IGroupByClause GroupByClause => ((ISqlQueryClauseAccessor)SqlBuilder).GroupByClause;
+    protected IGroupByClause GroupByClause => ((ISqlQueryClauseAccessor)SqlBuilder).GroupByClause;
 
     /// <summary>
     /// OrderBy子句
     /// </summary>
-    public IOrderByClause OrderByClause => ((ISqlQueryClauseAccessor)SqlBuilder).OrderByClause;
+    protected IOrderByClause OrderByClause => ((ISqlQueryClauseAccessor)SqlBuilder).OrderByClause;
 
     /// <summary>
     /// 参数列表
@@ -276,17 +290,17 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// <summary>
     /// 是否包含联合操作
     /// </summary>
-    public bool IsUnion => ((IUnionAccessor)SqlBuilder).IsUnion;
+    protected bool IsUnion => ((IUnionAccessor)SqlBuilder).IsUnion;
 
     /// <summary>
     /// 联合操作项集合
     /// </summary>
-    public List<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
+    protected List<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
 
     /// <summary>
     /// 公用表表达式CTE集合
     /// </summary>
-    public List<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
+    protected List<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
 
     #endregion
 
@@ -314,6 +328,184 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
         var resolvedProvider = providerResolver.Resolve(GetDatabaseContext(), provider, GetDatabaseType());
         _provider = resolvedProvider;
         return factory.Create(resolvedProvider, CreateSqlBuilderServices());
+    }
+
+    /// <summary>
+    /// 创建供独立查询描述使用的 SQL Builder。
+    /// </summary>
+    /// <remarks>
+    /// 每次调用必须返回新的 Builder，避免不同查询描述之间共享可变状态。
+    /// </remarks>
+    /// <returns>绑定当前 Provider 的独立 SQL Builder。</returns>
+    protected virtual ISqlBuilder CreateIndependentSqlBuilder() => CreateSqlBuilder(GetCurrentProvider());
+
+    /// <inheritdoc />
+    ISqlBuilder ISqlQueryBuilderSource.CreateIndependentSqlBuilder() => CreateIndependentSqlBuilder();
+
+    /// <inheritdoc />
+    public SqlQuery<TResult> Sql<TResult>()
+    {
+        EnsureExecutionAvailable();
+        var executor = (ISqlQueryPlanExecutor)this;
+        return new SqlQuery<TResult>(executor, executor.CreateIndependentSqlBuilder());
+    }
+
+    /// <inheritdoc />
+    public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null)
+    {
+        EnsureExecutionAvailable();
+        return new SqlTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
+    }
+
+    /// <inheritdoc />
+    public SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql)
+    {
+        EnsureExecutionAvailable();
+        if (sql == null)
+            throw new ArgumentNullException(nameof(sql));
+
+        var parameterPrefix = GetCurrentProvider().Dialect.GetPrefix();
+        var arguments = sql.GetArguments();
+        var parameters = new Dictionary<string, object>(arguments.Length);
+        var parameterNames = new Dictionary<int, string>(arguments.Length);
+        for (var index = 0; index < arguments.Length; index++)
+        {
+            var parameterName = GetInterpolatedParameterName(sql.Format, index, parameterPrefix);
+            parameterNames.Add(index, parameterName);
+            parameters.Add(parameterName, arguments[index]);
+        }
+        var commandText = CreateInterpolatedCommandText(sql.Format, parameterNames, parameterPrefix);
+        return Sql<TResult>(commandText, parameters);
+    }
+
+    /// <inheritdoc />
+    public SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null)
+    {
+        EnsureExecutionAvailable();
+        if (string.IsNullOrWhiteSpace(procedure))
+            throw new ArgumentException("存储过程名称不能为空。", nameof(procedure));
+        var executor = (ISqlQueryPlanExecutor)this;
+        return new SqlProcedureQuery<TResult>(executor, GetProcedure(procedure), parameters);
+    }
+
+    /// <summary>
+    /// 将复合格式 SQL 转换为仅包含参数占位符的命令文本。
+    /// </summary>
+    /// <param name="format">插值字符串的复合格式文本。</param>
+    /// <param name="parameterNames">格式项索引对应的参数名称。</param>
+    /// <param name="parameterPrefix">当前 SQL 方言使用的参数前缀。</param>
+    /// <returns>可交由 Dapper 执行的参数化 SQL 文本。</returns>
+    /// <remarks>
+    /// 插值值始终交由参数绑定器处理，因此格式项的对齐和格式说明仅用于验证复合格式语法，不会影响 SQL 文本。
+    /// </remarks>
+    /// <exception cref="FormatException">复合格式文本包含无效格式项时抛出。</exception>
+    private static string CreateInterpolatedCommandText(string format, IReadOnlyDictionary<int, string> parameterNames,
+        string parameterPrefix)
+    {
+        if (format == null)
+            throw new ArgumentNullException(nameof(format));
+        if (parameterNames == null)
+            throw new ArgumentNullException(nameof(parameterNames));
+        if (string.IsNullOrWhiteSpace(parameterPrefix))
+            throw new ArgumentException("SQL 方言参数前缀不能为空。", nameof(parameterPrefix));
+        var result = new StringBuilder(format.Length + parameterNames.Count * 4);
+        for (var position = 0; position < format.Length; position++)
+        {
+            var current = format[position];
+            if (current == '{')
+            {
+                if (position + 1 < format.Length && format[position + 1] == '{')
+                {
+                    result.Append('{');
+                    position++;
+                    continue;
+                }
+                var indexStart = ++position;
+                while (position < format.Length && char.IsDigit(format[position]))
+                    position++;
+                if (indexStart == position || int.TryParse(format.Substring(indexStart, position - indexStart), out var index) == false ||
+                    parameterNames.TryGetValue(index, out var parameterName) == false)
+                    throw new FormatException("插值 SQL 包含无效的格式项索引。");
+                SkipInterpolatedFormatItem(format, ref position);
+                result.Append(parameterPrefix).Append(parameterName);
+                continue;
+            }
+            if (current == '}')
+            {
+                if (position + 1 >= format.Length || format[position + 1] != '}')
+                    throw new FormatException("插值 SQL 包含未转义的右花括号。");
+                result.Append('}');
+                position++;
+                continue;
+            }
+            result.Append(current);
+        }
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// 跳过复合格式项的可选对齐和格式说明，并定位到右花括号后的下一个字符。
+    /// </summary>
+    /// <param name="format">完整复合格式文本。</param>
+    /// <param name="position">当前格式项索引后的读取位置。</param>
+    /// <exception cref="FormatException">格式项未以右花括号结束时抛出。</exception>
+    private static void SkipInterpolatedFormatItem(string format, ref int position)
+    {
+        if (position < format.Length && format[position] == ',')
+        {
+            position++;
+            while (position < format.Length && char.IsWhiteSpace(format[position]))
+                position++;
+            if (position < format.Length && (format[position] == '+' || format[position] == '-'))
+                position++;
+            var alignmentStart = position;
+            while (position < format.Length && char.IsDigit(format[position]))
+                position++;
+            if (alignmentStart == position)
+                throw new FormatException("插值 SQL 格式项的对齐宽度无效。");
+        }
+        if (position < format.Length && format[position] == ':')
+        {
+            position++;
+            while (position < format.Length && format[position] != '}')
+            {
+                if (format[position] is '{' or '\r' or '\n')
+                    throw new FormatException("插值 SQL 格式项包含无效字符。");
+                position++;
+            }
+        }
+        if (position >= format.Length || format[position] != '}')
+            throw new FormatException("插值 SQL 格式项缺少右花括号。");
+    }
+
+    /// <summary>
+    /// 获取不与 SQL 文本中已有参数冲突的插值参数名。
+    /// </summary>
+    /// <param name="format">复合格式 SQL 文本。</param>
+    /// <param name="index">插值参数索引。</param>
+    /// <param name="parameterPrefix">当前 SQL 方言使用的参数前缀。</param>
+    /// <returns>当前插值参数使用的名称。</returns>
+    private static string GetInterpolatedParameterName(string format, int index, string parameterPrefix)
+    {
+        if (string.IsNullOrWhiteSpace(parameterPrefix))
+            throw new ArgumentException("SQL 方言参数前缀不能为空。", nameof(parameterPrefix));
+        var baseName = $"p{index}";
+        var parameterName = baseName;
+        var suffix = 0;
+        while (Regex.IsMatch(format, $@"{Regex.Escape(parameterPrefix)}{Regex.Escape(parameterName)}(?![A-Za-z0-9_])",
+                   RegexOptions.IgnoreCase))
+            parameterName = $"{baseName}_{++suffix}";
+        return parameterName;
+    }
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TEntity> Lambda<TEntity>() where TEntity : class
+    {
+        EnsureExecutionAvailable();
+        var executor = (ISqlQueryPlanExecutor)this;
+        var query = new SqlLambdaQuery<TEntity>(executor, executor.CreateIndependentSqlBuilder());
+        query.Select().From();
+        return query;
     }
 
     /// <summary>
@@ -345,7 +537,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// 创建 Sql 参数绑定器
     /// </summary>
     /// <returns>Sql 参数绑定器</returns>
-    protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
+    private protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
         ServiceProvider.GetService<ISqlParameterBinder>() ?? new DefaultSqlParameterBinder(
             EntityMappingResolver,
             ServiceProvider.GetService<IDatabaseContextAccessor>(),
@@ -404,7 +596,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     /// <returns>执行使用的数据库连接。</returns>
     protected IDbConnection GetExecutionConnection() =>
-        ((ISqlQueryExecutionResourceAccessor)this).GetOrCreateConnection();
+        GetOrCreateConnection();
 
     /// <summary>
     /// 获取当前实例的非阻塞执行租约。
@@ -415,6 +607,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// <returns>必须在操作结束时释放的执行租约。</returns>
     protected IDisposable AcquireExecutionLease()
     {
+        EnsureExecutionAvailable();
         if (Interlocked.CompareExchange(ref _executionLease, 1, 0) != 0)
             throw new InvalidOperationException("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。");
         return new ExecutionLease(this);
@@ -450,13 +643,46 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     }
 
     /// <summary>
+    /// 查询专属运行时资源控制器。
+    /// </summary>
+    private sealed class RuntimeController : ISqlQueryRuntimeController
+    {
+        private readonly SqlQueryBase _owner;
+
+        public RuntimeController(SqlQueryBase owner) => _owner = owner;
+
+        public IDbConnection GetOrCreateConnection() => _owner.GetOrCreateConnection();
+
+        public IDbTransaction GetCurrentTransaction() => _owner.GetCurrentTransaction();
+
+        public string GetCurrentTransactionId() => _owner.GetCurrentTransactionId();
+
+        public void BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
+            _owner.BindConnection(connection, SqlResourceOwnership.Owned, source);
+
+        public void BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
+            _owner.BindConnection(connection, SqlResourceOwnership.External, source);
+
+        public void BindExternalTransaction(IDbTransaction transaction, string transactionId = null) =>
+            _owner.BindExternalTransaction(transaction, transactionId);
+
+        public void BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+            _owner.BindExternalTransactionResolver(resolver);
+
+        public void BindTransactionScope(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
+            ISqlTransactionScopeLease lease) => _owner.SetTransactionContext(context, connection, transaction, lease);
+
+        public void BindEntityMappingResolver(IEntityMappingResolver resolver) =>
+            _owner.BindEntityMappingResolver(resolver);
+    }
+
+    /// <summary>
     /// 获取或创建执行连接。
     /// </summary>
     /// <returns>执行使用的数据库连接。</returns>
-    IDbConnection ISqlQueryExecutionResourceAccessor.GetOrCreateConnection()
+    private IDbConnection GetOrCreateConnection()
     {
-        _transactionScopeLease?.EnsureActive();
-        ThrowIfTransactionScopeChildDisposed();
+        EnsureExecutionAvailable();
         if (_connection != null)
             return _connection;
         var connectionString = ResolveConnectionString();
@@ -564,13 +790,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     }
 
     /// <summary>
-    /// 绑定实体映射解析器。
-    /// </summary>
-    /// <param name="resolver">实体映射解析器。</param>
-    void ISqlQueryMetadataBinder.BindEntityMappingResolver(IEntityMappingResolver resolver) =>
-        BindEntityMappingResolver(resolver);
-
-    /// <summary>
     /// 校验外部连接与当前固定数据库上下文的物理身份。
     /// </summary>
     /// <param name="connection">外部数据库连接。</param>
@@ -623,15 +842,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     protected void ClearAfterExecution()
     {
         EnabledDebugSql = true;
-        if (Options.IsClearAfterExecution == false)
+        if (Options.IsClearAfterExecution == false || _sqlBuilder == null)
             return;
-        SqlBuilder.Clear();
+        _sqlBuilder.Clear();
     }
-
-    /// <summary>
-    /// 获取调试Sql语句
-    /// </summary>
-    public string GetDebugSql() => SqlBuilder.ToDebugSql();
 
     /// <summary>
     /// 获取Sql语句
@@ -643,20 +857,24 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     protected void ValidateQueryBuilder()
     {
-        if (_sqlBuilder == null)
-            return;
-        if (_sqlBuilder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
-            SqlOperationKind.Update or SqlOperationKind.Delete))
-            return;
-        if (_sqlBuilder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
-            return;
-        throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
+        ValidateQueryBuilder(_sqlBuilder);
     }
 
     /// <summary>
-    /// 获取Sql生成器
+    /// 验证指定 Builder 可通过查询结果 API 执行。
     /// </summary>
-    public ISqlBuilder GetBuilder() => SqlBuilder;
+    /// <param name="builder">待验证的 SQL Builder；原生 SQL 文本查询传入 null。</param>
+    protected void ValidateQueryBuilder(ISqlBuilder builder)
+    {
+        if (builder == null)
+            return;
+        if (builder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+            SqlOperationKind.Update or SqlOperationKind.Delete))
+            return;
+        if (builder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
+            return;
+        throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
+    }
 
     /// <summary>
     /// 获取数据库参数
@@ -732,87 +950,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     }
 
     /// <summary>
-    /// 分页查询
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">获取列表操作</param>
-    /// <param name="parameter">分页参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    public virtual PagerList<TResult> PagerQuery<TResult>(Func<List<TResult>> func, IPager parameter, int? timeout = null)
-    {
-        parameter = GetPage(parameter);
-        if (parameter.TotalCount == 0)
-            parameter.TotalCount = GetCount(timeout);
-        SetPager(parameter);
-        return new PagerList<TResult>(parameter, func());
-    }
-
-    /// <summary>
-    /// 获取行数
-    /// </summary>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    protected int GetCount(int? timeout = null)
-    {
-        using var executionLease = AcquireExecutionLease();
-        DiagnosticsMessage message = null;
-        try
-        {
-            var builder = GetCountBuilder();
-            var sql = builder.ToSql();
-            var conn = GetExecutionConnection();
-            var dbParameters = GetDbParameters(builder);
-            var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            var transaction = GetQueryTransaction();
-            message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
-
-            WriteTraceLog(builder, sql);
-            var result = conn.ExecuteScalar(sql, dbParameters, transaction, timeout);
-
-            CompleteQueryTransaction();
-            ExecuteAfter(message);
-            return Conv.ToInt(result);
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// 设置分页参数
-    /// </summary>
-    /// <param name="parameter">分页参数</param>
-    private void SetPager(IPager parameter)
-    {
-        SqlBuilder.OrderBy(parameter.Order);
-        SqlBuilder.Page(parameter);
-    }
-
-    /// <summary>
-    /// 分页查询。
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型。</typeparam>
-    /// <param name="func">使用取消令牌获取列表的操作。</param>
-    /// <param name="parameter">分页参数。</param>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示最终分页结果的异步操作。</returns>
-    public virtual async Task<PagerList<TResult>> PagerQueryAsync<TResult>(Func<CancellationToken, Task<List<TResult>>> func,
-        IPager parameter, int? timeout = null, CancellationToken cancellationToken = default)
-    {
-        if (func == null)
-            throw new ArgumentNullException(nameof(func));
-        cancellationToken.ThrowIfCancellationRequested();
-        parameter = GetPage(parameter);
-        if (parameter.TotalCount == 0)
-            parameter.TotalCount = await GetCountAsync(timeout, cancellationToken);
-        SetPager(parameter);
-        return new PagerList<TResult>(parameter, await func(cancellationToken));
-    }
-
-    /// <summary>
     /// 临时禁用调试日志
     /// </summary>
     public ISqlQuery DisableDebugLog()
@@ -822,37 +959,47 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     }
 
     /// <summary>
-    /// 获取行数
+    /// 为单次独立查询计划创建临时调试日志范围。
     /// </summary>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    protected async Task<int> GetCountAsync(int? timeout = null, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// <see cref="DisableDebugLog"/> 只影响紧随其后的一个查询计划；范围结束后必须恢复默认调试状态，
+    /// 包括执行失败、取消和流式枚举提前终止。
+    /// </remarks>
+    /// <returns>在范围结束时恢复临时调试状态的对象。</returns>
+    private IDisposable BeginQueryPlanDebugLogScope() => new QueryPlanDebugLogScope(this, EnabledDebugSql == false);
+
+    /// <summary>
+    /// 独立查询计划的临时调试日志范围。
+    /// </summary>
+    private sealed class QueryPlanDebugLogScope : IDisposable
     {
-        using var executionLease = AcquireExecutionLease();
-        DiagnosticsMessage message = null;
-        try
+        /// <summary>
+        /// 所属 Root 查询。
+        /// </summary>
+        private SqlQueryBase _owner;
+
+        /// <summary>
+        /// 是否需要在范围结束时恢复调试状态。
+        /// </summary>
+        private readonly bool _restoreDebugLog;
+
+        /// <summary>
+        /// 初始化一个<see cref="QueryPlanDebugLogScope"/>类型的实例。
+        /// </summary>
+        /// <param name="owner">所属 Root 查询。</param>
+        /// <param name="restoreDebugLog">是否需要恢复调试状态。</param>
+        public QueryPlanDebugLogScope(SqlQueryBase owner, bool restoreDebugLog)
         {
-            var builder = GetCountBuilder();
-            var sql = builder.ToSql();
-            var conn = GetExecutionConnection();
-            var dbParameters = GetDbParameters(builder);
-            var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            var transaction = GetQueryTransaction();
-            message = ExecuteBefore(sql, builder.GetParams(), conn, parameterMetadata);
-
-            WriteTraceLog(builder, sql);
-            var result = await conn.ExecuteScalarAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
-                cancellationToken: cancellationToken));
-
-            CompleteQueryTransaction();
-            ExecuteAfter(message);
-            return Conv.ToInt(result);
+            _owner = owner;
+            _restoreDebugLog = restoreDebugLog;
         }
-        catch (Exception e)
+
+        /// <inheritdoc />
+        public void Dispose()
         {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
+            var owner = Interlocked.Exchange(ref _owner, null);
+            if (owner != null && _restoreDebugLog)
+                owner.EnabledDebugSql = true;
         }
     }
 
@@ -870,7 +1017,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
             return;
         var message = new StringBuilder();
         foreach (var param in parameters)
-            message.AppendLine($"    {param.Key} : {ParamLiteralsResolver.GetParamLiterals(param.Value)} : {param.Value?.GetType()},");
+        {
+            var isSensitive = IsSensitiveParameter(param.Key);
+            var literal = isSensitive ? "'<redacted>'" : ParamLiteralsResolver.GetParamLiterals(param.Value);
+            var type = isSensitive ? "<redacted>" : param.Value?.GetType().ToString();
+            message.AppendLine($"    {param.Key} : {literal} : {type},");
+        }
         var result = message.ToString().RemoveEnd($",{Common.Line}");
         Logger.LogTrace("原始Sql:\r\n{Sql}\r\n调试Sql:\r\n{DebugSql}\r\nSql参数:\r\n{SqlParam}\r\n", sql, debugSql, result);
     }
@@ -887,78 +1039,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
         WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
     }
 
-    /// <summary>
-    /// 获取分页参数
-    /// </summary>
-    /// <param name="parameter">分页参数</param>
-    protected IPager GetPage(IPager parameter)
-    {
-        if (parameter != null)
-            return parameter;
-        return SqlBuilder.Pager;
-    }
-
-    /// <summary>
-    /// 获取行数Sql生成器
-    /// </summary>
-    protected ISqlBuilder GetCountBuilder()
-    {
-        var builder = SqlBuilder.Clone();
-        ClearCountBuilder(builder);
-        if (IsUnion)
-            return GetCountBuilderByUnion(builder);
-        if (IsGroup(builder))
-            return GetCountBuilderByGroup(builder);
-        return GetCountBuilder(builder);
-    }
-
-    /// <summary>
-    /// 清空行数Sql生成器
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    private void ClearCountBuilder(ISqlBuilder builder)
-    {
-        builder.ClearOrderBy();
-        builder.ClearPageParams();
-    }
-
-    /// <summary>
-    /// 获取行数Sql生成器 - 联合
-    /// </summary>
-    /// <param name="countBuilder">行数Sql生成器</param>
-    private ISqlBuilder GetCountBuilderByUnion(ISqlBuilder countBuilder) => countBuilder.New().Count().From(countBuilder, "t");
-
-    /// <summary>
-    /// 是否分组
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    private bool IsGroup(ISqlBuilder builder)
-    {
-        if (builder is ISqlQueryClauseAccessor accessor)
-            return accessor.GroupByClause.IsGroup;
-        return false;
-    }
-
-    /// <summary>
-    /// 获取行数Sql生成器 - 分组
-    /// </summary>
-    /// <param name="countBuilder">行数Sql生成器</param>
-    private ISqlBuilder GetCountBuilderByGroup(ISqlBuilder countBuilder)
-    {
-        countBuilder.ClearSelect();
-        return countBuilder.New().Count().From(countBuilder.AppendSelect("1 As c"), "t");
-    }
-
-    /// <summary>
-    /// 获取行数Sql生成器
-    /// </summary>
-    /// <param name="countBuilder">行数Sql生成器</param>
-    private ISqlBuilder GetCountBuilder(ISqlBuilder countBuilder)
-    {
-        countBuilder.ClearSelect();
-        return countBuilder.Count();
-    }
-
     #region Dispose(释放资源)
 
     /// <summary>
@@ -966,16 +1046,35 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+            return;
+        Exception transactionException = null;
         try
         {
             ReleaseTransaction();
+        }
+        catch (Exception exception)
+        {
+            transactionException = exception;
+        }
+        try
+        {
             ReleaseConnection();
+        }
+        catch (Exception connectionException)
+        {
+            if (transactionException != null)
+                throw new AggregateException(transactionException, connectionException);
+            throw;
         }
         finally
         {
             if (_transactionScopeLease != null)
                 _isTransactionScopeChildDisposed = true;
+            SqlQueryRuntimeBridge.Remove(this);
         }
+        if (transactionException != null)
+            ExceptionDispatchInfo.Capture(transactionException).Throw();
     }
 
     /// <summary>
@@ -988,15 +1087,39 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     }
 
     /// <summary>
+    /// 确保当前查询可以在其所属事务作用域中继续执行。
+    /// </summary>
+    /// <remarks>
+    /// 事务作用域结束应优先于对象释放状态报告，以便调用方识别跨作用域复用错误。
+    /// </remarks>
+    private void EnsureExecutionAvailable()
+    {
+        _transactionScopeLease?.EnsureActive();
+        ThrowIfTransactionScopeChildDisposed();
+        ThrowIfDisposed();
+    }
+
+    /// <summary>
+    /// 确保 Root Query 未被释放。
+    /// </summary>
+    private void ThrowIfDisposed()
+    {
+        if (Volatile.Read(ref _isDisposed) != 0)
+            throw new ObjectDisposedException(nameof(SqlQueryBase), "SQL Query 或 Executor 已释放，不能继续执行或获取资源。");
+    }
+
+    /// <summary>
     /// 释放事务
     /// </summary>
     private void ReleaseTransaction()
     {
-        if (_transactionOwnership == SqlResourceOwnership.Owned)
-            _transaction?.Dispose();
+        var transaction = _transaction;
+        var ownership = _transactionOwnership;
         _transaction = null;
         _transactionId = null;
         _transactionOwnership = SqlResourceOwnership.Owned;
+        if (ownership == SqlResourceOwnership.Owned)
+            transaction?.Dispose();
     }
 
     /// <summary>
@@ -1004,10 +1127,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     private void ReleaseConnection()
     {
-        if (_connectionOwnership == SqlResourceOwnership.Owned)
-            _connection?.Dispose();
+        var connection = _connection;
+        var ownership = _connectionOwnership;
         _connection = null;
         _connectionOwnership = SqlResourceOwnership.Owned;
+        _connectionSource = SqlConnectionSource.Unknown;
+        if (ownership == SqlResourceOwnership.Owned)
+            connection?.Dispose();
     }
 
     /// <summary>
@@ -1028,17 +1154,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     /// <typeparam name="T">参数值类型</typeparam>
     /// <param name="name">参数名</param>
-    public virtual T GetParam<T>(string name)
+    protected virtual T GetParam<T>(string name)
     {
         return (T)ParameterManager?.GetValue(name);
-    }
-
-    /// <summary>
-    /// 清空Sql参数
-    /// </summary>
-    public void ClearParams()
-    {
-        ParameterManager?.Clear();
     }
 
     /// <summary>
@@ -1046,8 +1164,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlCommonPartAccessor, 
     /// </summary>
     protected void Clear()
     {
+        if (_sqlBuilder == null)
+            return;
         ClearAfterExecution();
-        ClearParams();
+        if (_sqlBuilder is ISqlCommonPartAccessor accessor)
+            accessor.ParameterManager?.Clear();
     }
 
     /// <summary>

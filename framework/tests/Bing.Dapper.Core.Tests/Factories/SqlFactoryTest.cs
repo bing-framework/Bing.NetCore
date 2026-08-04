@@ -1,4 +1,5 @@
 using System.Data;
+using System.Reflection;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
@@ -18,31 +19,35 @@ namespace Bing.Dapper.Core.Tests.Factories;
 public class SqlFactoryTest
 {
     /// <summary>
-    /// 测试目的：事务作用域创建的子查询释放后不得经资源绑定器重新绑定并恢复执行能力。
+    /// 测试目的：Root 查询不得继续公开废弃的调试、过程执行和参数清理继承入口。
     /// </summary>
     [Fact]
-    public void BindTransactionScope_WhenChildQueryDisposed_ShouldThrowObjectDisposedException()
+    public void SqlQueryBase_WhenApiInspected_ShouldNotExposeLegacyExecutionMembers()
+    {
+        // Arrange
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        // Assert
+        Assert.Null(typeof(SqlQueryBase).GetMethod("GetDebugSql", flags));
+        Assert.Null(typeof(SqlQueryBase).GetMethod("InternalProcedureQuery", flags));
+        Assert.Null(typeof(SqlQueryBase).GetMethod("InternalProcedureQueryAsync", flags));
+        Assert.Null(typeof(SqlQueryBase).GetMethod("ClearParams", flags));
+    }
+
+    /// <summary>
+    /// 测试目的：查询释放后不得再次创建独立查询描述并恢复执行能力。
+    /// </summary>
+    [Fact]
+    public void Sql_WhenQueryDisposed_ShouldThrowObjectDisposedException()
     {
         // Arrange
         var services = CreateServices();
         using var provider = services.BuildServiceProvider();
         var query = new MySqlTestQuery(provider, new SqlOptions<MySqlTestQuery>());
-        var connection = new Mock<IDbConnection>().Object;
-        var transaction = new Mock<IDbTransaction>();
-        transaction.SetupGet(item => item.Connection).Returns(connection);
-        var lease = new TestTransactionScopeLease();
-        var context = new DatabaseContext
-        {
-            DbKey = "mysql",
-            DataSource = new SqlDataSourceDescriptor { Key = "mysql", DatabaseType = DatabaseType.MySql }
-        };
-        var binder = (ISqlTransactionScopeResourceBinder)query;
-        binder.BindTransactionScope(context, connection, transaction.Object, lease);
         query.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() =>
-            binder.BindTransactionScope(context, connection, transaction.Object, lease));
+        Assert.Throws<ObjectDisposedException>(() => query.Sql<int>("Select 1"));
     }
 
     /// <summary>
@@ -379,25 +384,6 @@ public class SqlFactoryTest
 
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
-    }
-
-    /// <summary>
-    /// 用于事务绑定测试的活动租约。
-    /// </summary>
-    private sealed class TestTransactionScopeLease : ISqlTransactionScopeLease
-    {
-        /// <inheritdoc />
-        public string TransactionId { get; } = "test-transaction";
-
-        /// <inheritdoc />
-        public bool IsActive { get; private set; } = true;
-
-        /// <inheritdoc />
-        public void EnsureActive()
-        {
-            if (IsActive == false)
-                throw new InvalidOperationException("事务作用域租约已失效。");
-        }
     }
 
     /// <summary>

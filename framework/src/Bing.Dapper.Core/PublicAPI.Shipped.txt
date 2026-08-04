@@ -1,0 +1,202 @@
+Bing.Dapper.DapperCoreServiceCollectionExtensions
+Bing.Dapper.DapperSqlOptionsExtensions
+Bing.Data.Sql.DefaultSqlDbConnectionFactoryResolver
+Bing.Data.Sql.DefaultSqlDbConnectionFactoryResolver.Create(string providerKey, string connectionString) -> System.Data.IDbConnection
+Bing.Data.Sql.DefaultSqlDbConnectionFactoryResolver.DefaultSqlDbConnectionFactoryResolver(System.Collections.Generic.IEnumerable<Bing.Data.Sql.SqlDbConnectionFactoryRegistration> registrations) -> void
+Bing.Data.Sql.DefaultSqlImplementationTypeResolver
+Bing.Data.Sql.DefaultSqlImplementationTypeResolver.DefaultSqlImplementationTypeResolver(Bing.Data.Sql.SqlImplementationTypeOptions options = null) -> void
+Bing.Data.Sql.DefaultSqlImplementationTypeResolver.Resolve(System.Type serviceType, string providerKey) -> System.Type
+Bing.Data.Sql.DefaultSqlParameterBinder
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(Bing.Data.Sql.ISqlBuilder builder) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.SqlOptions options) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.SqlOptions options, Bing.Data.Sql.SqlParameterBindingContext context) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(object parameter) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(object parameter, Bing.Data.SqlOptions options) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.Bind(object parameter, Bing.Data.SqlOptions options, Bing.Data.Sql.SqlParameterBindingContext context) -> object
+Bing.Data.Sql.DefaultSqlParameterBinder.DefaultSqlParameterBinder(Bing.Data.Sql.Metadata.IEntityMappingResolver entityMappingResolver = null, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Builders.Params.ISqlParameterFactory sqlParameterFactory = null, Bing.Data.Sql.Configs.SqlMetadataOptions options = null, Bing.Data.Sql.ISqlDatabaseContextResolver databaseContextResolver = null, Bing.Data.Sql.ISqlParameterResolver parameterResolver = null, System.Collections.Generic.IEnumerable<Bing.Data.Sql.ISqlDbParameterCustomizer> dbParameterCustomizers = null) -> void
+Bing.Data.Sql.DefaultSqlParameterBinder.GetSqlParams(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.SqlOptions options) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.DefaultSqlParameterBinder.GetSqlParams(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.SqlOptions options, Bing.Data.Sql.SqlParameterBindingContext context) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.DefaultSqlParameterBinder.GetSqlParams(object parameter, Bing.Data.SqlOptions options) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.DefaultSqlParameterBinder.GetSqlParams(object parameter, Bing.Data.SqlOptions options, Bing.Data.Sql.SqlParameterBindingContext context) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.DefaultSqlProviderResolver
+Bing.Data.Sql.DefaultSqlProviderResolver.DefaultSqlProviderResolver(System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.ISqlProvider> providers) -> void
+Bing.Data.Sql.DefaultSqlProviderResolver.Resolve(Bing.Data.Sql.DatabaseContext context, Bing.Data.Sql.Builders.ISqlProvider provider = null, Bing.Data.Enums.DatabaseType? databaseType = null) -> Bing.Data.Sql.Builders.ISqlProvider
+Bing.Data.Sql.DefaultSqlProviderResolver.Resolve(string providerKey) -> Bing.Data.Sql.Builders.ISqlProvider
+Bing.Data.Sql.DefaultSqlProviderResolver.TryResolve(string providerKey, out Bing.Data.Sql.Builders.ISqlProvider provider) -> bool
+Bing.Data.Sql.ISqlProviderResolver
+Bing.Data.Sql.ISqlProviderResolver.Resolve(Bing.Data.Sql.DatabaseContext context, Bing.Data.Sql.Builders.ISqlProvider provider = null, Bing.Data.Enums.DatabaseType? databaseType = null) -> Bing.Data.Sql.Builders.ISqlProvider
+Bing.Data.Sql.ISqlProviderResolver.Resolve(string providerKey) -> Bing.Data.Sql.Builders.ISqlProvider
+Bing.Data.Sql.ISqlProviderResolver.TryResolve(string providerKey, out Bing.Data.Sql.Builders.ISqlProvider provider) -> bool
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration.Factory.get -> System.Func<string, System.Data.IDbConnection>
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration.Factory.init -> void
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration.ProviderKey.get -> string
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration.ProviderKey.init -> void
+Bing.Data.Sql.SqlDbConnectionFactoryRegistration.SqlDbConnectionFactoryRegistration() -> void
+Bing.Data.Sql.SqlExecutorBase
+Bing.Data.Sql.SqlExecutorBase.ExecuteReturningQueryAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlExecutorBase.SqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqlExecutorFactory
+Bing.Data.Sql.SqlExecutorFactory.Create<TExecutor>() -> TExecutor
+Bing.Data.Sql.SqlExecutorFactory.Create<TExecutor>(string dbKey) -> TExecutor
+Bing.Data.Sql.SqlExecutorFactory.SqlExecutorFactory(System.IServiceProvider serviceProvider, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.Sql.ISqlImplementationTypeResolver implementationTypeResolver = null, Bing.Data.Sql.ISqlDataSourceResolver dataSourceResolver = null) -> void
+Bing.Data.Sql.SqlFactoryBase
+Bing.Data.Sql.SqlFactoryBase.CreateContext(string dbKey) -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.SqlFactoryBase.CreateInstance<TService>(Bing.Data.Sql.DatabaseContext context) -> TService
+Bing.Data.Sql.SqlFactoryBase.CreateOptions(System.Type implementationType, Bing.Data.Sql.DatabaseContext context) -> Bing.Data.SqlOptions
+Bing.Data.Sql.SqlFactoryBase.CreateTransactionContext(string dbKey) -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.SqlFactoryBase.GetCurrentContext(System.Type serviceType) -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.SqlFactoryBase.GetImplementationType(System.Type serviceType, string providerKey) -> System.Type
+Bing.Data.Sql.SqlFactoryBase.GetTemplateOptions(System.Type implementationType) -> Bing.Data.SqlOptions
+Bing.Data.Sql.SqlFactoryBase.SqlFactoryBase(System.IServiceProvider serviceProvider, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.Sql.ISqlImplementationTypeResolver implementationTypeResolver = null, Bing.Data.Sql.ISqlDataSourceResolver dataSourceResolver = null, Bing.Data.Sql.ISqlProviderResolver providerResolver = null, Bing.Data.Sql.ISqlConnectionStringResolver connectionStringResolver = null) -> void
+Bing.Data.Sql.SqlImplementationTypeOptions
+Bing.Data.Sql.SqlImplementationTypeOptions.Map(System.Type serviceType, System.Type implementationType, string providerKey) -> void
+Bing.Data.Sql.SqlImplementationTypeOptions.ProviderMappings.get -> System.Collections.Generic.IDictionary<string, System.Type>
+Bing.Data.Sql.SqlImplementationTypeOptions.SqlImplementationTypeOptions() -> void
+Bing.Data.Sql.SqlMultipleQueryExecutorBase
+Bing.Data.Sql.SqlMultipleQueryExecutorBase.CreateBatch() -> Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder
+Bing.Data.Sql.SqlMultipleQueryExecutorBase.Execute(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null) -> Bing.Data.Sql.ISqlMultipleQueryResult
+Bing.Data.Sql.SqlMultipleQueryExecutorBase.ExecuteAsync(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlMultipleQueryResult>
+Bing.Data.Sql.SqlMultipleQueryExecutorBase.SqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options, Bing.Data.Sql.Builders.SqlProviderCapabilities capabilities) -> void
+Bing.Data.Sql.SqlMultipleQueryExecutorFactory
+Bing.Data.Sql.SqlMultipleQueryExecutorFactory.Create() -> Bing.Data.Sql.ISqlMultipleQueryExecutor
+Bing.Data.Sql.SqlMultipleQueryExecutorFactory.Create(string dbKey) -> Bing.Data.Sql.ISqlMultipleQueryExecutor
+Bing.Data.Sql.SqlMultipleQueryExecutorFactory.SqlMultipleQueryExecutorFactory(System.IServiceProvider serviceProvider, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.Sql.ISqlImplementationTypeResolver implementationTypeResolver = null, Bing.Data.Sql.ISqlDataSourceResolver dataSourceResolver = null) -> void
+Bing.Data.Sql.SqlQueryBase
+Bing.Data.Sql.SqlQueryBase.AcquireExecutionLease() -> System.IDisposable
+Bing.Data.Sql.SqlQueryBase.Clear() -> void
+Bing.Data.Sql.SqlQueryBase.ClearAfterExecution() -> void
+Bing.Data.Sql.SqlQueryBase.CompleteQueryTransaction() -> void
+Bing.Data.Sql.SqlQueryBase.Config(System.Action<Bing.Data.SqlOptions> configAction) -> void
+Bing.Data.Sql.SqlQueryBase.ConnectionSource.get -> Bing.Data.Sql.SqlConnectionSource
+Bing.Data.Sql.SqlQueryBase.ContextId.get -> string
+Bing.Data.Sql.SqlQueryBase.CreateSqlBuilder(Bing.Data.Sql.Builders.ISqlProvider provider) -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.SqlQueryBase.CteItems.get -> System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.BuilderItem>
+Bing.Data.Sql.SqlQueryBase.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.SqlQueryBase.DisableDebugLog() -> Bing.Data.Sql.ISqlQuery
+Bing.Data.Sql.SqlQueryBase.Dispose() -> void
+Bing.Data.Sql.SqlQueryBase.EnabledDebugSql.get -> bool
+Bing.Data.Sql.SqlQueryBase.EnabledDebugSql.set -> void
+Bing.Data.Sql.SqlQueryBase.EntityMappingResolver.get -> Bing.Data.Sql.Metadata.IEntityMappingResolver
+Bing.Data.Sql.SqlQueryBase.FromClause.get -> Bing.Data.Sql.Builders.IFromClause
+Bing.Data.Sql.SqlQueryBase.GetCurrentProvider() -> Bing.Data.Sql.Builders.ISqlProvider
+Bing.Data.Sql.SqlQueryBase.GetDbParameters() -> object
+Bing.Data.Sql.SqlQueryBase.GetDbParameters(Bing.Data.Sql.ISqlBuilder builder) -> object
+Bing.Data.Sql.SqlQueryBase.GetDbParameters(Bing.Data.Sql.ISqlBuilder builder, string sql) -> object
+Bing.Data.Sql.SqlQueryBase.GetDbParameters(object parameter) -> object
+Bing.Data.Sql.SqlQueryBase.GetDbParameters(object parameter, string sql) -> object
+Bing.Data.Sql.SqlQueryBase.GetExecutionConnection() -> System.Data.IDbConnection
+Bing.Data.Sql.SqlQueryBase.GetExecutionTransaction() -> System.Data.IDbTransaction
+Bing.Data.Sql.SqlQueryBase.GetQueryTransaction() -> System.Data.IDbTransaction
+Bing.Data.Sql.SqlQueryBase.GetSql() -> string
+Bing.Data.Sql.SqlQueryBase.GroupByClause.get -> Bing.Data.Sql.Builders.IGroupByClause
+Bing.Data.Sql.SqlQueryBase.IsUnion.get -> bool
+Bing.Data.Sql.SqlQueryBase.JoinClause.get -> Bing.Data.Sql.Builders.IJoinClause
+Bing.Data.Sql.SqlQueryBase.Lambda<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlQueryBase.Logger.get -> Microsoft.Extensions.Logging.ILogger
+Bing.Data.Sql.SqlQueryBase.Options.get -> Bing.Data.SqlOptions
+Bing.Data.Sql.SqlQueryBase.Options.set -> void
+Bing.Data.Sql.SqlQueryBase.OrderByClause.get -> Bing.Data.Sql.Builders.IOrderByClause
+Bing.Data.Sql.SqlQueryBase.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
+Bing.Data.Sql.SqlQueryBase.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.SqlQueryBase.ParameterManager.get -> Bing.Data.Sql.Builders.Params.IParameterManager
+Bing.Data.Sql.SqlQueryBase.Params.get -> System.Collections.Generic.IReadOnlyDictionary<string, object>
+Bing.Data.Sql.SqlQueryBase.Procedure<TResult>(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.RollbackQueryTransaction() -> void
+Bing.Data.Sql.SqlQueryBase.SelectClause.get -> Bing.Data.Sql.Builders.ISelectClause
+Bing.Data.Sql.SqlQueryBase.ServiceProvider.get -> System.IServiceProvider
+Bing.Data.Sql.SqlQueryBase.Sql<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.SqlBuilder.get -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.SqlQueryBase.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.SqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqlQueryBase.UnionItems.get -> System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.BuilderItem>
+Bing.Data.Sql.SqlQueryBase.ValidateQueryBuilder() -> void
+Bing.Data.Sql.SqlQueryBase.ValidateQueryBuilder(Bing.Data.Sql.ISqlBuilder builder) -> void
+Bing.Data.Sql.SqlQueryBase.WhereClause.get -> Bing.Data.Sql.Builders.IWhereClause
+Bing.Data.Sql.SqlQueryFactory
+Bing.Data.Sql.SqlQueryFactory.Create<TQuery>() -> TQuery
+Bing.Data.Sql.SqlQueryFactory.Create<TQuery>(string dbKey) -> TQuery
+Bing.Data.Sql.SqlQueryFactory.SqlQueryFactory(System.IServiceProvider serviceProvider, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.Sql.ISqlImplementationTypeResolver implementationTypeResolver = null, Bing.Data.Sql.ISqlDataSourceResolver dataSourceResolver = null) -> void
+Bing.Data.Sql.SqlTransactionScopeFactory
+Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dbKey = null) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dbKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dbKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dbKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.SqlTransactionScopeFactory.SqlTransactionScopeFactory(Bing.Data.Sql.ISqlQueryFactory queryFactory, Bing.Data.Sql.ISqlExecutorFactory executorFactory) -> void
+Dapper.Handlers.GuidTypeHandler
+Dapper.Handlers.GuidTypeHandler.GuidTypeHandler() -> void
+Dapper.Handlers.StringTypeHandler
+Dapper.Handlers.StringTypeHandler.StringTypeHandler() -> void
+abstract Bing.Data.Sql.SqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Dapper.Handlers.GuidTypeHandler.Parse(object value) -> System.Guid
+override Dapper.Handlers.GuidTypeHandler.SetValue(System.Data.IDbDataParameter parameter, System.Guid value) -> void
+override Dapper.Handlers.StringTypeHandler.Parse(object value) -> string
+override Dapper.Handlers.StringTypeHandler.SetValue(System.Data.IDbDataParameter parameter, string value) -> void
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddDatabaseTypeConverter<TConverter>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Bing.Data.Enums.DatabaseType databaseType) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddEntityModelMetadataProvider<TEntityMetadata>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddEntityModelMetadataProvider<TInterface, TImplementation>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlBuilderProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Bing.Data.Sql.Builders.ISqlProvider provider, System.Func<Bing.Data.Sql.Builders.Core.SqlBuilderServices, Bing.Data.Sql.ISqlBuilder> creator) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlCore(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDataSource(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, string key, Bing.Data.Enums.DatabaseType databaseType, string connectionStringName = null, System.Action<Bing.Data.Sql.SqlDataSourceDescriptor> setupAction = null, string providerKey = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDataSource(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string key, Bing.Data.Enums.DatabaseType databaseType, string connectionString = null, string connectionStringName = null, System.Action<Bing.Data.Sql.SqlDataSourceDescriptor> setupAction = null, string providerKey = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDbConnectionFactory(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string providerKey, System.Func<string, System.Data.IDbConnection> factory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlImplementationType<TService, TImplementation>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string providerKey) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperCoreServiceCollectionExtensions.ConfigureSqlMetadata(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Bing.Data.Sql.Configs.SqlMetadataOptions> setupAction) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Dapper.DapperSqlOptionsExtensions.RegisterGuidTypeHandler(this Bing.Data.SqlOptions options) -> Bing.Data.SqlOptions
+static Bing.Dapper.DapperSqlOptionsExtensions.RegisterStringTypeHandler(this Bing.Data.SqlOptions options) -> Bing.Data.SqlOptions
+static Bing.Data.Sql.SqlImplementationTypeOptions.GetKey(System.Type serviceType, string providerKey) -> string
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.Bind(Bing.Data.Sql.ISqlParameterMap map) -> object
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.Bind(Bing.Data.Sql.ISqlParameterMap map, Bing.Data.SqlOptions options) -> object
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.CreateSqlParam(Bing.Data.Sql.SqlParameterBindingItem item, Bing.Data.SqlOptions options) -> Bing.Data.Sql.Builders.Params.SqlParam
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.CreateSqlParam(Bing.Data.Sql.SqlParameterMapItem item) -> Bing.Data.Sql.Builders.Params.SqlParam
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.CreateSqlParam(Bing.Data.Sql.SqlParameterMapItem item, Bing.Data.SqlOptions options) -> Bing.Data.Sql.Builders.Params.SqlParam
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.GetDatabaseContext() -> Bing.Data.Sql.DatabaseContext
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.GetDatabaseContext(Bing.Data.SqlOptions options) -> Bing.Data.Sql.DatabaseContext
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.ResolveColumnMetadata(System.Type entityType, string propertyOrColumnName) -> Bing.Data.Sql.Metadata.ColumnMappingMetadata
+virtual Bing.Data.Sql.DefaultSqlParameterBinder.ResolveColumnMetadata(System.Type entityType, string propertyOrColumnName, Bing.Data.SqlOptions options) -> Bing.Data.Sql.Metadata.ColumnMappingMetadata
+virtual Bing.Data.Sql.SqlExecutorBase.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.DeleteAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.DeleteBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.DeleteBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.Execute(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteAsync(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSql(string sql, object param = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSql<TEntity>(string sql, Bing.Data.Sql.SqlParameterMap<TEntity> param, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSqlAsync<TEntity>(string sql, Bing.Data.Sql.SqlParameterMap<TEntity> param, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.InsertAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.InsertBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.InsertBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.UpdateAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlExecutorBase.UpdateBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.UpdateBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+virtual Bing.Data.Sql.SqlQueryBase.CreateConnectionDiagnosticInfo(System.Data.IDbConnection connection) -> Bing.Data.Sql.Diagnostics.SqlConnectionDiagnosticInfo
+virtual Bing.Data.Sql.SqlQueryBase.CreateIndependentSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+virtual Bing.Data.Sql.SqlQueryBase.CreateParamLiteralsResolver() -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+virtual Bing.Data.Sql.SqlQueryBase.CreateParameterBindingContext(string sql, object source, System.Type entityType = null) -> Bing.Data.Sql.SqlParameterBindingContext
+virtual Bing.Data.Sql.SqlQueryBase.CreateParameterDiagnostics(object parameter, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo> parameterMetadata) -> Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticSnapshot
+virtual Bing.Data.Sql.SqlQueryBase.CreateQueryCommandDefinition(string sql, object parameters, System.Data.IDbTransaction transaction, int? timeout, bool buffered, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken), System.Data.CommandType? commandType = null) -> Dapper.CommandDefinition
+virtual Bing.Data.Sql.SqlQueryBase.CreateSqlBuilderServices() -> Bing.Data.Sql.Builders.Core.SqlBuilderServices
+virtual Bing.Data.Sql.SqlQueryBase.CreateSqlParameterDiagnosticInfo(Bing.Data.Sql.Builders.Params.SqlParam parameter) -> Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo
+virtual Bing.Data.Sql.SqlQueryBase.CreateTransactionDiagnosticInfo(System.Data.IDbTransaction transaction) -> Bing.Data.Sql.Diagnostics.SqlTransactionDiagnosticInfo
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteAfter(Bing.Data.Sql.Diagnostics.DiagnosticsMessage message) -> void
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteAfter(object result) -> void
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteBefore() -> bool
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteBefore(string sql, object parameter, System.Data.IDbConnection connection, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo> parameterMetadata = null) -> Bing.Data.Sql.Diagnostics.DiagnosticsMessage
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteError(Bing.Data.Sql.Diagnostics.DiagnosticsMessage message, System.Exception exception) -> void
+virtual Bing.Data.Sql.SqlQueryBase.ExecuteMaterializedQueryAsync<TResult>(System.Data.IDbConnection connection, Dapper.CommandDefinition command, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+virtual Bing.Data.Sql.SqlQueryBase.GetParam<T>(string name) -> T
+virtual Bing.Data.Sql.SqlQueryBase.GetProcedure(string procedure) -> string
+virtual Bing.Data.Sql.SqlQueryBase.GetProcedureCommandType() -> System.Data.CommandType
+virtual Bing.Data.Sql.SqlQueryBase.GetSqlParameterDiagnostics(Bing.Data.Sql.ISqlBuilder builder) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo>
+virtual Bing.Data.Sql.SqlQueryBase.GetSqlParameterDiagnostics(Bing.Data.Sql.ISqlBuilder builder, string sql) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo>
+virtual Bing.Data.Sql.SqlQueryBase.GetSqlParameterDiagnostics(object parameter) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo>
+virtual Bing.Data.Sql.SqlQueryBase.GetSqlParameterDiagnostics(object parameter, string sql) -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticInfo>
+virtual Bing.Data.Sql.SqlQueryBase.ResolveConnectionString() -> string
+virtual Bing.Data.Sql.SqlQueryBase.ResolveReadPreferenceDataSource(Bing.Data.Sql.DatabaseContext context) -> Bing.Data.Sql.SqlDataSourceDescriptor
+virtual Bing.Data.Sql.SqlQueryBase.WriteTraceLog(string sql, System.Collections.Generic.IReadOnlyDictionary<string, object> parameters, string debugSql) -> void
