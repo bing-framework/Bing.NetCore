@@ -47,21 +47,17 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
         await _fixture.SeedAggregateDataAsync();
 
         // Act
-        using var countAllQuery = CreateAggregateQuery();
-        var countAll = await countAllQuery.Count().ExecuteScalarAsync<int>();
-        using var countColumnQuery = CreateAggregateQuery();
-        var distinctUsers = await countColumnQuery.Count("p.UserId", distinct: true).ExecuteScalarAsync<int>();
-        using var sumQuery = CreateAggregateQuery();
-        var total = await sumQuery.Sum("p.Amount").ExecuteScalarAsync<decimal>();
-        using var expressionQuery = CreateAggregateQuery();
-        var conditionalTotal = await expressionQuery.AggregateExpression(SqlAggregateFunction.Sum,
+        using var query = _fixture.CreateQuery();
+        var countAll = await CreateAggregateDescription<int>(query).Count().ScalarAsync();
+        var distinctUsers = await CreateAggregateDescription<int>(query).Count("p.UserId", distinct: true).ScalarAsync();
+        var total = await CreateAggregateDescription<decimal>(query).Sum("p.Amount").ScalarAsync();
+        var conditionalTotal = await CreateAggregateDescription<decimal>(query).AggregateExpression(SqlAggregateFunction.Sum,
                 "Case When [p].[Amount]>@MinAmount Then [p].[Amount] Else 0 End")
             .AddParam("MinAmount", 15)
-            .ExecuteScalarAsync<decimal>();
-        using var rawQuery = CreateAggregateQuery();
-        var enabledTotal = await rawQuery.AggregateRaw(SqlAggregateFunction.Sum,
+            .ScalarAsync();
+        var enabledTotal = await CreateAggregateDescription<decimal>(query).AggregateRaw(SqlAggregateFunction.Sum,
                 "Case When p.Enabled=1 Then p.Amount Else 0 End")
-            .ExecuteScalarAsync<decimal>();
+            .ScalarAsync();
 
         // Assert
         Assert.Equal(4, countAll);
@@ -93,7 +89,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
             .Returning<SqlServerOutputRow>(row => new { row.Id, row.UserId });
 
         // Act
-        var rows = await executor.ExecuteQueryAsync<SqlServerOutputRow>();
+        var rows = await executor.ExecuteReturningQueryAsync<SqlServerOutputRow>();
 
         // Assert
         Assert.Equal(new[] { "output-first", "output-second" }, rows.Select(row => row.UserId));
@@ -101,10 +97,13 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 创建指向受控聚合集成测试表的查询。
+    /// 创建指向受控聚合集成测试表的独立查询描述。
     /// </summary>
-    /// <returns>SQL Server 查询对象。</returns>
-    private ISqlQuery CreateAggregateQuery() => _fixture.CreateQuery().From("dbo.BingSqlAggregateIntegration", "p");
+    /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
+    /// <param name="query">承载连接和事务资源的根查询。</param>
+    /// <returns>SQL Server 独立查询描述。</returns>
+    private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
+        query.Sql<TResult>().From("dbo.BingSqlAggregateIntegration", "p");
 
     /// <summary>
     /// SQL Server Output 物化模型。

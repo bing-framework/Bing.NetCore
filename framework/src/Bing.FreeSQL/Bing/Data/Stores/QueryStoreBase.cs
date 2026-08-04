@@ -68,13 +68,11 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     protected virtual ISqlQuery CreateSqlQuery()
     {
         var result = ServiceLocator.Instance.GetService<ISqlQuery>();
-        if (result is not ISqlQueryMetadataBinder binder)
-            throw new InvalidOperationException("SQL 查询对象未实现元数据绑定器，无法绑定 FreeSQL 工作单元映射。");
         var metadataProvider = new CompositeEntityModelMetadataProvider(new IEntityModelMetadataProvider[]
         {
             new FreeSqlEntityModelMetadataProvider(UnitOfWork.Orm)
         });
-        binder.BindEntityMappingResolver(new DefaultEntityMappingResolver(
+        SqlQueryRuntimeBridge.BindEntityMappingResolver(result, new DefaultEntityMappingResolver(
             ServiceLocator.Instance.GetService<IDatabaseContextAccessor>(),
             ServiceLocator.Instance.GetService<SqlMetadataOptions>(),
             ServiceLocator.Instance.GetService<ITypeConverterResolver>(), metadataProvider));

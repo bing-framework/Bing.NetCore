@@ -20,6 +20,24 @@ namespace Bing.Dapper.Tests.Metadata;
 public class MultiProviderRegistrationTest
 {
     /// <summary>
+    /// 测试目的：同容器直接注入根查询时应按当前数据库上下文路由，而非返回第一个 Provider 的实现。
+    /// </summary>
+    [Fact]
+    public void ResolveDirectly_WhenDatabaseScopeChanges_ShouldRouteQueryByCurrentDataSource()
+    {
+        // Arrange
+        using var provider = CreateProvider();
+        var databaseScopeManager = provider.GetRequiredService<IDatabaseScopeManager>();
+
+        // Act
+        using var sqliteScope = databaseScopeManager.Use("sqlite");
+        using var sqliteQuery = provider.GetRequiredService<ISqlQuery>();
+
+        // Assert
+        Assert.IsType<SqliteSqlQuery>(sqliteQuery);
+    }
+
+    /// <summary>
     /// 测试 - 同一容器应根据具名数据源创建对应 Provider 的查询、方言和参数规则。
     /// </summary>
     [Fact]
@@ -28,6 +46,7 @@ public class MultiProviderRegistrationTest
         // Arrange
         using var provider = CreateProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var providerResolver = provider.GetRequiredService<ISqlProviderResolver>();
 
         // Act
         using var mysql = factory.Create<ISqlQuery>("mysql");
@@ -38,20 +57,20 @@ public class MultiProviderRegistrationTest
 
         // Assert
         Assert.IsType<MySqlQuery>(mysql);
-        Assert.IsType<MySqlDialect>(((ISqlCommonPartAccessor)mysql).Dialect);
-        Assert.Equal('`', ((ISqlCommonPartAccessor)mysql).Dialect.OpeningIdentifier);
+        Assert.IsType<MySqlDialect>(providerResolver.Resolve(MySqlSqlProvider.Instance.Key).Dialect);
+        Assert.Equal('`', providerResolver.Resolve(MySqlSqlProvider.Instance.Key).Dialect.OpeningIdentifier);
         Assert.IsType<PostgreSqlQuery>(postgreSql);
-        Assert.IsType<PostgreSqlDialect>(((ISqlCommonPartAccessor)postgreSql).Dialect);
-        Assert.Equal('"', ((ISqlCommonPartAccessor)postgreSql).Dialect.OpeningIdentifier);
+        Assert.IsType<PostgreSqlDialect>(providerResolver.Resolve(PostgreSqlSqlProvider.Instance.Key).Dialect);
+        Assert.Equal('"', providerResolver.Resolve(PostgreSqlSqlProvider.Instance.Key).Dialect.OpeningIdentifier);
         Assert.IsType<SqlServerSqlQuery>(sqlServer);
-        Assert.IsType<SqlServerDialect>(((ISqlCommonPartAccessor)sqlServer).Dialect);
-        Assert.Equal('[', ((ISqlCommonPartAccessor)sqlServer).Dialect.OpeningIdentifier);
+        Assert.IsType<SqlServerDialect>(providerResolver.Resolve(SqlServerSqlProvider.Instance.Key).Dialect);
+        Assert.Equal('[', providerResolver.Resolve(SqlServerSqlProvider.Instance.Key).Dialect.OpeningIdentifier);
         Assert.IsType<SqliteSqlQuery>(sqlite);
-        Assert.IsType<SqliteDialect>(((ISqlCommonPartAccessor)sqlite).Dialect);
-        Assert.Equal('`', ((ISqlCommonPartAccessor)sqlite).Dialect.OpeningIdentifier);
+        Assert.IsType<SqliteDialect>(providerResolver.Resolve(SqliteSqlProvider.Instance.Key).Dialect);
+        Assert.Equal('`', providerResolver.Resolve(SqliteSqlProvider.Instance.Key).Dialect.OpeningIdentifier);
         Assert.IsType<OracleSqlQuery>(oracle);
-        Assert.IsType<OracleDialect>(((ISqlCommonPartAccessor)oracle).Dialect);
-        Assert.Equal('"', ((ISqlCommonPartAccessor)oracle).Dialect.OpeningIdentifier);
+        Assert.IsType<OracleDialect>(providerResolver.Resolve(OracleSqlProvider.Instance.Key).Dialect);
+        Assert.Equal('"', providerResolver.Resolve(OracleSqlProvider.Instance.Key).Dialect.OpeningIdentifier);
     }
 
     /// <summary>
@@ -88,6 +107,7 @@ public class MultiProviderRegistrationTest
         // Arrange
         using var provider = CreateProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var providerResolver = provider.GetRequiredService<ISqlProviderResolver>();
         var transactionScopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
@@ -96,7 +116,7 @@ public class MultiProviderRegistrationTest
 
         // Assert
         Assert.IsType<MySqlQuery>(query);
-        Assert.IsType<MySqlDialect>(((ISqlCommonPartAccessor)query).Dialect);
+        Assert.IsType<MySqlDialect>(providerResolver.Resolve(MySqlSqlProvider.Instance.Key).Dialect);
         Assert.Contains("doris", exception.Message);
         Assert.DoesNotContain("Password", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -110,6 +130,8 @@ public class MultiProviderRegistrationTest
         // Arrange
         using var provider = CreateProvider();
         var formatter = provider.GetRequiredService<ISqlObjectNameFormatter>();
+        var dialect = provider.GetRequiredService<ISqlProviderResolver>()
+            .Resolve(SqlServerSqlProvider.Instance.Key).Dialect;
         using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlserver");
         var reference = new SqlTableReference
         {
@@ -119,7 +141,7 @@ public class MultiProviderRegistrationTest
         };
 
         // Act
-        var result = formatter.Format(reference, ((ISqlCommonPartAccessor)query).Dialect, DatabaseType.SqlServer);
+        var result = formatter.Format(reference, dialect, DatabaseType.SqlServer);
 
         // Assert
         Assert.Equal("[reporting].[dbo].[users]", result);

@@ -60,8 +60,7 @@ public class MultiProviderQueryTest
         using (_databaseScopeManager.Use(dbKey))
         using (var query = _queryFactory.Create<ISqlQuery>())
         {
-            query.AppendSelect("1").AppendFrom("(Select 1 as Value) t");
-            return await query.ExecuteScalarAsync<int>();
+            return await query.Sql<int>().Select("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
         }
     }
 }

@@ -36,12 +36,8 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     {
         // Arrange
         using var query = _fixture.CreateQuery();
-        query.Clear()
-            .AppendSelect("1")
-            .AppendFrom("(Select 1 as Value) t");
-
         // Act
-        var result = await query.ExecuteScalarAsync<int>();
+        var result = await query.Sql<int>().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
 
         // Assert
         Assert.Equal(1, result);
@@ -58,11 +54,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         var secondId = Guid.NewGuid();
         await InsertProductAsync(firstId, "list-first");
         await InsertProductAsync(secondId, "list-second");
-        using var query = CreateProductQuery();
-        query.In("id", new object[] { firstId, secondId });
+        using var query = _fixture.CreateQuery();
+        var description = CreateProductDescription(query).In("id", new object[] { firstId, secondId });
 
         // Act
-        var result = await query.ExecuteQueryAsync<IntegrationProduct>();
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Equal(new[] { firstId, secondId }.OrderBy(id => id), result.Select(product => product.Id).OrderBy(id => id));
@@ -80,11 +76,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         const decimal amount = 123456789012.123456m;
         const string payload = "{\"name\":\"Bing\",\"enabled\":true}";
         await InsertProductAsync(id, "single", "single-name", amount, occurredAt, payload);
-        using var query = CreateProductQuery();
-        query.AppendWhere("id=@id").AddParam("id", id);
+        using var query = _fixture.CreateQuery();
+        var description = CreateProductDescription(query).AppendWhere("id=@id").AddParam("id", id);
 
         // Act
-        var result = query.ExecuteSingle<IntegrationProduct>();
+        var result = description.FirstOrDefault();
 
         // Assert
         Assert.Equal(id, result.Id);
@@ -106,11 +102,9 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         // Arrange
         await InsertProductAsync(Guid.NewGuid(), "scalar-first");
         await InsertProductAsync(Guid.NewGuid(), "scalar-second");
-        using var query = _fixture.CreateQuery();
-        query.AppendSelect("Count(*)").AppendFrom("public.integration_products");
-
         // Act
-        var result = query.ExecuteScalar<int>();
+        using var query = _fixture.CreateQuery();
+        var result = query.Sql<int>().Count().From("public.integration_products").Scalar();
 
         // Assert
         Assert.Equal(2, result);
@@ -125,11 +119,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         // Arrange
         var id = Guid.NewGuid();
         await InsertProductAsync(id, "null", null);
-        using var query = CreateProductQuery();
-        query.AppendWhere("id=@id").AddParam("id", id);
+        using var query = _fixture.CreateQuery();
+        var description = CreateProductDescription(query).AppendWhere("id=@id").AddParam("id", id);
 
         // Act
-        var result = await query.ExecuteSingleAsync<IntegrationProduct>();
+        var result = await description.FirstOrDefaultAsync();
 
         // Assert
         Assert.Null(result.Name);
@@ -149,11 +143,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
             "Insert Into public.integration_products(id,code,name,amount,occurred_at) Values(@id,@code,@name,@amount,@occurredAt)",
             new { id, code = "partial", name = "unmapped-name", amount = 9.5m, occurredAt },
             map => map.Map("code", product => product.Code));
-        using var query = CreateProductQuery();
-        query.AppendWhere("id=@id").AddParam("id", id);
+        using var query = _fixture.CreateQuery();
+        var description = CreateProductDescription(query).AppendWhere("id=@id").AddParam("id", id);
 
         // Act
-        var result = query.ExecuteSingle<IntegrationProduct>();
+        var result = description.FirstOrDefault();
 
         // Assert
         Assert.Equal("partial", result.Code);
@@ -173,11 +167,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         await InsertProductAsync(firstId, "array-first");
         await InsertProductAsync(secondId, "array-second");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Count(*)").AppendFrom("public.integration_products")
+        var description = query.Sql<int>().Count().From("public.integration_products")
             .AppendWhere("id=Any(@ids)").AddParam("ids", new[] { firstId, secondId });
 
         // Act
-        var result = await query.ExecuteScalarAsync<int>();
+        var result = await description.ScalarAsync();
 
         // Assert
         Assert.Equal(2, result);
@@ -192,12 +186,12 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         // Arrange
         foreach (var code in new[] { "page-1", "page-2", "page-3", "page-4", "page-5" })
             await InsertProductAsync(Guid.NewGuid(), code);
-        using var query = CreateProductQuery();
+        using var query = _fixture.CreateQuery();
+        var description = CreateProductDescription(query);
         var pager = new Pager(2, 2, order: "code");
 
         // Act
-        var result = await query.PagerQueryAsync(token => query.ExecuteQueryAsync<IntegrationProduct>(cancellationToken: token),
-            pager);
+        var result = await description.ToPageAsync(pager);
 
         // Assert
         Assert.Equal(5, result.TotalCount);
@@ -213,8 +207,8 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         // Arrange
         await SeedProductsAsync();
         List<IntegrationProduct> result;
-        using (var query = CreateProductQuery())
-            result = query.ExecuteQuery<IntegrationProduct>(buffered: false);
+        using (var query = _fixture.CreateQuery())
+            result = CreateProductDescription(query).AsEnumerable().ToList();
 
         // Act
         await InsertProductAsync(Guid.NewGuid(), "after-buffered-false");
@@ -232,10 +226,12 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     {
         // Arrange
         await SeedProductsAsync();
-        using var query = CreateProductQuery();
+        using var query = _fixture.CreateQuery();
 
         // Act
-        var result = await query.ExecuteQueryAsync<IntegrationProduct>(buffered: false);
+        var result = new List<IntegrationProduct>();
+        await foreach (var product in CreateProductDescription(query).AsAsyncEnumerable())
+            result.Add(product);
 
         // Assert
         Assert.Equal(new[] { "stream-1", "stream-2", "stream-3" }, result.Select(product => product.Code));
@@ -251,10 +247,10 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     {
         // Arrange
         await SeedProductsAsync();
-        using var query = CreateProductQuery();
+        using var query = _fixture.CreateQuery();
 
         // Act
-        var result = query.StreamQuery<IntegrationProduct>().Select(product => product.Code).ToList();
+        var result = CreateProductDescription(query).AsEnumerable().Select(product => product.Code).ToList();
 
         // Assert
         Assert.Equal(new[] { "stream-1", "stream-2", "stream-3" }, result);
@@ -270,11 +266,11 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     {
         // Arrange
         await SeedProductsAsync();
-        using var query = CreateProductQuery();
+        using var query = _fixture.CreateQuery();
         var result = new List<string>();
 
         // Act
-        await foreach (var product in query.StreamAsync<IntegrationProduct>())
+        await foreach (var product in CreateProductDescription(query).AsAsyncEnumerable())
             result.Add(product.Code);
 
         // Assert
@@ -289,8 +285,8 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     {
         // Arrange
         await SeedProductsAsync();
-        using (var query = CreateProductQuery())
-        using (var enumerator = query.StreamQuery<IntegrationProduct>().GetEnumerator())
+        using (var query = _fixture.CreateQuery())
+        using (var enumerator = CreateProductDescription(query).AsEnumerable().GetEnumerator())
             Assert.True(enumerator.MoveNext());
 
         // Act
@@ -310,12 +306,13 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         await SeedProductsAsync();
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
-        using var query = CreateProductQuery();
+        using var query = _fixture.CreateQuery();
 
         // Act
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.StreamAsync<IntegrationProduct>(cancellationToken: cancellationTokenSource.Token))
+            await foreach (var _ in CreateProductDescription(query)
+                               .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
             {
             }
         });
@@ -400,10 +397,8 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         using var query = scope.CreateQuery();
         executor.ExecuteSql("Insert Into public.integration_products(id,code,name,amount,occurred_at) Values(@id,@code,@name,@amount,@occurredAt)",
             CreateProductParameters(Guid.NewGuid(), "shared", "shared-name", 1m, new DateTime(2026, 7, 22)));
-        query.AppendSelect("Count(*)").AppendFrom("public.integration_products");
-
         // Act
-        var count = query.ExecuteScalar<int>();
+        var count = query.Sql<int>().Count().From("public.integration_products").Scalar();
         scope.Commit();
 
         // Assert
@@ -507,16 +502,15 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     /// <summary>
-    /// 创建产品查询。
+    /// 创建产品独立查询描述。
     /// </summary>
-    /// <returns>固定到主数据源的产品查询对象。</returns>
-    private ISqlQuery CreateProductQuery()
-    {
-        var query = _fixture.CreateQuery();
-        query.AppendSelect("id As Id,code As Code,name As Name,amount As Amount,occurred_at As OccurredAt,payload::text As Payload")
-            .AppendFrom("public.integration_products").OrderBy("code");
-        return query;
-    }
+    /// <param name="query">承载连接和事务资源的根查询。</param>
+    /// <returns>不修改根 Builder 的产品查询描述。</returns>
+    private static SqlQuery<IntegrationProduct> CreateProductDescription(ISqlQuery query) =>
+        query.Sql<IntegrationProduct>()
+            .AppendSelect("id As Id,code As Code,name As Name,amount As Amount,occurred_at As OccurredAt,payload::text As Payload")
+            .From("public.integration_products")
+            .OrderBy("code");
 
     /// <summary>
     /// 写入 PostgreSQL 产品测试数据。
@@ -577,8 +571,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     private async Task<int> CountProductsAsync()
     {
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Count(*)").AppendFrom("public.integration_products");
-        return await query.ExecuteScalarAsync<int>();
+        return await query.Sql<int>().Count().From("public.integration_products").ScalarAsync();
     }
 
     /// <summary>

@@ -103,7 +103,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
                 var connection = CreateIndependentConnection(dataSource, connectionString);
                 try
                 {
-                    GetResourceBinder(query).BindOwnedConnection(connection, SqlConnectionSource.DataSource);
+                    SqlQueryRuntimeBridge.BindOwnedConnection(query, connection, SqlConnectionSource.DataSource);
                 }
                 catch
                 {
@@ -112,9 +112,10 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
                 }
                 return query;
             }
-            var binder = GetResourceBinder(query);
-            binder.BindExternalConnection(unitOfWork.Database.GetDbConnection(), SqlConnectionSource.EntityFrameworkCore);
-            binder.BindExternalTransactionResolver(() => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
+            SqlQueryRuntimeBridge.BindExternalConnection(query, unitOfWork.Database.GetDbConnection(),
+                SqlConnectionSource.EntityFrameworkCore);
+            SqlQueryRuntimeBridge.BindExternalTransactionResolver(query,
+                () => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
             return query;
         }
         catch
@@ -158,7 +159,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         {
             new EfCoreEntityModelMetadataProvider(unitOfWork.Model)
         });
-        GetMetadataBinder(query).BindEntityMappingResolver(new DefaultEntityMappingResolver(
+        SqlQueryRuntimeBridge.BindEntityMappingResolver(query, new DefaultEntityMappingResolver(
             databaseContextAccessor: _databaseContextAccessor, options: _metadataOptions,
             typeConverterResolver: _typeConverterResolver, entityModelMetadataProvider: metadataProvider));
     }
@@ -291,21 +292,4 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         throw new NotSupportedException($"不支持 EF Core Provider {providerName ?? "<未指定>"} 的 SQL 查询集成。");
     }
 
-    /// <summary>
-    /// 获取 SQL 查询外部资源绑定器。
-    /// </summary>
-    /// <param name="query">SQL 查询对象。</param>
-    /// <returns>执行资源绑定器。</returns>
-    private static ISqlQueryResourceBinder GetResourceBinder(ISqlQuery query) =>
-        query as ISqlQueryResourceBinder ??
-        throw new InvalidOperationException("SQL 查询对象未实现外部资源绑定器，无法绑定 EF Core 上下文。");
-
-    /// <summary>
-    /// 获取 SQL 查询元数据绑定器。
-    /// </summary>
-    /// <param name="query">SQL 查询对象。</param>
-    /// <returns>实体元数据绑定器。</returns>
-    private static ISqlQueryMetadataBinder GetMetadataBinder(ISqlQuery query) =>
-        query as ISqlQueryMetadataBinder ??
-        throw new InvalidOperationException("SQL 查询对象未实现元数据绑定器，无法绑定 EF Core 上下文。");
 }

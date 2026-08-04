@@ -125,8 +125,8 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         // Act
         var affectedRows = await executor.ExecuteAsync(builder);
         using var query = _fixture.CreateQuery();
-        var name = await query.Select("name").From("public.integration_products").Where("id", id)
-            .ExecuteScalarAsync<string>();
+        var name = await query.Sql<string>().Select("name").From("public.integration_products").Where("id", id)
+            .ScalarAsync();
 
         // Assert
         Assert.Equal(1, affectedRows);
@@ -163,14 +163,14 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         // Act
         var affectedRows = await executor.ExecuteAsync(builder);
         using var matchedQuery = _fixture.CreateQuery();
-        var matchedCount = await matchedQuery.Select("Count(*)").From("public.integration_products")
-            .Where("id", matchedId).ExecuteScalarAsync<int>();
+        var matchedCount = await matchedQuery.Sql<int>().AppendSelect("Count(*)").From("public.integration_products")
+            .Where("id", matchedId).ScalarAsync();
         using var unmatchedQuery = _fixture.CreateQuery();
-        var unmatchedCount = await unmatchedQuery.Select("Count(*)").From("public.integration_products")
-            .Where("id", unmatchedId).ExecuteScalarAsync<int>();
+        var unmatchedCount = await unmatchedQuery.Sql<int>().AppendSelect("Count(*)").From("public.integration_products")
+            .Where("id", unmatchedId).ScalarAsync();
         using var sourceQuery = _fixture.CreateQuery();
-        var sourceCount = await sourceQuery.Select("Count(*)").From("public.integration_product_updates")
-            .Where("id", matchedId).ExecuteScalarAsync<int>();
+        var sourceCount = await sourceQuery.Sql<int>().AppendSelect("Count(*)").From("public.integration_product_updates")
+            .Where("id", matchedId).ScalarAsync();
 
         // Assert
         Assert.Equal(1, affectedRows);
@@ -201,7 +201,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .Returning("id", "name");
 
         // Act
-        var rows = await executor.ExecuteQueryAsync<PostgreSqlReturningProduct>();
+        var rows = await executor.ExecuteReturningQueryAsync<PostgreSqlReturningProduct>();
 
         // Assert
         Assert.Equal(new[] { firstId, secondId }, rows.Select(row => row.Id));

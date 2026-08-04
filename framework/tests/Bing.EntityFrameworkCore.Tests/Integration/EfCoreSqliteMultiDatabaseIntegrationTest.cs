@@ -33,13 +33,13 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         string ambientName;
         using (scopeManager.Use("second"))
         using (var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent))
-            ambientName = query.AppendSelect("Name").AppendFrom("ef_file_users").AppendWhere("Id=1")
-                .ExecuteScalar<string>();
+            ambientName = query.Sql<string>().Select("Name").From("ef_file_users").AppendWhere("Id=1")
+                .Scalar();
         string explicitName;
         using (scopeManager.Use("second"))
         using (var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Independent, "first"))
-            explicitName = query.AppendSelect("Name").AppendFrom("ef_file_users").AppendWhere("Id=1")
-                .ExecuteScalar<string>();
+            explicitName = query.Sql<string>().Select("Name").From("ef_file_users").AppendWhere("Id=1")
+                .Scalar();
 
         // Assert
         Assert.Equal("second-row", ambientName);
@@ -60,8 +60,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
 
         // Act
         using var query = factory.Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "first");
-        var name = query.AppendSelect("Name").AppendFrom("ef_file_users").AppendWhere("Id=1")
-            .ExecuteScalar<string>();
+        var name = query.Sql<string>().Select("Name").From("ef_file_users").AppendWhere("Id=1").Scalar();
 
         // Assert
         Assert.Equal("first-row", name);
@@ -109,8 +108,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         // Act
         string name;
         using (scopeManager.Use("second"))
-            name = query.AppendSelect("Name").AppendFrom("ef_file_users").AppendWhere("Id=1")
-                .ExecuteScalar<string>();
+            name = query.Sql<string>().Select("Name").From("ef_file_users").AppendWhere("Id=1").Scalar();
 
         // Assert
         Assert.Equal("first-row", name);
@@ -144,8 +142,7 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
         // Act
         using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>()
             .Create(unitOfWork, EfCoreSqlConnectionMode.Shared, "shared");
-        var name = query.AppendSelect("Name").AppendFrom("shared_memory_users").AppendWhere("Id=1")
-            .ExecuteScalar<string>();
+        var name = query.Sql<string>().Select("Name").From("shared_memory_users").AppendWhere("Id=1").Scalar();
 
         // Assert
         Assert.Equal("shared-memory", name);

@@ -63,22 +63,24 @@ public partial class PostgreSqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 空 In 与 Not In 集合应忽略条件且不生成参数。
+    /// 测试 - 空 In 与 Not In 集合应生成明确的常量条件且不生成参数。
     /// </summary>
     [Fact]
-    public void InAndNotIn_WhenValuesAreEmpty_ShouldOmitConditionsAndKeepParametersEmpty()
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldRenderConstantConditionsAndKeepParametersEmpty()
     {
         // Arrange
-        const string expected = "Select * \r\nFrom \"users\"";
+        const string expectedIn = "Select * \r\nFrom \"users\" \r\nWhere 1 = 0";
+        const string expectedNotIn = "Select * \r\nFrom \"users\" \r\nWhere 1 = 1";
 
         // Act
         var inSql = _builder.New().From("users").In("Id", Array.Empty<object>()).ToSql();
         var notInSql = _builder.New().From("users").NotIn("Id", Array.Empty<object>()).ToSql();
 
         // Assert
-        Assert.Equal(expected, inSql);
-        Assert.Equal(expected, notInSql);
-        Assert.Empty(_builder.GetParams());
+        Assert.Equal(expectedIn, inSql);
+        Assert.Equal(expectedNotIn, notInSql);
+        Assert.Empty(_builder.New().From("users").In("Id", Array.Empty<object>()).GetParams());
+        Assert.Empty(_builder.New().From("users").NotIn("Id", Array.Empty<object>()).GetParams());
     }
 
     /// <summary>

@@ -17,7 +17,8 @@ public partial class MySqlExecutorTest
         var id = Guid.NewGuid();
         var sql = "Insert Product(ProductId,Code) Values(@ProductId,@Code)";
         await _sqlExecutor.ExecuteSqlAsync(sql, new { ProductId = id, Code = "abc" });
-        var result = await _sqlExecutor.Select("Code").From("Product").Where("ProductId", id).ToStringAsync();
+        using var query = _fixture.CreateQuery();
+        var result = await query.Sql<string>().Select("Code").From("Product").Where("ProductId", id).ScalarAsync();
         Assert.Equal(TestConfig.Value, result);
     }
 

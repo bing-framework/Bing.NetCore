@@ -105,10 +105,8 @@ public class SqliteMultiDataSourceExecutionTest
             {
                 CreateTableAndInsert(executorFactory, "first");
                 using var query = queryFactory.Create<ISqlQuery>();
-                query.Select("Id,Name").From("samples");
-
                 // Act
-                var result = query.ExecuteQuery<Sample>(buffered: false);
+                var result = query.Sql<Sample>().Select("Id,Name").From("samples").AsEnumerable().ToList();
 
                 // Assert
                 Assert.Single(result);
@@ -142,8 +140,8 @@ public class SqliteMultiDataSourceExecutionTest
                 CreateTableAndInsert(executorFactory, "first");
                 using (var query = queryFactory.Create<ISqlQuery>())
                 {
-                    query.Select("Id,Name").From("samples");
-                    using var enumerator = query.StreamQuery<Sample>().GetEnumerator();
+                    using var enumerator = query.Sql<Sample>().Select("Id,Name").From("samples")
+                        .AsEnumerable().GetEnumerator();
                     Assert.True(enumerator.MoveNext());
                     Assert.Equal("first", enumerator.Current.Name);
                 }
@@ -185,12 +183,11 @@ public class SqliteMultiDataSourceExecutionTest
                 using var cancellationTokenSource = new CancellationTokenSource();
                 using (var query = queryFactory.Create<ISqlQuery>())
                 {
-                    query.Select("Id,Name").From("samples");
-
                     // Act
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
                     {
-                        await foreach (var _ in query.StreamAsync<Sample>(cancellationToken: cancellationTokenSource.Token))
+                        await foreach (var _ in query.Sql<Sample>().Select("Id,Name").From("samples")
+                                           .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
                             cancellationTokenSource.Cancel();
                     });
                 }
@@ -336,8 +333,7 @@ public class SqliteMultiDataSourceExecutionTest
         using (databaseScopeManager.Use(dbKey))
         using (var query = queryFactory.Create<ISqlQuery>())
         {
-            query.Select("Name").From("samples");
-            return query.ExecuteQuery<Sample>(buffered: false).Single().Name;
+            return query.Sql<Sample>().Select("Name").From("samples").AsEnumerable().Single().Name;
         }
     }
 

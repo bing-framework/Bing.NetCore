@@ -35,12 +35,8 @@ public class SqlServerQueryTest
     public async Task GetValue_SelectOne_ShouldReturnOne()
     {
         // Arrange
-        _sqlQuery.Clear()
-            .AppendSelect("1")
-            .AppendFrom("(Select 1 as Value) t");
-
         // Act
-        var result = await _sqlQuery.ExecuteScalarAsync<int>();
+        var result = await _sqlQuery.Sql<int>().Select("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
 
         // Assert
         _output.WriteLine($"SELECT 1 = {result}");

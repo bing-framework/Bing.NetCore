@@ -62,27 +62,25 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         cancellationTokenSource.Cancel();
 
         // Act and Assert
-        using (var listQuery = CreateSamplesQuery())
+        using (var listQuery = _fixture.CreateQuery())
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                listQuery.ExecuteQueryAsync<Sample>(cancellationToken: cancellationTokenSource.Token));
+                CreateSamplesDescription(listQuery).ToListAsync(cancellationToken: cancellationTokenSource.Token));
         using (var scalarQuery = _fixture.CreateQuery())
-        {
-            scalarQuery.AppendSelect("Count(*)").AppendFrom("samples");
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                scalarQuery.ExecuteScalarAsync<int>(cancellationToken: cancellationTokenSource.Token));
-        }
+                scalarQuery.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples")
+                    .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
         using (var scalarExtensionQuery = _fixture.CreateQuery())
         {
-            scalarExtensionQuery.AppendSelect("Count(*)").AppendFrom("samples");
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                scalarExtensionQuery.ToIntAsync(cancellationTokenSource.Token));
+                scalarExtensionQuery.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples")
+                    .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
         }
-        using (var singleQuery = CreateSamplesQuery())
+        using (var singleQuery = _fixture.CreateQuery())
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                singleQuery.ExecuteSingleAsync<Sample>(cancellationToken: cancellationTokenSource.Token));
-        using (var pagerQuery = CreateSamplesQuery())
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => pagerQuery.ToPagerListAsync<Sample>(
-                new Pager(1, 2), cancellationToken: cancellationTokenSource.Token));
+            CreateSamplesDescription(singleQuery).FirstOrDefaultAsync(cancellationToken: cancellationTokenSource.Token));
+        using (var pagerQuery = _fixture.CreateQuery())
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => CreateSamplesDescription(pagerQuery)
+                .ToPageAsync(new Pager(1, 2), cancellationToken: cancellationTokenSource.Token));
 
         // Assert
         await InsertAsync("after-query-cancellation");
@@ -107,9 +105,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         {
             await executor.ExecuteSqlAsync("Attach Database @path As reporting",
                 new { path = _fixture.SecondDatabasePath });
-            query.AppendSelect("Name").From("reporting.samples");
-
-            var result = query.ExecuteScalar<string>();
+            var result = query.Sql<string>().Select("Name").From("reporting.samples").Scalar();
 
             // Assert
             Assert.Equal("attached", result);
@@ -176,11 +172,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var observer = new SqliteDiagnosticObserver(item => message = item);
         var manager = _fixture.GetDatabaseScopeManager();
         using var query = _fixture.CreateQuery("first");
-        query.AppendSelect("Count(*)").AppendFrom("samples");
 
         // Act
         using (manager.Use("second"))
-            query.ExecuteScalar<int>();
+            query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
 
         // Assert
         Assert.NotNull(message);
@@ -198,12 +193,51 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("second");
         await InsertAsync("third");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Id,Name,Amount").AppendFrom("samples")
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
             .In("Name", new object[] { "first", "third" });
 
-        var result = query.ExecuteQuery<Sample>();
+        var result = description.ToList();
 
         Assert.Equal(new[] { "first", "third" }, result.Select(t => t.Name));
+    }
+
+    /// <summary>
+    /// 测试 - 空 In 集合必须保留恒假过滤，不能因忽略 Where 条件而返回全表数据。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteQuery_WhenInValuesAreEmpty_ShouldReturnNoRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").In("Id", Array.Empty<object>());
+
+        // Act
+        var result = description.ToList();
+
+        // Assert
+        Assert.Empty(result);
+        Assert.Equal(3, await _fixture.CountAsync());
+    }
+
+    /// <summary>
+    /// 测试 - 空 Not In 集合必须保留恒真过滤，并保持原始数据集完整。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteQuery_WhenNotInValuesAreEmpty_ShouldReturnAllRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+            .NotIn("Id", Array.Empty<object>()).OrderBy("Id");
+
+        // Act
+        var result = description.ToList();
+
+        // Assert
+        Assert.Equal(new[] { "one", "two", "three" }, result.Select(t => t.Name));
+        Assert.Equal(3, await _fixture.CountAsync());
     }
 
     /// <summary>
@@ -215,9 +249,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("first");
         await InsertAsync("second");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Count(*)").AppendFrom("samples");
-
-        var result = query.ExecuteScalar<int>();
+        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
 
         Assert.Equal(2, result);
     }
@@ -230,9 +262,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     {
         await InsertAsync("single");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Id,Name,Amount").AppendFrom("samples").AppendWhere("Name=@name").AddParam("name", "single");
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+            .AppendWhere("Name=@name").AddParam("name", "single");
 
-        var result = query.ExecuteSingle<Sample>();
+        var result = description.FirstOrDefault();
 
         Assert.Equal("single", result.Name);
     }
@@ -252,22 +285,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 new { id = 2, tenantId = "tenant-2", name = "second" });
         }
         using var query = _fixture.CreateQuery();
-        query.Select("o.Id,o.Name")
+        var description = query.Sql<OrderSample>().Select("o.Id,o.Name")
             .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
             .AddParam("TenantId", "tenant-1");
 
         // Act
-        var firstSql = query.GetBuilder().ToSql();
-        var secondSql = query.GetBuilder().ToSql();
+        var firstSql = description.ToSql();
+        var secondSql = description.ToSql();
 
         // Assert
         Assert.Equal("Select `o`.`Id`,`o`.`Name` \r\nFrom (Select * From Orders Where TenantId=@TenantId) o", firstSql);
         Assert.Equal(firstSql, secondSql);
-        Assert.Equal(new[] { "@TenantId" }, query.GetParams().Keys);
-        Assert.Equal("tenant-1", query.GetParam("TenantId"));
+        Assert.Equal(new[] { "@TenantId" }, description.GetParams().Keys);
+        Assert.Equal("tenant-1", description.GetParam("TenantId"));
 
         // Act
-        var result = query.ExecuteQuery<OrderSample>();
+        var result = description.ToList();
 
         // Assert
         var order = Assert.Single(result);
@@ -290,14 +323,14 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 new { id = 2, tenantId = "tenant-1", name = "second" });
         }
         using var query = _fixture.CreateQuery();
-        query.Select("o.Id,o.Name")
+        var description = query.Sql<OrderSample>().Select("o.Id,o.Name")
             .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
             .AddParam("TenantId", "tenant-1")
             .Where("o.Name", "second");
 
         // Act
-        var sql = query.GetBuilder().ToSql();
-        var result = query.ExecuteSingle<OrderSample>();
+        var sql = description.ToSql();
+        var result = description.FirstOrDefault();
 
         // Assert
         Assert.Equal("Select `o`.`Id`,`o`.`Name` \r\nFrom (Select * From Orders Where TenantId=@TenantId) o \r\nWhere `o`.`Name`=@_p_0", sql);
@@ -314,10 +347,14 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await InsertAsync("typed-from");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("Name").From<SqliteStructuredTableSample>();
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .ClearSelect()
+            .Select("Name")
+            .From()
+            .As<string>();
 
         // Act
-        var result = query.ExecuteScalar<string>();
+        var result = description.Scalar();
 
         // Assert
         Assert.Equal("typed-from", result);
@@ -367,9 +404,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task ExecuteQuery_ShouldSupportBufferedFalse()
     {
         await SeedAsync();
-        using var query = CreateSamplesQuery();
+        using var query = _fixture.CreateQuery();
 
-        var result = query.ExecuteQuery<Sample>(buffered: false);
+        var result = CreateSamplesDescription(query).AsEnumerable().ToList();
 
         Assert.Equal(3, result.Count);
         Assert.Equal(3, await _fixture.CountAsync());
@@ -382,9 +419,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task ExecuteQueryAsync_ShouldSupportBufferedFalse()
     {
         await SeedAsync();
-        using var query = CreateSamplesQuery();
+        using var query = _fixture.CreateQuery();
 
-        var result = await query.ExecuteQueryAsync<Sample>(buffered: false);
+        var result = new List<Sample>();
+        await foreach (var item in CreateSamplesDescription(query).AsAsyncEnumerable())
+            result.Add(item);
 
         Assert.Equal(3, result.Count);
     }
@@ -396,11 +435,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task ExecuteQuery_ShouldReturnSameRowsForBufferedModes()
     {
         await SeedAsync();
-        using var bufferedQuery = CreateSamplesQuery();
-        using var nonBufferedQuery = CreateSamplesQuery();
+        using var bufferedQuery = _fixture.CreateQuery();
+        using var nonBufferedQuery = _fixture.CreateQuery();
 
-        var buffered = bufferedQuery.ExecuteQuery<Sample>(buffered: true);
-        var nonBuffered = nonBufferedQuery.ExecuteQuery<Sample>(buffered: false);
+        var buffered = CreateSamplesDescription(bufferedQuery).ToList();
+        var nonBuffered = CreateSamplesDescription(nonBufferedQuery).AsEnumerable().ToList();
 
         Assert.Equal(buffered.Select(t => t.Name), nonBuffered.Select(t => t.Name));
     }
@@ -412,9 +451,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task ExecuteQuery_ShouldMaterializeAllRowsWhenBufferedFalse()
     {
         await SeedAsync();
-        using var query = CreateSamplesQuery();
+        using var query = _fixture.CreateQuery();
 
-        var result = query.ExecuteQuery<Sample>(buffered: false);
+        var result = CreateSamplesDescription(query).AsEnumerable().ToList();
 
         Assert.Equal(new[] { "one", "two", "three" }, result.Select(t => t.Name));
     }
@@ -427,8 +466,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     {
         await SeedAsync();
         List<Sample> result;
-        using (var query = CreateSamplesQuery())
-            result = query.ExecuteQuery<Sample>(buffered: false);
+        using (var query = _fixture.CreateQuery())
+            result = CreateSamplesDescription(query).AsEnumerable().ToList();
 
         using var executor = _fixture.CreateExecutor();
         executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "after-query" });
@@ -444,9 +483,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task StreamQuery_ShouldReturnAllRows()
     {
         await SeedAsync();
-        using var query = CreateSamplesQuery();
+        using var query = _fixture.CreateQuery();
 
-        var result = query.StreamQuery<Sample>().Select(t => t.Name).ToList();
+        var result = CreateSamplesDescription(query).AsEnumerable().Select(t => t.Name).ToList();
 
         Assert.Equal(new[] { "one", "two", "three" }, result);
     }
@@ -458,10 +497,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task StreamAsync_ShouldReturnAllRows()
     {
         await SeedAsync();
-        using var query = CreateSamplesQuery();
+        using var query = _fixture.CreateQuery();
         var result = new List<string>();
 
-        await foreach (var sample in query.StreamAsync<Sample>())
+        await foreach (var sample in CreateSamplesDescription(query).AsAsyncEnumerable())
             result.Add(sample.Name);
 
         Assert.Equal(new[] { "one", "two", "three" }, result);
@@ -474,8 +513,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     public async Task StreamQuery_ShouldReleaseReaderWhenEnumerationStopsEarly()
     {
         await SeedAsync();
-        using (var query = CreateSamplesQuery())
-        using (var enumerator = query.StreamQuery<Sample>().GetEnumerator())
+        using (var query = _fixture.CreateQuery())
+        using (var enumerator = CreateSamplesDescription(query).AsEnumerable().GetEnumerator())
         {
             Assert.True(enumerator.MoveNext());
             Assert.Equal("one", enumerator.Current.Name);
@@ -497,16 +536,16 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = CreateSamplesQuery();
 
         // Act and Assert
-        using (var enumerator = query.StreamQuery<Sample>().GetEnumerator())
+        using (var enumerator = CreateSamplesDescription(query).AsEnumerable().GetEnumerator())
         {
             Assert.True(enumerator.MoveNext());
-            var exception = Assert.Throws<InvalidOperationException>(() => query.ExecuteScalar());
+            var exception = Assert.Throws<InvalidOperationException>(() => query.Sql<int>()
+                .AppendSelect("Count(*)").AppendFrom("samples").Scalar());
             Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
                 exception.Message);
         }
 
-        query.AppendSelect("Count(*)").AppendFrom("samples");
-        Assert.Equal(3, query.ExecuteScalar<int>());
+        Assert.Equal(3, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
     }
 
     /// <summary>
@@ -522,7 +561,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.StreamAsync<Sample>(cancellationToken: cancellationTokenSource.Token))
+            await foreach (var _ in CreateSamplesDescription(query)
+                               .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
             {
             }
         });
@@ -543,7 +583,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.StreamAsync<Sample>(cancellationToken: cancellationTokenSource.Token))
+            await foreach (var _ in CreateSamplesDescription(query)
+                               .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
                 cancellationTokenSource.Cancel();
         });
 
@@ -560,7 +601,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await SeedAsync();
         using (var query = CreateSamplesQuery())
         {
-            await foreach (var _ in query.StreamAsync<Sample>())
+            await foreach (var _ in CreateSamplesDescription(query).AsAsyncEnumerable())
             {
             }
         }
@@ -626,8 +667,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (var query = scope.CreateQuery())
         {
             executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "shared" });
-            query.AppendSelect("Count(*)").AppendFrom("samples");
-            Assert.Equal(1, query.ExecuteScalar<int>());
+            Assert.Equal(1, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
             scope.Commit();
         }
 
@@ -848,9 +888,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (manager.Use("second"))
         using (var query = _fixture.CreateQuery("second"))
         {
-            query.AppendSelect("Count(*)").AppendFrom("samples");
-
-            Assert.Equal(1, query.ExecuteScalar<int>());
+            Assert.Equal(1, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
         }
         Assert.Empty(await _fixture.ReadNamesAsync("first"));
     }
@@ -877,26 +915,18 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await SeedAggregateSamplesAsync();
 
         // Act
-        using var countAllQuery = _fixture.CreateQuery();
-        var countAll = countAllQuery.Count(alias: "Total").From("samples", "s").ExecuteScalar<int>();
-        using var countColumnQuery = _fixture.CreateQuery();
-        var countColumn = countColumnQuery.Count("s.Amount", "AmountCount").From("samples", "s")
-            .ExecuteScalar<int>();
-        using var distinctCountQuery = _fixture.CreateQuery();
-        var distinctCount = distinctCountQuery.Count("s.Name", "NameCount", distinct: true)
-            .From("samples", "s")
-            .ExecuteScalar<int>();
-        using var sumQuery = _fixture.CreateQuery();
-        var sum = sumQuery.Sum("s.Amount", "Total").From("samples", "s").ExecuteScalar<decimal>();
-        using var averageQuery = _fixture.CreateQuery();
-        var average = averageQuery.Avg("s.Amount", "Average", distinct: true).From("samples", "s")
-            .ExecuteScalar<decimal>();
-        using var maximumQuery = _fixture.CreateQuery();
-        var maximum = maximumQuery.Max("s.Amount", "Maximum", distinct: true).From("samples", "s")
-            .ExecuteScalar<decimal>();
-        using var minimumQuery = _fixture.CreateQuery();
-        var minimum = minimumQuery.Min("s.Amount", "Minimum", distinct: true).From("samples", "s")
-            .ExecuteScalar<decimal>();
+        using var query = _fixture.CreateQuery();
+        var countAll = CreateAggregateDescription<int>(query).Count(alias: "Total").Scalar();
+        var countColumn = CreateAggregateDescription<int>(query).Count("s.Amount", "AmountCount").Scalar();
+        var distinctCount = CreateAggregateDescription<int>(query).Count("s.Name", "NameCount", distinct: true)
+            .Scalar();
+        var sum = CreateAggregateDescription<decimal>(query).Sum("s.Amount", "Total").Scalar();
+        var average = CreateAggregateDescription<decimal>(query).Avg("s.Amount", "Average", distinct: true)
+            .Scalar();
+        var maximum = CreateAggregateDescription<decimal>(query).Max("s.Amount", "Maximum", distinct: true)
+            .Scalar();
+        var minimum = CreateAggregateDescription<decimal>(query).Min("s.Amount", "Minimum", distinct: true)
+            .Scalar();
 
         // Assert
         Assert.Equal(4, countAll);
@@ -918,25 +948,20 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await SeedAggregateSamplesAsync();
 
         // Act
-        using var rawQuery = _fixture.CreateQuery();
-        var rawTotal = rawQuery.AggregateRaw(SqlAggregateFunction.Sum, "Amount * 2", "DoubleTotal")
+        using var query = _fixture.CreateQuery();
+        var rawTotal = query.Sql<decimal>().AggregateRaw(SqlAggregateFunction.Sum, "Amount * 2", "DoubleTotal")
             .From("samples")
-            .ExecuteScalar<decimal>();
-        using var expressionQuery = _fixture.CreateQuery();
-        var expressionTotal = expressionQuery.AggregateExpression(SqlAggregateFunction.Sum, "[s].[Amount] * 2",
-                "DoubleTotal")
-            .From("samples", "s")
-            .ExecuteScalar<decimal>();
-        using var caseQuery = _fixture.CreateQuery();
-        var caseCount = caseQuery.AggregateExpression(SqlAggregateFunction.Count,
+            .Scalar();
+        var expressionTotal = CreateAggregateDescription<decimal>(query).AggregateExpression(SqlAggregateFunction.Sum,
+                "[s].[Amount] * 2", "DoubleTotal")
+            .Scalar();
+        var caseCount = CreateAggregateDescription<int>(query).AggregateExpression(SqlAggregateFunction.Count,
                 "Case When [s].[Amount] Is Not Null Then [s].[Name] End", "NamedCount", distinct: true)
-            .From("samples", "s")
-            .ExecuteScalar<int>();
-        using var dtoQuery = _fixture.CreateQuery();
-        var result = dtoQuery.Count("s.Name", "DistinctNameCount", distinct: true)
+            .Scalar();
+        var result = CreateAggregateDescription<AggregateResult>(query)
+            .Count("s.Name", "DistinctNameCount", distinct: true)
             .Sum("s.Amount", "DistinctAmount", distinct: true)
-            .From("samples", "s")
-            .ExecuteSingle<AggregateResult>();
+            .FirstOrDefault();
 
         // Assert
         Assert.Equal(80m, rawTotal);
@@ -944,6 +969,1035 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(2, caseCount);
         Assert.Equal(2, result.DistinctNameCount);
         Assert.Equal(30m, result.DistinctAmount);
+    }
+
+    /// <summary>
+    /// 测试目的：Root Query 释放后，已有 Fluent、原生文本、根执行和流式描述均不得重新创建连接或继续执行。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenRootQueryDisposed_ShouldRejectAllExecutionEntrypoints()
+    {
+        // Arrange
+        await SeedAsync();
+        var rootQuery = _fixture.CreateQuery();
+        var fluent = rootQuery.Sql<Sample>().Select("Id,Name,Amount").From("samples");
+        var text = rootQuery.Sql<Sample>("Select Id,Name,Amount From samples");
+        rootQuery.Dispose();
+        rootQuery.Dispose();
+
+        // Act and Assert
+        Assert.Throws<ObjectDisposedException>(() => rootQuery.Sql<Sample>().Select("Id,Name,Amount").From("samples").ToList());
+        Assert.Throws<ObjectDisposedException>(() => fluent.ToList());
+        Assert.Throws<ObjectDisposedException>(() => text.ToList());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => fluent.ToListAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => text.ToListAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(async () =>
+        {
+            await foreach (var _ in fluent.AsAsyncEnumerable())
+            {
+            }
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 查询描述应通过根查询的执行链返回完整列表和正确的 First/Single 基数语义。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenFluentQueryExecuted_ShouldMaterializeAndEnforceCardinality()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var list = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        var first = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
+        var only = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "two" }).SingleAsync();
+        var firstMissing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "missing" }).FirstOrDefaultAsync();
+        var missing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "missing" }).SingleOrDefaultAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one", "two", "three" }, list.Select(item => item.Name));
+        Assert.Equal("one", first.Name);
+        Assert.Equal("two", only.Name);
+        Assert.Null(firstMissing);
+        Assert.Null(missing);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => query.Sql<Sample>()
+            .Select("Id,Name,Amount").From("samples").SingleAsync());
+    }
+
+    /// <summary>
+    /// 测试目的：独立查询描述的同步终结方法应完整物化结果，并保持 First 和 Single 的基数语义。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenSynchronouslyExecuted_ShouldMaterializeAndEnforceCardinality()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var list = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToList();
+        var first = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").First();
+        var only = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "two" }).Single();
+        var firstMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "missing" }).FirstOrDefault();
+        var singleMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+            new { name = "missing" }).SingleOrDefault();
+
+        // Assert
+        Assert.Equal(new[] { "one", "two", "three" }, list.Select(item => item.Name));
+        Assert.Equal("one", first.Name);
+        Assert.Equal("two", only.Name);
+        Assert.Null(firstMissing);
+        Assert.Null(singleMissing);
+        Assert.Throws<InvalidOperationException>(() => query.Sql<Sample>()
+            .Select("Id,Name,Amount").From("samples").Single());
+        Assert.Throws<InvalidOperationException>(() => query.Sql<Sample>(
+            "Select Id,Name,Amount From samples Where Name = @name", new { name = "missing" }).First());
+    }
+
+    /// <summary>
+    /// 测试目的：同一 Root 创建的独立查询描述在执行后应保持各自 SQL 和参数状态，确保可顺序复用。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenExecuted_ShouldKeepDescriptionBuildersIsolated()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var selected = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "one");
+        var selectedSql = selected.ToSql();
+        var selectedParameters = selected.GetParams();
+        var countDescription = query.Sql<int>().Count().From("samples");
+
+        // Act
+        var descriptions = selected.ToList();
+        var count = countDescription.Scalar();
+
+        // Assert
+        Assert.Single(descriptions);
+        Assert.Equal("one", descriptions[0].Name);
+        Assert.Equal(3, count);
+        Assert.Equal(selectedSql, selected.ToSql());
+        Assert.Single(selectedParameters);
+        Assert.Equal("one", selectedParameters["@_p_0"]);
+        Assert.Equal("Select Count(*) \r\nFrom `samples`", countDescription.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Fluent 查询描述应可直接参与子查询、派生表、CTE 和 Union，调用方无需访问内部 Builder。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenComposedFromDescriptions_ShouldExecuteWithoutBuilderEscapeHatch()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var selectedIds = query.Sql<int>().Select("Id").From("samples").Where("Name", "two");
+        var selectedNames = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
+        var selectedSamples = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "two");
+
+        // Act
+        var inResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").In("Id", selectedIds).ToList();
+        var existsResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Exists(selectedIds).ToList();
+        var derivedResult = query.Sql<Sample>().Select("selected.Id,selected.Name,selected.Amount")
+            .From(selectedSamples, "selected").ToList();
+        var cteResult = query.Sql<Sample>().With("selected", selectedSamples)
+            .Select("Id,Name,Amount").From("selected").ToList();
+        var unionResult = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+            .Union(selectedNames).ToList();
+
+        // Assert
+        Assert.Equal(new[] { "two" }, inResult.Select(item => item.Name));
+        Assert.Equal(new[] { "one", "two", "three" }, existsResult.Select(item => item.Name));
+        Assert.Equal(new[] { "two" }, derivedResult.Select(item => item.Name));
+        Assert.Equal(new[] { "two" }, cteResult.Select(item => item.Name));
+        Assert.Equal(new[] { "one", "two" }, unionResult.OrderBy(item => item));
+    }
+
+    /// <summary>
+    /// 测试目的：独立子描述与外层产生连续同名参数时，应分别绑定每个子条件，且组合后可稳定重复渲染和执行。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenInChildUsesSequentialConflictingParameters_ShouldKeepBindingsIsolated()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var child = query.Sql<int>().Select("Id").From("samples")
+            .Where("Name", "one")
+            .Where("Name", "two");
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "two")
+            .In("Id", child);
+        var childSql = child.ToSql();
+
+        // Act
+        var firstSql = description.ToSql();
+        var firstResult = await description.ToListAsync();
+        var secondSql = description.ToSql();
+        var secondResult = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(childSql, child.ToSql());
+        Assert.Empty(firstResult);
+        Assert.Empty(secondResult);
+    }
+
+    /// <summary>
+    /// 测试目的：结构化 Fluent 查询描述分页时应独立生成计数和数据页 SQL，且不污染可复用描述的排序和分页状态。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenPaged_ShouldReturnTotalAndKeepDescriptionReusable()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples");
+
+        // Act
+        var firstPage = description.ToPage(new Pager(1, 2) { Order = "Name" });
+        var secondPage = await description.ToPageAsync(new Pager(2, 1) { Order = "Name" });
+        var allItems = description.ToList();
+
+        // Assert
+        Assert.Equal(3, firstPage.TotalCount);
+        Assert.Equal(new[] { "one", "three" }, firstPage.Data.Select(item => item.Name));
+        Assert.Equal(3, secondPage.TotalCount);
+        Assert.Equal(new[] { "three" }, secondPage.Data.Select(item => item.Name));
+        Assert.Equal(new[] { "one", "three", "two" }, allItems.OrderBy(item => item.Name).Select(item => item.Name));
+    }
+
+    /// <summary>
+    /// 测试目的：Distinct 查询分页应对去重后的投影计数，而不是对来源表原始记录计数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenDistinctPaged_ShouldCountDistinctRows()
+    {
+        // Arrange
+        await SeedAsync();
+        await InsertAsync("one");
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<string>().Distinct().Select("Name").From("samples");
+
+        // Act
+        var page = description.ToPage(new Pager(1, 2) { Order = "Name" });
+
+        // Assert
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new[] { "one", "three" }, page.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：带 Having 的分组查询分页应以满足 Having 条件的分组数量作为总数，并支持同步和异步执行。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenGroupedHavingPaged_ShouldCountFilteredGroups()
+    {
+        // Arrange
+        await SeedAggregateSamplesAsync();
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<string>().Select("Name").From("samples")
+            .GroupBy("Name", "Count(*) > 1");
+
+        // Act
+        var syncPage = description.ToPage(new Pager(1, 1) { Order = "Name" });
+        var asyncPage = await description.ToPageAsync(new Pager(1, 1) { Order = "Name" });
+
+        // Assert
+        Assert.Equal(1, syncPage.TotalCount);
+        Assert.Equal(new[] { "A" }, syncPage.Data);
+        Assert.Equal(1, asyncPage.TotalCount);
+        Assert.Equal(new[] { "A" }, asyncPage.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：Union 与 Union All 分页应分别按去重和保留重复的结果集计算总数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenUnionPaged_ShouldCountDistinctAndAllRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var selectedName = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
+        var union = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+            .Union(selectedName);
+        var unionAll = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+            .UnionAll(selectedName);
+
+        // Act
+        var unionPage = union.ToPage(new Pager(1, 2) { Order = "Name" });
+        var unionAllPage = await unionAll.ToPageAsync(new Pager(1, 2) { Order = "Name" });
+
+        // Assert
+        Assert.Equal(1, unionPage.TotalCount);
+        Assert.Equal(new[] { "one" }, unionPage.Data);
+        Assert.Equal(2, unionAllPage.TotalCount);
+        Assert.Equal(new[] { "one", "one" }, unionAllPage.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：纯 CTE 查询应支持自动分页计数，而 CTE 与 Group 或 Union 组合时应明确拒绝不安全的自动计数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenCtePaged_ShouldSupportSimpleAndRejectComplexAutomaticCount()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var source = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
+        var simpleCte = query.Sql<string>().With("selected", source).Select("Name").From("selected");
+        var groupCte = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+            .GroupBy("Name");
+        var unionCte = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+            .Union(source);
+
+        // Act
+        var syncPage = simpleCte.ToPage(new Pager(1, 1) { Order = "Name" });
+        var asyncPage = await simpleCte.ToPageAsync(new Pager(1, 1) { Order = "Name" });
+        var groupException = Assert.Throws<NotSupportedException>(() => groupCte.ToPage(new Pager(1, 1)));
+        var unionException = await Assert.ThrowsAsync<NotSupportedException>(() => unionCte.ToPageAsync(new Pager(1, 1)));
+
+        // Assert
+        Assert.Equal(1, syncPage.TotalCount);
+        Assert.Equal(new[] { "two" }, syncPage.Data);
+        Assert.Equal(1, asyncPage.TotalCount);
+        Assert.Equal(new[] { "two" }, asyncPage.Data);
+        Assert.Equal("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。", groupException.Message);
+        Assert.Equal(groupException.Message, unionException.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：包含 CTE 的复杂去重查询无法在所有方言安全重写计数 SQL 时，应拒绝自动分页而非返回错误总数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenCteDistinctPaged_ShouldRejectUnsafeAutomaticCount()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var source = query.Sql<string>().Select("Name").From("samples");
+        var description = query.Sql<string>().With("selected", source).Distinct().Select("Name").From("selected");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => description.ToPage(new Pager(1, 1) { Order = "Name" }));
+
+        // Assert
+        Assert.Equal("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：调用方已明确总数为零时，复杂 CTE 分页不得尝试不安全的自动 Count，仍应执行当前页数据查询。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenComplexCtePageHasKnownZeroTotal_ShouldSkipAutomaticCount()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var source = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
+        var description = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+            .GroupBy("Name");
+        var pager = new Pager(1, 1) { Order = "Name", TotalCount = 0 };
+
+        // Act
+        var page = description.ToPage(pager);
+
+        // Assert
+        Assert.True(pager.IsTotalCountKnown);
+        Assert.Equal(0, page.TotalCount);
+        Assert.Equal(new[] { "two" }, page.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应通过标量终结方法返回首行首列，并遵循取消和空结果默认值语义。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenScalarExecuted_ShouldReturnFirstColumnAndRespectCancellation()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        using var cancellationTokenSource = new CancellationTokenSource();
+
+        // Act
+        var fluentCount = query.Sql<int>().Count().From("samples").Scalar();
+        var textCount = await query.Sql<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
+            .ScalarAsync();
+        var missingAmount = query.Sql<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
+            .Scalar();
+        cancellationTokenSource.Cancel();
+
+        // Assert
+        Assert.Equal(3, fluentCount);
+        Assert.Equal(2, textCount);
+        Assert.Null(missingAmount);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<int>("Select Count(*) From samples")
+            .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应支持同步惰性读取，并在枚举提前终止后归还执行资源。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenSynchronouslyStreamed_ShouldKeepLeaseUntilEnumerationIsDisposed()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluentNames = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id")
+            .AsEnumerable().Select(item => item.Name).ToList();
+        using (var enumerator = query.Sql<Sample>(
+                   "Select Id,Name,Amount From samples Where Name <> @name Order By Id", new { name = "two" })
+               .AsEnumerable().GetEnumerator())
+        {
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal("one", enumerator.Current.Name);
+            Assert.Throws<InvalidOperationException>(() => query.Sql<int>("Select Count(*) From samples").Scalar());
+        }
+        var count = query.Sql<int>("Select Count(*) From samples").Scalar();
+
+        // Assert
+        Assert.Equal(new[] { "one", "two", "three" }, fluentNames);
+        Assert.Equal(3, count);
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成双对象映射，并传递异步取消令牌。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenTwoTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        using var cancellationTokenSource = new CancellationTokenSource();
+
+        // Act
+        var fluent = query.Sql<SamplePair>().Select("s.Id,s.Name,s.Amount,s.Id,s.Name").From("samples", "s")
+            .OrderBy("s.Id").ToList<Sample, SampleName>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
+        var text = await query.Sql<SamplePair>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
+        cancellationTokenSource.Cancel();
+
+        // Assert
+        Assert.Equal(new[] { "one:one", "two:two", "three:three" },
+            fluent.Select(item => $"{item.SampleName}:{item.RelatedName}"));
+        Assert.Equal(new[] { "one:one", "three:three" }, text.Select(item => $"{item.SampleName}:{item.RelatedName}"));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<SamplePair>(
+                "Select Id,Name,Amount,Id,Name From samples")
+            .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            }, cancellationToken: cancellationTokenSource.Token));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成三对象映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenThreeTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<SampleTriple>()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToList<Sample, SampleName, SampleName>((sample, second, third) => new SampleTriple
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name
+            });
+        var text = await query.Sql<SampleTriple>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName, SampleName>((sample, second, third) => new SampleTriple
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name
+            });
+
+        // Assert
+        Assert.Equal(new[] { "one:one:one", "two:two:two", "three:three:three" },
+            fluent.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
+        Assert.Equal(new[] { "one:one:one", "three:three:three" },
+            text.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成四对象映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenFourTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<SampleQuad>()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToList<Sample, SampleName, SampleName, SampleName>((sample, second, third, fourth) => new SampleQuad
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name,
+                FourthName = fourth.Name
+            });
+        var text = await query.Sql<SampleQuad>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName, SampleName, SampleName>((sample, second, third, fourth) => new SampleQuad
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name,
+                FourthName = fourth.Name
+            });
+
+        // Assert
+        Assert.Equal(new[] { "one:one:one:one", "two:two:two:two", "three:three:three:three" },
+            fluent.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
+        Assert.Equal(new[] { "one:one:one:one", "three:three:three:three" },
+            text.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成五对象映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenFiveTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<SampleQuint>()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName>((sample, second, third, fourth, fifth) =>
+                new SampleQuint
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name
+                });
+        var text = await query.Sql<SampleQuint>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName>((sample, second, third, fourth, fifth) =>
+                new SampleQuint
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name
+                });
+
+        // Assert
+        Assert.Equal(new[] { "one:one:one:one:one", "two:two:two:two:two", "three:three:three:three:three" },
+            fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one", "three:three:three:three:three" },
+            text.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}"));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成六对象映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenSixTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<SampleSext>()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName, SampleName>(
+                (sample, second, third, fourth, fifth, sixth) => new SampleSext
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name
+                });
+        var text = await query.Sql<SampleSext>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName>(
+                (sample, second, third, fourth, fifth, sixth) => new SampleSext
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name
+                });
+
+        // Assert
+        Assert.Equal(new[] { "one:one:one:one:one:one", "two:two:two:two:two:two", "three:three:three:three:three:three" },
+            fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one", "three:three:three:three:three:three" },
+            text.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}"));
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 与原生文本查询应按默认 Id 分段规则完成七对象映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenSevenTypeMapped_ShouldMaterializeFluentAndTextResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<SampleSept>()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName>(
+                (sample, second, third, fourth, fifth, sixth, seventh) => new SampleSept
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name,
+                    SeventhName = seventh.Name
+                });
+        var text = await query.Sql<SampleSept>(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName>(
+                (sample, second, third, fourth, fifth, sixth, seventh) => new SampleSept
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name,
+                    SeventhName = seventh.Name
+                });
+
+        // Assert
+        Assert.Equal(new[] { "one:one:one:one:one:one:one", "two:two:two:two:two:two:two", "three:three:three:three:three:three:three" },
+            fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}:{item.SeventhName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one:one", "three:three:three:three:three:three:three" },
+            text.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}:{item.SeventhName}"));
+    }
+
+    /// <summary>
+    /// 测试目的：原生 SQL 文本查询应保留参数绑定、异步流释放和取消语义。
+    /// </summary>
+    [Fact]
+    public async Task SqlTextQuery_WhenStreamedOrCancelled_ShouldBindParametersAndReleaseExecutionResources()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var names = new List<string>();
+
+        // Act
+        await foreach (var sample in query.Sql<Sample>("Select Id,Name,Amount From samples Where Name <> @name Order By Id",
+                           new { name = "two" }).AsAsyncEnumerable())
+            names.Add(sample.Name);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Assert
+        Assert.Equal(new[] { "one", "three" }, names);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<Sample>(
+            "Select Id,Name,Amount From samples").ToListAsync(cancellationToken: cancellationTokenSource.Token));
+        Assert.Equal("one", (await query.Sql<Sample>("Select Id,Name,Amount From samples Order By Id")
+            .FirstAsync()).Name);
+    }
+
+    /// <summary>
+    /// 测试目的：事务作用域创建的根查询执行独立原生计划时，应复用未提交事务中的连接和数据。
+    /// </summary>
+    [Fact]
+    public async Task SqlTextQuery_WhenCreatedInsideTransactionScope_ShouldReadUncommittedScopeData()
+    {
+        // Arrange
+        using var scope = _fixture.GetTransactionScopeFactory().Begin("first");
+        using var executor = scope.CreateExecutor();
+        using var query = scope.CreateQuery();
+        await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "planned" });
+
+        // Act
+        var count = await query.Sql<int>("Select Count(*) From samples Where Name = @name", new { name = "planned" })
+            .SingleAsync();
+        scope.Commit();
+
+        // Assert
+        Assert.Equal(1, count);
+        Assert.Equal(new[] { "planned" }, await _fixture.ReadNamesAsync());
+    }
+
+    /// <summary>
+    /// 测试目的：插值 SQL 查询应将插值值作为参数传递，而不是将值拼接到 SQL 文本中。
+    /// </summary>
+    [Fact]
+    public async Task SqlInterpolated_WhenValueContainsQuote_ShouldUseBoundParameter()
+    {
+        // Arrange
+        await InsertAsync("O'Reilly");
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var result = await query.SqlInterpolated<Sample>($"Select Id,Name,Amount From samples Where Name = {"O'Reilly"}")
+            .SingleAsync();
+
+        // Assert
+        Assert.Equal("O'Reilly", result.Name);
+    }
+
+    /// <summary>
+    /// 测试目的：插值 SQL 应正确还原转义花括号，并忽略仅用于 CLR 格式化的对齐和格式说明，不得影响参数化执行。
+    /// </summary>
+    [Fact]
+    public async Task SqlInterpolated_WhenFormatContainsEscapedBracesAndAlignment_ShouldKeepSqlLiteralAndParameter()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.SqlInterpolated<Sample>(
+            $"Select Id,Name,Amount From samples Where Name = {"one",-10:ignored} And '{{' = '{{'");
+        var result = await description.SingleAsync();
+
+        // Assert
+        Assert.Contains("Name = @p0", description.CommandText, StringComparison.Ordinal);
+        Assert.Contains("'{' = '{'", description.CommandText, StringComparison.Ordinal);
+        Assert.DoesNotContain("{{", description.CommandText, StringComparison.Ordinal);
+        Assert.Equal("one", result.Name);
+    }
+
+    /// <summary>
+    /// 测试目的：插值参数默认名称与 SQL 中已有 Token 冲突时，应生成独立参数名并保持原 Token 不变。
+    /// </summary>
+    [Fact]
+    public async Task SqlInterpolated_WhenGeneratedNameConflictsWithExistingToken_ShouldUseUniqueParameterName()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.SqlInterpolated<Sample>(
+            $"Select Id,Name,Amount From samples Where Name = {"one"} And '@p0' = '@p0'");
+        var result = await description.SingleAsync();
+
+        // Assert
+        Assert.Contains("Name = @p0_1", description.CommandText, StringComparison.Ordinal);
+        Assert.Contains("'@p0' = '@p0'", description.CommandText, StringComparison.Ordinal);
+        var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
+        Assert.Equal("one", Assert.Single(parameters).Value);
+        Assert.Equal("one", result.Name);
+    }
+
+    /// <summary>
+    /// 测试目的：独立 Fluent 和原生文本查询应将自定义分段列传递给 Dapper 多映射。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenCustomSplitOnConfigured_ShouldMapAtSpecifiedColumn()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Sql<string>()
+            .Select("Id,Name,Name")
+            .From("samples")
+            .OrderBy("Id")
+            .SplitOn("Name")
+            .ToList<Sample, SampleName>((sample, name) => name.Name);
+        var text = await query.Sql<string>("Select Id,Name,Name From samples Order By Id")
+            .SplitOn("Name")
+            .ToListAsync<Sample, SampleName>((sample, name) => name.Name);
+
+        // Assert
+        Assert.Equal(new[] { "one", "two", "three" }, fluent);
+        Assert.Equal(new[] { "one", "two", "three" }, text);
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应依据实体映射生成投影、来源表和参数化筛选条件。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenEntityPredicateAndPageConfigured_ShouldUseMappedQuery()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var result = await query.Lambda<SqliteStructuredTableSample>()
+            .Where(sample => sample.Name != "two")
+            .OrderBy(sample => sample.Name)
+            .Skip(1)
+            .Take(1)
+            .SingleAsync();
+
+        // Assert
+        Assert.Equal("three", result.Name);
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应可将属性投影和聚合切换为指定结果类型，并复用实体映射与参数化执行链。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenProjectionAndAggregateResultTypesConfigured_ShouldExecuteMappedResults()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var names = await query.Lambda<SqliteStructuredTableSample>()
+            .Select<string>(sample => new object[] { sample.Name })
+            .OrderBy("Name")
+            .ToListAsync();
+        var count = await query.Lambda<SqliteStructuredTableSample>()
+            .Aggregate<int>(SqlAggregateFunction.Count, sample => sample.Name)
+            .ScalarAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one", "three", "two" }, names);
+        Assert.Equal(3, count);
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 自定义 Select 必须替换创建时的默认实体投影，避免重复列并支持直接映射标量结果。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenCustomSelectConfigured_ShouldReplaceDefaultProjection()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new object[] { sample.Name })
+            .From()
+            .As<string>();
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal("Select `samples`.`Name` \r\nFrom `samples`", description.ToSql());
+        Assert.Equal(new[] { "one", "three", "two" }, result.OrderBy(item => item).ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 连续 Select 应始终替换前一投影，只有 AppendSelect 才允许显式追加投影列。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenSelectRepeated_ShouldReplaceAndAppendSelectShouldAppend()
+    {
+        // Arrange
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var replacement = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new object[] { sample.Name })
+            .Select(sample => new object[] { sample.Name })
+            .From();
+        var appended = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new object[] { sample.Name })
+            .AppendSelect(sample => new object[] { sample.Id })
+            .From();
+
+        // Assert
+        Assert.Equal("Select `samples`.`Name` \r\nFrom `samples`", replacement.ToSql());
+        Assert.Equal("Select `samples`.`Name`,`samples`.`Id` \r\nFrom `samples`", appended.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应在不暴露 Builder 的情况下支持类型化投影、条件和排序，并转换为标量结果描述执行。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenTypedDescriptionCompositionConfigured_ShouldExecuteProjectedResult()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .SelectFrom<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
+            .From("sample")
+            .WhereIfNotEmpty<SqliteStructuredTableSample>(sample => sample.Name, "two")
+            .WhereFrom<SqliteStructuredTableSample>(sample => sample.Name == "two")
+            .OrderBy<SqliteStructuredTableSample>(sample => sample.Name)
+            .As<string>();
+        var names = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "two" }, names);
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应通过类型化 Join、On 与显式追加投影执行多表 DTO 映射，无需访问 Builder。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenJoinedWithMappedEntity_ShouldExecuteDtoProjection()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var samples = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[0].Id, tenantId = "tenant-1", name = "order-one" });
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[1].Id, tenantId = "tenant-2", name = "order-two" });
+        }
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .From("s")
+            .Select(sample => new object[] { sample.Id, sample.Name }, true)
+            .Join<SqliteStructuredOrderSample>("o")
+            .On<SqliteStructuredTableSample, SqliteStructuredOrderSample>((sample, order) => sample.Id == order.Id)
+            .AppendSelectFrom<SqliteStructuredOrderSample>(order => new object[] { order.TenantId }, true)
+            .OrderBy<SqliteStructuredTableSample>(sample => sample.Id)
+            .As<LambdaJoinResult>();
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one:tenant-1", "two:tenant-2" },
+            result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `s`.`Id`,`s`.`Name`,`o`.`TenantId` \r\nFrom `samples` As `s` \r\nJoin `Orders` As `o` On `s`.`Id`=`o`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应通过类型化 LeftJoin 保留没有关联订单的主表记录。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenLeftJoinedWithMappedEntity_ShouldKeepUnmatchedRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var sample = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+            new { id = sample.Id, tenantId = "tenant-1", name = "order-one" });
+
+        // Act
+        var result = await query.Lambda<SqliteStructuredTableSample>()
+            .From("s")
+            .Select(sample => new object[] { sample.Name }, true)
+            .LeftJoin<SqliteStructuredOrderSample>("o")
+            .On<SqliteStructuredTableSample, SqliteStructuredOrderSample>((sample, order) => sample.Id == order.Id)
+            .AppendSelectFrom<SqliteStructuredOrderSample>(order => new object[] { order.TenantId }, true)
+            .OrderBy<SqliteStructuredTableSample>(sample => sample.Id)
+            .As<LambdaJoinResult>()
+            .ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one:tenant-1", "two:", "three:" },
+            result.Select(item => $"{item.Name}:{item.TenantId}"));
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应组合类型化 GroupBy 与 Having，并将聚合结果映射为目标标量类型。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenGroupedWithHaving_ShouldExecuteAggregateResults()
+    {
+        // Arrange
+        await SeedAsync();
+        await InsertAsync("one");
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .GroupBy(sample => sample.Name)
+            .HavingRaw("Count(*) > 1")
+            .Aggregate<int>(SqlAggregateFunction.Count, sample => sample.Id);
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { 2 }, result);
+        Assert.Equal("Select Count(`samples`.`Id`) \r\nFrom `samples` \r\nGroup By `samples`.`Name` Having Count(*) > 1",
+            description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 查询应支持去重投影分页，并对去重后的投影返回正确总数与页数据。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDistinctProjectionPaged_ShouldReturnDistinctPage()
+    {
+        // Arrange
+        await SeedAsync();
+        await InsertAsync("one");
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new object[] { sample.Name })
+            .Distinct()
+            .OrderBy(sample => sample.Name)
+            .As<string>();
+        var page = await description.ToPageAsync(new Pager(1, 2) { Order = "Name" });
+
+        // Assert
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new[] { "one", "three" }, page.Data);
     }
 
     /// <inheritdoc />
@@ -961,10 +2015,25 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <returns>SQL 查询对象。</returns>
     private ISqlQuery CreateSamplesQuery()
     {
-        var query = _fixture.CreateQuery();
-        query.AppendSelect("Id,Name,Amount").AppendFrom("samples").AppendWhere("1=1 Order By Id");
-        return query;
+        return _fixture.CreateQuery();
     }
+
+    /// <summary>
+    /// 创建样例实体独立查询描述。
+    /// </summary>
+    /// <param name="query">承载连接和事务资源的根查询。</param>
+    /// <returns>按标识排序的样例查询描述。</returns>
+    private static SqlQuery<Sample> CreateSamplesDescription(ISqlQuery query) =>
+        query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id");
+
+    /// <summary>
+    /// 创建聚合独立查询描述。
+    /// </summary>
+    /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
+    /// <param name="query">承载连接和事务资源的根查询。</param>
+    /// <returns>带样例表别名的聚合查询描述。</returns>
+    private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
+        query.Sql<TResult>().From("samples", "s");
 
     /// <summary>
     /// 写入一个样例记录。
@@ -1051,6 +2120,193 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// SQLite 多映射第二段样例实体。
+    /// </summary>
+    private sealed class SampleName
+    {
+        /// <summary>
+        /// 标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 双对象多映射结果模型。
+    /// </summary>
+    private sealed class SamplePair
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string SampleName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string RelatedName { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 三对象多映射结果模型。
+    /// </summary>
+    private sealed class SampleTriple
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string SecondName { get; set; }
+
+        /// <summary>
+        /// 第三段样例名称。
+        /// </summary>
+        public string ThirdName { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 四对象多映射结果模型。
+    /// </summary>
+    private sealed class SampleQuad
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string SecondName { get; set; }
+
+        /// <summary>
+        /// 第三段样例名称。
+        /// </summary>
+        public string ThirdName { get; set; }
+
+        /// <summary>
+        /// 第四段样例名称。
+        /// </summary>
+        public string FourthName { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 五对象多映射结果模型。
+    /// </summary>
+    private sealed class SampleQuint
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string SecondName { get; set; }
+
+        /// <summary>
+        /// 第三段样例名称。
+        /// </summary>
+        public string ThirdName { get; set; }
+
+        /// <summary>
+        /// 第四段样例名称。
+        /// </summary>
+        public string FourthName { get; set; }
+
+        /// <summary>
+        /// 第五段样例名称。
+        /// </summary>
+        public string FifthName { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 六对象多映射结果模型。
+    /// </summary>
+    private sealed class SampleSext
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string SecondName { get; set; }
+
+        /// <summary>
+        /// 第三段样例名称。
+        /// </summary>
+        public string ThirdName { get; set; }
+
+        /// <summary>
+        /// 第四段样例名称。
+        /// </summary>
+        public string FourthName { get; set; }
+
+        /// <summary>
+        /// 第五段样例名称。
+        /// </summary>
+        public string FifthName { get; set; }
+
+        /// <summary>
+        /// 第六段样例名称。
+        /// </summary>
+        public string SixthName { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 七对象多映射结果模型。
+    /// </summary>
+    private sealed class SampleSept
+    {
+        /// <summary>
+        /// 第一段样例名称。
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// 第二段样例名称。
+        /// </summary>
+        public string SecondName { get; set; }
+
+        /// <summary>
+        /// 第三段样例名称。
+        /// </summary>
+        public string ThirdName { get; set; }
+
+        /// <summary>
+        /// 第四段样例名称。
+        /// </summary>
+        public string FourthName { get; set; }
+
+        /// <summary>
+        /// 第五段样例名称。
+        /// </summary>
+        public string FifthName { get; set; }
+
+        /// <summary>
+        /// 第六段样例名称。
+        /// </summary>
+        public string SixthName { get; set; }
+
+        /// <summary>
+        /// 第七段样例名称。
+        /// </summary>
+        public string SeventhName { get; set; }
+    }
+
+    /// <summary>
     /// SQLite 聚合结果映射模型。
     /// </summary>
     private sealed class AggregateResult
@@ -1064,6 +2320,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 去重后的非空金额总和。
         /// </summary>
         public decimal DistinctAmount { get; set; }
+    }
+
+    /// <summary>
+    /// Lambda 多表投影结果模型。
+    /// </summary>
+    private sealed class LambdaJoinResult
+    {
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 租户标识。
+        /// </summary>
+        public string TenantId { get; set; }
     }
 
     /// <summary>

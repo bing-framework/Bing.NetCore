@@ -134,6 +134,29 @@ public class SqlServerBuilderTest
         Assert.Equal(30, builder.GetParam("_p_1"));
     }
 
+    /// <summary>
+    /// 测试目的：空 In 与 Not In 集合必须生成明确常量条件，不能忽略 Where 过滤。
+    /// </summary>
+    [Fact]
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldRenderConstantConditionsWithoutParameters()
+    {
+        // Arrange
+        const string expectedIn = "Select * \r\nFrom [User] \r\nWhere 1 = 0";
+        const string expectedNotIn = "Select * \r\nFrom [User] \r\nWhere 1 = 1";
+        var inBuilder = NewBuilder().Select("*").From("User").In("Id", Array.Empty<object>());
+        var notInBuilder = NewBuilder().Select("*").From("User").NotIn("Id", Array.Empty<object>());
+
+        // Act
+        var inSql = inBuilder.ToSql();
+        var notInSql = notInBuilder.ToSql();
+
+        // Assert
+        Assert.Equal(expectedIn, inSql);
+        Assert.Equal(expectedNotIn, notInSql);
+        Assert.Empty(inBuilder.GetParams());
+        Assert.Empty(notInBuilder.GetParams());
+    }
+
     // ── Join ─────────────────────────────────────────────────────
 
     /// <summary>

@@ -19,6 +19,24 @@ namespace Bing.Dapper.Tests.Metadata;
 public class DefaultSqlParameterBinderTest
 {
     /// <summary>
+    /// 测试目的：参数绑定运行时契约仅供框架内部使用，公开程序集不得暴露可替换的绑定 SPI。
+    /// </summary>
+    [Fact]
+    public void ParameterBindingRuntimeContracts_ShouldNotBePublic()
+    {
+        // Arrange
+        var exportedTypeNames = typeof(DefaultSqlParameterBinder).Assembly.GetExportedTypes()
+            .Select(type => type.Name);
+
+        // Assert
+        Assert.DoesNotContain("ISqlParameterBinder", exportedTypeNames);
+        Assert.DoesNotContain("ISqlParameterContextBinder", exportedTypeNames);
+        Assert.DoesNotContain("IDapperParameterBinder", exportedTypeNames);
+        Assert.DoesNotContain("IDapperParameterSet", exportedTypeNames);
+        Assert.True(typeof(DefaultSqlParameterBinder).IsPublic);
+    }
+
+    /// <summary>
     /// 测试目的：参数映射中的长度与 DbType 元数据应被写入 IDbDataParameter。
     /// </summary>
     [Fact]

@@ -93,6 +93,27 @@ public partial class PostgreSqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：子查询参数冲突改名时，不得修改 PostgreSQL dollar-quoted 文本或 @@ 系统变量。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSubqueryContainsDollarQuotedTextOrSystemVariable_ShouldRenameOnlyParameterToken()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom \"Parent\" \r\nJoin (Select * \r\nFrom \"Child\" \r\nWhere payload=$tag$@_p_0$tag$ And server=@@version And value=@_p_1) As \"c\" \r\nWhere \"Id\"=@_p_0";
+        var subquery = new PostgreSqlBuilder().From("Child")
+            .AppendWhere("payload=$tag$@_p_0$tag$ And server=@@version And value=@_p_0")
+            .AddParam("_p_0", "child");
+
+        // Act
+        var sql = _builder.From("Parent").Where("Id", 1).Join(subquery, "c").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child", _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
     /// 测试 - 未配置 Join 时 On 应抛出异常，且不添加参数或污染后续 Join。
     /// </summary>
     [Fact]

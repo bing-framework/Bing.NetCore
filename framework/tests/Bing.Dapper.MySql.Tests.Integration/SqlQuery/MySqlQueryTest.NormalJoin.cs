@@ -20,13 +20,13 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(productId, "join-inner");
         await InsertProductItemAsync(Guid.NewGuid(), productId, "inner-sku", 3);
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("p.Code As ProductCode,i.Sku As Sku,i.Quantity As Quantity")
+        var description = query.Sql<ProductItemProjection>().Select("p.Code As ProductCode,i.Sku As Sku,i.Quantity As Quantity")
             .AppendFrom("Product p")
             .Join("ProductItem", "i").AppendOn("i.ProductId=p.ProductId")
             .Where("p.ProductId", productId);
 
         // Act
-        var result = await query.ExecuteSingleAsync<ProductItemProjection>();
+        var result = await description.FirstOrDefaultAsync();
 
         // Assert
         Assert.Equal("join-inner", result.ProductCode);
@@ -46,13 +46,13 @@ public partial class MySqlQueryTest
         var productId = Guid.NewGuid();
         await InitProductDataAsync(productId, "join-left");
         using var query = _fixture.CreateQuery();
-        query.AppendSelect("p.Code As ProductCode,i.Sku As Sku")
+        var description = query.Sql<ProductItemProjection>().Select("p.Code As ProductCode,i.Sku As Sku")
             .AppendFrom("Product p")
             .LeftJoin("ProductItem", "i").AppendOn("i.ProductId=p.ProductId")
             .Where("p.ProductId", productId);
 
         // Act
-        var result = await query.ExecuteSingleAsync<ProductItemProjection>();
+        var result = await description.FirstOrDefaultAsync();
 
         // Assert
         Assert.Equal("join-left", result.ProductCode);

@@ -1,11 +1,11 @@
 using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
 using Bing.Data.Sql.Builders;
 using System.Data.Common;
-using System.Reflection;
 
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
@@ -21,24 +21,20 @@ public class EfCoreSqlQueryFactoryTest
         "Data Source=file:ef-core-query-factory?mode=memory&cache=shared";
 
     /// <summary>
-    /// 测试 - EF共享模式应通过内部元数据绑定器绑定模型，不应恢复旧外部上下文依赖。
+    /// 测试目的：公共查询基类不应暴露仅供框架桥接使用的资源和元数据绑定 SPI。
     /// </summary>
     [Fact]
-    public void Create_ShouldUseInternalMetadataBinderInsteadOfLegacyExternalContext()
+    public void SqlQueryBase_ShouldNotExposeRuntimeBindingInterfaces()
     {
         // Arrange
-        var factoryType = typeof(EfCoreSqlQueryFactory);
-
-        // Act
-        var metadataBinder = factoryType.GetMethod("GetMetadataBinder",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        var legacyExternalContext = factoryType.GetMethod("GetExternalContext",
-            BindingFlags.NonPublic | BindingFlags.Static);
+        var interfaces = typeof(SqlQueryBase).GetInterfaces();
 
         // Assert
-        Assert.NotNull(metadataBinder);
-        Assert.Equal("ISqlQueryMetadataBinder", metadataBinder.ReturnType.Name);
-        Assert.Null(legacyExternalContext);
+        var interfaceNames = interfaces.Select(item => item.Name);
+        Assert.DoesNotContain("ISqlQueryExecutionResourceAccessor", interfaceNames);
+        Assert.DoesNotContain("ISqlQueryResourceBinder", interfaceNames);
+        Assert.DoesNotContain("ISqlTransactionScopeResourceBinder", interfaceNames);
+        Assert.DoesNotContain("ISqlQueryMetadataBinder", interfaceNames);
     }
 
     /// <summary>
@@ -56,8 +52,7 @@ public class EfCoreSqlQueryFactoryTest
 
         // Act
         var query = factory.Create(unitOfWork);
-        query.From<TestEntity>().Where<TestEntity>(entity => entity.DisplayName, "Bing");
-        var sql = query.GetDebugSql();
+        var sql = query.Lambda<TestEntity>().Where(entity => entity.DisplayName, "Bing").ToSql();
 
         // Assert
         Assert.Contains("ef_query_users", sql);
@@ -491,8 +486,7 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <param name="query">待执行的查询对象。</param>
     /// <returns>SQLite 元数据项数量。</returns>
-    private static int ExecuteCount(ISqlQuery query) => query.AppendSelect("Count(*)").AppendFrom("sqlite_master")
-        .ExecuteScalar<int>();
+    private static int ExecuteCount(ISqlQuery query) => query.Sql<int>().Count().From("sqlite_master").Scalar();
 
     /// <summary>
     /// 创建服务提供程序

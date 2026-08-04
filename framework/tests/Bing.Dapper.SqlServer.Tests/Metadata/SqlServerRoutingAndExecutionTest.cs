@@ -10,6 +10,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
@@ -284,12 +285,12 @@ public class SqlServerRoutingAndExecutionTest
                 ConnectionString = "Server=default;Database=test;"
             }
         };
-        query.From<MappedSample>("u").Where<MappedSample>(t => t.Name, "abc");
+        var description = query.Lambda<MappedSample>().From("u").Where(t => t.Name, "abc");
 
         // Assert
         query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
-        query.CurrentSql.ShouldContain("[Users_Reporting]");
-        query.CurrentSql.ShouldContain("[reporting_name]");
+        description.ToSql().ShouldContain("[Users_Reporting]");
+        description.ToSql().ShouldContain("[reporting_name]");
     }
 
     /// <summary>
@@ -705,7 +706,7 @@ public class SqlServerRoutingAndExecutionTest
         scope.Commit();
 
         // Assert
-        exception.Message.ShouldContain("事务作用域资源绑定器", Case.Insensitive);
+        exception.Message.ShouldContain("运行时资源绑定", Case.Insensitive);
         trackingProxy.DisposeCount.ShouldBe(1);
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
@@ -738,61 +739,44 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：事务作用域资源绑定器应绑定固定事务上下文，并在租约失效后拒绝资源访问。
+    /// 测试目的：事务作用域完成后，已创建的子查询应拒绝继续创建或执行独立查询描述。
     /// </summary>
     [Fact]
-    public void TransactionScopeResourceBinder_WhenLeaseExpires_ShouldRejectBoundResourceAccess()
+    public void TransactionScope_WhenLeaseExpires_ShouldRejectChildQueryExecution()
     {
         // Arrange
         var connection = new CaptureDbConnection();
         var services = CreateServices();
         services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
         using var provider = services.BuildServiceProvider();
-        var query = provider.GetRequiredService<ISqlQuery>();
-        var transaction = connection.BeginTransaction();
-        var lease = new TestTransactionScopeLease("scope-1");
-        var context = new DatabaseContext
-        {
-            DbKey = "reporting",
-            DataSource = new SqlDataSourceDescriptor { Key = "reporting", DatabaseType = DatabaseType.SqlServer }
-        };
+        var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
+        using var scope = scopeFactory.Begin();
+        var query = scope.CreateQuery();
 
         // Act
-        ((ISqlTransactionScopeResourceBinder)query).BindTransactionScope(context, connection, transaction, lease);
-        var accessor = (ISqlQueryExecutionResourceAccessor)query;
-        var boundTransaction = accessor.GetCurrentTransaction();
-        var transactionId = accessor.GetCurrentTransactionId();
-        lease.IsActive = false;
-        var exception = Should.Throw<InvalidOperationException>(() => accessor.GetCurrentTransaction());
+        scope.Commit();
+        var exception = Should.Throw<InvalidOperationException>(() => query.Sql<int>("Select 1"));
 
         // Assert
-        boundTransaction.ShouldBeSameAs(transaction);
-        transactionId.ShouldBe("scope-1");
-        exception.Message.ShouldBe("事务作用域租约已失效。");
+        exception.Message.ShouldContain("事务作用域已结束");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
     }
 
     /// <summary>
-    /// 测试目的：外部事务绑定器必须拒绝与 Query 外部连接不匹配的事务连接。
+    /// 测试目的：公共查询对象不应暴露外部资源绑定 SPI。
     /// </summary>
     [Fact]
-    public void QueryResourceBinder_WhenTransactionConnectionDiffers_ShouldThrow()
+    public void SqlQuery_WhenCreated_ShouldNotImplementResourceBinder()
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var otherConnection = new CaptureDbConnection();
         var services = CreateServices();
         services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
         using var provider = services.BuildServiceProvider();
         var query = provider.GetRequiredService<ISqlQuery>();
-        var binder = (ISqlQueryResourceBinder)query;
-        binder.BindExternalConnection(connection, SqlConnectionSource.External);
-
-        // Act
-        var exception = Should.Throw<InvalidOperationException>(() =>
-            binder.BindExternalTransaction(otherConnection.BeginTransaction(), "external-1"));
-
         // Assert
-        exception.Message.ShouldBe("外部事务连接与 Query 连接不一致。");
+        Assert.DoesNotContain("ISqlQueryResourceBinder", query.GetType().GetInterfaces().Select(item => item.Name));
     }
 
     /// <summary>
@@ -1232,7 +1216,7 @@ public class SqlServerRoutingAndExecutionTest
             // Assert
             transactionScope.DbKey.ShouldBe("default");
             transactionScope.DatabaseType.ShouldBe(DatabaseType.SqlServer);
-            query.AppendSelect("Count(*)").AppendFrom("[Users]").ExecuteScalar<int>().ShouldBe(1);
+            query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar().ShouldBe(1);
             executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "scope" }).ShouldBe(1);
             transactionScope.Connection.ShouldBeSameAs(connection);
             transactionScope.Transaction.ShouldBeSameAs(connection.LastTransaction);
@@ -1262,7 +1246,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         connection.State.ShouldBe(ConnectionState.Open);
-        Should.Throw<InvalidOperationException>(() => query.ExecuteScalar<int>());
+        Should.Throw<InvalidOperationException>(() => query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
     }
 
     /// <summary>
@@ -1286,7 +1270,7 @@ public class SqlServerRoutingAndExecutionTest
         executor.Dispose();
 
         // Assert
-        Should.Throw<ObjectDisposedException>(() => query.ExecuteScalar<int>());
+        Should.Throw<ObjectDisposedException>(() => query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
         Should.Throw<ObjectDisposedException>(() => executor.ExecuteSql("Update [Users] Set [Name]=@name",
             new { name = "after-dispose" }));
         connection.State.ShouldBe(ConnectionState.Open);
@@ -1303,10 +1287,12 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
-        query.From<MappedSample>("a").Where<MappedSample>(t => t.Name, "abc");
+        var description = query.Lambda<MappedSample>()
+            .Where(t => t.Name, "abc")
+            .Aggregate<int>(SqlAggregateFunction.Count, t => t.Id);
 
         // Act
-        var result = await query.InvokeCountAsync();
+        var result = await description.ScalarAsync();
 
         // Assert
         result.ShouldBe(1);
@@ -1325,10 +1311,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = query.ExecuteScalar<int>();
+        var result = description.Scalar();
 
         // Assert
         Assert.Equal(1, result);
@@ -1346,10 +1332,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = await query.ExecuteScalarAsync<int>();
+        var result = await description.ScalarAsync();
 
         // Assert
         Assert.Equal(1, result);
@@ -1367,10 +1353,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        query.Select("Id,Name").From("[Users]");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
-        var result = query.StreamQuery<MappedSample>().ToList();
+        var result = description.AsEnumerable().ToList();
 
         // Assert
         Assert.Single(result);
@@ -1388,11 +1374,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        query.Select("Id,Name").From("[Users]");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var result = new List<MappedSample>();
-        await foreach (var item in query.StreamQueryAsync<MappedSample>())
+        await foreach (var item in description.AsAsyncEnumerable())
             result.Add(item);
 
         // Assert
@@ -1411,10 +1397,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, false);
-        syncQuery.From("[Users]");
+        var syncDescription = syncQuery.Sql<int>().Select("Count(*)").From("[Users]");
 
         // Act
-        var syncResult = syncQuery.InvokeCount();
+        var syncResult = syncDescription.Scalar();
 
         // Assert
         Assert.Equal(1, syncResult);
@@ -1424,10 +1410,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, false);
-        asyncQuery.From("[Users]");
+        var asyncDescription = asyncQuery.Sql<int>().Select("Count(*)").From("[Users]");
 
         // Act
-        var asyncResult = await asyncQuery.InvokeCountAsync();
+        var asyncResult = await asyncDescription.ScalarAsync();
 
         // Assert
         Assert.Equal(1, asyncResult);
@@ -1444,10 +1430,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, true);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[Name]=@name").AddParam("name", "trace");
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]")
+            .AppendWhere("[Name]=@name").AddParam("name", "trace");
 
         // Act
-        var result = query.ExecuteScalar<int>();
+        var result = description.Scalar();
 
         // Assert
         Assert.Equal(1, result);
@@ -1455,6 +1442,117 @@ public class SqlServerRoutingAndExecutionTest
         Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
         Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
         Assert.Equal("Select Count(*) \r\nFrom [Users] \r\nWhere [Name]='trace'", query.TraceDebugSql);
+    }
+
+    /// <summary>
+    /// 测试目的：Trace 日志应遮蔽敏感参数，避免调试 SQL 或参数清单泄露令牌值。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenTraceContainsSensitiveParameter_ShouldRedactDebugSqlAndParameterLog()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var loggerFactory = new TraceLoggerFactory(true);
+        using var query = CreateTraceQuery(connection, loggerFactory);
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[ApiToken]=@ApiToken")
+            .AddParam("ApiToken", "super-secret-token");
+
+        // Act
+        var result = description.Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        var log = Assert.Single(loggerFactory.Messages);
+        Assert.Contains("Where [ApiToken]='<redacted>'", log);
+        Assert.Contains("@ApiToken : '<redacted>' : <redacted>", log);
+        Assert.DoesNotContain("super-secret-token", log);
+    }
+
+    /// <summary>
+    /// 测试目的：原生文本查询的字典参数诊断应按真实参数名识别并脱敏敏感值。
+    /// </summary>
+    [Fact]
+    public void SqlTextQuery_WhenDictionaryContainsSensitiveParameter_ShouldRedactDiagnosticValue()
+    {
+        // Arrange
+        DiagnosticsMessage before = null;
+        using var observer = new SqlDiagnosticObserver(message =>
+        {
+            if (message.Operation == SqlQueryDiagnosticListenerNames.BeforeExecute)
+                before = message;
+        }, name => name == SqlQueryDiagnosticListenerNames.BeforeExecute);
+        var connection = new CaptureDbConnection { ScalarResult = 1 };
+        using var query = CreateQuery(connection);
+
+        // Act
+        var result = query.Sql<int>("Select @ApiToken", new Dictionary<string, object>
+        {
+            ["ApiToken"] = "super-secret-token"
+        }).Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.NotNull(before);
+        var parameter = Assert.Single(before.Parameters.Items);
+        Assert.Equal("ApiToken", parameter.Name);
+        Assert.True(parameter.IsSensitive);
+        Assert.Null(parameter.Value);
+        Assert.Null(parameter.OriginalValue);
+    }
+
+    /// <summary>
+    /// 测试目的：独立查询描述不得继承或清空 Root Query 已预配置的 Builder 状态。
+    /// </summary>
+    [Fact]
+    public void SqlQueryDescription_WhenRootBuilderIsPreconfigured_ShouldKeepRootStateIsolated()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ScalarResult = 1 };
+        using var query = CreateQuery(connection);
+        query.ConfigureRootSql();
+        var rootSql = query.RootSql;
+        var rootParameters = query.RootParameters;
+
+        // Act
+        var result = query.Sql<int>().Select("Count(*)").From("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(rootSql, query.RootSql);
+        Assert.Equal(rootParameters, query.RootParameters);
+        Assert.Contains("[RootUsers]", query.RootSql);
+        Assert.DoesNotContain("[Users]", query.RootSql);
+    }
+
+    /// <summary>
+    /// 测试目的：同步和异步流式查询的前置钩子失败时，均应执行统一的完成清理钩子。
+    /// </summary>
+    [Fact]
+    public async Task QueryPlanStream_WhenBeforeHookThrows_ShouldRunCompletionHook()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingBeforeSqlServerQuery, ThrowingBeforeSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection()));
+        using var provider = services.BuildServiceProvider();
+        using var syncQuery = provider.GetRequiredService<ThrowingBeforeSqlServerQuery>();
+
+        // Act
+        var syncException = Should.Throw<InvalidOperationException>(() =>
+            syncQuery.Sql<int>("Select 1").AsEnumerable().ToList());
+        using var asyncQuery = provider.GetRequiredService<ThrowingBeforeSqlServerQuery>();
+        var asyncException = await Should.ThrowAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in asyncQuery.Sql<int>("Select 1").AsAsyncEnumerable())
+            {
+            }
+        });
+
+        // Assert
+        syncException.Message.ShouldBe("before failed");
+        asyncException.Message.ShouldBe("before failed");
+        syncQuery.AfterCount.ShouldBe(1);
+        asyncQuery.AfterCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -1466,16 +1564,115 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, true);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]").DisableDebugLog();
+        query.DisableDebugLog();
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = query.ExecuteScalar<int>();
+        var result = description.Scalar();
 
         // Assert
         Assert.Equal(1, result);
         Assert.Equal(1, query.Counters.ToSqlCallCount);
         Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
         Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：禁用调试日志只应影响紧随其后的一个独立查询计划，成功执行后必须恢复默认 Trace 行为。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenDebugLogDisabledForOnePlan_ShouldRestoreAfterSuccess()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, true);
+        query.DisableDebugLog();
+
+        // Act
+        var disabledResult = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        var restoredResult = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, disabledResult);
+        Assert.Equal(1, restoredResult);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.NotNull(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：禁用调试日志的查询执行失败后，后续独立计划必须恢复默认 Trace 行为。
+    /// </summary>
+    [Fact]
+    public void ExecuteScalar_WhenDebugLogDisabledAndExecutionFails_ShouldRestoreAfterFailure()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
+        using var query = CreateCountingQuery(connection, true);
+        query.DisableDebugLog();
+
+        // Act and Assert
+        Assert.Throws<InvalidOperationException>(() => query.Sql<int>().AppendSelect("Count(*)")
+            .AppendFrom("[Users]").Scalar());
+        connection.ThrowOnScalarExecute = false;
+        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.NotNull(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：禁用调试日志的异步查询在执行前取消后，后续独立计划必须恢复默认 Trace 行为。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteScalarAsync_WhenDebugLogDisabledAndCancelled_ShouldRestoreAfterCancellation()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateCountingQuery(connection, true);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        query.DisableDebugLog();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<int>().AppendSelect("Count(*)")
+            .AppendFrom("[Users]").ScalarAsync(cancellationToken: cancellationTokenSource.Token));
+        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.NotNull(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：禁用调试日志的流式查询提前停止枚举后，后续独立计划必须恢复默认 Trace 行为。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenDebugLogDisabledAndEnumerationStopsEarly_ShouldRestoreAfterDisposal()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" })
+        };
+        using var query = CreateCountingQuery(connection, true);
+        query.DisableDebugLog();
+
+        // Act
+        using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("[Users]")
+                   .AsEnumerable().GetEnumerator())
+        {
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal("stream", enumerator.Current.Name);
+        }
+        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, result);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+        Assert.NotNull(query.TraceSql);
     }
 
     /// <summary>
@@ -1490,10 +1687,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-trace" })
         };
         using var query = CreateCountingQuery(connection, true);
-        query.Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
 
         // Act
-        var result = await query.ExecuteQueryAsync<MappedSample>();
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Single(result);
@@ -1512,10 +1709,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        syncQuery.From("[Users]").Where("[Enabled]", true);
+        var syncDescription = syncQuery.Sql<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
-        var syncResult = syncQuery.InvokeCount();
+        var syncResult = syncDescription.Scalar();
 
         // Assert
         Assert.Equal(1, syncResult);
@@ -1526,10 +1723,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        asyncQuery.From("[Users]").Where("[Enabled]", true);
+        var asyncDescription = asyncQuery.Sql<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
-        var asyncResult = await asyncQuery.InvokeCountAsync();
+        var asyncResult = await asyncDescription.ScalarAsync();
 
         // Assert
         Assert.Equal(1, asyncResult);
@@ -1550,10 +1747,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-stream" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        syncQuery.Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
-        var syncResult = syncQuery.StreamQuery<MappedSample>().ToList();
+        var syncResult = syncDescription.AsEnumerable().ToList();
 
         // Assert
         Assert.Single(syncResult);
@@ -1567,11 +1764,11 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        asyncQuery.Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var asyncResult = new List<MappedSample>();
-        await foreach (var item in asyncQuery.StreamQueryAsync<MappedSample>())
+        await foreach (var item in asyncDescription.AsAsyncEnumerable())
             asyncResult.Add(item);
 
         // Assert
@@ -1593,10 +1790,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-page" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        syncQuery.Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
-        var syncResult = syncQuery.PagerQuery(() => syncQuery.ExecuteQuery<MappedSample>(), new Pager(1, 20, "Id"));
+        var syncResult = syncDescription.ToPage(new Pager(1, 20, "Id"));
 
         // Assert
         Assert.Single(syncResult.Data);
@@ -1610,11 +1807,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-page" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        asyncQuery.Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
-        var asyncResult = await asyncQuery.PagerQueryAsync(
-            token => asyncQuery.ExecuteQueryAsync<MappedSample>(cancellationToken: token), new Pager(1, 20, "Id"));
+        var asyncResult = await asyncDescription.ToPageAsync(new Pager(1, 20, "Id"));
 
         // Assert
         Assert.Single(asyncResult.Data);
@@ -1635,10 +1831,10 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => query.ExecuteScalar<int>());
+        var exception = Assert.Throws<InvalidOperationException>(() => description.Scalar());
 
         // Assert
         Assert.Equal("execute failed", exception.Message);
@@ -1660,10 +1856,10 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        query.AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => query.ExecuteScalarAsync<int>());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ScalarAsync());
 
         // Assert
         Assert.Equal("execute failed", exception.Message);
@@ -1671,6 +1867,97 @@ public class SqlServerRoutingAndExecutionTest
         Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
         Assert.Equal(query.TraceSql, query.Counters.LastDebugSqlInput);
         Assert.Same(exception, errorMessage.Exception);
+    }
+
+    /// <summary>
+    /// 测试目的：查询执行失败后，回滚失败不得覆盖原始执行异常，应按主异常在前的顺序聚合。
+    /// </summary>
+    [Fact]
+    public void QueryPlan_WhenOperationAndRollbackFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnScalarExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        using var query = CreateOwnedQuery(connection);
+        ConfigurePrimaryReadTransaction(query);
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
+            .Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：异步查询执行失败后，回滚失败不得覆盖原始执行异常，应按主异常在前的顺序聚合。
+    /// </summary>
+    [Fact]
+    public async Task QueryPlanAsync_WhenOperationAndRollbackFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnScalarExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        using var query = CreateOwnedQuery(connection);
+        ConfigurePrimaryReadTransaction(query);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(() =>
+            query.Sql<int>("Select Count(*) From [Users]").ScalarAsync());
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
+            .Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：诊断错误钩子失败不得覆盖原始执行异常，应作为清理异常保留。
+    /// </summary>
+    [Fact]
+    public void QueryPlan_WhenOperationAndErrorHookFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
+        using var provider = services.BuildServiceProvider();
+        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "error hook failed" }, exception.Flatten().InnerExceptions
+            .Select(item => item.Message));
+    }
+
+    /// <summary>
+    /// 测试目的：查询完成钩子失败不得覆盖原始执行异常，应作为清理异常保留。
+    /// </summary>
+    [Fact]
+    public void QueryPlan_WhenOperationAndCompletionHookFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingCompletionSqlServerQuery, ThrowingCompletionSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
+        using var provider = services.BuildServiceProvider();
+        using var query = provider.GetRequiredService<ThrowingCompletionSqlServerQuery>();
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "completion hook failed" }, exception.Flatten().InnerExceptions
+            .Select(item => item.Message));
     }
 
     /// <summary>
@@ -1685,12 +1972,12 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        query.Select("Id,Name").From("[Users]");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in query.StreamQueryAsync<MappedSample>())
+            await foreach (var _ in description.AsAsyncEnumerable())
             {
             }
         });
@@ -1714,18 +2001,165 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ScalarResult = 7 };
         var query = CreateQuery(connection);
-        query.From<MappedSample>("a").Where<MappedSample>(t => t.Name, "abc");
-
         // Act
-        var result = query.ExecuteProcedureScalar<int>("usp_users_count");
+        var result = query.Procedure<int>("usp_users_count", new { name = "abc" }).Scalar();
 
         // Assert
         result.ShouldBe(7);
         connection.LastCommandText.ShouldBe("usp_users_count");
         connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
         connection.LastCreatedParameters.Count.ShouldBe(1);
-        connection.LastCreatedParameters[0].DbType.ShouldBe(DbType.String);
-        connection.LastCreatedParameters[0].Size.ShouldBe(20);
+        connection.LastCreatedParameters[0].Value.ShouldBe("abc");
+    }
+
+    /// <summary>
+    /// 测试目的：存储过程描述应通过独立计划执行并使用 StoredProcedure 命令类型，不得退化为文本 SQL。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenExecuted_ShouldUseStoredProcedureCommandAndMapRows()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 3, Name = "Charlie" })
+        };
+        var query = CreateQuery(connection);
+
+        // Act
+        var result = query.Procedure<MappedSample>("usp_users_query", new { Name = "Charlie" }).ToList();
+
+        // Assert
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Charlie");
+        connection.LastCommandText.ShouldBe("usp_users_query");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        connection.LastCreatedParameters.Count.ShouldBe(1);
+        connection.LastCreatedParameters[0].Value.ShouldBe("Charlie");
+    }
+
+    /// <summary>
+    /// 测试目的：异步过程描述应将 StoredProcedure 命令类型传递给 CommandDefinition，并保留调用方输出参数对象身份。
+    /// </summary>
+    [Fact]
+    public async Task ProcedureDescription_WhenExecutedAsync_ShouldUseStoredProcedureCommandAndKeepParameterIdentity()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(
+                new MappedSample { Id = 4, Name = "Delta" })
+        };
+        var query = CreateQuery(connection);
+        var parameters = new DynamicParameters();
+        parameters.Add("name", "Delta");
+        parameters.Add("code", dbType: DbType.String, direction: ParameterDirection.Output, size: 20);
+        var description = query.Procedure<MappedSample>("usp_users_query", parameters);
+
+        // Act
+        var result = await description.SingleAsync();
+
+        // Assert
+        result.Name.ShouldBe("Delta");
+        description.Parameters.ShouldBeSameAs(parameters);
+        connection.LastCommandText.ShouldBe("usp_users_query");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+    }
+
+    /// <summary>
+    /// 测试目的：过程查询描述完成同步和异步执行后，应通过框架统一契约读取 output 与 input-output 参数。
+    /// </summary>
+    [Fact]
+    public async Task ProcedureDescription_WhenOutputParametersConfigured_ShouldExposeFinalValues()
+    {
+        // Arrange
+        var syncConnection = new CaptureDbConnection { ScalarResult = 1 };
+        var asyncConnection = new CaptureDbConnection { ScalarResult = 1 };
+        using var syncQuery = CreateQuery(syncConnection);
+        using var asyncQuery = CreateQuery(asyncConnection);
+        var syncDescription = syncQuery.Procedure<int>("usp_sync", new SqlParameterCollection()
+            .AddOutput("result", DbType.Int32)
+            .Add(new SqlParam("state", 1, DbType.Int32, ParameterDirection.InputOutput)));
+        var asyncDescription = asyncQuery.Procedure<int>("usp_async", new SqlParameterCollection()
+            .AddOutput("result", DbType.Int32));
+
+        // Act
+        syncDescription.Scalar();
+        syncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 7;
+        syncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "state").Value = 2;
+        await asyncDescription.ScalarAsync();
+        asyncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 9;
+
+        // Assert
+        Assert.NotNull(syncDescription.OutputParameters);
+        Assert.Equal(7, syncDescription.OutputParameters.GetValue<int>("result"));
+        Assert.Equal(2, syncDescription.OutputParameters.GetValue<int>("state"));
+        Assert.NotNull(asyncDescription.OutputParameters);
+        Assert.Equal(9, asyncDescription.OutputParameters.GetValue<int>("result"));
+    }
+
+    /// <summary>
+    /// 测试目的：存储过程描述多映射应将自定义 splitOn 传递给 Dapper，并按各段结果生成目标对象。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenMultiMapped_ShouldUseCustomSplitOnAndMapSegments()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateProcedureSplitTable(5, "Echo", 9, "Admin")
+        };
+        var query = CreateQuery(connection);
+
+        // Act
+        var result = query.Procedure<ProcedureJoinResult>("usp_users_with_role")
+            .SplitOn("SplitId")
+            .ToList<MappedSample, ProcedureSplitSample>((user, role) => new ProcedureJoinResult
+            {
+                UserName = user.Name,
+                RoleName = role.SplitName
+            });
+
+        // Assert
+        result.Count.ShouldBe(1);
+        result[0].UserName.ShouldBe("Echo");
+        result[0].RoleName.ShouldBe("Admin");
+        connection.LastCommandText.ShouldBe("usp_users_with_role");
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+    }
+
+    /// <summary>
+    /// 测试目的：存储过程描述的 First、FirstOrDefault 和 Single 应分别保持首行、空结果默认值和严格单行语义。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenCardinalityTerminalsUsed_ShouldPreserveExpectedSemantics()
+    {
+        // Arrange
+        var firstConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "First" },
+                new MappedSample { Id = 2, Name = "Second" })
+        };
+        var emptyConnection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable() };
+        var multipleConnection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "First" },
+                new MappedSample { Id = 2, Name = "Second" })
+        };
+
+        // Act
+        var first = CreateQuery(firstConnection).Procedure<MappedSample>("usp_users").First();
+        var empty = CreateQuery(emptyConnection).Procedure<MappedSample>("usp_users").FirstOrDefault();
+        var exception = Should.Throw<InvalidOperationException>(() =>
+            CreateQuery(multipleConnection).Procedure<MappedSample>("usp_users").Single());
+
+        // Assert
+        first.Name.ShouldBe("First");
+        empty.ShouldBeNull();
+        exception.Message.ShouldNotBeNullOrWhiteSpace();
+        firstConnection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        emptyConnection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+        multipleConnection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
     }
 
     /// <summary>
@@ -1742,7 +2176,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = await query.ExecuteProcedureSingleAsync<MappedSample>("usp_users_single");
+        var result = await query.Procedure<MappedSample>("usp_users_single").FirstAsync();
 
         // Assert
         result.ShouldNotBeNull();
@@ -1767,13 +2201,13 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        var result = await query.ExecuteQueryAsync<MappedSample>(buffered: false);
+        var result = await description.ToListAsync();
 
         // Assert
-        query.LastQueryCommandFlags.ShouldBe(CommandFlags.None);
+        query.LastQueryCommandFlags.ShouldBe(CommandFlags.Buffered);
         result.Count.ShouldBe(2);
         connection.ReaderCreateCount.ShouldBe(1);
         connection.ReaderDisposeCount.ShouldBe(1);
@@ -1796,10 +2230,10 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = await query.ExecuteProcedureQueryAsync<MappedSample>("usp_users_query", buffered: false);
+        var result = await query.Procedure<MappedSample>("usp_users_query").ToListAsync();
 
         // Assert
-        query.LastQueryCommandFlags.ShouldBe(CommandFlags.None);
+        query.LastQueryCommandFlags.ShouldBe(CommandFlags.Buffered);
         result.Count.ShouldBe(2);
         connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
         connection.ReaderDisposeCount.ShouldBe(1);
@@ -1821,7 +2255,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = query.ExecuteProcedureQuery<MappedSample>("usp_users_query");
+        var result = query.Procedure<MappedSample>("usp_users_query").ToList();
 
         // Assert
         result.Count.ShouldBe(2);
@@ -1846,10 +2280,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        var result = query.StreamQuery<MappedSample>().ToList();
+        var result = description.AsEnumerable().ToList();
 
         // Assert
         result.Count.ShouldBe(2);
@@ -1874,10 +2308,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        using (var enumerator = query.StreamQuery<MappedSample>().GetEnumerator())
+        using (var enumerator = description.AsEnumerable().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             enumerator.Current.Name.ShouldBe("Alice");
@@ -1905,10 +2339,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        using (var enumerator = query.StreamQuery<MappedSample>().GetEnumerator())
+        using (var enumerator = description.AsEnumerable().GetEnumerator())
             enumerator.MoveNext().ShouldBeTrue();
 
         // Assert
@@ -1931,10 +2365,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        await foreach (var item in query.StreamQueryAsync<MappedSample>())
+        await foreach (var item in description.AsAsyncEnumerable())
         {
             item.Name.ShouldBe("Alice");
             break;
@@ -1959,10 +2393,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
-        await foreach (var item in query.StreamAsync<MappedSample>())
+        await foreach (var item in description.AsAsyncEnumerable())
         {
             item.Name.ShouldBe("Alice");
             break;
@@ -1989,13 +2423,13 @@ public class SqlServerRoutingAndExecutionTest
         table.Rows.Add("invalid-id", "Alice");
         var connection = new CaptureDbConnection { ResultSet = table };
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         Exception exception = null;
         try
         {
-            await foreach (var _ in query.StreamAsync<MappedSample>())
+            await foreach (var _ in description.AsAsyncEnumerable())
             {
             }
         }
@@ -2012,6 +2446,118 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：同步流式读取失败时，错误诊断钩子异常不得覆盖原始读取异常，二者应按顺序聚合。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenReadAndErrorHookFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var table = new DataTable();
+        table.Columns.Add(nameof(MappedSample.Id), typeof(string));
+        table.Columns.Add(nameof(MappedSample.Name), typeof(string));
+        table.Rows.Add("invalid-id", "Alice");
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection { ResultSet = table }));
+        using var provider = services.BuildServiceProvider();
+        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<MappedSample>()
+            .Select("Id,Name").From("Users").AsEnumerable().ToList());
+
+        // Assert
+        Assert.Equal("error hook failed", exception.Flatten().InnerExceptions.Last().Message);
+        Assert.NotEqual("error hook failed", exception.Flatten().InnerExceptions.First().Message);
+    }
+
+    /// <summary>
+    /// 测试目的：异步流式读取失败时，错误诊断钩子异常不得覆盖原始读取异常，二者应按顺序聚合。
+    /// </summary>
+    [Fact]
+    public async Task StreamQueryAsync_WhenReadAndErrorHookFail_ShouldPreserveBothExceptions()
+    {
+        // Arrange
+        var table = new DataTable();
+        table.Columns.Add(nameof(MappedSample.Id), typeof(string));
+        table.Columns.Add(nameof(MappedSample.Name), typeof(string));
+        table.Rows.Add("invalid-id", "Alice");
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection { ResultSet = table }));
+        using var provider = services.BuildServiceProvider();
+        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(async () =>
+        {
+            await foreach (var _ in query.Sql<MappedSample>().Select("Id,Name").From("Users").AsAsyncEnumerable())
+            {
+            }
+        });
+
+        // Assert
+        Assert.Equal("error hook failed", exception.Flatten().InnerExceptions.Last().Message);
+        Assert.NotEqual("error hook failed", exception.Flatten().InnerExceptions.First().Message);
+    }
+
+    /// <summary>
+    /// 测试目的：同步流提前停止时，完成钩子失败应被传播且仅调用一次。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenEnumerationStopsEarlyAndCompletionHookFails_ShouldRunHookOnce()
+    {
+        // Arrange
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ThrowingCompletionSqlServerQuery, ThrowingCompletionSqlServerQuery>(options =>
+            options.Connection(new CaptureDbConnection
+            {
+                ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+            }));
+        using var provider = services.BuildServiceProvider();
+        using var query = provider.GetRequiredService<ThrowingCompletionSqlServerQuery>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            using var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users").AsEnumerable()
+                .GetEnumerator();
+            enumerator.MoveNext();
+        });
+
+        // Assert
+        Assert.Equal("completion hook failed", exception.Message);
+        Assert.Equal(1, query.AfterCount);
+    }
+
+    /// <summary>
+    /// 测试目的：读取器释放失败应走错误清理路径，并在抛出后归还执行租约。
+    /// </summary>
+    [Fact]
+    public void StreamQuery_WhenReaderDisposeFails_ShouldReleaseExecutionLease()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" }),
+            ThrowOnReaderDispose = true
+        };
+        using var query = CreateQuery(connection);
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable().ToList());
+        var readerDisposeCount = connection.ReaderDisposeCount;
+        connection.ThrowOnReaderDispose = false;
+        var result = query.Sql<int>("Select Count(*) From [Users]").Scalar();
+
+        // Assert
+        Assert.Equal("reader dispose failed", exception.Message);
+        Assert.True(readerDisposeCount >= 1);
+        Assert.Equal(1, result);
+    }
+
+    /// <summary>
     /// 测试 - 主库短事务策略下应拒绝流式查询。
     /// </summary>
     [Fact]
@@ -2020,11 +2566,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
-        query.Select("Id,Name").From("Users");
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
         ConfigurePrimaryReadTransaction(query);
 
         // Act
-        var exception = Should.Throw<InvalidOperationException>(() => query.StreamQuery<MappedSample>());
+        var exception = Should.Throw<InvalidOperationException>(() => description.AsEnumerable().ToList());
 
         // Assert
         exception.Message.ShouldContain("PrimaryReadStrategy.Transaction");
@@ -2062,24 +2608,6 @@ public class SqlServerRoutingAndExecutionTest
             services.AddSingleton(metadataOptions);
         services.AddSqlCore();
         return services;
-    }
-
-    /// <summary>
-    /// 可控事务作用域租约。
-    /// </summary>
-    private sealed class TestTransactionScopeLease : ISqlTransactionScopeLease
-    {
-        public TestTransactionScopeLease(string transactionId) => TransactionId = transactionId;
-
-        public string TransactionId { get; }
-
-        public bool IsActive { get; set; } = true;
-
-        public void EnsureActive()
-        {
-            if (IsActive == false)
-                throw new InvalidOperationException("事务作用域租约已失效。");
-        }
     }
 
     /// <summary>
@@ -2148,6 +2676,25 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建存储过程多映射样例结果集。
+    /// </summary>
+    /// <param name="userId">用户标识。</param>
+    /// <param name="userName">用户名称。</param>
+    /// <param name="roleId">角色标识。</param>
+    /// <param name="roleName">角色名称。</param>
+    /// <returns>包含两个 Dapper 映射段的数据表。</returns>
+    private static DataTable CreateProcedureSplitTable(int userId, string userName, int roleId, string roleName)
+    {
+        var table = new DataTable();
+        table.Columns.Add(nameof(MappedSample.Id), typeof(int));
+        table.Columns.Add(nameof(MappedSample.Name), typeof(string));
+        table.Columns.Add(nameof(ProcedureSplitSample.SplitId), typeof(int));
+        table.Columns.Add(nameof(ProcedureSplitSample.SplitName), typeof(string));
+        table.Rows.Add(userId, userName, roleId, roleName);
+        return table;
+    }
+
+    /// <summary>
     /// 创建查询对象
     /// </summary>
     /// <param name="connection">数据库连接</param>
@@ -2162,15 +2709,40 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建用于验证真实 Trace 日志的查询对象。
+    /// </summary>
+    /// <param name="connection">测试连接。</param>
+    /// <param name="loggerFactory">日志工厂。</param>
+    /// <returns>未重写日志写入行为的查询对象。</returns>
+    private static InspectableSqlServerQuery CreateTraceQuery(CaptureDbConnection connection, ILoggerFactory loggerFactory)
+    {
+        var services = CreateServices();
+        services.AddSingleton(loggerFactory);
+        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+            options.Connection(connection));
+        var provider = services.BuildServiceProvider();
+        return provider.GetRequiredService<InspectableSqlServerQuery>();
+    }
+
+    /// <summary>
     /// 创建用于验证 SQL 渲染次数的查询对象。
     /// </summary>
     /// <param name="connection">数据库连接。</param>
     /// <param name="traceEnabled">是否启用 Trace 日志。</param>
     /// <returns>可计数 SQL Server 查询对象。</returns>
     private static CountingSqlServerQuery CreateCountingQuery(CaptureDbConnection connection, bool traceEnabled)
+        => CreateCountingQuery(connection, new TraceLoggerFactory(traceEnabled));
+
+    /// <summary>
+    /// 创建指定日志工厂的可计数 SQL Server 查询对象。
+    /// </summary>
+    /// <param name="connection">测试连接。</param>
+    /// <param name="loggerFactory">日志工厂。</param>
+    /// <returns>可计数 SQL Server 查询对象。</returns>
+    private static CountingSqlServerQuery CreateCountingQuery(CaptureDbConnection connection, ILoggerFactory loggerFactory)
     {
         var services = CreateServices();
-        services.AddSingleton<ILoggerFactory>(new TraceLoggerFactory(traceEnabled));
+        services.AddSingleton(loggerFactory);
         services.AddSqlServerSqlQuery<CountingSqlServerQuery, CountingSqlServerQuery>(options =>
             options.Connection(connection));
         var provider = services.BuildServiceProvider();
@@ -2290,9 +2862,13 @@ public class SqlServerRoutingAndExecutionTest
 
         public string CurrentSql => GetSql();
 
-        public Task<int> InvokeCountAsync() => GetCountAsync();
-
         public string InvokeResolveConnectionString() => ResolveConnectionString();
+
+        public string RootSql => SqlBuilder.ToSql();
+
+        public IReadOnlyDictionary<string, object> RootParameters => SqlBuilder.GetParams();
+
+        public void ConfigureRootSql() => SqlBuilder.Select("RootId").From("RootUsers").Where("RootId", 7);
 
         public CommandFlags LastQueryCommandFlags { get; private set; }
 
@@ -2304,6 +2880,81 @@ public class SqlServerRoutingAndExecutionTest
                 cancellationToken, commandType);
             LastQueryCommandFlags = command.Flags;
             return command;
+        }
+    }
+
+    /// <summary>
+    /// 前置执行钩子固定失败的测试查询对象。
+    /// </summary>
+    private sealed class ThrowingBeforeSqlServerQuery : SqlServerSqlQueryBase
+    {
+        /// <summary>
+        /// 初始化一个<see cref="ThrowingBeforeSqlServerQuery"/>类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        public ThrowingBeforeSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<ThrowingBeforeSqlServerQuery> options) : base(serviceProvider, options)
+        {
+        }
+
+        /// <summary>
+        /// 完成清理钩子调用次数。
+        /// </summary>
+        public int AfterCount { get; private set; }
+
+        /// <inheritdoc />
+        protected override bool ExecuteBefore() => throw new InvalidOperationException("before failed");
+
+        /// <inheritdoc />
+        protected override void ExecuteAfter(object result) => AfterCount++;
+    }
+
+    /// <summary>
+    /// 错误诊断钩子固定失败的测试查询对象。
+    /// </summary>
+    private sealed class ThrowingErrorSqlServerQuery : SqlServerSqlQueryBase
+    {
+        /// <summary>
+        /// 初始化一个<see cref="ThrowingErrorSqlServerQuery"/>类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        public ThrowingErrorSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<ThrowingErrorSqlServerQuery> options) : base(serviceProvider, options)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override void ExecuteError(DiagnosticsMessage message, Exception exception) =>
+            throw new InvalidOperationException("error hook failed");
+    }
+
+    /// <summary>
+    /// 完成钩子固定失败的测试查询对象。
+    /// </summary>
+    private sealed class ThrowingCompletionSqlServerQuery : SqlServerSqlQueryBase
+    {
+        /// <summary>
+        /// 初始化一个<see cref="ThrowingCompletionSqlServerQuery"/>类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        public ThrowingCompletionSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<ThrowingCompletionSqlServerQuery> options) : base(serviceProvider, options)
+        {
+        }
+
+        /// <summary>
+        /// 完成钩子调用次数。
+        /// </summary>
+        public int AfterCount { get; private set; }
+
+        /// <inheritdoc />
+        protected override void ExecuteAfter(object result)
+        {
+            AfterCount++;
+            throw new InvalidOperationException("completion hook failed");
         }
     }
 
@@ -2337,20 +2988,11 @@ public class SqlServerRoutingAndExecutionTest
         /// </summary>
         public string TraceDebugSql { get; private set; }
 
-        /// <summary>
-        /// 调用受保护的同步 Count 查询。
-        /// </summary>
-        /// <returns>查询结果。</returns>
-        public int InvokeCount() => GetCount();
-
-        /// <summary>
-        /// 调用受保护的异步 Count 查询。
-        /// </summary>
-        /// <returns>查询结果。</returns>
-        public Task<int> InvokeCountAsync() => GetCountAsync();
-
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => new CountingSqlServerBuilder(Counters);
+
+        /// <inheritdoc />
+        protected override ISqlBuilder CreateIndependentSqlBuilder() => new CountingSqlServerBuilder(Counters);
 
         /// <inheritdoc />
         protected override void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
@@ -2426,16 +3068,24 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class TraceLoggerFactory : ILoggerFactory
     {
-        private readonly bool _traceEnabled;
+        private readonly TraceLogger _logger;
 
         /// <summary>
         /// 初始化一个<see cref="TraceLoggerFactory"/>类型的实例。
         /// </summary>
         /// <param name="traceEnabled">是否启用 Trace 日志。</param>
-        public TraceLoggerFactory(bool traceEnabled) => _traceEnabled = traceEnabled;
+        public TraceLoggerFactory(bool traceEnabled)
+        {
+            _logger = new TraceLogger(traceEnabled);
+        }
+
+        /// <summary>
+        /// 已格式化的 Trace 日志文本。
+        /// </summary>
+        public IReadOnlyList<string> Messages => _logger.Messages;
 
         /// <inheritdoc />
-        public ILogger CreateLogger(string categoryName) => new TraceLogger(_traceEnabled);
+        public ILogger CreateLogger(string categoryName) => _logger;
 
         /// <inheritdoc />
         public void AddProvider(ILoggerProvider provider) { }
@@ -2450,12 +3100,18 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class TraceLogger : ILogger
     {
         private readonly bool _traceEnabled;
+        private readonly List<string> _messages = new();
 
         /// <summary>
         /// 初始化一个<see cref="TraceLogger"/>类型的实例。
         /// </summary>
         /// <param name="traceEnabled">是否启用 Trace 日志。</param>
         public TraceLogger(bool traceEnabled) => _traceEnabled = traceEnabled;
+
+        /// <summary>
+        /// 已格式化的 Trace 日志文本。
+        /// </summary>
+        public IReadOnlyList<string> Messages => _messages;
 
         /// <inheritdoc />
         public IDisposable BeginScope<TState>(TState state) => EmptyScope.Instance;
@@ -2465,7 +3121,11 @@ public class SqlServerRoutingAndExecutionTest
 
         /// <inheritdoc />
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
-            Func<TState, Exception, string> formatter) { }
+            Func<TState, Exception, string> formatter)
+        {
+            if (IsEnabled(logLevel))
+                _messages.Add(formatter(state, exception));
+        }
     }
 
     /// <summary>
@@ -2626,6 +3286,38 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 存储过程第二映射段样例。
+    /// </summary>
+    private sealed class ProcedureSplitSample
+    {
+        /// <summary>
+        /// 角色标识。
+        /// </summary>
+        public int SplitId { get; set; }
+
+        /// <summary>
+        /// 角色名称。
+        /// </summary>
+        public string SplitName { get; set; }
+    }
+
+    /// <summary>
+    /// 存储过程多映射结果。
+    /// </summary>
+    private sealed class ProcedureJoinResult
+    {
+        /// <summary>
+        /// 用户名称。
+        /// </summary>
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// 角色名称。
+        /// </summary>
+        public string RoleName { get; set; }
+    }
+
+    /// <summary>
     /// 捕获参数的数据库连接
     /// </summary>
     private sealed class CaptureDbConnection : DbConnection
@@ -2654,6 +3346,16 @@ public class SqlServerRoutingAndExecutionTest
         /// 是否在标量执行时抛出异常。
         /// </summary>
         public bool ThrowOnScalarExecute { get; set; }
+
+        /// <summary>
+        /// 是否在读取器释放时抛出异常。
+        /// </summary>
+        public bool ThrowOnReaderDispose { get; set; }
+
+        /// <summary>
+        /// 是否让本连接创建的事务在回滚时抛出异常。
+        /// </summary>
+        public bool ThrowOnTransactionRollback { get; set; }
 
         /// <summary>
         /// 是否在原生异步开始事务时抛出异常。
@@ -2692,7 +3394,10 @@ public class SqlServerRoutingAndExecutionTest
 
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
-            LastTransaction = new CaptureDbTransaction(this, isolationLevel);
+            LastTransaction = new CaptureDbTransaction(this, isolationLevel)
+            {
+                ThrowOnRollback = ThrowOnTransactionRollback
+            };
             return LastTransaction;
         }
 
@@ -2705,7 +3410,10 @@ public class SqlServerRoutingAndExecutionTest
             AsyncBeginCount++;
             if (ThrowOnAsyncBegin)
                 throw new InvalidOperationException("async begin failed");
-            LastTransaction = new CaptureDbTransaction(this, isolationLevel);
+            LastTransaction = new CaptureDbTransaction(this, isolationLevel)
+            {
+                ThrowOnRollback = ThrowOnTransactionRollback
+            };
             return ValueTask.FromResult<DbTransaction>(LastTransaction);
         }
 
@@ -2920,6 +3628,8 @@ public class SqlServerRoutingAndExecutionTest
             {
                 _reader.Dispose();
                 _connection.OnReaderDisposed();
+                if (_connection.ThrowOnReaderDispose)
+                    throw new InvalidOperationException("reader dispose failed");
             }
 
             base.Dispose(disposing);

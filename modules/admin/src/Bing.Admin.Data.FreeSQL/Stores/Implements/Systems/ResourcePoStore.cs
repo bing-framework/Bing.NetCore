@@ -7,6 +7,7 @@ using Bing.Admin.Data.Stores.Abstractions.Systems;
 using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Stores;
 
 namespace Bing.Admin.Data.Stores.Implements.Systems
@@ -33,13 +34,14 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql
-                .Select<ResourcePo>(true)
-                .From<ResourcePo>("a")
+            var result = await Sql.Lambda<ResourcePo>()
+                .ClearSelect()
+                .Select(true)
+                .From("a")
                 .Join<Permission>("b")
                 .On<ResourcePo, Permission>((l, r) => l.Id == r.ResourceId)
-                .Where<ResourcePo>(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.Enabled)
-                .Where<Permission>(x => roleIds.Contains(x.RoleId) && x.IsDeny == false).ToListAsync<ResourcePo>();
+                .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.Enabled)
+                .WhereFrom<Permission>(x => roleIds.Contains(x.RoleId) && x.IsDeny == false).ToListAsync();
             return result.Distinct<ResourcePo>().OrderBy(x => x.SortId).ToList();
         }
 
@@ -51,11 +53,12 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql
-                .Select<ResourcePo>(true)
-                .From<ResourcePo>("a")
-                .Where<ResourcePo>(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
-                .ToListAsync<ResourcePo>();
+            var result = await Sql.Lambda<ResourcePo>()
+                .ClearSelect()
+                .Select(true)
+                .From("a")
+                .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
+                .ToListAsync();
             return result;
         }
 
@@ -68,11 +71,12 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (moduleId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql
-                .Select<ResourcePo>(true)
-                .From<ResourcePo>("a")
-                .Where<ResourcePo>(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
-                .ToListAsync<ResourcePo>();
+            var result = await Sql.Lambda<ResourcePo>()
+                .ClearSelect()
+                .Select(true)
+                .From("a")
+                .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
+                .ToListAsync();
             return result;
         }
 
@@ -85,14 +89,15 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql
-                .Select<ResourcePo>(true)
-                .From<ResourcePo>("a")
+            var result = await Sql.Lambda<ResourcePo>()
+                .ClearSelect()
+                .Select(true)
+                .From("a")
                 .Join<Permission>("b")
                 .On<ResourcePo, Permission>((l, r) => l.Id == r.ResourceId)
-                .Where<ResourcePo>(x =>
+                .Where(x =>
                     x.Type == ResourceType.Operation && x.ApplicationId == applicationId && x.Enabled)
-                .Where<Permission>(x => roleIds.Contains(x.RoleId) && x.IsDeny == false).ToListAsync<ResourcePo>();
+                .WhereFrom<Permission>(x => roleIds.Contains(x.RoleId) && x.IsDeny == false).ToListAsync();
             return result.Distinct<ResourcePo>().OrderBy(x => x.SortId).ToList();
         }
 
@@ -104,11 +109,12 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql
-                .Select<ResourcePo>(true)
-                .From<ResourcePo>("a")
-                .Where<ResourcePo>(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)
-                .ToListAsync<ResourcePo>();
+            var result = await Sql.Lambda<ResourcePo>()
+                .ClearSelect()
+                .Select(true)
+                .From("a")
+                .Where(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)
+                .ToListAsync();
             return result;
         }
 
@@ -118,10 +124,11 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         /// <param name="applicationId">应用程序标识</param>
         /// <param name="moduleId">模块标识</param>
         public async Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId) =>
-            await Sql.Max<ResourcePo>(x => x.SortId)
-                .From<ResourcePo>("a")
-                .Where<ResourcePo>(x => x.ApplicationId == applicationId)
-                .Where<ResourcePo>(x => x.ParentId == moduleId)
-                .ToEntityAsync<int?>();
+            await Sql.Lambda<ResourcePo>()
+                .From("a")
+                .Where(x => x.ApplicationId == applicationId)
+                .Where(x => x.ParentId == moduleId)
+                .Aggregate<int?>(SqlAggregateFunction.Max, x => x.SortId)
+                .ScalarAsync();
     }
 }

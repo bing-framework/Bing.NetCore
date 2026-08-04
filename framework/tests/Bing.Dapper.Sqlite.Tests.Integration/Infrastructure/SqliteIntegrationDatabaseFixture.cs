@@ -58,13 +58,16 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
             EntityType = typeof(SqliteStructuredTableSample),
             TableName = "samples"
         }));
+        services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(SqliteStructuredOrderSample),
+            TableName = "Orders"
+        }));
         services.AddSqlDataSource("default", DatabaseType.Sqlite, FirstConnectionString);
         services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString,
             setupAction: descriptor => descriptor.MappingProfile = "first-profile");
         services.AddSqlDataSource(SecondDatabaseKey, DatabaseType.Sqlite, SecondConnectionString);
-        services.AddSqliteSqlQuery();
-        services.AddSqliteSqlExecutor();
-        services.AddSqliteSqlMultipleQueryExecutor();
+        services.AddSqliteProvider();
         _serviceProvider = services.BuildServiceProvider();
 
         await InitializeDatabaseAsync(FirstConnectionString);

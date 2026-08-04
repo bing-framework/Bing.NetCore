@@ -24,11 +24,12 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(id2, code);
 
         // 获取对象
-        var result = _sqlQuery
-            .Select<Product>(true)
-            .From<Product>()
-            .In<Product>(x => x.Id, new object[] { id, id2 })
-            .ExecuteQuery<Product>();
+        var result = _sqlQuery.Lambda<Product>()
+            .ClearSelect()
+            .Select(true)
+            .From()
+            .Where<Product>(x => x.Id, new object[] { id, id2 }, Operator.In)
+            .ToList();
 
         //断言
         Assert.NotNull(result);

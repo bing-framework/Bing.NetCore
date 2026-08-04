@@ -1,6 +1,7 @@
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders.Conditions;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -31,23 +32,41 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 空 In 与 Not In 集合应忽略条件且不生成参数。
+    /// 测试 - 空 In 与 Not In 集合应生成明确的常量条件且不生成参数。
     /// </summary>
     [Fact]
-    public void InAndNotIn_WhenValuesAreEmpty_ShouldOmitConditionsAndKeepParametersEmpty()
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldRenderConstantConditionsAndKeepParametersEmpty()
     {
         // Arrange
-        const string expected = "Select * \r\nFrom `users`";
+        const string expectedIn = "Select * \r\nFrom `users` \r\nWhere 1 = 0";
+        const string expectedNotIn = "Select * \r\nFrom `users` \r\nWhere 1 = 1";
 
         // Act
         var inBuilder = _builder.New().From("users").In("Id", Array.Empty<object>());
         var notInBuilder = _builder.New().From("users").NotIn("Id", Array.Empty<object>());
 
         // Assert
-        Assert.Equal(expected, inBuilder.ToSql());
-        Assert.Equal(expected, notInBuilder.ToSql());
+        Assert.Equal(expectedIn, inBuilder.ToSql());
+        Assert.Equal(expectedNotIn, notInBuilder.ToSql());
         Assert.Empty(inBuilder.GetParams());
         Assert.Empty(notInBuilder.GetParams());
+    }
+
+    /// <summary>
+    /// 测试 - 空 In 常量条件应在 And 与 Or 组合中保持逻辑位置，避免筛选条件被移除。
+    /// </summary>
+    [Fact]
+    public void In_WhenValuesAreEmptyAndCombinedWithAndOr_ShouldKeepConstantCondition()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom `users` \r\nWhere (`Status`=@_p_0 And 1 = 0 Or 1 = 1)";
+
+        // Act
+        var sql = _builder.New().From("users").Where("Status", "active")
+            .In("Id", Array.Empty<object>()).Or(new SqlCondition("1 = 1")).ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
     }
 
     /// <summary>

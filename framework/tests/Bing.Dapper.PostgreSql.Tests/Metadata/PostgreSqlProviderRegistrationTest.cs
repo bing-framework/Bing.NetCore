@@ -38,7 +38,8 @@ public class PostgreSqlProviderRegistrationTest
         Assert.IsType<PostgreSqlQuery>(query);
         Assert.IsType<PostgreSqlExecutor>(executor);
         Assert.IsType<PostgreSqlMultipleQueryExecutor>(multipleQueryExecutor);
-        Assert.IsType<PostgreSqlDialect>(((ISqlCommonPartAccessor)query).Dialect);
+        Assert.IsType<PostgreSqlDialect>(provider.GetRequiredService<ISqlProviderResolver>()
+            .Resolve(PostgreSqlSqlProvider.Instance.Key).Dialect);
         Assert.IsType<NpgsqlConnection>(connection);
         Assert.IsType<PostgreSqlBatchUpdateRenderer>(provider.GetRequiredService<ISqlBatchUpdateRenderer>());
         Assert.Equal("Host=localhost;Database=test;", connection.ConnectionString);

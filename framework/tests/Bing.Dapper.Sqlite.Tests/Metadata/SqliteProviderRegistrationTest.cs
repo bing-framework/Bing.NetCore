@@ -56,7 +56,8 @@ public class SqliteProviderRegistrationTest
         // Assert
         Assert.IsType<SqliteSqlQuery>(query);
         Assert.IsType<SqliteSqlExecutor>(executor);
-        Assert.IsType<SqliteDialect>(((ISqlCommonPartAccessor)query).Dialect);
+        Assert.IsType<SqliteDialect>(provider.GetRequiredService<ISqlProviderResolver>()
+            .Resolve(SqliteSqlProvider.Instance.Key).Dialect);
         Assert.IsType<SqliteConnection>(connection);
         Assert.Equal("Data Source=:memory:", connection.ConnectionString);
     }
