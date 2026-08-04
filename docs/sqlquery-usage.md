@@ -648,37 +648,44 @@ await foreach (var user in query.StreamAsync<User>(cancellationToken: cancellati
 
 ---
 
-## 典型使用示例
+## 独立查询描述
 
-> 以下示例中的执行部分（`SomeExecutor.Execute*`）仅为示意，请根据实际项目中 `ISqlQueryOperation` 的实现替换为真实调用方式。
+根 `ISqlQuery` 保存连接、事务和诊断状态，并持有可变 Builder。需要构建并执行单个查询时，使用 `Sql()` 创建独立查询描述：每个描述都有独立 Builder，执行时仍复用根查询的连接、事务、诊断和 Trace 上下文。
+
+```csharp
+var fluent = sqlQuery.Sql<Order>();
+var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new { Id = orderId });
+```
+
+- `Sql()`：创建未指定映射类型的 Fluent 描述，终结时通过泛型参数指定结果类型，例如 `ToList<Order>()`。
+- `Sql<TResult>()`：创建指定映射类型的 Fluent 描述，支持 `ToList`、`First`、`Single`、`Scalar` 及同步/异步流式终结方法。
+- `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换。
+
+原生 SQL 仅应使用调用方控制的固定模板，并通过参数对象绑定外部值；不得将外部输入拼接到 SQL 文本、表名、列名、排序字段或其他结构位置。
+
+## 典型使用示例
 
 ### 示例一：简单列表查询
 
 ```csharp
 public async Task<List<Order>> GetPaidOrdersAsync(ISqlQuery sqlQuery)
 {
-    sqlQuery
+    return await sqlQuery.Sql<Order>()
         .Select<Order>(x => new object[] { x.Id, x.OrderNo, x.CustomerName, x.Amount })
         .From<Order>("o")
-        .Where<Order>(x => x.Status, OrderStatus.Paid);
-
-    var builder = sqlQuery.GetBuilder();
-    var sql = builder.ToDebugSql();
-    var parameters = builder.GetParams(); // 伪代码，按实际 ISqlBuilder 实现调整
-
-    var result = await SomeExecutor.ExecuteQueryAsync<Order>(sql, parameters);
-    return result;
+        .Where<Order>(x => x.Status, OrderStatus.Paid)
+        .ToListAsync();
 }
 ```
 
-### 示例二：带可选条件的分页查询
+### 示例二：带可选条件的限量查询
 
 ```csharp
-public async Task<PagerList<OrderDto>> QueryOrdersAsync(
+public async Task<List<OrderDto>> QueryOrdersAsync(
     ISqlQuery sqlQuery,
     OrderQueryParameter parameter)
 {
-    sqlQuery
+    return await sqlQuery.Sql<OrderDto>()
         .Select<Order>(x => new object[]
         {
             x.Id, x.OrderNo, x.CustomerName, x.Amount, x.Status
@@ -688,19 +695,10 @@ public async Task<PagerList<OrderDto>> QueryOrdersAsync(
         .OrIf<Order>(
             !string.IsNullOrWhiteSpace(parameter.Keyword),
             x => x.OrderNo.Contains(parameter.Keyword)
-              || x.CustomerName.Contains(parameter.Keyword));
-
-    var result = await sqlQuery.PagerQueryAsync(
-        func: async () =>
-        {
-            var builder = sqlQuery.GetBuilder();
-            var sql = builder.ToDebugSql();
-            var parameters = builder.GetParams();
-            return await SomeExecutor.ExecuteQueryAsync<OrderDto>(sql, parameters);
-        },
-        parameter: parameter);
-
-    return result;
+              || x.CustomerName.Contains(parameter.Keyword))
+        .Skip(20)
+        .Take(20)
+        .ToListAsync();
 }
 ```
 
@@ -711,38 +709,26 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
     ISqlQuery sqlQuery,
     Guid orderId)
 {
-    sqlQuery
+    return await sqlQuery.Sql<OrderWithCustomerDto>()
         .Select<Order>(x => new object[] { x.Id, x.OrderNo, x.Amount })
         .Select<Customer>(x => new object[] { x.Name, x.Phone })
         .From<Order>("o")
         .LeftJoin<Customer>("c")
         .On<Order, Customer>(o => o.CustomerId, c => c.Id)
-        .Where<Order>(o => o.Id, orderId);
-
-    var builder = sqlQuery.GetBuilder();
-    var sql = builder.ToDebugSql();
-    var parameters = builder.GetParams();
-
-    var list = await SomeExecutor.ExecuteQueryAsync<OrderWithCustomerDto>(sql, parameters);
-    return list;
+        .Where<Order>(o => o.Id, orderId)
+        .ToListAsync();
 }
 ```
 
-### 示例四：忽略逻辑删除过滤器
+### 示例四：原生 SQL 文本查询
 
 ```csharp
-public async Task<Order> GetDeletedOrderAsync(ISqlQuery sqlQuery, Guid orderId)
+public Task<Order> GetOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 {
-    sqlQuery
-        .IgnoreDeletedFilter()
-        .From<Order>("o")
-        .Where<Order>(x => x.Id, orderId);
-
-    var builder = sqlQuery.GetBuilder();
-    var sql = builder.ToDebugSql();
-    var parameters = builder.GetParams();
-
-    return await SomeExecutor.ExecuteSingleAsync<Order>(sql, parameters);
+    return sqlQuery.Sql<Order>(
+            "Select Id,OrderNo,CustomerName,Amount From Orders Where Id=@Id",
+            new { Id = orderId })
+        .FirstOrDefaultAsync();
 }
 ```
 

@@ -337,3 +337,53 @@ public class SqlBuilderAppendToBenchmarks
         return result.Length;
     }
 }
+
+/// <summary>
+/// CTE 快照与上下文感知参数扫描性能基准。
+/// </summary>
+[MemoryDiagnoser]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqlBuilderCteAndParameterTokenBenchmarks
+{
+    private MySqlBuilder _debugBuilder;
+    private string _debugSql;
+
+    /// <summary>
+    /// 初始化参数标记扫描基准使用的稳定 SQL。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        _debugBuilder = new MySqlBuilder();
+        _debugBuilder.AppendSelect("*").AppendFrom("orders")
+            .AppendWhere("Code=@Code And Note='@Code' /* @Code */ And `@Code`=@Code")
+            .AddParam("Code", "benchmark");
+        _debugSql = _debugBuilder.ToSql();
+    }
+
+    /// <summary>
+    /// 测量注册 CTE 时独立快照输入 Builder 并渲染复合查询的成本。
+    /// </summary>
+    /// <returns>包含 CTE 的 SQL 文本。</returns>
+    [Benchmark]
+    public string ConfigureCteSnapshotAndRender()
+    {
+        var cte = new MySqlBuilder();
+        cte.Select("o.Id,o.CustomerId").From("orders", "o")
+            .LeftJoin("order_items", "i").AppendOn("i.OrderId=o.Id")
+            .Where("o.Enabled", true)
+            .Where("i.Enabled", true);
+
+        return new MySqlBuilder().With("active_orders", cte)
+            .Select("Id,CustomerId")
+            .From("active_orders")
+            .ToSql();
+    }
+
+    /// <summary>
+    /// 测量调试 SQL 替换时跳过字符串、注释和引用标识符内参数文本的成本。
+    /// </summary>
+    /// <returns>调试 SQL 文本。</returns>
+    [Benchmark]
+    public string RenderDebugSqlWithProtectedParameterContexts() => _debugBuilder.ToDebugSql(_debugSql);
+}
