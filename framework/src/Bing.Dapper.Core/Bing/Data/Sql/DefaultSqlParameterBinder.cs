@@ -416,7 +416,16 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <inheritdoc />
         public T GetValue<T>(string name)
         {
-            if (TryGetValue<T>(name, out var value))
+            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+                throw new KeyNotFoundException($"未找到输出参数 '{name}'。");
+            var rawValue = parameter.Value == DBNull.Value ? null : parameter.Value;
+            if (rawValue == null)
+            {
+                if (IsNullableType<T>())
+                    return default;
+                throw new InvalidOperationException($"输出参数 '{name}' 的值为数据库 NULL，无法转换为非空类型 {typeof(T).FullName}。");
+            }
+            if (TryConvertValue(rawValue, out T value))
                 return value;
             throw new InvalidCastException($"输出参数 '{name}' 无法转换为 {typeof(T).FullName}。");
         }
@@ -424,12 +433,29 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <inheritdoc />
         public bool TryGetValue<T>(string name, out T value)
         {
-            var rawValue = GetValue(name);
+            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+            {
+                value = default;
+                return false;
+            }
+            var rawValue = parameter.Value == DBNull.Value ? null : parameter.Value;
             if (rawValue == null)
             {
                 value = default;
                 return true;
             }
+            return TryConvertValue(rawValue, out value);
+        }
+
+        /// <summary>
+        /// 尝试将已存在的数据库输出值转换为目标类型。
+        /// </summary>
+        /// <typeparam name="T">目标类型。</typeparam>
+        /// <param name="rawValue">数据库参数原始值。</param>
+        /// <param name="value">转换结果。</param>
+        /// <returns>转换成功时返回 <see langword="true"/>。</returns>
+        private static bool TryConvertValue<T>(object rawValue, out T value)
+        {
             if (rawValue is T typedValue)
             {
                 value = typedValue;
@@ -438,17 +464,30 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
             var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
             try
             {
-                value = targetType.IsEnum
-                    ? (T)Enum.ToObject(targetType, rawValue)
-                    : (T)Convert.ChangeType(rawValue, targetType);
+                if (targetType.IsEnum)
+                {
+                    value = rawValue is string enumName
+                        ? (T)Enum.Parse(targetType, enumName, ignoreCase: true)
+                        : (T)Enum.ToObject(targetType, rawValue);
+                }
+                else
+                    value = (T)Convert.ChangeType(rawValue, targetType);
                 return true;
             }
-            catch (Exception) when (rawValue is IConvertible)
+            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException or ArgumentException)
             {
                 value = default;
                 return false;
             }
         }
+
+        /// <summary>
+        /// 判断泛型目标类型是否可以表示数据库 NULL。
+        /// </summary>
+        /// <typeparam name="T">目标类型。</typeparam>
+        /// <returns>可表示 null 时返回 <see langword="true"/>。</returns>
+        private static bool IsNullableType<T>() => typeof(T).IsValueType == false ||
+                                                   Nullable.GetUnderlyingType(typeof(T)) != null;
 
         /// <summary>
         /// 规范化参数名称

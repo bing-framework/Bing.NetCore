@@ -1560,13 +1560,10 @@ Bing.Data.Sql.ISqlExecutor
 Bing.Data.Sql.ISqlExecutor.Config(System.Action<Bing.Data.SqlOptions> configAction) -> void
 Bing.Data.Sql.ISqlExecutor.Execute(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteAsync(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturningQueryAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.ISqlExecutor.ExecuteSql(string sql, object param = null, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.GetBuilder() -> Bing.Data.Sql.ISqlBuilder
-Bing.Data.Sql.ISqlExecutor.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.ISqlExecutorFactory
 Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>() -> TExecutor
 Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>(string dbKey) -> TExecutor
@@ -2040,7 +2037,6 @@ Bing.Data.Sql.SqlParameterSource.SqlBuilder = 4 -> Bing.Data.Sql.SqlParameterSou
 Bing.Data.Sql.SqlParameterSource.SystemFilter = 7 -> Bing.Data.Sql.SqlParameterSource
 Bing.Data.Sql.SqlParameterSource.Unknown = 0 -> Bing.Data.Sql.SqlParameterSource
 Bing.Data.Sql.SqlProcedureQuery<TResult>
-Bing.Data.Sql.SqlProcedureQuery<TResult>.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlQuery<TResult>.AsAsyncEnumerable(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
 Bing.Data.Sql.SqlQuery<TResult>.AsEnumerable(int? timeout = null) -> System.Collections.Generic.IEnumerable<TResult>

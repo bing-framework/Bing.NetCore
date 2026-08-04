@@ -97,7 +97,6 @@ Bing.Data.Sql.SqlQueryBase.Logger.get -> Microsoft.Extensions.Logging.ILogger
 Bing.Data.Sql.SqlQueryBase.Options.get -> Bing.Data.SqlOptions
 Bing.Data.Sql.SqlQueryBase.Options.set -> void
 Bing.Data.Sql.SqlQueryBase.OrderByClause.get -> Bing.Data.Sql.Builders.IOrderByClause
-Bing.Data.Sql.SqlQueryBase.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.SqlQueryBase.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
 Bing.Data.Sql.SqlQueryBase.ParameterManager.get -> Bing.Data.Sql.Builders.Params.IParameterManager
 Bing.Data.Sql.SqlQueryBase.Params.get -> System.Collections.Generic.IReadOnlyDictionary<string, object>
@@ -161,8 +160,6 @@ virtual Bing.Data.Sql.SqlExecutorBase.DeleteBatch<TEntity>(System.Collections.Ge
 virtual Bing.Data.Sql.SqlExecutorBase.DeleteBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 virtual Bing.Data.Sql.SqlExecutorBase.Execute(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null) -> int
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteAsync(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> int
-virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSql(string sql, object param = null, int? timeout = null) -> int
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSql<TEntity>(string sql, Bing.Data.Sql.SqlParameterMap<TEntity> param, int? timeout = null) -> int
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>

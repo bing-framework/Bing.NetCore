@@ -106,6 +106,39 @@ public class DefaultSqlParameterBinderTest
     }
 
     /// <summary>
+    /// 测试目的：输出参数访问器应区分缺失参数、数据库 NULL 和类型转换失败，
+    /// Try 模式不得因缺失或不可转换值抛出异常。
+    /// </summary>
+    [Fact]
+    public void OutputParameterAccessor_WhenValueIsMissingNullOrIncompatible_ShouldFollowExplicitContract()
+    {
+        // Arrange
+        var binder = new DefaultSqlParameterBinder();
+        var parameters = Assert.IsAssignableFrom<SqlMapper.IDynamicParameters>(binder.Bind(
+            new SqlParameterCollection().AddOutput("result", DbType.String)));
+        var accessor = Assert.IsAssignableFrom<ISqlOutputParameterAccessor>(parameters);
+        var command = new FakeDbCommand();
+        parameters.AddParameters(command, null);
+        var output = Assert.Single(command.CreatedParameters);
+
+        // Act / Assert - Missing
+        accessor.TryGetValue<int>("missing", out _).ShouldBeFalse();
+        Should.Throw<KeyNotFoundException>(() => accessor.GetValue<int>("missing"));
+
+        // Act / Assert - Database null
+        output.Value = DBNull.Value;
+        accessor.GetValue<string>("result").ShouldBeNull();
+        Should.Throw<InvalidOperationException>(() => accessor.GetValue<int>("result"));
+
+        // Act / Assert - Convertible and incompatible values
+        output.Value = "42";
+        accessor.GetValue<int>("result").ShouldBe(42);
+        output.Value = "not-an-int";
+        accessor.TryGetValue<int>("result", out _).ShouldBeFalse();
+        Should.Throw<InvalidCastException>(() => accessor.GetValue<int>("result"));
+    }
+
+    /// <summary>
     /// 测试 - 框架参数集合应在实际命令中保留输入和输出参数的完整元数据。
     /// </summary>
     [Fact]

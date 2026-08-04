@@ -1,0 +1,2 @@
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>

@@ -25,6 +25,7 @@ public abstract partial class SqlQueryBase
         var dapperParameters = plan.IsBuilderPlan
             ? GetDbParameters(plan.Builder, sql)
             : GetDbParameters(plan.Parameters, sql);
+        plan.NotifyParametersBound(dapperParameters);
         return new PreparedQueryPlan(plan, sql, dapperParameters, parameterSource,
             GetPreparedParameterDiagnostics(plan, dapperParameters, sql));
     }

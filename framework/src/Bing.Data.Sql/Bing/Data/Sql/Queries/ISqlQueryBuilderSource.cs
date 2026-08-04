@@ -39,11 +39,6 @@ internal partial interface ISqlQueryPlanExecutor : ISqlQueryBuilderSource
 {
 
     /// <summary>
-    /// 获取最近一次查询计划执行后可读取的输出参数访问器。
-    /// </summary>
-    ISqlOutputParameterAccessor OutputParameters { get; }
-
-    /// <summary>
     /// 同步执行查询计划并完整物化结果集。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>

@@ -10,6 +10,7 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Multiple;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
@@ -629,6 +630,173 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastTransaction.ShouldNotBeSameAs(failedTransaction);
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：普通同步 Executor 的执行、回滚、错误钩子和完成钩子同时失败时，
+    /// 原始执行异常必须排在聚合异常首位，后续清理异常按生命周期顺序保留。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleExecutor(connection);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        ConfigurePrimaryReadTransaction((ISqlQuery)executor);
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() =>
+            executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "failure" }));
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+    }
+
+    /// <summary>
+    /// 测试目的：普通异步 Executor 的异常聚合规则必须与同步入口一致，
+    /// 取消或命令失败均不得被回滚或 Hook 异常覆盖。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleExecutor(connection);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        ConfigurePrimaryReadTransaction((ISqlQuery)executor);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(() =>
+            executor.ExecuteSqlAsync("Update [Users] Set [Name]=@name", new { name = "failure" }));
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+    }
+
+    /// <summary>
+    /// 测试目的：多结果集命令在创建读取器失败时，执行、回滚、错误 Hook 和完成 Hook 异常
+    /// 必须按生命周期顺序聚合，不能由清理步骤覆盖原始数据库异常。
+    /// </summary>
+    [Fact]
+    public void ExecuteMultiple_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        ConfigurePrimaryReadTransaction((ISqlQuery)executor);
+        var command = new SqlMultipleQueryCommand("Select 1", Array.Empty<SqlParam>());
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() => executor.Execute(command));
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+    }
+
+    /// <summary>
+    /// 测试目的：多结果集异步命令失败时，异常聚合规则必须与同步入口一致。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnExecute = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        ConfigurePrimaryReadTransaction((ISqlQuery)executor);
+        var command = new SqlMultipleQueryCommand("Select 1", Array.Empty<SqlParam>());
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(() => executor.ExecuteAsync(command));
+
+        // Assert
+        Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+    }
+
+    /// <summary>
+    /// 测试目的：单体更新的并发校验必须在事务提交前发生，零受影响行应回滚内部事务。
+    /// </summary>
+    [Fact]
+    public void Update_WhenConcurrencyValidationFails_ShouldRollbackInsteadOfCommit()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { NonQueryResult = 0 };
+        var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        Should.Throw<Bing.Exceptions.ConcurrencyException>(() => executor.Update(new ConcurrencySample
+        {
+            Id = 1,
+            Name = "updated",
+            Version = 2
+        }));
+
+        // Assert
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：异步单体更新的并发校验必须在事务提交前发生，零受影响行应回滚内部事务。
+    /// </summary>
+    [Fact]
+    public async Task UpdateAsync_WhenConcurrencyValidationFails_ShouldRollbackInsteadOfCommit()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { NonQueryResult = 0 };
+        var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        await Should.ThrowAsync<Bing.Exceptions.ConcurrencyException>(() => executor.UpdateAsync(new ConcurrencySample
+        {
+            Id = 1,
+            Name = "updated",
+            Version = 2
+        }));
+
+        // Assert
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -1600,6 +1768,49 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：自动分页的 Count 与 Data 查询必须共享一次禁用调试日志的执行范围，
+    /// 完成后才恢复后续独立查询的默认 Trace 行为。
+    /// </summary>
+    [Fact]
+    public void ToPage_WhenDebugLogIsDisabled_ShouldSuppressCountAndDataDebugSql()
+    {
+        // Arrange
+        using var query = CreateCountingQuery(new CaptureDbConnection(), true);
+        query.DisableDebugLog();
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+
+        // Act
+        var page = description.ToPage(new Pager(1, 10, "Id"));
+        var restored = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(1, restored);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：异步自动分页的 Count 与 Data 查询也必须共享一次禁用调试日志的执行范围。
+    /// </summary>
+    [Fact]
+    public async Task ToPageAsync_WhenDebugLogIsDisabled_ShouldSuppressCountAndDataDebugSql()
+    {
+        // Arrange
+        using var query = CreateCountingQuery(new CaptureDbConnection(), true);
+        query.DisableDebugLog();
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+
+        // Act
+        var page = await description.ToPageAsync(new Pager(1, 10, "Id"));
+        var restored = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(1, restored);
+        Assert.Equal(1, query.Counters.ToDebugSqlCallCount);
+    }
+
+    /// <summary>
     /// 测试目的：禁用调试日志的查询执行失败后，后续独立计划必须恢复默认 Trace 行为。
     /// </summary>
     [Fact]
@@ -2013,6 +2224,29 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：直接过程执行必须在同一结果对象中返回受影响行数和本次输出参数，
+    /// 不得通过 Executor 的最近一次可变状态读取输出值。
+    /// </summary>
+    [Fact]
+    public void ExecuteProcedure_WhenOutputParameterConfigured_ShouldReturnExecutionResult()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { NonQueryResult = 3 };
+        using var executor = CreateExecutor(connection);
+        var parameters = new SqlParameterCollection().AddOutput("result", DbType.Int32);
+
+        // Act
+        var result = executor.ExecuteProcedure("usp_update", parameters);
+        connection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 7;
+
+        // Assert
+        result.Result.ShouldBe(3);
+        result.OutputParameters.ShouldNotBeNull();
+        result.OutputParameters.GetValue<int>("result").ShouldBe(7);
+        connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
+    }
+
+    /// <summary>
     /// 测试目的：存储过程描述应通过独立计划执行并使用 StoredProcedure 命令类型，不得退化为文本 SQL。
     /// </summary>
     [Fact]
@@ -2067,7 +2301,8 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：过程查询描述完成同步和异步执行后，应通过框架统一契约读取 output 与 input-output 参数。
+    /// 测试目的：过程查询每次终结执行都应返回独立的输出参数访问器，
+    /// 同步和异步结果不得依赖 Root Query 的最近一次共享状态。
     /// </summary>
     [Fact]
     public async Task ProcedureDescription_WhenOutputParametersConfigured_ShouldExposeFinalValues()
@@ -2084,18 +2319,45 @@ public class SqlServerRoutingAndExecutionTest
             .AddOutput("result", DbType.Int32));
 
         // Act
-        syncDescription.Scalar();
+        var syncResult = syncDescription.ExecuteScalar();
         syncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 7;
         syncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "state").Value = 2;
-        await asyncDescription.ScalarAsync();
+        var asyncResult = await asyncDescription.ExecuteScalarAsync();
         asyncConnection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 9;
 
         // Assert
-        Assert.NotNull(syncDescription.OutputParameters);
-        Assert.Equal(7, syncDescription.OutputParameters.GetValue<int>("result"));
-        Assert.Equal(2, syncDescription.OutputParameters.GetValue<int>("state"));
-        Assert.NotNull(asyncDescription.OutputParameters);
-        Assert.Equal(9, asyncDescription.OutputParameters.GetValue<int>("result"));
+        Assert.Equal(1, syncResult.Result);
+        Assert.NotNull(syncResult.OutputParameters);
+        Assert.Equal(7, syncResult.OutputParameters.GetValue<int>("result"));
+        Assert.Equal(2, syncResult.OutputParameters.GetValue<int>("state"));
+        Assert.Equal(1, asyncResult.Result);
+        Assert.NotNull(asyncResult.OutputParameters);
+        Assert.Equal(9, asyncResult.OutputParameters.GetValue<int>("result"));
+    }
+
+    /// <summary>
+    /// 测试目的：同一个过程描述连续执行时，前一次结果必须保留自己的输出参数访问器，
+    /// 后一次执行不得覆盖已返回结果。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenExecutedSequentially_ShouldRetainEachOutputParameterAccessor()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ScalarResult = 1 };
+        using var query = CreateQuery(connection);
+        var description = query.Procedure<int>("usp_output", new SqlParameterCollection()
+            .AddOutput("result", DbType.Int32));
+
+        // Act
+        var first = description.ExecuteScalar();
+        connection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 7;
+        var second = description.ExecuteScalar();
+        connection.LastCreatedParameters.Single(parameter => parameter.ParameterName == "result").Value = 9;
+
+        // Assert
+        Assert.Equal(7, first.OutputParameters.GetValue<int>("result"));
+        Assert.Equal(9, second.OutputParameters.GetValue<int>("result"));
+        Assert.NotSame(first.OutputParameters, second.OutputParameters);
     }
 
     /// <summary>
@@ -2794,6 +3056,35 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 创建可控制生命周期 Hook 的 SQL Server 执行器。
+    /// </summary>
+    /// <param name="connection">测试数据库连接。</param>
+    /// <returns>用于验证异常聚合的执行器。</returns>
+    private static LifecycleSqlServerExecutor CreateLifecycleExecutor(CaptureDbConnection connection)
+    {
+        var services = CreateServices();
+        services.AddSqlServerSqlExecutor<LifecycleSqlServerExecutor, LifecycleSqlServerExecutor>(options =>
+            options.Connection(connection));
+        var provider = services.BuildServiceProvider();
+        return provider.GetRequiredService<LifecycleSqlServerExecutor>();
+    }
+
+    /// <summary>
+    /// 创建可控制生命周期 Hook 的 SQL Server 多结果集执行器。
+    /// </summary>
+    /// <param name="connection">测试数据库连接。</param>
+    /// <returns>用于验证多结果集异常聚合的执行器。</returns>
+    private static LifecycleSqlServerMultipleQueryExecutor CreateLifecycleMultipleExecutor(CaptureDbConnection connection)
+    {
+        var services = CreateServices();
+        services.AddSqlServerSqlMultipleQueryExecutor(options => options.Connection(connection));
+        var provider = services.BuildServiceProvider();
+        var options = new SqlOptions<LifecycleSqlServerMultipleQueryExecutor>();
+        options.Connection(connection);
+        return new LifecycleSqlServerMultipleQueryExecutor(provider, options);
+    }
+
+    /// <summary>
     /// 配置主库短事务策略
     /// </summary>
     /// <param name="executor">SQL 执行器</param>
@@ -3263,6 +3554,114 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 为直接 Executor 生命周期测试提供可控错误与完成 Hook 的实现。
+    /// </summary>
+    private sealed class LifecycleSqlServerExecutor : SqlServerSqlExecutorBase
+    {
+        /// <summary>
+        /// 初始化生命周期测试执行器。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
+        public LifecycleSqlServerExecutor(IServiceProvider serviceProvider,
+            SqlOptions<LifecycleSqlServerExecutor> options) : base(serviceProvider, options)
+        {
+        }
+
+        /// <summary>
+        /// 是否在错误诊断 Hook 中抛出受控异常。
+        /// </summary>
+        public bool ThrowOnErrorHook { get; set; }
+
+        /// <summary>
+        /// 是否在业务完成 Hook 中抛出受控异常。
+        /// </summary>
+        public bool ThrowOnCompletionHook { get; set; }
+
+        /// <summary>
+        /// 错误诊断 Hook 调用次数。
+        /// </summary>
+        public int ErrorHookCount { get; private set; }
+
+        /// <summary>
+        /// 业务完成 Hook 调用次数。
+        /// </summary>
+        public int CompletionHookCount { get; private set; }
+
+        /// <inheritdoc />
+        protected override void ExecuteError(DiagnosticsMessage message, Exception exception)
+        {
+            ErrorHookCount++;
+            if (ThrowOnErrorHook)
+                throw new InvalidOperationException("error hook failed");
+            base.ExecuteError(message, exception);
+        }
+
+        /// <inheritdoc />
+        protected override void ExecuteAfter(object result)
+        {
+            CompletionHookCount++;
+            if (ThrowOnCompletionHook)
+                throw new InvalidOperationException("completion hook failed");
+            base.ExecuteAfter(result);
+        }
+    }
+
+    /// <summary>
+    /// 用于验证多结果集执行器生命周期异常顺序的 SQL Server 测试实现。
+    /// </summary>
+    private sealed class LifecycleSqlServerMultipleQueryExecutor : SqlServerSqlMultipleQueryExecutorBase
+    {
+        /// <summary>
+        /// 初始化测试执行器。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">执行器配置。</param>
+        public LifecycleSqlServerMultipleQueryExecutor(IServiceProvider serviceProvider,
+            SqlOptions<LifecycleSqlServerMultipleQueryExecutor> options) : base(serviceProvider, options)
+        {
+        }
+
+        /// <summary>
+        /// 指示错误 Hook 是否抛出异常。
+        /// </summary>
+        public bool ThrowOnErrorHook { get; set; }
+
+        /// <summary>
+        /// 指示业务完成 Hook 是否抛出异常。
+        /// </summary>
+        public bool ThrowOnCompletionHook { get; set; }
+
+        /// <summary>
+        /// 错误 Hook 调用次数。
+        /// </summary>
+        public int ErrorHookCount { get; private set; }
+
+        /// <summary>
+        /// 业务完成 Hook 调用次数。
+        /// </summary>
+        public int CompletionHookCount { get; private set; }
+
+        /// <inheritdoc />
+        protected override void ExecuteError(DiagnosticsMessage message, Exception exception)
+        {
+            ErrorHookCount++;
+            if (ThrowOnErrorHook)
+                throw new InvalidOperationException("error hook failed");
+            base.ExecuteError(message, exception);
+        }
+
+        /// <inheritdoc />
+        protected override void ExecuteAfter(object result)
+        {
+            CompletionHookCount++;
+            if (ThrowOnCompletionHook)
+                throw new InvalidOperationException("completion hook failed");
+            base.ExecuteAfter(result);
+        }
+    }
+
+    /// <summary>
     /// 字符串映射测试样例
     /// </summary>
     private sealed class MappedSample
@@ -3315,6 +3714,29 @@ public class SqlServerRoutingAndExecutionTest
         /// 角色名称。
         /// </summary>
         public string RoleName { get; set; }
+    }
+
+    /// <summary>
+    /// 用于并发 Mutation 测试的实体。
+    /// </summary>
+    private sealed class ConcurrencySample
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 更新后的名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 并发令牌。
+        /// </summary>
+        [ConcurrencyCheck]
+        public int Version { get; set; }
     }
 
     /// <summary>

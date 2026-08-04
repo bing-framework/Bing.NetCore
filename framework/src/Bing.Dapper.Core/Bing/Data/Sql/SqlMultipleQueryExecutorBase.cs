@@ -41,14 +41,12 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         ValidateCommand(command);
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         try
         {
             if (ExecuteBefore() == false)
-            {
-                executionLease.Dispose();
-                ExecuteAfter((object)null);
-                return null;
-            }
+                return CompleteSkippedExecution(executionLease, cleanupExceptions);
             var connection = GetExecutionConnection();
             var dbParameters = GetDbParameters(command.Parameters, command.Sql);
             var parameterMetadata = GetSqlParameterDiagnostics(command.Parameters, command.Sql);
@@ -61,12 +59,14 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         }
         catch (Exception exception)
         {
-            executionLease.Dispose();
-            RollbackQueryTransaction();
-            ExecuteError(message, exception);
-            ExecuteAfter((object)null);
-            throw;
+            primaryException = exception;
         }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return null;
     }
 
     /// <inheritdoc />
@@ -76,14 +76,12 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         ValidateCommand(command);
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         try
         {
             if (ExecuteBefore() == false)
-            {
-                executionLease.Dispose();
-                ExecuteAfter((object)null);
-                return null;
-            }
+                return CompleteSkippedExecution(executionLease, cleanupExceptions);
             var connection = GetExecutionConnection();
             var dbParameters = GetDbParameters(command.Parameters, command.Sql);
             var parameterMetadata = GetSqlParameterDiagnostics(command.Parameters, command.Sql);
@@ -97,12 +95,14 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         }
         catch (Exception exception)
         {
-            executionLease.Dispose();
-            RollbackQueryTransaction();
-            ExecuteError(message, exception);
-            ExecuteAfter((object)null);
-            throw;
+            primaryException = exception;
         }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return null;
     }
 
     /// <summary>
@@ -125,21 +125,32 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     /// <param name="exception">读取过程中的异常。</param>
     private void CompleteExecution(bool completed, DiagnosticsMessage message, Exception exception)
     {
-        try
-        {
-            if (completed)
-                CompleteQueryTransaction();
-            else
-                RollbackQueryTransaction();
-            if (exception != null)
-                ExecuteError(message, exception);
-            else
-                ExecuteAfter(message);
-        }
-        finally
-        {
-            ExecuteAfter((object)null);
-        }
+        var cleanupExceptions = new List<Exception>();
+        if (completed)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, CompleteQueryTransaction);
+        else
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+        if (exception != null)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
+        else
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(message));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
+        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 完成被执行前置条件拒绝的多结果集操作。
+    /// </summary>
+    /// <param name="executionLease">当前执行租约。</param>
+    /// <param name="cleanupExceptions">用于保留完成和释放异常的集合。</param>
+    /// <returns>始终为 <see langword="null"/>。</returns>
+    private ISqlMultipleQueryResult CompleteSkippedExecution(IDisposable executionLease,
+        List<Exception> cleanupExceptions)
+    {
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(null, cleanupExceptions);
+        return null;
     }
 
     /// <summary>

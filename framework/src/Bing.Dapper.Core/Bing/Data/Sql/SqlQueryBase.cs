@@ -162,9 +162,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     public string ContextId { get; private set; }
 
-    /// <inheritdoc />
-    public ISqlOutputParameterAccessor OutputParameters { get; private set; }
-
     /// <summary>
     /// 服务提供程序
     /// </summary>
@@ -901,7 +898,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
             ? binder.Bind(builder, Options, CreateParameterBindingContext(sql, builder?.GetParams()))
             : SqlParameterBinder.Bind(builder);
-        OutputParameters = parameters as ISqlOutputParameterAccessor;
         return parameters;
     }
 
@@ -924,7 +920,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         var parameters = SqlParameterBinder is ISqlParameterContextBinder binder
             ? binder.Bind(parameter, Options, CreateParameterBindingContext(sql, parameter))
             : SqlParameterBinder.Bind(parameter);
-        OutputParameters = parameters as ISqlOutputParameterAccessor;
         return parameters;
     }
 
@@ -959,14 +954,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
-    /// 为单次独立查询计划创建临时调试日志范围。
+    /// 为独立查询计划创建临时调试日志范围。
     /// </summary>
     /// <remarks>
     /// <see cref="DisableDebugLog"/> 只影响紧随其后的一个查询计划；范围结束后必须恢复默认调试状态，
     /// 包括执行失败、取消和流式枚举提前终止。
     /// </remarks>
-    /// <returns>在范围结束时恢复临时调试状态的对象。</returns>
-    private IDisposable BeginQueryPlanDebugLogScope() => new QueryPlanDebugLogScope(this, EnabledDebugSql == false);
+    /// <param name="consumeTemporaryState">是否在当前范围结束时消费并恢复临时禁用状态。</param>
+    /// <returns>在范围结束时按配置恢复临时调试状态的对象。</returns>
+    private IDisposable BeginQueryPlanDebugLogScope(bool consumeTemporaryState = true) =>
+        new QueryPlanDebugLogScope(this, consumeTemporaryState && EnabledDebugSql == false);
 
     /// <summary>
     /// 独立查询计划的临时调试日志范围。

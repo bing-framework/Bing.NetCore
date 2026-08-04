@@ -144,6 +144,17 @@
 | `SqlQueryBase.InternalQueryPlan` / `InternalQueryPlanAsync` / `SqlQueryPlanLifecycle` | 执行异常优先保留；回滚、诊断、完成钩子和执行租约释放失败按后续清理异常聚合。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.QueryPlan_WhenOperationAndRollbackFail_ShouldPreserveBothExceptions`; `QueryPlanAsync_WhenOperationAndRollbackFail_ShouldPreserveBothExceptions`; `QueryPlan_WhenOperationAndErrorHookFail_ShouldPreserveBothExceptions`; `QueryPlan_WhenOperationAndCompletionHookFail_ShouldPreserveBothExceptions`。 |
 | `SqlQueryBase.StreamQueryPlan` / `StreamQueryPlanAsync` / `SqlQueryPlanLifecycle` | 同步和异步流在读取、映射、读取器释放或提前终止时均执行诊断、事务与租约清理，且不覆盖原始读取失败。 | `Bing.Dapper.SqlServer.Tests`: `StreamQuery_WhenReadAndErrorHookFail_ShouldPreserveBothExceptions`; `StreamQueryAsync_WhenReadAndErrorHookFail_ShouldPreserveBothExceptions`; `StreamQuery_WhenEnumerationStopsEarlyAndCompletionHookFails_ShouldRunHookOnce`; `StreamQuery_WhenReaderDisposeFails_ShouldReleaseExecutionLease`。 |
 
+### 发布前执行边界整改追溯
+
+| 生产符号 | 关键行为 | 测试项目与方法 |
+| --- | --- | --- |
+| `SqlExecutorBase.ExecuteDirect` / `ExecuteDirectAsync` | 直接命令入口保留原始执行异常，并按回滚、错误 Hook、完成 Hook、执行租约释放顺序聚合清理异常。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.ExecuteSql_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder`; `ExecuteSqlAsync_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder`。 |
+| `SqlExecutorBase.ExecuteMutationCommand` / `ExecuteMutationCommandAsync` / `ExecuteSqlCore` / `ExecuteSqlCoreAsync` | 单体 Mutation 的受影响行并发校验在事务提交前执行；零受影响行会进入回滚链路。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.Update_WhenConcurrencyValidationFails_ShouldRollbackInsteadOfCommit`; `UpdateAsync_WhenConcurrencyValidationFails_ShouldRollbackInsteadOfCommit`。 |
+| `SqlMultipleQueryExecutorBase.Execute` / `ExecuteAsync` / `CompleteExecution` / `SqlMultipleQueryResult.Complete` | 多结果集创建、读取、取消和释放均保留主异常，且不会重复聚合同一取消异常。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.ExecuteMultiple_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder`; `ExecuteMultipleAsync_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder`。`Bing.Dapper.Sqlite.Tests.Integration`: `SqliteMultipleQueryIntegrationTest.ReadAsync_WhenCancellationRequested_ShouldReleaseExecutionResources`。 |
+| `SqlProcedureResult<TResult>` / `SqlProcedureQuery<TResult>.Execute*` / `ISqlExecutor.ExecuteProcedure` | 过程返回值和输出参数由同一次执行结果对象持有；Root Query 和 Executor 不再公开最近一次输出参数状态。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.ProcedureDescription_WhenOutputParametersConfigured_ShouldExposeFinalValues`; `ProcedureDescription_WhenExecutedSequentially_ShouldRetainEachOutputParameterAccessor`; `ExecuteProcedure_WhenOutputParameterConfigured_ShouldReturnExecutionResult`。 |
+| `DefaultSqlParameterBinder.MetadataDynamicParameters.GetValue` / `TryGetValue` | 缺失参数、数据库 NULL、可转换和不可转换值使用明确且不抛漏的访问器契约。 | `Bing.Dapper.SqlServer.Tests`: `DefaultSqlParameterBinderTest.OutputParameterAccessor_WhenValueIsMissingNullOrIncompatible_ShouldFollowExplicitContract`。 |
+| `SqlQueryBase.QueryPlan.Paging` / `InternalQueryPlan` / `InternalQueryPlanAsync` | 自动分页 Count 与 Data 共用一次执行租约和临时调试日志范围，且仅由数据查询完成事务。 | `Bing.Dapper.SqlServer.Tests`: `SqlServerRoutingAndExecutionTest.ToPage_WhenDebugLogIsDisabled_ShouldSuppressCountAndDataDebugSql`; `ToPageAsync_WhenDebugLogIsDisabled_ShouldSuppressCountAndDataDebugSql`。 |
+
 ### 查询描述收敛执行证据
 
 | 验收项 | 结果 |

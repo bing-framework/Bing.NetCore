@@ -45,17 +45,21 @@ public abstract partial class SqlQueryBase
     /// <typeparam name="TResult">执行结果类型。</typeparam>
     /// <param name="plan">待执行的查询计划。</param>
     /// <param name="operation">调用 Dapper 查询 API 的操作。</param>
+    /// <param name="acquireExecutionLease">是否为当前内部计划单独获取执行租约。</param>
+    /// <param name="completeTransaction">当前内部计划成功后是否完成事务。</param>
+    /// <param name="consumeDebugLogState">当前内部计划结束时是否恢复临时调试日志状态。</param>
     /// <returns>最终执行结果。</returns>
     private TResult InternalQueryPlan<TResult>(SqlQueryPlan plan,
-        Func<IDbConnection, string, object, IDbTransaction, TResult> operation)
+        Func<IDbConnection, string, object, IDbTransaction, TResult> operation, bool acquireExecutionLease = true,
+        bool completeTransaction = true, bool consumeDebugLogState = true)
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        using var debugLogScope = BeginQueryPlanDebugLogScope(consumeDebugLogState);
         ValidateQueryBuilder(plan.Builder);
-        var executionLease = AcquireExecutionLease();
+        var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
         Exception primaryException = null;
@@ -71,7 +75,8 @@ public abstract partial class SqlQueryBase
                     preparedPlan.ParameterDiagnostics);
                 WritePlanTraceLog(preparedPlan);
                 result = operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
-                CompleteQueryTransaction();
+                if (completeTransaction)
+                    CompleteQueryTransaction();
                 ExecuteAfter(message);
             }
         }
@@ -85,7 +90,8 @@ public abstract partial class SqlQueryBase
         {
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(result));
         }
-        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        if (executionLease != null)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         return result;
     }
@@ -97,19 +103,23 @@ public abstract partial class SqlQueryBase
     /// <param name="plan">待执行的查询计划。</param>
     /// <param name="operation">调用 Dapper 查询 API 的操作。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <param name="acquireExecutionLease">是否为当前内部计划单独获取执行租约。</param>
+    /// <param name="completeTransaction">当前内部计划成功后是否完成事务。</param>
+    /// <param name="consumeDebugLogState">当前内部计划结束时是否恢复临时调试日志状态。</param>
     /// <returns>表示最终执行结果的异步操作。</returns>
     private async Task<TResult> InternalQueryPlanAsync<TResult>(SqlQueryPlan plan,
         Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> operation,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, bool acquireExecutionLease = true, bool completeTransaction = true,
+        bool consumeDebugLogState = true)
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        using var debugLogScope = BeginQueryPlanDebugLogScope(consumeDebugLogState);
         cancellationToken.ThrowIfCancellationRequested();
         ValidateQueryBuilder(plan.Builder);
-        var executionLease = AcquireExecutionLease();
+        var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
         Exception primaryException = null;
@@ -125,7 +135,8 @@ public abstract partial class SqlQueryBase
                     preparedPlan.ParameterDiagnostics);
                 WritePlanTraceLog(preparedPlan);
                 result = await operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
-                CompleteQueryTransaction();
+                if (completeTransaction)
+                    CompleteQueryTransaction();
                 ExecuteAfter(message);
             }
         }
@@ -139,7 +150,8 @@ public abstract partial class SqlQueryBase
         {
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(result));
         }
-        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        if (executionLease != null)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         return result;
     }

@@ -147,13 +147,36 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private void Complete(bool completed, Exception exception)
     {
         var complete = Interlocked.Exchange(ref _complete, null);
+        var cleanupExceptions = new List<Exception>();
         try
         {
             complete?.Invoke(completed, exception);
         }
-        finally
+        catch (Exception completionException)
         {
-            Interlocked.Exchange(ref _executionLease, null)?.Dispose();
+            CaptureCompletionExceptions(cleanupExceptions, completionException, exception);
+        }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
+            () => Interlocked.Exchange(ref _executionLease, null)?.Dispose());
+        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 捕获完成回调产生的清理异常，排除其重新抛出的同一主异常。
+    /// </summary>
+    /// <param name="cleanupExceptions">当前清理异常集合。</param>
+    /// <param name="completionException">完成回调抛出的异常。</param>
+    /// <param name="primaryException">读取或释放路径的原始异常。</param>
+    private static void CaptureCompletionExceptions(ICollection<Exception> cleanupExceptions, Exception completionException,
+        Exception primaryException)
+    {
+        IEnumerable<Exception> exceptions = completionException is AggregateException aggregateException
+            ? aggregateException.Flatten().InnerExceptions
+            : new[] { completionException };
+        foreach (var exception in exceptions)
+        {
+            if (ReferenceEquals(exception, primaryException) == false)
+                cleanupExceptions.Add(exception);
         }
     }
 }

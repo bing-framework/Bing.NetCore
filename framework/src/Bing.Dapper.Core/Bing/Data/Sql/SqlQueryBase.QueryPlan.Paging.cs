@@ -10,39 +10,73 @@ public abstract partial class SqlQueryBase
     PagerList<TResult> ISqlQueryPlanExecutor.ToPage<TResult>(SqlQueryPlan plan, IPager pager, int? timeout)
     {
         var page = GetPlanPager(plan, pager);
-        if (IsPlanTotalCountUnknown(page))
+        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        var executionLease = AcquireExecutionLease();
+        PagerList<TResult> result = null;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
         {
-            var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
-            page.TotalCount = InternalQueryPlan(countPlan, (connection, sql, parameters, transaction) =>
-                Conv.ToInt(connection.ExecuteScalar(sql, parameters, transaction, timeout, commandType: countPlan.CommandType)));
+            if (IsPlanTotalCountUnknown(page))
+            {
+                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
+                page.TotalCount = InternalQueryPlan(countPlan, (connection, sql, parameters, transaction) =>
+                    Conv.ToInt(connection.ExecuteScalar(sql, parameters, transaction, timeout,
+                        commandType: countPlan.CommandType)), acquireExecutionLease: false, completeTransaction: false,
+                    consumeDebugLogState: false);
+            }
+            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
+            var items = InternalQueryPlan(pagePlan, (connection, sql, parameters, transaction) => connection
+                .Query<TResult>(sql, parameters, transaction, buffered: true, commandTimeout: timeout,
+                    commandType: pagePlan.CommandType).ToList(), acquireExecutionLease: false,
+                consumeDebugLogState: false);
+            result = new PagerList<TResult>(page, items);
         }
-        var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
-        var items = InternalQueryPlan(pagePlan, (connection, sql, parameters, transaction) => connection
-            .Query<TResult>(sql, parameters, transaction, buffered: true, commandTimeout: timeout,
-                commandType: pagePlan.CommandType).ToList());
-        return new PagerList<TResult>(page, items);
+        catch (Exception exception)
+        {
+            primaryException = exception;
+        }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return result;
     }
 
     /// <inheritdoc />
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
         var page = GetPlanPager(plan, pager);
-        if (IsPlanTotalCountUnknown(page))
+        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        cancellationToken.ThrowIfCancellationRequested();
+        var executionLease = AcquireExecutionLease();
+        PagerList<TResult> result = null;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
         {
-            var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
-            page.TotalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction) =>
-                Conv.ToInt(await connection.ExecuteScalarAsync(CreateQueryCommandDefinition(sql, parameters,
-                    transaction, timeout, buffered: true, cancellationToken, countPlan.CommandType))), cancellationToken);
+            if (IsPlanTotalCountUnknown(page))
+            {
+                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
+                page.TotalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction) =>
+                    Conv.ToInt(await connection.ExecuteScalarAsync(CreateQueryCommandDefinition(sql, parameters,
+                        transaction, timeout, buffered: true, cancellationToken, countPlan.CommandType))), cancellationToken,
+                    acquireExecutionLease: false, completeTransaction: false, consumeDebugLogState: false);
+            }
+            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
+            var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction) =>
+                await ExecuteMaterializedQueryAsync<TResult>(connection,
+                    CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, cancellationToken,
+                        pagePlan.CommandType), cancellationToken), cancellationToken, acquireExecutionLease: false,
+                consumeDebugLogState: false);
+            result = new PagerList<TResult>(page, items);
         }
-        var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
-        var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction) =>
-            await ExecuteMaterializedQueryAsync<TResult>(connection,
-                CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, cancellationToken,
-                    pagePlan.CommandType),
-                cancellationToken), cancellationToken);
-        return new PagerList<TResult>(page, items);
+        catch (Exception exception)
+        {
+            primaryException = exception;
+        }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return result;
     }
 
     /// <summary>

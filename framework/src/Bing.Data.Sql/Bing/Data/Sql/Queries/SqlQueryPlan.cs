@@ -12,6 +12,11 @@ namespace Bing.Data.Sql;
 internal sealed class SqlQueryPlan
 {
     /// <summary>
+    /// 当前计划本次参数绑定完成后的输出参数访问器接收器。
+    /// </summary>
+    private Action<ISqlOutputParameterAccessor> _outputParametersReceiver;
+
+    /// <summary>
     /// 使用 Fluent SQL Builder 创建查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
@@ -71,6 +76,23 @@ internal sealed class SqlQueryPlan
     /// 指示当前计划是否使用 Fluent SQL Builder。
     /// </summary>
     public bool IsBuilderPlan => Builder != null;
+
+    /// <summary>
+    /// 在本次计划参数绑定完成后接收输出参数访问器。
+    /// </summary>
+    /// <param name="receiver">接收绑定参数访问器的回调。</param>
+    /// <remarks>
+    /// 仅过程结果终结入口使用该回调；计划对象不保留任何执行后的可变状态。
+    /// </remarks>
+    internal void SetOutputParametersReceiver(Action<ISqlOutputParameterAccessor> receiver) =>
+        _outputParametersReceiver = receiver;
+
+    /// <summary>
+    /// 通知本次计划已完成参数绑定。
+    /// </summary>
+    /// <param name="parameters">Dapper 实际使用的参数对象。</param>
+    internal void NotifyParametersBound(object parameters) =>
+        _outputParametersReceiver?.Invoke(parameters as ISqlOutputParameterAccessor);
 
     /// <summary>
     /// 创建 Fluent SQL Builder 查询计划。

@@ -36,10 +36,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     {
         var builder = SqlBuilder;
         ValidateReturningMutationBuilder(builder);
-        using var executionLease = AcquireExecutionLease();
-        List<TResult> result = default;
-        DiagnosticsMessage message = default;
-        try
+        return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
                 return default;
@@ -48,25 +45,15 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(builder, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
+            context.Message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
-            result = await ExecuteMaterializedQueryAsync<TResult>(connection,
+            var result = await ExecuteMaterializedQueryAsync<TResult>(connection,
                 CreateQueryCommandDefinition(sql, dbParameters, transaction, timeout, buffered: true,
                     cancellationToken), cancellationToken);
             CompleteQueryTransaction();
-            ExecuteAfter(message);
+            ExecuteAfter(context.Message);
             return result;
-        }
-        catch (Exception exception)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, exception);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+        }).ConfigureAwait(false);
     }
 
     #region Execute(执行统一 Builder)
@@ -75,10 +62,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     public virtual int Execute(ISqlBuilder builder, int? timeout = null)
     {
         ValidateExecutableBuilder(builder);
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
@@ -87,23 +71,13 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(builder, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
+            context.Message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
-            result = connection.Execute(sql, dbParameters, transaction, timeout);
+            var result = connection.Execute(sql, dbParameters, transaction, timeout);
             CompleteQueryTransaction();
-            ExecuteAfter(message);
+            ExecuteAfter(context.Message);
             return result;
-        }
-        catch (Exception exception)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, exception);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+        });
     }
 
     /// <inheritdoc />
@@ -111,10 +85,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         CancellationToken cancellationToken = default)
     {
         ValidateExecutableBuilder(builder);
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
@@ -123,24 +94,14 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(builder, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(builder);
-            message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
+            context.Message = ExecuteBefore(sql, builder.GetParams(), connection, parameterMetadata);
             WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
-            result = await connection.ExecuteAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
+            var result = await connection.ExecuteAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
                 cancellationToken: cancellationToken));
             CompleteQueryTransaction();
-            ExecuteAfter(message);
+            ExecuteAfter(context.Message);
             return result;
-        }
-        catch (Exception exception)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, exception);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+        }).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -283,11 +244,19 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="timeout">执行超时时间。单位：秒</param>
     /// <returns>操作影响的行数</returns>
     public virtual int ExecuteSql(string sql, object param = null, int? timeout = null)
+        => ExecuteSqlCore(sql, param, timeout, null);
+
+    /// <summary>
+    /// 在同一执行生命周期内执行 SQL 并在提交前验证受影响行数。
+    /// </summary>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="param">SQL 参数。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="validateResult">在事务提交前验证受影响行数的回调。</param>
+    /// <returns>操作影响的行数。</returns>
+    private int ExecuteSqlCore(string sql, object param, int? timeout, Action<int> validateResult)
     {
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
@@ -295,22 +264,13 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
-            message = ExecuteBefore(sql, param, connection, parameterMetadata);
-            result = connection.Execute(sql, dbParameters, transaction, timeout);
+            context.Message = ExecuteBefore(sql, param, connection, parameterMetadata);
+            var result = connection.Execute(sql, dbParameters, transaction, timeout);
+            validateResult?.Invoke(result);
             CompleteQueryTransaction();
-            ExecuteAfter(message);
+            ExecuteAfter(context.Message);
             return result;
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+        });
     }
 
     #endregion
@@ -327,11 +287,21 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>操作影响的行数</returns>
     public virtual async Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null,
         CancellationToken cancellationToken = default)
+        => await ExecuteSqlCoreAsync(sql, param, timeout, cancellationToken, null).ConfigureAwait(false);
+
+    /// <summary>
+    /// 在同一异步执行生命周期内执行 SQL 并在提交前验证受影响行数。
+    /// </summary>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="param">SQL 参数。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <param name="validateResult">在事务提交前验证受影响行数的回调。</param>
+    /// <returns>表示操作影响行数的异步操作。</returns>
+    private async Task<int> ExecuteSqlCoreAsync(string sql, object param, int? timeout,
+        CancellationToken cancellationToken, Action<int> validateResult)
     {
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
@@ -339,23 +309,14 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, sql);
             var parameterMetadata = GetSqlParameterDiagnostics(param, sql);
-            message = ExecuteBefore(sql, param, connection, parameterMetadata);
-            result = await connection.ExecuteAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
+            context.Message = ExecuteBefore(sql, param, connection, parameterMetadata);
+            var result = await connection.ExecuteAsync(new CommandDefinition(sql, dbParameters, transaction, timeout,
                 cancellationToken: cancellationToken));
+            validateResult?.Invoke(result);
             CompleteQueryTransaction();
-            ExecuteAfter(message);
+            ExecuteAfter(context.Message);
             return result;
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+        }).ConfigureAwait(false);
     }
 
     #endregion
@@ -368,36 +329,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="procedure">存储过程</param>
     /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
-    /// <returns>受影响行数</returns>
-    public virtual int ExecuteProcedure(string procedure, object param = null, int? timeout = null)
+    /// <returns>包含受影响行数及本次输出参数访问器的过程执行结果。</returns>
+    public virtual SqlProcedureResult<int> ExecuteProcedure(string procedure, object param = null, int? timeout = null)
     {
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
-                return 0;
+                return new SqlProcedureResult<int>(0, null);
             var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, procedure);
             var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);
-            message = ExecuteBefore(procedure, param, connection, parameterMetadata);
-            result = connection.Execute(procedure, dbParameters, transaction, timeout, GetProcedureCommandType());
+            context.Message = ExecuteBefore(procedure, param, connection, parameterMetadata);
+            var result = connection.Execute(procedure, dbParameters, transaction, timeout, GetProcedureCommandType());
             CompleteQueryTransaction();
-            ExecuteAfter(message);
-            return result;
-        }
-        catch (Exception e)
-        {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
-        }
-        finally
-        {
-            ExecuteAfter(result);
-        }
+            ExecuteAfter(context.Message);
+            return new SqlProcedureResult<int>(result, dbParameters as ISqlOutputParameterAccessor);
+        });
     }
 
     #endregion
@@ -411,38 +359,110 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="param">SQL参数</param>
     /// <param name="timeout">执行超时时间，单位：秒</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>受影响行数</returns>
-    public virtual async Task<int> ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null,
+    /// <returns>表示包含受影响行数及本次输出参数访问器的过程执行结果的异步操作。</returns>
+    public virtual async Task<SqlProcedureResult<int>> ExecuteProcedureAsync(string procedure, object param = null,
+        int? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        using var executionLease = AcquireExecutionLease();
-        var result = 0;
-        DiagnosticsMessage message = default;
-        try
+        return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
-                return 0;
+                return new SqlProcedureResult<int>(0, null);
             var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
             var dbParameters = GetDbParameters(param, procedure);
             var parameterMetadata = GetSqlParameterDiagnostics(param, procedure);
-            message = ExecuteBefore(procedure, param, connection, parameterMetadata);
-            result = await connection.ExecuteAsync(new CommandDefinition(procedure, dbParameters, transaction, timeout,
+            context.Message = ExecuteBefore(procedure, param, connection, parameterMetadata);
+            var result = await connection.ExecuteAsync(new CommandDefinition(procedure, dbParameters, transaction, timeout,
                 GetProcedureCommandType(), cancellationToken: cancellationToken));
             CompleteQueryTransaction();
-            ExecuteAfter(message);
-            return result;
-        }
-        catch (Exception e)
+            ExecuteAfter(context.Message);
+            return new SqlProcedureResult<int>(result, dbParameters as ISqlOutputParameterAccessor);
+        }).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 在统一异常聚合语义下执行同步命令入口。
+    /// </summary>
+    /// <typeparam name="TResult">命令结果类型。</typeparam>
+    /// <param name="operation">实际命令操作。</param>
+    /// <returns>命令操作的结果。</returns>
+    /// <remarks>
+    /// 原始操作异常始终作为主异常保留；回滚、错误诊断、业务完成 Hook 和执行租约释放失败
+    /// 按生命周期顺序追加为清理异常，避免任一清理步骤覆盖诊断根因。
+    /// </remarks>
+    private TResult ExecuteDirect<TResult>(Func<DirectExecutionContext, TResult> operation)
+    {
+        var executionLease = AcquireExecutionLease();
+        var context = new DirectExecutionContext();
+        TResult result = default;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
         {
-            RollbackQueryTransaction();
-            ExecuteError(message, e);
-            throw;
+            result = operation(context);
+        }
+        catch (Exception exception)
+        {
+            primaryException = exception;
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
+                () => ExecuteError(context.Message, exception));
         }
         finally
         {
-            ExecuteAfter(result);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(result));
         }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return result;
+    }
+
+    /// <summary>
+    /// 在统一异常聚合语义下执行异步命令入口。
+    /// </summary>
+    /// <typeparam name="TResult">命令结果类型。</typeparam>
+    /// <param name="operation">实际异步命令操作。</param>
+    /// <returns>表示命令操作结果的异步任务。</returns>
+    /// <remarks>
+    /// 与同步入口保持相同的主异常和清理异常排序，确保取消异常不会被清理异常覆盖。
+    /// </remarks>
+    private async Task<TResult> ExecuteDirectAsync<TResult>(Func<DirectExecutionContext, Task<TResult>> operation)
+    {
+        var executionLease = AcquireExecutionLease();
+        var context = new DirectExecutionContext();
+        TResult result = default;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
+        {
+            result = await operation(context).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            primaryException = exception;
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
+                () => ExecuteError(context.Message, exception));
+        }
+        finally
+        {
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(result));
+        }
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return result;
+    }
+
+    /// <summary>
+    /// 保存一次直接命令执行过程中创建的诊断消息。
+    /// </summary>
+    private sealed class DirectExecutionContext
+    {
+        /// <summary>
+        /// 当前命令的执行前诊断消息。
+        /// </summary>
+        public DiagnosticsMessage Message { get; set; }
     }
 
     /// <summary>
@@ -1057,9 +1077,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>命令实际影响的行数。</returns>
     private int ExecuteMutationCommand(SqlMutationCommand command, int? timeout)
     {
-        var result = ExecuteSql(command.Sql, command.Parameters, timeout);
-        ValidateAffectedRows(command, result);
-        return result;
+        return ExecuteSqlCore(command.Sql, command.Parameters, timeout,
+            affectedRows => ValidateAffectedRows(command, affectedRows));
     }
 
     /// <summary>
@@ -1072,10 +1091,8 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     private async Task<int> ExecuteMutationCommandAsync(SqlMutationCommand command, int? timeout,
         CancellationToken cancellationToken)
     {
-        var result = await ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken)
-            .ConfigureAwait(false);
-        ValidateAffectedRows(command, result);
-        return result;
+        return await ExecuteSqlCoreAsync(command.Sql, command.Parameters, timeout, cancellationToken,
+            affectedRows => ValidateAffectedRows(command, affectedRows)).ConfigureAwait(false);
     }
 
     /// <summary>

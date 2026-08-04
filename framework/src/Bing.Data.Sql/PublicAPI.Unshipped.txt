@@ -1,0 +1,18 @@
+Bing.Data.Sql.ISqlExecutor.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
+Bing.Data.Sql.ISqlExecutor.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirst(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstOrDefaultAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteList(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteListAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<System.Collections.Generic.List<TResult>>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteScalar(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteScalarAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingle(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleOrDefaultAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureResult<TResult>.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
+Bing.Data.Sql.SqlProcedureResult<TResult>.Result.get -> TResult
+Bing.Data.Sql.SqlProcedureResult<TResult>.SqlProcedureResult(TResult result, Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void

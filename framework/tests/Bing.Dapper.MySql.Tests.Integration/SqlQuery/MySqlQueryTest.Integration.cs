@@ -443,9 +443,9 @@ public partial class MySqlQueryTest
             new SqlParam("code_output", null, DbType.String, ParameterDirection.Output, 50)
         };
 
-        _sqlExecutor.ExecuteProcedure("Proc_GetProductCode_Output", parameters);
+        var result = _sqlExecutor.ExecuteProcedure("Proc_GetProductCode_Output", parameters);
 
-        Assert.Equal("output-code", _sqlExecutor.OutputParameters.GetValue<string>("code_output"));
+        Assert.Equal("output-code", result.OutputParameters.GetValue<string>("code_output"));
     }
 
     /// <summary>
@@ -461,9 +461,9 @@ public partial class MySqlQueryTest
             new SqlParam("code_value", "input", DbType.String, ParameterDirection.InputOutput, 50)
         };
 
-        _sqlExecutor.ExecuteProcedure("Proc_AppendProductCode_InputOutput", parameters);
+        var result = _sqlExecutor.ExecuteProcedure("Proc_AppendProductCode_InputOutput", parameters);
 
-        Assert.Equal("input_output", _sqlExecutor.OutputParameters.GetValue<string>("code_value"));
+        Assert.Equal("input_output", result.OutputParameters.GetValue<string>("code_value"));
     }
 
     /// <summary>
