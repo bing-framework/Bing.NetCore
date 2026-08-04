@@ -28,7 +28,7 @@ public static partial class EmailExtensions
                 headers.Add(new Header(key, value));
         }
 
-        var message = new MimeMessage(headers.ToArray());
+        var message = new MimeMessage((IEnumerable<Header>)headers);
         MimeEntity body = null;
         if (mail.Sender != null)
             message.Sender = mail.Sender.ToMailboxAddress();

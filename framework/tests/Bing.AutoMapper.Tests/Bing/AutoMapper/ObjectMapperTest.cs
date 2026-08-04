@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.ObjectMapping;
 using Bing.Reflection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.AutoMapper;
 
@@ -28,6 +31,7 @@ public class ObjectMapperTest
             .ToList();
         var configuration = new MapperConfiguration(cfg =>
         {
+            cfg.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             foreach (var instance in instances)
             {
 
@@ -36,7 +40,7 @@ public class ObjectMapperTest
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 cfg.AddProfile(instance as Profile);
             }
-        });
+        }, NullLoggerFactory.Instance);
         _mapper = new AutoMapperObjectMapper(configuration, instances);
     }
 

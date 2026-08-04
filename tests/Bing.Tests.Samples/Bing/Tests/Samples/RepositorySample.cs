@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.Auditing;
 using Bing.Data;
 using Bing.Data.Queries;
@@ -41,7 +42,7 @@ public class EntitySample : AggregateRoot<EntitySample>, IAuditedObjectWithName
     /// <summary>
     /// 忽略值
     /// </summary>
-    [IgnoreMap]
+    [Ignore]
     public string IgnoreValue { get; set; }
 
     /// <summary>

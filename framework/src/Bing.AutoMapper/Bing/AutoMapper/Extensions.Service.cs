@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.ObjectMapping;
 using Bing.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging.Abstractions;
 using IObjectMapper = Bing.ObjectMapping.IObjectMapper;
 
 namespace Bing.AutoMapper;
@@ -27,6 +30,7 @@ public static partial class Extensions
         // 创建 AutoMapper 配置
         var configuration = new MapperConfiguration(cfg =>
         {
+            cfg.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             foreach (var instance in instances)
             {
                 Debug.WriteLine($"初始化AutoMapper配置：{instance.GetType().FullName}");
@@ -34,7 +38,7 @@ public static partial class Extensions
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 cfg.AddProfile(instance as Profile);
             }
-        });
+        }, NullLoggerFactory.Instance);
         var mapper = new AutoMapperObjectMapper(configuration, instances);
         ObjectMapperExtensions.SetMapper(mapper);
         services.TryAddSingleton<IObjectMapper>(mapper);

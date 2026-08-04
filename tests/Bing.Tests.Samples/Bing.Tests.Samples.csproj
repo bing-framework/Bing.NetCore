@@ -35,7 +35,6 @@
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.*" />
     <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.*" />
-    <PackageReference Include="MessagePack" Version="2.4.35" />
     <PackageReference Include="NSubstitute" Version="4.4.0" />
     <!--<PackageReference Include="Castle.Core" Version="5.1.0" />-->
   </ItemGroup>

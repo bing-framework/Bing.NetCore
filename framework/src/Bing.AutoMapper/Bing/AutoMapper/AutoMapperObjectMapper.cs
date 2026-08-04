@@ -1,8 +1,12 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using AutoMapper;
 using AutoMapper.Configuration;
+using AutoMapper.Configuration.Annotations;
+using AutoMapper.Internal;
 using AutoMapper.QueryableExtensions;
 using Bing.ObjectMapping;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.AutoMapper;
 
@@ -129,7 +133,8 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// </summary>
     /// <param name="sourceType">源类型</param>
     /// <param name="destinationType">目标类型</param>
-    private bool Exists(Type sourceType, Type destinationType) => _configuration.FindTypeMapFor(sourceType, destinationType) != null;
+    private bool Exists(Type sourceType, Type destinationType) =>
+        _configuration.Internal().FindTypeMapFor(sourceType, destinationType) != null;
 
     /// <summary>
     /// 获取映射结果
@@ -146,16 +151,17 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <param name="destinationType">目标类型</param>
     private void ConfigMap(Type sourceType, Type destinationType)
     {
-        var maps = _configuration.GetAllTypeMaps();
+        var maps = _configuration.Internal().GetAllTypeMaps();
         _configuration = new MapperConfiguration(t =>
         {
+            t.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             t.ShouldMapMethod = _ => false;
             t.CreateMap(sourceType, destinationType);
             foreach (var map in maps)
                 t.CreateMap(map.SourceType, map.DestinationType);
             foreach (var profile in _profiles)
                 t.AddProfile(profile as Profile);
-        });
+        }, NullLoggerFactory.Instance);
         _mapper = _configuration.CreateMapper();
     }
 

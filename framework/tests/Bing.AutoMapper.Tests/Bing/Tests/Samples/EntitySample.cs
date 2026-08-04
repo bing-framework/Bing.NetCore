@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.Application.Dtos;
 using Bing.Auditing;
 using Bing.Domain.Entities;
@@ -32,7 +33,7 @@ public class EntitySample : AggregateRoot<EntitySample>, IAuditedObjectWithName
     /// <summary>
     /// 忽略值
     /// </summary>
-    [IgnoreMap]
+    [Ignore]
     public string IgnoreValue { get; set; }
 
     /// <summary>
@@ -90,7 +91,7 @@ public class DtoSample : DtoBase, IAuditedObjectWithName
     /// <summary>
     /// 忽略值
     /// </summary>
-    [IgnoreMap]
+    [Ignore]
     public string IgnoreValue { get; set; }
 
     /// <summary>

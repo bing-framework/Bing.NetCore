@@ -8,7 +8,7 @@
   <Import Project="..\..\..\framework.props" />
 
   <ItemGroup>
-    <PackageReference Include="Scriban" Version="4.0.2" />
+    <PackageReference Include="Scriban" Version="7.2.6" />
   </ItemGroup>
 
   <ItemGroup>

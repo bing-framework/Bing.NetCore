@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.Application.Dtos;
 using Bing.Application.Services;
 using Bing.Auditing;
@@ -23,7 +24,7 @@ public class DtoSample : DtoBase, IAuditedObjectWithName
     /// <summary>
     /// 忽略值
     /// </summary>
-    [IgnoreMap]
+    [Ignore]
     public string IgnoreValue { get; set; }
 
     /// <summary>

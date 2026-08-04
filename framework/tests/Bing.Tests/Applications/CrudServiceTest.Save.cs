@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.AutoMapper;
 using Bing.DependencyInjection;
 using Bing.Tests.Samples;
 using NSubstitute;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Bing.Extensions;
 using Bing.ObjectMapping;
@@ -89,6 +92,7 @@ public partial class CrudServiceTest
             .ToList();
         var configuration = new MapperConfiguration(cfg =>
         {
+            cfg.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             foreach (var instance in instances)
             {
 
@@ -97,7 +101,7 @@ public partial class CrudServiceTest
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 cfg.AddProfile(instance as Profile);
             }
-        });
+        }, NullLoggerFactory.Instance);
         var mapper = new AutoMapperObjectMapper(configuration, instances);
         ObjectMapperExtensions.SetMapper(mapper);
     }

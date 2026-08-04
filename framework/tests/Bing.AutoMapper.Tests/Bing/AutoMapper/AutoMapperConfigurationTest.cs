@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using System.Reflection;
 using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using Bing.ObjectMapping;
 using Bing.Reflection;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bing.AutoMapper;
 
@@ -24,13 +27,14 @@ public class AutoMapperConfigurationTest
 
         var config = new MapperConfiguration(cfg =>
         {
+            cfg.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             foreach (var instance in instances)
             {
                 Debug.WriteLine($"Profile: {instance.GetType().FullName}");
                 instance.CreateMap();
                 cfg.AddProfile(instance as Profile);
             }
-        });
+        }, NullLoggerFactory.Instance);
         return config;
     }
 
@@ -107,12 +111,13 @@ public class AutoMapperConfigurationTest
             .ToList();
         var config = new MapperConfiguration(cfg =>
         {
+            cfg.ShouldMapProperty = property => property.GetCustomAttribute<IgnoreAttribute>() == null;
             foreach (var instance in instances)
             {
                 instance.CreateMap();
                 cfg.AddProfile(instance as Profile);
             }
-        });
+        }, NullLoggerFactory.Instance);
 
         // Act & Assert
         Should.NotThrow(() => new AutoMapperObjectMapper(config, instances));
