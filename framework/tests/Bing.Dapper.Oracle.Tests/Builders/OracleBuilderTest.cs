@@ -47,6 +47,29 @@ public class OracleBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：Oracle 空 In 与 Not In 集合必须保留明确常量语义且不创建参数。
+    /// </summary>
+    [Fact]
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldRenderConstantConditionsWithoutParameters()
+    {
+        // Arrange
+        const string expectedIn = "Select * \r\nFrom \"Sample\" \r\nWhere 1 = 0";
+        const string expectedNotIn = "Select * \r\nFrom \"Sample\" \r\nWhere 1 = 1";
+        var inBuilder = new OracleBuilder().Select("*").From("Sample").In("Id", Array.Empty<object>());
+        var notInBuilder = new OracleBuilder().Select("*").From("Sample").NotIn("Id", Array.Empty<object>());
+
+        // Act
+        var inSql = inBuilder.ToSql();
+        var notInSql = notInBuilder.ToSql();
+
+        // Assert
+        Assert.Equal(expectedIn, inSql);
+        Assert.Equal(expectedNotIn, notInSql);
+        Assert.Empty(inBuilder.GetParams());
+        Assert.Empty(notInBuilder.GetParams());
+    }
+
+    /// <summary>
     /// 测试目的：Oracle 12c+ 分页应使用 Offset/Fetch Next 语法，并保持偏移量和限制参数的顺序。
     /// </summary>
     [Fact]
@@ -103,5 +126,43 @@ public class OracleBuilderTest
         Assert.Equal("5", fresh.GetParam("p_1"));
         Assert.Equal("10", _builder.GetParam("p_0"));
         Assert.Equal("10", _builder.GetParam("p_1"));
+    }
+
+    /// <summary>
+    /// 测试目的：子查询参数冲突改名时，PostgreSQL 风格的双冒号类型转换不得被识别为 Oracle 冒号参数。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSubqueryContainsDoubleColonCast_ShouldRenameOnlyParameterToken()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom \"Parent\" \r\nJoin (Select * \r\nFrom \"Child\" \r\nWhere Payload::text=:p_0 And Note=':text' /* :text */) \"c\" \r\nWhere Id=:text";
+        var subquery = new OracleBuilder().From("Child")
+            .AppendWhere("Payload::text=:text And Note=':text' /* :text */")
+            .AddParam("text", "child");
+
+        // Act
+        var sql = _builder.From("Parent").AppendWhere("Id=:text").AddParam("text", "outer").Join(subquery, "c").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Equal("outer", _builder.GetParam("text"));
+        Assert.Equal("child", _builder.GetParam("p_0"));
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle 派生表 From 别名不得使用不受支持的 As 关键字。
+    /// </summary>
+    [Fact]
+    public void From_WhenSourceIsSubquery_ShouldRenderOracleAliasWithoutAs()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom (Select \"Id\" \r\nFrom \"Child\") \"c\"";
+        var subquery = new OracleBuilder().Select("Id").From("Child");
+
+        // Act
+        var sql = _builder.From(subquery, "c").ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
     }
 }

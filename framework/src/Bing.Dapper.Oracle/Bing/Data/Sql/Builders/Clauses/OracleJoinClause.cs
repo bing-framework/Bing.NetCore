@@ -36,4 +36,7 @@ public class OracleJoinClause : JoinClause
     /// <inheritdoc />
     protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
         new OracleJoinClause(context, joinItems);
+
+    /// <inheritdoc />
+    protected override string GetSubqueryAlias(string alias) => $" {_dialect.SafeName(alias)}";
 }

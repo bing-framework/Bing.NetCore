@@ -35,7 +35,7 @@ public static class SelectClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.SelectClause.Select(columns, tableAlias);
         return source;
     }
@@ -51,7 +51,7 @@ public static class SelectClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.SelectClause.Select(builder, columnAlias);
         return source;
     }
@@ -67,7 +67,7 @@ public static class SelectClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.SelectClause.Select(action, columnAlias);
         return source;
     }
@@ -86,7 +86,7 @@ public static class SelectClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.SelectClause.AppendSql(sql);
         return source;
     }
@@ -115,7 +115,7 @@ public static class SelectClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.SelectClause.RemoveSelect(columns, tableAlias);
         return source;
     }

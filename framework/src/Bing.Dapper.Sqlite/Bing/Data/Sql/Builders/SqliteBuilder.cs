@@ -1,4 +1,5 @@
-﻿using Bing.Data;
+﻿using System.Text;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
@@ -29,4 +30,27 @@ public class SqliteBuilder : SqlBuilderBase
 
     /// <inheritdoc />
     protected override string GetCteKeyWord() => "With Recursive";
+
+    /// <summary>
+    /// 创建 SQLite 联合查询 SQL。
+    /// </summary>
+    /// <param name="result">承载最终 SQL 的字符串构建器。</param>
+    /// <remarks>
+    /// SQLite 不支持将复合 SELECT 的每个操作数包裹在括号中，因此保留基类的参数合并流程但省略操作数括号。
+    /// </remarks>
+    protected override void CreateSqlByUnion(StringBuilder result)
+    {
+        AppendSelect(result);
+        AppendFrom(result);
+        AppendClause(result, JoinClause);
+        AppendClause(result, WhereClause);
+        AppendClause(result, GroupByClause);
+        foreach (var operation in UnionItems)
+        {
+            AppendSql(result, operation.Name);
+            AppendSql(result, RenderSubquery(operation.Builder));
+        }
+        AppendClause(result, OrderByClause);
+        AppendLimit(result);
+    }
 }

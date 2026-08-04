@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Metadata;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;
@@ -19,8 +20,25 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.Join(table, alias);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加结构化左连接表引用。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="table">结构化表引用。</param>
+    public static T LeftJoin<T>(this T source, SqlTableReference table) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.LeftJoin(table);
         return source;
     }
 
@@ -37,7 +55,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.AppendJoin(sql);
         return source;
     }
@@ -64,7 +82,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.Join(builder, alias);
         return source;
     }
@@ -80,10 +98,22 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.Join(action, alias);
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述添加内连接子查询。
+    /// </summary>
+    /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
+    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="query">作为子查询使用的独立查询描述。</param>
+    /// <param name="alias">子查询别名。</param>
+    /// <returns>追加连接后的源对象。</returns>
+    public static T Join<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+        Join(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
     /// 左外连接
@@ -96,7 +126,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.LeftJoin(table, alias);
         return source;
     }
@@ -114,7 +144,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.AppendLeftJoin(sql);
         return source;
     }
@@ -141,7 +171,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.LeftJoin(builder, alias);
         return source;
     }
@@ -157,10 +187,22 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.LeftJoin(action, alias);
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述添加左连接子查询。
+    /// </summary>
+    /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
+    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="query">作为子查询使用的独立查询描述。</param>
+    /// <param name="alias">子查询别名。</param>
+    /// <returns>追加连接后的源对象。</returns>
+    public static T LeftJoin<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+        LeftJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
     /// 右外连接
@@ -173,7 +215,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.RightJoin(table, alias);
         return source;
     }
@@ -191,7 +233,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.AppendRightJoin(sql);
         return source;
     }
@@ -218,7 +260,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.RightJoin(builder, alias);
         return source;
     }
@@ -234,10 +276,22 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.RightJoin(action, alias);
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述添加右连接子查询。
+    /// </summary>
+    /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
+    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="query">作为子查询使用的独立查询描述。</param>
+    /// <param name="alias">子查询别名。</param>
+    /// <returns>追加连接后的源对象。</returns>
+    public static T RightJoin<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+        RightJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
     /// 设置连接条件
@@ -249,7 +303,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.On(condition);
         return source;
     }
@@ -267,7 +321,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.On(left, value, @operator);
         return source;
     }
@@ -284,7 +338,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.JoinClause.AppendOn(sql);
         return source;
     }

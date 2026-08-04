@@ -22,8 +22,20 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (string.IsNullOrWhiteSpace(name) || builder == null)
             return source;
-        if (source is ICteAccessor accessor)
-            accessor.CteItems.Add(new BuilderItem(name, builder));
+        if (GetOperationBuilder(source) is ICteAccessor accessor)
+            accessor.CteItems.Add(new BuilderItem(name, builder.Clone()));
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述设置公用表表达式。
+    /// </summary>
+    /// <typeparam name="T">支持 CTE 的源类型。</typeparam>
+    /// <typeparam name="TResult">查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="name">CTE 名称。</param>
+    /// <param name="query">作为 CTE 使用的独立查询描述。</param>
+    /// <returns>追加 CTE 后的源对象。</returns>
+    public static T With<T, TResult>(this T source, string name, SqlQuery<TResult> query) where T : ICte =>
+        With(source, name, GetQueryBuilder(query, nameof(query)));
 }

@@ -55,5 +55,47 @@ public partial class SqlBuilderTest
         Assert.Equal(result.ToString(), _builder.ToSql());
     }
 
+    /// <summary>
+    /// 测试目的：注册 CTE 后修改输入 Builder 时，已组合查询应保持 CTE 注册时的独立快照。
+    /// </summary>
+    [Fact]
+    public void With_WhenInputBuilderChangesAfterRegistration_ShouldKeepCteSnapshotIsolated()
+    {
+        // Arrange
+        const string expected = "With [active_users] \r\nAs (Select [Id] \r\nFrom [Users])\r\nSelect [Id] \r\nFrom [active_users]";
+        var cte = _builder.New().Select("Id").From("Users");
+
+        // Act
+        _builder.Select("Id").From("active_users").With("active_users", cte);
+        cte.Select("Name");
+
+        // Assert
+        Assert.Equal(expected, _builder.ToSql());
+        Assert.Equal("Select [Id],[Name] \r\nFrom [Users]", cte.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：延迟渲染的 CTE 连续参数与主查询冲突时，应分别重命名并在重复渲染时保持稳定。
+    /// </summary>
+    [Fact]
+    public void With_WhenCteHasSequentialConflictingParameters_ShouldRenameEachTokenOnce()
+    {
+        // Arrange
+        const string expected = "With [selected] \r\nAs (Select * \r\nFrom [Child] \r\nWhere [Name]=@_p_1 And [Age]=@_p_2)\r\nSelect * \r\nFrom [Parent] \r\nWhere [Id]=@_p_0";
+        var cte = _builder.New().From("Child").Where("Name", "child-name").Where("Age", 18);
+
+        // Act
+        _builder.From("Parent").Where("Id", 1).With("selected", cte);
+        var firstSql = _builder.ToSql();
+        var secondSql = _builder.ToSql();
+
+        // Assert
+        Assert.Equal(expected, firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child-name", _builder.GetParam("@_p_1"));
+        Assert.Equal(18, _builder.GetParam("@_p_2"));
+    }
+
     #endregion
 }

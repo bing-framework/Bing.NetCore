@@ -102,6 +102,54 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：子查询连续参数均与外层冲突时，应基于原始 SQL 一次性重命名，避免先替换的参数被后续替换再次改写。
+    /// </summary>
+    [Fact]
+    public void Join_WhenChildHasSequentialConflictingParameters_ShouldRenameEachTokenOnce()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().From("Test2").Where("Name", "child-name").Where("Age", 18);
+        const string expected = "Select * \r\nFrom [Test] \r\nJoin (Select * \r\nFrom [Test2] \r\nWhere [Name]=@_p_1 And [Age]=@_p_2) As [t] \r\nWhere [Id]=@_p_0";
+
+        // Act
+        _builder.From("Test").Where("Id", 1).Join(subquery, "t");
+
+        // Assert
+        Assert.Equal(expected, _builder.ToSql());
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child-name", _builder.GetParam("@_p_1"));
+        Assert.Equal(18, _builder.GetParam("@_p_2"));
+    }
+
+    /// <summary>
+    /// 测试目的：子查询参数冲突改名时，只应替换 SQL 代码中的参数标记，不得修改字符串、注释或方括号标识符。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSubqueryContainsQuotedOrCommentedParameterText_ShouldRenameOnlyParameterToken()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().From("Child")
+            .AppendWhere("[Text]='@_p_0' And [@_p_0]=1 /* @_p_0 */ -- @_p_0\r\n And [Value]=@_p_0")
+            .AddParam("_p_0", "child");
+        var expected = new StringBuilder();
+        expected.AppendLine("Select * ");
+        expected.AppendLine("From [Parent] ");
+        expected.AppendLine("Join (Select * ");
+        expected.AppendLine("From [Child] ");
+        expected.AppendLine("Where [Text]='@_p_0' And [@_p_0]=1 /* @_p_0 */ -- @_p_0");
+        expected.AppendLine(" And [Value]=@_p_1) As [c] ");
+        expected.Append("Where [Id]=@_p_0");
+
+        // Act
+        _builder.From("Parent").Where("Id", 1).Join(subquery, "c");
+
+        // Assert
+        Assert.Equal(expected.ToString(), _builder.ToSql());
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child", _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
     /// 测试目的：结构化 From 和 Join 在同一查询范围内使用重复 alias 时应立即失败。
     /// </summary>
     [Fact]

@@ -366,8 +366,15 @@ public class JoinClause : IJoinClause
             return;
         _register?.RegisterAlias(alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
-        AddItem(JoinItem.CreateRaw(joinType, $"({sql}) As {_dialect.SafeName(alias)}"));
+        AddItem(JoinItem.CreateRaw(joinType, $"({sql}){GetSubqueryAlias(alias)}"));
     }
+
+    /// <summary>
+    /// 获取派生表连接别名的方言渲染文本。
+    /// </summary>
+    /// <param name="alias">派生表别名。</param>
+    /// <returns>包含前导空格的别名 SQL 文本。</returns>
+    protected virtual string GetSubqueryAlias(string alias) => $" As {_dialect.SafeName(alias)}";
 
     /// <summary>
     /// 内连接子查询

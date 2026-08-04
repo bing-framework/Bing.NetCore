@@ -34,8 +34,10 @@ public class NotInCondition : ICondition
     /// </summary>
     public string GetCondition()
     {
-        if (string.IsNullOrWhiteSpace(_name) || _values == null || _values.Count == 0)
+        if (string.IsNullOrWhiteSpace(_name) || _values == null)
             return null;
+        if (_values.Count == 0)
+            return "1 = 1";
         var result = new StringBuilder();
         result.Append($"{_name} Not In (");
         result.Append(_values.Join());

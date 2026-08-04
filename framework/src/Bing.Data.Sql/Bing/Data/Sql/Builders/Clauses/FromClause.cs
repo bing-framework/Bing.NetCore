@@ -187,8 +187,15 @@ public class FromClause : IFromClause
             return;
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         Register?.RegisterAlias(alias);
-        Table = SqlItem.Raw($"({result}) As {Dialect.SafeName(alias)}");
+        Table = SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}");
     }
+
+    /// <summary>
+    /// 获取派生表别名的方言渲染文本。
+    /// </summary>
+    /// <param name="alias">派生表别名。</param>
+    /// <returns>包含前导空格的别名 SQL 文本。</returns>
+    protected virtual string GetSubqueryAlias(string alias) => $" As {Dialect.SafeName(alias)}";
 
     /// <inheritdoc />
     public void From(Action<ISqlBuilder> action, string alias)

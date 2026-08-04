@@ -45,6 +45,9 @@ public class SelectClause : ISelectClause
     /// </summary>
     private bool _distinct;
 
+    /// <inheritdoc />
+    public bool IsDistinct => _distinct;
+
     /// <summary>
     /// 当前投影数量是否可以可靠确定。
     /// </summary>

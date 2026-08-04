@@ -128,6 +128,25 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：调试 SQL 应遮蔽敏感参数值，且不得改写字符串字面量中的同名文本。
+    /// </summary>
+    [Fact]
+    public void ToDebugSql_WhenParameterIsSensitive_ShouldRedactOnlyExecutableParameterToken()
+    {
+        // Arrange
+        var builder = _builder.AppendSelect("*").AppendFrom("[Test]")
+            .AppendWhere("[Token]=@ApiToken And [Note]='@ApiToken'")
+            .AddParam("ApiToken", "super-secret-token");
+
+        // Act
+        var result = builder.ToDebugSql(builder.ToSql());
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Test] \r\nWhere [Token]='<redacted>' And [Note]='@ApiToken'", result);
+        Assert.DoesNotContain("super-secret-token", result);
+    }
+
+    /// <summary>
     /// 测试目的：传入空 SQL 时应明确拒绝，避免调试渲染出现不可诊断的空引用异常。
     /// </summary>
     [Fact]

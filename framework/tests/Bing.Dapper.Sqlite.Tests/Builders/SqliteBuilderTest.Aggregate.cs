@@ -9,6 +9,29 @@ namespace Bing.Dapper.Tests.Builders;
 public class SqliteBuilderAggregateTest
 {
     /// <summary>
+    /// 测试 - SQLite 空 In 与 Not In 集合应生成明确常量条件，且不生成无效参数。
+    /// </summary>
+    [Fact]
+    public void InAndNotIn_WhenValuesAreEmpty_ShouldRenderConstantConditionsWithoutParameters()
+    {
+        // Arrange
+        const string expectedIn = "Select * \r\nFrom `Samples` \r\nWhere 1 = 0";
+        const string expectedNotIn = "Select * \r\nFrom `Samples` \r\nWhere 1 = 1";
+        var inBuilder = new SqliteBuilder().Select("*").From("Samples").In("Id", Array.Empty<object>());
+        var notInBuilder = new SqliteBuilder().Select("*").From("Samples").NotIn("Id", Array.Empty<object>());
+
+        // Act
+        var inSql = inBuilder.ToSql();
+        var notInSql = notInBuilder.ToSql();
+
+        // Assert
+        Assert.Equal(expectedIn, inSql);
+        Assert.Equal(expectedNotIn, notInSql);
+        Assert.Empty(inBuilder.GetParams());
+        Assert.Empty(notInBuilder.GetParams());
+    }
+
+    /// <summary>
     /// 测试 - SQLite Distinct 聚合应在函数参数内使用反引号限定列。
     /// </summary>
     [Fact]

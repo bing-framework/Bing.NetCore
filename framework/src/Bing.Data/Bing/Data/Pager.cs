@@ -34,11 +34,13 @@ public class Pager : IPager
     /// <param name="pageSize">每页显示行数，默认20</param>
     /// <param name="totalCount">总行数</param>
     /// <param name="order">排序条件</param>
-    public Pager(int page, int pageSize = 20, int totalCount = 0, string order = "")
+    /// <param name="totalCountKnown">总行数是否已知。</param>
+    public Pager(int page, int pageSize = 20, int totalCount = 0, string order = "", bool totalCountKnown = false)
     {
         Page = page;
         PageSize = pageSize;
-        TotalCount = totalCount;
+        _totalCount = totalCount;
+        IsTotalCountKnown = totalCountKnown || totalCount != 0;
         Order = order;
     }
 
@@ -53,6 +55,11 @@ public class Pager : IPager
     /// 描述
     /// </summary>
     private StringBuilder _description;
+
+    /// <summary>
+    /// 总行数。
+    /// </summary>
+    private int _totalCount;
 
     /// <summary>
     /// 页索引，即第几页，从1开始
@@ -76,7 +83,23 @@ public class Pager : IPager
     /// <summary>
     /// 总行数
     /// </summary>
-    public int TotalCount { get; set; }
+    public int TotalCount
+    {
+        get => _totalCount;
+        set
+        {
+            _totalCount = value;
+            IsTotalCountKnown = true;
+        }
+    }
+
+    /// <summary>
+    /// 总行数是否已由调用方或执行路径确定。
+    /// </summary>
+    /// <remarks>
+    /// 默认值为 <see langword="false"/>，允许分页执行路径自动计数；当已知结果恰好为零时，调用方应显式设置为 <see langword="true"/>。
+    /// </remarks>
+    public bool IsTotalCountKnown { get; set; }
 
     /// <summary>
     /// 排序条件

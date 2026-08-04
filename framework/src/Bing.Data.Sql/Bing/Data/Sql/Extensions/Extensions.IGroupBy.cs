@@ -19,8 +19,40 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.GroupByClause.GroupBy(columns, having);
+        return source;
+    }
+
+    /// <summary>
+    /// 设置受信任的原始 Having 条件。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源对象。</param>
+    /// <param name="sql">Having SQL 条件；外部输入必须通过参数 API 提供。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T HavingRaw<T>(this T source, string sql) where T : IGroupBy
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.GroupByClause.HavingRaw(sql);
+        return source;
+    }
+
+    /// <summary>
+    /// 设置 Having 条件，并按当前方言解析方括号标识符。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源对象。</param>
+    /// <param name="sql">Having SQL 条件；外部输入必须通过参数 API 提供。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T Having<T>(this T source, string sql) where T : IGroupBy
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.GroupByClause.Having(sql);
         return source;
     }
 
@@ -35,7 +67,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is ISqlQueryClauseAccessor accessor)
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
             accessor.GroupByClause.AppendSql(sql);
         return source;
     }

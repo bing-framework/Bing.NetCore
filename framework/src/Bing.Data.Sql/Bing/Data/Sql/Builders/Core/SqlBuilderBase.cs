@@ -608,7 +608,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
 
         // 克隆分页信息
         Pager = new Pager(sqlBuilder.Pager.Page, sqlBuilder.Pager.PageSize, sqlBuilder.Pager.TotalCount,
-            sqlBuilder.Pager.Order);
+            sqlBuilder.Pager.Order, sqlBuilder.Pager is Pager sourcePager && sourcePager.IsTotalCountKnown);
         OffsetParam = sqlBuilder.OffsetParam;
         LimitParam = sqlBuilder.LimitParam;
         _isAddFilters = sqlBuilder._isAddFilters;
@@ -629,7 +629,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 渲染子查询并合并独立参数上下文。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
-    internal string RenderSubquery(ISqlBuilder builder)
+    protected internal string RenderSubquery(ISqlBuilder builder)
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
@@ -674,11 +674,242 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
                 else
                     ParameterManager.Add(targetName, parameter.Value);
             }
-            if (string.Equals(parameter.Key, targetName, StringComparison.Ordinal) == false)
-                sql = Regex.Replace(sql, $@"(?<![\w]){Regex.Escape(parameter.Key)}(?![\w])", targetName);
         }
-        return sql;
+            return ReplaceParameterTokens(sql, nameMap);
     }
+
+    /// <summary>
+    /// 在 SQL 代码片段中替换独立参数标记，同时保留字符串、注释和标识符中的原始文本。
+    /// </summary>
+    /// <param name="sql">待处理的 SQL 文本。</param>
+    /// <param name="parameterNames">源参数名称与目标参数名称的映射，均包含方言前缀。</param>
+    /// <returns>仅替换实际参数标记后的 SQL 文本。</returns>
+    private static string ReplaceParameterTokens(string sql, IReadOnlyDictionary<string, string> parameterNames)
+    {
+        if (string.IsNullOrEmpty(sql) || parameterNames == null || parameterNames.Count == 0)
+            return sql;
+
+        var replacements = parameterNames
+            .Where(item => string.Equals(item.Key, item.Value, StringComparison.Ordinal) == false)
+            .OrderByDescending(item => item.Key.Length)
+            .ToArray();
+        if (replacements.Length == 0)
+            return sql;
+
+        var result = new StringBuilder(sql.Length);
+        for (var index = 0; index < sql.Length;)
+        {
+            var current = sql[index];
+            if (current == '\'')
+            {
+                index = AppendQuotedSegment(sql, result, index, '\'');
+                continue;
+            }
+            if (current == '"')
+            {
+                index = AppendQuotedSegment(sql, result, index, '"');
+                continue;
+            }
+            if (current == '`')
+            {
+                index = AppendQuotedSegment(sql, result, index, '`');
+                continue;
+            }
+            if (current == '[')
+            {
+                index = AppendBracketedIdentifier(sql, result, index);
+                continue;
+            }
+            if (current == '-' && index + 1 < sql.Length && sql[index + 1] == '-')
+            {
+                index = AppendLineComment(sql, result, index);
+                continue;
+            }
+            if (current == '/' && index + 1 < sql.Length && sql[index + 1] == '*')
+            {
+                index = AppendBlockComment(sql, result, index);
+                continue;
+            }
+            if (current == '$' && TryAppendDollarQuotedSegment(sql, result, ref index))
+                continue;
+            var replacement = replacements.FirstOrDefault(item => IsParameterToken(sql, index, item.Key));
+            if (string.IsNullOrEmpty(replacement.Key) == false)
+            {
+                result.Append(replacement.Value);
+                index += replacement.Key.Length;
+                continue;
+            }
+            result.Append(current);
+            index++;
+        }
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// 替换单个 SQL 参数标记。
+    /// </summary>
+    /// <param name="sql">待处理的 SQL 文本。</param>
+    /// <param name="sourceName">源参数名称，包含方言前缀。</param>
+    /// <param name="targetName">目标参数名称或调试文本。</param>
+    /// <returns>仅替换实际参数标记后的 SQL 文本。</returns>
+    private static string ReplaceParameterToken(string sql, string sourceName, string targetName) =>
+        ReplaceParameterTokens(sql, new Dictionary<string, string> { [sourceName] = targetName });
+
+    /// <summary>
+    /// 追加单引号、双引号或反引号包裹的 SQL 片段，并处理连续引号转义。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="result">输出缓冲区。</param>
+    /// <param name="index">引号起始位置。</param>
+    /// <param name="quote">当前引号字符。</param>
+    /// <returns>下一个待处理字符的位置。</returns>
+    private static int AppendQuotedSegment(string sql, StringBuilder result, int index, char quote)
+    {
+        result.Append(sql[index]);
+        index++;
+        while (index < sql.Length)
+        {
+            var current = sql[index++];
+            result.Append(current);
+            if (current != quote)
+                continue;
+            if (index >= sql.Length)
+                break;
+            if (sql[index] == quote)
+            {
+                result.Append(sql[index]);
+                index++;
+                continue;
+            }
+            break;
+        }
+        return index;
+    }
+
+    /// <summary>
+    /// 追加方括号标识符片段，并处理连续右括号转义。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="result">输出缓冲区。</param>
+    /// <param name="index">方括号起始位置。</param>
+    /// <returns>下一个待处理字符的位置。</returns>
+    private static int AppendBracketedIdentifier(string sql, StringBuilder result, int index)
+    {
+        do
+        {
+            var current = sql[index];
+            result.Append(current);
+            index++;
+            if (current != ']' || index >= sql.Length)
+                continue;
+            if (sql[index] == ']')
+            {
+                result.Append(sql[index]);
+                index++;
+                continue;
+            }
+            break;
+        } while (index < sql.Length);
+        return index;
+    }
+
+    /// <summary>
+    /// 追加单行注释片段。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="result">输出缓冲区。</param>
+    /// <param name="index">注释起始位置。</param>
+    /// <returns>下一个待处理字符的位置。</returns>
+    private static int AppendLineComment(string sql, StringBuilder result, int index)
+    {
+        while (index < sql.Length)
+        {
+            var current = sql[index++];
+            result.Append(current);
+            if (current is '\r' or '\n')
+                break;
+        }
+        return index;
+    }
+
+    /// <summary>
+    /// 追加块注释片段。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="result">输出缓冲区。</param>
+    /// <param name="index">注释起始位置。</param>
+    /// <returns>下一个待处理字符的位置。</returns>
+    private static int AppendBlockComment(string sql, StringBuilder result, int index)
+    {
+        while (index < sql.Length)
+        {
+            var current = sql[index++];
+            result.Append(current);
+            if (current == '*' && index < sql.Length && sql[index] == '/')
+            {
+                result.Append(sql[index]);
+                return index + 1;
+            }
+        }
+        return index;
+    }
+
+    /// <summary>
+    /// 尝试追加 PostgreSQL dollar-quoted 文本片段。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="result">输出缓冲区。</param>
+    /// <param name="index">当前字符位置。</param>
+    /// <returns>找到并追加 dollar-quoted 片段时返回 true。</returns>
+    private static bool TryAppendDollarQuotedSegment(string sql, StringBuilder result, ref int index)
+    {
+        var delimiterEnd = index + 1;
+        while (delimiterEnd < sql.Length && (char.IsLetterOrDigit(sql[delimiterEnd]) || sql[delimiterEnd] == '_'))
+            delimiterEnd++;
+        if (delimiterEnd >= sql.Length || sql[delimiterEnd] != '$')
+            return false;
+
+        var delimiter = sql.Substring(index, delimiterEnd - index + 1);
+        var contentEnd = sql.IndexOf(delimiter, delimiterEnd + 1, StringComparison.Ordinal);
+        if (contentEnd < 0)
+            return false;
+
+        result.Append(sql, index, contentEnd + delimiter.Length - index);
+        index = contentEnd + delimiter.Length;
+        return true;
+    }
+
+    /// <summary>
+    /// 判断当前位置是否为独立 SQL 参数标记。
+    /// </summary>
+    /// <param name="sql">完整 SQL 文本。</param>
+    /// <param name="index">当前字符位置。</param>
+    /// <param name="parameterName">包含方言前缀的参数名。</param>
+    /// <returns>是独立参数标记时返回 true。</returns>
+    private static bool IsParameterToken(string sql, int index, string parameterName)
+    {
+        if (index + parameterName.Length > sql.Length ||
+            string.Compare(sql, index, parameterName, 0, parameterName.Length, StringComparison.Ordinal) != 0)
+            return false;
+        if (index > 0 && IsParameterNameCharacter(sql[index - 1]))
+            return false;
+        if (index + parameterName.Length < sql.Length && IsParameterNameCharacter(sql[index + parameterName.Length]))
+            return false;
+        if (parameterName[0] == '@' && index > 0 && sql[index - 1] == '@')
+            return false;
+        if (parameterName[0] == ':' &&
+            ((index > 0 && sql[index - 1] == ':') ||
+             (index + parameterName.Length < sql.Length && sql[index + parameterName.Length] == ':')))
+            return false;
+        return true;
+    }
+
+    /// <summary>
+    /// 判断字符是否属于 SQL 参数名称。
+    /// </summary>
+    /// <param name="value">待判断字符。</param>
+    /// <returns>属于参数名称时返回 true。</returns>
+    private static bool IsParameterNameCharacter(char value) => char.IsLetterOrDigit(value) || value == '_';
 
     /// <summary>
     /// 克隆增强 SQL 参数并替换参数名。
@@ -915,10 +1146,27 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         var parameters = ParameterManager.GetParams();
         foreach (var parameter in parameters)
         {
-            var literal = ParamLiteralsResolver.GetParamLiterals(parameter.Value);
-            sql = Regex.Replace(sql, $@"(?<![\w]){Regex.Escape(parameter.Key)}(?![\w])", _ => literal);
+            var literal = IsSensitiveParameterName(parameter.Key)
+                ? "'<redacted>'"
+                : ParamLiteralsResolver.GetParamLiterals(parameter.Value);
+            sql = ReplaceParameterToken(sql, parameter.Key, literal);
         }
         return sql;
+    }
+
+    /// <summary>
+    /// 判断参数名称是否包含敏感信息标识。
+    /// </summary>
+    /// <param name="name">参数名称。</param>
+    /// <returns>包含敏感信息标识时返回 true。</returns>
+    private static bool IsSensitiveParameterName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+        return name.IndexOf("password", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("secret", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("key", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     #endregion
@@ -1001,7 +1249,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 创建Sql语句 - 联合
     /// </summary>
     /// <param name="result">Sql拼接</param>
-    protected void CreateSqlByUnion(StringBuilder result)
+    protected virtual void CreateSqlByUnion(StringBuilder result)
     {
         result.Append("(");
         AppendSelect(result);
@@ -1115,7 +1363,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 添加分页Sql
     /// </summary>
     /// <param name="result">Sql拼接器</param>
-    private void AppendLimit(StringBuilder result)
+    protected void AppendLimit(StringBuilder result)
     {
         if (IsLimit)
             AppendSql(result, CreateLimitSql());

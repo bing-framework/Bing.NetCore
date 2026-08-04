@@ -29,4 +29,7 @@ public class OracleFromClause : FromClause
     /// <inheritdoc />
     protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new OracleFromClause(context, table, ProviderDatabaseType);
+
+    /// <inheritdoc />
+    protected override string GetSubqueryAlias(string alias) => $" {Dialect.SafeName(alias)}";
 }

@@ -69,6 +69,7 @@ public class TreeQueryParameter<TParentId> : QueryParameter, ITreeQueryParameter
             case "pagesize":
             case "page":
             case "totalcount":
+            case "istotalcountknown":
                 return false;
         }
         return true;

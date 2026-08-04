@@ -124,4 +124,40 @@ public class GroupByClauseTest
         _clause.AppendSql("d");
         Assert.Equal("Group By [a],[b],c,d", GetSql());
     }
+
+    /// <summary>
+    /// 测试目的：显式 HavingRaw 应替换旧条件并保留原始聚合表达式。
+    /// </summary>
+    [Fact]
+    public void HavingRaw_WhenGroupConfigured_ShouldReplaceHavingCondition()
+    {
+        // Arrange
+        _clause.GroupBy("a", "Count(*) > 1");
+
+        // Act
+        _clause.HavingRaw("Sum([Amount]) >= @minimum");
+
+        // Assert
+        Assert.Equal("Group By [a] Having Sum([Amount]) >= @minimum", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Having 应解析方括号标识符，而 HavingRaw 必须保持完全原样。
+    /// </summary>
+    [Fact]
+    public void Having_WhenIdentifierSyntaxProvided_ShouldResolveDialectButRawShouldNot()
+    {
+        // Arrange
+        _clause.GroupBy("a");
+
+        // Act
+        _clause.Having("Count([a]) >= @minimum");
+        var resolved = GetSql();
+        _clause.HavingRaw("Count([raw]) >= @minimum");
+        var raw = GetSql();
+
+        // Assert
+        Assert.Equal("Group By [a] Having Count([a]) >= @minimum", resolved);
+        Assert.Equal("Group By [a] Having Count([raw]) >= @minimum", raw);
+    }
 }

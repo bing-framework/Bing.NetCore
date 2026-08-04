@@ -31,6 +31,27 @@ public class PagerTest
         Assert.Equal("", _pager.Order);
         Assert.Equal(1, _pager.GetStartNumber());
         Assert.Equal(20, _pager.GetEndNumber());
+        Assert.False(_pager.IsTotalCountKnown);
+    }
+
+    /// <summary>
+    /// 测试目的：总数状态应区分默认未知、显式赋值零值和构造时已知总数。
+    /// </summary>
+    [Fact]
+    public void TotalCount_WhenAssignedOrExplicitlyDeclared_ShouldTrackKnownState()
+    {
+        // Arrange
+        var constructorValue = new Pager(1, 20, 3);
+        var explicitZero = new Pager(1, 20, 0, totalCountKnown: true);
+
+        // Act
+        _pager.TotalCount = 0;
+
+        // Assert
+        Assert.True(_pager.IsTotalCountKnown);
+        Assert.True(constructorValue.IsTotalCountKnown);
+        Assert.True(explicitZero.IsTotalCountKnown);
+        Assert.Equal(0, explicitZero.TotalCount);
     }
 
     /// <summary>

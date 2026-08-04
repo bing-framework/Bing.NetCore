@@ -41,6 +41,18 @@ public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause
     void GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null);
 
     /// <summary>
+    /// 设置 Having 条件，并按当前方言解析方括号标识符。
+    /// </summary>
+    /// <param name="sql">Having SQL 条件；外部输入必须通过参数 API 提供。</param>
+    void Having(string sql);
+
+    /// <summary>
+    /// 设置受信任的原始 Having 条件。
+    /// </summary>
+    /// <param name="sql">Having SQL 条件；调用方负责参数化外部输入。</param>
+    void HavingRaw(string sql);
+
+    /// <summary>
     /// 添加到GroupBy子句
     /// </summary>
     /// <param name="sql">Sql语句</param>

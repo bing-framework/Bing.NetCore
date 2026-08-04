@@ -9,6 +9,11 @@ namespace Bing.Data.Sql.Builders;
 public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
 {
     /// <summary>
+    /// 指示当前投影是否启用了去重。
+    /// </summary>
+    bool IsDistinct { get; }
+
+    /// <summary>
     /// 可确定的查询输出列数量；通配符或无法可靠分析的原始投影返回 null。
     /// </summary>
     int? ProjectionCount { get; }

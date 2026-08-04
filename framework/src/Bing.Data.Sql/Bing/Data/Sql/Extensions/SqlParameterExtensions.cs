@@ -28,7 +28,7 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
             accessor.ParameterManager.Add(name, value);
         return source;
     }
@@ -49,7 +49,7 @@ public static class SqlParameterExtensions
     {
         source.CheckNull(nameof(source));
         property.CheckNull(nameof(property));
-        if (source is not ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is not ISqlCommonPartAccessor accessor)
             return source;
         if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
         {
@@ -71,7 +71,7 @@ public static class SqlParameterExtensions
     public static IReadOnlyDictionary<string, object> GetParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
             return accessor.ParameterManager.GetParams();
         return default;
     }
@@ -83,7 +83,7 @@ public static class SqlParameterExtensions
     public static IReadOnlyDictionary<string, SqlParam> GetSqlParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
-        if (source is not ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is not ISqlCommonPartAccessor accessor)
             return default;
         if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
             return advancedParameterManager.GetSqlParams();
@@ -111,9 +111,7 @@ public static class SqlParameterExtensions
     public static T GetParam<T>(this ISqlParameter source, string name)
     {
         source.CheckNull(nameof(source));
-        if (source is IGetParameter target)
-            return target.GetParam<T>(name);
-        if (source is ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
             return (T)accessor.ParameterManager.GetValue(name);
         return default;
     }
@@ -126,7 +124,7 @@ public static class SqlParameterExtensions
     public static object GetParam(this ISqlParameter source, string name)
     {
         source.CheckNull(nameof(source));
-        if (source is ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
             return accessor.ParameterManager.GetValue(name);
         return default;
     }
@@ -144,12 +142,7 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (source is IClearParameters target)
-        {
-            target.ClearParams();
-            return source;
-        }
-        if (source is ISqlCommonPartAccessor accessor)
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
             accessor.ParameterManager.Clear();
         return source;
     }
@@ -198,11 +191,11 @@ public static class SqlParameterExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <returns>Sql 生成器</returns>
-    private static ISqlBuilder GetSqlBuilder<T>(T source) where T : ISqlParameter
+    private static object GetSqlBuilder<T>(T source) where T : ISqlParameter
     {
-        if (source is ISqlQuery sqlQuery)
-            return sqlQuery.GetBuilder();
-        return source as ISqlBuilder;
+        if (source is ISqlQueryBuilderAccessor accessor)
+            return accessor.GetSqlBuilder();
+        return (object)(source as ISqlBuilder) ?? source as ISqlCommonPartAccessor;
     }
 
     #endregion

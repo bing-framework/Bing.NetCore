@@ -128,6 +128,24 @@ public class GroupByClause : IGroupByClause
         _having = having;
     }
 
+    /// <inheritdoc />
+    public void HavingRaw(string sql)
+    {
+        if (string.IsNullOrWhiteSpace(sql))
+            throw new ArgumentException("Having 条件不能为空。", nameof(sql));
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        _having = sql;
+    }
+
+    /// <inheritdoc />
+    public void Having(string sql)
+    {
+        if (string.IsNullOrWhiteSpace(sql))
+            throw new ArgumentException("Having 条件不能为空。", nameof(sql));
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        _having = Helper.ResolveSql(sql, _dialect);
+    }
+
     /// <summary>
     /// 添加到GroupBy子句
     /// </summary>

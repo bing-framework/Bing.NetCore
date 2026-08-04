@@ -38,13 +38,16 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (builders == null)
             return;
-        if (!(source is IUnionAccessor accessor))
+        if (GetOperationBuilder(source) is not IUnionAccessor accessor)
             return;
         foreach (var builder in builders)
         {
-            builder.ClearOrderBy();
-            builder.ClearPageParams();
-            accessor.UnionItems.Add(new BuilderItem(operation, builder));
+            if (builder == null)
+                continue;
+            var unionBuilder = builder.Clone();
+            unionBuilder.ClearOrderBy();
+            unionBuilder.ClearPageParams();
+            accessor.UnionItems.Add(new BuilderItem(operation, unionBuilder));
         }
     }
 
@@ -60,6 +63,17 @@ public static partial class Extensions
         Union(source, "Union", builders);
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述执行 Union。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="queries">要参与 Union 的查询描述。</param>
+    /// <returns>追加联合项后的源对象。</returns>
+    public static T Union<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+        Union(source, GetQueryBuilders(queries));
 
     #endregion
 
@@ -91,6 +105,17 @@ public static partial class Extensions
         return source;
     }
 
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述执行 Union All。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="queries">要参与 Union All 的查询描述。</param>
+    /// <returns>追加联合项后的源对象。</returns>
+    public static T UnionAll<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+        UnionAll(source, GetQueryBuilders(queries));
+
     #endregion
 
     #region Intersect(交集)
@@ -121,6 +146,17 @@ public static partial class Extensions
         return source;
     }
 
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述执行 Intersect。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="queries">要参与 Intersect 的查询描述。</param>
+    /// <returns>追加联合项后的源对象。</returns>
+    public static T Intersect<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+        Intersect(source, GetQueryBuilders(queries));
+
     #endregion
 
     #region Except(并集)
@@ -150,6 +186,26 @@ public static partial class Extensions
         Union(source, "Except", builders);
         return source;
     }
+
+    /// <summary>
+    /// 使用指定结果类型的 Fluent 查询描述执行 Except。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="queries">要参与 Except 的查询描述。</param>
+    /// <returns>追加联合项后的源对象。</returns>
+    public static T Except<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+        Except(source, GetQueryBuilders(queries));
+
+    /// <summary>
+    /// 将指定结果类型查询描述转换为其专属 Builder 列表。
+    /// </summary>
+    /// <typeparam name="TResult">查询描述的结果类型。</typeparam>
+    /// <param name="queries">查询描述列表。</param>
+    /// <returns>与查询描述一一对应的 Builder 列表。</returns>
+    private static IEnumerable<ISqlBuilder> GetQueryBuilders<TResult>(IEnumerable<SqlQuery<TResult>> queries) =>
+        queries?.Select(query => GetQueryBuilder(query, nameof(queries)));
 
     #endregion
 }

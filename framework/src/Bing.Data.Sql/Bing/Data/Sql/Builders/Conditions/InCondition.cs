@@ -34,8 +34,10 @@ public class InCondition : ICondition
     /// </summary>
     public string GetCondition()
     {
-        if (string.IsNullOrWhiteSpace(_name) || _values == null || _values.Count == 0)
+        if (string.IsNullOrWhiteSpace(_name) || _values == null)
             return null;
+        if (_values.Count == 0)
+            return "1 = 0";
         var result = new StringBuilder();
         result.Append($"{_name} In (");
         result.Append(_values.Join());

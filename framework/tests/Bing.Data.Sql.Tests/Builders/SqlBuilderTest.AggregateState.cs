@@ -104,6 +104,29 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：延迟渲染的 Union All 连续参数与首个查询冲突时，应分别重命名且重复渲染结果稳定。
+    /// </summary>
+    [Fact]
+    public void UnionAll_WhenChildHasSequentialConflictingParameters_ShouldRenameEachTokenOnce()
+    {
+        // Arrange
+        const string expected = "(Select [Id] \r\nFrom [Parent] \r\nWhere [Id]=@_p_0 \r\n) \r\nUnion All \r\n(Select [Id] \r\nFrom [Child] \r\nWhere [Name]=@_p_1 And [Age]=@_p_2 \r\n)";
+        var child = _builder.New().Select("Id").From("Child").Where("Name", "child-name").Where("Age", 18);
+
+        // Act
+        _builder.Select("Id").From("Parent").Where("Id", 1).UnionAll(child);
+        var firstSql = _builder.ToSql();
+        var secondSql = _builder.ToSql();
+
+        // Assert
+        Assert.Equal(expected, firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(1, _builder.GetParam("@_p_0"));
+        Assert.Equal("child-name", _builder.GetParam("@_p_1"));
+        Assert.Equal(18, _builder.GetParam("@_p_2"));
+    }
+
+    /// <summary>
     /// 测试 - 含可转换聚合表达式的子查询应合并参数并保持 SQL 稳定。
     /// </summary>
     [Fact]

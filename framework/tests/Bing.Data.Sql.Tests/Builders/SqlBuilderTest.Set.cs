@@ -96,6 +96,28 @@ public partial class SqlBuilderTest
         Assert.Equal(1, _builder.GetParam("@_p_1"));
     }
 
+    /// <summary>
+    /// 测试目的：Union 应仅清理自身克隆分支的排序和分页，且后续修改输入 Builder 不得污染已组合查询。
+    /// </summary>
+    [Fact]
+    public void Union_WhenInputBuilderHasOrderAndPage_ShouldKeepInputStateAndIsolateSubsequentChanges()
+    {
+        // Arrange
+        const string expected = "(Select [a] \r\nFrom [Test] \r\n) \r\nUnion \r\n(Select [a] \r\nFrom [Test2] \r\n)";
+        const string expectedInput = "Select [a],[c] \r\nFrom [Test2] \r\nOrder By [b] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only";
+        var union = _builder.New().Select("a").From("Test2").OrderBy("b").Skip(2).Take(3);
+
+        // Act
+        _builder.Select("a").From("Test").Union(union);
+        union.Select("c");
+
+        // Assert
+        Assert.Equal(expected, _builder.ToSql());
+        Assert.Equal(expectedInput, union.ToSql());
+        Assert.Equal(2, union.GetParam("@_p_0"));
+        Assert.Equal(3, union.GetParam("@_p_1"));
+    }
+
 
     #endregion
 }
