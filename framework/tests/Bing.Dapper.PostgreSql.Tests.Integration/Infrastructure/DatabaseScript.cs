@@ -47,6 +47,12 @@ Create Table If Not Exists public.integration_product_updates(
     id uuid Primary Key,
     name text Null
 );");
+        await ExecuteAsync(connection, @"
+Create Table If Not Exists public.integration_hierarchy_nodes(
+    id integer Primary Key,
+    parent_id integer Null,
+    name text Not Null
+);");
         await ExecuteAsync(connection,
             "Create Index If Not Exists ix_integration_product_items_product_id On public.integration_product_items(product_id);");
         await ExecuteAsync(connection, @"
@@ -71,7 +77,7 @@ Create Table If Not Exists integration_reporting.integration_samples(
         if (connection == null)
             throw new ArgumentNullException(nameof(connection));
         await ExecuteAsync(connection,
-            "Truncate Table public.integration_product_items, public.integration_product_updates, public.integration_products, integration_primary.integration_samples, integration_reporting.integration_samples Restart Identity;");
+            "Truncate Table public.integration_product_items, public.integration_product_updates, public.integration_products, public.integration_hierarchy_nodes, integration_primary.integration_samples, integration_reporting.integration_samples Restart Identity;");
     }
 
     /// <summary>

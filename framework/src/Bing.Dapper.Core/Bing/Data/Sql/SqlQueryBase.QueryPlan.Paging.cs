@@ -56,10 +56,10 @@ public abstract partial class SqlQueryBase
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var sourcePager = GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
         var sourceBuilder = plan.Builder.Clone();
-        cancellationToken.ThrowIfCancellationRequested();
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;

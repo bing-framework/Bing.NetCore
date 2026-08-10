@@ -216,6 +216,11 @@ Create Table If Not Exists Orders(
     Id Integer Not Null,
     TenantId Text Null,
     Name Text Null
+);
+Create Table If Not Exists HierarchyNodes(
+    Id Integer Not Null Primary Key,
+    ParentId Integer Null,
+    Name Text Not Null
 );";
         await command.ExecuteNonQueryAsync();
     }
@@ -230,7 +235,7 @@ Create Table If Not Exists Orders(
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
-        command.CommandText = "Delete From Orders; Delete From samples;";
+        command.CommandText = "Delete From HierarchyNodes; Delete From Orders; Delete From samples;";
         await command.ExecuteNonQueryAsync();
     }
 

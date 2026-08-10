@@ -609,6 +609,51 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：命令完成后、事务提交前发生取消时，主库短事务必须回滚，不能依赖 Provider 忽略取消令牌的提交实现。
+    /// </summary>
+    [Fact]
+    public async Task ScalarAsync_WhenCancelledAfterCommand_ShouldRollbackBeforeTransactionCommit()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var connection = new CaptureDbConnection { OnScalarExecuted = cancellationTokenSource.Cancel };
+        using var query = CreateOwnedQuery(connection);
+        ConfigurePrimaryReadTransaction(query);
+        var description = query.Sql<int>().Select("Count(*)").From("[Users]");
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ScalarAsync(
+            cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：预取消必须先于分页参数校验执行，不能先因缺少分页参数而失败。
+    /// </summary>
+    [Fact]
+    public async Task ToPageAsync_WhenCancellationRequested_ShouldCancelBeforePagingPlanValidation()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateQuery(connection);
+        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ToPageAsync(
+            cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        connection.ExecutedCommandTexts.ShouldBeEmpty();
+    }
+
+    /// <summary>
     /// 测试目的：普通异步命令失败时，主库短事务必须使用原生异步回滚成员且保留原始执行异常。
     /// </summary>
     [Fact]
@@ -991,6 +1036,50 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：只读数据源上的带 Returning 结构化查询计划必须在创建读取器前拒绝写入。
+    /// </summary>
+    [Fact]
+    public void QueryPlanReturning_WhenDataSourceIsReadOnly_ShouldRejectBeforeReaderCreation()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateQuery(connection);
+        ConfigureReadOnlyDataSource(query);
+        var plan = CreateReturningQueryPlan();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => ((ISqlQueryPlanExecutor)query).ToList<int>(plan,
+            timeout: null));
+
+        // Assert
+        exception.Message.ShouldContain("reporting");
+        connection.ReaderCreateCount.ShouldBe(0);
+        connection.ExecutedCommandTexts.ShouldBeEmpty();
+    }
+
+    /// <summary>
+    /// 测试目的：异步带 Returning 结构化查询计划必须与同步入口一致，在创建读取器前拒绝只读数据源写入。
+    /// </summary>
+    [Fact]
+    public async Task QueryPlanReturningAsync_WhenDataSourceIsReadOnly_ShouldRejectBeforeReaderCreation()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateQuery(connection);
+        ConfigureReadOnlyDataSource(query);
+        var plan = CreateReturningQueryPlan();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => ((ISqlQueryPlanExecutor)query)
+            .ToListAsync<int>(plan, timeout: null, cancellationToken: CancellationToken.None));
+
+        // Assert
+        exception.Message.ShouldContain("reporting");
+        connection.ReaderCreateCount.ShouldBe(0);
+        connection.ExecutedCommandTexts.ShouldBeEmpty();
+    }
+
+    /// <summary>
     /// 测试目的：由 SQLite Builder 冻结的 Returning 描述必须在 SQL Server Executor 打开连接前被拒绝。
     /// </summary>
     [Fact]
@@ -1071,6 +1160,31 @@ public class SqlServerRoutingAndExecutionTest
             .Select(item => item.Message));
         Assert.Equal(1, connection.ReaderDisposeCount);
         Assert.Equal(1, connection.LastTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：多结果集异步命令完成后发生取消时，执行器必须释放已获取的读取器并回滚短事务，不能返回可提交的结果对象。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenCancelledAfterCommand_ShouldDisposeReaderAndRollback()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var connection = new CaptureDbConnection { OnReaderCreated = cancellationTokenSource.Cancel };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(command,
+            cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        connection.ReaderDisposeCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -1281,6 +1395,35 @@ public class SqlServerRoutingAndExecutionTest
         // Act
         using var scope = scopeFactory.Begin();
         var exception = Should.Throw<InvalidOperationException>(() => scope.CreateQuery());
+        scope.Commit();
+
+        // Assert
+        exception.Message.ShouldContain("运行时资源绑定", Case.Insensitive);
+        trackingProxy.DisposeCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：子 Executor 绑定事务作用域失败时，应释放已创建子对象且不影响作用域提交自身事务。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_CreateExecutor_WhenBindingFails_ShouldDisposeChildAndKeepScopeUsable()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        var invalidChild = DispatchProxy.Create<ISqlExecutor, DisposeTrackingSqlExecutorProxy>();
+        var trackingProxy = (DisposeTrackingSqlExecutorProxy)(object)invalidChild;
+        var executorFactory = new BindingFailureSqlExecutorFactory(invalidChild);
+        var scopeFactory = new SqlTransactionScopeFactory(provider.GetRequiredService<ISqlQueryFactory>(), executorFactory);
+
+        // Act
+        using var scope = scopeFactory.Begin();
+        var exception = Should.Throw<InvalidOperationException>(() => scope.CreateExecutor());
         scope.Commit();
 
         // Assert
@@ -1703,6 +1846,33 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：同步事务开始失败且 Owner Query 清理失败时，应按开始异常、清理异常的顺序聚合保留两个失败原因。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenBeginAndOwnerQueryCleanupFail_ShouldAggregateFailures()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnBegin = true, ThrowOnDispose = true };
+        var services = CreateServices();
+        services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
+        services.AddSqlServerSqlQuery<ISqlQuery, FaultingTransactionSqlServerQuery>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options =>
+            options.ConnectionString("Server=test;Database=test;"));
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var exception = Assert.Throws<AggregateException>(() =>
+            provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin());
+
+        // Assert
+        exception.Flatten().InnerExceptions.Select(item => item.Message)
+            .ShouldBe(new[] { "begin failed", "connection dispose failed" });
+        connection.DisposeCount.ShouldBe(1);
+        connection.AsyncDisposeCount.ShouldBe(0);
+    }
+
+    /// <summary>
     /// 测试 - 预先取消异步事务开始时不应打开连接或创建事务。
     /// </summary>
     [Fact]
@@ -1863,6 +2033,79 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：子查询流式读取持有执行租约时，Scope 同步释放必须拒绝且不得提前回滚、失效租约或释放资源。
+    /// </summary>
+    [Fact]
+    public void SqlTransactionScope_WhenChildStreamIsActive_ShouldRejectDisposeBeforeResourceSideEffects()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        var query = scope.CreateQuery();
+
+        // Act
+        using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
+        {
+            enumerator.MoveNext().ShouldBeTrue();
+            var exception = Should.Throw<InvalidOperationException>(scope.Dispose);
+
+            // Assert
+            exception.Message.ShouldBe("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
+            scope.IsCompleted.ShouldBeFalse();
+            connection.LastTransaction.CommitCount.ShouldBe(0);
+            connection.LastTransaction.RollbackCount.ShouldBe(0);
+            connection.LastTransaction.DisposeCount.ShouldBe(0);
+        }
+
+        scope.Commit();
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：子查询异步流式读取持有执行租约时，Scope 异步释放必须拒绝且不改变事务状态；释放读取器后可正常异步提交。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenChildAsyncStreamIsActive_ShouldRejectDisposeAsyncBeforeResourceSideEffects()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        var services = CreateServices();
+        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
+        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        var query = scope.CreateQuery();
+
+        // Act
+        await using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users")
+                         .AsAsyncEnumerable().GetAsyncEnumerator())
+        {
+            (await enumerator.MoveNextAsync()).ShouldBeTrue();
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.DisposeAsync().AsTask());
+
+            // Assert
+            exception.Message.ShouldBe("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
+            scope.IsCompleted.ShouldBeFalse();
+            connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+            connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+            connection.LastTransaction.DisposeCount.ShouldBe(0);
+        }
+
+        await scope.CommitAsync();
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -3820,6 +4063,38 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 将 Query 绑定到只读数据源，用于验证结构化写入计划的执行边界。
+    /// </summary>
+    /// <param name="query">待绑定的查询对象。</param>
+    private static void ConfigureReadOnlyDataSource(ISqlQuery query)
+    {
+        SqlQueryRuntimeBridge.BindDatabaseContext(query, new DatabaseContext
+        {
+            DbKey = "reporting",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "reporting",
+                DatabaseType = DatabaseType.SqlServer,
+                IsReadOnly = true
+            }
+        });
+    }
+
+    /// <summary>
+    /// 创建通过查询结果 API 执行的带 Returning 更新计划。
+    /// </summary>
+    /// <returns>待验证的独立更新查询计划。</returns>
+    private static SqlQueryPlan CreateReturningQueryPlan()
+    {
+        ISqlBuilder builder = new SqlServerBuilder();
+        builder.Update(new SqlTableReference { TableName = "Users" })
+            .Set("Name", "Bing")
+            .Where("Id", 1)
+            .Returning("Id");
+        return SqlQueryPlan.Create(builder);
+    }
+
+    /// <summary>
     /// 测试目的：首次使用 Query 前可以绑定固定数据库上下文，供事务和 ORM 适配层完成创建期路由。
     /// </summary>
     [Fact]
@@ -4311,6 +4586,26 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 始终创建缺少内部资源绑定器子执行器的测试执行器工厂。
+    /// </summary>
+    private sealed class BindingFailureSqlExecutorFactory : ISqlExecutorFactory
+    {
+        private readonly ISqlExecutor _invalidChild;
+
+        /// <summary>
+        /// 初始化一个<see cref="BindingFailureSqlExecutorFactory"/>类型的实例。
+        /// </summary>
+        /// <param name="invalidChild">不实现内部绑定器的子执行器。</param>
+        public BindingFailureSqlExecutorFactory(ISqlExecutor invalidChild) => _invalidChild = invalidChild;
+
+        /// <inheritdoc />
+        public TExecutor Create<TExecutor>() where TExecutor : class, ISqlExecutor => Create<TExecutor>(null);
+
+        /// <inheritdoc />
+        public TExecutor Create<TExecutor>(string dbKey) where TExecutor : class, ISqlExecutor => _invalidChild as TExecutor;
+    }
+
+    /// <summary>
     /// 记录 Dispose 调用的查询代理。
     /// </summary>
     private class DisposeTrackingSqlQueryProxy : DispatchProxy
@@ -4329,6 +4624,13 @@ public class SqlServerRoutingAndExecutionTest
                 ? null
                 : targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
         }
+    }
+
+    /// <summary>
+    /// 记录 Dispose 调用的执行器代理。
+    /// </summary>
+    private class DisposeTrackingSqlExecutorProxy : DisposeTrackingSqlQueryProxy
+    {
     }
 
     /// <summary>
@@ -4611,11 +4913,15 @@ public class SqlServerRoutingAndExecutionTest
         public Action OnScalarExecuted { get; set; }
 
         /// <summary>
+        /// 数据读取器创建后的测试回调。
+        /// </summary>
+        public Action OnReaderCreated { get; set; }
+
+        /// <summary>
         /// 是否在读取器释放时抛出异常。
         /// </summary>
         public bool ThrowOnReaderDispose { get; set; }
 
-        /// <summary>
         /// <summary>
         /// 是否让本连接创建的事务在回滚时抛出异常。
         /// </summary>
@@ -4625,6 +4931,11 @@ public class SqlServerRoutingAndExecutionTest
         /// 是否让本连接创建的事务在提交时抛出异常。
         /// </summary>
         public bool ThrowOnTransactionCommit { get; set; }
+
+        /// <summary>
+        /// 是否在同步开始事务时抛出异常。
+        /// </summary>
+        public bool ThrowOnBegin { get; set; }
 
         /// <summary>
         /// 是否在原生异步开始事务时抛出异常。
@@ -4684,6 +4995,8 @@ public class SqlServerRoutingAndExecutionTest
 
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
+            if (ThrowOnBegin)
+                throw new InvalidOperationException("begin failed");
             LastTransaction = new CaptureDbTransaction(this, isolationLevel)
             {
                 ThrowOnRollback = ThrowOnTransactionRollback,
@@ -4754,7 +5067,9 @@ public class SqlServerRoutingAndExecutionTest
         {
             ReaderCreateCount++;
             var table = ResultSet ?? new DataTable();
-            return new CaptureDbDataReader(table.CreateDataReader(), this);
+            var reader = new CaptureDbDataReader(table.CreateDataReader(), this);
+            OnReaderCreated?.Invoke();
+            return reader;
         }
 
         public void OnReaderDisposed() => ReaderDisposeCount++;

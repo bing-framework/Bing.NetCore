@@ -19,11 +19,19 @@ internal static class DatabaseScript
         await ExecuteAsync(connection, @"
 If Object_Id(N'dbo.BingSqlAggregateIntegration', N'U') Is Not Null
     Drop Table dbo.BingSqlAggregateIntegration;
+If Object_Id(N'dbo.BingSqlHierarchyIntegration', N'U') Is Not Null
+    Drop Table dbo.BingSqlHierarchyIntegration;
 Create Table dbo.BingSqlAggregateIntegration(
     Id int Identity(1,1) Not Null Primary Key,
     UserId nvarchar(50) Null,
     Amount decimal(18,2) Null,
     Enabled bit Not Null
+);
+Create Table dbo.BingSqlHierarchyIntegration(
+    Id int Not Null Primary Key,
+    ParentId int Null,
+    Name nvarchar(100) Not Null,
+    Index IX_BingSqlHierarchyIntegration_ParentId(ParentId)
 );");
     }
 
@@ -33,7 +41,7 @@ Create Table dbo.BingSqlAggregateIntegration(
     /// <param name="connection">已打开的 SQL Server 连接。</param>
     /// <returns>异步任务。</returns>
     public static Task ResetAsync(SqlConnection connection) =>
-        ExecuteAsync(connection, "Delete From dbo.BingSqlAggregateIntegration;");
+        ExecuteAsync(connection, "Delete From dbo.BingSqlHierarchyIntegration; Delete From dbo.BingSqlAggregateIntegration;");
 
     /// <summary>
     /// 写入覆盖 null、重复值和条件表达式的聚合测试数据。

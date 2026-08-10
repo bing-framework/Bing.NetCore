@@ -631,6 +631,56 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：异步事务作用域未完成即释放时，必须通过异步释放路径回滚未提交数据，且连接资源可立即复用。
+    /// </summary>
+    [Fact]
+    public async Task TransactionScope_ShouldRollbackWhenAsyncDisposedWithoutCompletion()
+    {
+        // Arrange and Act
+        await using (var scope = await _fixture.GetTransactionScopeFactory().BeginAsync("first"))
+        using (var executor = scope.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
+                new { name = "implicit-async-rollback" });
+        }
+
+        // Assert
+        Assert.Empty(await _fixture.ReadNamesAsync());
+
+        await InsertAsync("after-implicit-async-rollback");
+        Assert.Equal(new[] { "after-implicit-async-rollback" }, await _fixture.ReadNamesAsync());
+    }
+
+    /// <summary>
+    /// 测试目的：事务作用域子查询持有活动异步流时，异步释放必须被拒绝且不提交或回滚；释放流后可正常回滚。
+    /// </summary>
+    [Fact]
+    public async Task TransactionScope_WhenChildAsyncStreamIsActive_ShouldRejectDisposeAsyncWithoutStateChanges()
+    {
+        // Arrange
+        await SeedAsync();
+        await using var scope = await _fixture.GetTransactionScopeFactory().BeginAsync("first");
+        using var query = scope.CreateQuery();
+
+        // Act
+        await using (var enumerator = CreateSamplesDescription(query).AsAsyncEnumerable().GetAsyncEnumerator())
+        {
+            Assert.True(await enumerator.MoveNextAsync());
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.DisposeAsync().AsTask());
+
+            // Assert
+            Assert.Equal("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。", exception.Message);
+            Assert.False(scope.IsCompleted);
+        }
+
+        await scope.RollbackAsync();
+
+        // Assert
+        Assert.True(scope.IsCompleted);
+        Assert.Equal(3, await _fixture.CountAsync());
+    }
+
+    /// <summary>
     /// 测试 - SQLite事务作用域创建的Query和Executor应共享事务。
     /// </summary>
     [Fact]
@@ -1289,6 +1339,49 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.StartsWith("With Recursive", sql);
         Assert.Equal(new[] { 1, 2, 3 }, firstResult);
         Assert.Equal(firstResult, secondResult);
+    }
+
+    /// <summary>
+    /// 测试目的：邻接表树状查询应通过递归 CTE 返回完整层级、父子关系和稳定深度排序。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenRecursiveCteQueriesHierarchy_ShouldReturnOrderedTree()
+    {
+        // Arrange
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync(
+                "Insert Into HierarchyNodes(Id,ParentId,Name) Values (@id,@parentId,@name)",
+                new { id = 1, parentId = (int?)null, name = "root" });
+            await executor.ExecuteSqlAsync(
+                "Insert Into HierarchyNodes(Id,ParentId,Name) Values (@id,@parentId,@name)",
+                new { id = 2, parentId = (int?)1, name = "child-a" });
+            await executor.ExecuteSqlAsync(
+                "Insert Into HierarchyNodes(Id,ParentId,Name) Values (@id,@parentId,@name)",
+                new { id = 3, parentId = (int?)1, name = "child-b" });
+            await executor.ExecuteSqlAsync(
+                "Insert Into HierarchyNodes(Id,ParentId,Name) Values (@id,@parentId,@name)",
+                new { id = 4, parentId = (int?)2, name = "leaf" });
+        }
+        using var query = _fixture.CreateQuery();
+        var tree = query.Sql<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth").From("HierarchyNodes")
+            .IsNull("ParentId")
+            .UnionAll(query.Sql<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
+                .From("HierarchyNodes", "n").Join("tree", "t").AppendOn("n.ParentId=t.Id"));
+        var description = query.Sql<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
+            .From("tree").OrderBy("Depth").OrderBy("Id");
+
+        // Act
+        var sql = description.ToSql();
+        var firstResult = await description.ToListAsync();
+        var secondResult = await description.ToListAsync();
+
+        // Assert
+        Assert.StartsWith("With Recursive", sql);
+        Assert.Equal(new[] { "root:0", "child-a:1", "child-b:1", "leaf:2" },
+            firstResult.Select(item => $"{item.Name}:{item.Depth}"));
+        Assert.Equal(new int?[] { null, 1, 1, 2 }, firstResult.Select(item => item.ParentId));
+        Assert.Equal(firstResult.Select(item => item.Name), secondResult.Select(item => item.Name));
     }
 
     /// <summary>
@@ -2292,6 +2385,32 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 金额。
         /// </summary>
         public decimal? Amount { get; set; }
+    }
+
+    /// <summary>
+    /// SQLite 邻接表递归查询投影。
+    /// </summary>
+    private sealed class HierarchyNode
+    {
+        /// <summary>
+        /// 节点标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 父节点标识；根节点为 <see langword="null"/>。
+        /// </summary>
+        public int? ParentId { get; set; }
+
+        /// <summary>
+        /// 节点名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 从根节点开始计算的层级深度。
+        /// </summary>
+        public int Depth { get; set; }
     }
 
     /// <summary>

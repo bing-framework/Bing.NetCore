@@ -902,7 +902,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     protected string GetSql() => SqlBuilder.ToSql();
 
     /// <summary>
-    /// 验证普通查询 API 不会执行缺少 Returning 的 Mutation。
+    /// 验证普通查询 API 不会执行缺少 Returning 的 Mutation，且不会通过只读数据源执行结构化写入。
     /// </summary>
     protected void ValidateQueryBuilder()
     {
@@ -921,7 +921,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
             SqlOperationKind.Update or SqlOperationKind.Delete))
             return;
         if (builder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
+        {
+            EnsureWritableDataSource();
             return;
+        }
         throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
     }
 
@@ -1333,9 +1336,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
-    /// 获取存储过程名城管
+    /// 获取当前 Provider 使用的存储过程名称。
     /// </summary>
-    /// <param name="procedure">存储过程</param>
+    /// <param name="procedure">调用方指定的存储过程名称。</param>
+    /// <returns>默认原样返回的存储过程名称。</returns>
     protected virtual string GetProcedure(string procedure) => procedure;
 
     /// <summary>

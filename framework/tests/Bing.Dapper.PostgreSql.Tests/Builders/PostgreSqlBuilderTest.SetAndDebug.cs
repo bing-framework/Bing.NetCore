@@ -9,13 +9,13 @@ namespace Bing.Dapper.Tests.Builders;
 public partial class PostgreSqlBuilderTest
 {
     /// <summary>
-    /// 测试 - CTE 应在主查询前输出并合并其参数。
+    /// 测试目的：PostgreSQL CTE 应使用 With Recursive 关键字、在主查询前输出并合并其参数。
     /// </summary>
     [Fact]
     public void With_WhenCteIsConfigured_ShouldRenderCteBeforeMainQuery()
     {
         // Arrange
-        const string expected = "With \"active_users\" \r\nAs (Select \"Id\" \r\nFrom \"users\" \r\nWhere \"Enabled\"=@_p_0)\r\nSelect \"Id\" \r\nFrom \"active_users\"";
+        const string expected = "With Recursive \"active_users\" \r\nAs (Select \"Id\" \r\nFrom \"users\" \r\nWhere \"Enabled\"=@_p_0)\r\nSelect \"Id\" \r\nFrom \"active_users\"";
         var cte = _builder.New().Select("Id").From("users").Where("Enabled", true);
 
         // Act

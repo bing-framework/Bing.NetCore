@@ -1,7 +1,9 @@
 using AspectCore.Extensions.DependencyInjection;
+using Bing.Data;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Datas.EntityFramework.Core;
 using Bing.DependencyInjection;
@@ -77,7 +79,14 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         services.AddSingleton<IEntityModelMetadataProvider>(provider =>
             CreateEntityModelMetadataProvider(connectionString, provider));
         services.AddSqlCore();
-        services.AddMySqlQuery(connectionString);
+        services.AddMySqlQuery(options =>
+        {
+            options.ConnectionString(connectionString);
+            options.QueryCapabilities = new SqlQueryCapabilities
+            {
+                Cte = SqlQueryCapabilityState.Supported
+            };
+        });
         services.AddMySqlExecutor(connectionString);
         services.AddLogging();
         services.EnableAop();

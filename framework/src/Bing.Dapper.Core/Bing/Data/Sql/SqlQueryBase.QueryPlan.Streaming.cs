@@ -33,9 +33,9 @@ public abstract partial class SqlQueryBase
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
+        cancellationToken.ThrowIfCancellationRequested();
         EnsureStreamingSupported();
         EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
         ValidateQueryBuilder(plan.Builder);
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = default;

@@ -28,6 +28,9 @@ public class MySqlBuilder : SqlBuilderBase
         new MySqlBuilder(Services, parameterManager);
 
     /// <inheritdoc />
+    /// <remarks>
+    /// MySQL 8 的递归公用表表达式使用 <c>With Recursive</c> 语法；该关键字同样可用于普通 CTE。
+    /// </remarks>
     protected override string GetCteKeyWord() => "With Recursive";
 
 }

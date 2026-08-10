@@ -308,6 +308,34 @@ public sealed class ProviderProfileExecutionGateTest
     }
 
     /// <summary>
+    /// 测试目的：预取消必须先于流式能力校验执行，避免调用方收到与已取消操作无关的 Provider 配置异常。
+    /// </summary>
+    [Fact]
+    public async Task AsAsyncEnumerable_WhenCancellationRequested_ShouldCancelBeforeStreamingValidation()
+    {
+        // Arrange
+        var connection = CreateConnection();
+        using var serviceProvider = CreateServiceProvider(new SqlProviderProfile
+        {
+            Execution = new SqlProviderExecutionCapabilities { SupportsStreaming = false }
+        });
+        using var query = new ProfileGateQuery(serviceProvider, CreateOptions(connection.Object));
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+        {
+            await foreach (var _ in query.Sql<int>("Select 1").AsAsyncEnumerable(
+                               cancellationToken: cancellationTokenSource.Token))
+            {
+            }
+        });
+        connection.Verify(item => item.Open(), Times.Never);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
+    }
+
+    /// <summary>
     /// 测试目的：Provider 禁用取消时，携带可取消令牌的异步原生命令应在打开连接前拒绝。
     /// </summary>
     [Fact]

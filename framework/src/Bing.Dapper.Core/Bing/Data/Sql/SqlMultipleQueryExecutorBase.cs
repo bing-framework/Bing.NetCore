@@ -80,6 +80,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
         var skippedExecution = false;
+        SqlMapper.GridReader reader = null;
         try
         {
             if (ExecuteBefore() == false)
@@ -92,11 +93,12 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
             var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
             message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
-            var reader = await connection.QueryMultipleAsync(new CommandDefinition(preparedCommand.Sql,
+            reader = await connection.QueryMultipleAsync(new CommandDefinition(preparedCommand.Sql,
                 preparedCommand.DapperParameters, transaction,
                 commandTimeout: timeout, cancellationToken: cancellationToken));
+            cancellationToken.ThrowIfCancellationRequested();
             return new SqlMultipleQueryResult(reader, executionLease,
-                (completed, exception) => CompleteExecutionAsync(completed, message, exception));
+                (completed, exception) => CompleteExecutionAsync(completed, message, exception, cancellationToken));
         }
         catch (Exception) when (skippedExecution)
         {
@@ -106,6 +108,8 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         {
             primaryException = exception;
         }
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
+            () => SqlTransactionAsyncAdapter.DisposeAsync(reader)).ConfigureAwait(false);
         await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
             .ConfigureAwait(false);
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
@@ -175,7 +179,9 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     /// <param name="completed">是否完整读取全部结果集。</param>
     /// <param name="message">执行前诊断消息。</param>
     /// <param name="exception">读取过程中的异常。</param>
-    private async Task CompleteExecutionAsync(bool completed, DiagnosticsMessage message, Exception exception)
+    /// <param name="cancellationToken">原始异步执行使用的取消令牌。</param>
+    private async Task CompleteExecutionAsync(bool completed, DiagnosticsMessage message, Exception exception,
+        CancellationToken cancellationToken)
     {
         var cleanupExceptions = new List<Exception>();
         var lifecycleException = exception;
@@ -183,7 +189,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         {
             try
             {
-                await CompleteQueryTransactionAsync().ConfigureAwait(false);
+                await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception completionException)
             {

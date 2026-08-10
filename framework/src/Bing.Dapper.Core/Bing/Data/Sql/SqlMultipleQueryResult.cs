@@ -43,6 +43,9 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <summary>
     /// 初始化一个支持异步完成的<see cref="SqlMultipleQueryResult"/>类型的实例。
     /// </summary>
+    /// <param name="reader">Dapper 结果集读取器。</param>
+    /// <param name="executionLease">当前执行租约。</param>
+    /// <param name="complete">异步执行完成回调。</param>
     public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
         Func<bool, Exception, Task> complete)
     {

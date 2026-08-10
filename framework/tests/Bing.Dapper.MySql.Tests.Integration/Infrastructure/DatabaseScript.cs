@@ -23,6 +23,7 @@ public class DatabaseScript
         await ExecuteAsync(connection, "Drop Table If Exists ParameterSample;");
         await ExecuteAsync(connection, "Drop Table If Exists ProductItem;");
         await ExecuteAsync(connection, "Drop Table If Exists Product;");
+        await ExecuteAsync(connection, "Drop Table If Exists IntegrationHierarchyNode;");
         await ExecuteAsync(connection, @"
     Create Table Product(
     ProductId char(36) Not Null Primary Key,
@@ -50,6 +51,13 @@ Create Table ProductItem(
     Quantity int Not Null,
     Enabled bit Not Null Default 1,
     Index IX_ProductItem_ProductId(ProductId)
+);");
+        await ExecuteAsync(connection, @"
+Create Table IntegrationHierarchyNode(
+    Id int Not Null Primary Key,
+    ParentId int Null,
+    Name varchar(100) Not Null,
+    Index IX_IntegrationHierarchyNode_ParentId(ParentId)
 );");
         await ExecuteAsync(connection, @"
 Create Table ParameterSample(
@@ -95,6 +103,7 @@ End;");
         await ExecuteAsync(connection, "Delete From ParameterSample;");
         await ExecuteAsync(connection, "Delete From ProductItem;");
         await ExecuteAsync(connection, "Delete From Product;");
+        await ExecuteAsync(connection, "Delete From IntegrationHierarchyNode;");
     }
 
     /// <summary>
