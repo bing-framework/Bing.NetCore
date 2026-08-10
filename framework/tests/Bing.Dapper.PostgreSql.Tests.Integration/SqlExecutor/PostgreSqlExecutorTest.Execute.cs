@@ -116,14 +116,14 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
             new { id, name = "after" });
-        var builder = executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .Update(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
             .SetFrom("name", "name")
             .WhereFrom("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteAsync(builder);
+        var affectedRows = await executor.ExecuteAsync(builder.ToMutationDescription());
         using var query = _fixture.CreateQuery();
         var name = await query.Sql<string>().Select("name").From("public.integration_products").Where("id", id)
             .ScalarAsync();
@@ -155,13 +155,13 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
             new { id = matchedId, name = "delete" });
-        var builder = executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
             .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
             .WhereUsing("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteAsync(builder);
+        var affectedRows = await executor.ExecuteAsync(builder.ToMutationDescription());
         using var matchedQuery = _fixture.CreateQuery();
         var matchedCount = await matchedQuery.Sql<int>().AppendSelect("Count(*)").From("public.integration_products")
             .Where("id", matchedId).ScalarAsync();
@@ -194,14 +194,14 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             new object[] { firstId, "returning-first", "first", 1m, new DateTime(2026, 7, 30) },
             new object[] { secondId, "returning-second", "second", 2m, new DateTime(2026, 7, 30) }
         };
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .InsertInto(new SqlTableReference { Schema = "public", TableName = "integration_products" })
             .Columns("id", "code", "name", "amount", "occurred_at")
             .Values(values)
             .Returning("id", "name");
 
         // Act
-        var rows = await executor.ExecuteReturningQueryAsync<PostgreSqlReturningProduct>();
+        var rows = await executor.ExecuteReturningQueryAsync<PostgreSqlReturningProduct>(builder.ToMutationDescription());
 
         // Assert
         Assert.Equal(new[] { firstId, secondId }, rows.Select(row => row.Id));

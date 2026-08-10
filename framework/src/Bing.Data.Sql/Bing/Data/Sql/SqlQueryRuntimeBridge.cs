@@ -1,5 +1,6 @@
 using System.Data;
 using System.Runtime.CompilerServices;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql;
@@ -11,13 +12,16 @@ internal interface ISqlQueryRuntimeController
 {
     IDbConnection GetOrCreateConnection();
     IDbTransaction GetCurrentTransaction();
+    SqlProviderProfile GetProviderProfile();
     string GetCurrentTransactionId();
+    void EnsureNoActiveExecution();
     void BindOwnedConnection(IDbConnection connection, SqlConnectionSource source);
     void BindExternalConnection(IDbConnection connection, SqlConnectionSource source);
     void BindExternalTransaction(IDbTransaction transaction, string transactionId = null);
     void BindExternalTransactionResolver(Func<IDbTransaction> resolver);
     void BindTransactionScope(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
         ISqlTransactionScopeLease lease);
+    void BindDatabaseContext(DatabaseContext context);
     void BindEntityMappingResolver(IEntityMappingResolver resolver);
 }
 
@@ -47,7 +51,22 @@ internal static class SqlQueryRuntimeBridge
 
     internal static IDbTransaction GetCurrentTransaction(ISqlQuery query) => GetController(query).GetCurrentTransaction();
 
+    internal static SqlProviderProfile GetProviderProfile(ISqlQuery query) => GetController(query).GetProviderProfile();
+
     internal static string GetCurrentTransactionId(ISqlQuery query) => GetController(query).GetCurrentTransactionId();
+
+    /// <summary>
+    /// 在查询仍绑定内部运行时控制器时，确保其不存在活动执行。
+    /// </summary>
+    /// <param name="query">待检查的查询。</param>
+    /// <returns>查询仍受内部运行时控制器管理时返回 <see langword="true"/>。</returns>
+    internal static bool TryEnsureNoActiveExecution(ISqlQuery query)
+    {
+        if (query == null || Controllers.TryGetValue(query, out var controller) == false)
+            return false;
+        controller.EnsureNoActiveExecution();
+        return true;
+    }
 
     internal static void BindOwnedConnection(ISqlQuery query, IDbConnection connection, SqlConnectionSource source) =>
         GetController(query).BindOwnedConnection(connection, source);
@@ -64,6 +83,9 @@ internal static class SqlQueryRuntimeBridge
     internal static void BindTransactionScope(ISqlQuery query, DatabaseContext context, IDbConnection connection,
         IDbTransaction transaction, ISqlTransactionScopeLease lease) =>
         GetController(query).BindTransactionScope(context, connection, transaction, lease);
+
+    internal static void BindDatabaseContext(ISqlQuery query, DatabaseContext context) =>
+        GetController(query).BindDatabaseContext(context);
 
     internal static void BindEntityMappingResolver(ISqlQuery query, IEntityMappingResolver resolver) =>
         GetController(query).BindEntityMappingResolver(resolver);

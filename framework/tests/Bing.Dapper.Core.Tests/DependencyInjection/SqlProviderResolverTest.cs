@@ -8,7 +8,7 @@ using Xunit;
 namespace Bing.Dapper.Core.Tests.DependencyInjection;
 
 /// <summary>
-/// <see cref="DefaultSqlProviderResolver"/> 单元测试。
+/// <see cref="ISqlProviderResolver"/> 单元测试。
 /// </summary>
 public class SqlProviderResolverTest
 {
@@ -20,7 +20,8 @@ public class SqlProviderResolverTest
     {
         // Arrange
         var expected = new TestSqlProvider("custom.sqlite", DatabaseType.Sqlite);
-        var resolver = new DefaultSqlProviderResolver(new ISqlProvider[] { expected });
+        using var serviceProvider = CreateServiceProvider(expected);
+        var resolver = serviceProvider.GetRequiredService<ISqlProviderResolver>();
 
         // Act
         var actual = resolver.Resolve("  CUSTOM.SQLITE  ");
@@ -40,7 +41,8 @@ public class SqlProviderResolverTest
         // Arrange
         var first = new TestSqlProvider("custom.sqlite.first", DatabaseType.Sqlite);
         var second = new TestSqlProvider("custom.sqlite.second", DatabaseType.Sqlite);
-        var resolver = new DefaultSqlProviderResolver(new ISqlProvider[] { first, second });
+        using var serviceProvider = CreateServiceProvider(first, second);
+        var resolver = serviceProvider.GetRequiredService<ISqlProviderResolver>();
         var context = new DatabaseContext
         {
             DataSource = new SqlDataSourceDescriptor
@@ -58,6 +60,58 @@ public class SqlProviderResolverTest
     }
 
     /// <summary>
+    /// 测试目的：数据源声明的数据库类型与显式 Provider 类型冲突时必须拒绝解析，避免方言和元数据规则混用。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDataSourceProviderTypeConflictsWithDatabaseType_ShouldThrow()
+    {
+        // Arrange
+        var sqlite = new TestSqlProvider("custom.sqlite", DatabaseType.Sqlite);
+        using var serviceProvider = CreateServiceProvider(sqlite);
+        var resolver = serviceProvider.GetRequiredService<ISqlProviderResolver>();
+        var context = new DatabaseContext
+        {
+            DataSource = new SqlDataSourceDescriptor
+            {
+                DatabaseType = DatabaseType.SqlServer,
+                ProviderKey = sqlite.Key
+            }
+        };
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => resolver.Resolve(context));
+
+        // Assert
+        Assert.Equal("数据源 DatabaseType SqlServer 与 Provider custom.sqlite 的数据库类型 Sqlite 不兼容。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Doris 数据源应继续复用官方 MySQL Provider，保持既有协议兼容行为。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDorisUsesOfficialMySqlProvider_ShouldAllowCompatibility()
+    {
+        // Arrange
+        var mySql = new TestSqlProvider("bing.mysql", DatabaseType.MySql);
+        using var serviceProvider = CreateServiceProvider(mySql);
+        var resolver = serviceProvider.GetRequiredService<ISqlProviderResolver>();
+        var context = new DatabaseContext
+        {
+            DataSource = new SqlDataSourceDescriptor
+            {
+                DatabaseType = DatabaseType.Doris,
+                ProviderKey = mySql.Key
+            }
+        };
+
+        // Act
+        var actual = resolver.Resolve(context);
+
+        // Assert
+        Assert.Same(mySql, actual);
+    }
+
+    /// <summary>
     /// 测试目的：数据源 Key、上下文 Key、显式 Provider 和官方数据库类型兼容映射应按既定优先级解析。
     /// </summary>
     [Fact]
@@ -68,10 +122,8 @@ public class SqlProviderResolverTest
         var dataSource = new TestSqlProvider("custom.datasource", DatabaseType.Sqlite);
         var contextProvider = new TestSqlProvider("custom.context", DatabaseType.Sqlite);
         var explicitProvider = new TestSqlProvider("custom.explicit", DatabaseType.Sqlite);
-        var resolver = new DefaultSqlProviderResolver(new ISqlProvider[]
-        {
-            official, dataSource, contextProvider, explicitProvider
-        });
+        using var serviceProvider = CreateServiceProvider(official, dataSource, contextProvider, explicitProvider);
+        var resolver = serviceProvider.GetRequiredService<ISqlProviderResolver>();
         var context = new DatabaseContext
         {
             ProviderKey = contextProvider.Key,
@@ -124,6 +176,18 @@ public class SqlProviderResolverTest
         // Assert
         Assert.Equal("CUSTOM.SQLITE", dataSource.ProviderKey.Trim(), StringComparer.OrdinalIgnoreCase);
         Assert.Same(expected, actual);
+    }
+
+    /// <summary>
+    /// 通过公开服务注册创建 Provider 解析器。
+    /// </summary>
+    private static ServiceProvider CreateServiceProvider(params ISqlProvider[] providers)
+    {
+        var services = new ServiceCollection();
+        foreach (var provider in providers)
+            services.AddSingleton(provider);
+        services.AddSqlCore();
+        return services.BuildServiceProvider();
     }
 
     /// <summary>

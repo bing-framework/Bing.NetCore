@@ -2,6 +2,7 @@
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql;
 
 namespace Bing.Dapper.Tests.Builders.Clauses;
 
@@ -36,5 +37,26 @@ public class WhereClauseTest
     {
         _clause.Where("Name", "a");
         Assert.Equal("Where \"Name\"=:p_0", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle 将空字符串视为 NULL，空值条件不得生成恒不匹配的空字符串比较。
+    /// </summary>
+    [Fact]
+    public void IsEmptyAndNotEmpty_WhenOracleTreatsEmptyStringAsNull_ShouldUseNullChecks()
+    {
+        // Arrange
+        var empty = new OracleBuilder().From("Users").IsEmpty("Name");
+        var notEmpty = new OracleBuilder().From("Users").IsNotEmpty("Name");
+
+        // Act
+        var emptySql = empty.ToSql();
+        var notEmptySql = notEmpty.ToSql();
+        var cloneSql = empty.Clone().ToSql();
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom \"Users\" \r\nWhere \"Name\" Is Null", emptySql);
+        Assert.Equal("Select * \r\nFrom \"Users\" \r\nWhere \"Name\" Is Not Null", notEmptySql);
+        Assert.Equal(emptySql, cloneSql);
     }
 }

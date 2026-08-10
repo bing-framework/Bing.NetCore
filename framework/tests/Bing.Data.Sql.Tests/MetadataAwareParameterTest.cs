@@ -14,6 +14,25 @@ namespace Bing.Data.Sql.Tests;
 public class MetadataAwareParameterTest
 {
     /// <summary>
+    /// 测试目的：默认参数解析实现仅服务框架内部，公开程序集只能暴露对应的可替换接口。
+    /// </summary>
+    [Fact]
+    public void DefaultParameterResolvers_ShouldNotBePublic()
+    {
+        // Arrange
+        var exportedTypeNames = typeof(ISqlParameterResolver).Assembly.GetExportedTypes()
+            .Select(type => type.Name);
+
+        // Assert
+        Assert.DoesNotContain("DefaultSqlParameterNameNormalizer", exportedTypeNames);
+        Assert.DoesNotContain("DefaultSqlParameterSourceResolver", exportedTypeNames);
+        Assert.DoesNotContain("DefaultSqlParameterResolver", exportedTypeNames);
+        Assert.Contains("ISqlParameterNameNormalizer", exportedTypeNames);
+        Assert.Contains("ISqlParameterSourceResolver", exportedTypeNames);
+        Assert.Contains("ISqlParameterResolver", exportedTypeNames);
+    }
+
+    /// <summary>
     /// 测试 - 通过实体属性表达式手工添加参数时应生成完整元数据参数。
     /// </summary>
     [Fact]

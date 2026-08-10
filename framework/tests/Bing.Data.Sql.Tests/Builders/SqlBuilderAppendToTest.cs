@@ -16,7 +16,7 @@ public class SqlBuilderAppendToTest
     {
         // Arrange
         var builder = new TestSqlBuilder();
-        builder.Count("u.Id", "UserCount", distinct: true).From("Users", "u").Where("u.Enabled", true);
+        builder.CountColumn("u.Id", "UserCount", distinct: true).From("Users", "u").Where("u.Enabled", true);
         var result = new StringBuilder();
 
         // Act
@@ -52,7 +52,7 @@ public class SqlBuilderAppendToTest
     {
         // Arrange
         var builder = new TestSqlBuilder();
-        builder.Count(alias: "Total").From("Users");
+        builder.CountAll("Total").From("Users");
         var result = new StringBuilder();
         var sql = builder.ToSql();
 
@@ -89,7 +89,7 @@ public class SqlBuilderAppendToTest
         // Arrange
         const string expected = "Select (Select Count(Distinct [Id]) As [Count] \r\nFrom [Audit] \r\nWhere [Enabled]=@_p_0) As [AuditCount] \r\nFrom [Users] \r\nWhere [Enabled]=@_p_1";
         var builder = new TestSqlBuilder();
-        var subquery = builder.New().Count("Id", "Count", distinct: true).From("Audit").Where("Enabled", true);
+        var subquery = builder.New().CountColumn("Id", "Count", distinct: true).From("Audit").Where("Enabled", true);
         builder.Select(subquery, "AuditCount").From("Users").Where("Enabled", false);
         var result = new StringBuilder();
 

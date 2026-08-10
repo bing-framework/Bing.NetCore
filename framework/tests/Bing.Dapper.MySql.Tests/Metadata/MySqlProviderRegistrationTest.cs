@@ -31,7 +31,8 @@ public class MySqlProviderRegistrationTest
         Assert.Equal(DatabaseType.MySql, queryOptions.DatabaseType);
         Assert.Equal(DatabaseType.MySql, executorOptions.DatabaseType);
         Assert.Equal(DatabaseType.MySql, multipleQueryOptions.DatabaseType);
-        Assert.True(MySqlSqlProvider.Instance.Capabilities.SupportsMultipleResultSets);
+        Assert.True(MySqlSqlProvider.Instance.Profile.Execution.SupportsMultipleResultSets);
+        Assert.Equal(SqlQueryCapabilityState.Supported, MySqlSqlProvider.Instance.Profile.Query.Pagination);
     }
 
     /// <summary>

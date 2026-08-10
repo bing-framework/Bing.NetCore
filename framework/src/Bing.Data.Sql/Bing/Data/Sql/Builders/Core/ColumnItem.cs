@@ -221,7 +221,9 @@ public class ColumnItem
     /// 获取表别名
     /// </summary>
     /// <param name="register">实体别名注册器</param>
-    private string GetTableAlias(IEntityAliasRegister register) => register != null && register.Contains(TableType) ? register.GetAlias(TableType) : TableAlias;
+    private string GetTableAlias(IEntityAliasRegister register) => string.IsNullOrWhiteSpace(TableAlias) == false
+        ? TableAlias
+        : register != null && register.Contains(TableType) ? register.GetAlias(TableType) : null;
 
     /// <summary>
     /// 克隆

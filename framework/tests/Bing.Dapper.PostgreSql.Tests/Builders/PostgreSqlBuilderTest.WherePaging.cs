@@ -94,7 +94,7 @@ public partial class PostgreSqlBuilderTest
 
         // Act
         var sql = _builder.Select("Region").Sum("Amount", "Total").From("sales")
-            .GroupBy("Region", "Sum(Amount)>100").OrderBy("Region").OrderBy("Total desc").ToSql();
+            .GroupBy("Region").HavingRaw("Sum(Amount)>100").OrderBy("Region").OrderBy("Total desc").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);
@@ -112,7 +112,7 @@ public partial class PostgreSqlBuilderTest
         // Act
         var sql = _builder.Select("u.Region,u.Currency").Sum("u.Amount", "Total")
             .From("public.sales", "u").Where("u.Enabled", true)
-            .GroupBy("u.Region,u.Currency", "Sum(\"u\".\"Amount\")>@Minimum")
+            .GroupBy("u.Region,u.Currency").HavingRaw("Sum(\"u\".\"Amount\")>@Minimum")
             .AddParam("Minimum", 100).OrderBy("u.Region").OrderBy("Total desc").Skip(20).Take(10).ToSql();
 
         // Assert

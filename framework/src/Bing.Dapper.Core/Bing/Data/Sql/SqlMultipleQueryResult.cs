@@ -18,6 +18,11 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private Action<bool, Exception> _complete;
 
     /// <summary>
+    /// 异步执行完成回调。
+    /// </summary>
+    private Func<bool, Exception, Task> _completeAsync;
+
+    /// <summary>
     /// 执行租约。
     /// </summary>
     private IDisposable _executionLease;
@@ -33,6 +38,17 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
         _complete = complete ?? throw new ArgumentNullException(nameof(complete));
+    }
+
+    /// <summary>
+    /// 初始化一个支持异步完成的<see cref="SqlMultipleQueryResult"/>类型的实例。
+    /// </summary>
+    public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+        Func<bool, Exception, Task> complete)
+    {
+        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+        _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
+        _completeAsync = complete ?? throw new ArgumentNullException(nameof(complete));
     }
 
     /// <inheritdoc />
@@ -55,7 +71,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         var reader = Interlocked.Exchange(ref _reader, null);
         if (reader == null)
             return;
-        Exception exception = null;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         var completed = false;
         try
         {
@@ -64,13 +81,33 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
         catch (Exception currentException)
         {
-            exception = currentException;
-            throw;
+            primaryException = currentException;
         }
-        finally
+        Complete(completed && primaryException == null, primaryException, cleanupExceptions);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        var reader = Interlocked.Exchange(ref _reader, null);
+        if (reader == null)
+            return;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        var completed = false;
+        try
         {
-            Complete(completed && exception == null, exception);
+            completed = reader.IsConsumed;
+            await SqlTransactionAsyncAdapter.DisposeAsync(reader).ConfigureAwait(false);
         }
+        catch (Exception currentException)
+        {
+            primaryException = currentException;
+        }
+        await CompleteAsync(completed && primaryException == null, primaryException, cleanupExceptions)
+            .ConfigureAwait(false);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
     }
 
     /// <summary>
@@ -111,7 +148,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
         catch (Exception exception)
         {
-            DisposeAfterFailure(exception);
+            await DisposeAfterFailureAsync(exception).ConfigureAwait(false);
             throw;
         }
     }
@@ -129,14 +166,24 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private void DisposeAfterFailure(Exception exception)
     {
         var reader = Interlocked.Exchange(ref _reader, null);
-        try
-        {
-            reader?.Dispose();
-        }
-        finally
-        {
-            Complete(false, exception);
-        }
+        var cleanupExceptions = new List<Exception>();
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => reader?.Dispose());
+        Complete(false, exception, cleanupExceptions);
+        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 异步处理读取失败。
+    /// </summary>
+    /// <param name="exception">读取异常。</param>
+    private async Task DisposeAfterFailureAsync(Exception exception)
+    {
+        var reader = Interlocked.Exchange(ref _reader, null);
+        var cleanupExceptions = new List<Exception>();
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
+            () => SqlTransactionAsyncAdapter.DisposeAsync(reader)).ConfigureAwait(false);
+        await CompleteAsync(false, exception, cleanupExceptions).ConfigureAwait(false);
+        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
     }
 
     /// <summary>
@@ -144,13 +191,16 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// </summary>
     /// <param name="completed">是否完整读取全部结果集。</param>
     /// <param name="exception">读取异常。</param>
-    private void Complete(bool completed, Exception exception)
+    /// <param name="cleanupExceptions">当前生命周期已捕获的清理异常。</param>
+    private void Complete(bool completed, Exception exception, ICollection<Exception> cleanupExceptions)
     {
         var complete = Interlocked.Exchange(ref _complete, null);
-        var cleanupExceptions = new List<Exception>();
         try
         {
-            complete?.Invoke(completed, exception);
+            if (complete != null)
+                complete(completed, exception);
+            else
+                Interlocked.Exchange(ref _completeAsync, null)?.Invoke(completed, exception).GetAwaiter().GetResult();
         }
         catch (Exception completionException)
         {
@@ -158,7 +208,40 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
             () => Interlocked.Exchange(ref _executionLease, null)?.Dispose());
-        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 异步执行一次完成回调并归还租约。
+    /// </summary>
+    private async Task CompleteAsync(bool completed, Exception exception, ICollection<Exception> cleanupExceptions)
+    {
+        var completeAsync = Interlocked.Exchange(ref _completeAsync, null);
+        if (completeAsync != null)
+        {
+            try
+            {
+                await completeAsync(completed, exception).ConfigureAwait(false);
+            }
+            catch (Exception completionException)
+            {
+                CaptureCompletionExceptions(cleanupExceptions, completionException, exception);
+            }
+        }
+        else
+        {
+            var complete = Interlocked.Exchange(ref _complete, null);
+            try
+            {
+                complete?.Invoke(completed, exception);
+            }
+            catch (Exception completionException)
+            {
+                CaptureCompletionExceptions(cleanupExceptions, completionException, exception);
+            }
+        }
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
+            () => SqlTransactionAsyncAdapter.DisposeAsync(Interlocked.Exchange(ref _executionLease, null)))
+            .ConfigureAwait(false);
     }
 
     /// <summary>

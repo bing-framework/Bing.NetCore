@@ -1,3 +1,4 @@
+using System.Data;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
@@ -79,6 +80,42 @@ public class SqliteProviderRegistrationTest
 
         // Assert
         Assert.IsType<SqliteTypeConverter>(converter);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite Profile 必须如实声明不支持存储过程和输出参数。
+    /// </summary>
+    [Fact]
+    public void SqliteProviderProfile_ShouldNotSupportProceduresOrOutputParameters()
+    {
+        // Arrange
+        var profile = SqliteSqlProvider.Instance.Profile;
+
+        // Assert
+        Assert.False(profile.Procedure.SupportsStoredProcedures);
+        Assert.False(profile.Procedure.SupportsOutputParameters);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite 存储过程入口必须在打开连接前拒绝，避免将不支持的命令交给底层驱动。
+    /// </summary>
+    [Fact]
+    public void ExecuteProcedure_WhenSqliteProviderConfigured_ShouldRejectBeforeOpeningConnection()
+    {
+        // Arrange
+        var connection = new SqliteConnection("Data Source=:memory:");
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSqliteSqlExecutor(options => options.Connection(connection));
+        using var provider = services.BuildServiceProvider();
+        using var executor = provider.GetRequiredService<ISqlExecutor>();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("unsupported_procedure"));
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 不支持存储过程命令。", exception.Message);
+        Assert.Equal(ConnectionState.Closed, connection.State);
     }
 
     /// <summary>

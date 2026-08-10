@@ -20,7 +20,7 @@ public partial class MySqlBuilderTest
         const string expected = "Select Count(`u`.`Id`) As `Count` \r\nFrom `users` As `u`";
 
         // Act
-        var sql = _builder.Count(column, "Count").From("users", "u").ToSql();
+        var sql = _builder.CountColumn(column, "Count").From("users", "u").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);
@@ -53,7 +53,7 @@ public partial class MySqlBuilderTest
     {
         // Arrange
         const string expected = "Select Count(`u`.`Id`) As `Count` \r\nFrom `users` As `u`";
-        _builder.Count("u.Id", "Count").From("users", "u");
+        _builder.CountColumn("u.Id", "Count").From("users", "u");
 
         // Act
         var sql = _builder.Clone().ToSql();

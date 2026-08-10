@@ -24,13 +24,19 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Distinct();
 
     /// <summary>
-    /// 添加 Count 聚合。
+    /// 添加全行 Count 聚合。
     /// </summary>
-    /// <param name="column">待统计列。默认值为 *，表示统计全部记录。</param>
     /// <param name="alias">聚合结果别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    /// <exception cref="ArgumentException">对 Count(*) 指定 Distinct 时抛出。</exception>
-    void Count(string column = "*", string alias = null, bool distinct = false);
+    void CountAll(string alias = null);
+
+    /// <summary>
+    /// 添加指定列的 Count 聚合。
+    /// </summary>
+    /// <param name="column">待统计的单个结构化列名。</param>
+    /// <param name="alias">聚合结果别名。</param>
+    /// <param name="distinct">是否对指定列去重。</param>
+    /// <exception cref="ArgumentException">列名为空、不是单个结构化列或为通配符时抛出。</exception>
+    void CountColumn(string column, string alias = null, bool distinct = false);
 
     /// <summary>
     /// 添加字段 Count 聚合。

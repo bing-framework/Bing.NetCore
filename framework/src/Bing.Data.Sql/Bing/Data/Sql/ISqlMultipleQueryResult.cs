@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 结果集必须按 SQL 语句顺序读取，并且必须释放该对象以归还连接、事务和执行租约。
 /// </remarks>
-public interface ISqlMultipleQueryResult : IDisposable
+public interface ISqlMultipleQueryResult : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// 读取当前结果集的动态行集合。

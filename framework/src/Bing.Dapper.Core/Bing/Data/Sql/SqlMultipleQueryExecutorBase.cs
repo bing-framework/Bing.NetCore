@@ -15,21 +15,13 @@ namespace Bing.Data.Sql;
 public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQueryExecutor
 {
     /// <summary>
-    /// 当前 Provider 的可选运行能力。
-    /// </summary>
-    private readonly SqlProviderCapabilities _capabilities;
-
-    /// <summary>
     /// 初始化一个<see cref="SqlMultipleQueryExecutorBase"/>类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="options">当前执行器配置。</param>
-    /// <param name="capabilities">当前 Provider 的运行能力。</param>
-    protected SqlMultipleQueryExecutorBase(IServiceProvider serviceProvider, SqlOptions options,
-        SqlProviderCapabilities capabilities)
+    protected SqlMultipleQueryExecutorBase(IServiceProvider serviceProvider, SqlOptions options)
         : base(serviceProvider, options)
     {
-        _capabilities = capabilities ?? new SqlProviderCapabilities();
     }
 
     /// <inheritdoc />
@@ -43,19 +35,26 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         DiagnosticsMessage message = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
+        var skippedExecution = false;
         try
         {
             if (ExecuteBefore() == false)
+            {
+                skippedExecution = true;
                 return CompleteSkippedExecution(executionLease, cleanupExceptions);
+            }
             var connection = GetExecutionConnection();
-            var dbParameters = GetDbParameters(command.Parameters, command.Sql);
-            var parameterMetadata = GetSqlParameterDiagnostics(command.Parameters, command.Sql);
+            var preparedCommand = PrepareCommand(command.Sql, command.Parameters);
             var transaction = GetQueryTransaction();
-            message = ExecuteBefore(command.Sql, command.Parameters, connection, parameterMetadata);
-            WriteTraceLog(command.Sql, ToParameterValues(command.Parameters), command.Sql);
-            var reader = connection.QueryMultiple(command.Sql, dbParameters, transaction, timeout);
+            message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
+            var reader = connection.QueryMultiple(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
             return new SqlMultipleQueryResult(reader, executionLease,
                 (completed, exception) => CompleteExecution(completed, message, exception));
+        }
+        catch (Exception) when (skippedExecution)
+        {
+            throw;
         }
         catch (Exception exception)
         {
@@ -74,30 +73,41 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         CancellationToken cancellationToken = default)
     {
         ValidateCommand(command);
+        EnsureCancellationSupported(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
+        var skippedExecution = false;
         try
         {
             if (ExecuteBefore() == false)
+            {
+                skippedExecution = true;
                 return CompleteSkippedExecution(executionLease, cleanupExceptions);
+            }
             var connection = GetExecutionConnection();
-            var dbParameters = GetDbParameters(command.Parameters, command.Sql);
-            var parameterMetadata = GetSqlParameterDiagnostics(command.Parameters, command.Sql);
-            var transaction = GetQueryTransaction();
-            message = ExecuteBefore(command.Sql, command.Parameters, connection, parameterMetadata);
-            WriteTraceLog(command.Sql, ToParameterValues(command.Parameters), command.Sql);
-            var reader = await connection.QueryMultipleAsync(new CommandDefinition(command.Sql, dbParameters, transaction,
+            var preparedCommand = PrepareCommand(command.Sql, command.Parameters);
+            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
+            var reader = await connection.QueryMultipleAsync(new CommandDefinition(preparedCommand.Sql,
+                preparedCommand.DapperParameters, transaction,
                 commandTimeout: timeout, cancellationToken: cancellationToken));
             return new SqlMultipleQueryResult(reader, executionLease,
-                (completed, exception) => CompleteExecution(completed, message, exception));
+                (completed, exception) => CompleteExecutionAsync(completed, message, exception));
+        }
+        catch (Exception) when (skippedExecution)
+        {
+            throw;
         }
         catch (Exception exception)
         {
             primaryException = exception;
         }
-        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
+            .ConfigureAwait(false);
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
@@ -113,7 +123,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     {
         if (command == null)
             throw new ArgumentNullException(nameof(command));
-        if (_capabilities.SupportsMultipleResultSets == false)
+        if (GetCurrentProviderProfile().Execution.SupportsMultipleResultSets == false)
             throw new NotSupportedException($"数据库类型 {GetDatabaseType()} 不支持单次命令读取多个结果集。");
     }
 
@@ -126,12 +136,75 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     private void CompleteExecution(bool completed, DiagnosticsMessage message, Exception exception)
     {
         var cleanupExceptions = new List<Exception>();
+        var lifecycleException = exception;
         if (completed)
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, CompleteQueryTransaction);
+        {
+            try
+            {
+                CompleteQueryTransaction();
+            }
+            catch (Exception completionException)
+            {
+                cleanupExceptions.Add(completionException);
+                lifecycleException ??= completionException;
+            }
+        }
         else
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
-        if (exception != null)
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
+        {
+            try
+            {
+                RollbackQueryTransaction();
+            }
+            catch (Exception rollbackException)
+            {
+                cleanupExceptions.Add(rollbackException);
+                lifecycleException ??= rollbackException;
+            }
+        }
+        if (lifecycleException != null)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, lifecycleException));
+        else
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(message));
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
+        SqlQueryPlanLifecycle.ThrowExceptions(exception, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 异步完成多结果集执行的事务、诊断和状态清理。
+    /// </summary>
+    /// <param name="completed">是否完整读取全部结果集。</param>
+    /// <param name="message">执行前诊断消息。</param>
+    /// <param name="exception">读取过程中的异常。</param>
+    private async Task CompleteExecutionAsync(bool completed, DiagnosticsMessage message, Exception exception)
+    {
+        var cleanupExceptions = new List<Exception>();
+        var lifecycleException = exception;
+        if (completed)
+        {
+            try
+            {
+                await CompleteQueryTransactionAsync().ConfigureAwait(false);
+            }
+            catch (Exception completionException)
+            {
+                cleanupExceptions.Add(completionException);
+                lifecycleException ??= completionException;
+            }
+        }
+        else
+        {
+            try
+            {
+                await RollbackQueryTransactionAsync().ConfigureAwait(false);
+            }
+            catch (Exception rollbackException)
+            {
+                cleanupExceptions.Add(rollbackException);
+                lifecycleException ??= rollbackException;
+            }
+        }
+        if (lifecycleException != null)
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, lifecycleException));
         else
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(message));
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
@@ -153,15 +226,4 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         return null;
     }
 
-    /// <summary>
-    /// 将参数快照转换为诊断日志使用的键值集合。
-    /// </summary>
-    /// <param name="parameters">参数快照。</param>
-    /// <returns>参数键值集合。</returns>
-    private static IReadOnlyDictionary<string, object> ToParameterValues(IEnumerable<Builders.Params.SqlParam> parameters)
-    {
-        return (parameters ?? Array.Empty<Builders.Params.SqlParam>())
-            .Where(parameter => parameter != null)
-            .ToDictionary(parameter => parameter.Name, parameter => parameter.Value, StringComparer.OrdinalIgnoreCase);
-    }
 }

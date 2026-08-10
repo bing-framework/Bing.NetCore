@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Tests.Samples;
 /// <summary>
 /// 供 Mutation Builder 单元测试使用的 SQL Provider。
 /// </summary>
-internal sealed class TestMutationSqlProvider : ISqlProvider, ISqlProviderCapabilityProvider
+internal sealed class TestMutationSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// 测试 Provider 单例。
@@ -48,8 +48,16 @@ internal sealed class TestMutationSqlProvider : ISqlProvider, ISqlProviderCapabi
     public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: false,
-        supportsMultiRowValues: true, supportsUpdateFrom: true, supportsDeleteUsing: true, supportsReturning: true);
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = true,
+            SupportsUpdateFrom = true,
+            SupportsDeleteUsing = true,
+            SupportsReturning = true
+        }
+    };
 
     /// <summary>
     /// 测试分页渲染器。

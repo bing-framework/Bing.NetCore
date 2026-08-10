@@ -104,7 +104,7 @@ public sealed class PostgreSqlMutationBuilderTest
                      "From \"public\".\"sample_updates\" As \"s\" Where \"t\".\"Id\"=\"s\".\"Id\"",
             sql);
         Assert.Equal(2, builder.GetParams()["@_p_0"]);
-        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsUpdateFrom);
+        Assert.True(PostgreSqlSqlProvider.Instance.Profile.Mutation.SupportsUpdateFrom);
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ public sealed class PostgreSqlMutationBuilderTest
         // Assert
         Assert.Equal("Delete From \"public\".\"samples\" As \"t\" Using \"public\".\"sample_deletes\" As \"s\" " +
                      "Where \"t\".\"Id\"=\"s\".\"Id\"", sql);
-        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsDeleteUsing);
+        Assert.True(PostgreSqlSqlProvider.Instance.Profile.Mutation.SupportsDeleteUsing);
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public sealed class PostgreSqlMutationBuilderTest
         // Assert
         Assert.Equal("Update \"public\".\"returning_samples\" Set \"sample_name\" = @_p_0 " +
                      "Where \"sample_id\"=@_p_1 Returning \"sample_id\" As \"Id\", \"sample_name\" As \"Name\"", sql);
-        Assert.True(PostgreSqlSqlProvider.Instance.Capabilities.SupportsReturning);
+        Assert.True(PostgreSqlSqlProvider.Instance.Profile.Mutation.SupportsReturning);
     }
 
     /// <summary>

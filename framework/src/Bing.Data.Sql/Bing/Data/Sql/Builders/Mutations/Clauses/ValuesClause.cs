@@ -122,7 +122,7 @@ public sealed class ValuesClause : IValuesClause
             throw new InvalidOperationException("Insert Values 不能为空。");
         if (_rows.Any(row => row.Count != ColumnCount))
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        if (_rows.Count > 1 && context?.Capabilities.SupportsMultiRowValues == false)
+        if (_rows.Count > 1 && context?.Profile.Mutation.SupportsMultiRowValues == false)
             throw new NotSupportedException($"Provider {context.Provider.Key} 不支持多行 Values。");
     }
 }

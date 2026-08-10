@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// </summary>
 /// <typeparam name="TResult">本次过程执行返回的结果类型。</typeparam>
 /// <remarks>
-/// 输出参数访问器与本次执行绑定，不依赖 Root Query 或 Executor 的最近一次可变状态。
+/// 输出参数访问器与本次执行绑定，且在构造时复制最终值，不依赖 Root Query、Executor 或 ADO.NET 参数对象的后续状态。
 /// 当参数源不是框架支持的输出参数模型时，<see cref="OutputParameters"/> 为 <see langword="null"/>，
 /// 调用方应直接使用其参数源所定义的访问方式。
 /// </remarks>
@@ -19,7 +19,7 @@ public sealed class SqlProcedureResult<TResult>
     public SqlProcedureResult(TResult result, ISqlOutputParameterAccessor outputParameters)
     {
         Result = result;
-        OutputParameters = outputParameters;
+        OutputParameters = SqlOutputParameterSnapshot.Create(outputParameters);
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public sealed class SqlProcedureResult<TResult>
     public TResult Result { get; }
 
     /// <summary>
-    /// 获取本次过程执行完成后可读取的输出参数访问器；不支持框架输出参数模型时为 <see langword="null"/>。
+    /// 获取本次过程执行完成后可读取的输出参数值快照；不支持框架输出参数模型时为 <see langword="null"/>。
     /// </summary>
     public ISqlOutputParameterAccessor OutputParameters { get; }
 }

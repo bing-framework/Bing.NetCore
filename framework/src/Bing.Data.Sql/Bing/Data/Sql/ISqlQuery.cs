@@ -6,19 +6,8 @@
 /// <remarks>
 /// 实例包含可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
-public partial interface ISqlQuery : IDisposable
+public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 {
-    /// <summary>
-    /// 上下文标识
-    /// </summary>
-    string ContextId { get; }
-
-    /// <summary>
-    /// 配置
-    /// </summary>
-    /// <param name="configAction">配置操作</param>
-    void Config(Action<SqlOptions> configAction);
-
     /// <summary>
     /// 创建指定结果类型的独立 Fluent SQL 查询描述。
     /// </summary>
@@ -58,9 +47,4 @@ public partial interface ISqlQuery : IDisposable
     /// <typeparam name="TEntity">查询结果和实体映射类型。</typeparam>
     /// <returns>已设置实体投影和来源表的独立查询描述。</returns>
     SqlLambdaQuery<TEntity> Lambda<TEntity>() where TEntity : class;
-
-    /// <summary>
-    /// 临时禁用调试日志
-    /// </summary>
-    ISqlQuery DisableDebugLog();
 }

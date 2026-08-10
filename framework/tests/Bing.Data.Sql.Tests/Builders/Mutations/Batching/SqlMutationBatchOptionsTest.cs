@@ -74,7 +74,7 @@ public sealed class SqlMutationBatchOptionsTest
     /// <summary>
     /// 声明固定参数上限的测试 Provider。
     /// </summary>
-    private sealed class ParameterLimitedProvider : ISqlProvider, ISqlParameterLimitProvider
+    private sealed class ParameterLimitedProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
         /// 复用常规测试 Provider 的不可变方言与工厂依赖。
@@ -85,7 +85,10 @@ public sealed class SqlMutationBatchOptionsTest
         /// 初始化一个 <see cref="ParameterLimitedProvider"/> 类型的实例。
         /// </summary>
         /// <param name="maxParameterCount">允许的最大参数数量。</param>
-        public ParameterLimitedProvider(int maxParameterCount) => MaxParameterCount = maxParameterCount;
+        public ParameterLimitedProvider(int maxParameterCount) => Profile = new SqlProviderProfile
+        {
+            Limits = new SqlProviderLimits { MaxParameterCount = maxParameterCount }
+        };
 
         /// <inheritdoc />
         public string Key => "test.mutation.limited";
@@ -112,6 +115,6 @@ public sealed class SqlMutationBatchOptionsTest
         public IParamLiteralsResolver ParamLiteralsResolver => _inner.ParamLiteralsResolver;
 
         /// <inheritdoc />
-        public int? MaxParameterCount { get; }
+        public SqlProviderProfile Profile { get; }
     }
 }

@@ -102,6 +102,25 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：作为 On 条件的独立 Builder 必须合并参数，并在冲突时重命名避免错误绑定到外层值。
+    /// </summary>
+    [Fact]
+    public void Join_WhenOnUsesExternalBuilderCondition_ShouldMergeParameters()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom [Parent] \r\nJoin [Child] On [TenantId]=@_p_1 \r\nWhere [TenantId]=@_p_0";
+        var condition = new TestSqlBuilder().Where("TenantId", "child");
+
+        // Act
+        _builder.From("Parent").Where("TenantId", "parent").Join("Child").On(condition);
+
+        // Assert
+        Assert.Equal(expected, _builder.ToSql());
+        Assert.Equal("parent", _builder.GetParam("@_p_0"));
+        Assert.Equal("child", _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
     /// 测试目的：子查询连续参数均与外层冲突时，应基于原始 SQL 一次性重命名，避免先替换的参数被后续替换再次改写。
     /// </summary>
     [Fact]
@@ -163,6 +182,24 @@ public partial class SqlBuilderTest
 
         // Assert
         Assert.Equal("查询中已存在表别名 \"o\"。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：同一实体类型自连接时，类型化 On 表达式应分别使用来源表和最新 Join 表的别名。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSelfJoinTypedOnConfigured_ShouldRenderDistinctAliases()
+    {
+        // Arrange
+        _builder.Select("s.Email")
+            .From<Sample>("s")
+            .Join<Sample>("p");
+
+        // Act
+        _builder.On<Sample, Sample>((left, right) => left.IntValue == right.IntValue);
+
+        // Assert
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample] As [p] On [s].[IntValue]=[p].[IntValue]", _builder.ToSql());
     }
 
     /// <summary>

@@ -382,7 +382,7 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
-    /// 测试目的：异步单实体 Insert 在调用前已取消时，应将令牌传递到执行边界且不执行命令。
+    /// 测试目的：异步单实体 Insert 在调用前已取消时，应在创建命令前短路。
     /// </summary>
     [Fact]
     public async Task InsertAsync_WhenCancellationRequested_ShouldNotExecuteCommand()
@@ -397,7 +397,58 @@ public sealed class SqlMutationBatchStrategyTest
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.InsertAsync(
             new MutationSample { Name = "cancelled" }, cancellationToken: cancellationTokenSource.Token));
         Assert.Empty(executor.Commands);
-        Assert.Equal(cancellationTokenSource.Token, Assert.Single(executor.CancellationTokens));
+        Assert.Empty(executor.CancellationTokens);
+    }
+
+    /// <summary>
+    /// 测试目的：预取消必须先于单体 Mutation 和过程入口的 Provider、Builder 与写入能力校验执行。
+    /// </summary>
+    /// <param name="operation">待执行的 Mutation 操作类型。</param>
+    [Theory]
+    [InlineData(SingleMutationOperation.Insert)]
+    [InlineData(SingleMutationOperation.Update)]
+    [InlineData(SingleMutationOperation.Delete)]
+    [InlineData(SingleMutationOperation.Procedure)]
+    public async Task SingleMutationAsync_WhenCancellationRequested_ShouldCancelBeforeValidation(
+        SingleMutationOperation operation)
+    {
+        // Arrange
+        using var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        using var executor = new RecordingExecutor(serviceProvider, DatabaseType.Sqlite);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ExecuteSingleAsync(executor, operation,
+            cancellationTokenSource.Token));
+        Assert.Empty(executor.Commands);
+        Assert.Empty(executor.CancellationTokens);
+    }
+
+    /// <summary>
+    /// 测试目的：预取消的批量 Mutation 必须在枚举输入和构建 SQL 前直接取消。
+    /// </summary>
+    /// <param name="operation">批量 Mutation 操作类型。</param>
+    [Theory]
+    [InlineData(BatchMutationOperation.Insert)]
+    [InlineData(BatchMutationOperation.Update)]
+    [InlineData(BatchMutationOperation.Delete)]
+    public async Task BatchMutationAsync_WhenCancellationRequested_ShouldNotEnumerateEntities(
+        BatchMutationOperation operation)
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: true);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+        var entities = new ThrowOnEnumerationEnumerable<MutationSample>();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ExecuteBatchAsync(executor, operation, entities,
+            cancellationTokenSource.Token));
+        Assert.Equal(0, entities.EnumerationCount);
+        Assert.Empty(executor.Commands);
+        Assert.Empty(executor.CancellationTokens);
     }
 
     /// <summary>
@@ -450,6 +501,42 @@ public sealed class SqlMutationBatchStrategyTest
             new MutationSample { Name = "second" }
         }, new SqlBatchInsertOptions { UseTransaction = true }, cancellationToken: cancellationTokenSource.Token));
         Assert.Single(transactionExecutor.Commands);
+        transactionScope.Verify(scope => scope.RollbackAsync(CancellationToken.None), Times.Once);
+        transactionScope.Verify(scope => scope.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    /// <summary>
+    /// 测试目的：最后一条批量命令完成后取消时，取消异常应优先于回滚异常保留。
+    /// </summary>
+    [Fact]
+    public async Task InsertBatchAsync_WhenCancelledBeforeCommitAndRollbackFails_ShouldAggregateCancellationFirst()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var rollbackException = new InvalidOperationException("rollback failed");
+        var transactionScope = new Mock<ISqlTransactionScope>();
+        transactionScope.Setup(scope => scope.RollbackAsync(CancellationToken.None)).ThrowsAsync(rollbackException);
+        var transactionScopeFactory = new Mock<ISqlTransactionScopeFactory>();
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false,
+            transactionScopeFactory: transactionScopeFactory.Object);
+        using var transactionExecutor = new RecordingExecutor(provider, DatabaseType.Sqlite)
+        {
+            AfterExecuteAsync = cancellationTokenSource.Cancel
+        };
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+        transactionScope.Setup(scope => scope.CreateExecutor()).Returns(transactionExecutor);
+        transactionScopeFactory.Setup(factory => factory.BeginAsync(null, cancellationTokenSource.Token))
+            .ReturnsAsync(transactionScope.Object);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<AggregateException>(() => executor.InsertBatchAsync(new[]
+        {
+            new MutationSample { Name = "first" }
+        }, new SqlBatchInsertOptions { UseTransaction = true }, cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        Assert.IsType<OperationCanceledException>(exception.InnerExceptions[0]);
+        Assert.Same(rollbackException, exception.InnerExceptions[1]);
         transactionScope.Verify(scope => scope.RollbackAsync(CancellationToken.None), Times.Once);
         transactionScope.Verify(scope => scope.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -601,6 +688,99 @@ public sealed class SqlMutationBatchStrategyTest
         if (transactionScopeFactory != null)
             services.AddSingleton(transactionScopeFactory);
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 执行指定的异步批量 Mutation。
+    /// </summary>
+    /// <param name="executor">测试执行器。</param>
+    /// <param name="operation">批量 Mutation 操作类型。</param>
+    /// <param name="entities">实体序列。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示异步执行结果的任务。</returns>
+    private static Task<int> ExecuteBatchAsync(RecordingExecutor executor, BatchMutationOperation operation,
+        IEnumerable<MutationSample> entities, CancellationToken cancellationToken) => operation switch
+    {
+        BatchMutationOperation.Insert => executor.InsertBatchAsync(entities, cancellationToken: cancellationToken),
+        BatchMutationOperation.Update => executor.UpdateBatchAsync(entities, cancellationToken: cancellationToken),
+        BatchMutationOperation.Delete => executor.DeleteBatchAsync(entities, cancellationToken: cancellationToken),
+        _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null)
+    };
+
+    /// <summary>
+    /// 执行指定的异步单体 Mutation 或存储过程。
+    /// </summary>
+    /// <param name="executor">测试执行器。</param>
+    /// <param name="operation">Mutation 操作类型。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示异步执行结果的任务。</returns>
+    private static Task ExecuteSingleAsync(RecordingExecutor executor, SingleMutationOperation operation,
+        CancellationToken cancellationToken) => operation switch
+    {
+        SingleMutationOperation.Insert => executor.InsertAsync(new MutationSample { Name = "cancelled" },
+            cancellationToken: cancellationToken),
+        SingleMutationOperation.Update => executor.UpdateAsync(new MutationSample { Name = "cancelled" },
+            cancellationToken: cancellationToken),
+        SingleMutationOperation.Delete => executor.DeleteAsync(new MutationSample { Name = "cancelled" },
+            cancellationToken: cancellationToken),
+        SingleMutationOperation.Procedure => executor.ExecuteProcedureAsync("usp_cancelled",
+            cancellationToken: cancellationToken),
+        _ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null)
+    };
+
+    /// <summary>
+    /// 单体 Mutation 操作类型。
+    /// </summary>
+    public enum SingleMutationOperation
+    {
+        /// <summary>插入。</summary>
+        Insert,
+
+        /// <summary>更新。</summary>
+        Update,
+
+        /// <summary>删除。</summary>
+        Delete,
+
+        /// <summary>存储过程。</summary>
+        Procedure
+    }
+
+    /// <summary>
+    /// 批量 Mutation 操作类型。
+    /// </summary>
+    public enum BatchMutationOperation
+    {
+        /// <summary>插入。</summary>
+        Insert,
+
+        /// <summary>更新。</summary>
+        Update,
+
+        /// <summary>删除。</summary>
+        Delete
+    }
+
+    /// <summary>
+    /// 一旦被枚举就失败的实体序列。
+    /// </summary>
+    /// <typeparam name="T">实体类型。</typeparam>
+    private sealed class ThrowOnEnumerationEnumerable<T> : IEnumerable<T>
+    {
+        /// <summary>
+        /// 枚举次数。
+        /// </summary>
+        public int EnumerationCount { get; private set; }
+
+        /// <inheritdoc />
+        public IEnumerator<T> GetEnumerator()
+        {
+            EnumerationCount++;
+            throw new InvalidOperationException("实体序列不应被枚举。");
+        }
+
+        /// <inheritdoc />
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     /// <summary>
@@ -806,7 +986,7 @@ public sealed class SqlMutationBatchStrategyTest
     /// <summary>
     /// 声明批量 Insert 能力的测试 Provider。
     /// </summary>
-    private sealed class TestProvider : ISqlProvider, ISqlProviderCapabilityProvider, ISqlParameterLimitProvider
+    private sealed class TestProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
         /// 初始化测试 Provider。
@@ -815,8 +995,12 @@ public sealed class SqlMutationBatchStrategyTest
         /// <param name="maxParameterCount">Provider 允许的最大参数数量。</param>
         public TestProvider(bool supportsMultiRowValues, int? maxParameterCount)
         {
-            Capabilities = new SqlProviderCapabilities(supportsMultiRowValues: supportsMultiRowValues);
-            MaxParameterCount = maxParameterCount;
+            Profile = new SqlProviderProfile
+            {
+                Mutation = new SqlProviderMutationCapabilities { SupportsMultiRowValues = supportsMultiRowValues },
+                Execution = new SqlProviderExecutionCapabilities { SupportsCancellation = true },
+                Limits = new SqlProviderLimits { MaxParameterCount = maxParameterCount }
+            };
         }
 
         /// <inheritdoc />
@@ -844,10 +1028,8 @@ public sealed class SqlMutationBatchStrategyTest
         public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
 
         /// <inheritdoc />
-        public SqlProviderCapabilities Capabilities { get; }
+        public SqlProviderProfile Profile { get; }
 
-        /// <inheritdoc />
-        public int? MaxParameterCount { get; }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using Bing.Data.Enums;
+using Bing.Data;
 using Bing.Data.Sql.Configs;
 
 namespace Bing.Data.Sql;
@@ -78,10 +79,29 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
             MappingProfile = descriptor.MappingProfile,
             PrimaryReadStrategy = descriptor.PrimaryReadStrategy,
             PrimaryDataSourceKey = descriptor.PrimaryDataSourceKey,
-            SupportsTransactions = descriptor.SupportsTransactions
+            SupportsTransactions = descriptor.SupportsTransactions,
+            QueryCapabilities = CloneQueryCapabilities(descriptor.QueryCapabilities)
         };
         return result;
     }
+
+    /// <summary>
+    /// 克隆查询语法能力配置。
+    /// </summary>
+    /// <param name="capabilities">源能力配置。</param>
+    /// <returns>独立能力配置副本。</returns>
+    private static SqlQueryCapabilities CloneQueryCapabilities(SqlQueryCapabilities capabilities) => capabilities == null
+        ? null
+        : new SqlQueryCapabilities
+        {
+            Cte = capabilities.Cte,
+            Union = capabilities.Union,
+            UnionAll = capabilities.UnionAll,
+            Intersect = capabilities.Intersect,
+            Except = capabilities.Except,
+            RightJoin = capabilities.RightJoin,
+            Pagination = capabilities.Pagination
+        };
 
     /// <summary>
     /// 应用读取偏好

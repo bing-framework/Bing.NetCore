@@ -222,7 +222,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-a", Name = "copied" });
-        var insertSelect = executor.GetBuilder()
+        var insertSelect = executor.CreateBuilder()
             .InsertInto("samples")
             .Columns("Name")
             .Select("Name")
@@ -230,14 +230,16 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Where("TenantId", "tenant-a");
 
         // Act
-        var inserted = await executor.ExecuteAsync(insertSelect);
+        var inserted = await executor.ExecuteAsync(insertSelect.ToMutationDescription());
         var updated = executor.Execute(insertSelect.New()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("SecretText", "v2")
-            .Where("Name", "copied"));
+            .Where("Name", "copied")
+            .ToMutationDescription());
         var deleted = await executor.ExecuteAsync(insertSelect.New()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
-            .Where("SecretText", "v2"));
+            .Where("SecretText", "v2")
+            .ToMutationDescription());
 
         // Assert
         Assert.Equal(1, inserted);
@@ -278,18 +280,46 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             new object[] { "returning-first", 1m, "v1" },
             new object[] { "returning-second", 2m, "v2" }
         };
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name", "Amount", "SecretText")
             .Values(values)
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var rows = (await executor.ExecuteReturningQueryAsync<SqliteReturningRow>()).OrderBy(row => row.Id).ToArray();
+        var rows = (await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(builder.ToMutationDescription()))
+            .OrderBy(row => row.Id).ToArray();
 
         // Assert
         Assert.Equal(new[] { "returning-first", "returning-second" }, rows.Select(row => row.Name));
         Assert.All(rows, row => Assert.True(row.Id > 0));
+        Assert.Equal(2, await _fixture.CountAsync());
+    }
+
+    /// <summary>
+    /// 测试目的：同一冻结 Mutation 描述应可重复通过同步 Returning 执行，每次均使用独立参数和结果物化。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteReturningQuery_WhenDescriptionIsReused_ShouldMaterializeEachExecution()
+    {
+        // Arrange
+        using var executor = _fixture.CreateExecutor();
+        var description = executor.CreateBuilder()
+            .InsertInto(new SqlTableReference { TableName = "samples" })
+            .Columns("Name", "Amount", "SecretText")
+            .Values("returning-repeat", 1m, "v1")
+            .Returning<SqliteReturningRow>(row => new { row.Id, row.Name })
+            .ToMutationDescription();
+
+        // Act
+        var first = Assert.Single(executor.ExecuteReturningQuery<SqliteReturningRow>(description));
+        var second = Assert.Single(executor.ExecuteReturningQuery<SqliteReturningRow>(description));
+
+        // Assert
+        Assert.True(first.Id > 0);
+        Assert.True(second.Id > first.Id);
+        Assert.Equal("returning-repeat", first.Name);
+        Assert.Equal("returning-repeat", second.Name);
         Assert.Equal(2, await _fixture.CountAsync());
     }
 
@@ -304,7 +334,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-returning", Name = "copied-returning" });
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
             .Select("Name")
@@ -313,7 +343,8 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>());
+        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+            builder.ToMutationDescription()));
 
         // Assert
         Assert.True(row.Id > 0);
@@ -329,14 +360,15 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("before-update", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("Name", "after-update")
             .Where("Name", "before-update")
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>());
+        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+            builder.ToMutationDescription()));
 
         // Assert
         Assert.True(row.Id > 0);
@@ -353,13 +385,14 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("deleted-returning", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("Name", "deleted-returning")
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>());
+        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+            builder.ToMutationDescription()));
 
         // Assert
         Assert.True(row.Id > 0);
@@ -368,20 +401,20 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：Executor 应在访问数据库前拒绝执行 Select 状态的统一 Builder。
+    /// 测试目的：Mutation 描述创建应拒绝 Select 状态的 Builder，避免把查询状态传入写入执行器。
     /// </summary>
     [Fact]
-    public async Task ExecuteAsync_WhenBuilderIsSelect_ShouldThrow()
+    public async Task ToMutationDescription_WhenBuilderIsSelect_ShouldThrow()
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.GetBuilder().Select("Id").From("samples");
+        var builder = executor.CreateBuilder().Select("Id").From("samples");
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => executor.ExecuteAsync(builder));
+        var exception = Assert.Throws<ArgumentException>(() => builder.ToMutationDescription());
 
         // Assert
-        Assert.Equal("ISqlExecutor 不支持执行 Select 状态的 SQL Builder。", exception.Message);
+        Assert.Contains("Mutation 描述必须包含 Insert、Update 或 Delete 操作。", exception.Message);
         Assert.Equal(0, await _fixture.CountAsync());
     }
 
@@ -393,14 +426,15 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .InsertInto("samples")
             .Columns("Name")
             .Values("returning")
             .Returning("Id");
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => executor.ExecuteAsync(builder));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            executor.ExecuteAsync(builder.ToMutationDescription()));
 
         // Assert
         Assert.Equal("包含 Returning 的 Mutation 必须通过查询结果 API 执行。", exception.Message);
@@ -415,10 +449,11 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        executor.GetBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
+        var builder = executor.CreateBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => executor.ExecuteReturningQueryAsync<int>());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            executor.ExecuteReturningQueryAsync<int>(builder.ToMutationDescription()));
 
         // Assert
         Assert.Equal("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。", exception.Message);

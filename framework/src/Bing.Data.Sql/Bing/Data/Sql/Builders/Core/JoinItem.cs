@@ -226,7 +226,7 @@ public class JoinItem : IJoinOn
     {
         if (Table?.IsRaw != true || string.IsNullOrWhiteSpace(Table.Name))
             return false;
-        return Table.Name.IndexOf(" On ", StringComparison.OrdinalIgnoreCase) >= 0;
+        return SqlBuilderBase.ContainsSqlKeyword(Table.Name, "On");
     }
 
     #endregion

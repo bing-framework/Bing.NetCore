@@ -23,6 +23,11 @@ public class EntityAliasRegister : IEntityAliasRegister
     private readonly Dictionary<Type, string> _data;
 
     /// <summary>
+    /// 按注册顺序保存的实体表别名。
+    /// </summary>
+    private readonly Dictionary<Type, List<string>> _entityAliases;
+
+    /// <summary>
     /// 当前查询范围内已注册的别名。
     /// </summary>
     private readonly HashSet<string> _aliases;
@@ -38,9 +43,28 @@ public class EntityAliasRegister : IEntityAliasRegister
     {
         _data = data == null ? new Dictionary<Type, string>() : new Dictionary<Type, string>(data);
         Data = _data;
+        _entityAliases = _data.ToDictionary(item => item.Key, item => new List<string> { item.Value });
         _aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var alias in _data.Values)
             RegisterAlias(alias);
+        FromType = fromType;
+    }
+
+    /// <summary>
+    /// 使用完整别名注册状态初始化实例。
+    /// </summary>
+    /// <param name="data">实体当前别名映射。</param>
+    /// <param name="entityAliases">实体别名注册顺序。</param>
+    /// <param name="fromType">From 实体类型。</param>
+    private EntityAliasRegister(Dictionary<Type, string> data, Dictionary<Type, List<string>> entityAliases,
+        Type fromType)
+    {
+        _data = data;
+        Data = _data;
+        _entityAliases = entityAliases;
+        _aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var alias in entityAliases.SelectMany(item => item.Value))
+            _aliases.Add(alias);
         FromType = fromType;
     }
 
@@ -59,6 +83,7 @@ public class EntityAliasRegister : IEntityAliasRegister
             throw new ArgumentNullException(nameof(entity));
         RegisterAlias(alias);
         _data[entity] = alias;
+        GetEntityAliases(entity).Add(alias);
     }
 
     /// <summary>
@@ -74,6 +99,7 @@ public class EntityAliasRegister : IEntityAliasRegister
             _aliases.Remove(currentAlias);
         RegisterAlias(alias);
         _data[entity] = alias;
+        _entityAliases[entity] = new List<string> { alias };
     }
 
     /// <summary>
@@ -113,6 +139,19 @@ public class EntityAliasRegister : IEntityAliasRegister
         return _data.TryGetValue(entity, out var alias) ? alias : null;
     }
 
+    /// <summary>
+    /// 获取同实体自连接 On 条件使用的别名。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>匹配的表别名。</returns>
+    public string GetSelfJoinAlias(Type entity, bool right)
+    {
+        if (entity == null || _entityAliases.TryGetValue(entity, out var aliases) == false || aliases.Count < 2)
+            return GetAlias(entity);
+        return aliases[right ? aliases.Count - 1 : aliases.Count - 2];
+    }
+
     #endregion
 
     #region Clone(克隆)
@@ -120,7 +159,22 @@ public class EntityAliasRegister : IEntityAliasRegister
     /// <summary>
     /// 克隆
     /// </summary>
-    public IEntityAliasRegister Clone() => new EntityAliasRegister(_data, FromType);
+    public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(_data),
+        _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)), FromType);
+
+    /// <summary>
+    /// 获取实体别名注册集合。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <returns>实体别名注册集合。</returns>
+    private List<string> GetEntityAliases(Type entity)
+    {
+        if (_entityAliases.TryGetValue(entity, out var aliases))
+            return aliases;
+        aliases = new List<string>();
+        _entityAliases[entity] = aliases;
+        return aliases;
+    }
 
     #endregion
 }

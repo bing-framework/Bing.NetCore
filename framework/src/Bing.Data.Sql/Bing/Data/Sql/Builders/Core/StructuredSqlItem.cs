@@ -98,7 +98,7 @@ public sealed class StructuredSqlItem : SqlItem
     /// </summary>
     private void ValidateCrossDatabaseReference()
     {
-        if (_isCrossDatabaseValidated || _crossDatabaseQueryValidator == null || _sourceReference == null)
+        if (_isCrossDatabaseValidated || _crossDatabaseQueryValidator == null)
             return;
         _crossDatabaseQueryValidator.Validate(_databaseContext, _sourceReference, Reference);
         _isCrossDatabaseValidated = true;

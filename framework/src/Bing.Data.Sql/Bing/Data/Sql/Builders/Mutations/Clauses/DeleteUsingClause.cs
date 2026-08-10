@@ -60,7 +60,7 @@ public sealed class DeleteUsingClause : MutationTableClauseBase, IDeleteUsingCla
         ValidateTable(Table, "Delete Using");
         if (string.IsNullOrWhiteSpace(Table.Alias))
             throw new InvalidOperationException("Delete Using 来源表必须指定别名。");
-        if (context.Capabilities.SupportsDeleteUsing == false)
+        if (context.Profile.Mutation.SupportsDeleteUsing == false)
             throw new NotSupportedException($"Provider {context.Provider.Key} 不支持 Delete Using。");
     }
 }

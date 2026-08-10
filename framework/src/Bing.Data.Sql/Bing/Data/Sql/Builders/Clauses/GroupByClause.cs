@@ -90,14 +90,12 @@ public class GroupByClause : IGroupByClause
     /// 分组
     /// </summary>
     /// <param name="columns">分组字段</param>
-    /// <param name="having">分组条件</param>
-    public void GroupBy(string columns, string having = null)
+    public void GroupBy(string columns)
     {
         if (string.IsNullOrWhiteSpace(columns))
             return;
         _context.UseOperation(SqlOperationAction.QueryClause);
         _group.AddRange(columns.Split(',').Select(item => new SqlItem(item)));
-        _having = having;
     }
 
     /// <summary>
@@ -118,14 +116,12 @@ public class GroupByClause : IGroupByClause
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="column">分组字段</param>
-    /// <param name="having">分组条件</param>
-    public void GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null)
+    public void GroupBy<TEntity>(Expression<Func<TEntity, object>> column)
     {
         if (column == null)
             return;
         _context.UseOperation(SqlOperationAction.QueryClause);
         _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
-        _having = having;
     }
 
     /// <inheritdoc />

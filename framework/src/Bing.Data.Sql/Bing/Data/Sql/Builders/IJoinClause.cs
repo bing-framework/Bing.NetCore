@@ -111,6 +111,12 @@ public interface IJoinClause : ISqlClause, ISqlClauseCloneable<IJoinClause>
     void RightJoin(string table, string alias = null);
 
     /// <summary>
+    /// 右外连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void RightJoin(SqlTableReference reference);
+
+    /// <summary>
     /// 右外连接
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>

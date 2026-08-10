@@ -20,9 +20,4 @@
       <DependentUpon>appsettings.json</DependentUpon>
     </Content>
   </ItemGroup>
-
-  <PropertyGroup>
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
-  </PropertyGroup>
-
 </Project>

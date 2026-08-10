@@ -48,6 +48,7 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
         await DatabaseScript.InitializeAsync(connection);
 
         var services = new ServiceCollection();
+        services.AddSqlCore();
         services.AddSqlServerSqlQuery(ConnectionString);
         services.AddSqlServerSqlExecutor(ConnectionString);
         services.AddLogging();

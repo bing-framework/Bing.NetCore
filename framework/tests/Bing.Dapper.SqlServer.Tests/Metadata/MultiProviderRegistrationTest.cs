@@ -122,6 +122,25 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
+    /// 测试目的：Doris 只读数据源必须在创建连接前拒绝写入型存储过程。
+    /// </summary>
+    [Fact]
+    public void ExecuteProcedure_WhenDorisDataSourceIsReadOnly_ShouldRejectBeforeConnectionAccess()
+    {
+        // Arrange
+        using var provider = CreateProvider();
+        var factory = provider.GetRequiredService<ISqlExecutorFactory>();
+        using var executor = factory.Create<ISqlExecutor>("doris");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("sync_analytics"));
+
+        // Assert
+        Assert.Contains("doris", exception.Message);
+        Assert.Contains("只读", exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：SQL Server Provider 应将 Database、Schema 和表名逐段格式化。
     /// </summary>
     [Fact]

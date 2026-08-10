@@ -9,7 +9,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 默认 Sql 参数绑定器
 /// </summary>
-public class DefaultSqlParameterBinder : IDapperParameterBinder
+internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
 {
     /// <summary>
     /// 实体映射解析器
@@ -123,6 +123,8 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     {
         if (parameter == null)
             return null;
+        if (parameter is global::Dapper.DynamicParameters dynamicParameters)
+            return new DynamicParametersOutputAccessor(dynamicParameters);
         if (parameter is SqlMapper.IDynamicParameters)
             return parameter;
         if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
@@ -196,7 +198,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// </summary>
     /// <param name="map">参数映射</param>
     /// <returns>Dapper 可识别的参数对象</returns>
-    protected virtual object Bind(ISqlParameterMap map) => Bind(map, null);
+    private object Bind(ISqlParameterMap map) => Bind(map, null);
 
     /// <summary>
     /// 绑定参数映射
@@ -204,7 +206,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="map">参数映射</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>Dapper 可识别的参数对象</returns>
-    protected virtual object Bind(ISqlParameterMap map, SqlOptions options)
+    private object Bind(ISqlParameterMap map, SqlOptions options)
     {
         if (map == null)
             return null;
@@ -216,7 +218,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// </summary>
     /// <param name="item">参数映射项</param>
     /// <returns>Sql 参数</returns>
-    protected virtual SqlParam CreateSqlParam(SqlParameterMapItem item) => CreateSqlParam(item, null);
+    private SqlParam CreateSqlParam(SqlParameterMapItem item) => CreateSqlParam(item, null);
 
     /// <summary>
     /// 创建增强 Sql 参数
@@ -224,7 +226,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="item">参数映射项</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>Sql 参数</returns>
-    protected virtual SqlParam CreateSqlParam(SqlParameterMapItem item, SqlOptions options)
+    private SqlParam CreateSqlParam(SqlParameterMapItem item, SqlOptions options)
     {
         if (item == null)
             return null;
@@ -249,7 +251,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="item">参数绑定项</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>增强 Sql 参数</returns>
-    protected virtual SqlParam CreateSqlParam(SqlParameterBindingItem item, SqlOptions options)
+    private SqlParam CreateSqlParam(SqlParameterBindingItem item, SqlOptions options)
     {
         if (item == null)
             return null;
@@ -283,7 +285,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="entityType">实体类型</param>
     /// <param name="propertyOrColumnName">属性名或列名</param>
     /// <returns>列映射元数据</returns>
-    protected virtual ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName) =>
+    private ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName) =>
         ResolveColumnMetadata(entityType, propertyOrColumnName, null);
 
     /// <summary>
@@ -293,7 +295,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="propertyOrColumnName">属性名或列名</param>
     /// <param name="options">Sql 配置</param>
     /// <returns>列映射元数据</returns>
-    protected virtual ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName,
+    private ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName,
         SqlOptions options)
     {
         if (entityType == null || string.IsNullOrWhiteSpace(propertyOrColumnName))
@@ -312,7 +314,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// 获取数据库上下文
     /// </summary>
     /// <returns>数据库上下文</returns>
-    protected virtual DatabaseContext GetDatabaseContext() =>
+    private DatabaseContext GetDatabaseContext() =>
         GetDatabaseContext(null);
 
     /// <summary>
@@ -320,7 +322,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// </summary>
     /// <param name="options">Sql 配置</param>
     /// <returns>数据库上下文</returns>
-    protected virtual DatabaseContext GetDatabaseContext(SqlOptions options) =>
+    private DatabaseContext GetDatabaseContext(SqlOptions options) =>
         _databaseContextResolver?.Resolve(options) ?? options.GetDatabaseContext() ?? _databaseContextAccessor?.Current ??
         _options.DefaultDatabaseContext;
 
@@ -328,7 +330,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
     /// 元数据参数对象
     /// </summary>
     private sealed class MetadataDynamicParameters : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
-        IDapperParameterSet
+        ISqlOutputParameterSnapshotProvider, IDapperParameterSet
     {
         /// <summary>
         /// 参数集合
@@ -408,7 +410,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <inheritdoc />
         public object GetValue(string name)
         {
-            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+            if (TryGetOutputParameter(name, out var parameter) == false)
                 throw new KeyNotFoundException($"未找到输出参数 '{name}'。");
             return parameter.Value == DBNull.Value ? null : parameter.Value;
         }
@@ -416,16 +418,16 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <inheritdoc />
         public T GetValue<T>(string name)
         {
-            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+            if (TryGetOutputParameter(name, out var parameter) == false)
                 throw new KeyNotFoundException($"未找到输出参数 '{name}'。");
             var rawValue = parameter.Value == DBNull.Value ? null : parameter.Value;
             if (rawValue == null)
             {
-                if (IsNullableType<T>())
+                if (SqlOutputParameterValueConverter.IsNullableType<T>())
                     return default;
                 throw new InvalidOperationException($"输出参数 '{name}' 的值为数据库 NULL，无法转换为非空类型 {typeof(T).FullName}。");
             }
-            if (TryConvertValue(rawValue, out T value))
+            if (SqlOutputParameterValueConverter.TryConvert(rawValue, out T value))
                 return value;
             throw new InvalidCastException($"输出参数 '{name}' 无法转换为 {typeof(T).FullName}。");
         }
@@ -433,7 +435,7 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <inheritdoc />
         public bool TryGetValue<T>(string name, out T value)
         {
-            if (_dbParameters.TryGetValue(NormalizeName(name), out var parameter) == false)
+            if (TryGetOutputParameter(name, out var parameter) == false)
             {
                 value = default;
                 return false;
@@ -442,52 +444,31 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
             if (rawValue == null)
             {
                 value = default;
-                return true;
+                return SqlOutputParameterValueConverter.IsNullableType<T>();
             }
-            return TryConvertValue(rawValue, out value);
+            return SqlOutputParameterValueConverter.TryConvert(rawValue, out value);
         }
 
+        /// <inheritdoc />
+        public ISqlOutputParameterAccessor CreateSnapshot() => new SqlOutputParameterSnapshot(_dbParameters
+            .Where(item => item.Value.Direction is ParameterDirection.Output or ParameterDirection.InputOutput or
+                           ParameterDirection.ReturnValue)
+            .Select(item => new KeyValuePair<string, object>(item.Key,
+                item.Value.Value == DBNull.Value ? null : item.Value.Value)));
+
         /// <summary>
-        /// 尝试将已存在的数据库输出值转换为目标类型。
+        /// 查找实际创建的输出数据库参数。
         /// </summary>
-        /// <typeparam name="T">目标类型。</typeparam>
-        /// <param name="rawValue">数据库参数原始值。</param>
-        /// <param name="value">转换结果。</param>
-        /// <returns>转换成功时返回 <see langword="true"/>。</returns>
-        private static bool TryConvertValue<T>(object rawValue, out T value)
+        /// <param name="name">参数名称。</param>
+        /// <param name="parameter">命中的输出数据库参数。</param>
+        /// <returns>参数存在且其方向属于输出方向时返回 <see langword="true"/>。</returns>
+        private bool TryGetOutputParameter(string name, out IDbDataParameter parameter)
         {
-            if (rawValue is T typedValue)
-            {
-                value = typedValue;
-                return true;
-            }
-            var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-            try
-            {
-                if (targetType.IsEnum)
-                {
-                    value = rawValue is string enumName
-                        ? (T)Enum.Parse(targetType, enumName, ignoreCase: true)
-                        : (T)Enum.ToObject(targetType, rawValue);
-                }
-                else
-                    value = (T)Convert.ChangeType(rawValue, targetType);
-                return true;
-            }
-            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException or ArgumentException)
-            {
-                value = default;
+            if (_dbParameters.TryGetValue(NormalizeName(name), out parameter) == false)
                 return false;
-            }
+            return parameter.Direction is ParameterDirection.Output or ParameterDirection.InputOutput or
+                ParameterDirection.ReturnValue;
         }
-
-        /// <summary>
-        /// 判断泛型目标类型是否可以表示数据库 NULL。
-        /// </summary>
-        /// <typeparam name="T">目标类型。</typeparam>
-        /// <returns>可表示 null 时返回 <see langword="true"/>。</returns>
-        private static bool IsNullableType<T>() => typeof(T).IsValueType == false ||
-                                                   Nullable.GetUnderlyingType(typeof(T)) != null;
 
         /// <summary>
         /// 规范化参数名称
@@ -501,5 +482,89 @@ public class DefaultSqlParameterBinder : IDapperParameterBinder
             name = name.Trim();
             return name[0] is '@' or ':' or '?' ? name.Substring(1) : name;
         }
+    }
+}
+
+/// <summary>
+/// 原生 Dapper 参数集合的输出参数访问器。
+/// </summary>
+/// <remarks>
+/// 该适配器只在过程执行期间临时持有 <see cref="global::Dapper.DynamicParameters"/>；
+/// <see cref="SqlProcedureResult{TResult}"/> 构造时会立即将其转换为独立值快照。
+/// </remarks>
+internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
+    ISqlOutputParameterSnapshotProvider
+{
+    /// <summary>
+    /// 原生 Dapper 参数集合。
+    /// </summary>
+    private readonly global::Dapper.DynamicParameters _parameters;
+
+    /// <summary>
+    /// 本次执行实际创建的输出数据库参数。
+    /// </summary>
+    private readonly IDictionary<string, IDbDataParameter> _outputParameters =
+        new Dictionary<string, IDbDataParameter>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 当前过程是否允许输出参数。
+    /// </summary>
+    private bool _supportsOutputParameters = true;
+
+    /// <summary>
+    /// 初始化原生 Dapper 输出参数访问器。
+    /// </summary>
+    /// <param name="parameters">当前执行使用的参数集合。</param>
+    public DynamicParametersOutputAccessor(global::Dapper.DynamicParameters parameters) =>
+        _parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+
+    /// <summary>
+    /// 配置当前过程的输出参数能力。
+    /// </summary>
+    /// <param name="supportsOutputParameters">是否允许输出参数。</param>
+    internal void SetOutputParametersSupported(bool supportsOutputParameters) =>
+        _supportsOutputParameters = supportsOutputParameters;
+
+    /// <inheritdoc />
+    public void AddParameters(IDbCommand command, SqlMapper.Identity identity)
+    {
+        ((SqlMapper.IDynamicParameters)_parameters).AddParameters(command, identity);
+        _outputParameters.Clear();
+        if (command?.Parameters == null)
+            return;
+        foreach (IDataParameter parameter in command.Parameters)
+        {
+            if (parameter is IDbDataParameter dbParameter && dbParameter.Direction is ParameterDirection.Output or
+                    ParameterDirection.InputOutput or ParameterDirection.ReturnValue)
+                _outputParameters[NormalizeName(dbParameter.ParameterName)] = dbParameter;
+        }
+        if (_supportsOutputParameters == false && _outputParameters.Count > 0)
+            throw new NotSupportedException("当前 Provider 不支持存储过程输出参数。");
+    }
+
+    /// <inheritdoc />
+    public object GetValue(string name) => CreateSnapshot().GetValue(name);
+
+    /// <inheritdoc />
+    public T GetValue<T>(string name) => CreateSnapshot().GetValue<T>(name);
+
+    /// <inheritdoc />
+    public bool TryGetValue<T>(string name, out T value) => CreateSnapshot().TryGetValue(name, out value);
+
+    /// <inheritdoc />
+    public ISqlOutputParameterAccessor CreateSnapshot() => new SqlOutputParameterSnapshot(_outputParameters.Select(item =>
+        new KeyValuePair<string, object>(item.Key, item.Value.Value == DBNull.Value ? null : item.Value.Value)));
+
+    /// <summary>
+    /// 规范化 Provider 参数名称。
+    /// </summary>
+    /// <param name="name">原始参数名称。</param>
+    /// <returns>不含参数前缀的参数名称。</returns>
+    private static string NormalizeName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return string.Empty;
+        name = name.Trim();
+        return name[0] is '@' or ':' or '?' ? name.Substring(1) : name;
     }
 }

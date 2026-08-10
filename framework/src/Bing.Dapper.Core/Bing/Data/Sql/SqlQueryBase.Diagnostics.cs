@@ -23,7 +23,7 @@ public abstract partial class SqlQueryBase
     protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, IDbConnection connection,
         IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null)
     {
-        if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
+        if (IsExecutionDiagnosticsEnabled() == false)
             return null;
         var parameters = CreateParameterDiagnostics(parameter, parameterMetadata);
         var connectionInfo = CreateConnectionDiagnosticInfo(connection);
@@ -39,8 +39,83 @@ public abstract partial class SqlQueryBase
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute
         };
-        _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
+        if (_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
+            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
         return message;
+    }
+
+    /// <summary>
+    /// 为 Builder 执行按需创建执行前诊断消息。
+    /// </summary>
+    /// <param name="builder">当前 SQL Builder。</param>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="dapperParameters">本次执行已绑定的 Dapper 参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <returns>监听器未启用时返回 null；否则返回执行前诊断消息。</returns>
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(ISqlBuilder builder, string sql,
+        object dapperParameters, IDbConnection connection)
+    {
+        if (IsExecutionDiagnosticsEnabled() == false)
+            return null;
+        var parameters = builder?.GetParams();
+        return ExecuteBefore(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
+            () => GetSqlParameterDiagnostics(builder, sql)));
+    }
+
+    /// <summary>
+    /// 为原生参数执行按需创建执行前诊断消息。
+    /// </summary>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="parameters">调用方提供的原始参数。</param>
+    /// <param name="dapperParameters">本次执行已绑定的 Dapper 参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <returns>监听器未启用时返回 null；否则返回执行前诊断消息。</returns>
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(string sql, object parameters,
+        object dapperParameters, IDbConnection connection)
+    {
+        if (IsExecutionDiagnosticsEnabled() == false)
+            return null;
+        return ExecuteBefore(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
+            () => GetSqlParameterDiagnostics(parameters, sql)));
+    }
+
+    /// <summary>
+    /// 为已准备命令按需创建执行前诊断消息。
+    /// </summary>
+    /// <param name="command">当前执行的准备命令。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <returns>监听器未启用时返回 null；否则返回执行前诊断消息。</returns>
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(SqlPreparedCommand command,
+        IDbConnection connection)
+    {
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        return command.IsBuilderCommand
+            ? CreateExecutionDiagnostics(command.Builder, command.Sql, command.DapperParameters, connection)
+            : CreateExecutionDiagnostics(command.Sql, command.ParameterSource, command.DapperParameters, connection);
+    }
+
+    /// <summary>
+    /// 判断任一执行生命周期诊断事件是否已启用。
+    /// </summary>
+    /// <returns>存在启用的执行诊断事件时返回 <see langword="true"/>。</returns>
+    private static bool IsExecutionDiagnosticsEnabled() =>
+        _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute) ||
+        _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute) ||
+        _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute);
+
+    /// <summary>
+    /// 优先从本次已绑定的参数集创建诊断元数据，避免为诊断再次绑定参数源。
+    /// </summary>
+    /// <param name="dapperParameters">本次执行已绑定的 Dapper 参数。</param>
+    /// <param name="fallback">未提供增强参数集时的诊断元数据工厂。</param>
+    /// <returns>当前执行的参数诊断元数据。</returns>
+    private IReadOnlyCollection<SqlParameterDiagnosticInfo> GetBoundParameterDiagnostics(object dapperParameters,
+        Func<IReadOnlyCollection<SqlParameterDiagnosticInfo>> fallback)
+    {
+        if (dapperParameters is IDapperParameterSet parameterSet)
+            return parameterSet.Parameters.Select(CreateSqlParameterDiagnosticInfo).ToList();
+        return fallback();
     }
 
     /// <summary>
@@ -249,8 +324,13 @@ public abstract partial class SqlQueryBase
         if (string.IsNullOrWhiteSpace(name))
             return false;
         return name.IndexOf("password", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("pwd", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("passphrase", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("secret", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("credential", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("authorization", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("signature", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("key", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 

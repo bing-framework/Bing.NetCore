@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
 using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Queries;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -246,10 +247,21 @@ public class WhereClause : IWhereClause
     /// <param name="column">列名</param>
     /// <param name="builder">子查询Sql生成器</param>
     /// <param name="operator">运算符</param>
+    /// <remarks>In 和 NotIn 使用子查询集合语义，其他运算符按标量子查询条件处理。</remarks>
     public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
     {
         if (builder == null)
             return;
+        if (@operator == Operator.In)
+        {
+            In(column, builder);
+            return;
+        }
+        if (@operator == Operator.NotIn)
+        {
+            NotIn(column, builder);
+            return;
+        }
         column = _helper.GetColumn(column);
         var sql = $"({GetSubquerySql(builder)})";
         And(SqlConditionFactory.Create(column, sql, @operator));
@@ -387,6 +399,11 @@ public class WhereClause : IWhereClause
     public void IsEmpty(string column)
     {
         column = _helper.GetColumn(column);
+        if (Context.Provider.DatabaseType == DatabaseType.Oracle)
+        {
+            And(new IsNullCondition(column));
+            return;
+        }
         And(new OrCondition(new IsNullCondition(column), new EqualCondition(column, "''")));
     }
 
@@ -408,6 +425,11 @@ public class WhereClause : IWhereClause
     public void IsNotEmpty(string column)
     {
         column = _helper.GetColumn(column);
+        if (Context.Provider.DatabaseType == DatabaseType.Oracle)
+        {
+            And(new IsNotNullCondition(column));
+            return;
+        }
         And(new AndCondition(new IsNotNullCondition(column), new NotEqualCondition(column, "''")));
     }
 

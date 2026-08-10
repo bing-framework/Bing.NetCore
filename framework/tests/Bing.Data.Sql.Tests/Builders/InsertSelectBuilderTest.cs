@@ -63,11 +63,12 @@ public class InsertSelectBuilderTest
             .InsertInto("archive_orders")
             .Columns("Status", "Total")
             .Select("o.Status")
-            .Count("d.Id", "Total")
+            .CountColumn("d.Id", "Total")
             .From("orders", "o")
             .Join("order_details", "d")
             .AppendOn("[o].[Id]=[d].[OrderId]")
-            .GroupBy("o.Status", "Count(d.Id) > 0")
+            .GroupBy("o.Status")
+            .HavingRaw("Count(d.Id) > 0")
             .OrderBy("o.Status");
 
         // Act
@@ -135,6 +136,50 @@ public class InsertSelectBuilderTest
         // Assert
         Assert.Equal("Insert Into [archive_orders] ([DisplayName]) \r\nSelect Concat([FirstName], [LastName]) \r\nFrom [orders]", sql);
         Assert.Null(builder.SelectClause.ProjectionCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Insert Select 包含 CTE 时必须在渲染前明确拒绝，避免输出方言不一致的写入 SQL。
+    /// </summary>
+    [Fact]
+    public void InsertSelect_WhenCteIsConfigured_ShouldRejectRendering()
+    {
+        // Arrange
+        var source = new TestSqlBuilder().Select("Id").From("orders");
+        var builder = new TestSqlBuilder()
+            .InsertInto("archive_orders")
+            .Columns("Id")
+            .With("selected", source)
+            .Select("Id")
+            .From("selected");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Insert Select 当前不支持 Union 或 CTE。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Insert Select 包含集合操作时必须在渲染前明确拒绝，避免生成未定义的写入语义。
+    /// </summary>
+    [Fact]
+    public void InsertSelect_WhenUnionIsConfigured_ShouldRejectRendering()
+    {
+        // Arrange
+        var union = new TestSqlBuilder().Select("Id").From("archived_orders");
+        var builder = new TestSqlBuilder()
+            .InsertInto("archive_orders")
+            .Columns("Id")
+            .Select("Id")
+            .From("orders")
+            .Union(union);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Insert Select 当前不支持 Union 或 CTE。", exception.Message);
     }
 
     /// <summary>

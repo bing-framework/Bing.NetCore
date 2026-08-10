@@ -89,7 +89,7 @@ public sealed class ReturningClause : IReturningClause
             throw new ArgumentNullException(nameof(context));
         if (IsEmpty)
             throw new InvalidOperationException("Returning 未指定返回列。");
-        if (context.Capabilities.SupportsReturning == false)
+        if (context.Profile.Mutation.SupportsReturning == false)
             throw new NotSupportedException($"Provider {context.Provider.Key} 不支持 Returning。");
         _executionKind = context.ExecutionKind;
     }

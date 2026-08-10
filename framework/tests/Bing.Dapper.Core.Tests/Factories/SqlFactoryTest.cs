@@ -19,6 +19,34 @@ namespace Bing.Dapper.Core.Tests.Factories;
 public class SqlFactoryTest
 {
     /// <summary>
+    /// 测试目的：SQL 工厂基类仅用于框架内部复用，调用方必须依赖公开的工厂接口。
+    /// </summary>
+    [Fact]
+    public void SqlFactoryBase_ShouldNotBePublic()
+    {
+        // Arrange
+        var dapperCoreExportedTypeNames = typeof(DapperCoreServiceCollectionExtensions).Assembly.GetExportedTypes()
+            .Select(type => type.Name);
+        var sqlContractExportedTypeNames = typeof(ISqlQueryFactory).Assembly.GetExportedTypes()
+            .Select(type => type.Name);
+
+        // Assert
+        Assert.DoesNotContain("SqlFactoryBase", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("SqlQueryFactory", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("SqlExecutorFactory", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("SqlMultipleQueryExecutorFactory", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("DefaultSqlDbConnectionFactoryResolver", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("DefaultSqlImplementationTypeResolver", dapperCoreExportedTypeNames);
+        Assert.DoesNotContain("DefaultSqlProviderResolver", dapperCoreExportedTypeNames);
+        Assert.Contains("ISqlProviderResolver", dapperCoreExportedTypeNames);
+        Assert.Contains("ISqlQueryFactory", sqlContractExportedTypeNames);
+        Assert.Contains("ISqlExecutorFactory", sqlContractExportedTypeNames);
+        Assert.Contains("ISqlMultipleQueryExecutorFactory", sqlContractExportedTypeNames);
+        Assert.Contains("ISqlDbConnectionFactoryResolver", sqlContractExportedTypeNames);
+        Assert.Contains("ISqlImplementationTypeResolver", sqlContractExportedTypeNames);
+    }
+
+    /// <summary>
     /// 测试目的：Root 查询不得继续公开废弃的调试、过程执行和参数清理继承入口。
     /// </summary>
     [Fact]
@@ -57,7 +85,9 @@ public class SqlFactoryTest
     public async Task BeginAsync_WhenCancellationOccursDuringSynchronousOpen_ShouldNotBeginTransaction()
     {
         // Arrange
-        using var provider = CreateServices().BuildServiceProvider();
+        var services = CreateServices();
+        AddTestProvider(services, "bing.mysql", DatabaseType.MySql);
+        using var provider = services.BuildServiceProvider();
         using var cancellationTokenSource = new CancellationTokenSource();
         var connection = new Mock<IDbConnection>();
         var transaction = new Mock<IDbTransaction>();
@@ -217,6 +247,35 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：Factory 创建实例时必须深复制可变查询能力配置，避免后续修改模板选项影响既有查询实例。
+    /// </summary>
+    [Fact]
+    public void Create_WhenTemplateHasQueryCapabilities_ShouldCloneProfile()
+    {
+        // Arrange
+        var template = new SqlOptions<MySqlTestQuery>
+        {
+            QueryCapabilities = new SqlQueryCapabilities { Cte = SqlQueryCapabilityState.Supported }
+        };
+        var services = CreateServices();
+        AddTestProvider(services, "test.mysql", DatabaseType.MySql);
+        services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=test;Database=capabilities;",
+            providerKey: "test.mysql");
+        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
+        services.AddSingleton(template);
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+
+        // Act
+        var query = Assert.IsType<MySqlTestQuery>(factory.Create<ISqlQuery>("mysql"));
+        template.QueryCapabilities.Cte = SqlQueryCapabilityState.Unsupported;
+
+        // Assert
+        Assert.NotSame(template.QueryCapabilities, query.CurrentOptions.QueryCapabilities);
+        Assert.Equal(SqlQueryCapabilityState.Supported, query.CurrentOptions.QueryCapabilities.Cte);
+    }
+
+    /// <summary>
     /// 测试目的：数据源指定未注册 Provider Key 时，Factory 必须在实例创建前拒绝，不能仅凭实现映射继续执行。
     /// </summary>
     [Fact]
@@ -257,7 +316,7 @@ public class SqlFactoryTest
     /// <summary>
     /// 仅用于 Factory Provider 路由测试的 SQL Provider。
     /// </summary>
-    private sealed class TestSqlProvider : ISqlProvider
+    private sealed class TestSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
         /// 初始化测试 Provider。
@@ -293,6 +352,12 @@ public class SqlFactoryTest
 
         /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => null;
+
+        /// <inheritdoc />
+        public SqlProviderProfile Profile { get; } = new()
+        {
+            Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true }
+        };
     }
 
     /// <summary>

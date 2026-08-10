@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql 执行器工厂
 /// </summary>
-public sealed class SqlExecutorFactory : SqlFactoryBase, ISqlExecutorFactory
+internal sealed class SqlExecutorFactory : SqlFactoryBase, ISqlExecutorFactory
 {
     /// <summary>
     /// 初始化一个<see cref="SqlExecutorFactory"/>类型的实例

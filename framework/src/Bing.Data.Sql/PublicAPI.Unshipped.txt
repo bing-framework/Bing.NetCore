@@ -1,5 +1,16 @@
+Bing.Data.Sql.Builders.IJoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.ISqlBuilder.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
+static Bing.Data.Sql.Extensions.Join<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
+static Bing.Data.Sql.Extensions.LeftJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
+static Bing.Data.Sql.Extensions.RightJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutor.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>
+Bing.Data.Sql.ISqlExecutor.Execute(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.ExecuteAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturningQuery<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturningQueryAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirst(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
@@ -12,7 +23,105 @@ Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingle(int? timeout = null) -> B
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteSingleOrDefaultAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery<TResult>.Parameters.get -> object
+Bing.Data.Sql.SqlProcedureQuery<TResult>.Procedure.get -> string
 Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureResult<TResult>.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.SqlProcedureResult<TResult>.Result.get -> TResult
 Bing.Data.Sql.SqlProcedureResult<TResult>.SqlProcedureResult(TResult result, Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void
+Bing.Data.Sql.Mutations.SqlMutationDescription
+Bing.Data.Sql.Mutations.SqlMutationDescription.HasReturning.get -> bool
+Bing.Data.Sql.Mutations.SqlMutationDescription.OperationKind.get -> Bing.Data.Sql.Builders.SqlOperationKind
+Bing.Data.Sql.Mutations.SqlMutationDescription.Parameters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlMutationParameter>
+Bing.Data.Sql.Mutations.SqlMutationDescription.ProviderKey.get -> string
+Bing.Data.Sql.Mutations.SqlMutationDescription.Sql.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter
+Bing.Data.Sql.Mutations.SqlMutationParameter.ColumnName.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter.ConverterKind.get -> Bing.Data.Sql.FieldValueConverterKind
+Bing.Data.Sql.Mutations.SqlMutationParameter.CustomConverterName.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter.DatabaseType.get -> Bing.Data.Enums.DatabaseType?
+Bing.Data.Sql.Mutations.SqlMutationParameter.DbType.get -> System.Data.DbType?
+Bing.Data.Sql.Mutations.SqlMutationParameter.Direction.get -> System.Data.ParameterDirection?
+Bing.Data.Sql.Mutations.SqlMutationParameter.EntityType.get -> System.Type
+Bing.Data.Sql.Mutations.SqlMutationParameter.MetadataLevel.get -> Bing.Data.Sql.SqlParameterMetadataLevel
+Bing.Data.Sql.Mutations.SqlMutationParameter.Name.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter.OriginalValue.get -> object
+Bing.Data.Sql.Mutations.SqlMutationParameter.Precision.get -> byte?
+Bing.Data.Sql.Mutations.SqlMutationParameter.PropertyName.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter.ProviderTypeName.get -> string
+Bing.Data.Sql.Mutations.SqlMutationParameter.Scale.get -> byte?
+Bing.Data.Sql.Mutations.SqlMutationParameter.Size.get -> int?
+Bing.Data.Sql.Mutations.SqlMutationParameter.Source.get -> Bing.Data.Sql.SqlParameterSource
+Bing.Data.Sql.Mutations.SqlMutationParameter.StorageKind.get -> Bing.Data.Sql.ColumnStorageKind
+Bing.Data.Sql.Mutations.SqlMutationParameter.Value.get -> object
+Bing.Data.Sql.Mutations.SqlMutationDescriptionExtensions
+static Bing.Data.Sql.Mutations.SqlMutationDescriptionExtensions.ToMutationDescription(this Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.Mutations.SqlMutationDescription
+Bing.Data.Sql.Builders.Core.EntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
+Bing.Data.Sql.Builders.IEntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
+Bing.Data.Sql.Builders.SqlValidationContext.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.SqlDataSourceDescriptor.QueryCapabilities.get -> Bing.Data.SqlQueryCapabilities
+Bing.Data.Sql.SqlDataSourceDescriptor.QueryCapabilities.set -> void
+Bing.Data.Sql.Builders.ISqlProviderProfileProvider
+Bing.Data.Sql.Builders.ISqlProviderProfileProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SqlProviderExecutionCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsMultipleResultSets.get -> bool
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsMultipleResultSets.init -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsStreaming.get -> bool
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsStreaming.init -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsCancellation.get -> bool
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsCancellation.init -> void
+Bing.Data.Sql.Builders.SqlProviderLimits
+Bing.Data.Sql.Builders.SqlProviderLimits.SqlProviderLimits() -> void
+Bing.Data.Sql.Builders.SqlProviderLimits.MaxParameterCount.get -> int?
+Bing.Data.Sql.Builders.SqlProviderLimits.MaxParameterCount.init -> void
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SqlProviderProcedureCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsStoredProcedures.get -> bool
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsStoredProcedures.init -> void
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsOutputParameters.get -> bool
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsOutputParameters.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SqlProviderMutationCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsDeleteUsing.get -> bool
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsDeleteUsing.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsMultiRowValues.get -> bool
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsMultiRowValues.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsReturning.get -> bool
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsReturning.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsUpdateFrom.get -> bool
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsUpdateFrom.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.SqlProviderProfile.SqlProviderProfile() -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Execution.get -> Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities
+Bing.Data.Sql.Builders.SqlProviderProfile.Execution.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Limits.get -> Bing.Data.Sql.Builders.SqlProviderLimits
+Bing.Data.Sql.Builders.SqlProviderProfile.Limits.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Mutation.get -> Bing.Data.Sql.Builders.SqlProviderMutationCapabilities
+Bing.Data.Sql.Builders.SqlProviderProfile.Mutation.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Procedure.get -> Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities
+Bing.Data.Sql.Builders.SqlProviderProfile.Procedure.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Query.get -> Bing.Data.Sql.Builders.SqlProviderQueryCapabilities
+Bing.Data.Sql.Builders.SqlProviderProfile.Query.init -> void
+Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.get -> Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities
+Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SqlProviderTransactionCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsTransactions.get -> bool
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsTransactions.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.SqlProviderQueryCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Cte.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Cte.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Except.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Except.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Intersect.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Intersect.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Pagination.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Pagination.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.RightJoin.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.RightJoin.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Union.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Union.init -> void
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.UnionAll.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.UnionAll.init -> void

@@ -42,7 +42,7 @@ public class SqliteBuilderAggregateTest
         var builder = new SqliteBuilder();
 
         // Act
-        var sql = builder.Count("o.UserId", "UserCount", distinct: true)
+        var sql = builder.CountColumn("o.UserId", "UserCount", distinct: true)
             .Sum("o.Amount", "Amount", distinct: true)
             .Avg("o.Amount", "Average", distinct: true)
             .Max("o.Amount", "Maximum", distinct: true)
@@ -88,7 +88,7 @@ public class SqliteBuilderAggregateTest
 
         // Assert
         Assert.Equal("column", exception.ParamName);
-        Assert.Equal("Select Count(*) As `Total` \r\nFrom `Orders`", builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As `Total` \r\nFrom `Orders`", builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>

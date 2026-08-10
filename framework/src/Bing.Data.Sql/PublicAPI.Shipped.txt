@@ -27,8 +27,8 @@ Bing.Data.Sql.Builders.Clauses.GroupByClause
 Bing.Data.Sql.Builders.Clauses.GroupByClause.AppendSql(string sql) -> void
 Bing.Data.Sql.Builders.Clauses.GroupByClause.AppendTo(System.Text.StringBuilder builder) -> void
 Bing.Data.Sql.Builders.Clauses.GroupByClause.Clear() -> void
-Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupBy(string columns, string having = null) -> void
-Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string having = null) -> void
+Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupBy(string columns) -> void
+Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> void
 Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupBy<TEntity>(params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> void
 Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupByClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.SqlItem> group = null, string having = null) -> void
 Bing.Data.Sql.Builders.Clauses.GroupByClause.GroupColumns.get -> string
@@ -104,7 +104,8 @@ Bing.Data.Sql.Builders.Clauses.SelectClause.AppendTo(System.Text.StringBuilder b
 Bing.Data.Sql.Builders.Clauses.SelectClause.Avg(string column, string columnAlias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.Clauses.SelectClause.Avg<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string columnAlias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.Clauses.SelectClause.Clear() -> void
-Bing.Data.Sql.Builders.Clauses.SelectClause.Count(string column = "*", string alias = null, bool distinct = false) -> void
+Bing.Data.Sql.Builders.Clauses.SelectClause.CountAll(string alias = null) -> void
+Bing.Data.Sql.Builders.Clauses.SelectClause.CountColumn(string column, string alias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.Clauses.SelectClause.Count<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string alias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.Clauses.SelectClause.Distinct() -> void
 Bing.Data.Sql.Builders.Clauses.SelectClause.IsDistinct.get -> bool
@@ -552,8 +553,8 @@ Bing.Data.Sql.Builders.IFromClause.Validate() -> void
 Bing.Data.Sql.Builders.IGroupBy
 Bing.Data.Sql.Builders.IGroupByClause
 Bing.Data.Sql.Builders.IGroupByClause.AppendSql(string sql) -> void
-Bing.Data.Sql.Builders.IGroupByClause.GroupBy(string groupBy, string having = null) -> void
-Bing.Data.Sql.Builders.IGroupByClause.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string having = null) -> void
+Bing.Data.Sql.Builders.IGroupByClause.GroupBy(string groupBy) -> void
+Bing.Data.Sql.Builders.IGroupByClause.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> void
 Bing.Data.Sql.Builders.IGroupByClause.GroupBy<TEntity>(params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> void
 Bing.Data.Sql.Builders.IGroupByClause.GroupColumns.get -> string
 Bing.Data.Sql.Builders.IGroupByClause.Having(string sql) -> void
@@ -607,7 +608,8 @@ Bing.Data.Sql.Builders.ISelectClause.AggregateRaw(Bing.Data.Sql.Builders.SqlAggr
 Bing.Data.Sql.Builders.ISelectClause.AppendSql(string sql, string columnAlias = null) -> void
 Bing.Data.Sql.Builders.ISelectClause.Avg(string column, string columnAlias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.ISelectClause.Avg<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string columnAlias = null, bool distinct = false) -> void
-Bing.Data.Sql.Builders.ISelectClause.Count(string column = "*", string alias = null, bool distinct = false) -> void
+Bing.Data.Sql.Builders.ISelectClause.CountAll(string alias = null) -> void
+Bing.Data.Sql.Builders.ISelectClause.CountColumn(string column, string alias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.ISelectClause.Count<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string alias = null, bool distinct = false) -> void
 Bing.Data.Sql.Builders.ISelectClause.Distinct() -> void
 Bing.Data.Sql.Builders.ISelectClause.IsDistinct.get -> bool
@@ -650,8 +652,6 @@ Bing.Data.Sql.Builders.ISqlFilter
 Bing.Data.Sql.Builders.ISqlFilter.Filter(Bing.Data.Sql.Builders.Core.SqlFilterContext context) -> void
 Bing.Data.Sql.Builders.ISqlPaginationRenderer
 Bing.Data.Sql.Builders.ISqlPaginationRenderer.Render(string offsetParameterName, string limitParameterName) -> string
-Bing.Data.Sql.Builders.ISqlParameterLimitProvider
-Bing.Data.Sql.Builders.ISqlParameterLimitProvider.MaxParameterCount.get -> int?
 Bing.Data.Sql.Builders.ISqlProvider
 Bing.Data.Sql.Builders.ISqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
 Bing.Data.Sql.Builders.ISqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
@@ -661,8 +661,6 @@ Bing.Data.Sql.Builders.ISqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Buil
 Bing.Data.Sql.Builders.ISqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
 Bing.Data.Sql.Builders.ISqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
 Bing.Data.Sql.Builders.ISqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
-Bing.Data.Sql.Builders.ISqlProviderCapabilityProvider
-Bing.Data.Sql.Builders.ISqlProviderCapabilityProvider.Capabilities.get -> Bing.Data.Sql.Builders.SqlProviderCapabilities
 Bing.Data.Sql.Builders.ISqlQueryClauseAccessor
 Bing.Data.Sql.Builders.ISqlQueryClauseAccessor.FromClause.get -> Bing.Data.Sql.Builders.IFromClause
 Bing.Data.Sql.Builders.ISqlQueryClauseAccessor.GroupByClause.get -> Bing.Data.Sql.Builders.IGroupByClause
@@ -1256,18 +1254,8 @@ Bing.Data.Sql.Builders.SqlOperationKind.InsertValues = 2 -> Bing.Data.Sql.Builde
 Bing.Data.Sql.Builders.SqlOperationKind.None = 0 -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Builders.SqlOperationKind.Select = 1 -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Builders.SqlOperationKind.Update = 4 -> Bing.Data.Sql.Builders.SqlOperationKind
-Bing.Data.Sql.Builders.SqlProviderCapabilities
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SqlProviderCapabilities(bool supportsMultipleResultSets = false, bool supportsMultiRowValues = true, bool supportsUpdateFrom = false) -> void
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SqlProviderCapabilities(bool supportsMultipleResultSets, bool supportsMultiRowValues, bool supportsUpdateFrom, bool supportsDeleteUsing) -> void
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SqlProviderCapabilities(bool supportsMultipleResultSets, bool supportsMultiRowValues, bool supportsUpdateFrom, bool supportsDeleteUsing, bool supportsReturning) -> void
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SupportsDeleteUsing.get -> bool
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SupportsMultiRowValues.get -> bool
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SupportsMultipleResultSets.get -> bool
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SupportsReturning.get -> bool
-Bing.Data.Sql.Builders.SqlProviderCapabilities.SupportsUpdateFrom.get -> bool
 Bing.Data.Sql.Builders.SqlValidationContext
 Bing.Data.Sql.Builders.SqlValidationContext.AllowAllRows.get -> bool
-Bing.Data.Sql.Builders.SqlValidationContext.Capabilities.get -> Bing.Data.Sql.Builders.SqlProviderCapabilities
 Bing.Data.Sql.Builders.SqlValidationContext.ExecutionKind.get -> Bing.Data.Sql.Builders.SqlExecutionKind
 Bing.Data.Sql.Builders.SqlValidationContext.ParameterCount.get -> int
 Bing.Data.Sql.Builders.SqlValidationContext.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
@@ -1386,16 +1374,6 @@ Bing.Data.Sql.DefaultSqlDatabaseIdentityContributor.Resolve(Bing.Data.Enums.Data
 Bing.Data.Sql.DefaultSqlDatabaseIdentityResolver
 Bing.Data.Sql.DefaultSqlDatabaseIdentityResolver.DefaultSqlDatabaseIdentityResolver(System.Collections.Generic.IEnumerable<Bing.Data.Sql.ISqlDatabaseIdentityContributor> contributors = null) -> void
 Bing.Data.Sql.DefaultSqlDatabaseIdentityResolver.Resolve(Bing.Data.Enums.DatabaseType databaseType, string connectionString) -> Bing.Data.Sql.SqlDatabaseIdentity
-Bing.Data.Sql.DefaultSqlParameterNameNormalizer
-Bing.Data.Sql.DefaultSqlParameterNameNormalizer.DefaultSqlParameterNameNormalizer() -> void
-Bing.Data.Sql.DefaultSqlParameterNameNormalizer.Normalize(string name) -> string
-Bing.Data.Sql.DefaultSqlParameterResolver
-Bing.Data.Sql.DefaultSqlParameterResolver.DefaultSqlParameterResolver(Bing.Data.Sql.ISqlParameterNameNormalizer nameNormalizer = null, Bing.Data.Sql.ISqlParameterSourceResolver sourceResolver = null) -> void
-Bing.Data.Sql.DefaultSqlParameterResolver.Resolve(Bing.Data.Sql.SqlParameterBindingContext context) -> Bing.Data.Sql.SqlParameterBindingResult
-Bing.Data.Sql.DefaultSqlParameterSourceResolver
-Bing.Data.Sql.DefaultSqlParameterSourceResolver.CanResolve(object source) -> bool
-Bing.Data.Sql.DefaultSqlParameterSourceResolver.DefaultSqlParameterSourceResolver(Bing.Data.Sql.ISqlParameterNameNormalizer nameNormalizer = null) -> void
-Bing.Data.Sql.DefaultSqlParameterSourceResolver.TryResolve(object source, string parameterName, out object value) -> bool
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Connection.get -> Bing.Data.Sql.Diagnostics.SqlConnectionDiagnosticInfo
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Connection.set -> void
@@ -1557,13 +1535,9 @@ Bing.Data.Sql.ISqlDeleteExecutor.DeleteAsync<TEntity>(TEntity entity, Bing.Data.
 Bing.Data.Sql.ISqlDeleteExecutor.DeleteBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null) -> int
 Bing.Data.Sql.ISqlDeleteExecutor.DeleteBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor
-Bing.Data.Sql.ISqlExecutor.Config(System.Action<Bing.Data.SqlOptions> configAction) -> void
-Bing.Data.Sql.ISqlExecutor.Execute(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteAsync(Bing.Data.Sql.ISqlBuilder builder, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.ExecuteReturningQueryAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.ISqlExecutor.ExecuteSql(string sql, object param = null, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.GetBuilder() -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.ISqlExecutor.CreateBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutorFactory
 Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>() -> TExecutor
 Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>(string dbKey) -> TExecutor
@@ -1601,9 +1575,6 @@ Bing.Data.Sql.ISqlParameterSourceResolver
 Bing.Data.Sql.ISqlParameterSourceResolver.CanResolve(object source) -> bool
 Bing.Data.Sql.ISqlParameterSourceResolver.TryResolve(object source, string parameterName, out object value) -> bool
 Bing.Data.Sql.ISqlQuery
-Bing.Data.Sql.ISqlQuery.Config(System.Action<Bing.Data.SqlOptions> configAction) -> void
-Bing.Data.Sql.ISqlQuery.ContextId.get -> string
-Bing.Data.Sql.ISqlQuery.DisableDebugLog() -> Bing.Data.Sql.ISqlQuery
 Bing.Data.Sql.ISqlQuery.Lambda<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.ISqlQuery.Procedure<TResult>(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
 Bing.Data.Sql.ISqlQuery.Sql<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
@@ -1914,7 +1885,7 @@ Bing.Data.Sql.SqlLambdaQuery<TEntity>.As<TResult>() -> Bing.Data.Sql.SqlQuery<TR
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.ClearSelect() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.From(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.From<TSource>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string having = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Having(string sql) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.HavingRaw(string sql) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
@@ -2068,7 +2039,6 @@ Bing.Data.Sql.SqlQuery<TResult>.ToListAsync<TFirst, TSecond>(System.Func<TFirst,
 Bing.Data.Sql.SqlQuery<TResult>.ToPage(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
 Bing.Data.Sql.SqlQuery<TResult>.ToPageAsync(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
 Bing.Data.Sql.SqlQuery<TResult>.ToSql() -> string
-Bing.Data.Sql.SqlQueryExtensions
 Bing.Data.Sql.SqlReadPreference
 Bing.Data.Sql.SqlReadPreference.Default = 0 -> Bing.Data.Sql.SqlReadPreference
 Bing.Data.Sql.SqlReadPreference.Primary = 1 -> Bing.Data.Sql.SqlReadPreference
@@ -2192,7 +2162,8 @@ static Bing.Data.Sql.Extensions.Between<TEntity>(this Bing.Data.Sql.ISqlBuilder 
 static Bing.Data.Sql.Extensions.Between<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, int? min, int? max, Bing.Data.Queries.Boundary boundary = Bing.Data.Queries.Boundary.Both) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Between<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, long? min, long? max, Bing.Data.Queries.Boundary boundary = Bing.Data.Queries.Boundary.Both) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Contains<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
-static Bing.Data.Sql.Extensions.Count<T>(this T source, string column = "*", string alias = null, bool distinct = false) -> T
+static Bing.Data.Sql.Extensions.CountAll<T>(this T source, string alias = null) -> T
+static Bing.Data.Sql.Extensions.CountColumn<T>(this T source, string column, string alias = null, bool distinct = false) -> T
 static Bing.Data.Sql.Extensions.Count<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string alias = null, bool distinct = false) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Distinct<T>(this T source) -> T
 static Bing.Data.Sql.Extensions.Ends<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
@@ -2209,8 +2180,8 @@ static Bing.Data.Sql.Extensions.From<T>(this T source, string table, string alia
 static Bing.Data.Sql.Extensions.From<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias = null, string schema = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Greater<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.GreaterEqual<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
-static Bing.Data.Sql.Extensions.GroupBy<T>(this T source, string columns, string having = null) -> T
-static Bing.Data.Sql.Extensions.GroupBy<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string having = null) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.GroupBy<T>(this T source, string columns) -> T
+static Bing.Data.Sql.Extensions.GroupBy<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.GroupBy<TEntity>(this Bing.Data.Sql.ISqlBuilder source, params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Having<T>(this T source, string sql) -> T
 static Bing.Data.Sql.Extensions.HavingRaw<T>(this T source, string sql) -> T
@@ -2357,8 +2328,6 @@ static Bing.Data.Sql.SqlParameterExtensions.GetParam(this Bing.Data.Sql.Builders
 static Bing.Data.Sql.SqlParameterExtensions.GetParam<T>(this Bing.Data.Sql.Builders.Operations.ISqlParameter source, string name) -> T
 static Bing.Data.Sql.SqlParameterExtensions.GetParams(this Bing.Data.Sql.Builders.Operations.ISqlParameter source) -> System.Collections.Generic.IReadOnlyDictionary<string, object>
 static Bing.Data.Sql.SqlParameterExtensions.GetSqlParams(this Bing.Data.Sql.Builders.Operations.ISqlParameter source) -> System.Collections.Generic.IReadOnlyDictionary<string, Bing.Data.Sql.Builders.Params.SqlParam>
-static Bing.Data.Sql.SqlQueryExtensions.UsePrimary(this Bing.Data.Sql.ISqlQuery source) -> Bing.Data.Sql.ISqlQuery
-static Bing.Data.Sql.SqlQueryExtensions.UseReadPreference(this Bing.Data.Sql.ISqlQuery source, Bing.Data.Sql.SqlReadPreference readPreference) -> Bing.Data.Sql.ISqlQuery
 static Bing.Data.Sql.WhereClauseExtensions.AppendWhere<T>(this T source, string sql) -> T
 static Bing.Data.Sql.WhereClauseExtensions.AppendWhere<T>(this T source, string sql, bool condition) -> T
 static Bing.Data.Sql.WhereClauseExtensions.Between<T>(this T source, string column, System.DateTime? min, System.DateTime? max, bool includeTime = true, Bing.Data.Queries.Boundary? boundary = null) -> T

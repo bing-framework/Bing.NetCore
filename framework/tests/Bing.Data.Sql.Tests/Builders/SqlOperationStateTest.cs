@@ -32,6 +32,41 @@ public class SqlOperationStateTest
     }
 
     /// <summary>
+    /// 测试目的：非空原始 From 应进入查询状态，避免后续 Mutation 静默忽略已配置来源。
+    /// </summary>
+    [Fact]
+    public void Update_WhenRawFromWasConfigured_ShouldThrowImmediately()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().AppendFrom("samples s");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Update(Table));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 Update。", exception.Message);
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：子查询 From 应进入查询状态，避免后续 Mutation 静默忽略已配置来源。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenSubqueryFromWasConfigured_ShouldThrowImmediately()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().Select("Id").From("source_samples");
+        var builder = new TestSqlBuilder().From(subquery, "s");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.DeleteFrom(Table));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 DeleteFrom。", exception.Message);
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
     /// 测试 - Update 后调用 InsertInto 应立即失败。
     /// </summary>
     [Fact]

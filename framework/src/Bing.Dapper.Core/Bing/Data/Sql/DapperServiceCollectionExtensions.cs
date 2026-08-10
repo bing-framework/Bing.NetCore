@@ -186,7 +186,10 @@ public static class DapperCoreServiceCollectionExtensions
                 ConnectionStringName = normalizedConnectionStringName
             };
             if (databaseType == DatabaseType.Doris)
+            {
+                descriptor.IsReadOnly = true;
                 descriptor.SupportsTransactions = false;
+            }
             setupAction?.Invoke(descriptor);
             options.DataSources.DataSources.Add(dataSourceKey, descriptor);
         });

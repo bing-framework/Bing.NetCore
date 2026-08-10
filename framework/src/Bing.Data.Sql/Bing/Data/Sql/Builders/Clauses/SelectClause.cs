@@ -57,6 +57,22 @@ public class SelectClause : ISelectClause
     public int? ProjectionCount => _columns.Count == 0 || _projectionCountKnown == false ? null : _columns.Count;
 
     /// <summary>
+    /// 是否包含结构化聚合投影。
+    /// </summary>
+    internal bool HasAggregate
+    {
+        get
+        {
+            for (var index = 0; index < _columns.Count; index++)
+            {
+                if (_columns[index].AggregateFunction.HasValue)
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    /// <summary>
     /// 初始化一个<see cref="SelectClause"/>类型的实例
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
@@ -107,8 +123,15 @@ public class SelectClause : ISelectClause
     }
 
     /// <inheritdoc />
-    public void Count(string column = "*", string alias = null, bool distinct = false) =>
+    public void CountAll(string alias = null) => Aggregate(SqlAggregateFunction.Count, "*", alias);
+
+    /// <inheritdoc />
+    public void CountColumn(string column, string alias = null, bool distinct = false)
+    {
+        if (string.Equals(column?.Trim(), "*", StringComparison.Ordinal))
+            throw new ArgumentException("CountColumn 不支持通配符参数，请使用 CountAll。", nameof(column));
         Aggregate(SqlAggregateFunction.Count, column, alias, distinct);
+    }
 
     /// <inheritdoc />
     public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string alias = null,
@@ -333,8 +356,79 @@ public class SelectClause : ISelectClause
             }
             return;
         }
+        if (body is MemberInitExpression memberInit)
+        {
+            AddMemberInitColumns<TEntity>(memberInit, expression.Parameters);
+            return;
+        }
         _columns.AddColumns(_resolver.GetColumn(expression), typeof(TEntity), columnAlias);
     }
+
+    /// <summary>
+    /// 固定指定实体类型的既有投影表别名。
+    /// </summary>
+    /// <param name="entityType">实体类型。</param>
+    /// <param name="tableAlias">表别名。</param>
+    internal void FreezeEntityAlias(Type entityType, string tableAlias) => _columns.FreezeTableAlias(entityType, tableAlias);
+
+    /// <summary>
+    /// 添加 DTO 成员初始化投影列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="memberInit">DTO 成员初始化表达式。</param>
+    /// <param name="parameters">实体参数表达式集合。</param>
+    private void AddMemberInitColumns<TEntity>(MemberInitExpression memberInit,
+        IReadOnlyList<ParameterExpression> parameters) where TEntity : class
+    {
+        var items = new List<ColumnItem>();
+        foreach (var binding in memberInit.Bindings)
+        {
+            if (binding is not MemberAssignment assignment)
+                throw CreateUnsupportedDtoProjectionException(binding.BindingType.ToString());
+
+            var source = UnwrapConversion(assignment.Expression);
+            if (source is not MemberExpression member || IsDirectParameterMember(member, parameters) == false)
+                throw CreateUnsupportedDtoProjectionException(source.NodeType.ToString());
+
+            var lambda = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(member, typeof(object)), parameters);
+            var column = _resolver.GetColumn(lambda);
+            if (string.IsNullOrWhiteSpace(column))
+                throw CreateUnsupportedDtoProjectionException(source.NodeType.ToString());
+
+            var item = new SqlItem(column, alias: assignment.Member.Name);
+            items.Add(ColumnItem.CreateColumn(item.Name, columnAlias: item.Alias, tableType: typeof(TEntity)));
+        }
+        items.ForEach(_columns.AddColumn);
+    }
+
+    /// <summary>
+    /// 解包转换表达式。
+    /// </summary>
+    /// <param name="expression">表达式。</param>
+    /// <returns>已解包的表达式。</returns>
+    private static Expression UnwrapConversion(Expression expression)
+    {
+        while (expression is UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked } conversion)
+            expression = conversion.Operand;
+        return expression;
+    }
+
+    /// <summary>
+    /// 检查成员访问是否直接来自当前实体参数。
+    /// </summary>
+    /// <param name="member">成员访问表达式。</param>
+    /// <param name="parameters">实体参数表达式集合。</param>
+    /// <returns>如果成员直接来自当前实体参数，返回 true。</returns>
+    private static bool IsDirectParameterMember(MemberExpression member, IReadOnlyList<ParameterExpression> parameters) =>
+        parameters.Count == 1 && ReferenceEquals(UnwrapConversion(member.Expression), parameters[0]);
+
+    /// <summary>
+    /// 创建不支持 DTO 投影表达式的异常。
+    /// </summary>
+    /// <param name="nodeType">不支持的表达式节点类型。</param>
+    /// <returns>异常对象。</returns>
+    private static NotSupportedException CreateUnsupportedDtoProjectionException(string nodeType) =>
+        new($"不支持的 DTO 投影表达式节点类型：{nodeType}。仅支持当前实体的直接成员赋值。");
 
     /// <summary>
     /// 设置子查询列

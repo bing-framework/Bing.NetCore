@@ -57,6 +57,14 @@ public class TestEntityAliasRegister : IEntityAliasRegister
     public string GetAlias(Type entity) => $"as_{entity.Name}";
 
     /// <summary>
+    /// 获取同实体自连接 On 条件使用的别名。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>匹配的表别名。</returns>
+    public string GetSelfJoinAlias(Type entity, bool right) => GetAlias(entity);
+
+    /// <summary>
     /// 复制实体别名注册器
     /// </summary>
     public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(Data));

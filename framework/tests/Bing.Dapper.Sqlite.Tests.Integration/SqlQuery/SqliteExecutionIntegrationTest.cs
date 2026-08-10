@@ -114,32 +114,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：SQLite 真实执行诊断应保留作用域映射配置，并仅在显式启用后输出租户标识。
-    /// </summary>
-    [Fact]
-    public async Task ExecuteSql_WhenDiagnosticsEnabled_ShouldPublishPinnedScopeContext()
-    {
-        // Arrange
-        DiagnosticsMessage message = null;
-        using var observer = new SqliteDiagnosticObserver(item => message = item);
-        var manager = _fixture.GetDatabaseScopeManager();
-
-        // Act
-        using (manager.Use(new DatabaseScopeOptions { DbKey = "first", TenantId = "tenant-sqlite" }))
-        using (var executor = _fixture.CreateExecutor("first"))
-        {
-            executor.Config(options => options.IncludeTenantIdInDiagnostics = true);
-            await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "diagnostic" });
-        }
-
-        // Assert
-        Assert.NotNull(message);
-        Assert.Equal("first", message.Connection.DbKey);
-        Assert.Equal("first-profile", message.MappingProfile);
-        Assert.Equal("tenant-sqlite", message.TenantId);
-    }
-
-    /// <summary>
     /// 测试目的：未显式启用租户诊断时，真实 SQLite 执行不应输出环境租户标识。
     /// </summary>
     [Fact]
@@ -916,9 +890,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         using var query = _fixture.CreateQuery();
-        var countAll = CreateAggregateDescription<int>(query).Count(alias: "Total").Scalar();
-        var countColumn = CreateAggregateDescription<int>(query).Count("s.Amount", "AmountCount").Scalar();
-        var distinctCount = CreateAggregateDescription<int>(query).Count("s.Name", "NameCount", distinct: true)
+        var countAll = CreateAggregateDescription<int>(query).CountAll("Total").Scalar();
+        var countColumn = CreateAggregateDescription<int>(query).CountColumn("s.Amount", "AmountCount").Scalar();
+        var distinctCount = CreateAggregateDescription<int>(query).CountColumn("s.Name", "NameCount", distinct: true)
             .Scalar();
         var sum = CreateAggregateDescription<decimal>(query).Sum("s.Amount", "Total").Scalar();
         var average = CreateAggregateDescription<decimal>(query).Avg("s.Amount", "Average", distinct: true)
@@ -959,7 +933,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 "Case When [s].[Amount] Is Not Null Then [s].[Name] End", "NamedCount", distinct: true)
             .Scalar();
         var result = CreateAggregateDescription<AggregateResult>(query)
-            .Count("s.Name", "DistinctNameCount", distinct: true)
+            .CountColumn("s.Name", "DistinctNameCount", distinct: true)
             .Sum("s.Amount", "DistinctAmount", distinct: true)
             .FirstOrDefault();
 
@@ -1073,7 +1047,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var selected = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "one");
         var selectedSql = selected.ToSql();
         var selectedParameters = selected.GetParams();
-        var countDescription = query.Sql<int>().Count().From("samples");
+        var countDescription = query.Sql<int>().CountAll().From("samples");
 
         // Act
         var descriptions = selected.ToList();
@@ -1104,7 +1078,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var inResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").In("Id", selectedIds).ToList();
+        var notInResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").NotIn("Id", selectedIds).ToList();
         var existsResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Exists(selectedIds).ToList();
+        var notExistsResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").NotExists(selectedIds).ToList();
         var derivedResult = query.Sql<Sample>().Select("selected.Id,selected.Name,selected.Amount")
             .From(selectedSamples, "selected").ToList();
         var cteResult = query.Sql<Sample>().With("selected", selectedSamples)
@@ -1114,7 +1090,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "two" }, inResult.Select(item => item.Name));
+        Assert.Equal(new[] { "one", "three" }, notInResult.OrderBy(item => item.Name).Select(item => item.Name));
         Assert.Equal(new[] { "one", "two", "three" }, existsResult.Select(item => item.Name));
+        Assert.Empty(notExistsResult);
         Assert.Equal(new[] { "two" }, derivedResult.Select(item => item.Name));
         Assert.Equal(new[] { "two" }, cteResult.Select(item => item.Name));
         Assert.Equal(new[] { "one", "two" }, unionResult.OrderBy(item => item));
@@ -1203,8 +1181,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAggregateSamplesAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<string>().Select("Name").From("samples")
-            .GroupBy("Name", "Count(*) > 1");
+        var description = query.Sql<string>().Select("Name").CountAll("Total").From("samples")
+            .GroupBy("Name")
+            .HavingRaw("[Total] > 1");
 
         // Act
         var syncPage = description.ToPage(new Pager(1, 1) { Order = "Name" });
@@ -1215,6 +1194,28 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "A" }, syncPage.Data);
         Assert.Equal(1, asyncPage.TotalCount);
         Assert.Equal(new[] { "A" }, asyncPage.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：无 Group By 的聚合查询分页时，总数应为聚合结果集行数而非来源表行数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenAggregateWithoutGroupIsPaged_ShouldCountAggregateResultRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<int>().CountAll("Total").From("samples");
+
+        // Act
+        var syncPage = description.ToPage(new Pager(1, 1, "Total"));
+        var asyncPage = await description.ToPageAsync(new Pager(1, 1, "Total"));
+
+        // Assert
+        Assert.Equal(1, syncPage.TotalCount);
+        Assert.Equal(new[] { 3 }, syncPage.Data);
+        Assert.Equal(1, asyncPage.TotalCount);
+        Assert.Equal(new[] { 3 }, asyncPage.Data);
     }
 
     /// <summary>
@@ -1241,6 +1242,127 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "one" }, unionPage.Data);
         Assert.Equal(2, unionAllPage.TotalCount);
         Assert.Equal(new[] { "one", "one" }, unionAllPage.Data);
+    }
+
+    /// <summary>
+    /// 测试目的：CTE 与 Union 组合执行时必须隔离重复参数名，确保 CTE 与集合分支不会覆盖彼此的参数值。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenCteAndUnionAreComposed_ShouldExecuteWithIsolatedParameters()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var cteSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
+        var unionSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
+        var description = query.Sql<string>().With("selected", cteSource).Select("Name").From("selected")
+            .Union(unionSource);
+
+        // Act
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one", "two" }, result.OrderBy(item => item));
+    }
+
+    /// <summary>
+    /// 测试目的：递归 CTE 应使用 SQLite 的 With Recursive 语法执行 Union All，并在重复执行时保留参数绑定。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenRecursiveCteUsesUnionAll_ShouldExecuteExpectedSequence()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var recursiveSource = query.Sql<int>().Distinct().AppendSelect("1 As Value").From("samples")
+            .UnionAll(query.Sql<int>().AppendSelect("Value + 1 As Value").From("numbers")
+                .AppendWhere("Value < @maxValue").AddParam("maxValue", 3));
+        var description = query.Sql<int>().With("numbers", recursiveSource)
+            .Select("Value").From("numbers").OrderBy("Value");
+
+        // Act
+        var sql = description.ToSql();
+        var firstResult = await description.ToListAsync();
+        var secondResult = await description.ToListAsync();
+
+        // Assert
+        Assert.StartsWith("With Recursive", sql);
+        Assert.Equal(new[] { 1, 2, 3 }, firstResult);
+        Assert.Equal(firstResult, secondResult);
+    }
+
+    /// <summary>
+    /// 测试目的：参数化 CTE 作为 Left Join 来源时，应保留 CTE 参数、别名和未匹配行的 DTO 映射。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenParameterizedCteIsLeftJoined_ShouldMapMatchedAndUnmatchedRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var samples = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[0].Id, tenantId = "tenant-1", name = "order-one" });
+        var filteredSamples = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+            .In("Name", new[] { "one", "two" });
+        var description = query.Sql<LambdaJoinResult>().With("selected", filteredSamples)
+            .Select("s.Name,o.TenantId").From("selected", "s")
+            .LeftJoin("Orders", "o").AppendOn("o.Id=s.Id")
+            .OrderBy("s.Id");
+
+        // Act
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one:tenant-1", "two:" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite 不支持 Right Join 时，描述应在生成 SQL 前拒绝而不进入数据库执行路径。
+    /// </summary>
+    [Fact]
+    public void SqlQueryPlan_WhenRightJoined_ShouldRejectBeforeExecuting()
+    {
+        // Arrange
+        using var query = _fixture.CreateQuery();
+        var description = query.Sql<OrderSample>().Select("o.Id,o.Name").From("samples", "s")
+            .RightJoin("Orders", "o").AppendOn("s.Id=o.Id")
+            .OrderBy("o.Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => description.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Intersect 与 Except 分页应在 SQLite 中执行真实集合语义，并通过派生表计算正确总数。
+    /// </summary>
+    [Fact]
+    public async Task SqlQueryPlan_WhenIntersectAndExceptArePaged_ShouldReturnExpectedRowsAndCounts()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var intersectSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
+        var exceptSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
+        var intersect = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+            .Intersect(intersectSource);
+        var except = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+            .Union(query.Sql<string>().Select("Name").From("samples").Where("Name", "two"))
+            .Except(exceptSource);
+
+        // Act
+        var intersectPage = intersect.ToPage(new Pager(1, 1) { Order = "Name" });
+        var exceptPage = await except.ToPageAsync(new Pager(1, 1) { Order = "Name" });
+
+        // Assert
+        Assert.Equal(1, intersectPage.TotalCount);
+        Assert.Equal(new[] { "one" }, intersectPage.Data);
+        Assert.Equal(1, exceptPage.TotalCount);
+        Assert.Equal(new[] { "one" }, exceptPage.Data);
     }
 
     /// <summary>
@@ -1328,7 +1450,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        var fluentCount = query.Sql<int>().Count().From("samples").Scalar();
+        var fluentCount = query.Sql<int>().CountAll().From("samples").Scalar();
         var textCount = await query.Sql<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
             .ScalarAsync();
         var missingAmount = query.Sql<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
@@ -1723,10 +1845,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：插值参数默认名称与 SQL 中已有 Token 冲突时，应生成独立参数名并保持原 Token 不变。
+    /// 测试目的：仅出现在 SQL 字符串中的参数样式不应与插值参数冲突，且字符串文本必须保持不变。
     /// </summary>
     [Fact]
-    public async Task SqlInterpolated_WhenGeneratedNameConflictsWithExistingToken_ShouldUseUniqueParameterName()
+    public async Task SqlInterpolated_WhenTokenAppearsOnlyInStringLiteral_ShouldKeepDefaultParameterName()
     {
         // Arrange
         await SeedAsync();
@@ -1738,7 +1860,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var result = await description.SingleAsync();
 
         // Assert
-        Assert.Contains("Name = @p0_1", description.CommandText, StringComparison.Ordinal);
+        Assert.Contains("Name = @p0", description.CommandText, StringComparison.Ordinal);
         Assert.Contains("'@p0' = '@p0'", description.CommandText, StringComparison.Ordinal);
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
         Assert.Equal("one", Assert.Single(parameters).Value);
@@ -1840,6 +1962,34 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：Lambda DTO 成员初始化投影应按目标成员别名执行，并将数据库空值映射到可空属性。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenMemberInitProjectionConfigured_ShouldMapAliasedAndNullableValues()
+    {
+        // Arrange
+        await InsertAggregateSampleAsync("member-init", null);
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new LambdaMemberInitResult
+            {
+                DisplayName = sample.Name,
+                OptionalAmount = sample.Amount
+            })
+            .From()
+            .Where(sample => sample.Name == "member-init")
+            .As<LambdaMemberInitResult>();
+        var result = await description.SingleAsync();
+
+        // Assert
+        Assert.Equal("Select `samples`.`Name` As `DisplayName`,`samples`.`Amount` As `OptionalAmount` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0", description.ToSql());
+        Assert.Equal("member-init", result.DisplayName);
+        Assert.Null(result.OptionalAmount);
+    }
+
+    /// <summary>
     /// 测试目的：Lambda 连续 Select 应始终替换前一投影，只有 AppendSelect 才允许显式追加投影列。
     /// </summary>
     [Fact]
@@ -1920,6 +2070,31 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "one:tenant-1", "two:tenant-2" },
             result.Select(item => $"{item.Name}:{item.TenantId}"));
         Assert.Equal("Select `s`.`Id`,`s`.`Name`,`o`.`TenantId` \r\nFrom `samples` As `s` \r\nJoin `Orders` As `o` On `s`.`Id`=`o`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：同一实体类型自连接应在 On 条件中使用不同别名，并能执行返回来源表投影。
+    /// </summary>
+    [Fact]
+    public async Task SqlQuery_WhenSelfJoinedWithTypedOn_ShouldUseDistinctAliasesAndExecute()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var description = query.Lambda<SqliteStructuredTableSample>()
+            .Select(sample => new object[] { sample.Name })
+            .From<SqliteStructuredTableSample>("s")
+            .Join<SqliteStructuredTableSample>("p")
+            .On<SqliteStructuredTableSample, SqliteStructuredTableSample>((left, right) => left.Id == right.Id)
+            .OrderBy("s.Id")
+            .As<string>();
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal("Select `s`.`Name` \r\nFrom `samples` As `s` \r\nJoin `samples` As `p` On `s`.`Id`=`p`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
+        Assert.Equal(new[] { "one", "two", "three" }, result);
     }
 
     /// <summary>
@@ -2336,6 +2511,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 租户标识。
         /// </summary>
         public string TenantId { get; set; }
+    }
+
+    /// <summary>
+    /// Lambda DTO 成员初始化投影结果模型。
+    /// </summary>
+    private sealed class LambdaMemberInitResult
+    {
+        /// <summary>
+        /// 显示名称。
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// 可空金额。
+        /// </summary>
+        public decimal? OptionalAmount { get; set; }
     }
 
     /// <summary>

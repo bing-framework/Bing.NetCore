@@ -16,6 +16,15 @@ public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation, ISqlQuery
     IAllowAllRowsMutationBuilder
 {
     /// <summary>
+    /// 获取生成当前 SQL 的 Provider。
+    /// </summary>
+    /// <remarks>
+    /// Mutation 描述会冻结该 Provider 的身份和能力档案，第三方 Builder 必须返回实际 Provider，不能返回
+    /// <see langword="null"/>。
+    /// </remarks>
+    ISqlProvider Provider { get; }
+
+    /// <summary>
     /// 当前 SQL 操作类型。
     /// </summary>
     SqlOperationKind OperationKind { get; }

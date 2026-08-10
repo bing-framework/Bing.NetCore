@@ -26,6 +26,23 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 添加结构化内连接表引用。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="table">结构化表引用。</param>
+    public static T Join<T>(this T source, SqlTableReference table) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.Join(table);
+        return source;
+    }
+
+    /// <summary>
     /// 添加结构化左连接表引用。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
@@ -221,6 +238,23 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 添加结构化右连接表引用。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源。</param>
+    /// <param name="table">结构化表引用。</param>
+    public static T RightJoin<T>(this T source, SqlTableReference table) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.RightJoin(table);
+        return source;
+    }
+
+    /// <summary>
     /// 追加原始右连接表表达式。
     /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。
     /// 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
@@ -328,7 +362,7 @@ public static partial class Extensions
 
     /// <summary>
     /// 向最后一个连接添加 On 原始条件。
-    /// 没有连接时此调用会被忽略，条件不会保存并应用到后续连接。
+    /// 空白条件会被忽略；没有连接时非空条件会抛出 <see cref="InvalidOperationException"/>，且不会保存并应用到后续连接。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>

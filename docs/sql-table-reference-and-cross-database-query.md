@@ -30,7 +30,7 @@ query.AppendFrom("Orders o").AppendFrom(", Customers c");
 query.AppendFrom("Orders o").AppendFrom("Customers c");
 ```
 
-`AppendJoin`、`AppendLeftJoin` 和 `AppendRightJoin` 同样保留原始表表达式，不解析别名。可以通过 `AppendOn` 将条件追加到最后一个 Join；没有 Join 时 `AppendOn` 无操作。`AppendFrom`/原始 Join 保持调用方文本，其他 `AppendSelect`、`AppendWhere`、`AppendGroupBy`、`AppendOrderBy` 和 `AppendOn` 会对方括号标识符执行 Provider 方言替换。
+`AppendJoin`、`AppendLeftJoin` 和 `AppendRightJoin` 同样保留原始表表达式，不解析别名。可以通过 `AppendOn` 将条件追加到最后一个 Join；空白条件无操作，没有 Join 时非空条件抛出 `InvalidOperationException`。`AppendFrom`/原始 Join 保持调用方文本，其他 `AppendSelect`、`AppendWhere`、`AppendGroupBy`、`AppendOrderBy` 和 `AppendOn` 会对方括号标识符执行 Provider 方言替换。
 
 ## MySQL 跨数据库集成测试
 

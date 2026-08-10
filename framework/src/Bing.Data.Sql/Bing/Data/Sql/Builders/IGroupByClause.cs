@@ -22,8 +22,7 @@ public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause
     /// 分组
     /// </summary>
     /// <param name="groupBy">分组列表</param>
-    /// <param name="having">分组条件</param>
-    void GroupBy(string groupBy, string having = null);
+    void GroupBy(string groupBy);
 
     /// <summary>
     /// 分组
@@ -37,8 +36,7 @@ public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="column">分组字段</param>
-    /// <param name="having">分组条件</param>
-    void GroupBy<TEntity>(Expression<Func<TEntity, object>> column, string having = null);
+    void GroupBy<TEntity>(Expression<Func<TEntity, object>> column);
 
     /// <summary>
     /// 设置 Having 条件，并按当前方言解析方括号标识符。

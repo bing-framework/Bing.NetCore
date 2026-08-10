@@ -20,7 +20,7 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.Price", "Count");
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.Price", "Count");
 
         // Act
         var result = description.Scalar();
@@ -40,7 +40,7 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.Price", "Count", distinct: true);
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.Price", "Count", distinct: true);
 
         // Act
         var result = description.Scalar();
@@ -107,7 +107,7 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.UserId", "UserCount", distinct: true);
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.UserId", "UserCount", distinct: true);
 
         // Act
         var result = description.Scalar();
@@ -153,7 +153,7 @@ public partial class MySqlQueryTest
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
         var description = CreateAggregateDescription<MySqlAggregateResult>(query)
-            .Count("p.UserId", "UserCount", distinct: true)
+            .CountColumn("p.UserId", "UserCount", distinct: true)
             .Sum("p.Price", "DistinctAmount", distinct: true);
 
         // Act
@@ -176,7 +176,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-first");
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().Count("p.ProductId", "Count").From("Product", "p");
+        var description = query.Sql<int>().CountColumn("p.ProductId", "Count").From("Product", "p");
 
         // Act
         var result = description.Scalar();

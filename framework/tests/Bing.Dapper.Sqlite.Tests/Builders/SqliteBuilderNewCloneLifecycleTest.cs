@@ -1,6 +1,8 @@
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -46,5 +48,43 @@ public class SqliteBuilderNewCloneLifecycleTest
         Assert.IsType<SqliteFromClause>(clone.FromClause);
         Assert.IsType<SqliteJoinClause>(clone.JoinClause);
         Assert.Equal(expected, clone.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite Profile 应在生成 SQL 前拒绝运行时不支持的 Right Join。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenRightJoinIsConfigured_ShouldRejectUsingSqliteProfile()
+    {
+        // Arrange
+        var builder = new SqliteBuilder();
+        builder.Select("o.Id").From("samples", "s")
+            .RightJoin("Orders", "o").AppendOn("s.Id=o.Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, SqliteSqlProvider.Instance.Profile.Query.RightJoin);
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：结构化 Right Join 同样应在 SQLite 生成 SQL 前按 Provider Profile 拒绝。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenStructuredRightJoinIsConfigured_ShouldRejectUsingSqliteProfile()
+    {
+        // Arrange
+        var builder = new SqliteBuilder();
+        builder.Select("o.Id").From("samples", "s")
+            .RightJoin(new SqlTableReference { TableName = "Orders", Alias = "o" })
+            .AppendOn("s.Id=o.Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
     }
 }

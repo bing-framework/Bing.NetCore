@@ -8,7 +8,7 @@
 - 已完成：同一容器可通过不写默认数据源的 `Add*Provider` 方法注册 MySQL、PostgreSQL、SQL Server 和 SQLite，并通过具名 `AddSqlDataSource` 运行时路由。
 - 已完成：SQLite 双文件测试覆盖数据库切换、事务固定、`buffered:false` 列表物化、提前终止流式读取和 `Task.WhenAll` 并行隔离。
 - 已完成：EF Core Independent 模式经统一数据源解析器使用环境 `Use(dbKey)` 快照；Shared 模式继续验证物理数据库一致性。
-- 已完成：Doris 作为 MySQL 协议兼容数据源使用 `DatabaseType.MySql`，建议设置独立 Mapping Profile 与 `SupportsTransactions=false`；未新增 `DatabaseType.Doris`。
+- 已完成：Doris 保留 `DatabaseType.Doris` 兼容标识并路由至 MySQL Provider；兼容数据源默认设置 `IsReadOnly=true` 与 `SupportsTransactions=false`，也可使用 `DatabaseType.MySql` 配置独立 Mapping Profile 并显式设置这两个属性。只读数据源会拒绝框架可识别的结构化 Mutation、执行型存储过程和本地事务；原生 SQL 保持调用方显式负责的权限边界。
 - 已完成：流式查询在提前终止、完成和异常路径正确释放 Reader；`buffered:false` 参数未删除或强制改写。
 
 ## 使用模式
@@ -26,6 +26,7 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
     setupAction: source =>
     {
         source.MappingProfile = "doris";
+        source.IsReadOnly = true;
         source.SupportsTransactions = false;
     });
 ```

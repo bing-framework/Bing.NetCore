@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 默认 SQL 实现类型解析器
 /// </summary>
-public sealed class DefaultSqlImplementationTypeResolver : ISqlImplementationTypeResolver
+internal sealed class DefaultSqlImplementationTypeResolver : ISqlImplementationTypeResolver
 {
     /// <summary>
     /// SQL 实现类型配置

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Bing.Data;
 using Bing.Data.Sql.Builders;
 
 namespace Bing.Dapper.Tests.Metadata;
@@ -54,7 +55,7 @@ public class OfficialProviderInstanceTest
     }
 
     /// <summary>
-    /// 测试目的：官方 Provider 应声明其参数上限，SQL Server 必须遵循 2100 参数限制。
+    /// 测试目的：官方 Provider 应仅通过统一 Profile 声明参数上限，SQL Server 必须遵循 2100 参数限制。
     /// </summary>
     [Fact]
     public void Provider_WhenParameterLimitIsRequested_ShouldReturnOfficialContract()
@@ -63,9 +64,24 @@ public class OfficialProviderInstanceTest
         var providers = CreateProviders();
 
         // Act / Assert
-        Assert.Equal(2100, Assert.IsAssignableFrom<ISqlParameterLimitProvider>(SqlServerSqlProvider.Instance).MaxParameterCount);
+        Assert.Equal(2100, SqlServerSqlProvider.Instance.Profile.Limits.MaxParameterCount);
         foreach (var provider in providers.Where(provider => provider != SqlServerSqlProvider.Instance))
-            Assert.Null(Assert.IsAssignableFrom<ISqlParameterLimitProvider>(provider).MaxParameterCount);
+            Assert.Null(((ISqlProviderProfileProvider)provider).Profile.Limits.MaxParameterCount);
+    }
+
+    /// <summary>
+    /// 测试目的：官方 Provider 应明确声明 Right Join 的方言支持状态，避免运行时数据库错误泄漏到调用方。
+    /// </summary>
+    [Fact]
+    public void Provider_WhenRightJoinCapabilityIsRequested_ShouldReturnOfficialContract()
+    {
+        // Arrange
+        var providers = CreateProviders();
+
+        // Act and Assert
+        foreach (var provider in providers.Where(provider => provider != SqliteSqlProvider.Instance))
+            Assert.Equal(SqlQueryCapabilityState.Supported, ((ISqlProviderProfileProvider)provider).Profile.Query.RightJoin);
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, SqliteSqlProvider.Instance.Profile.Query.RightJoin);
     }
 
     /// <summary>

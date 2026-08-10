@@ -22,17 +22,17 @@ public class ExecutionLeaseTest
     public void Query_WhenExecutionIsActive_ShouldRejectReentrantOperationAndAllowReuse()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var query = new ReentrantQuery(provider) { VerifyReentrantOperation = true };
 
         // Act
-        var result = query.Procedure<object>("sample").Scalar();
+        var result = query.Procedure<object>("sample").ExecuteScalar();
 
         // Assert
-        Assert.Null(result);
+        Assert.Null(result.Result);
         Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
             query.ReentrantException.Message);
-        Assert.Null(query.Procedure<object>("sample").Scalar());
+        Assert.Null(query.Procedure<object>("sample").ExecuteScalar().Result);
     }
 
     /// <summary>
@@ -42,15 +42,16 @@ public class ExecutionLeaseTest
     public void Query_WhenExecutionFails_ShouldReleaseLease()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var query = new ReentrantQuery(provider) { ThrowOnExecuteBefore = true };
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => query.Procedure<object>("sample").Scalar());
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            query.Procedure<object>("sample").ExecuteScalar());
 
         // Assert
         Assert.Equal("受控执行前异常。", exception.Message);
-        Assert.Null(query.Procedure<object>("sample").Scalar());
+        Assert.Null(query.Procedure<object>("sample").ExecuteScalar().Result);
     }
 
     /// <summary>
@@ -60,7 +61,7 @@ public class ExecutionLeaseTest
     public void Procedure_WhenQueryDisposed_ShouldRejectDescriptionCreation()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var query = new ReentrantQuery(provider);
         query.Dispose();
 
@@ -75,17 +76,17 @@ public class ExecutionLeaseTest
     public async Task QueryAsync_WhenExecutionIsActive_ShouldRejectReentrantOperationAndAllowReuse()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var query = new ReentrantQuery(provider) { VerifyReentrantOperation = true };
 
         // Act
-        var result = await query.Procedure<object>("sample").ScalarAsync();
+        var result = await query.Procedure<object>("sample").ExecuteScalarAsync();
 
         // Assert
-        Assert.Null(result);
+        Assert.Null(result.Result);
         Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
             query.ReentrantException.Message);
-        Assert.Null(await query.Procedure<object>("sample").ScalarAsync());
+        Assert.Null((await query.Procedure<object>("sample").ExecuteScalarAsync()).Result);
     }
 
     /// <summary>
@@ -95,7 +96,7 @@ public class ExecutionLeaseTest
     public void Executor_WhenExecutionIsActive_ShouldRejectReentrantOperationAndAllowReuse()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var executor = new ReentrantExecutor(provider) { VerifyReentrantOperation = true };
 
         // Act
@@ -115,7 +116,7 @@ public class ExecutionLeaseTest
     public async Task ExecutorAsync_WhenExecutionIsActive_ShouldRejectReentrantOperationAndAllowReuse()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var executor = new ReentrantExecutor(provider) { VerifyReentrantOperation = true };
 
         // Act
@@ -135,7 +136,7 @@ public class ExecutionLeaseTest
     public void Dispose_WhenOwnedTransactionDisposeFails_ShouldStillDisposeOwnedConnection()
     {
         // Arrange
-        using var provider = new ServiceCollection().BuildServiceProvider();
+        using var provider = CreateServiceProvider();
         var query = new ReentrantQuery(provider);
         var transactionException = new InvalidOperationException("受控事务释放异常。");
         var transaction = new Mock<IDbTransaction>();
@@ -169,6 +170,43 @@ public class ExecutionLeaseTest
     }
 
     /// <summary>
+    /// 创建声明过程能力的测试服务容器。
+    /// </summary>
+    private static ServiceProvider CreateServiceProvider()
+    {
+        var provider = new Mock<ISqlProvider>();
+        provider.SetupGet(item => item.Key).Returns("test.execution-lease");
+        provider.SetupGet(item => item.DatabaseType).Returns(Bing.Data.Enums.DatabaseType.SqlServer);
+        provider.As<ISqlProviderProfileProvider>().SetupGet(item => item.Profile).Returns(new SqlProviderProfile
+        {
+            Procedure = new SqlProviderProcedureCapabilities { SupportsStoredProcedures = true }
+        });
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSingleton(provider.Object);
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建固定到执行租约测试 Provider 的 SQL 配置。
+    /// </summary>
+    private static SqlOptions CreateOptions()
+    {
+        var options = new SqlOptions();
+        options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "execution-lease",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "execution-lease",
+                ProviderKey = "test.execution-lease",
+                DatabaseType = Bing.Data.Enums.DatabaseType.SqlServer
+            }
+        });
+        return options;
+    }
+
+    /// <summary>
     /// 使用执行前钩子重入另一执行入口的 Query 测试实现。
     /// </summary>
     private sealed class ReentrantQuery : SqlQueryBase
@@ -177,7 +215,7 @@ public class ExecutionLeaseTest
         /// 初始化测试 Query。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
-        public ReentrantQuery(IServiceProvider serviceProvider) : base(serviceProvider, new SqlOptions())
+        public ReentrantQuery(IServiceProvider serviceProvider) : base(serviceProvider, CreateOptions())
         {
         }
 
@@ -207,7 +245,8 @@ public class ExecutionLeaseTest
             if (VerifyReentrantOperation)
             {
                 VerifyReentrantOperation = false;
-                ReentrantException = Assert.Throws<InvalidOperationException>(() => Procedure<object>("sample").Scalar());
+                ReentrantException = Assert.Throws<InvalidOperationException>(() =>
+                    Procedure<object>("sample").ExecuteScalar());
             }
             return false;
         }
@@ -230,7 +269,7 @@ public class ExecutionLeaseTest
         /// 初始化测试 Executor。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
-        public ReentrantExecutor(IServiceProvider serviceProvider) : base(serviceProvider, new SqlOptions())
+        public ReentrantExecutor(IServiceProvider serviceProvider) : base(serviceProvider, CreateOptions())
         {
         }
 

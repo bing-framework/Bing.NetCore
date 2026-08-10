@@ -127,7 +127,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("expressionSql", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public partial class SqlBuilderTest
         Assert.Equal("argumentSql", rawException.ParamName);
         Assert.Equal("expressionSql", expressionException.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -248,7 +248,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -266,7 +266,7 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("column", exception.ParamName);
         Assert.Empty(_builder.GetParams());
-        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.Count(alias: "Total").From("Orders").ToSql());
+        Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", _builder.CountAll("Total").From("Orders").ToSql());
     }
 
     /// <summary>
@@ -321,7 +321,7 @@ public partial class SqlBuilderTest
     public void Count_WhenAliasIsConfigured_ShouldRenderCountWildcard()
     {
         // Act
-        var sql = _builder.Count(alias: "Total").From("Orders").ToSql();
+        var sql = _builder.CountAll("Total").From("Orders").ToSql();
 
         // Assert
         Assert.Equal("Select Count(*) As [Total] \r\nFrom [Orders]", sql);
@@ -334,7 +334,7 @@ public partial class SqlBuilderTest
     public void Count_WhenColumnIsConfigured_ShouldRenderColumnCount()
     {
         // Act
-        var sql = _builder.Count("o.UserId", "UserCount").From("Orders", "o").ToSql();
+        var sql = _builder.CountColumn("o.UserId", "UserCount").From("Orders", "o").ToSql();
 
         // Assert
         Assert.Equal("Select Count([o].[UserId]) As [UserCount] \r\nFrom [Orders] As [o]", sql);
@@ -347,7 +347,7 @@ public partial class SqlBuilderTest
     public void Count_WhenDistinctIsConfigured_ShouldRenderDistinctColumnCount()
     {
         // Act
-        var sql = _builder.Count("o.UserId", "UserCount", distinct: true).From("Orders", "o").ToSql();
+        var sql = _builder.CountColumn("o.UserId", "UserCount", distinct: true).From("Orders", "o").ToSql();
 
         // Assert
         Assert.Equal("Select Count(Distinct [o].[UserId]) As [UserCount] \r\nFrom [Orders] As [o]", sql);
@@ -361,7 +361,7 @@ public partial class SqlBuilderTest
     {
         // Act
         var sql = _builder.Aggregate(SqlAggregateFunction.Sum, "o.Amount")
-            .Count("o.UserId")
+            .CountColumn("o.UserId")
             .AggregateRaw(SqlAggregateFunction.Max, "o.UpdatedAt")
             .AggregateExpression(SqlAggregateFunction.Min, "[o].[CreatedAt]")
             .From("Orders", "o")
@@ -382,7 +382,7 @@ public partial class SqlBuilderTest
             .Avg("o.Amount")
             .Max("o.Amount")
             .Min("o.Amount")
-            .Count("o.Id")
+            .CountColumn("o.Id")
             .From("Orders", "o")
             .ToSql();
 
@@ -397,7 +397,7 @@ public partial class SqlBuilderTest
     public void Count_WhenSingleStringIsConfigured_ShouldTreatStringAsColumn()
     {
         // Act
-        var sql = _builder.Count("UserId").From("Orders").ToSql();
+        var sql = _builder.CountColumn("UserId").From("Orders").ToSql();
 
         // Assert
         Assert.Equal("Select Count([UserId]) \r\nFrom [Orders]", sql);

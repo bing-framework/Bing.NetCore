@@ -61,7 +61,7 @@ public partial class SqlBuilderTest
         result.Append("Where [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.From(builder2, "test").Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -88,7 +88,7 @@ public partial class SqlBuilderTest
         result.Append("Where [Age]=@_p_1");
 
         //执行
-        _builder.From(builder => builder.Count().From("Test2").Where("Name", "a"), "test").Where("Age", 1);
+        _builder.From(builder => builder.CountAll().From("Test2").Where("Name", "a"), "test").Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
         //验证
@@ -96,6 +96,28 @@ public partial class SqlBuilderTest
         Assert.Equal(2, _builder.GetParams().Count);
         Assert.Equal("a", _builder.GetParam("@_p_0"));
         Assert.Equal(1, _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
+    /// 测试目的：完整 Clear 后重用同一子查询时，不得沿用已清空父 Builder 的参数重命名映射。
+    /// </summary>
+    [Fact]
+    public void Clear_WhenReusingSubquery_ShouldResetMergedParameterNames()
+    {
+        // Arrange
+        var child = _builder.New().From("Child").Where("Name", "child-name");
+        _builder.From("Parent").Where("Name", "parent-name").From(child, "child");
+        _builder.ToSql();
+
+        // Act
+        _builder.Clear().From(child, "child");
+        var sql = _builder.ToSql();
+
+        // Assert
+        Assert.Contains("Where [Name]=@_p_0", sql);
+        Assert.DoesNotContain("@_p_1", sql);
+        Assert.Single(_builder.GetParams());
+        Assert.Equal("child-name", _builder.GetParam("@_p_0"));
     }
 
     /// <summary>

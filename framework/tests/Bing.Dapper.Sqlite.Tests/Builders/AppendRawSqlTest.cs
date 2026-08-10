@@ -51,14 +51,19 @@ public class AppendRawSqlTest
     }
 
     /// <summary>
-    /// 测试 - SQLite 原始右连接应保留反引号带点表名。
+    /// 测试目的：SQLite 原始 Right Join 应在渲染前由 Provider Profile 拒绝。
     /// </summary>
     [Fact]
-    public void AppendRightJoin_ShouldPreserveRawSql()
+    public void AppendRightJoin_ShouldRejectUsingProviderProfile()
     {
-        var sql = new SqliteBuilder().Select("u.Id").AppendFrom("main.Users u")
-            .AppendRightJoin("`Payments.Log` p On p.UserId=u.Id").ToSql();
+        // Arrange
+        var builder = new SqliteBuilder().Select("u.Id").AppendFrom("main.Users u")
+            .AppendRightJoin("`Payments.Log` p On p.UserId=u.Id");
 
-        Assert.Equal("Select `u`.`Id` \r\nFrom main.Users u \r\nRight Join `Payments.Log` p On p.UserId=u.Id", sql);
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
     }
 }

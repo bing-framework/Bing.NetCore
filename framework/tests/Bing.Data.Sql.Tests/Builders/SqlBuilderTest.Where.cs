@@ -286,7 +286,7 @@ public partial class SqlBuilderTest
         result.Append("And [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.From("abc.Test").Where("b2", builder2, Operator.NotEqual).Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -314,7 +314,7 @@ public partial class SqlBuilderTest
         result.Append("And [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.From<Sample>("s").Where<Sample>(t => t.Email, builder2, Operator.NotEqual).Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -343,7 +343,7 @@ public partial class SqlBuilderTest
 
         //执行
         _builder.From("abc.Test").Where("b2", builder => {
-            builder.Count().From("Test2").Where("Name", "a");
+            builder.CountAll().From("Test2").Where("Name", "a");
         }, Operator.NotEqual).Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -372,7 +372,7 @@ public partial class SqlBuilderTest
 
         //执行
         _builder.From<Sample>("s").Where<Sample>(t => t.Email, builder => {
-            builder.Count().From("Test2").Where("Name", "a");
+            builder.CountAll().From("Test2").Where("Name", "a");
         }, Operator.NotEqual).Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -381,6 +381,28 @@ public partial class SqlBuilderTest
         Assert.Equal(2, _builder.GetParams().Count);
         Assert.Equal("a", _builder.GetParam("@_p_0"));
         Assert.Equal(1, _builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
+    /// 测试目的：委托式子查询 Where 使用 In 运算符时，应采用集合子查询语义并合并子查询参数。
+    /// </summary>
+    [Fact]
+    public void Where_WhenActionSubqueryUsesInOperator_ShouldRenderSqlAndMergeParameters()
+    {
+        // Arrange
+        const string expected = "Select * \r\nFrom [Users] \r\nWhere [RoleId] In (Select [Id] \r\n" +
+            "From [Roles] \r\nWhere [Name]=@_p_0) And [Enabled]=@_p_1";
+
+        // Act
+        var sql = _builder.From("Users")
+            .Where("RoleId", builder => builder.Select("Id").From("Roles").Where("Name", "admin"), Operator.In)
+            .Where("Enabled", true)
+            .ToSql();
+
+        // Assert
+        Assert.Equal(expected, sql);
+        Assert.Equal("admin", _builder.GetParam("@_p_0"));
+        Assert.Equal(true, _builder.GetParam("@_p_1"));
     }
 
     /// <summary>
@@ -700,7 +722,7 @@ public partial class SqlBuilderTest
         result.Append("And [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.From("abc.Test").WhereIf("a", builder2, false).WhereIf("b2", builder2, true, Operator.NotEqual).Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
 
@@ -728,7 +750,7 @@ public partial class SqlBuilderTest
         result.Append("And [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.From<Sample>("s")
             .WhereIf<Sample>(t => t.Url, builder2, false)
             .WhereIf<Sample>(t => t.Email, builder2, true, Operator.NotEqual)
@@ -761,10 +783,10 @@ public partial class SqlBuilderTest
         //执行
         _builder.From("abc.Test")
             .WhereIf("b2", builder => {
-                builder.Count().From("a").Where("Name", "b");
+                builder.CountAll().From("a").Where("Name", "b");
             }, false)
             .WhereIf("b2", builder => {
-                builder.Count().From("Test2").Where("Name", "a");
+                builder.CountAll().From("Test2").Where("Name", "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
@@ -795,10 +817,10 @@ public partial class SqlBuilderTest
         //执行
         _builder.From<Sample>("s")
             .WhereIf<Sample>(t => t.Email, builder => {
-                builder.Count().From("a").Where("Name", "b");
+                builder.CountAll().From("a").Where("Name", "b");
             }, false)
             .WhereIf<Sample>(t => t.Email, builder => {
-                builder.Count().From("Test2").Where("Name", "a");
+                builder.CountAll().From("Test2").Where("Name", "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
         _output.WriteLine(_builder.ToSql());
@@ -830,10 +852,10 @@ public partial class SqlBuilderTest
         _builder.From<Sample>("s")
             .WhereIf<Sample>(t => t.Email, builder =>
             {
-                builder.Count().From<Test2>().Where<Test2>(x => x.Name, "b");
+                builder.CountAll().From<Test2>().Where<Test2>(x => x.Name, "b");
             }, false)
             .WhereIf<Sample>(t => t.Email, builder => {
-                builder.Count().From<Test2>().Where<Test2>(x => x.Name, "a");
+                builder.CountAll().From<Test2>().Where<Test2>(x => x.Name, "a");
             }, true, Operator.NotEqual)
             .Where("Age", 1);
         _output.WriteLine(_builder.ToSql());

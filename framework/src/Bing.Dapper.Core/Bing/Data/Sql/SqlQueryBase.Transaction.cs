@@ -1,5 +1,5 @@
-﻿using System.Runtime.ExceptionServices;
-using Bing.Extensions;
+﻿using Bing.Extensions;
+using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql;
 
@@ -122,6 +122,27 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
+    /// 异步获取查询事务。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当前事务，不存在时返回 null。</returns>
+    private protected async Task<IDbTransaction> GetQueryTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        _transactionScopeLease?.EnsureActive();
+        cancellationToken.ThrowIfCancellationRequested();
+        var transaction = GetExecutionTransaction();
+        if (transaction != null)
+            return transaction;
+        var context = Options.GetDatabaseContext();
+        if (context?.ReadPreference != SqlReadPreference.Primary ||
+            context.DataSource?.PrimaryReadStrategy != PrimaryReadStrategy.Transaction)
+            return null;
+        var primaryReadTransaction = await BeginOwnedTransactionAsync(cancellationToken).ConfigureAwait(false);
+        _primaryReadTransactionStarted = true;
+        return primaryReadTransaction;
+    }
+
+    /// <summary>
     /// 完成查询事务。
     /// </summary>
     protected void CompleteQueryTransaction()
@@ -131,6 +152,24 @@ public abstract partial class SqlQueryBase
         try
         {
             CommitOwnedTransaction();
+        }
+        finally
+        {
+            _primaryReadTransactionStarted = false;
+        }
+    }
+
+    /// <summary>
+    /// 异步完成 Query 内部事务。
+    /// </summary>
+    /// <param name="cancellationToken">提交事务使用的取消令牌。</param>
+    private protected async Task CompleteQueryTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_primaryReadTransactionStarted == false)
+            return;
+        try
+        {
+            await CommitOwnedTransactionAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -156,6 +195,24 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
+    /// 异步回滚 Query 内部事务。
+    /// </summary>
+    /// <remarks>清理阶段不得继承业务操作的取消令牌。</remarks>
+    private protected async Task RollbackQueryTransactionAsync()
+    {
+        if (_primaryReadTransactionStarted == false)
+            return;
+        try
+        {
+            await RollbackOwnedTransactionAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            _primaryReadTransactionStarted = false;
+        }
+    }
+
+    /// <summary>
     /// 开始 Query 内部拥有的事务。
     /// </summary>
     /// <param name="isolationLevel">事务隔离级别。</param>
@@ -164,11 +221,22 @@ public abstract partial class SqlQueryBase
         BeginTransactionImpl(isolationLevel);
 
     /// <summary>
+    /// 异步开始 Query 内部拥有的事务。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <param name="isolationLevel">事务隔离级别。</param>
+    /// <returns>内部拥有的数据库事务。</returns>
+    private Task<IDbTransaction> BeginOwnedTransactionAsync(CancellationToken cancellationToken,
+        IsolationLevel? isolationLevel = null) => BeginTransactionImplAsync(isolationLevel, cancellationToken);
+
+    /// <summary>
     /// 开始事务
     /// </summary>
     /// <param name="isolationLevel">事务隔离级别</param>
     private IDbTransaction BeginTransactionImpl(IsolationLevel? isolationLevel)
     {
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         try
         {
             if (_transaction != null)
@@ -187,12 +255,48 @@ public abstract partial class SqlQueryBase
             _transactionOwnership = SqlResourceOwnership.Owned;
             return _transaction;
         }
-        catch
+        catch (Exception exception)
         {
-            CloseOwnedConnection();
-            ReleaseTransaction();
-            throw;
+            primaryException = exception;
         }
+        ReleaseOwnedTransactionResources(cleanupExceptions);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return null;
+    }
+
+    /// <summary>
+    /// 异步开始事务。
+    /// </summary>
+    private async Task<IDbTransaction> BeginTransactionImplAsync(IsolationLevel? isolationLevel,
+        CancellationToken cancellationToken)
+    {
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
+        {
+            if (_transaction != null)
+            {
+                EnsureOwnedTransaction("开始");
+                return _transaction;
+            }
+            EnsureTransactionsSupported();
+            var connection = GetExecutionConnection();
+            if (connection.State == ConnectionState.Closed)
+                await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            _transaction = await SqlTransactionAsyncAdapter.BeginAsync(connection,
+                isolationLevel ?? IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
+            _transactionId = Guid.NewGuid().ToString("N");
+            _transactionOwnership = SqlResourceOwnership.Owned;
+            return _transaction;
+        }
+        catch (Exception exception)
+        {
+            primaryException = exception;
+        }
+        await ReleaseOwnedTransactionResourcesAsync(cleanupExceptions).ConfigureAwait(false);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        return null;
     }
 
     /// <summary>
@@ -201,10 +305,86 @@ public abstract partial class SqlQueryBase
     private void EnsureTransactionsSupported()
     {
         var dataSource = Options.GetDatabaseContext()?.DataSource;
+        EnsureWritableDataSource(dataSource);
+        if (GetCurrentProviderProfile().Transaction.SupportsTransactions == false)
+            throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持本地事务。请使用不依赖事务的查询操作。");
         if (dataSource?.SupportsTransactions != false)
             return;
         var dbKey = dataSource.Key ?? Options.GetDatabaseContext()?.DbKey ?? "<default>";
         throw new NotSupportedException($"数据源 {dbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
+    }
+
+    /// <summary>
+    /// 确保当前 Provider 支持存储过程命令。
+    /// </summary>
+    private protected void EnsureStoredProceduresSupported()
+    {
+        EnsureWritableDataSource();
+        if (GetCurrentProviderProfile().Procedure.SupportsStoredProcedures)
+            return;
+        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持存储过程命令。");
+    }
+
+    /// <summary>
+    /// 确保当前 Provider 支持调用方请求的存储过程输出参数。
+    /// </summary>
+    /// <param name="parameters">存储过程参数。</param>
+    private protected void EnsureOutputParametersSupported(object parameters)
+    {
+        if (HasOutputParameters(parameters) == false || GetCurrentProviderProfile().Procedure.SupportsOutputParameters)
+            return;
+        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持存储过程输出参数。");
+    }
+
+    /// <summary>
+    /// 判断参数源是否声明输出方向。
+    /// </summary>
+    /// <param name="parameters">待检查的参数源。</param>
+    /// <returns>包含 Output、InputOutput 或 ReturnValue 参数时返回 <see langword="true"/>。</returns>
+    private static bool HasOutputParameters(object parameters)
+    {
+        if (parameters is SqlParam parameter)
+            return IsOutputDirection(parameter.Direction);
+        if (parameters is IEnumerable<SqlParam> sqlParameters)
+            return sqlParameters.Any(item => item != null && IsOutputDirection(item.Direction));
+        if (parameters is ISqlParameterMap parameterMap)
+            return parameterMap.GetItems().Any(item => item != null && IsOutputDirection(item.Direction));
+        return false;
+    }
+
+    /// <summary>
+    /// 判断参数方向是否需要在过程完成后读取结果。
+    /// </summary>
+    /// <param name="direction">参数方向。</param>
+    /// <returns>需要输出访问器时返回 <see langword="true"/>。</returns>
+    private static bool IsOutputDirection(ParameterDirection? direction) => direction is ParameterDirection.Output or
+        ParameterDirection.InputOutput or ParameterDirection.ReturnValue;
+
+    /// <summary>
+    /// 确保当前 Provider 支持请求的异步取消。
+    /// </summary>
+    /// <param name="cancellationToken">调用方传入的取消令牌。</param>
+    private protected void EnsureCancellationSupported(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.CanBeCanceled == false)
+            return;
+        cancellationToken.ThrowIfCancellationRequested();
+        if (GetCurrentProviderProfile().Execution.SupportsCancellation)
+            return;
+        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持异步命令取消。");
+    }
+
+    /// <summary>
+    /// 确保当前数据源允许执行结构化写入或事务操作。
+    /// </summary>
+    /// <param name="dataSource">当前执行数据源。</param>
+    private protected void EnsureWritableDataSource(SqlDataSourceDescriptor dataSource = null)
+    {
+        dataSource ??= Options.GetDatabaseContext()?.DataSource;
+        if (dataSource?.IsReadOnly != true)
+            return;
+        var dbKey = dataSource.Key ?? Options.GetDatabaseContext()?.DbKey ?? "<default>";
+        throw new NotSupportedException($"数据源 {dbKey} 是只读数据源，不支持写入或事务操作。");
     }
 
     /// <summary>
@@ -215,27 +395,45 @@ public abstract partial class SqlQueryBase
         if (_transaction == null)
             return;
         EnsureOwnedTransaction("提交");
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         try
         {
             _transaction.Commit();
         }
         catch (Exception commitException)
         {
-            try
-            {
-                _transaction.Rollback();
-            }
-            catch (Exception rollbackException)
-            {
-                throw new AggregateException(commitException, rollbackException);
-            }
-            ExceptionDispatchInfo.Capture(commitException).Throw();
+            primaryException = commitException;
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => _transaction.Rollback());
         }
-        finally
+        ReleaseOwnedTransactionResources(cleanupExceptions);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 异步提交 Query 内部拥有的事务。
+    /// </summary>
+    /// <param name="cancellationToken">提交事务使用的取消令牌。</param>
+    private async Task CommitOwnedTransactionAsync(CancellationToken cancellationToken)
+    {
+        if (_transaction == null)
+            return;
+        EnsureOwnedTransaction("提交");
+        var transaction = _transaction;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
         {
-            CloseOwnedConnection();
-            ReleaseTransaction();
+            await SqlTransactionAsyncAdapter.CommitAsync(transaction, cancellationToken).ConfigureAwait(false);
         }
+        catch (Exception commitException)
+        {
+            primaryException = commitException;
+            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
+                () => SqlTransactionAsyncAdapter.RollbackAsync(transaction, CancellationToken.None)).ConfigureAwait(false);
+        }
+        await ReleaseOwnedTransactionResourcesAsync(cleanupExceptions).ConfigureAwait(false);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
     }
 
     /// <summary>
@@ -246,16 +444,93 @@ public abstract partial class SqlQueryBase
         if (_transaction == null)
             return;
         EnsureOwnedTransaction("回滚");
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
         try
         {
             if (_connection?.State != ConnectionState.Closed)
                 _transaction.Rollback();
         }
-        finally
+        catch (Exception exception)
         {
-            CloseOwnedConnection();
-            ReleaseTransaction();
+            primaryException = exception;
         }
+        ReleaseOwnedTransactionResources(cleanupExceptions);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 异步回滚内部拥有的事务。
+    /// </summary>
+    /// <remarks>回滚属于资源清理，始终使用不可取消令牌。</remarks>
+    private async Task RollbackOwnedTransactionAsync()
+    {
+        if (_transaction == null)
+            return;
+        EnsureOwnedTransaction("回滚");
+        var transaction = _transaction;
+        Exception primaryException = null;
+        var cleanupExceptions = new List<Exception>();
+        try
+        {
+            if (_connection?.State != ConnectionState.Closed)
+                await SqlTransactionAsyncAdapter.RollbackAsync(transaction, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            primaryException = exception;
+        }
+        await ReleaseOwnedTransactionResourcesAsync(cleanupExceptions).ConfigureAwait(false);
+        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+    }
+
+    /// <summary>
+    /// 关闭并释放当前 Query 自有事务资源。
+    /// </summary>
+    /// <param name="cleanupExceptions">用于保存关闭和释放失败的异常集合。</param>
+    /// <remarks>
+    /// 连接关闭和事务释放必须分别尝试，避免连接关闭失败阻断事务释放。
+    /// </remarks>
+    private void ReleaseOwnedTransactionResources(ICollection<Exception> cleanupExceptions)
+    {
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, CloseOwnedConnection);
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, ReleaseTransaction);
+    }
+
+    /// <summary>
+    /// 异步关闭并释放当前 Query 自有事务资源。
+    /// </summary>
+    /// <param name="cleanupExceptions">用于保存关闭和释放失败的异常集合。</param>
+    private async Task ReleaseOwnedTransactionResourcesAsync(ICollection<Exception> cleanupExceptions)
+    {
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, CloseOwnedConnectionAsync)
+            .ConfigureAwait(false);
+        await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, ReleaseTransactionAsync)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 异步关闭自有连接。
+    /// </summary>
+    private Task CloseOwnedConnectionAsync()
+    {
+        if (_connectionOwnership != SqlResourceOwnership.Owned || _connection?.State != ConnectionState.Open)
+            return Task.CompletedTask;
+        return SqlTransactionAsyncAdapter.CloseAsync(_connection);
+    }
+
+    /// <summary>
+    /// 异步释放自有事务。
+    /// </summary>
+    private async Task ReleaseTransactionAsync()
+    {
+        var transaction = _transaction;
+        var ownership = _transactionOwnership;
+        _transaction = null;
+        _transactionId = null;
+        _transactionOwnership = SqlResourceOwnership.Owned;
+        if (ownership == SqlResourceOwnership.Owned)
+            await SqlTransactionAsyncAdapter.DisposeAsync(transaction).ConfigureAwait(false);
     }
 
     /// <summary>

@@ -35,7 +35,9 @@ public class SqlMutationBatchOptions
     /// <returns>调用方与 Provider 上限中较小的有效值；二者均未限制时返回 null。</returns>
     public int? GetEffectiveMaxParameterCount(ISqlProvider provider)
     {
-        var providerLimit = (provider as ISqlParameterLimitProvider)?.MaxParameterCount;
+        if (provider == null)
+            throw new ArgumentNullException(nameof(provider));
+        var providerLimit = SqlProviderCapabilityResolver.GetProfile(provider).Limits.MaxParameterCount;
         if (MaxParameterCount == null)
             return providerLimit;
         if (providerLimit == null)

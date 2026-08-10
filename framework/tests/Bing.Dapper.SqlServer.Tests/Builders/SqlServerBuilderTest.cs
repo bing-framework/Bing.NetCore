@@ -1,6 +1,8 @@
 using System.Text;
+using Bing.Data;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders.Core;
 using Shouldly;
 using Xunit;
 
@@ -12,7 +14,27 @@ namespace Bing.Dapper.Tests.Builders;
 /// </summary>
 public class SqlServerBuilderTest
 {
-    private SqlServerBuilder NewBuilder() => new SqlServerBuilder();
+    private SqlServerBuilder NewBuilder() => new(new SqlBuilderServices(options: new SqlOptions
+    {
+        QueryCapabilities = new SqlQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported }
+    }));
+
+    /// <summary>
+    /// 测试目的：未确认 SQL Server 版本时，Offset/Fetch 分页必须在 SQL 渲染前被拒绝。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenSqlServerPaginationVersionIsNotConfirmed_ShouldReject()
+    {
+        // Arrange
+        var builder = new SqlServerBuilder();
+        builder.Select("Id").From("Users").OrderBy("Id").Page(new Pager(1, 10, "Id"));
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlserver 的当前查询能力配置不支持 分页。", exception.Message);
+    }
 
     // ── Select + From + Where ────────────────────────────────────
 

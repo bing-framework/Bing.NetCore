@@ -55,7 +55,7 @@ public sealed class SqlMultipleQueryBatchBuilder : ISqlMultipleQueryBatchBuilder
                 throw new InvalidOperationException($"批处理包含重复参数名称 {parameter.Name}。");
         }
         _statements.Add(statement);
-        _parameters.AddRange(items);
+        _parameters.AddRange(items.Select(CloneParameter));
         _parameterNames.UnionWith(items.Select(parameter => parameter.Name));
         return this;
     }
@@ -74,4 +74,31 @@ public sealed class SqlMultipleQueryBatchBuilder : ISqlMultipleQueryBatchBuilder
         }
         return new SqlMultipleQueryCommand(sql.ToString(), _parameters);
     }
+
+    /// <summary>
+    /// 创建参数快照，避免追加后调用方修改参数影响批处理命令。
+    /// </summary>
+    private static SqlParam CloneParameter(SqlParam parameter)
+    {
+        return new SqlParam(parameter.Name, CloneValue(parameter.Value), parameter.DbType, parameter.Direction,
+            parameter.Size, parameter.Precision, parameter.Scale)
+        {
+            OriginalValue = CloneValue(parameter.OriginalValue),
+            EntityType = parameter.EntityType,
+            PropertyName = parameter.PropertyName,
+            ColumnName = parameter.ColumnName,
+            DatabaseType = parameter.DatabaseType,
+            ProviderTypeName = parameter.ProviderTypeName,
+            Source = parameter.Source,
+            MetadataLevel = parameter.MetadataLevel,
+            StorageKind = parameter.StorageKind,
+            ConverterKind = parameter.ConverterKind,
+            CustomConverterName = parameter.CustomConverterName
+        };
+    }
+
+    /// <summary>
+    /// 复制数组值，防止可变元素容器泄漏到命令快照外部。
+    /// </summary>
+    private static object CloneValue(object value) => value is Array array ? array.Clone() : value;
 }

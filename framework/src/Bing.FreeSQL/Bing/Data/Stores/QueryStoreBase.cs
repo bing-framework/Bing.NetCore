@@ -67,16 +67,31 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     protected virtual ISqlQuery CreateSqlQuery()
     {
-        var result = ServiceLocator.Instance.GetService<ISqlQuery>();
+        var serviceProvider = UnitOfWork.ServiceProvider;
+        var result = GetRequiredService<ISqlQuery>(serviceProvider);
         var metadataProvider = new CompositeEntityModelMetadataProvider(new IEntityModelMetadataProvider[]
         {
             new FreeSqlEntityModelMetadataProvider(UnitOfWork.Orm)
         });
         SqlQueryRuntimeBridge.BindEntityMappingResolver(result, new DefaultEntityMappingResolver(
-            ServiceLocator.Instance.GetService<IDatabaseContextAccessor>(),
-            ServiceLocator.Instance.GetService<SqlMetadataOptions>(),
-            ServiceLocator.Instance.GetService<ITypeConverterResolver>(), metadataProvider));
+            GetRequiredService<IDatabaseContextAccessor>(serviceProvider),
+            GetRequiredService<SqlMetadataOptions>(serviceProvider),
+            GetRequiredService<ITypeConverterResolver>(serviceProvider), metadataProvider));
         return result;
+    }
+
+    /// <summary>
+    /// 从当前工作单元的作用域解析必需服务。
+    /// </summary>
+    /// <typeparam name="T">服务类型。</typeparam>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <returns>服务实例。</returns>
+    private static T GetRequiredService<T>(IServiceProvider serviceProvider) where T : class
+    {
+        var service = serviceProvider?.GetService(typeof(T)) as T;
+        if (service != null)
+            return service;
+        throw new InvalidOperationException($"FreeSQL 查询存储器未注册必需服务：{typeof(T).FullName}。");
     }
 
     /// <summary>

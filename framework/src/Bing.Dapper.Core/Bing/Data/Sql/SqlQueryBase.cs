@@ -1,9 +1,10 @@
 ﻿using System.Runtime.ExceptionServices;
+using System.Collections;
 using Bing.Data.Sql.Builders;
-using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
@@ -137,7 +138,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         _connection = options.Connection;
         if (_connection != null)
             _connectionOwnership = SqlResourceOwnership.External;
-        ContextId = Guid.NewGuid().ToString("N");
         SqlQueryRuntimeBridge.Register(this, new RuntimeController(this));
     }
 
@@ -153,14 +153,21 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         return loggerFactory.CreateLogger(GetType());
     }
 
+    /// <summary>
+    /// 创建本次执行的输出参数访问器。
+    /// </summary>
+    /// <param name="parameters">Dapper 实际使用的参数对象。</param>
+    /// <returns>支持执行后快照的输出参数访问器；没有输出模型时返回 null。</returns>
+    private protected static ISqlOutputParameterAccessor CreateOutputParameterAccessor(object parameters) => parameters switch
+    {
+        ISqlOutputParameterAccessor accessor => accessor,
+        global::Dapper.DynamicParameters dynamicParameters => new DynamicParametersOutputAccessor(dynamicParameters),
+        _ => null
+    };
+
     #endregion
 
     #region 属性
-
-    /// <summary>
-    /// 上下文标识
-    /// </summary>
-    public string ContextId { get; private set; }
 
     /// <summary>
     /// 服务提供程序
@@ -220,9 +227,24 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
-    /// 是否启用调试SQL
+    /// 获取当前执行上下文固定 Provider 的统一能力档案。
     /// </summary>
-    protected bool EnabledDebugSql { get; set; } = true;
+    /// <returns>当前 Provider 的不可变能力档案。</returns>
+    private protected SqlProviderProfile GetCurrentProviderProfile()
+    {
+        if (_provider != null)
+            return SqlProviderCapabilityResolver.GetProfile(_provider);
+        if (ServiceProvider.GetService<ISqlProviderResolver>() == null)
+            return new SqlProviderProfile();
+        try
+        {
+            return SqlProviderCapabilityResolver.GetProfile(GetCurrentProvider());
+        }
+        catch (NotSupportedException)
+        {
+            return new SqlProviderProfile();
+        }
+    }
 
     /// <summary>
     /// Sql生成器
@@ -367,6 +389,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         var parameterNames = new Dictionary<int, string>(arguments.Length);
         for (var index = 0; index < arguments.Length; index++)
         {
+            EnsureInterpolatedParameterIsSupported(arguments[index]);
             var parameterName = GetInterpolatedParameterName(sql.Format, index, parameterPrefix);
             parameterNames.Add(index, parameterName);
             parameters.Add(parameterName, arguments[index]);
@@ -381,6 +404,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         EnsureExecutionAvailable();
         if (string.IsNullOrWhiteSpace(procedure))
             throw new ArgumentException("存储过程名称不能为空。", nameof(procedure));
+        EnsureStoredProceduresSupported();
+        EnsureOutputParametersSupported(parameters);
         var executor = (ISqlQueryPlanExecutor)this;
         return new SqlProcedureQuery<TResult>(executor, GetProcedure(procedure), parameters);
     }
@@ -489,10 +514,21 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         var baseName = $"p{index}";
         var parameterName = baseName;
         var suffix = 0;
-        while (Regex.IsMatch(format, $@"{Regex.Escape(parameterPrefix)}{Regex.Escape(parameterName)}(?![A-Za-z0-9_])",
-                   RegexOptions.IgnoreCase))
+        while (SqlBuilderBase.ContainsParameterToken(format, parameterPrefix + parameterName))
             parameterName = $"{baseName}_{++suffix}";
         return parameterName;
+    }
+
+    /// <summary>
+    /// 验证插值参数具有已定义的单值绑定语义。
+    /// </summary>
+    /// <param name="value">插值参数值。</param>
+    /// <exception cref="NotSupportedException">参数为尚未定义展开语义的集合时抛出。</exception>
+    private static void EnsureInterpolatedParameterIsSupported(object value)
+    {
+        if (value is null or string or byte[] || value is not IEnumerable)
+            return;
+        throw new NotSupportedException("插值 SQL 暂不支持集合参数，请使用显式参数化查询。");
     }
 
     /// <inheritdoc />
@@ -535,12 +571,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     /// <returns>Sql 参数绑定器</returns>
     private protected virtual ISqlParameterBinder CreateSqlParameterBinder() =>
-        ServiceProvider.GetService<ISqlParameterBinder>() ?? new DefaultSqlParameterBinder(
-            EntityMappingResolver,
-            ServiceProvider.GetService<IDatabaseContextAccessor>(),
-            ServiceProvider.GetService<ISqlParameterFactory>(),
-            ServiceProvider.GetService<SqlMetadataOptions>(),
-            ServiceProvider.GetService<ISqlDatabaseContextResolver>());
+        ServiceProvider.GetService<ISqlParameterBinder>() ??
+        throw new InvalidOperationException("未注册 SQL 参数绑定器。请调用 AddSqlCore 注册默认绑定器。");
 
     /// <summary>
     /// 解析连接字符串
@@ -652,7 +684,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
 
         public IDbTransaction GetCurrentTransaction() => _owner.GetCurrentTransaction();
 
+        public SqlProviderProfile GetProviderProfile() => _owner.GetCurrentProviderProfile();
+
         public string GetCurrentTransactionId() => _owner.GetCurrentTransactionId();
+
+        public void EnsureNoActiveExecution() => _owner.EnsureNoActiveExecutionForDispose();
 
         public void BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
             _owner.BindConnection(connection, SqlResourceOwnership.Owned, source);
@@ -668,6 +704,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
 
         public void BindTransactionScope(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
             ISqlTransactionScopeLease lease) => _owner.SetTransactionContext(context, connection, transaction, lease);
+
+        public void BindDatabaseContext(DatabaseContext context) => _owner.BindDatabaseContext(context);
 
         public void BindEntityMappingResolver(IEntityMappingResolver resolver) =>
             _owner.BindEntityMappingResolver(resolver);
@@ -695,13 +733,23 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         return _connection;
     }
 
-    #region Config(配置)
-
     /// <summary>
-    /// 配置
+    /// 绑定对象创建后不可变的数据库上下文。
     /// </summary>
-    /// <param name="configAction">配置操作</param>
-    public void Config(Action<SqlOptions> configAction) => configAction?.Invoke(Options);
+    /// <param name="context">由工厂或框架适配层创建的数据库上下文。</param>
+    private void BindDatabaseContext(DatabaseContext context)
+    {
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+        EnsureExecutionAvailable();
+        if (Volatile.Read(ref _executionLease) != 0)
+            throw new InvalidOperationException("当前 SQL Query 或 Executor 正在执行，不能修改数据库上下文。");
+        if (_provider != null || _sqlBuilder != null || _connectionOwnership == SqlResourceOwnership.Owned && _connection != null)
+            throw new InvalidOperationException("SQL Query 已初始化 Provider、Builder 或连接，不能修改数据库上下文。");
+        Options.SetDatabaseContext(DatabaseContextSnapshot.Create(context));
+    }
+
+    #region 连接绑定
 
     /// <summary>
     /// 绑定执行连接。
@@ -783,6 +831,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// <param name="resolver">实体映射解析器。</param>
     private void BindEntityMappingResolver(IEntityMappingResolver resolver)
     {
+        if (resolver == null)
+            throw new ArgumentNullException(nameof(resolver));
+        EnsureExecutionAvailable();
+        if (_sqlBuilder != null)
+            throw new InvalidOperationException("SQL Query 已创建 Builder，不能修改实体映射解析器。");
         _entityMappingResolver = resolver;
     }
 
@@ -838,8 +891,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     protected void ClearAfterExecution()
     {
-        EnabledDebugSql = true;
-        if (Options.IsClearAfterExecution == false || _sqlBuilder == null)
+        if (_sqlBuilder == null)
             return;
         _sqlBuilder.Clear();
     }
@@ -924,6 +976,64 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
+    /// 准备 Builder 命令执行所需的 SQL 和参数。
+    /// </summary>
+    /// <param name="builder">当前 SQL Builder。</param>
+    /// <returns>本次执行的不可变准备快照。</returns>
+    private protected SqlPreparedCommand PrepareCommand(ISqlBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        var sql = builder.ToSql();
+        return new SqlPreparedCommand(sql, null, GetDbParameters(builder, sql), builder);
+    }
+
+    /// <summary>
+    /// 准备独立 Mutation 描述执行所需的 SQL 和参数。
+    /// </summary>
+    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <returns>本次执行的不可变准备快照。</returns>
+    private protected SqlPreparedCommand PrepareCommand(SqlMutationDescription description)
+    {
+        if (description == null)
+            throw new ArgumentNullException(nameof(description));
+        var parameters = description.CreateParameters();
+        return new SqlPreparedCommand(description.Sql, parameters, GetDbParameters(parameters, description.Sql));
+    }
+
+    /// <summary>
+    /// 准备原生 SQL 命令执行所需的参数。
+    /// </summary>
+    /// <param name="sql">待执行的 SQL 文本。</param>
+    /// <param name="parameters">调用方提供的原始参数源。</param>
+    /// <returns>本次执行的不可变准备快照。</returns>
+    private protected SqlPreparedCommand PrepareCommand(string sql, object parameters) =>
+        new(sql, parameters, GetDbParameters(parameters, sql));
+
+    /// <summary>
+    /// 准备存储过程执行所需的 SQL 和参数，并配置实际参数物化后的输出能力校验。
+    /// </summary>
+    /// <param name="procedure">存储过程名称。</param>
+    /// <param name="parameters">调用方提供的参数源。</param>
+    /// <returns>本次执行的不可变准备快照。</returns>
+    private protected SqlPreparedCommand PrepareProcedureCommand(string procedure, object parameters)
+    {
+        var command = PrepareCommand(procedure, parameters);
+        ConfigureOutputParameterSupport(command);
+        return command;
+    }
+
+    /// <summary>
+    /// 为 Dapper 原生参数访问器注入当前 Provider 的输出参数能力。
+    /// </summary>
+    /// <param name="command">已绑定的准备命令。</param>
+    private void ConfigureOutputParameterSupport(SqlPreparedCommand command)
+    {
+        if (command?.DapperParameters is DynamicParametersOutputAccessor accessor)
+            accessor.SetOutputParametersSupported(GetCurrentProviderProfile().Procedure.SupportsOutputParameters);
+    }
+
+    /// <summary>
     /// 创建参数绑定上下文
     /// </summary>
     /// <param name="sql">当前执行的 Sql 语句</param>
@@ -945,62 +1055,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
-    /// 临时禁用调试日志
-    /// </summary>
-    public ISqlQuery DisableDebugLog()
-    {
-        EnabledDebugSql = false;
-        return this;
-    }
-
-    /// <summary>
-    /// 为独立查询计划创建临时调试日志范围。
-    /// </summary>
-    /// <remarks>
-    /// <see cref="DisableDebugLog"/> 只影响紧随其后的一个查询计划；范围结束后必须恢复默认调试状态，
-    /// 包括执行失败、取消和流式枚举提前终止。
-    /// </remarks>
-    /// <param name="consumeTemporaryState">是否在当前范围结束时消费并恢复临时禁用状态。</param>
-    /// <returns>在范围结束时按配置恢复临时调试状态的对象。</returns>
-    private IDisposable BeginQueryPlanDebugLogScope(bool consumeTemporaryState = true) =>
-        new QueryPlanDebugLogScope(this, consumeTemporaryState && EnabledDebugSql == false);
-
-    /// <summary>
-    /// 独立查询计划的临时调试日志范围。
-    /// </summary>
-    private sealed class QueryPlanDebugLogScope : IDisposable
-    {
-        /// <summary>
-        /// 所属 Root 查询。
-        /// </summary>
-        private SqlQueryBase _owner;
-
-        /// <summary>
-        /// 是否需要在范围结束时恢复调试状态。
-        /// </summary>
-        private readonly bool _restoreDebugLog;
-
-        /// <summary>
-        /// 初始化一个<see cref="QueryPlanDebugLogScope"/>类型的实例。
-        /// </summary>
-        /// <param name="owner">所属 Root 查询。</param>
-        /// <param name="restoreDebugLog">是否需要恢复调试状态。</param>
-        public QueryPlanDebugLogScope(SqlQueryBase owner, bool restoreDebugLog)
-        {
-            _owner = owner;
-            _restoreDebugLog = restoreDebugLog;
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            var owner = Interlocked.Exchange(ref _owner, null);
-            if (owner != null && _restoreDebugLog)
-                owner.EnabledDebugSql = true;
-        }
-    }
-
-    /// <summary>
     /// 写日志
     /// </summary>
     /// <param name="sql">Sql语句</param>
@@ -1009,8 +1063,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     protected virtual void WriteTraceLog(string sql, IReadOnlyDictionary<string, object> parameters, string debugSql)
     {
         if (Logger.IsEnabled(LogLevel.Trace) == false)
-            return;
-        if (EnabledDebugSql == false)
             return;
         var message = new StringBuilder();
         foreach (var param in parameters)
@@ -1025,15 +1077,65 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <summary>
+    /// 按需写入原生参数 SQL 的调试跟踪日志。
+    /// </summary>
+    /// <param name="sql">当前执行 SQL。</param>
+    /// <param name="parameters">原始参数对象。</param>
+    private protected void WriteTraceLog(string sql, object parameters)
+    {
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
+            return;
+        WriteTraceLog(sql, ToTraceParameters(parameters), sql);
+    }
+
+    /// <summary>
     /// 写查询跟踪日志。
     /// </summary>
     /// <param name="builder">Sql生成器。</param>
     /// <param name="sql">已生成的Sql语句。</param>
-    private void WriteTraceLog(ISqlBuilder builder, string sql)
+    private protected void WriteTraceLog(ISqlBuilder builder, string sql)
     {
-        if (Logger.IsEnabled(LogLevel.Trace) == false || EnabledDebugSql == false)
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
             return;
         WriteTraceLog(sql, builder.GetParams(), builder.ToDebugSql(sql));
+    }
+
+    /// <summary>
+    /// 按需写入已准备命令的调试跟踪日志。
+    /// </summary>
+    /// <param name="command">当前执行的准备命令。</param>
+    private protected void WriteTraceLog(SqlPreparedCommand command)
+    {
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        if (command.IsBuilderCommand)
+        {
+            WriteTraceLog(command.Builder, command.Sql);
+            return;
+        }
+        WriteTraceLog(command.Sql, command.ParameterSource);
+    }
+
+    /// <summary>
+    /// 将原生参数源转换为 Trace 使用的名称和值快照。
+    /// </summary>
+    /// <param name="parameters">原生 SQL 参数源。</param>
+    /// <returns>不共享调用方可变状态的参数快照。</returns>
+    private protected static IReadOnlyDictionary<string, object> ToTraceParameters(object parameters)
+    {
+        if (parameters == null)
+            return new Dictionary<string, object>();
+        if (parameters is IReadOnlyDictionary<string, object> readOnlyDictionary)
+            return readOnlyDictionary.ToDictionary(item => item.Key, item => item.Value);
+        if (parameters is IDictionary<string, object> dictionary)
+            return new Dictionary<string, object>(dictionary);
+        if (parameters is IEnumerable<SqlParam> sqlParameters)
+            return sqlParameters.Where(parameter => parameter != null)
+                .ToDictionary(parameter => parameter.Name, parameter => parameter.Value, StringComparer.OrdinalIgnoreCase);
+        return parameters.GetType().GetProperties(System.Reflection.BindingFlags.Instance |
+                                                   System.Reflection.BindingFlags.Public)
+            .Where(property => property.CanRead && property.GetIndexParameters().Length == 0)
+            .ToDictionary(property => property.Name, property => property.GetValue(parameters));
     }
 
     #region Dispose(释放资源)
@@ -1043,6 +1145,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     public void Dispose()
     {
+        EnsureNoActiveExecutionForDispose();
         if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
             return;
         Exception transactionException = null;
@@ -1072,6 +1175,53 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         }
         if (transactionException != null)
             ExceptionDispatchInfo.Capture(transactionException).Throw();
+    }
+
+    /// <summary>
+    /// 异步释放自有事务、连接和运行时注册。
+    /// </summary>
+    /// <remarks>活动执行期间不得释放 Root 对象，避免中断流式读取或结果集生命周期。</remarks>
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        EnsureNoActiveExecutionForDispose();
+        if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+            return;
+        Exception transactionException = null;
+        try
+        {
+            await ReleaseTransactionAsync().ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            transactionException = exception;
+        }
+        try
+        {
+            await ReleaseConnectionAsync().ConfigureAwait(false);
+        }
+        catch (Exception connectionException)
+        {
+            if (transactionException != null)
+                throw new AggregateException(transactionException, connectionException);
+            throw;
+        }
+        finally
+        {
+            if (_transactionScopeLease != null)
+                _isTransactionScopeChildDisposed = true;
+            SqlQueryRuntimeBridge.Remove(this);
+        }
+        if (transactionException != null)
+            ExceptionDispatchInfo.Capture(transactionException).Throw();
+    }
+
+    /// <summary>
+    /// 确保当前 Root 对象未在执行中。
+    /// </summary>
+    private void EnsureNoActiveExecutionForDispose()
+    {
+        if (Volatile.Read(ref _executionLease) != 0)
+            throw new InvalidOperationException("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
     }
 
     /// <summary>
@@ -1131,6 +1281,20 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         _connectionSource = SqlConnectionSource.Unknown;
         if (ownership == SqlResourceOwnership.Owned)
             connection?.Dispose();
+    }
+
+    /// <summary>
+    /// 异步释放连接。
+    /// </summary>
+    private async Task ReleaseConnectionAsync()
+    {
+        var connection = _connection;
+        var ownership = _connectionOwnership;
+        _connection = null;
+        _connectionOwnership = SqlResourceOwnership.Owned;
+        _connectionSource = SqlConnectionSource.Unknown;
+        if (ownership == SqlResourceOwnership.Owned)
+            await SqlTransactionAsyncAdapter.DisposeAsync(connection).ConfigureAwait(false);
     }
 
     /// <summary>

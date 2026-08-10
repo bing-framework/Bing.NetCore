@@ -62,47 +62,4 @@ public partial class MySqlQueryTest : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// 测试 - 临时禁用调试日志
-    /// </summary>
-    [IntegrationFact("MySql")]
-    public async Task Test_DisableDebugLog()
-    {
-        // 插入2条数据
-        var id = Guid.NewGuid();
-        var id2 = Guid.NewGuid();
-        var code = "Test_ExecuteQuery_1";
-        await InitProductDataAsync(id, code);
-        await InitProductDataAsync(id2, code);
-
-        // 获取对象
-        var result = _sqlQuery.Lambda<Product>()
-            .ClearSelect()
-            .Select(true)
-            .From()
-            .Where<Product>(x => x.Id, new object[] { id, id2 }, Operator.In)
-            .ToList();
-
-        _sqlQuery.DisableDebugLog();
-        result = _sqlQuery.Lambda<Product>()
-            .ClearSelect()
-            .Select(true)
-            .From()
-            .Where<Product>(x => x.Id, new object[] { id, id2 }, Operator.In)
-            .ToList();
-
-        result = _sqlQuery.Lambda<Product>()
-            .ClearSelect()
-            .Select(true)
-            .From()
-            .Where<Product>(x => x.Id, new object[] { id, id2 }, Operator.In)
-            .ToList();
-
-        //断言
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-        Assert.Contains(result, t => t.Id == id);
-        Assert.Contains(result, t => t.Id == id2);
-        Assert.Contains(result, t => t.Code == code);
-    }
 }

@@ -12,6 +12,8 @@ public abstract partial class SqlQueryBase
     /// </summary>
     private void EnsureStreamingSupported()
     {
+        if (GetCurrentProviderProfile().Execution.SupportsStreaming == false)
+            throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持流式查询。");
         var context = GetDatabaseContext();
         if (context?.ReadPreference == SqlReadPreference.Primary &&
             context.DataSource?.PrimaryReadStrategy == PrimaryReadStrategy.Transaction)
@@ -31,8 +33,8 @@ public abstract partial class SqlQueryBase
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
         EnsureStreamingSupported();
+        EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         ValidateQueryBuilder(plan.Builder);
         var executionLease = AcquireExecutionLease();
@@ -52,8 +54,7 @@ public abstract partial class SqlQueryBase
                     var preparedPlan = PrepareQueryPlan(plan);
                     var connection = GetExecutionConnection();
                     var transaction = GetQueryTransaction();
-                    message = ExecuteBefore(preparedPlan.Sql, preparedPlan.ParameterSource, connection,
-                        preparedPlan.ParameterDiagnostics);
+                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
                     WritePlanTraceLog(preparedPlan);
                     reader = await connection.ExecuteReaderAsync(CreateQueryCommandDefinition(preparedPlan.Sql,
                         preparedPlan.DapperParameters, transaction, timeout, buffered: false, cancellationToken,
@@ -99,7 +100,7 @@ public abstract partial class SqlQueryBase
                     {
                         try
                         {
-                            reader?.Dispose();
+                            await SqlTransactionAsyncAdapter.DisposeAsync(reader).ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {
@@ -149,7 +150,6 @@ public abstract partial class SqlQueryBase
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
         EnsureStreamingSupported();
         ValidateQueryBuilder(plan.Builder);
         var executionLease = AcquireExecutionLease();
@@ -168,8 +168,7 @@ public abstract partial class SqlQueryBase
                     var preparedPlan = PrepareQueryPlan(plan);
                     var connection = GetExecutionConnection();
                     var transaction = GetQueryTransaction();
-                    message = ExecuteBefore(preparedPlan.Sql, preparedPlan.ParameterSource, connection,
-                        preparedPlan.ParameterDiagnostics);
+                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
                     WritePlanTraceLog(preparedPlan);
                     enumerator = connection.Query<TResult>(preparedPlan.Sql, preparedPlan.DapperParameters, transaction,
                         buffered: false, commandTimeout: timeout, commandType: plan.CommandType).GetEnumerator();

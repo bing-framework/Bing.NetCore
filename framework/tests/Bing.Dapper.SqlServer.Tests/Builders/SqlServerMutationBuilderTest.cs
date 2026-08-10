@@ -47,7 +47,7 @@ public sealed class SqlServerMutationBuilderTest
 
         // Assert
         Assert.Equal("Provider bing.sqlserver 不支持 Update From。", exception.Message);
-        Assert.False(SqlServerSqlProvider.Instance.Capabilities.SupportsUpdateFrom);
+        Assert.False(SqlServerSqlProvider.Instance.Profile.Mutation.SupportsUpdateFrom);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public sealed class SqlServerMutationBuilderTest
 
         // Assert
         Assert.Equal("Provider bing.sqlserver 不支持 Delete Using。", exception.Message);
-        Assert.False(SqlServerSqlProvider.Instance.Capabilities.SupportsDeleteUsing);
+        Assert.False(SqlServerSqlProvider.Instance.Profile.Mutation.SupportsDeleteUsing);
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public sealed class SqlServerMutationBuilderTest
         Assert.Equal("Update [dbo].[returning_samples] Set [sample_name] = @_p_0 " +
                      "Output [Inserted].[sample_id] As [Id], [Inserted].[sample_name] As [Name] " +
                      "Where [sample_id]=@_p_1", sql);
-        Assert.True(SqlServerSqlProvider.Instance.Capabilities.SupportsReturning);
+        Assert.True(SqlServerSqlProvider.Instance.Profile.Mutation.SupportsReturning);
     }
 
     /// <summary>

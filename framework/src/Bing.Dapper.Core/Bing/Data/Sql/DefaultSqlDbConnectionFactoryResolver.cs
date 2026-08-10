@@ -3,7 +3,7 @@
 /// <summary>
 /// 默认 SQL Provider 独立连接工厂解析器。
 /// </summary>
-public sealed class DefaultSqlDbConnectionFactoryResolver : ISqlDbConnectionFactoryResolver
+internal sealed class DefaultSqlDbConnectionFactoryResolver : ISqlDbConnectionFactoryResolver
 {
     /// <summary>
     /// 按 Provider Key 保存的连接工厂。

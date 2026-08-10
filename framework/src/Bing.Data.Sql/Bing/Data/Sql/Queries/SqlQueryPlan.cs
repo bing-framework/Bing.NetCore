@@ -17,6 +17,11 @@ internal sealed class SqlQueryPlan
     private Action<ISqlOutputParameterAccessor> _outputParametersReceiver;
 
     /// <summary>
+    /// 当前计划执行成功后创建输出参数快照的回调。
+    /// </summary>
+    private Action _outputParametersCompletion;
+
+    /// <summary>
     /// 使用 Fluent SQL Builder 创建查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
@@ -81,18 +86,30 @@ internal sealed class SqlQueryPlan
     /// 在本次计划参数绑定完成后接收输出参数访问器。
     /// </summary>
     /// <param name="receiver">接收绑定参数访问器的回调。</param>
+    /// <param name="completion">数据库执行成功后创建输出参数快照的回调。</param>
     /// <remarks>
     /// 仅过程结果终结入口使用该回调；计划对象不保留任何执行后的可变状态。
     /// </remarks>
-    internal void SetOutputParametersReceiver(Action<ISqlOutputParameterAccessor> receiver) =>
+    internal void SetOutputParametersReceiver(Action<ISqlOutputParameterAccessor> receiver, Action completion = null)
+    {
         _outputParametersReceiver = receiver;
+        _outputParametersCompletion = completion;
+    }
 
     /// <summary>
     /// 通知本次计划已完成参数绑定。
     /// </summary>
-    /// <param name="parameters">Dapper 实际使用的参数对象。</param>
-    internal void NotifyParametersBound(object parameters) =>
-        _outputParametersReceiver?.Invoke(parameters as ISqlOutputParameterAccessor);
+    /// <param name="outputParameters">当前绑定器提供的输出参数访问器。</param>
+    internal void NotifyParametersBound(ISqlOutputParameterAccessor outputParameters) =>
+        _outputParametersReceiver?.Invoke(outputParameters);
+
+    /// <summary>
+    /// 通知当前计划已成功完成数据库执行。
+    /// </summary>
+    /// <remarks>
+    /// 过程输出参数必须在事务提交和成功诊断之前复制，避免快照失败被误判为成功执行。
+    /// </remarks>
+    internal void NotifyExecutionCompleted() => _outputParametersCompletion?.Invoke();
 
     /// <summary>
     /// 创建 Fluent SQL Builder 查询计划。

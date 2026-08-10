@@ -66,6 +66,26 @@ public class EqualConditionTest
     }
 
     /// <summary>
+    /// 测试目的：同一参数化条件重复渲染应复用参数名称，避免未引用参数持续累积。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenRepeated_ShouldReuseSameParameter()
+    {
+        // Arrange
+        var condition = new EqualSqlCondition(_parameterManager, "a", 1, true);
+
+        // Act
+        var first = GetResult(condition);
+        var second = GetResult(condition);
+
+        // Assert
+        Assert.Equal("a=@_p_0", first);
+        Assert.Equal(first, second);
+        Assert.Single(_parameterManager.GetParams());
+        Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
+    }
+
+    /// <summary>
     /// 测试 - 获取条件 - 非参数化
     /// </summary>
     [Fact]

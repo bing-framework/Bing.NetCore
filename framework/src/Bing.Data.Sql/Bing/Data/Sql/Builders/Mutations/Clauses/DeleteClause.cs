@@ -37,8 +37,7 @@ public sealed class DeleteClause : MutationTableClauseBase, IDeleteClause
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
         builder.Append("Delete From ");
-        if (Context.Provider is ISqlProviderCapabilityProvider capabilityProvider &&
-            capabilityProvider.Capabilities?.SupportsDeleteUsing == true)
+        if (SqlProviderCapabilityResolver.GetProfile(Context.Provider).Mutation.SupportsDeleteUsing)
             AppendAliasedTable(builder, Table);
         else
             AppendTable(builder, Table);

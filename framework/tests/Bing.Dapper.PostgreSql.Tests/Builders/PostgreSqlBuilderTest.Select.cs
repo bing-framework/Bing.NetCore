@@ -37,7 +37,7 @@ public partial class PostgreSqlBuilderTest
         const string expected = "Select Count(\"u\".\"Id\") As \"Count\" \r\nFrom \"public\".\"orders\" As \"u\"";
 
         // Act
-        var sql = _builder.Count(column, "Count").From("public.orders", "u").ToSql();
+        var sql = _builder.CountColumn(column, "Count").From("public.orders", "u").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);
@@ -87,7 +87,7 @@ public partial class PostgreSqlBuilderTest
     {
         // Arrange
         const string expected = "Select Count(\"u\".\"Id\") As \"Count\" \r\nFrom \"public\".\"orders\" As \"u\"";
-        _builder.Count("u.Id", "Count").From("public.orders", "u");
+        _builder.CountColumn("u.Id", "Count").From("public.orders", "u");
 
         // Act
         var sql = _builder.Clone().ToSql();
@@ -125,7 +125,7 @@ public partial class PostgreSqlBuilderTest
         const string expected = "Select Distinct Count(\"u\".\"Id\") As \"Count\",Sum(\"u\".\"Amount\") As \"Total\" \r\nFrom \"public\".\"orders\" As \"u\"";
 
         // Act
-        var sql = _builder.Distinct().Count("u.Id", "Count").Sum("u.Amount", "Total")
+        var sql = _builder.Distinct().CountColumn("u.Id", "Count").Sum("u.Amount", "Total")
             .From("public.orders", "u").ToSql();
 
         // Assert
@@ -140,7 +140,7 @@ public partial class PostgreSqlBuilderTest
     {
         // Arrange
         const string expected = "Select (Select Count(*) \r\nFrom \"audit\".\"logs\" \r\nWhere \"UserId\"=@_p_0) As \"LogCount\" \r\nFrom \"public\".\"users\" \r\nWhere \"Enabled\"=@_p_1";
-        var subquery = _builder.New().Count().From("audit.logs").Where("UserId", 7);
+        var subquery = _builder.New().CountAll().From("audit.logs").Where("UserId", 7);
 
         // Act
         var sql = _builder.Select(subquery, "LogCount").From("public.users").Where("Enabled", true).ToSql();

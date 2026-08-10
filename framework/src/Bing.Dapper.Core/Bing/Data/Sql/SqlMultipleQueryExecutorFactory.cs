@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 多结果集查询执行器工厂。
 /// </summary>
-public sealed class SqlMultipleQueryExecutorFactory : SqlFactoryBase, ISqlMultipleQueryExecutorFactory
+internal sealed class SqlMultipleQueryExecutorFactory : SqlFactoryBase, ISqlMultipleQueryExecutorFactory
 {
     /// <summary>
     /// 初始化一个<see cref="SqlMultipleQueryExecutorFactory"/>类型的实例。

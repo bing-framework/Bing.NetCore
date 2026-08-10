@@ -202,12 +202,44 @@ public class Helper
         Type entityType, SqlParameterSource source)
     {
         if (IsInCondition(@operator, value))
+        {
+            ValidateInConditionValue(value);
             return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, source: source);
+        }
         if (IsNotInCondition(@operator, value))
+        {
+            ValidateInConditionValue(value);
             return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, true, source);
+        }
+        ValidateComparisonConditionValue(value, @operator);
         var paramName = GenerateParamName(value, @operator);
         AddParameter(paramName, value, @operator, entityType, rawColumn, source);
         return SqlConditionFactory.Create(column, paramName, @operator);
+    }
+
+    /// <summary>
+    /// 验证 In 和 NotIn 条件值。
+    /// </summary>
+    /// <param name="value">条件值。</param>
+    private static void ValidateInConditionValue(object value)
+    {
+        if (value == null)
+            return;
+        if (value is string || value is byte[] || value is not IEnumerable)
+            throw new ArgumentException("In 和 NotIn 条件值必须是非字符串、非二进制的 IEnumerable。", nameof(value));
+    }
+
+    /// <summary>
+    /// 验证关系比较条件值。
+    /// </summary>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">运算符。</param>
+    private static void ValidateComparisonConditionValue(object value, Operator @operator)
+    {
+        if (value != null)
+            return;
+        if (@operator is Operator.Greater or Operator.GreaterEqual or Operator.Less or Operator.LessEqual)
+            throw new ArgumentNullException(nameof(value), "关系比较条件值不能为空。");
     }
 
     /// <summary>
@@ -249,7 +281,7 @@ public class Helper
         bool notIn = false, SqlParameterSource source = SqlParameterSource.Unknown)
     {
         if (values == null)
-            return NullCondition.Instance;
+            return notIn ? new NotInCondition(column, new List<string>()) : new InCondition(column, new List<string>());
         var paramNames = new List<string>();
         foreach (var value in values)
         {

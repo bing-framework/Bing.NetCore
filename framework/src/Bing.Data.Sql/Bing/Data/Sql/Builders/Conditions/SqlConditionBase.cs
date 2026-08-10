@@ -9,6 +9,11 @@ namespace Bing.Data.Sql.Builders.Conditions;
 public abstract class SqlConditionBase : ISqlCondition
 {
     /// <summary>
+    /// 参数化渲染后固定的参数名称。
+    /// </summary>
+    private string _parameterName;
+
+    /// <summary>
     /// 初始化一个<see cref="SqlConditionBase"/>类型的实例
     /// </summary>
     /// <param name="parameterManager">参数管理器</param>
@@ -78,7 +83,7 @@ public abstract class SqlConditionBase : ISqlCondition
     /// <param name="builder">字符串生成器</param>
     protected virtual void AppendParameterizedCondition(StringBuilder builder)
     {
-        var paramName = GenerateParamName();
+        var paramName = _parameterName ??= GenerateParamName();
         var value = GetValue();
         ParameterManager.Add(paramName, value);
         AppendCondition(builder, Column, paramName);

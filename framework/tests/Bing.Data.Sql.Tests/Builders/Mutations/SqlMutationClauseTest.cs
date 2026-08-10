@@ -201,7 +201,7 @@ public sealed class SqlMutationClauseTest
     /// <summary>
     /// 只支持单行 Values 的测试 Provider。
     /// </summary>
-    private sealed class SingleRowValuesProvider : ISqlProvider, ISqlProviderCapabilityProvider
+    private sealed class SingleRowValuesProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
         /// 测试 Provider 单例。
@@ -233,6 +233,9 @@ public sealed class SqlMutationClauseTest
         public IParamLiteralsResolver ParamLiteralsResolver => TestMutationSqlProvider.Instance.ParamLiteralsResolver;
 
         /// <inheritdoc />
-        public SqlProviderCapabilities Capabilities { get; } = new(supportsMultiRowValues: false);
+        public SqlProviderProfile Profile { get; } = new()
+        {
+            Mutation = new SqlProviderMutationCapabilities { SupportsMultiRowValues = false }
+        };
     }
 }

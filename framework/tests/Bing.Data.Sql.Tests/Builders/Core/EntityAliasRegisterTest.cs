@@ -60,4 +60,28 @@ public class EntityAliasRegisterTest
         Assert.Equal("current", register.GetAlias(typeof(Sample)));
         Assert.Equal("current", register.Data[typeof(Sample)]);
     }
+
+    /// <summary>
+    /// 测试目的：同一实体多次注册时，自连接条件应按注册顺序解析来源与最新连接别名，并在克隆后保持独立。
+    /// </summary>
+    [Fact]
+    public void GetSelfJoinAlias_WhenSameEntityRegisteredMultipleTimes_ShouldUseLastTwoAliases()
+    {
+        // Arrange
+        var register = new EntityAliasRegister();
+        register.Replace(typeof(Sample), "s");
+        register.Register(typeof(Sample), "p");
+        var clone = register.Clone();
+        register.Register(typeof(Sample), "q");
+
+        // Act
+        var sourceAlias = register.GetSelfJoinAlias(typeof(Sample), false);
+        var targetAlias = register.GetSelfJoinAlias(typeof(Sample), true);
+
+        // Assert
+        Assert.Equal("p", sourceAlias);
+        Assert.Equal("q", targetAlias);
+        Assert.Equal("s", clone.GetSelfJoinAlias(typeof(Sample), false));
+        Assert.Equal("p", clone.GetSelfJoinAlias(typeof(Sample), true));
+    }
 }

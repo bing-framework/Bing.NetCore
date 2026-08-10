@@ -63,6 +63,51 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
+    /// 测试目的：字符串、标识符和注释中的参数样式不应导致插值参数错误改名。
+    /// </summary>
+    [Fact]
+    public void SqlInterpolated_WhenTokenAppearsOnlyInProtectedSqlContexts_ShouldKeepDefaultParameterName()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("sqlite", Bing.Data.Enums.DatabaseType.Sqlite, "Data Source=:memory:");
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlite");
+
+        // Act
+        var description = rootQuery.SqlInterpolated<string>(
+            $"Select '@p0', \"@p0\", `@p0`, [@p0] Where Name = {"Bing"} -- @p0\n/* @p0 */");
+        var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
+
+        // Assert
+        Assert.Contains("Where Name = @p0", description.CommandText, StringComparison.Ordinal);
+        Assert.True(parameters.ContainsKey("p0"));
+        Assert.Equal("Bing", parameters["p0"]);
+    }
+
+    /// <summary>
+    /// 测试目的：插值 SQL 尚未定义集合展开语义时，应在创建描述前明确拒绝集合参数。
+    /// </summary>
+    [Fact]
+    public void SqlInterpolated_WhenArgumentIsCollection_ShouldRejectBeforeDescriptionCreation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("sqlite", Bing.Data.Enums.DatabaseType.Sqlite, "Data Source=:memory:");
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlite");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => rootQuery.SqlInterpolated<int>(
+            $"Select {new[] { 1, 2, 3 }}"));
+
+        // Assert
+        Assert.Equal("插值 SQL 暂不支持集合参数，请使用显式参数化查询。", exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：独立 Fluent 查询的类型化参数应解析自身 Builder 的实体列映射，而不是退化为弱元数据。
     /// </summary>
     [Fact]

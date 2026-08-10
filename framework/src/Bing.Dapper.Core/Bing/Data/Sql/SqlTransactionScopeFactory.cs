@@ -30,7 +30,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         var query = CreateTransactionQuery(dbKey, out var context);
         try
         {
-            EnsureTransactionsSupported(context);
+            EnsureTransactionsSupported(context, query);
             var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
@@ -56,7 +56,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         var query = CreateTransactionQuery(dbKey, out var context);
         try
         {
-            EnsureTransactionsSupported(context);
+            EnsureTransactionsSupported(context, query);
             var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
@@ -67,7 +67,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         }
         catch (Exception exception)
         {
-            ThrowAfterBeginFailure(exception, query);
+            await ThrowAfterBeginFailureAsync(exception, query).ConfigureAwait(false);
             throw;
         }
     }
@@ -91,11 +91,37 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         ExceptionDispatchInfo.Capture(operationException).Throw();
     }
 
+    /// <summary>
+    /// 异步处理事务开始失败后的查询资源释放。
+    /// </summary>
+    /// <param name="operationException">开始事务时发生的异常。</param>
+    /// <param name="query">拥有连接生命周期的查询对象。</param>
+    /// <returns>表示资源释放完成的异步操作。</returns>
+    private static async Task ThrowAfterBeginFailureAsync(Exception operationException, ISqlQuery query)
+    {
+        try
+        {
+            await SqlTransactionAsyncAdapter.DisposeAsync(query).ConfigureAwait(false);
+        }
+        catch (Exception cleanupException)
+        {
+            throw new AggregateException(operationException, cleanupException);
+        }
+
+        ExceptionDispatchInfo.Capture(operationException).Throw();
+    }
+
     private SqlTransactionScope CreateScope(DatabaseContext context, ISqlQuery query, IDbConnection connection,
         IDbTransaction transaction) => new(context, query, connection, _queryFactory, _executorFactory, transaction);
 
-    private static void EnsureTransactionsSupported(DatabaseContext context)
+    private static void EnsureTransactionsSupported(DatabaseContext context, ISqlQuery query)
     {
+        if (context?.DataSource?.IsReadOnly == true)
+            throw new NotSupportedException(
+                $"数据源 {context.DataSource.Key ?? context.DbKey ?? "<default>"} 是只读数据源，不支持写入或事务操作。");
+        var profile = SqlQueryRuntimeBridge.GetProviderProfile(query);
+        if (profile.Transaction.SupportsTransactions == false)
+            throw new NotSupportedException("当前 SQL Provider 不支持本地事务。请使用不依赖事务的查询操作。");
         if (context?.DataSource?.SupportsTransactions == false)
             throw new NotSupportedException($"数据源 {context.DbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
     }
@@ -178,6 +204,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             if (_state == SqlTransactionScopeState.Committed)
                 return;
             EnsureActiveForCompletion();
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception operationException = null;
             try
@@ -200,6 +227,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 return;
             cancellationToken.ThrowIfCancellationRequested();
             EnsureActiveForCompletion();
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception operationException = null;
             try
@@ -221,6 +249,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             if (_state == SqlTransactionScopeState.RolledBack)
                 return;
             EnsureActiveForCompletion();
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception operationException = null;
             try
@@ -243,6 +272,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 return;
             cancellationToken.ThrowIfCancellationRequested();
             EnsureActiveForCompletion();
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception operationException = null;
             try
@@ -262,6 +292,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         {
             if (_isExplicitlyDisposed)
                 return;
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception rollbackException = null;
             if (_state == SqlTransactionScopeState.Active)
@@ -291,6 +322,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         {
             if (_isExplicitlyDisposed)
                 return;
+            EnsureChildrenHaveNoActiveExecution();
             _lease.Invalidate();
             Exception rollbackException = null;
             if (_state == SqlTransactionScopeState.Active)
@@ -330,6 +362,18 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 throw new ObjectDisposedException(nameof(SqlTransactionScope));
             if (_state != SqlTransactionScopeState.Active)
                 throw new InvalidOperationException("SQL 事务作用域已完成，不能重复提交或回滚。");
+        }
+
+        /// <summary>
+        /// 确保所有事务作用域子对象均未持有活动执行租约。
+        /// </summary>
+        private void EnsureChildrenHaveNoActiveExecution()
+        {
+            foreach (var child in _children)
+            {
+                if (child is ISqlQuery query)
+                    SqlQueryRuntimeBridge.TryEnsureNoActiveExecution(query);
+            }
         }
 
         private void ThrowIfInactive()
@@ -527,6 +571,13 @@ internal static class SqlTransactionAsyncAdapter
                 return transaction;
         }
         return connection.BeginTransaction(isolationLevel);
+    }
+
+    public static async Task CloseAsync(IDbConnection connection)
+    {
+        var invocation = await TryInvokeAsync(connection, "CloseAsync").ConfigureAwait(false);
+        if (invocation.IsInvoked == false)
+            connection.Close();
     }
 
     public static Task CommitAsync(IDbTransaction transaction, CancellationToken cancellationToken) =>

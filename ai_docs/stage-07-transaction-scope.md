@@ -31,7 +31,7 @@
 
 - 事务开始时通过主库读取偏好解析并复制完整数据库上下文；事务子 Query 和 Executor 复用该快照、同一连接和同一事务，不再读取后续 Ambient Context。
 - 数据源快照会复制连接名称、映射配置、读写策略与本地事务能力，避免运行期间修改描述符导致事务上下文漂移。
-- `SqlDataSourceDescriptor.SupportsTransactions` 默认值为 `true`。Doris 使用 `DatabaseType.MySql` 和独立 Mapping Profile 接入时应设为 `false`，本地事务开始会明确抛出不支持异常。Doris 复用 MySQL 协议、方言与参数格式，但不默认具备完整 MySQL 的事务、更新、锁和批量写能力。
+- `SqlDataSourceDescriptor.SupportsTransactions` 默认值为 `true`。Doris 使用 `DatabaseType.MySql` 和独立 Mapping Profile 接入时应设为 `IsReadOnly=true` 和 `SupportsTransactions=false`；结构化 Mutation、执行型存储过程和本地事务会在创建连接前明确拒绝。原生 SQL 是调用方显式选择的执行边界，不进行关键字猜测。Doris 复用 MySQL 协议、方言与参数格式，但不默认具备完整 MySQL 的事务、更新、锁和批量写能力。
 
 ## 2026-07-17 子对象生命周期
 

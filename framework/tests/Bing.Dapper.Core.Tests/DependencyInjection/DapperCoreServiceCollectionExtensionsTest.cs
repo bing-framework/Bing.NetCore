@@ -149,10 +149,10 @@ public class DapperCoreServiceCollectionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：空键数据源应使用默认 Key，Doris 数据源应关闭本地事务。
+    /// 测试目的：空键数据源应使用默认 Key，Doris 数据源默认只读且关闭本地事务。
     /// </summary>
     [Fact]
-    public void AddSqlDataSource_WhenKeyMissingOrDorisConfigured_ShouldUseDefaultKeyAndDisableTransactions()
+    public void AddSqlDataSource_WhenKeyMissingOrDorisConfigured_ShouldUseDefaultKeyAndApplyReadOnlyDefaults()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -167,6 +167,7 @@ public class DapperCoreServiceCollectionExtensionsTest
         // Assert
         Assert.Equal("default", dataSource.Key);
         Assert.Equal(DatabaseType.Doris, dataSource.DatabaseType);
+        Assert.True(dataSource.IsReadOnly);
         Assert.False(dataSource.SupportsTransactions);
         Assert.Equal("Server=doris;Database=analytics;", dataSource.ConnectionString);
     }

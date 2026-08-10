@@ -135,16 +135,13 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         if (query == null || dataSource == null)
             return;
         var current = _databaseContextAccessor?.Current;
-        query.Config(options =>
+        SqlQueryRuntimeBridge.BindDatabaseContext(query, new DatabaseContext
         {
-            options.SetDatabaseContext(new DatabaseContext
-            {
-                DbKey = dataSource.Key,
-                DataSource = dataSource,
-                TenantId = current?.TenantId,
-                MappingProfile = dataSource.MappingProfile ?? current?.MappingProfile,
-                ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
-            });
+            DbKey = dataSource.Key,
+            DataSource = dataSource,
+            TenantId = current?.TenantId,
+            MappingProfile = dataSource.MappingProfile ?? current?.MappingProfile,
+            ReadPreference = current?.ReadPreference ?? SqlReadPreference.Default
         });
     }
 

@@ -312,6 +312,49 @@ public class SelectClauseTest
     }
 
     /// <summary>
+    /// 测试目的：DTO 成员初始化投影应使用映射后的来源列，并按 DTO 属性生成结果别名。
+    /// </summary>
+    [Fact]
+    public void Select_WhenMemberInitProjectionConfigured_ShouldRenderMappedColumnsWithTargetAliases()
+    {
+        // Arrange
+        _clause = new SelectClause(TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new EntityResolver(new TestEntityMetadata()), aliasRegister: new TestEntityAliasRegister()));
+
+        // Act
+        _clause.Select<Sample>(sample => new MemberInitProjection
+        {
+            DisplayName = sample.Email,
+            PrimaryEmail = sample.Email,
+            SecondaryEmail = sample.Email
+        });
+
+        // Assert
+        Assert.Equal("Select [as_Sample].[Sample_Email] As [DisplayName],[as_Sample].[Sample_Email] As [PrimaryEmail],[as_Sample].[Sample_Email] As [SecondaryEmail]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：DTO 成员初始化投影不支持方法调用时应在构建阶段明确失败，避免退化为通配符查询。
+    /// </summary>
+    [Fact]
+    public void Select_WhenMemberInitContainsMethodCall_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        _clause.Select("Existing");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => _clause.Select<Sample>(sample => new MemberInitProjection
+        {
+            DisplayName = sample.Email.ToUpper()
+        }));
+        var sql = GetSql();
+
+        // Assert
+        Assert.Equal("不支持的 DTO 投影表达式节点类型：Call。仅支持当前实体的直接成员赋值。", exception.Message);
+        Assert.Equal("Select [Existing]", sql);
+    }
+
+    /// <summary>
     /// 复制副本
     /// </summary>
     [Fact]
@@ -342,5 +385,26 @@ public class SelectClauseTest
     {
         _clause.AppendSql("[a].[b]");
         Assert.Equal("Select [a].[b]", GetSql());
+    }
+
+    /// <summary>
+    /// DTO 成员初始化投影结果模型。
+    /// </summary>
+    private sealed class MemberInitProjection
+    {
+        /// <summary>
+        /// 显示名称。
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// 主邮箱。
+        /// </summary>
+        public string PrimaryEmail { get; set; }
+
+        /// <summary>
+        /// 次邮箱。
+        /// </summary>
+        public string SecondaryEmail { get; set; }
     }
 }

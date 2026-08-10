@@ -45,10 +45,10 @@ public sealed class SqlMultipleQueryCommand
     /// <returns>独立的参数快照。</returns>
     private static SqlParam CloneParameter(SqlParam parameter)
     {
-        return new SqlParam(parameter.Name, parameter.Value, parameter.DbType, parameter.Direction, parameter.Size,
+        return new SqlParam(parameter.Name, CloneValue(parameter.Value), parameter.DbType, parameter.Direction, parameter.Size,
             parameter.Precision, parameter.Scale)
         {
-            OriginalValue = parameter.OriginalValue,
+            OriginalValue = CloneValue(parameter.OriginalValue),
             EntityType = parameter.EntityType,
             PropertyName = parameter.PropertyName,
             ColumnName = parameter.ColumnName,
@@ -61,4 +61,9 @@ public sealed class SqlMultipleQueryCommand
             CustomConverterName = parameter.CustomConverterName
         };
     }
+
+    /// <summary>
+    /// 复制数组值，防止可变元素容器泄漏到命令快照外部。
+    /// </summary>
+    private static object CloneValue(object value) => value is Array array ? array.Clone() : value;
 }

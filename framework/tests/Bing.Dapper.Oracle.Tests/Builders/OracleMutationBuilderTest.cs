@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Bing.Data;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
@@ -17,10 +18,11 @@ public sealed class OracleMutationBuilderTest
     public void Capabilities_WhenResolved_ShouldDisableStandardMultiRowValues()
     {
         // Arrange / Act
-        var capabilities = OracleSqlProvider.Instance.Capabilities;
+        var capabilities = OracleSqlProvider.Instance.Profile.Mutation;
 
         // Assert
         Assert.False(capabilities.SupportsMultiRowValues);
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, OracleSqlProvider.Instance.Profile.Query.Except);
     }
 
     /// <summary>

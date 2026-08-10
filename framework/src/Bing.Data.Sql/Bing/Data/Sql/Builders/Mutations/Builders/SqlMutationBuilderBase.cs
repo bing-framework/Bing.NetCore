@@ -68,10 +68,11 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
     /// </summary>
     protected void ValidateParameterLimit()
     {
-        if (Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maximum })
+        var maximum = SqlProviderCapabilityResolver.GetProfile(Provider).Limits.MaxParameterCount;
+        if (maximum == null)
             return;
-        if (ParameterManager.Count > maximum)
-            throw new InvalidOperationException($"Provider {Provider.Key} 的参数数量不能超过 {maximum}。");
+        if (ParameterManager.Count > maximum.Value)
+            throw new InvalidOperationException($"Provider {Provider.Key} 的参数数量不能超过 {maximum.Value}。");
     }
 
     /// <summary>

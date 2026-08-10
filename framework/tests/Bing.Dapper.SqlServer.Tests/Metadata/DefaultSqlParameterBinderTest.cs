@@ -33,7 +33,7 @@ public class DefaultSqlParameterBinderTest
         Assert.DoesNotContain("ISqlParameterContextBinder", exportedTypeNames);
         Assert.DoesNotContain("IDapperParameterBinder", exportedTypeNames);
         Assert.DoesNotContain("IDapperParameterSet", exportedTypeNames);
-        Assert.True(typeof(DefaultSqlParameterBinder).IsPublic);
+        Assert.False(typeof(DefaultSqlParameterBinder).IsPublic);
     }
 
     /// <summary>
@@ -128,6 +128,9 @@ public class DefaultSqlParameterBinderTest
         // Act / Assert - Database null
         output.Value = DBNull.Value;
         accessor.GetValue<string>("result").ShouldBeNull();
+        accessor.TryGetValue<string>("result", out var nullableValue).ShouldBeTrue();
+        nullableValue.ShouldBeNull();
+        accessor.TryGetValue<int>("result", out _).ShouldBeFalse();
         Should.Throw<InvalidOperationException>(() => accessor.GetValue<int>("result"));
 
         // Act / Assert - Convertible and incompatible values
@@ -166,6 +169,8 @@ public class DefaultSqlParameterBinderTest
         var output = command.CreatedParameters.Single(t => t.ParameterName == "result");
         output.Direction.ShouldBe(ParameterDirection.Output);
         accessor.GetValue<int>("result").ShouldBe(42);
+        accessor.TryGetValue<string>("name", out _).ShouldBeFalse();
+        Should.Throw<KeyNotFoundException>(() => accessor.GetValue<string>("name"));
     }
 
     /// <summary>

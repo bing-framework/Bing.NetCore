@@ -14,7 +14,7 @@ public abstract class MySqlMultipleQueryExecutorBase : SqlMultipleQueryExecutorB
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="options">当前执行器配置。</param>
     protected MySqlMultipleQueryExecutorBase(IServiceProvider serviceProvider, SqlOptions options)
-        : base(serviceProvider, options, MySqlSqlProvider.Instance.Capabilities)
+        : base(serviceProvider, options)
     {
     }
 

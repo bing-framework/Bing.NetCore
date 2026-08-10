@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 默认 SQL Provider 解析器。
 /// </summary>
-public sealed class DefaultSqlProviderResolver : ISqlProviderResolver
+internal sealed class DefaultSqlProviderResolver : ISqlProviderResolver
 {
     /// <summary>
     /// 已注册的 Provider Key 映射。
@@ -70,17 +70,37 @@ public sealed class DefaultSqlProviderResolver : ISqlProviderResolver
     public ISqlProvider Resolve(DatabaseContext context, ISqlProvider provider = null, DatabaseType? databaseType = null)
     {
         var dataSourceProviderKey = context?.DataSource?.ProviderKey;
-        if (string.IsNullOrWhiteSpace(dataSourceProviderKey) == false)
-            return Resolve(dataSourceProviderKey);
-        if (string.IsNullOrWhiteSpace(context?.ProviderKey) == false)
-            return Resolve(context.ProviderKey);
-        if (provider != null)
-            return Resolve(provider.Key);
         var resolvedDatabaseType = context?.DataSource?.DatabaseType ?? databaseType;
+        if (string.IsNullOrWhiteSpace(dataSourceProviderKey) == false)
+            return ValidateDatabaseType(Resolve(dataSourceProviderKey), resolvedDatabaseType, context?.DataSource != null);
+        if (string.IsNullOrWhiteSpace(context?.ProviderKey) == false)
+            return ValidateDatabaseType(Resolve(context.ProviderKey), resolvedDatabaseType, context?.DataSource != null);
+        if (provider != null)
+            return ValidateDatabaseType(Resolve(provider.Key), resolvedDatabaseType, context?.DataSource != null);
         if (resolvedDatabaseType != null && OfficialProviderKeys.TryGetValue(resolvedDatabaseType.Value, out var key))
-            return Resolve(key);
+            return ValidateDatabaseType(Resolve(key), resolvedDatabaseType, context?.DataSource != null);
         var databaseTypeText = resolvedDatabaseType?.ToString() ?? "<未指定>";
         throw new NotSupportedException($"未能解析数据库类型 '{databaseTypeText}' 对应的官方 SQL Provider。请为数据源配置 {nameof(SqlDataSourceDescriptor.ProviderKey)}。");
+    }
+
+    /// <summary>
+    /// 校验 Provider 与当前数据库类型兼容，避免方言、连接和元数据规则分属不同数据库类型。
+    /// </summary>
+    /// <param name="provider">已解析 Provider。</param>
+    /// <param name="databaseType">当前数据库类型。</param>
+    /// <param name="isDataSourceType">是否由数据源直接声明数据库类型。</param>
+    /// <returns>已验证的 Provider。</returns>
+    private static ISqlProvider ValidateDatabaseType(ISqlProvider provider, DatabaseType? databaseType,
+        bool isDataSourceType)
+    {
+        if (databaseType == null || provider.DatabaseType == databaseType.Value)
+            return provider;
+        if (databaseType == DatabaseType.Doris && provider.DatabaseType == DatabaseType.MySql &&
+            string.Equals(provider.Key, OfficialProviderKeys[DatabaseType.Doris], StringComparison.OrdinalIgnoreCase))
+            return provider;
+        var source = isDataSourceType ? "数据源 DatabaseType" : "数据库类型";
+        throw new InvalidOperationException(
+            $"{source} {databaseType} 与 Provider {provider.Key} 的数据库类型 {provider.DatabaseType} 不兼容。");
     }
 
     /// <summary>

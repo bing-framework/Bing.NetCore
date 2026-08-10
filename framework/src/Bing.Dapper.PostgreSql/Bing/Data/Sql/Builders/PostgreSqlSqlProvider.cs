@@ -5,7 +5,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>PostgreSQL SQL 提供程序。</summary>
-public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
+public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 PostgreSQL Provider 单例。
@@ -42,12 +42,39 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlParameterLimitProv
     public IParamLiteralsResolver ParamLiteralsResolver { get; } = PostgreSqlParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true,
-        supportsMultiRowValues: true, supportsUpdateFrom: true, supportsDeleteUsing: true, supportsReturning: true);
-
-    /// <inheritdoc />
-    /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>
-    public int? MaxParameterCount => null;
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Query = new SqlProviderQueryCapabilities
+        {
+            Cte = SqlQueryCapabilityState.Supported,
+            Union = SqlQueryCapabilityState.Supported,
+            UnionAll = SqlQueryCapabilityState.Supported,
+            Intersect = SqlQueryCapabilityState.Supported,
+            Except = SqlQueryCapabilityState.Supported,
+            RightJoin = SqlQueryCapabilityState.Supported,
+            Pagination = SqlQueryCapabilityState.Supported
+        },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = true,
+            SupportsUpdateFrom = true,
+            SupportsDeleteUsing = true,
+            SupportsReturning = true
+        },
+        Execution = new SqlProviderExecutionCapabilities
+        {
+            SupportsMultipleResultSets = true,
+            SupportsStreaming = true,
+            SupportsCancellation = true
+        },
+        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Procedure = new SqlProviderProcedureCapabilities
+        {
+            SupportsStoredProcedures = true,
+            SupportsOutputParameters = true
+        },
+        Limits = new SqlProviderLimits { MaxParameterCount = null }
+    };
 }
 
 /// <summary>

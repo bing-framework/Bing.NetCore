@@ -1,5 +1,7 @@
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Tests;
 
@@ -22,7 +24,63 @@ public class SqlQueryApiContractTest
         Assert.DoesNotContain(type.GetInterfaces(), item => item.Name == "ISqlOptions");
         Assert.DoesNotContain(typeof(ISqlExecutor).GetInterfaces(), item => item.Name == "ISqlOptions");
         Assert.Null(type.GetProperty("SqlBuilder"));
+        Assert.Null(type.GetProperty("ContextId"));
+        Assert.Null(type.GetMethod("Config"));
         Assert.Null(type.GetMethod("GetBuilder"));
+        Assert.Null(type.GetMethod("DisableDebugLog"));
+    }
+
+    /// <summary>
+    /// 测试目的：Root 执行器不得重新公开运行时配置或共享 Builder，所有 Mutation 终结入口必须接收冻结描述。
+    /// </summary>
+    [Fact]
+    public void RootExecutor_WhenPublicApiInspected_ShouldUseFrozenMutationDescriptionContract()
+    {
+        // Arrange
+        var type = typeof(ISqlExecutor);
+        var returning = type.GetMethod(nameof(ISqlExecutor.ExecuteReturningQueryAsync));
+
+        // Act
+        var builderFactory = type.GetMethod(nameof(ISqlExecutor.CreateBuilder));
+
+        // Assert
+        Assert.Null(type.GetMethod("Config"));
+        Assert.Null(type.GetMethod("GetBuilder"));
+        Assert.NotNull(builderFactory);
+        Assert.Equal(typeof(ISqlBuilder), builderFactory.ReturnType);
+        Assert.NotNull(returning);
+        Assert.Equal(typeof(SqlMutationDescription), returning.GetParameters().First().ParameterType);
+        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.Execute))
+            ?.GetParameters().First().ParameterType);
+        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteAsync))
+            ?.GetParameters().First().ParameterType);
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturningQuery)));
+    }
+
+    /// <summary>
+    /// 测试目的：Mutation 描述只保存冻结 SQL、参数和语义，不得持有可变 Builder 或执行资源。
+    /// </summary>
+    [Fact]
+    public void MutationDescription_WhenPublicApiInspected_ShouldNotExposeBuilderOrExecutionResources()
+    {
+        // Arrange
+        var type = typeof(SqlMutationDescription);
+        var properties = type.GetProperties().Select(property => property.Name).OrderBy(name => name).ToArray();
+
+        // Assert
+        Assert.Equal(new[] { "HasReturning", "OperationKind", "Parameters", "ProviderKey", "Sql" }, properties);
+        Assert.Null(type.GetProperty("Builder"));
+        Assert.Null(type.GetProperty("Connection"));
+        Assert.Null(type.GetProperty("Transaction"));
+    }
+
+    /// <summary>
+    /// 测试目的：执行后的 Builder 清理是固定生命周期行为，不得通过可变 Options 开关改变。
+    /// </summary>
+    [Fact]
+    public void SqlOptions_WhenPublicApiInspected_ShouldNotExposeClearAfterExecutionSwitch()
+    {
+        Assert.Null(typeof(SqlOptions).GetProperty("IsClearAfterExecution"));
     }
 
     /// <summary>
@@ -84,8 +142,6 @@ public class SqlQueryApiContractTest
         Assert.DoesNotContain(methods, method => method.Name == "Sql" &&
                             method.IsGenericMethod == false &&
                             method.GetParameters().Length == 0);
-        Assert.Empty(typeof(SqlQueryExtensions).GetMethods()
-            .Where(method => method.Name == "Sql" && method.IsStatic));
     }
 
     /// <summary>
@@ -131,6 +187,31 @@ public class SqlQueryApiContractTest
         Assert.True(parameters[1].HasDefaultValue);
         Assert.True(typeof(SqlProcedureQuery<>).IsPublic);
         Assert.True(typeof(SqlProcedureQuery<>).IsSealed);
+        Assert.False(typeof(SqlTextQuery<>).IsAssignableFrom(typeof(SqlProcedureQuery<>)));
+    }
+
+    /// <summary>
+    /// 测试目的：过程描述只允许过程结果终结入口，不能继承文本查询、流式或多映射终结方法绕过输出参数快照。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenPublicApiInspected_ShouldNotExposeTextQueryTerminals()
+    {
+        // Arrange
+        var type = typeof(SqlProcedureQuery<>);
+        var forbiddenMethods = new[]
+        {
+            "ToList", "First", "FirstOrDefault", "Single", "SingleOrDefault", "Scalar", "AsEnumerable",
+            "ToListAsync", "FirstAsync", "FirstOrDefaultAsync", "SingleAsync", "SingleOrDefaultAsync",
+            "ScalarAsync", "AsAsyncEnumerable", "SplitOn"
+        };
+
+        // Act
+        var publicMethods = type.GetMethods().Select(method => method.Name);
+
+        // Assert
+        Assert.DoesNotContain(publicMethods, method => forbiddenMethods.Contains(method));
+        Assert.NotNull(type.GetProperty(nameof(SqlProcedureQuery<int>.Procedure)));
+        Assert.NotNull(type.GetProperty(nameof(SqlProcedureQuery<int>.Parameters)));
     }
 
     /// <summary>
@@ -171,6 +252,25 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(SqlQuery<>), projection.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlQuery<>), aggregate.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(2, lambdaType.GetMethods().Count(method => method.Name == "GroupBy" && method.DeclaringType == lambdaType));
+    }
+
+    /// <summary>
+    /// 测试目的：字符串 Count 与 GroupBy API 必须使用明确的统计和 Having 入口，不得重新公开语义混合重载。
+    /// </summary>
+    [Fact]
+    public void QueryClauses_WhenPublicApiInspected_ShouldExposeExplicitCountAndHavingContracts()
+    {
+        // Arrange
+        var selectMethods = typeof(Bing.Data.Sql.Builders.ISelectClause).GetMethods();
+        var groupMethods = typeof(Bing.Data.Sql.Builders.IGroupByClause).GetMethods();
+
+        // Assert
+        Assert.NotNull(typeof(Bing.Data.Sql.Builders.ISelectClause).GetMethod("CountAll", new[] { typeof(string) }));
+        Assert.NotNull(typeof(Bing.Data.Sql.Builders.ISelectClause).GetMethod("CountColumn",
+            new[] { typeof(string), typeof(string), typeof(bool) }));
+        Assert.DoesNotContain(selectMethods, method => method.Name == "Count" && method.IsGenericMethod == false);
+        Assert.DoesNotContain(groupMethods, method => method.Name == "GroupBy" && method.GetParameters().Length == 2);
+        Assert.NotNull(typeof(SqlLambdaQuery<>).GetMethod("HavingRaw", new[] { typeof(string) }));
     }
 
     /// <summary>

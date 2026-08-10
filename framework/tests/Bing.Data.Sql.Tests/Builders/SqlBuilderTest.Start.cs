@@ -97,5 +97,28 @@ public partial class SqlBuilderTest
         Assert.Equal(18, _builder.GetParam("@_p_2"));
     }
 
+    /// <summary>
+    /// 测试目的：已渲染的 CTE 在克隆后应复用冻结的参数重命名，不遗留未引用参数。
+    /// </summary>
+    [Fact]
+    public void With_WhenRenderedBeforeClone_ShouldPreserveSubqueryParameterNames()
+    {
+        // Arrange
+        var cte = _builder.New().From("Child").Where("Name", "child-name");
+        _builder.From("Parent").Where("Name", "parent-name").With("selected", cte);
+        var expectedSql = _builder.ToSql();
+        var expectedParameters = _builder.GetParams().OrderBy(item => item.Key).ToArray();
+
+        // Act
+        var clone = _builder.Clone();
+        var cloneSql = clone.ToSql();
+
+        // Assert
+        Assert.Equal(expectedSql, cloneSql);
+        Assert.Equal(expectedParameters, clone.GetParams().OrderBy(item => item.Key).ToArray());
+        Assert.DoesNotContain("@_p_2", cloneSql);
+        Assert.False(clone.GetParams().ContainsKey("@_p_2"));
+    }
+
     #endregion
 }

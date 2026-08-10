@@ -48,13 +48,13 @@ public sealed class SqlMutationPublicApiGovernanceTest
     }
 
     /// <summary>
-    /// 测试目的：Provider 能力对象只应公开具有生产消费链的能力标志。
+    /// 测试目的：Provider 能力应按查询、Mutation、执行、事务、过程和资源限制责任域分组公开。
     /// </summary>
     [Fact]
-    public void ProviderCapabilities_WhenPublicPropertiesAreInspected_ShouldExposeConsumedCapabilities()
+    public void ProviderProfile_WhenPublicPropertiesAreInspected_ShouldExposeCapabilityDomains()
     {
         // Arrange and Act
-        var properties = typeof(SqlProviderCapabilities).GetProperties()
+        var properties = typeof(SqlProviderProfile).GetProperties()
             .Select(property => property.Name)
             .OrderBy(name => name, StringComparer.Ordinal)
             .ToArray();
@@ -62,29 +62,33 @@ public sealed class SqlMutationPublicApiGovernanceTest
         // Assert
         Assert.Equal(new[]
         {
-            "SupportsDeleteUsing", "SupportsMultiRowValues", "SupportsMultipleResultSets", "SupportsReturning",
-            "SupportsUpdateFrom"
+            "Execution", "Limits", "Mutation", "Procedure", "Query", "Transaction"
         }, properties);
     }
 
     /// <summary>
-    /// 测试目的：新增能力标志后必须保留原三参数和四参数 CLR 构造签名，避免破坏已编译 Provider。
+    /// 测试目的：Profile 各能力分组应使用无位置布尔参数的对象初始化模型。
     /// </summary>
     [Fact]
-    public void ProviderCapabilities_WhenConstructorsAreInspected_ShouldPreserveLegacySignature()
+    public void ProviderProfile_WhenConstructorsAreInspected_ShouldAvoidPositionalBooleanConstructors()
     {
         // Arrange and Act
-        var constructor = typeof(SqlProviderCapabilities).GetConstructor(new[]
+        var capabilityTypes = new[]
         {
-            typeof(bool), typeof(bool), typeof(bool)
-        });
+            typeof(SqlProviderMutationCapabilities),
+            typeof(SqlProviderExecutionCapabilities),
+            typeof(SqlProviderTransactionCapabilities),
+            typeof(SqlProviderProcedureCapabilities),
+            typeof(SqlProviderLimits)
+        };
 
         // Assert
-        Assert.NotNull(constructor);
-        Assert.NotNull(typeof(SqlProviderCapabilities).GetConstructor(new[]
+        foreach (var capabilityType in capabilityTypes)
         {
-            typeof(bool), typeof(bool), typeof(bool), typeof(bool)
-        }));
+            var constructors = capabilityType.GetConstructors();
+            Assert.Single(constructors);
+            Assert.Empty(constructors[0].GetParameters());
+        }
     }
 
     /// <summary>

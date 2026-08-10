@@ -197,6 +197,14 @@ public class JoinClause : IJoinClause
     /// <param name="type">表实体类型</param>
     public IJoinOn Find(Type type) => _params.Find(t => t.Type == type);
 
+    /// <summary>
+    /// 判断当前子句是否包含指定连接类型。
+    /// </summary>
+    /// <param name="joinType">连接类型关键字。</param>
+    /// <returns>包含指定连接类型时返回 true。</returns>
+    internal bool ContainsJoinType(string joinType) => _params.Any(item =>
+        string.Equals(item.JoinType, joinType, StringComparison.Ordinal));
+
     #endregion
 
     #region Join(内连接)
@@ -254,7 +262,10 @@ public class JoinClause : IJoinClause
         var sourceReference = GetSourceReference(databaseContext);
         AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext));
         if (reference.EntityType != null)
+        {
+            FreezeExistingProjectionAlias(reference.EntityType);
             _register?.Register(reference.EntityType, _resolver.GetAlias(reference.EntityType, reference.Alias));
+        }
     }
 
     /// <summary>
@@ -345,6 +356,17 @@ public class JoinClause : IJoinClause
             return builder.GetDatabaseContext();
         return _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
             _databaseContextAccessor?.Current ?? _metadataOptions?.DefaultDatabaseContext;
+    }
+
+    /// <summary>
+    /// 在同一实体重复连接前固定既有投影使用的表别名。
+    /// </summary>
+    /// <param name="entityType">即将连接的实体类型。</param>
+    private void FreezeExistingProjectionAlias(Type entityType)
+    {
+        if (_register?.Contains(entityType) != true || _sqlBuilder.SelectClause is not SelectClause selectClause)
+            return;
+        selectClause.FreezeEntityAlias(entityType, _register.GetAlias(entityType));
     }
 
     /// <summary>
@@ -474,6 +496,12 @@ public class JoinClause : IJoinClause
     public void RightJoin(string table, string alias = null) => Join(RightJoinKey, table, alias);
 
     /// <summary>
+    /// 右外连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    public void RightJoin(SqlTableReference reference) => Join(RightJoinKey, reference);
+
+    /// <summary>
     /// 右外连接
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
@@ -510,7 +538,19 @@ public class JoinClause : IJoinClause
     /// 设置连接条件
     /// </summary>
     /// <param name="condition">连接条件</param>
-    public void On(ICondition condition) => GetLastJoinOrThrow().On(condition);
+    public void On(ICondition condition) => GetLastJoinOrThrow().On(MergeBuilderCondition(condition));
+
+    /// <summary>
+    /// 合并作为连接条件使用的独立 Builder 参数。
+    /// </summary>
+    /// <param name="condition">连接条件。</param>
+    /// <returns>可安全追加到当前 Join 的条件。</returns>
+    private ICondition MergeBuilderCondition(ICondition condition)
+    {
+        if (condition is not ISqlBuilder builder || _sqlBuilder is not SqlBuilderBase sqlBuilder)
+            return condition;
+        return new SqlCondition(sqlBuilder.MergeSubqueryParameters(builder, builder.GetCondition()));
+    }
 
     /// <summary>
     /// 设置连接条件
@@ -532,8 +572,9 @@ public class JoinClause : IJoinClause
     public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal) where TLeft : class where TRight : class
     {
         var join = GetLastJoinOrThrow();
-        var leftColumn = new SqlItem(GetColumn(left)).ToSql(_dialect);
-        var rightColumn = new SqlItem(GetColumn(right)).ToSql(_dialect);
+        var selfJoin = typeof(TLeft) == typeof(TRight);
+        var leftColumn = new SqlItem(GetColumn(left, selfJoin, false)).ToSql(_dialect);
+        var rightColumn = new SqlItem(GetColumn(right, selfJoin, true)).ToSql(_dialect);
         var condition = SqlConditionFactory.Create(leftColumn, rightColumn, @operator);
         join.AppendOn(condition.GetCondition(), _dialect);
     }
@@ -543,15 +584,20 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="column">列名</param>
-    private string GetColumn<TEntity>(Expression<Func<TEntity, object>> column) =>
-        GetColumn(typeof(TEntity), _resolver.GetColumn(column));
+    /// <param name="selfJoin">是否为同实体自连接。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    private string GetColumn<TEntity>(Expression<Func<TEntity, object>> column, bool selfJoin = false,
+        bool right = false) => GetColumn(typeof(TEntity), _resolver.GetColumn(column), selfJoin, right);
 
     /// <summary>
     /// 获取列
     /// </summary>
     /// <param name="entity">实体类型</param>
     /// <param name="column">列名</param>
-    private string GetColumn(Type entity, string column) => $"{_register.GetAlias(entity)}.{column}";
+    /// <param name="selfJoin">是否为同实体自连接。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    private string GetColumn(Type entity, string column, bool selfJoin = false, bool right = false) =>
+        $"{GetAlias(entity, selfJoin, right)}.{column}";
 
     /// <summary>
     /// 设置连接条件
@@ -574,16 +620,23 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="group">条件组</param>
     private List<OnItem> GetOnItems(List<Expression> group) =>
-        @group.Select(expression => new OnItem(
-            GetColumn(expression, false), GetColumn(expression, true), Lambdas.GetOperator(expression).SafeValue()
-        )).ToList();
+        @group.Select(expression =>
+        {
+            var leftType = _resolver.GetType(expression, false);
+            var rightType = _resolver.GetType(expression, true);
+            var selfJoin = leftType == rightType;
+            return new OnItem(
+                GetColumn(expression, false, selfJoin), GetColumn(expression, true, selfJoin),
+                Lambdas.GetOperator(expression).SafeValue());
+        }).ToList();
 
     /// <summary>
     /// 获取列
     /// </summary>
     /// <param name="expression">表达式</param>
     /// <param name="right">是否取右侧操作数</param>
-    private SqlItem GetColumn(Expression expression, bool right)
+    /// <param name="selfJoin">是否为同实体自连接。</param>
+    private SqlItem GetColumn(Expression expression, bool right, bool selfJoin)
     {
         var type = _resolver.GetType(expression, right);
         var column = _resolver.GetColumn(expression, type, right);
@@ -594,8 +647,18 @@ public class JoinClause : IJoinClause
             return new SqlItem(name, raw: true);
         }
 
-        return new SqlItem(GetColumn(type, column));
+        return new SqlItem(GetColumn(type, column, selfJoin, right));
     }
+
+    /// <summary>
+    /// 获取连接条件成员使用的实体别名。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <param name="selfJoin">是否为同实体自连接。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>表别名。</returns>
+    private string GetAlias(Type entity, bool selfJoin, bool right) =>
+        selfJoin ? _register.GetSelfJoinAlias(entity, right) : _register.GetAlias(entity);
 
     #endregion
 

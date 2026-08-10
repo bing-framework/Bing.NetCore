@@ -28,21 +28,21 @@ public class SqlAggregateRenderingBenchmarks
     public void Setup()
     {
         _countBuilder = new MySqlBuilder();
-        _countBuilder.Count(alias: "Total").From("orders");
+        _countBuilder.CountAll("Total").From("orders");
 
         _aggregateBuilder = new MySqlBuilder();
-        _aggregateBuilder.Count("o.Id", "Count")
+        _aggregateBuilder.CountColumn("o.Id", "Count")
             .Sum("o.Amount", "Sum")
             .Avg("o.Amount", "Average", distinct: true)
             .Max("o.Amount", "Maximum", distinct: true)
             .Min("o.Amount", "Minimum")
-            .Count("o.UserId", "DistinctUsers", distinct: true)
+            .CountColumn("o.UserId", "DistinctUsers", distinct: true)
             .Sum("o.Amount", "DistinctSum", distinct: true)
             .Avg("o.Amount", "DistinctAverage", distinct: true)
             .Max("o.Amount", "DistinctMaximum")
             .Min("o.Amount", "DistinctMinimum", distinct: true)
             .From("orders", "o")
-            .GroupBy("o.CategoryId", "Count(o.Id)>0");
+            .GroupBy("o.CategoryId").HavingRaw("Count(o.Id)>0");
 
         _expressionAggregateBuilder = new MySqlBuilder();
         _expressionAggregateBuilder.AggregateExpression(SqlAggregateFunction.Count,
@@ -63,7 +63,7 @@ public class SqlAggregateRenderingBenchmarks
             "Case When [o].[Enabled]=1 Then [o].[Id] End", "EnabledCount", distinct: true).From("orders", "o");
 
         _countDistinctColumnBuilder = new MySqlBuilder();
-        _countDistinctColumnBuilder.Count("o.UserId", "DistinctUsers", distinct: true).From("orders", "o");
+        _countDistinctColumnBuilder.CountColumn("o.UserId", "DistinctUsers", distinct: true).From("orders", "o");
 
         _aggregateExpressionBuilder = new MySqlBuilder();
         _aggregateExpressionBuilder.AggregateExpression(SqlAggregateFunction.Count, "[o].[Id]", "Count")
@@ -77,7 +77,7 @@ public class SqlAggregateRenderingBenchmarks
             .AggregateExpression(SqlAggregateFunction.Max, "[o].[Amount]", "DistinctMaximum")
             .AggregateExpression(SqlAggregateFunction.Min, "[o].[Amount]", "DistinctMinimum", distinct: true)
             .From("orders", "o")
-            .GroupBy("o.CategoryId", "Count(o.Id)>0");
+            .GroupBy("o.CategoryId").HavingRaw("Count(o.Id)>0");
     }
 
     /// <summary>

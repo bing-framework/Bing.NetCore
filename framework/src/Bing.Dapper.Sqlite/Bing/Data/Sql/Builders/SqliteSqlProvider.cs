@@ -6,7 +6,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>SQLite SQL 提供程序。</summary>
-public sealed class SqliteSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
+public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 SQLite Provider 单例。
@@ -44,13 +44,37 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlParameterLimitProvider
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true,
-        supportsMultiRowValues: true, supportsUpdateFrom: false, supportsDeleteUsing: false,
-        supportsReturning: true);
-
-    /// <inheritdoc />
-    /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>
-    public int? MaxParameterCount => null;
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Query = new SqlProviderQueryCapabilities
+        {
+            Cte = SqlQueryCapabilityState.Supported,
+            Union = SqlQueryCapabilityState.Supported,
+            UnionAll = SqlQueryCapabilityState.Supported,
+            Intersect = SqlQueryCapabilityState.Supported,
+            Except = SqlQueryCapabilityState.Supported,
+            RightJoin = SqlQueryCapabilityState.Unsupported,
+            Pagination = SqlQueryCapabilityState.Supported
+        },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = true,
+            SupportsReturning = true
+        },
+        Execution = new SqlProviderExecutionCapabilities
+        {
+            SupportsMultipleResultSets = true,
+            SupportsStreaming = true,
+            SupportsCancellation = true
+        },
+        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Procedure = new SqlProviderProcedureCapabilities
+        {
+            SupportsStoredProcedures = false,
+            SupportsOutputParameters = false
+        },
+        Limits = new SqlProviderLimits { MaxParameterCount = null }
+    };
 
     /// <summary>
     /// 创建使用 SQLite 表引用子句的 Clause 集合。

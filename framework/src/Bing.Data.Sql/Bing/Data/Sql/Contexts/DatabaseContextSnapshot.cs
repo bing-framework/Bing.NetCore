@@ -1,3 +1,5 @@
+using Bing.Data;
+
 namespace Bing.Data.Sql;
 
 /// <summary>
@@ -45,7 +47,26 @@ public static class DatabaseContextSnapshot
             MappingProfile = source.MappingProfile,
             PrimaryReadStrategy = source.PrimaryReadStrategy,
             PrimaryDataSourceKey = source.PrimaryDataSourceKey,
-            SupportsTransactions = source.SupportsTransactions
+            SupportsTransactions = source.SupportsTransactions,
+            QueryCapabilities = CloneQueryCapabilities(source.QueryCapabilities)
         };
     }
+
+    /// <summary>
+    /// 克隆查询语法能力配置。
+    /// </summary>
+    /// <param name="capabilities">源能力配置。</param>
+    /// <returns>独立能力配置副本。</returns>
+    private static SqlQueryCapabilities CloneQueryCapabilities(SqlQueryCapabilities capabilities) => capabilities == null
+        ? null
+        : new SqlQueryCapabilities
+        {
+            Cte = capabilities.Cte,
+            Union = capabilities.Union,
+            UnionAll = capabilities.UnionAll,
+            Intersect = capabilities.Intersect,
+            Except = capabilities.Except,
+            RightJoin = capabilities.RightJoin,
+            Pagination = capabilities.Pagination
+        };
 }

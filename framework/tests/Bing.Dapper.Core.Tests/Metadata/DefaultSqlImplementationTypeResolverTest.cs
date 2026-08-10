@@ -5,7 +5,7 @@ using Xunit;
 namespace Bing.Dapper.Core.Tests.Metadata;
 
 /// <summary>
-/// <see cref="DefaultSqlImplementationTypeResolver"/> 单元测试。
+/// <see cref="ISqlImplementationTypeResolver"/> 单元测试。
 /// </summary>
 public class DefaultSqlImplementationTypeResolverTest
 {
@@ -19,7 +19,8 @@ public class DefaultSqlImplementationTypeResolverTest
         var options = new SqlImplementationTypeOptions();
         options.Map(typeof(ITestService), typeof(DefaultService), "custom.sqlserver.first");
         options.Map(typeof(ITestService), typeof(SqlServerService), "custom.sqlserver.second");
-        var resolver = new DefaultSqlImplementationTypeResolver(options);
+        using var provider = CreateServiceProvider(options);
+        var resolver = provider.GetRequiredService<ISqlImplementationTypeResolver>();
 
         // Act
         var result = resolver.Resolve(typeof(ITestService), "custom.sqlserver.second");
@@ -37,7 +38,8 @@ public class DefaultSqlImplementationTypeResolverTest
         // Arrange
         var options = new SqlImplementationTypeOptions();
         options.Map(typeof(ITestService), typeof(DefaultService), "custom.mysql");
-        var resolver = new DefaultSqlImplementationTypeResolver(options);
+        using var provider = CreateServiceProvider(options);
+        var resolver = provider.GetRequiredService<ISqlImplementationTypeResolver>();
 
         // Act
         var result = resolver.Resolve(typeof(ITestService), "custom.postgresql");
@@ -53,7 +55,8 @@ public class DefaultSqlImplementationTypeResolverTest
     public void Resolve_WhenTypeIsConcreteAbstractOrNull_ShouldReturnExpectedResult()
     {
         // Arrange
-        var resolver = new DefaultSqlImplementationTypeResolver();
+        using var provider = CreateServiceProvider();
+        var resolver = provider.GetRequiredService<ISqlImplementationTypeResolver>();
 
         // Act and Assert
         Assert.Equal(typeof(ConcreteService), resolver.Resolve(typeof(ConcreteService), "custom.provider"));
@@ -97,6 +100,18 @@ public class DefaultSqlImplementationTypeResolverTest
         Assert.Throws<InvalidOperationException>(() =>
             Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlImplementationType<ITestService, DefaultService>(
                 services, "custom.provider"));
+    }
+
+    /// <summary>
+    /// 通过公开服务注册创建实现类型解析器。
+    /// </summary>
+    private static ServiceProvider CreateServiceProvider(SqlImplementationTypeOptions options = null)
+    {
+        var services = new ServiceCollection();
+        if (options != null)
+            services.AddSingleton(options);
+        services.AddSqlCore();
+        return services.BuildServiceProvider();
     }
 
     /// <summary>

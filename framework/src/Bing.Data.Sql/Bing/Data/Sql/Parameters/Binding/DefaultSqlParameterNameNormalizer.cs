@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 默认 SQL 参数名称规范化器
 /// </summary>
-public sealed class DefaultSqlParameterNameNormalizer : ISqlParameterNameNormalizer
+internal sealed class DefaultSqlParameterNameNormalizer : ISqlParameterNameNormalizer
 {
     /// <inheritdoc />
     public string Normalize(string name)

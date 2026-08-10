@@ -106,6 +106,44 @@ public class AppendJoinAndOnCompositionTest
     }
 
     /// <summary>
+    /// 测试目的：原始 Join 的 ON 使用换行分隔时，追加条件应识别既有 ON 并使用 And。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_WhenExistingOnUsesNewline_ShouldAppendAndCondition()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var sql = builder.AppendFrom("Orders o")
+            .AppendJoin("Items i\nOn i.OrderId=o.Id")
+            .AppendOn("i.IsActive=1")
+            .ToSql();
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom Orders o \r\nJoin Items i\nOn i.OrderId=o.Id And i.IsActive=1", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：注释中的 ON 不得被识别为原始 Join 的连接条件。
+    /// </summary>
+    [Fact]
+    public void AppendJoin_WhenCommentContainsOn_ShouldAppendOnCondition()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var sql = builder.AppendFrom("Orders o")
+            .AppendJoin("Items i /* On is documentation only */")
+            .AppendOn("i.OrderId=o.Id")
+            .ToSql();
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom Orders o \r\nJoin Items i /* On is documentation only */ On i.OrderId=o.Id", sql);
+    }
+
+    /// <summary>
     /// 测试 - 前一个原始连接已有 On 时，后续 AppendOn 应绑定到最新连接。
     /// </summary>
     [Fact]

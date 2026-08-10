@@ -2,6 +2,7 @@
 using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -20,7 +21,49 @@ public class OracleBuilderTest
     /// </summary>
     public OracleBuilderTest() 
     {
-        _builder = new OracleBuilder();
+        _builder = new OracleBuilder(new SqlBuilderServices(options: new SqlOptions
+        {
+            QueryCapabilities = new SqlQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported }
+        }));
+    }
+
+    /// <summary>
+    /// 测试目的：未确认 Oracle 版本时，Offset/Fetch 分页必须在 SQL 渲染前被拒绝。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenOraclePaginationVersionIsNotConfirmed_ShouldReject()
+    {
+        // Arrange
+        var builder = new OracleBuilder();
+        builder.Select("Id").From("Sample").OrderBy("Id").Page(new Pager(1, 10, "Id"));
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.oracle 的当前查询能力配置不支持 分页。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle 明确不支持 Except，选项配置不得重新启用该语法。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenOracleExceptIsExplicitlyEnabled_ShouldStillReject()
+    {
+        // Arrange
+        var builder = new OracleBuilder(new SqlBuilderServices(options: new SqlOptions
+        {
+            QueryCapabilities = new SqlQueryCapabilities { Except = SqlQueryCapabilityState.Supported }
+        }));
+        var archived = (OracleBuilder)builder.New();
+        archived.Select("Id").From("ArchivedRows");
+        builder.Select("Id").From("CurrentRows").Except(archived);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.oracle 的当前查询能力配置不支持 Except。", exception.Message);
     }
 
     /// <summary>
@@ -76,7 +119,7 @@ public class OracleBuilderTest
     public void Page_WhenSkipAndTakeAreSet_ShouldRenderOracleOffsetFetchSyntax()
     {
         // Arrange
-        var builder = new OracleBuilder();
+        var builder = (OracleBuilder)_builder.New();
 
         // Act
         builder.Select("*").From("Sample").OrderBy("Id").Page(new Pager(2, 10, "Id"));

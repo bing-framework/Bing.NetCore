@@ -261,45 +261,6 @@ public class SqlOptionsTest
     }
 
     /// <summary>
-    /// 测试目的：默认 IsClearAfterExecution 应为 true。
-    /// </summary>
-    [Fact]
-    public void Default_IsClearAfterExecution_ShouldBeTrue()
-    {
-        // Act
-        var options = new SqlOptions();
-
-        // Assert
-        options.IsClearAfterExecution.ShouldBeTrue();
-    }
-
-    /// <summary>
-    /// 测试目的：默认 LogLevel 应为 DataLogLevel.Sql。
-    /// </summary>
-    [Fact]
-    public void Default_LogLevel_ShouldBeSql()
-    {
-        // Act
-        var options = new SqlOptions();
-
-        // Assert
-        options.LogLevel.ShouldBe(DataLogLevel.Sql);
-    }
-
-    /// <summary>
-    /// 测试目的：默认 LogCategory 应为 "Bing.Data.Sql"。
-    /// </summary>
-    [Fact]
-    public void Default_LogCategory_ShouldBeBingDataSql()
-    {
-        // Act
-        var options = new SqlOptions();
-
-        // Assert
-        options.LogCategory.ShouldBe("Bing.Data.Sql");
-    }
-
-    /// <summary>
     /// 测试目的：默认 ConnectionString 和 Connection 均为 null。
     /// </summary>
     [Fact]
@@ -325,19 +286,27 @@ public class SqlOptionsTest
 
         // Act
         options.DatabaseType = DatabaseType.MySql;
-        options.IsClearAfterExecution = false;
-        options.LogLevel = DataLogLevel.Off;
-        options.LogCategory = "custom";
         options.ConnectionString = "Server=localhost";
         options.Connection = mockConn;
 
         // Assert
         options.DatabaseType.ShouldBe(DatabaseType.MySql);
-        options.IsClearAfterExecution.ShouldBeFalse();
-        options.LogLevel.ShouldBe(DataLogLevel.Off);
-        options.LogCategory.ShouldBe("custom");
         options.ConnectionString.ShouldBe("Server=localhost");
         options.Connection.ShouldBeSameAs(mockConn);
+    }
+
+    /// <summary>
+    /// 测试目的：SQL 选项不应再公开未参与执行或诊断的日志级别和类别配置。
+    /// </summary>
+    [Fact]
+    public void PublicApi_WhenInspected_ShouldNotExposeUnusedLogConfiguration()
+    {
+        // Arrange and Act
+        var type = typeof(SqlOptions);
+
+        // Assert
+        type.GetProperty("LogLevel").ShouldBeNull();
+        type.GetProperty("LogCategory").ShouldBeNull();
     }
 
     /// <summary>

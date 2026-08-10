@@ -1,4 +1,5 @@
 using Bing.Data.Enums;
+using Bing.Data;
 
 namespace Bing.Data.Sql;
 
@@ -33,7 +34,7 @@ public sealed class SqlDataSourceDescriptor
     public string ConnectionString { get; set; }
 
     /// <summary>
-    /// 是否为只读数据源标识。该属性仅描述用途，不构成数据库权限约束。
+    /// 是否为只读数据源。框架会拒绝结构化 Mutation、执行型存储过程和本地事务；原生 SQL 仍由调用方负责权限控制。
     /// </summary>
     public bool IsReadOnly { get; set; }
 
@@ -56,4 +57,12 @@ public sealed class SqlDataSourceDescriptor
     /// 是否支持本地事务。Doris 等仅通过 MySQL 协议提供分析查询的数据源应设为 false。
     /// </summary>
     public bool SupportsTransactions { get; set; } = true;
+
+    /// <summary>
+    /// 已验证的数据源查询语法能力配置。
+    /// </summary>
+    /// <remarks>
+    /// 用于覆盖受服务器版本影响的 Provider 默认能力；未设置的属性继承 Provider 声明。
+    /// </remarks>
+    public SqlQueryCapabilities QueryCapabilities { get; set; }
 }

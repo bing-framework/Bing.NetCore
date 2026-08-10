@@ -114,6 +114,19 @@ public class ColumnCollection
     }
 
     /// <summary>
+    /// 固定指定实体类型且尚未指定别名的投影表别名。
+    /// </summary>
+    /// <param name="entityType">实体类型。</param>
+    /// <param name="tableAlias">表别名。</param>
+    internal void FreezeTableAlias(Type entityType, string tableAlias)
+    {
+        if (entityType == null || string.IsNullOrWhiteSpace(tableAlias))
+            return;
+        foreach (var item in _items.Where(item => item.TableType == entityType && string.IsNullOrWhiteSpace(item.TableAlias)))
+            item.TableAlias = tableAlias;
+    }
+
+    /// <summary>
     /// 清空全部列项。
     /// </summary>
     public void Clear() => _items.Clear();

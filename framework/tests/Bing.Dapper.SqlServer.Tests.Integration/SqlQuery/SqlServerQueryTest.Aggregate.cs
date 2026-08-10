@@ -1,6 +1,7 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Mutations;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Test.Shared;
 
@@ -48,8 +49,8 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
 
         // Act
         using var query = _fixture.CreateQuery();
-        var countAll = await CreateAggregateDescription<int>(query).Count().ScalarAsync();
-        var distinctUsers = await CreateAggregateDescription<int>(query).Count("p.UserId", distinct: true).ScalarAsync();
+        var countAll = await CreateAggregateDescription<int>(query).CountAll().ScalarAsync();
+        var distinctUsers = await CreateAggregateDescription<int>(query).CountColumn("p.UserId", distinct: true).ScalarAsync();
         var total = await CreateAggregateDescription<decimal>(query).Sum("p.Amount").ScalarAsync();
         var conditionalTotal = await CreateAggregateDescription<decimal>(query).AggregateExpression(SqlAggregateFunction.Sum,
                 "Case When [p].[Amount]>@MinAmount Then [p].[Amount] Else 0 End")
@@ -82,14 +83,14 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
             new object[] { "output-first", 1m, true },
             new object[] { "output-second", 2m, false }
         };
-        executor.GetBuilder()
+        var builder = executor.CreateBuilder()
             .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "BingSqlAggregateIntegration" })
             .Columns("UserId", "Amount", "Enabled")
             .Values(values)
             .Returning<SqlServerOutputRow>(row => new { row.Id, row.UserId });
 
         // Act
-        var rows = await executor.ExecuteReturningQueryAsync<SqlServerOutputRow>();
+        var rows = await executor.ExecuteReturningQueryAsync<SqlServerOutputRow>(builder.ToMutationDescription());
 
         // Assert
         Assert.Equal(new[] { "output-first", "output-second" }, rows.Select(row => row.UserId));

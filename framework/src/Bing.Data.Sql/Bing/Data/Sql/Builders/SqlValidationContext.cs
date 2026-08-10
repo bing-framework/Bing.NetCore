@@ -19,9 +19,7 @@ public sealed class SqlValidationContext
         ParameterCount = parameterCount;
         AllowAllRows = allowAllRows;
         ExecutionKind = executionKind;
-        Capabilities = provider is ISqlProviderCapabilityProvider capabilityProvider
-            ? capabilityProvider.Capabilities ?? new SqlProviderCapabilities()
-            : new SqlProviderCapabilities();
+        Profile = SqlProviderCapabilityResolver.GetProfile(provider);
     }
 
     /// <summary>
@@ -30,9 +28,9 @@ public sealed class SqlValidationContext
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// 当前 Provider 的运行能力。
+    /// 当前 Provider 的统一能力档案。
     /// </summary>
-    public SqlProviderCapabilities Capabilities { get; }
+    public SqlProviderProfile Profile { get; }
 
     /// <summary>
     /// 当前命令已经分配的参数数量。

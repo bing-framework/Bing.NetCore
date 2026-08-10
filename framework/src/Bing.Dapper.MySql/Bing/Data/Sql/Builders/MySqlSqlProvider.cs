@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders;
 /// <summary>
 /// MySQL SQL 提供程序。
 /// </summary>
-public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider
+public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 MySQL Provider 单例。
@@ -39,11 +39,36 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlParameterLimitProvider,
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true);
-
-    /// <inheritdoc />
-    /// <remarks>当前驱动与版本组合未提供可跨环境保证的固定参数数量上限。</remarks>
-    public int? MaxParameterCount => null;
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Query = new SqlProviderQueryCapabilities
+        {
+            Union = SqlQueryCapabilityState.Supported,
+            UnionAll = SqlQueryCapabilityState.Supported,
+            RightJoin = SqlQueryCapabilityState.Supported,
+            Pagination = SqlQueryCapabilityState.Supported
+        },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = true,
+            SupportsUpdateFrom = false,
+            SupportsDeleteUsing = false,
+            SupportsReturning = false
+        },
+        Execution = new SqlProviderExecutionCapabilities
+        {
+            SupportsMultipleResultSets = true,
+            SupportsStreaming = true,
+            SupportsCancellation = true
+        },
+        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Procedure = new SqlProviderProcedureCapabilities
+        {
+            SupportsStoredProcedures = true,
+            SupportsOutputParameters = true
+        },
+        Limits = new SqlProviderLimits { MaxParameterCount = null }
+    };
 
     /// <summary>
     /// 创建使用 MySQL 表引用子句的 Clause 集合。

@@ -298,6 +298,23 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 左外连接结构化表引用。
+    /// </summary>
+    /// <param name="source">Sql生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>Sql生成器。</returns>
+    public static ISqlBuilder LeftJoin(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.LeftJoin(reference);
+        return source;
+    }
+
+    /// <summary>
     /// 右外连接
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
@@ -311,6 +328,23 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlQueryClauseAccessor accessor)
             accessor.JoinClause.RightJoin<TEntity>(alias, schema);
+        return source;
+    }
+
+    /// <summary>
+    /// 右外连接结构化表引用。
+    /// </summary>
+    /// <param name="source">Sql生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>Sql生成器。</returns>
+    public static ISqlBuilder RightJoin(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.RightJoin(reference);
         return source;
     }
 
@@ -987,19 +1021,18 @@ public static partial class Extensions
     #region GroupBy子句
 
     /// <summary>
-    /// 分组
+    /// 按实体属性表达式分组。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="column">分组字段。范例：a.Id,b.Name</param>
-    /// <param name="having">分组条件。范例：Count(*) > 1</param>
-    public static ISqlBuilder GroupBy<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> column, string having = null)
+    public static ISqlBuilder GroupBy<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> column)
         where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (source is ISqlQueryClauseAccessor accessor)
-            accessor.GroupByClause.GroupBy(column, having);
+            accessor.GroupByClause.GroupBy(column);
         return source;
     }
 

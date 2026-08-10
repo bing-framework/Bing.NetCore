@@ -47,53 +47,40 @@ public abstract partial class SqlQueryBase
     /// <param name="operation">调用 Dapper 查询 API 的操作。</param>
     /// <param name="acquireExecutionLease">是否为当前内部计划单独获取执行租约。</param>
     /// <param name="completeTransaction">当前内部计划成功后是否完成事务。</param>
-    /// <param name="consumeDebugLogState">当前内部计划结束时是否恢复临时调试日志状态。</param>
     /// <returns>最终执行结果。</returns>
     private TResult InternalQueryPlan<TResult>(SqlQueryPlan plan,
         Func<IDbConnection, string, object, IDbTransaction, TResult> operation, bool acquireExecutionLease = true,
-        bool completeTransaction = true, bool consumeDebugLogState = true)
+        bool completeTransaction = true)
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        using var debugLogScope = BeginQueryPlanDebugLogScope(consumeDebugLogState);
         ValidateQueryBuilder(plan.Builder);
         var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
-        Exception primaryException = null;
-        var cleanupExceptions = new List<Exception>();
-        try
+        return SqlQueryPlanLifecycle.Execute(() =>
         {
             if (ExecuteBefore())
             {
                 var preparedPlan = PrepareQueryPlan(plan);
                 var connection = GetExecutionConnection();
                 var transaction = GetQueryTransaction();
-                message = ExecuteBefore(preparedPlan.Sql, preparedPlan.ParameterSource, connection,
-                    preparedPlan.ParameterDiagnostics);
+                message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
                 WritePlanTraceLog(preparedPlan);
                 result = operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
+                plan.NotifyExecutionCompleted();
                 if (completeTransaction)
                     CompleteQueryTransaction();
                 ExecuteAfter(message);
             }
-        }
-        catch (Exception exception)
+            return result;
+        }, (exception, cleanupExceptions) =>
         {
-            primaryException = exception;
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
-        }
-        finally
-        {
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(result));
-        }
-        if (executionLease != null)
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
-        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
-        return result;
+        }, result => ExecuteQueryPlanAfter(result), () => executionLease?.Dispose());
     }
 
     /// <summary>
@@ -105,55 +92,43 @@ public abstract partial class SqlQueryBase
     /// <param name="cancellationToken">取消令牌。</param>
     /// <param name="acquireExecutionLease">是否为当前内部计划单独获取执行租约。</param>
     /// <param name="completeTransaction">当前内部计划成功后是否完成事务。</param>
-    /// <param name="consumeDebugLogState">当前内部计划结束时是否恢复临时调试日志状态。</param>
     /// <returns>表示最终执行结果的异步操作。</returns>
     private async Task<TResult> InternalQueryPlanAsync<TResult>(SqlQueryPlan plan,
         Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> operation,
-        CancellationToken cancellationToken, bool acquireExecutionLease = true, bool completeTransaction = true,
-        bool consumeDebugLogState = true)
+        CancellationToken cancellationToken, bool acquireExecutionLease = true, bool completeTransaction = true)
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        using var debugLogScope = BeginQueryPlanDebugLogScope(consumeDebugLogState);
+        EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         ValidateQueryBuilder(plan.Builder);
         var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
-        Exception primaryException = null;
-        var cleanupExceptions = new List<Exception>();
-        try
+        return await SqlQueryPlanLifecycle.ExecuteAsync(async () =>
         {
             if (ExecuteBefore())
             {
                 var preparedPlan = PrepareQueryPlan(plan);
                 var connection = GetExecutionConnection();
-                var transaction = GetQueryTransaction();
-                message = ExecuteBefore(preparedPlan.Sql, preparedPlan.ParameterSource, connection,
-                    preparedPlan.ParameterDiagnostics);
+                var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
                 WritePlanTraceLog(preparedPlan);
                 result = await operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
+                plan.NotifyExecutionCompleted();
                 if (completeTransaction)
-                    CompleteQueryTransaction();
+                    await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
                 ExecuteAfter(message);
             }
-        }
-        catch (Exception exception)
+            return result;
+        }, async (exception, cleanupExceptions) =>
         {
-            primaryException = exception;
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
+                .ConfigureAwait(false);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
-        }
-        finally
-        {
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(result));
-        }
-        if (executionLease != null)
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
-        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
-        return result;
+        }, result => ExecuteQueryPlanAfter(result), () => executionLease?.Dispose()).ConfigureAwait(false);
     }
 
 }

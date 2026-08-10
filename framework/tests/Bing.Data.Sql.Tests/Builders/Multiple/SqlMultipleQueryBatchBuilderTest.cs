@@ -89,6 +89,32 @@ public class SqlMultipleQueryBatchBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：数组参数在追加、构建和公开读取的各阶段均应隔离，避免可变值污染命令快照。
+    /// </summary>
+    [Fact]
+    public void Build_WhenParameterValuesAreArrays_ShouldPreserveIndependentArraySnapshots()
+    {
+        // Arrange
+        var values = new[] { 1, 2 };
+        var originalValues = new[] { 3, 4 };
+        var parameter = new SqlParam("ids", values) { OriginalValue = originalValues };
+        var builder = new SqlMultipleQueryBatchBuilder(';');
+
+        // Act
+        var command = builder.Append("Select @ids", new[] { parameter }).Build();
+        values[0] = 9;
+        originalValues[0] = 8;
+        var exposed = Assert.Single(command.Parameters);
+        ((int[])exposed.Value)[1] = 7;
+        ((int[])exposed.OriginalValue)[1] = 6;
+        var snapshot = Assert.Single(command.Parameters);
+
+        // Assert
+        Assert.Equal(new[] { 1, 2 }, (int[])snapshot.Value);
+        Assert.Equal(new[] { 3, 4 }, (int[])snapshot.OriginalValue);
+    }
+
+    /// <summary>
     /// 测试目的：同名参数应按大小写不敏感规则拒绝，且失败的追加不得污染后续 Builder 状态。
     /// </summary>
     [Fact]

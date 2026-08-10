@@ -296,14 +296,13 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 使用实体属性表达式设置分组和可选 Having 条件。
+    /// 使用实体属性表达式设置分组。
     /// </summary>
     /// <param name="column">分组字段表达式。</param>
-    /// <param name="having">受信任的 Having SQL 条件。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> GroupBy(Expression<Func<TEntity, object>> column, string having = null)
+    public SqlLambdaQuery<TEntity> GroupBy(Expression<Func<TEntity, object>> column)
     {
-        GetBuilder().GroupBy(column, having);
+        GetBuilder().GroupBy(column);
         return this;
     }
 

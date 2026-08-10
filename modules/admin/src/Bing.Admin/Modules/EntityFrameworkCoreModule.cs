@@ -44,7 +44,6 @@ namespace Bing.Admin.Modules
             services.AddMySqlQuery(t =>
                 {
                     t.DatabaseType = DatabaseType.MySql;
-                    t.IsClearAfterExecution = true;
                 })
                 .AddSqlCore();
             // 注册SqlExecutor

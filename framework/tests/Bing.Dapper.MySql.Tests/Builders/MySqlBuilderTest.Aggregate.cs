@@ -19,7 +19,7 @@ public class MySqlBuilderAggregateTest
         var builder = new MySqlBuilder();
 
         // Act
-        var sql = builder.Count("o.UserId", "UserCount", distinct: true)
+        var sql = builder.CountColumn("o.UserId", "UserCount", distinct: true)
             .Sum("o.Amount", "Amount", distinct: true)
             .Avg("o.Amount", "Average", distinct: true)
             .Max("o.Amount", "Maximum", distinct: true)
@@ -82,7 +82,7 @@ public class MySqlBuilderAggregateTest
         var builder = new MySqlBuilder();
 
         // Act
-        var sql = builder.Count(alias: "Total").Count("o.UserId", "UserCount", distinct: true)
+        var sql = builder.CountAll("Total").CountColumn("o.UserId", "UserCount", distinct: true)
             .From("orders", "o")
             .ToSql();
 

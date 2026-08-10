@@ -15,7 +15,7 @@ public abstract class SqliteSqlMultipleQueryExecutorBase : SqlMultipleQueryExecu
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="options">当前执行器配置。</param>
     protected SqliteSqlMultipleQueryExecutorBase(IServiceProvider serviceProvider, SqlOptions options)
-        : base(serviceProvider, options, SqliteSqlProvider.Instance.Capabilities)
+        : base(serviceProvider, options)
     {
     }
 

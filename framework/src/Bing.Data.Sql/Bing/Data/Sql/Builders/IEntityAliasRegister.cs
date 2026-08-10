@@ -48,6 +48,14 @@ public interface IEntityAliasRegister
     string GetAlias(Type entity);
 
     /// <summary>
+    /// 获取同实体自连接 On 条件使用的别名。
+    /// </summary>
+    /// <param name="entity">实体类型。</param>
+    /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>匹配的表别名。</returns>
+    string GetSelfJoinAlias(Type entity, bool right);
+
+    /// <summary>
     /// 克隆
     /// </summary>
     IEntityAliasRegister Clone();

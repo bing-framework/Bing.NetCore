@@ -185,6 +185,7 @@ public class FromClause : IFromClause
     {
         if (builder == null)
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         Register?.RegisterAlias(alias);
         Table = SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}");
@@ -212,6 +213,7 @@ public class FromClause : IFromClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
         if (Table != null && Table.IsRaw)
         {
             Table = SqlItem.Raw($"{Table.Name}{sql}");

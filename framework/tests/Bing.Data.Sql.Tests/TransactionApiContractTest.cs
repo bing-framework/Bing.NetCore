@@ -170,56 +170,6 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：旧 Query 异步扩展已移除，避免通过 Root Query 重新暴露终端执行。
-    /// </summary>
-    [Fact]
-    public void QueryAsyncExtensions_ShouldNotExposeLegacyTerminals()
-    {
-        // Arrange
-        var legacyMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name is "ToEntityAsync" or "ToListAsync" or "ToPagerListAsync").ToList();
-
-        // Act and Assert
-        Assert.Empty(legacyMethods);
-    }
-
-    /// <summary>
-    /// 测试目的：旧 Root Query 标量转换扩展已移除，标量查询应通过描述对象执行。
-    /// </summary>
-    [Fact]
-    public void ScalarAsyncExtensions_ShouldNotExposeLegacyTerminals()
-    {
-        // Arrange
-        var scalarMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name is "ToStringAsync" or "ToIntAsync" or "ToIntOrNullAsync" or
-                "ToLongAsync" or "ToLongOrNullAsync" or "ToGuidAsync" or "ToGuidOrNullAsync" or "ToBoolAsync" or
-                "ToBoolOrNullAsync" or "ToFloatAsync" or "ToFloatOrNullAsync" or "ToDoubleAsync" or
-                "ToDoubleOrNullAsync" or "ToDecimalAsync" or "ToDecimalOrNullAsync" or "ToDateTimeAsync" or
-                "ToDateTimeOrNullAsync")
-            .ToList();
-
-        // Act and Assert
-        Assert.Empty(scalarMethods);
-    }
-
-    /// <summary>
-    /// 测试目的：7.0 不再公开含义重复的旧 Query 扩展，调用方必须使用命名明确的替代 API。
-    /// </summary>
-    [Fact]
-    public void QueryExtensions_ShouldNotExposeRemovedLegacyMethods()
-    {
-        // Arrange
-        var extensionMethods = typeof(SqlQueryExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static);
-        var removedMethodNames = new[] { "To", "ToAsync", "ToScalar", "ToScalarAsync" };
-
-        // Act
-        var remainingLegacyMethods = extensionMethods.Where(method => removedMethodNames.Contains(method.Name)).ToList();
-
-        // Assert
-        Assert.Empty(remainingLegacyMethods);
-    }
-
-    /// <summary>
     /// 测试目的：跨 ORM 的数据库契约仍应提供只读连接访问器。
     /// </summary>
     [Fact]

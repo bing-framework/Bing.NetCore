@@ -6,8 +6,8 @@ using Bing.Data.Sql.Builders.Mutations;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>SQL Server SQL 提供程序。</summary>
-public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvider, ISqlProviderCapabilityProvider,
-    ISqlReturningDialect
+public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
+    ISqlProviderProfileProvider
 {
     /// <summary>
     /// 可在线程间安全共享的 SQL Server Provider 单例。
@@ -45,8 +45,36 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvi
         global::Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance;
 
     /// <inheritdoc />
-    public SqlProviderCapabilities Capabilities { get; } = new(supportsMultipleResultSets: true,
-        supportsMultiRowValues: true, supportsUpdateFrom: false, supportsDeleteUsing: false, supportsReturning: true);
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Query = new SqlProviderQueryCapabilities
+        {
+            Cte = SqlQueryCapabilityState.Supported,
+            Union = SqlQueryCapabilityState.Supported,
+            UnionAll = SqlQueryCapabilityState.Supported,
+            Intersect = SqlQueryCapabilityState.Supported,
+            Except = SqlQueryCapabilityState.Supported,
+            RightJoin = SqlQueryCapabilityState.Supported
+        },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = true,
+            SupportsReturning = true
+        },
+        Execution = new SqlProviderExecutionCapabilities
+        {
+            SupportsMultipleResultSets = true,
+            SupportsStreaming = true,
+            SupportsCancellation = true
+        },
+        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Procedure = new SqlProviderProcedureCapabilities
+        {
+            SupportsStoredProcedures = true,
+            SupportsOutputParameters = true
+        },
+        Limits = new SqlProviderLimits { MaxParameterCount = 2100 }
+    };
 
     /// <inheritdoc />
     public SqlReturningClausePosition Position => SqlReturningClausePosition.BeforeSource;
@@ -58,9 +86,6 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlParameterLimitProvi
     public string GetQualifier(SqlExecutionKind executionKind, string configuredQualifier) =>
         executionKind == SqlExecutionKind.Delete ? "Deleted" : "Inserted";
 
-    /// <inheritdoc />
-    /// <remarks>SQL Server 单个命令最多允许 2100 个参数。</remarks>
-    public int? MaxParameterCount => 2100;
 }
 
 /// <summary>

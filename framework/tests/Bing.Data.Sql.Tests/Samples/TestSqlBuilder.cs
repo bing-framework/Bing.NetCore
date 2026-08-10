@@ -99,7 +99,7 @@ public class TestSqlBuilder : SqlBuilderBase
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new TestSqlBuilder(Services, Dialect, parameterManager);
 
-    private sealed class TestSqlProvider : ISqlProvider
+    private sealed class TestSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         public string Key => "test.sqlserver";
 
@@ -111,6 +111,19 @@ public class TestSqlBuilder : SqlBuilderBase
         public ISqlPaginationRenderer PaginationRenderer { get; } = new TestPaginationRenderer();
         public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
         public IParamLiteralsResolver ParamLiteralsResolver => new ParamLiteralsResolver();
+        public SqlProviderProfile Profile { get; } = new()
+        {
+            Query = new SqlProviderQueryCapabilities
+            {
+                Cte = SqlQueryCapabilityState.Supported,
+                Union = SqlQueryCapabilityState.Supported,
+                UnionAll = SqlQueryCapabilityState.Supported,
+                Intersect = SqlQueryCapabilityState.Supported,
+                Except = SqlQueryCapabilityState.Supported,
+                RightJoin = SqlQueryCapabilityState.Supported,
+                Pagination = SqlQueryCapabilityState.Supported
+            }
+        };
     }
 
     private sealed class TestPaginationRenderer : ISqlPaginationRenderer

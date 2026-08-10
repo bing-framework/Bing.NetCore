@@ -1,11 +1,13 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
 using Bing.Data.Sql.Builders;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace Bing.EntityFrameworkCore.Tests.Core;
 
@@ -125,6 +127,72 @@ public class EfCoreSqlQueryFactoryTest
 
         // Assert
         AssertCanExecute(query);
+    }
+
+    /// <summary>
+    /// 测试目的：Shared 模式应在诊断快照中声明 EF Core 外部连接与当前 EF Core 事务。
+    /// </summary>
+    [Fact]
+    public void Create_WhenSharedQueryExecutesInsideEfTransaction_ShouldPublishExternalEfDiagnostics()
+    {
+        // Arrange
+        const string sql = "Select Count(*) From sqlite_master Where Name = @name";
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item =>
+        {
+            if (item.Sql == sql)
+                message = item;
+        });
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider();
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        using var transaction = unitOfWork.Database.BeginTransaction();
+        using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>().Create(unitOfWork);
+
+        // Act
+        var result = query.Sql<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
+
+        // Assert
+        Assert.Equal(0, result);
+        Assert.NotNull(message);
+        Assert.Equal(SqlConnectionSource.EntityFrameworkCore, message.Connection.Source);
+        Assert.Equal(SqlResourceOwnership.External, message.Connection.Ownership);
+        Assert.True(message.Transaction.HasTransaction);
+        Assert.Equal(SqlResourceOwnership.External, message.Transaction.Ownership);
+    }
+
+    /// <summary>
+    /// 测试目的：Independent 模式即使 EF Core 事务已存在，也应使用自有数据源连接且不绑定该事务。
+    /// </summary>
+    [Fact]
+    public void Create_WhenIndependentQueryExecutesInsideEfTransaction_ShouldPublishOwnedDataSourceDiagnostics()
+    {
+        // Arrange
+        const string sql = "Select Count(*) From sqlite_master Where Name = @name";
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item =>
+        {
+            if (item.Sql == sql)
+                message = item;
+        });
+        using var connection = new SqliteConnection(SharedMemoryConnectionString);
+        connection.Open();
+        using var serviceProvider = CreateServiceProvider();
+        using var unitOfWork = CreateUnitOfWork(connection, serviceProvider);
+        using var transaction = unitOfWork.Database.BeginTransaction();
+        using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>()
+            .Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
+
+        // Act
+        var result = query.Sql<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
+
+        // Assert
+        Assert.Equal(0, result);
+        Assert.NotNull(message);
+        Assert.Equal(SqlConnectionSource.DataSource, message.Connection.Source);
+        Assert.Equal(SqlResourceOwnership.Owned, message.Connection.Ownership);
+        Assert.False(message.Transaction.HasTransaction);
     }
 
     /// <summary>
@@ -486,7 +554,7 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <param name="query">待执行的查询对象。</param>
     /// <returns>SQLite 元数据项数量。</returns>
-    private static int ExecuteCount(ISqlQuery query) => query.Sql<int>().Count().From("sqlite_master").Scalar();
+    private static int ExecuteCount(ISqlQuery query) => query.Sql<int>().CountAll().From("sqlite_master").Scalar();
 
     /// <summary>
     /// 创建服务提供程序
@@ -623,6 +691,65 @@ public class EfCoreSqlQueryFactoryTest
             .UseSqlite(connection)
             .Options;
         return new TestUnitOfWork(options, serviceProvider);
+    }
+
+    /// <summary>
+    /// 捕获 SQL 诊断消息的观察器。
+    /// </summary>
+    private sealed class SqlDiagnosticObserver : IObserver<DiagnosticListener>,
+        IObserver<KeyValuePair<string, object>>, IDisposable
+    {
+        /// <summary>
+        /// 接收诊断消息的回调。
+        /// </summary>
+        private readonly Action<DiagnosticsMessage> _onMessage;
+
+        /// <summary>
+        /// 全局诊断监听器订阅。
+        /// </summary>
+        private readonly IDisposable _allSubscription;
+
+        /// <summary>
+        /// SQL 查询诊断监听器订阅。
+        /// </summary>
+        private IDisposable _listenerSubscription;
+
+        /// <summary>
+        /// 初始化一个<see cref="SqlDiagnosticObserver"/>类型的实例。
+        /// </summary>
+        /// <param name="onMessage">接收诊断消息的回调。</param>
+        public SqlDiagnosticObserver(Action<DiagnosticsMessage> onMessage)
+        {
+            _onMessage = onMessage ?? throw new ArgumentNullException(nameof(onMessage));
+            _allSubscription = DiagnosticListener.AllListeners.Subscribe(this);
+        }
+
+        /// <inheritdoc />
+        public void OnNext(DiagnosticListener value)
+        {
+            if (value.Name == SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
+                _listenerSubscription = value.Subscribe(this);
+        }
+
+        /// <inheritdoc />
+        public void OnNext(KeyValuePair<string, object> value)
+        {
+            if (value.Key == SqlQueryDiagnosticListenerNames.BeforeExecute && value.Value is DiagnosticsMessage message)
+                _onMessage(message);
+        }
+
+        /// <inheritdoc />
+        public void OnCompleted() { }
+
+        /// <inheritdoc />
+        public void OnError(Exception error) { }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            _listenerSubscription?.Dispose();
+            _allSubscription.Dispose();
+        }
     }
 
     /// <summary>

@@ -99,4 +99,76 @@ public class StructuredTableReferenceBuilderTest
         // Assert
         Assert.Equal("Left Join [sales].[dbo].[customers] As [c]", builder.JoinClause.ToSql());
     }
+
+    /// <summary>
+    /// 测试目的：结构化 RightJoin 应输出完整的 SQL Server 三段表名和别名。
+    /// </summary>
+    [Fact]
+    public void RightJoin_WhenUsingStructuredReference_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        var reference = new SqlTableReference
+        {
+            Database = "sales",
+            Schema = "dbo",
+            TableName = "customers",
+            Alias = "c"
+        };
+
+        // Act
+        builder.JoinClause.RightJoin(reference);
+
+        // Assert
+        Assert.Equal("Right Join [sales].[dbo].[customers] As [c]", builder.JoinClause.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：原始 From 后的结构化 Join 在 PostgreSQL 目标包含 Database 时应拒绝跨库 SQL。
+    /// </summary>
+    [Fact]
+    public void Join_WhenRawFromAndPostgreSqlTargetContainsDatabase_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var builder = CreateBuilder(DatabaseType.PgSql);
+        builder.FromClause.AppendSql("orders o");
+        builder.JoinClause.Join(new SqlTableReference { Database = "reporting", TableName = "customers" });
+
+        // Act
+        var action = () => builder.JoinClause.ToSql();
+
+        // Assert
+        Assert.Throws<NotSupportedException>(action);
+    }
+
+    /// <summary>
+    /// 测试目的：原始 From 后的结构化 Join 在 Oracle 目标包含 Database 时应拒绝跨库 SQL。
+    /// </summary>
+    [Fact]
+    public void Join_WhenRawFromAndOracleTargetContainsDatabase_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var builder = CreateBuilder(DatabaseType.Oracle);
+        builder.FromClause.AppendSql("orders o");
+        builder.JoinClause.Join(new SqlTableReference { Database = "reporting", TableName = "customers" });
+
+        // Act
+        var action = () => builder.JoinClause.ToSql();
+
+        // Assert
+        Assert.Throws<NotSupportedException>(action);
+    }
+
+    /// <summary>
+    /// 创建带指定 Provider 执行上下文的测试 Builder。
+    /// </summary>
+    private static TestSqlBuilder CreateBuilder(DatabaseType databaseType)
+    {
+        var context = new DatabaseContext
+        {
+            DataSource = new SqlDataSourceDescriptor { DatabaseType = databaseType }
+        };
+        return new TestSqlBuilder(options: new SqlOptions().SetDatabaseContext(context),
+            crossDatabaseQueryValidator: new DefaultSqlCrossDatabaseQueryValidator());
+    }
 }

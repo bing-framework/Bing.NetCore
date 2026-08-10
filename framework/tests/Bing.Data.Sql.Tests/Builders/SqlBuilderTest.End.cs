@@ -147,6 +147,32 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：调试 SQL 必须遮蔽所有支持的凭据别名，普通参数仍应保留其可诊断值。
+    /// </summary>
+    [Fact]
+    public void ToDebugSql_WhenCredentialAliasesAreUsed_ShouldRedactSensitiveValues()
+    {
+        // Arrange
+        var builder = _builder.AppendSelect("*").AppendFrom("[Test]")
+            .AppendWhere("[Pwd]=@pwd And [Credential]=@ClientCredential And [Auth]=@Authorization And [Signature]=@Signature And [Name]=@Name")
+            .AddParam("pwd", "database-password")
+            .AddParam("ClientCredential", "client-credential")
+            .AddParam("Authorization", "Bearer access-token")
+            .AddParam("Signature", "request-signature")
+            .AddParam("Name", "Bing");
+
+        // Act
+        var result = builder.ToDebugSql(builder.ToSql());
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Test] \r\nWhere [Pwd]='<redacted>' And [Credential]='<redacted>' And [Auth]='<redacted>' And [Signature]='<redacted>' And [Name]='Bing'", result);
+        Assert.DoesNotContain("database-password", result);
+        Assert.DoesNotContain("client-credential", result);
+        Assert.DoesNotContain("access-token", result);
+        Assert.DoesNotContain("request-signature", result);
+    }
+
+    /// <summary>
     /// 测试目的：传入空 SQL 时应明确拒绝，避免调试渲染出现不可诊断的空引用异常。
     /// </summary>
     [Fact]

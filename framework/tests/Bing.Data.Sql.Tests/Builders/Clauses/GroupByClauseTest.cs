@@ -75,7 +75,8 @@ public class GroupByClauseTest
     [Fact]
     public void Test_GroupBy_4()
     {
-        _clause.GroupBy("a", "b");
+        _clause.GroupBy("a");
+        _clause.HavingRaw("b");
         Assert.Equal("Group By [a] Having b", GetSql());
     }
 
@@ -85,7 +86,8 @@ public class GroupByClauseTest
     [Fact]
     public void Test_GroupBy_5()
     {
-        _clause.GroupBy<Sample>(t => t.Email, "b");
+        _clause.GroupBy<Sample>(t => t.Email);
+        _clause.HavingRaw("b");
         Assert.Equal("Group By [Email] Having b", GetSql());
     }
 
@@ -97,7 +99,8 @@ public class GroupByClauseTest
     {
         _clause = new GroupByClause(TestSqlBuilder.CreateTestClauseContext(
             entityResolver: new TestEntityResolver(), aliasRegister: new TestEntityAliasRegister()));
-        _clause.GroupBy<Sample>(t => t.Email, "b");
+        _clause.GroupBy<Sample>(t => t.Email);
+        _clause.HavingRaw("b");
         Assert.Equal("Group By [as_Sample].[t_Email] Having b", GetSql());
     }
 
@@ -107,8 +110,10 @@ public class GroupByClauseTest
     [Fact]
     public void Test_GroupBy_7()
     {
-        _clause.GroupBy("a", "b");
-        _clause.GroupBy<Sample>(t => t.Email, "c");
+        _clause.GroupBy("a");
+        _clause.HavingRaw("b");
+        _clause.GroupBy<Sample>(t => t.Email);
+        _clause.HavingRaw("c");
         Assert.Equal("Group By [a],[Email] Having c", GetSql());
     }
 
@@ -132,7 +137,8 @@ public class GroupByClauseTest
     public void HavingRaw_WhenGroupConfigured_ShouldReplaceHavingCondition()
     {
         // Arrange
-        _clause.GroupBy("a", "Count(*) > 1");
+        _clause.GroupBy("a");
+        _clause.HavingRaw("Count(*) > 1");
 
         // Act
         _clause.HavingRaw("Sum([Amount]) >= @minimum");

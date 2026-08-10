@@ -22,7 +22,8 @@ public partial class SqlBuilderTest
         //执行
         _builder.Select<Sample>(t => t.Email)
             .From<Sample>("a")
-            .GroupBy("b", "c");
+            .GroupBy("b")
+            .HavingRaw("c");
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());
@@ -43,7 +44,8 @@ public partial class SqlBuilderTest
         //执行
         _builder.Select<Sample>(t => t.Email)
             .From<Sample>("a")
-            .GroupBy<Sample>(t => t.Email, "b");
+            .GroupBy<Sample>(t => t.Email)
+            .HavingRaw("b");
 
         //验证
         Assert.Equal(result.ToString(), _builder.ToSql());

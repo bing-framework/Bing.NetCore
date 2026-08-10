@@ -1,5 +1,6 @@
 using Bing.Helpers;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql;
 
@@ -9,32 +10,42 @@ public abstract partial class SqlQueryBase
     /// <inheritdoc />
     PagerList<TResult> ISqlQueryPlanExecutor.ToPage<TResult>(SqlQueryPlan plan, IPager pager, int? timeout)
     {
-        var page = GetPlanPager(plan, pager);
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        var sourcePager = GetPlanPager(plan, pager);
+        var page = CreatePlanPagerSnapshot(sourcePager);
+        var sourceBuilder = plan.Builder.Clone();
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
         try
         {
+            var totalCount = page.TotalCount;
+            var totalCountCalculated = false;
             if (IsPlanTotalCountUnknown(page))
             {
-                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
-                page.TotalCount = InternalQueryPlan(countPlan, (connection, sql, parameters, transaction) =>
+                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(sourceBuilder));
+                totalCount = InternalQueryPlan(countPlan, (connection, sql, parameters, transaction) =>
                     Conv.ToInt(connection.ExecuteScalar(sql, parameters, transaction, timeout,
-                        commandType: countPlan.CommandType)), acquireExecutionLease: false, completeTransaction: false,
-                    consumeDebugLogState: false);
+                        commandType: countPlan.CommandType)), acquireExecutionLease: false, completeTransaction: false);
+                totalCountCalculated = true;
             }
-            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
+            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(sourceBuilder, page), plan.SplitOn);
             var items = InternalQueryPlan(pagePlan, (connection, sql, parameters, transaction) => connection
                 .Query<TResult>(sql, parameters, transaction, buffered: true, commandTimeout: timeout,
                     commandType: pagePlan.CommandType).ToList(), acquireExecutionLease: false,
-                consumeDebugLogState: false);
+                completeTransaction: false);
+            CompleteQueryTransaction();
+            if (totalCountCalculated)
+            {
+                page.TotalCount = totalCount;
+                sourcePager.TotalCount = totalCount;
+            }
             result = new PagerList<TResult>(page, items);
         }
         catch (Exception exception)
         {
             primaryException = exception;
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
         }
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
@@ -45,8 +56,9 @@ public abstract partial class SqlQueryBase
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
-        var page = GetPlanPager(plan, pager);
-        using var debugLogScope = BeginQueryPlanDebugLogScope();
+        var sourcePager = GetPlanPager(plan, pager);
+        var page = CreatePlanPagerSnapshot(sourcePager);
+        var sourceBuilder = plan.Builder.Clone();
         cancellationToken.ThrowIfCancellationRequested();
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
@@ -54,25 +66,36 @@ public abstract partial class SqlQueryBase
         var cleanupExceptions = new List<Exception>();
         try
         {
+            var totalCount = page.TotalCount;
+            var totalCountCalculated = false;
             if (IsPlanTotalCountUnknown(page))
             {
-                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(plan.Builder));
-                page.TotalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction) =>
+                var countPlan = SqlQueryPlan.Create(CreatePlanCountBuilder(sourceBuilder));
+                totalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction) =>
                     Conv.ToInt(await connection.ExecuteScalarAsync(CreateQueryCommandDefinition(sql, parameters,
                         transaction, timeout, buffered: true, cancellationToken, countPlan.CommandType))), cancellationToken,
-                    acquireExecutionLease: false, completeTransaction: false, consumeDebugLogState: false);
+                    acquireExecutionLease: false, completeTransaction: false);
+                totalCountCalculated = true;
             }
-            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(plan.Builder, page), plan.SplitOn);
+            var pagePlan = SqlQueryPlan.Create(CreatePlanPageBuilder(sourceBuilder, page), plan.SplitOn);
             var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction) =>
                 await ExecuteMaterializedQueryAsync<TResult>(connection,
                     CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, cancellationToken,
                         pagePlan.CommandType), cancellationToken), cancellationToken, acquireExecutionLease: false,
-                consumeDebugLogState: false);
+                completeTransaction: false);
+            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            if (totalCountCalculated)
+            {
+                page.TotalCount = totalCount;
+                sourcePager.TotalCount = totalCount;
+            }
             result = new PagerList<TResult>(page, items);
         }
         catch (Exception exception)
         {
             primaryException = exception;
+            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
+                .ConfigureAwait(false);
         }
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
@@ -105,9 +128,22 @@ public abstract partial class SqlQueryBase
         : pager.TotalCount == 0;
 
     /// <summary>
+    /// 创建本次分页执行使用的不可变输入快照。
+    /// </summary>
+    /// <param name="source">调用方或查询计划提供的分页参数。</param>
+    /// <returns>与调用方对象隔离的分页参数副本。</returns>
+    private static Pager CreatePlanPagerSnapshot(IPager source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        return new Pager(source.Page, source.PageSize, source.TotalCount, source.Order,
+            source is Pager pager && pager.IsTotalCountKnown);
+    }
+
+    /// <summary>
     /// 创建当前页数据使用的独立 Builder。
     /// </summary>
-    /// <param name="source">查询描述持有的源 Builder。</param>
+    /// <param name="source">本次执行开始时冻结的源 Builder。</param>
     /// <param name="pager">分页参数。</param>
     /// <returns>已应用排序和分页的独立 Builder。</returns>
     private static ISqlBuilder CreatePlanPageBuilder(ISqlBuilder source, IPager pager)
@@ -120,7 +156,7 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 创建总行数查询使用的独立 Builder。
     /// </summary>
-    /// <param name="source">查询描述持有的源 Builder。</param>
+    /// <param name="source">本次执行开始时冻结的源 Builder。</param>
     /// <returns>返回单个总行数的 Builder。</returns>
     private static ISqlBuilder CreatePlanCountBuilder(ISqlBuilder source)
     {
@@ -131,16 +167,13 @@ public abstract partial class SqlQueryBase
         var hasUnion = builder is IUnionAccessor { IsUnion: true };
         var hasGroup = builder is ISqlQueryClauseAccessor { GroupByClause.IsGroup: true };
         var hasDistinct = builder is ISqlQueryClauseAccessor { SelectClause.IsDistinct: true };
-        if (hasCte && (hasUnion || hasGroup || hasDistinct))
+        var hasAggregate = builder is ISqlQueryClauseAccessor { SelectClause: SelectClause selectClause } &&
+                           selectClause.HasAggregate;
+        if (hasCte && (hasUnion || hasGroup || hasDistinct || hasAggregate))
             throw new NotSupportedException("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。");
-        if (hasUnion || hasDistinct)
-            return builder.New().Count().From(builder, "t");
-        if (hasGroup)
-        {
-            builder.ClearSelect();
-            return builder.New().Count().From(builder.AppendSelect("1 As c"), "t");
-        }
+        if (hasUnion || hasGroup || hasDistinct || hasAggregate)
+            return builder.New().CountAll().From(builder, "t");
         builder.ClearSelect();
-        return builder.Count();
+        return builder.CountAll();
     }
 }

@@ -34,7 +34,7 @@ internal sealed class CustomSqlBuilder : SqlBuilderBase
 /// <summary>
 /// 外部 Provider 验收用 SQL Provider。
 /// </summary>
-internal sealed class CustomSqlProvider : ISqlProvider
+internal sealed class CustomSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// Provider 单例。
@@ -68,6 +68,12 @@ internal sealed class CustomSqlProvider : ISqlProvider
 
     /// <inheritdoc />
     public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
+
+    /// <inheritdoc />
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Query = new SqlProviderQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported }
+    };
 }
 
 /// <summary>
@@ -178,7 +184,7 @@ internal sealed class LimitedCustomSqlBuilder : SqlBuilderBase
 /// <summary>
 /// 外部 Provider 参数数量上限验收用 SQL Provider。
 /// </summary>
-internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlParameterLimitProvider
+internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
     /// Provider 单例。
@@ -214,7 +220,10 @@ internal sealed class LimitedCustomSqlProvider : ISqlProvider, ISqlParameterLimi
     public IParamLiteralsResolver ParamLiteralsResolver => CustomSqlProvider.Instance.ParamLiteralsResolver;
 
     /// <inheritdoc />
-    public int? MaxParameterCount => 1;
+    public SqlProviderProfile Profile { get; } = new()
+    {
+        Limits = new SqlProviderLimits { MaxParameterCount = 1 }
+    };
 }
 
 /// <summary>

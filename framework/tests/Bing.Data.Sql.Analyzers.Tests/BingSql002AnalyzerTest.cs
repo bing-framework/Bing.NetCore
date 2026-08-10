@@ -64,6 +64,35 @@ public class BingSql002AnalyzerTest
     }
 
     /// <summary>
+    /// 测试目的：经转换、条件、空合并或 String.Concat 包装的插值 SQL 仍应报告风险。
+    /// </summary>
+    [Fact]
+    public async Task Analyze_WhenInterpolatedSqlFlowsThroughWrapperExpressions_ShouldReportDiagnostic()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            public class Test
+            {
+                public void Execute(Query query, string name, bool usePrimary)
+                {
+                    query.Sql<string>((string)$"Select * From samples Where Name = '{name}'");
+                    query.Sql<string>(usePrimary ? $"Select * From samples Where Name = '{name}'" : "Select * From samples");
+                    query.Sql<string>(null ?? $"Select * From samples Where Name = '{name}'");
+                    query.Sql<string>(string.Concat("Select * From samples Where Name = '", $"{name}'"));
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzeAsync(source);
+
+        // Assert
+        Assert.Equal(4, diagnostics.Length);
+        Assert.All(diagnostics, diagnostic => Assert.Equal("BINGSQL002", diagnostic.Id));
+    }
+
+    /// <summary>
     /// 测试目的：参数对象和 FormattableString 安全入口不应报告 BINGSQL002。
     /// </summary>
     [Fact]
@@ -136,6 +165,60 @@ public class BingSql002AnalyzerTest
     }
 
     /// <summary>
+    /// 测试目的：执行器同步和异步原生 SQL 入口接收插值值时应报告参数化风险。
+    /// </summary>
+    [Fact]
+    public async Task Analyze_WhenInterpolatedSqlPassedToExecutorEntryPoints_ShouldReportDiagnostic()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            public class Test
+            {
+                public void Execute(Executor executor, string name)
+                {
+                    executor.ExecuteSql($"Delete From samples Where Name = '{name}'");
+                    executor.ExecuteSqlAsync($"Delete From samples Where Name = '{name}'");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzeAsync(source);
+
+        // Assert
+        Assert.Equal(2, diagnostics.Length);
+        Assert.All(diagnostics, diagnostic => Assert.Equal("BINGSQL002", diagnostic.Id));
+    }
+
+    /// <summary>
+    /// 测试目的：ISqlExecutor 的普通文本扩展入口接收插值 SQL 时也应报告风险。
+    /// </summary>
+    [Fact]
+    public async Task Analyze_WhenInterpolatedSqlPassedToExecutorExtensionEntryPoint_ShouldReportDiagnostic()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            public class Test
+            {
+                public void Execute(Executor executor, string name)
+                {
+                    executor.ExecuteSql($"Delete From samples Where Name = '{name}'");
+                    executor.Sql($"Unrelated helper: {name}");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzeAsync(source, SqlExecutorExtensionApiStub);
+
+        // Assert
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("BINGSQL002", diagnostic.Id);
+    }
+
+    /// <summary>
     /// 测试目的：生成代码中的普通文本入口不应报告 BINGSQL002，避免影响源码生成器输出。
     /// </summary>
     [Fact]
@@ -193,6 +276,18 @@ public class BingSql002AnalyzerTest
                 public object Sql<TResult>(string sql, object parameters = null) => null;
                 public object SqlInterpolated<TResult>(System.FormattableString sql) => null;
             }
+
+            public interface ISqlExecutor
+            {
+                object ExecuteSql(string sql, object parameters = null);
+                object ExecuteSqlAsync(string sql, object parameters = null);
+            }
+
+            public sealed class Executor : ISqlExecutor
+            {
+                public object ExecuteSql(string sql, object parameters = null) => null;
+                public object ExecuteSqlAsync(string sql, object parameters = null) => null;
+            }
         }
         """;
 
@@ -209,6 +304,24 @@ public class BingSql002AnalyzerTest
             public static class QueryExtensions
             {
                 public static object Sql<TResult>(this ISqlQuery query, string sql, object parameters = null) => null;
+            }
+        }
+        """;
+
+    /// <summary>
+    /// 用于验证执行器扩展入口识别的最小 SQL API 源码替身。
+    /// </summary>
+    private const string SqlExecutorExtensionApiStub = """
+        namespace Bing.Data.Sql
+        {
+            public interface ISqlExecutor { }
+
+            public sealed class Executor : ISqlExecutor { }
+
+            public static class ExecutorExtensions
+            {
+                public static object ExecuteSql(this ISqlExecutor executor, string sql, object parameters = null) => null;
+                public static object Sql(this ISqlExecutor executor, string text) => null;
             }
         }
         """;

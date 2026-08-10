@@ -2,7 +2,7 @@
 
 ## 概述
 
-`ISqlQuery` 是 Bing 数据访问层中的 Sql 查询对象，用于基于实体表达式构建类型安全的 Sql，并提供执行与分页等能力。它内部通过 `ISqlBuilder` 生成 Sql 语句，并继承了执行操作接口 `ISqlQueryOperation` 以及配置接口 `ISqlOptions`，同时实现 `IDisposable` 以管理数据库连接、事务等资源。
+`ISqlQuery` 是 Bing 数据访问层中的 Sql 查询对象，用于基于实体表达式构建类型安全的 Sql，并提供执行与分页等能力。它通过受控的查询描述生成 Sql 语句，同时实现 `IDisposable` 以管理数据库连接、事务等资源。
 
 在典型场景中，`ISqlQuery` 主要用于：
 
@@ -18,28 +18,13 @@
 `ISqlQuery` 的核心定义位于 `framework/src/Bing.Data.Sql/Bing/Data/Sql/ISqlQuery.cs`：
 
 ```csharp
-public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposable
+public partial interface ISqlQuery : IDisposable
 {
-    /// <summary>
-    /// 上下文标识
-    /// </summary>
-    string ContextId { get; }
-
-    /// <summary>
-    /// Sql 生成器
-    /// </summary>
-    ISqlBuilder SqlBuilder { get; }
-
     /// <summary>
     /// 配置
     /// </summary>
     /// <param name="configAction">配置操作</param>
     void Config(Action<SqlOptions> configAction);
-
-    /// <summary>
-    /// 获取 Sql 生成器
-    /// </summary>
-    ISqlBuilder GetBuilder();
 
     /// <summary>
     /// 分页查询
@@ -77,25 +62,14 @@ public partial interface ISqlQuery : ISqlQueryOperation, ISqlOptions, IDisposabl
         int? timeout = null,
         CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// 临时禁用调试日志
-    /// </summary>
-    ISqlQuery DisableDebugLog();
 }
 ```
-
-### 关键属性
-
-- `ContextId`：当前查询上下文标识，用于日志和诊断，便于跨组件追踪一次完整查询过程。
-- `SqlBuilder`：内部使用的 Sql 生成器实例，通常通过 `GetBuilder()` 获取并间接操作，不建议直接替换。
 
 ### 重要方法
 
 - `Config(Action<SqlOptions> configAction)`：对当前查询对象进行配置，例如设置执行超时、是否执行后清空等。
-- `GetBuilder()`：获取当前查询关联的 `ISqlBuilder` 实例，通常用于高级场景或自定义执行逻辑。
 - `PagerQuery` / `PagerQueryAsync`：在给定分页参数 `IPager` 的基础上，统一完成分页逻辑，返回 `PagerList<TResult>`。
 - `StreamQuery` / `StreamQueryAsync`：以非缓冲方式读取结果集，适合导出、大结果集扫描等场景；调用方必须自行控制枚举生命周期。
-- `DisableDebugLog()`：临时禁用调试日志输出，适合高频调用、对日志量敏感的场景。
 
 ---
 
@@ -162,7 +136,7 @@ query.AppendFrom("Orders o")
     .AddParam("TenantId", tenantId);
 ```
 
-没有 Join 时调用 `AppendOn` 是无操作，条件不会保存到后续 Join。原始 Join 已包含 `On` 时，后续 `AppendOn` 会以 `And` 追加到同一 Join。
+空白 `AppendOn` 是无操作；没有 Join 时传入非空条件会抛出 `InvalidOperationException`，条件不会保存到后续 Join。原始 Join 已包含 `On` 时，后续 `AppendOn` 会以 `And` 追加到同一 Join。
 
 `AppendSelect`、`AppendWhere`、`AppendGroupBy`、`AppendOrderBy` 与 `AppendOn` 不属于完全字节原样的 API：其中的方括号标识符会按当前方言转换。它们的参数同样必须显式 `AddParam`。
 
@@ -170,7 +144,7 @@ query.AppendFrom("Orders o")
 
 | Provider | 支持的限定部分 |
 | --- | --- |
-| MySQL / Doris | `Schema.Table` |
+| MySQL / Doris 兼容配置 | `Schema.Table` |
 | SQL Server | `Database.Schema.Table` |
 | PostgreSQL | `Schema.Table` |
 | Oracle | `Schema.Table` |
@@ -556,19 +530,20 @@ executor.ExecuteSql<User>(
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 
 ```csharp
-sqlQuery.From<User>("u")
+var query = sqlQuery.Sql<User>()
+    .From<User>("u")
     .Where<User>(x => x.Name, "Tom");
 
-sqlQuery.GetBuilder().AddParam<User>("statusCode", x => x.Status, 1);
+query.AddParam<SqlQuery<User>, User>("statusCode", x => x.Status, 1);
 ```
 
 该方式适合：
 
-- 继续沿用现有 Builder / Query 代码；
+- 在受控查询描述中补齐参数元数据；
 - 在不改 SQL 片段文本的前提下，补齐特定参数的数据库元数据；
 - 让 `GetCountAsync()`、原生 SQL 执行、分页等路径统一走增强参数绑定。
 
-注意：`GetBuilder().GetParams()` 仍然保留轻量参数列表语义，便于调试；真正执行时会自动绑定增强后的数据库参数。
+注意：`query.GetParams()` 仍然保留轻量参数列表语义，便于调试；真正执行时会自动绑定增强后的数据库参数。
 
 ---
 

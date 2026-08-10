@@ -62,7 +62,7 @@ public partial class SqlBuilderTest
         result.Append("From [b]");
 
         //执行
-        _builder.Count()
+        _builder.CountAll()
             .From("b");
 
         //验证
@@ -523,7 +523,7 @@ public partial class SqlBuilderTest
         result.Append("Where [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.Select("*").Select(builder2, "TestCount").From("Test").Where("Age", 1);
 
         //验证
@@ -551,7 +551,7 @@ public partial class SqlBuilderTest
         //执行
         _builder.Select("*").Select(builder =>
         {
-            builder.Count().From("Test2").Where("Name", "a");
+            builder.CountAll().From("Test2").Where("Name", "a");
         }, "TestCount")
             .From("Test").Where("Age", 1);
 
@@ -597,7 +597,7 @@ public partial class SqlBuilderTest
         result.Append("Where [Age]=@_p_1");
 
         //执行
-        var builder2 = _builder.New().Count().From("Test2").Where("Name", "a");
+        var builder2 = _builder.New().CountAll().From("Test2").Where("Name", "a");
         _builder.Select("*").AppendSelect("(").Select(builder2, "").AppendSelect(") As testCount").From("Test")
             .Where("Age", 1);
 

@@ -80,7 +80,7 @@ public partial class MySqlBuilderTest
 
         // Act
         var sql = _builder.Select("Region").Sum("Amount", "Total").From("sales")
-            .GroupBy("Region", "Sum(Amount)>100").OrderBy("Region").OrderBy("Total desc").ToSql();
+            .GroupBy("Region").HavingRaw("Sum(Amount)>100").OrderBy("Region").OrderBy("Total desc").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);
@@ -97,7 +97,7 @@ public partial class MySqlBuilderTest
 
         // Act
         var sql = _builder.Select("Region").Sum("Amount", "Total").From("sales")
-            .GroupBy("Region", "Sum(Amount)>100").OrderBy("Total desc").Skip(50).Take(25).ToSql();
+            .GroupBy("Region").HavingRaw("Sum(Amount)>100").OrderBy("Total desc").Skip(50).Take(25).ToSql();
 
         // Assert
         Assert.Equal(expected, sql);

@@ -7,7 +7,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 默认 SQL 参数源解析器
 /// </summary>
-public sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceResolver
+internal sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceResolver
 {
     /// <summary>
     /// 参数名称规范化器

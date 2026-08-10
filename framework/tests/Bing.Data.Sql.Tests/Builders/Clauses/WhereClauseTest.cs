@@ -144,6 +144,46 @@ public class WhereClauseTest
     }
 
     /// <summary>
+    /// 测试目的：通用子查询 Where 使用 In 时应渲染子查询条件，并在父、子查询参数同名时保持绑定隔离。
+    /// </summary>
+    [Fact]
+    public void Where_WhenSubqueryUsesInOperator_ShouldRenderSqlAndMergeParameters()
+    {
+        // Arrange
+        var parentBuilder = new TestSqlBuilder(parameterManager: _parameterManager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(parameterManager: _parameterManager,
+            builder: parentBuilder));
+        var builder = parentBuilder.New().Select("RoleId").From("Roles").Where("Name", "child");
+        _clause.Where("User.Name", "parent");
+
+        // Act
+        _clause.Where("User.RoleId", builder, Operator.In);
+
+        // Assert
+        GetSql().ShouldBe("Where [User].[Name]=@_p_0 And [User].[RoleId] In (Select [RoleId] \r\n" +
+            "From [Roles] \r\nWhere [Name]=@_p_1)");
+        _parameterManager.GetValue("@_p_0").ShouldBe("parent");
+        _parameterManager.GetValue("@_p_1").ShouldBe("child");
+    }
+
+    /// <summary>
+    /// 测试目的：泛型子查询 Where 使用 NotIn 时应复用子查询渲染路径，且无参数子查询不得生成额外参数。
+    /// </summary>
+    [Fact]
+    public void Where_WhenGenericSubqueryUsesNotInOperator_ShouldRenderSqlWithoutParameters()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("RoleEmail").From("Roles");
+
+        // Act
+        _clause.Where<Sample>(sample => sample.Email, builder, Operator.NotIn);
+
+        // Assert
+        GetSql().ShouldBe("Where [Email] Not In (Select [RoleEmail] \r\nFrom [Roles])");
+        _parameterManager.GetParams().ShouldBeEmpty();
+    }
+
+    /// <summary>
     /// 测试 - 设置条件 - 通过lambda设置列名
     /// </summary>
     [Fact]
@@ -246,6 +286,25 @@ public class WhereClauseTest
         _clause.Where<Sample>(t => t.IntValue <= 1);
         Assert.Equal("Where [IntValue]<=@_p_0", GetSql());
         Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
+    }
+
+    /// <summary>
+    /// 测试目的：关系比较条件不能接受 null，避免生成始终未知的 SQL 三值逻辑表达式。
+    /// </summary>
+    [Theory]
+    [InlineData(Operator.Greater)]
+    [InlineData(Operator.GreaterEqual)]
+    [InlineData(Operator.Less)]
+    [InlineData(Operator.LessEqual)]
+    public void Where_WhenComparisonValueIsNull_ShouldThrowWithoutAddingParameters(Operator @operator)
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => _clause.Where("IntValue", (object)null, @operator));
+
+        // Assert
+        Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
     }
 
     /// <summary>
@@ -726,6 +785,52 @@ public class WhereClauseTest
         Assert.Equal(3, _parameterManager.GetParams().Count);
     }
 
+    /// <summary>
+    /// 测试目的：null In 集合必须按空集合处理，不能静默移除已声明的过滤条件。
+    /// </summary>
+    [Fact]
+    public void In_WhenValuesAreNull_ShouldRenderAlwaysFalseCondition()
+    {
+        // Act
+        _clause.In("Email", (IEnumerable<object>)null);
+
+        // Assert
+        Assert.Equal("Where 1 = 0", GetSql());
+        Assert.Empty(_parameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：通用 In 入口接收标量、字符串或二进制值时应在添加参数前拒绝，不能退化为集合条件。
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData("tenant-a")]
+    public void In_WhenValueIsNotCollection_ShouldThrowWithoutAddingParameters(object value)
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.Where("Email", value, Operator.In));
+
+        // Assert
+        Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：通用 In 入口接收二进制值时应在添加参数前拒绝，不能按字节展开。
+    /// </summary>
+    [Fact]
+    public void In_WhenValueIsBinary_ShouldThrowWithoutAddingParameters()
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.Where("Email", new byte[] { 1, 2 }, Operator.In));
+
+        // Assert
+        Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
     #endregion
 
     #region NotIn
@@ -749,6 +854,52 @@ public class WhereClauseTest
         Assert.Equal("a", _parameterManager.GetValue("@_p_0"));
         Assert.Equal("b", _parameterManager.GetValue("@_p_1"));
         Assert.Equal(2, _parameterManager.GetParams().Count);
+    }
+
+    /// <summary>
+    /// 测试目的：null NotIn 集合必须按空集合处理，保持恒真过滤语义且不创建参数。
+    /// </summary>
+    [Fact]
+    public void NotIn_WhenValuesAreNull_ShouldRenderAlwaysTrueCondition()
+    {
+        // Act
+        _clause.NotIn("Email", (IEnumerable<object>)null);
+
+        // Assert
+        Assert.Equal("Where 1 = 1", GetSql());
+        Assert.Empty(_parameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：通用 NotIn 入口接收标量、字符串或二进制值时应在添加参数前拒绝，避免恒真条件扩大查询结果。
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData("tenant-a")]
+    public void NotIn_WhenValueIsNotCollection_ShouldThrowWithoutAddingParameters(object value)
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.Where("Email", value, Operator.NotIn));
+
+        // Assert
+        Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：通用 NotIn 入口接收二进制值时应在添加参数前拒绝，避免按字节展开或退化为恒真条件。
+    /// </summary>
+    [Fact]
+    public void NotIn_WhenValueIsBinary_ShouldThrowWithoutAddingParameters()
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.Where("Email", new byte[] { 1, 2 }, Operator.NotIn));
+
+        // Assert
+        Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
     }
 
     /// <summary>

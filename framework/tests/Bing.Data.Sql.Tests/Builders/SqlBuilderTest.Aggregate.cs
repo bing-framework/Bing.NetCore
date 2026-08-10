@@ -18,7 +18,7 @@ public partial class SqlBuilderTest
         const string expected = "Select Count(*) As [Total] \r\nFrom [Users]";
 
         // Act
-        var sql = _builder.Count(alias: "Total").From("Users").ToSql();
+        var sql = _builder.CountAll("Total").From("Users").ToSql();
 
         // Assert
         Assert.Equal(expected, sql);
@@ -36,9 +36,9 @@ public partial class SqlBuilderTest
         const string bothDistinctExpected = "Select Distinct Count(Distinct [u].[Id]) As [Count] \r\nFrom [Users] As [u]";
 
         // Act
-        var queryDistinctSql = new TestSqlBuilder().Distinct().Count("u.Id", "Count").From("Users", "u").ToSql();
-        var aggregateDistinctSql = new TestSqlBuilder().Count("u.Id", "Count", distinct: true).From("Users", "u").ToSql();
-        var bothDistinctSql = new TestSqlBuilder().Distinct().Count("u.Id", "Count", distinct: true)
+        var queryDistinctSql = new TestSqlBuilder().Distinct().CountColumn("u.Id", "Count").From("Users", "u").ToSql();
+        var aggregateDistinctSql = new TestSqlBuilder().CountColumn("u.Id", "Count", distinct: true).From("Users", "u").ToSql();
+        var bothDistinctSql = new TestSqlBuilder().Distinct().CountColumn("u.Id", "Count", distinct: true)
             .From("Users", "u").ToSql();
 
         // Assert
@@ -57,7 +57,7 @@ public partial class SqlBuilderTest
         const string expected = "Select Count([u].[Id]) As [Count],Sum(Distinct [o].[Amount]) As [DistinctAmount],Avg(Distinct [o].[Amount]) As [Average],Max(Distinct [o].[Amount]) As [Maximum],Min(Distinct [o].[Amount]) As [Minimum] \r\nFrom [Orders] As [o]";
 
         // Act
-        var sql = _builder.Count("u.Id", "Count")
+        var sql = _builder.CountColumn("u.Id", "Count")
             .Sum("o.Amount", "DistinctAmount", distinct: true)
             .Avg("o.Amount", "Average", distinct: true)
             .Max("o.Amount", "Maximum", distinct: true)
@@ -115,10 +115,10 @@ public partial class SqlBuilderTest
     public void Count_WhenDistinctWildcardIsRequested_ShouldThrowArgumentException()
     {
         // Act
-        var exception = Assert.Throws<ArgumentException>(() => _builder.Count("*", "Total", distinct: true));
+        var exception = Assert.Throws<ArgumentException>(() => _builder.CountColumn("*", "Total", distinct: true));
 
         // Assert
-        Assert.Equal("distinct", exception.ParamName);
+        Assert.Equal("column", exception.ParamName);
     }
 
     /// <summary>
@@ -130,7 +130,7 @@ public partial class SqlBuilderTest
         // Arrange
         const string sourceExpected = "Select Count(Distinct [u].[Id]) As [Users] \r\nFrom [Users] As [u]";
         const string cloneExpected = "Select Count(Distinct [u].[Id]) As [Users],Sum([u].[Amount]) As [Total] \r\nFrom [Users] As [u]";
-        _builder.Count("u.Id", "Users", distinct: true).From("Users", "u");
+        _builder.CountColumn("u.Id", "Users", distinct: true).From("Users", "u");
 
         // Act
         var clone = _builder.Clone();
@@ -149,7 +149,7 @@ public partial class SqlBuilderTest
     {
         // Arrange
         const string expected = "Select Sum(Distinct [u].[Amount]) As [Amount] \r\nFrom [Users] As [u]";
-        _builder.Distinct().Count("u.Id", "Users", distinct: true).From("Users", "u");
+        _builder.Distinct().CountColumn("u.Id", "Users", distinct: true).From("Users", "u");
 
         // Act
         var sql = _builder.ClearSelect().Sum("u.Amount", "Amount", distinct: true).ToSql();

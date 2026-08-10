@@ -23,20 +23,37 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加 Count 聚合。
+    /// 添加全行 Count 聚合。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源对象。</param>
-    /// <param name="column">待统计列。默认值为 *，表示统计全部记录。</param>
     /// <param name="alias">聚合结果别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
     /// <returns>源对象。</returns>
-    public static T Count<T>(this T source, string column = "*", string alias = null, bool distinct = false) where T : ISelect
+    public static T CountAll<T>(this T source, string alias = null) where T : ISelect
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Count(column, alias, distinct);
+            accessor.SelectClause.CountAll(alias);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加指定列的 Count 聚合。
+    /// </summary>
+    /// <typeparam name="T">源类型。</typeparam>
+    /// <param name="source">源对象。</param>
+    /// <param name="column">待统计的单个结构化列名。</param>
+    /// <param name="alias">聚合结果别名。</param>
+    /// <param name="distinct">是否对指定列去重。</param>
+    /// <returns>源对象。</returns>
+    public static T CountColumn<T>(this T source, string column, string alias = null, bool distinct = false)
+        where T : ISelect
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.SelectClause.CountColumn(column, alias, distinct);
         return source;
     }
 

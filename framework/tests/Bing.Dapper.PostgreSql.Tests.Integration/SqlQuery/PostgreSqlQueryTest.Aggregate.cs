@@ -19,7 +19,7 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.amount", "Count");
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.amount", "Count");
 
         // Act
         var result = description.Scalar();
@@ -37,7 +37,7 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.amount", "Count", distinct: true);
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.amount", "Count", distinct: true);
 
         // Act
         var result = description.Scalar();
@@ -98,7 +98,7 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).Count("p.user_id", "UserCount", distinct: true);
+        var description = CreateAggregateDescription<int>(query).CountColumn("p.user_id", "UserCount", distinct: true);
 
         // Act
         var result = description.Scalar();
@@ -140,7 +140,7 @@ public sealed partial class PostgreSqlQueryTest
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
         var description = CreateAggregateDescription<PostgreSqlAggregateResult>(query)
-            .Count("p.user_id", "UserCount", distinct: true)
+            .CountColumn("p.user_id", "UserCount", distinct: true)
             .Sum("p.amount", "DistinctAmount", distinct: true);
 
         // Act
@@ -161,7 +161,7 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-first");
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().Count("p.id", "Count").From("public.integration_products", "p");
+        var description = query.Sql<int>().CountColumn("p.id", "Count").From("public.integration_products", "p");
 
         // Act
         var result = description.Scalar();

@@ -1,12 +1,13 @@
 using System.Data;
 using Bing.Data.Sql;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
 namespace Bing.Dapper.Core.Tests.Metadata;
 
 /// <summary>
-/// <see cref="DefaultSqlDbConnectionFactoryResolver"/> 单元测试。
+/// <see cref="ISqlDbConnectionFactoryResolver"/> 单元测试。
 /// </summary>
 public class DefaultSqlDbConnectionFactoryResolverTest
 {
@@ -17,7 +18,8 @@ public class DefaultSqlDbConnectionFactoryResolverTest
     public void Create_WhenFactoryIsMissing_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var resolver = new DefaultSqlDbConnectionFactoryResolver(null);
+        using var provider = CreateServiceProvider();
+        var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
 
         // Act and Assert
         Assert.Throws<InvalidOperationException>(() => resolver.Create("bing.sqlserver", "Server=(local)"));
@@ -32,18 +34,16 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         // Arrange
         var connection = new Mock<IDbConnection>().Object;
         string receivedConnectionString = null;
-        var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
+        using var provider = CreateServiceProvider(new SqlDbConnectionFactoryRegistration
         {
-            new SqlDbConnectionFactoryRegistration
+            ProviderKey = "test.sqlite",
+            Factory = connectionString =>
             {
-                ProviderKey = "test.sqlite",
-                Factory = connectionString =>
-                {
-                    receivedConnectionString = connectionString;
-                    return connection;
-                }
+                receivedConnectionString = connectionString;
+                return connection;
             }
         });
+        var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
 
         // Act
         var result = resolver.Create("TEST.SQLITE", "Data Source=test.db");
@@ -64,11 +64,11 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         var duplicateConnection = new Mock<IDbConnection>().Object;
 
         // Act and Assert
-        Assert.Throws<InvalidOperationException>(() => new DefaultSqlDbConnectionFactoryResolver(new[]
-        {
+        using var provider = CreateServiceProvider(
             new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => firstConnection },
-            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => duplicateConnection }
-        }));
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.mysql", Factory = _ => duplicateConnection });
+        Assert.Throws<InvalidOperationException>(() =>
+            provider.GetRequiredService<ISqlDbConnectionFactoryResolver>());
     }
 
     /// <summary>
@@ -80,11 +80,10 @@ public class DefaultSqlDbConnectionFactoryResolverTest
         // Arrange
         var firstConnection = new Mock<IDbConnection>().Object;
         var secondConnection = new Mock<IDbConnection>().Object;
-        var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
-        {
+        using var provider = CreateServiceProvider(
             new SqlDbConnectionFactoryRegistration { ProviderKey = "custom.sqlite.first", Factory = _ => firstConnection },
-            new SqlDbConnectionFactoryRegistration { ProviderKey = "custom.sqlite.second", Factory = _ => secondConnection }
-        });
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "custom.sqlite.second", Factory = _ => secondConnection });
+        var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
 
         // Act
         var first = resolver.Create("custom.sqlite.first", "Data Source=first.db");
@@ -102,12 +101,23 @@ public class DefaultSqlDbConnectionFactoryResolverTest
     public void Create_WhenFactoryReturnsNull_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var resolver = new DefaultSqlDbConnectionFactoryResolver(new[]
-        {
-            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.oracle", Factory = _ => null }
-        });
+        using var provider = CreateServiceProvider(
+            new SqlDbConnectionFactoryRegistration { ProviderKey = "test.oracle", Factory = _ => null });
+        var resolver = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>();
 
         // Act and Assert
         Assert.Throws<InvalidOperationException>(() => resolver.Create("test.oracle", "Data Source=oracle"));
+    }
+
+    /// <summary>
+    /// 通过公开服务注册创建连接工厂解析器。
+    /// </summary>
+    private static ServiceProvider CreateServiceProvider(params SqlDbConnectionFactoryRegistration[] registrations)
+    {
+        var services = new ServiceCollection();
+        foreach (var registration in registrations)
+            services.AddSingleton(registration);
+        services.AddSqlCore();
+        return services.BuildServiceProvider();
     }
 }

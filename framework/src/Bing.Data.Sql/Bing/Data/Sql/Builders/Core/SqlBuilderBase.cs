@@ -391,6 +391,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public List<BuilderItem> CteItems { get; private set; }
 
+    /// <summary>
+    /// Builder 创建时冻结的查询语法能力。
+    /// </summary>
+    private SqlQueryCapabilities QueryCapabilities { get; }
+
     #endregion
 
     #region 构造函数
@@ -421,6 +426,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         SqlParameterFactory = Services.ParameterFactory;
         EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
             DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
+        QueryCapabilities = ResolveQueryCapabilities();
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
@@ -451,12 +457,12 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <returns>应用当前 Provider 参数数量限制后的参数管理器；输入为 null 时返回 null。</returns>
     private IParameterManager ApplyParameterLimit(IParameterManager parameterManager)
     {
-        if (parameterManager == null || parameterManager is ParameterLimitManagerBase ||
-            Provider is not ISqlParameterLimitProvider { MaxParameterCount: int maxParameterCount })
+        var maxParameterCount = SqlProviderCapabilityResolver.GetProfile(Provider).Limits.MaxParameterCount;
+        if (parameterManager == null || parameterManager is ParameterLimitManagerBase || maxParameterCount == null)
             return parameterManager;
         return parameterManager is IAdvancedParameterManager advancedParameterManager
-            ? new AdvancedParameterLimitManager(advancedParameterManager, maxParameterCount, Provider.Key)
-            : new ParameterLimitManager(parameterManager, maxParameterCount, Provider.Key);
+            ? new AdvancedParameterLimitManager(advancedParameterManager, maxParameterCount.Value, Provider.Key)
+            : new ParameterLimitManager(parameterManager, maxParameterCount.Value, Provider.Key);
     }
 
     /// <summary>
@@ -614,9 +620,28 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         _isAddFilters = sqlBuilder._isAddFilters;
 
         // 克隆集合
-        UnionItems = sqlBuilder.UnionItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
-        CteItems = sqlBuilder.CteItems.Select(t => new BuilderItem(t.Name, t.Builder.Clone())).ToList();
+        UnionItems = CloneBuilderItems(sqlBuilder.UnionItems, sqlBuilder);
+        CteItems = CloneBuilderItems(sqlBuilder.CteItems, sqlBuilder);
         _excludedFilters = new List<Type>(sqlBuilder._excludedFilters);
+    }
+
+    /// <summary>
+    /// 克隆集合操作 Builder，并保留已冻结的子查询参数重命名关系。
+    /// </summary>
+    /// <param name="items">待克隆的集合操作项。</param>
+    /// <param name="source">当前克隆的源 Builder。</param>
+    /// <returns>独立的集合操作项。</returns>
+    private List<BuilderItem> CloneBuilderItems(IEnumerable<BuilderItem> items, SqlBuilderBase source)
+    {
+        var result = new List<BuilderItem>();
+        foreach (var item in items)
+        {
+            var builder = item.Builder.Clone();
+            result.Add(new BuilderItem(item.Name, builder));
+            if (source._subqueryParameterNames.TryGetValue(item.Builder, out var names))
+                _subqueryParameterNames[builder] = new Dictionary<string, string>(names);
+        }
+        return result;
     }
 
     /// <summary>
@@ -754,6 +779,114 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <returns>仅替换实际参数标记后的 SQL 文本。</returns>
     private static string ReplaceParameterToken(string sql, string sourceName, string targetName) =>
         ReplaceParameterTokens(sql, new Dictionary<string, string> { [sourceName] = targetName });
+
+    /// <summary>
+    /// 判断 SQL 代码上下文中是否包含独立参数标记，并忽略字符串、注释和标识符中的文本。
+    /// </summary>
+    /// <param name="sql">待扫描的 SQL 文本。</param>
+    /// <param name="parameterName">包含方言前缀的参数名称。</param>
+    /// <returns>代码上下文包含该参数标记时返回 true。</returns>
+    internal static bool ContainsParameterToken(string sql, string parameterName)
+    {
+        if (string.IsNullOrEmpty(sql) || string.IsNullOrWhiteSpace(parameterName))
+            return false;
+
+        var ignored = new StringBuilder();
+        for (var index = 0; index < sql.Length;)
+        {
+            var current = sql[index];
+            if (current == '\'')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '\'');
+                continue;
+            }
+            if (current == '"')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '"');
+                continue;
+            }
+            if (current == '`')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '`');
+                continue;
+            }
+            if (current == '[')
+            {
+                index = AppendBracketedIdentifier(sql, ignored, index);
+                continue;
+            }
+            if (current == '-' && index + 1 < sql.Length && sql[index + 1] == '-')
+            {
+                index = AppendLineComment(sql, ignored, index);
+                continue;
+            }
+            if (current == '/' && index + 1 < sql.Length && sql[index + 1] == '*')
+            {
+                index = AppendBlockComment(sql, ignored, index);
+                continue;
+            }
+            if (current == '$' && TryAppendDollarQuotedSegment(sql, ignored, ref index))
+                continue;
+            if (IsParameterToken(sql, index, parameterName))
+                return true;
+            index++;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 判断 SQL 代码上下文中是否包含独立关键字，并忽略字符串、注释和标识符中的文本。
+    /// </summary>
+    /// <param name="sql">待扫描的 SQL 文本。</param>
+    /// <param name="keyword">不含分隔符的关键字。</param>
+    /// <returns>代码上下文包含该关键字时返回 true。</returns>
+    internal static bool ContainsSqlKeyword(string sql, string keyword)
+    {
+        if (string.IsNullOrEmpty(sql) || string.IsNullOrWhiteSpace(keyword))
+            return false;
+
+        var ignored = new StringBuilder();
+        for (var index = 0; index < sql.Length;)
+        {
+            var current = sql[index];
+            if (current == '\'')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '\'');
+                continue;
+            }
+            if (current == '"')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '"');
+                continue;
+            }
+            if (current == '`')
+            {
+                index = AppendQuotedSegment(sql, ignored, index, '`');
+                continue;
+            }
+            if (current == '[')
+            {
+                index = AppendBracketedIdentifier(sql, ignored, index);
+                continue;
+            }
+            if (current == '-' && index + 1 < sql.Length && sql[index + 1] == '-')
+            {
+                index = AppendLineComment(sql, ignored, index);
+                continue;
+            }
+            if (current == '/' && index + 1 < sql.Length && sql[index + 1] == '*')
+            {
+                index = AppendBlockComment(sql, ignored, index);
+                continue;
+            }
+            if (current == '$' && TryAppendDollarQuotedSegment(sql, ignored, ref index))
+                continue;
+            if (IsSqlKeywordToken(sql, index, keyword))
+                return true;
+            index++;
+        }
+        return false;
+    }
 
     /// <summary>
     /// 追加单引号、双引号或反引号包裹的 SQL 片段，并处理连续引号转义。
@@ -905,6 +1038,24 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     }
 
     /// <summary>
+    /// 判断指定位置是否是独立 SQL 关键字。
+    /// </summary>
+    /// <param name="sql">待扫描 SQL。</param>
+    /// <param name="index">关键字起始位置。</param>
+    /// <param name="keyword">关键字。</param>
+    /// <returns>当前位置是独立关键字时返回 true。</returns>
+    private static bool IsSqlKeywordToken(string sql, int index, string keyword)
+    {
+        if (index + keyword.Length > sql.Length ||
+            string.Compare(sql, index, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase) != 0)
+            return false;
+        if (index > 0 && IsParameterNameCharacter(sql[index - 1]))
+            return false;
+        return index + keyword.Length >= sql.Length ||
+               IsParameterNameCharacter(sql[index + keyword.Length]) == false;
+    }
+
+    /// <summary>
     /// 判断字符是否属于 SQL 参数名称。
     /// </summary>
     /// <param name="value">待判断字符。</param>
@@ -1009,6 +1160,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         ClearPageParams();
         ClearUnionBuilders();
         ClearCte();
+        _subqueryParameterNames.Clear();
         _insertClause?.Clear();
         _insertColumnsClause?.Clear();
         _valuesClause?.Clear();
@@ -1164,8 +1316,13 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         if (string.IsNullOrWhiteSpace(name))
             return false;
         return name.IndexOf("password", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("pwd", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("passphrase", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("secret", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("credential", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("authorization", StringComparison.OrdinalIgnoreCase) >= 0 ||
+               name.IndexOf("signature", StringComparison.OrdinalIgnoreCase) >= 0 ||
                name.IndexOf("key", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
@@ -1193,8 +1350,101 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public virtual void Validate()
     {
+        ValidateQueryCapabilities();
         FromClause.Validate();
         OrderByClause.Validate(IsLimit);
+    }
+
+    /// <summary>
+    /// 合并并冻结 Provider、数据源与选项的查询语法能力。
+    /// </summary>
+    /// <returns>当前 Builder 使用的查询语法能力。</returns>
+    private SqlQueryCapabilities ResolveQueryCapabilities()
+    {
+        var provider = SqlProviderCapabilityResolver.GetQueryCapabilities(Provider);
+        var dataSource = ExecutionContext.DatabaseContext?.DataSource?.QueryCapabilities;
+        var options = Options?.QueryCapabilities;
+        return new SqlQueryCapabilities
+        {
+            Cte = ResolveQueryCapability(provider.Cte, dataSource?.Cte,
+                options?.Cte),
+            Union = ResolveQueryCapability(provider.Union, dataSource?.Union,
+                options?.Union),
+            UnionAll = ResolveQueryCapability(provider.UnionAll,
+                dataSource?.UnionAll, options?.UnionAll),
+            Intersect = ResolveQueryCapability(provider.Intersect,
+                dataSource?.Intersect, options?.Intersect),
+            Except = ResolveQueryCapability(provider.Except,
+                dataSource?.Except, options?.Except),
+            RightJoin = ResolveQueryCapability(provider.RightJoin,
+                dataSource?.RightJoin, options?.RightJoin),
+            Pagination = ResolveQueryCapability(provider.Pagination,
+                dataSource?.Pagination, options?.Pagination)
+        };
+    }
+
+    /// <summary>
+    /// 解析单项查询语法能力。
+    /// </summary>
+    /// <param name="provider">Provider 能力基线。</param>
+    /// <param name="dataSource">数据源能力覆盖。</param>
+    /// <param name="options">选项能力覆盖。</param>
+    /// <returns>最终能力状态。</returns>
+    private static SqlQueryCapabilityState ResolveQueryCapability(SqlQueryCapabilityState provider,
+        SqlQueryCapabilityState? dataSource, SqlQueryCapabilityState? options)
+    {
+        if (provider == SqlQueryCapabilityState.Unsupported)
+            return SqlQueryCapabilityState.Unsupported;
+        if (options is { } option && option != SqlQueryCapabilityState.Inherit)
+            return option;
+        if (dataSource is { } source && source != SqlQueryCapabilityState.Inherit)
+            return source;
+        return provider;
+    }
+
+    /// <summary>
+    /// 验证当前查询使用的语法均已由冻结能力配置确认。
+    /// </summary>
+    private void ValidateQueryCapabilities()
+    {
+        if (CteItems.Count > 0)
+            ValidateQueryCapability(QueryCapabilities.Cte, "CTE");
+        foreach (var item in UnionItems)
+            ValidateQueryCapability(item.Name);
+        if (JoinClause is JoinClause joinClause && joinClause.ContainsJoinType("Right Join"))
+            ValidateQueryCapability(QueryCapabilities.RightJoin, "Right Join");
+        if (IsLimit)
+            ValidateQueryCapability(QueryCapabilities.Pagination, "分页");
+    }
+
+    /// <summary>
+    /// 验证集合操作语法能力。
+    /// </summary>
+    /// <param name="operation">集合操作关键字。</param>
+    private void ValidateQueryCapability(string operation)
+    {
+        var capability = operation switch
+        {
+            "Union" => QueryCapabilities.Union,
+            "Union All" => QueryCapabilities.UnionAll,
+            "Intersect" => QueryCapabilities.Intersect,
+            "Except" => QueryCapabilities.Except,
+            "Right Join" => QueryCapabilities.RightJoin,
+            _ => SqlQueryCapabilityState.Unsupported
+        };
+        ValidateQueryCapability(capability, operation);
+    }
+
+    /// <summary>
+    /// 验证单项查询语法能力。
+    /// </summary>
+    /// <param name="capability">能力状态。</param>
+    /// <param name="name">语法名称。</param>
+    private void ValidateQueryCapability(SqlQueryCapabilityState capability, string name)
+    {
+        if (capability == SqlQueryCapabilityState.Supported)
+            return;
+        throw new NotSupportedException($"Provider {Provider.Key} 的当前查询能力配置不支持 {name}。");
     }
 
     /// <summary>

@@ -14,13 +14,12 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="columns">分组字段，范例：a.Id,b.Name</param>
-    /// <param name="having">分组条件，范例：Count(*) > 1</param>
-    public static T GroupBy<T>(this T source, string columns, string having = null) where T : IGroupBy
+    public static T GroupBy<T>(this T source, string columns) where T : IGroupBy
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
         if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.GroupByClause.GroupBy(columns, having);
+            accessor.GroupByClause.GroupBy(columns);
         return source;
     }
 

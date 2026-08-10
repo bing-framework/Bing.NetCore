@@ -51,6 +51,11 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// </summary>
     protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
 
+    /// <summary>
+    /// 获取当前工作单元所属的服务提供程序。
+    /// </summary>
+    internal IServiceProvider ServiceProvider => _serviceProvider;
+
     #endregion
 
     #region 静态构造函数

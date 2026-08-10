@@ -3,7 +3,9 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
+using Moq;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
 
@@ -75,6 +77,95 @@ public sealed class SqlInsertBuilderTest
         Assert.Single(command.Parameters);
         Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
         Assert.Equal(1, parameterManager.Count);
+    }
+
+    /// <summary>
+    /// 测试目的：Mutation 描述创建后必须冻结 SQL 和参数，后续 Builder 写入或数组值变更不能影响已创建描述。
+    /// </summary>
+    [Fact]
+    public void ToMutationDescription_WhenBuilderChangesAfterCreation_ShouldKeepSqlAndParametersIndependent()
+    {
+        // Arrange
+        var payload = new byte[] { 1, 2 };
+        var builder = new TestSqlBuilder()
+            .InsertInto("samples")
+            .Columns(nameof(MutationSample.Name))
+            .Values(payload);
+
+        // Act
+        var description = ((ISqlBuilder)builder).ToMutationDescription();
+        builder.Values("later");
+        payload[0] = 9;
+
+        // Assert
+        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", description.Sql);
+        Assert.Equal("test.sqlserver", description.ProviderKey);
+        Assert.Single(description.Parameters);
+        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(description.Parameters[0].Value));
+    }
+
+    /// <summary>
+    /// 测试目的：Mutation 描述必须在 SQL 渲染完成后只导出一次参数快照，确保渲染期间合并的参数与 SQL 对应。
+    /// </summary>
+    [Fact]
+    public void ToMutationDescription_WhenParametersConfigured_ShouldRenderBeforeExportingSnapshot()
+    {
+        // Arrange
+        var parameterManager = new CountingParameterManager(TestMutationSqlProvider.Instance.Dialect);
+        var builder = new TestSqlBuilder(parameterManager: parameterManager)
+            .InsertInto("samples")
+            .Columns(nameof(MutationSample.Name))
+            .Values("Bing");
+
+        // Act
+        var description = builder.ToMutationDescription();
+
+        // Assert
+        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", description.Sql);
+        Assert.Equal("test.sqlserver", description.ProviderKey);
+        Assert.Single(description.Parameters);
+        Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：第三方 Builder 未提供 Provider 时必须在渲染 SQL 前明确拒绝，避免生成无法验证执行身份的 Mutation 描述。
+    /// </summary>
+    [Fact]
+    public void ToMutationDescription_WhenBuilderDoesNotProvideProvider_ShouldRejectBeforeRendering()
+    {
+        // Arrange
+        var builder = new Mock<ISqlBuilder>();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Object.ToMutationDescription());
+
+        // Assert
+        Assert.Equal("Mutation Builder 必须提供 SQL Provider。", exception.Message);
+        builder.Verify(item => item.ToSql(), Times.Never);
+    }
+
+    /// <summary>
+    /// 测试目的：同一 Mutation 描述的每次执行准备都必须返回独立参数，避免 Provider 绑定污染后续执行。
+    /// </summary>
+    [Fact]
+    public void MutationDescription_WhenParametersArePreparedRepeatedly_ShouldCreateIndependentParameterInstances()
+    {
+        // Arrange
+        var description = new TestSqlBuilder()
+            .InsertInto("samples")
+            .Columns(nameof(MutationSample.Name))
+            .Values(new byte[] { 1, 2 })
+            .ToMutationDescription();
+
+        // Act
+        var first = Assert.Single(description.CreateParameters());
+        var second = Assert.Single(description.CreateParameters());
+        ((byte[])first.Value)[0] = 9;
+
+        // Assert
+        Assert.NotSame(first, second);
+        Assert.NotSame(first.Value, second.Value);
+        Assert.Equal(new byte[] { 1, 2 }, second.Value);
     }
 
     /// <summary>

@@ -7,11 +7,16 @@ namespace Bing.Data.Sql;
 /// </summary>
 /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
 /// <remarks>
-/// 该描述复用原生文本查询的终结方法，但固定以 <see cref="CommandType.StoredProcedure"/> 执行。
+/// 该描述仅公开过程专用终结方法，并固定以 <see cref="CommandType.StoredProcedure"/> 执行。
 /// 传入的非字典参数对象保持原引用，以便 Dapper 输出参数在执行后回写到调用方对象。
 /// </remarks>
-public sealed class SqlProcedureQuery<TResult> : SqlTextQuery<TResult>
+public sealed class SqlProcedureQuery<TResult>
 {
+    /// <summary>
+    /// 执行当前过程计划的根查询内部执行器。
+    /// </summary>
+    private readonly ISqlQueryPlanExecutor _executor;
+
     /// <summary>
     /// 使用根查询、存储过程名称和参数源初始化查询描述。
     /// </summary>
@@ -19,9 +24,28 @@ public sealed class SqlProcedureQuery<TResult> : SqlTextQuery<TResult>
     /// <param name="procedure">要执行的存储过程名称。</param>
     /// <param name="parameters">由参数绑定器处理的输入和输出参数源。</param>
     internal SqlProcedureQuery(ISqlQueryPlanExecutor executor, string procedure, object parameters)
-        : base(executor, procedure, parameters)
     {
+        _executor = executor ?? throw new ArgumentNullException(nameof(executor));
+        if (string.IsNullOrWhiteSpace(procedure))
+            throw new ArgumentException("存储过程名称不能为空。", nameof(procedure));
+        Procedure = procedure;
+        Parameters = SqlQueryPlan.SnapshotParameters(parameters);
     }
+
+    /// <summary>
+    /// 获取要执行的存储过程名称。
+    /// </summary>
+    public string Procedure { get; }
+
+    /// <summary>
+    /// 获取由参数绑定器处理的输入和输出参数源。
+    /// </summary>
+    public object Parameters { get; }
+
+    /// <summary>
+    /// 获取执行当前描述的内部执行器。
+    /// </summary>
+    private ISqlQueryPlanExecutor Executor => _executor;
 
     /// <summary>
     /// 同步执行过程并完整物化结果列表。
@@ -167,7 +191,7 @@ public sealed class SqlProcedureQuery<TResult> : SqlTextQuery<TResult>
     private SqlQueryPlan CreateExecutionPlan(OutputParametersReceiver receiver)
     {
         var plan = GetPlan();
-        plan.SetOutputParametersReceiver(receiver.Set);
+        plan.SetOutputParametersReceiver(receiver.Set, receiver.CreateSnapshot);
         return plan;
     }
 
@@ -186,9 +210,14 @@ public sealed class SqlProcedureQuery<TResult> : SqlTextQuery<TResult>
         /// </summary>
         /// <param name="outputParameters">由参数绑定器创建的输出参数访问器。</param>
         public void Set(ISqlOutputParameterAccessor outputParameters) => OutputParameters = outputParameters;
+
+        /// <summary>
+        /// 复制本次过程执行完成后的输出参数值。
+        /// </summary>
+        public void CreateSnapshot() => OutputParameters = SqlOutputParameterSnapshot.Create(OutputParameters);
     }
 
     /// <inheritdoc />
-    private protected override SqlQueryPlan GetPlan() => SqlQueryPlan.Create(CommandText, Parameters, SplitOnColumn,
-        System.Data.CommandType.StoredProcedure);
+    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(Procedure, Parameters,
+        commandType: System.Data.CommandType.StoredProcedure);
 }

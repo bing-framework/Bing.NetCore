@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
@@ -173,7 +174,8 @@ public sealed class SqliteMutationBuilderTest
         // Assert
         Assert.Equal("Update `mapped_samples` Set `sample_name` = @_p_0 Where `sample_id`=@_p_1 " +
                      "Returning `sample_id` As `Id`, `sample_name` As `Name`", sql);
-        Assert.True(SqliteSqlProvider.Instance.Capabilities.SupportsReturning);
+        Assert.True(SqliteSqlProvider.Instance.Profile.Mutation.SupportsReturning);
+        Assert.Equal(SqlQueryCapabilityState.Supported, SqliteSqlProvider.Instance.Profile.Query.Pagination);
     }
 
     /// <summary>
