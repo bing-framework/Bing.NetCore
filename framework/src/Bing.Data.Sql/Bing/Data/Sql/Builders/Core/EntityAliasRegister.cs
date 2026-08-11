@@ -1,9 +1,21 @@
 ﻿namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
+/// 管理查询来源移除时的内部别名生命周期。
+/// </summary>
+internal interface IEntityAliasRegisterLifecycle
+{
+    /// <summary>
+    /// 释放不再属于查询图的表来源别名。
+    /// </summary>
+    /// <param name="alias">待释放的表别名。</param>
+    void ReleaseAlias(string alias);
+}
+
+/// <summary>
 /// 实体别名注册器
 /// </summary>
-public class EntityAliasRegister : IEntityAliasRegister
+public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLifecycle
 {
     #region 属性
 
@@ -55,16 +67,15 @@ public class EntityAliasRegister : IEntityAliasRegister
     /// </summary>
     /// <param name="data">实体当前别名映射。</param>
     /// <param name="entityAliases">实体别名注册顺序。</param>
+    /// <param name="aliases">查询范围内完整别名集合。</param>
     /// <param name="fromType">From 实体类型。</param>
     private EntityAliasRegister(Dictionary<Type, string> data, Dictionary<Type, List<string>> entityAliases,
-        Type fromType)
+        HashSet<string> aliases, Type fromType)
     {
         _data = data;
         Data = _data;
         _entityAliases = entityAliases;
-        _aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var alias in entityAliases.SelectMany(item => item.Value))
-            _aliases.Add(alias);
+        _aliases = new HashSet<string>(aliases, StringComparer.OrdinalIgnoreCase);
         FromType = fromType;
     }
 
@@ -95,9 +106,12 @@ public class EntityAliasRegister : IEntityAliasRegister
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
-        if (_data.TryGetValue(entity, out var currentAlias) && string.IsNullOrWhiteSpace(currentAlias) == false)
+        _data.TryGetValue(entity, out var currentAlias);
+        ValidateReplacementAlias(alias, currentAlias);
+        if (string.IsNullOrWhiteSpace(currentAlias) == false)
             _aliases.Remove(currentAlias);
-        RegisterAlias(alias);
+        if (string.IsNullOrWhiteSpace(alias) == false)
+            _aliases.Add(alias.Trim());
         _data[entity] = alias;
         _entityAliases[entity] = new List<string> { alias };
     }
@@ -160,7 +174,30 @@ public class EntityAliasRegister : IEntityAliasRegister
     /// 克隆
     /// </summary>
     public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(_data),
-        _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)), FromType);
+        _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)),
+        new HashSet<string>(_aliases, StringComparer.OrdinalIgnoreCase), FromType);
+
+    /// <inheritdoc />
+    void IEntityAliasRegisterLifecycle.ReleaseAlias(string alias)
+    {
+        if (string.IsNullOrWhiteSpace(alias))
+            return;
+        var normalizedAlias = alias.Trim();
+        if (_aliases.Remove(normalizedAlias) == false)
+            return;
+        foreach (var entity in _entityAliases.Keys.ToList())
+        {
+            var aliases = _entityAliases[entity];
+            aliases.RemoveAll(item => string.Equals(item, normalizedAlias, StringComparison.OrdinalIgnoreCase));
+            if (aliases.Count == 0)
+            {
+                _entityAliases.Remove(entity);
+                _data.Remove(entity);
+                continue;
+            }
+            _data[entity] = aliases[^1];
+        }
+    }
 
     /// <summary>
     /// 获取实体别名注册集合。
@@ -174,6 +211,21 @@ public class EntityAliasRegister : IEntityAliasRegister
         aliases = new List<string>();
         _entityAliases[entity] = aliases;
         return aliases;
+    }
+
+    /// <summary>
+    /// 验证替换别名可在保留当前注册状态的前提下写入。
+    /// </summary>
+    /// <param name="alias">待替换的新别名。</param>
+    /// <param name="currentAlias">当前实体别名。</param>
+    private void ValidateReplacementAlias(string alias, string currentAlias)
+    {
+        if (string.IsNullOrWhiteSpace(alias))
+            return;
+        var normalizedAlias = alias.Trim();
+        if (_aliases.Contains(normalizedAlias) &&
+            string.Equals(normalizedAlias, currentAlias, StringComparison.OrdinalIgnoreCase) == false)
+            throw new InvalidOperationException($"查询中已存在表别名 \"{alias}\"。");
     }
 
     #endregion

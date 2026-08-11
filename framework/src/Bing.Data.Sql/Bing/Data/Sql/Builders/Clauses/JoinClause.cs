@@ -265,8 +265,11 @@ public class JoinClause : IJoinClause
     private void Join(string joinType, string table, string alias)
     {
         var parsedTable = ParseTableName(table, alias);
-        _register?.RegisterAlias(parsedTable.Alias);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = _register?.Clone();
+        registerProbe?.RegisterAlias(parsedTable.Alias);
         AddItem(CreateJoinItem(joinType, parsedTable.TableName, parsedTable.Schema, parsedTable.Alias));
+        _register?.RegisterAlias(parsedTable.Alias);
     }
 
     /// <summary>
@@ -290,16 +293,24 @@ public class JoinClause : IJoinClause
     {
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var resolvedAlias = reference.EntityType == null ? reference.Alias :
+            _resolver.GetAlias(reference.EntityType, reference.Alias);
+        var registerProbe = _register?.Clone();
         if (reference.EntityType == null)
-            _register?.RegisterAlias(reference.Alias);
+            registerProbe?.RegisterAlias(reference.Alias);
+        else
+            registerProbe?.Register(reference.EntityType, resolvedAlias);
         var databaseContext = GetCurrentDatabaseContext();
         var sourceReference = GetSourceReference(databaseContext);
         AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext));
         if (reference.EntityType != null)
         {
             FreezeExistingProjectionAlias(reference.EntityType);
-            _register?.Register(reference.EntityType, _resolver.GetAlias(reference.EntityType, reference.Alias));
+            _register?.Register(reference.EntityType, resolvedAlias);
         }
+        else
+            _register?.RegisterAlias(reference.Alias);
     }
 
     /// <summary>
@@ -426,9 +437,12 @@ public class JoinClause : IJoinClause
     {
         if (builder == null)
             return;
-        _register?.RegisterAlias(alias);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = _register?.Clone();
+        registerProbe?.RegisterAlias(alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
-        AddItem(JoinItem.CreateRaw(joinType, $"({sql}){GetSubqueryAlias(alias)}"));
+        _register?.RegisterAlias(alias);
+        AddItem(JoinItem.CreateRaw(joinType, $"({sql}){GetSubqueryAlias(alias)}", alias));
     }
 
     /// <summary>
@@ -439,15 +453,20 @@ public class JoinClause : IJoinClause
     {
         if (subquery == null)
             throw new ArgumentNullException(nameof(subquery));
-        _register?.RegisterAlias(subquery.Alias);
+        subquery.ValidateCompatible(_sqlBuilder);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = _register?.Clone();
+        registerProbe?.RegisterAlias(subquery.Alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder
             ? sqlBuilder.RenderSubquery(subquery.Builder)
             : subquery.Builder.ToSql();
+        _register?.RegisterAlias(subquery.Alias);
         var table = SqlItem.Raw($"({sql}){GetSubqueryAlias(subquery.Alias)}");
         AddItem(JoinItem.CreateDerived(joinType, table,
             new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
                 subquery.ProjectedMembers)));
     }
+
 
     /// <summary>
     /// 获取派生表连接别名的方言渲染文本。
@@ -825,7 +844,17 @@ public class JoinClause : IJoinClause
     }
 
     /// <inheritdoc />
-    public void Clear() => _params.Clear();
+    public void Clear()
+    {
+        if (_register is IEntityAliasRegisterLifecycle lifecycle)
+        {
+            foreach (var alias in _params.Select(item => item.Source?.Alias ?? item.Table?.Alias)
+                         .Where(alias => string.IsNullOrWhiteSpace(alias) == false)
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
+                lifecycle.ReleaseAlias(alias);
+        }
+        _params.Clear();
+    }
 
     /// <summary>
     /// 输出Sql。

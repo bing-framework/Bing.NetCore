@@ -65,6 +65,12 @@ public sealed class SqlBuilderServices
     public IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 
     /// <summary>
+    /// 解析不含凭据的物理数据库身份。
+    /// </summary>
+    internal ISqlDatabaseIdentityResolver DatabaseIdentityResolver { get; set; } =
+        new DefaultSqlDatabaseIdentityResolver();
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlBuilderServices"/> 类型的实例，并填充默认服务。
     /// </summary>
     /// <param name="entityMappingResolver">实体映射解析器。</param>

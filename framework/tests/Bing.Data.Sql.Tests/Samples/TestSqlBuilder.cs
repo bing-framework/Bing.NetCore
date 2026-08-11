@@ -25,6 +25,13 @@ public class TestSqlBuilder : SqlBuilderBase
     public SqlClauseContext CreateCurrentClauseContext() => CreateClauseContext();
 
     /// <summary>
+    /// 渲染子查询并合并参数，仅用于验证子查询组合边界。
+    /// </summary>
+    /// <param name="builder">待渲染的子查询 Builder。</param>
+    /// <returns>参数合并后的 SQL。</returns>
+    public string RenderSubqueryForTest(ISqlBuilder builder) => RenderSubquery(builder);
+
+    /// <summary>
     /// 为独立 Clause 测试创建运行上下文。
     /// </summary>
     /// <param name="dialect">SQL 方言。</param>

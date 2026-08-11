@@ -99,7 +99,14 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
         var subqueryAccessor = (ISqlQueryClauseAccessor)builder;
         builder.ClearSelect();
         subqueryAccessor.SelectClause.Select(string.Join(", ", columns));
-        return new SqlSubquery<TProjection>(builder, alias, projectedMembers);
+        if (builder is SqlBuilderBase { HasLimit: false })
+            builder.ClearOrderBy();
+        var sqlBuilder = builder as SqlBuilderBase;
+        var context = sqlBuilder?.GetDatabaseContext();
+        var dataSourceKey = context?.DataSource?.Key ?? context?.DbKey;
+        return new SqlSubquery<TProjection>(builder, alias, projectedMembers, builder.Provider?.Key, dataSourceKey,
+            context?.MappingProfile, context?.TenantId, sqlBuilder?.GetDatabaseIdentity(),
+            sqlBuilder?.GetExecutionScope());
     }
 
     /// <summary>
@@ -354,6 +361,17 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// </summary>
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection,
         string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
+
+    /// <summary>
+    /// 设置最后一个连接的双表条件。
+    /// </summary>
+    /// <param name="predicate">双表连接条件表达式。</param>
+    /// <returns>当前双表查询描述。</returns>
+    public SqlLambdaQuery<TFirst, TSecond> On(Expression<Func<TFirst, TSecond, bool>> predicate)
+    {
+        OnCore(predicate);
+        return this;
+    }
 
     /// <summary>
     /// 设置双表分组列。

@@ -49,6 +49,15 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class;
 
     /// <summary>
+    /// 创建以严格 DTO 类型化派生表作为根来源的独立结构化 SQL 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>仅允许访问派生表显式投影成员的查询描述。</returns>
+    SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class;
+
+    /// <summary>
     /// 创建使用两个实体映射初始化的独立结构化 SQL 查询描述。
     /// </summary>
     /// <typeparam name="TFirst">第一个表源及默认结果映射类型。</typeparam>

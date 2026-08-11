@@ -542,6 +542,17 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <inheritdoc />
+    public SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        EnsureExecutionAvailable();
+        if (subquery == null)
+            throw new ArgumentNullException(nameof(subquery));
+        var executor = (ISqlQueryPlanExecutor)this;
+        return new SqlSubqueryLambdaQuery<TProjection>(executor, executor.CreateIndependentSqlBuilder(), subquery);
+    }
+
+    /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond> From<TFirst, TSecond>() where TFirst : class where TSecond : class
     {
         EnsureExecutionAvailable();
@@ -591,17 +602,23 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// 服务包可由同一 Builder 的 New 和 Clone 共享，但不得跨 Query 复用，避免泄漏 <see cref="SqlOptions"/>。
     /// </remarks>
     /// <returns>仅可在当前查询及其 Builder 派生实例间共享的服务包。</returns>
-    protected virtual SqlBuilderServices CreateSqlBuilderServices() => new(
-        EntityMappingResolver,
-        ServiceProvider.GetService<IDatabaseContextAccessor>(),
-        ServiceProvider.GetService<ISqlParameterFactory>(),
-        ServiceProvider.GetService<SqlMetadataOptions>(),
-        Options,
-        ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
-        ServiceProvider.GetService<ISqlObjectNameFormatter>(),
-        ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
-        ServiceProvider.GetService<ISqlTableReferenceValidator>(),
-        ServiceProvider.GetService<IEntityModelMetadataProvider>());
+    protected virtual SqlBuilderServices CreateSqlBuilderServices()
+    {
+        var services = new SqlBuilderServices(
+            EntityMappingResolver,
+            ServiceProvider.GetService<IDatabaseContextAccessor>(),
+            ServiceProvider.GetService<ISqlParameterFactory>(),
+            ServiceProvider.GetService<SqlMetadataOptions>(),
+            Options,
+            ServiceProvider.GetService<ISqlDatabaseContextResolver>(),
+            ServiceProvider.GetService<ISqlObjectNameFormatter>(),
+            ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
+            ServiceProvider.GetService<ISqlTableReferenceValidator>(),
+            ServiceProvider.GetService<IEntityModelMetadataProvider>());
+        services.DatabaseIdentityResolver = ServiceProvider.GetService<ISqlDatabaseIdentityResolver>() ??
+            services.DatabaseIdentityResolver;
+        return services;
+    }
 
     /// <summary>
     /// 创建用于诊断 SQL 的参数字面值解析器。

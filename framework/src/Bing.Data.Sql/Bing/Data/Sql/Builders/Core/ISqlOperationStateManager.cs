@@ -6,6 +6,12 @@ namespace Bing.Data.Sql.Builders.Core;
 internal interface ISqlOperationStateManager
 {
     /// <summary>
+    /// 验证当前 Fluent 操作是否可执行，但不修改 Builder 状态。
+    /// </summary>
+    /// <param name="action">当前 Fluent 操作。</param>
+    void ValidateOperation(SqlOperationAction action);
+
+    /// <summary>
     /// 在修改 Clause 前验证并切换操作状态。
     /// </summary>
     /// <param name="action">当前 Fluent 操作。</param>

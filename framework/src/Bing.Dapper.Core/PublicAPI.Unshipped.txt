@@ -1,4 +1,5 @@
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlQueryBase.From<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>

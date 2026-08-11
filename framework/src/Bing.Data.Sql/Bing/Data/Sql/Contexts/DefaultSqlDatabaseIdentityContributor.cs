@@ -11,6 +11,7 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
     /// <inheritdoc />
     public bool CanResolve(DatabaseType databaseType) => databaseType == DatabaseType.Sqlite ||
         databaseType == DatabaseType.SqlServer || databaseType == DatabaseType.MySql ||
+        databaseType == DatabaseType.Doris ||
         databaseType == DatabaseType.PgSql || databaseType == DatabaseType.Oracle;
 
     /// <inheritdoc />
@@ -22,7 +23,7 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         {
             DatabaseType.Sqlite => ResolveSqlite(builder),
             DatabaseType.SqlServer => ResolveSqlServer(builder),
-            DatabaseType.MySql => ResolveServerDatabase(databaseType, builder, 3306, "Server", "Data Source", "Host"),
+            DatabaseType.MySql or DatabaseType.Doris => ResolveServerDatabase(databaseType, builder, 3306, "Server", "Data Source", "Host"),
             DatabaseType.PgSql => ResolveServerDatabase(databaseType, builder, 5432, "Host", "Server", "Data Source"),
             DatabaseType.Oracle => ResolveOracle(builder),
             _ => throw new NotSupportedException($"数据库类型 {databaseType} 不支持物理数据库身份比较。")

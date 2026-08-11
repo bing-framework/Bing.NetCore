@@ -2207,6 +2207,238 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：单表 DTO 派生表应在 SQLite 中通过双表 Lambda Join 完成参数绑定和 DTO 物化。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenSingleSourceDtoSubqueryJoined_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var samples = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[0].Id, tenantId = "tenant-1", name = "order-one" });
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[1].Id, tenantId = "tenant-2", name = "order-two" });
+        }
+        var summary = query.From<SqliteStructuredTableSample>()
+            .Where(sample => sample.Name == "one")
+            .SelectSubquery(sample => new LambdaSubqueryResult { SampleId = sample.Id }, "summary");
+
+        // Act
+        var description = query.From<SqliteStructuredOrderSample>()
+            .Join(summary)
+            .On((order, derived) => order.Id == derived.SampleId)
+            .SelectDto((order, derived) => new LambdaJoinResult
+            {
+                Name = order.Name,
+                TenantId = order.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `Orders` \r\nJoin (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` On `Orders`.`Id`=`summary`.`SampleId`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：单表实体查询应能通过 Cross Join 组合类型化派生表，并在 SQLite 中物化关联的 DTO 结果。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenSingleSourceDtoSubqueryCrossJoined_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var sample = await query.Query<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "one").SingleAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = sample.Id, tenantId = "tenant-1", name = "order-one" });
+        var summary = query.From<SqliteStructuredTableSample>()
+            .Where(item => item.Name == "one")
+            .SelectSubquery(item => new LambdaSubqueryResult { SampleId = item.Id }, "summary");
+
+        // Act
+        var description = query.From<SqliteStructuredOrderSample>()
+            .CrossJoin(summary)
+            .Where((order, item) => order.Id == item.SampleId)
+            .SelectDto((order, item) => new LambdaJoinResult
+            {
+                Name = order.Name,
+                TenantId = order.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `Orders` \r\nCross Join (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `Orders`.`Id`=`summary`.`SampleId`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：单表实体查询应能通过 Cross Join 进入双表 Lambda 链，并在 SQLite 中执行和物化 DTO 投影。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenSingleSourceTypedEntityCrossJoined_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var sample = await query.Query<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "one").SingleAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = sample.Id, tenantId = "tenant-1", name = "order-one" });
+
+        // Act
+        var description = query.From<SqliteStructuredTableSample>()
+            .CrossJoin<SqliteStructuredOrderSample>()
+            .Where((item, order) => item.Id == order.Id)
+            .SelectDto((item, order) => new LambdaJoinResult
+            {
+                Name = item.Name,
+                TenantId = order.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `samples`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `samples` \r\nCross Join `Orders` \r\nWhere `samples`.`Id`=`Orders`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：DTO 派生表作为根来源后，应在 SQLite 中保留成员白名单、参数和投影物化行为。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDtoSubqueryUsedAsRoot_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var expected = await query.Query<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "two").SingleAsync();
+        var summary = query.From<SqliteStructuredTableSample>()
+            .Where(sample => sample.Name == "two")
+            .SelectSubquery(sample => new LambdaSubqueryResult { SampleId = sample.Id }, "summary");
+
+        // Act
+        var description = query.From(summary)
+            .Where(item => item.SampleId > 0)
+            .SelectDto(item => new LambdaSubqueryResult { SampleId = item.SampleId });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { expected.Id }, result.Select(item => item.SampleId).ToArray());
+        Assert.Equal("Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化派生根再次冻结后，应能作为新的根来源在 SQLite 中执行并物化最终 DTO 投影。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDtoSubqueryRootIsReprojected_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var expected = await query.Query<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "two").SingleAsync();
+        var summary = query.From<SqliteStructuredTableSample>()
+            .Where(sample => sample.Name == "two")
+            .SelectSubquery(sample => new LambdaSubqueryResult { SampleId = sample.Id }, "summary");
+        var refined = query.From(summary)
+            .Where(item => item.SampleId > 0)
+            .SelectSubquery(item => new LambdaSubqueryResult { SampleId = item.SampleId }, "refined");
+
+        // Act
+        var description = query.From(refined)
+            .Where(item => item.SampleId > 0)
+            .SelectDto(item => new LambdaSubqueryResult { SampleId = item.SampleId });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { expected.Id }, result.Select(item => item.SampleId).ToArray());
+        Assert.Equal("Select `refined`.`SampleId` As `SampleId` \r\nFrom (Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1) As `refined` \r\nWhere `refined`.`SampleId`>@_p_2", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：派生 DTO 根经 Left Join 后再次冻结时，应在 SQLite 中保留未匹配右表行并物化嵌套投影。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDtoSubqueryRootIsLeftJoinedAndReprojected_ShouldMaterializeMatchedAndUnmatchedRows()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var first = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = first.Id, tenantId = "tenant-1", name = "order-one" });
+        var owner = query.From<SqliteStructuredTableSample>()
+            .Where(sample => sample.Id > 0)
+            .SelectSubquery(sample => new LambdaSubqueryResult { SampleId = sample.Id }, "owner");
+        var refined = query.From(owner)
+            .LeftJoin<SqliteStructuredOrderSample>("order")
+            .On((summary, order) => summary.SampleId == order.Id)
+            .SelectSubquery((summary, order) => new LambdaSubqueryResult
+            {
+                SampleId = summary.SampleId,
+                TenantId = order.TenantId
+            }, "refined");
+
+        // Act
+        var description = query.From(refined)
+            .Where(item => item.SampleId > 0)
+            .SelectDto(item => new LambdaSubqueryResult
+            {
+                SampleId = item.SampleId,
+                TenantId = item.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { $"{first.Id}:tenant-1", "2:", "3:" },
+            result.OrderBy(item => item.SampleId).Select(item => $"{item.SampleId}:{item.TenantId}"));
+        Assert.Equal("Select `refined`.`SampleId` As `SampleId`,`refined`.`TenantId` As `TenantId` \r\nFrom (Select `owner`.`SampleId` As `SampleId`,`order`.`TenantId` As `TenantId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Id`>@_p_0) As `owner` \r\nLeft Join `Orders` As `order` On `owner`.`SampleId`=`order`.`Id`) As `refined` \r\nWhere `refined`.`SampleId`>@_p_1", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：DTO 派生表作为根来源后，应能通过 Cross Join 绑定实体成员并在 SQLite 中执行物化。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDtoSubqueryRootCrossJoined_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var expected = await query.Query<Sample>().Select("Id,Name,Amount").From("samples")
+            .Where("Name", "one").SingleAsync();
+        using (var executor = _fixture.CreateExecutor())
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = expected.Id, tenantId = "tenant-1", name = "order-one" });
+        var summary = query.From<SqliteStructuredTableSample>()
+            .Where(sample => sample.Name == "one")
+            .SelectSubquery(sample => new LambdaSubqueryResult { SampleId = sample.Id }, "summary");
+
+        // Act
+        var description = query.From(summary)
+            .CrossJoin<SqliteStructuredOrderSample>()
+            .Where((item, order) => item.SampleId == order.Id)
+            .SelectDto((item, order) => new LambdaJoinResult
+            {
+                Name = order.Name,
+                TenantId = order.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nCross Join `Orders` \r\nWhere `summary`.`SampleId`=`Orders`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：同一实体类型自连接应在 On 条件中使用不同别名，并能执行返回来源表投影。
     /// </summary>
     [Fact]

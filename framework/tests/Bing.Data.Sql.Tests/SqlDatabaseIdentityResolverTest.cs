@@ -48,6 +48,29 @@ public class SqlDatabaseIdentityResolverTest
     }
 
     /// <summary>
+    /// 测试 - Doris 应按 MySQL 兼容连接字符串解析物理数据库身份，并保留 Doris 数据库类型。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDorisConnectionStringOrderDiffers_ShouldReturnSameDorisIdentity()
+    {
+        // Arrange
+        var resolver = new DefaultSqlDatabaseIdentityResolver();
+
+        // Act
+        var first = resolver.Resolve(DatabaseType.Doris,
+            "Server=doris01;Port=9030;Database=warehouse;User Id=app;Password=secret;");
+        var second = resolver.Resolve(DatabaseType.Doris,
+            "Password=other;Database=warehouse;Port=9030;Host=doris01;User Id=another;");
+
+        // Assert
+        Assert.Equal(first, second);
+        Assert.Equal(DatabaseType.Doris, first.DatabaseType);
+        Assert.Equal("doris01", first.Server);
+        Assert.Equal(9030, first.Port);
+        Assert.Equal("warehouse", first.Database);
+    }
+
+    /// <summary>
     /// 测试 - 连接池参数不同不应影响数据库身份。
     /// </summary>
     [Fact]

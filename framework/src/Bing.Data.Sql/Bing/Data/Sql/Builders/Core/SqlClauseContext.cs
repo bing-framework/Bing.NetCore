@@ -83,4 +83,11 @@ public sealed record SqlClauseContext
     internal void UseOperation(SqlOperationAction action) =>
         (Builder as ISqlOperationStateManager)?.UseOperation(action);
 
+    /// <summary>
+    /// 验证查询操作不会与当前 Builder 状态冲突，但不提交状态转换。
+    /// </summary>
+    /// <param name="action">当前查询行为。</param>
+    internal void ValidateOperation(SqlOperationAction action) =>
+        (Builder as ISqlOperationStateManager)?.ValidateOperation(action);
+
 }

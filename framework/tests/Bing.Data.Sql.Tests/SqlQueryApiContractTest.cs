@@ -259,6 +259,42 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
+    /// 测试目的：根查询应公开类型化派生表入口，并由受限的派生根查询描述承接后续 Lambda 组合。
+    /// </summary>
+    [Fact]
+    public void From_WhenPublicApiInspected_ShouldExposeTypedSubqueryRootEntryPoint()
+    {
+        // Arrange and Act
+        var method = typeof(ISqlQuery).GetMethods().Single(candidate => candidate.Name == "From" &&
+            candidate.IsGenericMethodDefinition && candidate.GetGenericArguments().Length == 1 &&
+            candidate.GetParameters().Length == 1 && candidate.GetParameters()[0].ParameterType.IsGenericType &&
+            candidate.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+        var type = typeof(SqlSubqueryLambdaQuery<>);
+
+        // Assert
+        Assert.Equal(type, method.ReturnType.GetGenericTypeDefinition());
+        var methods = type.GetMethods();
+        Assert.Contains(methods, candidate => candidate.Name == "Where");
+        Assert.Contains(methods, candidate => candidate.Name == "Select");
+        Assert.Contains(methods, candidate => candidate.Name == "OrderBy");
+        Assert.DoesNotContain(methods, candidate => candidate.Name == "On");
+
+        var joinNames = new[] { "Join", "LeftJoin", "RightJoin", "FullJoin", "CrossJoin" };
+        foreach (var joinName in joinNames)
+        {
+            var entityJoin = methods.Single(candidate => candidate.Name == joinName &&
+                candidate.IsGenericMethodDefinition && candidate.GetParameters().Length == 2);
+            Assert.Equal(typeof(SqlLambdaQuery<,>), entityJoin.ReturnType.GetGenericTypeDefinition());
+
+            var derivedJoin = methods.Single(candidate => candidate.Name == joinName &&
+                candidate.IsGenericMethodDefinition && candidate.GetParameters().Length == 1 &&
+                candidate.GetParameters()[0].ParameterType.IsGenericType &&
+                candidate.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+            Assert.Equal(typeof(SqlLambdaQuery<,>), derivedJoin.ReturnType.GetGenericTypeDefinition());
+        }
+    }
+
+    /// <summary>
     /// 测试目的：多表查询应以逐步扩展泛型元数的 Join 链公开 On 表达式，避免退回按实体类型猜测别名的旧接口。
     /// </summary>
     [Fact]
@@ -294,7 +330,7 @@ public class SqlQueryApiContractTest
             }
         }
 
-        foreach (var type in types.Skip(1))
+        foreach (var type in types)
         {
             var on = type.GetMethods().Single(method => method.Name == "On" &&
                 method.IsGenericMethodDefinition == false && method.GetParameters().Length == 1);
@@ -354,8 +390,16 @@ public class SqlQueryApiContractTest
         var lambdaType = typeof(SqlLambdaQuery<>);
 
         // Act
-        var join = lambdaType.GetMethods().Single(method => method.Name == "Join" && method.IsGenericMethodDefinition);
-        var leftJoin = lambdaType.GetMethods().Single(method => method.Name == "LeftJoin" && method.IsGenericMethodDefinition);
+        var join = lambdaType.GetMethods().Single(method => method.Name == "Join" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
+        var leftJoin = lambdaType.GetMethods().Single(method => method.Name == "LeftJoin" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
+        var rightJoin = lambdaType.GetMethods().Single(method => method.Name == "RightJoin" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
+        var fullJoin = lambdaType.GetMethods().Single(method => method.Name == "FullJoin" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
+        var crossJoin = lambdaType.GetMethods().Single(method => method.Name == "CrossJoin" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
         var on = lambdaType.GetMethods().Single(method => method.Name == "On" && method.IsGenericMethodDefinition);
         var projection = lambdaType.GetMethods().Single(method => method.Name == "Select" && method.IsGenericMethodDefinition);
         var aggregate = lambdaType.GetMethods().Single(method => method.Name == "Aggregate" && method.IsGenericMethodDefinition);
@@ -363,10 +407,37 @@ public class SqlQueryApiContractTest
         // Assert
         Assert.Equal(typeof(SqlLambdaQuery<>), join.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<>), leftJoin.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), rightJoin.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), fullJoin.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), crossJoin.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<>), on.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlQuery<>), projection.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlQuery<>), aggregate.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(2, lambdaType.GetMethods().Count(method => method.Name == "GroupBy" && method.DeclaringType == lambdaType));
+
+        var selectSubquery = lambdaType.GetMethods().Single(method => method.Name == "SelectSubquery" &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+            method.GetParameters().Length == 2);
+        var derivedJoin = lambdaType.GetMethods().Single(method => method.Name == "Join" &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+            method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType.IsGenericType &&
+            method.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+        var derivedLeftJoin = lambdaType.GetMethods().Single(method => method.Name == "LeftJoin" &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+            method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType.IsGenericType &&
+            method.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+        Assert.Equal(typeof(SqlSubquery<>), selectSubquery.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), derivedJoin.ReturnType.GetGenericTypeDefinition());
+        var derivedJoinNames = new[] { "LeftJoin", "RightJoin", "FullJoin", "CrossJoin" };
+        foreach (var methodName in derivedJoinNames)
+        {
+            var derivedJoinMethod = methodName == "LeftJoin" ? derivedLeftJoin : lambdaType.GetMethods().Single(method =>
+                method.Name == methodName && method.IsGenericMethodDefinition &&
+                method.GetGenericArguments().Length == 1 && method.GetParameters().Length == 1 &&
+                method.GetParameters()[0].ParameterType.IsGenericType &&
+                method.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+            Assert.Equal(typeof(SqlLambdaQuery<,>), derivedJoinMethod.ReturnType.GetGenericTypeDefinition());
+        }
     }
 
     /// <summary>

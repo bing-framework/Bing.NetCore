@@ -185,6 +185,105 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：替换根 From 后，已移除根表的 alias 应可由新的 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenRootFromWasReplaced_ShouldAllowReusingReleasedRootAlias()
+    {
+        // Arrange
+        _builder.From("Orders", "o");
+
+        // Act
+        _builder.From("Customers", "c").Join("OrderItems", "o");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Customers] As [c] \r\nJoin [OrderItems] As [o]", _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：原始 From 替换结构化根来源后，被移除根表的 alias 应可由新的 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenRawFromReplacesRoot_ShouldAllowReusingReleasedRootAlias()
+    {
+        // Arrange
+        _builder.From("Orders", "o");
+
+        // Act
+        _builder.AppendFrom("ArchivedOrders archive").Join("OrderItems", "o");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom ArchivedOrders archive \r\nJoin [OrderItems] As [o]", _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：普通子查询替换结构化根来源后，被移除根表的 alias 应可由新的 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSubqueryFromReplacesRoot_ShouldAllowReusingReleasedRootAlias()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().Select("*").From("ArchivedOrders");
+        _builder.From("Orders", "o");
+
+        // Act
+        _builder.From(subquery, "archive").Join("OrderItems", "o");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom (Select * \r\nFrom [ArchivedOrders]) As [archive] \r\nJoin [OrderItems] As [o]",
+            _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：清除根 From 后，已移除根表的 alias 应可由新的 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenRootFromWasCleared_ShouldAllowReusingReleasedRootAlias()
+    {
+        // Arrange
+        _builder.From("Orders", "o");
+
+        // Act
+        _builder.ClearFrom().From("Customers", "c").Join("OrderItems", "o");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Customers] As [c] \r\nJoin [OrderItems] As [o]", _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：清除结构化 Join 后，已移除连接的 alias 应可由新 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenPreviousJoinWasCleared_ShouldAllowReusingReleasedJoinAlias()
+    {
+        // Arrange
+        _builder.From("Orders", "o").Join("OrderItems", "i");
+
+        // Act
+        _builder.ClearJoin().Join("Invoices", "i");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Orders] As [o] \r\nJoin [Invoices] As [i]", _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：清除普通子查询 Join 后，已移除连接的 alias 应可由新 Join 合法复用。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSubqueryJoinWasCleared_ShouldAllowReusingReleasedJoinAlias()
+    {
+        // Arrange
+        var subquery = new TestSqlBuilder().Select("*").From("OrderItems");
+        _builder.From("Orders", "o").Join(subquery, "items");
+
+        // Act
+        _builder.ClearJoin().Join("Invoices", "items");
+
+        // Assert
+        Assert.Equal("Select * \r\nFrom [Orders] As [o] \r\nJoin [Invoices] As [items]", _builder.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：同一实体类型自连接时，类型化 On 表达式应分别使用来源表和最新 Join 表的别名。
     /// </summary>
     [Fact]

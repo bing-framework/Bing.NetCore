@@ -17,6 +17,7 @@ using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
+using Bing.Dapper.Sqlite;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +54,82 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：支持 Full Join 的 SQL Server 应允许单表实体查询进入双表类型化 Full Join 链。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenSingleSourceTypedFullJoinConfigured_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+
+        // Act
+        var query = rootQuery.From<MappedSample>()
+            .FullJoin<MappedSample>("audit")
+            .On((owner, audit) => owner.Id == audit.Id)
+            .Select((owner, audit) => new object[] { owner.Id, audit.Id });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [Users].[Id],[audit].[Id] \r\nFrom [Users] \r\nFull Join [Users] As [audit] On [Users].[Id]=[audit].[Id]");
+    }
+
+    /// <summary>
+    /// 测试目的：无行限制的类型化派生表不应保留内部排序，避免 SQL Server 派生表的无效 Order By 语法。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenTypedSubqueryHasOrderWithoutLimit_ShouldRemoveInnerOrderBy()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var summary = rootQuery.From<MappedSample>()
+            .OrderBy(item => item.Id)
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+
+        // Act
+        var query = rootQuery.From(summary)
+            .Select(item => new object[] { item.OwnerId });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users]) As [summary]");
+    }
+
+    /// <summary>
+    /// 测试目的：含 Skip 和 Take 的类型化派生表必须保留内部排序与分页，以维持行限制语义。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenTypedSubqueryHasOrderAndLimit_ShouldKeepInnerOrderByAndPaging()
+    {
+        // Arrange
+        var metadataOptions = CreateRoutingMetadataOptions();
+        metadataOptions.DataSources.DataSources["default"].QueryCapabilities = new SqlQueryCapabilities
+        {
+            Pagination = SqlQueryCapabilityState.Supported
+        };
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var summary = rootQuery.From<MappedSample>()
+            .OrderBy(item => item.Id)
+            .Skip(5)
+            .Take(10)
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+
+        // Act
+        var query = rootQuery.From(summary)
+            .Select(item => new object[] { item.OwnerId });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nOrder By [Users].[Id] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only) As [summary]");
+        query.GetParams().Values.ShouldBe(new object[] { 5, 10 });
+    }
+
+    /// <summary>
     /// 测试目的：支持 Full Join 的 SQL Server 应以 DTO 成员别名绑定类型化派生表，并保留内部筛选参数。
     /// </summary>
     [Fact]
@@ -76,6 +153,149 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[summary].[OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
         query.GetParams().Values.Single().ShouldBe(10);
+    }
+
+    /// <summary>
+    /// 测试目的：支持 Full Join 的 SQL Server 应允许单表实体来源连接类型化派生表，并保留派生表参数。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenSingleSourceDtoSubqueryFullJoined_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var summary = rootQuery.From<MappedSample>()
+            .Where(item => item.Id > 10)
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+
+        // Act
+        var query = rootQuery.From<MappedSample>()
+            .FullJoin(summary)
+            .On((sample, derived) => sample.Id == derived.OwnerId)
+            .Select((sample, derived) => new object[] { sample.Id, derived.OwnerId });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [Users].[Id],[summary].[OwnerId] \r\nFrom [Users] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
+        query.GetParams().Values.Single().ShouldBe(10);
+    }
+
+    /// <summary>
+    /// 测试目的：支持 Full Join 的 SQL Server 应允许两个类型化派生表以派生根入口组合，并隔离同名参数。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenDtoSubqueryRootFullJoined_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var owner = rootQuery.From<MappedSample>()
+            .Where(item => item.Id > 10)
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "owner");
+        var audit = rootQuery.From<MappedSample>()
+            .Where(item => item.Id > 20)
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "audit");
+
+        // Act
+        var query = rootQuery.From(owner)
+            .FullJoin(audit)
+            .On((left, right) => left.OwnerId == right.OwnerId)
+            .Select((left, right) => new object[] { left.OwnerId, right.OwnerId });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [owner].[OwnerId],[audit].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [owner] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_1) As [audit] On [owner].[OwnerId]=[audit].[OwnerId]");
+        query.GetParams().Values.ShouldBe(new object[] { 10, 20 });
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 DTO 派生表不能跨 Provider 组合，拒绝时不得修改外层 SQL 状态。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenDtoSubqueryUsesDifferentProvider_ShouldRejectWithoutChangingOuterQuery()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["sqlserver"] = new SqlDataSourceDescriptor
+        {
+            Key = "sqlserver",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=sqlserver;Database=test;"
+        };
+        metadataOptions.DataSources.DataSources["sqlite"] = new SqlDataSourceDescriptor
+        {
+            Key = "sqlite",
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = "Data Source=:memory:"
+        };
+        foreach (var dbKey in new[] { "sqlserver", "sqlite" })
+            metadataOptions.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(MappedSample),
+                DbKey = dbKey,
+                TableName = "Users"
+            });
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerProvider();
+        services.AddSqliteProvider();
+        using var provider = services.BuildServiceProvider();
+        using var sqlServerQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlserver");
+        using var sqliteQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
+        var subquery = sqliteQuery.From<MappedSample, MappedSample>()
+            .SelectSubquery((left, right) => new DerivedMappedSample { OwnerId = left.Id }, "summary");
+        var outer = sqlServerQuery.From<MappedSample, MappedSample>();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+
+        // Assert
+        exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
+        outer.ToSql().ShouldBe("Select * \r\nFrom [Users], [Users] As [Users_2]");
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 DTO 派生表作为根来源时，跨 Provider 组合应在独立 Builder 创建阶段拒绝，且不访问连接。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenDtoSubqueryRootUsesDifferentProvider_ShouldRejectBeforeConnectionAccess()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions();
+        metadataOptions.DataSources.DataSources["sqlserver"] = new SqlDataSourceDescriptor
+        {
+            Key = "sqlserver",
+            DatabaseType = DatabaseType.SqlServer,
+            ConnectionString = "Server=sqlserver;Database=test;"
+        };
+        metadataOptions.DataSources.DataSources["sqlite"] = new SqlDataSourceDescriptor
+        {
+            Key = "sqlite",
+            DatabaseType = DatabaseType.Sqlite,
+            ConnectionString = "Data Source=:memory:"
+        };
+        foreach (var dbKey in new[] { "sqlserver", "sqlite" })
+            metadataOptions.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(MappedSample),
+                DbKey = dbKey,
+                TableName = "Users"
+            });
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerProvider();
+        services.AddSqliteProvider();
+        using var provider = services.BuildServiceProvider();
+        using var sqlServerQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlserver");
+        using var sqliteQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
+        var subquery = sqliteQuery.From<MappedSample>()
+            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => sqlServerQuery.From(subquery));
+
+        // Assert
+        exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
     }
 
     /// <summary>

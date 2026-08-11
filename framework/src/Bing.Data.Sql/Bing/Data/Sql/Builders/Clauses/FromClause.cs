@@ -118,10 +118,15 @@ public class FromClause : IFromClause
     /// <inheritdoc />
     public void From(string table, string alias = null)
     {
-        _context.UseOperation(SqlOperationAction.QueryClause);
         var parsedTable = ParseTableName(table, alias);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        registerProbe?.RegisterAlias(parsedTable.Alias);
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
         Register?.RegisterAlias(parsedTable.Alias);
-        ReplaceSources(CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias));
+        ReplaceSources(CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias), alias: parsedTable.Alias);
     }
 
     /// <summary>
@@ -139,14 +144,25 @@ public class FromClause : IFromClause
     /// <inheritdoc />
     public void From(SqlTableReference reference)
     {
-        _context.UseOperation(SqlOperationAction.QueryClause);
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var resolvedAlias = reference.EntityType == null ? reference.Alias :
+            Resolver.GetAlias(reference.EntityType, reference.Alias);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        if (reference.EntityType == null)
+            registerProbe?.RegisterAlias(reference.Alias);
+        else
+            registerProbe?.Replace(reference.EntityType, resolvedAlias);
+        var item = CreateStructuredSqlItem(reference);
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
         if (reference.EntityType == null)
             Register?.RegisterAlias(reference.Alias);
         else
-            Register?.Replace(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
-        ReplaceSources(CreateStructuredSqlItem(reference), reference.EntityType);
+            Register?.Replace(reference.EntityType, resolvedAlias);
+        ReplaceSources(item, reference.EntityType, resolvedAlias);
         if (reference.EntityType == null)
             return;
         if (Register != null)
@@ -258,15 +274,23 @@ public class FromClause : IFromClause
     /// <param name="reference">待追加的表引用。</param>
     internal void AppendRoot(SqlTableReference reference)
     {
-        _context.UseOperation(SqlOperationAction.QueryClause);
         if (reference == null)
             throw new ArgumentNullException(nameof(reference));
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var resolvedAlias = reference.EntityType == null ? reference.Alias :
+            Resolver.GetAlias(reference.EntityType, reference.Alias);
+        var registerProbe = Register?.Clone();
+        if (reference.EntityType == null)
+            registerProbe?.RegisterAlias(reference.Alias);
+        else
+            registerProbe?.Register(reference.EntityType, resolvedAlias);
+        var item = CreateStructuredSqlItem(reference);
+        _context.UseOperation(SqlOperationAction.QueryClause);
         if (reference.EntityType == null)
             Register?.RegisterAlias(reference.Alias);
         else
-            Register?.Register(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
-        var item = CreateStructuredSqlItem(reference);
-        _sources.Add(new TableSource($"source_{_sources.Count}", item, reference.EntityType));
+            Register?.Register(reference.EntityType, resolvedAlias);
+        _sources.Add(new TableSource($"source_{_sources.Count}", item, reference.EntityType, resolvedAlias));
         Table = item;
     }
 
@@ -358,6 +382,8 @@ public class FromClause : IFromClause
         var body = UnwrapConversion(expression.Body);
         if (body is not System.Linq.Expressions.MemberInitExpression memberInit)
             throw new NotSupportedException("多表 DTO 投影必须使用成员初始化表达式。");
+        if (memberInit.Bindings.Count == 0)
+            throw new NotSupportedException("多表 DTO 投影至少需要一个成员初始化绑定。");
 
         var bindings = new SqlParameterBindingScope(expression, sources);
         var result = new List<string>();
@@ -414,7 +440,8 @@ public class FromClause : IFromClause
         string column;
         if (source.ProjectedMembers != null)
         {
-            if (member == null || source.ProjectedMembers.Contains(member.Member.Name) == false)
+            if (member == null || UnwrapConversion(member.Expression) is not System.Linq.Expressions.ParameterExpression ||
+                source.ProjectedMembers.Contains(member.Member.Name) == false)
                 throw new NotSupportedException("多表派生表只能引用已投影的 DTO 成员。");
             column = member.Member.Name;
         }
@@ -429,10 +456,38 @@ public class FromClause : IFromClause
     {
         if (builder == null)
             return;
-        _context.UseOperation(SqlOperationAction.QueryClause);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        registerProbe?.RegisterAlias(alias);
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
         Register?.RegisterAlias(alias);
-        ReplaceSources(SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}"));
+        ReplaceSources(SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}"), alias: alias);
+    }
+
+    /// <summary>
+    /// 使用保留 DTO 投影成员与来源身份的类型化派生表替换根来源。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    internal void From<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class
+    {
+        if (subquery == null)
+            throw new ArgumentNullException(nameof(subquery));
+        subquery.ValidateCompatible(Builder);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        registerProbe?.RegisterAlias(subquery.Alias);
+        var sql = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(subquery.Builder) :
+            subquery.Builder.ToSql();
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
+        Register?.RegisterAlias(subquery.Alias);
+        ReplaceSources(SqlItem.Raw($"({sql}){GetSubqueryAlias(subquery.Alias)}"), typeof(TProjection), subquery.Alias,
+            subquery.ProjectedMembers);
     }
 
     /// <summary>
@@ -464,6 +519,7 @@ public class FromClause : IFromClause
             _sources[^1] = new TableSource(_sources[^1].SourceId, Table);
             return;
         }
+        ReleaseSourceAliases(Register);
         ReplaceSources(SqlItem.Raw(sql));
     }
 
@@ -490,8 +546,25 @@ public class FromClause : IFromClause
     /// <inheritdoc />
     public void Clear()
     {
+        ReleaseSourceAliases(Register);
+        if (Register != null)
+            Register.FromType = null;
         Table = null;
         _sources.Clear();
+    }
+
+    /// <summary>
+    /// 从指定注册器中释放当前根来源已占用的别名。
+    /// </summary>
+    /// <param name="register">待修改的真实或预检注册器。</param>
+    private void ReleaseSourceAliases(IEntityAliasRegister register)
+    {
+        if (register is not IEntityAliasRegisterLifecycle lifecycle)
+            return;
+        foreach (var alias in _sources.Select(source => source.Alias)
+                     .Where(alias => string.IsNullOrWhiteSpace(alias) == false)
+                     .Distinct(StringComparer.OrdinalIgnoreCase))
+            lifecycle.ReleaseAlias(alias);
     }
 
     /// <summary>
@@ -499,12 +572,15 @@ public class FromClause : IFromClause
     /// </summary>
     /// <param name="item">新的来源表项。</param>
     /// <param name="entityType">关联实体类型。</param>
-    private void ReplaceSources(SqlItem item, Type entityType = null)
+    /// <param name="alias">外层查询引用来源时使用的别名。</param>
+    /// <param name="projectedMembers">派生来源向外层公开的投影成员。</param>
+    private void ReplaceSources(SqlItem item, Type entityType = null, string alias = null,
+        IReadOnlyCollection<string> projectedMembers = null)
     {
         Table = item;
         _sources.Clear();
         if (item != null)
-            _sources.Add(new TableSource("source_0", item, entityType));
+            _sources.Add(new TableSource("source_0", item, entityType, alias, projectedMembers));
     }
 
     /// <summary>

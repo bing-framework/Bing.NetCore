@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql;
 
@@ -279,6 +281,142 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     {
         GetBuilder().LeftJoin<TJoin>(alias, schema);
         return this;
+    }
+
+    /// <summary>
+    /// 添加类型化右外连接表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名称。</param>
+    /// <returns>包含实体来源和连接表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TJoin> RightJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    {
+        GetBuilder().RightJoin<TJoin>(alias, schema);
+        return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化全外连接表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名称。</param>
+    /// <returns>包含实体来源和连接表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TJoin> FullJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    {
+        GetBuilder().FullJoin<TJoin>(alias, schema);
+        return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化交叉连接表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名称。</param>
+    /// <returns>包含实体来源和连接表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TJoin> CrossJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    {
+        GetBuilder().CrossJoin<TJoin>(alias, schema);
+        return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 将严格 DTO 投影冻结为可复用的类型化派生表。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="projection">当前实体的 DTO 成员初始化投影表达式。</param>
+    /// <param name="alias">派生表别名。</param>
+    /// <returns>冻结投影、参数、Provider 和数据源身份的类型化派生表。</returns>
+    public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TEntity, TProjection>> projection,
+        string alias) where TProjection : class
+    {
+        if (projection == null)
+            throw new ArgumentNullException(nameof(projection));
+        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
+        var fromClause = accessor.FromClause as FromClause ??
+            throw new NotSupportedException("当前 SQL Provider 不支持单表类型化派生查询。");
+        if (fromClause.Sources.Count != 1)
+            throw new NotSupportedException("单表类型化派生查询只能包含一个根来源。");
+        var columns = fromClause.ResolveMultiSourceDtoColumns(projection, new[] { fromClause.Sources[0] },
+            out var projectedMembers);
+        var builder = GetBuilder().Clone();
+        builder.ClearSelect();
+        ((ISqlQueryClauseAccessor)builder).SelectClause.Select(string.Join(", ", columns));
+        if (builder is SqlBuilderBase { HasLimit: false })
+            builder.ClearOrderBy();
+        var sqlBuilder = builder as SqlBuilderBase;
+        var context = sqlBuilder?.GetDatabaseContext();
+        var dataSourceKey = context?.DataSource?.Key ?? context?.DbKey;
+        return new SqlSubquery<TProjection>(builder, alias, projectedMembers, builder.Provider?.Key, dataSourceKey,
+            context?.MappingProfile, context?.TenantId, sqlBuilder?.GetDatabaseIdentity(),
+            sqlBuilder?.GetExecutionScope());
+    }
+
+    /// <summary>
+    /// 添加类型化内连接派生表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TProjection> Join<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).Join(subquery);
+        return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化左外连接派生表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TProjection> LeftJoin<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).LeftJoin(subquery);
+        return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化右外连接派生表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TProjection> RightJoin<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).RightJoin(subquery);
+        return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化全外连接派生表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TProjection> FullJoin<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).FullJoin(subquery);
+        return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加类型化交叉连接派生表并切换到双表 Lambda 查询描述。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
+    public SqlLambdaQuery<TEntity, TProjection> CrossJoin<TProjection>(SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).CrossJoin(subquery);
+        return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
     }
 
     /// <summary>

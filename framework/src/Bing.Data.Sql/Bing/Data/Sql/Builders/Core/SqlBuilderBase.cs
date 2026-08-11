@@ -21,6 +21,11 @@ namespace Bing.Data.Sql.Builders.Core;
 public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IUnionAccessor,
     ICteAccessor, ISqlOperationStateManager, IReturningClauseAccessor
 {
+
+    /// <summary>
+    /// 是否已配置会输出的行限制。
+    /// </summary>
+    internal bool HasLimit => IsLimit;
     #region 字段
 
     /// <summary>
@@ -651,6 +656,26 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     internal virtual DatabaseContext GetDatabaseContext() => ExecutionContext.DatabaseContext;
 
     /// <summary>
+    /// 获取当前 Builder 冻结连接对应的物理数据库身份。
+    /// </summary>
+    /// <returns>不含凭据的物理数据库身份；无法取得连接字符串时返回 null。</returns>
+    internal SqlDatabaseIdentity GetDatabaseIdentity()
+    {
+        var context = GetDatabaseContext();
+        var connectionString = Options?.ConnectionString;
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return null;
+        var databaseType = context?.DataSource?.DatabaseType ?? Options?.DatabaseType ?? Provider.DatabaseType;
+        return Services.DatabaseIdentityResolver.Resolve(databaseType, connectionString);
+    }
+
+    /// <summary>
+    /// 获取可识别同一根查询执行上下文的内部作用域令牌。
+    /// </summary>
+    /// <returns>当前根查询专属的 SQL 选项实例。</returns>
+    internal object GetExecutionScope() => Options;
+
+    /// <summary>
     /// 渲染子查询并合并独立参数上下文。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
@@ -677,30 +702,48 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
 
         var sourceParameters = accessor.ParameterManager.GetParams();
         var sourceSqlParameters = (accessor.ParameterManager as IAdvancedParameterManager)?.GetSqlParams();
-        if (_subqueryParameterNames.TryGetValue(builder, out var nameMap) == false)
-        {
-            nameMap = new Dictionary<string, string>();
-            _subqueryParameterNames[builder] = nameMap;
-        }
+        var nameMap = _subqueryParameterNames.TryGetValue(builder, out var existingNameMap)
+            ? new Dictionary<string, string>(existingNameMap)
+            : new Dictionary<string, string>();
+        var parameterManager = ParameterManager;
+        var parameterProbe = parameterManager.Clone();
         foreach (var parameter in sourceParameters)
         {
             if (nameMap.TryGetValue(parameter.Key, out var targetName) == false)
             {
                 targetName = parameter.Key;
-                if (ParameterManager.Contains(parameter.Key) && Equals(ParameterManager.GetValue(parameter.Key), parameter.Value) == false)
-                    targetName = ParameterManager.GenerateName();
+                if (parameterProbe.Contains(parameter.Key) && Equals(parameterProbe.GetValue(parameter.Key), parameter.Value) == false)
+                    targetName = parameterProbe.GenerateName();
                 nameMap[parameter.Key] = targetName;
             }
-            if (ParameterManager.Contains(targetName) == false)
-            {
-                if (sourceSqlParameters != null && sourceSqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
-                    ParameterManager is IAdvancedParameterManager advancedParameterManager)
-                    advancedParameterManager.Add(CloneSqlParameter(sqlParameter, targetName));
-                else
-                    ParameterManager.Add(targetName, parameter.Value);
-            }
+            AddSubqueryParameter(parameterProbe, sourceSqlParameters, parameter.Key, targetName, parameter.Value);
         }
-            return ReplaceParameterTokens(sql, nameMap);
+        foreach (var parameter in sourceParameters)
+            AddSubqueryParameter(parameterManager, sourceSqlParameters, parameter.Key, nameMap[parameter.Key], parameter.Value);
+        _subqueryParameterNames[builder] = nameMap;
+        return ReplaceParameterTokens(sql, nameMap);
+    }
+
+    /// <summary>
+    /// 将子查询参数复制到目标参数管理器；同名参数已存在时保留原值。
+    /// </summary>
+    /// <param name="target">目标参数管理器。</param>
+    /// <param name="sourceSqlParameters">源参数元数据快照。</param>
+    /// <param name="sourceName">源参数名称。</param>
+    /// <param name="targetName">目标参数名称。</param>
+    /// <param name="value">源参数值。</param>
+    private static void AddSubqueryParameter(IParameterManager target,
+        IReadOnlyDictionary<string, SqlParam> sourceSqlParameters, string sourceName, string targetName, object value)
+    {
+        if (target.Contains(targetName))
+            return;
+        if (sourceSqlParameters != null && sourceSqlParameters.TryGetValue(sourceName, out var sqlParameter) &&
+            target is IAdvancedParameterManager advancedParameterManager)
+        {
+            advancedParameterManager.Add(CloneSqlParameter(sqlParameter, targetName));
+            return;
+        }
+        target.Add(targetName, value);
     }
 
     /// <summary>
@@ -1190,6 +1233,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder ClearFrom()
     {
+        _fromClause?.Clear();
         _fromClause = CreateFromClause();
         return this;
     }
@@ -1199,6 +1243,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder ClearJoin()
     {
+        _joinClause?.Clear();
         _joinClause = CreateJoinClause();
         return this;
     }
@@ -1725,6 +1770,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <inheritdoc />
     void ISqlOperationStateManager.UseOperation(SqlOperationAction action) => UseOperation(action);
 
+    /// <inheritdoc />
+    void ISqlOperationStateManager.ValidateOperation(SqlOperationAction action) => ValidateOperation(action);
+
     /// <summary>
     /// 在 Clause 修改前验证并切换当前操作状态。
     /// </summary>
@@ -1735,12 +1783,25 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <exception cref="InvalidOperationException">操作会混用不兼容的查询和 Mutation 语句时抛出。</exception>
     private void UseOperation(SqlOperationAction action)
     {
+        _operationState = GetNextOperationStateOrThrow(action);
+    }
+
+    /// <summary>
+    /// 验证操作状态转换，但不改变当前状态。
+    /// </summary>
+    /// <param name="action">即将执行的查询或 Mutation 操作。</param>
+    private void ValidateOperation(SqlOperationAction action) => GetNextOperationStateOrThrow(action);
+
+    /// <summary>
+    /// 获取合法操作状态转换的目标状态，或抛出统一异常。
+    /// </summary>
+    /// <param name="action">即将执行的查询或 Mutation 操作。</param>
+    /// <returns>状态转换后的目标状态。</returns>
+    private SqlBuilderOperationState GetNextOperationStateOrThrow(SqlOperationAction action)
+    {
         var nextState = GetNextOperationState(action);
         if (nextState.HasValue)
-        {
-            _operationState = nextState.Value;
-            return;
-        }
+            return nextState.Value;
         throw new InvalidOperationException($"当前 Builder 已处于 {GetOperationName(_operationState)} 状态，不能调用 {GetActionName(action)}。");
     }
 

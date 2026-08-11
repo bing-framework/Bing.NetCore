@@ -36,6 +36,28 @@ static Bing.Data.Sql.Extensions.CrossJoin<TEntity>(this Bing.Data.Sql.ISqlBuilde
 static Bing.Data.Sql.Extensions.CrossJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.CrossJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.ISqlQuery.From<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Where(System.Linq.Expressions.Expression<System.Func<TProjection, bool>> predicate) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Select(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Select<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.SelectDto<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, TResult>> projection) -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.SelectSubquery<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, TResult>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TResult>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.GroupBy(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Having(System.Linq.Expressions.Expression<System.Func<TProjection, bool>> predicate) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.OrderBy(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Skip(int count) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Take(int count) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Join<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.LeftJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.RightJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.FullJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.CrossJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Join<TJoin>(Bing.Data.Sql.SqlSubquery<TJoin> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.LeftJoin<TJoin>(Bing.Data.Sql.SqlSubquery<TJoin> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.RightJoin<TJoin>(Bing.Data.Sql.SqlSubquery<TJoin> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.FullJoin<TJoin>(Bing.Data.Sql.SqlSubquery<TJoin> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
+Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.CrossJoin<TJoin>(Bing.Data.Sql.SqlSubquery<TJoin> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TProjection, TJoin>
 Bing.Data.Sql.SqlMultiLambdaQuery<TResult>
 Bing.Data.Sql.SqlMultiLambdaQuery<TResult>.As<TProjection>() -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlSubquery<TProjection>
@@ -46,6 +68,7 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select(System.Linq.Expressions.Exp
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Join<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
@@ -61,6 +84,15 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.CrossJoin<TThird>(Bing.Data.Sql.Sq
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.RightJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.FullJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.CrossJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Join<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.LeftJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.RightJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.FullJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.CrossJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
 Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
 Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
 Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth, TFifth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
