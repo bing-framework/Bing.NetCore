@@ -1,3 +1,179 @@
+Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.ISqlQuery.Text<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.ISqlQuery.TextInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.FullJoin.get -> Bing.Data.SqlQueryCapabilityState
+Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.FullJoin.init -> void
+Bing.Data.Sql.Builders.IJoinClause.FullJoin(string table, string alias = null) -> void
+Bing.Data.Sql.Builders.IJoinClause.FullJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.Builders.IJoinClause.FullJoin<TEntity>(string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.IJoinClause.AppendFullJoin(string sql) -> void
+Bing.Data.Sql.Builders.IJoinClause.CrossJoin(string table, string alias = null) -> void
+Bing.Data.Sql.Builders.IJoinClause.CrossJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.Builders.IJoinClause.CrossJoin<TEntity>(string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.IJoinClause.AppendCrossJoin(string sql) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.FullJoin(string table, string alias = null) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.FullJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.FullJoin<TEntity>(string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.AppendFullJoin(string sql) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.CrossJoin(string table, string alias = null) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.CrossJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.CrossJoin<TEntity>(string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.Clauses.JoinClause.AppendCrossJoin(string sql) -> void
+static Bing.Data.Sql.Extensions.FullJoin<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.FullJoin<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.FullJoin<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
+static Bing.Data.Sql.Extensions.AppendFullJoin<T>(this T source, string sql) -> T
+static Bing.Data.Sql.Extensions.CrossJoin<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.CrossJoin<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.CrossJoin<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
+static Bing.Data.Sql.Extensions.AppendCrossJoin<T>(this T source, string sql) -> T
+static Bing.Data.Sql.Extensions.FullJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.FullJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.FullJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.FullJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.CrossJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.CrossJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.CrossJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.CrossJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlMultiLambdaQuery<TResult>
+Bing.Data.Sql.SqlMultiLambdaQuery<TResult>.As<TProjection>() -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlSubquery<TProjection>.Alias.get -> string
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Join<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.LeftJoin<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.RightJoin<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.FullJoin<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.CrossJoin<TThird>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Join<TThird>(Bing.Data.Sql.SqlSubquery<TThird> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.LeftJoin<TThird>(Bing.Data.Sql.SqlSubquery<TThird> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.RightJoin<TThird>(Bing.Data.Sql.SqlSubquery<TThird> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.FullJoin<TThird>(Bing.Data.Sql.SqlSubquery<TThird> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.CrossJoin<TThird>(Bing.Data.Sql.SqlSubquery<TThird> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth, TFifth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Join<TFourth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.LeftJoin<TFourth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.RightJoin<TFourth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.FullJoin<TFourth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.CrossJoin<TFourth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Join<TFourth>(Bing.Data.Sql.SqlSubquery<TFourth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.LeftJoin<TFourth>(Bing.Data.Sql.SqlSubquery<TFourth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.RightJoin<TFourth>(Bing.Data.Sql.SqlSubquery<TFourth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.FullJoin<TFourth>(Bing.Data.Sql.SqlSubquery<TFourth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.CrossJoin<TFourth>(Bing.Data.Sql.SqlSubquery<TFourth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Join<TFifth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.LeftJoin<TFifth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.RightJoin<TFifth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.FullJoin<TFifth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.CrossJoin<TFifth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Join<TFifth>(Bing.Data.Sql.SqlSubquery<TFifth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.LeftJoin<TFifth>(Bing.Data.Sql.SqlSubquery<TFifth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.RightJoin<TFifth>(Bing.Data.Sql.SqlSubquery<TFifth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.FullJoin<TFifth>(Bing.Data.Sql.SqlSubquery<TFifth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.CrossJoin<TFifth>(Bing.Data.Sql.SqlSubquery<TFifth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Join<TSixth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.LeftJoin<TSixth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.RightJoin<TSixth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.FullJoin<TSixth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.CrossJoin<TSixth>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Join<TSixth>(Bing.Data.Sql.SqlSubquery<TSixth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.LeftJoin<TSixth>(Bing.Data.Sql.SqlSubquery<TSixth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.RightJoin<TSixth>(Bing.Data.Sql.SqlSubquery<TSixth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.FullJoin<TSixth>(Bing.Data.Sql.SqlSubquery<TSixth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.CrossJoin<TSixth>(Bing.Data.Sql.SqlSubquery<TSixth> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Join<TSeventh>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.LeftJoin<TSeventh>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.RightJoin<TSeventh>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.FullJoin<TSeventh>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.CrossJoin<TSeventh>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Join<TSeventh>(Bing.Data.Sql.SqlSubquery<TSeventh> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.LeftJoin<TSeventh>(Bing.Data.Sql.SqlSubquery<TSeventh> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.RightJoin<TSeventh>(Bing.Data.Sql.SqlSubquery<TSeventh> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.FullJoin<TSeventh>(Bing.Data.Sql.SqlSubquery<TSeventh> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.CrossJoin<TSeventh>(Bing.Data.Sql.SqlSubquery<TSeventh> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.SelectDto<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Having(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.get -> int?
+Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.set -> void
+Bing.Data.Sql.ISqlExecutor.ExecuteMutation(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlExecutor.ExecuteText(string sql, object param = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.ExecuteTextAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.Builders.IJoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.Builders.Clauses.JoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.ISqlBuilder.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
@@ -9,8 +185,6 @@ Bing.Data.Sql.ISqlExecutor.ExecuteProcedure(string procedure, object param = nul
 Bing.Data.Sql.ISqlExecutor.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>
 Bing.Data.Sql.ISqlExecutor.Execute(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.ExecuteReturningQuery<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.ISqlExecutor.ExecuteReturningQueryAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirst(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>

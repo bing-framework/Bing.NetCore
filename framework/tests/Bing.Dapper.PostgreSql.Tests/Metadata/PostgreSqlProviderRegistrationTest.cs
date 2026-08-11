@@ -27,10 +27,10 @@ public class PostgreSqlProviderRegistrationTest
         services.AddPostgreSqlProvider();
         services.AddSqlDataSource("pgsql", DatabaseType.PgSql, "Host=localhost;Database=test;");
         using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("pgsql");
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("pgsql");
 
         // Act
-        var description = query.SqlInterpolated<string>(
+        var description = query.TextInterpolated<string>(
             $"Select $tag$@p0$tag$ Where Name = {"Bing"}");
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
 
@@ -54,8 +54,8 @@ public class PostgreSqlProviderRegistrationTest
         using var provider = services.BuildServiceProvider();
 
         // Act
-        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("pgsql");
-        using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>("pgsql");
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("pgsql");
+        using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create("pgsql");
         using var multipleQueryExecutor = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>()
             .Create("pgsql");
         using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()

@@ -187,7 +187,7 @@ public class ReadOnlyDataSourceExecutionTest
         var connection = CreateConnection();
         var query = new ReadOnlyTestQuery(CreateServiceProvider(), CreateOptions(connection.Object));
         var queryFactory = new Mock<ISqlQueryFactory>();
-        queryFactory.Setup(item => item.Create<ISqlQuery>()).Returns(query);
+        queryFactory.Setup(item => item.Create(null)).Returns(query);
         var executorFactory = new Mock<ISqlExecutorFactory>();
         var factory = new SqlTransactionScopeFactory(queryFactory.Object, executorFactory.Object);
 

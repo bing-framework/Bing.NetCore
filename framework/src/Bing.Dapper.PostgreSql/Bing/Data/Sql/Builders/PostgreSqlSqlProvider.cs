@@ -52,6 +52,7 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
             Intersect = SqlQueryCapabilityState.Supported,
             Except = SqlQueryCapabilityState.Supported,
             RightJoin = SqlQueryCapabilityState.Supported,
+            FullJoin = SqlQueryCapabilityState.Supported,
             Pagination = SqlQueryCapabilityState.Supported
         },
         Mutation = new SqlProviderMutationCapabilities

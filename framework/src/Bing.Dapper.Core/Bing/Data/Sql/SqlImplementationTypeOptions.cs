@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 实现类型配置
 /// </summary>
-public sealed class SqlImplementationTypeOptions
+internal sealed class SqlImplementationTypeOptions
 {
     /// <summary>
     /// Provider Key 维度的服务类型到实现类型映射。

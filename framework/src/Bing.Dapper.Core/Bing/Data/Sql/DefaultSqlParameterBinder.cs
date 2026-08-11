@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Enums;
+using System.Reflection;
 
 namespace Bing.Data.Sql;
 
@@ -496,6 +497,22 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
     ISqlOutputParameterSnapshotProvider
 {
     /// <summary>
+    /// Dapper 原生参数字典字段。
+    /// </summary>
+    /// <remarks>
+    /// Dapper 2.1.28 未公开参数方向枚举 API；框架使用锁定版本的内部元数据，
+    /// 以便在创建连接和命令前完成输出参数能力校验。
+    /// </remarks>
+    private static readonly FieldInfo ParametersField = typeof(global::Dapper.DynamicParameters).GetField("parameters",
+        BindingFlags.Instance | BindingFlags.NonPublic);
+
+    /// <summary>
+    /// Dapper 原生参数项方向属性。
+    /// </summary>
+    private static readonly PropertyInfo ParameterDirectionProperty = ParametersField?.FieldType.GetGenericArguments()
+        .LastOrDefault()?.GetProperty("ParameterDirection", BindingFlags.Instance | BindingFlags.Public);
+
+    /// <summary>
     /// 原生 Dapper 参数集合。
     /// </summary>
     private readonly global::Dapper.DynamicParameters _parameters;
@@ -517,6 +534,31 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
     /// <param name="parameters">当前执行使用的参数集合。</param>
     public DynamicParametersOutputAccessor(global::Dapper.DynamicParameters parameters) =>
         _parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
+
+    /// <summary>
+    /// 检查原生 Dapper 参数集合是否声明输出方向。
+    /// </summary>
+    /// <param name="parameters">原生 Dapper 参数集合。</param>
+    /// <returns>存在 Output、InputOutput 或 ReturnValue 参数时返回 <see langword="true"/>。</returns>
+    /// <exception cref="InvalidOperationException">当前 Dapper 版本不再提供所需的参数方向元数据时抛出。</exception>
+    internal static bool HasOutputParameters(global::Dapper.DynamicParameters parameters)
+    {
+        if (parameters == null)
+            return false;
+        if (ParametersField == null || ParameterDirectionProperty == null)
+            throw new InvalidOperationException("当前 Dapper 版本未提供原生参数方向元数据，无法安全校验存储过程输出参数。");
+        if (ParametersField.GetValue(parameters) is not System.Collections.IEnumerable parameterEntries)
+            throw new InvalidOperationException("无法读取原生 Dapper 参数集合，无法安全校验存储过程输出参数。");
+        foreach (var entry in parameterEntries)
+        {
+            var parameter = entry?.GetType().GetProperty("Value", BindingFlags.Instance | BindingFlags.Public)
+                ?.GetValue(entry);
+            if (ParameterDirectionProperty.GetValue(parameter) is ParameterDirection direction &&
+                direction is ParameterDirection.Output or ParameterDirection.InputOutput or ParameterDirection.ReturnValue)
+                return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// 配置当前过程的输出参数能力。

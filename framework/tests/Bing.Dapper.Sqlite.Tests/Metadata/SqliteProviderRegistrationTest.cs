@@ -49,8 +49,8 @@ public class SqliteProviderRegistrationTest
         using var provider = services.BuildServiceProvider();
 
         // Act
-        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlite");
-        using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>("sqlite");
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
+        using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create("sqlite");
         using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
             .Create(SqliteSqlProvider.Instance.Key, "Data Source=:memory:");
 
@@ -105,10 +105,11 @@ public class SqliteProviderRegistrationTest
         // Arrange
         var connection = new SqliteConnection("Data Source=:memory:");
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddSqliteSqlExecutor(options => options.Connection(connection));
+        services.AddSqliteProvider();
         using var provider = services.BuildServiceProvider();
-        using var executor = provider.GetRequiredService<ISqlExecutor>();
+        var options = new SqlOptions<SqliteSqlExecutor> { DatabaseType = DatabaseType.Sqlite };
+        options.Connection(connection);
+        using var executor = new SqliteSqlExecutor(provider, options);
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("unsupported_procedure"));

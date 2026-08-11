@@ -43,7 +43,7 @@ public class SqlFactoryTest
         Assert.Contains("ISqlExecutorFactory", sqlContractExportedTypeNames);
         Assert.Contains("ISqlMultipleQueryExecutorFactory", sqlContractExportedTypeNames);
         Assert.Contains("ISqlDbConnectionFactoryResolver", sqlContractExportedTypeNames);
-        Assert.Contains("ISqlImplementationTypeResolver", sqlContractExportedTypeNames);
+        Assert.DoesNotContain("ISqlImplementationTypeResolver", sqlContractExportedTypeNames);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class SqlFactoryTest
         query.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() => query.Sql<int>("Select 1"));
+        Assert.Throws<ObjectDisposedException>(() => query.Text<int>("Select 1"));
     }
 
     /// <summary>
@@ -125,17 +125,17 @@ public class SqlFactoryTest
         AddTestProvider(services, "test.sqlite", DatabaseType.Sqlite);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=app;", providerKey: "test.mysql");
         services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=app.db", providerKey: "test.sqlite");
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
-        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("test.sqlite");
-        services.AddSqlImplementationType<ISqlExecutor, MySqlTestExecutor>("test.mysql");
-        services.AddSqlImplementationType<ISqlExecutor, SqliteTestExecutor>("test.sqlite");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "test.sqlite");
+        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(MySqlTestExecutor), "test.mysql");
+        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(SqliteTestExecutor), "test.sqlite");
         using var provider = services.BuildServiceProvider();
         var queryFactory = provider.GetRequiredService<ISqlQueryFactory>();
         var executorFactory = provider.GetRequiredService<ISqlExecutorFactory>();
 
         // Act
-        var query = queryFactory.Create<ISqlQuery>("mysql");
-        var executor = executorFactory.Create<ISqlExecutor>("sqlite");
+        var query = queryFactory.Create("mysql");
+        var executor = executorFactory.Create("sqlite");
 
         // Assert
         var mysqlQuery = Assert.IsType<MySqlTestQuery>(query);
@@ -161,14 +161,14 @@ public class SqlFactoryTest
         AddTestProvider(services, "custom.sqlite.second", DatabaseType.Sqlite);
         services.AddSqlDataSource("first", DatabaseType.Sqlite, "Data Source=first.db", providerKey: "custom.sqlite.first");
         services.AddSqlDataSource("second", DatabaseType.Sqlite, "Data Source=second.db", providerKey: "custom.sqlite.second");
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("custom.sqlite.first");
-        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("custom.sqlite.second");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "custom.sqlite.first");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "custom.sqlite.second");
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var first = factory.Create<ISqlQuery>("first");
-        var second = factory.Create<ISqlQuery>("second");
+        var first = factory.Create("first");
+        var second = factory.Create("second");
 
         // Assert
         Assert.IsType<MySqlTestQuery>(first);
@@ -184,7 +184,7 @@ public class SqlFactoryTest
         // Arrange
         var services = CreateServices();
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
         using var provider = services.BuildServiceProvider();
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
         accessor.Current = new DatabaseContext
@@ -204,7 +204,7 @@ public class SqlFactoryTest
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<ISqlQuery>();
+        var query = factory.Create();
         var context = Assert.IsType<MySqlTestQuery>(query).CurrentOptions.GetDatabaseContext();
 
         // Assert
@@ -231,13 +231,13 @@ public class SqlFactoryTest
         var services = CreateServices();
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, providerKey: "test.mysql");
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
         services.AddSingleton(template);
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = Assert.IsType<MySqlTestQuery>(factory.Create<ISqlQuery>("mysql"));
+        var query = Assert.IsType<MySqlTestQuery>(factory.Create("mysql"));
 
         // Assert
         Assert.NotSame(template, query.CurrentOptions);
@@ -261,13 +261,13 @@ public class SqlFactoryTest
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=test;Database=capabilities;",
             providerKey: "test.mysql");
-        services.AddSqlImplementationType<ISqlQuery, MySqlTestQuery>("test.mysql");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
         services.AddSingleton(template);
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = Assert.IsType<MySqlTestQuery>(factory.Create<ISqlQuery>("mysql"));
+        var query = Assert.IsType<MySqlTestQuery>(factory.Create("mysql"));
         template.QueryCapabilities.Cte = SqlQueryCapabilityState.Unsupported;
 
         // Assert
@@ -284,12 +284,12 @@ public class SqlFactoryTest
         // Arrange
         var services = CreateServices();
         services.AddSqlDataSource("missing", DatabaseType.Sqlite, "Data Source=missing.db", providerKey: "custom.missing");
-        services.AddSqlImplementationType<ISqlQuery, SqliteTestQuery>("custom.missing");
+        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "custom.missing");
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act and Assert
-        var exception = Assert.Throws<NotSupportedException>(() => factory.Create<ISqlQuery>("missing"));
+        var exception = Assert.Throws<NotSupportedException>(() => factory.Create("missing"));
         Assert.Contains("custom.missing", exception.Message);
     }
 
@@ -465,10 +465,7 @@ public class SqlFactoryTest
         public FixedQueryFactory(ISqlQuery query) => _query = query;
 
         /// <inheritdoc />
-        public TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery => _query as TQuery;
-
-        /// <inheritdoc />
-        public TQuery Create<TQuery>() where TQuery : class, ISqlQuery => _query as TQuery;
+        public ISqlQuery Create(string dbKey = null) => _query;
     }
 
     /// <summary>
@@ -477,11 +474,7 @@ public class SqlFactoryTest
     private sealed class ThrowingExecutorFactory : ISqlExecutorFactory
     {
         /// <inheritdoc />
-        public TExecutor Create<TExecutor>(string dbKey) where TExecutor : class, ISqlExecutor =>
-            throw new InvalidOperationException("事务开始阶段不应创建执行器。");
-
-        /// <inheritdoc />
-        public TExecutor Create<TExecutor>() where TExecutor : class, ISqlExecutor =>
+        public ISqlExecutor Create(string dbKey = null) =>
             throw new InvalidOperationException("事务开始阶段不应创建执行器。");
     }
 }

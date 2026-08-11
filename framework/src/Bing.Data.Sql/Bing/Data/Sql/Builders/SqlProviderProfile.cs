@@ -38,6 +38,11 @@ public sealed class SqlProviderQueryCapabilities
     public SqlQueryCapabilityState RightJoin { get; init; }
 
     /// <summary>
+    /// 是否支持 Full Join。
+    /// </summary>
+    public SqlQueryCapabilityState FullJoin { get; init; }
+
+    /// <summary>
     /// 是否支持 Skip、Take 和 Page 分页语法。
     /// </summary>
     public SqlQueryCapabilityState Pagination { get; init; }
@@ -222,6 +227,7 @@ internal static class SqlProviderCapabilityResolver
                 Intersect = query.Intersect,
                 Except = query.Except,
                 RightJoin = query.RightJoin,
+                FullJoin = query.FullJoin,
                 Pagination = query.Pagination
             },
             Mutation = new SqlProviderMutationCapabilities
@@ -266,6 +272,7 @@ internal static class SqlProviderCapabilityResolver
             Intersect = query.Intersect,
             Except = query.Except,
             RightJoin = query.RightJoin,
+            FullJoin = query.FullJoin,
             Pagination = query.Pagination
         };
     }

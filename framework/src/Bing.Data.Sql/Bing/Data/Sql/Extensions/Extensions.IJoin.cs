@@ -328,6 +328,126 @@ public static partial class Extensions
         RightJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
+    /// 添加全外连接表。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">表名。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T FullJoin<T>(this T source, string table) where T : IJoin => FullJoin(source, table, null);
+
+    /// <summary>
+    /// 添加全外连接表。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">表别名。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T FullJoin<T>(this T source, string table, string alias) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.FullJoin(table, alias);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加结构化全外连接表引用。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">结构化表引用。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T FullJoin<T>(this T source, SqlTableReference table) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.FullJoin(table);
+        return source;
+    }
+
+    /// <summary>
+    /// 追加原始全外连接表表达式。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="sql">原始连接 SQL。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T AppendFullJoin<T>(this T source, string sql) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.AppendFullJoin(sql);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加交叉连接表。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">表名。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T CrossJoin<T>(this T source, string table) where T : IJoin => CrossJoin(source, table, null);
+
+    /// <summary>
+    /// 添加交叉连接表。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">表别名。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T CrossJoin<T>(this T source, string table, string alias) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.CrossJoin(table, alias);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加结构化交叉连接表引用。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="table">结构化表引用。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T CrossJoin<T>(this T source, SqlTableReference table) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (table == null)
+            throw new ArgumentNullException(nameof(table));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.CrossJoin(table);
+        return source;
+    }
+
+    /// <summary>
+    /// 追加原始交叉连接表表达式。
+    /// </summary>
+    /// <typeparam name="T">支持连接子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="sql">原始连接 SQL。</param>
+    /// <returns>传入的同一个源对象。</returns>
+    public static T AppendCrossJoin<T>(this T source, string sql) where T : IJoin
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
+            accessor.JoinClause.AppendCrossJoin(sql);
+        return source;
+    }
+
+    /// <summary>
     /// 设置连接条件
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>

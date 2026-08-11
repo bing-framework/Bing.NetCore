@@ -19,12 +19,26 @@ namespace Bing.Data.Sql.Benchmarks;
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlMetadataBenchmarks
 {
+    /// <summary>
+    /// 容量已满时用于测量未准入映射解析的解析器。
+    /// </summary>
+    private DefaultEntityMappingResolver _boundedMappingResolver;
+
     private DefaultEntityMappingResolver _mappingResolver;
     private readonly DefaultSqlObjectNameFormatter _formatter = new();
     private readonly BenchmarkDialect _dialect = new();
     private readonly DatabaseContext _databaseContext = new()
     {
         DbKey = "benchmark",
+        DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+    };
+    /// <summary>
+    /// 容量已满时未准入映射使用的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _boundedMappingContext = new()
+    {
+        DbKey = "benchmark",
+        MappingProfile = "uncached",
         DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
     };
     private readonly SqlTableReference _reference = new()
@@ -64,6 +78,26 @@ public class SqlMetadataBenchmarks
             });
         _mappingResolver = new DefaultEntityMappingResolver(options: metadataOptions);
         _databaseContext.MappingProfile = $"profile-{MappingConfigurationCount - 1}";
+        var boundedOptions = new SqlMetadataOptions { EntityMappingCacheCapacity = 1 };
+        boundedOptions.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(BenchmarkEntity),
+            MappingProfile = "cached",
+            TableName = "orders_cached"
+        });
+        boundedOptions.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(BenchmarkEntity),
+            MappingProfile = "uncached",
+            TableName = "orders_uncached"
+        });
+        _boundedMappingResolver = new DefaultEntityMappingResolver(options: boundedOptions);
+        _boundedMappingResolver.Resolve(typeof(BenchmarkEntity), new DatabaseContext
+        {
+            DbKey = "benchmark",
+            MappingProfile = "cached",
+            DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+        });
         _builder = new BenchmarkBuilder();
         _builder.FromClause.From(_reference);
     }
@@ -94,6 +128,14 @@ public class SqlMetadataBenchmarks
         return new DefaultEntityMappingResolver(options: metadataOptions).Resolve(typeof(BenchmarkEntity),
             _databaseContext);
     }
+
+    /// <summary>
+    /// 测量有界缓存已满时不准入新最终映射的解析性能。
+    /// </summary>
+    /// <returns>未缓存但与当前路由匹配的实体映射元数据。</returns>
+    [Benchmark]
+    public EntityMappingMetadata ResolveMappingWhenBoundedCacheIsFull() =>
+        _boundedMappingResolver.Resolve(typeof(BenchmarkEntity), _boundedMappingContext);
 
     /// <summary>
     /// 测量结构化表对象名称格式化性能。

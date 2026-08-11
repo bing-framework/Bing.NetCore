@@ -18,11 +18,11 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedHierarchyNodesAsync();
         using var query = _fixture.CreateQuery();
-        var tree = query.Sql<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth").From("IntegrationHierarchyNode")
+        var tree = query.Query<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth").From("IntegrationHierarchyNode")
             .IsNull("ParentId")
-            .UnionAll(query.Sql<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
+            .UnionAll(query.Query<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
                 .From("IntegrationHierarchyNode", "n").Join("tree", "t").AppendOn("n.ParentId=t.Id"));
-        var description = query.Sql<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
+        var description = query.Query<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
             .From("tree").OrderBy("Depth").OrderBy("Id");
 
         // Act

@@ -57,8 +57,7 @@ public class Startup
 
         // 如果连接字符串为空，SqlQuery/SqlExecutor 将无法正常工作，
         // 但 Startup 本身不应抛异常，测试通过 [IntegrationFact] 跳过机制保护。
-        services.AddSqlServerSqlQuery(connectionString ?? string.Empty);
-        services.AddSqlServerSqlExecutor(connectionString ?? string.Empty);
+        services.AddSqlServerProvider();
         services.AddMySqlProvider();
         services.AddPostgreSqlProvider();
         services.AddSqlDataSource("mysql", Bing.Data.Enums.DatabaseType.MySql, mySqlConnectionString);

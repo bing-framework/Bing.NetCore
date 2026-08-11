@@ -1,4 +1,3 @@
-using System.Data;
 using Bing.Data.Enums;
 
 namespace Bing.Data.Sql;
@@ -24,22 +23,17 @@ public interface ISqlTransactionContext
     DatabaseType DatabaseType { get; }
 
     /// <summary>
-    /// 获取固定的数据库上下文快照。
+    /// 获取映射配置标识。
     /// </summary>
-    DatabaseContext DatabaseContext { get; }
+    string MappingProfile { get; }
 
     /// <summary>
-    /// 获取事务使用的数据库连接。
+    /// 获取读取偏好。
     /// </summary>
-    IDbConnection Connection { get; }
-
-    /// <summary>
-    /// 获取事务使用的数据库事务。
-    /// </summary>
-    IDbTransaction Transaction { get; }
+    SqlReadPreference ReadPreference { get; }
 
     /// <summary>
     /// 获取事务隔离级别。
     /// </summary>
-    IsolationLevel IsolationLevel { get; }
+    System.Data.IsolationLevel IsolationLevel { get; }
 }

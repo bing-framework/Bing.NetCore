@@ -1378,6 +1378,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
                 dataSource?.Except, options?.Except),
             RightJoin = ResolveQueryCapability(provider.RightJoin,
                 dataSource?.RightJoin, options?.RightJoin),
+            FullJoin = ResolveQueryCapability(provider.FullJoin,
+                dataSource?.FullJoin, options?.FullJoin),
             Pagination = ResolveQueryCapability(provider.Pagination,
                 dataSource?.Pagination, options?.Pagination)
         };
@@ -1413,6 +1415,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             ValidateQueryCapability(item.Name);
         if (JoinClause is JoinClause joinClause && joinClause.ContainsJoinType("Right Join"))
             ValidateQueryCapability(QueryCapabilities.RightJoin, "Right Join");
+        if (JoinClause is JoinClause fullJoinClause && fullJoinClause.ContainsJoinType("Full Join"))
+            ValidateQueryCapability(QueryCapabilities.FullJoin, "Full Join");
         if (IsLimit)
             ValidateQueryCapability(QueryCapabilities.Pagination, "分页");
     }
@@ -1430,6 +1434,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             "Intersect" => QueryCapabilities.Intersect,
             "Except" => QueryCapabilities.Except,
             "Right Join" => QueryCapabilities.RightJoin,
+            "Full Join" => QueryCapabilities.FullJoin,
             _ => SqlQueryCapabilityState.Unsupported
         };
         ValidateQueryCapability(capability, operation);

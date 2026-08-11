@@ -36,56 +36,59 @@ public class MySqlProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：注册默认 MySQL 查询对象时应固定使用 MySQL 数据库类型。
+    /// 测试目的：固定 Query Factory 应为 MySQL 数据源创建官方查询实现。
     /// </summary>
     [Fact]
-    public void AddMySqlQuery_WhenRegistered_ShouldConfigureMySqlDatabaseType()
+    public void QueryFactory_WhenMySqlDataSourceRegistered_ShouldCreateMySqlQuery()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddMySqlQuery("Server=mysql;Database=app;");
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.MySql, "Server=mysql;Database=app;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<MySqlQuery>>();
+        var query = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.MySql, options.DatabaseType);
+        Assert.IsType<MySqlQuery>(query);
     }
 
     /// <summary>
-    /// 测试目的：注册默认 MySQL 执行器时应固定使用 MySQL 数据库类型。
+    /// 测试目的：固定 Executor Factory 应为 MySQL 数据源创建官方执行器实现。
     /// </summary>
     [Fact]
-    public void AddMySqlExecutor_WhenRegistered_ShouldConfigureMySqlDatabaseType()
+    public void ExecutorFactory_WhenMySqlDataSourceRegistered_ShouldCreateMySqlExecutor()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddMySqlExecutor("Server=mysql;Database=app;");
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.MySql, "Server=mysql;Database=app;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<MySqlExecutor>>();
+        var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.MySql, options.DatabaseType);
+        Assert.IsType<MySqlExecutor>(executor);
     }
 
     /// <summary>
-    /// 测试目的：注册默认 MySQL 多结果集执行器时应固定使用 MySQL 数据库类型。
+    /// 测试目的：固定 Multiple Factory 应为 MySQL 数据源创建官方多结果集执行器实现。
     /// </summary>
     [Fact]
-    public void AddMySqlMultipleQueryExecutor_WhenRegistered_ShouldConfigureMySqlDatabaseType()
+    public void MultipleQueryExecutorFactory_WhenMySqlDataSourceRegistered_ShouldCreateMySqlExecutor()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddMySqlMultipleQueryExecutor("Server=mysql;Database=app;");
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.MySql, "Server=mysql;Database=app;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<MySqlMultipleQueryExecutor>>();
+        var executor = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.MySql, options.DatabaseType);
+        Assert.IsType<MySqlMultipleQueryExecutor>(executor);
     }
 }

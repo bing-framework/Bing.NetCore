@@ -8,15 +8,7 @@ public interface ISqlQueryFactory
     /// <summary>
     /// 创建 Sql 查询对象
     /// </summary>
-    /// <typeparam name="TQuery">Sql 查询对象类型</typeparam>
     /// <param name="dbKey">数据库键</param>
     /// <returns>Sql 查询对象</returns>
-    TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery;
-
-    /// <summary>
-    /// 基于当前数据库上下文创建 Sql 查询对象
-    /// </summary>
-    /// <typeparam name="TQuery">Sql 查询对象类型</typeparam>
-    /// <returns>Sql 查询对象</returns>
-    TQuery Create<TQuery>() where TQuery : class, ISqlQuery;
+    ISqlQuery Create(string dbKey = null);
 }

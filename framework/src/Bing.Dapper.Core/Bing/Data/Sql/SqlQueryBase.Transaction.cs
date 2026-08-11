@@ -343,6 +343,8 @@ public abstract partial class SqlQueryBase
     /// <returns>包含 Output、InputOutput 或 ReturnValue 参数时返回 <see langword="true"/>。</returns>
     private static bool HasOutputParameters(object parameters)
     {
+        if (parameters is global::Dapper.DynamicParameters dynamicParameters)
+            return DynamicParametersOutputAccessor.HasOutputParameters(dynamicParameters);
         if (parameters is SqlParam parameter)
             return IsOutputDirection(parameter.Direction);
         if (parameters is IEnumerable<SqlParam> sqlParameters)

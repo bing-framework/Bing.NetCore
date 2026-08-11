@@ -149,6 +149,47 @@ public class DapperCoreServiceCollectionExtensionsTest
     }
 
     /// <summary>
+    /// 测试目的：通过依赖注入配置的映射缓存容量应传递给单例解析器，并限制不同最终映射的缓存条目数。
+    /// </summary>
+    [Fact]
+    public void ConfigureSqlMetadata_WhenMappingCacheCapacityIsConfigured_ShouldApplyToResolver()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options =>
+        {
+            options.EntityMappingCacheCapacity = 1;
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(TestEntity),
+                MappingProfile = "primary",
+                TableName = "primary_entities"
+            });
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(TestEntity),
+                MappingProfile = "reporting",
+                TableName = "reporting_entities"
+            });
+        });
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+        var resolver = Assert.IsType<DefaultEntityMappingResolver>(provider.GetRequiredService<IEntityMappingResolver>());
+
+        // Act
+        var primary = resolver.Resolve(typeof(TestEntity), new DatabaseContext { MappingProfile = "primary" });
+        var reporting = resolver.Resolve(typeof(TestEntity), new DatabaseContext { MappingProfile = "reporting" });
+        var cachedPrimary = resolver.Resolve(typeof(TestEntity), new DatabaseContext { MappingProfile = "primary" });
+        var uncachedReporting = resolver.Resolve(typeof(TestEntity), new DatabaseContext { MappingProfile = "reporting" });
+
+        // Assert
+        Assert.Equal("primary_entities", primary.Table.TableName);
+        Assert.Equal("reporting_entities", reporting.Table.TableName);
+        Assert.Same(primary, cachedPrimary);
+        Assert.NotSame(reporting, uncachedReporting);
+    }
+
+    /// <summary>
     /// 测试目的：空键数据源应使用默认 Key，Doris 数据源默认只读且关闭本地事务。
     /// </summary>
     [Fact]

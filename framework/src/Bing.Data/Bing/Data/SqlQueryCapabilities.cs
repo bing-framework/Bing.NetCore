@@ -61,6 +61,11 @@ public sealed class SqlQueryCapabilities
     public SqlQueryCapabilityState RightJoin { get; set; }
 
     /// <summary>
+    /// 是否支持 Full Join。
+    /// </summary>
+    public SqlQueryCapabilityState FullJoin { get; set; }
+
+    /// <summary>
     /// 是否支持 Skip、Take 和 Page 分页语法。
     /// </summary>
     public SqlQueryCapabilityState Pagination { get; set; }

@@ -1,5 +1,6 @@
 using AspectCore.Extensions.DependencyInjection;
 using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Data.Sql;
@@ -78,16 +79,14 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
             throw new ArgumentNullException(nameof(services));
         services.AddSingleton<IEntityModelMetadataProvider>(provider =>
             CreateEntityModelMetadataProvider(connectionString, provider));
-        services.AddSqlCore();
-        services.AddMySqlQuery(options =>
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.MySql, connectionString, setupAction: descriptor =>
         {
-            options.ConnectionString(connectionString);
-            options.QueryCapabilities = new SqlQueryCapabilities
+            descriptor.QueryCapabilities = new SqlQueryCapabilities
             {
                 Cte = SqlQueryCapabilityState.Supported
             };
         });
-        services.AddMySqlExecutor(connectionString);
         services.AddLogging();
         services.EnableAop();
         services.AddBing();
@@ -160,13 +159,13 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     /// 创建 MySQL SQL 查询对象。
     /// </summary>
     /// <returns>SQL 查询对象。</returns>
-    public ISqlQuery CreateQuery() => GetQueryFactory().Create<ISqlQuery>();
+    public ISqlQuery CreateQuery() => GetQueryFactory().Create();
 
     /// <summary>
     /// 创建 MySQL SQL 执行对象。
     /// </summary>
     /// <returns>SQL 执行对象。</returns>
-    public ISqlExecutor CreateExecutor() => GetExecutorFactory().Create<ISqlExecutor>();
+    public ISqlExecutor CreateExecutor() => GetExecutorFactory().Create();
 
     /// <summary>
     /// 获取 SQL 查询工厂。

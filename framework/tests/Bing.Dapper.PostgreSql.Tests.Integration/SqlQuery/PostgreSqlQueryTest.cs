@@ -37,7 +37,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         // Arrange
         using var query = _fixture.CreateQuery();
         // Act
-        var result = await query.Sql<int>().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
+        var result = await query.Query<int>().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
 
         // Assert
         Assert.Equal(1, result);
@@ -104,7 +104,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         await InsertProductAsync(Guid.NewGuid(), "scalar-second");
         // Act
         using var query = _fixture.CreateQuery();
-        var result = query.Sql<int>().CountAll().From("public.integration_products").Scalar();
+        var result = query.Query<int>().CountAll().From("public.integration_products").Scalar();
 
         // Assert
         Assert.Equal(2, result);
@@ -167,7 +167,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         await InsertProductAsync(firstId, "array-first");
         await InsertProductAsync(secondId, "array-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().CountAll().From("public.integration_products")
+        var description = query.Query<int>().CountAll().From("public.integration_products")
             .AppendWhere("id=Any(@ids)").AddParam("ids", new[] { firstId, secondId });
 
         // Act
@@ -398,7 +398,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         executor.ExecuteSql("Insert Into public.integration_products(id,code,name,amount,occurred_at) Values(@id,@code,@name,@amount,@occurredAt)",
             CreateProductParameters(Guid.NewGuid(), "shared", "shared-name", 1m, new DateTime(2026, 7, 22)));
         // Act
-        var count = query.Sql<int>().CountAll().From("public.integration_products").Scalar();
+        var count = query.Query<int>().CountAll().From("public.integration_products").Scalar();
         scope.Commit();
 
         // Assert
@@ -452,14 +452,14 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
         var executorFactory = _fixture.ServiceProvider.GetRequiredService<ISqlExecutorFactory>();
         using (manager.Use(PostgreSqlIntegrationDatabaseFixture.PrimaryDatabaseKey))
         {
-            using (var primaryExecutor = executorFactory.Create<ISqlExecutor>())
+            using (var primaryExecutor = executorFactory.Create())
                 await primaryExecutor.ExecuteSqlAsync("Insert Into integration_samples(name) Values(@name)",
                     new { name = "primary-before" });
             using (manager.Use(PostgreSqlIntegrationDatabaseFixture.ReportingDatabaseKey))
-            using (var reportingExecutor = executorFactory.Create<ISqlExecutor>())
+            using (var reportingExecutor = executorFactory.Create())
                 await reportingExecutor.ExecuteSqlAsync("Insert Into integration_samples(name) Values(@name)",
                     new { name = "reporting" });
-            using (var restoredPrimaryExecutor = executorFactory.Create<ISqlExecutor>())
+            using (var restoredPrimaryExecutor = executorFactory.Create())
                 await restoredPrimaryExecutor.ExecuteSqlAsync("Insert Into integration_samples(name) Values(@name)",
                     new { name = "primary-after" });
             using (var scope = _fixture.GetTransactionScopeFactory().Begin())
@@ -507,7 +507,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>不修改根 Builder 的产品查询描述。</returns>
     private static SqlQuery<IntegrationProduct> CreateProductDescription(ISqlQuery query) =>
-        query.Sql<IntegrationProduct>()
+        query.Query<IntegrationProduct>()
             .AppendSelect("id As Id,code As Code,name As Name,amount As Amount,occurred_at As OccurredAt,payload::text As Payload")
             .From("public.integration_products")
             .OrderBy("code");
@@ -571,7 +571,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     private async Task<int> CountProductsAsync()
     {
         using var query = _fixture.CreateQuery();
-        return await query.Sql<int>().CountAll().From("public.integration_products").ScalarAsync();
+        return await query.Query<int>().CountAll().From("public.integration_products").ScalarAsync();
     }
 
     /// <summary>

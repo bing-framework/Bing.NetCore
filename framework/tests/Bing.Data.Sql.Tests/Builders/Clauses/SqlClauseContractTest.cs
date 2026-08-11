@@ -125,7 +125,7 @@ public class SqlClauseContractTest
         // Act
         var exposesMutationMarker = typeof(ISqlOperation).IsAssignableFrom(executor);
         var exposesQuery = typeof(ISqlQuery).IsAssignableFrom(executor);
-        var returningMethod = executor.GetMethod(nameof(ISqlExecutor.ExecuteReturningQueryAsync));
+        var returningMethod = executor.GetMethod(nameof(ISqlExecutor.ExecuteReturningAsync));
 
         // Assert
         Assert.False(exposesMutationMarker);

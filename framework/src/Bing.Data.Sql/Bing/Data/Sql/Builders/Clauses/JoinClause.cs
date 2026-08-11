@@ -36,6 +36,16 @@ public class JoinClause : IJoinClause
     private const string RightJoinKey = "Right Join";
 
     /// <summary>
+    /// Full Join 关键字。
+    /// </summary>
+    private const string FullJoinKey = "Full Join";
+
+    /// <summary>
+    /// Cross Join 关键字。
+    /// </summary>
+    private const string CrossJoinKey = "Cross Join";
+
+    /// <summary>
     /// 子句运行上下文。
     /// </summary>
     private readonly SqlClauseContext _context;
@@ -204,6 +214,30 @@ public class JoinClause : IJoinClause
     /// <returns>包含指定连接类型时返回 true。</returns>
     internal bool ContainsJoinType(string joinType) => _params.Any(item =>
         string.Equals(item.JoinType, joinType, StringComparison.Ordinal));
+
+    /// <summary>
+    /// 获取类型化连接在当前查询图中的表源快照。
+    /// </summary>
+    /// <remarks>
+    /// 原始连接和派生表没有关联实体类型，不能参与强类型 Lambda 参数绑定。
+    /// </remarks>
+    /// <returns>按连接追加顺序排列的类型化表源。</returns>
+    internal IReadOnlyList<TableSource> GetTypedSources() => _params
+        .Select((item, index) => new { Item = item, Index = index })
+        .Where(item => item.Item.Type != null)
+        .Select(item => item.Item.Source ?? new TableSource($"join_{item.Index}", item.Item.Table, item.Item.Type))
+        .ToList();
+
+    /// <summary>
+    /// 为最后一个连接设置已按表源实例绑定的参数化条件。
+    /// </summary>
+    /// <param name="condition">已按当前方言解析的连接条件。</param>
+    internal void SetBoundOn(ICondition condition)
+    {
+        if (condition == null)
+            throw new ArgumentNullException(nameof(condition));
+        GetLastJoinOrThrow().On(condition);
+    }
 
     #endregion
 
@@ -377,6 +411,12 @@ public class JoinClause : IJoinClause
     public void Join(ISqlBuilder builder, string alias) => JoinSubquery(JoinKey, builder, alias);
 
     /// <summary>
+    /// 内连接严格 DTO 派生表。
+    /// </summary>
+    internal void Join<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        JoinSubquery(JoinKey, subquery);
+
+    /// <summary>
     /// 添加到连接子句
     /// </summary>
     /// <param name="joinType">连接类型</param>
@@ -389,6 +429,24 @@ public class JoinClause : IJoinClause
         _register?.RegisterAlias(alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         AddItem(JoinItem.CreateRaw(joinType, $"({sql}){GetSubqueryAlias(alias)}"));
+    }
+
+    /// <summary>
+    /// 添加保留投影成员绑定信息的类型化派生表。
+    /// </summary>
+    private void JoinSubquery<TProjection>(string joinType, SqlSubquery<TProjection> subquery)
+        where TProjection : class
+    {
+        if (subquery == null)
+            throw new ArgumentNullException(nameof(subquery));
+        _register?.RegisterAlias(subquery.Alias);
+        var sql = _sqlBuilder is SqlBuilderBase sqlBuilder
+            ? sqlBuilder.RenderSubquery(subquery.Builder)
+            : subquery.Builder.ToSql();
+        var table = SqlItem.Raw($"({sql}){GetSubqueryAlias(subquery.Alias)}");
+        AddItem(JoinItem.CreateDerived(joinType, table,
+            new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
+                subquery.ProjectedMembers)));
     }
 
     /// <summary>
@@ -472,6 +530,12 @@ public class JoinClause : IJoinClause
     public void LeftJoin(ISqlBuilder builder, string alias) => JoinSubquery(LeftJoinKey, builder, alias);
 
     /// <summary>
+    /// 左外连接严格 DTO 派生表。
+    /// </summary>
+    internal void LeftJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        JoinSubquery(LeftJoinKey, subquery);
+
+    /// <summary>
     /// 左外连接子查询
     /// </summary>
     /// <param name="action">子查询操作</param>
@@ -518,6 +582,12 @@ public class JoinClause : IJoinClause
     public void RightJoin(ISqlBuilder builder, string alias) => JoinSubquery(RightJoinKey, builder, alias);
 
     /// <summary>
+    /// 右外连接严格 DTO 派生表。
+    /// </summary>
+    internal void RightJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        JoinSubquery(RightJoinKey, subquery);
+
+    /// <summary>
     /// 右外连接子查询
     /// </summary>
     /// <param name="action">子查询操作</param>
@@ -529,6 +599,52 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="sql">原始 SQL。</param>
     public void AppendRightJoin(string sql) => AppendJoin(RightJoinKey, sql);
+
+    #endregion
+
+    #region FullJoin(全外连接)
+
+    /// <inheritdoc />
+    public void FullJoin(string table, string alias = null) => Join(FullJoinKey, table, alias);
+
+    /// <inheritdoc />
+    public void FullJoin(SqlTableReference reference) => Join(FullJoinKey, reference);
+
+    /// <inheritdoc />
+    public void FullJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        Join<TEntity>(FullJoinKey, alias, schema);
+
+    /// <summary>
+    /// 全外连接严格 DTO 派生表。
+    /// </summary>
+    internal void FullJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        JoinSubquery(FullJoinKey, subquery);
+
+    /// <inheritdoc />
+    public void AppendFullJoin(string sql) => AppendJoin(FullJoinKey, sql);
+
+    #endregion
+
+    #region CrossJoin(交叉连接)
+
+    /// <inheritdoc />
+    public void CrossJoin(string table, string alias = null) => Join(CrossJoinKey, table, alias);
+
+    /// <inheritdoc />
+    public void CrossJoin(SqlTableReference reference) => Join(CrossJoinKey, reference);
+
+    /// <inheritdoc />
+    public void CrossJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        Join<TEntity>(CrossJoinKey, alias, schema);
+
+    /// <summary>
+    /// 交叉连接严格 DTO 派生表。
+    /// </summary>
+    internal void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        JoinSubquery(CrossJoinKey, subquery);
+
+    /// <inheritdoc />
+    public void AppendCrossJoin(string sql) => AppendJoin(CrossJoinKey, sql);
 
     #endregion
 

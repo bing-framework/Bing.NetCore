@@ -19,12 +19,13 @@ public class TransactionApiContractTest
         var scopeType = typeof(ISqlTransactionScope);
 
         // Act
-        var databaseContextProperty = contextType.GetProperty(nameof(ISqlTransactionContext.DatabaseContext));
-
         // Assert
         Assert.True(contextType.IsAssignableFrom(scopeType));
-        Assert.NotNull(databaseContextProperty);
-        Assert.False(databaseContextProperty.CanWrite);
+        Assert.NotNull(contextType.GetProperty(nameof(ISqlTransactionContext.MappingProfile)));
+        Assert.NotNull(contextType.GetProperty(nameof(ISqlTransactionContext.ReadPreference)));
+        Assert.Null(contextType.GetProperty("DatabaseContext"));
+        Assert.Null(contextType.GetProperty("Connection"));
+        Assert.Null(contextType.GetProperty("Transaction"));
     }
 
     /// <summary>

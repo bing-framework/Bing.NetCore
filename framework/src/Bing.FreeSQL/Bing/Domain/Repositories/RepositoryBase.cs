@@ -1,4 +1,7 @@
 ﻿using Bing.Data.Stores;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Bing.Domain.Entities;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
@@ -15,7 +18,14 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase<TEntity, Guid>, I
     /// 初始化一个<see cref="RepositoryBase{TEntity}"/>类型的实例
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
-    protected RepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)
+    /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="metadataOptions">SQL 元数据配置</param>
+    /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+    protected RepositoryBase(IUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+        IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+        ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
+        metadataOptions, typeConverterResolver)
     {
     }
 }
@@ -32,7 +42,14 @@ public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, 
     /// 初始化一个<see cref="RepositoryBase{TEntity,TKey}"/>类型的实例
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
-    protected RepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)
+    /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="metadataOptions">SQL 元数据配置</param>
+    /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+    protected RepositoryBase(IUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+        IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+        ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
+        metadataOptions, typeConverterResolver)
     {
     }
 

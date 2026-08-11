@@ -33,7 +33,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .Select(true)
                 .From("a")
                 .Join<Permission>("b")
@@ -51,7 +51,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .Select(true)
                 .From("a")
                 .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
@@ -68,7 +68,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (moduleId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .Select(true)
                 .From("a")
                 .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
@@ -85,7 +85,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .Select(true)
                 .From("a")
                 .Join<Permission>("b")
@@ -104,7 +104,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .Select(true)
                 .From("a")
                 .Where(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)

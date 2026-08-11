@@ -234,11 +234,11 @@ public sealed class SqlMutationParameter
     };
 
     /// <summary>
-    /// 为常见数组值创建独立副本；其他引用类型保留调用时的对象引用。
+    /// 为具有确定容器语义的参数值创建独立副本；其他引用类型保留调用时的对象引用。
     /// </summary>
     /// <param name="value">参数值。</param>
     /// <returns>参数值快照。</returns>
-    private static object SnapshotValue(object value) => value is Array array ? array.Clone() : value;
+    private static object SnapshotValue(object value) => SqlParameterSnapshot.SnapshotValue(value);
 }
 
 /// <summary>

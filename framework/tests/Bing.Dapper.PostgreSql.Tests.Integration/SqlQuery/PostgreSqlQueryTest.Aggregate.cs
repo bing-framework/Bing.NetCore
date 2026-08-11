@@ -161,7 +161,7 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-first");
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().CountColumn("p.id", "Count").From("public.integration_products", "p");
+        var description = query.Query<int>().CountColumn("p.id", "Count").From("public.integration_products", "p");
 
         // Act
         var result = description.Scalar();
@@ -180,7 +180,7 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(Guid.NewGuid(), "sum-qualified-first", amount: 12.5m);
         await InsertProductAsync(Guid.NewGuid(), "sum-qualified-second", amount: 7.5m);
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<decimal>().Sum("p.amount", "Total").From("public.integration_products", "p");
+        var description = query.Query<decimal>().Sum("p.amount", "Total").From("public.integration_products", "p");
 
         // Act
         var result = description.Scalar();
@@ -196,7 +196,7 @@ public sealed partial class PostgreSqlQueryTest
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>包含产品表别名的独立查询描述。</returns>
     private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Sql<TResult>().From("public.integration_products", "p");
+        query.Query<TResult>().From("public.integration_products", "p");
 
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。

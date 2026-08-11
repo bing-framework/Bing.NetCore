@@ -52,7 +52,7 @@ namespace Bing.Admin.Service.Implements.Systems
             if (parameter == null)
                 return new PagerList<AdministratorResponse>();
             Debug.WriteLine($"当前用户: {CurrentUser.UserId}, {CurrentUser.UserName}");
-            var query = SqlQuery.Lambda<User>()
+            var query = SqlQuery.From<User>()
                 .ClearSelect()
                 .SelectFrom<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },
@@ -66,7 +66,7 @@ namespace Bing.Admin.Service.Implements.Systems
                 .WhereIf<User>(x => x.Enabled, parameter.Enabled, parameter.Enabled.HasValue);
             if (!parameter.RoleId.IsEmpty())
             {
-                var roleQuery = SqlQuery.Lambda<UserRole>()
+                var roleQuery = SqlQuery.From<UserRole>()
                     .ClearSelect()
                     .Select(x => new object[] { x.UserId }, true)
                     .From()
@@ -89,7 +89,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="id">用户标识</param>
         public async Task<AdministratorResponse> GetById(Guid id)
         {
-            var result = await SqlQuery.Lambda<User>()
+            var result = await SqlQuery.From<User>()
                 .ClearSelect()
                 .SelectFrom<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },
@@ -111,7 +111,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="userIds">用户编号列表</param>
         private async Task<List<UserRoleResponse>> GetUserRolesAsync(List<Guid> userIds)
         {
-            var userRoles = await SqlQuery.Lambda<UserRole>()
+            var userRoles = await SqlQuery.From<UserRole>()
                 .ClearSelect()
                 .SelectFrom<UserRole>(x => new object[] { x.UserId }, true)
                 .AppendSelectFrom<Role>(x => new object[] { x.Id, x.Name, x.Code }, true)

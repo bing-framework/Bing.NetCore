@@ -1,4 +1,7 @@
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
+using System.Collections;
 using System.Data;
 
 namespace Bing.Data.Sql;
@@ -131,18 +134,11 @@ internal sealed class SqlQueryPlan
         CommandType commandType = System.Data.CommandType.Text) => new(commandText, parameters, splitOn, commandType);
 
     /// <summary>
-    /// 创建原生 SQL 查询参数的浅快照。
+    /// 创建原生 SQL 查询参数快照。
     /// </summary>
     /// <param name="parameters">调用方提供的参数源。</param>
-    /// <returns>字典参数的独立副本；其他参数对象保持原引用。</returns>
-    internal static object SnapshotParameters(object parameters)
-    {
-        if (parameters is IReadOnlyDictionary<string, object> readOnlyDictionary)
-            return readOnlyDictionary.ToDictionary(item => item.Key, item => item.Value);
-        if (parameters is IDictionary<string, object> dictionary)
-            return new Dictionary<string, object>(dictionary);
-        return parameters;
-    }
+    /// <returns>常见可变参数容器的独立副本；不具备通用克隆语义的对象保持原引用。</returns>
+    internal static object SnapshotParameters(object parameters) => SqlParameterSnapshot.Create(parameters);
 
     /// <summary>
     /// 规范化 Dapper 多映射分段列名称。
@@ -155,4 +151,72 @@ internal sealed class SqlQueryPlan
             throw new ArgumentException("多映射分段列不能为空。", nameof(splitOn));
         return splitOn;
     }
+}
+
+/// <summary>
+/// SQL 描述的参数快照帮助器。
+/// </summary>
+/// <remarks>
+/// 仅复制具有确定容器语义的字典、数组和集合；实体、动态参数和映射对象保留原引用，
+/// 以维持调用方定义的转换、输出回写和 Provider 专用行为。
+/// </remarks>
+internal static class SqlParameterSnapshot
+{
+    /// <summary>
+    /// 创建参数源快照。
+    /// </summary>
+    /// <param name="parameters">原始参数源。</param>
+    /// <returns>可安全用于后续执行的参数源。</returns>
+    internal static object Create(object parameters)
+    {
+        if (parameters is IEnumerable<SqlParam> sqlParameters)
+            return sqlParameters.Where(parameter => parameter != null).Select(CloneSqlParameter).ToArray();
+        if (parameters is IReadOnlyDictionary<string, object> readOnlyDictionary)
+            return readOnlyDictionary.ToDictionary(item => item.Key, item => SnapshotValue(item.Value));
+        if (parameters is IDictionary<string, object> dictionary)
+            return dictionary.ToDictionary(item => item.Key, item => SnapshotValue(item.Value));
+        return parameters;
+    }
+
+    /// <summary>
+    /// 复制可证明可变的参数值容器。
+    /// </summary>
+    /// <param name="value">原始参数值。</param>
+    /// <returns>容器副本或原始不可泛化克隆对象。</returns>
+    internal static object SnapshotValue(object value)
+    {
+        if (value is Array array)
+            return SnapshotArray(array);
+        if (value is IReadOnlyDictionary<string, object> readOnlyDictionary)
+            return readOnlyDictionary.ToDictionary(item => item.Key, item => SnapshotValue(item.Value));
+        if (value is IDictionary<string, object> dictionary)
+            return dictionary.ToDictionary(item => item.Key, item => SnapshotValue(item.Value));
+        if (value is IEnumerable enumerable && value is not string && value is not ISqlParameterMap)
+            return enumerable.Cast<object>().Select(SnapshotValue).ToArray();
+        return value;
+    }
+
+    /// <summary>
+    /// 复制一维数组及其嵌套数组元素。
+    /// </summary>
+    /// <param name="source">原始数组。</param>
+    /// <returns>独立数组副本。</returns>
+    private static Array SnapshotArray(Array source)
+    {
+        if (source.Rank != 1)
+            return (Array)source.Clone();
+        var elementType = source.GetType().GetElementType();
+        var result = Array.CreateInstance(elementType, source.Length);
+        for (var index = 0; index < source.Length; index++)
+            result.SetValue(SnapshotValue(source.GetValue(index)), index);
+        return result;
+    }
+
+    /// <summary>
+    /// 复制增强参数及其可变值。
+    /// </summary>
+    /// <param name="parameter">原始增强参数。</param>
+    /// <returns>执行专属增强参数。</returns>
+    private static SqlParam CloneSqlParameter(SqlParam parameter) => SqlMutationParameter.Create(parameter)
+        .CreateSqlParam();
 }

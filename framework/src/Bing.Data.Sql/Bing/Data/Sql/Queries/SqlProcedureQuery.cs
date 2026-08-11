@@ -8,7 +8,7 @@ namespace Bing.Data.Sql;
 /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
 /// <remarks>
 /// 该描述仅公开过程专用终结方法，并固定以 <see cref="CommandType.StoredProcedure"/> 执行。
-/// 传入的非字典参数对象保持原引用，以便 Dapper 输出参数在执行后回写到调用方对象。
+/// 具有确定容器语义的参数会被冻结；任意对象和原生 Dapper 参数保持原引用，以便输出值回写到调用方对象。
 /// </remarks>
 public sealed class SqlProcedureQuery<TResult>
 {
@@ -16,6 +16,11 @@ public sealed class SqlProcedureQuery<TResult>
     /// 执行当前过程计划的根查询内部执行器。
     /// </summary>
     private readonly ISqlQueryPlanExecutor _executor;
+
+    /// <summary>
+    /// 描述创建时冻结的参数源。
+    /// </summary>
+    private readonly object _parameters;
 
     /// <summary>
     /// 使用根查询、存储过程名称和参数源初始化查询描述。
@@ -29,7 +34,7 @@ public sealed class SqlProcedureQuery<TResult>
         if (string.IsNullOrWhiteSpace(procedure))
             throw new ArgumentException("存储过程名称不能为空。", nameof(procedure));
         Procedure = procedure;
-        Parameters = SqlQueryPlan.SnapshotParameters(parameters);
+        _parameters = SqlQueryPlan.SnapshotParameters(parameters);
     }
 
     /// <summary>
@@ -40,7 +45,7 @@ public sealed class SqlProcedureQuery<TResult>
     /// <summary>
     /// 获取由参数绑定器处理的输入和输出参数源。
     /// </summary>
-    public object Parameters { get; }
+    public object Parameters => SqlQueryPlan.SnapshotParameters(_parameters);
 
     /// <summary>
     /// 获取执行当前描述的内部执行器。
@@ -218,6 +223,6 @@ public sealed class SqlProcedureQuery<TResult>
     }
 
     /// <inheritdoc />
-    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(Procedure, Parameters,
+    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(Procedure, _parameters,
         commandType: System.Data.CommandType.StoredProcedure);
 }

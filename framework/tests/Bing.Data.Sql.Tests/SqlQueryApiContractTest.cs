@@ -38,7 +38,7 @@ public class SqlQueryApiContractTest
     {
         // Arrange
         var type = typeof(ISqlExecutor);
-        var returning = type.GetMethod(nameof(ISqlExecutor.ExecuteReturningQueryAsync));
+        var returning = type.GetMethod(nameof(ISqlExecutor.ExecuteReturningAsync));
 
         // Act
         var builderFactory = type.GetMethod(nameof(ISqlExecutor.CreateBuilder));
@@ -50,11 +50,15 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(ISqlBuilder), builderFactory.ReturnType);
         Assert.NotNull(returning);
         Assert.Equal(typeof(SqlMutationDescription), returning.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.Execute))
+        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteMutation))
             ?.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteAsync))
+        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteMutationAsync))
             ?.GetParameters().First().ParameterType);
-        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturningQuery)));
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturning)));
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteText)));
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteTextAsync)));
+        Assert.Null(type.GetMethod("ExecuteReturningQuery"));
+        Assert.Null(type.GetMethod("ExecuteReturningQueryAsync"));
     }
 
     /// <summary>
@@ -118,30 +122,52 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：根查询只应公开类型化 Fluent 和原生文本查询入口，避免无类型描述绕开结果映射约束。
+    /// 测试目的：根查询应公开语义化实体来源和原生文本查询入口，避免无类型描述绕开结果映射约束。
     /// </summary>
     [Fact]
-    public void Sql_WhenPublicApiInspected_ShouldExposeTypedInstanceQueryEntryPoints()
+    public void FromAndText_WhenPublicApiInspected_ShouldExposeTypedInstanceQueryEntryPoints()
     {
         // Arrange
         var methods = typeof(ISqlQuery).GetMethods();
 
         // Act
-        var typed = methods.Single(method => method.Name == "Sql" &&
-                                            method.IsGenericMethodDefinition &&
-                                            method.GetParameters().Length == 0);
-        var raw = methods.Single(method => method.Name == "Sql" &&
+        var typed = methods.Single(method => method.Name == "From" &&
+                            method.IsGenericMethodDefinition &&
+                            method.GetGenericArguments().Length == 1 &&
+                            method.GetParameters().Length == 0);
+        var raw = methods.Single(method => method.Name == "Text" &&
                                           method.IsGenericMethodDefinition &&
                                           method.GetParameters().Length == 2);
 
         // Assert
-        Assert.Equal(typeof(SqlQuery<>), typed.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<>), typed.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlTextQuery<>), raw.ReturnType.GetGenericTypeDefinition());
         Assert.True(typeof(SqlQuery<>).IsPublic);
         Assert.True(typeof(SqlTextQuery<>).IsPublic);
-        Assert.DoesNotContain(methods, method => method.Name == "Sql" &&
-                            method.IsGenericMethod == false &&
-                            method.GetParameters().Length == 0);
+        Assert.DoesNotContain(methods, method => method.Name is "Sql" or "SqlInterpolated");
+        Assert.Null(typeof(ISqlQuery).GetMethod("Lambda"));
+    }
+
+    /// <summary>
+    /// 测试目的：多表根查询必须完整公开二至七表入口，并使用对应 arity 的强类型查询描述。
+    /// </summary>
+    [Fact]
+    public void From_WhenMultipleEntitySourcesSupported_ShouldExposeArityTwoThroughSeven()
+    {
+        // Arrange
+        var methods = typeof(ISqlQuery).GetMethods().Where(method => method.Name == "From" &&
+            method.IsGenericMethodDefinition && method.GetParameters().Length == 0).ToList();
+
+        // Act
+        var arities = methods.Select(method => method.GetGenericArguments().Length).OrderBy(count => count).ToArray();
+
+        // Assert
+        Assert.Equal(new[] { 1, 2, 3, 4, 5, 6, 7 }, arities);
+        foreach (var method in methods.Where(method => method.GetGenericArguments().Length > 1))
+        {
+            Assert.Equal("SqlLambdaQuery", method.ReturnType.GetGenericTypeDefinition().Name.Split('`')[0]);
+            Assert.Equal(method.GetGenericArguments().Length, method.ReturnType.GetGenericArguments().Length);
+        }
     }
 
     /// <summary>
@@ -157,14 +183,15 @@ public class SqlQueryApiContractTest
     /// 测试目的：根查询应公开参数化插值 SQL 入口，避免调用方手工拼接参数值。
     /// </summary>
     [Fact]
-    public void SqlInterpolated_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
+    public void TextInterpolated_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
     {
-        var method = typeof(ISqlQuery).GetMethod("SqlInterpolated");
+        var method = typeof(ISqlQuery).GetMethod("TextInterpolated");
 
         Assert.NotNull(method);
         Assert.True(method.IsGenericMethodDefinition);
         Assert.Equal(typeof(FormattableString), method.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(SqlTextQuery<>), method.ReturnType.GetGenericTypeDefinition());
+        Assert.Null(typeof(ISqlQuery).GetMethod("SqlInterpolated"));
     }
 
     /// <summary>
@@ -215,12 +242,14 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：根查询应公开使用实体映射初始化的 Lambda 查询入口。
+    /// 测试目的：根查询应公开使用实体映射初始化的 From 查询入口。
     /// </summary>
     [Fact]
-    public void Lambda_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
+    public void From_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
     {
-        var method = typeof(ISqlQuery).GetMethod("Lambda");
+        var method = typeof(ISqlQuery).GetMethods().Single(candidate => candidate.Name == "From" &&
+            candidate.IsGenericMethodDefinition && candidate.GetGenericArguments().Length == 1 &&
+            candidate.GetParameters().Length == 0);
 
         Assert.NotNull(method);
         Assert.True(method.IsGenericMethodDefinition);
@@ -230,7 +259,93 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：Lambda 查询应公开受控的类型化连接、分组、投影和聚合成员，并通过 SqlQuery 切换结果映射类型。
+    /// 测试目的：多表查询应以逐步扩展泛型元数的 Join 链公开 On 表达式，避免退回按实体类型猜测别名的旧接口。
+    /// </summary>
+    [Fact]
+    public void MultiLambdaQuery_WhenPublicApiInspected_ShouldExposeTypedJoinChainAndOn()
+    {
+        // Arrange
+        var types = new[]
+        {
+            typeof(SqlLambdaQuery<,>),
+            typeof(SqlLambdaQuery<,,>),
+            typeof(SqlLambdaQuery<,,,>),
+            typeof(SqlLambdaQuery<,,,,>),
+            typeof(SqlLambdaQuery<,,,,,>),
+            typeof(SqlLambdaQuery<,,,,,,>)
+        };
+
+        // Act and Assert
+        var joinMethodNames = new[] { "Join", "LeftJoin", "RightJoin", "FullJoin", "CrossJoin" };
+        for (var index = 0; index < types.Length - 1; index++)
+        {
+            foreach (var methodName in joinMethodNames)
+            {
+                var join = types[index].GetMethods().Single(method => method.Name == methodName &&
+                    method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                    method.GetParameters().Length == 2);
+                Assert.Equal(types[index + 1], join.ReturnType.GetGenericTypeDefinition());
+
+                var derivedJoin = types[index].GetMethods().Single(method => method.Name == methodName &&
+                    method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                    method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType.IsGenericType &&
+                    method.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(SqlSubquery<>));
+                Assert.Equal(types[index + 1], derivedJoin.ReturnType.GetGenericTypeDefinition());
+            }
+        }
+
+        foreach (var type in types.Skip(1))
+        {
+            var on = type.GetMethods().Single(method => method.Name == "On" &&
+                method.IsGenericMethodDefinition == false && method.GetParameters().Length == 1);
+            Assert.Equal(type, on.ReturnType.GetGenericTypeDefinition());
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：多表查询应以各元数对应的类型化投影入口和公共 As 入口切换结果映射类型，同时保持后续终结方法使用 SqlQuery 契约。
+    /// </summary>
+    [Fact]
+    public void MultiLambdaQuery_WhenPublicApiInspected_ShouldExposeProjectionResultTransitions()
+    {
+        // Arrange
+        var types = new[]
+        {
+            typeof(SqlLambdaQuery<,>),
+            typeof(SqlLambdaQuery<,,>),
+            typeof(SqlLambdaQuery<,,,>),
+            typeof(SqlLambdaQuery<,,,,>),
+            typeof(SqlLambdaQuery<,,,,,>),
+            typeof(SqlLambdaQuery<,,,,,,>)
+        };
+
+        // Act and Assert
+        foreach (var type in types)
+        {
+            var select = type.GetMethods().Single(method => method.Name == "Select" &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                method.GetParameters().Length == 1);
+            Assert.Equal(typeof(SqlQuery<>), select.ReturnType.GetGenericTypeDefinition());
+
+            var selectDto = type.GetMethods().Single(method => method.Name == "SelectDto" &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                method.GetParameters().Length == 1);
+            Assert.Equal(typeof(SqlQuery<>), selectDto.ReturnType.GetGenericTypeDefinition());
+
+            var selectSubquery = type.GetMethods().Single(method => method.Name == "SelectSubquery" &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                method.GetParameters().Length == 2);
+            Assert.Equal(typeof(SqlSubquery<>), selectSubquery.ReturnType.GetGenericTypeDefinition());
+
+            var asMethod = type.GetMethods().Single(method => method.Name == "As" &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
+                method.GetParameters().Length == 0);
+            Assert.Equal(typeof(SqlQuery<>), asMethod.ReturnType.GetGenericTypeDefinition());
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：From 查询应公开受控的类型化连接、分组、投影和聚合成员，并通过 SqlQuery 切换结果映射类型。
     /// </summary>
     [Fact]
     public void LambdaQuery_WhenPublicApiInspected_ShouldExposeTypedCompositionAndResultTransitions()
@@ -584,6 +699,38 @@ public class SqlQueryApiContractTest
         Assert.Equal(expectedSyncParameterTypes, textSync.GetParameters().Select(GetGenericTypeDefinition));
         Assert.Equal(expectedAsyncParameterTypes, fluentAsync.GetParameters().Select(GetGenericTypeDefinition));
         Assert.Equal(expectedAsyncParameterTypes, textAsync.GetParameters().Select(GetGenericTypeDefinition));
+    }
+
+    /// <summary>
+    /// 测试目的：根服务工厂和事务 Scope 必须使用固定返回契约，不能重新开放任意实现类型创建入口。
+    /// </summary>
+    [Fact]
+    public void FactoriesAndTransactionScope_WhenPublicApiInspected_ShouldUseFixedCreationContracts()
+    {
+        // Arrange
+        var factories = new[]
+        {
+            (typeof(ISqlQueryFactory), typeof(ISqlQuery)),
+            (typeof(ISqlExecutorFactory), typeof(ISqlExecutor)),
+            (typeof(ISqlMultipleQueryExecutorFactory), typeof(ISqlMultipleQueryExecutor))
+        };
+
+        // Act and Assert
+        foreach (var (factoryType, resultType) in factories)
+        {
+            var create = Assert.Single(factoryType.GetMethods().Where(method => method.Name == "Create"));
+            Assert.False(create.IsGenericMethodDefinition);
+            Assert.Equal(resultType, create.ReturnType);
+            Assert.Equal(new[] { typeof(string) }, create.GetParameters().Select(parameter => parameter.ParameterType));
+        }
+
+        var scopeMethods = typeof(ISqlTransactionScope).GetMethods();
+        var createQuery = Assert.Single(scopeMethods.Where(method => method.Name == "CreateQuery"));
+        var createExecutor = Assert.Single(scopeMethods.Where(method => method.Name == "CreateExecutor"));
+        Assert.False(createQuery.IsGenericMethodDefinition);
+        Assert.False(createExecutor.IsGenericMethodDefinition);
+        Assert.Equal(typeof(ISqlQuery), createQuery.ReturnType);
+        Assert.Equal(typeof(ISqlExecutor), createExecutor.ReturnType);
     }
 
     /// <summary>

@@ -349,6 +349,114 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 添加实体全外连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder FullJoin<TEntity>(this ISqlBuilder source)
+        where TEntity : class => FullJoin<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 添加带别名的实体全外连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="alias">表别名。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder FullJoin<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => FullJoin<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 添加实体全外连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="alias">表别名。</param>
+    /// <param name="schema">架构名。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder FullJoin<TEntity>(this ISqlBuilder source, string alias, string schema)
+        where TEntity : class
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.FullJoin<TEntity>(alias, schema);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加结构化全外连接表引用。
+    /// </summary>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder FullJoin(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.FullJoin(reference);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加实体交叉连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder CrossJoin<TEntity>(this ISqlBuilder source)
+        where TEntity : class => CrossJoin<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 添加带别名的实体交叉连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="alias">表别名。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder CrossJoin<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => CrossJoin<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 添加实体交叉连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="alias">表别名。</param>
+    /// <param name="schema">架构名。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder CrossJoin<TEntity>(this ISqlBuilder source, string alias, string schema)
+        where TEntity : class
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.CrossJoin<TEntity>(alias, schema);
+        return source;
+    }
+
+    /// <summary>
+    /// 添加结构化交叉连接表引用。
+    /// </summary>
+    /// <param name="source">SQL 生成器。</param>
+    /// <param name="reference">结构化表引用。</param>
+    /// <returns>SQL 生成器。</returns>
+    public static ISqlBuilder CrossJoin(this ISqlBuilder source, SqlTableReference reference)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        if (source is ISqlQueryClauseAccessor accessor)
+            accessor.JoinClause.CrossJoin(reference);
+        return source;
+    }
+
+    /// <summary>
     /// 设置连接条件
     /// </summary>
     /// <param name="source">Sql生成器</param>

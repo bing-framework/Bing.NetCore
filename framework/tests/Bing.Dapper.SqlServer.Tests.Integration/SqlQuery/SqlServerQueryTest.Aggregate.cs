@@ -90,7 +90,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
             .Returning<SqlServerOutputRow>(row => new { row.Id, row.UserId });
 
         // Act
-        var rows = await executor.ExecuteReturningQueryAsync<SqlServerOutputRow>(builder.ToMutationDescription());
+        var rows = await executor.ExecuteReturningAsync<SqlServerOutputRow>(builder.ToMutationDescription());
 
         // Assert
         Assert.Equal(new[] { "output-first", "output-second" }, rows.Select(row => row.UserId));
@@ -104,7 +104,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>SQL Server 独立查询描述。</returns>
     private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Sql<TResult>().From("dbo.BingSqlAggregateIntegration", "p");
+        query.Query<TResult>().From("dbo.BingSqlAggregateIntegration", "p");
 
     /// <summary>
     /// SQL Server Output 物化模型。

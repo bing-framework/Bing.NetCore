@@ -13,6 +13,14 @@ namespace Bing.Data.Sql;
 /// </summary>
 public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 {
+    /// <summary>
+    /// 未指定批量大小时使用的最大实体窗口。
+    /// </summary>
+    /// <remarks>
+    /// 该上限仅限制内存占用；Provider 参数和 SQL 长度限制仍由既有批量规划器在窗口内收紧。
+    /// </remarks>
+    private const int DefaultMutationBatchWindowSize = 256;
+
     /// <inheritdoc />
     public ISqlBuilder CreateBuilder() => CreateIndependentSqlBuilder();
 
@@ -31,7 +39,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     #endregion
 
     /// <inheritdoc />
-    public List<TResult> ExecuteReturningQuery<TResult>(SqlMutationDescription description, int? timeout = null)
+    public List<TResult> ExecuteReturning<TResult>(SqlMutationDescription description, int? timeout = null)
     {
         EnsureWritableDataSource();
         ValidateReturningMutationDescription(description);
@@ -53,7 +61,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <inheritdoc />
-    public async Task<List<TResult>> ExecuteReturningQueryAsync<TResult>(SqlMutationDescription description, int? timeout = null,
+    public async Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlMutationDescription description, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
@@ -77,10 +85,10 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }, cancellationToken).ConfigureAwait(false);
     }
 
-    #region Execute(执行 Mutation 描述)
+    #region ExecuteMutation(执行 Mutation 描述)
 
     /// <inheritdoc />
-    public virtual int Execute(SqlMutationDescription description, int? timeout = null)
+    public virtual int ExecuteMutation(SqlMutationDescription description, int? timeout = null)
     {
         EnsureWritableDataSource();
         ValidateExecutableMutationDescription(description);
@@ -101,7 +109,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <inheritdoc />
-    public virtual async Task<int> ExecuteAsync(SqlMutationDescription description, int? timeout = null,
+    public virtual async Task<int> ExecuteMutationAsync(SqlMutationDescription description, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
@@ -123,6 +131,14 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             return result;
         }, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc />
+    public virtual int Execute(SqlMutationDescription description, int? timeout = null) =>
+        ExecuteMutation(description, timeout);
+
+    /// <inheritdoc />
+    public virtual Task<int> ExecuteAsync(SqlMutationDescription description, int? timeout = null,
+        CancellationToken cancellationToken = default) => ExecuteMutationAsync(description, timeout, cancellationToken);
 
     /// <summary>
     /// 验证 Mutation 描述是否可通过非 Returning 执行入口执行。
@@ -202,7 +218,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         int? timeout = null) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
-        return ExecuteMutationBatch(CreateInsertBatchCommands(entities, options), options?.UseTransaction ?? true, timeout);
+        options ??= new SqlBatchInsertOptions();
+        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
     /// <inheritdoc />
@@ -212,8 +230,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureMutationBatchExecutionAllowed(entities);
         EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        return ExecuteMutationBatchAsync(CreateInsertBatchCommands(entities, options), options?.UseTransaction ?? true,
-            timeout, cancellationToken);
+        options ??= new SqlBatchInsertOptions();
+        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
     #endregion
@@ -245,7 +264,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         int? timeout = null) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
-        return ExecuteMutationBatch(CreateUpdateBatchCommands(entities, options), options?.UseTransaction ?? true, timeout);
+        options ??= new SqlBatchUpdateOptions();
+        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
     /// <inheritdoc />
@@ -255,8 +276,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureMutationBatchExecutionAllowed(entities);
         EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        return ExecuteMutationBatchAsync(CreateUpdateBatchCommands(entities, options), options?.UseTransaction ?? true,
-            timeout, cancellationToken);
+        options ??= new SqlBatchUpdateOptions();
+        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
     #endregion
@@ -288,7 +310,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         int? timeout = null) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
-        return ExecuteMutationBatch(CreateDeleteBatchCommands(entities, options), options?.UseTransaction ?? true, timeout);
+        options ??= new SqlBatchDeleteOptions();
+        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
     /// <inheritdoc />
@@ -298,8 +322,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureMutationBatchExecutionAllowed(entities);
         EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        return ExecuteMutationBatchAsync(CreateDeleteBatchCommands(entities, options), options?.UseTransaction ?? true,
-            timeout, cancellationToken);
+        options ??= new SqlBatchDeleteOptions();
+        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
+            items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
     #endregion
@@ -316,7 +341,73 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureWritableDataSource();
     }
 
-    #region ExecuteSql(执行Sql增删改操作)
+    /// <summary>
+    /// 按受控实体窗口惰性生成批量命令。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待处理实体序列。</param>
+    /// <param name="options">当前批量选项。</param>
+    /// <param name="batchFactory">基于单个窗口创建命令的工厂。</param>
+    /// <returns>按需生成的批量命令序列。</returns>
+    /// <remarks>
+    /// 一个窗口内仍使用既有参数和 SQL 长度规划，因而不会放宽 Provider 限制；
+    /// 数据库命令失败或取消后，枚举不会读取下一窗口实体。
+    /// </remarks>
+    private static IEnumerable<SqlMutationBatchCommand> CreateWindowedMutationBatchCommands<TEntity>(
+        IEnumerable<TEntity> entities, SqlMutationBatchOptions options,
+        Func<IEnumerable<TEntity>, IReadOnlyList<SqlMutationBatchCommand>> batchFactory) where TEntity : class
+    {
+        if (batchFactory == null)
+            throw new ArgumentNullException(nameof(batchFactory));
+        foreach (var window in EnumerateMutationWindows(entities, GetMutationBatchWindowSize(options)))
+        {
+            foreach (var batch in batchFactory(window))
+                yield return batch;
+        }
+    }
+
+    /// <summary>
+    /// 获取单次命令生成可保留的最大实体数。
+    /// </summary>
+    /// <param name="options">当前批量选项。</param>
+    /// <returns>调用方指定批次大小或保守默认窗口大小。</returns>
+    private static int GetMutationBatchWindowSize(SqlMutationBatchOptions options)
+    {
+        var windowSize = options?.BatchSize ?? DefaultMutationBatchWindowSize;
+        if (windowSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(options), "批量大小必须大于零。");
+        return windowSize;
+    }
+
+    /// <summary>
+    /// 将输入序列按窗口大小分割，且不读取未请求的后续窗口。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待处理实体序列。</param>
+    /// <param name="windowSize">单个窗口的最大实体数。</param>
+    /// <returns>惰性实体窗口。</returns>
+    private static IEnumerable<IReadOnlyList<TEntity>> EnumerateMutationWindows<TEntity>(IEnumerable<TEntity> entities,
+        int windowSize)
+    {
+        using var enumerator = entities.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+            var window = new List<TEntity>(windowSize) { enumerator.Current };
+            while (window.Count < windowSize && enumerator.MoveNext())
+                window.Add(enumerator.Current);
+            yield return window;
+        }
+    }
+
+    #region ExecuteText(执行 SQL 文本)
+
+    /// <inheritdoc />
+    public virtual int ExecuteText(string sql, object param = null, int? timeout = null) =>
+        ExecuteSql(sql, param, timeout);
+
+    /// <inheritdoc />
+    public virtual Task<int> ExecuteTextAsync(string sql, object param = null, int? timeout = null,
+        CancellationToken cancellationToken = default) => ExecuteSqlAsync(sql, param, timeout, cancellationToken);
 
     /// <summary>
     /// 执行指定的SQL语句
@@ -1003,20 +1094,24 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="timeout">单条命令执行超时时间，单位为秒。</param>
     /// <returns>所有命令影响行数的总和。</returns>
     /// <remarks>任一命令失败会回滚；回滚也失败时保留执行与回滚异常。</remarks>
-    private int ExecuteMutationBatch(IReadOnlyList<SqlMutationBatchCommand> batches, bool useTransaction, int? timeout)
+    private int ExecuteMutationBatch(IEnumerable<SqlMutationBatchCommand> batches, bool useTransaction, int? timeout)
     {
-        if (batches == null || batches.Count == 0)
+        if (batches == null)
+            return 0;
+        using var enumerator = batches.GetEnumerator();
+        if (enumerator.MoveNext() == false)
             return 0;
         EnsureWritableDataSource();
-        if (useTransaction == false && batches.Any(batch => batch.RequiresTransaction) == false)
-            return ExecuteMutationCommands(this, batches, timeout);
+        var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
+        if (useTransaction == false)
+            return ExecuteMutationCommands(this, orderedBatches, timeout);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
         using var scope = factory.Begin(GetDatabaseContext()?.DbKey);
         int result;
         try
         {
-            result = ExecuteMutationCommands(scope.CreateExecutor(), batches, timeout);
+            result = ExecuteMutationCommands(scope.CreateExecutor(), orderedBatches, timeout);
         }
         catch (Exception executionException)
         {
@@ -1043,22 +1138,26 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="cancellationToken">在开始及每条命令执行前检查的取消令牌。</param>
     /// <returns>表示异步执行并返回总影响行数的任务。</returns>
     /// <remarks>任一命令失败会回滚；回滚也失败时保留执行与回滚异常。</remarks>
-    private async Task<int> ExecuteMutationBatchAsync(IReadOnlyList<SqlMutationBatchCommand> batches,
+    private async Task<int> ExecuteMutationBatchAsync(IEnumerable<SqlMutationBatchCommand> batches,
         bool useTransaction, int? timeout, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (batches == null || batches.Count == 0)
+        if (batches == null)
+            return 0;
+        using var enumerator = batches.GetEnumerator();
+        if (enumerator.MoveNext() == false)
             return 0;
         EnsureWritableDataSource();
-        if (useTransaction == false && batches.Any(batch => batch.RequiresTransaction) == false)
-            return await ExecuteMutationCommandsAsync(this, batches, timeout, cancellationToken).ConfigureAwait(false);
+        var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
+        if (useTransaction == false)
+            return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, cancellationToken).ConfigureAwait(false);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
         await using var scope = await factory.BeginAsync(GetDatabaseContext()?.DbKey, cancellationToken).ConfigureAwait(false);
         int result;
         try
         {
-            result = await ExecuteMutationCommandsAsync(scope.CreateExecutor(), batches, timeout, cancellationToken)
+            result = await ExecuteMutationCommandsAsync(scope.CreateExecutor(), orderedBatches, timeout, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception executionException)
@@ -1146,6 +1245,20 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             result = checked(result + batchResult);
         }
         return result;
+    }
+
+    /// <summary>
+    /// 将已探测的首批命令和同一枚举器中的后续命令组合为单次枚举序列。
+    /// </summary>
+    /// <param name="first">已探测的第一批命令。</param>
+    /// <param name="enumerator">仍位于第一批后的原始枚举器。</param>
+    /// <returns>按原始顺序输出的批量命令。</returns>
+    private static IEnumerable<SqlMutationBatchCommand> EnumerateFirstAndRemaining(SqlMutationBatchCommand first,
+        IEnumerator<SqlMutationBatchCommand> enumerator)
+    {
+        yield return first;
+        while (enumerator.MoveNext())
+            yield return enumerator.Current;
     }
 
     /// <summary>

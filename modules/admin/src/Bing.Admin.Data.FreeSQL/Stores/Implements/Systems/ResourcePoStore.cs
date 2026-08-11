@@ -8,6 +8,8 @@ using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Configs;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Stores;
 
 namespace Bing.Admin.Data.Stores.Implements.Systems
@@ -21,7 +23,14 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         /// 初始化一个<see cref="ResourcePoStore"/>类型的实例
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
-        public ResourcePoStore(IAdminUnitOfWork unitOfWork) : base(unitOfWork)
+        /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
+        /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+        /// <param name="metadataOptions">SQL 元数据配置</param>
+        /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+        public ResourcePoStore(IAdminUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+            IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+            ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
+            metadataOptions, typeConverterResolver)
         {
         }
 
@@ -34,7 +43,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .ClearSelect()
                 .Select(true)
                 .From("a")
@@ -53,7 +62,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .ClearSelect()
                 .Select(true)
                 .From("a")
@@ -71,7 +80,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (moduleId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .ClearSelect()
                 .Select(true)
                 .From("a")
@@ -89,7 +98,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .ClearSelect()
                 .Select(true)
                 .From("a")
@@ -109,7 +118,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
-            var result = await Sql.Lambda<ResourcePo>()
+            var result = await Sql.From<ResourcePo>()
                 .ClearSelect()
                 .Select(true)
                 .From("a")
@@ -124,7 +133,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         /// <param name="applicationId">应用程序标识</param>
         /// <param name="moduleId">模块标识</param>
         public async Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId) =>
-            await Sql.Lambda<ResourcePo>()
+            await Sql.From<ResourcePo>()
                 .From("a")
                 .Where(x => x.ApplicationId == applicationId)
                 .Where(x => x.ParentId == moduleId)

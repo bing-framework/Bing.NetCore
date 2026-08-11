@@ -15,6 +15,11 @@ public class SqlTextQuery<TResult>
     private readonly ISqlQueryPlanExecutor _executor;
 
     /// <summary>
+    /// 描述创建时冻结的参数源。
+    /// </summary>
+    private readonly object _parameters;
+
+    /// <summary>
     /// 获取当前描述绑定的内部计划执行器。
     /// </summary>
     private protected ISqlQueryPlanExecutor Executor => _executor;
@@ -33,7 +38,7 @@ public class SqlTextQuery<TResult>
         if (string.IsNullOrWhiteSpace(commandText))
             throw new ArgumentException("SQL 文本不能为空。", nameof(commandText));
         CommandText = commandText;
-        Parameters = SqlQueryPlan.SnapshotParameters(parameters);
+        _parameters = SqlQueryPlan.SnapshotParameters(parameters);
     }
 
     /// <summary>
@@ -44,7 +49,7 @@ public class SqlTextQuery<TResult>
     /// <summary>
     /// 获取由参数绑定器处理的参数源。
     /// </summary>
-    public object Parameters { get; }
+    public object Parameters => SqlQueryPlan.SnapshotParameters(_parameters);
 
     /// <summary>
     /// Dapper 多映射的分段列名称。
@@ -359,5 +364,5 @@ public class SqlTextQuery<TResult>
     /// 获取当前原生文本查询对应的内部执行计划。
     /// </summary>
     /// <returns>包含 SQL 文本和参数源的查询计划。</returns>
-    private protected virtual SqlQueryPlan GetPlan() => SqlQueryPlan.Create(CommandText, Parameters, SplitOnColumn);
+    private protected virtual SqlQueryPlan GetPlan() => SqlQueryPlan.Create(CommandText, _parameters, SplitOnColumn);
 }

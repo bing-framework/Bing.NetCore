@@ -1,5 +1,6 @@
 using AspectCore.Extensions.Hosting;
 using Bing.Dapper.Oracle;
+using Bing.Data.Enums;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,8 +36,8 @@ public class Startup
         var connectionString = IntegrationTestGate.IsProviderEnabled("Oracle")
             ? IntegrationTestConnectionStringResolver.Resolve("Oracle")
             : string.Empty;
-        services.AddOracleSqlQuery(connectionString);
-        services.AddOracleSqlExecutor(connectionString);
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, connectionString);
         services.AddLogging(builder => builder.AddXunitOutput());
         services.AddBing();
     }

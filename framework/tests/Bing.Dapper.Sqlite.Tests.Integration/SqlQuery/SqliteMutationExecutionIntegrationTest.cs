@@ -39,7 +39,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Act
         var inserted = await executor.InsertAsync(entity);
         using var identityQuery = _fixture.CreateQuery();
-        entity.Id = identityQuery.Sql<int>().Select("Id").From("samples").Where("Name", "created").Scalar();
+        entity.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "created").Scalar();
         entity.Name = "updated";
         var updated = executor.Update(entity, new SqlUpdateOptions<MutationSample>
         {
@@ -66,7 +66,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         using var executor = _fixture.CreateExecutor();
         await executor.InsertAsync(entity);
         using var identityQuery = _fixture.CreateQuery();
-        entity.Id = identityQuery.Sql<int>().Select("Id").From("samples").Where("Name", "protected").Scalar();
+        entity.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "protected").Scalar();
 
         // Act
         var exception = Assert.Throws<Bing.Exceptions.ConcurrencyException>(() => executor.Delete(entity,
@@ -89,9 +89,9 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var second = new MutationSample { Name = "delete-second", Amount = 2m, SecretText = "v2" };
         await executor.InsertBatchAsync(new[] { first, second });
         using (var query = _fixture.CreateQuery())
-            first.Id = query.Sql<int>().Select("Id").From("samples").Where("Name", first.Name).Scalar();
+            first.Id = query.Query<int>().Select("Id").From("samples").Where("Name", first.Name).Scalar();
         using (var query = _fixture.CreateQuery())
-            second.Id = query.Sql<int>().Select("Id").From("samples").Where("Name", second.Name).Scalar();
+            second.Id = query.Query<int>().Select("Id").From("samples").Where("Name", second.Name).Scalar();
 
         // Act
         var affectedRows = await executor.DeleteBatchAsync(new[] { first, second }, new SqlBatchDeleteOptions
@@ -172,8 +172,8 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var second = new MutationSample { Name = "second", Amount = 2m, SecretText = "v1" };
         await executor.InsertBatchAsync(new[] { first, second });
         using var identityQuery = _fixture.CreateQuery();
-        first.Id = identityQuery.Sql<int>().Select("Id").From("samples").Where("Name", "first").Scalar();
-        second.Id = identityQuery.Sql<int>().Select("Id").From("samples").Where("Name", "second").Scalar();
+        first.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "first").Scalar();
+        second.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "second").Scalar();
         first.Name = "first-updated";
         second.Name = "second-not-updated";
         second.SecretText = "other";
@@ -287,7 +287,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var rows = (await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(builder.ToMutationDescription()))
+        var rows = (await executor.ExecuteReturningAsync<SqliteReturningRow>(builder.ToMutationDescription()))
             .OrderBy(row => row.Id).ToArray();
 
         // Assert
@@ -312,8 +312,8 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .ToMutationDescription();
 
         // Act
-        var first = Assert.Single(executor.ExecuteReturningQuery<SqliteReturningRow>(description));
-        var second = Assert.Single(executor.ExecuteReturningQuery<SqliteReturningRow>(description));
+        var first = Assert.Single(executor.ExecuteReturning<SqliteReturningRow>(description));
+        var second = Assert.Single(executor.ExecuteReturning<SqliteReturningRow>(description));
 
         // Assert
         Assert.True(first.Id > 0);
@@ -343,7 +343,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+        var row = Assert.Single(await executor.ExecuteReturningAsync<SqliteReturningRow>(
             builder.ToMutationDescription()));
 
         // Assert
@@ -367,7 +367,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+        var row = Assert.Single(await executor.ExecuteReturningAsync<SqliteReturningRow>(
             builder.ToMutationDescription()));
 
         // Assert
@@ -391,7 +391,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
-        var row = Assert.Single(await executor.ExecuteReturningQueryAsync<SqliteReturningRow>(
+        var row = Assert.Single(await executor.ExecuteReturningAsync<SqliteReturningRow>(
             builder.ToMutationDescription()));
 
         // Assert
@@ -453,7 +453,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteReturningQueryAsync<int>(builder.ToMutationDescription()));
+            executor.ExecuteReturningAsync<int>(builder.ToMutationDescription()));
 
         // Assert
         Assert.Equal("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。", exception.Message);

@@ -264,7 +264,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     {
         if (dataSource == null)
             throw new InvalidOperationException("未解析到可用的 SQL 数据源。");
-        return _queryFactory.Create<ISqlQuery>(dataSource.Key);
+        return _queryFactory.Create(dataSource.Key);
     }
 
     /// <summary>

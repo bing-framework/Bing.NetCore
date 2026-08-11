@@ -115,13 +115,15 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
         services.TryAddSingleton<ISqlEntityMutationCommandBuilderFactory, SqlEntityMutationCommandBuilderFactory>();
         services.TryAddSingleton<ISqlFluentMutationBuilderFactory, SqlFluentMutationBuilderFactory>();
-        services.TryAddSingleton<SqlImplementationTypeOptions>();
-        services.TryAddSingleton<ISqlImplementationTypeResolver, DefaultSqlImplementationTypeResolver>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddTransient<ISqlQuery>(provider =>
-            provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>());
+            provider.GetRequiredService<ISqlQueryFactory>().Create());
         services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
+        services.TryAddTransient<ISqlExecutor>(provider =>
+            provider.GetRequiredService<ISqlExecutorFactory>().Create());
         services.TryAddSingleton<ISqlMultipleQueryExecutorFactory, SqlMultipleQueryExecutorFactory>();
+        services.TryAddTransient<ISqlMultipleQueryExecutor>(provider =>
+            provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create());
         services.TryAddSingleton<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();
         services.TryAddSingleton<ISqlDbConnectionFactoryResolver, DefaultSqlDbConnectionFactoryResolver>();
         return services;
@@ -378,45 +380,31 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册指定 Provider 的 SQL 服务实现映射。
+    /// 注册指定 Provider 的内部运行时服务实现。
     /// </summary>
-    /// <typeparam name="TService">服务契约类型。</typeparam>
-    /// <typeparam name="TImplementation">具体实现类型。</typeparam>
-    /// <param name="services">要注册服务的服务集合。</param>
-    /// <param name="providerKey">映射适用的 Provider 唯一标识。</param>
-    /// <returns>当前服务集合，以支持链式注册。</returns>
-    public static IServiceCollection AddSqlImplementationType<TService, TImplementation>(this IServiceCollection services,
-        string providerKey)
-        where TImplementation : TService
+    /// <param name="services">服务集合。</param>
+    /// <param name="serviceType">服务契约类型。</param>
+    /// <param name="implementationType">具体实现类型。</param>
+    /// <param name="providerKey">Provider 唯一标识。</param>
+    /// <returns>当前服务集合。</returns>
+    internal static IServiceCollection AddSqlProviderRuntime(this IServiceCollection services, Type serviceType,
+        Type implementationType, string providerKey)
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
         if (string.IsNullOrWhiteSpace(providerKey))
             throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
-        var options = GetOrCreateImplementationTypeOptions(services);
-        options.Map(typeof(TService), typeof(TImplementation), providerKey);
+        var registrations = services.Where(item => item.ServiceType == typeof(SqlProviderRuntimeRegistration)).ToList();
+        var registration = registrations.Select(item => item.ImplementationInstance as SqlProviderRuntimeRegistration)
+            .SingleOrDefault(item => item != null && string.Equals(item.ProviderKey, providerKey.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+        if (registration == null)
+        {
+            registration = new SqlProviderRuntimeRegistration(providerKey);
+            services.AddSingleton(registration);
+        }
+        registration.Map(serviceType, implementationType);
         return services;
-    }
-
-    /// <summary>
-    /// 获取或创建 SQL 实现类型配置
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>SQL 实现类型配置</returns>
-    private static SqlImplementationTypeOptions GetOrCreateImplementationTypeOptions(IServiceCollection services)
-    {
-        var descriptors = services
-            .Where(descriptor => descriptor.ServiceType == typeof(SqlImplementationTypeOptions))
-            .ToList();
-        if (descriptors.Count > 1)
-            throw new InvalidOperationException("SQL 实现类型配置重复注册，无法确定唯一的 Provider 实现映射。");
-        if (descriptors.Count == 1 && descriptors[0].ImplementationInstance is SqlImplementationTypeOptions options)
-            return options;
-        if (descriptors.Count == 1)
-            services.Remove(descriptors[0]);
-        options = new SqlImplementationTypeOptions();
-        services.AddSingleton(options);
-        return options;
     }
 
 }

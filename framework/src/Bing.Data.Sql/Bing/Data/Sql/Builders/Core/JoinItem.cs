@@ -36,6 +36,11 @@ public class JoinItem : IJoinOn
     public Type Type { get; }
 
     /// <summary>
+    /// 类型化派生表的绑定来源；普通连接为 null。
+    /// </summary>
+    internal TableSource Source { get; }
+
+    /// <summary>
     /// 连接条件
     /// </summary>
     public ICondition Condition { get; private set; }
@@ -53,6 +58,12 @@ public class JoinItem : IJoinOn
     /// <param name="condition">连接条件。</param>
     public static JoinItem Create(string joinType, SqlItem table, Type type = null, ICondition condition = null) =>
         new(joinType, table, type, condition);
+
+    /// <summary>
+    /// 创建保留 DTO 投影绑定信息的类型化派生表连接项。
+    /// </summary>
+    internal static JoinItem CreateDerived(string joinType, SqlItem table, TableSource source) =>
+        new(joinType, table, source?.EntityType, null, source);
 
     /// <summary>
     /// 创建结构化表连接项。
@@ -96,12 +107,14 @@ public class JoinItem : IJoinOn
     /// <param name="table">表</param>
     /// <param name="type">表实体类型</param>
     /// <param name="condition">连接条件列表</param>
-    private JoinItem(string joinType, SqlItem table, Type type, ICondition condition)
+    /// <param name="source">类型化派生表的来源绑定信息。</param>
+    private JoinItem(string joinType, SqlItem table, Type type, ICondition condition, TableSource source = null)
     {
         JoinType = joinType;
         Table = table;
         Type = type;
         Condition = condition;
+        Source = source;
     }
 
     #endregion
@@ -124,6 +137,7 @@ public class JoinItem : IJoinOn
     /// <param name="condition">连接条件</param>
     public void On(ICondition condition)
     {
+        EnsureSupportsOn();
         if (condition == null)
             return;
         Condition = new AndCondition(Condition, condition);
@@ -137,6 +151,7 @@ public class JoinItem : IJoinOn
     /// <param name="operator">运算符</param>
     public void On(string column, object value, Operator @operator = Operator.Equal)
     {
+        EnsureSupportsOn();
         if (_helper == null)
             return;
         var condition = _helper.CreateCondition(column, value, @operator);
@@ -150,6 +165,7 @@ public class JoinItem : IJoinOn
     /// <param name="dialect">Sql方言</param>
     public void On(List<List<OnItem>> items, IDialect dialect)
     {
+        EnsureSupportsOn();
         if (items == null)
             return;
         ICondition orCondition = null;
@@ -174,6 +190,7 @@ public class JoinItem : IJoinOn
     /// <param name="dialect">Sql方言</param>
     public void AppendOn(string sql, IDialect dialect)
     {
+        EnsureSupportsOn();
         if (string.IsNullOrWhiteSpace(sql))
             return;
         sql = Helper.ResolveSql(sql, dialect);
@@ -190,7 +207,9 @@ public class JoinItem : IJoinOn
     public JoinItem Clone(Helper helper)
     {
         var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
-        var result = Create(JoinType, Table?.Clone(), Type, condition);
+        var result = Source == null
+            ? Create(JoinType, Table?.Clone(), Type, condition)
+            : new JoinItem(JoinType, Table?.Clone(), Type, condition, Source.Clone());
         result.SetDependency(helper);
         return result;
     }
@@ -217,6 +236,15 @@ public class JoinItem : IJoinOn
         if (Condition == null)
             return null;
         return HasRawOnCondition() ? $" And {Condition.GetCondition()}" : $" On {Condition.GetCondition()}";
+    }
+
+    /// <summary>
+    /// 验证当前连接允许追加 On 条件。
+    /// </summary>
+    private void EnsureSupportsOn()
+    {
+        if (string.Equals(JoinType, "Cross Join", StringComparison.Ordinal))
+            throw new InvalidOperationException("Cross Join 不支持 On 条件。");
     }
 
     /// <summary>

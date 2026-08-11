@@ -23,7 +23,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(firstId, "list-first");
         await InitProductDataAsync(secondId, "list-second");
 
-        var result = _sqlQuery.Lambda<Product>()
+        var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
             .From()
@@ -45,7 +45,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "scalar-first");
         await InitProductDataAsync(Guid.NewGuid(), "scalar-second");
 
-        var result = _sqlQuery.Sql<int>().CountAll().From("Product").Scalar();
+        var result = _sqlQuery.Query<int>().CountAll().From("Product").Scalar();
 
         Assert.Equal(2, result);
     }
@@ -61,7 +61,7 @@ public partial class MySqlQueryTest
         var id = Guid.NewGuid();
         await InitProductDataAsync(id, "single");
 
-        var result = _sqlQuery.Lambda<Product>()
+        var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
             .From()
@@ -88,7 +88,7 @@ public partial class MySqlQueryTest
                 .Map("code", product => product.Code)
                 .Add("name", product => product.Name, null));
 
-        var result = _sqlQuery.Lambda<Product>()
+        var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
             .From()
@@ -112,7 +112,7 @@ public partial class MySqlQueryTest
             new { productId = id, code = "partial", name = "unmapped-name" }, map =>
                 map.Map("code", product => product.Code));
 
-        var result = _sqlQuery.Lambda<Product>()
+        var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
             .From()
@@ -133,8 +133,8 @@ public partial class MySqlQueryTest
     {
         await SeedProductsAsync();
 
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
-        var result = query.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
+        using var query = _sqlQueryFactory.Create();
+        var result = query.From<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
 
         Assert.Equal(3, result.Count);
     }
@@ -149,9 +149,9 @@ public partial class MySqlQueryTest
     {
         await SeedProductsAsync();
 
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
+        using var query = _sqlQueryFactory.Create();
         var result = new List<Product>();
-        await foreach (var product in query.Lambda<Product>().ClearSelect().Select(true).From().AsAsyncEnumerable())
+        await foreach (var product in query.From<Product>().ClearSelect().Select(true).From().AsAsyncEnumerable())
             result.Add(product);
 
         Assert.Equal(3, result.Count);
@@ -166,11 +166,11 @@ public partial class MySqlQueryTest
     public async Task ExecuteQuery_ShouldReturnSameRowsForBufferedModes()
     {
         await SeedProductsAsync();
-        using var bufferedQuery = _sqlQueryFactory.Create<ISqlQuery>();
-        using var nonBufferedQuery = _sqlQueryFactory.Create<ISqlQuery>();
+        using var bufferedQuery = _sqlQueryFactory.Create();
+        using var nonBufferedQuery = _sqlQueryFactory.Create();
 
-        var buffered = bufferedQuery.Lambda<Product>().ClearSelect().Select(true).From().ToList();
-        var nonBuffered = nonBufferedQuery.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
+        var buffered = bufferedQuery.From<Product>().ClearSelect().Select(true).From().ToList();
+        var nonBuffered = nonBufferedQuery.From<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
 
         Assert.Equal(buffered.Select(product => product.Code), nonBuffered.Select(product => product.Code));
     }
@@ -185,8 +185,8 @@ public partial class MySqlQueryTest
     {
         await SeedProductsAsync();
 
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
-        var result = query.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
+        using var query = _sqlQueryFactory.Create();
+        var result = query.From<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
 
         Assert.Equal(new[] { "buffer-one", "buffer-three", "buffer-two" },
             result.Select(product => product.Code).OrderBy(code => code));
@@ -202,13 +202,13 @@ public partial class MySqlQueryTest
     {
         await SeedProductsAsync();
         List<Product> result;
-        using (var query = _sqlQueryFactory.Create<ISqlQuery>())
-            result = query.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
+        using (var query = _sqlQueryFactory.Create())
+            result = query.From<Product>().ClearSelect().Select(true).From().AsEnumerable().ToList();
 
         await InitProductDataAsync(Guid.NewGuid(), "after-materialization");
 
         Assert.Equal(3, result.Count);
-        Assert.Equal(4, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
     }
 
     /// <summary>
@@ -220,9 +220,9 @@ public partial class MySqlQueryTest
     public async Task StreamQuery_ShouldReturnAllRows()
     {
         await SeedProductsAsync();
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
+        using var query = _sqlQueryFactory.Create();
 
-        var result = query.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable()
+        var result = query.From<Product>().ClearSelect().Select(true).From().AsEnumerable()
             .Select(product => product.Code).OrderBy(code => code).ToList();
 
         Assert.Equal(new[] { "buffer-one", "buffer-three", "buffer-two" }, result);
@@ -237,10 +237,10 @@ public partial class MySqlQueryTest
     public async Task StreamAsync_ShouldReturnAllRows()
     {
         await SeedProductsAsync();
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
+        using var query = _sqlQueryFactory.Create();
         var result = new List<string>();
 
-        await foreach (var product in query.Lambda<Product>().ClearSelect().Select(true).From().AsAsyncEnumerable())
+        await foreach (var product in query.From<Product>().ClearSelect().Select(true).From().AsAsyncEnumerable())
             result.Add(product.Code);
 
         Assert.Equal(new[] { "buffer-one", "buffer-three", "buffer-two" }, result.OrderBy(code => code));
@@ -255,13 +255,13 @@ public partial class MySqlQueryTest
     public async Task StreamQuery_ShouldReleaseReaderWhenEnumerationStopsEarly()
     {
         await SeedProductsAsync();
-        using (var query = _sqlQueryFactory.Create<ISqlQuery>())
-        using (var enumerator = query.Lambda<Product>().ClearSelect().Select(true).From().AsEnumerable().GetEnumerator())
+        using (var query = _sqlQueryFactory.Create())
+        using (var enumerator = query.From<Product>().ClearSelect().Select(true).From().AsEnumerable().GetEnumerator())
             Assert.True(enumerator.MoveNext());
 
         await InitProductDataAsync(Guid.NewGuid(), "after-stream");
 
-        Assert.Equal(4, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
     }
 
     /// <summary>
@@ -275,18 +275,18 @@ public partial class MySqlQueryTest
         await SeedProductsAsync();
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
-        using var query = _sqlQueryFactory.Create<ISqlQuery>();
+        using var query = _sqlQueryFactory.Create();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.Lambda<Product>().ClearSelect().Select(true).From()
+            await foreach (var _ in query.From<Product>().ClearSelect().Select(true).From()
                                .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
             {
             }
         });
 
         await InitProductDataAsync(Guid.NewGuid(), "after-cancel");
-        Assert.Equal(4, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
     }
 
     /// <summary>
@@ -305,7 +305,7 @@ public partial class MySqlQueryTest
             scope.Commit();
         }
 
-        Assert.Equal(1, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(1, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
         return Task.CompletedTask;
     }
 
@@ -325,7 +325,7 @@ public partial class MySqlQueryTest
             scope.Rollback();
         }
 
-        Assert.Equal(0, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(0, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
         return Task.CompletedTask;
     }
 
@@ -342,7 +342,7 @@ public partial class MySqlQueryTest
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
                 new { productId = Guid.NewGuid(), code = "implicit-rollback" });
 
-        Assert.Equal(0, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(0, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
         return Task.CompletedTask;
     }
 
@@ -360,11 +360,11 @@ public partial class MySqlQueryTest
         {
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
                 new { productId = Guid.NewGuid(), code = "shared" });
-            Assert.Equal(1, query.Sql<int>().CountAll().From("Product").Scalar());
+            Assert.Equal(1, query.Query<int>().CountAll().From("Product").Scalar());
             scope.Commit();
         }
 
-        Assert.Equal(1, _sqlQuery.Sql<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(1, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
         return Task.CompletedTask;
     }
 
@@ -382,7 +382,7 @@ public partial class MySqlQueryTest
             "Insert ParameterSample(ParameterSampleId, JsonValue, DecimalValue) Values(@id, @json, @decimal)",
             new { id, json, @decimal = 1.25m });
 
-        var result = _sqlQuery.Sql<string>().Select("JsonValue").From("ParameterSample")
+        var result = _sqlQuery.Query<string>().Select("JsonValue").From("ParameterSample")
             .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
 
         Assert.Equal(json, result);
@@ -401,7 +401,7 @@ public partial class MySqlQueryTest
         await _sqlExecutor.ExecuteSqlAsync(
             "Insert ParameterSample(ParameterSampleId, DecimalValue) Values(@id, @value)", new { id, value });
 
-        var result = _sqlQuery.Sql<decimal>().Select("DecimalValue").From("ParameterSample")
+        var result = _sqlQuery.Query<decimal>().Select("DecimalValue").From("ParameterSample")
             .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
 
         Assert.Equal(value, result);
@@ -421,7 +421,7 @@ public partial class MySqlQueryTest
             "Insert ParameterSample(ParameterSampleId, DecimalValue, DateTimeValue) Values(@id, @decimal, @value)",
             new { id, @decimal = 1m, value });
 
-        var result = _sqlQuery.Sql<DateTime>().Select("DateTimeValue").From("ParameterSample")
+        var result = _sqlQuery.Query<DateTime>().Select("DateTimeValue").From("ParameterSample")
             .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
 
         Assert.Equal(value, result);

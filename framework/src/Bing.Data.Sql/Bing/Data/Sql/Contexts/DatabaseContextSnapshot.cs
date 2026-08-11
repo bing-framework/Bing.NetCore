@@ -67,6 +67,7 @@ public static class DatabaseContextSnapshot
             Intersect = capabilities.Intersect,
             Except = capabilities.Except,
             RightJoin = capabilities.RightJoin,
+            FullJoin = capabilities.FullJoin,
             Pagination = capabilities.Pagination
         };
 }

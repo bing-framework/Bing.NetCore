@@ -21,8 +21,8 @@ public class MySqlTypeConverterResolverTest
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddMySqlQuery("Server=default;Database=test;");
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.MySql, "Server=default;Database=test;");
         using var provider = services.BuildServiceProvider();
 
         // Act

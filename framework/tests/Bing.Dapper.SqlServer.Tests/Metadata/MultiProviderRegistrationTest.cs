@@ -38,6 +38,27 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
+    /// 测试目的：直接注入的执行器和多结果集执行器必须与查询使用同一数据源路由，
+    /// 不能由首个 Provider 的直接服务注册决定实现类型。
+    /// </summary>
+    [Fact]
+    public void ResolveDirectly_WhenDatabaseScopeChanges_ShouldRouteAllRootServicesByCurrentDataSource()
+    {
+        // Arrange
+        using var provider = CreateProvider();
+        var databaseScopeManager = provider.GetRequiredService<IDatabaseScopeManager>();
+        using var sqliteScope = databaseScopeManager.Use("sqlite");
+
+        // Act
+        using var executor = provider.GetRequiredService<ISqlExecutor>();
+        using var multipleQueryExecutor = provider.GetRequiredService<ISqlMultipleQueryExecutor>();
+
+        // Assert
+        Assert.IsType<SqliteSqlExecutor>(executor);
+        Assert.IsType<SqliteSqlMultipleQueryExecutor>(multipleQueryExecutor);
+    }
+
+    /// <summary>
     /// 测试 - 同一容器应根据具名数据源创建对应 Provider 的查询、方言和参数规则。
     /// </summary>
     [Fact]
@@ -49,11 +70,11 @@ public class MultiProviderRegistrationTest
         var providerResolver = provider.GetRequiredService<ISqlProviderResolver>();
 
         // Act
-        using var mysql = factory.Create<ISqlQuery>("mysql");
-        using var postgreSql = factory.Create<ISqlQuery>("pgsql");
-        using var sqlServer = factory.Create<ISqlQuery>("sqlserver");
-        using var sqlite = factory.Create<ISqlQuery>("sqlite");
-        using var oracle = factory.Create<ISqlQuery>("oracle");
+        using var mysql = factory.Create("mysql");
+        using var postgreSql = factory.Create("pgsql");
+        using var sqlServer = factory.Create("sqlserver");
+        using var sqlite = factory.Create("sqlite");
+        using var oracle = factory.Create("oracle");
 
         // Assert
         Assert.IsType<MySqlQuery>(mysql);
@@ -111,7 +132,7 @@ public class MultiProviderRegistrationTest
         var transactionScopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
-        using var query = factory.Create<ISqlQuery>("doris");
+        using var query = factory.Create("doris");
         var exception = Assert.Throws<NotSupportedException>(() => transactionScopeFactory.Begin("doris"));
 
         // Assert
@@ -130,7 +151,7 @@ public class MultiProviderRegistrationTest
         // Arrange
         using var provider = CreateProvider();
         var factory = provider.GetRequiredService<ISqlExecutorFactory>();
-        using var executor = factory.Create<ISqlExecutor>("doris");
+        using var executor = factory.Create("doris");
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("sync_analytics"));
@@ -151,7 +172,7 @@ public class MultiProviderRegistrationTest
         var formatter = provider.GetRequiredService<ISqlObjectNameFormatter>();
         var dialect = provider.GetRequiredService<ISqlProviderResolver>()
             .Resolve(SqlServerSqlProvider.Instance.Key).Dialect;
-        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>("sqlserver");
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlserver");
         var reference = new SqlTableReference
         {
             Database = "reporting",
@@ -225,18 +246,23 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
-    /// 创建仅注册执行器的服务提供程序。
+    /// 创建注册多个 Provider 能力和具名数据源的服务提供程序。
     /// </summary>
     /// <returns>服务提供程序。</returns>
     private static ServiceProvider CreateExecutorOnlyProvider()
     {
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddMySqlExecutor("Server=mysql;Database=test;");
-        services.AddPostgreSqlExecutor("Host=pgsql;Database=test;");
-        services.AddSqlServerSqlExecutor("Server=sqlserver;Database=test;");
-        services.AddSqliteSqlExecutor("Data Source=executor-only.db");
-        services.AddOracleSqlExecutor("User Id=bing;Password=secret;Data Source=oracle-test");
+        services.AddMySqlProvider();
+        services.AddPostgreSqlProvider();
+        services.AddSqlServerProvider();
+        services.AddSqliteProvider();
+        services.AddOracleProvider();
+        services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=test;");
+        services.AddSqlDataSource("pgsql", DatabaseType.PgSql, "Host=pgsql;Database=test;");
+        services.AddSqlDataSource("sqlserver", DatabaseType.SqlServer, "Server=sqlserver;Database=test;");
+        services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=executor-only.db");
+        services.AddSqlDataSource("oracle", DatabaseType.Oracle,
+            "User Id=bing;Password=secret;Data Source=oracle-test");
         return services.BuildServiceProvider();
     }
 

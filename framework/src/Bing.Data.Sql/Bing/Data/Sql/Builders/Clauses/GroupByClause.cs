@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
+using System.Linq;
 using System.Text;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Internal;
 using Bing.Extensions;
 
@@ -122,6 +124,34 @@ public class GroupByClause : IGroupByClause
             return;
         _context.UseOperation(SqlOperationAction.QueryClause);
         _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
+    }
+
+    /// <summary>
+    /// 追加已绑定到具体表源实例的分组列。
+    /// </summary>
+    /// <param name="columns">已按当前方言解析完成的列 SQL。</param>
+    internal void AddBoundColumns(IEnumerable<string> columns)
+    {
+        if (columns == null)
+            throw new ArgumentNullException(nameof(columns));
+        var items = columns.Where(column => string.IsNullOrWhiteSpace(column) == false).ToList();
+        if (items.Count == 0)
+            return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        foreach (var item in items)
+            _group.Add(SqlItem.Raw(item));
+    }
+
+    /// <summary>
+    /// 设置已绑定到具体表源实例的 Having 条件。
+    /// </summary>
+    /// <param name="condition">已参数化且按当前方言解析完成的条件。</param>
+    internal void SetBoundHaving(ICondition condition)
+    {
+        if (condition == null)
+            throw new ArgumentNullException(nameof(condition));
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        _having = condition.GetCondition();
     }
 
     /// <inheritdoc />

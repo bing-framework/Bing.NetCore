@@ -104,9 +104,9 @@ public class SqliteMultiDataSourceExecutionTest
             using (databaseScopeManager.Use("first"))
             {
                 CreateTableAndInsert(executorFactory, "first");
-                using var query = queryFactory.Create<ISqlQuery>();
+                using var query = queryFactory.Create();
                 // Act
-                var result = query.Sql<Sample>().Select("Id,Name").From("samples").AsEnumerable().ToList();
+                var result = query.Query<Sample>().Select("Id,Name").From("samples").AsEnumerable().ToList();
 
                 // Assert
                 Assert.Single(result);
@@ -138,16 +138,16 @@ public class SqliteMultiDataSourceExecutionTest
             using (databaseScopeManager.Use("first"))
             {
                 CreateTableAndInsert(executorFactory, "first");
-                using (var query = queryFactory.Create<ISqlQuery>())
+                using (var query = queryFactory.Create())
                 {
-                    using var enumerator = query.Sql<Sample>().Select("Id,Name").From("samples")
+                    using var enumerator = query.Query<Sample>().Select("Id,Name").From("samples")
                         .AsEnumerable().GetEnumerator();
                     Assert.True(enumerator.MoveNext());
                     Assert.Equal("first", enumerator.Current.Name);
                 }
 
                 // Act
-                using var executor = executorFactory.Create<ISqlExecutor>();
+                using var executor = executorFactory.Create();
                 executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "after-stream" });
 
                 // Assert
@@ -181,18 +181,18 @@ public class SqliteMultiDataSourceExecutionTest
                 CreateTableAndInsert(executorFactory, "first");
                 Insert(executorFactory, "second-row");
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using (var query = queryFactory.Create<ISqlQuery>())
+                using (var query = queryFactory.Create())
                 {
                     // Act
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
                     {
-                        await foreach (var _ in query.Sql<Sample>().Select("Id,Name").From("samples")
+                        await foreach (var _ in query.Query<Sample>().Select("Id,Name").From("samples")
                                            .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
                             cancellationTokenSource.Cancel();
                     });
                 }
 
-                using var executor = executorFactory.Create<ISqlExecutor>();
+                using var executor = executorFactory.Create();
                 executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "after-cancellation" });
 
                 // Assert
@@ -251,11 +251,9 @@ public class SqliteMultiDataSourceExecutionTest
     private static ServiceProvider CreateProvider(string firstPath, string secondPath)
     {
         var services = new ServiceCollection();
-        services.AddSqlCore();
+        services.AddSqliteProvider();
         services.AddSqlDataSource("first", DatabaseType.Sqlite, $"Data Source={firstPath};Pooling=False");
         services.AddSqlDataSource("second", DatabaseType.Sqlite, $"Data Source={secondPath};Pooling=False");
-        services.AddSqliteSqlQuery();
-        services.AddSqliteSqlExecutor();
         return services.BuildServiceProvider();
     }
 
@@ -277,7 +275,7 @@ public class SqliteMultiDataSourceExecutionTest
     /// <param name="name">样例名称。</param>
     private static void Insert(ISqlExecutorFactory executorFactory, string name)
     {
-        using var executor = executorFactory.Create<ISqlExecutor>();
+        using var executor = executorFactory.Create();
         executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name });
     }
 
@@ -287,7 +285,7 @@ public class SqliteMultiDataSourceExecutionTest
     /// <param name="executorFactory">SQL 执行器工厂。</param>
     private static void CreateTable(ISqlExecutorFactory executorFactory)
     {
-        using var executor = executorFactory.Create<ISqlExecutor>();
+        using var executor = executorFactory.Create();
         executor.ExecuteSql("Create Table samples(Id Integer Primary Key, Name Text)");
     }
 
@@ -331,9 +329,9 @@ public class SqliteMultiDataSourceExecutionTest
     {
         await Task.Yield();
         using (databaseScopeManager.Use(dbKey))
-        using (var query = queryFactory.Create<ISqlQuery>())
+        using (var query = queryFactory.Create())
         {
-            return query.Sql<Sample>().Select("Name").From("samples").AsEnumerable().Single().Name;
+            return query.Query<Sample>().Select("Name").From("samples").AsEnumerable().Single().Name;
         }
     }
 

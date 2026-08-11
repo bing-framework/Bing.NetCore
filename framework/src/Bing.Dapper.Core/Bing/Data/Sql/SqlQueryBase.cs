@@ -182,7 +182,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// <summary>
     /// Sql配置
     /// </summary>
-    protected SqlOptions Options { get; set; }
+    protected internal SqlOptions Options { get; set; }
 
     /// <summary>
     /// 实体映射解析器
@@ -362,7 +362,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     ISqlBuilder ISqlQueryBuilderSource.CreateIndependentSqlBuilder() => CreateIndependentSqlBuilder();
 
     /// <inheritdoc />
-    public SqlQuery<TResult> Sql<TResult>()
+    public SqlQuery<TResult> Query<TResult>()
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
@@ -370,14 +370,14 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <inheritdoc />
-    public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null)
+    public SqlTextQuery<TResult> Text<TResult>(string sql, object parameters = null)
     {
         EnsureExecutionAvailable();
         return new SqlTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
     }
 
     /// <inheritdoc />
-    public SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql)
+    public SqlTextQuery<TResult> TextInterpolated<TResult>(FormattableString sql)
     {
         EnsureExecutionAvailable();
         if (sql == null)
@@ -395,7 +395,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
             parameters.Add(parameterName, arguments[index]);
         }
         var commandText = CreateInterpolatedCommandText(sql.Format, parameterNames, parameterPrefix);
-        return Sql<TResult>(commandText, parameters);
+        return Text<TResult>(commandText, parameters);
     }
 
     /// <inheritdoc />
@@ -532,13 +532,56 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <inheritdoc />
-    public SqlLambdaQuery<TEntity> Lambda<TEntity>() where TEntity : class
+    public SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
         var query = new SqlLambdaQuery<TEntity>(executor, executor.CreateIndependentSqlBuilder());
         query.Select().From();
         return query;
+    }
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond> From<TFirst, TSecond>() where TFirst : class where TSecond : class
+    {
+        EnsureExecutionAvailable();
+        var executor = (ISqlQueryPlanExecutor)this;
+        return new SqlLambdaQuery<TFirst, TSecond>(executor, executor.CreateIndependentSqlBuilder());
+    }
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird> From<TFirst, TSecond, TThird>()
+        where TFirst : class where TSecond : class where TThird : class =>
+        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> From<TFirst, TSecond, TThird, TFourth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class =>
+        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> From<TFirst, TSecond, TThird, TFourth, TFifth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class =>
+        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class =>
+        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class =>
+        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(executor, builder));
+
+    /// <summary>
+    /// 创建持有独立 Builder 的多根来源查询描述。
+    /// </summary>
+    private TQuery CreateMultiSourceQuery<TQuery>(Func<ISqlQueryPlanExecutor, ISqlBuilder, TQuery> factory)
+    {
+        EnsureExecutionAvailable();
+        var executor = (ISqlQueryPlanExecutor)this;
+        return factory(executor, executor.CreateIndependentSqlBuilder());
     }
 
     /// <summary>
@@ -624,7 +667,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// 获取或创建内部执行连接。
     /// </summary>
     /// <returns>执行使用的数据库连接。</returns>
-    protected IDbConnection GetExecutionConnection() =>
+    protected internal IDbConnection GetExecutionConnection() =>
         GetOrCreateConnection();
 
     /// <summary>

@@ -254,4 +254,62 @@ public class FromClauseTest
         Assert.Equal("From [a] As [b]", GetSql());
         Assert.Equal("From [c] As [d]", copy.ToSql());
     }
+
+    /// <summary>
+    /// 测试目的：内部根来源追加应按来源注册顺序使用逗号渲染，且保留每个来源的稳定标识。
+    /// </summary>
+    [Fact]
+    public void AppendRoot_WhenMultipleStructuredSourcesProvided_ShouldRenderCommaSeparatedSources()
+    {
+        // Arrange
+        _clause.From<Sample>("s");
+
+        // Act
+        _clause.AppendRoot<Sample2>("s2");
+
+        // Assert
+        Assert.Equal("From [Sample] As [s], [Sample2] As [s2]", GetSql());
+        Assert.Equal(new[] { "source_0", "source_1" }, _clause.Sources.Select(source => source.SourceId));
+        Assert.Equal(new[] { typeof(Sample), typeof(Sample2) }, _clause.Sources.Select(source => source.EntityType));
+    }
+
+    /// <summary>
+    /// 测试目的：同一实体的多个根来源必须保存不同表源实例，不能因 CLR 类型相同而合并。
+    /// </summary>
+    [Fact]
+    public void AppendRoot_WhenSameEntityIsAddedTwice_ShouldKeepDistinctSourceInstances()
+    {
+        // Arrange
+        _clause.From<Sample>("owner");
+
+        // Act
+        _clause.AppendRoot<Sample>("reviewer");
+
+        // Assert
+        Assert.Equal("From [Sample] As [owner], [Sample] As [reviewer]", GetSql());
+        Assert.Equal(2, _clause.Sources.Count);
+        Assert.NotSame(_clause.Sources[0], _clause.Sources[1]);
+        Assert.All(_clause.Sources, source => Assert.Equal(typeof(Sample), source.EntityType));
+    }
+
+    /// <summary>
+    /// 测试目的：克隆多根来源后，向克隆追加来源不得改变原查询图或来源标识序列。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenMultipleRootSourcesConfigured_ShouldRemainDeeplyIsolated()
+    {
+        // Arrange
+        _clause.From<Sample>("s");
+        _clause.AppendRoot<Sample2>("s2");
+        var copy = (FromClause)_clause.Clone(TestSqlBuilder.CreateTestClauseContext());
+
+        // Act
+        copy.AppendRoot<Sample3>("s3");
+
+        // Assert
+        Assert.Equal("From [Sample] As [s], [Sample2] As [s2]", GetSql());
+        Assert.Equal("From [Sample] As [s], [Sample2] As [s2], [Sample3] As [s3]", copy.ToSql());
+        Assert.Equal(new[] { "source_0", "source_1" }, _clause.Sources.Select(source => source.SourceId));
+        Assert.Equal(new[] { "source_0", "source_1", "source_2" }, copy.Sources.Select(source => source.SourceId));
+    }
 }

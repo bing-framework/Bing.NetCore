@@ -113,7 +113,7 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     /// <param name="dbKey">数据源标识。</param>
     /// <returns>SQL 查询对象。</returns>
     public ISqlQuery CreateQuery(string dbKey = PrimaryDatabaseKey) =>
-        ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>(dbKey);
+        ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create(dbKey);
 
     /// <summary>
     /// 创建指定数据源的 PostgreSQL SQL 执行对象。
@@ -121,7 +121,7 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     /// <param name="dbKey">数据源标识。</param>
     /// <returns>SQL 执行对象。</returns>
     public ISqlExecutor CreateExecutor(string dbKey = PrimaryDatabaseKey) =>
-        ServiceProvider.GetRequiredService<ISqlExecutorFactory>().Create<ISqlExecutor>(dbKey);
+        ServiceProvider.GetRequiredService<ISqlExecutorFactory>().Create(dbKey);
 
     /// <summary>
     /// 获取数据库作用域管理器。

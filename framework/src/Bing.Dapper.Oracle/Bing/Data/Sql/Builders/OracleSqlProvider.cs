@@ -54,7 +54,8 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlProviderProfileProvide
             UnionAll = SqlQueryCapabilityState.Supported,
             Intersect = SqlQueryCapabilityState.Supported,
             Except = SqlQueryCapabilityState.Unsupported,
-            RightJoin = SqlQueryCapabilityState.Supported
+            RightJoin = SqlQueryCapabilityState.Supported,
+            FullJoin = SqlQueryCapabilityState.Supported
         },
         Mutation = new SqlProviderMutationCapabilities { SupportsMultiRowValues = false },
         Execution = new SqlProviderExecutionCapabilities

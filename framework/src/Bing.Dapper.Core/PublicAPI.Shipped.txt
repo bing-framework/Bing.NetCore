@@ -13,10 +13,6 @@ Bing.Data.Sql.SqlDbConnectionFactoryRegistration.SqlDbConnectionFactoryRegistrat
 Bing.Data.Sql.SqlExecutorBase
 Bing.Data.Sql.SqlExecutorBase.CreateBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.SqlExecutorBase.SqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
-Bing.Data.Sql.SqlImplementationTypeOptions
-Bing.Data.Sql.SqlImplementationTypeOptions.Map(System.Type serviceType, System.Type implementationType, string providerKey) -> void
-Bing.Data.Sql.SqlImplementationTypeOptions.ProviderMappings.get -> System.Collections.Generic.IDictionary<string, System.Type>
-Bing.Data.Sql.SqlImplementationTypeOptions.SqlImplementationTypeOptions() -> void
 Bing.Data.Sql.SqlMultipleQueryExecutorBase
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.CreateBatch() -> Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.Execute(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null) -> Bing.Data.Sql.ISqlMultipleQueryResult
@@ -43,10 +39,10 @@ Bing.Data.Sql.SqlQueryBase.GetExecutionConnection() -> System.Data.IDbConnection
 Bing.Data.Sql.SqlQueryBase.GetExecutionTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetQueryTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetSql() -> string
+Bing.Data.Sql.SqlQueryBase.From<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlQueryBase.GroupByClause.get -> Bing.Data.Sql.Builders.IGroupByClause
 Bing.Data.Sql.SqlQueryBase.IsUnion.get -> bool
 Bing.Data.Sql.SqlQueryBase.JoinClause.get -> Bing.Data.Sql.Builders.IJoinClause
-Bing.Data.Sql.SqlQueryBase.Lambda<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlQueryBase.Logger.get -> Microsoft.Extensions.Logging.ILogger
 Bing.Data.Sql.SqlQueryBase.Options.get -> Bing.Data.SqlOptions
 Bing.Data.Sql.SqlQueryBase.Options.set -> void
@@ -58,10 +54,7 @@ Bing.Data.Sql.SqlQueryBase.Procedure<TResult>(string procedure, object parameter
 Bing.Data.Sql.SqlQueryBase.RollbackQueryTransaction() -> void
 Bing.Data.Sql.SqlQueryBase.SelectClause.get -> Bing.Data.Sql.Builders.ISelectClause
 Bing.Data.Sql.SqlQueryBase.ServiceProvider.get -> System.IServiceProvider
-Bing.Data.Sql.SqlQueryBase.Sql<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
-Bing.Data.Sql.SqlQueryBase.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.SqlBuilder.get -> Bing.Data.Sql.ISqlBuilder
-Bing.Data.Sql.SqlQueryBase.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.SqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
 Bing.Data.Sql.SqlQueryBase.UnionItems.get -> System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.BuilderItem>
 Bing.Data.Sql.SqlQueryBase.ValidateQueryBuilder() -> void
@@ -90,11 +83,9 @@ static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlCore(this Microso
 static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDataSource(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, string key, Bing.Data.Enums.DatabaseType databaseType, string connectionStringName = null, System.Action<Bing.Data.Sql.SqlDataSourceDescriptor> setupAction = null, string providerKey = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
 static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDataSource(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string key, Bing.Data.Enums.DatabaseType databaseType, string connectionString = null, string connectionStringName = null, System.Action<Bing.Data.Sql.SqlDataSourceDescriptor> setupAction = null, string providerKey = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
 static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlDbConnectionFactory(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string providerKey, System.Func<string, System.Data.IDbConnection> factory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
-static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlImplementationType<TService, TImplementation>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string providerKey) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
 static Bing.Dapper.DapperCoreServiceCollectionExtensions.ConfigureSqlMetadata(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Bing.Data.Sql.Configs.SqlMetadataOptions> setupAction) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
 static Bing.Dapper.DapperSqlOptionsExtensions.RegisterGuidTypeHandler(this Bing.Data.SqlOptions options) -> Bing.Data.SqlOptions
 static Bing.Dapper.DapperSqlOptionsExtensions.RegisterStringTypeHandler(this Bing.Data.SqlOptions options) -> Bing.Data.SqlOptions
-static Bing.Data.Sql.SqlImplementationTypeOptions.GetKey(System.Type serviceType, string providerKey) -> string
 virtual Bing.Data.Sql.SqlExecutorBase.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null) -> int
 virtual Bing.Data.Sql.SqlExecutorBase.DeleteAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 virtual Bing.Data.Sql.SqlExecutorBase.DeleteBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null) -> int

@@ -1,5 +1,18 @@
-Bing.Data.Sql.SqlExecutorBase.ExecuteReturningQuery<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlExecutorBase.ExecuteReturningQueryAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlQueryBase.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.Text<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.TextInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutation(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.SqlExecutorBase.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlExecutorBase.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteText(string sql, object param = null, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteTextAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 virtual Bing.Data.Sql.SqlExecutorBase.Execute(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.SqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void

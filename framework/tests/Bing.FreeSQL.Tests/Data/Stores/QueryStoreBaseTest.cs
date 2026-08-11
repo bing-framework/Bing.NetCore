@@ -1,4 +1,6 @@
 using Bing.Data.Sql;
+using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Stores;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
@@ -19,49 +21,52 @@ namespace Bing.FreeSQL.Tests.Data.Stores;
 public class QueryStoreBaseTest
 {
     /// <summary>
-    /// 测试目的：查询存储器应从工作单元作用域解析 SQL Query，并注入当前 FreeSQL 的实体元数据。
+    /// 测试目的：查询存储器应使用显式注入的 SQL Query 工厂，并注入当前 FreeSQL 的实体元数据。
     /// </summary>
     [Fact]
-    public void CreateSqlQuery_WhenScopeHasRequiredServices_ShouldUseScopedQueryAndFreeSqlMetadata()
+    public void CreateSqlQuery_WhenDependenciesAreExplicit_ShouldUseFactoryAndFreeSqlMetadata()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddMySqlQuery("Server=scope;Database=test;");
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", Bing.Data.Enums.DatabaseType.MySql, "Server=scope;Database=test;");
         using var serviceProvider = services.BuildServiceProvider();
         using var scope = serviceProvider.CreateScope();
         using var orm = CreateOrm();
         var scopedServices = new RecordingServiceProvider(scope.ServiceProvider);
         using var unitOfWork = new TestUnitOfWork(new FreeSqlWrapper { Orm = orm }, scopedServices);
-        var store = new TestQueryStore(unitOfWork);
+        var store = new TestQueryStore(unitOfWork, scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>(),
+            scope.ServiceProvider.GetRequiredService<IDatabaseContextAccessor>(),
+            scope.ServiceProvider.GetRequiredService<SqlMetadataOptions>(),
+            scope.ServiceProvider.GetRequiredService<ITypeConverterResolver>());
 
         // Act
         var query = store.GetSqlQuery();
-        var sql = query.Lambda<StoreSample>().From("s").ToSql();
+        var sql = query.From<StoreSample>().From("s").ToSql();
 
         // Assert
-        Assert.Contains(typeof(ISqlQuery), scopedServices.RequestedServiceTypes);
+        Assert.DoesNotContain(typeof(ISqlQuery), scopedServices.RequestedServiceTypes);
         Assert.IsType<MySqlQuery>(query);
         Assert.Equal("Select `s`.`Id` \r\nFrom `scope_items` As `s`", sql);
     }
 
     /// <summary>
-    /// 测试目的：工作单元作用域缺少 SQL Query 时应在边界处明确失败，不回退到全局服务定位器。
+    /// 测试目的：缺少显式 SQL Query 工厂时应在构造边界明确失败，不回退到工作单元服务提供器。
     /// </summary>
     [Fact]
-    public void CreateSqlQuery_WhenScopeMissesSqlQuery_ShouldThrowDeterministicError()
+    public void CreateSqlQuery_WhenFactoryIsMissing_ShouldThrowArgumentNullException()
     {
         // Arrange
         using var serviceProvider = new ServiceCollection().BuildServiceProvider();
         using var orm = CreateOrm();
         using var unitOfWork = new TestUnitOfWork(new FreeSqlWrapper { Orm = orm }, serviceProvider);
-        var store = new TestQueryStore(unitOfWork);
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => store.GetSqlQuery());
+        var exception = Assert.Throws<ArgumentNullException>(() => new TestQueryStore(unitOfWork, null,
+            new AsyncLocalDatabaseContextAccessor(), new SqlMetadataOptions(), new DefaultTypeConverterResolver()));
 
         // Assert
-        Assert.Equal($"FreeSQL 查询存储器未注册必需服务：{typeof(ISqlQuery).FullName}。", exception.Message);
+        Assert.Equal("sqlQueryFactory", exception.ParamName);
     }
 
     /// <summary>
@@ -97,7 +102,10 @@ public class QueryStoreBaseTest
         /// 初始化一个<see cref="TestQueryStore"/>类型的实例。
         /// </summary>
         /// <param name="unitOfWork">工作单元。</param>
-        public TestQueryStore(MySqlUnitOfWork unitOfWork) : base(unitOfWork)
+        public TestQueryStore(MySqlUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+            IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+            ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
+            metadataOptions, typeConverterResolver)
         {
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Linq;
 using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Internal;
@@ -123,6 +124,23 @@ public class OrderByClause : IOrderByClause
             return;
         _context.UseOperation(SqlOperationAction.QueryClause);
         AddItem(_resolver.GetColumn(column), desc, typeof(TEntity));
+    }
+
+    /// <summary>
+    /// 追加已绑定到具体表源实例的排序列。
+    /// </summary>
+    /// <param name="columns">已按当前方言解析完成的列 SQL。</param>
+    /// <param name="desc">是否按降序排列。</param>
+    internal void AddBoundColumns(IEnumerable<string> columns, bool desc)
+    {
+        if (columns == null)
+            throw new ArgumentNullException(nameof(columns));
+        var items = columns.Where(column => string.IsNullOrWhiteSpace(column) == false).ToList();
+        if (items.Count == 0)
+            return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        foreach (var item in items)
+            _items.Add(new OrderByItem(desc ? $"{item} Desc" : item, raw: true));
     }
 
     /// <summary>

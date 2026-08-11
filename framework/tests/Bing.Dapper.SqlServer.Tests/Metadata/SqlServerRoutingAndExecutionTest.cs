@@ -31,6 +31,54 @@ namespace Bing.Dapper.Tests.Metadata;
 public class SqlServerRoutingAndExecutionTest
 {
     /// <summary>
+    /// 测试目的：支持 Full Join 的 SQL Server 应为多表类型化连接生成完整方言 SQL，并按参数位置绑定同类型来源。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenTypedFullJoinConfigured_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+
+        // Act
+        var query = rootQuery.From<MappedSample, MappedSample>()
+            .FullJoin<MappedSample>("audit")
+            .On((owner, reviewer, audit) => owner.Id == audit.Id)
+            .Select((owner, reviewer, audit) => new object[] { owner.Id, reviewer.Id, audit.Id });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[audit].[Id] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join [Users] As [audit] On [Users].[Id]=[audit].[Id]");
+    }
+
+    /// <summary>
+    /// 测试目的：支持 Full Join 的 SQL Server 应以 DTO 成员别名绑定类型化派生表，并保留内部筛选参数。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenDtoSubqueryFullJoined_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var summary = rootQuery.From<MappedSample, MappedSample>()
+            .Where((owner, reviewer) => owner.Id > 10)
+            .SelectSubquery((owner, reviewer) => new DerivedMappedSample { OwnerId = owner.Id }, "summary");
+
+        // Act
+        var query = rootQuery.From<MappedSample, MappedSample>()
+            .FullJoin(summary)
+            .On((owner, reviewer, derived) => owner.Id == derived.OwnerId)
+            .Select((owner, reviewer, derived) => new object[] { owner.Id, reviewer.Id, derived.OwnerId });
+
+        // Assert
+        query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[summary].[OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
+        query.GetParams().Values.Single().ShouldBe(10);
+    }
+
+    /// <summary>
     /// 测试 - 查询工厂应使用解析后的连接字符串创建查询对象。
     /// </summary>
     [Fact]
@@ -45,18 +93,17 @@ public class SqlServerRoutingAndExecutionTest
             ConnectionString = "Server=reporting;Database=test;"
         };
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=default;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+        var query = Assert.IsType<SqlServerSqlQuery>(factory.Create("reporting"));
 
         // Assert
-        query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
-        query.CurrentOptions.DatabaseType.ShouldBe(DatabaseType.SqlServer);
-        query.CurrentOptions.Connection.ShouldBeNull();
+        query.Options.ConnectionString.ShouldBe("Server=reporting;Database=test;");
+        query.Options.DatabaseType.ShouldBe(DatabaseType.SqlServer);
+        query.Options.Connection.ShouldBeNull();
     }
 
     /// <summary>
@@ -75,18 +122,17 @@ public class SqlServerRoutingAndExecutionTest
             MappingProfile = "reporting-v2"
         };
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=default;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+        var query = Assert.IsType<SqlServerSqlQuery>(factory.Create("reporting"));
 
         // Assert
-        query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
-        query.CurrentOptions.DatabaseType.ShouldBe(DatabaseType.SqlServer);
-        query.CurrentOptions.GetDatabaseContext().MappingProfile.ShouldBe("reporting-v2");
+        query.Options.ConnectionString.ShouldBe("Server=reporting;Database=test;");
+        query.Options.DatabaseType.ShouldBe(DatabaseType.SqlServer);
+        query.Options.GetDatabaseContext().MappingProfile.ShouldBe("reporting-v2");
     }
 
     /// <summary>
@@ -104,16 +150,15 @@ public class SqlServerRoutingAndExecutionTest
             .Build();
         var services = CreateServices();
         services.AddSqlDataSource(configuration, "reporting", DatabaseType.SqlServer);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=default;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+        var query = Assert.IsType<SqlServerSqlQuery>(factory.Create("reporting"));
 
         // Assert
-        query.CurrentOptions.ConnectionString.ShouldBe("Server=config;Database=test;");
+        query.Options.ConnectionString.ShouldBe("Server=config;Database=test;");
     }
 
     /// <summary>
@@ -152,14 +197,13 @@ public class SqlServerRoutingAndExecutionTest
             ConnectionStringName = "ReportingConnection"
         };
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=template;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() =>
-            factory.Create<InspectableSqlServerQuery>("reporting"));
+            factory.Create("reporting"));
 
         // Assert
         exception.Message.ShouldContain("reporting");
@@ -182,14 +226,13 @@ public class SqlServerRoutingAndExecutionTest
         };
         var services = CreateServices(metadataOptions);
         services.AddSingleton(new ConnectionStringCollection { Default = "Server=default;Database=test;" });
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=template;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() =>
-            factory.Create<InspectableSqlServerQuery>("reporting"));
+            factory.Create("reporting"));
 
         // Assert
         exception.Message.ShouldContain("ReportingConnection");
@@ -219,8 +262,7 @@ public class SqlServerRoutingAndExecutionTest
             PrimaryDataSourceKey = "default"
         };
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=template;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
         using var scope = provider.GetRequiredService<IDatabaseScopeManager>().Use(new DatabaseScopeOptions
@@ -228,23 +270,22 @@ public class SqlServerRoutingAndExecutionTest
             DbKey = "reporting",
             ReadPreference = SqlReadPreference.Primary
         });
-        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+        var query = Assert.IsType<SqlServerSqlQuery>(factory.Create("reporting"));
 
         // Act
-        var connectionString = query.InvokeResolveConnectionString();
+        var connectionString = query.GetExecutionConnection().ConnectionString;
 
         // Assert
         connectionString.ShouldBe("Server=primary;Database=test;");
     }
 
     /// <summary>
-    /// 测试 - 查询工厂创建接口查询对象时不应为了获取实现类型而提前创建实例。
+    /// 测试 - 固定查询工厂应按 Provider 路由创建官方查询实现。
     /// </summary>
     [Fact]
-    public void SqlQueryFactory_CreateInterface_ShouldNotInstantiateServiceWhenResolvingImplementationType()
+    public void SqlQueryFactory_Create_ShouldUseOfficialProviderImplementation()
     {
         // Arrange
-        CountedSqlServerQuery.CreatedCount = 0;
         var metadataOptions = new SqlMetadataOptions();
         metadataOptions.DataSources.DataSources["reporting"] = new SqlDataSourceDescriptor
         {
@@ -253,17 +294,15 @@ public class SqlServerRoutingAndExecutionTest
             ConnectionString = "Server=reporting;Database=test;"
         };
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<ICountedSqlServerQuery, CountedSqlServerQuery>(options =>
-            options.ConnectionString("Server=default;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
-        var query = factory.Create<ICountedSqlServerQuery>("reporting");
+        var query = factory.Create("reporting");
 
         // Assert
-        query.ShouldBeOfType<CountedSqlServerQuery>();
-        CountedSqlServerQuery.CreatedCount.ShouldBe(1);
+        query.ShouldBeOfType<SqlServerSqlQuery>();
     }
 
     /// <summary>
@@ -275,14 +314,13 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var metadataOptions = CreateRoutingMetadataOptions();
         var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.ConnectionString("Server=default;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
 
         // Act
-        var query = factory.Create<InspectableSqlServerQuery>("reporting");
+        var query = Assert.IsType<SqlServerSqlQuery>(factory.Create("reporting"));
         accessor.Current = new DatabaseContext
         {
             DbKey = "default",
@@ -293,10 +331,10 @@ public class SqlServerRoutingAndExecutionTest
                 ConnectionString = "Server=default;Database=test;"
             }
         };
-        var description = query.Lambda<MappedSample>().From("u").Where(t => t.Name, "abc");
+        var description = query.From<MappedSample>().From("u").Where(t => t.Name, "abc");
 
         // Assert
-        query.CurrentOptions.ConnectionString.ShouldBe("Server=reporting;Database=test;");
+        query.Options.ConnectionString.ShouldBe("Server=reporting;Database=test;");
         description.ToSql().ShouldContain("[Users_Reporting]");
         description.ToSql().ShouldContain("[reporting_name]");
     }
@@ -550,12 +588,12 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         var resolver = new CaptureConnectionResolver(connection);
-        var services = CreateServices();
+        var services = new ServiceCollection();
         services.AddSingleton<ISqlDbConnectionFactoryResolver>(resolver);
-        services.AddSqlServerSqlExecutor<InspectableSqlServerExecutor, InspectableSqlServerExecutor>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
-        var executor = provider.GetRequiredService<InspectableSqlServerExecutor>();
+        using var executor = CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.ConnectionString("Server=test;Database=test;"));
 
         // Act
         executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "abc" });
@@ -619,7 +657,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection { OnScalarExecuted = cancellationTokenSource.Cancel };
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Sql<int>().Select("Count(*)").From("[Users]");
+        var description = query.Query<int>().Select("Count(*)").From("[Users]");
 
         // Act and Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ScalarAsync(
@@ -641,7 +679,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
@@ -998,7 +1036,7 @@ public class SqlServerRoutingAndExecutionTest
         var description = builder.ToMutationDescription();
 
         // Act
-        var rows = executor.ExecuteReturningQuery<int>(description);
+        var rows = executor.ExecuteReturning<int>(description);
 
         // Assert
         Assert.Empty(rows);
@@ -1025,7 +1063,7 @@ public class SqlServerRoutingAndExecutionTest
         var description = builder.ToMutationDescription();
 
         // Act
-        var rows = await executor.ExecuteReturningQueryAsync<int>(description);
+        var rows = await executor.ExecuteReturningAsync<int>(description);
 
         // Assert
         Assert.NotNull(rows);
@@ -1096,7 +1134,7 @@ public class SqlServerRoutingAndExecutionTest
         var description = builder.ToMutationDescription();
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturningQuery<int>(description));
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(description));
 
         // Assert
         Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
@@ -1124,7 +1162,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteReturningQueryAsync<int>(description));
+            executor.ExecuteReturningAsync<int>(description));
 
         // Assert
         Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
@@ -1331,10 +1369,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
@@ -1357,10 +1392,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
@@ -1382,10 +1414,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var invalidChild = DispatchProxy.Create<ISqlQuery, DisposeTrackingSqlQueryProxy>();
         var trackingProxy = (DisposeTrackingSqlQueryProxy)(object)invalidChild;
         var queryFactory = new BindingFailureSqlQueryFactory(provider.GetRequiredService<ISqlQueryFactory>(), invalidChild);
@@ -1412,10 +1441,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var invalidChild = DispatchProxy.Create<ISqlExecutor, DisposeTrackingSqlExecutorProxy>();
         var trackingProxy = (DisposeTrackingSqlExecutorProxy)(object)invalidChild;
         var executorFactory = new BindingFailureSqlExecutorFactory(invalidChild);
@@ -1441,10 +1467,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
         var scope = scopeFactory.Begin();
         var executor = scope.CreateExecutor();
@@ -1467,17 +1490,14 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
         using var scope = scopeFactory.Begin();
         var query = scope.CreateQuery();
 
         // Act
         scope.Commit();
-        var exception = Should.Throw<InvalidOperationException>(() => query.Sql<int>("Select 1"));
+        var exception = Should.Throw<InvalidOperationException>(() => query.Text<int>("Select 1"));
 
         // Assert
         exception.Message.ShouldContain("事务作用域已结束");
@@ -1492,9 +1512,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var query = provider.GetRequiredService<ISqlQuery>();
         // Assert
         Assert.DoesNotContain("ISqlQueryResourceBinder", query.GetType().GetInterfaces().Select(item => item.Name));
@@ -1577,10 +1595,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
@@ -1602,10 +1617,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
 
         // Act
@@ -1629,10 +1641,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
 
         // Act
@@ -1654,10 +1663,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
 
         // Act
@@ -1680,10 +1686,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         var executor = scope.CreateExecutor();
         connection.LastTransaction.ThrowOnDispose = true;
@@ -1707,10 +1710,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
 
         // Act
         await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
@@ -1730,10 +1730,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
 
         // Act
         await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
@@ -1752,10 +1749,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         connection.LastTransaction.ThrowOnCommit = true;
 
@@ -1776,10 +1770,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         connection.LastTransaction.ThrowOnCommit = true;
         connection.LastTransaction.ThrowOnRollback = true;
@@ -1802,10 +1793,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
         connection.LastTransaction.ThrowOnCommit = true;
 
@@ -1826,13 +1814,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection { ThrowOnAsyncBegin = true, ThrowOnDispose = true };
-        var services = CreateServices();
-        services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
-        services.AddSqlServerSqlQuery<ISqlQuery, FaultingTransactionSqlServerQuery>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerOwnedScopeProvider(connection);
 
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
@@ -1853,13 +1835,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection { ThrowOnBegin = true, ThrowOnDispose = true };
-        var services = CreateServices();
-        services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
-        services.AddSqlServerSqlQuery<ISqlQuery, FaultingTransactionSqlServerQuery>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerOwnedScopeProvider(connection);
 
         // Act
         var exception = Assert.Throws<AggregateException>(() =>
@@ -1880,10 +1856,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
@@ -1904,10 +1877,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         var scopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
 
         // Act
@@ -1916,8 +1886,9 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         scope.DatabaseType.ShouldBe(DatabaseType.SqlServer);
         scope.IsolationLevel.ShouldBe(IsolationLevel.Serializable);
-        scope.Connection.ShouldBeSameAs(connection);
-        scope.Transaction.ShouldBeSameAs(connection.LastTransaction);
+        var runtime = (ISqlTransactionScopeRuntime)scope;
+        runtime.Connection.ShouldBeSameAs(connection);
+        runtime.Transaction.ShouldBeSameAs(connection.LastTransaction);
         scope.IsCompleted.ShouldBeFalse();
 
         // Act
@@ -1941,10 +1912,7 @@ public class SqlServerRoutingAndExecutionTest
         metadataOptions.DataSources.DataSources["reporting"].ConnectionString = null;
         metadataOptions.DataSources.DataSources["reporting"].PrimaryReadStrategy = PrimaryReadStrategy.PrimaryDataSource;
         metadataOptions.DataSources.DataSources["reporting"].PrimaryDataSourceKey = "default";
-        var services = CreateServices(metadataOptions);
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection, metadataOptions);
         var databaseScopeManager = provider.GetRequiredService<IDatabaseScopeManager>();
         var transactionScopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
@@ -1965,10 +1933,11 @@ public class SqlServerRoutingAndExecutionTest
             // Assert
             transactionScope.DbKey.ShouldBe("default");
             transactionScope.DatabaseType.ShouldBe(DatabaseType.SqlServer);
-            query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar().ShouldBe(1);
+            query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar().ShouldBe(1);
             executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "scope" }).ShouldBe(1);
-            transactionScope.Connection.ShouldBeSameAs(connection);
-            transactionScope.Transaction.ShouldBeSameAs(connection.LastTransaction);
+            var runtime = (ISqlTransactionScopeRuntime)transactionScope;
+            runtime.Connection.ShouldBeSameAs(connection);
+            runtime.Transaction.ShouldBeSameAs(connection.LastTransaction);
         }
 
         connection.LastTransaction.RollbackCount.ShouldBe(1);
@@ -1982,10 +1951,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         var query = scope.CreateQuery();
 
@@ -1995,7 +1961,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         connection.State.ShouldBe(ConnectionState.Open);
-        Should.Throw<InvalidOperationException>(() => query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+        Should.Throw<InvalidOperationException>(() => query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
     }
 
     /// <summary>
@@ -2009,15 +1975,12 @@ public class SqlServerRoutingAndExecutionTest
         {
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
         };
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         var query = scope.CreateQuery();
 
         // Act
-        using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
+        using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             var exception = Should.Throw<InvalidOperationException>(() => scope.Commit());
@@ -2046,15 +2009,12 @@ public class SqlServerRoutingAndExecutionTest
         {
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
         };
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         var query = scope.CreateQuery();
 
         // Act
-        using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
+        using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             var exception = Should.Throw<InvalidOperationException>(scope.Dispose);
@@ -2082,15 +2042,12 @@ public class SqlServerRoutingAndExecutionTest
         {
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
         };
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
         var query = scope.CreateQuery();
 
         // Act
-        await using (var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users")
+        await using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users")
                          .AsAsyncEnumerable().GetAsyncEnumerator())
         {
             (await enumerator.MoveNextAsync()).ShouldBeTrue();
@@ -2116,10 +2073,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ISqlQuery, SqlServerSqlQuery>(options => options.Connection(connection));
-        services.AddSqlServerSqlExecutor<ISqlExecutor, SqlServerSqlExecutor>(options => options.Connection(connection));
-        using var provider = services.BuildServiceProvider();
+        using var provider = CreateSqlServerScopeProvider(connection);
         using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
         var query = scope.CreateQuery();
         var executor = scope.CreateExecutor();
@@ -2129,7 +2083,7 @@ public class SqlServerRoutingAndExecutionTest
         executor.Dispose();
 
         // Assert
-        Should.Throw<ObjectDisposedException>(() => query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+        Should.Throw<ObjectDisposedException>(() => query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
         Should.Throw<ObjectDisposedException>(() => executor.ExecuteSql("Update [Users] Set [Name]=@name",
             new { name = "after-dispose" }));
         connection.State.ShouldBe(ConnectionState.Open);
@@ -2146,7 +2100,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
-        var description = query.Lambda<MappedSample>()
+        var description = query.From<MappedSample>()
             .Where(t => t.Name, "abc")
             .Aggregate<int>(SqlAggregateFunction.Count, t => t.Id);
 
@@ -2170,7 +2124,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
         var result = description.Scalar();
@@ -2191,7 +2145,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
         var result = await description.ScalarAsync();
@@ -2213,7 +2167,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
         var result = await description.ScalarAsync();
@@ -2235,7 +2189,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var result = description.AsEnumerable().ToList();
@@ -2256,7 +2210,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var result = new List<MappedSample>();
@@ -2279,7 +2233,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, false);
-        var syncDescription = syncQuery.Sql<int>().Select("Count(*)").From("[Users]");
+        var syncDescription = syncQuery.Query<int>().Select("Count(*)").From("[Users]");
 
         // Act
         var syncResult = syncDescription.Scalar();
@@ -2292,7 +2246,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, false);
-        var asyncDescription = asyncQuery.Sql<int>().Select("Count(*)").From("[Users]");
+        var asyncDescription = asyncQuery.Query<int>().Select("Count(*)").From("[Users]");
 
         // Act
         var asyncResult = await asyncDescription.ScalarAsync();
@@ -2312,7 +2266,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]")
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]")
             .AppendWhere("[Name]=@name").AddParam("name", "trace");
 
         // Act
@@ -2336,7 +2290,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         var loggerFactory = new TraceLoggerFactory(true);
         using var query = CreateTraceQuery(connection, loggerFactory);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[ApiToken]=@ApiToken")
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[ApiToken]=@ApiToken")
             .AddParam("ApiToken", "super-secret-token");
 
         // Act
@@ -2367,7 +2321,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Sql<int>("Select @ApiToken", new Dictionary<string, object>
+        var result = query.Text<int>("Select @ApiToken", new Dictionary<string, object>
         {
             ["ApiToken"] = "super-secret-token"
         }).Scalar();
@@ -2399,7 +2353,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Sql<int>("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
+        var result = query.Text<int>("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
             new Dictionary<string, object>
             {
                 ["pwd"] = "database-password",
@@ -2439,7 +2393,7 @@ public class SqlServerRoutingAndExecutionTest
         var rootParameters = query.RootParameters;
 
         // Act
-        var result = query.Sql<int>().Select("Count(*)").From("[Users]").Scalar();
+        var result = query.Query<int>().Select("Count(*)").From("[Users]").Scalar();
 
         // Assert
         Assert.Equal(1, result);
@@ -2456,19 +2410,18 @@ public class SqlServerRoutingAndExecutionTest
     public async Task QueryPlanStream_WhenBeforeHookThrows_ShouldRunCompletionHook()
     {
         // Arrange
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingBeforeSqlServerQuery, ThrowingBeforeSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection()));
-        using var provider = services.BuildServiceProvider();
-        using var syncQuery = provider.GetRequiredService<ThrowingBeforeSqlServerQuery>();
+        using var provider = CreateSqlServerTestProvider();
+        using var syncQuery = CreateSqlServerTestRoot<ThrowingBeforeSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection()));
 
         // Act
         var syncException = Should.Throw<InvalidOperationException>(() =>
-            syncQuery.Sql<int>("Select 1").AsEnumerable().ToList());
-        using var asyncQuery = provider.GetRequiredService<ThrowingBeforeSqlServerQuery>();
+            syncQuery.Text<int>("Select 1").AsEnumerable().ToList());
+        using var asyncQuery = CreateSqlServerTestRoot<ThrowingBeforeSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection()));
         var asyncException = await Should.ThrowAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in asyncQuery.Sql<int>("Select 1").AsAsyncEnumerable())
+            await foreach (var _ in asyncQuery.Text<int>("Select 1").AsAsyncEnumerable())
             {
             }
         });
@@ -2492,7 +2445,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act and Assert
         var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage(pager));
@@ -2517,7 +2470,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act and Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
@@ -2542,7 +2495,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateSecondPlanSkippingQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var page = description.ToPage(new Pager(1, 10, "Id"));
@@ -2564,7 +2517,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         connection.OnScalarExecuted = () => description.Where("[Name]", "changed-after-count");
 
         // Act
@@ -2588,7 +2541,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
         connection.OnScalarExecuted = () =>
         {
             pager.Order = "Name Desc";
@@ -2619,7 +2572,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         connection.OnScalarExecuted = () =>
         {
             description.Where("[Name]", "changed-after-count");
@@ -2650,7 +2603,7 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-trace" })
         };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
 
         // Act
         var result = await description.ToListAsync();
@@ -2672,7 +2625,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Sql<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
+        var syncDescription = syncQuery.Query<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
         var syncResult = syncDescription.Scalar();
@@ -2686,7 +2639,7 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Sql<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
+        var asyncDescription = asyncQuery.Query<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
         var asyncResult = await asyncDescription.ScalarAsync();
@@ -2710,7 +2663,7 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-stream" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var syncResult = syncDescription.AsEnumerable().ToList();
@@ -2727,7 +2680,7 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var asyncResult = new List<MappedSample>();
@@ -2753,7 +2706,7 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-page" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var syncResult = syncDescription.ToPage(new Pager(1, 20, "Id"));
@@ -2770,7 +2723,7 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-page" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var asyncResult = await asyncDescription.ToPageAsync(new Pager(1, 20, "Id"));
@@ -2794,7 +2747,7 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() => description.Scalar());
@@ -2819,7 +2772,7 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ScalarAsync());
@@ -2848,7 +2801,7 @@ public class SqlServerRoutingAndExecutionTest
         ConfigurePrimaryReadTransaction(query);
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -2873,7 +2826,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
-            query.Sql<int>("Select Count(*) From [Users]").ScalarAsync());
+            query.Text<int>("Select Count(*) From [Users]").ScalarAsync());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -2889,14 +2842,12 @@ public class SqlServerRoutingAndExecutionTest
     public void QueryPlan_WhenOperationAndErrorHookFail_ShouldPreserveBothExceptions()
     {
         // Arrange
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
-        using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+        using var provider = CreateSqlServerTestProvider();
+        using var query = CreateSqlServerTestRoot<ThrowingErrorSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "error hook failed" }, exception.Flatten().InnerExceptions
@@ -2910,14 +2861,12 @@ public class SqlServerRoutingAndExecutionTest
     public void QueryPlan_WhenOperationAndCompletionHookFail_ShouldPreserveBothExceptions()
     {
         // Arrange
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingCompletionSqlServerQuery, ThrowingCompletionSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
-        using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ThrowingCompletionSqlServerQuery>();
+        using var provider = CreateSqlServerTestProvider();
+        using var query = CreateSqlServerTestRoot<ThrowingCompletionSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "completion hook failed" }, exception.Flatten().InnerExceptions
@@ -2936,7 +2885,7 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -2974,6 +2923,38 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastCommandType.ShouldBe(CommandType.StoredProcedure);
         connection.LastCreatedParameters.Count.ShouldBe(1);
         connection.LastCreatedParameters[0].Value.ShouldBe("abc");
+    }
+
+    /// <summary>
+    /// 测试目的：过程描述必须冻结嵌套字典、集合和数组，调用方后续修改不得污染本次过程执行输入。
+    /// </summary>
+    [Fact]
+    public void ProcedureDescription_WhenNestedParameterContainersChange_ShouldKeepIndependentSnapshots()
+    {
+        // Arrange
+        using var query = CreateQuery(new CaptureDbConnection());
+        var payload = new byte[] { 1, 2 };
+        var identifiers = new List<int> { 3, 4 };
+        var parameters = new Dictionary<string, object>
+        {
+            ["filter"] = new Dictionary<string, object>
+            {
+                ["Payload"] = payload,
+                ["Identifiers"] = identifiers
+            }
+        };
+
+        // Act
+        var description = query.Procedure<int>("usp_report", parameters);
+        payload[0] = 9;
+        identifiers[0] = 8;
+        ((IDictionary<string, object>)parameters["filter"])["Payload"] = new byte[] { 7 };
+
+        // Assert
+        var filter = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(
+            Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters)["filter"]);
+        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(filter["Payload"]));
+        Assert.Equal(new object[] { 3, 4 }, Assert.IsType<object[]>(filter["Identifiers"]));
     }
 
     /// <summary>
@@ -3355,7 +3336,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         var result = await description.ToListAsync();
@@ -3434,7 +3415,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         var result = description.AsEnumerable().ToList();
@@ -3462,7 +3443,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         using (var enumerator = description.AsEnumerable().GetEnumerator())
@@ -3493,7 +3474,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         using (var enumerator = description.AsEnumerable().GetEnumerator())
@@ -3519,7 +3500,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        var result = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
 
         // Assert
         result.ShouldBe(1);
@@ -3543,7 +3524,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
-            query.Sql<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+            query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
 
         // Assert
         exception.Message.ShouldBe("execute failed");
@@ -3566,7 +3547,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         await foreach (var item in description.AsAsyncEnumerable())
@@ -3595,7 +3576,7 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         await foreach (var item in description.AsAsyncEnumerable())
@@ -3625,7 +3606,7 @@ public class SqlServerRoutingAndExecutionTest
         table.Rows.Add("invalid-id", "Alice");
         var connection = new CaptureDbConnection { ResultSet = table };
         var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         Exception exception = null;
@@ -3658,14 +3639,12 @@ public class SqlServerRoutingAndExecutionTest
         table.Columns.Add(nameof(MappedSample.Id), typeof(string));
         table.Columns.Add(nameof(MappedSample.Name), typeof(string));
         table.Rows.Add("invalid-id", "Alice");
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection { ResultSet = table }));
-        using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+        using var provider = CreateSqlServerTestProvider();
+        using var query = CreateSqlServerTestRoot<ThrowingErrorSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection { ResultSet = table }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<MappedSample>()
+        var exception = Assert.Throws<AggregateException>(() => query.Query<MappedSample>()
             .Select("Id,Name").From("Users").AsEnumerable().ToList());
 
         // Assert
@@ -3684,16 +3663,14 @@ public class SqlServerRoutingAndExecutionTest
         table.Columns.Add(nameof(MappedSample.Id), typeof(string));
         table.Columns.Add(nameof(MappedSample.Name), typeof(string));
         table.Rows.Add("invalid-id", "Alice");
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingErrorSqlServerQuery, ThrowingErrorSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection { ResultSet = table }));
-        using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ThrowingErrorSqlServerQuery>();
+        using var provider = CreateSqlServerTestProvider();
+        using var query = CreateSqlServerTestRoot<ThrowingErrorSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection { ResultSet = table }));
 
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(async () =>
         {
-            await foreach (var _ in query.Sql<MappedSample>().Select("Id,Name").From("Users").AsAsyncEnumerable())
+            await foreach (var _ in query.Query<MappedSample>().Select("Id,Name").From("Users").AsAsyncEnumerable())
             {
             }
         });
@@ -3710,19 +3687,17 @@ public class SqlServerRoutingAndExecutionTest
     public void StreamQuery_WhenEnumerationStopsEarlyAndCompletionHookFails_ShouldRunHookOnce()
     {
         // Arrange
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<ThrowingCompletionSqlServerQuery, ThrowingCompletionSqlServerQuery>(options =>
-            options.Connection(new CaptureDbConnection
+        using var provider = CreateSqlServerTestProvider();
+        using var query = CreateSqlServerTestRoot<ThrowingCompletionSqlServerQuery>(provider,
+            options => options.Connection(new CaptureDbConnection
             {
                 ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
             }));
-        using var provider = services.BuildServiceProvider();
-        using var query = provider.GetRequiredService<ThrowingCompletionSqlServerQuery>();
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
         {
-            using var enumerator = query.Sql<MappedSample>().Select("Id,Name").From("Users").AsEnumerable()
+            using var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable()
                 .GetEnumerator();
             enumerator.MoveNext();
         });
@@ -3745,13 +3720,13 @@ public class SqlServerRoutingAndExecutionTest
             ThrowOnReaderDispose = true
         };
         using var query = CreateQuery(connection);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable().ToList());
         var readerDisposeCount = connection.ReaderDisposeCount;
         connection.ThrowOnReaderDispose = false;
-        var result = query.Sql<int>("Select Count(*) From [Users]").Scalar();
+        var result = query.Text<int>("Select Count(*) From [Users]").Scalar();
 
         // Assert
         Assert.Equal("reader dispose failed", exception.Message);
@@ -3769,7 +3744,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Sql<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() => description.AsEnumerable().ToList());
@@ -3786,8 +3761,8 @@ public class SqlServerRoutingAndExecutionTest
     public void TypeConverterResolver_ShouldResolveProviderConverter()
     {
         // Arrange
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery("Server=default;Database=test;");
+        var services = new ServiceCollection();
+        services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
 
         // Act
@@ -3903,11 +3878,8 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>查询对象</returns>
     private static InspectableSqlServerQuery CreateQuery(CaptureDbConnection connection)
     {
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.Connection(connection));
-        var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<InspectableSqlServerQuery>();
+        var provider = CreateSqlServerTestProvider();
+        return CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider, options => options.Connection(connection));
     }
 
     /// <summary>
@@ -3918,12 +3890,11 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>未重写日志写入行为的查询对象。</returns>
     private static InspectableSqlServerQuery CreateTraceQuery(CaptureDbConnection connection, ILoggerFactory loggerFactory)
     {
-        var services = CreateServices();
+        var services = new ServiceCollection();
         services.AddSingleton(loggerFactory);
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
-            options.Connection(connection));
+        services.AddSqlServerProvider();
         var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<InspectableSqlServerQuery>();
+        return CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider, options => options.Connection(connection));
     }
 
     /// <summary>
@@ -3943,12 +3914,11 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>可计数 SQL Server 查询对象。</returns>
     private static CountingSqlServerQuery CreateCountingQuery(CaptureDbConnection connection, ILoggerFactory loggerFactory)
     {
-        var services = CreateServices();
+        var services = new ServiceCollection();
         services.AddSingleton(loggerFactory);
-        services.AddSqlServerSqlQuery<CountingSqlServerQuery, CountingSqlServerQuery>(options =>
-            options.Connection(connection));
+        services.AddSqlServerProvider();
         var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<CountingSqlServerQuery>();
+        return CreateSqlServerTestRoot<CountingSqlServerQuery>(provider, options => options.Connection(connection));
     }
 
     /// <summary>
@@ -3958,11 +3928,9 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>用于验证分页短事务完成行为的查询对象。</returns>
     private static SecondPlanSkippingSqlServerQuery CreateSecondPlanSkippingQuery(CaptureDbConnection connection)
     {
-        var services = CreateServices();
-        services.AddSqlServerSqlQuery<SecondPlanSkippingSqlServerQuery, SecondPlanSkippingSqlServerQuery>(options =>
-            options.Connection(connection));
-        var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<SecondPlanSkippingSqlServerQuery>();
+        var provider = CreateSqlServerTestProvider();
+        return CreateSqlServerTestRoot<SecondPlanSkippingSqlServerQuery>(provider,
+            options => options.Connection(connection));
     }
 
     /// <summary>
@@ -3972,9 +3940,11 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>查询对象</returns>
     private static InspectableSqlServerQuery CreateOwnedQuery(CaptureDbConnection connection)
     {
-        var services = CreateServices();
+        var services = new ServiceCollection();
         services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
-        services.AddSqlServerSqlQuery<InspectableSqlServerQuery, InspectableSqlServerQuery>(options =>
+        services.AddSqlServerProvider();
+        var provider = services.BuildServiceProvider();
+        return CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider, options =>
         {
             options.ConnectionString("Server=test;Database=test;");
             options.QueryCapabilities = new SqlQueryCapabilities
@@ -3982,8 +3952,6 @@ public class SqlServerRoutingAndExecutionTest
                 Pagination = SqlQueryCapabilityState.Supported
             };
         });
-        var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<InspectableSqlServerQuery>();
     }
 
     /// <summary>
@@ -3993,11 +3961,9 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>执行器</returns>
     private static InspectableSqlServerExecutor CreateExecutor(CaptureDbConnection connection)
     {
-        var services = CreateServices();
-        services.AddSqlServerSqlExecutor<InspectableSqlServerExecutor, InspectableSqlServerExecutor>(options =>
-            options.Connection(connection));
-        var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<InspectableSqlServerExecutor>();
+        var provider = CreateSqlServerTestProvider();
+        return CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.Connection(connection));
     }
 
     /// <summary>
@@ -4007,12 +3973,12 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>执行器</returns>
     private static InspectableSqlServerExecutor CreateOwnedExecutor(CaptureDbConnection connection)
     {
-        var services = CreateServices();
+        var services = new ServiceCollection();
         services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
-        services.AddSqlServerSqlExecutor<InspectableSqlServerExecutor, InspectableSqlServerExecutor>(options =>
-            options.ConnectionString("Server=test;Database=test;"));
+        services.AddSqlServerProvider();
         var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<InspectableSqlServerExecutor>();
+        return CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.ConnectionString("Server=test;Database=test;"));
     }
 
     /// <summary>
@@ -4022,11 +3988,9 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>用于验证异常聚合的执行器。</returns>
     private static LifecycleSqlServerExecutor CreateLifecycleExecutor(CaptureDbConnection connection)
     {
-        var services = CreateServices();
-        services.AddSqlServerSqlExecutor<LifecycleSqlServerExecutor, LifecycleSqlServerExecutor>(options =>
-            options.Connection(connection));
-        var provider = services.BuildServiceProvider();
-        return provider.GetRequiredService<LifecycleSqlServerExecutor>();
+        var provider = CreateSqlServerTestProvider();
+        return CreateSqlServerTestRoot<LifecycleSqlServerExecutor>(provider,
+            options => options.Connection(connection));
     }
 
     /// <summary>
@@ -4036,12 +4000,86 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>用于验证多结果集异常聚合的执行器。</returns>
     private static LifecycleSqlServerMultipleQueryExecutor CreateLifecycleMultipleExecutor(CaptureDbConnection connection)
     {
-        var services = CreateServices();
-        services.AddSqlServerSqlMultipleQueryExecutor(options => options.Connection(connection));
-        var provider = services.BuildServiceProvider();
+        var provider = CreateSqlServerTestProvider();
         var options = new SqlOptions<LifecycleSqlServerMultipleQueryExecutor>();
+        options.DatabaseType = DatabaseType.SqlServer;
         options.Connection(connection);
         return new LifecycleSqlServerMultipleQueryExecutor(provider, options);
+    }
+
+    /// <summary>
+    /// 创建包含官方 SQL Server Provider 能力的测试服务提供程序。
+    /// </summary>
+    private static ServiceProvider CreateSqlServerTestProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddSqlServerProvider();
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建使用外部 Fake ADO 连接的官方 SQL Server Provider 服务图。
+    /// </summary>
+    private static ServiceProvider CreateSqlServerScopeProvider(IDbConnection connection,
+        SqlMetadataOptions metadataOptions = null)
+    {
+        var services = new ServiceCollection();
+        if (metadataOptions != null)
+            services.AddSingleton(metadataOptions);
+        services.AddSqlServerProvider();
+        services.AddSqlDataSource("default", DatabaseType.SqlServer);
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlQuery>(connection));
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlExecutor>(connection));
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlMultipleQueryExecutor>(connection));
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建通过连接解析器提供所有权连接的官方 SQL Server Provider 服务图。
+    /// </summary>
+    private static ServiceProvider CreateSqlServerOwnedScopeProvider(CaptureDbConnection connection)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<ISqlDbConnectionFactoryResolver>(new CaptureConnectionResolver(connection));
+        services.AddSqlServerProvider();
+        services.AddSqlDataSource("default", DatabaseType.SqlServer, "Server=test;Database=test;");
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlQuery>("Server=test;Database=test;"));
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlExecutor>("Server=test;Database=test;"));
+        services.AddSingleton(CreateSqlServerOptions<SqlServerSqlMultipleQueryExecutor>("Server=test;Database=test;"));
+        return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建使用外部连接的 SQL Server 配置模板。
+    /// </summary>
+    private static SqlOptions<T> CreateSqlServerOptions<T>(IDbConnection connection)
+        where T : class
+    {
+        var options = new SqlOptions<T> { DatabaseType = DatabaseType.SqlServer };
+        options.Connection(connection);
+        return options;
+    }
+
+    /// <summary>
+    /// 创建使用连接字符串的 SQL Server 配置模板。
+    /// </summary>
+    private static SqlOptions<T> CreateSqlServerOptions<T>(string connectionString)
+        where T : class
+    {
+        var options = new SqlOptions<T> { DatabaseType = DatabaseType.SqlServer };
+        options.ConnectionString(connectionString);
+        return options;
+    }
+
+    /// <summary>
+    /// 直接构造测试派生 Root 对象，避免测试实现参与 Provider 运行时映射。
+    /// </summary>
+    private static T CreateSqlServerTestRoot<T>(IServiceProvider serviceProvider, Action<SqlOptions<T>> configure)
+        where T : class
+    {
+        var options = new SqlOptions<T> { DatabaseType = DatabaseType.SqlServer };
+        configure?.Invoke(options);
+        return (T)Activator.CreateInstance(typeof(T), serviceProvider, options);
     }
 
     /// <summary>
@@ -4129,7 +4167,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         using var query = CreateOwnedQuery(new CaptureDbConnection());
-        _ = query.Sql<int>();
+        _ = query.Query<int>();
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() => SqlQueryRuntimeBridge.BindDatabaseContext(query,
@@ -4512,23 +4550,6 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 事务开始失败测试查询对象。
-    /// </summary>
-    private sealed class FaultingTransactionSqlServerQuery : SqlServerSqlQueryBase
-    {
-        /// <summary>
-        /// 初始化一个<see cref="FaultingTransactionSqlServerQuery"/>类型的实例。
-        /// </summary>
-        /// <param name="serviceProvider">服务提供程序。</param>
-        /// <param name="options">SQL 配置。</param>
-        public FaultingTransactionSqlServerQuery(IServiceProvider serviceProvider,
-            SqlOptions<FaultingTransactionSqlServerQuery> options)
-            : base(serviceProvider, options)
-        {
-        }
-    }
-
-    /// <summary>
     /// 计数查询接口
     /// </summary>
     private interface ICountedSqlServerQuery : ISqlQuery
@@ -4571,17 +4592,14 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <inheritdoc />
-        public TQuery Create<TQuery>() where TQuery : class, ISqlQuery => Create<TQuery>(null);
-
-        /// <inheritdoc />
-        public TQuery Create<TQuery>(string dbKey) where TQuery : class, ISqlQuery
+        public ISqlQuery Create(string dbKey = null)
         {
             if (_ownerCreated == false)
             {
                 _ownerCreated = true;
-                return _innerFactory.Create<TQuery>(dbKey);
+                return _innerFactory.Create(dbKey);
             }
-            return _invalidChild as TQuery;
+            return _invalidChild;
         }
     }
 
@@ -4599,10 +4617,7 @@ public class SqlServerRoutingAndExecutionTest
         public BindingFailureSqlExecutorFactory(ISqlExecutor invalidChild) => _invalidChild = invalidChild;
 
         /// <inheritdoc />
-        public TExecutor Create<TExecutor>() where TExecutor : class, ISqlExecutor => Create<TExecutor>(null);
-
-        /// <inheritdoc />
-        public TExecutor Create<TExecutor>(string dbKey) where TExecutor : class, ISqlExecutor => _invalidChild as TExecutor;
+        public ISqlExecutor Create(string dbKey = null) => _invalidChild;
     }
 
     /// <summary>
@@ -4807,6 +4822,17 @@ public class SqlServerRoutingAndExecutionTest
         /// 二进制载荷。
         /// </summary>
         public byte[] Payload { get; set; }
+    }
+
+    /// <summary>
+    /// 类型化派生表映射样例。
+    /// </summary>
+    private sealed class DerivedMappedSample
+    {
+        /// <summary>
+        /// 所有者标识。
+        /// </summary>
+        public int OwnerId { get; set; }
     }
 
     /// <summary>

@@ -87,4 +87,23 @@ public class SqliteBuilderNewCloneLifecycleTest
         // Assert
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
     }
+
+    /// <summary>
+    /// 测试目的：SQLite Profile 应在生成 SQL 前拒绝 Full Join，且数据源或选项不得重新启用。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenFullJoinIsConfigured_ShouldRejectUsingSqliteProfile()
+    {
+        // Arrange
+        var builder = new SqliteBuilder();
+        builder.Select("o.Id").From("samples", "s")
+            .FullJoin("Orders", "o").AppendOn("s.Id=o.Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, SqliteSqlProvider.Instance.Profile.Query.FullJoin);
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", exception.Message);
+    }
 }

@@ -150,6 +150,56 @@ public class QueryCapabilityValidationTest
     }
 
     /// <summary>
+    /// 测试目的：Provider 明确支持 Full Join 时，应按结构化表和 On 条件生成完整 SQL。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenProviderSupportsFullJoin_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var builder = new CapabilitySqlBuilder(new SqlQueryCapabilities
+        {
+            FullJoin = SqlQueryCapabilityState.Supported
+        });
+        builder.Select("s.Id").From("Samples", "s")
+            .FullJoin("Reviews", "r").AppendOn("s.Id=r.SampleId");
+
+        // Act
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Select [s].[Id] \r\nFrom [Samples] As [s] \r\nFull Join [Reviews] As [r] On s.Id=r.SampleId", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 明确不支持 Full Join 时，数据源和选项均不得重新启用该语法。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenProviderDisablesFullJoin_ShouldNotAllowOverridesToEnableIt()
+    {
+        // Arrange
+        var options = new SqlOptions
+        {
+            QueryCapabilities = new SqlQueryCapabilities { FullJoin = SqlQueryCapabilityState.Supported }
+        }.SetDatabaseContext(new DatabaseContext
+        {
+            DataSource = new SqlDataSourceDescriptor
+            {
+                QueryCapabilities = new SqlQueryCapabilities { FullJoin = SqlQueryCapabilityState.Supported }
+            }
+        });
+        var builder = new CapabilitySqlBuilder(
+            new SqlQueryCapabilities { FullJoin = SqlQueryCapabilityState.Unsupported }, options);
+        builder.Select("right_source.Id").From("left_source")
+            .FullJoin("right_source").AppendOn("left_source.Id=right_source.Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider capability.test 的当前查询能力配置不支持 Full Join。", exception.Message);
+    }
+
+    /// <summary>
     /// 测试用 Provider 能力生成器。
     /// </summary>
     private sealed class CapabilitySqlBuilder : SqlBuilderBase
@@ -194,6 +244,7 @@ public class QueryCapabilityValidationTest
                 Intersect = queryCapabilities.Intersect,
                 Except = queryCapabilities.Except,
                 RightJoin = queryCapabilities.RightJoin,
+                FullJoin = queryCapabilities.FullJoin,
                 Pagination = queryCapabilities.Pagination
             }
         };

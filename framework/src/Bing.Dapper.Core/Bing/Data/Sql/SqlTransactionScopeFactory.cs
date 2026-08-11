@@ -148,8 +148,8 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     private ISqlQuery CreateTransactionQuery(string dbKey, out DatabaseContext context)
     {
         if (_queryFactory is SqlQueryFactory factory)
-            return factory.CreateForTransaction<ISqlQuery>(dbKey, out context);
-        var query = string.IsNullOrWhiteSpace(dbKey) ? _queryFactory.Create<ISqlQuery>() : _queryFactory.Create<ISqlQuery>(dbKey);
+            return factory.CreateForTransaction(dbKey, out context);
+        var query = _queryFactory.Create(dbKey);
         context = query is SqlQueryBase sqlQuery ? sqlQuery.GetDatabaseContext() : null;
         if (context == null)
             throw new InvalidOperationException("事务查询对象必须提供固定数据库上下文");
@@ -159,7 +159,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// <summary>
     /// SQL 事务作用域。
     /// </summary>
-    private sealed class SqlTransactionScope : ISqlTransactionScope
+    private sealed class SqlTransactionScope : ISqlTransactionScope, ISqlTransactionScopeRuntime
     {
         private readonly ISqlQuery _ownerQuery;
         private readonly IDbConnection _connection;
@@ -203,16 +203,19 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         public DatabaseType DatabaseType => _context.DataSource?.DatabaseType ?? default;
 
         /// <inheritdoc />
-        public DatabaseContext DatabaseContext => DatabaseContextSnapshot.Create(_context);
+        public string MappingProfile => _context.MappingProfile;
+
+        /// <inheritdoc />
+        public SqlReadPreference ReadPreference => _context.ReadPreference;
 
         /// <inheritdoc />
         public IsolationLevel IsolationLevel => _transaction.IsolationLevel;
 
-        /// <inheritdoc />
-        public IDbConnection Connection => _connection;
+        DatabaseContext ISqlTransactionScopeRuntime.DatabaseContext => DatabaseContextSnapshot.Create(_context);
 
-        /// <inheritdoc />
-        public IDbTransaction Transaction => _transaction;
+        IDbConnection ISqlTransactionScopeRuntime.Connection => _connection;
+
+        IDbTransaction ISqlTransactionScopeRuntime.Transaction => _transaction;
 
         /// <inheritdoc />
         public bool IsCompleted => _state != SqlTransactionScopeState.Active;
@@ -221,27 +224,21 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         public string TransactionId { get; }
 
         /// <inheritdoc />
-        public ISqlQuery CreateQuery() => CreateQuery<ISqlQuery>();
-
-        /// <inheritdoc />
-        public TQuery CreateQuery<TQuery>() where TQuery : class, ISqlQuery
+        public ISqlQuery CreateQuery()
         {
             ThrowIfInactive();
             return CreateAndBindChild(() => _queryFactory is SqlQueryFactory factory
-                ? factory.CreateForTransaction<TQuery>(_context)
-                : _queryFactory.Create<TQuery>(DbKey));
+                ? factory.CreateForTransaction(_context)
+                : _queryFactory.Create(DbKey));
         }
 
         /// <inheritdoc />
-        public ISqlExecutor CreateExecutor() => CreateExecutor<ISqlExecutor>();
-
-        /// <inheritdoc />
-        public TExecutor CreateExecutor<TExecutor>() where TExecutor : class, ISqlExecutor
+        public ISqlExecutor CreateExecutor()
         {
             ThrowIfInactive();
             return CreateAndBindChild(() => _executorFactory is SqlExecutorFactory factory
-                ? factory.CreateForTransaction<TExecutor>(_context)
-                : _executorFactory.Create<TExecutor>(DbKey));
+                ? factory.CreateForTransaction(_context)
+                : _executorFactory.Create(DbKey));
         }
 
         /// <inheritdoc />
@@ -616,6 +613,27 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         RolledBack,
         Faulted,
     }
+}
+
+/// <summary>
+/// SQL 事务作用域内部资源访问契约。
+/// </summary>
+internal interface ISqlTransactionScopeRuntime
+{
+    /// <summary>
+    /// 获取冻结的数据库上下文。
+    /// </summary>
+    DatabaseContext DatabaseContext { get; }
+
+    /// <summary>
+    /// 获取事务连接。
+    /// </summary>
+    IDbConnection Connection { get; }
+
+    /// <summary>
+    /// 获取数据库事务。
+    /// </summary>
+    IDbTransaction Transaction { get; }
 }
 
 /// <summary>

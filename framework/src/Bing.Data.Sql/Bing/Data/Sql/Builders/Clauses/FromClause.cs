@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Conditions;
 using System.Text;
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
@@ -14,9 +15,14 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class FromClause : IFromClause
 {
     /// <summary>
-    /// 当前查询源的 SQL 项，可能是字符串表、结构化表或子查询。
+    /// 当前查询源的 SQL 项，兼容旧 Update From 路径。
     /// </summary>
     protected SqlItem Table;
+
+    /// <summary>
+    /// 查询图中的根表源实例。
+    /// </summary>
+    private readonly List<TableSource> _sources;
 
     /// <summary>
     /// 子句运行上下文。
@@ -83,6 +89,10 @@ public class FromClause : IFromClause
         _context = context ?? throw new ArgumentNullException(nameof(context));
         Table = table;
         ProviderDatabaseType = providerDatabaseType;
+        _sources = table == null ? new List<TableSource>() : new List<TableSource>
+        {
+            new("source_0", table)
+        };
     }
 
     /// <inheritdoc />
@@ -90,14 +100,17 @@ public class FromClause : IFromClause
     {
         if (context.AliasRegister != null)
             context.AliasRegister.FromType = Register.FromType;
-        return CreateClone(context, Table?.Clone());
+        var sources = _sources.Select(source => source.Clone()).ToList();
+        var clone = CreateClone(context, sources.LastOrDefault()?.Item);
+        clone.SetSources(sources);
+        return clone;
     }
 
     /// <summary>
     /// 创建克隆后的 From 子句。
     /// </summary>
     /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <param name="table">已复制的表项。</param>
+    /// <param name="table">已复制的末尾表项。</param>
     /// <returns>保留 Provider 子类类型的 From 子句。</returns>
     protected virtual FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new FromClause(context, table, ProviderDatabaseType);
@@ -108,7 +121,7 @@ public class FromClause : IFromClause
         _context.UseOperation(SqlOperationAction.QueryClause);
         var parsedTable = ParseTableName(table, alias);
         Register?.RegisterAlias(parsedTable.Alias);
-        Table = CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias);
+        ReplaceSources(CreateSqlItem(parsedTable.TableName, parsedTable.Schema, parsedTable.Alias));
     }
 
     /// <summary>
@@ -133,7 +146,7 @@ public class FromClause : IFromClause
             Register?.RegisterAlias(reference.Alias);
         else
             Register?.Replace(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
-        Table = CreateStructuredSqlItem(reference);
+        ReplaceSources(CreateStructuredSqlItem(reference), reference.EntityType);
         if (reference.EntityType == null)
             return;
         if (Register != null)
@@ -180,6 +193,237 @@ public class FromClause : IFromClause
     /// <returns>结构化表引用；原始字符串 From 返回 <see langword="null"/>。</returns>
     internal SqlTableReference GetStructuredReference() => (Table as StructuredSqlItem)?.Reference;
 
+    /// <summary>
+    /// 获取当前查询图的根表源快照。
+    /// </summary>
+    internal IReadOnlyList<TableSource> Sources => _sources;
+
+    /// <summary>
+    /// 追加结构化实体根表源。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="alias">来源别名。</param>
+    /// <param name="schema">来源架构。</param>
+    internal void AppendRoot<TEntity>(string alias = null, string schema = null) where TEntity : class
+    {
+        AppendRoot(typeof(TEntity), alias, schema);
+    }
+
+    /// <summary>
+    /// 追加指定实体类型的结构化根表源。
+    /// </summary>
+    /// <param name="entityType">来源实体类型。</param>
+    /// <param name="alias">来源别名。</param>
+    /// <param name="schema">来源架构。</param>
+    internal void AppendRoot(Type entityType, string alias = null, string schema = null)
+    {
+        if (entityType == null)
+            throw new ArgumentNullException(nameof(entityType));
+        var reference = Resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType };
+        if (string.IsNullOrWhiteSpace(schema) == false)
+            reference = reference with { Schema = schema };
+        AppendRoot(reference);
+    }
+
+    /// <summary>
+    /// 使用指定实体类型替换当前根表源集合。
+    /// </summary>
+    /// <param name="entityTypes">按查询根来源顺序排列的实体类型。</param>
+    internal void SetRoots(IReadOnlyList<Type> entityTypes)
+    {
+        if (entityTypes == null)
+            throw new ArgumentNullException(nameof(entityTypes));
+        if (entityTypes.Count == 0)
+            throw new ArgumentException("至少需要一个查询根表源。", nameof(entityTypes));
+
+        Clear();
+        var occurrences = new Dictionary<Type, int>();
+        foreach (var entityType in entityTypes)
+        {
+            if (entityType == null)
+                throw new ArgumentException("查询根表源类型不能为空。", nameof(entityTypes));
+            occurrences.TryGetValue(entityType, out var occurrence);
+            occurrences[entityType] = ++occurrence;
+            var alias = occurrence == 1 ? null : $"{Resolver.GetAlias(entityType, null)}_{occurrence}";
+            if (_sources.Count == 0)
+                From(Resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType });
+            else
+                AppendRoot(entityType, alias);
+        }
+    }
+
+    /// <summary>
+    /// 追加结构化根表源。
+    /// </summary>
+    /// <param name="reference">待追加的表引用。</param>
+    internal void AppendRoot(SqlTableReference reference)
+    {
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        if (reference == null)
+            throw new ArgumentNullException(nameof(reference));
+        if (reference.EntityType == null)
+            Register?.RegisterAlias(reference.Alias);
+        else
+            Register?.Register(reference.EntityType, Resolver.GetAlias(reference.EntityType, reference.Alias));
+        var item = CreateStructuredSqlItem(reference);
+        _sources.Add(new TableSource($"source_{_sources.Count}", item, reference.EntityType));
+        Table = item;
+    }
+
+    /// <summary>
+    /// 使用参数位置绑定解析多表 Lambda 谓词。
+    /// </summary>
+    /// <param name="expression">多表谓词表达式。</param>
+    /// <returns>可追加到 Where 子句的参数化条件。</returns>
+    internal ICondition ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression) =>
+        ResolveMultiSourcePredicate(expression, Sources);
+
+    /// <summary>
+    /// 使用指定查询图表源解析多表 Lambda 谓词。
+    /// </summary>
+    /// <param name="expression">多表谓词表达式。</param>
+    /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
+    /// <returns>可追加到 Where、Having 或 On 子句的参数化条件。</returns>
+    internal ICondition ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression,
+        IReadOnlyList<TableSource> sources)
+    {
+        if (sources == null)
+            throw new ArgumentNullException(nameof(sources));
+        return new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, _context.ParameterManager)
+            .Resolve(expression);
+    }
+
+    /// <summary>
+    /// 解析多表投影表达式中的参数成员。
+    /// </summary>
+    /// <param name="expression">返回 object 数组的投影表达式。</param>
+    /// <returns>按投影顺序排列的完整列 SQL。</returns>
+    internal IReadOnlyList<string> ResolveMultiSourceColumns(System.Linq.Expressions.LambdaExpression expression) =>
+        ResolveMultiSourceColumns(expression, Sources);
+
+    /// <summary>
+    /// 解析指定查询图表源的多表投影、分组或排序表达式。
+    /// </summary>
+    /// <param name="expression">返回列或列数组的表达式。</param>
+    /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
+    /// <returns>按表达式顺序排列的完整列 SQL。</returns>
+    internal IReadOnlyList<string> ResolveMultiSourceColumns(System.Linq.Expressions.LambdaExpression expression,
+        IReadOnlyList<TableSource> sources)
+    {
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        if (sources == null)
+            throw new ArgumentNullException(nameof(sources));
+        var bindings = new SqlParameterBindingScope(expression, sources);
+        IEnumerable<System.Linq.Expressions.Expression> columns = expression.Body is System.Linq.Expressions.NewArrayExpression array
+            ? array.Expressions
+            : new[] { expression.Body };
+        var result = new List<string>();
+        foreach (var column in columns)
+        {
+            var current = column is System.Linq.Expressions.UnaryExpression { NodeType: System.Linq.Expressions.ExpressionType.Convert } unary
+                ? unary.Operand
+                : column;
+            if (bindings.TryGetSource(current, out var source) == false)
+                throw new InvalidOperationException("多表投影中的列必须引用当前查询的 Lambda 参数。");
+            result.Add(GetSqlColumn(current, source));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 解析多表 DTO 成员初始化投影，并使用目标成员名作为结果列别名。
+    /// </summary>
+    /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
+    /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
+    /// <returns>包含方言安全结果别名的投影列。</returns>
+    internal IReadOnlyList<string> ResolveMultiSourceDtoColumns(System.Linq.Expressions.LambdaExpression expression,
+        IReadOnlyList<TableSource> sources) => ResolveMultiSourceDtoColumns(expression, sources, out _);
+
+    /// <summary>
+    /// 解析多表 DTO 成员初始化投影，并返回可供派生表公开的成员名称。
+    /// </summary>
+    /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
+    /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
+    /// <param name="projectedMembers">DTO 投影成员名称。</param>
+    /// <returns>包含方言安全结果别名的投影列。</returns>
+    internal IReadOnlyList<string> ResolveMultiSourceDtoColumns(System.Linq.Expressions.LambdaExpression expression,
+        IReadOnlyList<TableSource> sources, out IReadOnlyCollection<string> projectedMembers)
+    {
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        if (sources == null)
+            throw new ArgumentNullException(nameof(sources));
+        var body = UnwrapConversion(expression.Body);
+        if (body is not System.Linq.Expressions.MemberInitExpression memberInit)
+            throw new NotSupportedException("多表 DTO 投影必须使用成员初始化表达式。");
+
+        var bindings = new SqlParameterBindingScope(expression, sources);
+        var result = new List<string>();
+        var members = new List<string>();
+        foreach (var binding in memberInit.Bindings)
+        {
+            if (binding is not System.Linq.Expressions.MemberAssignment assignment)
+                throw new NotSupportedException($"不支持的多表 DTO 投影绑定: {binding.BindingType}。");
+            var sourceExpression = UnwrapConversion(assignment.Expression);
+            if (IsDirectParameterMember(sourceExpression, expression.Parameters) == false ||
+                bindings.TryGetSource(sourceExpression, out var source) == false)
+                throw new NotSupportedException("多表 DTO 投影成员必须引用当前查询的 Lambda 参数。");
+            result.Add($"{GetSqlColumn(sourceExpression, source)} As {Dialect.SafeName(assignment.Member.Name)}");
+            members.Add(assignment.Member.Name);
+        }
+
+        projectedMembers = members;
+        return result;
+    }
+
+    /// <summary>
+    /// 解包表达式中的装箱或数值转换节点。
+    /// </summary>
+    /// <param name="expression">待处理的表达式。</param>
+    /// <returns>移除转换节点后的表达式。</returns>
+    private static System.Linq.Expressions.Expression UnwrapConversion(System.Linq.Expressions.Expression expression)
+    {
+        while (expression is System.Linq.Expressions.UnaryExpression
+               {
+                   NodeType: System.Linq.Expressions.ExpressionType.Convert or
+                       System.Linq.Expressions.ExpressionType.ConvertChecked
+               } conversion)
+            expression = conversion.Operand;
+        return expression;
+    }
+
+    /// <summary>
+    /// 判断表达式是否为当前 Lambda 参数的直接成员访问。
+    /// </summary>
+    /// <param name="expression">待验证的成员表达式。</param>
+    /// <param name="parameters">当前 Lambda 参数集合。</param>
+    /// <returns>表达式为直接成员访问时返回 true。</returns>
+    private static bool IsDirectParameterMember(System.Linq.Expressions.Expression expression,
+        IReadOnlyList<System.Linq.Expressions.ParameterExpression> parameters) =>
+        expression is System.Linq.Expressions.MemberExpression member &&
+        parameters.Any(parameter => ReferenceEquals(UnwrapConversion(member.Expression), parameter));
+
+    /// <summary>
+    /// 根据已绑定的表源实例生成列 SQL。
+    /// </summary>
+    private string GetSqlColumn(System.Linq.Expressions.Expression expression, TableSource source)
+    {
+        var member = expression as System.Linq.Expressions.MemberExpression;
+        string column;
+        if (source.ProjectedMembers != null)
+        {
+            if (member == null || source.ProjectedMembers.Contains(member.Member.Name) == false)
+                throw new NotSupportedException("多表派生表只能引用已投影的 DTO 成员。");
+            column = member.Member.Name;
+        }
+        else
+            column = Resolver.GetColumn(expression, source.EntityType);
+        var alias = source.Alias ?? source.Reference?.Alias ?? Resolver.GetAlias(source.EntityType, null);
+        return new SqlItem(column, alias).ToSql(Dialect);
+    }
+
     /// <inheritdoc />
     public void From(ISqlBuilder builder, string alias)
     {
@@ -188,7 +432,7 @@ public class FromClause : IFromClause
         _context.UseOperation(SqlOperationAction.QueryClause);
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         Register?.RegisterAlias(alias);
-        Table = SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}");
+        ReplaceSources(SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}"));
     }
 
     /// <summary>
@@ -217,15 +461,16 @@ public class FromClause : IFromClause
         if (Table != null && Table.IsRaw)
         {
             Table = SqlItem.Raw($"{Table.Name}{sql}");
+            _sources[^1] = new TableSource(_sources[^1].SourceId, Table);
             return;
         }
-        Table = SqlItem.Raw(sql);
+        ReplaceSources(SqlItem.Raw(sql));
     }
 
     /// <inheritdoc />
     public void Validate()
     {
-        if (string.IsNullOrWhiteSpace(Table?.Name))
+        if (_sources.Count == 0 || _sources.Any(source => string.IsNullOrWhiteSpace(source.Item.Name)))
             throw new InvalidOperationException(LibraryResource.TableIsEmpty);
     }
 
@@ -234,15 +479,43 @@ public class FromClause : IFromClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        var table = Table?.ToSql(Dialect);
-        if (string.IsNullOrWhiteSpace(table))
+        var tables = _sources.Select(source => source.Item.ToSql(Dialect))
+            .Where(table => string.IsNullOrWhiteSpace(table) == false).ToList();
+        if (tables.Count == 0)
             return;
         builder.Append("From ");
-        builder.Append(table);
+        builder.Append(string.Join(", ", tables));
     }
 
     /// <inheritdoc />
-    public void Clear() => Table = null;
+    public void Clear()
+    {
+        Table = null;
+        _sources.Clear();
+    }
+
+    /// <summary>
+    /// 使用单个来源替换当前查询图的全部根来源。
+    /// </summary>
+    /// <param name="item">新的来源表项。</param>
+    /// <param name="entityType">关联实体类型。</param>
+    private void ReplaceSources(SqlItem item, Type entityType = null)
+    {
+        Table = item;
+        _sources.Clear();
+        if (item != null)
+            _sources.Add(new TableSource("source_0", item, entityType));
+    }
+
+    /// <summary>
+    /// 使用已深复制的根表源替换克隆实例的初始状态。
+    /// </summary>
+    private void SetSources(List<TableSource> sources)
+    {
+        _sources.Clear();
+        _sources.AddRange(sources);
+        Table = _sources.LastOrDefault()?.Item;
+    }
 
     /// <summary>
     /// 输出Sql。

@@ -22,6 +22,46 @@ namespace Bing.Dapper.Core.Tests;
 public sealed class SqlMutationBatchStrategyTest
 {
     /// <summary>
+    /// 测试目的：明确文本执行入口应复用既有可覆写的 SQL 执行路径，避免破坏 Provider 和测试执行器扩展。
+    /// </summary>
+    [Fact]
+    public void ExecuteText_ShouldDelegateToExistingTextExecutionOverride()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.ExecuteText("Update [mutation_samples] Set [Name]=@name", new { name = "Bing" });
+
+        // Assert
+        Assert.Equal(0, affectedRows);
+        var command = Assert.Single(executor.Commands);
+        Assert.Equal("Update [mutation_samples] Set [Name]=@name", command.Sql);
+    }
+
+    /// <summary>
+    /// 测试目的：异步明确文本执行入口应将取消令牌传递给既有可覆写执行路径。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteTextAsync_ShouldDelegateToExistingTextExecutionOverride()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+        using var cancellationTokenSource = new CancellationTokenSource();
+
+        // Act
+        var affectedRows = await executor.ExecuteTextAsync("Update [mutation_samples] Set [Name]=@name",
+            new { name = "Bing" }, cancellationToken: cancellationTokenSource.Token);
+
+        // Assert
+        Assert.Equal(0, affectedRows);
+        Assert.Equal(cancellationTokenSource.Token, Assert.Single(executor.CancellationTokens));
+        Assert.Equal("Update [mutation_samples] Set [Name]=@name", Assert.Single(executor.Commands).Sql);
+    }
+
+    /// <summary>
     /// 测试目的：Provider 显式支持多行 Values 时，Auto 策略应为同一分片生成一条组合 Insert 命令。
     /// </summary>
     [Fact]
@@ -378,6 +418,40 @@ public sealed class SqlMutationBatchStrategyTest
 
         // Assert
         Assert.Equal(0, affectedRows);
+        Assert.Empty(executor.Commands);
+    }
+
+    /// <summary>
+    /// 测试目的：首个窗口的执行失败不应预先枚举后续实体，避免大输入在失败前全量物化。
+    /// </summary>
+    [Fact]
+    public void InsertBatch_WhenFirstWindowFails_ShouldNotEnumerateLaterEntities()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite)
+        {
+            ExecuteException = new InvalidOperationException("execute failed")
+        };
+        var entities = new YieldTrackingEnumerable<MutationSample>(new[]
+        {
+            new MutationSample { Name = "first" },
+            new MutationSample { Name = "second" },
+            new MutationSample { Name = "third" }
+        });
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.InsertBatch(entities,
+            new SqlBatchInsertOptions
+            {
+                BatchSize = 1,
+                Strategy = SqlBatchInsertStrategy.PerEntity,
+                UseTransaction = false
+            }));
+
+        // Assert
+        Assert.Equal("execute failed", exception.Message);
+        Assert.Equal(1, entities.YieldCount);
         Assert.Empty(executor.Commands);
     }
 
@@ -777,6 +851,39 @@ public sealed class SqlMutationBatchStrategyTest
         {
             EnumerationCount++;
             throw new InvalidOperationException("实体序列不应被枚举。");
+        }
+
+        /// <inheritdoc />
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    /// <summary>
+    /// 记录已产出元素数量的测试实体序列。
+    /// </summary>
+    /// <typeparam name="T">实体类型。</typeparam>
+    private sealed class YieldTrackingEnumerable<T> : IEnumerable<T>
+    {
+        private readonly IEnumerable<T> _items;
+
+        /// <summary>
+        /// 初始化测试序列。
+        /// </summary>
+        /// <param name="items">待枚举的实体。</param>
+        public YieldTrackingEnumerable(IEnumerable<T> items) => _items = items;
+
+        /// <summary>
+        /// 已向调用方产出的元素数量。
+        /// </summary>
+        public int YieldCount { get; private set; }
+
+        /// <inheritdoc />
+        public IEnumerator<T> GetEnumerator()
+        {
+            foreach (var item in _items)
+            {
+                YieldCount++;
+                yield return item;
+            }
         }
 
         /// <inheritdoc />

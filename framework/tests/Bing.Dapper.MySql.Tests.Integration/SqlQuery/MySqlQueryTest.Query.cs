@@ -24,7 +24,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(id2, code);
 
         // 获取对象
-        var result = _sqlQuery.Lambda<Product>()
+        var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
             .From()

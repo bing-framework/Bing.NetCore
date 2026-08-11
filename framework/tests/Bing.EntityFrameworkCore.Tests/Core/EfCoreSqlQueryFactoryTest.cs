@@ -54,7 +54,7 @@ public class EfCoreSqlQueryFactoryTest
 
         // Act
         var query = factory.Create(unitOfWork);
-        var sql = query.Lambda<TestEntity>().Where(entity => entity.DisplayName, "Bing").ToSql();
+        var sql = query.From<TestEntity>().Where(entity => entity.DisplayName, "Bing").ToSql();
 
         // Assert
         Assert.Contains("ef_query_users", sql);
@@ -151,7 +151,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>().Create(unitOfWork);
 
         // Act
-        var result = query.Sql<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
+        var result = query.Text<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
 
         // Assert
         Assert.Equal(0, result);
@@ -185,7 +185,7 @@ public class EfCoreSqlQueryFactoryTest
             .Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Act
-        var result = query.Sql<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
+        var result = query.Text<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
 
         // Assert
         Assert.Equal(0, result);
@@ -554,7 +554,7 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <param name="query">待执行的查询对象。</param>
     /// <returns>SQLite 元数据项数量。</returns>
-    private static int ExecuteCount(ISqlQuery query) => query.Sql<int>().CountAll().From("sqlite_master").Scalar();
+    private static int ExecuteCount(ISqlQuery query) => query.Query<int>().CountAll().From("sqlite_master").Scalar();
 
     /// <summary>
     /// 创建服务提供程序
@@ -572,8 +572,8 @@ public class EfCoreSqlQueryFactoryTest
             services.AddSingleton<ISqlDatabaseIdentityContributor>(identityContributor);
         if (metadataOptions != null)
             services.ConfigureSqlMetadata(options => ApplyMetadataOptions(options, metadataOptions));
-        services.AddSqlCore();
-        services.AddSqliteSqlQuery(SharedMemoryConnectionString);
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("default", DatabaseType.Sqlite, SharedMemoryConnectionString);
         services.AddEfCoreSqlQueryFactory();
         return services.BuildServiceProvider();
     }

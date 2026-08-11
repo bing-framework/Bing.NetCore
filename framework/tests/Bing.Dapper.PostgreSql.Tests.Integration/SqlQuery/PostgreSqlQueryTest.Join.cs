@@ -20,7 +20,7 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(productId, "join-inner");
         await InsertProductItemAsync(Guid.NewGuid(), productId, "inner-sku", 3);
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<ProductItemProjection>().Select("p.code As ProductCode,i.sku As Sku,i.quantity As Quantity")
+        var description = query.Query<ProductItemProjection>().Select("p.code As ProductCode,i.sku As Sku,i.quantity As Quantity")
             .AppendFrom("public.integration_products p")
             .Join("public.integration_product_items", "i").AppendOn("i.product_id=p.id")
             .Where("p.id", productId);
@@ -44,7 +44,7 @@ public sealed partial class PostgreSqlQueryTest
         var productId = Guid.NewGuid();
         await InsertProductAsync(productId, "join-left");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<ProductItemProjection>().Select("p.code As ProductCode,i.sku As Sku")
+        var description = query.Query<ProductItemProjection>().Select("p.code As ProductCode,i.sku As Sku")
             .AppendFrom("public.integration_products p")
             .LeftJoin("public.integration_product_items", "i").AppendOn("i.product_id=p.id")
             .Where("p.id", productId);

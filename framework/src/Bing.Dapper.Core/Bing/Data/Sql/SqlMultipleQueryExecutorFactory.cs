@@ -13,22 +13,16 @@ internal sealed class SqlMultipleQueryExecutorFactory : SqlFactoryBase, ISqlMult
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
     /// <param name="metadataOptions">SQL 元数据配置。</param>
-    /// <param name="implementationTypeResolver">SQL 实现类型解析器。</param>
     /// <param name="dataSourceResolver">SQL 数据源解析器。</param>
     public SqlMultipleQueryExecutorFactory(IServiceProvider serviceProvider,
         IDatabaseContextAccessor databaseContextAccessor = null,
         SqlMetadataOptions metadataOptions = null,
-        ISqlImplementationTypeResolver implementationTypeResolver = null,
         ISqlDataSourceResolver dataSourceResolver = null)
-        : base(serviceProvider, databaseContextAccessor, metadataOptions, implementationTypeResolver, dataSourceResolver)
+        : base(serviceProvider, databaseContextAccessor, metadataOptions, dataSourceResolver: dataSourceResolver)
     {
     }
 
     /// <inheritdoc />
-    public ISqlMultipleQueryExecutor Create(string dbKey) =>
-        CreateInstance<ISqlMultipleQueryExecutor>(CreateContext(dbKey));
-
-    /// <inheritdoc />
-    public ISqlMultipleQueryExecutor Create() =>
-        CreateInstance<ISqlMultipleQueryExecutor>(GetCurrentContext(typeof(ISqlMultipleQueryExecutor)));
+    public ISqlMultipleQueryExecutor Create(string dbKey = null) =>
+        CreateInstance<ISqlMultipleQueryExecutor>(string.IsNullOrWhiteSpace(dbKey) ? GetCurrentContext() : CreateContext(dbKey));
 }

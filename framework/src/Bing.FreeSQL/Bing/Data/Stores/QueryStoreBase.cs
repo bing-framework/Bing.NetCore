@@ -28,7 +28,14 @@ public abstract class QueryStoreBase<TEntity> : QueryStoreBase<TEntity, Guid>, I
     /// 初始化一个<see cref="QueryStoreBase{TEntity}"/>类型的实例
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
-    protected QueryStoreBase(IUnitOfWork unitOfWork) : base(unitOfWork)
+    /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="metadataOptions">SQL 元数据配置</param>
+    /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+    protected QueryStoreBase(IUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+        IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+        ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
+        metadataOptions, typeConverterResolver)
     {
     }
 }
@@ -46,6 +53,26 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 工作单元
     /// </summary>
     protected UnitOfWorkBase UnitOfWork { get; }
+
+    /// <summary>
+    /// SQL 查询对象工厂。
+    /// </summary>
+    private readonly ISqlQueryFactory _sqlQueryFactory;
+
+    /// <summary>
+    /// 数据库上下文访问器。
+    /// </summary>
+    private readonly IDatabaseContextAccessor _databaseContextAccessor;
+
+    /// <summary>
+    /// SQL 元数据配置。
+    /// </summary>
+    private readonly SqlMetadataOptions _metadataOptions;
+
+    /// <summary>
+    /// 数据类型转换器解析器。
+    /// </summary>
+    private readonly ITypeConverterResolver _typeConverterResolver;
 
     /// <summary>
     /// 实体集
@@ -67,31 +94,14 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     protected virtual ISqlQuery CreateSqlQuery()
     {
-        var serviceProvider = UnitOfWork.ServiceProvider;
-        var result = GetRequiredService<ISqlQuery>(serviceProvider);
+        var result = _sqlQueryFactory.Create();
         var metadataProvider = new CompositeEntityModelMetadataProvider(new IEntityModelMetadataProvider[]
         {
             new FreeSqlEntityModelMetadataProvider(UnitOfWork.Orm)
         });
         SqlQueryRuntimeBridge.BindEntityMappingResolver(result, new DefaultEntityMappingResolver(
-            GetRequiredService<IDatabaseContextAccessor>(serviceProvider),
-            GetRequiredService<SqlMetadataOptions>(serviceProvider),
-            GetRequiredService<ITypeConverterResolver>(serviceProvider), metadataProvider));
+            _databaseContextAccessor, _metadataOptions, _typeConverterResolver, metadataProvider));
         return result;
-    }
-
-    /// <summary>
-    /// 从当前工作单元的作用域解析必需服务。
-    /// </summary>
-    /// <typeparam name="T">服务类型。</typeparam>
-    /// <param name="serviceProvider">服务提供程序。</param>
-    /// <returns>服务实例。</returns>
-    private static T GetRequiredService<T>(IServiceProvider serviceProvider) where T : class
-    {
-        var service = serviceProvider?.GetService(typeof(T)) as T;
-        if (service != null)
-            return service;
-        throw new InvalidOperationException($"FreeSQL 查询存储器未注册必需服务：{typeof(T).FullName}。");
     }
 
     /// <summary>
@@ -107,7 +117,20 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 初始化一个<see cref="QueryStoreBase{TEntity,TKey}"/>类型的实例
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
-    protected QueryStoreBase(IUnitOfWork unitOfWork) => UnitOfWork = (UnitOfWorkBase)unitOfWork;
+    /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
+    /// <param name="databaseContextAccessor">数据库上下文访问器</param>
+    /// <param name="metadataOptions">SQL 元数据配置</param>
+    /// <param name="typeConverterResolver">数据类型转换器解析器</param>
+    protected QueryStoreBase(IUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
+        IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
+        ITypeConverterResolver typeConverterResolver)
+    {
+        UnitOfWork = (UnitOfWorkBase)unitOfWork;
+        _sqlQueryFactory = sqlQueryFactory ?? throw new ArgumentNullException(nameof(sqlQueryFactory));
+        _databaseContextAccessor = databaseContextAccessor;
+        _metadataOptions = metadataOptions ?? throw new ArgumentNullException(nameof(metadataOptions));
+        _typeConverterResolver = typeConverterResolver ?? throw new ArgumentNullException(nameof(typeConverterResolver));
+    }
 
     #endregion
 

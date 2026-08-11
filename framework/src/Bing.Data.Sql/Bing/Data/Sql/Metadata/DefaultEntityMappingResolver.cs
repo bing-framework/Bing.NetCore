@@ -20,6 +20,36 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ConcurrentDictionary<EntityMappingCacheKey, EntityMappingMetadata> _mappingCache = new();
 
     /// <summary>
+    /// 控制有限容量映射缓存准入的同步锁。
+    /// </summary>
+    private readonly object _mappingCacheAdmissionLock = new();
+
+    /// <summary>
+    /// 最终实体映射缓存的固定容量；<see langword="null"/> 表示不限制容量。
+    /// </summary>
+    private readonly int? _mappingCacheCapacity;
+
+    /// <summary>
+    /// 最终实体映射缓存首次查找命中次数。
+    /// </summary>
+    private long _mappingCacheHitCount;
+
+    /// <summary>
+    /// 最终实体映射缓存首次查找未命中次数。
+    /// </summary>
+    private long _mappingCacheMissCount;
+
+    /// <summary>
+    /// 最终实体映射因容量策略未写入缓存的次数。
+    /// </summary>
+    private long _mappingCacheBypassCount;
+
+    /// <summary>
+    /// 按实体类型缓存原始模型元数据，避免为计算最终缓存键重复调用外部 ORM 元数据提供器。
+    /// </summary>
+    private readonly ConcurrentDictionary<RuntimeTypeHandle, Lazy<EntityModelMetadata>> _modelCache = new();
+
+    /// <summary>
     /// 按实体类型分组并按匹配优先级排序的映射配置索引。
     /// </summary>
     private readonly IReadOnlyDictionary<RuntimeTypeHandle, EntityMappingOptions[]> _mappingOptionsIndex;
@@ -45,6 +75,21 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ITypeConverterResolver _typeConverterResolver;
 
     /// <summary>
+    /// 获取当前最终实体映射缓存的条目数。
+    /// </summary>
+    internal int MappingCacheCount => _mappingCache.Count;
+
+    /// <summary>
+    /// 获取最终实体映射缓存的聚合统计快照。
+    /// </summary>
+    internal EntityMappingCacheStatistics MappingCacheStatistics => new(
+        System.Threading.Interlocked.Read(ref _mappingCacheHitCount),
+        System.Threading.Interlocked.Read(ref _mappingCacheMissCount),
+        System.Threading.Interlocked.Read(ref _mappingCacheBypassCount),
+        _mappingCache.Count,
+        _mappingCacheCapacity);
+
+    /// <summary>
     /// 初始化一个<see cref="DefaultEntityMappingResolver"/>类型的实例
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -59,6 +104,10 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         _entityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
+        _mappingCacheCapacity = _options.EntityMappingCacheCapacity;
+        if (_mappingCacheCapacity.HasValue && _mappingCacheCapacity.Value < 0)
+            throw new ArgumentOutOfRangeException(nameof(SqlMetadataOptions.EntityMappingCacheCapacity),
+                _mappingCacheCapacity, "实体最终映射缓存容量不能小于 0。");
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
         _mappingOptionsIndex = CreateMappingOptionsIndex(_options.EntityMappings);
     }
@@ -112,19 +161,66 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             throw new ArgumentNullException(nameof(entityType));
         var context = GetDatabaseContext(databaseContext);
         var mappingOptions = ResolveEntityMappingOptions(entityType, context);
+        var model = GetCachedModelMetadata(entityType);
+        var database = mappingOptions?.Database;
+        var schema = GetSchema(model, mappingOptions);
+        var tableName = GetTableName(model, mappingOptions);
         var cacheKey = new EntityMappingCacheKey(
             entityType.TypeHandle,
             NormalizeCacheValue(context.DbKey),
             GetDatabaseType(context),
             NormalizeCacheValue(GetMappingProfile(context, mappingOptions)),
-            GetCacheTableRouteKey(mappingOptions));
+            GetCacheTableRouteKey(mappingOptions),
+            NormalizeCacheValue(database),
+            NormalizeCacheValue(schema),
+            NormalizeCacheValue(tableName));
         if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
+        {
+            System.Threading.Interlocked.Increment(ref _mappingCacheHitCount);
             return cachedMapping;
-        var model = GetModelMetadata(entityType);
-        var schema = GetSchema(model, mappingOptions);
-        var tableName = GetTableName(model, mappingOptions);
-        return _mappingCache.GetOrAdd(cacheKey,
-            _ => CreateMapping(model, context, schema, tableName, mappingOptions));
+        }
+        System.Threading.Interlocked.Increment(ref _mappingCacheMissCount);
+        return GetOrCreateMapping(cacheKey, model, context, schema, tableName, mappingOptions);
+    }
+
+    /// <summary>
+    /// 获取或创建最终实体映射，并在配置了容量时限制新条目的准入。
+    /// </summary>
+    /// <param name="cacheKey">根据最终路由结果生成的映射缓存键。</param>
+    /// <param name="model">已缓存的实体模型元数据。</param>
+    /// <param name="databaseContext">当前数据库上下文。</param>
+    /// <param name="schema">最终数据库架构。</param>
+    /// <param name="tableName">最终物理表名。</param>
+    /// <param name="mappingOptions">已匹配的实体映射配置。</param>
+    /// <returns>与当前路由匹配的实体映射元数据。</returns>
+    private EntityMappingMetadata GetOrCreateMapping(EntityMappingCacheKey cacheKey, EntityModelMetadata model,
+        DatabaseContext databaseContext, string schema, string tableName, EntityMappingOptions mappingOptions)
+    {
+        if (_mappingCacheCapacity == null)
+            return _mappingCache.GetOrAdd(cacheKey,
+                _ => CreateMapping(model, databaseContext, schema, tableName, mappingOptions));
+        if (_mappingCacheCapacity.Value == 0)
+        {
+            System.Threading.Interlocked.Increment(ref _mappingCacheBypassCount);
+            return CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+        }
+
+        lock (_mappingCacheAdmissionLock)
+        {
+            if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
+                return cachedMapping;
+
+            // 容量已满时不驱逐已缓存的稳定路由，避免动态路由放大缓存竞争。
+            if (_mappingCache.Count >= _mappingCacheCapacity.Value)
+            {
+                System.Threading.Interlocked.Increment(ref _mappingCacheBypassCount);
+                return CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+            }
+
+            var mapping = CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+            _mappingCache.TryAdd(cacheKey, mapping);
+            return mapping;
+        }
     }
 
     /// <summary>
@@ -314,7 +410,9 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// </summary>
     /// <param name="value">原始值。</param>
     /// <returns>规范化后的缓存键值。</returns>
-    private static string NormalizeCacheValue(string value) => string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
+    private static string NormalizeCacheValue(string value) => string.IsNullOrWhiteSpace(value)
+        ? string.Empty
+        : value.Trim().ToUpperInvariant();
 
     /// <summary>
     /// 获取不包含租户标识的映射缓存路由键。
@@ -525,6 +623,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     protected virtual EntityModelMetadata GetModelMetadata(Type entityType) =>
         _entityModelMetadataProvider.GetMetadata(entityType) ??
         new ConventionEntityModelMetadataProvider().GetMetadata(entityType);
+
+    /// <summary>
+    /// 获取实体模型元数据缓存。
+    /// </summary>
+    /// <param name="entityType">实体类型。</param>
+    /// <returns>用于计算最终映射对象名的稳定模型元数据。</returns>
+    private EntityModelMetadata GetCachedModelMetadata(Type entityType) => _modelCache.GetOrAdd(entityType.TypeHandle,
+        _ => new Lazy<EntityModelMetadata>(() => GetModelMetadata(entityType),
+            LazyThreadSafetyMode.ExecutionAndPublication)).Value;
 
     /// <summary>
     /// 获取字段存储方式

@@ -203,6 +203,22 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：Cross Join 不允许通过任意 On 入口附加连接条件。
+    /// </summary>
+    [Fact]
+    public void CrossJoin_WhenOnConfigured_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        _builder.Select("s.Id").From("Samples", "s").CrossJoin("Reviews", "r");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => _builder.AppendOn("s.Id=r.SampleId"));
+
+        // Assert
+        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：Append 原始 SQL 不应参与别名冲突校验。
     /// </summary>
     [Fact]

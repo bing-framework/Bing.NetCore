@@ -55,6 +55,14 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>当前查询专属的 SQL Builder。</returns>
     internal ISqlBuilder GetBuilder() => _builder;
 
+    /// <summary>
+    /// 获取当前查询描述使用的内部计划执行器。
+    /// </summary>
+    /// <remarks>
+    /// 派生查询描述仅可将其传递给共享同一 Builder 的后继描述，不能直接执行或替换执行器。
+    /// </remarks>
+    internal ISqlQueryPlanExecutor Executor => _executor;
+
     /// <inheritdoc />
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _builder;
 

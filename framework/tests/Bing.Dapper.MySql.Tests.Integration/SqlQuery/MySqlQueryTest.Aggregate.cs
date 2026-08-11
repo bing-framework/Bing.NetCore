@@ -176,7 +176,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-first");
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().CountColumn("p.ProductId", "Count").From("Product", "p");
+        var description = query.Query<int>().CountColumn("p.ProductId", "Count").From("Product", "p");
 
         // Act
         var result = description.Scalar();
@@ -201,7 +201,7 @@ public partial class MySqlQueryTest
         await _sqlExecutor.ExecuteSqlAsync("Insert Product(ProductId,Code,Price) Values(@productId,@code,@price)",
             new { productId = secondId, code = "sum-qualified-second", price = 7.5m });
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<decimal>().Sum("p.Price", "Total").From("Product", "p");
+        var description = query.Query<decimal>().Sum("p.Price", "Total").From("Product", "p");
 
         // Act
         var result = description.Scalar();
@@ -217,7 +217,7 @@ public partial class MySqlQueryTest
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>包含 Product 表别名的独立查询描述。</returns>
     private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Sql<TResult>().From("Product", "p");
+        query.Query<TResult>().From("Product", "p");
 
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。

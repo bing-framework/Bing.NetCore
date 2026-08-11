@@ -85,6 +85,23 @@ public class OfficialProviderInstanceTest
     }
 
     /// <summary>
+    /// 测试目的：官方 Provider 应明确声明 Full Join 的方言支持状态，MySQL 与 SQLite 必须在生成 SQL 前拒绝。
+    /// </summary>
+    [Fact]
+    public void Provider_WhenFullJoinCapabilityIsRequested_ShouldReturnOfficialContract()
+    {
+        // Arrange
+        var providers = CreateProviders();
+
+        // Act and Assert
+        foreach (var provider in providers.Where(provider =>
+                     provider != MySqlSqlProvider.Instance && provider != SqliteSqlProvider.Instance))
+            Assert.Equal(SqlQueryCapabilityState.Supported, ((ISqlProviderProfileProvider)provider).Profile.Query.FullJoin);
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, MySqlSqlProvider.Instance.Profile.Query.FullJoin);
+        Assert.Equal(SqlQueryCapabilityState.Unsupported, SqliteSqlProvider.Instance.Profile.Query.FullJoin);
+    }
+
+    /// <summary>
     /// 创建官方 Provider 集合。
     /// </summary>
     private static ISqlProvider[] CreateProviders() =>

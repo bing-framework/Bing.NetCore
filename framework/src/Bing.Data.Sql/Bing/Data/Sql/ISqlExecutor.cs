@@ -23,6 +23,24 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="description">已冻结的 Mutation 描述。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <returns>操作影响的行数。</returns>
+    int ExecuteMutation(SqlMutationDescription description, int? timeout = null);
+
+    /// <summary>
+    /// 异步执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
+    /// </summary>
+    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示操作影响行数的异步操作。</returns>
+    Task<int> ExecuteMutationAsync(SqlMutationDescription description, int? timeout = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
+    /// </summary>
+    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <returns>操作影响的行数。</returns>
     int Execute(SqlMutationDescription description, int? timeout = null);
 
     /// <summary>
@@ -33,6 +51,26 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>操作影响的行数。</returns>
     Task<int> ExecuteAsync(SqlMutationDescription description, int? timeout = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 执行指定 SQL 文本。
+    /// </summary>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="param">SQL 参数。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <returns>操作影响的行数。</returns>
+    int ExecuteText(string sql, object param = null, int? timeout = null);
+
+    /// <summary>
+    /// 异步执行指定 SQL 文本。
+    /// </summary>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="param">SQL 参数。</param>
+    /// <param name="timeout">执行超时时间。单位：秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示操作影响行数的异步操作。</returns>
+    Task<int> ExecuteTextAsync(string sql, object param = null, int? timeout = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -82,7 +120,7 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="description">已冻结的带 Returning Mutation 描述。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>返回行集合。</returns>
-    List<TResult> ExecuteReturningQuery<TResult>(SqlMutationDescription description, int? timeout = null);
+    List<TResult> ExecuteReturning<TResult>(SqlMutationDescription description, int? timeout = null);
 
     /// <summary>
     /// 异步执行带 Returning 或 Output 的 Mutation，并物化返回行。
@@ -92,6 +130,7 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示返回行集合的异步操作。</returns>
-    Task<List<TResult>> ExecuteReturningQueryAsync<TResult>(SqlMutationDescription description, int? timeout = null,
+    Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlMutationDescription description, int? timeout = null,
         CancellationToken cancellationToken = default);
+
 }

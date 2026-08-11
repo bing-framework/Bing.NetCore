@@ -51,14 +51,8 @@ namespace Bing.Admin.Modules
                     });
                 });
             //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr);
-            // 注册SqlQuery
-            services.AddMySqlQuery(t =>
-                {
-                    t.DatabaseType = DatabaseType.MySql;
-                })
-                .AddSqlCore();
-            // 注册SqlExecutor
-            services.AddMySqlExecutor();
+            services.AddMySqlProvider();
+            services.AddSqlDataSource("default", DatabaseType.MySql, connectionStr);
             return services;
         }
     }

@@ -31,39 +31,41 @@ public class OracleProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：注册默认 Oracle 查询对象时应固定使用 Oracle 数据库类型。
+    /// 测试目的：固定 Query Factory 应为 Oracle 数据源创建官方查询实现。
     /// </summary>
     [Fact]
-    public void AddOracleSqlQuery_WhenRegistered_ShouldConfigureOracleDatabaseType()
+    public void QueryFactory_WhenOracleDataSourceRegistered_ShouldCreateOracleQuery()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddOracleSqlQuery("Data Source=oracle;User Id=bing;Password=secret;");
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, "Data Source=oracle;User Id=bing;Password=secret;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<OracleSqlQuery>>();
+        var query = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.Oracle, options.DatabaseType);
+        Assert.IsType<OracleSqlQuery>(query);
     }
 
     /// <summary>
-    /// 测试目的：注册默认 Oracle 执行器时应固定使用 Oracle 数据库类型。
+    /// 测试目的：固定 Executor Factory 应为 Oracle 数据源创建官方执行器实现。
     /// </summary>
     [Fact]
-    public void AddOracleSqlExecutor_WhenRegistered_ShouldConfigureOracleDatabaseType()
+    public void ExecutorFactory_WhenOracleDataSourceRegistered_ShouldCreateOracleExecutor()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddOracleSqlExecutor("Data Source=oracle;User Id=bing;Password=secret;");
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, "Data Source=oracle;User Id=bing;Password=secret;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<OracleSqlExecutor>>();
+        var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.Oracle, options.DatabaseType);
+        Assert.IsType<OracleSqlExecutor>(executor);
     }
 
     /// <summary>
@@ -74,13 +76,13 @@ public class OracleProviderRegistrationTest
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddOracleSqlQuery("Data Source=oracle;User Id=bing;Password=secret;");
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, "Data Source=oracle;User Id=bing;Password=secret;");
         using var provider = services.BuildServiceProvider();
-        var query = provider.GetRequiredService<ISqlQueryFactory>().Create<ISqlQuery>();
+        var query = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Act
-        var description = query.SqlInterpolated<string>(
+        var description = query.TextInterpolated<string>(
             $"Select :p0 As ExistingValue, {"value"} As InterpolatedValue From dual");
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
 

@@ -46,6 +46,7 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
             Union = SqlQueryCapabilityState.Supported,
             UnionAll = SqlQueryCapabilityState.Supported,
             RightJoin = SqlQueryCapabilityState.Supported,
+            FullJoin = SqlQueryCapabilityState.Unsupported,
             Pagination = SqlQueryCapabilityState.Supported
         },
         Mutation = new SqlProviderMutationCapabilities

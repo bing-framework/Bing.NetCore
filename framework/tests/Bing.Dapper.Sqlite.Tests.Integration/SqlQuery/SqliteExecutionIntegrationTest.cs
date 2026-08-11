@@ -67,12 +67,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 CreateSamplesDescription(listQuery).ToListAsync(cancellationToken: cancellationTokenSource.Token));
         using (var scalarQuery = _fixture.CreateQuery())
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                scalarQuery.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples")
+                scalarQuery.Query<int>().AppendSelect("Count(*)").AppendFrom("samples")
                     .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
         using (var scalarExtensionQuery = _fixture.CreateQuery())
         {
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-                scalarExtensionQuery.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples")
+                scalarExtensionQuery.Query<int>().AppendSelect("Count(*)").AppendFrom("samples")
                     .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
         }
         using (var singleQuery = _fixture.CreateQuery())
@@ -105,7 +105,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         {
             await executor.ExecuteSqlAsync("Attach Database @path As reporting",
                 new { path = _fixture.SecondDatabasePath });
-            var result = query.Sql<string>().Select("Name").From("reporting.samples").Scalar();
+            var result = query.Query<string>().Select("Name").From("reporting.samples").Scalar();
 
             // Assert
             Assert.Equal("attached", result);
@@ -149,7 +149,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         using (manager.Use("second"))
-            query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
+            query.Query<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
 
         // Assert
         Assert.NotNull(message);
@@ -167,7 +167,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("second");
         await InsertAsync("third");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples")
             .In("Name", new object[] { "first", "third" });
 
         var result = description.ToList();
@@ -184,7 +184,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").In("Id", Array.Empty<object>());
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples").In("Id", Array.Empty<object>());
 
         // Act
         var result = description.ToList();
@@ -203,7 +203,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples")
             .NotIn("Id", Array.Empty<object>()).OrderBy("Id");
 
         // Act
@@ -223,7 +223,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("first");
         await InsertAsync("second");
         using var query = _fixture.CreateQuery();
-        var result = query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
+        var result = query.Query<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar();
 
         Assert.Equal(2, result);
     }
@@ -236,7 +236,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     {
         await InsertAsync("single");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples")
             .AppendWhere("Name=@name").AddParam("name", "single");
 
         var result = description.FirstOrDefault();
@@ -259,7 +259,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 new { id = 2, tenantId = "tenant-2", name = "second" });
         }
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<OrderSample>().Select("o.Id,o.Name")
+        var description = query.Query<OrderSample>().Select("o.Id,o.Name")
             .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
             .AddParam("TenantId", "tenant-1");
 
@@ -297,7 +297,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 new { id = 2, tenantId = "tenant-1", name = "second" });
         }
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<OrderSample>().Select("o.Id,o.Name")
+        var description = query.Query<OrderSample>().Select("o.Id,o.Name")
             .AppendFrom("(Select * From Orders Where TenantId=@TenantId) o")
             .AddParam("TenantId", "tenant-1")
             .Where("o.Name", "second");
@@ -321,7 +321,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await InsertAsync("typed-from");
         using var query = _fixture.CreateQuery();
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .ClearSelect()
             .Select("Name")
             .From()
@@ -513,13 +513,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (var enumerator = CreateSamplesDescription(query).AsEnumerable().GetEnumerator())
         {
             Assert.True(enumerator.MoveNext());
-            var exception = Assert.Throws<InvalidOperationException>(() => query.Sql<int>()
+            var exception = Assert.Throws<InvalidOperationException>(() => query.Query<int>()
                 .AppendSelect("Count(*)").AppendFrom("samples").Scalar());
             Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
                 exception.Message);
         }
 
-        Assert.Equal(3, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
+        Assert.Equal(3, query.Query<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
     }
 
     /// <summary>
@@ -691,7 +691,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (var query = scope.CreateQuery())
         {
             executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "shared" });
-            Assert.Equal(1, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
+            Assert.Equal(1, query.Query<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
             scope.Commit();
         }
 
@@ -827,7 +827,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 using (manager.Use("second"))
                 {
                     Assert.Equal("second", accessor.Current.DbKey);
-                    using var childExecutor = executorFactory.Create<ISqlExecutor>();
+                    using var childExecutor = executorFactory.Create();
                     await childExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
                         new { name = "child-exception" });
                     throw new InvalidOperationException("expected child failure");
@@ -835,7 +835,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             });
 
             Assert.Equal("first", accessor.Current.DbKey);
-            using var parentExecutor = executorFactory.Create<ISqlExecutor>();
+            using var parentExecutor = executorFactory.Create();
             await parentExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
                 new { name = "parent-after-exception" });
         }
@@ -866,7 +866,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 using (manager.Use("second"))
                 {
                     Assert.Equal("second", accessor.Current.DbKey);
-                    using var childExecutor = executorFactory.Create<ISqlExecutor>();
+                    using var childExecutor = executorFactory.Create();
                     await childExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
                         new { name = "child-cancelled" });
                     cancellationTokenSource.Cancel();
@@ -875,7 +875,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             });
 
             Assert.Equal("first", accessor.Current.DbKey);
-            using var parentExecutor = executorFactory.Create<ISqlExecutor>();
+            using var parentExecutor = executorFactory.Create();
             await parentExecutor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)",
                 new { name = "parent-after-cancellation" });
         }
@@ -912,7 +912,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using (manager.Use("second"))
         using (var query = _fixture.CreateQuery("second"))
         {
-            Assert.Equal(1, query.Sql<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
+            Assert.Equal(1, query.Query<int>().AppendSelect("Count(*)").AppendFrom("samples").Scalar());
         }
         Assert.Empty(await _fixture.ReadNamesAsync("first"));
     }
@@ -973,7 +973,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         using var query = _fixture.CreateQuery();
-        var rawTotal = query.Sql<decimal>().AggregateRaw(SqlAggregateFunction.Sum, "Amount * 2", "DoubleTotal")
+        var rawTotal = query.Query<decimal>().AggregateRaw(SqlAggregateFunction.Sum, "Amount * 2", "DoubleTotal")
             .From("samples")
             .Scalar();
         var expressionTotal = CreateAggregateDescription<decimal>(query).AggregateExpression(SqlAggregateFunction.Sum,
@@ -1004,13 +1004,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         var rootQuery = _fixture.CreateQuery();
-        var fluent = rootQuery.Sql<Sample>().Select("Id,Name,Amount").From("samples");
-        var text = rootQuery.Sql<Sample>("Select Id,Name,Amount From samples");
+        var fluent = rootQuery.Query<Sample>().Select("Id,Name,Amount").From("samples");
+        var text = rootQuery.Text<Sample>("Select Id,Name,Amount From samples");
         rootQuery.Dispose();
         rootQuery.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() => rootQuery.Sql<Sample>().Select("Id,Name,Amount").From("samples").ToList());
+        Assert.Throws<ObjectDisposedException>(() => rootQuery.Query<Sample>().Select("Id,Name,Amount").From("samples").ToList());
         Assert.Throws<ObjectDisposedException>(() => fluent.ToList());
         Assert.Throws<ObjectDisposedException>(() => text.ToList());
         await Assert.ThrowsAsync<ObjectDisposedException>(() => fluent.ToListAsync());
@@ -1034,13 +1034,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var list = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
-        var first = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
-        var only = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var list = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        var first = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
+        var only = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "two" }).SingleAsync();
-        var firstMissing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var firstMissing = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefaultAsync();
-        var missing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var missing = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).SingleOrDefaultAsync();
 
         // Assert
@@ -1049,7 +1049,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("two", only.Name);
         Assert.Null(firstMissing);
         Assert.Null(missing);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => query.Sql<Sample>()
+        await Assert.ThrowsAsync<InvalidOperationException>(() => query.Query<Sample>()
             .Select("Id,Name,Amount").From("samples").SingleAsync());
     }
 
@@ -1064,13 +1064,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var list = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToList();
-        var first = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").First();
-        var only = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var list = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToList();
+        var first = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").First();
+        var only = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "two" }).Single();
-        var firstMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var firstMissing = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefault();
-        var singleMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var singleMissing = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).SingleOrDefault();
 
         // Assert
@@ -1079,9 +1079,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("two", only.Name);
         Assert.Null(firstMissing);
         Assert.Null(singleMissing);
-        Assert.Throws<InvalidOperationException>(() => query.Sql<Sample>()
+        Assert.Throws<InvalidOperationException>(() => query.Query<Sample>()
             .Select("Id,Name,Amount").From("samples").Single());
-        Assert.Throws<InvalidOperationException>(() => query.Sql<Sample>(
+        Assert.Throws<InvalidOperationException>(() => query.Text<Sample>(
             "Select Id,Name,Amount From samples Where Name = @name", new { name = "missing" }).First());
     }
 
@@ -1094,10 +1094,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var selected = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "one");
+        var selected = query.Query<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "one");
         var selectedSql = selected.ToSql();
         var selectedParameters = selected.GetParams();
-        var countDescription = query.Sql<int>().CountAll().From("samples");
+        var countDescription = query.Query<int>().CountAll().From("samples");
 
         // Act
         var descriptions = selected.ToList();
@@ -1122,20 +1122,20 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var selectedIds = query.Sql<int>().Select("Id").From("samples").Where("Name", "two");
-        var selectedNames = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
-        var selectedSamples = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "two");
+        var selectedIds = query.Query<int>().Select("Id").From("samples").Where("Name", "two");
+        var selectedNames = query.Query<string>().Select("Name").From("samples").Where("Name", "two");
+        var selectedSamples = query.Query<Sample>().Select("Id,Name,Amount").From("samples").Where("Name", "two");
 
         // Act
-        var inResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").In("Id", selectedIds).ToList();
-        var notInResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").NotIn("Id", selectedIds).ToList();
-        var existsResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").Exists(selectedIds).ToList();
-        var notExistsResult = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").NotExists(selectedIds).ToList();
-        var derivedResult = query.Sql<Sample>().Select("selected.Id,selected.Name,selected.Amount")
+        var inResult = query.Query<Sample>().Select("Id,Name,Amount").From("samples").In("Id", selectedIds).ToList();
+        var notInResult = query.Query<Sample>().Select("Id,Name,Amount").From("samples").NotIn("Id", selectedIds).ToList();
+        var existsResult = query.Query<Sample>().Select("Id,Name,Amount").From("samples").Exists(selectedIds).ToList();
+        var notExistsResult = query.Query<Sample>().Select("Id,Name,Amount").From("samples").NotExists(selectedIds).ToList();
+        var derivedResult = query.Query<Sample>().Select("selected.Id,selected.Name,selected.Amount")
             .From(selectedSamples, "selected").ToList();
-        var cteResult = query.Sql<Sample>().With("selected", selectedSamples)
+        var cteResult = query.Query<Sample>().With("selected", selectedSamples)
             .Select("Id,Name,Amount").From("selected").ToList();
-        var unionResult = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+        var unionResult = query.Query<string>().Select("Name").From("samples").Where("Name", "one")
             .Union(selectedNames).ToList();
 
         // Assert
@@ -1157,10 +1157,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var child = query.Sql<int>().Select("Id").From("samples")
+        var child = query.Query<int>().Select("Id").From("samples")
             .Where("Name", "one")
             .Where("Name", "two");
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples")
             .Where("Name", "two")
             .In("Id", child);
         var childSql = child.ToSql();
@@ -1187,7 +1187,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<Sample>().Select("Id,Name,Amount").From("samples");
+        var description = query.Query<Sample>().Select("Id,Name,Amount").From("samples");
 
         // Act
         var firstPage = description.ToPage(new Pager(1, 2) { Order = "Name" });
@@ -1212,7 +1212,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await SeedAsync();
         await InsertAsync("one");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<string>().Distinct().Select("Name").From("samples");
+        var description = query.Query<string>().Distinct().Select("Name").From("samples");
 
         // Act
         var page = description.ToPage(new Pager(1, 2) { Order = "Name" });
@@ -1231,7 +1231,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAggregateSamplesAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<string>().Select("Name").CountAll("Total").From("samples")
+        var description = query.Query<string>().Select("Name").CountAll("Total").From("samples")
             .GroupBy("Name")
             .HavingRaw("[Total] > 1");
 
@@ -1255,7 +1255,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<int>().CountAll("Total").From("samples");
+        var description = query.Query<int>().CountAll("Total").From("samples");
 
         // Act
         var syncPage = description.ToPage(new Pager(1, 1, "Total"));
@@ -1277,10 +1277,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var selectedName = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
-        var union = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+        var selectedName = query.Query<string>().Select("Name").From("samples").Where("Name", "one");
+        var union = query.Query<string>().Select("Name").From("samples").Where("Name", "one")
             .Union(selectedName);
-        var unionAll = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+        var unionAll = query.Query<string>().Select("Name").From("samples").Where("Name", "one")
             .UnionAll(selectedName);
 
         // Act
@@ -1303,9 +1303,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var cteSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
-        var unionSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
-        var description = query.Sql<string>().With("selected", cteSource).Select("Name").From("selected")
+        var cteSource = query.Query<string>().Select("Name").From("samples").Where("Name", "one");
+        var unionSource = query.Query<string>().Select("Name").From("samples").Where("Name", "two");
+        var description = query.Query<string>().With("selected", cteSource).Select("Name").From("selected")
             .Union(unionSource);
 
         // Act
@@ -1324,10 +1324,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var recursiveSource = query.Sql<int>().Distinct().AppendSelect("1 As Value").From("samples")
-            .UnionAll(query.Sql<int>().AppendSelect("Value + 1 As Value").From("numbers")
+        var recursiveSource = query.Query<int>().Distinct().AppendSelect("1 As Value").From("samples")
+            .UnionAll(query.Query<int>().AppendSelect("Value + 1 As Value").From("numbers")
                 .AppendWhere("Value < @maxValue").AddParam("maxValue", 3));
-        var description = query.Sql<int>().With("numbers", recursiveSource)
+        var description = query.Query<int>().With("numbers", recursiveSource)
             .Select("Value").From("numbers").OrderBy("Value");
 
         // Act
@@ -1364,11 +1364,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 new { id = 4, parentId = (int?)2, name = "leaf" });
         }
         using var query = _fixture.CreateQuery();
-        var tree = query.Sql<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth").From("HierarchyNodes")
+        var tree = query.Query<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth").From("HierarchyNodes")
             .IsNull("ParentId")
-            .UnionAll(query.Sql<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
+            .UnionAll(query.Query<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
                 .From("HierarchyNodes", "n").Join("tree", "t").AppendOn("n.ParentId=t.Id"));
-        var description = query.Sql<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
+        var description = query.Query<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
             .From("tree").OrderBy("Depth").OrderBy("Id");
 
         // Act
@@ -1393,13 +1393,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var samples = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        var samples = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
         using (var executor = _fixture.CreateExecutor())
             await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
                 new { id = samples[0].Id, tenantId = "tenant-1", name = "order-one" });
-        var filteredSamples = query.Sql<Sample>().Select("Id,Name,Amount").From("samples")
+        var filteredSamples = query.Query<Sample>().Select("Id,Name,Amount").From("samples")
             .In("Name", new[] { "one", "two" });
-        var description = query.Sql<LambdaJoinResult>().With("selected", filteredSamples)
+        var description = query.Query<LambdaJoinResult>().With("selected", filteredSamples)
             .Select("s.Name,o.TenantId").From("selected", "s")
             .LeftJoin("Orders", "o").AppendOn("o.Id=s.Id")
             .OrderBy("s.Id");
@@ -1419,7 +1419,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<OrderSample>().Select("o.Id,o.Name").From("samples", "s")
+        var description = query.Query<OrderSample>().Select("o.Id,o.Name").From("samples", "s")
             .RightJoin("Orders", "o").AppendOn("s.Id=o.Id")
             .OrderBy("o.Id");
 
@@ -1439,12 +1439,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var intersectSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "one");
-        var exceptSource = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
-        var intersect = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
+        var intersectSource = query.Query<string>().Select("Name").From("samples").Where("Name", "one");
+        var exceptSource = query.Query<string>().Select("Name").From("samples").Where("Name", "two");
+        var intersect = query.Query<string>().Select("Name").From("samples").Where("Name", "one")
             .Intersect(intersectSource);
-        var except = query.Sql<string>().Select("Name").From("samples").Where("Name", "one")
-            .Union(query.Sql<string>().Select("Name").From("samples").Where("Name", "two"))
+        var except = query.Query<string>().Select("Name").From("samples").Where("Name", "one")
+            .Union(query.Query<string>().Select("Name").From("samples").Where("Name", "two"))
             .Except(exceptSource);
 
         // Act
@@ -1467,11 +1467,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var source = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
-        var simpleCte = query.Sql<string>().With("selected", source).Select("Name").From("selected");
-        var groupCte = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+        var source = query.Query<string>().Select("Name").From("samples").Where("Name", "two");
+        var simpleCte = query.Query<string>().With("selected", source).Select("Name").From("selected");
+        var groupCte = query.Query<string>().With("selected", source).Select("Name").From("selected")
             .GroupBy("Name");
-        var unionCte = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+        var unionCte = query.Query<string>().With("selected", source).Select("Name").From("selected")
             .Union(source);
 
         // Act
@@ -1498,8 +1498,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var source = query.Sql<string>().Select("Name").From("samples");
-        var description = query.Sql<string>().With("selected", source).Distinct().Select("Name").From("selected");
+        var source = query.Query<string>().Select("Name").From("samples");
+        var description = query.Query<string>().With("selected", source).Distinct().Select("Name").From("selected");
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => description.ToPage(new Pager(1, 1) { Order = "Name" }));
@@ -1517,8 +1517,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var source = query.Sql<string>().Select("Name").From("samples").Where("Name", "two");
-        var description = query.Sql<string>().With("selected", source).Select("Name").From("selected")
+        var source = query.Query<string>().Select("Name").From("samples").Where("Name", "two");
+        var description = query.Query<string>().With("selected", source).Select("Name").From("selected")
             .GroupBy("Name");
         var pager = new Pager(1, 1) { Order = "Name", TotalCount = 0 };
 
@@ -1543,10 +1543,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        var fluentCount = query.Sql<int>().CountAll().From("samples").Scalar();
-        var textCount = await query.Sql<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
+        var fluentCount = query.Query<int>().CountAll().From("samples").Scalar();
+        var textCount = await query.Text<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
             .ScalarAsync();
-        var missingAmount = query.Sql<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
+        var missingAmount = query.Text<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
             .Scalar();
         cancellationTokenSource.Cancel();
 
@@ -1554,7 +1554,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(3, fluentCount);
         Assert.Equal(2, textCount);
         Assert.Null(missingAmount);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<int>("Select Count(*) From samples")
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<int>("Select Count(*) From samples")
             .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
     }
 
@@ -1569,17 +1569,17 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluentNames = query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id")
+        var fluentNames = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id")
             .AsEnumerable().Select(item => item.Name).ToList();
-        using (var enumerator = query.Sql<Sample>(
+        using (var enumerator = query.Text<Sample>(
                    "Select Id,Name,Amount From samples Where Name <> @name Order By Id", new { name = "two" })
                .AsEnumerable().GetEnumerator())
         {
             Assert.True(enumerator.MoveNext());
             Assert.Equal("one", enumerator.Current.Name);
-            Assert.Throws<InvalidOperationException>(() => query.Sql<int>("Select Count(*) From samples").Scalar());
+            Assert.Throws<InvalidOperationException>(() => query.Text<int>("Select Count(*) From samples").Scalar());
         }
-        var count = query.Sql<int>("Select Count(*) From samples").Scalar();
+        var count = query.Text<int>("Select Count(*) From samples").Scalar();
 
         // Assert
         Assert.Equal(new[] { "one", "two", "three" }, fluentNames);
@@ -1598,13 +1598,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        var fluent = query.Sql<SamplePair>().Select("s.Id,s.Name,s.Amount,s.Id,s.Name").From("samples", "s")
+        var fluent = query.Query<SamplePair>().Select("s.Id,s.Name,s.Amount,s.Id,s.Name").From("samples", "s")
             .OrderBy("s.Id").ToList<Sample, SampleName>((sample, name) => new SamplePair
             {
                 SampleName = sample.Name,
                 RelatedName = name.Name
             });
-        var text = await query.Sql<SamplePair>(
+        var text = await query.Text<SamplePair>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
@@ -1618,7 +1618,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "one:one", "two:two", "three:three" },
             fluent.Select(item => $"{item.SampleName}:{item.RelatedName}"));
         Assert.Equal(new[] { "one:one", "three:three" }, text.Select(item => $"{item.SampleName}:{item.RelatedName}"));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<SamplePair>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<SamplePair>(
                 "Select Id,Name,Amount,Id,Name From samples")
             .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
             {
@@ -1638,7 +1638,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<SampleTriple>()
+        var fluent = query.Query<SampleTriple>()
             .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name")
             .From("samples", "s")
             .OrderBy("s.Id")
@@ -1648,7 +1648,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 SecondName = second.Name,
                 ThirdName = third.Name
             });
-        var text = await query.Sql<SampleTriple>(
+        var text = await query.Text<SampleTriple>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName>((sample, second, third) => new SampleTriple
@@ -1676,7 +1676,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<SampleQuad>()
+        var fluent = query.Query<SampleQuad>()
             .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
             .From("samples", "s")
             .OrderBy("s.Id")
@@ -1687,7 +1687,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 ThirdName = third.Name,
                 FourthName = fourth.Name
             });
-        var text = await query.Sql<SampleQuad>(
+        var text = await query.Text<SampleQuad>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName>((sample, second, third, fourth) => new SampleQuad
@@ -1716,7 +1716,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<SampleQuint>()
+        var fluent = query.Query<SampleQuint>()
             .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
             .From("samples", "s")
             .OrderBy("s.Id")
@@ -1729,7 +1729,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FourthName = fourth.Name,
                     FifthName = fifth.Name
                 });
-        var text = await query.Sql<SampleQuint>(
+        var text = await query.Text<SampleQuint>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName>((sample, second, third, fourth, fifth) =>
@@ -1762,7 +1762,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<SampleSext>()
+        var fluent = query.Query<SampleSext>()
             .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
             .From("samples", "s")
             .OrderBy("s.Id")
@@ -1776,7 +1776,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FifthName = fifth.Name,
                     SixthName = sixth.Name
                 });
-        var text = await query.Sql<SampleSext>(
+        var text = await query.Text<SampleSext>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName>(
@@ -1810,7 +1810,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<SampleSept>()
+        var fluent = query.Query<SampleSept>()
             .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
             .From("samples", "s")
             .OrderBy("s.Id")
@@ -1825,7 +1825,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     SixthName = sixth.Name,
                     SeventhName = seventh.Name
                 });
-        var text = await query.Sql<SampleSept>(
+        var text = await query.Text<SampleSept>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName>(
@@ -1861,7 +1861,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var names = new List<string>();
 
         // Act
-        await foreach (var sample in query.Sql<Sample>("Select Id,Name,Amount From samples Where Name <> @name Order By Id",
+        await foreach (var sample in query.Text<Sample>("Select Id,Name,Amount From samples Where Name <> @name Order By Id",
                            new { name = "two" }).AsAsyncEnumerable())
             names.Add(sample.Name);
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -1869,9 +1869,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "one", "three" }, names);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<Sample>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<Sample>(
             "Select Id,Name,Amount From samples").ToListAsync(cancellationToken: cancellationTokenSource.Token));
-        Assert.Equal("one", (await query.Sql<Sample>("Select Id,Name,Amount From samples Order By Id")
+        Assert.Equal("one", (await query.Text<Sample>("Select Id,Name,Amount From samples Order By Id")
             .FirstAsync()).Name);
     }
 
@@ -1888,7 +1888,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "planned" });
 
         // Act
-        var count = await query.Sql<int>("Select Count(*) From samples Where Name = @name", new { name = "planned" })
+        var count = await query.Text<int>("Select Count(*) From samples Where Name = @name", new { name = "planned" })
             .SingleAsync();
         scope.Commit();
 
@@ -1908,7 +1908,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var result = await query.SqlInterpolated<Sample>($"Select Id,Name,Amount From samples Where Name = {"O'Reilly"}")
+        var result = await query.TextInterpolated<Sample>($"Select Id,Name,Amount From samples Where Name = {"O'Reilly"}")
             .SingleAsync();
 
         // Assert
@@ -1926,7 +1926,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.SqlInterpolated<Sample>(
+        var description = query.TextInterpolated<Sample>(
             $"Select Id,Name,Amount From samples Where Name = {"one",-10:ignored} And '{{' = '{{'");
         var result = await description.SingleAsync();
 
@@ -1948,7 +1948,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.SqlInterpolated<Sample>(
+        var description = query.TextInterpolated<Sample>(
             $"Select Id,Name,Amount From samples Where Name = {"one"} And '@p0' = '@p0'");
         var result = await description.SingleAsync();
 
@@ -1971,13 +1971,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var fluent = query.Sql<string>()
+        var fluent = query.Query<string>()
             .Select("Id,Name,Name")
             .From("samples")
             .OrderBy("Id")
             .SplitOn("Name")
             .ToList<Sample, SampleName>((sample, name) => name.Name);
-        var text = await query.Sql<string>("Select Id,Name,Name From samples Order By Id")
+        var text = await query.Text<string>("Select Id,Name,Name From samples Order By Id")
             .SplitOn("Name")
             .ToListAsync<Sample, SampleName>((sample, name) => name.Name);
 
@@ -1997,7 +1997,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var result = await query.Lambda<SqliteStructuredTableSample>()
+        var result = await query.From<SqliteStructuredTableSample>()
             .Where(sample => sample.Name != "two")
             .OrderBy(sample => sample.Name)
             .Skip(1)
@@ -2019,11 +2019,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var names = await query.Lambda<SqliteStructuredTableSample>()
+        var names = await query.From<SqliteStructuredTableSample>()
             .Select<string>(sample => new object[] { sample.Name })
             .OrderBy("Name")
             .ToListAsync();
-        var count = await query.Lambda<SqliteStructuredTableSample>()
+        var count = await query.From<SqliteStructuredTableSample>()
             .Aggregate<int>(SqlAggregateFunction.Count, sample => sample.Name)
             .ScalarAsync();
 
@@ -2043,7 +2043,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .Select(sample => new object[] { sample.Name })
             .From()
             .As<string>();
@@ -2065,7 +2065,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .Select(sample => new LambdaMemberInitResult
             {
                 DisplayName = sample.Name,
@@ -2092,11 +2092,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var replacement = query.Lambda<SqliteStructuredTableSample>()
+        var replacement = query.From<SqliteStructuredTableSample>()
             .Select(sample => new object[] { sample.Name })
             .Select(sample => new object[] { sample.Name })
             .From();
-        var appended = query.Lambda<SqliteStructuredTableSample>()
+        var appended = query.From<SqliteStructuredTableSample>()
             .Select(sample => new object[] { sample.Name })
             .AppendSelect(sample => new object[] { sample.Id })
             .From();
@@ -2117,7 +2117,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .SelectFrom<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
             .From("sample")
             .WhereIfNotEmpty<SqliteStructuredTableSample>(sample => sample.Name, "two")
@@ -2139,7 +2139,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var samples = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        var samples = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
         using (var executor = _fixture.CreateExecutor())
         {
             await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
@@ -2149,7 +2149,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         }
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .From("s")
             .Select(sample => new object[] { sample.Id, sample.Name }, true)
             .Join<SqliteStructuredOrderSample>("o")
@@ -2166,6 +2166,47 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：多表 DTO 派生表应在 SQLite 中保留筛选参数和成员别名，并作为外层类型化 Join 来源完成物化。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenDtoSubqueryJoined_ShouldExecuteAndMaterializeProjectedMembers()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var samples = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
+        using (var executor = _fixture.CreateExecutor())
+        {
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[0].Id, tenantId = "tenant-1", name = "order-one" });
+            await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
+                new { id = samples[1].Id, tenantId = "tenant-2", name = "order-two" });
+        }
+        var summary = query.From<SqliteStructuredTableSample, SqliteStructuredOrderSample>()
+            .Where((sample, order) => sample.Id == order.Id && order.TenantId == "tenant-1")
+            .SelectSubquery((sample, order) => new LambdaSubqueryResult
+            {
+                SampleId = sample.Id,
+                TenantId = order.TenantId
+            }, "summary");
+
+        // Act
+        var description = query.From<SqliteStructuredTableSample, SqliteStructuredOrderSample>()
+            .Join(summary)
+            .On((sample, order, derived) => sample.Id == derived.SampleId && order.Id == derived.SampleId)
+            .SelectDto((sample, order, derived) => new LambdaJoinResult
+            {
+                Name = sample.Name,
+                TenantId = derived.TenantId
+            });
+        var result = await description.ToListAsync();
+
+        // Assert
+        Assert.Equal(new[] { "one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
+        Assert.Equal("Select `samples`.`Name` As `Name`,`summary`.`TenantId` As `TenantId` \r\nFrom `samples`, `Orders` \r\nJoin (Select `samples`.`Id` As `SampleId`,`Orders`.`TenantId` As `TenantId` \r\nFrom `samples`, `Orders` \r\nWhere `samples`.`Id`=`Orders`.`Id` And `Orders`.`TenantId`=@_p_0) As `summary` On `samples`.`Id`=`summary`.`SampleId` And `Orders`.`Id`=`summary`.`SampleId`", description.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：同一实体类型自连接应在 On 条件中使用不同别名，并能执行返回来源表投影。
     /// </summary>
     [Fact]
@@ -2176,7 +2217,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .Select(sample => new object[] { sample.Name })
             .From<SqliteStructuredTableSample>("s")
             .Join<SqliteStructuredTableSample>("p")
@@ -2199,13 +2240,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var sample = await query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
+        var sample = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
         using (var executor = _fixture.CreateExecutor())
             await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
             new { id = sample.Id, tenantId = "tenant-1", name = "order-one" });
 
         // Act
-        var result = await query.Lambda<SqliteStructuredTableSample>()
+        var result = await query.From<SqliteStructuredTableSample>()
             .From("s")
             .Select(sample => new object[] { sample.Name }, true)
             .LeftJoin<SqliteStructuredOrderSample>("o")
@@ -2232,7 +2273,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .GroupBy(sample => sample.Name)
             .HavingRaw("Count(*) > 1")
             .Aggregate<int>(SqlAggregateFunction.Count, sample => sample.Id);
@@ -2256,7 +2297,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.Lambda<SqliteStructuredTableSample>()
+        var description = query.From<SqliteStructuredTableSample>()
             .Select(sample => new object[] { sample.Name })
             .Distinct()
             .OrderBy(sample => sample.Name)
@@ -2292,7 +2333,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>按标识排序的样例查询描述。</returns>
     private static SqlQuery<Sample> CreateSamplesDescription(ISqlQuery query) =>
-        query.Sql<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id");
+        query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id");
 
     /// <summary>
     /// 创建聚合独立查询描述。
@@ -2301,7 +2342,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>带样例表别名的聚合查询描述。</returns>
     private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Sql<TResult>().From("samples", "s");
+        query.Query<TResult>().From("samples", "s");
 
     /// <summary>
     /// 写入一个样例记录。
@@ -2625,6 +2666,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         /// 名称。
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 租户标识。
+        /// </summary>
+        public string TenantId { get; set; }
+    }
+
+    /// <summary>
+    /// Lambda DTO 派生表的公开成员模型。
+    /// </summary>
+    private sealed class LambdaSubqueryResult
+    {
+        /// <summary>
+        /// 样例标识。
+        /// </summary>
+        public int SampleId { get; set; }
 
         /// <summary>
         /// 租户标识。

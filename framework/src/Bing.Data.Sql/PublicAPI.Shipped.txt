@@ -12,9 +12,9 @@ Bing.Data.Sql.Builders.Clauses.FromClause.From(Bing.Data.Sql.ISqlBuilder builder
 Bing.Data.Sql.Builders.Clauses.FromClause.From(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.Builders.Clauses.FromClause.From(System.Action<Bing.Data.Sql.ISqlBuilder> action, string alias) -> void
 Bing.Data.Sql.Builders.Clauses.FromClause.From(string table, string alias = null) -> void
+Bing.Data.Sql.Builders.Clauses.FromClause.FromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table, Bing.Data.Enums.DatabaseType? providerDatabaseType) -> void
 Bing.Data.Sql.Builders.Clauses.FromClause.From<TEntity>(string alias = null, string schema = null) -> void
 Bing.Data.Sql.Builders.Clauses.FromClause.FromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
-Bing.Data.Sql.Builders.Clauses.FromClause.FromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table, Bing.Data.Enums.DatabaseType? providerDatabaseType) -> void
 Bing.Data.Sql.Builders.Clauses.FromClause.ObjectNameFormatter.get -> Bing.Data.Sql.Metadata.ISqlObjectNameFormatter
 Bing.Data.Sql.Builders.Clauses.FromClause.Register.get -> Bing.Data.Sql.Builders.IEntityAliasRegister
 Bing.Data.Sql.Builders.Clauses.FromClause.Resolver.get -> Bing.Data.Sql.Builders.IEntityResolver
@@ -1539,10 +1539,7 @@ Bing.Data.Sql.ISqlExecutor.ExecuteSql(string sql, object param = null, int? time
 Bing.Data.Sql.ISqlExecutor.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.CreateBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutorFactory
-Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>() -> TExecutor
-Bing.Data.Sql.ISqlExecutorFactory.Create<TExecutor>(string dbKey) -> TExecutor
-Bing.Data.Sql.ISqlImplementationTypeResolver
-Bing.Data.Sql.ISqlImplementationTypeResolver.Resolve(System.Type serviceType, string providerKey) -> System.Type
+Bing.Data.Sql.ISqlExecutorFactory.Create(string dbKey = null) -> Bing.Data.Sql.ISqlExecutor
 Bing.Data.Sql.ISqlInsertExecutor
 Bing.Data.Sql.ISqlInsertExecutor.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null) -> int
 Bing.Data.Sql.ISqlInsertExecutor.InsertAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
@@ -1553,8 +1550,7 @@ Bing.Data.Sql.ISqlMultipleQueryExecutor.CreateBatch() -> Bing.Data.Sql.Builders.
 Bing.Data.Sql.ISqlMultipleQueryExecutor.Execute(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null) -> Bing.Data.Sql.ISqlMultipleQueryResult
 Bing.Data.Sql.ISqlMultipleQueryExecutor.ExecuteAsync(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlMultipleQueryResult>
 Bing.Data.Sql.ISqlMultipleQueryExecutorFactory
-Bing.Data.Sql.ISqlMultipleQueryExecutorFactory.Create() -> Bing.Data.Sql.ISqlMultipleQueryExecutor
-Bing.Data.Sql.ISqlMultipleQueryExecutorFactory.Create(string dbKey) -> Bing.Data.Sql.ISqlMultipleQueryExecutor
+Bing.Data.Sql.ISqlMultipleQueryExecutorFactory.Create(string dbKey = null) -> Bing.Data.Sql.ISqlMultipleQueryExecutor
 Bing.Data.Sql.ISqlMultipleQueryResult
 Bing.Data.Sql.ISqlMultipleQueryResult.Read() -> System.Collections.Generic.List<dynamic>
 Bing.Data.Sql.ISqlMultipleQueryResult.Read<TEntity>() -> System.Collections.Generic.List<TEntity>
@@ -1575,29 +1571,22 @@ Bing.Data.Sql.ISqlParameterSourceResolver
 Bing.Data.Sql.ISqlParameterSourceResolver.CanResolve(object source) -> bool
 Bing.Data.Sql.ISqlParameterSourceResolver.TryResolve(object source, string parameterName, out object value) -> bool
 Bing.Data.Sql.ISqlQuery
-Bing.Data.Sql.ISqlQuery.Lambda<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.ISqlQuery.From<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.ISqlQuery.Procedure<TResult>(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
-Bing.Data.Sql.ISqlQuery.Sql<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
-Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
-Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.ISqlQueryFactory
-Bing.Data.Sql.ISqlQueryFactory.Create<TQuery>() -> TQuery
-Bing.Data.Sql.ISqlQueryFactory.Create<TQuery>(string dbKey) -> TQuery
+Bing.Data.Sql.ISqlQueryFactory.Create(string dbKey = null) -> Bing.Data.Sql.ISqlQuery
 Bing.Data.Sql.ISqlTransactionContext
-Bing.Data.Sql.ISqlTransactionContext.Connection.get -> System.Data.IDbConnection
-Bing.Data.Sql.ISqlTransactionContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
 Bing.Data.Sql.ISqlTransactionContext.DatabaseType.get -> Bing.Data.Enums.DatabaseType
 Bing.Data.Sql.ISqlTransactionContext.DbKey.get -> string
 Bing.Data.Sql.ISqlTransactionContext.IsolationLevel.get -> System.Data.IsolationLevel
-Bing.Data.Sql.ISqlTransactionContext.Transaction.get -> System.Data.IDbTransaction
+Bing.Data.Sql.ISqlTransactionContext.MappingProfile.get -> string
+Bing.Data.Sql.ISqlTransactionContext.ReadPreference.get -> Bing.Data.Sql.SqlReadPreference
 Bing.Data.Sql.ISqlTransactionContext.TransactionId.get -> string
 Bing.Data.Sql.ISqlTransactionScope
 Bing.Data.Sql.ISqlTransactionScope.Commit() -> void
 Bing.Data.Sql.ISqlTransactionScope.CommitAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Bing.Data.Sql.ISqlTransactionScope.CreateExecutor() -> Bing.Data.Sql.ISqlExecutor
-Bing.Data.Sql.ISqlTransactionScope.CreateExecutor<TExecutor>() -> TExecutor
 Bing.Data.Sql.ISqlTransactionScope.CreateQuery() -> Bing.Data.Sql.ISqlQuery
-Bing.Data.Sql.ISqlTransactionScope.CreateQuery<TQuery>() -> TQuery
 Bing.Data.Sql.ISqlTransactionScope.IsCompleted.get -> bool
 Bing.Data.Sql.ISqlTransactionScope.Rollback() -> void
 Bing.Data.Sql.ISqlTransactionScope.RollbackAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
@@ -2373,8 +2362,8 @@ static Bing.Data.Sql.WhereClauseExtensions.WhereIf<T>(this T source, string colu
 static Bing.Data.Sql.WhereClauseExtensions.WhereIfNotEmpty<T>(this T source, string column, object value, Bing.Operator operator = Bing.Operator.Equal) -> T
 static readonly Bing.Data.Sql.Builders.Conditions.NullCondition.Instance -> Bing.Data.Sql.Builders.Conditions.NullCondition
 virtual Bing.Data.Sql.Builders.Clauses.FromClause.Clone(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> Bing.Data.Sql.Builders.IFromClause
-virtual Bing.Data.Sql.Builders.Clauses.FromClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table) -> Bing.Data.Sql.Builders.Clauses.FromClause
 virtual Bing.Data.Sql.Builders.Clauses.FromClause.CreateSqlItem(string table, string schema, string alias) -> Bing.Data.Sql.Builders.Core.SqlItem
+virtual Bing.Data.Sql.Builders.Clauses.FromClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table) -> Bing.Data.Sql.Builders.Clauses.FromClause
 virtual Bing.Data.Sql.Builders.Clauses.FromClause.CreateStructuredSqlItem(Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.Builders.Core.SqlItem
 virtual Bing.Data.Sql.Builders.Clauses.FromClause.GetSubqueryAlias(string alias) -> string
 virtual Bing.Data.Sql.Builders.Clauses.FromClause.ParseTableName(string table, string alias) -> (string TableName, string Alias, string Schema)

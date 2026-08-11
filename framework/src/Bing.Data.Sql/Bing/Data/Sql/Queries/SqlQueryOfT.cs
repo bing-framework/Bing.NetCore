@@ -343,6 +343,14 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     internal ISqlBuilder GetBuilder() => _query.GetBuilder();
 
     /// <summary>
+    /// 获取当前查询描述使用的内部计划执行器。
+    /// </summary>
+    /// <remarks>
+    /// 仅供同程序集的强类型查询描述创建共享 Builder 的后继对象。
+    /// </remarks>
+    internal ISqlQueryPlanExecutor Executor => _query.Executor;
+
+    /// <summary>
     /// 生成当前查询的 SQL 文本。
     /// </summary>
     public string ToSql() => _query.ToSql();

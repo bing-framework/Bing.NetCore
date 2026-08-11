@@ -21,7 +21,7 @@ public partial class MySqlQueryTest
         await InitDottedCompanyDataAsync(id, "structured-company");
 
         // Act
-        var result = _sqlQuery.Sql<int>().AppendSelect("Count(*)")
+        var result = _sqlQuery.Query<int>().AppendSelect("Count(*)")
             .From("Merchants.Company", "c")
             .Where("c.CompanyId", id)
             .Scalar();
@@ -43,7 +43,7 @@ public partial class MySqlQueryTest
         await InitDottedCompanyDataAsync(id, "raw-company");
 
         // Act
-        var result = _sqlQuery.Sql<int>().AppendSelect("Count(*)")
+        var result = _sqlQuery.Query<int>().AppendSelect("Count(*)")
             .AppendFrom("`Merchants.Company` As `c`")
             .Where("c.CompanyId", id)
             .Scalar();
@@ -66,7 +66,7 @@ public partial class MySqlQueryTest
         await InitDottedMerchantDataAsync(merchantId, "merchant-structured");
         await InitDottedCompanyDataAsync(companyId, "company-structured", merchantId);
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
+        var description = query.Query<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From("Merchants.Company", "c")
             .LeftJoin("Merchants.Merchant", "m")
             .AppendOn("c.MerchantId=m.MerchantId")
@@ -97,7 +97,7 @@ public partial class MySqlQueryTest
         await InitDottedMerchantDataAsync(merchantId, "merchant-typed");
         await InitDottedCompanyDataAsync(companyId, "company-typed", merchantId);
         using var query = _fixture.CreateQuery();
-        var description = query.Lambda<MySqlDottedCompany>()
+        var description = query.From<MySqlDottedCompany>()
             .ClearSelect()
             .Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From("c")
@@ -131,7 +131,7 @@ public partial class MySqlQueryTest
         await InitDottedMerchantDataAsync(merchantId, "merchant-raw");
         await InitDottedCompanyDataAsync(companyId, "company-raw", merchantId);
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<DottedCompanyJoinResult>().AppendSelect("c.CompanyId,c.Name,m.Name As MerchantName")
+        var description = query.Query<DottedCompanyJoinResult>().AppendSelect("c.CompanyId,c.Name,m.Name As MerchantName")
             .AppendFrom("`Merchants.Company` As `c`")
             .AppendLeftJoin("`Merchants.Merchant` As `m`")
             .AppendOn("`m`.`MerchantId`=`c`.`MerchantId`")
@@ -160,7 +160,7 @@ public partial class MySqlQueryTest
         var companyId = Guid.NewGuid();
         await InitDottedCompanyDataAsync(companyId, "company-without-merchant", Guid.NewGuid());
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
+        var description = query.Query<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From("Merchants.Company", "c")
             .LeftJoin("Merchants.Merchant", "m")
             .AppendOn("c.MerchantId=m.MerchantId")
@@ -187,7 +187,7 @@ public partial class MySqlQueryTest
         var companyId = Guid.NewGuid();
         await InitDottedCompanyDataAsync(companyId, "company-raw-parameter");
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name")
+        var description = query.Query<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name")
             .AppendFrom("(Select * From `Merchants.Company` Where `CompanyId`=@Id) As `c`")
             .AddParam("Id", companyId);
 
@@ -223,7 +223,7 @@ public partial class MySqlQueryTest
         await InitDottedMerchantDataAsync(merchantId, "merchant-raw-parameter");
         await InitDottedCompanyDataAsync(companyId, "company-raw-parameter", merchantId);
         using var query = _fixture.CreateQuery();
-        var description = query.Sql<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
+        var description = query.Query<DottedCompanyJoinResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .AppendFrom("`Merchants.Company` As `c`")
             .AppendJoin("`Merchants.Merchant` As `m` On `m`.`MerchantId`=`c`.`MerchantId` And `m`.`MerchantId`=@MerchantId")
             .AddParam("MerchantId", merchantId);

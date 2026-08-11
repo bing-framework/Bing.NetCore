@@ -100,6 +100,7 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
             Intersect = capabilities.Intersect,
             Except = capabilities.Except,
             RightJoin = capabilities.RightJoin,
+            FullJoin = capabilities.FullJoin,
             Pagination = capabilities.Pagination
         };
 

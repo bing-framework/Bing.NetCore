@@ -54,6 +54,7 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
             Intersect = SqlQueryCapabilityState.Supported,
             Except = SqlQueryCapabilityState.Supported,
             RightJoin = SqlQueryCapabilityState.Unsupported,
+            FullJoin = SqlQueryCapabilityState.Unsupported,
             Pagination = SqlQueryCapabilityState.Supported
         },
         Mutation = new SqlProviderMutationCapabilities

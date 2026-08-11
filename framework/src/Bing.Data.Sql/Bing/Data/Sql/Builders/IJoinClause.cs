@@ -147,6 +147,60 @@ public interface IJoinClause : ISqlClause, ISqlClauseCloneable<IJoinClause>
     void AppendRightJoin(string sql);
 
     /// <summary>
+    /// 全外连接。
+    /// </summary>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">表别名。</param>
+    void FullJoin(string table, string alias = null);
+
+    /// <summary>
+    /// 全外连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void FullJoin(SqlTableReference reference);
+
+    /// <summary>
+    /// 全外连接实体表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="alias">表别名。</param>
+    /// <param name="schema">架构名。</param>
+    void FullJoin<TEntity>(string alias = null, string schema = null) where TEntity : class;
+
+    /// <summary>
+    /// 追加原始全外连接表表达式。
+    /// </summary>
+    /// <param name="sql">原始连接文本；调用方负责 SQL 安全性和参数化。</param>
+    void AppendFullJoin(string sql);
+
+    /// <summary>
+    /// 交叉连接。
+    /// </summary>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">表别名。</param>
+    void CrossJoin(string table, string alias = null);
+
+    /// <summary>
+    /// 交叉连接结构化表引用。
+    /// </summary>
+    /// <param name="reference">结构化表引用。</param>
+    void CrossJoin(SqlTableReference reference);
+
+    /// <summary>
+    /// 交叉连接实体表。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="alias">表别名。</param>
+    /// <param name="schema">架构名。</param>
+    void CrossJoin<TEntity>(string alias = null, string schema = null) where TEntity : class;
+
+    /// <summary>
+    /// 追加原始交叉连接表表达式。
+    /// </summary>
+    /// <param name="sql">原始连接文本；调用方负责 SQL 安全性和参数化。</param>
+    void AppendCrossJoin(string sql);
+
+    /// <summary>
     /// 设置连接条件
     /// </summary>
     /// <param name="condition">连接条件</param>

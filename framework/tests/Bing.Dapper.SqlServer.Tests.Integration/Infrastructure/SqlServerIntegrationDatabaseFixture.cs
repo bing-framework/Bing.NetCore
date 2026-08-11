@@ -1,4 +1,5 @@
 using Bing.Dapper.SqlServer;
+using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Bing.Test.Shared;
@@ -48,9 +49,8 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
         await DatabaseScript.InitializeAsync(connection);
 
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddSqlServerSqlQuery(ConnectionString);
-        services.AddSqlServerSqlExecutor(ConnectionString);
+        services.AddSqlServerProvider();
+        services.AddSqlDataSource("default", DatabaseType.SqlServer, ConnectionString);
         services.AddLogging();
         services.AddBing();
         _serviceProvider = services.BuildServiceProvider();

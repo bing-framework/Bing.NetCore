@@ -105,6 +105,37 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：Mutation 描述应递归冻结数组、集合和字典参数，避免嵌套容器在 Builder 创建后改变本次执行输入。
+    /// </summary>
+    [Fact]
+    public void ToMutationDescription_WhenNestedParameterContainersChange_ShouldKeepIndependentSnapshots()
+    {
+        // Arrange
+        var payload = new byte[] { 1, 2 };
+        var values = new List<int> { 3, 4 };
+        var parameter = new Dictionary<string, object>
+        {
+            ["Payload"] = payload,
+            ["Values"] = values
+        };
+        var builder = new TestSqlBuilder()
+            .InsertInto("samples")
+            .Columns(nameof(MutationSample.Name))
+            .Values(parameter);
+
+        // Act
+        var description = builder.ToMutationDescription();
+        payload[0] = 9;
+        values[0] = 8;
+        parameter["Payload"] = new byte[] { 7 };
+        var snapshot = Assert.IsType<Dictionary<string, object>>(description.Parameters[0].Value);
+
+        // Assert
+        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(snapshot["Payload"]));
+        Assert.Equal(new object[] { 3, 4 }, Assert.IsType<object[]>(snapshot["Values"]));
+    }
+
+    /// <summary>
     /// 测试目的：Mutation 描述必须在 SQL 渲染完成后只导出一次参数快照，确保渲染期间合并的参数与 SQL 对应。
     /// </summary>
     [Fact]

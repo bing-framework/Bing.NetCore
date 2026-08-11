@@ -25,7 +25,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// 测试目的：冻结描述未声明 Returning 能力时，同步入口必须在连接打开前拒绝，即使当前 Provider 支持其他 Mutation。
     /// </summary>
     [Fact]
-    public void ExecuteReturningQuery_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
+    public void ExecuteReturning_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
     {
         // Arrange
         var connection = CreateConnection();
@@ -38,7 +38,7 @@ public sealed class ProviderProfileExecutionGateTest
         var description = CreateReturningDescription(profile);
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturningQuery<int>(description));
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(description));
 
         // Assert
         Assert.Equal("Mutation 描述 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
@@ -50,7 +50,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// 测试目的：冻结描述未声明 Returning 能力时，异步入口必须与同步入口在连接访问前使用相同 Gate。
     /// </summary>
     [Fact]
-    public async Task ExecuteReturningQueryAsync_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
+    public async Task ExecuteReturningAsync_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
     {
         // Arrange
         var connection = CreateConnection();
@@ -64,7 +64,7 @@ public sealed class ProviderProfileExecutionGateTest
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteReturningQueryAsync<int>(description));
+            executor.ExecuteReturningAsync<int>(description));
 
         // Assert
         Assert.Equal("Mutation 描述 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
@@ -76,7 +76,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// 测试目的：预取消应先于普通 Mutation 描述的参数与 Provider 校验执行。
     /// </summary>
     [Fact]
-    public async Task ExecuteAsync_WhenCancellationRequested_ShouldCancelBeforeDescriptionValidation()
+    public async Task ExecuteMutationAsync_WhenCancellationRequested_ShouldCancelBeforeDescriptionValidation()
     {
         // Arrange
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile());
@@ -85,7 +85,7 @@ public sealed class ProviderProfileExecutionGateTest
         cancellationTokenSource.Cancel();
 
         // Act and Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(null,
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteMutationAsync(null,
             cancellationToken: cancellationTokenSource.Token));
         Assert.Equal(0, executor.ExecuteBeforeCount);
     }
@@ -94,7 +94,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// 测试目的：预取消应先于 Returning Mutation 描述的参数与能力校验执行。
     /// </summary>
     [Fact]
-    public async Task ExecuteReturningQueryAsync_WhenCancellationRequested_ShouldCancelBeforeDescriptionValidation()
+    public async Task ExecuteReturningAsync_WhenCancellationRequested_ShouldCancelBeforeDescriptionValidation()
     {
         // Arrange
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile());
@@ -103,7 +103,7 @@ public sealed class ProviderProfileExecutionGateTest
         cancellationTokenSource.Cancel();
 
         // Act and Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteReturningQueryAsync<int>(null,
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteReturningAsync<int>(null,
             cancellationToken: cancellationTokenSource.Token));
         Assert.Equal(0, executor.ExecuteBeforeCount);
     }
@@ -122,7 +122,7 @@ public sealed class ProviderProfileExecutionGateTest
         });
         using var query = new ProfileGateQuery(serviceProvider, CreateOptions(connection.Object));
         var queryFactory = new Mock<ISqlQueryFactory>();
-        queryFactory.Setup(factory => factory.Create<ISqlQuery>()).Returns(query);
+        queryFactory.Setup(factory => factory.Create(null)).Returns(query);
         var executorFactory = new Mock<ISqlExecutorFactory>();
         var factory = new SqlTransactionScopeFactory(queryFactory.Object, executorFactory.Object);
 
@@ -216,6 +216,8 @@ public sealed class ProviderProfileExecutionGateTest
 
         // Assert
         Assert.Contains("不支持存储过程输出参数", exception.Message);
+        connection.Verify(item => item.Open(), Times.Never);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
         command.Verify(item => item.ExecuteNonQuery(), Times.Never);
     }
 
@@ -276,6 +278,8 @@ public sealed class ProviderProfileExecutionGateTest
 
         // Assert
         Assert.Contains("不支持存储过程输出参数", exception.Message);
+        connection.Verify(item => item.Open(), Times.Never);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
         command.Verify(item => item.ExecuteReader(), Times.Never);
     }
 
@@ -296,7 +300,7 @@ public sealed class ProviderProfileExecutionGateTest
         // Act
         var exception = await Assert.ThrowsAsync<NotSupportedException>(async () =>
         {
-            await foreach (var _ in query.Sql<int>("Select 1").AsAsyncEnumerable())
+            await foreach (var _ in query.Text<int>("Select 1").AsAsyncEnumerable())
             {
             }
         });
@@ -326,7 +330,7 @@ public sealed class ProviderProfileExecutionGateTest
         // Act and Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.Sql<int>("Select 1").AsAsyncEnumerable(
+            await foreach (var _ in query.Text<int>("Select 1").AsAsyncEnumerable(
                                cancellationToken: cancellationTokenSource.Token))
             {
             }

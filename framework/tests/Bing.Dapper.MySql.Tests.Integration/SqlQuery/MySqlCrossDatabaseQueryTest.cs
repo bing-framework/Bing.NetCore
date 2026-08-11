@@ -41,7 +41,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "cross-database-company");
             using var query = _fixture.CreateQuery();
-            var description = query.Sql<CrossDatabaseCompanyResult>().AppendSelect("c.CompanyId,c.Name")
+            var description = query.Query<CrossDatabaseCompanyResult>().AppendSelect("c.CompanyId,c.Name")
                 .AppendFrom($"{tableName} As `c`")
                 .Where("c.CompanyId", companyId);
 
@@ -78,7 +78,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "string-cross-database-company");
             using var query = _fixture.CreateQuery();
-            var description = query.Sql<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name")
+            var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name")
                 .From(tableName, "c")
                 .Where("c.CompanyId", companyId);
 
@@ -117,7 +117,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "structured-cross-database-company");
             using var query = _fixture.CreateQuery();
-            var description = query.Sql<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name");
+            var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name");
             description.From(new SqlTableReference
             {
                 Schema = databaseName,
@@ -222,7 +222,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await InsertCompanyAsync(connection, "`Merchants.Company`", companyId, merchantId,
                 "string-cross-database-company");
             using var query = _fixture.CreateQuery();
-            var description = query.Sql<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
+            var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
                 .From("Merchants.Company", "c")
                 .Join(merchantTable, "m")
                 .AppendOn("c.MerchantId=m.MerchantId")
@@ -272,7 +272,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await InsertCompanyAsync(connection, "`Merchants.Company`", companyId, Guid.NewGuid(),
                 "string-cross-database-company-without-merchant");
             using var query = _fixture.CreateQuery();
-            var description = query.Sql<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
+            var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName")
                 .From("Merchants.Company", "c")
                 .LeftJoin(merchantTable, "m")
                 .AppendOn("c.MerchantId=m.MerchantId")
@@ -325,7 +325,7 @@ public sealed class MySqlCrossDatabaseQueryTest
     private static SqlQuery<CrossDatabaseCompanyResult> CreateStructuredCrossDatabaseJoinQuery(ISqlQuery query,
         string databaseName, Guid companyId)
     {
-        var description = query.Sql<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName");
+        var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName");
         description.From(new SqlTableReference { TableName = "Merchants.Company", Alias = "c" });
         description.LeftJoin(new SqlTableReference
         {

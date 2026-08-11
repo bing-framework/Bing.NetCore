@@ -54,7 +54,8 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
             UnionAll = SqlQueryCapabilityState.Supported,
             Intersect = SqlQueryCapabilityState.Supported,
             Except = SqlQueryCapabilityState.Supported,
-            RightJoin = SqlQueryCapabilityState.Supported
+            RightJoin = SqlQueryCapabilityState.Supported,
+            FullJoin = SqlQueryCapabilityState.Supported
         },
         Mutation = new SqlProviderMutationCapabilities
         {

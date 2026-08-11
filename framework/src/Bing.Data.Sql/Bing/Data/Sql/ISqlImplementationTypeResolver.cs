@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 实现类型解析器
 /// </summary>
-public interface ISqlImplementationTypeResolver
+internal interface ISqlImplementationTypeResolver
 {
     /// <summary>
     /// 解析服务类型对应的实现类型

@@ -10,11 +10,5 @@ public interface ISqlMultipleQueryExecutorFactory
     /// </summary>
     /// <param name="dbKey">数据源标识。</param>
     /// <returns>独立的多结果集查询执行器。</returns>
-    ISqlMultipleQueryExecutor Create(string dbKey);
-
-    /// <summary>
-    /// 为当前数据库上下文创建多结果集查询执行器。
-    /// </summary>
-    /// <returns>独立的多结果集查询执行器。</returns>
-    ISqlMultipleQueryExecutor Create();
+    ISqlMultipleQueryExecutor Create(string dbKey = null);
 }

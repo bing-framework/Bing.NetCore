@@ -23,7 +23,30 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Text<string>($"Select * From samples Where Name = '{name}'");
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzeAsync(source);
+
+        // Assert
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("BINGSQL002", diagnostic.Id);
+    }
+
+    /// <summary>
+    /// 测试目的：Text 文本入口接收插值 SQL 时必须报告安全诊断。
+    /// </summary>
+    [Fact]
+    public async Task Analyze_WhenInterpolatedSqlPassedToExplicitTextEntryPoint_ShouldReportDiagnostic()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            public class Test
+            {
+                public void Execute(Query query, string name) => query.Text<string>($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -49,8 +72,8 @@ public class BingSql002AnalyzerTest
                 public void Execute(Query query, string name)
                 {
                     var sql = $"Select * From samples Where Name = '{name}'";
-                    query.Sql<string>(sql);
-                    query.Sql<string>("Select * From samples Where Name = '" + $"{name}'");
+                    query.Text<string>(sql);
+                    query.Text<string>("Select * From samples Where Name = '" + $"{name}'");
                 }
             }
             """;
@@ -76,10 +99,10 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Query query, string name, bool usePrimary)
                 {
-                    query.Sql<string>((string)$"Select * From samples Where Name = '{name}'");
-                    query.Sql<string>(usePrimary ? $"Select * From samples Where Name = '{name}'" : "Select * From samples");
-                    query.Sql<string>(null ?? $"Select * From samples Where Name = '{name}'");
-                    query.Sql<string>(string.Concat("Select * From samples Where Name = '", $"{name}'"));
+                    query.Text<string>((string)$"Select * From samples Where Name = '{name}'");
+                    query.Text<string>(usePrimary ? $"Select * From samples Where Name = '{name}'" : "Select * From samples");
+                    query.Text<string>(null ?? $"Select * From samples Where Name = '{name}'");
+                    query.Text<string>(string.Concat("Select * From samples Where Name = '", $"{name}'"));
                 }
             }
             """;
@@ -105,8 +128,8 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Query query, string name)
                 {
-                    query.Sql<string>("Select * From samples Where Name = @name", new { name });
-                    query.SqlInterpolated<string>($"Select * From samples Where Name = {name}");
+                    query.Text<string>("Select * From samples Where Name = @name", new { name });
+                    query.TextInterpolated<string>($"Select * From samples Where Name = {name}");
                 }
             }
             """;
@@ -129,7 +152,7 @@ public class BingSql002AnalyzerTest
             using QueryAlias = Bing.Data.Sql.Query;
             public class Test
             {
-                public void Execute(QueryAlias query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(QueryAlias query, string name) => query.Text<string>($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -152,7 +175,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Text<string>($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -177,8 +200,8 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Executor executor, string name)
                 {
-                    executor.ExecuteSql($"Delete From samples Where Name = '{name}'");
-                    executor.ExecuteSqlAsync($"Delete From samples Where Name = '{name}'");
+                    executor.ExecuteText($"Delete From samples Where Name = '{name}'");
+                    executor.ExecuteTextAsync($"Delete From samples Where Name = '{name}'");
                 }
             }
             """;
@@ -204,7 +227,7 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Executor executor, string name)
                 {
-                    executor.ExecuteSql($"Delete From samples Where Name = '{name}'");
+                    executor.ExecuteText($"Delete From samples Where Name = '{name}'");
                     executor.Sql($"Unrelated helper: {name}");
                 }
             }
@@ -230,7 +253,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Text<string>($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -267,26 +290,26 @@ public class BingSql002AnalyzerTest
         {
             public interface ISqlQuery
             {
-                object Sql<TResult>(string sql, object parameters = null);
-                object SqlInterpolated<TResult>(System.FormattableString sql);
+                object Text<TResult>(string sql, object parameters = null);
+                object TextInterpolated<TResult>(System.FormattableString sql);
             }
 
             public sealed class Query : ISqlQuery
             {
-                public object Sql<TResult>(string sql, object parameters = null) => null;
-                public object SqlInterpolated<TResult>(System.FormattableString sql) => null;
+                public object Text<TResult>(string sql, object parameters = null) => null;
+                public object TextInterpolated<TResult>(System.FormattableString sql) => null;
             }
 
             public interface ISqlExecutor
             {
-                object ExecuteSql(string sql, object parameters = null);
-                object ExecuteSqlAsync(string sql, object parameters = null);
+                object ExecuteText(string sql, object parameters = null);
+                object ExecuteTextAsync(string sql, object parameters = null);
             }
 
             public sealed class Executor : ISqlExecutor
             {
-                public object ExecuteSql(string sql, object parameters = null) => null;
-                public object ExecuteSqlAsync(string sql, object parameters = null) => null;
+                public object ExecuteText(string sql, object parameters = null) => null;
+                public object ExecuteTextAsync(string sql, object parameters = null) => null;
             }
         }
         """;
@@ -303,7 +326,7 @@ public class BingSql002AnalyzerTest
 
             public static class QueryExtensions
             {
-                public static object Sql<TResult>(this ISqlQuery query, string sql, object parameters = null) => null;
+                public static object Text<TResult>(this ISqlQuery query, string sql, object parameters = null) => null;
             }
         }
         """;
@@ -320,7 +343,7 @@ public class BingSql002AnalyzerTest
 
             public static class ExecutorExtensions
             {
-                public static object ExecuteSql(this ISqlExecutor executor, string sql, object parameters = null) => null;
+                public static object ExecuteText(this ISqlExecutor executor, string sql, object parameters = null) => null;
                 public static object Sql(this ISqlExecutor executor, string text) => null;
             }
         }

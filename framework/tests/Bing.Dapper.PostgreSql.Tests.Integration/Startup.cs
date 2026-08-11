@@ -1,5 +1,6 @@
 using AspectCore.Extensions.Hosting;
 using Bing.Dapper.PostgreSql;
+using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -48,15 +49,8 @@ public class Startup
         var connectionString = context.Configuration.GetConnectionString("PostgreSqlConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
             connectionString = context.Configuration.GetConnectionString("DefaultConnection");
-        services.AddSqlCore();
-        services.AddPostgreSqlQuery(options =>
-        {
-            options.ConnectionString(connectionString ?? string.Empty);
-        });
-        services.AddPostgreSqlExecutor(options =>
-        {
-            options.ConnectionString(connectionString ?? string.Empty);
-        });
+        services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.PgSql, connectionString ?? string.Empty);
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.AddBing();
     }

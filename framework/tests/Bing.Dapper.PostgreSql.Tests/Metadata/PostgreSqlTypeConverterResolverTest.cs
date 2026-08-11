@@ -34,39 +34,41 @@ public class PostgreSqlTypeConverterResolverTest
     }
 
     /// <summary>
-    /// 测试目的：注册 PostgreSql 查询对象时应固定使用 PgSql 数据库类型，确保独立连接工厂解析到 Npgsql。
+    /// 测试目的：固定 Query Factory 应为 PostgreSql 数据源创建官方查询实现。
     /// </summary>
     [Fact]
-    public void AddPostgreSqlQuery_ShouldConfigurePgSqlDatabaseType()
+    public void QueryFactory_WhenPostgreSqlDataSourceRegistered_ShouldCreatePostgreSqlQuery()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddPostgreSqlQuery("Host=localhost;Database=test;");
+        services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.PgSql, "Host=localhost;Database=test;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<PostgreSqlQuery>>();
+        var query = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.PgSql, options.DatabaseType);
+        Assert.IsType<PostgreSqlQuery>(query);
     }
 
     /// <summary>
-    /// 测试目的：注册 PostgreSql 执行器时应固定使用 PgSql 数据类型，避免回退为 SqlServer。
+    /// 测试目的：固定 Executor Factory 应为 PostgreSql 数据源创建官方执行器实现。
     /// </summary>
     [Fact]
-    public void AddPostgreSqlExecutor_ShouldConfigurePgSqlDatabaseType()
+    public void ExecutorFactory_WhenPostgreSqlDataSourceRegistered_ShouldCreatePostgreSqlExecutor()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddPostgreSqlExecutor("Host=localhost;Database=test;");
+        services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.PgSql, "Host=localhost;Database=test;");
         using var provider = services.BuildServiceProvider();
 
         // Act
-        var options = provider.GetRequiredService<SqlOptions<PostgreSqlExecutor>>();
+        var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create();
 
         // Assert
-        Assert.Equal(DatabaseType.PgSql, options.DatabaseType);
+        Assert.IsType<PostgreSqlExecutor>(executor);
     }
 
     /// <summary>
@@ -77,8 +79,8 @@ public class PostgreSqlTypeConverterResolverTest
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlCore();
-        services.AddPostgreSqlQuery("Host=localhost;Database=test;");
+        services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("default", DatabaseType.PgSql, "Host=localhost;Database=test;");
         using var provider = services.BuildServiceProvider();
 
         // Act
