@@ -32,7 +32,7 @@ public sealed class SqlMutationBatchStrategyTest
         using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
 
         // Act
-        var affectedRows = executor.ExecuteText("Update [mutation_samples] Set [Name]=@name", new { name = "Bing" });
+        var affectedRows = executor.ExecuteSql("Update [mutation_samples] Set [Name]=@name", new { name = "Bing" });
 
         // Assert
         Assert.Equal(0, affectedRows);
@@ -52,7 +52,7 @@ public sealed class SqlMutationBatchStrategyTest
         using var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        var affectedRows = await executor.ExecuteTextAsync("Update [mutation_samples] Set [Name]=@name",
+        var affectedRows = await executor.ExecuteSqlAsync("Update [mutation_samples] Set [Name]=@name",
             new { name = "Bing" }, cancellationToken: cancellationTokenSource.Token);
 
         // Assert

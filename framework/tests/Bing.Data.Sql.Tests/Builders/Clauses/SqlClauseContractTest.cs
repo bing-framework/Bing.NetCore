@@ -1,7 +1,9 @@
 using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
@@ -50,6 +52,40 @@ public class SqlClauseContractTest
 
         // Assert
         Assert.All(result, Assert.True);
+    }
+
+    /// <summary>
+    /// 测试 - 全部 Mutation Clause 接口必须统一提供清理、带上下文克隆和验证合同。
+    /// </summary>
+    [Fact]
+    public void MutationClauseInterfaces_ShouldDeclareClearCloneAndValidationContracts()
+    {
+        // Arrange
+        var clauseTypes = new[]
+        {
+            typeof(IInsertClause), typeof(IInsertColumnsClause), typeof(IValuesClause), typeof(IUpdateClause),
+            typeof(IUpdateFromClause), typeof(ISetClause), typeof(IDeleteClause), typeof(IDeleteUsingClause),
+            typeof(IMutationWhereClause), typeof(IReturningClause)
+        };
+
+        // Act
+        var contracts = clauseTypes.Select(type => new
+        {
+            Type = type,
+            Cloneable = type.GetInterfaces().Single(contract => contract.IsGenericType &&
+                contract.GetGenericTypeDefinition() == typeof(ISqlMutationClauseCloneable<>))
+        }).ToArray();
+
+        // Assert
+        Assert.All(contracts, contract =>
+        {
+            Assert.True(typeof(ISqlClause).IsAssignableFrom(contract.Type));
+            Assert.True(typeof(ISqlValidatable).IsAssignableFrom(contract.Type));
+            var clone = contract.Cloneable.GetMethod(nameof(ISqlMutationClauseCloneable<ISqlClause>.Clone));
+            Assert.NotNull(clone);
+            Assert.Equal(typeof(SqlMutationContext), Assert.Single(clone.GetParameters()).ParameterType);
+            Assert.True(contract.Type.IsAssignableFrom(clone.ReturnType));
+        });
     }
 
     /// <summary>

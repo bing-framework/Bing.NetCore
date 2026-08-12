@@ -1005,7 +1005,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await SeedAsync();
         var rootQuery = _fixture.CreateQuery();
         var fluent = rootQuery.Query<Sample>().Select("Id,Name,Amount").From("samples");
-        var text = rootQuery.Text<Sample>("Select Id,Name,Amount From samples");
+        var text = rootQuery.Sql<Sample>("Select Id,Name,Amount From samples");
         rootQuery.Dispose();
         rootQuery.Dispose();
 
@@ -1036,11 +1036,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         var list = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync();
         var first = await query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync();
-        var only = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var only = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "two" }).SingleAsync();
-        var firstMissing = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var firstMissing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefaultAsync();
-        var missing = await query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var missing = await query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).SingleOrDefaultAsync();
 
         // Assert
@@ -1066,11 +1066,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         var list = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToList();
         var first = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id").First();
-        var only = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var only = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "two" }).Single();
-        var firstMissing = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var firstMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefault();
-        var singleMissing = query.Text<Sample>("Select Id,Name,Amount From samples Where Name = @name",
+        var singleMissing = query.Sql<Sample>("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).SingleOrDefault();
 
         // Assert
@@ -1081,7 +1081,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Null(singleMissing);
         Assert.Throws<InvalidOperationException>(() => query.Query<Sample>()
             .Select("Id,Name,Amount").From("samples").Single());
-        Assert.Throws<InvalidOperationException>(() => query.Text<Sample>(
+        Assert.Throws<InvalidOperationException>(() => query.Sql<Sample>(
             "Select Id,Name,Amount From samples Where Name = @name", new { name = "missing" }).First());
     }
 
@@ -1544,9 +1544,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var fluentCount = query.Query<int>().CountAll().From("samples").Scalar();
-        var textCount = await query.Text<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
+        var textCount = await query.Sql<int>("Select Count(*) From samples Where Name <> @name", new { name = "two" })
             .ScalarAsync();
-        var missingAmount = query.Text<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
+        var missingAmount = query.Sql<decimal?>("Select Amount From samples Where Name = @name", new { name = "missing" })
             .Scalar();
         cancellationTokenSource.Cancel();
 
@@ -1554,7 +1554,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(3, fluentCount);
         Assert.Equal(2, textCount);
         Assert.Null(missingAmount);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<int>("Select Count(*) From samples")
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<int>("Select Count(*) From samples")
             .ScalarAsync(cancellationToken: cancellationTokenSource.Token));
     }
 
@@ -1571,15 +1571,15 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         var fluentNames = query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id")
             .AsEnumerable().Select(item => item.Name).ToList();
-        using (var enumerator = query.Text<Sample>(
+        using (var enumerator = query.Sql<Sample>(
                    "Select Id,Name,Amount From samples Where Name <> @name Order By Id", new { name = "two" })
                .AsEnumerable().GetEnumerator())
         {
             Assert.True(enumerator.MoveNext());
             Assert.Equal("one", enumerator.Current.Name);
-            Assert.Throws<InvalidOperationException>(() => query.Text<int>("Select Count(*) From samples").Scalar());
+            Assert.Throws<InvalidOperationException>(() => query.Sql<int>("Select Count(*) From samples").Scalar());
         }
-        var count = query.Text<int>("Select Count(*) From samples").Scalar();
+        var count = query.Sql<int>("Select Count(*) From samples").Scalar();
 
         // Assert
         Assert.Equal(new[] { "one", "two", "three" }, fluentNames);
@@ -1604,7 +1604,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 SampleName = sample.Name,
                 RelatedName = name.Name
             });
-        var text = await query.Text<SamplePair>(
+        var text = await query.Sql<SamplePair>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
@@ -1618,7 +1618,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(new[] { "one:one", "two:two", "three:three" },
             fluent.Select(item => $"{item.SampleName}:{item.RelatedName}"));
         Assert.Equal(new[] { "one:one", "three:three" }, text.Select(item => $"{item.SampleName}:{item.RelatedName}"));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<SamplePair>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<SamplePair>(
                 "Select Id,Name,Amount,Id,Name From samples")
             .ToListAsync<Sample, SampleName>((sample, name) => new SamplePair
             {
@@ -1648,7 +1648,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 SecondName = second.Name,
                 ThirdName = third.Name
             });
-        var text = await query.Text<SampleTriple>(
+        var text = await query.Sql<SampleTriple>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName>((sample, second, third) => new SampleTriple
@@ -1687,7 +1687,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 ThirdName = third.Name,
                 FourthName = fourth.Name
             });
-        var text = await query.Text<SampleQuad>(
+        var text = await query.Sql<SampleQuad>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName>((sample, second, third, fourth) => new SampleQuad
@@ -1729,7 +1729,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FourthName = fourth.Name,
                     FifthName = fifth.Name
                 });
-        var text = await query.Text<SampleQuint>(
+        var text = await query.Sql<SampleQuint>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName>((sample, second, third, fourth, fifth) =>
@@ -1776,7 +1776,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FifthName = fifth.Name,
                     SixthName = sixth.Name
                 });
-        var text = await query.Text<SampleSext>(
+        var text = await query.Sql<SampleSext>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName>(
@@ -1825,7 +1825,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     SixthName = sixth.Name,
                     SeventhName = seventh.Name
                 });
-        var text = await query.Text<SampleSept>(
+        var text = await query.Sql<SampleSept>(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
             .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName>(
@@ -1861,7 +1861,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var names = new List<string>();
 
         // Act
-        await foreach (var sample in query.Text<Sample>("Select Id,Name,Amount From samples Where Name <> @name Order By Id",
+        await foreach (var sample in query.Sql<Sample>("Select Id,Name,Amount From samples Where Name <> @name Order By Id",
                            new { name = "two" }).AsAsyncEnumerable())
             names.Add(sample.Name);
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -1869,9 +1869,9 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "one", "three" }, names);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Text<Sample>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql<Sample>(
             "Select Id,Name,Amount From samples").ToListAsync(cancellationToken: cancellationTokenSource.Token));
-        Assert.Equal("one", (await query.Text<Sample>("Select Id,Name,Amount From samples Order By Id")
+        Assert.Equal("one", (await query.Sql<Sample>("Select Id,Name,Amount From samples Order By Id")
             .FirstAsync()).Name);
     }
 
@@ -1888,7 +1888,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync("Insert Into samples(Name) Values (@name)", new { name = "planned" });
 
         // Act
-        var count = await query.Text<int>("Select Count(*) From samples Where Name = @name", new { name = "planned" })
+        var count = await query.Sql<int>("Select Count(*) From samples Where Name = @name", new { name = "planned" })
             .SingleAsync();
         scope.Commit();
 
@@ -1908,7 +1908,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var result = await query.TextInterpolated<Sample>($"Select Id,Name,Amount From samples Where Name = {"O'Reilly"}")
+        var result = await query.SqlInterpolated<Sample>($"Select Id,Name,Amount From samples Where Name = {"O'Reilly"}")
             .SingleAsync();
 
         // Assert
@@ -1926,7 +1926,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.TextInterpolated<Sample>(
+        var description = query.SqlInterpolated<Sample>(
             $"Select Id,Name,Amount From samples Where Name = {"one",-10:ignored} And '{{' = '{{'");
         var result = await description.SingleAsync();
 
@@ -1948,7 +1948,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.TextInterpolated<Sample>(
+        var description = query.SqlInterpolated<Sample>(
             $"Select Id,Name,Amount From samples Where Name = {"one"} And '@p0' = '@p0'");
         var result = await description.SingleAsync();
 
@@ -1977,7 +1977,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             .OrderBy("Id")
             .SplitOn("Name")
             .ToList<Sample, SampleName>((sample, name) => name.Name);
-        var text = await query.Text<string>("Select Id,Name,Name From samples Order By Id")
+        var text = await query.Sql<string>("Select Id,Name,Name From samples Order By Id")
             .SplitOn("Name")
             .ToListAsync<Sample, SampleName>((sample, name) => name.Name);
 

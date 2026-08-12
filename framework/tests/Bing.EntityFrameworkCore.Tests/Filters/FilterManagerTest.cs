@@ -56,6 +56,32 @@ public class FilterManagerTest
     }
 
     /// <summary>
+    /// 测试 - FilterManager 的有效状态必须来自共享 IDataFilter，不受旧 FilterBase 实例开关影响。
+    /// </summary>
+    [Fact]
+    public void IsEnabled_WhenLegacyFilterInstanceIsDisabled_ShouldUseSharedDataFilterState()
+    {
+        // Arrange
+        var filter = new TestFilter();
+        var dataFilter = new DataFilter();
+        var services = new ServiceCollection();
+        services.AddSingleton<IFilter<ITestFilterMarker>>(filter);
+        services.AddSingleton<IDataFilter>(dataFilter);
+        using var provider = services.BuildServiceProvider();
+        var manager = new FilterManager(provider);
+        using var legacyScope = filter.Disable();
+
+        // Act
+        var enabledWhileLegacyFilterIsDisabled = manager.IsEnabled<ITestFilterMarker>();
+        using var sharedScope = dataFilter.Disable<ITestFilterMarker>();
+        var enabledWhileSharedFilterIsDisabled = manager.IsEnabled<ITestFilterMarker>();
+
+        // Assert
+        Assert.True(enabledWhileLegacyFilterIsDisabled);
+        Assert.False(enabledWhileSharedFilterIsDisabled);
+    }
+
+    /// <summary>
     /// 测试过滤器。
     /// </summary>
     private sealed class TestFilter : FilterBase<ITestFilterMarker>

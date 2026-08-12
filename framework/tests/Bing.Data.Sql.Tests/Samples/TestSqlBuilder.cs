@@ -25,6 +25,12 @@ public class TestSqlBuilder : SqlBuilderBase
     public SqlClauseContext CreateCurrentClauseContext() => CreateClauseContext();
 
     /// <summary>
+    /// 获取当前 Builder 的类型化 Join 表源快照。
+    /// </summary>
+    public IReadOnlyList<TableSource> GetTypedJoinSources() =>
+        (JoinClause as Bing.Data.Sql.Builders.Clauses.JoinClause)?.GetTypedSources() ?? Array.Empty<TableSource>();
+
+    /// <summary>
     /// 渲染子查询并合并参数，仅用于验证子查询组合边界。
     /// </summary>
     /// <param name="builder">待渲染的子查询 Builder。</param>

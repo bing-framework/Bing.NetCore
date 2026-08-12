@@ -1,7 +1,9 @@
 ﻿using Bing.Data.Enums;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -90,6 +92,7 @@ public static class DapperCoreServiceCollectionExtensions
         });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
         services.TryAddScoped<IDatabaseScopeManager, DatabaseScopeManager>();
+        services.TryAddScoped<IDataFilter, DataFilter>();
         services.TryAddScoped<IReadPreferenceScopeManager, ReadPreferenceScopeManager>();
         services.TryAddSingleton<ISqlDataSourceResolver, DefaultSqlDataSourceResolver>();
         services.TryAddSingleton<ISqlProviderResolver, DefaultSqlProviderResolver>();
@@ -113,6 +116,7 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<IDapperParameterBinder, DefaultSqlParameterBinder>();
         services.TryAddSingleton<ISqlParameterBinder>(provider => provider.GetRequiredService<IDapperParameterBinder>());
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlFilter, IsDeletedFilter>());
         services.TryAddSingleton<ISqlEntityMutationCommandBuilderFactory, SqlEntityMutationCommandBuilderFactory>();
         services.TryAddSingleton<ISqlFluentMutationBuilderFactory, SqlFluentMutationBuilderFactory>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
@@ -380,30 +384,35 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 注册指定 Provider 的内部运行时服务实现。
+    /// 注册指定 Provider 的运行时服务实现。
     /// </summary>
     /// <param name="services">服务集合。</param>
-    /// <param name="serviceType">服务契约类型。</param>
-    /// <param name="implementationType">具体实现类型。</param>
-    /// <param name="providerKey">Provider 唯一标识。</param>
+    /// <param name="runtime">不可变的 Provider 运行时服务描述。</param>
     /// <returns>当前服务集合。</returns>
-    internal static IServiceCollection AddSqlProviderRuntime(this IServiceCollection services, Type serviceType,
-        Type implementationType, string providerKey)
+    public static IServiceCollection AddSqlProviderRuntime(this IServiceCollection services, SqlProviderRuntime runtime)
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));
-        if (string.IsNullOrWhiteSpace(providerKey))
-            throw new ArgumentException("SQL Provider Key 不能为空。", nameof(providerKey));
-        var registrations = services.Where(item => item.ServiceType == typeof(SqlProviderRuntimeRegistration)).ToList();
-        var registration = registrations.Select(item => item.ImplementationInstance as SqlProviderRuntimeRegistration)
-            .SingleOrDefault(item => item != null && string.Equals(item.ProviderKey, providerKey.Trim(),
-                StringComparison.OrdinalIgnoreCase));
-        if (registration == null)
+        if (runtime == null)
+            throw new ArgumentNullException(nameof(runtime));
+        var registrations = services
+            .Where(item => item.ServiceType == typeof(SqlProviderRuntime))
+            .Select(item => item.ImplementationInstance as SqlProviderRuntime)
+            .Where(item => item != null && string.Equals(item.ProviderKey, runtime.ProviderKey,
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (registrations.Count > 1)
+            throw new InvalidOperationException($"SQL Provider Key '{runtime.ProviderKey}' 的运行时服务重复注册。");
+        if (registrations.Count == 1)
         {
-            registration = new SqlProviderRuntimeRegistration(providerKey);
-            services.AddSingleton(registration);
+            var current = registrations[0];
+            if (ReferenceEquals(current, runtime) == false &&
+                (current.QueryType != runtime.QueryType || current.ExecutorType != runtime.ExecutorType ||
+                 current.MultipleQueryExecutorType != runtime.MultipleQueryExecutorType))
+                throw new InvalidOperationException($"SQL Provider Key '{runtime.ProviderKey}' 的运行时服务重复注册且配置不一致。");
+            return services;
         }
-        registration.Map(serviceType, implementationType);
+        services.AddSingleton(runtime);
         return services;
     }
 

@@ -1,7 +1,9 @@
 using Bing.Data;
+using Bing.Data.Filters;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Builders.Filters;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -65,6 +67,16 @@ public sealed class SqlBuilderServices
     public IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 
     /// <summary>
+    /// 当前 Builder 固定使用的 SQL 过滤器快照。
+    /// </summary>
+    public IReadOnlyList<ISqlFilter> Filters { get; }
+
+    /// <summary>
+    /// 当前异步执行流共享的数据过滤状态。
+    /// </summary>
+    public IDataFilter DataFilter { get; }
+
+    /// <summary>
     /// 解析不含凭据的物理数据库身份。
     /// </summary>
     internal ISqlDatabaseIdentityResolver DatabaseIdentityResolver { get; set; } =
@@ -83,6 +95,8 @@ public sealed class SqlBuilderServices
     /// <param name="crossDatabaseQueryValidator">跨数据库查询校验器。</param>
     /// <param name="tableReferenceValidator">SQL 表引用校验器。</param>
     /// <param name="entityModelMetadataProvider">实体模型原始元数据提供器。</param>
+    /// <param name="filters">当前 Builder 使用的过滤器快照。</param>
+    /// <param name="dataFilter">当前异步执行流共享的数据过滤状态。</param>
     public SqlBuilderServices(IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null, ISqlParameterFactory parameterFactory = null,
         SqlMetadataOptions metadataOptions = null, SqlOptions options = null,
@@ -90,12 +104,15 @@ public sealed class SqlBuilderServices
         ISqlObjectNameFormatter objectNameFormatter = null,
         ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null,
         ISqlTableReferenceValidator tableReferenceValidator = null,
-        IEntityModelMetadataProvider entityModelMetadataProvider = null)
+        IEntityModelMetadataProvider entityModelMetadataProvider = null, IEnumerable<ISqlFilter> filters = null,
+        IDataFilter dataFilter = null)
     {
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
         Options = options;
         DatabaseContextAccessor = databaseContextAccessor;
         EntityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
+        Filters = (filters ?? new ISqlFilter[] { new IsDeletedFilter() }).Where(filter => filter != null).ToArray();
+        DataFilter = dataFilter;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(
             databaseContextAccessor, MetadataOptions);
         EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(

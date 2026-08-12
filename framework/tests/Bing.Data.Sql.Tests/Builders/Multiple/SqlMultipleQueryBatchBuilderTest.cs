@@ -1,4 +1,5 @@
 using System.Data;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Multiple;
 using Bing.Data.Sql.Builders.Params;
 
@@ -86,6 +87,27 @@ public class SqlMultipleQueryBatchBuilderTest
         Assert.Equal(7, snapshot.Value);
         Assert.Equal("INTEGER", snapshot.ProviderTypeName);
         Assert.Equal(DbType.Int32, snapshot.DbType);
+    }
+
+    /// <summary>
+    /// 测试 - 已发布的 Mutation 命令公开参数数组被修改后，后续读取仍应返回原始冻结值。
+    /// </summary>
+    [Fact]
+    public void MutationCommand_WhenExposedArrayValueIsMutated_ShouldPreserveInternalSnapshot()
+    {
+        // Arrange
+        var command = new SqlMutationCommand("Update Orders Set Id=@id", new[]
+        {
+            new SqlParam("id", new[] { 1, 2 })
+        });
+
+        // Act
+        var exposed = Assert.Single(command.Parameters);
+        ((int[])exposed.Value)[0] = 9;
+        var snapshot = Assert.Single(command.Parameters);
+
+        // Assert
+        Assert.Equal(new[] { 1, 2 }, Assert.IsType<int[]>(snapshot.Value));
     }
 
     /// <summary>

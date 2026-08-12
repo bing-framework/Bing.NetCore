@@ -224,9 +224,34 @@ public class JoinClause : IJoinClause
     /// <returns>按连接追加顺序排列的类型化表源。</returns>
     internal IReadOnlyList<TableSource> GetTypedSources() => _params
         .Select((item, index) => new { Item = item, Index = index })
-        .Where(item => item.Item.Type != null)
-        .Select(item => item.Item.Source ?? new TableSource($"join_{item.Index}", item.Item.Table, item.Item.Type))
+        .Select(item => new
+        {
+            item.Item,
+            item.Index,
+            EntityType = item.Item.Source?.EntityType ?? item.Item.Type ??
+                (item.Item.Table as StructuredSqlItem)?.Reference?.EntityType
+        })
+        .Where(item => item.EntityType != null)
+        .Select(item => item.Item.Source ?? new TableSource($"join_{item.Index}", item.Item.Table, item.EntityType,
+            GetSourceAlias(item.Item)))
         .ToList();
+
+    /// <summary>
+    /// 向指定查询图表源追加过滤条件。
+    /// </summary>
+    /// <param name="sourceId">Join 表源标识。</param>
+    /// <param name="column">已方言转义的列名。</param>
+    /// <param name="value">参数值。</param>
+    internal void AddFilterCondition(string sourceId, string column, object value)
+    {
+        var item = _params.FirstOrDefault(candidate => string.Equals(candidate.Source?.SourceId, sourceId,
+            StringComparison.Ordinal));
+        if (item == null)
+            throw new InvalidOperationException($"未找到过滤器表源 {sourceId}。");
+        if (item.JoinType is "Right Join" or "Full Join" or "Cross Join")
+            throw new NotSupportedException($"无法安全将全局过滤器应用到 {item.JoinType} 表源 {sourceId}。请使用预过滤派生表或显式过滤条件。");
+        item.On(column, value);
+    }
 
     /// <summary>
     /// 为最后一个连接设置已按表源实例绑定的参数化条件。
@@ -303,7 +328,8 @@ public class JoinClause : IJoinClause
             registerProbe?.Register(reference.EntityType, resolvedAlias);
         var databaseContext = GetCurrentDatabaseContext();
         var sourceReference = GetSourceReference(databaseContext);
-        AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext));
+        AddItem(CreateStructuredJoinItem(joinType, reference, reference.EntityType, sourceReference, databaseContext),
+            resolvedAlias);
         if (reference.EntityType != null)
         {
             FreezeExistingProjectionAlias(reference.EntityType);
@@ -328,12 +354,25 @@ public class JoinClause : IJoinClause
     /// 添加连接项
     /// </summary>
     /// <param name="item">表连接项</param>
-    private void AddItem(JoinItem item)
+    /// <param name="sourceAlias">查询图中用于限定列的逻辑别名。</param>
+    private void AddItem(JoinItem item, string sourceAlias = null)
     {
         _context.UseOperation(SqlOperationAction.QueryClause);
+        var entityType = item.Type ?? (item.Table as StructuredSqlItem)?.Reference?.EntityType;
+        if (entityType != null && item.Source == null)
+            item.Source = new TableSource($"join_{_params.Count}", item.Table, entityType,
+                sourceAlias ?? GetSourceAlias(item));
         item.SetDependency(_helper);
         _params.Add(item);
     }
+
+    /// <summary>
+    /// 解析 Join 表源在最终 SQL 中使用的别名。
+    /// </summary>
+    /// <param name="item">连接项。</param>
+    /// <returns>已冻结的表别名。</returns>
+    private static string GetSourceAlias(JoinItem item) =>
+        (item.Table as StructuredSqlItem)?.Reference?.Alias ?? item.Table?.Alias;
 
     /// <summary>
     /// 内连接

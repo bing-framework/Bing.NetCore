@@ -55,8 +55,15 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteMutationAsync))
             ?.GetParameters().First().ParameterType);
         Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturning)));
-        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteText)));
-        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteTextAsync)));
+        Assert.Null(type.GetMethod("Execute", new[] { typeof(SqlMutationDescription), typeof(int?) }));
+        Assert.Null(type.GetMethod("ExecuteAsync", new[]
+        {
+            typeof(SqlMutationDescription), typeof(int?), typeof(CancellationToken)
+        }));
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteSql)));
+        Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteSqlAsync)));
+        Assert.Null(type.GetMethod("ExecuteText"));
+        Assert.Null(type.GetMethod("ExecuteTextAsync"));
         Assert.Null(type.GetMethod("ExecuteReturningQuery"));
         Assert.Null(type.GetMethod("ExecuteReturningQueryAsync"));
     }
@@ -125,7 +132,7 @@ public class SqlQueryApiContractTest
     /// 测试目的：根查询应公开语义化实体来源和原生文本查询入口，避免无类型描述绕开结果映射约束。
     /// </summary>
     [Fact]
-    public void FromAndText_WhenPublicApiInspected_ShouldExposeTypedInstanceQueryEntryPoints()
+    public void FromAndSql_WhenPublicApiInspected_ShouldExposeTypedInstanceQueryEntryPoints()
     {
         // Arrange
         var methods = typeof(ISqlQuery).GetMethods();
@@ -135,7 +142,7 @@ public class SqlQueryApiContractTest
                             method.IsGenericMethodDefinition &&
                             method.GetGenericArguments().Length == 1 &&
                             method.GetParameters().Length == 0);
-        var raw = methods.Single(method => method.Name == "Text" &&
+        var raw = methods.Single(method => method.Name == "Sql" &&
                                           method.IsGenericMethodDefinition &&
                                           method.GetParameters().Length == 2);
 
@@ -144,7 +151,8 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(SqlTextQuery<>), raw.ReturnType.GetGenericTypeDefinition());
         Assert.True(typeof(SqlQuery<>).IsPublic);
         Assert.True(typeof(SqlTextQuery<>).IsPublic);
-        Assert.DoesNotContain(methods, method => method.Name is "Sql" or "SqlInterpolated");
+        Assert.Contains(methods, method => method.Name == "SqlInterpolated");
+        Assert.DoesNotContain(methods, method => method.Name is "Text" or "TextInterpolated");
         Assert.Null(typeof(ISqlQuery).GetMethod("Lambda"));
     }
 
@@ -183,15 +191,15 @@ public class SqlQueryApiContractTest
     /// 测试目的：根查询应公开参数化插值 SQL 入口，避免调用方手工拼接参数值。
     /// </summary>
     [Fact]
-    public void TextInterpolated_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
+    public void SqlInterpolated_WhenPublicApiInspected_ShouldExposeTypedEntryPoint()
     {
-        var method = typeof(ISqlQuery).GetMethod("TextInterpolated");
+        var method = typeof(ISqlQuery).GetMethod("SqlInterpolated");
 
         Assert.NotNull(method);
         Assert.True(method.IsGenericMethodDefinition);
         Assert.Equal(typeof(FormattableString), method.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(SqlTextQuery<>), method.ReturnType.GetGenericTypeDefinition());
-        Assert.Null(typeof(ISqlQuery).GetMethod("SqlInterpolated"));
+        Assert.Null(typeof(ISqlQuery).GetMethod("TextInterpolated"));
     }
 
     /// <summary>

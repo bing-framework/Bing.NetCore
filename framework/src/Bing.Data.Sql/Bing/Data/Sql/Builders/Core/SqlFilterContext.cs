@@ -1,4 +1,5 @@
 using Bing.Data;
+using Bing.Data.Filters;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -36,6 +37,16 @@ public class SqlFilterContext
     public ISqlQueryClauseAccessor ClauseAccessor { get; }
 
     /// <summary>
+    /// 当前查询图中的根表源实例。
+    /// </summary>
+    public IReadOnlyList<TableSource> RootSources { get; }
+
+    /// <summary>
+    /// 当前查询图中的类型化 Join 表源实例。
+    /// </summary>
+    public IReadOnlyList<TableSource> JoinSources { get; }
+
+    /// <summary>
     /// 将实体成员解析为 SQL 映射元数据的解析器。
     /// </summary>
     public IEntityMappingResolver EntityMappingResolver { get; }
@@ -59,6 +70,11 @@ public class SqlFilterContext
     /// 根据选项和环境解析数据库上下文的解析器。
     /// </summary>
     public ISqlDatabaseContextResolver DatabaseContextResolver { get; }
+
+    /// <summary>
+    /// 当前异步执行流共享的数据过滤状态。
+    /// </summary>
+    public IDataFilter DataFilter { get; }
 
     /// <summary>
     /// Builder 生命周期内固定的数据库上下文。
@@ -91,11 +107,14 @@ public class SqlFilterContext
         Dialect = dialect;
         ParameterManager = parameterManager;
         ClauseAccessor = clause ?? throw new ArgumentNullException(nameof(clause));
+        RootSources = (clause.FromClause as Clauses.FromClause)?.Sources ?? Array.Empty<TableSource>();
+        JoinSources = (clause.JoinClause as Clauses.JoinClause)?.GetTypedSources() ?? Array.Empty<TableSource>();
         MetadataOptions = services.MetadataOptions;
         EntityMappingResolver = services.EntityMappingResolver;
         DatabaseContextAccessor = services.DatabaseContextAccessor;
         Options = services.Options;
         DatabaseContextResolver = services.DatabaseContextResolver;
+        DataFilter = services.DataFilter;
         _databaseContext = DatabaseContextSnapshot.Create(databaseContext);
     }
 }

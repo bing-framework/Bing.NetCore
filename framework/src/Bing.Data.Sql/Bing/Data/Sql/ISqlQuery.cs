@@ -17,20 +17,22 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 
     /// <summary>
     /// 创建指定结果类型的原生 SQL 文本查询描述。
+    /// 原生 SQL 不会自动应用结构化全局过滤器。
     /// </summary>
     /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
     /// <param name="sql">要原样执行的 SQL 文本。</param>
     /// <param name="parameters">由后续参数绑定器处理的参数源。</param>
     /// <returns>保留 SQL 文本和参数源的查询描述。</returns>
-    SqlTextQuery<TResult> Text<TResult>(string sql, object parameters = null);
+    SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null);
 
     /// <summary>
     /// 创建指定结果类型的参数化插值 SQL 文本查询描述。
+    /// 原生 SQL 不会自动应用结构化全局过滤器。
     /// </summary>
     /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
     /// <param name="sql">包含参数化插值值的 SQL 文本。</param>
     /// <returns>保留参数化 SQL 文本和插值参数的查询描述。</returns>
-    SqlTextQuery<TResult> TextInterpolated<TResult>(FormattableString sql);
+    SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql);
 
     /// <summary>
     /// 创建指定结果类型的存储过程查询描述。

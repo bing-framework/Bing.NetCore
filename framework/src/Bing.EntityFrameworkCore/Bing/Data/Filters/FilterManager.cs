@@ -8,16 +8,6 @@ namespace Bing.Data.Filters;
 public class FilterManager : IFilterManager
 {
     /// <summary>
-    /// 同步锁
-    /// </summary>
-    private static readonly object _sync = new();
-
-    /// <summary>
-    /// 过滤器类型列表
-    /// </summary>
-    private static readonly List<Type> _filterTypes = new();
-
-    /// <summary>
     /// 过滤器字典
     /// </summary>
     private readonly ConcurrentDictionary<Type, IFilter> _filters;
@@ -28,12 +18,19 @@ public class FilterManager : IFilterManager
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
+    /// 当前异步执行流的共享过滤状态。
+    /// </summary>
+    private readonly IDataFilter _dataFilter;
+
+    /// <summary>
     /// 初始化一个<see cref="FilterManager"/>类型的实例
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
-    public FilterManager(IServiceProvider serviceProvider)
+    /// <param name="dataFilter">当前执行流的共享过滤状态。</param>
+    public FilterManager(IServiceProvider serviceProvider, IDataFilter dataFilter = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _dataFilter = dataFilter ?? serviceProvider.GetService(typeof(IDataFilter)) as IDataFilter ?? new DataFilter();
         _filters = new ConcurrentDictionary<Type, IFilter>();
     }
 
@@ -41,10 +38,9 @@ public class FilterManager : IFilterManager
     /// 启用过滤器
     /// </summary>
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    public void EnableFilter<TFilterType>() where TFilterType : class
+    public IDisposable EnableFilter<TFilterType>() where TFilterType : class
     {
-        var filter = GetFilter<TFilterType>();
-        filter?.Enable();
+        return _dataFilter.Enable<TFilterType>();
     }
 
     /// <summary>
@@ -53,8 +49,7 @@ public class FilterManager : IFilterManager
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
     public IDisposable DisableFilter<TFilterType>() where TFilterType : class
     {
-        var filter = GetFilter<TFilterType>();
-        return filter?.Disable();
+        return _dataFilter.Disable<TFilterType>();
     }
 
     /// <summary>
@@ -72,13 +67,15 @@ public class FilterManager : IFilterManager
     /// <param name="filterType">过滤器类型</param>
     public IFilter GetFilter(Type filterType)
     {
-        if (_filters.ContainsKey(filterType) == false)
-        {
-            var serviceType = typeof(IFilter<>).MakeGenericType(filterType);
-            var filter = _serviceProvider.GetService(serviceType);
-            _filters.TryAdd(filterType, (IFilter)filter);
-        }
-        return _filters[filterType];
+        if (filterType == null)
+            return null;
+        if (_filters.TryGetValue(filterType, out var cached))
+            return cached;
+        var serviceType = typeof(IFilter<>).MakeGenericType(filterType);
+        var filter = _serviceProvider.GetService(serviceType) as IFilter;
+        if (filter != null)
+            _filters.TryAdd(filterType, filter);
+        return filter;
     }
 
     /// <summary>
@@ -87,13 +84,8 @@ public class FilterManager : IFilterManager
     /// <typeparam name="TEntity">实体类型</typeparam>
     public bool IsEntityEnabled<TEntity>()
     {
-        foreach (var type in _filterTypes)
-        {
-            var filter = GetFilter(type);
-            if (filter.IsEntityEnabled<TEntity>())
-                return true;
-        }
-        return false;
+        var filter = GetFilter<ISoftDelete>();
+        return filter != null && _dataFilter.IsEnabled<ISoftDelete>() && filter.IsEntityEnabled<TEntity>();
     }
 
     /// <summary>
@@ -102,38 +94,6 @@ public class FilterManager : IFilterManager
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
     public bool IsEnabled<TFilterType>() where TFilterType : class
     {
-        var filter = GetFilter<TFilterType>();
-        if (filter == null)
-            return false;
-        return filter.IsEnabled;
-    }
-
-    /// <summary>
-    /// 添加过滤器类型
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    public static void AddFilterType<TFilterType>()
-    {
-        var type = typeof(TFilterType);
-        lock (_sync)
-        {
-            if(_filterTypes.Contains(type))
-                return;
-            _filterTypes.Add(type);
-        }
-    }
-
-    /// <summary>
-    /// 移除过滤器类型
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    public static void RemoveFilterType<TFilterType>()
-    {
-        var type = typeof(TFilterType);
-        lock (_sync)
-        {
-            if (_filterTypes.Contains(type))
-                _filterTypes.Remove(type);
-        }
+        return GetFilter<TFilterType>() != null && _dataFilter.IsEnabled<TFilterType>();
     }
 }

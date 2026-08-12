@@ -39,10 +39,8 @@ public static class PostgreSqlServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, PostgreSqlDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(PostgreSqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(PostgreSqlQuery), PostgreSqlSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(PostgreSqlExecutor), PostgreSqlSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlMultipleQueryExecutor), typeof(PostgreSqlMultipleQueryExecutor),
-            PostgreSqlSqlProvider.Instance.Key);
+        services.AddSqlProviderRuntime(new SqlProviderRuntime(PostgreSqlSqlProvider.Instance.Key,
+            typeof(PostgreSqlQuery), typeof(PostgreSqlExecutor), typeof(PostgreSqlMultipleQueryExecutor)));
         services.TryAddTransient<ISqlQuery, PostgreSqlQuery>();
         services.TryAddTransient<ISqlExecutor, PostgreSqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>();

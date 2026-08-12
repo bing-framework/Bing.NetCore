@@ -38,7 +38,7 @@ public class JoinItem : IJoinOn
     /// <summary>
     /// 类型化派生表的绑定来源；普通连接为 null。
     /// </summary>
-    internal TableSource Source { get; }
+    internal TableSource Source { get; set; }
 
     /// <summary>
     /// 连接条件

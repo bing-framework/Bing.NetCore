@@ -38,10 +38,8 @@ public static class MySqlServiceCollectionExtensions
         services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlQuery), MySqlSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(MySqlExecutor), MySqlSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlMultipleQueryExecutor), typeof(MySqlMultipleQueryExecutor),
-            MySqlSqlProvider.Instance.Key);
+        services.AddSqlProviderRuntime(new SqlProviderRuntime(MySqlSqlProvider.Instance.Key, typeof(MySqlQuery),
+            typeof(MySqlExecutor), typeof(MySqlMultipleQueryExecutor)));
         services.TryAddTransient<ISqlQuery, MySqlQuery>();
         services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();

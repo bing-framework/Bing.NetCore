@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Core;
 /// <remarks>
 /// 表源身份与实体类型分离，使同一实体的多个来源可以在后续的表达式作用域中被独立绑定。
 /// </remarks>
-internal sealed class TableSource
+public sealed class TableSource
 {
     /// <summary>
     /// 初始化一个<see cref="TableSource"/>类型的实例。
@@ -33,7 +33,7 @@ internal sealed class TableSource
     /// <summary>
     /// 查询图内稳定的来源标识。
     /// </summary>
-    internal string SourceId { get; }
+    public string SourceId { get; }
 
     /// <summary>
     /// 用于最终 SQL 渲染的表项。
@@ -43,12 +43,12 @@ internal sealed class TableSource
     /// <summary>
     /// 关联实体类型；原始、命名和派生来源为 null。
     /// </summary>
-    internal Type EntityType { get; }
+    public Type EntityType { get; }
 
     /// <summary>
     /// 外层查询引用此来源时使用的别名。
     /// </summary>
-    internal string Alias { get; }
+    public string Alias { get; }
 
     /// <summary>
     /// 派生表公开给外层 Lambda 的投影成员；普通实体来源为 null。

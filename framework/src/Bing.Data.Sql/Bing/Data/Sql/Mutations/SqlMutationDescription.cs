@@ -93,13 +93,23 @@ public sealed class SqlMutationDescription
 public sealed class SqlMutationParameter
 {
     /// <summary>
+    /// 冻结后的参数值，仅在重建执行参数时使用。
+    /// </summary>
+    private readonly object _value;
+
+    /// <summary>
+    /// 冻结后的原始参数值，仅在重建执行参数时使用。
+    /// </summary>
+    private readonly object _originalValue;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlMutationParameter"/> 类型的实例。
     /// </summary>
     private SqlMutationParameter(SqlParam parameter)
     {
         Name = parameter.Name;
-        Value = SnapshotValue(parameter.Value);
-        OriginalValue = SnapshotValue(parameter.OriginalValue);
+        _value = SnapshotValue(parameter.Value);
+        _originalValue = SnapshotValue(parameter.OriginalValue);
         Direction = parameter.Direction;
         DbType = parameter.DbType;
         Size = parameter.Size;
@@ -125,12 +135,12 @@ public sealed class SqlMutationParameter
     /// <summary>
     /// 参数值。
     /// </summary>
-    public object Value { get; }
+    public object Value => SnapshotValue(_value);
 
     /// <summary>
     /// Provider 转换前的原始参数值。
     /// </summary>
-    public object OriginalValue { get; }
+    public object OriginalValue => SnapshotValue(_originalValue);
 
     /// <summary>
     /// 参数方向。
@@ -218,9 +228,9 @@ public sealed class SqlMutationParameter
     /// 为一次执行重建可变参数对象。
     /// </summary>
     /// <returns>执行专属的增强参数。</returns>
-    internal SqlParam CreateSqlParam() => new(Name, SnapshotValue(Value), DbType, Direction, Size, Precision, Scale)
+    internal SqlParam CreateSqlParam() => new(Name, SnapshotValue(_value), DbType, Direction, Size, Precision, Scale)
     {
-        OriginalValue = SnapshotValue(OriginalValue),
+        OriginalValue = SnapshotValue(_originalValue),
         EntityType = EntityType,
         PropertyName = PropertyName,
         ColumnName = ColumnName,

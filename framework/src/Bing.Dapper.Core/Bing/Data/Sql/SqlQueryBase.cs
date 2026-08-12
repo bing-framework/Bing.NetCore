@@ -1,5 +1,6 @@
 ﻿using System.Runtime.ExceptionServices;
 using System.Collections;
+using Bing.Data.Filters;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
@@ -370,14 +371,14 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     }
 
     /// <inheritdoc />
-    public SqlTextQuery<TResult> Text<TResult>(string sql, object parameters = null)
+    public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null)
     {
         EnsureExecutionAvailable();
         return new SqlTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
     }
 
     /// <inheritdoc />
-    public SqlTextQuery<TResult> TextInterpolated<TResult>(FormattableString sql)
+    public SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql)
     {
         EnsureExecutionAvailable();
         if (sql == null)
@@ -395,7 +396,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
             parameters.Add(parameterName, arguments[index]);
         }
         var commandText = CreateInterpolatedCommandText(sql.Format, parameterNames, parameterPrefix);
-        return Text<TResult>(commandText, parameters);
+        return Sql<TResult>(commandText, parameters);
     }
 
     /// <inheritdoc />
@@ -614,7 +615,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
             ServiceProvider.GetService<ISqlObjectNameFormatter>(),
             ServiceProvider.GetService<ISqlCrossDatabaseQueryValidator>(),
             ServiceProvider.GetService<ISqlTableReferenceValidator>(),
-            ServiceProvider.GetService<IEntityModelMetadataProvider>());
+            ServiceProvider.GetService<IEntityModelMetadataProvider>(),
+            ServiceProvider.GetServices<ISqlFilter>(),
+            ServiceProvider.GetService<IDataFilter>());
         services.DatabaseIdentityResolver = ServiceProvider.GetService<ISqlDatabaseIdentityResolver>() ??
             services.DatabaseIdentityResolver;
         return services;

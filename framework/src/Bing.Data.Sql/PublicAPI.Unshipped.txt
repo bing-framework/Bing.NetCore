@@ -1,6 +1,10 @@
 Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
-Bing.Data.Sql.ISqlQuery.Text<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
-Bing.Data.Sql.ISqlQuery.TextInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.Builders.Core.TableSource
+Bing.Data.Sql.Builders.Core.TableSource.Alias.get -> string
+Bing.Data.Sql.Builders.Core.TableSource.EntityType.get -> System.Type
+Bing.Data.Sql.Builders.Core.TableSource.SourceId.get -> string
 Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.FullJoin.get -> Bing.Data.SqlQueryCapabilityState
 Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.FullJoin.init -> void
 Bing.Data.Sql.Builders.IJoinClause.FullJoin(string table, string alias = null) -> void
@@ -204,8 +208,6 @@ Bing.Data.Sql.ISqlExecutor.ExecuteMutation(Bing.Data.Sql.Mutations.SqlMutationDe
 Bing.Data.Sql.ISqlExecutor.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.ISqlExecutor.ExecuteText(string sql, object param = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteTextAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.Builders.IJoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.Builders.Clauses.JoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.ISqlBuilder.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
@@ -215,8 +217,6 @@ static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, Bing.Data.Sql.Metada
 static Bing.Data.Sql.Extensions.RightJoin(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutor.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>
-Bing.Data.Sql.ISqlExecutor.Execute(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirst(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
 Bing.Data.Sql.SqlProcedureQuery<TResult>.ExecuteFirstOrDefault(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>

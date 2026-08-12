@@ -37,10 +37,8 @@ public static class SqlServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqlServerSqlQuery), SqlServerSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(SqlServerSqlExecutor), SqlServerSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlMultipleQueryExecutor), typeof(SqlServerSqlMultipleQueryExecutor),
-            SqlServerSqlProvider.Instance.Key);
+        services.AddSqlProviderRuntime(new SqlProviderRuntime(SqlServerSqlProvider.Instance.Key,
+            typeof(SqlServerSqlQuery), typeof(SqlServerSqlExecutor), typeof(SqlServerSqlMultipleQueryExecutor)));
         services.TryAddTransient<ISqlQuery, SqlServerSqlQuery>();
         services.TryAddTransient<ISqlExecutor, SqlServerSqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();

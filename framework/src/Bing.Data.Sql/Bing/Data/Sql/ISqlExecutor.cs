@@ -36,54 +36,17 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
-    /// </summary>
-    /// <param name="description">已冻结的 Mutation 描述。</param>
-    /// <param name="timeout">执行超时时间。单位：秒。</param>
-    /// <returns>操作影响的行数。</returns>
-    int Execute(SqlMutationDescription description, int? timeout = null);
-
-    /// <summary>
-    /// 异步执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
-    /// </summary>
-    /// <param name="description">已冻结的 Mutation 描述。</param>
-    /// <param name="timeout">执行超时时间。单位：秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>操作影响的行数。</returns>
-    Task<int> ExecuteAsync(SqlMutationDescription description, int? timeout = null,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// 执行指定 SQL 文本。
+    /// 原生 SQL 不会自动应用结构化全局过滤器。
     /// </summary>
     /// <param name="sql">执行的 SQL 语句。</param>
     /// <param name="param">SQL 参数。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <returns>操作影响的行数。</returns>
-    int ExecuteText(string sql, object param = null, int? timeout = null);
-
-    /// <summary>
-    /// 异步执行指定 SQL 文本。
-    /// </summary>
-    /// <param name="sql">执行的 SQL 语句。</param>
-    /// <param name="param">SQL 参数。</param>
-    /// <param name="timeout">执行超时时间。单位：秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示操作影响行数的异步操作。</returns>
-    Task<int> ExecuteTextAsync(string sql, object param = null, int? timeout = null,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 执行指定的SQL语句
-    /// </summary>
-    /// <param name="sql">执行的SQL语句</param>
-    /// <param name="param">SQL参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <returns>操作影响的行数</returns>
     int ExecuteSql(string sql, object param = null, int? timeout = null);
 
     /// <summary>
-    /// 执行指定的SQL语句
+    /// 异步执行指定 SQL 文本。原生 SQL 不会自动应用结构化全局过滤器。
     /// </summary>
     /// <param name="sql">执行的SQL语句</param>
     /// <param name="param">SQL参数</param>

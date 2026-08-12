@@ -37,10 +37,8 @@ public static class SqliteServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqliteDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(SqliteSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteSqlQuery), SqliteSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(SqliteSqlExecutor), SqliteSqlProvider.Instance.Key);
-        services.AddSqlProviderRuntime(typeof(ISqlMultipleQueryExecutor), typeof(SqliteSqlMultipleQueryExecutor),
-            SqliteSqlProvider.Instance.Key);
+        services.AddSqlProviderRuntime(new SqlProviderRuntime(SqliteSqlProvider.Instance.Key,
+            typeof(SqliteSqlQuery), typeof(SqliteSqlExecutor), typeof(SqliteSqlMultipleQueryExecutor)));
         services.TryAddTransient<ISqlQuery, SqliteSqlQuery>();
         services.TryAddTransient<ISqlExecutor, SqliteSqlExecutor>();
         services.TryAddTransient<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>();

@@ -7,5 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
   </ItemGroup>
 </Project>

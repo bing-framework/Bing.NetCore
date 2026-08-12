@@ -1380,9 +1380,49 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public virtual string ToSql()
     {
+        if (ShouldApplyFiltersOnRender())
+        {
+            var snapshot = (SqlBuilderBase)Clone();
+            snapshot.EnsureFiltersAdded();
+            return snapshot.ToSql();
+        }
         var result = new StringBuilder(256);
         AppendTo(result);
         return result.ToString();
+    }
+
+    /// <summary>
+    /// 判断当前语句是否需要在独立渲染快照中应用全局过滤器。
+    /// </summary>
+    private bool ShouldApplyFiltersOnRender()
+    {
+        if (_isAddFilters || (OperationKind is not (SqlOperationKind.Select or SqlOperationKind.InsertSelect)))
+            return false;
+        var activeFilters = Services.Filters.Where(filter => _excludedFilters.Contains(filter.GetType()) == false)
+            .ToList();
+        if (activeFilters.Any(filter => filter is not IsDeletedFilter))
+            return activeFilters.Count > 0;
+        if (activeFilters.Any(filter => filter is IsDeletedFilter) == false)
+            return false;
+        return GetFilterSources().Any(source => source.EntityType != null &&
+            typeof(ISoftDelete).IsAssignableFrom(source.EntityType));
+    }
+
+    /// <summary>
+    /// 获取当前查询中可由默认过滤器处理的根表和 Join 表来源。
+    /// </summary>
+    private IEnumerable<TableSource> GetFilterSources()
+    {
+        if (FromClause is FromClause fromClause)
+        {
+            foreach (var source in fromClause.Sources)
+                yield return source;
+        }
+        if (JoinClause is JoinClause joinClause)
+        {
+            foreach (var source in joinClause.GetTypedSources())
+                yield return source;
+        }
     }
 
     /// <summary>
@@ -1505,8 +1545,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         // 创建CTE
         CreateCte(result);
-        if (_isAddFilters == false)
-            EnsureFiltersAdded();
         if (IsUnion)
         {
             CreateSqlByUnion(result);
@@ -1651,7 +1689,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         _isAddFilters = true;
         var context = new SqlFilterContext(Dialect, AliasRegister, ParameterManager, this, Services,
             ExecutionContext.DatabaseContext);
-        foreach (var filter in SqlFilterCollection.Filters)
+        foreach (var filter in Services.Filters)
         {
             if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))
                 continue;
@@ -1951,8 +1989,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         if (targetColumnCount > 0 && SelectClause.ProjectionCount is int projectionCount &&
             targetColumnCount != projectionCount)
             throw new InvalidOperationException("Insert Select 的目标列数量与查询输出列数量不一致。");
-        if (_isAddFilters == false)
-            EnsureFiltersAdded();
         InsertClause.AppendTo(builder);
         if (targetColumnCount > 0)
             InsertColumnsClause.AppendTo(builder);

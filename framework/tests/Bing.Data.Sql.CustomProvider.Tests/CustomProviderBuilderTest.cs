@@ -1,9 +1,18 @@
+using System.Data;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Enums;
 using Bing.Data.Sql.CustomProvider.Tests.Samples;
+using Bing.Data.Sql.Configs;
+using Bing.Dapper;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Bing.Data.Sql.CustomProvider.Tests;
@@ -13,6 +22,41 @@ namespace Bing.Data.Sql.CustomProvider.Tests;
 /// </summary>
 public class CustomProviderBuilderTest
 {
+    /// <summary>
+    /// 测试 - 外部程序集应只通过公开 Provider Runtime SPI 路由 Builder、Query、Executor 和连接工厂，不依赖友元访问。
+    /// </summary>
+    [Fact]
+    public void ProviderRuntime_WhenRegisteredFromExternalAssembly_ShouldRoutePublicSqlServicesWithoutFriendAccess()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(CustomSqlProvider.Instance, builderServices => new CustomSqlBuilder(builderServices));
+        services.AddSqlDataSource("external", CustomSqlProvider.Instance.DatabaseType, "external-connection",
+            providerKey: CustomSqlProvider.Instance.Key);
+        services.AddSqlDbConnectionFactory(CustomSqlProvider.Instance.Key,
+            connectionString => new ExternalConnection(connectionString));
+        services.AddSqlProviderRuntime(new SqlProviderRuntime(CustomSqlProvider.Instance.Key,
+            typeof(ExternalQuery), typeof(ExternalExecutor), typeof(ExternalMultipleQueryExecutor)));
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var builder = provider.GetRequiredService<ISqlBuilderFactory>().Create(CustomSqlProvider.Instance.Key);
+        using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("external");
+        using var executor = provider.GetRequiredService<ISqlExecutorFactory>().Create("external");
+        using var multipleExecutor = provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create("external");
+        using var connection = provider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
+            .Create(CustomSqlProvider.Instance.Key, "external-connection");
+
+        // Assert
+        Assert.IsType<CustomSqlBuilder>(builder);
+        Assert.IsType<ExternalQuery>(query);
+        Assert.IsType<ExternalExecutor>(executor);
+        Assert.IsType<ExternalMultipleQueryExecutor>(multipleExecutor);
+        Assert.IsType<ExternalConnection>(connection);
+        Assert.Equal("external-connection", connection.ConnectionString);
+    }
+
     /// <summary>
     /// 测试目的：外部 Provider 应可仅通过公开 SPI 创建全部 SQL 子句。
     /// </summary>
@@ -35,6 +79,161 @@ public class CustomProviderBuilderTest
         Assert.IsType<WhereClause>(accessor.WhereClause);
         Assert.IsType<GroupByClause>(accessor.GroupByClause);
         Assert.IsType<OrderByClause>(accessor.OrderByClause);
+    }
+
+    /// <summary>
+    /// 测试 - 统一 Builder 必须通过外部 Provider 的可选 Mutation Clause Factory 创建 Update From、Delete Using 与 Returning 子句。
+    /// </summary>
+    [Fact]
+    public void MutationClauseFactory_WhenUnifiedBuilderUsesOptionalProviderSpi_ShouldCreateCustomClausesAndPreserveCloneState()
+    {
+        // Arrange
+        var update = new CustomSqlBuilder();
+        var delete = new CustomSqlBuilder();
+
+        // Act
+        update.Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .Set("Status", 1)
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id")
+            .Returning("Id");
+        delete.DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id")
+            .Returning("Id");
+        var clone = Assert.IsType<CustomSqlBuilder>(update.Clone());
+        update.Clear();
+
+        // Assert
+        Assert.IsType<CustomUpdateFromClause>(((IUpdateFromClauseAccessor)update).UpdateFromClause);
+        Assert.IsType<CustomReturningClause>(((IReturningClauseAccessor)update).ReturningClause);
+        Assert.IsType<CustomDeleteUsingClause>(((IDeleteUsingClauseAccessor)delete).DeleteUsingClause);
+        Assert.IsType<CustomReturningClause>(((IReturningClauseAccessor)delete).ReturningClause);
+        Assert.Equal("Update [samples] As [t] Set [Status] = @_p_0, [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
+            clone.ToSql());
+        Assert.Empty(update.GetParams());
+        Assert.Equal(1, clone.GetParam("@_p_0"));
+        Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
+            delete.ToSql());
+    }
+
+    /// <summary>
+    /// 测试 - 专用 Update 与 Delete Builder 必须选择外部 Provider 的可选 Mutation 子句，并在 Clone 与 Clear 后保持隔离。
+    /// </summary>
+    [Fact]
+    public void MutationClauseFactory_WhenDedicatedBuildersUseOptionalProviderSpi_ShouldCreateCustomClausesAndIsolateLifecycle()
+    {
+        // Arrange
+        var update = new SqlUpdateBuilder(CustomSqlProvider.Instance, new SqlBuilderServices());
+        var delete = new SqlDeleteBuilder(CustomSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        update.Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .Set("Status", 1)
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id");
+        delete.DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id");
+        var updateClone = update.Clone();
+        var deleteClone = delete.Clone();
+        update.Clear();
+        delete.Clear();
+        update.Update(new SqlTableReference { TableName = "samples" })
+            .Set("Status", 2)
+            .AllowAllRows();
+
+        // Assert
+        Assert.IsType<CustomUpdateFromClause>(update.UpdateFromClause);
+        Assert.IsType<CustomDeleteUsingClause>(delete.DeleteUsingClause);
+        Assert.IsType<CustomUpdateFromClause>(updateClone.UpdateFromClause);
+        Assert.IsType<CustomDeleteUsingClause>(deleteClone.DeleteUsingClause);
+        Assert.Equal("Update [samples] As [t] Set [Status] = @_p_0, [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id]",
+            updateClone.ToSql());
+        Assert.Equal(1, updateClone.BuildCommand().Parameters.Single().Value);
+        Assert.Equal(2, update.BuildCommand().Parameters.Single().Value);
+        Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id]",
+            deleteClone.ToSql());
+        Assert.Null(delete.DeleteUsingClause.Table);
+    }
+
+    /// <summary>
+    /// 外部程序集定义的查询实现。
+    /// </summary>
+    private sealed class ExternalQuery : SqlQueryBase
+    {
+        public ExternalQuery(IServiceProvider serviceProvider, SqlOptions<ExternalQuery> options)
+            : base(serviceProvider, options)
+        {
+        }
+
+        protected override ISqlBuilder CreateSqlBuilder() =>
+            new CustomSqlBuilder(CreateSqlBuilderServices());
+    }
+
+    /// <summary>
+    /// 外部程序集定义的执行器实现。
+    /// </summary>
+    private sealed class ExternalExecutor : SqlExecutorBase
+    {
+        public ExternalExecutor(IServiceProvider serviceProvider, SqlOptions<ExternalExecutor> options)
+            : base(serviceProvider, options)
+        {
+        }
+
+        protected override ISqlBuilder CreateSqlBuilder() =>
+            new CustomSqlBuilder(CreateSqlBuilderServices());
+    }
+
+    /// <summary>
+    /// 外部程序集定义的多结果集执行器实现。
+    /// </summary>
+    private sealed class ExternalMultipleQueryExecutor : SqlMultipleQueryExecutorBase
+    {
+        public ExternalMultipleQueryExecutor(IServiceProvider serviceProvider,
+            SqlOptions<ExternalMultipleQueryExecutor> options)
+            : base(serviceProvider, options)
+        {
+        }
+
+        protected override ISqlBuilder CreateSqlBuilder() =>
+            new CustomSqlBuilder(CreateSqlBuilderServices());
+    }
+
+    /// <summary>
+    /// 外部 Provider 返回的最小连接实现，仅用于验证独立连接工厂路由。
+    /// </summary>
+    private sealed class ExternalConnection : IDbConnection
+    {
+        public ExternalConnection(string connectionString) => ConnectionString = connectionString;
+
+        public string ConnectionString { get; set; }
+
+        public int ConnectionTimeout => 0;
+
+        public string Database => "external";
+
+        public ConnectionState State => ConnectionState.Closed;
+
+        public IDbTransaction BeginTransaction() => throw new NotSupportedException();
+
+        public IDbTransaction BeginTransaction(IsolationLevel il) => throw new NotSupportedException();
+
+        public void ChangeDatabase(string databaseName) => throw new NotSupportedException();
+
+        public void Close()
+        {
+        }
+
+        public IDbCommand CreateCommand() => throw new NotSupportedException();
+
+        public void Open() => throw new NotSupportedException();
+
+        public void Dispose()
+        {
+        }
     }
 
     /// <summary>

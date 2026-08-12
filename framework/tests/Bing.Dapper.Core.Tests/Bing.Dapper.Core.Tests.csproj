@@ -9,4 +9,9 @@
     <ProjectReference Include="..\..\src\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Bing.Dapper.MySql.Tests\Metadata\DefaultSqlParameterBinderTest.cs"
+             Link="Metadata\DefaultSqlParameterBinderTest.cs" />
+  </ItemGroup>
 </Project>

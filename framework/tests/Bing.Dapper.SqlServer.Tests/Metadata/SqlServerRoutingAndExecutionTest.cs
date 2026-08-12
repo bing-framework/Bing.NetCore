@@ -1717,7 +1717,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         scope.Commit();
-        var exception = Should.Throw<InvalidOperationException>(() => query.Text<int>("Select 1"));
+        var exception = Should.Throw<InvalidOperationException>(() => query.Sql<int>("Select 1"));
 
         // Assert
         exception.Message.ShouldContain("事务作用域已结束");
@@ -2541,7 +2541,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Text<int>("Select @ApiToken", new Dictionary<string, object>
+        var result = query.Sql<int>("Select @ApiToken", new Dictionary<string, object>
         {
             ["ApiToken"] = "super-secret-token"
         }).Scalar();
@@ -2573,7 +2573,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Text<int>("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
+        var result = query.Sql<int>("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
             new Dictionary<string, object>
             {
                 ["pwd"] = "database-password",
@@ -2636,12 +2636,12 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var syncException = Should.Throw<InvalidOperationException>(() =>
-            syncQuery.Text<int>("Select 1").AsEnumerable().ToList());
+            syncQuery.Sql<int>("Select 1").AsEnumerable().ToList());
         using var asyncQuery = CreateSqlServerTestRoot<ThrowingBeforeSqlServerQuery>(provider,
             options => options.Connection(new CaptureDbConnection()));
         var asyncException = await Should.ThrowAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in asyncQuery.Text<int>("Select 1").AsAsyncEnumerable())
+            await foreach (var _ in asyncQuery.Sql<int>("Select 1").AsAsyncEnumerable())
             {
             }
         });
@@ -3021,7 +3021,7 @@ public class SqlServerRoutingAndExecutionTest
         ConfigurePrimaryReadTransaction(query);
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -3046,7 +3046,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
-            query.Text<int>("Select Count(*) From [Users]").ScalarAsync());
+            query.Sql<int>("Select Count(*) From [Users]").ScalarAsync());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -3067,7 +3067,7 @@ public class SqlServerRoutingAndExecutionTest
             options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "error hook failed" }, exception.Flatten().InnerExceptions
@@ -3086,7 +3086,7 @@ public class SqlServerRoutingAndExecutionTest
             options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Text<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "completion hook failed" }, exception.Flatten().InnerExceptions
@@ -3946,7 +3946,7 @@ public class SqlServerRoutingAndExecutionTest
         var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable().ToList());
         var readerDisposeCount = connection.ReaderDisposeCount;
         connection.ThrowOnReaderDispose = false;
-        var result = query.Text<int>("Select Count(*) From [Users]").Scalar();
+        var result = query.Sql<int>("Select Count(*) From [Users]").Scalar();
 
         // Assert
         Assert.Equal("reader dispose failed", exception.Message);

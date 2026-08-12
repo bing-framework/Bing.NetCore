@@ -136,6 +136,30 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
+    /// 测试 - 调用方修改公开参数容器后，Mutation 描述应保留内部执行快照。
+    /// </summary>
+    [Fact]
+    public void ToMutationDescription_WhenExposedParameterContainerIsMutated_ShouldPreserveExecutionSnapshot()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder()
+            .InsertInto("samples")
+            .Columns(nameof(MutationSample.Name))
+            .Values(new Dictionary<string, object> { ["Payload"] = new byte[] { 1, 2 } });
+        var description = builder.ToMutationDescription();
+
+        // Act
+        var exposed = Assert.IsType<Dictionary<string, object>>(description.Parameters[0].Value);
+        ((byte[])exposed["Payload"])[0] = 9;
+        exposed["Payload"] = new byte[] { 8 };
+        var executionParameter = Assert.Single(description.CreateParameters());
+        var executionValue = Assert.IsType<Dictionary<string, object>>(executionParameter.Value);
+
+        // Assert
+        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(executionValue["Payload"]));
+    }
+
+    /// <summary>
     /// 测试目的：Mutation 描述必须在 SQL 渲染完成后只导出一次参数快照，确保渲染期间合并的参数与 SQL 对应。
     /// </summary>
     [Fact]

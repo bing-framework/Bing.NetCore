@@ -1,4 +1,6 @@
+using Bing.Data;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -6,114 +8,109 @@ using Xunit;
 namespace Bing.Dapper.Core.Tests.Metadata;
 
 /// <summary>
-/// <see cref="SqlProviderRuntimeRegistration"/> 单元测试。
+/// <see cref="SqlProviderRuntime"/> 单元测试。
 /// </summary>
 public class SqlProviderRuntimeRegistrationTest
 {
     /// <summary>
-    /// 测试目的：不同 Provider 注册应保存各自服务实现，避免相同数据库类型的 Provider 相互覆盖。
+    /// 测试 - 不同 Provider 注册应保存各自服务实现，避免相同数据库类型的 Provider 相互覆盖。
     /// </summary>
     [Fact]
-    public void Resolve_WhenProviderRegistrationsDiffer_ShouldKeepProviderSpecificImplementations()
+    public void Constructor_WhenProviderRuntimesDiffer_ShouldKeepProviderSpecificImplementations()
     {
         // Arrange
-        var first = new SqlProviderRuntimeRegistration("custom.sqlserver.first");
-        var second = new SqlProviderRuntimeRegistration("custom.sqlserver.second");
-        first.Map(typeof(ITestService), typeof(DefaultService));
-        second.Map(typeof(ITestService), typeof(SqlServerService));
+        var first = new SqlProviderRuntime("custom.sqlserver.first", typeof(QueryService), typeof(ExecutorService));
+        var second = new SqlProviderRuntime("custom.sqlserver.second", typeof(AlternateQueryService),
+            typeof(AlternateExecutorService), typeof(MultipleQueryExecutorService));
 
         // Act
-        var firstResult = first.Resolve(typeof(ITestService));
-        var secondResult = second.Resolve(typeof(ITestService));
+        var firstResult = first.QueryType;
+        var secondResult = second.QueryType;
 
         // Assert
-        Assert.Equal(typeof(DefaultService), firstResult);
-        Assert.Equal(typeof(SqlServerService), secondResult);
+        Assert.Equal(typeof(QueryService), firstResult);
+        Assert.Equal(typeof(AlternateQueryService), secondResult);
+        Assert.Equal(typeof(ExecutorService), first.ExecutorType);
+        Assert.Equal(typeof(AlternateExecutorService), second.ExecutorType);
+        Assert.Equal(typeof(MultipleQueryExecutorService), second.MultipleQueryExecutorType);
     }
 
     /// <summary>
-    /// 测试目的：未注册的服务契约不应回退到任意具体实现。
+    /// 测试 - 未提供多结果集实现时，该可选能力应保持未注册而非回退到任意执行器。
     /// </summary>
     [Fact]
-    public void Resolve_WhenServiceIsNotRegistered_ShouldReturnNull()
+    public void Constructor_WhenMultipleQueryExecutorIsOmitted_ShouldKeepOptionalCapabilityNull()
     {
         // Arrange
-        var registration = new SqlProviderRuntimeRegistration("custom.mysql");
-        registration.Map(typeof(ITestService), typeof(DefaultService));
+        var runtime = new SqlProviderRuntime("custom.mysql", typeof(QueryService), typeof(ExecutorService));
 
         // Act
-        var result = registration.Resolve(typeof(ConcreteService));
+        var result = runtime.MultipleQueryExecutorType;
 
         // Assert
         Assert.Null(result);
     }
 
     /// <summary>
-    /// 测试目的：注册时必须验证服务实现关系，避免 Factory 在运行时创建不兼容的类型。
+    /// 测试 - 注册时必须验证固定服务实现关系，避免 Factory 在运行时创建不兼容的类型。
     /// </summary>
     [Fact]
-    public void Map_WhenImplementationDoesNotImplementService_ShouldThrowArgumentException()
+    public void Constructor_WhenImplementationDoesNotImplementContract_ShouldThrowArgumentException()
     {
         // Arrange
-        var registration = new SqlProviderRuntimeRegistration("custom.provider");
-
         // Act and Assert
-        Assert.Throws<ArgumentException>(() => registration.Map(typeof(ITestService), typeof(ConcreteService)));
+        Assert.Throws<ArgumentException>(() => new SqlProviderRuntime("custom.provider", typeof(ConcreteService),
+            typeof(ExecutorService)));
+        Assert.Throws<ArgumentException>(() => new SqlProviderRuntime("custom.provider", typeof(QueryService),
+            typeof(ConcreteService)));
     }
 
     /// <summary>
-    /// 测试目的：同一 Provider 和服务契约只能登记一个实现，重复相同实现保持幂等。
+    /// 测试 - 同一 Provider Key 只能登记一套固定运行时服务；相同描述可重复注册。
     /// </summary>
     [Fact]
-    public void Map_WhenServiceIsRegisteredRepeatedly_ShouldBeIdempotentOrRejectConflict()
-    {
-        // Arrange
-        var registration = new SqlProviderRuntimeRegistration("custom.sqlserver");
-
-        // Act
-        registration.Map(typeof(ITestService), typeof(SqlServerService));
-        registration.Map(typeof(ITestService), typeof(SqlServerService));
-
-        // Assert
-        Assert.Equal(typeof(SqlServerService), registration.Resolve(typeof(ITestService)));
-        Assert.Throws<InvalidOperationException>(() =>
-            registration.Map(typeof(ITestService), typeof(DefaultService)));
-    }
-
-    /// <summary>
-    /// 测试目的：内部服务注册应按 Provider Key 规范化，并拒绝相同 Key 的冲突实现。
-    /// </summary>
-    [Fact]
-    public void AddSqlProviderRuntime_WhenProviderKeyConflicts_ShouldThrowInvalidOperationException()
+    public void AddSqlProviderRuntime_WhenProviderKeyConflicts_ShouldBeIdempotentOrRejectConflict()
     {
         // Arrange
         var services = new ServiceCollection();
-        services.AddSqlProviderRuntime(typeof(ITestService), typeof(DefaultService), " custom.provider ");
+        var runtime = new SqlProviderRuntime(" custom.sqlserver ", typeof(QueryService), typeof(ExecutorService));
 
-        // Act and Assert
+        // Act
+        services.AddSqlProviderRuntime(runtime);
+        services.AddSqlProviderRuntime(runtime);
+
+        // Assert
         Assert.Throws<InvalidOperationException>(() =>
-            services.AddSqlProviderRuntime(typeof(ITestService), typeof(SqlServerService), "CUSTOM.PROVIDER"));
+            services.AddSqlProviderRuntime(new SqlProviderRuntime("CUSTOM.SQLSERVER", typeof(AlternateQueryService),
+                typeof(AlternateExecutorService))));
     }
 
-    /// <summary>
-    /// 测试服务契约。
-    /// </summary>
-    private interface ITestService
+    private class QueryService : SqlQueryBase
     {
+        public QueryService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+        protected override ISqlBuilder CreateSqlBuilder() => null;
     }
 
-    /// <summary>
-    /// 默认测试服务实现。
-    /// </summary>
-    private sealed class DefaultService : ITestService
+    private sealed class AlternateQueryService : QueryService
     {
+        public AlternateQueryService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
     }
 
-    /// <summary>
-    /// SQL Server 测试服务实现。
-    /// </summary>
-    private sealed class SqlServerService : ITestService
+    private class ExecutorService : SqlExecutorBase
     {
+        public ExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+        protected override ISqlBuilder CreateSqlBuilder() => null;
+    }
+
+    private sealed class AlternateExecutorService : ExecutorService
+    {
+        public AlternateExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+    }
+
+    private sealed class MultipleQueryExecutorService : SqlMultipleQueryExecutorBase
+    {
+        public MultipleQueryExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+        protected override ISqlBuilder CreateSqlBuilder() => null;
     }
 
     /// <summary>

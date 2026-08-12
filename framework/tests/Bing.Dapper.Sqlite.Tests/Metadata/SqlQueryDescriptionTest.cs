@@ -54,7 +54,7 @@ public class SqlQueryDescriptionTest
         var parameters = new Dictionary<string, object> { ["Id"] = 1 };
 
         // Act
-        var query = rootQuery.Text<int>("Select * From users Where Id = @Id", parameters);
+        var query = rootQuery.Sql<int>("Select * From users Where Id = @Id", parameters);
         parameters["Id"] = 2;
 
         // Assert
@@ -87,7 +87,7 @@ public class SqlQueryDescriptionTest
         };
 
         // Act
-        var text = rootQuery.Text<int>("Select 1", parameters);
+        var text = rootQuery.Sql<int>("Select 1", parameters);
         payload[0] = 9;
         identifiers[0] = 8;
         ((IDictionary<string, object>)parameters["filter"])["Payload"] = new byte[] { 7 };
@@ -115,7 +115,7 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var description = rootQuery.TextInterpolated<string>(
+        var description = rootQuery.SqlInterpolated<string>(
             $"Select '@p0', \"@p0\", `@p0`, [@p0] Where Name = {"Bing"} -- @p0\n/* @p0 */");
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
 
@@ -139,7 +139,7 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => rootQuery.TextInterpolated<int>(
+        var exception = Assert.Throws<NotSupportedException>(() => rootQuery.SqlInterpolated<int>(
             $"Select {new[] { 1, 2, 3 }}"));
 
         // Assert

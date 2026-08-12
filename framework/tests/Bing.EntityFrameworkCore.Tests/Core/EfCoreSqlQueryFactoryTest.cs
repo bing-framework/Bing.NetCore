@@ -151,7 +151,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>().Create(unitOfWork);
 
         // Act
-        var result = query.Text<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
+        var result = query.Sql<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
 
         // Assert
         Assert.Equal(0, result);
@@ -185,7 +185,7 @@ public class EfCoreSqlQueryFactoryTest
             .Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Act
-        var result = query.Text<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
+        var result = query.Sql<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
 
         // Assert
         Assert.Equal(0, result);

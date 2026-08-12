@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Data;
 using Bing.Data.Sql;
-using Bing.Dapper.Tests.Samples;
 using Dapper;
+using Xunit;
 
 namespace Bing.Dapper.Tests.Metadata;
 
@@ -19,7 +20,7 @@ public class DefaultSqlParameterBinderTest
         // Arrange
         var binder = new DefaultSqlParameterBinder();
         var map = new SqlParameterMap<Sample>().Add("name", t => t.StringValue, "abc");
-        var parameters = binder.Bind(map).ShouldBeAssignableTo<SqlMapper.IDynamicParameters>();
+        var parameters = Assert.IsAssignableFrom<SqlMapper.IDynamicParameters>(binder.Bind(map));
         var command = new FakeDbCommand();
 
         // Act
@@ -27,10 +28,22 @@ public class DefaultSqlParameterBinderTest
         var parameter = command.CreatedParameters.Single();
 
         // Assert
-        parameter.ParameterName.ShouldBe("name");
-        parameter.Value.ShouldBe("abc");
-        parameter.DbType.ShouldBe(DbType.String);
-        parameter.Size.ShouldBe(20);
+        Assert.Equal("name", parameter.ParameterName);
+        Assert.Equal("abc", parameter.Value);
+        Assert.Equal(DbType.String, parameter.DbType);
+        Assert.Equal(20, parameter.Size);
+    }
+
+    /// <summary>
+    /// 默认参数绑定器测试使用的最小实体。
+    /// </summary>
+    private sealed class Sample
+    {
+        /// <summary>
+        /// 受长度约束的字符串属性。
+        /// </summary>
+        [System.ComponentModel.DataAnnotations.StringLength(20)]
+        public string StringValue { get; set; }
     }
 
     /// <summary>

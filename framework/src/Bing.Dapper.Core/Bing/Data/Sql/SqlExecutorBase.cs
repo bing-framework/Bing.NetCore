@@ -132,14 +132,6 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <inheritdoc />
-    public virtual int Execute(SqlMutationDescription description, int? timeout = null) =>
-        ExecuteMutation(description, timeout);
-
-    /// <inheritdoc />
-    public virtual Task<int> ExecuteAsync(SqlMutationDescription description, int? timeout = null,
-        CancellationToken cancellationToken = default) => ExecuteMutationAsync(description, timeout, cancellationToken);
-
     /// <summary>
     /// 验证 Mutation 描述是否可通过非 Returning 执行入口执行。
     /// </summary>
@@ -399,15 +391,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
     }
 
-    #region ExecuteText(执行 SQL 文本)
-
-    /// <inheritdoc />
-    public virtual int ExecuteText(string sql, object param = null, int? timeout = null) =>
-        ExecuteSql(sql, param, timeout);
-
-    /// <inheritdoc />
-    public virtual Task<int> ExecuteTextAsync(string sql, object param = null, int? timeout = null,
-        CancellationToken cancellationToken = default) => ExecuteSqlAsync(sql, param, timeout, cancellationToken);
+    #region ExecuteSql(执行 SQL 文本)
 
     /// <summary>
     /// 执行指定的SQL语句

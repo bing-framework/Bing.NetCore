@@ -452,15 +452,17 @@ Bing.Data.Sql.Builders.Core.SqlBuilderFactoryRegistration.Provider.get -> Bing.D
 Bing.Data.Sql.Builders.Core.SqlBuilderFactoryRegistration.SqlBuilderFactoryRegistration(Bing.Data.Sql.Builders.ISqlProvider provider, System.Func<Bing.Data.Sql.Builders.Core.SqlBuilderServices, Bing.Data.Sql.ISqlBuilder> creator) -> void
 Bing.Data.Sql.Builders.Core.SqlBuilderServices
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.CrossDatabaseQueryValidator.get -> Bing.Data.Sql.Metadata.ISqlCrossDatabaseQueryValidator
+Bing.Data.Sql.Builders.Core.SqlBuilderServices.DataFilter.get -> Bing.Data.Filters.IDataFilter
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.DatabaseContextAccessor.get -> Bing.Data.Sql.IDatabaseContextAccessor
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.DatabaseContextResolver.get -> Bing.Data.Sql.ISqlDatabaseContextResolver
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.EntityMappingResolver.get -> Bing.Data.Sql.Metadata.IEntityMappingResolver
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.EntityModelMetadataProvider.get -> Bing.Data.Sql.Metadata.IEntityModelMetadataProvider
+Bing.Data.Sql.Builders.Core.SqlBuilderServices.Filters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.ISqlFilter>
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.MetadataOptions.get -> Bing.Data.Sql.Configs.SqlMetadataOptions
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.ObjectNameFormatter.get -> Bing.Data.Sql.Metadata.ISqlObjectNameFormatter
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.Options.get -> Bing.Data.SqlOptions
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.ParameterFactory.get -> Bing.Data.Sql.Builders.Params.ISqlParameterFactory
-Bing.Data.Sql.Builders.Core.SqlBuilderServices.SqlBuilderServices(Bing.Data.Sql.Metadata.IEntityMappingResolver entityMappingResolver = null, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Builders.Params.ISqlParameterFactory parameterFactory = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.SqlOptions options = null, Bing.Data.Sql.ISqlDatabaseContextResolver databaseContextResolver = null, Bing.Data.Sql.Metadata.ISqlObjectNameFormatter objectNameFormatter = null, Bing.Data.Sql.Metadata.ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null, Bing.Data.Sql.Metadata.ISqlTableReferenceValidator tableReferenceValidator = null, Bing.Data.Sql.Metadata.IEntityModelMetadataProvider entityModelMetadataProvider = null) -> void
+Bing.Data.Sql.Builders.Core.SqlBuilderServices.SqlBuilderServices(Bing.Data.Sql.Metadata.IEntityMappingResolver entityMappingResolver = null, Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Builders.Params.ISqlParameterFactory parameterFactory = null, Bing.Data.Sql.Configs.SqlMetadataOptions metadataOptions = null, Bing.Data.SqlOptions options = null, Bing.Data.Sql.ISqlDatabaseContextResolver databaseContextResolver = null, Bing.Data.Sql.Metadata.ISqlObjectNameFormatter objectNameFormatter = null, Bing.Data.Sql.Metadata.ISqlCrossDatabaseQueryValidator crossDatabaseQueryValidator = null, Bing.Data.Sql.Metadata.ISqlTableReferenceValidator tableReferenceValidator = null, Bing.Data.Sql.Metadata.IEntityModelMetadataProvider entityModelMetadataProvider = null, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.ISqlFilter> filters = null, Bing.Data.Filters.IDataFilter dataFilter = null) -> void
 Bing.Data.Sql.Builders.Core.SqlBuilderServices.TableReferenceValidator.get -> Bing.Data.Sql.Metadata.ISqlTableReferenceValidator
 Bing.Data.Sql.Builders.Core.SqlClauseContext
 Bing.Data.Sql.Builders.Core.SqlClauseContext.AliasRegister.get -> Bing.Data.Sql.Builders.IEntityAliasRegister
@@ -473,11 +475,14 @@ Bing.Data.Sql.Builders.Core.SqlClauseContext.Provider.get -> Bing.Data.Sql.Build
 Bing.Data.Sql.Builders.Core.SqlClauseContext.Services.get -> Bing.Data.Sql.Builders.Core.SqlBuilderServices
 Bing.Data.Sql.Builders.Core.SqlFilterContext
 Bing.Data.Sql.Builders.Core.SqlFilterContext.ClauseAccessor.get -> Bing.Data.Sql.Builders.ISqlQueryClauseAccessor
+Bing.Data.Sql.Builders.Core.SqlFilterContext.DataFilter.get -> Bing.Data.Filters.IDataFilter
 Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
 Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContextAccessor.get -> Bing.Data.Sql.IDatabaseContextAccessor
 Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContextResolver.get -> Bing.Data.Sql.ISqlDatabaseContextResolver
 Bing.Data.Sql.Builders.Core.SqlFilterContext.Dialect.get -> Bing.Data.Sql.Builders.IDialect
 Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityAliasRegister.get -> Bing.Data.Sql.Builders.IEntityAliasRegister
+Bing.Data.Sql.Builders.Core.SqlFilterContext.JoinSources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
+Bing.Data.Sql.Builders.Core.SqlFilterContext.RootSources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
 Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityMappingResolver.get -> Bing.Data.Sql.Metadata.IEntityMappingResolver
 Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityModelMetadataProvider.get -> Bing.Data.Sql.Metadata.IEntityModelMetadataProvider
 Bing.Data.Sql.Builders.Core.SqlFilterContext.MetadataOptions.get -> Bing.Data.Sql.Configs.SqlMetadataOptions
@@ -506,7 +511,6 @@ Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions
 Bing.Data.Sql.Builders.Filters.IsDeletedFilter
 Bing.Data.Sql.Builders.Filters.IsDeletedFilter.Filter(Bing.Data.Sql.Builders.Core.SqlFilterContext context) -> void
 Bing.Data.Sql.Builders.Filters.IsDeletedFilter.IsDeletedFilter() -> void
-Bing.Data.Sql.Builders.Filters.SqlFilterCollection
 Bing.Data.Sql.Builders.ICondition
 Bing.Data.Sql.Builders.ICondition.GetCondition() -> string
 Bing.Data.Sql.Builders.ICte
@@ -2117,8 +2121,6 @@ static Bing.Data.Sql.Builders.Extensions.DialectExtensions.GetSafeName(this Bing
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetAlias(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity, string alias) -> string
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetTableAndSchema(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity) -> string
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetTableReference(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity) -> Bing.Data.Sql.Metadata.SqlTableReference
-static Bing.Data.Sql.Builders.Filters.SqlFilterCollection.Add(Bing.Data.Sql.Builders.ISqlFilter filter) -> void
-static Bing.Data.Sql.Builders.Filters.SqlFilterCollection.Filters.get -> System.Collections.Generic.List<Bing.Data.Sql.Builders.ISqlFilter>
 static Bing.Data.Sql.Builders.Internal.Helper.ResolveSql(string sql, Bing.Data.Sql.Builders.IDialect dialect) -> string
 static Bing.Data.Sql.Builders.Mutations.Clauses.MutationTableClauseBase.ValidateTable(Bing.Data.Sql.Metadata.SqlTableReference table, string operation) -> void
 static Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance.get -> Bing.Data.Sql.Builders.Params.ParamLiteralsResolver

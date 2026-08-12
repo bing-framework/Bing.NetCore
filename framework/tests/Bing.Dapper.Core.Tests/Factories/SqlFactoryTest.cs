@@ -1,5 +1,6 @@
 using System.Data;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
@@ -47,6 +48,30 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试 - 正式 Provider 库程序集不得通过 Core 友元访问内部实现，必须通过公开运行时 SPI 接入。
+    /// </summary>
+    [Fact]
+    public void DapperCore_WhenInternalsVisibleToInspected_ShouldNotExposeOfficialProviderLibraries()
+    {
+        // Arrange
+        var friends = typeof(DapperCoreServiceCollectionExtensions).Assembly
+            .GetCustomAttributes<InternalsVisibleToAttribute>()
+            .Select(attribute => attribute.AssemblyName)
+            .ToArray();
+        var officialProviderLibraries = new[]
+        {
+            "Bing.Dapper.MySql",
+            "Bing.Dapper.Oracle",
+            "Bing.Dapper.PostgreSql",
+            "Bing.Dapper.Sqlite",
+            "Bing.Dapper.SqlServer"
+        };
+
+        // Assert
+        Assert.DoesNotContain(friends, friend => officialProviderLibraries.Contains(friend));
+    }
+
+    /// <summary>
     /// 测试目的：Root 查询不得继续公开废弃的调试、过程执行和参数清理继承入口。
     /// </summary>
     [Fact]
@@ -75,7 +100,7 @@ public class SqlFactoryTest
         query.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() => query.Text<int>("Select 1"));
+        Assert.Throws<ObjectDisposedException>(() => query.Sql<int>("Select 1"));
     }
 
     /// <summary>
@@ -125,10 +150,10 @@ public class SqlFactoryTest
         AddTestProvider(services, "test.sqlite", DatabaseType.Sqlite);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=app;", providerKey: "test.mysql");
         services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=app.db", providerKey: "test.sqlite");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "test.sqlite");
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(MySqlTestExecutor), "test.mysql");
-        services.AddSqlProviderRuntime(typeof(ISqlExecutor), typeof(SqliteTestExecutor), "test.sqlite");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("test.mysql", typeof(MySqlTestQuery),
+            typeof(MySqlTestExecutor)));
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("test.sqlite", typeof(SqliteTestQuery),
+            typeof(SqliteTestExecutor)));
         using var provider = services.BuildServiceProvider();
         var queryFactory = provider.GetRequiredService<ISqlQueryFactory>();
         var executorFactory = provider.GetRequiredService<ISqlExecutorFactory>();
@@ -161,8 +186,10 @@ public class SqlFactoryTest
         AddTestProvider(services, "custom.sqlite.second", DatabaseType.Sqlite);
         services.AddSqlDataSource("first", DatabaseType.Sqlite, "Data Source=first.db", providerKey: "custom.sqlite.first");
         services.AddSqlDataSource("second", DatabaseType.Sqlite, "Data Source=second.db", providerKey: "custom.sqlite.second");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "custom.sqlite.first");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "custom.sqlite.second");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("custom.sqlite.first", typeof(MySqlTestQuery),
+            typeof(MySqlTestExecutor)));
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("custom.sqlite.second", typeof(SqliteTestQuery),
+            typeof(SqliteTestExecutor)));
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 
@@ -184,7 +211,8 @@ public class SqlFactoryTest
         // Arrange
         var services = CreateServices();
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("test.mysql", typeof(MySqlTestQuery),
+            typeof(MySqlTestExecutor)));
         using var provider = services.BuildServiceProvider();
         var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
         accessor.Current = new DatabaseContext
@@ -231,7 +259,8 @@ public class SqlFactoryTest
         var services = CreateServices();
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, providerKey: "test.mysql");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("test.mysql", typeof(MySqlTestQuery),
+            typeof(MySqlTestExecutor)));
         services.AddSingleton(template);
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
@@ -261,7 +290,8 @@ public class SqlFactoryTest
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
         services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=test;Database=capabilities;",
             providerKey: "test.mysql");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(MySqlTestQuery), "test.mysql");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("test.mysql", typeof(MySqlTestQuery),
+            typeof(MySqlTestExecutor)));
         services.AddSingleton(template);
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
@@ -284,7 +314,8 @@ public class SqlFactoryTest
         // Arrange
         var services = CreateServices();
         services.AddSqlDataSource("missing", DatabaseType.Sqlite, "Data Source=missing.db", providerKey: "custom.missing");
-        services.AddSqlProviderRuntime(typeof(ISqlQuery), typeof(SqliteTestQuery), "custom.missing");
+        services.AddSqlProviderRuntime(new SqlProviderRuntime("custom.missing", typeof(SqliteTestQuery),
+            typeof(SqliteTestExecutor)));
         using var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<ISqlQueryFactory>();
 

@@ -46,7 +46,7 @@ public sealed class UnsafeInterpolatedSqlAnalyzer : DiagnosticAnalyzer
     /// </summary>
     private static bool IsSqlTextEntryPoint(IMethodSymbol method)
     {
-        if (method.Name is not ("Text" or "ExecuteText" or "ExecuteTextAsync"))
+        if (method.Name is not ("Sql" or "ExecuteSql" or "ExecuteSqlAsync"))
             return false;
         var extensionMethod = method.ReducedFrom ?? method;
         if (extensionMethod.IsExtensionMethod)
@@ -69,7 +69,7 @@ public sealed class UnsafeInterpolatedSqlAnalyzer : DiagnosticAnalyzer
     private static bool IsSqlTextReceiver(ITypeSymbol type, string methodName)
     {
         var contractName = type.ToDisplayString();
-        return methodName is "Text"
+        return methodName is "Sql"
             ? contractName == "Bing.Data.Sql.ISqlQuery"
             : contractName == "Bing.Data.Sql.ISqlExecutor";
     }

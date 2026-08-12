@@ -2,7 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
@@ -174,6 +176,59 @@ public sealed class SqlServerMutationBuilderTest
                      "Output [Inserted].[sample_id] As [Id], [Inserted].[sample_name] As [Name] " +
                      "Where [sample_id]=@_p_1", sql);
         Assert.True(SqlServerSqlProvider.Instance.Profile.Mutation.SupportsReturning);
+    }
+
+    /// <summary>
+    /// 测试 - SQL Server Delete 的 OUTPUT 投影应随 Clone 保留，并在源 Builder Clear 后保持独立。
+    /// </summary>
+    [Fact]
+    public void Output_WhenDeleteBuilderIsClonedAndSourceCleared_ShouldRetainDeletedProjectionOnlyInClone()
+    {
+        // Arrange
+        var source = new SqlServerBuilder();
+        source.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" })
+            .Returning("Id", "Name");
+        ((IMutationWhereClauseAccessor)source).WhereClause.And(new EqualCondition("[Id]", "@_p_0"));
+        ((ISqlCommonPartAccessor)source).ParameterManager.Add("@_p_0", 1);
+
+        // Act
+        var clone = source.Clone();
+        source.Clear();
+        source.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" });
+        ((IMutationWhereClauseAccessor)source).WhereClause.And(new EqualCondition("[Id]", "@_p_0"));
+        ((ISqlCommonPartAccessor)source).ParameterManager.Add("@_p_0", 2);
+
+        // Assert
+        Assert.Equal("Delete From [dbo].[samples] Output [Deleted].[Id], [Deleted].[Name] Where [Id]=@_p_0",
+            clone.ToSql());
+        Assert.Equal("Delete From [dbo].[samples] Where [Id]=@_p_0", source.ToSql());
+    }
+
+    /// <summary>
+    /// 测试 - SQL Server Insert Select 在 Clear 后重用时不得残留此前的 OUTPUT 投影。
+    /// </summary>
+    [Fact]
+    public void Output_WhenInsertSelectBuilderIsClearedAndReused_ShouldNotLeakBeforeSourceProjection()
+    {
+        // Arrange
+        var builder = new SqlServerBuilder()
+            .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
+            .Columns("Id")
+            .Select("Id")
+            .From("samples")
+            .Returning("Id");
+
+        // Act
+        builder.ToSql();
+        builder.Clear()
+            .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
+            .Columns("Id")
+            .Select("Id")
+            .From("samples");
+        var sql = builder.ToSql();
+
+        // Assert
+        Assert.Equal("Insert Into [dbo].[archive_samples] ([Id]) \r\nSelect [Id] \r\nFrom [samples]", sql);
     }
 
     /// <summary>

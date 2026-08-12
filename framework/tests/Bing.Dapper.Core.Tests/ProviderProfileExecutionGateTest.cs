@@ -300,7 +300,7 @@ public sealed class ProviderProfileExecutionGateTest
         // Act
         var exception = await Assert.ThrowsAsync<NotSupportedException>(async () =>
         {
-            await foreach (var _ in query.Text<int>("Select 1").AsAsyncEnumerable())
+            await foreach (var _ in query.Sql<int>("Select 1").AsAsyncEnumerable())
             {
             }
         });
@@ -330,7 +330,7 @@ public sealed class ProviderProfileExecutionGateTest
         // Act and Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
         {
-            await foreach (var _ in query.Text<int>("Select 1").AsAsyncEnumerable(
+            await foreach (var _ in query.Sql<int>("Select 1").AsAsyncEnumerable(
                                cancellationToken: cancellationTokenSource.Token))
             {
             }

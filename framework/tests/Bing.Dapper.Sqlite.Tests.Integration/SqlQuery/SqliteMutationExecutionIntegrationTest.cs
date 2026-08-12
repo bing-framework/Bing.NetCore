@@ -215,7 +215,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     /// 测试目的：统一 Builder 的 Insert Select、Update 和 Delete 应通过 Executor 执行真实参数化写入。
     /// </summary>
     [Fact]
-    public async Task Execute_WhenUnifiedMutationBuildersAreConfigured_ShouldExecuteCrud()
+    public async Task ExecuteMutation_WhenUnifiedMutationBuildersAreConfigured_ShouldExecuteCrud()
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
@@ -230,13 +230,13 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Where("TenantId", "tenant-a");
 
         // Act
-        var inserted = await executor.ExecuteAsync(insertSelect.ToMutationDescription());
-        var updated = executor.Execute(insertSelect.New()
+        var inserted = await executor.ExecuteMutationAsync(insertSelect.ToMutationDescription());
+        var updated = executor.ExecuteMutation(insertSelect.New()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("SecretText", "v2")
             .Where("Name", "copied")
             .ToMutationDescription());
-        var deleted = await executor.ExecuteAsync(insertSelect.New()
+        var deleted = await executor.ExecuteMutationAsync(insertSelect.New()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("SecretText", "v2")
             .ToMutationDescription());
@@ -422,7 +422,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     /// 测试目的：非查询 Execute 不得静默丢弃 Mutation Returning 结果集。
     /// </summary>
     [Fact]
-    public async Task ExecuteAsync_WhenBuilderHasReturning_ShouldRejectBeforeProviderRendering()
+    public async Task ExecuteMutationAsync_WhenBuilderHasReturning_ShouldRejectBeforeProviderRendering()
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
@@ -434,7 +434,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteAsync(builder.ToMutationDescription()));
+            executor.ExecuteMutationAsync(builder.ToMutationDescription()));
 
         // Assert
         Assert.Equal("包含 Returning 的 Mutation 必须通过查询结果 API 执行。", exception.Message);

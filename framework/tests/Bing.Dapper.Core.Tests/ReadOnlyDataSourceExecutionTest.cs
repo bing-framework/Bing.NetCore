@@ -20,7 +20,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// 测试目的：只读数据源上的同步结构化 Mutation 应在描述已冻结后、创建命令前失败。
     /// </summary>
     [Fact]
-    public void Execute_WhenDataSourceIsReadOnly_ShouldRejectBeforeCommandCreation()
+    public void ExecuteMutation_WhenDataSourceIsReadOnly_ShouldRejectBeforeCommandCreation()
     {
         // Arrange
         var connection = CreateConnection();
@@ -31,7 +31,7 @@ public class ReadOnlyDataSourceExecutionTest
         var description = builder.Object.ToMutationDescription();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => executor.Execute(description));
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteMutation(description));
 
         // Assert
         Assert.Contains("reporting", exception.Message);
@@ -44,7 +44,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// 测试目的：只读数据源上的异步结构化 Mutation 应在描述已冻结后、创建命令前失败。
     /// </summary>
     [Fact]
-    public async Task ExecuteAsync_WhenDataSourceIsReadOnly_ShouldRejectBeforeCommandCreation()
+    public async Task ExecuteMutationAsync_WhenDataSourceIsReadOnly_ShouldRejectBeforeCommandCreation()
     {
         // Arrange
         var connection = CreateConnection();
@@ -55,7 +55,7 @@ public class ReadOnlyDataSourceExecutionTest
         var description = builder.Object.ToMutationDescription();
 
         // Act
-        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteAsync(description));
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteMutationAsync(description));
 
         // Assert
         Assert.Contains("reporting", exception.Message);

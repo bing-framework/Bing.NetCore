@@ -2,7 +2,11 @@ using Bing.Data.Enums;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Clauses;
+using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.CustomProvider.Tests.Samples;
 
@@ -34,7 +38,7 @@ internal sealed class CustomSqlBuilder : SqlBuilderBase
 /// <summary>
 /// 外部 Provider 验收用 SQL Provider。
 /// </summary>
-internal sealed class CustomSqlProvider : ISqlProvider, ISqlProviderProfileProvider
+internal sealed class CustomSqlProvider : ISqlProvider, ISqlProviderProfileProvider, ISqlMutationClauseFactoryProvider
 {
     /// <summary>
     /// Provider 单例。
@@ -70,9 +74,18 @@ internal sealed class CustomSqlProvider : ISqlProvider, ISqlProviderProfileProvi
     public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
 
     /// <inheritdoc />
+    public ISqlMutationClauseFactory MutationClauseFactory { get; } = new CustomMutationClauseFactory();
+
+    /// <inheritdoc />
     public SqlProviderProfile Profile { get; } = new()
     {
-        Query = new SqlProviderQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported }
+        Query = new SqlProviderQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsUpdateFrom = true,
+            SupportsDeleteUsing = true,
+            SupportsReturning = true
+        }
     };
 }
 
@@ -98,6 +111,171 @@ internal sealed class CustomClauseFactory : ISqlClauseFactory
 
     /// <inheritdoc />
     public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
+}
+
+/// <summary>
+/// 外部 Provider 的 Mutation 子句工厂，验证可选方言子句 SPI 的实际分派。
+/// </summary>
+internal sealed class CustomMutationClauseFactory : ISqlMutationClauseFactory, ISqlUpdateFromClauseFactory,
+    ISqlDeleteUsingClauseFactory, ISqlReturningClauseFactory
+{
+    /// <summary>
+    /// 默认 Mutation 子句工厂。
+    /// </summary>
+    private readonly DefaultSqlMutationClauseFactory _inner = new();
+
+    /// <inheritdoc />
+    public IInsertClause CreateInsert(SqlMutationContext context) => _inner.CreateInsert(context);
+
+    /// <inheritdoc />
+    public IInsertColumnsClause CreateInsertColumns(SqlMutationContext context) => _inner.CreateInsertColumns(context);
+
+    /// <inheritdoc />
+    public IValuesClause CreateValues(SqlMutationContext context) => _inner.CreateValues(context);
+
+    /// <inheritdoc />
+    public IUpdateClause CreateUpdate(SqlMutationContext context) => _inner.CreateUpdate(context);
+
+    /// <inheritdoc />
+    public IUpdateFromClause CreateUpdateFrom(SqlMutationContext context) => new CustomUpdateFromClause(context);
+
+    /// <inheritdoc />
+    public ISetClause CreateSet(SqlMutationContext context) => _inner.CreateSet(context);
+
+    /// <inheritdoc />
+    public IDeleteClause CreateDelete(SqlMutationContext context) => _inner.CreateDelete(context);
+
+    /// <inheritdoc />
+    public IDeleteUsingClause CreateDeleteUsing(SqlMutationContext context) => new CustomDeleteUsingClause(context);
+
+    /// <inheritdoc />
+    public IReturningClause CreateReturning(SqlMutationContext context) => new CustomReturningClause(context);
+
+    /// <inheritdoc />
+    public IMutationWhereClause CreateWhere(SqlMutationContext context) => _inner.CreateWhere(context);
+}
+
+/// <summary>
+/// 外部 Provider 的 Update From 子句代理。
+/// </summary>
+internal sealed class CustomUpdateFromClause : IUpdateFromClause
+{
+    /// <summary>
+    /// 默认实现。
+    /// </summary>
+    private readonly IUpdateFromClause _inner;
+
+    /// <summary>
+    /// 初始化外部 Provider Update From 子句。
+    /// </summary>
+    public CustomUpdateFromClause(SqlMutationContext context) : this(new UpdateFromClause(context))
+    {
+    }
+
+    /// <summary>
+    /// 使用已有内部子句初始化。
+    /// </summary>
+    private CustomUpdateFromClause(IUpdateFromClause inner) => _inner = inner;
+
+    /// <inheritdoc />
+    public SqlTableReference Table => _inner.Table;
+
+    /// <inheritdoc />
+    public void From(SqlTableReference table) => _inner.From(table);
+
+    /// <inheritdoc />
+    public void AppendTo(System.Text.StringBuilder builder) => _inner.AppendTo(builder);
+
+    /// <inheritdoc />
+    public void Clear() => _inner.Clear();
+
+    /// <inheritdoc />
+    public IUpdateFromClause Clone(SqlMutationContext context) => new CustomUpdateFromClause(_inner.Clone(context));
+
+    /// <inheritdoc />
+    public void Validate(SqlValidationContext context) => _inner.Validate(context);
+}
+
+/// <summary>
+/// 外部 Provider 的 Delete Using 子句代理。
+/// </summary>
+internal sealed class CustomDeleteUsingClause : IDeleteUsingClause
+{
+    /// <summary>
+    /// 默认实现。
+    /// </summary>
+    private readonly IDeleteUsingClause _inner;
+
+    /// <summary>
+    /// 初始化外部 Provider Delete Using 子句。
+    /// </summary>
+    public CustomDeleteUsingClause(SqlMutationContext context) : this(new DeleteUsingClause(context))
+    {
+    }
+
+    /// <summary>
+    /// 使用已有内部子句初始化。
+    /// </summary>
+    private CustomDeleteUsingClause(IDeleteUsingClause inner) => _inner = inner;
+
+    /// <inheritdoc />
+    public SqlTableReference Table => _inner.Table;
+
+    /// <inheritdoc />
+    public void Using(SqlTableReference table) => _inner.Using(table);
+
+    /// <inheritdoc />
+    public void AppendTo(System.Text.StringBuilder builder) => _inner.AppendTo(builder);
+
+    /// <inheritdoc />
+    public void Clear() => _inner.Clear();
+
+    /// <inheritdoc />
+    public IDeleteUsingClause Clone(SqlMutationContext context) => new CustomDeleteUsingClause(_inner.Clone(context));
+
+    /// <inheritdoc />
+    public void Validate(SqlValidationContext context) => _inner.Validate(context);
+}
+
+/// <summary>
+/// 外部 Provider 的 Returning 子句代理。
+/// </summary>
+internal sealed class CustomReturningClause : IReturningClause
+{
+    /// <summary>
+    /// 默认实现。
+    /// </summary>
+    private readonly IReturningClause _inner;
+
+    /// <summary>
+    /// 初始化外部 Provider Returning 子句。
+    /// </summary>
+    public CustomReturningClause(SqlMutationContext context) : this(new ReturningClause(context))
+    {
+    }
+
+    /// <summary>
+    /// 使用已有内部子句初始化。
+    /// </summary>
+    private CustomReturningClause(IReturningClause inner) => _inner = inner;
+
+    /// <inheritdoc />
+    public bool IsEmpty => _inner.IsEmpty;
+
+    /// <inheritdoc />
+    public void AddRange(IReadOnlyList<SqlReturningColumn> columns) => _inner.AddRange(columns);
+
+    /// <inheritdoc />
+    public void AppendTo(System.Text.StringBuilder builder) => _inner.AppendTo(builder);
+
+    /// <inheritdoc />
+    public void Clear() => _inner.Clear();
+
+    /// <inheritdoc />
+    public IReturningClause Clone(SqlMutationContext context) => new CustomReturningClause(_inner.Clone(context));
+
+    /// <inheritdoc />
+    public void Validate(SqlValidationContext context) => _inner.Validate(context);
 }
 
 /// <summary>

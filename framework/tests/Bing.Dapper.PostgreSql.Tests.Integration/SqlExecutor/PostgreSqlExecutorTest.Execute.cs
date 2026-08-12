@@ -105,7 +105,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     /// 测试目的：统一 Builder 的结构化 UpdateFrom 应在 PostgreSQL 中真实更新匹配行并返回实际影响行数。
     /// </summary>
     [IntegrationFact("PostgreSql")]
-    public async Task ExecuteAsync_WhenUpdateFromBuilderIsConfigured_ShouldUpdateMatchedRow()
+    public async Task ExecuteMutationAsync_WhenUpdateFromBuilderIsConfigured_ShouldUpdateMatchedRow()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -123,7 +123,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .WhereFrom("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteAsync(builder.ToMutationDescription());
+        var affectedRows = await executor.ExecuteMutationAsync(builder.ToMutationDescription());
         using var query = _fixture.CreateQuery();
         var name = await query.Query<string>().Select("name").From("public.integration_products").Where("id", id)
             .ScalarAsync();
@@ -137,7 +137,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     /// 测试目的：统一 Builder 的结构化 DeleteUsing 应只删除 PostgreSQL 中与来源表匹配的目标行。
     /// </summary>
     [IntegrationFact("PostgreSql")]
-    public async Task ExecuteAsync_WhenDeleteUsingBuilderIsConfigured_ShouldDeleteMatchedRow()
+    public async Task ExecuteMutationAsync_WhenDeleteUsingBuilderIsConfigured_ShouldDeleteMatchedRow()
     {
         // Arrange
         var matchedId = Guid.NewGuid();
@@ -161,7 +161,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .WhereUsing("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteAsync(builder.ToMutationDescription());
+        var affectedRows = await executor.ExecuteMutationAsync(builder.ToMutationDescription());
         using var matchedQuery = _fixture.CreateQuery();
         var matchedCount = await matchedQuery.Query<int>().AppendSelect("Count(*)").From("public.integration_products")
             .Where("id", matchedId).ScalarAsync();

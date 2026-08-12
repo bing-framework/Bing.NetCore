@@ -149,7 +149,7 @@ internal abstract class SqlFactoryBase
     /// <returns>实现类型。</returns>
     protected Type GetImplementationType(Type serviceType, string providerKey)
     {
-        var implementationType = _serviceProvider.GetServices<SqlProviderRuntimeRegistration>()
+        var implementationType = _serviceProvider.GetServices<SqlProviderRuntime>()
             .SingleOrDefault(item => string.Equals(item.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase))
             ?.Resolve(serviceType);
         if (implementationType != null)

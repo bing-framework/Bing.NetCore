@@ -14,18 +14,24 @@ public class IsDeletedFilter : ISqlFilter
     /// <param name="context">Sql查询执行上下文</param>
     public void Filter(SqlFilterContext context)
     {
-        foreach (var item in context.EntityAliasRegister.Data)
-            Filter(context, item.Key, item.Value);
+        if (context?.DataFilter?.IsEnabled<ISoftDelete>() == false)
+            return;
+        foreach (var source in context.RootSources)
+            Filter(context, source, true);
+        foreach (var source in context.JoinSources)
+            Filter(context, source, false);
     }
 
     /// <summary>
     /// 过滤
     /// </summary>
     /// <param name="context">Sql查询执行上下文</param>
-    /// <param name="type">类型</param>
-    /// <param name="alias">表别名</param>
-    private void Filter(SqlFilterContext context, Type type, string alias)
+    /// <param name="source">当前查询图中的表源实例。</param>
+    /// <param name="isRoot">是否为根表源。</param>
+    private void Filter(SqlFilterContext context, TableSource source, bool isRoot)
     {
+        var type = source?.EntityType;
+        var alias = source?.Alias;
         if (type == null)
             return;
         if (string.IsNullOrWhiteSpace(alias))
@@ -34,12 +40,12 @@ public class IsDeletedFilter : ISqlFilter
             return;
         var columnName = ResolveColumn(context, type, "IsDeleted");
         var isDeleted = $"{context.Dialect.SafeName(alias)}.{context.Dialect.SafeName(columnName)}";
-        if (context.EntityAliasRegister.FromType == type)
+        if (isRoot)
         {
             context.ClauseAccessor.WhereClause.Where(isDeleted, false);
             return;
         }
-        context.ClauseAccessor.JoinClause.Find(type)?.On(isDeleted, false);
+        (context.ClauseAccessor.JoinClause as Clauses.JoinClause)?.AddFilterCondition(source.SourceId, isDeleted, false);
     }
 
     /// <summary>

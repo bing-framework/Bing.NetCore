@@ -76,6 +76,47 @@ public sealed class SqliteMutationBuilderTest
     }
 
     /// <summary>
+    /// 测试 - SQLite 未声明 Update From 能力时，渲染必须明确拒绝。
+    /// </summary>
+    [Fact]
+    public void UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var builder = new SqliteBuilder()
+            .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 不支持 Update From。", exception.Message);
+        Assert.False(SqliteSqlProvider.Instance.Profile.Mutation.SupportsUpdateFrom);
+    }
+
+    /// <summary>
+    /// 测试 - SQLite 未声明 Delete Using 能力时，渲染必须明确拒绝。
+    /// </summary>
+    [Fact]
+    public void DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var builder = new SqliteBuilder()
+            .DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 不支持 Delete Using。", exception.Message);
+        Assert.False(SqliteSqlProvider.Instance.Profile.Mutation.SupportsDeleteUsing);
+    }
+
+    /// <summary>
     /// 测试目的：SQLite Insert Values 应在语句尾部输出结构化 Returning 投影。
     /// </summary>
     [Fact]
