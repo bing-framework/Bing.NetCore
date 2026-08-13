@@ -21,12 +21,14 @@ public sealed class EnvironmentVariableTestCollection
 public sealed class IntegrationTestGateTest : IDisposable
 {
     private const string MySqlVariable = "RUN_MYSQL_INTEGRATION_TESTS";
+    private const string DorisVariable = "RUN_DORIS_INTEGRATION_TESTS";
     private const string PostgreSqlVariable = "RUN_POSTGRESQL_INTEGRATION_TESTS";
     private const string SqlServerVariable = "RUN_SQLSERVER_INTEGRATION_TESTS";
     private const string OracleVariable = "RUN_ORACLE_INTEGRATION_TESTS";
     private const string ResetVariable = "ALLOW_DATABASE_RESET_FOR_TESTS";
     private const string DefaultConnectionVariable = "ConnectionStrings__DefaultConnection";
     private const string MySqlConnectionVariable = "ConnectionStrings__MySqlConnection";
+    private const string DorisConnectionVariable = "ConnectionStrings__DorisConnection";
     private const string PostgreSqlConnectionVariable = "ConnectionStrings__PostgreSqlConnection";
     private readonly Dictionary<string, string> _originalValues = new();
 
@@ -37,12 +39,14 @@ public sealed class IntegrationTestGateTest : IDisposable
     {
         ClearEnvironmentVariable(IntegrationTestGate.GlobalEnvironmentVariable);
         ClearEnvironmentVariable(MySqlVariable);
+        ClearEnvironmentVariable(DorisVariable);
         ClearEnvironmentVariable(PostgreSqlVariable);
         ClearEnvironmentVariable(SqlServerVariable);
         ClearEnvironmentVariable(OracleVariable);
         ClearEnvironmentVariable(ResetVariable);
         ClearEnvironmentVariable(DefaultConnectionVariable);
         ClearEnvironmentVariable(MySqlConnectionVariable);
+        ClearEnvironmentVariable(DorisConnectionVariable);
         ClearEnvironmentVariable(PostgreSqlConnectionVariable);
     }
 
@@ -67,6 +71,20 @@ public sealed class IntegrationTestGateTest : IDisposable
         SetEnvironmentVariable(MySqlVariable, "true");
 
         Assert.Null(IntegrationTestGate.GetSkipReason("MySql"));
+    }
+
+    /// <summary>
+    /// 测试目的：Doris 专属开关只能启用受控 Doris 只读集成测试。
+    /// </summary>
+    [Fact]
+    public void GetSkipReason_ShouldEnableOnlyDorisWhenDorisSwitchIsEnabled()
+    {
+        // Arrange
+        SetEnvironmentVariable(DorisVariable, "true");
+
+        // Act and Assert
+        Assert.Null(IntegrationTestGate.GetSkipReason("Doris"));
+        Assert.NotNull(IntegrationTestGate.GetSkipReason("MySql"));
     }
 
     /// <summary>
@@ -272,6 +290,42 @@ public sealed class IntegrationTestGateTest : IDisposable
         var result = IntegrationTestConnectionStringResolver.Resolve("MySql");
 
         Assert.Equal(providerConnectionString, result);
+    }
+
+    /// <summary>
+    /// 测试目的：Doris 集成测试必须优先解析 Doris 专属连接字符串，不能误用 MySQL Provider 配置。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDorisConnectionIsConfigured_ShouldUseDorisSpecificConnectionString()
+    {
+        // Arrange
+        const string dorisConnectionString = "Server=127.0.0.1;Port=9030;Database=bing_doris_test;User Id=test";
+        SetEnvironmentVariable(DorisConnectionVariable, dorisConnectionString);
+        SetEnvironmentVariable(MySqlConnectionVariable,
+            "Server=127.0.0.1;Port=3306;Database=bing_mysql_test;User Id=test");
+
+        // Act
+        var result = IntegrationTestConnectionStringResolver.Resolve("Doris");
+
+        // Assert
+        Assert.Equal(dorisConnectionString, result);
+    }
+
+    /// <summary>
+    /// 测试目的：Doris 连接字符串缺失时应给出专属配置指引，且不得泄露敏感信息。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenDorisConnectionIsMissing_ShouldProvideSafeConfigurationGuidance()
+    {
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            IntegrationTestConnectionStringResolver.Resolve("Doris"));
+
+        // Assert
+        Assert.Contains("Doris", exception.Message);
+        Assert.Contains(DorisConnectionVariable, exception.Message);
+        Assert.Contains("integration.doris.runsettings.example", exception.Message);
+        Assert.DoesNotContain("Password", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

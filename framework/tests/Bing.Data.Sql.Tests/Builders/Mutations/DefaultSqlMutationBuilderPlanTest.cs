@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading;
+using System.Data;
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
@@ -8,6 +10,7 @@ using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
 
@@ -63,6 +66,29 @@ public sealed class DefaultSqlMutationBuilderPlanTest
         Assert.Equal(new object[] { 1, "first", 1m, "v1", 2, "second", 2m, "v2" },
             command.Parameters.Select(parameter => parameter.Value));
         Assert.Equal(1, builder.PlanCacheCount);
+    }
+
+    /// <summary>
+    /// 测试 - 实体 Mutation 命令必须沿用专用 Builder 的软删除数据边界。
+    /// </summary>
+    [Fact]
+    public void Delete_WhenSoftDeleteEntityIsConfigured_ShouldAppendDataBoundary()
+    {
+        // 目标 SQL：实体主键和 IsDeleted=false 均进入物理 Delete 的 Where。
+        const string expectedSql = "Delete From [soft_delete_mutation_samples] Where [Id] = @_p_0 And [IsDeleted]=@_p_1";
+
+        // 目标参数：@_p_0 = 7；@_p_1 = false。
+        // 结果语义：实体 CRUD 不会绕过 Fluent Mutation 的软删除边界。
+        var builder = CreateBuilder();
+        var entity = new SoftDeleteMutationSample { Id = 7, Name = "Bing" };
+
+        // Act
+        var command = builder.Delete(entity);
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", false, DbType.Boolean);
     }
 
     /// <summary>
@@ -392,6 +418,29 @@ public sealed class DefaultSqlMutationBuilderPlanTest
         /// </summary>
         [Key]
         public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 带软删除边界的实体 Mutation 样例。
+    /// </summary>
+    [Table("soft_delete_mutation_samples")]
+    private sealed class SoftDeleteMutationSample : ISoftDelete
+    {
+        /// <summary>
+        /// 主键。
+        /// </summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 是否已删除。
+        /// </summary>
+        public bool IsDeleted { get; set; }
     }
 
 }

@@ -243,6 +243,33 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
+    /// 测试目的：已注册渲染器拒绝当前上下文时，显式优化策略必须在调用 Render 前稳定拒绝。
+    /// </summary>
+    [Fact]
+    public void UpdateBatch_WhenProviderOptimizedRendererRejectsContext_ShouldThrowNotSupportedExceptionBeforeRender()
+    {
+        // Arrange
+        var renderer = new RejectingBatchUpdateRenderer();
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false, renderer: renderer);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => executor.UpdateBatch(new[]
+        {
+            new UpdateSample { Id = 1, Name = "updated" }
+        }, new SqlBatchUpdateOptions
+        {
+            Strategy = SqlBatchUpdateStrategy.ProviderOptimized,
+            UseTransaction = false
+        }));
+
+        // Assert
+        Assert.Equal("Provider test.mutation-batch 无法为当前批量 Update 上下文生成优化命令。", exception.Message);
+        Assert.False(renderer.RenderCalled);
+        Assert.Empty(executor.Commands);
+    }
+
+    /// <summary>
     /// 测试目的：批量 Update 应接受强类型并发原始值，并将其写入实体条件参数。
     /// </summary>
     [Fact]
@@ -324,6 +351,39 @@ public sealed class SqlMutationBatchStrategyTest
         Assert.Contains("批量 Update 预期影响 2 行，实际影响 1 行。", exception.Message);
         Assert.Equal(2, renderer.LastEntityCount);
         Assert.Single(executor.Commands);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 优化批量 Update 遇到软删除写入边界时必须回退逐实体 Builder，不能绕过 IsDeleted=false 条件。
+    /// </summary>
+    [Fact]
+    public void UpdateBatch_WhenSoftDeleteBoundaryIsActive_ShouldFallbackFromProviderOptimizedRenderer()
+    {
+        // Arrange
+        var renderer = new TestBatchUpdateRenderer();
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false, renderer: renderer);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.UpdateBatch(new[]
+        {
+            new SoftDeleteUpdateSample { Id = 1, Name = "first" },
+            new SoftDeleteUpdateSample { Id = 2, Name = "second" }
+        }, new SqlBatchUpdateOptions
+        {
+            Strategy = SqlBatchUpdateStrategy.ProviderOptimized,
+            UseTransaction = false,
+            UpdateOptions = new SqlUpdateOptions { IncludeProperties = new[] { nameof(SoftDeleteUpdateSample.Name) } }
+        });
+
+        // Assert
+        Assert.Equal(6, affectedRows);
+        Assert.Equal(0, renderer.LastEntityCount);
+        Assert.Equal(2, executor.Commands.Count);
+        Assert.All(executor.Commands, command =>
+            Assert.Equal("Update [soft_delete_update_samples] Set [Name] = @_p_0 Where [Id] = @_p_1 And [IsDeleted]=@_p_2",
+                command.Sql));
+        Assert.All(executor.Commands, command => Assert.False(command.Parameters.Last().Value as bool? ?? true));
     }
 
     /// <summary>
@@ -967,6 +1027,23 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
+    /// 映射到逻辑删除 Update 策略测试表的实体。
+    /// </summary>
+    [Table("soft_delete_update_samples")]
+    private sealed class SoftDeleteUpdateSample : ISoftDelete
+    {
+        /// <summary>主键。</summary>
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Id { get; set; }
+
+        /// <summary>名称。</summary>
+        public string Name { get; set; }
+
+        /// <summary>逻辑删除标识。</summary>
+        public bool IsDeleted { get; set; }
+    }
+
+    /// <summary>
     /// 用于验证执行器批量行为的测试渲染器。
     /// </summary>
     private sealed class TestBatchUpdateRenderer : ISqlBatchUpdateRenderer
@@ -981,11 +1058,33 @@ public sealed class SqlMutationBatchStrategyTest
         public int LastEntityCount { get; private set; }
 
         /// <inheritdoc />
-        public SqlMutationCommand Render(SqlBatchUpdateRenderContext context)
+        public SqlWriteCommand Render(SqlBatchUpdateRenderContext context)
         {
             LastEntityCount = context.Entities.Count;
-            return new SqlMutationCommand("Update [concurrency_update_samples] Set [Name] = @_p_0",
+            return new SqlWriteCommand("Update [concurrency_update_samples] Set [Name] = @_p_0",
                 new[] { new SqlParam("@_p_0", "updated") });
+        }
+    }
+
+    /// <summary>
+    /// 始终拒绝上下文的优化渲染器，用于验证执行器遵守 CanRender 契约。
+    /// </summary>
+    private sealed class RejectingBatchUpdateRenderer : ISqlBatchUpdateRenderer
+    {
+        /// <inheritdoc />
+        public string ProviderKey => "test.mutation-batch";
+
+        /// <summary>是否调用过 Render。</summary>
+        public bool RenderCalled { get; private set; }
+
+        /// <inheritdoc />
+        public bool CanRender(SqlBatchUpdateRenderContext context) => false;
+
+        /// <inheritdoc />
+        public SqlWriteCommand Render(SqlBatchUpdateRenderContext context)
+        {
+            RenderCalled = true;
+            throw new InvalidOperationException("Render 不应在 CanRender 返回 false 后调用。");
         }
     }
 

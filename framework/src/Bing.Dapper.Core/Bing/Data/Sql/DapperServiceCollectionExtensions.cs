@@ -83,11 +83,13 @@ public static class DapperCoreServiceCollectionExtensions
     /// </remarks>
     public static IServiceCollection AddSqlCore(this IServiceCollection services)
     {
+        NormalizeRegisteredDataSourceConstraints(services);
         services.TryAddSingleton(provider =>
         {
             var options = new SqlMetadataOptions();
             foreach (var configure in provider.GetServices<ISqlMetadataOptionsConfigure>())
                 configure.Configure(options);
+            NormalizeDataSourceConstraints(options);
             return options;
         });
         services.TryAddSingleton<IDatabaseContextAccessor, AsyncLocalDatabaseContextAccessor>();
@@ -134,6 +136,46 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
+    /// 归一化调用方预注册的 SQL 元数据选项。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    private static void NormalizeRegisteredDataSourceConstraints(IServiceCollection services)
+    {
+        for (var index = 0; index < services.Count; index++)
+        {
+            var descriptor = services[index];
+            if (descriptor.ServiceType != typeof(SqlMetadataOptions))
+                continue;
+            if (descriptor.ImplementationInstance is SqlMetadataOptions options)
+            {
+                NormalizeDataSourceConstraints(options);
+                continue;
+            }
+            if (descriptor.ImplementationFactory != null)
+            {
+                var factory = descriptor.ImplementationFactory;
+                services[index] = new ServiceDescriptor(typeof(SqlMetadataOptions), provider =>
+                {
+                    var options = factory(provider) as SqlMetadataOptions;
+                    NormalizeDataSourceConstraints(options);
+                    return options;
+                }, descriptor.Lifetime);
+                continue;
+            }
+            if (descriptor.ImplementationType != null)
+            {
+                var implementationType = descriptor.ImplementationType;
+                services[index] = new ServiceDescriptor(typeof(SqlMetadataOptions), provider =>
+                {
+                    var options = ActivatorUtilities.CreateInstance(provider, implementationType) as SqlMetadataOptions;
+                    NormalizeDataSourceConstraints(options);
+                    return options;
+                }, descriptor.Lifetime);
+            }
+        }
+    }
+
+    /// <summary>
     /// 配置 SQL 元数据选项。
     /// </summary>
     /// <param name="services">服务集合。</param>
@@ -146,6 +188,23 @@ public static class DapperCoreServiceCollectionExtensions
             return services;
         services.AddSingleton<ISqlMetadataOptionsConfigure>(new DelegateSqlMetadataOptionsConfigure(setupAction));
         return services;
+    }
+
+    /// <summary>
+    /// 归一化具有固定运行边界的数据源约束。
+    /// </summary>
+    /// <param name="options">已完成所有配置回调的 SQL 元数据选项。</param>
+    private static void NormalizeDataSourceConstraints(SqlMetadataOptions options)
+    {
+        if (options == null)
+            return;
+        foreach (var descriptor in options.DataSources.DataSources.Values)
+        {
+            if (descriptor?.DatabaseType != DatabaseType.Doris)
+                continue;
+            descriptor.IsReadOnly = true;
+            descriptor.SupportsTransactions = false;
+        }
     }
 
     /// <summary>
@@ -197,6 +256,12 @@ public static class DapperCoreServiceCollectionExtensions
                 descriptor.SupportsTransactions = false;
             }
             setupAction?.Invoke(descriptor);
+            if (databaseType == DatabaseType.Doris)
+            {
+                // Doris 兼容标识始终保持保守的只读、无事务边界；可写 MySQL 端点必须显式使用 DatabaseType.MySql。
+                descriptor.IsReadOnly = true;
+                descriptor.SupportsTransactions = false;
+            }
             options.DataSources.DataSources.Add(dataSourceKey, descriptor);
         });
     }

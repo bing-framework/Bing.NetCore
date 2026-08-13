@@ -28,10 +28,10 @@ public class ReadOnlyDataSourceExecutionTest
         var builder = CreateMutationBuilder();
 
         // Act
-        var description = builder.Object.ToMutationDescription();
+        var command = builder.Object.ToSqlWriteCommand();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteMutation(description));
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteMutation(command));
 
         // Assert
         Assert.Contains("reporting", exception.Message);
@@ -52,10 +52,10 @@ public class ReadOnlyDataSourceExecutionTest
         var builder = CreateMutationBuilder();
 
         // Act
-        var description = builder.Object.ToMutationDescription();
+        var command = builder.Object.ToSqlWriteCommand();
 
         // Act
-        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteMutationAsync(description));
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteMutationAsync(command));
 
         // Assert
         Assert.Contains("reporting", exception.Message);
@@ -256,6 +256,7 @@ public class ReadOnlyDataSourceExecutionTest
         provider.SetupGet(item => item.Key).Returns("test.read-only-builder");
         builder.SetupGet(item => item.Provider).Returns(provider.Object);
         builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
+        builder.Setup(item => item.Clone()).Returns(builder.Object);
         builder.Setup(item => item.ToSql()).Returns("Update samples Set Name = 'updated'");
         return builder;
     }

@@ -79,8 +79,11 @@ public class OrderByClause : IOrderByClause
     {
         if (string.IsNullOrWhiteSpace(order))
             return;
+        var columns = order.Split(',').Where(column => string.IsNullOrWhiteSpace(column) == false).ToList();
+        if (columns.Count == 0)
+            return;
         _context.UseOperation(SqlOperationAction.QueryClause);
-        order.Split(',').ToList().ForEach(column => AddItem(column, tableAlias: tableAlias));
+        columns.ForEach(column => AddItem(column, tableAlias: tableAlias));
     }
 
     /// <summary>
@@ -122,8 +125,11 @@ public class OrderByClause : IOrderByClause
     {
         if (column == null)
             return;
+        var resolvedColumn = _resolver.GetColumn(column);
+        if (string.IsNullOrWhiteSpace(resolvedColumn))
+            return;
         _context.UseOperation(SqlOperationAction.QueryClause);
-        AddItem(_resolver.GetColumn(column), desc, typeof(TEntity));
+        AddItem(resolvedColumn, desc, typeof(TEntity));
     }
 
     /// <summary>
@@ -151,8 +157,9 @@ public class OrderByClause : IOrderByClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        _context.UseOperation(SqlOperationAction.QueryClause);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
         sql = Helper.ResolveSql(sql, _dialect);
+        _context.UseOperation(SqlOperationAction.QueryClause);
         _items.Add(new OrderByItem(sql, raw: true));
     }
 
@@ -175,8 +182,17 @@ public class OrderByClause : IOrderByClause
             throw new ArgumentNullException(nameof(builder));
         if (_items.Count == 0)
             return;
-        builder.Append("Order By ");
-        builder.Append(_items.Select(t => t.ToSql(_dialect, _register)).Join());
+        var startIndex = builder.Length;
+        try
+        {
+            builder.Append("Order By ");
+            builder.Append(_items.Select(t => t.ToSql(_dialect, _register)).Join());
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
     }
 
     /// <inheritdoc />

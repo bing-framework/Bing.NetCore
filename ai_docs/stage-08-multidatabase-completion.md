@@ -61,7 +61,7 @@ services.AddSqlDataSource("doris", DatabaseType.MySql, dorisConnectionString,
 
 ## 剩余风险
 
-- 中：Doris 能力边界由数据源配置声明，尚未接入真实 Doris 环境验证。建议在有可控 Doris CI 服务后增加只读查询、分页和能力拒绝集成测试。
+- 中：Doris 真实协议验证仍需受控 CI 服务。仓库已提供默认跳过的 `Bing.Dapper.Doris.Tests.Integration`，仅在 `RUN_DORIS_INTEGRATION_TESTS=true` 或全局 Gate 启用且配置 `ConnectionStrings__DorisConnection` 时执行常量读取、参数绑定和 `Limit/Offset` 分页；它不包含 DDL、DML、事务、存储过程或重置脚本。`DatabaseType.Doris` 的只读和无事务边界在数据源配置回调后再次固定，不能被误配解除。
 - 低：`BeginAsync` 在 `netstandard2.0` 仍以同步方式开启底层事务；不影响事务数据源固定，但不提供真实异步打开语义。
 - 非阻断：仓库保留 `net6.0` 生命周期、历史 NuGet 漏洞及 SQLite RID 相关警告，均不由本阶段引入。
 

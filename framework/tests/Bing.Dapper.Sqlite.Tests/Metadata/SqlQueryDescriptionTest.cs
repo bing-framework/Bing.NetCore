@@ -1,5 +1,6 @@
 using System.Data;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Builders.Params;
 using Microsoft.Extensions.DependencyInjection;
@@ -400,6 +401,67 @@ public class SqlQueryDescriptionTest
         Assert.Equal(multiSql, multi.ToSql());
         Assert.Equal(new object[] { 7 }, single.GetParams().Values.ToArray());
         Assert.Equal(new object[] { 9 }, multi.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：单表 Lambda 查询替换 DTO 投影失败时，必须保留调用前已配置的投影。
+    /// </summary>
+    [Fact]
+    public void From_WhenReplacementDtoProjectionFails_ShouldKeepExistingProjection()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(MultiSourceUser),
+            DbKey = "sqlite",
+            TableName = "users"
+        }));
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("sqlite", Bing.Data.Enums.DatabaseType.Sqlite, "Data Source=:memory:");
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
+        var query = rootQuery.From<MultiSourceUser>().Select(user => new object[] { user.Id });
+        var expectedSql = query.ToSql();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => query.Select(user => new MultiSourceProjection
+        {
+            OwnerId = user.Id + 1
+        }));
+
+        // Assert
+        Assert.Equal("不支持的 DTO 投影表达式节点类型：Add。仅支持当前实体的直接成员赋值。", exception.Message);
+        Assert.Equal(expectedSql, query.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：单表 Lambda 查询替换为非法聚合失败时，必须保留调用前已配置的投影。
+    /// </summary>
+    [Fact]
+    public void From_WhenReplacementAggregateValidationFails_ShouldKeepExistingProjection()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(MultiSourceUser),
+            DbKey = "sqlite",
+            TableName = "users"
+        }));
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("sqlite", Bing.Data.Enums.DatabaseType.Sqlite, "Data Source=:memory:");
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
+        var query = rootQuery.From<MultiSourceUser>().Select(user => new object[] { user.Id });
+        var expectedSql = query.ToSql();
+
+        // Act
+        Assert.Throws<ArgumentOutOfRangeException>(() => query.Aggregate<int>(
+            (SqlAggregateFunction)999, user => user.Id));
+
+        // Assert
+        Assert.Equal(expectedSql, query.ToSql());
     }
 
     /// <summary>

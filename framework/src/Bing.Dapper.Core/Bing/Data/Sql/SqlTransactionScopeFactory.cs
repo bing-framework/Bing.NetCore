@@ -169,9 +169,19 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         private readonly List<IDisposable> _children = new();
         private readonly SqlTransactionScopeLease _lease;
         private readonly DatabaseContext _context;
+
+        /// <summary>
+        /// 保护作用域状态、子对象集合和资源释放状态的同步锁。
+        /// </summary>
+        private readonly object _syncRoot = new();
         private SqlTransactionScopeState _state;
         private bool _resourcesReleased;
         private bool _isExplicitlyDisposed;
+
+        /// <summary>
+        /// 指示已有调用独占完成或释放当前作用域。
+        /// </summary>
+        private bool _completionInProgress;
 
         /// <summary>
         /// 初始化事务作用域并冻结资源和数据库上下文。
@@ -218,7 +228,14 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         IDbTransaction ISqlTransactionScopeRuntime.Transaction => _transaction;
 
         /// <inheritdoc />
-        public bool IsCompleted => _state != SqlTransactionScopeState.Active;
+        public bool IsCompleted
+        {
+            get
+            {
+                lock (_syncRoot)
+                    return _state != SqlTransactionScopeState.Active;
+            }
+        }
 
         /// <inheritdoc />
         public string TransactionId { get; }
@@ -226,7 +243,6 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <inheritdoc />
         public ISqlQuery CreateQuery()
         {
-            ThrowIfInactive();
             return CreateAndBindChild(() => _queryFactory is SqlQueryFactory factory
                 ? factory.CreateForTransaction(_context)
                 : _queryFactory.Create(DbKey));
@@ -235,7 +251,6 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <inheritdoc />
         public ISqlExecutor CreateExecutor()
         {
-            ThrowIfInactive();
             return CreateAndBindChild(() => _executorFactory is SqlExecutorFactory factory
                 ? factory.CreateForTransaction(_context)
                 : _executorFactory.Create(DbKey));
@@ -244,95 +259,107 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <inheritdoc />
         public void Commit()
         {
-            EnsureCanComplete(SqlTransactionScopeState.Committed);
-            if (_state == SqlTransactionScopeState.Committed)
+            if (TryBeginCompletion(SqlTransactionScopeState.Committed) == false)
                 return;
-            EnsureActiveForCompletion();
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
             Exception operationException = null;
+            var finalState = SqlTransactionScopeState.Committed;
             try
             {
                 _transaction.Commit();
-                _state = SqlTransactionScopeState.Committed;
             }
             catch (Exception exception)
             {
                 operationException = TryRollbackAfterCommitFailure(exception);
-                _state = SqlTransactionScopeState.Faulted;
+                finalState = SqlTransactionScopeState.Faulted;
             }
-            ThrowAfterCleanup(operationException);
+            try
+            {
+                ThrowAfterCleanup(operationException);
+            }
+            finally
+            {
+                EndCompletion(finalState);
+            }
         }
 
         /// <inheritdoc />
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
-            EnsureCanComplete(SqlTransactionScopeState.Committed);
-            if (_state == SqlTransactionScopeState.Committed)
-                return;
             cancellationToken.ThrowIfCancellationRequested();
-            EnsureActiveForCompletion();
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
+            if (TryBeginCompletion(SqlTransactionScopeState.Committed) == false)
+                return;
             Exception operationException = null;
+            var finalState = SqlTransactionScopeState.Committed;
             try
             {
                 await SqlTransactionAsyncAdapter.CommitAsync(_transaction, cancellationToken).ConfigureAwait(false);
-                _state = SqlTransactionScopeState.Committed;
             }
             catch (Exception exception)
             {
                 operationException = await TryRollbackAfterCommitFailureAsync(exception).ConfigureAwait(false);
-                _state = SqlTransactionScopeState.Faulted;
+                finalState = SqlTransactionScopeState.Faulted;
             }
-            await ThrowAfterCleanupAsync(operationException).ConfigureAwait(false);
+            try
+            {
+                await ThrowAfterCleanupAsync(operationException).ConfigureAwait(false);
+            }
+            finally
+            {
+                EndCompletion(finalState);
+            }
         }
 
         /// <inheritdoc />
         public void Rollback()
         {
-            EnsureCanComplete(SqlTransactionScopeState.RolledBack);
-            if (_state == SqlTransactionScopeState.RolledBack)
+            if (TryBeginCompletion(SqlTransactionScopeState.RolledBack) == false)
                 return;
-            EnsureActiveForCompletion();
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
             Exception operationException = null;
+            var finalState = SqlTransactionScopeState.RolledBack;
             try
             {
                 _transaction.Rollback();
-                _state = SqlTransactionScopeState.RolledBack;
             }
             catch (Exception exception)
             {
                 operationException = exception;
-                _state = SqlTransactionScopeState.Faulted;
+                finalState = SqlTransactionScopeState.Faulted;
             }
-            ThrowAfterCleanup(operationException);
+            try
+            {
+                ThrowAfterCleanup(operationException);
+            }
+            finally
+            {
+                EndCompletion(finalState);
+            }
         }
 
         /// <inheritdoc />
         public async Task RollbackAsync(CancellationToken cancellationToken = default)
         {
-            EnsureCanComplete(SqlTransactionScopeState.RolledBack);
-            if (_state == SqlTransactionScopeState.RolledBack)
-                return;
             cancellationToken.ThrowIfCancellationRequested();
-            EnsureActiveForCompletion();
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
+            if (TryBeginCompletion(SqlTransactionScopeState.RolledBack) == false)
+                return;
             Exception operationException = null;
+            var finalState = SqlTransactionScopeState.RolledBack;
             try
             {
                 await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, cancellationToken).ConfigureAwait(false);
-                _state = SqlTransactionScopeState.RolledBack;
             }
             catch (Exception exception)
             {
                 operationException = exception;
-                _state = SqlTransactionScopeState.Faulted;
+                finalState = SqlTransactionScopeState.Faulted;
             }
-            await ThrowAfterCleanupAsync(operationException).ConfigureAwait(false);
+            try
+            {
+                await ThrowAfterCleanupAsync(operationException).ConfigureAwait(false);
+            }
+            finally
+            {
+                EndCompletion(finalState);
+            }
         }
 
         /// <inheritdoc />
@@ -342,22 +369,19 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// </remarks>
         public void Dispose()
         {
-            if (_isExplicitlyDisposed)
+            if (TryBeginDispose(out var shouldRollback, out var finalState) == false)
                 return;
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
             Exception rollbackException = null;
-            if (_state == SqlTransactionScopeState.Active)
+            if (shouldRollback)
             {
                 try
                 {
                     _transaction.Rollback();
-                    _state = SqlTransactionScopeState.RolledBack;
                 }
                 catch (Exception exception)
                 {
                     rollbackException = exception;
-                    _state = SqlTransactionScopeState.Faulted;
+                    finalState = SqlTransactionScopeState.Faulted;
                 }
             }
             try
@@ -366,7 +390,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
             finally
             {
-                _isExplicitlyDisposed = true;
+                EndCompletion(finalState);
             }
         }
 
@@ -377,22 +401,19 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
-            if (_isExplicitlyDisposed)
+            if (TryBeginDispose(out var shouldRollback, out var finalState) == false)
                 return;
-            EnsureChildrenHaveNoActiveExecution();
-            _lease.Invalidate();
             Exception rollbackException = null;
-            if (_state == SqlTransactionScopeState.Active)
+            if (shouldRollback)
             {
                 try
                 {
                     await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, CancellationToken.None).ConfigureAwait(false);
-                    _state = SqlTransactionScopeState.RolledBack;
                 }
                 catch (Exception exception)
                 {
                     rollbackException = exception;
-                    _state = SqlTransactionScopeState.Faulted;
+                    finalState = SqlTransactionScopeState.Faulted;
                 }
             }
             try
@@ -401,7 +422,66 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
             finally
             {
+                EndCompletion(finalState);
+            }
+        }
+
+        /// <summary>
+        /// 原子开始提交或回滚，并阻止后续子对象创建与执行。
+        /// </summary>
+        /// <param name="expectedState">本次完成操作期望到达的终态。</param>
+        /// <returns>是否由当前调用获得完成操作所有权。</returns>
+        private bool TryBeginCompletion(SqlTransactionScopeState expectedState)
+        {
+            lock (_syncRoot)
+            {
+                EnsureCanComplete(expectedState);
+                if (_state == expectedState)
+                    return false;
+                if (_completionInProgress)
+                    throw new InvalidOperationException("SQL 事务作用域正在完成，不能并发提交、回滚或释放。");
+                _lease.InvalidateWhenNoActiveExecution();
+                _completionInProgress = true;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 原子开始释放，并在需要时保留回滚所有权。
+        /// </summary>
+        /// <param name="shouldRollback">是否应回滚活动事务。</param>
+        /// <param name="finalState">释放成功后应设置的事务状态。</param>
+        /// <returns>是否由当前调用获得释放操作所有权。</returns>
+        private bool TryBeginDispose(out bool shouldRollback, out SqlTransactionScopeState finalState)
+        {
+            lock (_syncRoot)
+            {
+                shouldRollback = false;
+                finalState = _state;
+                if (_isExplicitlyDisposed)
+                    return false;
+                if (_completionInProgress)
+                    throw new InvalidOperationException("SQL 事务作用域正在完成，不能并发提交、回滚或释放。");
+                _lease.InvalidateWhenNoActiveExecution();
+                _completionInProgress = true;
                 _isExplicitlyDisposed = true;
+                shouldRollback = _state == SqlTransactionScopeState.Active;
+                if (shouldRollback)
+                    finalState = SqlTransactionScopeState.RolledBack;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 收口本次独占完成操作的最终状态。
+        /// </summary>
+        /// <param name="state">要写入的最终事务状态。</param>
+        private void EndCompletion(SqlTransactionScopeState state)
+        {
+            lock (_syncRoot)
+            {
+                _state = state;
+                _completionInProgress = false;
             }
         }
 
@@ -413,31 +493,11 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 throw new InvalidOperationException("SQL 事务作用域已完成，不能重复提交或回滚。");
         }
 
-        private void EnsureActiveForCompletion()
-        {
-            if (_isExplicitlyDisposed)
-                throw new ObjectDisposedException(nameof(SqlTransactionScope));
-            if (_state != SqlTransactionScopeState.Active)
-                throw new InvalidOperationException("SQL 事务作用域已完成，不能重复提交或回滚。");
-        }
-
-        /// <summary>
-        /// 确保所有事务作用域子对象均未持有活动执行租约。
-        /// </summary>
-        private void EnsureChildrenHaveNoActiveExecution()
-        {
-            foreach (var child in _children)
-            {
-                if (child is ISqlQuery query)
-                    SqlQueryRuntimeBridge.TryEnsureNoActiveExecution(query);
-            }
-        }
-
         private void ThrowIfInactive()
         {
             if (_isExplicitlyDisposed || _resourcesReleased)
                 throw new ObjectDisposedException(nameof(SqlTransactionScope));
-            if (_state != SqlTransactionScopeState.Active)
+            if (_state != SqlTransactionScopeState.Active || _completionInProgress)
                 throw new InvalidOperationException("SQL 事务作用域已结束，不能继续创建 Query 或 Executor。");
         }
 
@@ -456,8 +516,12 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             try
             {
                 child = creator();
-                BindTransactionContext(child);
-                _children.Add(child);
+                lock (_syncRoot)
+                {
+                    ThrowIfInactive();
+                    BindTransactionContext(child);
+                    _children.Add(child);
+                }
                 return child;
             }
             catch (Exception bindException)
@@ -672,6 +736,7 @@ internal static class SqlTransactionAsyncAdapter
             if (invocation.Result is IDbTransaction transaction)
                 return transaction;
         }
+        cancellationToken.ThrowIfCancellationRequested();
         return connection.BeginTransaction(isolationLevel);
     }
 

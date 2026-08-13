@@ -53,17 +53,28 @@ public abstract class SqlConditionBase : ISqlCondition
     /// <inheritdoc />
     public virtual void AppendTo(StringBuilder builder)
     {
-        if (Value is ISqlBuilder sqlBuilder)
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        var startIndex = builder.Length;
+        try
         {
-            AppendSqlBuilder(builder, Column, sqlBuilder);
-            return;
+            if (Value is ISqlBuilder sqlBuilder)
+            {
+                AppendSqlBuilder(builder, Column, sqlBuilder);
+                return;
+            }
+            if (IsParameterization)
+            {
+                AppendParameterizedCondition(builder);
+                return;
+            }
+            AppendNonParameterizedCondition(builder);
         }
-        if (IsParameterization)
+        catch
         {
-            AppendParameterizedCondition(builder);
-            return;
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
         }
-        AppendNonParameterizedCondition(builder);
     }
 
     /// <summary>

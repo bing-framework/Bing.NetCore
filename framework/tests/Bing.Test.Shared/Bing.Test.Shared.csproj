@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
     <!-- FakeCurrentUser 依赖 ICurrentUser 接口 -->
     <ProjectReference Include="..\..\src\Bing.Security\Bing.Security.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
   </ItemGroup>
 
 </Project>

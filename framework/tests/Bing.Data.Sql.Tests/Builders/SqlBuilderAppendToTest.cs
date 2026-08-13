@@ -1,4 +1,9 @@
 using System.Text;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders;
@@ -101,5 +106,47 @@ public class SqlBuilderAppendToTest
         Assert.Equal(2, builder.GetParams().Count);
         Assert.Equal(true, builder.GetParam("@_p_0"));
         Assert.Equal(false, builder.GetParam("@_p_1"));
+    }
+
+    /// <summary>
+    /// 测试目的：动态全局过滤启用时，AppendTo 必须与 ToSql 使用相同的独立渲染快照。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenGlobalFilterIsEnabled_ShouldRenderSameSqlAsToSql()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        builder.Select<Sample5>(item => item.StringValue).From<Sample5>("s");
+        var result = new StringBuilder();
+
+        // Act
+        builder.AppendTo(result);
+
+        // Assert
+        Assert.Equal(builder.ToSql(), result.ToString());
+        Assert.Empty(builder.GetSqlParams());
+    }
+
+    /// <summary>
+    /// 测试目的：Mutation 延迟验证失败时，AppendTo 不得向调用方缓冲区保留部分 SQL。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenReturningIsUnsupported_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        builder.UpdateClause.UpdateTable(new SqlTableReference { TableName = "samples" });
+        builder.SetClause.Set("Name", "Bing");
+        builder.ParameterManager.Add("@id", 7);
+        ((IMutationWhereClauseAccessor)builder).WhereClause.And(new EqualCondition("[Id]", "@id"));
+        builder.Returning("Id");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.AppendTo(result));
+
+        // Assert
+        Assert.Equal("Provider test.sqlserver 不支持 Returning。", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
     }
 }

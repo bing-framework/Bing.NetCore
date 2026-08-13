@@ -80,12 +80,12 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
     /// </summary>
     /// <param name="render">当前 Builder 的 SQL 渲染操作。</param>
     /// <returns>可执行的 Mutation 命令快照。</returns>
-    protected SqlMutationCommand BuildCommand(Func<string> render)
+    protected SqlWriteCommand BuildCommand(Func<string> render)
     {
         if (render == null)
             throw new ArgumentNullException(nameof(render));
         var sql = render();
-        return new SqlMutationCommand(sql, GetParameters());
+        return new SqlWriteCommand(sql, GetParameters());
     }
 
     /// <summary>

@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Bing.Data.Queries;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -303,6 +305,38 @@ public class WhereClauseTest
 
         // Assert
         Assert.Equal("value", exception.ParamName);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：未知字符串 Where 运算符在条件工厂拒绝时，不得遗留未引用参数或条件状态。
+    /// </summary>
+    [Fact]
+    public void Where_WhenStringOperatorIsUnknown_ShouldThrowWithoutAddingParameters()
+    {
+        // Act
+        var exception = Assert.Throws<NotImplementedException>(() =>
+            _clause.Where("IntValue", 1, (Operator)999));
+
+        // Assert
+        Assert.Equal("运算符  尚未实现", exception.Message);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：未知类型化 Where 运算符在条件工厂拒绝时，不得遗留带实体元数据的未引用参数。
+    /// </summary>
+    [Fact]
+    public void Where_WhenTypedOperatorIsUnknown_ShouldThrowWithoutAddingParameters()
+    {
+        // Act
+        var exception = Assert.Throws<NotImplementedException>(() =>
+            _clause.Where<Sample>(sample => sample.IntValue, 1, (Operator)999));
+
+        // Assert
+        Assert.Equal("运算符  尚未实现", exception.Message);
         Assert.Empty(_parameterManager.GetParams());
         Assert.Null(GetSql());
     }
@@ -831,6 +865,43 @@ public class WhereClauseTest
         Assert.Null(GetSql());
     }
 
+    /// <summary>
+    /// 测试目的：In 集合在枚举过程中失败时，必须在生成任何参数或条件前传播异常。
+    /// </summary>
+    [Fact]
+    public void In_WhenEnumerationFails_ShouldThrowWithoutAddingParameters()
+    {
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _clause.In("Email", ThrowAfterFirstValue()));
+
+        // Assert
+        Assert.Equal("集合枚举失败。", exception.Message);
+        Assert.Empty(_parameterManager.GetParams());
+        Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：In 集合超过参数上限时，必须在提交任何集合参数前失败。
+    /// </summary>
+    [Fact]
+    public void In_WhenParameterLimitIsExceeded_ShouldThrowWithoutAddingParameters()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(parameterManager: parameterManager));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            clause.In("Email", new object[] { "first", "second" }));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Null(clause.ToSql());
+    }
+
     #endregion
 
     #region NotIn
@@ -900,6 +971,15 @@ public class WhereClauseTest
         Assert.Equal("value", exception.ParamName);
         Assert.Empty(_parameterManager.GetParams());
         Assert.Null(GetSql());
+    }
+
+    /// <summary>
+    /// 在产生首个值后抛出异常的测试集合。
+    /// </summary>
+    private static IEnumerable<object> ThrowAfterFirstValue()
+    {
+        yield return "first";
+        throw new InvalidOperationException("集合枚举失败。");
     }
 
     /// <summary>
@@ -984,6 +1064,27 @@ public class WhereClauseTest
         Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
         Assert.Equal(2, _parameterManager.GetValue("@_p_1"));
         Assert.Equal(result.ToString(), GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Between 的第二个参数超过上限时，不得残留已添加的第一个参数或范围条件。
+    /// </summary>
+    [Fact]
+    public void Between_WhenSecondParameterExceedsLimit_ShouldThrowWithoutAddingParameters()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(parameterManager: parameterManager));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            clause.Between("Value", 1, 2, Boundary.Both));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Null(clause.ToSql());
     }
 
     /// <summary>
@@ -1472,6 +1573,29 @@ public class WhereClauseTest
     }
 
     /// <summary>
+    /// 测试目的：Or 参数数组的后续谓词参数预检失败时，不得保留前序条件、参数或查询状态。
+    /// </summary>
+    [Fact]
+    public void Or_WhenLaterPredicateExceedsParameterLimit_ShouldKeepClauseParametersAndBuilderStateUnchanged()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var builder = new TestSqlBuilder(parameterManager: parameterManager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(builder: builder,
+            parameterManager: parameterManager));
+
+        // Act
+        Assert.Throws<InvalidOperationException>(() => _clause.Or<Sample>(
+            sample => sample.Email == "first",
+            sample => sample.Url == "second"));
+
+        // Assert
+        Assert.Null(GetSql());
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.None, builder.OperationKind);
+    }
+
+    /// <summary>
     /// Or查询条件 - lambda - 2个条件 - 参数值为空时添加条件
     /// </summary>
     [Fact]
@@ -1545,6 +1669,29 @@ public class WhereClauseTest
 
         //验证
         Assert.Equal(result.ToString(), GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：OrIfNotEmpty 参数数组的后续谓词参数预检失败时，不得保留前序条件、参数或查询状态。
+    /// </summary>
+    [Fact]
+    public void OrIfNotEmpty_WhenLaterPredicateExceedsParameterLimit_ShouldKeepClauseParametersAndBuilderStateUnchanged()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var builder = new TestSqlBuilder(parameterManager: parameterManager);
+        _clause = new WhereClause(TestSqlBuilder.CreateTestClauseContext(builder: builder,
+            parameterManager: parameterManager));
+
+        // Act
+        Assert.Throws<InvalidOperationException>(() => _clause.OrIfNotEmpty<Sample>(
+            sample => sample.Email == "first",
+            sample => sample.Url == "second"));
+
+        // Assert
+        Assert.Null(GetSql());
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.None, builder.OperationKind);
     }
 
     /// <summary>

@@ -40,6 +40,7 @@ public static partial class Extensions
             return;
         if (GetOperationBuilder(source) is not IUnionAccessor accessor)
             return;
+        var items = new List<BuilderItem>();
         foreach (var builder in builders)
         {
             if (builder == null)
@@ -47,8 +48,9 @@ public static partial class Extensions
             var unionBuilder = builder.Clone();
             unionBuilder.ClearOrderBy();
             unionBuilder.ClearPageParams();
-            accessor.UnionItems.Add(new BuilderItem(operation, unionBuilder));
+            items.Add(new BuilderItem(operation, unionBuilder));
         }
+        accessor.UnionItems.AddRange(items);
     }
 
     /// <summary>

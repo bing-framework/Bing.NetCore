@@ -1,6 +1,7 @@
 using Bing.Helpers;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql;
 
@@ -12,7 +13,7 @@ public abstract partial class SqlQueryBase
     {
         var sourcePager = GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
-        var sourceBuilder = plan.Builder.Clone();
+        var sourceBuilder = CreatePlanBuilderSnapshot(plan.Builder);
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
@@ -59,7 +60,7 @@ public abstract partial class SqlQueryBase
         cancellationToken.ThrowIfCancellationRequested();
         var sourcePager = GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
-        var sourceBuilder = plan.Builder.Clone();
+        var sourceBuilder = CreatePlanBuilderSnapshot(plan.Builder);
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
@@ -138,6 +139,20 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(source));
         return new Pager(source.Page, source.PageSize, source.TotalCount, source.Order,
             source is Pager pager && pager.IsTotalCountKnown);
+    }
+
+    /// <summary>
+    /// 创建当前分页操作使用的 Builder 输入快照。
+    /// </summary>
+    /// <param name="source">查询计划持有的源 Builder。</param>
+    /// <returns>已应用动态过滤器的独立 Builder 副本。</returns>
+    private static ISqlBuilder CreatePlanBuilderSnapshot(ISqlBuilder source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (source is SqlBuilderBase { RequiresRenderSnapshot: true } builder)
+            return builder.CreateRenderSnapshot().Builder.Clone();
+        return source.Clone();
     }
 
     /// <summary>

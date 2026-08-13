@@ -213,8 +213,9 @@ public class Helper
         }
         ValidateComparisonConditionValue(value, @operator);
         var paramName = GenerateParamName(value, @operator);
+        var condition = SqlConditionFactory.Create(column, paramName, @operator);
         AddParameter(paramName, value, @operator, entityType, rawColumn, source);
-        return SqlConditionFactory.Create(column, paramName, @operator);
+        return condition;
     }
 
     /// <summary>
@@ -282,11 +283,19 @@ public class Helper
     {
         if (values == null)
             return notIn ? new NotInCondition(column, new List<string>()) : new InCondition(column, new List<string>());
+        var items = values.Cast<object>().ToList();
+        var validation = _parameterManager.Clone();
         var paramNames = new List<string>();
-        foreach (var value in values)
+        foreach (var value in items)
         {
-            var name = _parameterManager.GenerateName();
+            var name = validation.GenerateName();
             paramNames.Add(name);
+            AddParameter(validation, name, value, null, entityType, rawColumn, source);
+        }
+        for (var index = 0; index < items.Count; index++)
+        {
+            var name = paramNames[index];
+            var value = items[index];
             AddParameter(name, value, null, entityType, rawColumn, source);
         }
         if (notIn)
@@ -304,18 +313,33 @@ public class Helper
     /// <param name="rawColumn">原始列名</param>
     /// <param name="source">参数来源</param>
     private void AddParameter(string paramName, object value, Operator? @operator, Type entityType, string rawColumn,
-        SqlParameterSource source)
+        SqlParameterSource source) => AddParameter(_parameterManager, paramName, value, @operator, entityType,
+        rawColumn, source);
+
+    /// <summary>
+    /// 向指定参数管理器添加参数。
+    /// </summary>
+    /// <param name="parameterManager">目标参数管理器。</param>
+    /// <param name="paramName">参数名。</param>
+    /// <param name="value">参数值。</param>
+    /// <param name="operator">参数关联的条件运算符。</param>
+    /// <param name="entityType">实体类型。</param>
+    /// <param name="rawColumn">原始列名。</param>
+    /// <param name="source">参数来源。</param>
+    private void AddParameter(IParameterManager parameterManager, string paramName, object value, Operator? @operator,
+        Type entityType, string rawColumn, SqlParameterSource source)
     {
         if (string.IsNullOrWhiteSpace(paramName))
             return;
-        if (TryAddAdvancedParameter(paramName, value, @operator, entityType, rawColumn, source))
+        if (TryAddAdvancedParameter(parameterManager, paramName, value, @operator, entityType, rawColumn, source))
             return;
-        _parameterManager.Add(paramName, value, @operator);
+        parameterManager.Add(paramName, value, @operator);
     }
 
     /// <summary>
     /// 尝试添加增强参数
     /// </summary>
+    /// <param name="parameterManager">目标参数管理器。</param>
     /// <param name="paramName">参数名</param>
     /// <param name="value">参数值</param>
     /// <param name="operator">运算符</param>
@@ -323,10 +347,10 @@ public class Helper
     /// <param name="rawColumn">原始列名</param>
     /// <param name="source">参数来源</param>
     /// <returns>是否添加成功</returns>
-    private bool TryAddAdvancedParameter(string paramName, object value, Operator? @operator, Type entityType,
-        string rawColumn, SqlParameterSource source)
+    private bool TryAddAdvancedParameter(IParameterManager parameterManager, string paramName, object value,
+        Operator? @operator, Type entityType, string rawColumn, SqlParameterSource source)
     {
-        if (_parameterManager is not IAdvancedParameterManager advancedParameterManager)
+        if (parameterManager is not IAdvancedParameterManager advancedParameterManager)
             return false;
         if (_sqlParameterFactory == null || _entityMappingResolver == null)
             return false;
@@ -453,16 +477,21 @@ public class Helper
     {
         string minParamName = null;
         string maxParamName = null;
+        var validation = _parameterManager.Clone();
         if (string.IsNullOrWhiteSpace(min.SafeString()) == false)
         {
-            minParamName = _parameterManager.GenerateName();
-            AddParameter(minParamName, min, null, entityType, rawColumn, source);
+            minParamName = validation.GenerateName();
+            AddParameter(validation, minParamName, min, null, entityType, rawColumn, source);
         }
         if (string.IsNullOrWhiteSpace(max.SafeString()) == false)
         {
-            maxParamName = _parameterManager.GenerateName();
-            AddParameter(maxParamName, max, null, entityType, rawColumn, source);
+            maxParamName = validation.GenerateName();
+            AddParameter(validation, maxParamName, max, null, entityType, rawColumn, source);
         }
+        if (minParamName != null)
+            AddParameter(minParamName, min, null, entityType, rawColumn, source);
+        if (maxParamName != null)
+            AddParameter(maxParamName, max, null, entityType, rawColumn, source);
         return new SegmentCondition(column, minParamName, maxParamName, boundary);
     }
 

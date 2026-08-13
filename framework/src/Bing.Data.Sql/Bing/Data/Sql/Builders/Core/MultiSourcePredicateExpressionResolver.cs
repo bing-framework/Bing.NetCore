@@ -84,9 +84,10 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// </summary>
     private ICondition ResolveComparison(BinaryExpression expression)
     {
+        var @operator = GetOperator(expression.NodeType);
         var left = ResolveOperand(expression.Left);
         var right = ResolveOperand(expression.Right);
-        return SqlConditionFactory.Create(left, right, GetOperator(expression.NodeType));
+        return SqlConditionFactory.Create(left, right, @operator);
     }
 
     /// <summary>

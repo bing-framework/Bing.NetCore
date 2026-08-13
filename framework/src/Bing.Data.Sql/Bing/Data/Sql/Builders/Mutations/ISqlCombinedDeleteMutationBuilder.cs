@@ -19,6 +19,6 @@ public interface ISqlCombinedDeleteMutationBuilder
     /// <param name="options">删除选项。</param>
     /// <param name="strategy">组合条件策略。</param>
     /// <returns>可执行的批量 Delete SQL 命令快照。</returns>
-    SqlMutationCommand DeleteCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
+    SqlWriteCommand DeleteCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
         SqlDeleteOptions options = null, SqlBatchDeleteStrategy strategy = SqlBatchDeleteStrategy.Auto) where TEntity : class;
 }

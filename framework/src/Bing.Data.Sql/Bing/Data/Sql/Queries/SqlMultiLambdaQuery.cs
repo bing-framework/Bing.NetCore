@@ -173,8 +173,10 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        (accessor.JoinClause as JoinClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表连接查询。"))
-            .SetBoundOn(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, GetBoundSources(accessor)));
+        var joinClause = accessor.JoinClause as JoinClause ??
+            throw new NotSupportedException("当前 SQL Provider 不支持多表连接查询。");
+        joinClause.ValidateLastJoinSupportsOn();
+        joinClause.SetBoundOn(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, GetBoundSources(accessor)));
         return this;
     }
 

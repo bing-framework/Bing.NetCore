@@ -1,3 +1,14 @@
+Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor
+Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor.IsTenantEntity(System.Type entityType) -> bool
+Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor.GetTenantId(Bing.Data.Sql.Builders.Filters.SqlTenantFilterContext context) -> object
+Bing.Data.Sql.Builders.Filters.SqlTenantFilterContext
+Bing.Data.Sql.Builders.Filters.SqlTenantFilterContext.SqlTenantFilterContext(System.Type entityType, Bing.Data.Sql.DatabaseContext databaseContext) -> void
+Bing.Data.Sql.Builders.Filters.SqlTenantFilterContext.EntityType.get -> System.Type
+Bing.Data.Sql.Builders.Filters.SqlTenantFilterContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.Builders.Filters.TenantIdFilter
+Bing.Data.Sql.Builders.Filters.TenantIdFilter.TenantIdFilter(Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor contributor) -> void
+Bing.Data.Sql.Builders.Filters.TenantIdFilter.Contributor.get -> Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor
+Bing.Data.Sql.Builders.Filters.TenantIdFilter.Filter(Bing.Data.Sql.Builders.Core.SqlFilterContext context) -> void
 Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
@@ -204,10 +215,10 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
 Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.get -> int?
 Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.set -> void
-Bing.Data.Sql.ISqlExecutor.ExecuteMutation(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.ISqlExecutor.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlExecutor.ExecuteMutation(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlExecutor.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.Builders.IJoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.Builders.Clauses.JoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 Bing.Data.Sql.ISqlBuilder.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
@@ -235,33 +246,36 @@ Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureResult<TResult>.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.SqlProcedureResult<TResult>.Result.get -> TResult
 Bing.Data.Sql.SqlProcedureResult<TResult>.SqlProcedureResult(TResult result, Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void
-Bing.Data.Sql.Mutations.SqlMutationDescription
-Bing.Data.Sql.Mutations.SqlMutationDescription.HasReturning.get -> bool
-Bing.Data.Sql.Mutations.SqlMutationDescription.OperationKind.get -> Bing.Data.Sql.Builders.SqlOperationKind
-Bing.Data.Sql.Mutations.SqlMutationDescription.Parameters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlMutationParameter>
-Bing.Data.Sql.Mutations.SqlMutationDescription.ProviderKey.get -> string
-Bing.Data.Sql.Mutations.SqlMutationDescription.Sql.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter
-Bing.Data.Sql.Mutations.SqlMutationParameter.ColumnName.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter.ConverterKind.get -> Bing.Data.Sql.FieldValueConverterKind
-Bing.Data.Sql.Mutations.SqlMutationParameter.CustomConverterName.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter.DatabaseType.get -> Bing.Data.Enums.DatabaseType?
-Bing.Data.Sql.Mutations.SqlMutationParameter.DbType.get -> System.Data.DbType?
-Bing.Data.Sql.Mutations.SqlMutationParameter.Direction.get -> System.Data.ParameterDirection?
-Bing.Data.Sql.Mutations.SqlMutationParameter.EntityType.get -> System.Type
-Bing.Data.Sql.Mutations.SqlMutationParameter.MetadataLevel.get -> Bing.Data.Sql.SqlParameterMetadataLevel
-Bing.Data.Sql.Mutations.SqlMutationParameter.Name.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter.OriginalValue.get -> object
-Bing.Data.Sql.Mutations.SqlMutationParameter.Precision.get -> byte?
-Bing.Data.Sql.Mutations.SqlMutationParameter.PropertyName.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter.ProviderTypeName.get -> string
-Bing.Data.Sql.Mutations.SqlMutationParameter.Scale.get -> byte?
-Bing.Data.Sql.Mutations.SqlMutationParameter.Size.get -> int?
-Bing.Data.Sql.Mutations.SqlMutationParameter.Source.get -> Bing.Data.Sql.SqlParameterSource
-Bing.Data.Sql.Mutations.SqlMutationParameter.StorageKind.get -> Bing.Data.Sql.ColumnStorageKind
-Bing.Data.Sql.Mutations.SqlMutationParameter.Value.get -> object
-Bing.Data.Sql.Mutations.SqlMutationDescriptionExtensions
-static Bing.Data.Sql.Mutations.SqlMutationDescriptionExtensions.ToMutationDescription(this Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.Mutations.SqlMutationDescription
+Bing.Data.Sql.Builders.Mutations.Batching.ISqlBatchUpdateRenderer.Render(Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateRenderContext context) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.Batching.SqlMutationBatchCommand.Commands.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlWriteCommand>
+Bing.Data.Sql.Builders.Mutations.Batching.SqlMutationBatchCommand.SqlMutationBatchCommand(System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlWriteCommand> commands, int entityCount, bool requiresTransaction, bool validateAffectedRows = false, string operationName = "Mutation") -> void
+Bing.Data.Sql.Builders.Mutations.Builders.SqlDeleteBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.Builders.SqlInsertBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.Builders.SqlMutationBuilderBase.BuildCommand(System.Func<string> render) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.Builders.SqlUpdateBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.DeleteCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy strategy = Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy.Auto) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.InsertCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlCombinedDeleteMutationBuilder.DeleteCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy strategy = Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy.Auto) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlCombinedInsertMutationBuilder.InsertCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Mutations.SqlWriteCommand.HasReturning.get -> bool
+Bing.Data.Sql.Mutations.SqlWriteCommand.OperationKind.get -> Bing.Data.Sql.Builders.SqlOperationKind
+Bing.Data.Sql.Mutations.SqlWriteCommand.Parameters.get -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.Mutations.SqlWriteCommand.ProviderKey.get -> string
+Bing.Data.Sql.Mutations.SqlWriteCommand.Sql.get -> string
+Bing.Data.Sql.Mutations.SqlWriteCommand.SqlWriteCommand(string sql, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam> parameters, bool validateAffectedRows = false) -> void
+Bing.Data.Sql.Mutations.SqlWriteCommand.ValidateAffectedRows.get -> bool
+Bing.Data.Sql.Mutations.SqlWriteCommandExtensions
+static Bing.Data.Sql.Mutations.SqlWriteCommandExtensions.ToSqlWriteCommand(this Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Core.EntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
 Bing.Data.Sql.Builders.IEntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
 Bing.Data.Sql.Builders.SqlValidationContext.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile

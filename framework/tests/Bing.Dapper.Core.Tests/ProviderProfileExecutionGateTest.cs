@@ -41,7 +41,7 @@ public sealed class ProviderProfileExecutionGateTest
         var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(description));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
+        Assert.Equal("写入命令 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
@@ -67,7 +67,7 @@ public sealed class ProviderProfileExecutionGateTest
             executor.ExecuteReturningAsync<int>(description));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
+        Assert.Equal("写入命令 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
@@ -453,11 +453,11 @@ public sealed class ProviderProfileExecutionGateTest
     }
 
     /// <summary>
-    /// 创建冻结的 Returning Mutation 描述。
+    /// 创建冻结的 Returning 写入命令。
     /// </summary>
-    /// <param name="profile">描述创建时使用的 Provider Profile。</param>
-    /// <returns>包含 Returning 标记的独立 Mutation 描述。</returns>
-    private static SqlMutationDescription CreateReturningDescription(SqlProviderProfile profile)
+    /// <param name="profile">命令创建时使用的 Provider Profile。</param>
+    /// <returns>包含 Returning 标记的独立写入命令。</returns>
+    private static SqlWriteCommand CreateReturningDescription(SqlProviderProfile profile)
     {
         var builder = new Mock<ISqlBuilder>();
         builder.SetupGet(item => item.Provider).Returns(new ProfileGateProvider(profile));
@@ -466,7 +466,8 @@ public sealed class ProviderProfileExecutionGateTest
         var returningClause = new Mock<IReturningClause>();
         returningClause.SetupGet(item => item.IsEmpty).Returns(false);
         builder.As<IReturningClauseAccessor>().SetupGet(item => item.ReturningClause).Returns(returningClause.Object);
-        return builder.Object.ToMutationDescription();
+        builder.Setup(item => item.Clone()).Returns(builder.Object);
+        return builder.Object.ToSqlWriteCommand();
     }
 
     /// <summary>

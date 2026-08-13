@@ -30,7 +30,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> Select(bool propertyAsAlias = false)
     {
-        GetBuilder().ClearSelect().Select<TEntity>(propertyAsAlias);
+        ReplaceSelect(select => select.Select<TEntity>(propertyAsAlias));
         return this;
     }
 
@@ -42,7 +42,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> Select(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false)
     {
-        GetBuilder().ClearSelect().Select(columns, propertyAsAlias);
+        ReplaceSelect(select => select.Select(columns, propertyAsAlias));
         return this;
     }
 
@@ -54,7 +54,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> Select(Expression<Func<TEntity, object>> column, string columnAlias = null)
     {
-        GetBuilder().ClearSelect().Select(column, columnAlias);
+        ReplaceSelect(select => select.Select(column, columnAlias));
         return this;
     }
 
@@ -114,7 +114,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     public SqlLambdaQuery<TEntity> SelectFrom<TSelect>(Expression<Func<TSelect, object[]>> columns,
         bool propertyAsAlias = false) where TSelect : class
     {
-        GetBuilder().ClearSelect().Select(columns, propertyAsAlias);
+        ReplaceSelect(select => select.Select(columns, propertyAsAlias));
         return this;
     }
 
@@ -487,7 +487,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     public SqlQuery<TResult> Select<TResult>(Expression<Func<TEntity, object[]>> columns,
         bool propertyAsAlias = false)
     {
-        GetBuilder().ClearSelect().Select(columns, propertyAsAlias);
+        ReplaceSelect(select => select.Select(columns, propertyAsAlias));
         return WithResult<TResult>();
     }
 
@@ -503,8 +503,19 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     public SqlQuery<TResult> Aggregate<TResult>(SqlAggregateFunction function,
         Expression<Func<TEntity, object>> column, string columnAlias = null, bool distinct = false)
     {
-        GetBuilder().ClearSelect().Aggregate(function, column, columnAlias, distinct);
+        ReplaceSelect(select => select.Aggregate(function, column, columnAlias, distinct));
         return WithResult<TResult>();
+    }
+
+    /// <summary>
+    /// 使用已成功配置的候选 Select 子句替换当前投影。
+    /// </summary>
+    /// <param name="configure">配置候选 Select 子句的操作。</param>
+    private void ReplaceSelect(Action<ISelectClause> configure)
+    {
+        var builder = GetBuilder() as SqlBuilderBase ??
+            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
+        builder.ReplaceSelect(configure);
     }
 
     /// <summary>

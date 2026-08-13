@@ -121,6 +121,24 @@ public class QueryCapabilityValidationTest
     }
 
     /// <summary>
+    /// 测试目的：分页能力校验失败时，Pager.Order 不得遗留到原 Builder 的排序子句。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenPaginationCapabilityIsInherited_ShouldNotKeepPagerOrderAfterFailure()
+    {
+        // Arrange
+        var builder = new CapabilitySqlBuilder(new SqlQueryCapabilities());
+        builder.Select("Id").From("Source").Page(new Pager(1, 10, "Id"));
+
+        // Act
+        Assert.Throws<NotSupportedException>(() => builder.ToSql());
+        var sql = builder.ClearPageParams().ToSql();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Source]", sql);
+    }
+
+    /// <summary>
     /// 测试目的：Provider 明确不支持 Right Join 时，数据源和选项均不得重新启用该语法。
     /// </summary>
     [Fact]

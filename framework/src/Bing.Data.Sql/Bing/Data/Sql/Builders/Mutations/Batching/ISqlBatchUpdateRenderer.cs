@@ -24,5 +24,5 @@ public interface ISqlBatchUpdateRenderer
     /// </summary>
     /// <param name="context">批量 Update 的结构化上下文。</param>
     /// <returns>可执行 SQL 命令快照。</returns>
-    SqlMutationCommand Render(SqlBatchUpdateRenderContext context);
+    SqlWriteCommand Render(SqlBatchUpdateRenderContext context);
 }

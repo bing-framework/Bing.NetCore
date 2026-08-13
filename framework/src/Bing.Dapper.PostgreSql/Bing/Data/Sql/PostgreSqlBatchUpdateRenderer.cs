@@ -21,7 +21,7 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
         context.Entities.Count > 0 && context.UpdateColumns.Count > 0 && context.Keys.Count > 0;
 
     /// <inheritdoc />
-    public SqlMutationCommand Render(SqlBatchUpdateRenderContext context)
+    public SqlWriteCommand Render(SqlBatchUpdateRenderContext context)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
@@ -55,7 +55,7 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
         for (var index = 0; index < context.ConcurrencyColumns.Count; index++)
             conditions.Add($"t.{context.Provider.Dialect.SafeName(context.ConcurrencyColumns[index].ColumnName)} = v.{aliases[concurrencyOffset + index]}");
         sql.Append(string.Join(" And ", conditions));
-        return new SqlMutationCommand(sql.ToString(), ExportParameters(parameterManager));
+        return new SqlWriteCommand(sql.ToString(), ExportParameters(parameterManager));
     }
 
     /// <summary>

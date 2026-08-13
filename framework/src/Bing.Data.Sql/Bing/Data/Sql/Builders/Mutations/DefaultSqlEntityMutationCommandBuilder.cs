@@ -60,7 +60,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     internal int GetterCacheCount => _planCache.GetterCount;
 
     /// <inheritdoc />
-    public SqlMutationCommand Insert<TEntity>(TEntity entity, SqlInsertOptions options = null) where TEntity : class
+    public SqlWriteCommand Insert<TEntity>(TEntity entity, SqlInsertOptions options = null) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
@@ -84,7 +84,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <inheritdoc />
-    public SqlMutationCommand InsertCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
+    public SqlWriteCommand InsertCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
         SqlInsertOptions options = null) where TEntity : class
     {
         if (entities == null)
@@ -117,7 +117,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <inheritdoc />
-    public SqlMutationCommand Update<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class
+    public SqlWriteCommand Update<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
@@ -160,7 +160,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <inheritdoc />
-    public SqlMutationCommand Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class
+    public SqlWriteCommand Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
@@ -174,7 +174,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <inheritdoc />
-    public SqlMutationCommand DeleteCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
+    public SqlWriteCommand DeleteCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
         SqlDeleteOptions options = null, SqlBatchDeleteStrategy strategy = SqlBatchDeleteStrategy.Auto) where TEntity : class
     {
         if (entities == null)
@@ -356,7 +356,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <param name="plan">实体 Mutation 计划。</param>
     /// <param name="behavior">调用方指定的并发冲突行为。</param>
     /// <returns>最终可执行命令。</returns>
-    private static SqlMutationCommand WithConcurrencyValidation(SqlMutationCommand command, SqlMutationPlan plan,
+    private static SqlWriteCommand WithConcurrencyValidation(SqlWriteCommand command, SqlMutationPlan plan,
         SqlConcurrencyConflictBehavior? behavior) => new(command.Sql, command.Parameters,
         plan.ConcurrencyColumns.Count > 0 && (behavior ?? SqlConcurrencyConflictBehavior.Throw) ==
         SqlConcurrencyConflictBehavior.Throw);

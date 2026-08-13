@@ -59,4 +59,10 @@ public sealed class SqlMutationContext
     /// </summary>
     /// <param name="action">当前 Mutation 行为。</param>
     internal void UseOperation(SqlOperationAction action) => OperationStateManager?.UseOperation(action);
+
+    /// <summary>
+    /// 验证当前 Mutation 操作可执行，但不切换统一 Builder 状态。
+    /// </summary>
+    /// <param name="action">当前 Mutation 行为。</param>
+    internal void ValidateOperation(SqlOperationAction action) => OperationStateManager?.ValidateOperation(action);
 }

@@ -123,7 +123,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .WhereFrom("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteMutationAsync(builder.ToMutationDescription());
+        var affectedRows = await executor.ExecuteMutationAsync(builder.ToSqlWriteCommand());
         using var query = _fixture.CreateQuery();
         var name = await query.Query<string>().Select("name").From("public.integration_products").Where("id", id)
             .ScalarAsync();
@@ -161,7 +161,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .WhereUsing("id", "id");
 
         // Act
-        var affectedRows = await executor.ExecuteMutationAsync(builder.ToMutationDescription());
+        var affectedRows = await executor.ExecuteMutationAsync(builder.ToSqlWriteCommand());
         using var matchedQuery = _fixture.CreateQuery();
         var matchedCount = await matchedQuery.Query<int>().AppendSelect("Count(*)").From("public.integration_products")
             .Where("id", matchedId).ScalarAsync();
@@ -201,7 +201,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             .Returning("id", "name");
 
         // Act
-        var rows = await executor.ExecuteReturningAsync<PostgreSqlReturningProduct>(builder.ToMutationDescription());
+        var rows = await executor.ExecuteReturningAsync<PostgreSqlReturningProduct>(builder.ToSqlWriteCommand());
 
         // Assert
         Assert.Equal(new[] { firstId, secondId }, rows.Select(row => row.Id));

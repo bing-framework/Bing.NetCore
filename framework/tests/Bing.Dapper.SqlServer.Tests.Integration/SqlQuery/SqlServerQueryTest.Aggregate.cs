@@ -90,7 +90,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
             .Returning<SqlServerOutputRow>(row => new { row.Id, row.UserId });
 
         // Act
-        var rows = await executor.ExecuteReturningAsync<SqlServerOutputRow>(builder.ToMutationDescription());
+        var rows = await executor.ExecuteReturningAsync<SqlServerOutputRow>(builder.ToSqlWriteCommand());
 
         // Assert
         Assert.Equal(new[] { "output-first", "output-second" }, rows.Select(row => row.UserId));

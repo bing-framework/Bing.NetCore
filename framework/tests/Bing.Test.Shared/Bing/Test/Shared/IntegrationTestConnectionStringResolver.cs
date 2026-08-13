@@ -45,6 +45,8 @@ public static class IntegrationTestConnectionStringResolver
         {
             "MYSQL" => new ProviderSettings("MySql", "ConnectionStrings__MySqlConnection",
                 "integration.mysql.runsettings.example"),
+            "DORIS" => new ProviderSettings("Doris", "ConnectionStrings__DorisConnection",
+                "integration.doris.runsettings.example"),
             "POSTGRESQL" => new ProviderSettings("PostgreSql", "ConnectionStrings__PostgreSqlConnection",
                 "integration.postgresql.runsettings.example"),
             "SQLSERVER" => new ProviderSettings("SqlServer", "ConnectionStrings__SqlServerConnection",

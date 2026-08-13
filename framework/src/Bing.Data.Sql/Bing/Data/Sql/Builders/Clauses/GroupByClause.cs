@@ -96,8 +96,11 @@ public class GroupByClause : IGroupByClause
     {
         if (string.IsNullOrWhiteSpace(columns))
             return;
+        var items = columns.Split(',').Where(item => string.IsNullOrWhiteSpace(item) == false).ToList();
+        if (items.Count == 0)
+            return;
         _context.UseOperation(SqlOperationAction.QueryClause);
-        _group.AddRange(columns.Split(',').Select(item => new SqlItem(item)));
+        _group.AddRange(items.Select(item => new SqlItem(item)));
     }
 
     /// <summary>
@@ -109,8 +112,20 @@ public class GroupByClause : IGroupByClause
     {
         if (columns == null)
             return;
+        var items = new List<SqlItem>();
         foreach (var column in columns)
-            GroupBy(column);
+        {
+            if (column == null)
+                continue;
+            var resolvedColumn = _resolver.GetColumn(column);
+            if (string.IsNullOrWhiteSpace(resolvedColumn))
+                continue;
+            items.Add(new SqlItem(resolvedColumn, _register.GetAlias(typeof(TEntity))));
+        }
+        if (items.Count == 0)
+            return;
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        _group.AddRange(items);
     }
 
     /// <summary>
@@ -122,8 +137,11 @@ public class GroupByClause : IGroupByClause
     {
         if (column == null)
             return;
+        var resolvedColumn = _resolver.GetColumn(column);
+        if (string.IsNullOrWhiteSpace(resolvedColumn))
+            return;
         _context.UseOperation(SqlOperationAction.QueryClause);
-        _group.Add(new SqlItem(_resolver.GetColumn(column), _register.GetAlias(typeof(TEntity))));
+        _group.Add(new SqlItem(resolvedColumn, _register.GetAlias(typeof(TEntity))));
     }
 
     /// <summary>
@@ -168,8 +186,10 @@ public class GroupByClause : IGroupByClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             throw new ArgumentException("Having 条件不能为空。", nameof(sql));
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        sql = Helper.ResolveSql(sql, _dialect);
         _context.UseOperation(SqlOperationAction.QueryClause);
-        _having = Helper.ResolveSql(sql, _dialect);
+        _having = sql;
     }
 
     /// <summary>
@@ -180,8 +200,9 @@ public class GroupByClause : IGroupByClause
     {
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        _context.UseOperation(SqlOperationAction.QueryClause);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
         sql = Helper.ResolveSql(sql, _dialect);
+        _context.UseOperation(SqlOperationAction.QueryClause);
         _group.Add(new SqlItem(sql, raw: true));
     }
 
@@ -192,12 +213,21 @@ public class GroupByClause : IGroupByClause
             throw new ArgumentNullException(nameof(builder));
         if (IsGroup == false)
             return;
-        builder.Append("Group By ");
-        builder.Append(GroupColumns);
-        if (string.IsNullOrWhiteSpace(_having))
-            return;
-        builder.Append(" Having ");
-        builder.Append(_having);
+        var startIndex = builder.Length;
+        try
+        {
+            builder.Append("Group By ");
+            builder.Append(GroupColumns);
+            if (string.IsNullOrWhiteSpace(_having))
+                return;
+            builder.Append(" Having ");
+            builder.Append(_having);
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
     }
 
     /// <inheritdoc />

@@ -139,6 +139,23 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：异步 Begin 回退到同步事务创建前必须再次检查取消令牌，避免取消后的事务泄漏。
+    /// </summary>
+    [Fact]
+    public async Task BeginAsync_WhenCancelledBeforeSynchronousFallback_ShouldNotBeginTransaction()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+        var connection = new Mock<IDbConnection>();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => SqlTransactionAsyncAdapter.BeginAsync(
+            connection.Object, IsolationLevel.ReadCommitted, cancellationTokenSource.Token));
+        connection.Verify(item => item.BeginTransaction(It.IsAny<IsolationLevel>()), Times.Never);
+    }
+
+    /// <summary>
     /// 测试目的：显式数据源 Key 应选择对应 Provider 的实现类型与独立配置快照。
     /// </summary>
     [Fact]

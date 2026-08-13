@@ -424,6 +424,37 @@ public class DatabaseScopeAndDataSourceTest
     }
 
     /// <summary>
+    /// 测试目的：嵌套作用域仅变更租户或读取偏好时必须继承父级已解析的数据源，避免重新路由到默认数据源。
+    /// </summary>
+    [Fact]
+    public void Use_WhenNestedScopeDoesNotSpecifyDbKey_ShouldInheritParentDataSource()
+    {
+        // Arrange
+        var accessor = new AsyncLocalDatabaseContextAccessor();
+        var manager = new DatabaseScopeManager(accessor, CreateMultiDataSourceOptions());
+
+        // Act
+        using (manager.Use("mysql"))
+        {
+            using (manager.Use(new DatabaseScopeOptions { TenantId = "tenant-a" }))
+            {
+                // Assert
+                Assert.Equal("mysql", accessor.Current.DbKey);
+                Assert.Equal("mysql", accessor.Current.DataSource.Key);
+                Assert.Equal("tenant-a", accessor.Current.TenantId);
+            }
+
+            using (manager.Use(new DatabaseScopeOptions { ReadPreference = SqlReadPreference.Primary }))
+            {
+                // Assert
+                Assert.Equal("mysql", accessor.Current.DbKey);
+                Assert.Equal("mysql", accessor.Current.DataSource.Key);
+                Assert.Equal(SqlReadPreference.Primary, accessor.Current.ReadPreference);
+            }
+        }
+    }
+
+    /// <summary>
     /// 测试目的：数据库作用域显式 Default 偏好应覆盖父级 Primary 偏好并在释放后恢复。
     /// </summary>
     [Fact]

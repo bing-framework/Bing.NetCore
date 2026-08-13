@@ -15,10 +15,10 @@ Bing.Data.Sql.SqlProviderRuntime.MultipleQueryExecutorType.get -> System.Type
 Bing.Data.Sql.SqlProviderRuntime.ProviderKey.get -> string
 Bing.Data.Sql.SqlProviderRuntime.QueryType.get -> System.Type
 static Bing.Dapper.DapperCoreServiceCollectionExtensions.AddSqlProviderRuntime(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Bing.Data.Sql.SqlProviderRuntime runtime) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
-virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutation(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> int
-virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.SqlExecutorBase.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlExecutorBase.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlMutationDescription description, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutation(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> int
+virtual Bing.Data.Sql.SqlExecutorBase.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.SqlExecutorBase.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlExecutorBase.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.SqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>

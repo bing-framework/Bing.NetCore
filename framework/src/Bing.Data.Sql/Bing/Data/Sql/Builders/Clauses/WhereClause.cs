@@ -108,8 +108,11 @@ public class WhereClause : IWhereClause
     /// 获取合并参数上下文后的子查询 SQL。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
-    private string GetSubquerySql(ISqlBuilder builder) =>
-        Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+    private string GetSubquerySql(ISqlBuilder builder)
+    {
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        return Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
+    }
 
     #endregion
 
@@ -121,8 +124,12 @@ public class WhereClause : IWhereClause
     /// <param name="condition">查询条件</param>
     public void And(ICondition condition)
     {
+        if (string.IsNullOrWhiteSpace(condition?.GetCondition()))
+            return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        var result = new AndCondition(_condition, MergeBuilderCondition(condition));
         Context.UseOperation(SqlOperationAction.QueryClause);
-        _condition = new AndCondition(_condition, MergeBuilderCondition(condition));
+        _condition = result;
     }
 
     /// <summary>
@@ -131,8 +138,12 @@ public class WhereClause : IWhereClause
     /// <param name="condition">查询条件</param>
     public void Or(ICondition condition)
     {
+        if (string.IsNullOrWhiteSpace(condition?.GetCondition()))
+            return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        var result = new OrCondition(_condition, MergeBuilderCondition(condition));
         Context.UseOperation(SqlOperationAction.QueryClause);
-        _condition = new OrCondition(_condition, MergeBuilderCondition(condition));
+        _condition = result;
     }
 
     /// <summary>
@@ -156,12 +167,7 @@ public class WhereClause : IWhereClause
     {
         if (conditions == null || conditions.Length == 0)
             return;
-        foreach (var condition in conditions.Where(x => x != null))
-        {
-            var predicate = _expressionResolver.Resolve(condition);
-            if (predicate != null)
-                Or(predicate);
-        }
+        AppendOrPredicates(conditions.Where(condition => condition != null));
     }
 
     /// <summary>
@@ -173,16 +179,195 @@ public class WhereClause : IWhereClause
     {
         if (conditions == null || conditions.Length == 0)
             return;
-        foreach (var condition in conditions.Where(x => x != null))
+        var items = new List<Expression<Func<TEntity, bool>>>();
+        foreach (var condition in conditions.Where(condition => condition != null))
         {
             ValidateSingleCondition(condition);
-
             if (string.IsNullOrWhiteSpace(Lambdas.GetValue(condition).SafeString()))
                 continue;
+            Context.ValidateOperation(SqlOperationAction.QueryClause);
+            items.Add(condition);
+        }
+        AppendOrPredicates(items);
+    }
 
-            var predicate = _expressionResolver.Resolve(condition);
-            if (predicate != null)
-                Or(predicate);
+    /// <summary>
+    /// 预检并追加一组 Or 谓词，避免后续解析失败时遗留前序条件或参数。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="conditions">待追加的谓词集合。</param>
+    private void AppendOrPredicates<TEntity>(IEnumerable<Expression<Func<TEntity, bool>>> conditions)
+    {
+        var items = conditions?.ToList();
+        if (items == null || items.Count == 0)
+            return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        var parameterManager = CreateBufferedParameterManager();
+        var context = new SqlClauseContext(Builder, Context.Provider, Context.EntityResolver, Context.AliasRegister,
+            parameterManager, Context.ExecutionContext, Context.Services);
+        var resolver = new PredicateExpressionResolver(context);
+        var predicates = new List<ICondition>();
+        foreach (var item in items)
+        {
+            var predicate = resolver.Resolve(item);
+            if (string.IsNullOrWhiteSpace(predicate?.GetCondition()) == false)
+                predicates.Add(predicate);
+        }
+        if (predicates.Count == 0)
+            return;
+        ICondition result = _condition;
+        foreach (var predicate in predicates)
+            result = new OrCondition(result, predicate);
+        parameterManager.Commit();
+        Context.UseOperation(SqlOperationAction.QueryClause);
+        _condition = result;
+    }
+
+    /// <summary>
+    /// 创建保留参数元数据的写入缓冲区。
+    /// </summary>
+    private BufferedParameterManager CreateBufferedParameterManager() =>
+        Context.ParameterManager is IAdvancedParameterManager advancedParameterManager
+            ? new BufferedAdvancedParameterManager(advancedParameterManager)
+            : new BufferedParameterManager(Context.ParameterManager);
+
+    /// <summary>
+    /// 在独立参数副本上预检，并延迟向真实管理器写入参数的缓冲区。
+    /// </summary>
+    private class BufferedParameterManager : IParameterManager
+    {
+        /// <summary>
+        /// 真实参数管理器。
+        /// </summary>
+        private readonly IParameterManager _target;
+
+        /// <summary>
+        /// 预检参数管理器。
+        /// </summary>
+        protected IParameterManager Probe { get; }
+
+        /// <summary>
+        /// 通过预检后的参数写入操作。
+        /// </summary>
+        private readonly List<Action<IParameterManager>> _operations = new();
+
+        /// <summary>
+        /// 初始化参数写入缓冲区。
+        /// </summary>
+        /// <param name="target">真实参数管理器。</param>
+        public BufferedParameterManager(IParameterManager target)
+        {
+            _target = target ?? throw new ArgumentNullException(nameof(target));
+            Probe = _target.Clone();
+        }
+
+        /// <inheritdoc />
+        public int Count => Probe.Count;
+
+        /// <inheritdoc />
+        public string GenerateName() => Probe.GenerateName();
+
+        /// <inheritdoc />
+        public string NormalizeName(string name) => Probe.NormalizeName(name);
+
+        /// <inheritdoc />
+        public void Add(string name, object value, Operator? @operator = null)
+        {
+            Probe.Add(name, value, @operator);
+            _operations.Add(target => target.Add(name, value, @operator));
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> GetParams() => Probe.GetParams();
+
+        /// <inheritdoc />
+        public bool Contains(string name) => Probe.Contains(name);
+
+        /// <inheritdoc />
+        public object GetValue(string name) => Probe.GetValue(name);
+
+        /// <inheritdoc />
+        public IParameterManager Clone() => Probe.Clone();
+
+        /// <inheritdoc />
+        public IParameterManager CreateEmpty() => Probe.CreateEmpty();
+
+        /// <inheritdoc />
+        public void Clear() => throw new NotSupportedException("参数预检期间不支持清空缓冲区。");
+
+        /// <summary>
+        /// 将全部预检通过的写入操作提交到真实参数管理器。
+        /// </summary>
+        public void Commit()
+        {
+            foreach (var operation in _operations)
+                operation(_target);
+        }
+
+        /// <summary>
+        /// 记录增强参数的写入操作。
+        /// </summary>
+        /// <param name="operation">写入操作。</param>
+        protected void Record(Action<IParameterManager> operation) => _operations.Add(operation);
+    }
+
+    /// <summary>
+    /// 保留 SqlParam 元数据的参数写入缓冲区。
+    /// </summary>
+    private sealed class BufferedAdvancedParameterManager : BufferedParameterManager, IAdvancedParameterManager
+    {
+        /// <summary>
+        /// 预检增强参数管理器。
+        /// </summary>
+        private IAdvancedParameterManager AdvancedProbe => (IAdvancedParameterManager)Probe;
+
+        /// <summary>
+        /// 初始化增强参数写入缓冲区。
+        /// </summary>
+        /// <param name="target">真实增强参数管理器。</param>
+        public BufferedAdvancedParameterManager(IAdvancedParameterManager target)
+            : base(target)
+        {
+        }
+
+        /// <inheritdoc />
+        public void Add(SqlParam parameter)
+        {
+            var snapshot = CloneSqlParameter(parameter);
+            AdvancedProbe.Add(snapshot);
+            Record(target => ((IAdvancedParameterManager)target).Add(CloneSqlParameter(snapshot)));
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => AdvancedProbe.GetSqlParams();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> ExportValues() => AdvancedProbe.ExportValues();
+
+        /// <summary>
+        /// 深复制参数容器，避免预检实现修改后影响真实提交。
+        /// </summary>
+        /// <param name="parameter">源参数。</param>
+        /// <returns>独立的参数副本。</returns>
+        private static SqlParam CloneSqlParameter(SqlParam parameter)
+        {
+            if (parameter == null)
+                return null;
+            return new SqlParam(parameter.Name, parameter.Value, parameter.DbType, parameter.Direction,
+                parameter.Size, parameter.Precision, parameter.Scale)
+            {
+                OriginalValue = parameter.OriginalValue,
+                EntityType = parameter.EntityType,
+                PropertyName = parameter.PropertyName,
+                ColumnName = parameter.ColumnName,
+                DatabaseType = parameter.DatabaseType,
+                ProviderTypeName = parameter.ProviderTypeName,
+                Source = parameter.Source,
+                MetadataLevel = parameter.MetadataLevel,
+                StorageKind = parameter.StorageKind,
+                ConverterKind = parameter.ConverterKind,
+                CustomConverterName = parameter.CustomConverterName
+            };
         }
     }
 
@@ -212,7 +397,11 @@ public class WhereClause : IWhereClause
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public void Where(string column, object value, Operator @operator = Operator.Equal) => And(_helper.CreateCondition(column, value, @operator));
+    public void Where(string column, object value, Operator @operator = Operator.Equal)
+    {
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        And(_helper.CreateCondition(column, value, @operator));
+    }
 
     /// <summary>
     /// 设置查询条件
@@ -222,7 +411,11 @@ public class WhereClause : IWhereClause
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal)
-        where TEntity : class => And(_helper.CreateCondition(expression, typeof(TEntity), value, @operator));
+        where TEntity : class
+    {
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+        And(_helper.CreateCondition(expression, typeof(TEntity), value, @operator));
+    }
 
     /// <summary>
     /// 设置查询条件
@@ -233,6 +426,7 @@ public class WhereClause : IWhereClause
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var condition = _expressionResolver.Resolve(expression);
         And(condition);
     }
@@ -287,6 +481,7 @@ public class WhereClause : IWhereClause
     {
         if (action == null)
             return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         Where(column, builder, @operator);
@@ -490,6 +685,7 @@ public class WhereClause : IWhereClause
     {
         if (action == null)
             return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         In(column, builder);
@@ -545,6 +741,7 @@ public class WhereClause : IWhereClause
     {
         if (action == null)
             return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         NotIn(column, builder);
@@ -596,6 +793,7 @@ public class WhereClause : IWhereClause
     {
         if (action == null)
             return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         Exists(builder);
@@ -621,6 +819,7 @@ public class WhereClause : IWhereClause
     {
         if (action == null)
             return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         NotExists(builder);
@@ -640,6 +839,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
@@ -653,6 +853,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
@@ -666,6 +867,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
@@ -679,6 +881,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
@@ -692,6 +895,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
@@ -706,6 +910,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) where TEntity : class
     {
+        ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), GetMin(min, max, includeTime),
             GetMax(min, max, includeTime), GetBoundary(boundary, includeTime)));
     }
@@ -770,6 +975,7 @@ public class WhereClause : IWhereClause
     /// <param name="boundary">包含边界</param>
     private void HandleBetween<T>(string column, T? min, T? max, Boundary boundary) where T : struct, IComparable<T>
     {
+        ValidateBetweenOperation(min, max);
         if (min.HasValue && max.HasValue && min.Value.CompareTo(max.Value) > 0)
         {
             Where(_helper.Between(column, max, min, boundary));
@@ -788,7 +994,35 @@ public class WhereClause : IWhereClause
     /// <param name="includeTime">是否包含时间</param>
     /// <param name="boundary">包含边界</param>
     public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) =>
-        Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime), GetBoundary(boundary, includeTime)));
+        HandleBetween(column, min, max, includeTime, boundary);
+
+    /// <summary>
+    /// 验证范围查询操作。
+    /// </summary>
+    /// <typeparam name="T">范围值类型。</typeparam>
+    /// <param name="min">最小值。</param>
+    /// <param name="max">最大值。</param>
+    private void ValidateBetweenOperation<T>(T? min, T? max) where T : struct
+    {
+        if (min.HasValue == false && max.HasValue == false)
+            return;
+        Context.ValidateOperation(SqlOperationAction.QueryClause);
+    }
+
+    /// <summary>
+    /// 处理日期范围查询。
+    /// </summary>
+    /// <param name="column">列名。</param>
+    /// <param name="min">最小值。</param>
+    /// <param name="max">最大值。</param>
+    /// <param name="includeTime">是否包含时间。</param>
+    /// <param name="boundary">包含边界。</param>
+    private void HandleBetween(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary)
+    {
+        ValidateBetweenOperation(min, max);
+        Where(_helper.Between(column, GetMin(min, max, includeTime), GetMax(min, max, includeTime),
+            GetBoundary(boundary, includeTime)));
+    }
 
     /// <summary>
     /// 获取最小日期

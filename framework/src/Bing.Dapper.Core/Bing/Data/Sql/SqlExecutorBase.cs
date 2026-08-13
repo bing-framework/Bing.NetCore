@@ -39,20 +39,20 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     #endregion
 
     /// <inheritdoc />
-    public List<TResult> ExecuteReturning<TResult>(SqlMutationDescription description, int? timeout = null)
+    public List<TResult> ExecuteReturning<TResult>(SqlWriteCommand command, int? timeout = null)
     {
         EnsureWritableDataSource();
-        ValidateReturningMutationDescription(description);
+        ValidateReturningMutationCommand(command);
         return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return new List<TResult>();
-            var command = PrepareCommand(description);
+            var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
-            context.Message = CreateExecutionDiagnostics(command, connection);
-            WriteTraceLog(command);
-            var result = connection.Query<TResult>(command.Sql, command.DapperParameters, transaction, true, timeout)
+            context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
+            var result = connection.Query<TResult>(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout)
                 .ToList();
             CompleteQueryTransaction();
             ExecuteAfter(context.Message);
@@ -61,23 +61,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <inheritdoc />
-    public async Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlMutationDescription description, int? timeout = null,
+    public async Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
         EnsureWritableDataSource();
-        ValidateReturningMutationDescription(description);
+        ValidateReturningMutationCommand(command);
         return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
                 return new List<TResult>();
-            var command = PrepareCommand(description);
+            var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
             var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
-            context.Message = CreateExecutionDiagnostics(command, connection);
-            WriteTraceLog(command);
+            context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
             var result = await ExecuteMaterializedQueryAsync<TResult>(connection,
-                CreateQueryCommandDefinition(command.Sql, command.DapperParameters, transaction, timeout, buffered: true,
+                CreateQueryCommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, buffered: true,
                     cancellationToken), cancellationToken);
             await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
@@ -85,23 +85,23 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }, cancellationToken).ConfigureAwait(false);
     }
 
-    #region ExecuteMutation(执行 Mutation 描述)
+    #region ExecuteMutation(执行写入命令)
 
     /// <inheritdoc />
-    public virtual int ExecuteMutation(SqlMutationDescription description, int? timeout = null)
+    public virtual int ExecuteMutation(SqlWriteCommand command, int? timeout = null)
     {
         EnsureWritableDataSource();
-        ValidateExecutableMutationDescription(description);
+        ValidateExecutableMutationCommand(command);
         return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var command = PrepareCommand(description);
+            var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
             var transaction = GetQueryTransaction();
-            context.Message = CreateExecutionDiagnostics(command, connection);
-            WriteTraceLog(command);
-            var result = connection.Execute(command.Sql, command.DapperParameters, transaction, timeout);
+            context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
+            var result = connection.Execute(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
             CompleteQueryTransaction();
             ExecuteAfter(context.Message);
             return result;
@@ -109,22 +109,22 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <inheritdoc />
-    public virtual async Task<int> ExecuteMutationAsync(SqlMutationDescription description, int? timeout = null,
+    public virtual async Task<int> ExecuteMutationAsync(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
         EnsureWritableDataSource();
-        ValidateExecutableMutationDescription(description);
+        ValidateExecutableMutationCommand(command);
         return await ExecuteDirectAsync(async context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var command = PrepareCommand(description);
+            var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
             var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
-            context.Message = CreateExecutionDiagnostics(command, connection);
-            WriteTraceLog(command);
-            var result = await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
+            context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
+            WriteTraceLog(preparedCommand);
+            var result = await connection.ExecuteAsync(new CommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
                 cancellationToken: cancellationToken));
             await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
@@ -133,52 +133,52 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <summary>
-    /// 验证 Mutation 描述是否可通过非 Returning 执行入口执行。
+    /// 验证写入命令是否可通过非 Returning 执行入口执行。
     /// </summary>
-    private void ValidateExecutableMutationDescription(SqlMutationDescription description)
+    private void ValidateExecutableMutationCommand(SqlWriteCommand command)
     {
-        if (description == null)
-            throw new ArgumentNullException(nameof(description));
-        if (description.HasReturning)
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        if (command.HasReturning)
             throw new InvalidOperationException("包含 Returning 的 Mutation 必须通过查询结果 API 执行。");
-        if (description.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+        if (command.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
             SqlOperationKind.Update or SqlOperationKind.Delete))
-            throw new InvalidOperationException($"ISqlExecutor 不支持执行 {description.OperationKind} 状态的 Mutation 描述。");
-        ValidateMutationDescriptionProvider(description);
+            throw new InvalidOperationException($"ISqlExecutor 不支持执行 {command.OperationKind} 状态的写入命令。");
+        ValidateMutationCommandProvider(command);
     }
 
     /// <summary>
-    /// 验证 Mutation 描述是否为包含 Returning 的 Mutation。
+    /// 验证写入命令是否为包含 Returning 的 Mutation。
     /// </summary>
-    private void ValidateReturningMutationDescription(SqlMutationDescription description)
+    private void ValidateReturningMutationCommand(SqlWriteCommand command)
     {
-        if (description == null)
-            throw new ArgumentNullException(nameof(description));
-        if (description.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        if (command.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
             SqlOperationKind.Update or SqlOperationKind.Delete))
-            throw new InvalidOperationException($"ISqlExecutor 不支持执行 {description.OperationKind} 状态的 Mutation 描述。");
-        if (description.HasReturning == false)
+            throw new InvalidOperationException($"ISqlExecutor 不支持执行 {command.OperationKind} 状态的写入命令。");
+        if (command.HasReturning == false)
             throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
-        if (description.ProviderProfile.Mutation.SupportsReturning == false)
-            throw new InvalidOperationException($"Mutation 描述 Provider {description.ProviderKey} 未声明 Returning 能力，不能执行。");
-        ValidateMutationDescriptionProvider(description);
+        if (command.ProviderProfile.Mutation.SupportsReturning == false)
+            throw new InvalidOperationException($"写入命令 Provider {command.ProviderKey} 未声明 Returning 能力，不能执行。");
+        ValidateMutationCommandProvider(command);
     }
 
     /// <summary>
-    /// 验证 Mutation 描述生成时的 Provider 与当前 Executor 一致。
+    /// 验证写入命令生成时的 Provider 与当前 Executor 一致。
     /// </summary>
-    /// <param name="description">待执行的 Mutation 描述。</param>
-    private void ValidateMutationDescriptionProvider(SqlMutationDescription description)
+    /// <param name="command">待执行的写入命令。</param>
+    private void ValidateMutationCommandProvider(SqlWriteCommand command)
     {
         var provider = GetCurrentProvider();
         var providerKey = provider.Key?.Trim();
-        if (string.Equals(description.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(command.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase))
         {
-            if (description.HasReturning && SqlProviderCapabilityResolver.GetProfile(provider).Mutation.SupportsReturning == false)
+            if (command.HasReturning && SqlProviderCapabilityResolver.GetProfile(provider).Mutation.SupportsReturning == false)
                 throw new NotSupportedException($"Provider {providerKey ?? "<未指定>"} 不支持 Mutation Returning。");
             return;
         }
-        throw new InvalidOperationException($"Mutation 描述 Provider {description.ProviderKey} 与当前 Executor Provider {providerKey ?? "<未指定>"} 不一致，不能执行。");
+        throw new InvalidOperationException($"写入命令 Provider {command.ProviderKey} 与当前 Executor Provider {providerKey ?? "<未指定>"} 不一致，不能执行。");
     }
 
     #endregion
@@ -722,7 +722,14 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             {
                 var context = contextBuilder.CreateUpdateRenderContext(items.Take(1).ToArray(), options.UpdateOptions);
                 if (renderer.CanRender(context))
+                {
+                    if (SqlMutationDataBoundary.RequiresStructuredUpdate(context.Services, context.Mapping.EntityType))
+                        return CreateMutationBatchCommands(items,
+                            entity => CreateMutationBuilder(provider).Update(entity, options.UpdateOptions), options);
                     return CreateProviderOptimizedUpdateBatchCommands(items, options);
+                }
+                if (options.Strategy == SqlBatchUpdateStrategy.ProviderOptimized)
+                    throw new NotSupportedException($"Provider {provider.Key} 无法为当前批量 Update 上下文生成优化命令。");
             }
             if (options.Strategy == SqlBatchUpdateStrategy.ProviderOptimized)
                 return CreateProviderOptimizedUpdateBatchCommands(items, options);
@@ -773,7 +780,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 var minimumSize = 1;
                 var maximumSize = remaining;
                 var commandSize = 0;
-                SqlMutationCommand command = null;
+                SqlWriteCommand command = null;
                 while (minimumSize <= maximumSize)
                 {
                     var candidateSize = minimumSize + (maximumSize - minimumSize) / 2;
@@ -808,7 +815,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="provider">用于创建 Mutation Builder 的 SQL Provider。</param>
     /// <param name="renderer">用于渲染优化命令的唯一 Provider 渲染器。</param>
     /// <returns>由 Provider 专用语法渲染的单条 Update 命令。</returns>
-    private SqlMutationCommand RenderProviderOptimizedUpdateCommand<TEntity>(IReadOnlyCollection<TEntity> entities,
+    private SqlWriteCommand RenderProviderOptimizedUpdateCommand<TEntity>(IReadOnlyCollection<TEntity> entities,
         SqlBatchUpdateOptions options, ISqlProvider provider, ISqlBatchUpdateRenderer renderer) where TEntity : class
     {
         if (CreateMutationBuilder(provider) is not ISqlBatchUpdateRenderContextBuilder contextBuilder)
@@ -920,7 +927,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 var minimumSize = 1;
                 var maximumSize = remaining;
                 var commandSize = 0;
-                SqlMutationCommand command = null;
+                SqlWriteCommand command = null;
                 while (minimumSize <= maximumSize)
                 {
                     var candidateSize = minimumSize + (maximumSize - minimumSize) / 2;
@@ -952,16 +959,16 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 将组合命令的并发校验提升到批次层，避免按单实体一行规则误判。
     /// </summary>
-    private static SqlMutationCommand WithoutSingleEntityAffectedRowsValidation(SqlMutationCommand command) =>
+    private static SqlWriteCommand WithoutSingleEntityAffectedRowsValidation(SqlWriteCommand command) =>
         command.ValidateAffectedRows
-            ? new SqlMutationCommand(command.Sql, command.Parameters)
+            ? new SqlWriteCommand(command.Sql, command.Parameters)
             : command;
 
     /// <summary>
     /// 将实体映射为按参数及 SQL 长度限制分组的 Mutation 命令。
     /// </summary>
     private IReadOnlyList<SqlMutationBatchCommand> CreateMutationBatchCommands<TEntity>(
-        IEnumerable<TEntity> entities, Func<TEntity, SqlMutationCommand> commandFactory, SqlMutationBatchOptions options)
+        IEnumerable<TEntity> entities, Func<TEntity, SqlWriteCommand> commandFactory, SqlMutationBatchOptions options)
         where TEntity : class
     {
         if (entities == null)
@@ -1044,7 +1051,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 var minimumSize = 1;
                 var maximumSize = remaining;
                 var commandSize = 0;
-                SqlMutationCommand command = null;
+                SqlWriteCommand command = null;
                 while (minimumSize <= maximumSize)
                 {
                     if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder builder)
@@ -1261,7 +1268,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="command">待执行的单体 Mutation 命令。</param>
     /// <param name="timeout">命令执行超时时间，单位为秒。</param>
     /// <returns>命令实际影响的行数。</returns>
-    private int ExecuteMutationCommand(SqlMutationCommand command, int? timeout)
+    private int ExecuteMutationCommand(SqlWriteCommand command, int? timeout)
     {
         return ExecuteSqlCore(command.Sql, command.Parameters, timeout,
             affectedRows => ValidateAffectedRows(command, affectedRows));
@@ -1274,7 +1281,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="timeout">命令执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">传递给数据库执行器的取消令牌。</param>
     /// <returns>表示异步执行并返回命令实际影响行数的任务。</returns>
-    private async Task<int> ExecuteMutationCommandAsync(SqlMutationCommand command, int? timeout,
+    private async Task<int> ExecuteMutationCommandAsync(SqlWriteCommand command, int? timeout,
         CancellationToken cancellationToken)
     {
         return await ExecuteSqlCoreAsync(command.Sql, command.Parameters, timeout, cancellationToken,
@@ -1284,7 +1291,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 验证单体带并发令牌的命令是否影响了一行。
     /// </summary>
-    private static void ValidateAffectedRows(SqlMutationCommand command, int affectedRows)
+    private static void ValidateAffectedRows(SqlWriteCommand command, int affectedRows)
     {
         if (command.ValidateAffectedRows && affectedRows != 1)
             throw new Bing.Exceptions.ConcurrencyException($"实体 Mutation 预期影响 1 行，实际影响 {affectedRows} 行。");

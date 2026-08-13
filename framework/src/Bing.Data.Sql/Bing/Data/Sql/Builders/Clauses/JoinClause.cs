@@ -264,6 +264,11 @@ public class JoinClause : IJoinClause
         GetLastJoinOrThrow().On(condition);
     }
 
+    /// <summary>
+    /// 验证最后一个连接允许追加 On 条件。
+    /// </summary>
+    internal void ValidateLastJoinSupportsOn() => GetLastJoinOrThrow();
+
     #endregion
 
     #region Join(内连接)
@@ -479,9 +484,10 @@ public class JoinClause : IJoinClause
         _context.ValidateOperation(SqlOperationAction.QueryClause);
         var registerProbe = _register?.Clone();
         registerProbe?.RegisterAlias(alias);
+        var subqueryAlias = GetSubqueryAlias(alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         _register?.RegisterAlias(alias);
-        AddItem(JoinItem.CreateRaw(joinType, $"({sql}){GetSubqueryAlias(alias)}", alias));
+        AddItem(JoinItem.CreateRaw(joinType, $"({sql}){subqueryAlias}", alias));
     }
 
     /// <summary>
@@ -496,11 +502,12 @@ public class JoinClause : IJoinClause
         _context.ValidateOperation(SqlOperationAction.QueryClause);
         var registerProbe = _register?.Clone();
         registerProbe?.RegisterAlias(subquery.Alias);
+        var subqueryAlias = GetSubqueryAlias(subquery.Alias);
         var sql = _sqlBuilder is SqlBuilderBase sqlBuilder
             ? sqlBuilder.RenderSubquery(subquery.Builder)
             : subquery.Builder.ToSql();
         _register?.RegisterAlias(subquery.Alias);
-        var table = SqlItem.Raw($"({sql}){GetSubqueryAlias(subquery.Alias)}");
+        var table = SqlItem.Raw($"({sql}){subqueryAlias}");
         AddItem(JoinItem.CreateDerived(joinType, table,
             new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
                 subquery.ProjectedMembers)));
@@ -531,6 +538,7 @@ public class JoinClause : IJoinClause
     {
         if (action == null)
             return;
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = _sqlBuilder.New();
         action(builder);
         JoinSubquery(joinType, builder, alias);
@@ -784,23 +792,33 @@ public class JoinClause : IJoinClause
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var join = GetLastJoinOrThrow();
+        var existingParameters = _parameterManager.GetParams();
+        var snapshot = _parameterManager.Clone();
         var expressions = Lambdas.GetGroupPredicates(expression);
-        var items = expressions.Select(GetOnItems).ToList();
+        var items = expressions.Select(item => GetOnItems(item, snapshot)).ToList();
+        var parameters = snapshot.GetParams()
+            .Where(parameter => existingParameters.ContainsKey(parameter.Key) == false)
+            .ToList();
+        var validation = _parameterManager.Clone();
+        AddParameters(validation, parameters);
         join.On(items, _dialect);
+        AddParameters(_parameterManager, parameters);
     }
 
     /// <summary>
     /// 设置连接条件组
     /// </summary>
     /// <param name="group">条件组</param>
-    private List<OnItem> GetOnItems(List<Expression> group) =>
+    /// <param name="parameterManager">用于解析当前条件组的参数管理器。</param>
+    private List<OnItem> GetOnItems(List<Expression> group, IParameterManager parameterManager) =>
         @group.Select(expression =>
         {
             var leftType = _resolver.GetType(expression, false);
             var rightType = _resolver.GetType(expression, true);
             var selfJoin = leftType == rightType;
             return new OnItem(
-                GetColumn(expression, false, selfJoin), GetColumn(expression, true, selfJoin),
+                GetColumn(expression, false, selfJoin, parameterManager),
+                GetColumn(expression, true, selfJoin, parameterManager),
                 Lambdas.GetOperator(expression).SafeValue());
         }).ToList();
 
@@ -810,18 +828,31 @@ public class JoinClause : IJoinClause
     /// <param name="expression">表达式</param>
     /// <param name="right">是否取右侧操作数</param>
     /// <param name="selfJoin">是否为同实体自连接。</param>
-    private SqlItem GetColumn(Expression expression, bool right, bool selfJoin)
+    /// <param name="parameterManager">用于解析闭包值的参数管理器。</param>
+    private SqlItem GetColumn(Expression expression, bool right, bool selfJoin, IParameterManager parameterManager)
     {
         var type = _resolver.GetType(expression, right);
         var column = _resolver.GetColumn(expression, type, right);
         if (string.IsNullOrWhiteSpace(column))
         {
-            var name = _parameterManager.GenerateName();
-            _parameterManager.Add(name, Lambdas.GetValue(expression));
+            var name = parameterManager.GenerateName();
+            parameterManager.Add(name, Lambdas.GetValue(expression));
             return new SqlItem(name, raw: true);
         }
 
         return new SqlItem(GetColumn(type, column, selfJoin, right));
+    }
+
+    /// <summary>
+    /// 向目标参数管理器按当前 Lambda On 的普通参数语义写入参数。
+    /// </summary>
+    /// <param name="parameterManager">目标参数管理器。</param>
+    /// <param name="parameters">待写入参数。</param>
+    private static void AddParameters(IParameterManager parameterManager,
+        IEnumerable<KeyValuePair<string, object>> parameters)
+    {
+        foreach (var parameter in parameters)
+            parameterManager.Add(parameter.Key, parameter.Value);
     }
 
     /// <summary>
@@ -862,6 +893,7 @@ public class JoinClause : IJoinClause
         var join = _params.LastOrDefault();
         if (join == null)
             throw new InvalidOperationException("当前不存在可追加 On 条件的 Join。");
+        join.ValidateSupportsOn();
         return join;
     }
 
@@ -874,11 +906,20 @@ public class JoinClause : IJoinClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        for (var index = 0; index < _params.Count; index++)
+        var startIndex = builder.Length;
+        try
         {
-            if (index > 0)
-                builder.AppendLine(" ");
-            builder.Append(_params[index].ToSql(_dialect));
+            for (var index = 0; index < _params.Count; index++)
+            {
+                if (index > 0)
+                    builder.AppendLine(" ");
+                builder.Append(_params[index].ToSql(_dialect));
+            }
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
         }
     }
 

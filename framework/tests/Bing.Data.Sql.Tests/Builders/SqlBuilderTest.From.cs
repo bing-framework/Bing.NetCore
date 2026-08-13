@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Tests.Samples;
+using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders;
 
@@ -105,6 +106,7 @@ public partial class SqlBuilderTest
     public void Clear_WhenReusingSubquery_ShouldResetMergedParameterNames()
     {
         // Arrange
+        const string expectedSql = "Select * \r\nFrom (Select * \r\nFrom [Child] \r\nWhere [Name]=@_p_0) As [child]";
         var child = _builder.New().From("Child").Where("Name", "child-name");
         _builder.From("Parent").Where("Name", "parent-name").From(child, "child");
         _builder.ToSql();
@@ -114,8 +116,7 @@ public partial class SqlBuilderTest
         var sql = _builder.ToSql();
 
         // Assert
-        Assert.Contains("Where [Name]=@_p_0", sql);
-        Assert.DoesNotContain("@_p_1", sql);
+        SqlAssert.Equal(expectedSql, sql, _builder.Provider.Key);
         Assert.Single(_builder.GetParams());
         Assert.Equal("child-name", _builder.GetParam("@_p_0"));
     }

@@ -248,6 +248,11 @@ public class JoinItem : IJoinOn
     }
 
     /// <summary>
+    /// 验证当前连接允许在解析条件前追加 On。
+    /// </summary>
+    internal void ValidateSupportsOn() => EnsureSupportsOn();
+
+    /// <summary>
     /// 是否已在原始 Join 文本中提供 On 条件。
     /// </summary>
     private bool HasRawOnCondition()

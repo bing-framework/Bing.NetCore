@@ -27,7 +27,7 @@ public class ExecutionPreparationTest
         var executor = CreateExecutor();
 
         // Act
-        var result = executor.ExecuteMutation(builder.Object.ToMutationDescription());
+        var result = executor.ExecuteMutation(builder.Object.ToSqlWriteCommand());
 
         // Assert
         Assert.Equal(1, result);
@@ -47,7 +47,7 @@ public class ExecutionPreparationTest
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteMutationAsync(builder.Object.ToMutationDescription()));
+            executor.ExecuteMutationAsync(builder.Object.ToSqlWriteCommand()));
 
         // Assert
         Assert.Contains("Async operations require use of a DbConnection", exception.Message);
@@ -56,28 +56,28 @@ public class ExecutionPreparationTest
     }
 
     /// <summary>
-    /// 测试目的：普通同步 Mutation 描述的 Provider 与 Executor 不一致时，必须在创建命令前拒绝。
+    /// 测试目的：普通同步写入命令的 Provider 与 Executor 不一致时，必须在创建命令前拒绝。
     /// </summary>
     [Fact]
-    public void ExecuteMutation_WhenDescriptionProviderMismatches_ShouldRejectBeforeCommandCreation()
+    public void ExecuteMutation_WhenWriteCommandProviderMismatches_ShouldRejectBeforeCommandCreation()
     {
         // Arrange
         var builder = CreateBuilder("bing.sqlite");
         var executor = CreateExecutor();
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteMutation(builder.Object.ToMutationDescription()));
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteMutation(builder.Object.ToSqlWriteCommand()));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
+        Assert.Equal("写入命令 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
             exception.Message);
     }
 
     /// <summary>
-    /// 测试目的：普通异步 Mutation 描述的 Provider 与 Executor 不一致时，必须在异步事务或命令创建前拒绝。
+    /// 测试目的：普通异步写入命令的 Provider 与 Executor 不一致时，必须在异步事务或命令创建前拒绝。
     /// </summary>
     [Fact]
-    public async Task ExecuteMutationAsync_WhenDescriptionProviderMismatches_ShouldRejectBeforeCommandCreation()
+    public async Task ExecuteMutationAsync_WhenWriteCommandProviderMismatches_ShouldRejectBeforeCommandCreation()
     {
         // Arrange
         var builder = CreateBuilder("bing.sqlite");
@@ -85,10 +85,10 @@ public class ExecutionPreparationTest
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteMutationAsync(builder.Object.ToMutationDescription()));
+            executor.ExecuteMutationAsync(builder.Object.ToSqlWriteCommand()));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
+        Assert.Equal("写入命令 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
             exception.Message);
     }
 
@@ -102,6 +102,7 @@ public class ExecutionPreparationTest
         provider.SetupGet(item => item.Key).Returns(providerKey);
         builder.SetupGet(item => item.Provider).Returns(provider.Object);
         builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
+        builder.Setup(item => item.Clone()).Returns(builder.Object);
         builder.Setup(item => item.ToSql()).Returns("Update samples Set Name = 'updated'");
         builder.Setup(item => item.ToDebugSql(It.IsAny<string>()))
             .Throws(new InvalidOperationException("Trace 关闭时不得生成调试 SQL。"));

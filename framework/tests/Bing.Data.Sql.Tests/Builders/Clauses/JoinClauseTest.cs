@@ -1,6 +1,7 @@
 ﻿using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Clauses;
@@ -52,6 +53,25 @@ public class JoinClauseTest
     public void Test_Default()
     {
         Assert.Empty(GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：后续结构化 Join 来源渲染失败时，不得向调用方缓冲区遗留前序 Join 或分隔符。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenLaterStructuredJoinIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        _clause.Join("users");
+        _clause.Join(new SqlTableReference { TableName = "orders;" });
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("表引用包含无效标识符字符。 (Parameter 'identifier')", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     #endregion

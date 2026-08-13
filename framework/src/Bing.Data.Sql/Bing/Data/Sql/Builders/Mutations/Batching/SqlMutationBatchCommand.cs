@@ -1,3 +1,5 @@
+using Bing.Data.Sql.Mutations;
+
 namespace Bing.Data.Sql.Builders.Mutations.Batching;
 
 /// <summary>
@@ -13,7 +15,7 @@ public sealed class SqlMutationBatchCommand
     /// <param name="requiresTransaction">是否要求在单一事务中执行。</param>
     /// <param name="validateAffectedRows">是否校验实际受影响行数与实体数量一致。</param>
     /// <param name="operationName">受影响行数校验失败时使用的操作名称。</param>
-    public SqlMutationBatchCommand(IReadOnlyList<SqlMutationCommand> commands, int entityCount,
+    public SqlMutationBatchCommand(IReadOnlyList<SqlWriteCommand> commands, int entityCount,
         bool requiresTransaction, bool validateAffectedRows = false, string operationName = "Mutation")
     {
         Commands = commands ?? throw new ArgumentNullException(nameof(commands));
@@ -28,7 +30,7 @@ public sealed class SqlMutationBatchCommand
     /// <summary>
     /// 按执行顺序保存的 SQL 命令。
     /// </summary>
-    public IReadOnlyList<SqlMutationCommand> Commands { get; }
+    public IReadOnlyList<SqlWriteCommand> Commands { get; }
 
     /// <summary>
     /// 本批覆盖的实体数量。

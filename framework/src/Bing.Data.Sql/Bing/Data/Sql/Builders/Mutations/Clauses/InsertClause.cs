@@ -34,10 +34,7 @@ public sealed class InsertClause : MutationTableClauseBase, IInsertClause
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-        builder.Append("Insert Into ");
-        AppendTable(builder, Table);
+        AppendPrefixedTable(builder, "Insert Into ", Table, false);
     }
 
     /// <inheritdoc />

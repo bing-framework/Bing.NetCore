@@ -42,5 +42,5 @@ public interface ISqlUpdateBuilder : ISqlContent, IUpdate, IUpdateClauseAccessor
     /// 生成当前 Update 的可执行命令快照。
     /// </summary>
     /// <returns>包含 SQL 与参数元数据的命令快照。</returns>
-    SqlMutationCommand BuildCommand();
+    SqlWriteCommand BuildCommand();
 }

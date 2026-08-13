@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Core;
@@ -53,6 +54,46 @@ public class SqlParameterBindingScopeTest
 
         // Assert
         Assert.Equal("[owner].[TestValue]=[reviewer].[TestValue]", condition.GetCondition());
+    }
+
+    /// <summary>
+    /// 测试目的：不支持的多表二元运算符必须在解析常量参数前失败，避免失败调用污染后续查询参数。
+    /// </summary>
+    [Fact]
+    public void ResolveMultiSourcePredicate_WhenBinaryOperatorIsUnsupported_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var parameterManager = new ParameterManager(TestDialect.Instance);
+        var clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(parameterManager: parameterManager));
+        clause.From<Sample>("sample");
+        Expression<Func<Sample, bool>> expression = sample => sample.BoolValue ^ true;
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => clause.ResolveMultiSourcePredicate(expression));
+
+        // Assert
+        Assert.Equal("不支持的多表谓词运算符: ExclusiveOr。", exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：组合多表谓词的后续分支解析失败时，已解析分支也不得向查询参数留下副作用。
+    /// </summary>
+    [Fact]
+    public void ResolveMultiSourcePredicate_WhenLaterCombinedBranchIsUnsupported_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var parameterManager = new ParameterManager(TestDialect.Instance);
+        var clause = new FromClause(TestSqlBuilder.CreateTestClauseContext(parameterManager: parameterManager));
+        clause.From<Sample>("sample");
+        Expression<Func<Sample, bool>> expression = sample => sample.IntValue == 1 && (sample.BoolValue ^ true);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => clause.ResolveMultiSourcePredicate(expression));
+
+        // Assert
+        Assert.Equal("不支持的多表谓词运算符: ExclusiveOr。", exception.Message);
+        Assert.Empty(parameterManager.GetParams());
     }
 
     /// <summary>

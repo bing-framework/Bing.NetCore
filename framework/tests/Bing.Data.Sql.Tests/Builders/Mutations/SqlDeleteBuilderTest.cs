@@ -1,10 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
+using System.Text;
+using Bing.Data.Filters;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
 
@@ -54,6 +60,7 @@ public sealed class SqlDeleteBuilderTest
     public void Where_WhenMultipleConditionsConfigured_ShouldComposeWithAnd()
     {
         // Arrange
+        const string expectedSql = "Delete From [samples] Where [Id]=@_p_0 And [TenantId]=@_p_1";
         var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
             .DeleteFrom(new SqlTableReference { TableName = "samples" });
 
@@ -62,7 +69,7 @@ public sealed class SqlDeleteBuilderTest
             .Where(new EqualCondition("[TenantId]", "@_p_1"));
 
         // Assert
-        Assert.Equal("Delete From [samples] Where [Id]=@_p_0 And [TenantId]=@_p_1", builder.ToSql());
+        SqlAssert.Equal(expectedSql, builder.ToSql(), TestMutationSqlProvider.Instance.Key, builder.GetParameters().ToArray());
     }
 
     /// <summary>
@@ -72,6 +79,7 @@ public sealed class SqlDeleteBuilderTest
     public void DeleteFrom_WhenTypedWhereConfigured_ShouldRenderMappedParameterizedSql()
     {
         // Arrange
+        const string expectedSql = "Delete From [typed_delete_samples] Where [Id]=@_p_0";
         var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
 
         // Act
@@ -80,8 +88,8 @@ public sealed class SqlDeleteBuilderTest
 
         // Assert
         var command = builder.BuildCommand();
-        Assert.Equal("Delete From [typed_delete_samples] Where [Id]=@_p_0", command.Sql);
-        Assert.Equal(new object[] { 7 }, command.Parameters.Select(item => item.Value));
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
     }
 
     /// <summary>
@@ -203,6 +211,175 @@ public sealed class SqlDeleteBuilderTest
     }
 
     /// <summary>
+    /// 测试 - 结构化软删除实体 Delete 必须执行物理删除且附加未删除边界。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenSoftDeleteEntityIsConfigured_ShouldAppendDataBoundary()
+    {
+        // 目标 SQL：物理 Delete 的 Where 同时包含调用方 Id 和 IsDeleted=false。
+        const string expectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0 And [IsDeleted]=@_p_1";
+
+        // 目标参数：@_p_0 = 7；@_p_1 = false。
+        // 结果语义：已删除记录不会被再次物理删除，Delete 不会隐式改写为 Update。
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.DeleteFrom<Sample5>().Where<Sample5, int>(item => item.IntValue, 7);
+
+        // Act
+        var command = builder.BuildCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", false, DbType.Boolean);
+    }
+
+    /// <summary>
+    /// 测试 - 显式 AllowAllRows 只能解除无条件写保护，不能绕过软删除数据边界。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenSoftDeleteEntityAllowsAllRows_ShouldRetainDataBoundary()
+    {
+        // 目标 SQL：即使允许全表 Delete，软删除实体仍限定到未删除记录。
+        const string expectedSql = "Delete From [Sample5] Where [IsDeleted]=@_p_0";
+
+        // 目标参数：@_p_0 = false。
+        // 结果语义：AllowAllRows 不会隐式跨越全局数据边界。
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.DeleteFrom<Sample5>().AllowAllRows();
+
+        // Act
+        var command = builder.BuildCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", false, DbType.Boolean);
+    }
+
+    /// <summary>
+    /// 测试 - 禁用共享软删除过滤后，结构化 Delete 不得生成 IsDeleted 边界。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenSoftDeleteFilterIsDisabled_ShouldOmitDataBoundary()
+    {
+        // 目标 SQL：禁用后只保留调用方条件。
+        const string expectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0";
+
+        // 目标参数：@_p_0 = 7。
+        // 结果语义：只有显式禁用过滤的维护作用域可物理删除已删除记录。
+        var dataFilter = new DataFilter();
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(dataFilter: dataFilter));
+        builder.DeleteFrom<Sample5>().Where<Sample5, int>(item => item.IntValue, 7);
+
+        // Act
+        using var _ = dataFilter.Disable<ISoftDelete>();
+        var command = builder.BuildCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
+    }
+
+    /// <summary>
+    /// 测试 - 同一 Delete Builder 在软删除过滤作用域切换后必须从独立渲染快照恢复边界。
+    /// </summary>
+    [Fact]
+    public void ToSql_WhenSoftDeleteFilterScopeChanges_ShouldRenderCurrentBoundaryWithoutMutatingBuilder()
+    {
+        // 目标 SQL：启用时包含 IsDeleted，禁用时只保留 Id，释放后恢复 IsDeleted。
+        const string enabledExpectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0 And [IsDeleted]=@_p_1";
+        const string disabledExpectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0";
+
+        // 目标参数：启用快照 @_p_0 = 7、@_p_1 = false；禁用快照仅 @_p_0 = 7。
+        // 结果语义：过滤 scope 不会被首次渲染永久固定，原 Builder 参数不包含渲染边界参数。
+        var dataFilter = new DataFilter();
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(dataFilter: dataFilter));
+        builder.DeleteFrom<Sample5>().Where<Sample5, int>(item => item.IntValue, 7);
+
+        // Act
+        var first = builder.ToSql();
+        string disabled;
+        using (dataFilter.Disable<ISoftDelete>())
+            disabled = builder.ToSql();
+        var restored = builder.ToSql();
+
+        // Assert
+        SqlAssert.Equal(enabledExpectedSql, first, TestMutationSqlProvider.Instance.Key);
+        SqlAssert.Equal(disabledExpectedSql, disabled, TestMutationSqlProvider.Instance.Key);
+        SqlAssert.Equal(enabledExpectedSql, restored, TestMutationSqlProvider.Instance.Key);
+        Assert.Single(builder.GetParameters());
+        SqlParameterAssert.Equal(builder.GetParameters(), "@_p_0", 7, DbType.Int32);
+    }
+
+    /// <summary>
+    /// 测试 - 结构化租户实体 Delete 必须保持物理删除语义并追加参数化 TenantId 边界。
+    /// </summary>
+    [Fact]
+    public void DeleteFrom_WhenTenantFilterIsEnabled_ShouldAppendTenantBoundary()
+    {
+        // Arrange
+        const string expectedSql = "Delete From [tenant_delete_samples] Where [Id]=@_p_0 And [TenantId]=@_p_1";
+        var services = new SqlBuilderServices(filters: new ISqlFilter[] { new TenantIdFilter(new TenantDeleteContributor()) });
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, services);
+
+        // Act
+        var command = builder.DeleteFrom<TenantDeleteSample>()
+            .Where<TenantDeleteSample, int>(item => item.Id, 7)
+            .BuildCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", "tenant-a", DbType.String);
+    }
+
+    /// <summary>
+    /// 测试目的：直接 AppendTo 应在数据边界后续失败时保留 Delete Builder 的原始参数和 Where 状态。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenTenantBoundaryFailsAfterSoftDeleteBoundary_ShouldNotMutateBuilder()
+    {
+        // Arrange
+        var dataFilter = new DataFilter();
+        var services = new SqlBuilderServices(dataFilter: dataFilter, filters: new ISqlFilter[]
+        {
+            new IsDeletedFilter(),
+            new TenantIdFilter(new MissingTenantSoftDeleteContributor())
+        });
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, services);
+        builder.DeleteFrom<SoftDeleteTenantDeleteSample>()
+            .Where<SoftDeleteTenantDeleteSample, int>(item => item.Id, 7);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.AppendTo(new StringBuilder()));
+
+        // Assert
+        Assert.Equal("租户过滤已启用，但实体 SoftDeleteTenantDeleteSample 未解析到当前租户值。", exception.Message);
+        Assert.Single(builder.GetParameters());
+        using (dataFilter.Disable<TenantIdFilter>())
+            Assert.Equal("Delete From [SoftDeleteTenantDeleteSample] Where [Id]=@_p_0 And [IsDeleted]=@_p_1", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Delete AppendTo 的目标表引用验证失败时，不得向调用方缓冲区遗留 SQL 前缀。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenTargetTableIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
+            .DeleteFrom(new SqlTableReference { TableName = "orders;" });
+        builder.AllowAllRows();
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => builder.AppendTo(result));
+
+        // Assert
+        Assert.Equal("表引用包含无效标识符字符。 (Parameter 'identifier')", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
+    }
+
+    /// <summary>
     /// 强类型 Delete 条件的映射实体。
     /// </summary>
     [Table("typed_delete_samples")]
@@ -213,5 +390,39 @@ public sealed class SqlDeleteBuilderTest
         /// </summary>
         [Key]
         public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 映射到租户 Delete 测试表的实体。
+    /// </summary>
+    [Table("tenant_delete_samples")]
+    private sealed class TenantDeleteSample
+    {
+        /// <summary>主键。</summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>租户标识。</summary>
+        public string TenantId { get; set; }
+    }
+
+    private sealed class TenantDeleteContributor : ISqlTenantFilterContributor
+    {
+        public bool IsTenantEntity(Type entityType) => entityType == typeof(TenantDeleteSample);
+        public object GetTenantId(SqlTenantFilterContext context) => "tenant-a";
+    }
+
+    private sealed class SoftDeleteTenantDeleteSample : ISoftDelete
+    {
+        [Key]
+        public int Id { get; set; }
+        public string TenantId { get; set; }
+        public bool IsDeleted { get; set; }
+    }
+
+    private sealed class MissingTenantSoftDeleteContributor : ISqlTenantFilterContributor
+    {
+        public bool IsTenantEntity(Type entityType) => entityType == typeof(SoftDeleteTenantDeleteSample);
+        public object GetTenantId(SqlTenantFilterContext context) => null;
     }
 }

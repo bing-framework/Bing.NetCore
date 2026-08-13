@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Tests.Samples;
+using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders;
 
@@ -318,15 +319,35 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：Cross Join 使用含常量的 Lambda On 条件时，必须在解析表达式和创建参数前拒绝，保持 Builder 状态不变。
+    /// </summary>
+    [Fact]
+    public void CrossJoin_WhenLambdaOnContainsConstant_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        _builder.From<Sample>("s").CrossJoin<Sample2>("r");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            _builder.On<Sample, Sample2>((left, right) => left.IntValue == 1));
+
+        // Assert
+        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
+        Assert.Empty(_builder.GetParams());
+        Assert.Equal("Select * \r\nFrom [Sample] As [s] \r\nCross Join [Sample2] As [r]", _builder.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：Append 原始 SQL 不应参与别名冲突校验。
     /// </summary>
     [Fact]
     public void AppendJoin_WhenSqlContainsAlias_ShouldNotRegisterAlias()
     {
+        const string expectedSql = "Select * \r\nFrom (Select 1) As source \r\nJoin (Select 2) As source";
         _builder.AppendFrom("(Select 1) As source");
         _builder.AppendJoin("(Select 2) As source");
 
-        Assert.Contains("Join (Select 2) As source", _builder.ToSql());
+        SqlAssert.Equal(expectedSql, _builder.ToSql(), _builder.Provider.Key);
     }
 
     /// <summary>

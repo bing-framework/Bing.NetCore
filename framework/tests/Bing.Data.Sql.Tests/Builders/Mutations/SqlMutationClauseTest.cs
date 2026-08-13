@@ -73,6 +73,39 @@ public sealed class SqlMutationClauseTest
     }
 
     /// <summary>
+    /// 测试目的：独立 Mutation 表子句渲染失败时，不得向调用方缓冲区遗留关键字前缀。
+    /// </summary>
+    [Theory]
+    [InlineData("Insert", "未指定写操作目标表。")]
+    [InlineData("Update", "未指定写操作目标表。")]
+    [InlineData("Delete", "未指定写操作目标表。")]
+    [InlineData("UpdateFrom", "未指定写操作目标表。")]
+    [InlineData("DeleteUsing", "未指定写操作目标表。")]
+    public void TableClauses_WhenTargetMissing_ShouldKeepCallerBufferUnchanged(
+        string clauseType, string message)
+    {
+        // Arrange
+        var context = CreateContext();
+        ISqlContent clause = clauseType switch
+        {
+            "Insert" => new InsertClause(context),
+            "Update" => new UpdateClause(context),
+            "Delete" => new DeleteClause(context),
+            "UpdateFrom" => new UpdateFromClause(context),
+            "DeleteUsing" => new DeleteUsingClause(context),
+            _ => throw new ArgumentOutOfRangeException(nameof(clauseType))
+        };
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal(message, exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
+    }
+
+    /// <summary>
     /// 测试目的：Set 子句克隆时必须保留已有参数名称和元数据，后续追加赋值不能影响来源子句。
     /// </summary>
     [Fact]
@@ -119,6 +152,25 @@ public sealed class SqlMutationClauseTest
         Assert.Equal("Provider test.mutation.single-row-values 不支持多行 Values。", exception.Message);
         Assert.Equal(2, values.RowCount);
         Assert.Equal(1, values.ColumnCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Values 子句的后续参数格式化失败时，不得向调用方缓冲区遗留关键字、括号或前序参数。
+    /// </summary>
+    [Fact]
+    public void ValuesClause_WhenLaterParameterFormattingFails_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var values = new ValuesClause(CreateContext(FailingValuesRenderProvider.Instance));
+        values.AddRow(new object[] { "Bing", "Framework" });
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => values.AppendTo(result));
+
+        // Assert
+        Assert.Equal("Parameter rendering failed.", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     /// <summary>
@@ -170,6 +222,69 @@ public sealed class SqlMutationClauseTest
         // Assert
         Assert.True(source.IsEmpty);
         Assert.Equal(" Returning [t].[id] As [Id], [occurred_at] As [OccurredAt]", ToSql(clone));
+    }
+
+    /// <summary>
+    /// 测试目的：Returning 子句的后续列格式化失败时，不得向调用方缓冲区遗留已渲染的关键字或列。
+    /// </summary>
+    [Fact]
+    public void ReturningClause_WhenLaterColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var clause = new ReturningClause(CreateContext());
+        clause.AddRange(new[]
+        {
+            new SqlReturningColumn("Id"),
+            new SqlReturningColumn("invalid;")
+        });
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
+    }
+
+    /// <summary>
+    /// 测试目的：Set 子句的后续赋值列格式化失败时，不得向调用方缓冲区遗留已渲染的 Set 文本。
+    /// </summary>
+    [Fact]
+    public void SetClause_WhenLaterColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var clause = new SetClause(CreateContext());
+        clause.Set("Name", "Bing");
+        clause.Set("invalid;", "Framework");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
+    }
+
+    /// <summary>
+    /// 测试目的：Insert 列子句的后续列格式化失败时，不得向调用方缓冲区遗留左括号或已渲染列。
+    /// </summary>
+    [Fact]
+    public void InsertColumnsClause_WhenLaterColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var clause = new InsertColumnsClause(CreateContext());
+        clause.Add("Name");
+        clause.Add("invalid;");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     /// <summary>
@@ -237,5 +352,57 @@ public sealed class SqlMutationClauseTest
         {
             Mutation = new SqlProviderMutationCapabilities { SupportsMultiRowValues = false }
         };
+    }
+
+    /// <summary>
+    /// 在第二个参数名格式化时失败的测试 Provider。
+    /// </summary>
+    private sealed class FailingValuesRenderProvider : ISqlProvider, ISqlProviderProfileProvider
+    {
+        /// <summary>
+        /// 测试 Provider 单例。
+        /// </summary>
+        public static FailingValuesRenderProvider Instance { get; } = new();
+
+        /// <inheritdoc />
+        public string Key => "test.mutation.failing-values-render";
+
+        /// <inheritdoc />
+        public DatabaseType DatabaseType => TestMutationSqlProvider.Instance.DatabaseType;
+
+        /// <inheritdoc />
+        public IDialect Dialect { get; } = new FailingParameterDialect();
+
+        /// <inheritdoc />
+        public ISqlClauseFactory ClauseFactory => TestMutationSqlProvider.Instance.ClauseFactory;
+
+        /// <inheritdoc />
+        public ISqlTableReferenceParser TableReferenceParser => TestMutationSqlProvider.Instance.TableReferenceParser;
+
+        /// <inheritdoc />
+        public ISqlPaginationRenderer PaginationRenderer => TestMutationSqlProvider.Instance.PaginationRenderer;
+
+        /// <inheritdoc />
+        public IParameterManagerFactory ParameterManagerFactory => TestMutationSqlProvider.Instance.ParameterManagerFactory;
+
+        /// <inheritdoc />
+        public IParamLiteralsResolver ParamLiteralsResolver => TestMutationSqlProvider.Instance.ParamLiteralsResolver;
+
+        /// <inheritdoc />
+        public SqlProviderProfile Profile { get; } = new();
+    }
+
+    /// <summary>
+    /// 在指定参数名格式化时失败的测试方言。
+    /// </summary>
+    private sealed class FailingParameterDialect : DialectBase
+    {
+        /// <inheritdoc />
+        public override string GetParamName(string paramName)
+        {
+            if (paramName == "@_p_1")
+                throw new InvalidOperationException("Parameter rendering failed.");
+            return base.GetParamName(paramName);
+        }
     }
 }

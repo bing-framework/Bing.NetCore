@@ -214,6 +214,143 @@ public class DapperCoreServiceCollectionExtensionsTest
     }
 
     /// <summary>
+    /// 测试目的：Doris 兼容数据源不得由配置回调解除只读和无事务边界，避免误将分析端点作为可写 MySQL 使用。
+    /// </summary>
+    [Fact]
+    public void AddSqlDataSource_WhenDorisSetupActionEnablesWrites_ShouldPreserveReadOnlyTransactionBoundary()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSqlDataSource("doris", DatabaseType.Doris, "Server=doris;Database=analytics;",
+            setupAction: source =>
+            {
+                source.MappingProfile = "analytics";
+                source.IsReadOnly = false;
+                source.SupportsTransactions = true;
+            });
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var dataSource = provider.GetRequiredService<SqlMetadataOptions>().DataSources.DataSources["doris"];
+
+        // Assert
+        Assert.Equal("analytics", dataSource.MappingProfile);
+        Assert.True(dataSource.IsReadOnly);
+        Assert.False(dataSource.SupportsTransactions);
+    }
+
+    /// <summary>
+    /// 测试目的：直接配置的 Doris 描述符也必须保留只读和无事务边界，不能绕过数据源注册扩展。
+    /// </summary>
+    [Fact]
+    public void ConfigureSqlMetadata_WhenDorisDescriptorEnablesWrites_ShouldNormalizeReadOnlyTransactionBoundary()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options => options.DataSources.DataSources["doris"] = new SqlDataSourceDescriptor
+        {
+            Key = "doris",
+            DatabaseType = DatabaseType.Doris,
+            ConnectionString = "Server=doris;Database=analytics;",
+            IsReadOnly = false,
+            SupportsTransactions = true
+        });
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var dataSource = provider.GetRequiredService<SqlMetadataOptions>().DataSources.DataSources["doris"];
+
+        // Assert
+        Assert.True(dataSource.IsReadOnly);
+        Assert.False(dataSource.SupportsTransactions);
+    }
+
+    /// <summary>
+    /// 测试目的：预注册的 Doris 元数据选项实例也必须归一化，不能因跳过核心选项工厂而解除只读和无事务边界。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_WhenDorisOptionsArePreRegistered_ShouldNormalizeReadOnlyTransactionBoundary()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        options.DataSources.DataSources["doris"] = new SqlDataSourceDescriptor
+        {
+            Key = "doris",
+            DatabaseType = DatabaseType.Doris,
+            ConnectionString = "Server=doris;Database=analytics;",
+            IsReadOnly = false,
+            SupportsTransactions = true
+        };
+        var services = new ServiceCollection();
+        services.AddSingleton(options);
+
+        // Act
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+        var dataSource = provider.GetRequiredService<SqlMetadataOptions>().DataSources.DataSources["doris"];
+
+        // Assert
+        Assert.True(dataSource.IsReadOnly);
+        Assert.False(dataSource.SupportsTransactions);
+    }
+
+    /// <summary>
+    /// 测试目的：预注册工厂创建的 Doris 元数据也必须在解析时归一化，不能绕过只读和无事务边界。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_WhenDorisOptionsFactoryIsPreRegistered_ShouldNormalizeReadOnlyTransactionBoundary()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<SqlMetadataOptions>(_ =>
+        {
+            var options = new SqlMetadataOptions();
+            options.DataSources.DataSources["doris"] = new SqlDataSourceDescriptor
+            {
+                Key = "doris",
+                DatabaseType = DatabaseType.Doris,
+                ConnectionString = "Server=doris;Database=analytics;",
+                IsReadOnly = false,
+                SupportsTransactions = true
+            };
+            return options;
+        });
+
+        // Act
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+        var dataSource = provider.GetRequiredService<SqlMetadataOptions>().DataSources.DataSources["doris"];
+
+        // Assert
+        Assert.True(dataSource.IsReadOnly);
+        Assert.False(dataSource.SupportsTransactions);
+    }
+
+    /// <summary>
+    /// 测试目的：预注册实现类型创建的 Doris 元数据也必须在解析时归一化，并保留原单例生命周期。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_WhenDorisOptionsImplementationTypeIsPreRegistered_ShouldNormalizeBoundaryAndKeepSingleton()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<SqlMetadataOptions, WritableDorisMetadataOptions>();
+
+        // Act
+        services.AddSqlCore();
+        using var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<SqlMetadataOptions>();
+        var dataSource = options.DataSources.DataSources["doris"];
+
+        // Assert
+        Assert.True(dataSource.IsReadOnly);
+        Assert.False(dataSource.SupportsTransactions);
+        Assert.Same(options, provider.GetRequiredService<SqlMetadataOptions>());
+    }
+
+    /// <summary>
     /// 测试目的：默认数据源已绑定其他 Provider 时，无键重复注册不得覆盖其类型。
     /// </summary>
     [Fact]
@@ -371,6 +508,27 @@ public class DapperCoreServiceCollectionExtensionsTest
         /// 实体标识。
         /// </summary>
         public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 用于验证实现类型注册归一化的 Doris 元数据选项。
+    /// </summary>
+    private sealed class WritableDorisMetadataOptions : SqlMetadataOptions
+    {
+        /// <summary>
+        /// 初始化一个 <see cref="WritableDorisMetadataOptions"/> 类型的实例。
+        /// </summary>
+        public WritableDorisMetadataOptions()
+        {
+            DataSources.DataSources["doris"] = new SqlDataSourceDescriptor
+            {
+                Key = "doris",
+                DatabaseType = DatabaseType.Doris,
+                ConnectionString = "Server=doris;Database=analytics;",
+                IsReadOnly = false,
+                SupportsTransactions = true
+            };
+        }
     }
 
     /// <summary>

@@ -94,7 +94,11 @@ internal abstract class SqlFactoryBase
     {
         var current = _databaseContextAccessor?.Current ?? _metadataOptions.DefaultDatabaseContext;
         if (current?.DataSource != null)
-            return Clone(current);
+        {
+            var resolvedDataSource = ResolveCurrentDataSource(current);
+            return CreateContext(resolvedDataSource, current.TenantId, current.MappingProfile,
+                current.ReadPreference);
+        }
         var options = new DatabaseScopeOptions
         {
             DbKey = current?.DbKey,
@@ -104,6 +108,25 @@ internal abstract class SqlFactoryBase
         var dataSource = _dataSourceResolver.Resolve(current?.DbKey, options);
         return CreateContext(dataSource, options.TenantId, current?.MappingProfile,
             options.ReadPreference ?? SqlReadPreference.Default);
+    }
+
+    /// <summary>
+    /// 解析当前上下文在读取偏好下实际使用的数据源。
+    /// </summary>
+    /// <param name="context">当前数据库上下文。</param>
+    /// <returns>用于冻结 Query 或 Executor 上下文的数据源。</returns>
+    private SqlDataSourceDescriptor ResolveCurrentDataSource(DatabaseContext context)
+    {
+        var dataSource = context?.DataSource;
+        if (context?.ReadPreference != SqlReadPreference.Primary ||
+            dataSource?.PrimaryReadStrategy != PrimaryReadStrategy.PrimaryDataSource)
+            return dataSource;
+        return _dataSourceResolver.Resolve(dataSource.Key, new DatabaseScopeOptions
+        {
+            DbKey = dataSource.Key,
+            TenantId = context.TenantId,
+            ReadPreference = SqlReadPreference.Primary
+        });
     }
 
     /// <summary>
@@ -224,16 +247,6 @@ internal abstract class SqlFactoryBase
         if (_providerResolver == null)
             throw new InvalidOperationException("未注册 SQL Provider 解析器，无法解析 SQL 实现类型。");
         return _providerResolver.Resolve(context, databaseType: context?.DataSource?.DatabaseType).Key;
-    }
-
-    /// <summary>
-    /// 克隆数据库上下文。
-    /// </summary>
-    /// <param name="context">数据库上下文。</param>
-    /// <returns>数据库上下文。</returns>
-    private DatabaseContext Clone(DatabaseContext context)
-    {
-        return DatabaseContextSnapshot.Create(context);
     }
 
     /// <summary>

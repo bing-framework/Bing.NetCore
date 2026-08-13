@@ -34,10 +34,7 @@ public sealed class UpdateClause : MutationTableClauseBase, IUpdateClause
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-        builder.Append("Update ");
-        AppendAliasedTable(builder, Table);
+        AppendPrefixedTable(builder, "Update ", Table, true);
     }
 
     /// <inheritdoc />

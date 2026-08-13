@@ -34,13 +34,13 @@ public static class MutationClauseExtensions
     public static ISqlBuilder InsertInto<TEntity>(this ISqlBuilder source,
         Expression<Func<TEntity, object>> columns) where TEntity : class
     {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        var mappedColumns = GetPropertyNames(columns).Select(propertyName =>
+            ResolveWritableColumn<TEntity>(source, propertyName, static item =>
+                item.CanInsert && item.IsKey == false && item.IsDatabaseGenerated == false, "插入").ColumnName).ToArray();
         InsertInto<ISqlBuilder, TEntity>(source);
-        foreach (var propertyName in GetPropertyNames(columns))
-        {
-            var column = ResolveWritableColumn<TEntity>(source, propertyName, static item =>
-                item.CanInsert && item.IsKey == false && item.IsDatabaseGenerated == false, "插入");
-            source.InsertColumnsClause.Add(column.ColumnName);
-        }
+        source.InsertColumnsClause.AddRange(mappedColumns);
         return source;
     }
 
@@ -165,12 +165,10 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        foreach (var propertyName in GetPropertyNames(columns))
-        {
-            var column = ResolveWritableColumn<TEntity>(source, propertyName, predicate: static column =>
-                column.CanInsert && column.IsKey == false && column.IsDatabaseGenerated == false, "插入");
-            source.InsertColumnsClause.Add(column.ColumnName);
-        }
+        var mappedColumns = GetPropertyNames(columns).Select(propertyName =>
+            ResolveWritableColumn<TEntity>(source, propertyName, predicate: static column =>
+                column.CanInsert && column.IsKey == false && column.IsDatabaseGenerated == false, "插入").ColumnName).ToArray();
+        source.InsertColumnsClause.AddRange(mappedColumns);
         return source;
     }
 
@@ -583,9 +581,9 @@ public static class MutationClauseExtensions
             return source;
         }
         var parameterName = context.ParameterManager.GenerateName();
+        var condition = SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameterName), @operator);
         context.ParameterManager.Add(parameterName, value);
-        ((IMutationWhereClauseAccessor)source).WhereClause.And(
-            SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameterName), @operator));
+        ((IMutationWhereClauseAccessor)source).WhereClause.And(condition);
         return source;
     }
 
@@ -665,8 +663,9 @@ public static class MutationClauseExtensions
         }
         var parameter = context.Services.ParameterFactory.Create(context.ParameterManager.GenerateName(), value, mapping,
             context.ExecutionContext.DatabaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
+        var condition = SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameter.Name), @operator);
         AddParameter(context.ParameterManager, parameter);
-        source.WhereClause.And(SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameter.Name), @operator));
+        source.WhereClause.And(condition);
         return source;
     }
 

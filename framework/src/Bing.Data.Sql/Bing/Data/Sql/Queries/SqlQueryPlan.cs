@@ -217,6 +217,24 @@ internal static class SqlParameterSnapshot
     /// </summary>
     /// <param name="parameter">原始增强参数。</param>
     /// <returns>执行专属增强参数。</returns>
-    private static SqlParam CloneSqlParameter(SqlParam parameter) => SqlMutationParameter.Create(parameter)
-        .CreateSqlParam();
+    internal static SqlParam CloneSqlParameter(SqlParam parameter)
+    {
+        if (parameter == null)
+            throw new ArgumentNullException(nameof(parameter));
+        return new SqlParam(parameter.Name, SnapshotValue(parameter.Value), parameter.DbType, parameter.Direction,
+            parameter.Size, parameter.Precision, parameter.Scale)
+        {
+            OriginalValue = SnapshotValue(parameter.OriginalValue),
+            EntityType = parameter.EntityType,
+            PropertyName = parameter.PropertyName,
+            ColumnName = parameter.ColumnName,
+            DatabaseType = parameter.DatabaseType,
+            ProviderTypeName = parameter.ProviderTypeName,
+            Source = parameter.Source,
+            MetadataLevel = parameter.MetadataLevel,
+            StorageKind = parameter.StorageKind,
+            ConverterKind = parameter.ConverterKind,
+            CustomConverterName = parameter.CustomConverterName
+        };
+    }
 }

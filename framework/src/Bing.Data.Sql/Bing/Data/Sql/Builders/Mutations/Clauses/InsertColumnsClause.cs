@@ -42,8 +42,14 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     {
         if (columns == null)
             throw new ArgumentNullException(nameof(columns));
-        foreach (var column in columns)
-            Add(column);
+        var items = columns.ToList();
+        if (items.Count == 0)
+            return;
+        if (items.Any(string.IsNullOrWhiteSpace))
+            throw new ArgumentException("插入列名不能为空。", "column");
+        _context.ValidateOperation(SqlOperationAction.InsertInto);
+        _columns.AddRange(items);
+        _context.UseOperation(SqlOperationAction.InsertInto);
     }
 
     /// <inheritdoc />
@@ -51,14 +57,23 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        builder.Append(" (");
-        for (var index = 0; index < _columns.Count; index++)
+        var startIndex = builder.Length;
+        try
         {
-            if (index > 0)
-                builder.Append(", ");
-            builder.Append(_context.Dialect.SafeName(_columns[index]));
+            builder.Append(" (");
+            for (var index = 0; index < _columns.Count; index++)
+            {
+                if (index > 0)
+                    builder.Append(", ");
+                builder.Append(_context.Dialect.SafeName(_columns[index]));
+            }
+            builder.Append(')');
         }
-        builder.Append(')');
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
     }
 
     /// <inheritdoc />

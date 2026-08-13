@@ -31,10 +31,10 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：Root 执行器不得重新公开运行时配置或共享 Builder，所有 Mutation 终结入口必须接收冻结描述。
+    /// 测试目的：Root 执行器不得重新公开运行时配置或共享 Builder，所有 Mutation 终结入口必须接收冻结写入命令。
     /// </summary>
     [Fact]
-    public void RootExecutor_WhenPublicApiInspected_ShouldUseFrozenMutationDescriptionContract()
+    public void RootExecutor_WhenPublicApiInspected_ShouldUseFrozenSqlWriteCommandContract()
     {
         // Arrange
         var type = typeof(ISqlExecutor);
@@ -49,16 +49,16 @@ public class SqlQueryApiContractTest
         Assert.NotNull(builderFactory);
         Assert.Equal(typeof(ISqlBuilder), builderFactory.ReturnType);
         Assert.NotNull(returning);
-        Assert.Equal(typeof(SqlMutationDescription), returning.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteMutation))
+        Assert.Equal(typeof(SqlWriteCommand), returning.GetParameters().First().ParameterType);
+        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteMutation))
             ?.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlMutationDescription), type.GetMethod(nameof(ISqlExecutor.ExecuteMutationAsync))
+        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteMutationAsync))
             ?.GetParameters().First().ParameterType);
         Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturning)));
-        Assert.Null(type.GetMethod("Execute", new[] { typeof(SqlMutationDescription), typeof(int?) }));
+        Assert.Null(type.GetMethod("Execute", new[] { typeof(SqlWriteCommand), typeof(int?) }));
         Assert.Null(type.GetMethod("ExecuteAsync", new[]
         {
-            typeof(SqlMutationDescription), typeof(int?), typeof(CancellationToken)
+            typeof(SqlWriteCommand), typeof(int?), typeof(CancellationToken)
         }));
         Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteSql)));
         Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteSqlAsync)));
@@ -69,17 +69,17 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：Mutation 描述只保存冻结 SQL、参数和语义，不得持有可变 Builder 或执行资源。
+    /// 测试目的：写入命令只保存冻结 SQL、参数和语义，不得持有可变 Builder 或执行资源。
     /// </summary>
     [Fact]
-    public void MutationDescription_WhenPublicApiInspected_ShouldNotExposeBuilderOrExecutionResources()
+    public void SqlWriteCommand_WhenPublicApiInspected_ShouldNotExposeBuilderOrExecutionResources()
     {
         // Arrange
-        var type = typeof(SqlMutationDescription);
+        var type = typeof(SqlWriteCommand);
         var properties = type.GetProperties().Select(property => property.Name).OrderBy(name => name).ToArray();
 
         // Assert
-        Assert.Equal(new[] { "HasReturning", "OperationKind", "Parameters", "ProviderKey", "Sql" }, properties);
+        Assert.Equal(new[] { "HasReturning", "OperationKind", "Parameters", "ProviderKey", "Sql", "ValidateAffectedRows" }, properties);
         Assert.Null(type.GetProperty("Builder"));
         Assert.Null(type.GetProperty("Connection"));
         Assert.Null(type.GetProperty("Transaction"));

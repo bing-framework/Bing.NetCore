@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Builders.Clauses;
+﻿using System.Text;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Tests.Samples;
 
@@ -385,6 +386,24 @@ public class SelectClauseTest
     {
         _clause.AppendSql("[a].[b]");
         Assert.Equal("Select [a].[b]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Select 子句的后续列格式化失败时，不得向调用方缓冲区遗留 Select 关键字。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenLaterColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        _clause.Select("Id,invalid;");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     /// <summary>

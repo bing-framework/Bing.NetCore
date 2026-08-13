@@ -70,6 +70,31 @@ public class ExecutionLeaseTest
     }
 
     /// <summary>
+    /// 测试目的：Root Query 持有执行租约时释放必须被拒绝，归还租约后才能进入释放状态。
+    /// </summary>
+    [Fact]
+    public void Dispose_WhenExecutionLeaseIsHeld_ShouldRejectWithoutChangingQueryState()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider();
+        var query = new ReentrantQuery(provider);
+
+        // Act
+        using (query.AcquireLeaseForTest())
+        {
+            var exception = Assert.Throws<InvalidOperationException>(query.Dispose);
+
+            // Assert
+            Assert.Equal("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。", exception.Message);
+            Assert.NotNull(query.Procedure<object>("sample"));
+        }
+        query.Dispose();
+
+        // Assert
+        Assert.Throws<ObjectDisposedException>(() => query.Procedure<object>("sample"));
+    }
+
+    /// <summary>
     /// 测试目的：异步 Query 执行范围内重入其他公共执行入口时应立即失败，操作结束后实例可复用。
     /// </summary>
     [Fact]
@@ -233,6 +258,12 @@ public class ExecutionLeaseTest
         /// 重入执行抛出的异常。
         /// </summary>
         public InvalidOperationException ReentrantException { get; private set; }
+
+        /// <summary>
+        /// 获取用于验证 Root 释放边界的执行租约。
+        /// </summary>
+        /// <returns>测试结束时应释放的执行租约。</returns>
+        public IDisposable AcquireLeaseForTest() => AcquireExecutionLease();
 
         /// <inheritdoc />
         protected override bool ExecuteBefore()

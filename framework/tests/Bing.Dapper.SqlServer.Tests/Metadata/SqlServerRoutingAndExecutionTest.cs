@@ -8,9 +8,11 @@ using System.Diagnostics;
 using System.Reflection;
 using Bing.Data;
 using Bing.Data.Enums;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Multiple;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -73,6 +75,62 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.ToSql().ShouldBe("Select [Users].[Id],[audit].[Id] \r\nFrom [Users] \r\nFull Join [Users] As [audit] On [Users].[Id]=[audit].[Id]");
+    }
+
+    /// <summary>
+    /// 测试目的：多表 Fluent Cross Join 的 On 表达式必须在解析常量和创建参数前被拒绝，保持查询描述状态不变。
+    /// </summary>
+    [Fact]
+    public void SqlQueryFactory_Create_WhenCrossJoinOnContainsConstant_ShouldRejectWithoutAddingParameter()
+    {
+        // Arrange
+        var services = CreateServices(CreateRoutingMetadataOptions());
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
+        var query = rootQuery.From<MappedSample>()
+            .CrossJoin<MappedSample>("audit");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            query.On((owner, audit) => owner.Id == 1));
+
+        // Assert
+        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
+        var builder = ((ISqlQueryBuilderAccessor)query).GetSqlBuilder();
+        Assert.Empty(builder.GetParams());
+        Assert.Equal(
+            "Select [Users].[Id],[Users].[Name],[Users].[Payload] \r\nFrom [Users] \r\nCross Join [Users] As [audit]",
+            query.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：执行带逻辑删除过滤的实体查询时，SQL 与 Dapper 参数必须来自同一渲染快照。
+    /// </summary>
+    [Fact]
+    public void ToList_WhenSoftDeleteFilterAddsParameter_ShouldBindRenderedSnapshotParameter()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        using var query = CreateQuery(connection);
+        var description = query.From<SoftDeleteMappedSample>();
+
+        // Act
+        var result = description.ToList();
+
+        // Assert
+        result.Count.ShouldBe(1);
+        connection.LastCommandText.ShouldBe(
+            "Select [SoftDeleteMappedSample].[Id],[SoftDeleteMappedSample].[Name],[SoftDeleteMappedSample].[IsDeleted] \r\nFrom [SoftDeleteMappedSample] \r\nWhere [SoftDeleteMappedSample].[IsDeleted]=@_p_0");
+        connection.LastCreatedParameters.Count.ShouldBe(1);
+        var parameter = connection.LastCreatedParameters.Single();
+        parameter.ParameterName.ShouldBe("@_p_0");
+        parameter.Value.ShouldBe(false);
+        var builder = ((ISqlQueryBuilderAccessor)description).GetSqlBuilder();
+        builder.GetParams().ShouldBeEmpty();
     }
 
     /// <summary>
@@ -497,6 +555,35 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         connectionString.ShouldBe("Server=primary;Database=test;");
+    }
+
+    /// <summary>
+    /// 测试目的：在已绑定只读数据源的作用域中切换主库读取偏好时，工厂必须同时切换连接、映射与 Provider 上下文。
+    /// </summary>
+    [Fact]
+    public void Create_WhenCurrentContextSwitchesToPrimaryRead_ShouldUsePrimaryContextAndMapping()
+    {
+        // Arrange
+        var metadataOptions = CreateRoutingMetadataOptions();
+        metadataOptions.DataSources.DataSources["reporting"].PrimaryReadStrategy =
+            PrimaryReadStrategy.PrimaryDataSource;
+        metadataOptions.DataSources.DataSources["reporting"].PrimaryDataSourceKey = "default";
+        var services = CreateServices(metadataOptions);
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        using var databaseScope = provider.GetRequiredService<IDatabaseScopeManager>().Use("reporting");
+        using var readPreferenceScope = provider.GetRequiredService<IReadPreferenceScopeManager>()
+            .Use(SqlReadPreference.Primary);
+
+        // Act
+        using var query = Assert.IsType<SqlServerSqlQuery>(factory.Create());
+        var description = query.From<MappedSample>().From("u").Where(item => item.Name, "primary");
+
+        // Assert
+        query.Options.ConnectionString.ShouldBe("Server=default;Database=test;");
+        description.ToSql().ShouldBe(
+            "Select [u].[Id],[u].[Name],[u].[Payload] \r\nFrom [Users] As [u] \r\nWhere [u].[Name]=@_p_0");
     }
 
     /// <summary>
@@ -1253,10 +1340,10 @@ public class SqlServerRoutingAndExecutionTest
             .Set("Name", "Bing")
             .Where("Id", 1)
             .Returning("Id");
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Act
-        var rows = executor.ExecuteReturning<int>(description);
+        var rows = executor.ExecuteReturning<int>(command);
 
         // Assert
         Assert.Empty(rows);
@@ -1280,10 +1367,10 @@ public class SqlServerRoutingAndExecutionTest
             .Set("Name", "Bing")
             .Where("Id", 1)
             .Returning("Id");
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Act
-        var rows = await executor.ExecuteReturningAsync<int>(description);
+        var rows = await executor.ExecuteReturningAsync<int>(command);
 
         // Assert
         Assert.NotNull(rows);
@@ -1338,10 +1425,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：由 SQLite Builder 冻结的 Returning 描述必须在 SQL Server Executor 打开连接前被拒绝。
+    /// 测试目的：由 SQLite Builder 冻结的 Returning 写入命令必须在 SQL Server Executor 打开连接前被拒绝。
     /// </summary>
     [Fact]
-    public void ExecuteReturningQuery_WhenDescriptionProviderMismatches_ShouldRejectBeforeConnectionAccess()
+    public void ExecuteReturningQuery_WhenWriteCommandProviderMismatches_ShouldRejectBeforeConnectionAccess()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -1351,13 +1438,13 @@ public class SqlServerRoutingAndExecutionTest
             .Set("Name", "Bing")
             .Where("Id", 1)
             .Returning("Id");
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(description));
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(command));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
+        Assert.Equal("写入命令 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
             exception.Message);
         Assert.Equal(0, connection.ReaderCreateCount);
         Assert.Null(connection.LastTransaction);
@@ -1365,10 +1452,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步 Returning 查询也必须在开始异步事务或创建读取器前拒绝跨 Provider 的 Mutation 描述。
+    /// 测试目的：异步 Returning 查询也必须在开始异步事务或创建读取器前拒绝跨 Provider 的写入命令。
     /// </summary>
     [Fact]
-    public async Task ExecuteReturningQueryAsync_WhenDescriptionProviderMismatches_ShouldRejectBeforeConnectionAccess()
+    public async Task ExecuteReturningQueryAsync_WhenWriteCommandProviderMismatches_ShouldRejectBeforeConnectionAccess()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -1378,14 +1465,14 @@ public class SqlServerRoutingAndExecutionTest
             .Set("Name", "Bing")
             .Where("Id", 1)
             .Returning("Id");
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteReturningAsync<int>(description));
+            executor.ExecuteReturningAsync<int>(command));
 
         // Assert
-        Assert.Equal("Mutation 描述 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
+        Assert.Equal("写入命令 Provider bing.sqlite 与当前 Executor Provider bing.sqlserver 不一致，不能执行。",
             exception.Message);
         Assert.Equal(0, connection.ReaderCreateCount);
         Assert.Null(connection.LastTransaction);
@@ -1500,6 +1587,49 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastTransaction.CommitCount.ShouldBe(0);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：同一多结果集读取器在异步读取期间必须拒绝第二次读取和释放，防止结果集错序或读取器被提前关闭。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenReadIsInProgress_ShouldRejectConcurrentReadAndDispose()
+    {
+        // Arrange
+        var readStarted = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var allowRead = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var readCount = 0;
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" }),
+            OnReaderReadAsync = async () =>
+            {
+                if (Interlocked.Increment(ref readCount) == 1)
+                {
+                    readStarted.TrySetResult(null);
+                    await allowRead.Task;
+                }
+            }
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+        var result = await executor.ExecuteAsync(command);
+
+        // Act
+        var readTask = result.ReadAsync<MappedSample>();
+        await readStarted.Task;
+        var concurrentReadException = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            result.ReadAsync<MappedSample>());
+        var disposeException = await Assert.ThrowsAsync<InvalidOperationException>(() => result.DisposeAsync().AsTask());
+        allowRead.TrySetResult(null);
+        var rows = await readTask;
+        await result.DisposeAsync();
+
+        // Assert
+        concurrentReadException.Message.ShouldBe("当前多结果集正在读取或释放，不能并发访问。");
+        disposeException.Message.ShouldBe("当前多结果集正在读取或释放，不能并发访问。");
+        rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
+        connection.ReaderDisposeCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -1851,6 +1981,77 @@ public class SqlServerRoutingAndExecutionTest
         scope.Dispose();
         Should.Throw<ObjectDisposedException>(() => scope.Commit());
         Should.Throw<ObjectDisposedException>(() => scope.Rollback());
+    }
+
+    /// <summary>
+    /// 测试目的：提交开始后必须原子阻止相反完成操作和新的子对象创建，且只允许一次底层提交。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenCommitIsInProgress_ShouldRejectConcurrentRollbackAndChildCreation()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var provider = CreateSqlServerScopeProvider(connection);
+        using var scope = provider.GetRequiredService<ISqlTransactionScopeFactory>().Begin();
+        using var commitStarted = new ManualResetEventSlim();
+        using var allowCommit = new ManualResetEventSlim();
+        connection.LastTransaction.OnCommit = () =>
+        {
+            commitStarted.Set();
+            allowCommit.Wait();
+        };
+
+        // Act
+        var commitTask = Task.Run(scope.Commit);
+        commitStarted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+        var duplicateCommitException = Should.Throw<InvalidOperationException>(() => scope.Commit());
+        var rollbackException = Should.Throw<InvalidOperationException>(() => scope.Rollback());
+        var createException = Should.Throw<InvalidOperationException>(() => scope.CreateExecutor());
+        allowCommit.Set();
+        await commitTask;
+
+        // Assert
+        duplicateCommitException.Message.ShouldContain("正在完成");
+        rollbackException.Message.ShouldContain("正在完成");
+        createException.Message.ShouldContain("已结束");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        scope.Commit();
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：异步提交尚未完成时，同步和异步释放都必须拒绝并发执行，避免调用方误判资源已释放。
+    /// </summary>
+    [Fact]
+    public async Task SqlTransactionScope_WhenCommitAsyncIsInProgress_ShouldRejectConcurrentDispose()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var provider = CreateSqlServerScopeProvider(connection);
+        await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        var commitStarted = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var allowCommit = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+        connection.LastTransaction.OnCommitAsync = async () =>
+        {
+            commitStarted.TrySetResult(null);
+            await allowCommit.Task;
+        };
+
+        // Act
+        var commitTask = scope.CommitAsync();
+        await commitStarted.Task;
+        var disposeException = Should.Throw<InvalidOperationException>(scope.Dispose);
+        var disposeAsyncException = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.DisposeAsync().AsTask());
+        allowCommit.TrySetResult(null);
+        await commitTask;
+
+        // Assert
+        disposeException.Message.ShouldContain("正在完成");
+        disposeAsyncException.Message.ShouldContain("正在完成");
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.DisposeCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -2422,6 +2623,33 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：同步流在取得后必须冻结 Fluent 查询描述，后续追加条件不得改变首次枚举的执行 SQL。
+    /// </summary>
+    [Fact]
+    public void AsEnumerable_WhenDescriptionChangesAfterStreamCreation_ShouldUseInitialBuilderSnapshot()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" })
+        };
+        using var query = CreateOwnedQuery(connection);
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var stream = description.AsEnumerable();
+        description.Where("[Name]", "changed-after-stream-creation");
+
+        // Act
+        var result = stream.ToList();
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal("Select [Id],[Name] \r\nFrom [Users] \r\nWhere [Enabled]=@_p_0", connection.LastCommandText);
+        Assert.Single(connection.LastCreatedParameters);
+        Assert.Equal("@_p_0", connection.LastCreatedParameters[0].ParameterName);
+        Assert.Equal(true, connection.LastCreatedParameters[0].Value);
+    }
+
+    /// <summary>
     /// 测试目的：Trace 未启用时，异步流式查询只应渲染一次执行 SQL，不应生成调试 SQL。
     /// </summary>
     [Fact]
@@ -2442,6 +2670,35 @@ public class SqlServerRoutingAndExecutionTest
         Assert.Equal(1, query.Counters.ToSqlCallCount);
         Assert.Equal(0, query.Counters.ToDebugSqlCallCount);
         Assert.Null(query.TraceSql);
+    }
+
+    /// <summary>
+    /// 测试目的：异步流在取得后必须冻结 Fluent 查询描述，后续追加条件不得改变首次枚举的执行 SQL。
+    /// </summary>
+    [Fact]
+    public async Task AsAsyncEnumerable_WhenDescriptionChangesAfterStreamCreation_ShouldUseInitialBuilderSnapshot()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
+        };
+        using var query = CreateOwnedQuery(connection);
+        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var stream = description.AsAsyncEnumerable();
+        description.Where("[Name]", "changed-after-stream-creation");
+
+        // Act
+        var result = new List<MappedSample>();
+        await foreach (var item in stream)
+            result.Add(item);
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal("Select [Id],[Name] \r\nFrom [Users] \r\nWhere [Enabled]=@_p_0", connection.LastCommandText);
+        Assert.Single(connection.LastCreatedParameters);
+        Assert.Equal("@_p_0", connection.LastCreatedParameters[0].ParameterName);
+        Assert.Equal(true, connection.LastCreatedParameters[0].Value);
     }
 
     /// <summary>
@@ -2748,6 +3005,50 @@ public class SqlServerRoutingAndExecutionTest
         Assert.Equal(2, connection.ExecutedCommandTexts.Count);
         Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[0]);
         Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[1]);
+    }
+
+    /// <summary>
+    /// 测试目的：分页的 Count 完成后即使全局逻辑删除过滤器被禁用，数据页仍必须保留分页开始时冻结的数据边界。
+    /// </summary>
+    [Fact]
+    public void ToPage_WhenFilterChangesAfterCount_ShouldUseInitialFilterSnapshot()
+    {
+        // Arrange
+        var dataFilter = new DataFilter();
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "active" })
+        };
+        var services = new ServiceCollection();
+        services.AddSingleton<IDataFilter>(dataFilter);
+        services.AddSqlServerProvider();
+        using var provider = services.BuildServiceProvider();
+        using var query = CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider,
+            options =>
+            {
+                options.Connection(connection);
+                options.QueryCapabilities = new SqlQueryCapabilities
+                {
+                    Pagination = SqlQueryCapabilityState.Supported
+                };
+            });
+        var description = query.From<SoftDeleteMappedSample>();
+        IDisposable disabledScope = null;
+        connection.OnScalarExecuted = () => disabledScope = dataFilter.Disable<IsDeletedFilter>();
+
+        // Act
+        var result = description.ToPage(new Pager(1, 10, "Id"));
+        disabledScope?.Dispose();
+
+        // Assert
+        Assert.Single(result.Data);
+        Assert.Equal(2, connection.ExecutedCommandTexts.Count);
+        Assert.Equal(
+            "Select Count(*) \r\nFrom [SoftDeleteMappedSample] \r\nWhere [SoftDeleteMappedSample].[IsDeleted]=@_p_0",
+            connection.ExecutedCommandTexts[0]);
+        Assert.Equal(
+            "Select [SoftDeleteMappedSample].[Id],[SoftDeleteMappedSample].[Name],[SoftDeleteMappedSample].[IsDeleted] \r\nFrom [SoftDeleteMappedSample] \r\nWhere [SoftDeleteMappedSample].[IsDeleted]=@_p_0 \r\nOrder By [Id] \r\nOffset @_p_1 Rows Fetch Next @_p_2 Rows Only",
+            connection.ExecutedCommandTexts[1]);
     }
 
     /// <summary>
@@ -5045,6 +5346,27 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 逻辑删除查询测试样例。
+    /// </summary>
+    private sealed class SoftDeleteMappedSample : ISoftDelete
+    {
+        /// <summary>
+        /// 标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 是否已删除。
+        /// </summary>
+        public bool IsDeleted { get; set; }
+    }
+
+    /// <summary>
     /// 类型化派生表映射样例。
     /// </summary>
     private sealed class DerivedMappedSample
@@ -5162,6 +5484,11 @@ public class SqlServerRoutingAndExecutionTest
         /// 数据读取器创建后的测试回调。
         /// </summary>
         public Action OnReaderCreated { get; set; }
+
+        /// <summary>
+        /// 数据读取器每次异步读取前的测试回调。
+        /// </summary>
+        public Func<Task> OnReaderReadAsync { get; set; }
 
         /// <summary>
         /// 是否在读取器释放时抛出异常。
@@ -5485,8 +5812,12 @@ public class SqlServerRoutingAndExecutionTest
 
         public override bool Read() => _reader.Read();
 
-        public override Task<bool> ReadAsync(CancellationToken cancellationToken) =>
-            _reader.ReadAsync(cancellationToken);
+        public override async Task<bool> ReadAsync(CancellationToken cancellationToken)
+        {
+            if (_connection.OnReaderReadAsync != null)
+                await _connection.OnReaderReadAsync();
+            return await _reader.ReadAsync(cancellationToken);
+        }
 
         public override T GetFieldValue<T>(int ordinal) => _reader.GetFieldValue<T>(ordinal);
 
@@ -5643,6 +5974,16 @@ public class SqlServerRoutingAndExecutionTest
 
         public bool ThrowOnRollback { get; set; }
 
+        /// <summary>
+        /// 同步提交开始后的测试回调。
+        /// </summary>
+        public Action OnCommit { get; set; }
+
+        /// <summary>
+        /// 异步提交开始后的测试回调。
+        /// </summary>
+        public Func<Task> OnCommitAsync { get; set; }
+
         public override IsolationLevel IsolationLevel => _isolationLevel;
 
         protected override DbConnection DbConnection => _connection;
@@ -5650,16 +5991,18 @@ public class SqlServerRoutingAndExecutionTest
         public override void Commit()
         {
             CommitCount++;
+            OnCommit?.Invoke();
             if (ThrowOnCommit)
                 throw new InvalidOperationException("commit failed");
         }
 
-        public override Task CommitAsync(CancellationToken cancellationToken = default)
+        public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             AsyncCommitCount++;
+            if (OnCommitAsync != null)
+                await OnCommitAsync();
             if (ThrowOnCommit)
-                return Task.FromException(new InvalidOperationException("commit failed"));
-            return Task.CompletedTask;
+                throw new InvalidOperationException("commit failed");
         }
 
         public override void Rollback()

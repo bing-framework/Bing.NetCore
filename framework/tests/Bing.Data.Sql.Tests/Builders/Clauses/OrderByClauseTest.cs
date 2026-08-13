@@ -1,4 +1,5 @@
-﻿using Bing.Data.Sql.Builders.Clauses;
+﻿using System.Text;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Tests.Samples;
 
@@ -242,5 +243,23 @@ public class OrderByClauseTest
     {
         _clause.OrderBy("a desc,c.D DESC,e,f asc,G Asc", "b");
         Assert.Equal("Order By [b].[a] Desc,[c].[D] Desc,[b].[e],[b].[f],[b].[G]", GetSql());
+    }
+
+    /// <summary>
+    /// 测试目的：Order By 子句的列格式化失败时，不得向调用方缓冲区遗留关键字前缀。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenOrderColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        _clause.OrderBy("Name,invalid;");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Conditions;
+using Bing.Data.Sql.Builders.Params;
 using System.Text;
 using Bing.Data.Sql.Builders.Extensions;
 using Bing.Data.Sql.Builders.Internal;
@@ -313,8 +314,41 @@ public class FromClause : IFromClause
     {
         if (sources == null)
             throw new ArgumentNullException(nameof(sources));
-        return new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, _context.ParameterManager)
+        var parameterManager = _context.ParameterManager;
+        var existingParameters = parameterManager.GetParams();
+        var snapshot = parameterManager.Clone();
+        var condition = new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, snapshot)
             .Resolve(expression);
+        var parameters = snapshot.GetParams()
+            .Where(parameter => existingParameters.ContainsKey(parameter.Key) == false)
+            .ToList();
+        var validation = parameterManager.Clone();
+        AddParameters(validation, snapshot, parameters);
+        AddParameters(parameterManager, snapshot, parameters);
+        return condition;
+    }
+
+    /// <summary>
+    /// 将解析副本中新建的参数提交到指定管理器。
+    /// </summary>
+    /// <param name="target">接收参数的管理器。</param>
+    /// <param name="source">保存解析结果的参数管理器。</param>
+    /// <param name="parameters">待提交的新参数。</param>
+    private static void AddParameters(IParameterManager target, IParameterManager source,
+        IEnumerable<KeyValuePair<string, object>> parameters)
+    {
+        var sourceMetadata = source as IAdvancedParameterManager;
+        var targetMetadata = target as IAdvancedParameterManager;
+        foreach (var parameter in parameters)
+        {
+            if (sourceMetadata?.GetSqlParams().TryGetValue(parameter.Key, out var metadata) == true &&
+                targetMetadata != null)
+            {
+                targetMetadata.Add(metadata);
+                continue;
+            }
+            target.Add(parameter.Key, parameter.Value);
+        }
     }
 
     /// <summary>
@@ -460,11 +494,12 @@ public class FromClause : IFromClause
         var registerProbe = Register?.Clone();
         ReleaseSourceAliases(registerProbe);
         registerProbe?.RegisterAlias(alias);
+        var subqueryAlias = GetSubqueryAlias(alias);
         var result = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
         _context.UseOperation(SqlOperationAction.QueryClause);
         ReleaseSourceAliases(Register);
         Register?.RegisterAlias(alias);
-        ReplaceSources(SqlItem.Raw($"({result}){GetSubqueryAlias(alias)}"), alias: alias);
+        ReplaceSources(SqlItem.Raw($"({result}){subqueryAlias}"), alias: alias);
     }
 
     /// <summary>
@@ -481,12 +516,13 @@ public class FromClause : IFromClause
         var registerProbe = Register?.Clone();
         ReleaseSourceAliases(registerProbe);
         registerProbe?.RegisterAlias(subquery.Alias);
+        var subqueryAlias = GetSubqueryAlias(subquery.Alias);
         var sql = Builder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(subquery.Builder) :
             subquery.Builder.ToSql();
         _context.UseOperation(SqlOperationAction.QueryClause);
         ReleaseSourceAliases(Register);
         Register?.RegisterAlias(subquery.Alias);
-        ReplaceSources(SqlItem.Raw($"({sql}){GetSubqueryAlias(subquery.Alias)}"), typeof(TProjection), subquery.Alias,
+        ReplaceSources(SqlItem.Raw($"({sql}){subqueryAlias}"), typeof(TProjection), subquery.Alias,
             subquery.ProjectedMembers);
     }
 
@@ -502,6 +538,7 @@ public class FromClause : IFromClause
     {
         if (action == null)
             return;
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
         var builder = Builder.New();
         action(builder);
         From(builder, alias);

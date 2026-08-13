@@ -50,22 +50,31 @@ public sealed class ReturningClause : IReturningClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        var dialect = _context.Provider as ISqlReturningDialect;
-        var keyword = dialect?.GetKeyword(_executionKind) ?? "Returning";
-        if (string.IsNullOrWhiteSpace(keyword))
-            throw new InvalidOperationException($"Provider {_context.Provider.Key} 返回了无效的 Returning 关键字。");
-        builder.Append(' ').Append(keyword).Append(' ');
-        for (var index = 0; index < _columns.Count; index++)
+        var startIndex = builder.Length;
+        try
         {
-            if (index > 0)
-                builder.Append(", ");
-            var column = _columns[index];
-            var qualifier = dialect?.GetQualifier(_executionKind, column.Qualifier) ?? column.Qualifier;
-            if (string.IsNullOrWhiteSpace(qualifier) == false)
-                builder.Append(_context.Dialect.SafeName(qualifier)).Append('.');
-            builder.Append(_context.Dialect.SafeName(column.Column));
-            if (string.IsNullOrWhiteSpace(column.Alias) == false)
-                builder.Append(" As ").Append(_context.Dialect.SafeName(column.Alias));
+            var dialect = _context.Provider as ISqlReturningDialect;
+            var keyword = dialect?.GetKeyword(_executionKind) ?? "Returning";
+            if (string.IsNullOrWhiteSpace(keyword))
+                throw new InvalidOperationException($"Provider {_context.Provider.Key} 返回了无效的 Returning 关键字。");
+            builder.Append(' ').Append(keyword).Append(' ');
+            for (var index = 0; index < _columns.Count; index++)
+            {
+                if (index > 0)
+                    builder.Append(", ");
+                var column = _columns[index];
+                var qualifier = dialect?.GetQualifier(_executionKind, column.Qualifier) ?? column.Qualifier;
+                if (string.IsNullOrWhiteSpace(qualifier) == false)
+                    builder.Append(_context.Dialect.SafeName(qualifier)).Append('.');
+                builder.Append(_context.Dialect.SafeName(column.Column));
+                if (string.IsNullOrWhiteSpace(column.Alias) == false)
+                    builder.Append(" As ").Append(_context.Dialect.SafeName(column.Alias));
+            }
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
         }
     }
 

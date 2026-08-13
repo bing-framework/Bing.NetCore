@@ -110,6 +110,14 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     private int _executionLease;
 
     /// <summary>
+    /// 保护执行租约和释放状态原子转换的同步锁。
+    /// </summary>
+    /// <remarks>
+    /// 仅保护状态位，不在锁内执行连接、事务或 Provider 资源释放，避免将 I/O 纳入临界区。
+    /// </remarks>
+    private readonly object _executionStateLock = new();
+
+    /// <summary>
     /// 当前 Root Query 是否已释放。
     /// </summary>
     private int _isDisposed;
@@ -699,16 +707,33 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// <returns>必须在操作结束时释放的执行租约。</returns>
     protected IDisposable AcquireExecutionLease()
     {
-        EnsureExecutionAvailable();
-        if (Interlocked.CompareExchange(ref _executionLease, 1, 0) != 0)
-            throw new InvalidOperationException("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。");
-        return new ExecutionLease(this);
+        var transactionScopeExecutionLease = _transactionScopeLease?.AcquireExecutionLease();
+        try
+        {
+            lock (_executionStateLock)
+            {
+                EnsureExecutionAvailable();
+                if (_executionLease != 0)
+                    throw new InvalidOperationException("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。");
+                _executionLease = 1;
+            }
+            return new ExecutionLease(this, transactionScopeExecutionLease);
+        }
+        catch
+        {
+            transactionScopeExecutionLease?.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
     /// 归还当前实例的执行租约。
     /// </summary>
-    private void ReleaseExecutionLease() => Volatile.Write(ref _executionLease, 0);
+    private void ReleaseExecutionLease()
+    {
+        lock (_executionStateLock)
+            _executionLease = 0;
+    }
 
     /// <summary>
     /// 当前实例执行租约。
@@ -721,16 +746,27 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         private SqlQueryBase _owner;
 
         /// <summary>
+        /// 当前执行关联的事务作用域租约。
+        /// </summary>
+        private IDisposable _transactionScopeExecutionLease;
+
+        /// <summary>
         /// 初始化执行租约。
         /// </summary>
         /// <param name="owner">所属查询对象。</param>
-        public ExecutionLease(SqlQueryBase owner) => _owner = owner;
+        /// <param name="transactionScopeExecutionLease">关联的事务作用域执行租约。</param>
+        public ExecutionLease(SqlQueryBase owner, IDisposable transactionScopeExecutionLease)
+        {
+            _owner = owner;
+            _transactionScopeExecutionLease = transactionScopeExecutionLease;
+        }
 
         /// <inheritdoc />
         public void Dispose()
         {
             var owner = Interlocked.Exchange(ref _owner, null);
             owner?.ReleaseExecutionLease();
+            Interlocked.Exchange(ref _transactionScopeExecutionLease, null)?.Dispose();
         }
     }
 
@@ -1050,21 +1086,27 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
+        if (builder is SqlBuilderBase sqlBuilder)
+        {
+            var snapshot = sqlBuilder.CreateRenderSnapshot();
+            return new SqlPreparedCommand(snapshot.Sql, null, GetDbParameters(snapshot.Builder, snapshot.Sql),
+                snapshot.Builder);
+        }
         var sql = builder.ToSql();
         return new SqlPreparedCommand(sql, null, GetDbParameters(builder, sql), builder);
     }
 
     /// <summary>
-    /// 准备独立 Mutation 描述执行所需的 SQL 和参数。
+    /// 准备独立写入命令执行所需的 SQL 和参数。
     /// </summary>
-    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <param name="command">已冻结的写入命令。</param>
     /// <returns>本次执行的不可变准备快照。</returns>
-    private protected SqlPreparedCommand PrepareCommand(SqlMutationDescription description)
+    private protected SqlPreparedCommand PrepareCommand(SqlWriteCommand command)
     {
-        if (description == null)
-            throw new ArgumentNullException(nameof(description));
-        var parameters = description.CreateParameters();
-        return new SqlPreparedCommand(description.Sql, parameters, GetDbParameters(parameters, description.Sql));
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        var parameters = command.CreateParameters();
+        return new SqlPreparedCommand(command.Sql, parameters, GetDbParameters(parameters, command.Sql));
     }
 
     /// <summary>
@@ -1211,8 +1253,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     public void Dispose()
     {
-        EnsureNoActiveExecutionForDispose();
-        if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+        if (TryBeginDispose() == false)
             return;
         Exception transactionException = null;
         try
@@ -1249,8 +1290,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// <remarks>活动执行期间不得释放 Root 对象，避免中断流式读取或结果集生命周期。</remarks>
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        EnsureNoActiveExecutionForDispose();
-        if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+        if (TryBeginDispose() == false)
             return;
         Exception transactionException = null;
         try
@@ -1286,8 +1326,28 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// </summary>
     private void EnsureNoActiveExecutionForDispose()
     {
-        if (Volatile.Read(ref _executionLease) != 0)
-            throw new InvalidOperationException("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
+        lock (_executionStateLock)
+        {
+            if (_executionLease != 0)
+                throw new InvalidOperationException("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
+        }
+    }
+
+    /// <summary>
+    /// 原子标记当前 Root 对象进入释放状态。
+    /// </summary>
+    /// <returns>首次开始释放时返回 true；已释放时返回 false。</returns>
+    private bool TryBeginDispose()
+    {
+        lock (_executionStateLock)
+        {
+            if (_executionLease != 0)
+                throw new InvalidOperationException("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。");
+            if (_isDisposed != 0)
+                return false;
+            _isDisposed = 1;
+            return true;
+        }
     }
 
     /// <summary>

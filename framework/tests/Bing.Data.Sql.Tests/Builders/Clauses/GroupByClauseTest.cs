@@ -1,5 +1,9 @@
-﻿using Bing.Data.Sql.Builders.Clauses;
+﻿using System.Text;
+using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Clauses;
@@ -165,5 +169,92 @@ public class GroupByClauseTest
         // Assert
         Assert.Equal("Group By [a] Having Count([a]) >= @minimum", resolved);
         Assert.Equal("Group By [a] Having Count([raw]) >= @minimum", raw);
+    }
+
+    /// <summary>
+    /// 测试目的：Group By 子句的列格式化失败时，不得向调用方缓冲区遗留关键字前缀。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenGroupColumnIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        _clause.GroupBy("Name,invalid;");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => _clause.AppendTo(result));
+
+        // Assert
+        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("Prefix:", result.ToString());
+    }
+
+    /// <summary>
+    /// 测试目的：多个类型化分组列的后续解析失败时，不得保留前序分组项或将统一 Builder 切换为查询状态。
+    /// </summary>
+    [Fact]
+    public void GroupBy_WhenLaterTypedColumnResolutionFails_ShouldKeepClauseAndBuilderStateUnchanged()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        _clause = new GroupByClause(TestSqlBuilder.CreateTestClauseContext(builder: builder,
+            entityResolver: new FailingAfterFirstEntityResolver()));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => _clause.GroupBy<Sample>(
+            sample => sample.Email,
+            sample => sample.Url));
+
+        // Assert
+        Assert.Equal("Group column resolution failed.", exception.Message);
+        Assert.False(_clause.IsGroup);
+        Assert.Equal(SqlOperationKind.None, builder.OperationKind);
+        builder.DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
+        Assert.Equal(SqlOperationKind.Delete, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 在第二次实体列解析时失败的测试解析器。
+    /// </summary>
+    private sealed class FailingAfterFirstEntityResolver : IEntityResolver
+    {
+        /// <summary>
+        /// 内部基础解析器。
+        /// </summary>
+        private readonly TestEntityResolver _inner = new();
+
+        /// <summary>
+        /// 已执行的类型化列解析次数。
+        /// </summary>
+        private int _typedColumnResolutionCount;
+
+        /// <inheritdoc />
+        public string GetTable(Type entity) => _inner.GetTable(entity);
+
+        /// <inheritdoc />
+        public string GetSchema(Type entity) => _inner.GetSchema(entity);
+
+        /// <inheritdoc />
+        public string GetColumns<TEntity>(bool propertyAsAlias) => _inner.GetColumns<TEntity>(propertyAsAlias);
+
+        /// <inheritdoc />
+        public string GetColumns<TEntity>(System.Linq.Expressions.Expression<Func<TEntity, object[]>> columns,
+            bool propertyAsAlias) => _inner.GetColumns(columns, propertyAsAlias);
+
+        /// <inheritdoc />
+        public string GetColumn<TEntity>(System.Linq.Expressions.Expression<Func<TEntity, object>> column)
+        {
+            if (++_typedColumnResolutionCount == 2)
+                throw new InvalidOperationException("Group column resolution failed.");
+            return _inner.GetColumn(column);
+        }
+
+        /// <inheritdoc />
+        public string GetColumn(System.Linq.Expressions.Expression expression, Type entity, bool right = false) =>
+            _inner.GetColumn(expression, entity, right);
+
+        /// <inheritdoc />
+        public Type GetType(System.Linq.Expressions.Expression expression, bool right = false) =>
+            _inner.GetType(expression, right);
     }
 }

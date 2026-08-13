@@ -48,7 +48,7 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
         var readPreference = options.ReadPreference ?? parent?.ReadPreference ?? SqlReadPreference.Default;
         var resolvedOptions = new DatabaseScopeOptions
         {
-            DbKey = options.DbKey,
+            DbKey = options.DbKey ?? parent?.DbKey,
             TenantId = options.TenantId,
             ReadPreference = readPreference
         };

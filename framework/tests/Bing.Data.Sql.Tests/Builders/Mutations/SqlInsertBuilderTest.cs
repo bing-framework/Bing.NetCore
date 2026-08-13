@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
 using Moq;
@@ -33,6 +35,27 @@ public sealed class SqlInsertBuilderTest
         Assert.Same(builder, result);
         Assert.Equal("Insert Into [samples] ([Name], [Age]) Values (@_p_0, @_p_1), (@_p_2, @_p_3)", builder.ToSql());
         Assert.Equal(4, builder.GetParameters().Count);
+    }
+
+    /// <summary>
+    /// 测试目的：Insert AppendTo 的目标表引用验证失败时，不得向调用方缓冲区遗留 SQL 前缀。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenTargetTableIsInvalid_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices())
+            .InsertInto(new SqlTableReference { TableName = "orders;" })
+            .Columns("Name")
+            .Values("Bing");
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => builder.AppendTo(result));
+
+        // Assert
+        Assert.Equal("表引用包含无效标识符字符。 (Parameter 'identifier')", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     /// <summary>
@@ -80,10 +103,10 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Mutation 描述创建后必须冻结 SQL 和参数，后续 Builder 写入或数组值变更不能影响已创建描述。
+    /// 测试目的：写入命令创建后必须冻结 SQL 和参数，后续 Builder 写入或数组值变更不能影响已创建命令。
     /// </summary>
     [Fact]
-    public void ToMutationDescription_WhenBuilderChangesAfterCreation_ShouldKeepSqlAndParametersIndependent()
+    public void ToSqlWriteCommand_WhenBuilderChangesAfterCreation_ShouldKeepSqlAndParametersIndependent()
     {
         // Arrange
         var payload = new byte[] { 1, 2 };
@@ -93,22 +116,23 @@ public sealed class SqlInsertBuilderTest
             .Values(payload);
 
         // Act
-        var description = ((ISqlBuilder)builder).ToMutationDescription();
+        var command = ((ISqlBuilder)builder).ToSqlWriteCommand();
         builder.Values("later");
         payload[0] = 9;
 
         // Assert
-        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", description.Sql);
-        Assert.Equal("test.sqlserver", description.ProviderKey);
-        Assert.Single(description.Parameters);
-        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(description.Parameters[0].Value));
+        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", command.Sql);
+        Assert.Equal("test.sqlserver", command.ProviderKey);
+        Assert.Equal(SqlOperationKind.InsertValues, command.OperationKind);
+        Assert.Single(command.Parameters);
+        Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(Assert.Single(command.Parameters).Value));
     }
 
     /// <summary>
-    /// 测试目的：Mutation 描述应递归冻结数组、集合和字典参数，避免嵌套容器在 Builder 创建后改变本次执行输入。
+    /// 测试目的：写入命令应递归冻结数组、集合和字典参数，避免嵌套容器在 Builder 创建后改变本次执行输入。
     /// </summary>
     [Fact]
-    public void ToMutationDescription_WhenNestedParameterContainersChange_ShouldKeepIndependentSnapshots()
+    public void ToSqlWriteCommand_WhenNestedParameterContainersChange_ShouldKeepIndependentSnapshots()
     {
         // Arrange
         var payload = new byte[] { 1, 2 };
@@ -124,11 +148,11 @@ public sealed class SqlInsertBuilderTest
             .Values(parameter);
 
         // Act
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
         payload[0] = 9;
         values[0] = 8;
         parameter["Payload"] = new byte[] { 7 };
-        var snapshot = Assert.IsType<Dictionary<string, object>>(description.Parameters[0].Value);
+        var snapshot = Assert.IsType<Dictionary<string, object>>(Assert.Single(command.Parameters).Value);
 
         // Assert
         Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(snapshot["Payload"]));
@@ -136,23 +160,23 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 调用方修改公开参数容器后，Mutation 描述应保留内部执行快照。
+    /// 测试 - 调用方修改公开参数容器后，写入命令应保留内部执行快照。
     /// </summary>
     [Fact]
-    public void ToMutationDescription_WhenExposedParameterContainerIsMutated_ShouldPreserveExecutionSnapshot()
+    public void ToSqlWriteCommand_WhenExposedParameterContainerIsMutated_ShouldPreserveExecutionSnapshot()
     {
         // Arrange
         var builder = new TestSqlBuilder()
             .InsertInto("samples")
             .Columns(nameof(MutationSample.Name))
             .Values(new Dictionary<string, object> { ["Payload"] = new byte[] { 1, 2 } });
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Act
-        var exposed = Assert.IsType<Dictionary<string, object>>(description.Parameters[0].Value);
+        var exposed = Assert.IsType<Dictionary<string, object>>(Assert.Single(command.Parameters).Value);
         ((byte[])exposed["Payload"])[0] = 9;
         exposed["Payload"] = new byte[] { 8 };
-        var executionParameter = Assert.Single(description.CreateParameters());
+        var executionParameter = Assert.Single(command.CreateParameters());
         var executionValue = Assert.IsType<Dictionary<string, object>>(executionParameter.Value);
 
         // Assert
@@ -160,10 +184,10 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Mutation 描述必须在 SQL 渲染完成后只导出一次参数快照，确保渲染期间合并的参数与 SQL 对应。
+    /// 测试目的：写入命令必须从独立渲染快照导出参数，确保渲染期间合并的参数与 SQL 对应且不读取原 Builder 的可变状态。
     /// </summary>
     [Fact]
-    public void ToMutationDescription_WhenParametersConfigured_ShouldRenderBeforeExportingSnapshot()
+    public void ToSqlWriteCommand_WhenParametersConfigured_ShouldRenderBeforeExportingSnapshot()
     {
         // Arrange
         var parameterManager = new CountingParameterManager(TestMutationSqlProvider.Instance.Dialect);
@@ -173,26 +197,27 @@ public sealed class SqlInsertBuilderTest
             .Values("Bing");
 
         // Act
-        var description = builder.ToMutationDescription();
+        var command = builder.ToSqlWriteCommand();
 
         // Assert
-        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", description.Sql);
-        Assert.Equal("test.sqlserver", description.ProviderKey);
-        Assert.Single(description.Parameters);
-        Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
+        Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", command.Sql);
+        Assert.Equal("test.sqlserver", command.ProviderKey);
+        Assert.Single(command.Parameters);
+        Assert.Equal(0, parameterManager.GetSqlParamsCallCount);
     }
 
     /// <summary>
-    /// 测试目的：第三方 Builder 未提供 Provider 时必须在渲染 SQL 前明确拒绝，避免生成无法验证执行身份的 Mutation 描述。
+    /// 测试目的：第三方 Builder 未提供 Provider 时必须在渲染 SQL 前明确拒绝，避免生成无法验证执行身份的写入命令。
     /// </summary>
     [Fact]
-    public void ToMutationDescription_WhenBuilderDoesNotProvideProvider_ShouldRejectBeforeRendering()
+    public void ToSqlWriteCommand_WhenBuilderDoesNotProvideProvider_ShouldRejectBeforeRendering()
     {
         // Arrange
         var builder = new Mock<ISqlBuilder>();
+        builder.Setup(item => item.Clone()).Returns(builder.Object);
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => builder.Object.ToMutationDescription());
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Object.ToSqlWriteCommand());
 
         // Assert
         Assert.Equal("Mutation Builder 必须提供 SQL Provider。", exception.Message);
@@ -200,21 +225,21 @@ public sealed class SqlInsertBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：同一 Mutation 描述的每次执行准备都必须返回独立参数，避免 Provider 绑定污染后续执行。
+    /// 测试目的：同一写入命令的每次执行准备都必须返回独立参数，避免 Provider 绑定污染后续执行。
     /// </summary>
     [Fact]
-    public void MutationDescription_WhenParametersArePreparedRepeatedly_ShouldCreateIndependentParameterInstances()
+    public void SqlWriteCommand_WhenParametersArePreparedRepeatedly_ShouldCreateIndependentParameterInstances()
     {
         // Arrange
-        var description = new TestSqlBuilder()
+        var command = new TestSqlBuilder()
             .InsertInto("samples")
             .Columns(nameof(MutationSample.Name))
             .Values(new byte[] { 1, 2 })
-            .ToMutationDescription();
+            .ToSqlWriteCommand();
 
         // Act
-        var first = Assert.Single(description.CreateParameters());
-        var second = Assert.Single(description.CreateParameters());
+        var first = Assert.Single(command.CreateParameters());
+        var second = Assert.Single(command.CreateParameters());
         ((byte[])first.Value)[0] = 9;
 
         // Assert
@@ -240,6 +265,57 @@ public sealed class SqlInsertBuilderTest
 
         // Assert
         Assert.Equal("Insert Values 行列数量不一致。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Values 的后续参数超过上限时，不得保留已添加的前序参数或未完成行。
+    /// </summary>
+    [Fact]
+    public void Values_WhenLaterParameterExceedsLimit_ShouldThrowWithoutAddingParametersOrRow()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestMutationSqlProvider.Instance.Dialect),
+            1, "test");
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(), parameterManager)
+            .InsertInto<SqlInsertBuilder, MutationSample>()
+            .Columns(nameof(MutationSample.Name), nameof(MutationSample.Age));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Values("Bing", 18));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Equal(0, builder.ValuesClause.RowCount);
+    }
+
+    /// <summary>
+    /// 测试目的：批量 Values 的后续行超过参数上限时，不得保留前序行参数或行状态。
+    /// </summary>
+    [Fact]
+    public void Values_WhenLaterBatchRowExceedsLimit_ShouldThrowWithoutAddingParametersOrRows()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestMutationSqlProvider.Instance.Dialect),
+            1, "test");
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(), parameterManager)
+            .InsertInto<SqlInsertBuilder, MutationSample>()
+            .Columns(nameof(MutationSample.Name));
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Values(
+            new List<IReadOnlyList<object>>
+            {
+                new object[] { "first" },
+                new object[] { "second" }
+            }));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Equal(0, builder.ValuesClause.RowCount);
     }
 
     /// <summary>

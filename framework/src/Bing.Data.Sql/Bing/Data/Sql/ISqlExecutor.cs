@@ -18,21 +18,21 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     ISqlBuilder CreateBuilder();
 
     /// <summary>
-    /// 执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
+    /// 执行独立写入命令表示的 Insert、Update 或 Delete 操作。
     /// </summary>
-    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <param name="command">已冻结的写入命令。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <returns>操作影响的行数。</returns>
-    int ExecuteMutation(SqlMutationDescription description, int? timeout = null);
+    int ExecuteMutation(SqlWriteCommand command, int? timeout = null);
 
     /// <summary>
-    /// 异步执行独立 Mutation 描述表示的 Insert、Update 或 Delete 操作。
+    /// 异步执行独立写入命令表示的 Insert、Update 或 Delete 操作。
     /// </summary>
-    /// <param name="description">已冻结的 Mutation 描述。</param>
+    /// <param name="command">已冻结的写入命令。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示操作影响行数的异步操作。</returns>
-    Task<int> ExecuteMutationAsync(SqlMutationDescription description, int? timeout = null,
+    Task<int> ExecuteMutationAsync(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -80,20 +80,20 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// 执行带 Returning 或 Output 的 Mutation，并同步物化返回行。
     /// </summary>
     /// <typeparam name="TResult">返回行映射类型。</typeparam>
-    /// <param name="description">已冻结的带 Returning Mutation 描述。</param>
+    /// <param name="command">已冻结的带 Returning 写入命令。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>返回行集合。</returns>
-    List<TResult> ExecuteReturning<TResult>(SqlMutationDescription description, int? timeout = null);
+    List<TResult> ExecuteReturning<TResult>(SqlWriteCommand command, int? timeout = null);
 
     /// <summary>
     /// 异步执行带 Returning 或 Output 的 Mutation，并物化返回行。
     /// </summary>
     /// <typeparam name="TResult">返回行映射类型。</typeparam>
-    /// <param name="description">已冻结的带 Returning Mutation 描述。</param>
+    /// <param name="command">已冻结的带 Returning 写入命令。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示返回行集合的异步操作。</returns>
-    Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlMutationDescription description, int? timeout = null,
+    Task<List<TResult>> ExecuteReturningAsync<TResult>(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default);
 
 }

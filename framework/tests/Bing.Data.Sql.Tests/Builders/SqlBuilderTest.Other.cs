@@ -1,8 +1,12 @@
 ﻿using Bing.Data.Filters;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
 using Bing.Data.Sql.Tests.XUnitHelpers;
+using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders;
 
@@ -14,38 +18,37 @@ public partial class SqlBuilderTest
     #region Filter
 
     /// <summary>
-    /// 测试逻辑删除过滤器 - From子句的逻辑删除添加到Where中
+    /// 测试 - 根表软删除谓词必须进入 Where，Join 表没有软删除实体时不得额外生成条件。
     /// </summary>
     [Fact]
     public void Test_IsDeletedFilter_1()
     {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [s].[StringValue] ");
-        result.AppendLine("From [Sample5] As [s] ");
-        result.AppendLine("Join [Sample2] As [s2] On [s].[IntValue]=[s2].[IntValue] ");
-        result.Append("Where [s].[IsDeleted]=@_p_0");
+        // 目标 SQL：根表谓词位于 Where。
+        const string expectedSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s] \r\nJoin [Sample2] As [s2] On [s].[IntValue]=[s2].[IntValue] \r\nWhere [s].[IsDeleted]=@_p_0";
+
+        // 目标参数：渲染快照中的 @_p_0 = false。
+        // 结果语义：没有被逻辑删除的 Sample5 才能作为根结果返回；原 Builder 参数不被渲染污染。
 
         //执行
         _builder.Select<Sample5>(t => t.StringValue).From<Sample5>("s").Join<Sample2>("s2").On<Sample5, Sample2>((l, r) => l.IntValue == r.IntValue);
 
         //验证
         _output.WriteLine(_builder.ToSql());
-        Assert.Equal(result.ToString(), _builder.ToSql());
+        SqlAssert.Equal(expectedSql, _builder.ToSql(), _builder.Provider.Key);
+        Assert.Empty(_builder.GetSqlParams());
     }
 
     /// <summary>
-    /// 测试逻辑删除过滤器 - Join子句的逻辑删除添加到Join中
+    /// 测试 - Inner Join 的软删除谓词必须进入 On，根表谓词仍进入 Where。
     /// </summary>
     [Fact]
     public void Test_IsDeletedFilter_2()
     {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [s].[StringValue] ");
-        result.AppendLine("From [Sample5] As [s] ");
-        result.AppendLine("Join [Sample6] As [s2] On [s].[IntValue]=[s2].[IntValue] And [s2].[IsDeleted]=@_p_1 ");
-        result.Append("Where [s].[IsDeleted]=@_p_0");
+        // 目标 SQL：Join 表谓词位于 On，避免与根表过滤混淆。
+        const string expectedSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s] \r\nJoin [Sample6] As [s2] On [s].[IntValue]=[s2].[IntValue] And [s2].[IsDeleted]=@_p_1 \r\nWhere [s].[IsDeleted]=@_p_0";
+
+        // 目标参数：渲染快照中的 @_p_0 = false；@_p_1 = false。
+        // 结果语义：仅匹配未删除的根表和关联表记录；原 Builder 参数不被渲染污染。
 
         //执行
         _builder.Select<Sample5>(t => t.StringValue)
@@ -54,7 +57,8 @@ public partial class SqlBuilderTest
 
         //验证
         _output.WriteLine(_builder.ToSql());
-        Assert.Equal(result.ToString(), _builder.ToSql());
+        SqlAssert.Equal(expectedSql, _builder.ToSql(), _builder.Provider.Key);
+        Assert.Empty(_builder.GetSqlParams());
     }
 
     /// <summary>
@@ -90,8 +94,9 @@ public partial class SqlBuilderTest
         var second = _builder.ToSql();
 
         // Assert
-        Assert.Equal(expectedSql, first);
-        Assert.Equal(expectedSql, second);
+        SqlAssert.Equal(expectedSql, first, _builder.Provider.Key);
+        SqlAssert.Equal(expectedSql, second, _builder.Provider.Key);
+        Assert.Empty(_builder.GetSqlParams());
         Assert.DoesNotContain("IsDeleted", _builder.GetCondition());
     }
 
@@ -114,9 +119,137 @@ public partial class SqlBuilderTest
         var restoredSql = builder.ToSql();
 
         // Assert
-        Assert.Equal("Select [s].[StringValue] \r\nFrom [Sample5] As [s]", disabledSql);
-        Assert.Equal("Select [s].[StringValue] \r\nFrom [Sample5] As [s] \r\nWhere [s].[IsDeleted]=@_p_0",
-            restoredSql);
+        const string disabledExpectedSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s]";
+        const string restoredExpectedSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s] \r\nWhere [s].[IsDeleted]=@_p_0";
+        SqlAssert.Equal(disabledExpectedSql, disabledSql, builder.Provider.Key);
+        SqlAssert.Equal(restoredExpectedSql, restoredSql, builder.Provider.Key);
+        Assert.Empty(builder.GetSqlParams());
+    }
+
+    /// <summary>
+    /// 测试 - 统一 Mutation Builder 冻结写入命令时，软删除边界 SQL 与参数必须来自同一渲染快照。
+    /// </summary>
+    [Fact]
+    public void ToSqlWriteCommand_WhenUnifiedDeleteUsesSoftDeleteBoundary_ShouldFreezeMatchingSqlAndParameters()
+    {
+        // 目标 SQL：调用方条件和默认 IsDeleted=false 边界均进入 Delete Where。
+        const string expectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0 And [IsDeleted]=@_p_1";
+
+        // 目标参数：@_p_0 = 7；@_p_1 = false。
+        // 结果语义：动态渲染边界不会造成 SQL token 与冻结参数集合不一致。
+        _builder.DeleteClause.From(new SqlTableReference { EntityType = typeof(Sample5), TableName = "Sample5" });
+        _builder.Where<Sample5, int>(item => item.IntValue, 7);
+
+        // Act
+        var command = _builder.ToSqlWriteCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, _builder.Provider.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", false);
+        Assert.Single(_builder.GetSqlParams());
+    }
+
+    /// <summary>
+    /// 测试 - 启用租户过滤时，结构化根表查询必须追加参数化 TenantId 谓词。
+    /// </summary>
+    [Fact]
+    public void TenantIdFilter_WhenTenantEntityIsQueried_ShouldAppendParameterizedBoundary()
+    {
+        // Arrange
+        const string expectedSql = "Select [t].[Name] \r\nFrom [TenantFilterSample] As [t] \r\nWhere [t].[TenantId]=@_p_0";
+        var services = new SqlBuilderServices(filters: new ISqlFilter[] { new TenantIdFilter(new TestTenantFilterContributor("tenant-a")) });
+        var builder = new TestSqlBuilder(services, TestDialect.Instance);
+
+        // Act
+        builder.Select<TenantFilterSample>(item => item.Name).From<TenantFilterSample>("t");
+        var sql = builder.ToSql();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, sql, builder.Provider.Key);
+        Assert.Empty(builder.GetSqlParams());
+    }
+
+    /// <summary>
+    /// 测试 - 启用租户过滤但未解析当前租户值时，结构化查询必须拒绝渲染。
+    /// </summary>
+    [Fact]
+    public void TenantIdFilter_WhenCurrentTenantIsMissing_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var services = new SqlBuilderServices(filters: new ISqlFilter[] { new TenantIdFilter(new TestTenantFilterContributor(null)) });
+        var builder = new TestSqlBuilder(services, TestDialect.Instance);
+        builder.Select<TenantFilterSample>(item => item.Name).From<TenantFilterSample>("t");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.ToSql());
+
+        // Assert
+        Assert.Equal("租户过滤已启用，但实体 TenantFilterSample 未解析到当前租户值。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试 - 租户过滤禁用作用域释放后，结构化查询必须恢复租户数据边界。
+    /// </summary>
+    [Fact]
+    public void TenantIdFilter_WhenDisabledInScope_ShouldOmitBoundaryAndRestoreAfterDispose()
+    {
+        // Arrange
+        const string disabledExpectedSql = "Select [t].[Name] \r\nFrom [TenantFilterSample] As [t]";
+        const string restoredExpectedSql = "Select [t].[Name] \r\nFrom [TenantFilterSample] As [t] \r\nWhere [t].[TenantId]=@_p_0";
+        var dataFilter = new DataFilter();
+        var services = new SqlBuilderServices(dataFilter: dataFilter,
+            filters: new ISqlFilter[] { new TenantIdFilter(new TestTenantFilterContributor("tenant-a")) });
+        var builder = new TestSqlBuilder(services, TestDialect.Instance);
+        builder.Select<TenantFilterSample>(item => item.Name).From<TenantFilterSample>("t");
+
+        // Act
+        string disabledSql;
+        using (dataFilter.Disable<TenantIdFilter>())
+            disabledSql = builder.ToSql();
+        var restoredSql = builder.ToSql();
+
+        // Assert
+        SqlAssert.Equal(disabledExpectedSql, disabledSql, builder.Provider.Key);
+        SqlAssert.Equal(restoredExpectedSql, restoredSql, builder.Provider.Key);
+        Assert.Empty(builder.GetSqlParams());
+    }
+
+    /// <summary>
+    /// 测试 - 原始 From SQL 缺少实体映射信息时，租户过滤不得猜测或改写调用方 SQL。
+    /// </summary>
+    [Fact]
+    public void TenantIdFilter_WhenRawFromIsConfigured_ShouldNotRewriteCallerOwnedSql()
+    {
+        // Arrange
+        const string expectedSql = "Select [r].[Name] \r\nFrom TenantFilterSample r";
+        var services = new SqlBuilderServices(filters: new ISqlFilter[] { new TenantIdFilter(new TestTenantFilterContributor("tenant-a")) });
+        var builder = new TestSqlBuilder(services, TestDialect.Instance);
+
+        // Act
+        var sql = builder.Select("r.Name").AppendFrom("TenantFilterSample r").ToSql();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, sql, builder.Provider.Key);
+        Assert.Empty(builder.GetSqlParams());
+    }
+
+    private sealed class TenantFilterSample
+    {
+        public int Id { get; set; }
+        public string TenantId { get; set; }
+        public string Name { get; set; }
+    }
+
+    private sealed class TestTenantFilterContributor : ISqlTenantFilterContributor
+    {
+        private readonly string _tenantId;
+
+        public TestTenantFilterContributor(string tenantId) => _tenantId = tenantId;
+
+        public bool IsTenantEntity(Type entityType) => entityType == typeof(TenantFilterSample);
+
+        public object GetTenantId(SqlTenantFilterContext context) => _tenantId;
     }
 
     /// <summary>
@@ -227,7 +360,7 @@ public partial class SqlBuilderTest
     public void Test_Validate_1()
     {
         _builder.Select("a");
-        AssertHelper.Throws<InvalidOperationException>(() => _builder.ToSql());
+        XUnitHelpers.AssertHelper.Throws<InvalidOperationException>(() => _builder.ToSql());
     }
 
     /// <summary>
@@ -236,7 +369,7 @@ public partial class SqlBuilderTest
     [Fact]
     public void Test_Validate_2()
     {
-        AssertHelper.Throws<ArgumentNullException>(() => _builder.Where("", "a"));
+        XUnitHelpers.AssertHelper.Throws<ArgumentNullException>(() => _builder.Where("", "a"));
     }
 
     #endregion

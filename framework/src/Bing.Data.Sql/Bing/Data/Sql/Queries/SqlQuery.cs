@@ -243,7 +243,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>结果行同步流。</returns>
     public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null) =>
-        _executor.AsEnumerable<TResult>(GetPlan(), timeout);
+        _executor.AsEnumerable<TResult>(GetPlan(snapshotBuilder: true), timeout);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并完整物化指定类型的结果集。
@@ -429,12 +429,14 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>结果行异步流。</returns>
     public IAsyncEnumerable<TResult> AsAsyncEnumerable<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.AsAsyncEnumerable<TResult>(GetPlan(), timeout,
+        CancellationToken cancellationToken = default) => _executor.AsAsyncEnumerable<TResult>(GetPlan(snapshotBuilder: true), timeout,
         cancellationToken);
 
     /// <summary>
     /// 获取当前 Fluent SQL Builder 对应的内部执行计划。
     /// </summary>
-    /// <returns>仅引用当前独立 Builder 的查询计划。</returns>
-    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(_builder, _splitOn);
+    /// <param name="snapshotBuilder">是否为延迟执行创建独立的 Builder 快照。</param>
+    /// <returns>引用当前 Builder 或其独立快照的查询计划。</returns>
+    private SqlQueryPlan GetPlan(bool snapshotBuilder = false) =>
+        SqlQueryPlan.Create(snapshotBuilder ? _builder.Clone() : _builder, _splitOn);
 }

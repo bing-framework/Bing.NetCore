@@ -148,15 +148,17 @@ public class SelectClause : ISelectClause
     public void Aggregate(SqlAggregateFunction function, string column, string columnAlias = null,
         bool distinct = false)
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         SqlAggregateArgumentValidator.ValidateFunction(function);
         if (SqlAggregateArgumentValidator.ValidateWildcard(function, column, distinct, nameof(column)))
         {
             _columns.AddAggregationColumn(function, null, columnAlias, distinct, wildcard: true);
+            _context.UseOperation(SqlOperationAction.Select);
             return;
         }
         _columns.AddStructuredAggregationColumn(function, SqlAggregateArgumentValidator.ParseStructuredColumn(column),
             columnAlias, distinct, useDefaultAlias: false);
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <summary>
@@ -170,13 +172,14 @@ public class SelectClause : ISelectClause
     public void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         SqlAggregateArgumentValidator.ValidateFunction(function);
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         _columns.AddStructuredAggregationColumn(function,
             SqlAggregateArgumentValidator.ParseStructuredColumn(_resolver.GetColumn(expression)), columnAlias,
             distinct, typeof(TEntity), useDefaultAlias: false);
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <summary>
@@ -189,23 +192,25 @@ public class SelectClause : ISelectClause
     public void AggregateRaw(SqlAggregateFunction function, string argumentSql, string columnAlias = null,
         bool distinct = false)
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         SqlAggregateArgumentValidator.ValidateFunction(function);
         argumentSql = SqlAggregateArgumentValidator.ValidateExpression(argumentSql, nameof(argumentSql));
         SqlAggregateArgumentValidator.ValidateWildcard(function, argumentSql, distinct, nameof(argumentSql));
         _columns.AddAggregationColumn(function, argumentSql, columnAlias, distinct, argumentRaw: true);
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <inheritdoc />
     public void AggregateExpression(SqlAggregateFunction function, string expressionSql, string columnAlias = null,
         bool distinct = false)
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         SqlAggregateArgumentValidator.ValidateFunction(function);
         expressionSql = SqlAggregateArgumentValidator.ValidateExpression(expressionSql, nameof(expressionSql));
         SqlAggregateArgumentValidator.ValidateWildcard(function, expressionSql, distinct, nameof(expressionSql));
         _columns.AddAggregationColumn(function, SqlExpressionIdentifierResolver.Resolve(expressionSql, _dialect), columnAlias, distinct,
             argumentRaw: true);
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <summary>
@@ -295,9 +300,10 @@ public class SelectClause : ISelectClause
     /// <param name="tableAlias">表别名</param>
     public void Select(string columns, string tableAlias = null)
     {
+        if (string.IsNullOrWhiteSpace(columns))
+            return;
         _context.UseOperation(SqlOperationAction.Select);
-        if (string.IsNullOrWhiteSpace(columns) == false &&
-            (columns.Contains("*") || columns.Contains("(") || columns.Contains(")")))
+        if (columns.Contains("*") || columns.Contains("(") || columns.Contains(")"))
             _projectionCountKnown = false;
         _columns.AddColumns(columns, tableAlias);
     }
@@ -309,8 +315,11 @@ public class SelectClause : ISelectClause
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
     public void Select<TEntity>(bool propertyAsAlias = false)
     {
+        var columns = _resolver.GetColumns<TEntity>(propertyAsAlias);
+        if (string.IsNullOrWhiteSpace(columns))
+            return;
         _context.UseOperation(SqlOperationAction.Select);
-        _columns.AddColumns(_resolver.GetColumns<TEntity>(propertyAsAlias), typeof(TEntity));
+        _columns.AddColumns(columns, typeof(TEntity));
     }
 
     /// <summary>
@@ -321,10 +330,14 @@ public class SelectClause : ISelectClause
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
     public void Select<TEntity>(Expression<Func<TEntity, object[]>> expression, bool propertyAsAlias = false) where TEntity : class
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         if (expression == null)
             return;
-        _columns.AddColumns(_resolver.GetColumns(expression, propertyAsAlias), tableType: typeof(TEntity));
+        var columns = _resolver.GetColumns(expression, propertyAsAlias);
+        if (string.IsNullOrWhiteSpace(columns))
+            return;
+        _columns.AddColumns(columns, tableType: typeof(TEntity));
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <summary>
@@ -335,7 +348,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     public void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         if (expression == null)
             return;
         var body = expression.Body is UnaryExpression
@@ -344,6 +357,7 @@ public class SelectClause : ISelectClause
         } unary ? unary.Operand : expression.Body;
         if (body is NewExpression creation && creation.Arguments.Count > 0)
         {
+            var columns = new List<string>();
             foreach (var argument in creation.Arguments)
             {
                 var value = argument is UnaryExpression
@@ -352,16 +366,27 @@ public class SelectClause : ISelectClause
                 } conversion ? conversion.Operand : argument;
                 var lambda = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(value, typeof(object)),
                     expression.Parameters);
-                _columns.AddColumns(_resolver.GetColumn(lambda), typeof(TEntity));
+                var column = _resolver.GetColumn(lambda);
+                if (string.IsNullOrWhiteSpace(column) == false)
+                    columns.Add(column);
             }
+            if (columns.Count == 0)
+                return;
+            columns.ForEach(column => _columns.AddColumns(column, typeof(TEntity)));
+            _context.UseOperation(SqlOperationAction.Select);
             return;
         }
         if (body is MemberInitExpression memberInit)
         {
             AddMemberInitColumns<TEntity>(memberInit, expression.Parameters);
+            _context.UseOperation(SqlOperationAction.Select);
             return;
         }
-        _columns.AddColumns(_resolver.GetColumn(expression), typeof(TEntity), columnAlias);
+        var resolvedColumn = _resolver.GetColumn(expression);
+        if (string.IsNullOrWhiteSpace(resolvedColumn))
+            return;
+        _columns.AddColumns(resolvedColumn, typeof(TEntity), columnAlias);
+        _context.UseOperation(SqlOperationAction.Select);
     }
 
     /// <summary>
@@ -437,7 +462,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     public void Select(ISqlBuilder builder, string columnAlias)
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         if (builder == null)
             return;
         var result = _sqlBuilder is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSubquery(builder) : builder.ToSql();
@@ -453,7 +478,7 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     public void Select(Action<ISqlBuilder> action, string columnAlias)
     {
-        _context.UseOperation(SqlOperationAction.Select);
+        _context.ValidateOperation(SqlOperationAction.Select);
         if (action == null)
             return;
         var builder = _sqlBuilder.New();
@@ -468,11 +493,12 @@ public class SelectClause : ISelectClause
     /// <param name="columnAlias">列别名</param>
     public void AppendSql(string sql, string columnAlias = null)
     {
-        _context.UseOperation(SqlOperationAction.Select);
         if (string.IsNullOrWhiteSpace(sql))
             return;
-        _projectionCountKnown = false;
+        _context.ValidateOperation(SqlOperationAction.Select);
         sql = Helper.ResolveSql(sql, _dialect);
+        _context.UseOperation(SqlOperationAction.Select);
+        _projectionCountKnown = false;
         _columns.AddRawColumn(sql, columnAlias);
     }
 
@@ -512,9 +538,9 @@ public class SelectClause : ISelectClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        builder.Append("Select ");
-        builder.Append(GetDistinct());
-        builder.Append(GetColumns());
+        var distinct = GetDistinct();
+        var columns = GetColumns();
+        builder.Append("Select ").Append(distinct).Append(columns);
     }
 
     /// <inheritdoc />

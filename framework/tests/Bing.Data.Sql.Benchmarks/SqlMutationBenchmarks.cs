@@ -74,14 +74,14 @@ public class SqlMutationBenchmarks
     /// </summary>
     /// <returns>可执行 Insert 命令快照。</returns>
     [Benchmark(Baseline = true)]
-    public SqlMutationCommand BuildInsertPlanCacheHit() => _cacheHitBuilder.Insert(_entities[0]);
+    public SqlWriteCommand BuildInsertPlanCacheHit() => _cacheHitBuilder.Insert(_entities[0]);
 
     /// <summary>
     /// 测量单条 Update 命令构建及完整参数快照导出。
     /// </summary>
     /// <returns>可执行 Update 命令快照。</returns>
     [Benchmark]
-    public SqlMutationCommand BuildUpdateCommand()
+    public SqlWriteCommand BuildUpdateCommand()
     {
         var builder = CreateBuilder();
         return builder.Update(_entities[0], new SqlUpdateOptions
@@ -95,7 +95,7 @@ public class SqlMutationBenchmarks
     /// </summary>
     /// <returns>可执行组合 Insert 命令快照。</returns>
     [Benchmark]
-    public SqlMutationCommand BuildCombinedInsertCommand() => CreateBuilder().InsertCombined(_entities);
+    public SqlWriteCommand BuildCombinedInsertCommand() => CreateBuilder().InsertCombined(_entities);
 
     /// <summary>
     /// 测量无额外 SQL 长度限制时的批次规划。
@@ -110,7 +110,7 @@ public class SqlMutationBenchmarks
     /// </summary>
     /// <returns>可执行 PostgreSQL 批量 Update 命令。</returns>
     [Benchmark]
-    public SqlMutationCommand RenderPostgreSqlBatchUpdate() =>
+    public SqlWriteCommand RenderPostgreSqlBatchUpdate() =>
         _postgreSqlRenderer.Render(_postgreSqlUpdateContext);
 
 

@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Mutations.Clauses;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
 
@@ -11,6 +12,11 @@ namespace Bing.Data.Sql.Builders.Mutations.Builders;
 /// </summary>
 public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
 {
+    /// <summary>
+    /// 是否已将默认数据边界追加到当前 Where 子句。
+    /// </summary>
+    private bool _isDataBoundaryApplied;
+
     /// <summary>
     /// 初始化一个 <see cref="SqlUpdateBuilder"/> 类型的实例。
     /// </summary>
@@ -51,6 +57,31 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
+        var startIndex = builder.Length;
+        try
+        {
+            if (ShouldRenderDataBoundarySnapshot())
+            {
+                var snapshot = (SqlUpdateBuilder)Clone();
+                snapshot.EnsureDataBoundary();
+                snapshot.AppendCore(builder);
+                return;
+            }
+            EnsureDataBoundary();
+            AppendCore(builder);
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 在当前状态下渲染 Update 子句，不追加新的数据边界。
+    /// </summary>
+    private void AppendCore(StringBuilder builder)
+    {
         Validate();
         UpdateClause.AppendTo(builder);
         SetClause.AppendTo(builder);
@@ -60,10 +91,28 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     }
 
     /// <inheritdoc />
-    public string ToSql() => Render(AppendTo);
+    public string ToSql()
+    {
+        if (ShouldRenderDataBoundarySnapshot())
+        {
+            var snapshot = (SqlUpdateBuilder)Clone();
+            snapshot.EnsureDataBoundary();
+            return snapshot.RenderCore();
+        }
+        return RenderCore();
+    }
 
     /// <inheritdoc />
-    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+    public SqlWriteCommand BuildCommand()
+    {
+        if (ShouldRenderDataBoundarySnapshot())
+        {
+            var snapshot = (SqlUpdateBuilder)Clone();
+            snapshot.EnsureDataBoundary();
+            return new SqlWriteCommand(snapshot.RenderCore(), snapshot.GetParameters());
+        }
+        return BuildCommand(RenderCore);
+    }
 
     /// <inheritdoc />
     public ISqlUpdateBuilder New() => new SqlUpdateBuilder(Provider, MutationContext.Services,
@@ -78,6 +127,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         result.SetClause = SetClause.Clone(result.MutationContext);
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
+        result._isDataBoundaryApplied = _isDataBoundaryApplied;
         return result;
     }
 
@@ -89,6 +139,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         SetClause.Clear();
         WhereClause.Clear();
         AllowAllRows = false;
+        _isDataBoundaryApplied = false;
         ParameterManager.Clear();
     }
 
@@ -105,6 +156,27 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         WhereClause.Validate(context);
         ValidateParameterLimit();
     }
+
+    /// <summary>
+    /// 在首次渲染前为结构化实体目标追加默认数据边界。
+    /// </summary>
+    private void EnsureDataBoundary()
+    {
+        if (_isDataBoundaryApplied)
+            return;
+        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, UpdateClause.Table, WhereClause);
+    }
+
+    /// <summary>
+    /// 判断当前渲染是否需要使用独立副本追加数据边界。
+    /// </summary>
+    private bool ShouldRenderDataBoundarySnapshot() => _isDataBoundaryApplied == false &&
+        SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table);
+
+    /// <summary>
+    /// 渲染当前 Update 状态。
+    /// </summary>
+    private string RenderCore() => Render(AppendCore);
 
     /// <summary>
     /// 创建 Update From 子句，优先使用 Provider 注册的专用子句工厂。

@@ -1,3 +1,5 @@
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders;
@@ -276,5 +278,70 @@ public class AppendJoinAndOnCompositionTest
         // Assert
         Assert.Equal("当前不存在可追加 On 条件的 Join。", exception.Message);
         Assert.Empty(builder.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 On 表达式的后续常量参数超过上限时，不得保留前序参数或部分连接条件。
+    /// </summary>
+    [Fact]
+    public void OnExpression_WhenLaterParameterExceedsLimit_ShouldThrowWithoutAddingParametersOrCondition()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var builder = new TestSqlBuilder(parameterManager: parameterManager)
+            .From<Sample>("s")
+            .Join<Sample2>("r");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.On<Sample, Sample2>((left, right) => left.IntValue == 1 && right.IntValue == 2));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        Assert.Empty(parameterManager.GetParams());
+        Assert.Equal("Select * \r\nFrom [Sample] As [s] \r\nJoin [Sample2] As [r]", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 On 条件的列标识符格式化失败时，不得提交已在快照中解析的参数或部分连接条件。
+    /// </summary>
+    [Fact]
+    public void OnExpression_WhenColumnFormattingFails_ShouldThrowWithoutAddingParametersOrCondition()
+    {
+        // Arrange
+        var dialect = new FailingOnColumnDialect();
+        var builder = new TestSqlBuilder(dialect)
+            .From<Sample>("s")
+            .Join<Sample2>("r");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.On<Sample, Sample2>((left, right) => left.IntValue == right.IntValue && left.IntValue > 1));
+
+        // Assert
+        Assert.Equal("On column formatting failed.", exception.Message);
+        Assert.Empty(builder.GetParams());
+        dialect.ShouldFail = false;
+        Assert.Equal("Select * \r\nFrom [Sample] As [s] \r\nJoin [Sample2] As [r]", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 仅在格式化 On 条件列名时失败的测试方言。
+    /// </summary>
+    private sealed class FailingOnColumnDialect : DialectBase
+    {
+        /// <summary>
+        /// 是否抛出格式化异常。
+        /// </summary>
+        public bool ShouldFail { get; set; } = true;
+
+        /// <inheritdoc />
+        public override string SafeName(string name)
+        {
+            if (ShouldFail && string.Equals(name, "IntValue", StringComparison.Ordinal))
+                throw new InvalidOperationException("On column formatting failed.");
+            return base.SafeName(name);
+        }
     }
 }

@@ -34,10 +34,7 @@ public sealed class UpdateFromClause : MutationTableClauseBase, IUpdateFromClaus
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-        builder.Append(" From ");
-        AppendAliasedTable(builder, Table);
+        AppendPrefixedTable(builder, " From ", Table, true);
     }
 
     /// <inheritdoc />

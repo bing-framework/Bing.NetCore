@@ -2,6 +2,7 @@ using System.Text;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
 
@@ -40,17 +41,26 @@ public sealed class SqlInsertBuilder : SqlMutationBuilderBase, ISqlInsertBuilder
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        Validate();
-        InsertClause.AppendTo(builder);
-        InsertColumnsClause.AppendTo(builder);
-        ValuesClause.AppendTo(builder);
+        var startIndex = builder.Length;
+        try
+        {
+            Validate();
+            InsertClause.AppendTo(builder);
+            InsertColumnsClause.AppendTo(builder);
+            ValuesClause.AppendTo(builder);
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
     }
 
     /// <inheritdoc />
     public string ToSql() => Render(AppendTo);
 
     /// <inheritdoc />
-    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+    public SqlWriteCommand BuildCommand() => BuildCommand(ToSql);
 
     /// <inheritdoc />
     public ISqlInsertBuilder New() => new SqlInsertBuilder(Provider, MutationContext.Services,

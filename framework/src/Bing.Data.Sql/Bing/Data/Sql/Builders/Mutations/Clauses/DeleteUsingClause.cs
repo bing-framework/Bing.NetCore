@@ -34,10 +34,7 @@ public sealed class DeleteUsingClause : MutationTableClauseBase, IDeleteUsingCla
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-        builder.Append(" Using ");
-        AppendAliasedTable(builder, Table);
+        AppendPrefixedTable(builder, " Using ", Table, true);
     }
 
     /// <inheritdoc />

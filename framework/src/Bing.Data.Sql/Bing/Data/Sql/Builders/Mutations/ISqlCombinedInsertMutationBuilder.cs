@@ -17,6 +17,6 @@ public interface ISqlCombinedInsertMutationBuilder
     /// <param name="entities">待插入且不能为空的实体集合。</param>
     /// <param name="options">插入选项。</param>
     /// <returns>可执行的多行 Insert SQL 命令快照。</returns>
-    SqlMutationCommand InsertCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
+    SqlWriteCommand InsertCombined<TEntity>(IReadOnlyCollection<TEntity> entities,
         SqlInsertOptions options = null) where TEntity : class;
 }

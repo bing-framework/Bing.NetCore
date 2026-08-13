@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Mutations.Clauses;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql.Builders.Mutations.Builders;
 
@@ -11,6 +12,11 @@ namespace Bing.Data.Sql.Builders.Mutations.Builders;
 /// </summary>
 public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
 {
+    /// <summary>
+    /// 是否已将默认数据边界追加到当前 Where 子句。
+    /// </summary>
+    private bool _isDataBoundaryApplied;
+
     /// <summary>
     /// 初始化一个 <see cref="SqlDeleteBuilder"/> 类型的实例。
     /// </summary>
@@ -47,6 +53,31 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
+        var startIndex = builder.Length;
+        try
+        {
+            if (ShouldRenderDataBoundarySnapshot())
+            {
+                var snapshot = (SqlDeleteBuilder)Clone();
+                snapshot.EnsureDataBoundary();
+                snapshot.AppendCore(builder);
+                return;
+            }
+            EnsureDataBoundary();
+            AppendCore(builder);
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 在当前状态下渲染 Delete 子句，不追加新的数据边界。
+    /// </summary>
+    private void AppendCore(StringBuilder builder)
+    {
         Validate();
         DeleteClause.AppendTo(builder);
         if (DeleteUsingClause.Table != null)
@@ -55,10 +86,28 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     }
 
     /// <inheritdoc />
-    public string ToSql() => Render(AppendTo);
+    public string ToSql()
+    {
+        if (ShouldRenderDataBoundarySnapshot())
+        {
+            var snapshot = (SqlDeleteBuilder)Clone();
+            snapshot.EnsureDataBoundary();
+            return snapshot.RenderCore();
+        }
+        return RenderCore();
+    }
 
     /// <inheritdoc />
-    public SqlMutationCommand BuildCommand() => BuildCommand(ToSql);
+    public SqlWriteCommand BuildCommand()
+    {
+        if (ShouldRenderDataBoundarySnapshot())
+        {
+            var snapshot = (SqlDeleteBuilder)Clone();
+            snapshot.EnsureDataBoundary();
+            return new SqlWriteCommand(snapshot.RenderCore(), snapshot.GetParameters());
+        }
+        return BuildCommand(RenderCore);
+    }
 
     /// <inheritdoc />
     public ISqlDeleteBuilder New() => new SqlDeleteBuilder(Provider, MutationContext.Services,
@@ -72,6 +121,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         result.DeleteUsingClause = DeleteUsingClause.Clone(result.MutationContext);
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
+        result._isDataBoundaryApplied = _isDataBoundaryApplied;
         return result;
     }
 
@@ -82,6 +132,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         DeleteUsingClause.Clear();
         WhereClause.Clear();
         AllowAllRows = false;
+        _isDataBoundaryApplied = false;
         ParameterManager.Clear();
     }
 
@@ -97,6 +148,27 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         WhereClause.Validate(context);
         ValidateParameterLimit();
     }
+
+    /// <summary>
+    /// 在首次渲染前为结构化实体目标追加默认数据边界。
+    /// </summary>
+    private void EnsureDataBoundary()
+    {
+        if (_isDataBoundaryApplied)
+            return;
+        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, DeleteClause.Table, WhereClause);
+    }
+
+    /// <summary>
+    /// 判断当前渲染是否需要使用独立副本追加数据边界。
+    /// </summary>
+    private bool ShouldRenderDataBoundarySnapshot() => _isDataBoundaryApplied == false &&
+        SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table);
+
+    /// <summary>
+    /// 渲染当前 Delete 状态。
+    /// </summary>
+    private string RenderCore() => Render(AppendCore);
 
     /// <summary>
     /// 创建 Delete Using 子句，优先使用 Provider 注册的专用子句工厂。

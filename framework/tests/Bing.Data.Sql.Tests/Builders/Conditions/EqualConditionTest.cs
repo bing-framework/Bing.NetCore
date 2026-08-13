@@ -1,6 +1,7 @@
 ﻿using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
+using Moq;
 
 namespace Bing.Data.Sql.Tests.Builders.Conditions;
 
@@ -83,6 +84,31 @@ public class EqualConditionTest
         Assert.Equal(first, second);
         Assert.Single(_parameterManager.GetParams());
         Assert.Equal(1, _parameterManager.GetValue("@_p_0"));
+    }
+
+    /// <summary>
+    /// 测试目的：子查询 Builder 渲染失败时，条件不得向调用方缓冲区遗留列名、括号或子查询片段。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenSubqueryRenderingFails_ShouldKeepCallerBufferUnchanged()
+    {
+        // Arrange
+        var subquery = new Mock<ISqlBuilder>();
+        subquery.Setup(item => item.AppendTo(It.IsAny<StringBuilder>()))
+            .Callback<StringBuilder>(builder =>
+            {
+                builder.Append("Partial");
+                throw new InvalidOperationException("Subquery rendering failed.");
+            });
+        var condition = new EqualSqlCondition(_parameterManager, "Id", subquery.Object, true);
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => condition.AppendTo(result));
+
+        // Assert
+        Assert.Equal("Subquery rendering failed.", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
     }
 
     /// <summary>

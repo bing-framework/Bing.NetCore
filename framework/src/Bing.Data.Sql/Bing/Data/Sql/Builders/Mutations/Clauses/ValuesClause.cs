@@ -39,14 +39,18 @@ public sealed class ValuesClause : IValuesClause
             throw new ArgumentNullException(nameof(values));
         if (_rows.Count > 0 && values.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        _context.UseOperation(SqlOperationAction.Values);
+        _context.ValidateOperation(SqlOperationAction.Values);
+        var validation = _context.ParameterManager.Clone();
         var names = new List<string>(values.Count);
         foreach (var value in values)
         {
-            var name = _context.ParameterManager.GenerateName();
-            _context.ParameterManager.Add(name, value);
+            var name = validation.GenerateName();
+            validation.Add(name, value);
             names.Add(name);
         }
+        for (var index = 0; index < values.Count; index++)
+            _context.ParameterManager.Add(names[index], values[index]);
+        _context.UseOperation(SqlOperationAction.Values);
         _rows.Add(names);
     }
 
@@ -57,18 +61,19 @@ public sealed class ValuesClause : IValuesClause
             throw new ArgumentNullException(nameof(parameters));
         if (_rows.Count > 0 && parameters.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        _context.UseOperation(SqlOperationAction.Values);
+        _context.ValidateOperation(SqlOperationAction.Values);
+        var validation = _context.ParameterManager.Clone();
         var names = new List<string>(parameters.Count);
         foreach (var parameter in parameters)
         {
             if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
                 throw new ArgumentException("Insert 参数名称不能为空。", nameof(parameters));
-            if (_context.ParameterManager is IAdvancedParameterManager advancedManager)
-                advancedManager.Add(parameter);
-            else
-                _context.ParameterManager.Add(parameter.Name, parameter.Value);
+            AddParameter(validation, parameter);
             names.Add(parameter.Name);
         }
+        foreach (var parameter in parameters)
+            AddParameter(_context.ParameterManager, parameter);
+        _context.UseOperation(SqlOperationAction.Values);
         _rows.Add(names);
     }
 
@@ -77,7 +82,28 @@ public sealed class ValuesClause : IValuesClause
     {
         if (rows == null)
             throw new ArgumentNullException(nameof(rows));
-        foreach (var row in rows)
+        var items = rows.ToList();
+        if (items.Count == 0)
+            return;
+        _context.ValidateOperation(SqlOperationAction.Values);
+        var validation = _context.ParameterManager.Clone();
+        var columnCount = ColumnCount;
+        var hasRow = _rows.Count > 0;
+        foreach (var row in items)
+        {
+            if (row == null)
+                throw new ArgumentNullException(nameof(rows));
+            if (hasRow && row.Count != columnCount)
+                throw new InvalidOperationException("Insert Values 行列数量不一致。");
+            foreach (var value in row)
+            {
+                var name = validation.GenerateName();
+                validation.Add(name, value);
+            }
+            columnCount = row.Count;
+            hasRow = true;
+        }
+        foreach (var row in items)
             AddRow(row);
     }
 
@@ -86,20 +112,29 @@ public sealed class ValuesClause : IValuesClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        builder.Append(" Values ");
-        for (var rowIndex = 0; rowIndex < _rows.Count; rowIndex++)
+        var startIndex = builder.Length;
+        try
         {
-            if (rowIndex > 0)
-                builder.Append(", ");
-            builder.Append('(');
-            var row = _rows[rowIndex];
-            for (var columnIndex = 0; columnIndex < row.Count; columnIndex++)
+            builder.Append(" Values ");
+            for (var rowIndex = 0; rowIndex < _rows.Count; rowIndex++)
             {
-                if (columnIndex > 0)
+                if (rowIndex > 0)
                     builder.Append(", ");
-                builder.Append(_context.Dialect.GetParamName(row[columnIndex]));
+                builder.Append('(');
+                var row = _rows[rowIndex];
+                for (var columnIndex = 0; columnIndex < row.Count; columnIndex++)
+                {
+                    if (columnIndex > 0)
+                        builder.Append(", ");
+                    builder.Append(_context.Dialect.GetParamName(row[columnIndex]));
+                }
+                builder.Append(')');
             }
-            builder.Append(')');
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
         }
     }
 
@@ -124,5 +159,20 @@ public sealed class ValuesClause : IValuesClause
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
         if (_rows.Count > 1 && context?.Profile.Mutation.SupportsMultiRowValues == false)
             throw new NotSupportedException($"Provider {context.Provider.Key} 不支持多行 Values。");
+    }
+
+    /// <summary>
+    /// 向指定参数管理器添加 Insert 参数。
+    /// </summary>
+    /// <param name="parameterManager">目标参数管理器。</param>
+    /// <param name="parameter">Insert 参数。</param>
+    private static void AddParameter(IParameterManager parameterManager, SqlParam parameter)
+    {
+        if (parameterManager is IAdvancedParameterManager advancedManager)
+        {
+            advancedManager.Add(parameter);
+            return;
+        }
+        parameterManager.Add(parameter.Name, parameter.Value);
     }
 }

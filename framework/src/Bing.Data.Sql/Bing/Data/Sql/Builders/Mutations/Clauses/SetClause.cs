@@ -34,9 +34,10 @@ public sealed class SetClause : ISetClause, IColumnSetClause
     {
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentException("更新列名不能为空。", nameof(column));
-        _context.UseOperation(SqlOperationAction.Set);
+        _context.ValidateOperation(SqlOperationAction.Set);
         var name = _context.ParameterManager.GenerateName();
         _context.ParameterManager.Add(name, value);
+        _context.UseOperation(SqlOperationAction.Set);
         _items.Add(new SetItem(column, name, true));
     }
 
@@ -47,11 +48,12 @@ public sealed class SetClause : ISetClause, IColumnSetClause
             throw new ArgumentException("更新列名不能为空。", nameof(column));
         if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
             throw new ArgumentException("更新参数名称不能为空。", nameof(parameter));
-        _context.UseOperation(SqlOperationAction.Set);
+        _context.ValidateOperation(SqlOperationAction.Set);
         if (_context.ParameterManager is IAdvancedParameterManager advancedManager)
             advancedManager.Add(parameter);
         else
             _context.ParameterManager.Add(parameter.Name, parameter.Value);
+        _context.UseOperation(SqlOperationAction.Set);
         _items.Add(new SetItem(column, parameter.Name, true));
     }
 
@@ -64,9 +66,10 @@ public sealed class SetClause : ISetClause, IColumnSetClause
             throw new ArgumentException("Update From 来源表别名不能为空。", nameof(sourceAlias));
         if (string.IsNullOrWhiteSpace(sourceColumn))
             throw new ArgumentException("Update From 来源列名不能为空。", nameof(sourceColumn));
-        _context.UseOperation(SqlOperationAction.Set);
+        _context.ValidateOperation(SqlOperationAction.Set);
         _items.Add(new SetItem(targetColumn,
             $"{_context.Dialect.SafeName(sourceAlias)}.{_context.Dialect.SafeName(sourceColumn)}", false));
+        _context.UseOperation(SqlOperationAction.Set);
     }
 
     /// <inheritdoc />
@@ -74,15 +77,24 @@ public sealed class SetClause : ISetClause, IColumnSetClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        builder.Append(" Set ");
-        for (var index = 0; index < _items.Count; index++)
+        var startIndex = builder.Length;
+        try
         {
-            if (index > 0)
-                builder.Append(", ");
-            var item = _items[index];
-            builder.Append(_context.Dialect.SafeName(item.Column));
-            builder.Append(" = ");
-            builder.Append(item.IsParameter ? _context.Dialect.GetParamName(item.Value) : item.Value);
+            builder.Append(" Set ");
+            for (var index = 0; index < _items.Count; index++)
+            {
+                if (index > 0)
+                    builder.Append(", ");
+                var item = _items[index];
+                builder.Append(_context.Dialect.SafeName(item.Column));
+                builder.Append(" = ");
+                builder.Append(item.IsParameter ? _context.Dialect.GetParamName(item.Value) : item.Value);
+            }
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
         }
     }
 

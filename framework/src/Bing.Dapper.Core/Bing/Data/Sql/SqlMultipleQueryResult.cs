@@ -8,6 +8,11 @@ namespace Bing.Data.Sql;
 internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
 {
     /// <summary>
+    /// 保护读取器与当前读取或释放操作的同步锁。
+    /// </summary>
+    private readonly object _syncRoot = new();
+
+    /// <summary>
     /// Dapper 结果集读取器。
     /// </summary>
     private SqlMapper.GridReader _reader;
@@ -26,6 +31,11 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// 执行租约。
     /// </summary>
     private IDisposable _executionLease;
+
+    /// <summary>
+    /// 指示当前读取器正在读取或释放，禁止并发访问同一结果集。
+    /// </summary>
+    private bool _operationInProgress;
 
     /// <summary>
     /// 初始化一个<see cref="SqlMultipleQueryResult"/>类型的实例。
@@ -71,8 +81,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <inheritdoc />
     public void Dispose()
     {
-        var reader = Interlocked.Exchange(ref _reader, null);
-        if (reader == null)
+        if (TryBeginDispose(out var reader) == false)
             return;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
@@ -86,15 +95,21 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         {
             primaryException = currentException;
         }
-        Complete(completed && primaryException == null, primaryException, cleanupExceptions);
-        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        try
+        {
+            Complete(completed && primaryException == null, primaryException, cleanupExceptions);
+            SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        }
+        finally
+        {
+            EndOperation();
+        }
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        var reader = Interlocked.Exchange(ref _reader, null);
-        if (reader == null)
+        if (TryBeginDispose(out var reader) == false)
             return;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
@@ -108,9 +123,16 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         {
             primaryException = currentException;
         }
-        await CompleteAsync(completed && primaryException == null, primaryException, cleanupExceptions)
-            .ConfigureAwait(false);
-        SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        try
+        {
+            await CompleteAsync(completed && primaryException == null, primaryException, cleanupExceptions)
+                .ConfigureAwait(false);
+            SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
+        }
+        finally
+        {
+            EndOperation();
+        }
     }
 
     /// <summary>
@@ -121,7 +143,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <returns>当前结果集。</returns>
     private TResult Read<TResult>(Func<SqlMapper.GridReader, TResult> read)
     {
-        var reader = GetReader();
+        var reader = BeginRead();
         try
         {
             return read(reader);
@@ -130,6 +152,10 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         {
             DisposeAfterFailure(exception);
             throw;
+        }
+        finally
+        {
+            EndOperation();
         }
     }
 
@@ -143,7 +169,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private async Task<TResult> ReadAsync<TResult>(Func<SqlMapper.GridReader, Task<TResult>> read,
         CancellationToken cancellationToken)
     {
-        var reader = GetReader();
+        var reader = BeginRead();
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -154,13 +180,61 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
             await DisposeAfterFailureAsync(exception).ConfigureAwait(false);
             throw;
         }
+        finally
+        {
+            EndOperation();
+        }
     }
 
     /// <summary>
     /// 获取当前可用读取器。
     /// </summary>
     /// <returns>Dapper 结果集读取器。</returns>
-    private SqlMapper.GridReader GetReader() => _reader ?? throw new ObjectDisposedException(nameof(SqlMultipleQueryResult));
+    /// <summary>
+    /// 原子取得当前结果集的读取所有权。
+    /// </summary>
+    /// <returns>可供当前操作读取的 Dapper 读取器。</returns>
+    private SqlMapper.GridReader BeginRead()
+    {
+        lock (_syncRoot)
+        {
+            if (_operationInProgress)
+                throw new InvalidOperationException("当前多结果集正在读取或释放，不能并发访问。");
+            if (_reader == null)
+                throw new ObjectDisposedException(nameof(SqlMultipleQueryResult));
+            _operationInProgress = true;
+            return _reader;
+        }
+    }
+
+    /// <summary>
+    /// 原子取得读取器的释放所有权。
+    /// </summary>
+    /// <param name="reader">待释放的读取器。</param>
+    /// <returns>是否需要由当前调用执行释放。</returns>
+    private bool TryBeginDispose(out SqlMapper.GridReader reader)
+    {
+        lock (_syncRoot)
+        {
+            if (_operationInProgress)
+                throw new InvalidOperationException("当前多结果集正在读取或释放，不能并发访问。");
+            reader = _reader;
+            if (reader == null)
+                return false;
+            _reader = null;
+            _operationInProgress = true;
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// 结束当前读取或释放操作。
+    /// </summary>
+    private void EndOperation()
+    {
+        lock (_syncRoot)
+            _operationInProgress = false;
+    }
 
     /// <summary>
     /// 处理读取失败。
@@ -168,7 +242,12 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <param name="exception">读取异常。</param>
     private void DisposeAfterFailure(Exception exception)
     {
-        var reader = Interlocked.Exchange(ref _reader, null);
+        SqlMapper.GridReader reader;
+        lock (_syncRoot)
+        {
+            reader = _reader;
+            _reader = null;
+        }
         var cleanupExceptions = new List<Exception>();
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => reader?.Dispose());
         Complete(false, exception, cleanupExceptions);
@@ -181,7 +260,12 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <param name="exception">读取异常。</param>
     private async Task DisposeAfterFailureAsync(Exception exception)
     {
-        var reader = Interlocked.Exchange(ref _reader, null);
+        SqlMapper.GridReader reader;
+        lock (_syncRoot)
+        {
+            reader = _reader;
+            _reader = null;
+        }
         var cleanupExceptions = new List<Exception>();
         await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
             () => SqlTransactionAsyncAdapter.DisposeAsync(reader)).ConfigureAwait(false);

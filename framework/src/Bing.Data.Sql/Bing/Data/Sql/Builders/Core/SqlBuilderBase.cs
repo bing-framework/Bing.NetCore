@@ -11,6 +11,7 @@ using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Mutations;
 using Bing.Extensions;
 
 namespace Bing.Data.Sql.Builders.Core;
@@ -26,6 +27,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 是否已配置会输出的行限制。
     /// </summary>
     internal bool HasLimit => IsLimit;
+
+    /// <summary>
+    /// 是否需要通过独立渲染快照应用动态数据边界。
+    /// </summary>
+    internal bool RequiresRenderSnapshot => ShouldRenderFromSnapshot();
     #region 字段
 
     /// <summary>
@@ -117,6 +123,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// Mutation Where 子句的延迟创建缓存。
     /// </summary>
     private IMutationWhereClause _mutationWhereClause;
+
+    /// <summary>
+    /// 是否已将默认写入数据边界追加到当前 Mutation Where 子句。
+    /// </summary>
+    private bool _isMutationDataBoundaryApplied;
 
     /// <summary>
     /// Returning 子句的延迟创建缓存，并在克隆时复制返回列。
@@ -399,7 +410,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <summary>
     /// Builder 创建时冻结的查询语法能力。
     /// </summary>
-    private SqlQueryCapabilities QueryCapabilities { get; }
+    private SqlQueryCapabilities QueryCapabilities { get; set; }
 
     #endregion
 
@@ -584,6 +595,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         DatabaseContextAccessor = Services.DatabaseContextAccessor;
         DatabaseContextResolver = Services.DatabaseContextResolver;
         ExecutionContext = sqlBuilder.ExecutionContext;
+        QueryCapabilities = sqlBuilder.QueryCapabilities;
         EntityMappingResolver = Services.EntityMappingResolver;
         EntityModelMetadataProvider = Services.EntityModelMetadataProvider;
         ObjectNameFormatter = Services.ObjectNameFormatter;
@@ -596,6 +608,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         var clonedContext = CreateClauseContext();
         _mutationClauseFactory = sqlBuilder._mutationClauseFactory;
         _mutationContext = CreateMutationContext();
+        _operationState = sqlBuilder._operationState;
+        AllowAllRows = sqlBuilder.AllowAllRows;
 
         // 克隆各子句
         _selectClause = sqlBuilder._selectClause?.Clone(clonedContext);
@@ -614,8 +628,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         _deleteUsingClause = sqlBuilder._deleteUsingClause?.Clone(MutationContext);
         _mutationWhereClause = sqlBuilder._mutationWhereClause?.Clone(MutationContext);
         _returningClause = sqlBuilder._returningClause?.Clone(MutationContext);
-        _operationState = sqlBuilder._operationState;
-        AllowAllRows = sqlBuilder.AllowAllRows;
+        _isMutationDataBoundaryApplied = sqlBuilder._isMutationDataBoundaryApplied;
 
         // 克隆分页信息
         Pager = new Pager(sqlBuilder.Pager.Page, sqlBuilder.Pager.PageSize, sqlBuilder.Pager.TotalCount,
@@ -683,8 +696,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        var sql = builder.ToSql();
-        return MergeSubqueryParameters(builder, sql);
+        var snapshot = builder.Clone();
+        var sql = snapshot is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSnapshot() : snapshot.ToSql();
+        return MergeSubqueryParameters(builder, snapshot, sql);
     }
 
     /// <summary>
@@ -695,9 +709,22 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <returns>参数名称已合并后的 SQL。</returns>
     internal string MergeSubqueryParameters(ISqlBuilder builder, string sql)
     {
+        return MergeSubqueryParameters(builder, builder, sql);
+    }
+
+    /// <summary>
+    /// 合并指定渲染快照中的子查询参数，并使用源 Builder 记录稳定的重命名结果。
+    /// </summary>
+    /// <param name="builder">原始子查询生成器，用于缓存参数重命名关系。</param>
+    /// <param name="parameterSource">与 SQL 同一渲染快照的参数来源。</param>
+    /// <param name="sql">已经生成的子查询 SQL 或条件 SQL。</param>
+    /// <returns>参数名称已合并后的 SQL。</returns>
+    private string MergeSubqueryParameters(ISqlBuilder builder, ISqlBuilder parameterSource, string sql)
+    {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        if (builder is not ISqlCommonPartAccessor accessor || ReferenceEquals(ParameterManager, accessor.ParameterManager))
+        if (parameterSource is not ISqlCommonPartAccessor accessor ||
+            ReferenceEquals(ParameterManager, accessor.ParameterManager))
             return sql;
 
         var sourceParameters = accessor.ParameterManager.GetParams();
@@ -1192,13 +1219,37 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder Clear()
     {
-        AliasRegister = new EntityAliasRegister();
-        ClearSelect();
-        ClearFrom();
-        ClearJoin();
-        ClearWhere();
-        ClearGroupBy();
-        ClearOrderBy();
+        var aliasRegister = new EntityAliasRegister();
+        var originalAliasRegister = AliasRegister;
+        ISelectClause selectClause;
+        IFromClause fromClause;
+        IJoinClause joinClause;
+        IWhereClause whereClause;
+        IGroupByClause groupByClause;
+        IOrderByClause orderByClause;
+        try
+        {
+            AliasRegister = aliasRegister;
+            selectClause = CreateSelectClause();
+            fromClause = CreateFromClause();
+            joinClause = CreateJoinClause();
+            whereClause = CreateWhereClause();
+            groupByClause = CreateGroupByClause();
+            orderByClause = CreateOrderByClause();
+        }
+        finally
+        {
+            AliasRegister = originalAliasRegister;
+        }
+
+        AliasRegister = aliasRegister;
+        _selectClause = selectClause;
+        _fromClause = fromClause;
+        _joinClause = joinClause;
+        _whereClause = whereClause;
+        _groupByClause = groupByClause;
+        _orderByClause = orderByClause;
+        _isAddFilters = false;
         ClearSqlParams();
         ClearPageParams();
         ClearUnionBuilders();
@@ -1214,6 +1265,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         _deleteUsingClause?.Clear();
         _mutationWhereClause?.Clear();
         _returningClause?.Clear();
+        _isMutationDataBoundaryApplied = false;
         AllowAllRows = false;
         _operationState = SqlBuilderOperationState.None;
         return this;
@@ -1229,12 +1281,29 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     }
 
     /// <summary>
+    /// 使用候选 Select 子句原子替换当前投影。
+    /// </summary>
+    /// <param name="configure">配置候选 Select 子句的操作。</param>
+    /// <remarks>
+    /// 候选子句配置失败时，当前投影保持不变。
+    /// </remarks>
+    internal void ReplaceSelect(Action<ISelectClause> configure)
+    {
+        if (configure == null)
+            throw new ArgumentNullException(nameof(configure));
+        var selectClause = CreateSelectClause();
+        configure(selectClause);
+        _selectClause = selectClause;
+    }
+
+    /// <summary>
     /// 清空From子句
     /// </summary>
     public ISqlBuilder ClearFrom()
     {
+        var fromClause = CreateFromClause();
         _fromClause?.Clear();
-        _fromClause = CreateFromClause();
+        _fromClause = fromClause;
         return this;
     }
 
@@ -1243,8 +1312,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder ClearJoin()
     {
+        var joinClause = CreateJoinClause();
         _joinClause?.Clear();
-        _joinClause = CreateJoinClause();
+        _joinClause = joinClause;
         return this;
     }
 
@@ -1253,8 +1323,9 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder ClearWhere()
     {
+        var whereClause = CreateWhereClause();
         _isAddFilters = false;
-        _whereClause = CreateWhereClause();
+        _whereClause = whereClause;
         return this;
     }
 
@@ -1321,7 +1392,30 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <summary>
     /// 创建Sql生成器
     /// </summary>
-    public virtual ISqlBuilder New() => CreateBuilder(CreateEmptyParameterManager());
+    public virtual ISqlBuilder New()
+    {
+        var result = CreateBuilder(CreateEmptyParameterManager());
+        result.InheritExecutionContext(this);
+        return result;
+    }
+
+    /// <summary>
+    /// 继承父 Builder 已冻结的执行上下文和查询能力。
+    /// </summary>
+    /// <remarks>
+    /// 委托式子查询由 <see cref="New"/> 创建，必须与父查询使用相同的租户、数据源、映射配置和能力快照。
+    /// </remarks>
+    /// <param name="source">提供冻结执行上下文的父 Builder。</param>
+    private void InheritExecutionContext(SqlBuilderBase source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        ExecutionContext = source.ExecutionContext;
+        QueryCapabilities = source.QueryCapabilities;
+        EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
+            DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
+        _mutationContext = CreateMutationContext();
+    }
 
     #endregion
 
@@ -1380,15 +1474,73 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public virtual string ToSql()
     {
-        if (ShouldApplyFiltersOnRender())
-        {
-            var snapshot = (SqlBuilderBase)Clone();
-            snapshot.EnsureFiltersAdded();
-            return snapshot.ToSql();
-        }
+        if (ShouldRenderFromSnapshot())
+            return CreateRenderSnapshot().Sql;
+        return ToSqlDirectly();
+    }
+
+    /// <summary>
+    /// 创建查询执行使用的渲染快照，确保 SQL 文本与参数来源来自同一个 Builder。
+    /// </summary>
+    /// <remarks>
+    /// 仅动态过滤或写入数据边界需要独立副本，普通查询继续复用当前 Builder 的既有参数生命周期。
+    /// </remarks>
+    /// <returns>当前 SQL 和对应参数 Builder 的渲染快照。</returns>
+    internal SqlBuilderRenderSnapshot CreateRenderSnapshot()
+    {
+        if (ShouldRenderFromSnapshot() == false)
+            return new SqlBuilderRenderSnapshot(ToSql(), this);
+        var snapshot = (SqlBuilderBase)Clone();
+        return new SqlBuilderRenderSnapshot(snapshot.RenderSnapshot(), snapshot);
+    }
+
+    /// <summary>
+    /// 判断当前语句是否需要从独立 Builder 快照渲染。
+    /// </summary>
+    /// <returns>需要使用独立快照时返回 true。</returns>
+    private bool ShouldRenderFromSnapshot() =>
+        ShouldApplyFiltersOnRender() || ShouldApplyMutationDataBoundaryOnRender();
+
+    /// <summary>
+    /// 直接从当前 Builder 生成 SQL，不应用独立快照数据边界。
+    /// </summary>
+    /// <returns>当前 Builder 生成的 SQL。</returns>
+    private string ToSqlDirectly()
+    {
         var result = new StringBuilder(256);
         AppendTo(result);
         return result.ToString();
+    }
+
+    /// <summary>
+    /// 在同一独立快照中应用动态数据边界并生成 SQL。
+    /// </summary>
+    /// <returns>与当前快照参数集合严格对应的 SQL。</returns>
+    private string RenderSnapshot()
+    {
+        if (ShouldApplyFiltersOnRender())
+            EnsureFiltersAdded();
+        if (ShouldApplyMutationDataBoundaryOnRender())
+            EnsureMutationDataBoundary();
+        var result = new StringBuilder(256);
+        AppendTo(result);
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// 从同一最终渲染快照创建写入命令，确保动态过滤生成的 SQL 与参数保持一致。
+    /// </summary>
+    /// <returns>包含当前写入 SQL 和参数的独立命令快照。</returns>
+    internal SqlWriteCommand CreateWriteCommandSnapshot()
+    {
+        var snapshot = (SqlBuilderBase)Clone();
+        if (snapshot.ShouldApplyFiltersOnRender())
+            snapshot.EnsureFiltersAdded();
+        if (snapshot.ShouldApplyMutationDataBoundaryOnRender())
+            snapshot.EnsureMutationDataBoundary();
+        var hasReturning = snapshot is IReturningClauseAccessor { ReturningClause.IsEmpty: false };
+        return new SqlWriteCommand(snapshot.RenderSnapshot(), snapshot.GetSqlParams()?.Values, snapshot.Provider,
+            snapshot.OperationKind, hasReturning);
     }
 
     /// <summary>
@@ -1406,6 +1558,21 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             return false;
         return GetFilterSources().Any(source => source.EntityType != null &&
             typeof(ISoftDelete).IsAssignableFrom(source.EntityType));
+    }
+
+    /// <summary>
+    /// 判断当前 Mutation 是否需要在独立渲染快照中追加默认数据边界。
+    /// </summary>
+    private bool ShouldApplyMutationDataBoundaryOnRender()
+    {
+        if (_isMutationDataBoundaryApplied)
+            return false;
+        return _operationState switch
+        {
+            SqlBuilderOperationState.Update => SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table),
+            SqlBuilderOperationState.Delete => SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table),
+            _ => false
+        };
     }
 
     /// <summary>
@@ -1543,14 +1710,58 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <param name="result">Sql拼接</param>
     protected virtual void CreateSql(StringBuilder result)
     {
-        // 创建CTE
-        CreateCte(result);
-        if (IsUnion)
+        if (CteItems.Count == 0 && IsUnion == false)
         {
-            CreateSqlByUnion(result);
+            CreateSqlByNoUnion(result);
             return;
         }
-        CreateSqlByNoUnion(result);
+        var parameterSnapshot = ParameterManager.Clone();
+        var parameterNameSnapshot = _subqueryParameterNames.ToDictionary(item => item.Key,
+            item => new Dictionary<string, string>(item.Value), ReferenceComparer<ISqlBuilder>.Instance);
+        var startIndex = result.Length;
+        try
+        {
+            // 创建CTE
+            CreateCte(result);
+            if (IsUnion)
+            {
+                CreateSqlByUnion(result);
+                return;
+            }
+            CreateSqlByNoUnion(result);
+        }
+        catch
+        {
+            RestoreQueryRenderSnapshot(parameterSnapshot, parameterNameSnapshot);
+            result.Remove(startIndex, result.Length - startIndex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 恢复查询渲染前的参数和子查询参数重命名状态。
+    /// </summary>
+    /// <param name="parameterSnapshot">渲染前的参数副本。</param>
+    /// <param name="parameterNameSnapshot">渲染前的子查询参数重命名映射。</param>
+    private void RestoreQueryRenderSnapshot(IParameterManager parameterSnapshot,
+        IReadOnlyDictionary<ISqlBuilder, Dictionary<string, string>> parameterNameSnapshot)
+    {
+        ParameterManager.Clear();
+        var sqlParameters = (parameterSnapshot as IAdvancedParameterManager)?.GetSqlParams();
+        foreach (var parameter in parameterSnapshot.GetParams())
+        {
+            if (sqlParameters != null && sqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
+                ParameterManager is IAdvancedParameterManager advancedParameterManager)
+            {
+                advancedParameterManager.Add(CloneSqlParameter(sqlParameter, parameter.Key));
+                continue;
+            }
+            ParameterManager.Add(parameter.Key, parameter.Value);
+        }
+
+        _subqueryParameterNames.Clear();
+        foreach (var item in parameterNameSnapshot)
+            _subqueryParameterNames[item.Key] = new Dictionary<string, string>(item.Value);
     }
 
     /// <summary>
@@ -1710,7 +1921,16 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <summary>
     /// 创建分页Sql
     /// </summary>
-    protected virtual string CreateLimitSql() => Provider.PaginationRenderer.Render(GetOffsetParam(), GetLimitParam());
+    protected virtual string CreateLimitSql()
+    {
+        if (string.IsNullOrWhiteSpace(OffsetParam) == false)
+            return Provider.PaginationRenderer.Render(OffsetParam, GetLimitParam());
+        var offsetParameter = ParameterManager.Clone().GenerateName();
+        var sql = Provider.PaginationRenderer.Render(offsetParameter, GetLimitParam());
+        ParameterManager.Add(offsetParameter, 0);
+        OffsetParam = offsetParameter;
+        return sql;
+    }
 
     #endregion
 
@@ -1731,8 +1951,19 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <param name="count">跳过的行数</param>
     public ISqlBuilder Skip(int count)
     {
-        var param = GetOffsetParam();
-        ParameterManager.Add(param, count);
+        if (string.IsNullOrWhiteSpace(OffsetParam))
+        {
+            var parameterManager = ParameterManager;
+            var parameter = parameterManager.GenerateName();
+            var parameterProbe = parameterManager.Clone();
+            parameterProbe.Add(parameter, 0);
+            parameterProbe.Add(parameter, count);
+            parameterManager.Add(parameter, 0);
+            parameterManager.Add(parameter, count);
+            OffsetParam = parameter;
+            return this;
+        }
+        ParameterManager.Add(OffsetParam, count);
         return this;
     }
 
@@ -1743,9 +1974,10 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         if (string.IsNullOrWhiteSpace(OffsetParam) == false)
             return OffsetParam;
-        OffsetParam = ParameterManager.GenerateName();
-        ParameterManager.Add(OffsetParam, 0);
-        return OffsetParam;
+        var parameter = ParameterManager.GenerateName();
+        ParameterManager.Add(parameter, 0);
+        OffsetParam = parameter;
+        return parameter;
     }
 
     /// <summary>
@@ -1754,8 +1986,17 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <param name="count">获取的行数</param>
     public ISqlBuilder Take(int count)
     {
-        var param = GetLimitParam();
-        ParameterManager.Add(param, count);
+        if (string.IsNullOrWhiteSpace(LimitParam))
+        {
+            var parameterManager = ParameterManager;
+            var parameter = parameterManager.GenerateName();
+            var parameterProbe = parameterManager.Clone();
+            parameterProbe.Add(parameter, count);
+            parameterManager.Add(parameter, count);
+            LimitParam = parameter;
+        }
+        else
+            ParameterManager.Add(LimitParam, count);
         Pager.PageSize = count;
         return this;
     }
@@ -1779,8 +2020,30 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         if (pager == null)
             return this;
+        var parameterManager = ParameterManager;
+        var parameterProbe = parameterManager.Clone();
+        var offsetParameter = OffsetParam;
+        var limitParameter = LimitParam;
+        if (string.IsNullOrWhiteSpace(offsetParameter))
+        {
+            offsetParameter = parameterProbe.GenerateName();
+            parameterProbe.Add(offsetParameter, 0);
+        }
+        parameterProbe.Add(offsetParameter, pager.GetSkipCount());
+        if (string.IsNullOrWhiteSpace(limitParameter))
+            limitParameter = parameterProbe.GenerateName();
+        parameterProbe.Add(limitParameter, pager.PageSize);
+
+        if (string.IsNullOrWhiteSpace(OffsetParam))
+        {
+            OffsetParam = parameterManager.GenerateName();
+            parameterManager.Add(OffsetParam, 0);
+        }
+        parameterManager.Add(OffsetParam, pager.GetSkipCount());
+        if (string.IsNullOrWhiteSpace(LimitParam))
+            LimitParam = parameterManager.GenerateName();
+        parameterManager.Add(LimitParam, pager.PageSize);
         Pager = pager;
-        Skip(pager.GetSkipCount()).Take(pager.PageSize);
         return this;
     }
 
@@ -2024,6 +2287,21 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     }
 
     /// <summary>
+    /// 在首次 Mutation 渲染前将结构化实体目标的默认数据边界写入 Where 子句。
+    /// </summary>
+    private void EnsureMutationDataBoundary()
+    {
+        if (_isMutationDataBoundaryApplied)
+            return;
+        var table = _operationState == SqlBuilderOperationState.Update
+            ? UpdateClause.Table
+            : _operationState == SqlBuilderOperationState.Delete
+                ? DeleteClause.Table
+                : null;
+        _isMutationDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, table, MutationWhereClause);
+    }
+
+    /// <summary>
     /// 在当前 Provider 要求的位置渲染 Returning 或 SQL Server Output 投影。
     /// </summary>
     /// <param name="builder">用于追加 SQL 的字符串生成器。</param>
@@ -2059,6 +2337,33 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         builder.CheckNull(nameof(builder));
         var startIndex = builder.Length;
+        try
+        {
+            if (ShouldRenderFromSnapshot())
+            {
+                var snapshot = (SqlBuilderBase)Clone();
+                if (snapshot.ShouldApplyFiltersOnRender())
+                    snapshot.EnsureFiltersAdded();
+                if (snapshot.ShouldApplyMutationDataBoundaryOnRender())
+                    snapshot.EnsureMutationDataBoundary();
+                snapshot.AppendToCore(builder);
+                return;
+            }
+            AppendToCore(builder);
+        }
+        catch
+        {
+            builder.Remove(startIndex, builder.Length - startIndex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 将当前 Builder 的 SQL 追加到缓冲区。
+    /// </summary>
+    private void AppendToCore(StringBuilder builder)
+    {
+        var startIndex = builder.Length;
         switch (_operationState)
         {
             case SqlBuilderOperationState.InsertValues:
@@ -2076,12 +2381,29 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
                 AppendInsertSelect(builder);
                 break;
             default:
-                Init();
-                Validate();
-                CreateSql(builder);
+                AppendQuery(builder);
                 break;
         }
         TrimAppendedWhitespace(builder, startIndex);
+    }
+
+    /// <summary>
+    /// 渲染查询 SQL，并在初始化或验证失败时恢复分页临时追加前的排序状态。
+    /// </summary>
+    private void AppendQuery(StringBuilder builder)
+    {
+        var orderBySnapshot = _orderByClause?.Clone(CreateClauseContext());
+        try
+        {
+            Init();
+            Validate();
+            CreateSql(builder);
+        }
+        catch
+        {
+            _orderByClause = orderBySnapshot;
+            throw;
+        }
     }
 
     /// <summary>
@@ -2098,6 +2420,33 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             builder.Remove(length, builder.Length - length);
     }
 
+}
+
+/// <summary>
+/// SQL Builder 单次渲染的 SQL 与参数来源快照。
+/// </summary>
+internal sealed class SqlBuilderRenderSnapshot
+{
+    /// <summary>
+    /// 初始化一个 <see cref="SqlBuilderRenderSnapshot"/> 类型的实例。
+    /// </summary>
+    /// <param name="sql">渲染后的 SQL。</param>
+    /// <param name="builder">与 SQL 对应的参数来源 Builder。</param>
+    public SqlBuilderRenderSnapshot(string sql, ISqlBuilder builder)
+    {
+        Sql = sql;
+        Builder = builder;
+    }
+
+    /// <summary>
+    /// 渲染后的 SQL。
+    /// </summary>
+    public string Sql { get; }
+
+    /// <summary>
+    /// 与 SQL 对应的参数来源 Builder。
+    /// </summary>
+    public ISqlBuilder Builder { get; }
 }
 
 /// <summary>
