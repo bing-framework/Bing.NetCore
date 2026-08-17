@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Params;
 using MySqlConnector;

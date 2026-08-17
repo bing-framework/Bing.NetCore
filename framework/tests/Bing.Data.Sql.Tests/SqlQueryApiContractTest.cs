@@ -11,6 +11,23 @@ namespace Bing.Data.Sql.Tests;
 public class SqlQueryApiContractTest
 {
     /// <summary>
+    /// 测试 - 当查询未实现运行时绑定控制器时，资源绑定入口应明确拒绝，避免使用全局注册表隐式绑定资源。
+    /// </summary>
+    [Fact]
+    public void RuntimeBinding_WhenQueryDoesNotImplementController_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        using var query = new UnsupportedRuntimeBindingQuery();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext()));
+
+        // Assert
+        Assert.Equal("当前 SQL 查询对象不支持框架运行时资源绑定。", exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：Root 查询只负责资源和描述创建，不得再次公开 Fluent 操作集合或 Builder 逃逸入口。
     /// </summary>
     [Fact]
@@ -41,7 +58,7 @@ public class SqlQueryApiContractTest
         var returning = type.GetMethod(nameof(ISqlExecutor.ExecuteReturningAsync));
 
         // Act
-        var builderFactory = type.GetMethod(nameof(ISqlExecutor.CreateBuilder));
+        var builderFactory = type.GetMethod(nameof(ISqlExecutor.CreateWriteBuilder));
 
         // Assert
         Assert.Null(type.GetMethod("Config"));
@@ -50,9 +67,9 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(ISqlBuilder), builderFactory.ReturnType);
         Assert.NotNull(returning);
         Assert.Equal(typeof(SqlWriteCommand), returning.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteMutation))
+        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteWrite))
             ?.GetParameters().First().ParameterType);
-        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteMutationAsync))
+        Assert.Equal(typeof(SqlWriteCommand), type.GetMethod(nameof(ISqlExecutor.ExecuteWriteAsync))
             ?.GetParameters().First().ParameterType);
         Assert.NotNull(type.GetMethod(nameof(ISqlExecutor.ExecuteReturning)));
         Assert.Null(type.GetMethod("Execute", new[] { typeof(SqlWriteCommand), typeof(int?) }));
@@ -79,7 +96,10 @@ public class SqlQueryApiContractTest
         var properties = type.GetProperties().Select(property => property.Name).OrderBy(name => name).ToArray();
 
         // Assert
-        Assert.Equal(new[] { "HasReturning", "OperationKind", "Parameters", "ProviderKey", "Sql", "ValidateAffectedRows" }, properties);
+        Assert.Equal(new[]
+        {
+            "HasReturning", "OperationKind", "Parameters", "ProviderKey", "ProviderProfile", "Sql", "ValidateAffectedRows"
+        }, properties);
         Assert.Null(type.GetProperty("Builder"));
         Assert.Null(type.GetProperty("Connection"));
         Assert.Null(type.GetProperty("Transaction"));
@@ -114,8 +134,6 @@ public class SqlQueryApiContractTest
         var restrictedInterfaces = new[]
         {
             typeof(Bing.Data.Sql.Builders.ISqlCommonPartAccessor),
-            typeof(Bing.Data.Sql.Builders.Params.IGetParameter),
-            typeof(Bing.Data.Sql.Builders.Params.IClearParameters),
             typeof(Bing.Data.Sql.Builders.IUnionAccessor),
             typeof(Bing.Data.Sql.Builders.ICteAccessor),
             typeof(Bing.Data.Sql.Builders.ISqlQueryClauseAccessor)
@@ -177,6 +195,69 @@ public class SqlQueryApiContractTest
             Assert.Equal(method.GetGenericArguments().Length, method.ReturnType.GetGenericArguments().Length);
         }
     }
+
+        /// <summary>
+        /// 未实现运行时绑定控制器的查询桩。
+        /// </summary>
+        private sealed class UnsupportedRuntimeBindingQuery : ISqlQuery
+        {
+            /// <inheritdoc />
+            public SqlQuery<TResult> Query<TResult>() => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null) => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql) => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null) =>
+                throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
+                where TProjection : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond> From<TFirst, TSecond>() where TFirst : class where TSecond : class =>
+                throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird> From<TFirst, TSecond, TThird>() where TFirst : class
+                where TSecond : class where TThird : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> From<TFirst, TSecond, TThird, TFourth>()
+                where TFirst : class where TSecond : class where TThird : class where TFourth : class =>
+                throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> From<TFirst, TSecond, TThird, TFourth, TFifth>()
+                where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class =>
+                throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From<TFirst, TSecond, TThird, TFourth,
+                TFifth, TSixth>() where TFirst : class where TSecond : class where TThird : class where TFourth : class
+                where TFifth : class where TSixth : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird,
+                TFourth, TFifth, TSixth, TSeventh>() where TFirst : class where TSecond : class where TThird : class
+                where TFourth : class where TFifth : class where TSixth : class where TSeventh : class =>
+                throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+            }
+
+            /// <inheritdoc />
+            public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        }
 
     /// <summary>
     /// 测试目的：指定结果类型的 Fluent 查询应直接公开自身契约，不应通过公开的无类型描述继承成员。

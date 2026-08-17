@@ -446,6 +446,7 @@ public class WhereClause : IWhereClause
     {
         if (builder == null)
             return;
+        SqlConditionFactory.ValidateSupported(@operator);
         if (@operator == Operator.In)
         {
             In(column, builder);

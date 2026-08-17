@@ -12,7 +12,7 @@ public class SqlServerTypeConverter : ITypeConverter
     {
         if (string.IsNullOrWhiteSpace(dataType))
             return null;
-        switch (dataType.ToLower())
+        switch (dataType.ToLowerInvariant())
         {
             case "uniqueidentifier":
                 return DbType.Guid;

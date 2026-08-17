@@ -90,6 +90,9 @@ public sealed class SqlDeleteBuilderTest
         var command = builder.BuildCommand();
         SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
         SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
+        Assert.Equal(SqlOperationKind.Delete, command.OperationKind);
+        Assert.False(command.HasReturning);
     }
 
     /// <summary>
@@ -109,6 +112,31 @@ public sealed class SqlDeleteBuilderTest
 
         // Assert
         Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id]", sql);
+    }
+
+    /// <summary>
+    /// 测试目的：DeleteUsing 的列对列 In 和 NotIn 条件必须输出完整集合谓词。
+    /// </summary>
+    /// <param name="operator">集合比较操作符。</param>
+    /// <param name="operatorSql">预期 SQL 操作符文本。</param>
+    [Theory]
+    [InlineData(Operator.In, "In")]
+    [InlineData(Operator.NotIn, "Not In")]
+    public void WhereUsing_WhenSetOperatorIsConfigured_ShouldRenderExpectedSql(Operator @operator,
+        string operatorSql)
+    {
+        // Arrange
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
+            .WhereUsing("Id", "Id", @operator);
+
+        // Assert
+        Assert.Equal($"Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id] {operatorSql} ([s].[Id])",
+            builder.ToSql());
+        Assert.Empty(builder.GetParameters());
     }
 
     /// <summary>

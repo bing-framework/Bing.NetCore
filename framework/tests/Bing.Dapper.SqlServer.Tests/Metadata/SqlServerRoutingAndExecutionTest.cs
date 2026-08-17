@@ -829,8 +829,8 @@ public class SqlServerRoutingAndExecutionTest
         using var executor = CreateExecutor(connection);
 
         // Act
-        var first = executor.CreateBuilder().InsertInto("Users").Columns("Name").Values("first");
-        var second = executor.CreateBuilder().InsertInto("Users").Columns("Name").Values("second");
+        var first = executor.CreateWriteBuilder().InsertInto("Users").Columns("Name").Values("first");
+        var second = executor.CreateWriteBuilder().InsertInto("Users").Columns("Name").Values("second");
 
         // Assert
         first.ShouldNotBeSameAs(second);
@@ -1590,6 +1590,35 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：多结果集已完整读取后即使调用方令牌迟到取消，也必须提交短事务并完成释放。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenCancelledAfterAllResultsConsumed_ShouldCommitAndReleaseResources()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = await executor.ExecuteAsync(command, cancellationToken: cancellationTokenSource.Token);
+        var rows = await result.ReadAsync<MappedSample>();
+        cancellationTokenSource.Cancel();
+        await result.DisposeAsync();
+
+        // Assert
+        rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
+        connection.ReaderDisposeCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
     /// 测试目的：同一多结果集读取器在异步读取期间必须拒绝第二次读取和释放，防止结果集错序或读取器被提前关闭。
     /// </summary>
     [Fact]
@@ -1777,7 +1806,7 @@ public class SqlServerRoutingAndExecutionTest
         scope.Commit();
 
         // Assert
-        exception.Message.ShouldContain("运行时资源绑定", Case.Insensitive);
+        exception.Message.ShouldContain("仅支持 Dapper SQL 查询实现", Case.Insensitive);
         trackingProxy.DisposeCount.ShouldBe(1);
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
@@ -1803,7 +1832,7 @@ public class SqlServerRoutingAndExecutionTest
         scope.Commit();
 
         // Assert
-        exception.Message.ShouldContain("运行时资源绑定", Case.Insensitive);
+        exception.Message.ShouldContain("仅支持 Dapper SQL 查询实现", Case.Insensitive);
         trackingProxy.DisposeCount.ShouldBe(1);
         connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
@@ -4150,6 +4179,39 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：Dapper 在初始化行解析器时失败，也必须释放已经创建的异步读取器并发布原始错误诊断。
+    /// </summary>
+    [Fact]
+    public async Task StreamAsync_WhenRowParserInitializationFails_ShouldPublishErrorAndDisposeReader()
+    {
+        // Arrange
+        DiagnosticsMessage errorMessage = null;
+        using var observer = new SqlDiagnosticObserver(item => errorMessage = item,
+            name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" }),
+            ThrowOnReaderParserInitialization = true
+        };
+        var query = CreateQuery(connection);
+        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in description.AsAsyncEnumerable())
+            {
+            }
+        });
+
+        // Assert
+        Assert.Equal("row parser initialization failed", exception.Message);
+        Assert.Same(exception, errorMessage.Exception);
+        Assert.Equal(1, connection.ReaderDisposeCount);
+        Assert.Equal(1, connection.AsyncReaderDisposeCount);
+    }
+
+    /// <summary>
     /// 测试目的：同步流式读取失败时，错误诊断钩子异常不得覆盖原始读取异常，二者应按顺序聚合。
     /// </summary>
     [Fact]
@@ -4609,7 +4671,7 @@ public class SqlServerRoutingAndExecutionTest
     /// <param name="query">SQL 查询对象</param>
     private static void ConfigurePrimaryReadTransaction(ISqlQuery query)
     {
-        SqlQueryRuntimeBridge.BindDatabaseContext(query, new DatabaseContext
+        SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext
         {
             ReadPreference = SqlReadPreference.Primary,
             DataSource = new SqlDataSourceDescriptor
@@ -4627,7 +4689,7 @@ public class SqlServerRoutingAndExecutionTest
     /// <param name="query">待绑定的查询对象。</param>
     private static void ConfigureReadOnlyDataSource(ISqlQuery query)
     {
-        SqlQueryRuntimeBridge.BindDatabaseContext(query, new DatabaseContext
+        SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext
         {
             DbKey = "reporting",
             DataSource = new SqlDataSourceDescriptor
@@ -4673,7 +4735,7 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        SqlQueryRuntimeBridge.BindDatabaseContext(query, context);
+        SqlQueryRuntimeBinding.BindDatabaseContext(query, context);
 
         // Assert
         query.CurrentOptions.GetDatabaseContext().DbKey.ShouldBe("reporting");
@@ -4691,7 +4753,7 @@ public class SqlServerRoutingAndExecutionTest
         _ = query.Query<int>();
 
         // Act
-        var exception = Should.Throw<InvalidOperationException>(() => SqlQueryRuntimeBridge.BindDatabaseContext(query,
+        var exception = Should.Throw<InvalidOperationException>(() => SqlQueryRuntimeBinding.BindDatabaseContext(query,
             new DatabaseContext
             {
                 DbKey = "reporting",
@@ -4721,7 +4783,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() =>
-            SqlQueryRuntimeBridge.BindEntityMappingResolver(query, resolver.Object));
+            SqlQueryRuntimeBinding.BindEntityMappingResolver(query, resolver.Object));
 
         // Assert
         exception.Message.ShouldBe("SQL Query 已创建 Builder，不能修改实体映射解析器。");
@@ -5496,6 +5558,11 @@ public class SqlServerRoutingAndExecutionTest
         public bool ThrowOnReaderDispose { get; set; }
 
         /// <summary>
+        /// 是否在 Dapper 初始化行解析器读取架构信息时抛出异常。
+        /// </summary>
+        public bool ThrowOnReaderParserInitialization { get; set; }
+
+        /// <summary>
         /// 是否让本连接创建的事务在回滚时抛出异常。
         /// </summary>
         public bool ThrowOnTransactionRollback { get; set; }
@@ -5779,7 +5846,11 @@ public class SqlServerRoutingAndExecutionTest
 
         public override IEnumerator GetEnumerator() => ((IEnumerable)_reader).GetEnumerator();
 
-        public override Type GetFieldType(int ordinal) => _reader.GetFieldType(ordinal);
+        public override Type GetFieldType(int ordinal)
+        {
+            ThrowIfParserInitializationFails();
+            return _reader.GetFieldType(ordinal);
+        }
 
         public override float GetFloat(int ordinal) => _reader.GetFloat(ordinal);
 
@@ -5791,7 +5862,11 @@ public class SqlServerRoutingAndExecutionTest
 
         public override long GetInt64(int ordinal) => _reader.GetInt64(ordinal);
 
-        public override string GetName(int ordinal) => _reader.GetName(ordinal);
+        public override string GetName(int ordinal)
+        {
+            ThrowIfParserInitializationFails();
+            return _reader.GetName(ordinal);
+        }
 
         public override int GetOrdinal(string name) => _reader.GetOrdinal(name);
 
@@ -5842,6 +5917,15 @@ public class SqlServerRoutingAndExecutionTest
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// 按测试配置模拟行解析器初始化失败。
+        /// </summary>
+        private void ThrowIfParserInitializationFails()
+        {
+            if (_connection.ThrowOnReaderParserInitialization)
+                throw new InvalidOperationException("row parser initialization failed");
         }
     }
 

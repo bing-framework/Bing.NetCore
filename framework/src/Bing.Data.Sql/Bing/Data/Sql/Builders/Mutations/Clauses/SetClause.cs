@@ -32,9 +32,9 @@ public sealed class SetClause : ISetClause, IColumnSetClause
     /// <inheritdoc />
     public void Set(string column, object value)
     {
+        _context.ValidateOperation(SqlOperationAction.Set);
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentException("更新列名不能为空。", nameof(column));
-        _context.ValidateOperation(SqlOperationAction.Set);
         var name = _context.ParameterManager.GenerateName();
         _context.ParameterManager.Add(name, value);
         _context.UseOperation(SqlOperationAction.Set);
@@ -44,11 +44,11 @@ public sealed class SetClause : ISetClause, IColumnSetClause
     /// <inheritdoc />
     public void Set(string column, SqlParam parameter)
     {
+        _context.ValidateOperation(SqlOperationAction.Set);
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentException("更新列名不能为空。", nameof(column));
         if (parameter == null || string.IsNullOrWhiteSpace(parameter.Name))
             throw new ArgumentException("更新参数名称不能为空。", nameof(parameter));
-        _context.ValidateOperation(SqlOperationAction.Set);
         if (_context.ParameterManager is IAdvancedParameterManager advancedManager)
             advancedManager.Add(parameter);
         else
@@ -60,13 +60,13 @@ public sealed class SetClause : ISetClause, IColumnSetClause
     /// <inheritdoc />
     public void SetFrom(string targetColumn, string sourceAlias, string sourceColumn)
     {
+        _context.ValidateOperation(SqlOperationAction.Set);
         if (string.IsNullOrWhiteSpace(targetColumn))
             throw new ArgumentException("更新列名不能为空。", nameof(targetColumn));
         if (string.IsNullOrWhiteSpace(sourceAlias))
             throw new ArgumentException("Update From 来源表别名不能为空。", nameof(sourceAlias));
         if (string.IsNullOrWhiteSpace(sourceColumn))
             throw new ArgumentException("Update From 来源列名不能为空。", nameof(sourceColumn));
-        _context.ValidateOperation(SqlOperationAction.Set);
         _items.Add(new SetItem(targetColumn,
             $"{_context.Dialect.SafeName(sourceAlias)}.{_context.Dialect.SafeName(sourceColumn)}", false));
         _context.UseOperation(SqlOperationAction.Set);

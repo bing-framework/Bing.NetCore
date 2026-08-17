@@ -1,116 +1,114 @@
-using Bing.Data;
-using Bing.Data.Filters;
-using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
-using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Mutations;
 
 /// <summary>
-/// 为结构化实体写操作应用数据边界谓词。
+/// 为结构化实体写操作应用已注册的数据边界 Contributor。
 /// </summary>
 /// <remarks>
-/// 原始表名缺少实体语义，不能安全推断过滤条件。默认边界支持逻辑删除和显式配置的租户过滤器。
+/// 原始表名没有实体语义，框架不会推断或改写调用方 SQL。Contributor 仅在结构化 Update/Delete
+/// 的独立渲染快照中执行，使 SQL 文本和参数始终来自同一冻结 Builder。
 /// </remarks>
 internal static class SqlMutationDataBoundary
 {
     /// <summary>
-    /// 应用当前 Mutation 目标的默认数据边界。
+    /// 应用当前结构化写入目标的全部数据边界。
     /// </summary>
     /// <param name="context">Mutation 运行上下文。</param>
-    /// <param name="table">结构化目标表。</param>
-    /// <param name="whereClause">待追加条件的 Mutation Where 子句。</param>
-    public static bool Apply(SqlMutationContext context, SqlTableReference table, IMutationWhereClause whereClause)
+    /// <param name="table">结构化写入目标。</param>
+    /// <param name="operation">当前写入操作类型。</param>
+    /// <param name="whereClause">接收边界谓词的 Where 子句。</param>
+    /// <returns>至少一个 Contributor 追加谓词时返回 <see langword="true"/>。</returns>
+    public static bool Apply(SqlMutationContext context, SqlTableReference table, SqlDataBoundaryOperation operation,
+        IMutationWhereClause whereClause)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
         if (table?.EntityType == null || whereClause == null)
             return false;
-        var applied = ApplySoftDelete(context, table, whereClause);
-        foreach (var tenantFilter in context.Services.Filters.OfType<TenantIdFilter>())
-            applied |= tenantFilter.ApplyMutation(context, table, whereClause);
+        var boundaryContext = new SqlDataBoundaryContext(context, table, operation, whereClause);
+        var applied = false;
+        foreach (var contributor in GetContributors(context))
+        {
+            if (contributor.ShouldApply(boundaryContext) == false)
+                continue;
+            contributor.Apply(boundaryContext);
+            applied = true;
+        }
         return applied;
     }
 
     /// <summary>
-    /// 应用逻辑删除写入边界。
-    /// </summary>
-    private static bool ApplySoftDelete(SqlMutationContext context, SqlTableReference table,
-        IMutationWhereClause whereClause)
-    {
-        if (ShouldApplySoftDelete(context, table) == false)
-            return false;
-        var mapping = context.Services.EntityMappingResolver.Resolve(table.EntityType,
-            context.ExecutionContext.DatabaseContext);
-        var column = mapping?.Columns?.Values.FirstOrDefault(item =>
-            string.Equals(item.PropertyName, nameof(ISoftDelete.IsDeleted), StringComparison.OrdinalIgnoreCase));
-        if (column == null)
-            throw new InvalidOperationException($"实体 {table.EntityType.Name} 实现了 {nameof(ISoftDelete)}，但属性 {nameof(ISoftDelete.IsDeleted)} 未映射到数据库列。");
-
-        var parameter = context.Services.ParameterFactory.Create(context.ParameterManager.GenerateName(), false, column,
-            context.ExecutionContext.DatabaseContext, table.EntityType, SqlParameterSource.SqlBuilder);
-        if (context.ParameterManager is IAdvancedParameterManager advancedManager)
-            advancedManager.Add(parameter);
-        else
-            context.ParameterManager.Add(parameter.Name, parameter.Value);
-        var left = string.IsNullOrWhiteSpace(table.Alias)
-            ? context.Dialect.SafeName(column.ColumnName)
-            : $"{context.Dialect.SafeName(table.Alias)}.{context.Dialect.SafeName(column.ColumnName)}";
-        whereClause.And(SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameter.Name), Operator.Equal));
-        return true;
-    }
-
-    /// <summary>
-    /// 判断当前结构化 Mutation 目标是否需要默认数据边界。
+    /// 判断当前结构化 Mutation 目标是否存在启用的数据边界。
     /// </summary>
     /// <param name="context">Mutation 运行上下文。</param>
-    /// <param name="table">结构化目标表。</param>
-    /// <returns>需要在渲染快照中追加边界时返回 true。</returns>
-    public static bool ShouldApply(SqlMutationContext context, SqlTableReference table) =>
-        ShouldApplySoftDelete(context, table) || context?.Services?.Filters.OfType<TenantIdFilter>()
-            .Any(filter => filter.ShouldApply(context, table)) == true;
-
-    /// <summary>
-    /// 判断实体是否需要通过结构化逐实体 Update 应用写入边界。
-    /// </summary>
-    /// <param name="services">当前执行器创建 Builder 时使用的共享服务。</param>
-    /// <param name="entityType">批量 Update 的实体类型。</param>
-    /// <returns>存在软删除或租户边界时返回 <c>true</c>。</returns>
-    internal static bool RequiresStructuredUpdate(SqlBuilderServices services, Type entityType)
+    /// <param name="table">结构化写入目标。</param>
+    /// <param name="operation">当前写入操作类型。</param>
+    /// <returns>需要在独立渲染快照中追加边界时返回 <see langword="true"/>。</returns>
+    public static bool ShouldApply(SqlMutationContext context, SqlTableReference table, SqlDataBoundaryOperation operation)
     {
-        if (entityType == null)
+        if (context == null || table?.EntityType == null)
             return false;
-        if (typeof(ISoftDelete).IsAssignableFrom(entityType) && ShouldApplySoftDelete(services))
-            return true;
-        return services?.Filters.OfType<TenantIdFilter>().Any(filter =>
-            IsTenantFilterEnabled(services.DataFilter) && filter.Contributor.IsTenantEntity(entityType)) == true;
+        var probe = new SqlDataBoundaryContext(context, table, operation, new ProbeMutationWhereClause());
+        return GetContributors(context).Any(contributor => contributor.ShouldApply(probe));
     }
 
     /// <summary>
-    /// 判断当前 Builder 服务是否启用默认软删除过滤。
+    /// 判断批量 Update 是否必须退回结构化逐实体路径以应用数据边界。
     /// </summary>
-    private static bool ShouldApplySoftDelete(SqlMutationContext context, SqlTableReference table)
-    {
-        if (table?.EntityType == null || typeof(ISoftDelete).IsAssignableFrom(table.EntityType) == false)
-            return false;
-        return ShouldApplySoftDelete(context?.Services);
-    }
+    /// <param name="context">当前 Mutation 上下文。</param>
+    /// <param name="table">结构化 Update 目标。</param>
+    /// <returns>存在启用的 Update 数据边界时返回 <see langword="true"/>。</returns>
+    internal static bool RequiresStructuredUpdate(SqlMutationContext context, SqlTableReference table) =>
+        ShouldApply(context, table, SqlDataBoundaryOperation.Update);
 
     /// <summary>
-    /// 判断当前服务是否启用了逻辑删除过滤。
+    /// 获取当前 Builder 注册的写入数据边界 Contributor。
     /// </summary>
-    private static bool ShouldApplySoftDelete(SqlBuilderServices services)
-    {
-        if (services?.Filters?.Any(filter => filter is IsDeletedFilter) == false)
-            return false;
-        return services.DataFilter?.IsEnabled<ISoftDelete>() != false;
-    }
+    /// <param name="context">Mutation 运行上下文。</param>
+    /// <returns>按服务注册顺序排列的 Contributor。</returns>
+    private static IEnumerable<ISqlDataBoundaryContributor> GetContributors(SqlMutationContext context) =>
+        context.Services.Filters.OfType<ISqlDataBoundaryContributor>();
 
     /// <summary>
-    /// 判断租户过滤是否在当前异步执行流中启用。
+    /// 用于 ShouldApply 探测的无副作用 Where 子句。
     /// </summary>
-    private static bool IsTenantFilterEnabled(IDataFilter dataFilter) => dataFilter?.IsEnabled<TenantIdFilter>() != false;
+    private sealed class ProbeMutationWhereClause : IMutationWhereClause
+    {
+        /// <inheritdoc />
+        public bool IsEmpty => true;
+
+        /// <inheritdoc />
+        public void And(ICondition condition)
+        {
+        }
+
+        /// <inheritdoc />
+        public void Or(ICondition condition)
+        {
+        }
+
+        /// <inheritdoc />
+        public IMutationWhereClause Clone(SqlMutationContext context) => new ProbeMutationWhereClause();
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+        }
+
+        /// <inheritdoc />
+        public void AppendTo(System.Text.StringBuilder builder)
+        {
+        }
+
+        /// <inheritdoc />
+        public string ToSql() => string.Empty;
+
+        /// <inheritdoc />
+        public void Validate(SqlValidationContext context)
+        {
+        }
+    }
 }

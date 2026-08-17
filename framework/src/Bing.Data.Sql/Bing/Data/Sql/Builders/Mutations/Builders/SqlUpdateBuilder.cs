@@ -18,6 +18,11 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     private bool _isDataBoundaryApplied;
 
     /// <summary>
+    /// 当前 Update 对应的数据边界语义。
+    /// </summary>
+    internal SqlDataBoundaryOperation DataBoundaryOperation { get; set; } = SqlDataBoundaryOperation.Update;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlUpdateBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
@@ -109,7 +114,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         {
             var snapshot = (SqlUpdateBuilder)Clone();
             snapshot.EnsureDataBoundary();
-            return new SqlWriteCommand(snapshot.RenderCore(), snapshot.GetParameters());
+            return snapshot.BuildCommand(snapshot.RenderCore);
         }
         return BuildCommand(RenderCore);
     }
@@ -128,6 +133,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
         result._isDataBoundaryApplied = _isDataBoundaryApplied;
+        result.DataBoundaryOperation = DataBoundaryOperation;
         return result;
     }
 
@@ -164,14 +170,15 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     {
         if (_isDataBoundaryApplied)
             return;
-        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, UpdateClause.Table, WhereClause);
+        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, UpdateClause.Table,
+            DataBoundaryOperation, WhereClause);
     }
 
     /// <summary>
     /// 判断当前渲染是否需要使用独立副本追加数据边界。
     /// </summary>
     private bool ShouldRenderDataBoundarySnapshot() => _isDataBoundaryApplied == false &&
-        SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table);
+        SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table, DataBoundaryOperation);
 
     /// <summary>
     /// 渲染当前 Update 状态。

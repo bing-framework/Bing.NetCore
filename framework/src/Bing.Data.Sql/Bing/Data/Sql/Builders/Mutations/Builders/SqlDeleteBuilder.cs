@@ -18,6 +18,11 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     private bool _isDataBoundaryApplied;
 
     /// <summary>
+    /// 当前 Delete 对应的数据边界语义。
+    /// </summary>
+    internal SqlDataBoundaryOperation DataBoundaryOperation { get; set; } = SqlDataBoundaryOperation.Delete;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlDeleteBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
@@ -104,7 +109,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         {
             var snapshot = (SqlDeleteBuilder)Clone();
             snapshot.EnsureDataBoundary();
-            return new SqlWriteCommand(snapshot.RenderCore(), snapshot.GetParameters());
+            return snapshot.BuildCommand(snapshot.RenderCore);
         }
         return BuildCommand(RenderCore);
     }
@@ -122,6 +127,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         result.WhereClause = WhereClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
         result._isDataBoundaryApplied = _isDataBoundaryApplied;
+        result.DataBoundaryOperation = DataBoundaryOperation;
         return result;
     }
 
@@ -156,14 +162,15 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     {
         if (_isDataBoundaryApplied)
             return;
-        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, DeleteClause.Table, WhereClause);
+        _isDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, DeleteClause.Table,
+            DataBoundaryOperation, WhereClause);
     }
 
     /// <summary>
     /// 判断当前渲染是否需要使用独立副本追加数据边界。
     /// </summary>
     private bool ShouldRenderDataBoundarySnapshot() => _isDataBoundaryApplied == false &&
-        SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table);
+        SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table, DataBoundaryOperation);
 
     /// <summary>
     /// 渲染当前 Delete 状态。

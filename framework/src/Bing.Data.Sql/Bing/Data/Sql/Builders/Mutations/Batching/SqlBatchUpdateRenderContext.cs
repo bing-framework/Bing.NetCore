@@ -40,7 +40,7 @@ public sealed class SqlBatchUpdateRenderContext
         ConcurrencyColumns = concurrencyColumns ?? throw new ArgumentNullException(nameof(concurrencyColumns));
         Entities = entities?.ToArray() ?? throw new ArgumentNullException(nameof(entities));
         Options = options;
-        _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver);
+        _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver, Services.MetadataOptions);
     }
 
     /// <summary>当前 SQL Provider。</summary>

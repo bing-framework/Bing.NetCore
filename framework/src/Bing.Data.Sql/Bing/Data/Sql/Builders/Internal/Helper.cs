@@ -201,6 +201,7 @@ public class Helper
     private ICondition CreateConditionInternal(string rawColumn, string column, object value, Operator @operator,
         Type entityType, SqlParameterSource source)
     {
+        SqlConditionFactory.ValidateSupported(@operator);
         if (IsInCondition(@operator, value))
         {
             ValidateInConditionValue(value);

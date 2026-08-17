@@ -79,7 +79,7 @@ public sealed class SqlBuilderServices
     /// <summary>
     /// 解析不含凭据的物理数据库身份。
     /// </summary>
-    internal ISqlDatabaseIdentityResolver DatabaseIdentityResolver { get; set; } =
+    public ISqlDatabaseIdentityResolver DatabaseIdentityResolver { get; set; } =
         new DefaultSqlDatabaseIdentityResolver();
 
     /// <summary>

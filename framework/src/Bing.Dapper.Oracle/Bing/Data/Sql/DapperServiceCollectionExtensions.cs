@@ -1,14 +1,14 @@
 ﻿using System;
+using Bing.Dapper;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Dapper;
-using Oracle.ManagedDataAccess.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Bing.Dapper.Oracle;
 
@@ -40,8 +40,6 @@ public static class OracleServiceCollectionExtensions
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
         services.AddSqlProviderRuntime(new SqlProviderRuntime(OracleSqlProvider.Instance.Key, typeof(OracleSqlQuery),
             typeof(OracleSqlExecutor)));
-        services.TryAddTransient<ISqlQuery, OracleSqlQuery>();
-        services.TryAddTransient<ISqlExecutor, OracleSqlExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         return services;

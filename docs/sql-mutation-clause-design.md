@@ -37,6 +37,6 @@ Insert Select 仅在目标列数和查询投影数都可证明时校验一致性
 
 默认使用 `DefaultSqlMutationClauseFactory`。Provider 如需替换局部 Clause，可实现 `ISqlMutationClauseFactoryProvider`；批量 Update 差异通过 `ISqlBatchUpdateRenderer` 扩展。Provider 不应复制完整 Mutation Builder。
 
-`ISqlUpdateFromClauseFactory`、`ISqlDeleteUsingClauseFactory` 与 `ISqlReturningClauseFactory` 是可选扩展，不向既有 `ISqlMutationClauseFactory` 强加新成员。Provider 必须分别通过 `SqlProviderCapabilities.SupportsUpdateFrom`、`SupportsDeleteUsing` 和 `SupportsReturning` 明确声明支持；未声明的 Provider 在渲染前抛出 `NotSupportedException`。
+`ISqlUpdateFromClauseFactory`、`ISqlDeleteUsingClauseFactory` 与 `ISqlReturningClauseFactory` 是可选扩展，不向既有 `ISqlMutationClauseFactory` 强加新成员。Provider 必须分别通过 `SqlProviderProfile.Mutation.SupportsUpdateFrom`、`SupportsDeleteUsing` 和 `SupportsReturning` 明确声明支持；未声明的 Provider 在渲染前抛出 `NotSupportedException`。
 
 支持非尾部返回结果语法的 Provider 实现可选 `ISqlReturningDialect`，声明 `End` 或 `BeforeSource` 位置并解析关键字和列限定符。未知位置或空关键字在渲染时明确失败，不能静默省略结果子句。

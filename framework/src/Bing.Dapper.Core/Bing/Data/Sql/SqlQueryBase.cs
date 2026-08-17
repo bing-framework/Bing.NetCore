@@ -25,7 +25,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, ISqlQueryRuntimeBindingController
 {
     #region 字段
 
@@ -147,7 +147,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         _connection = options.Connection;
         if (_connection != null)
             _connectionOwnership = SqlResourceOwnership.External;
-        SqlQueryRuntimeBridge.Register(this, new RuntimeController(this));
     }
 
     /// <summary>
@@ -239,15 +238,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     /// 获取当前执行上下文固定 Provider 的统一能力档案。
     /// </summary>
     /// <returns>当前 Provider 的不可变能力档案。</returns>
-    private protected SqlProviderProfile GetCurrentProviderProfile()
+    internal SqlProviderProfile GetCurrentProviderProfile()
     {
-        if (_provider != null)
-            return SqlProviderCapabilityResolver.GetProfile(_provider);
+        if (_provider is ISqlProviderProfileProvider { Profile: not null } profileProvider)
+            return profileProvider.Profile;
         if (ServiceProvider.GetService<ISqlProviderResolver>() == null)
             return new SqlProviderProfile();
         try
         {
-            return SqlProviderCapabilityResolver.GetProfile(GetCurrentProvider());
+            return (GetCurrentProvider() as ISqlProviderProfileProvider)?.Profile ?? new SqlProviderProfile();
         }
         catch (NotSupportedException)
         {
@@ -375,14 +374,14 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        return new SqlQuery<TResult>(executor, executor.CreateIndependentSqlBuilder());
+        return SqlQueryRuntimeFactory.CreateQuery<TResult>(executor, executor.CreateIndependentSqlBuilder());
     }
 
     /// <inheritdoc />
     public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null)
     {
         EnsureExecutionAvailable();
-        return new SqlTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
+        return SqlQueryRuntimeFactory.CreateTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
     }
 
     /// <inheritdoc />
@@ -416,7 +415,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         EnsureStoredProceduresSupported();
         EnsureOutputParametersSupported(parameters);
         var executor = (ISqlQueryPlanExecutor)this;
-        return new SqlProcedureQuery<TResult>(executor, GetProcedure(procedure), parameters);
+        return SqlQueryRuntimeFactory.CreateProcedureQuery<TResult>(executor, GetProcedure(procedure), parameters);
     }
 
     /// <summary>
@@ -523,7 +522,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         var baseName = $"p{index}";
         var parameterName = baseName;
         var suffix = 0;
-        while (SqlBuilderBase.ContainsParameterToken(format, parameterPrefix + parameterName))
+        while (SqlBuilderRuntimeBridge.ContainsParameterToken(format, parameterPrefix + parameterName))
             parameterName = $"{baseName}_{++suffix}";
         return parameterName;
     }
@@ -545,7 +544,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        var query = new SqlLambdaQuery<TEntity>(executor, executor.CreateIndependentSqlBuilder());
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(executor, executor.CreateIndependentSqlBuilder());
         query.Select().From();
         return query;
     }
@@ -558,7 +557,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         if (subquery == null)
             throw new ArgumentNullException(nameof(subquery));
         var executor = (ISqlQueryPlanExecutor)this;
-        return new SqlSubqueryLambdaQuery<TProjection>(executor, executor.CreateIndependentSqlBuilder(), subquery);
+        return SqlQueryRuntimeFactory.CreateSubqueryLambdaQuery(executor, executor.CreateIndependentSqlBuilder(), subquery);
     }
 
     /// <inheritdoc />
@@ -566,33 +565,33 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        return new SqlLambdaQuery<TFirst, TSecond>(executor, executor.CreateIndependentSqlBuilder());
+        return SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond>(executor, executor.CreateIndependentSqlBuilder());
     }
 
     /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond, TThird> From<TFirst, TSecond, TThird>()
         where TFirst : class where TSecond : class where TThird : class =>
-        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird>(executor, builder));
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird>(executor, builder));
 
     /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> From<TFirst, TSecond, TThird, TFourth>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class =>
-        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(executor, builder));
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth>(executor, builder));
 
     /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> From<TFirst, TSecond, TThird, TFourth, TFifth>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class =>
-        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(executor, builder));
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(executor, builder));
 
     /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class =>
-        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(executor, builder));
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(executor, builder));
 
     /// <inheritdoc />
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class =>
-        CreateMultiSourceQuery((executor, builder) => new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(executor, builder));
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(executor, builder));
 
     /// <summary>
     /// 创建持有独立 Builder 的多根来源查询描述。
@@ -770,45 +769,19 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         }
     }
 
-    /// <summary>
-    /// 查询专属运行时资源控制器。
-    /// </summary>
-    private sealed class RuntimeController : ISqlQueryRuntimeController
-    {
-        private readonly SqlQueryBase _owner;
+    void ISqlQueryRuntimeBindingController.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
+        BindConnection(connection, SqlResourceOwnership.Owned, source);
 
-        public RuntimeController(SqlQueryBase owner) => _owner = owner;
+    void ISqlQueryRuntimeBindingController.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
+        BindConnection(connection, SqlResourceOwnership.External, source);
 
-        public IDbConnection GetOrCreateConnection() => _owner.GetOrCreateConnection();
+    void ISqlQueryRuntimeBindingController.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+        BindExternalTransactionResolver(resolver);
 
-        public IDbTransaction GetCurrentTransaction() => _owner.GetCurrentTransaction();
+    void ISqlQueryRuntimeBindingController.BindDatabaseContext(DatabaseContext context) => BindDatabaseContext(context);
 
-        public SqlProviderProfile GetProviderProfile() => _owner.GetCurrentProviderProfile();
-
-        public string GetCurrentTransactionId() => _owner.GetCurrentTransactionId();
-
-        public void EnsureNoActiveExecution() => _owner.EnsureNoActiveExecutionForDispose();
-
-        public void BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
-            _owner.BindConnection(connection, SqlResourceOwnership.Owned, source);
-
-        public void BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
-            _owner.BindConnection(connection, SqlResourceOwnership.External, source);
-
-        public void BindExternalTransaction(IDbTransaction transaction, string transactionId = null) =>
-            _owner.BindExternalTransaction(transaction, transactionId);
-
-        public void BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
-            _owner.BindExternalTransactionResolver(resolver);
-
-        public void BindTransactionScope(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
-            ISqlTransactionScopeLease lease) => _owner.SetTransactionContext(context, connection, transaction, lease);
-
-        public void BindDatabaseContext(DatabaseContext context) => _owner.BindDatabaseContext(context);
-
-        public void BindEntityMappingResolver(IEntityMappingResolver resolver) =>
-            _owner.BindEntityMappingResolver(resolver);
-    }
+    void ISqlQueryRuntimeBindingController.BindEntityMappingResolver(IEntityMappingResolver resolver) =>
+        BindEntityMappingResolver(resolver);
 
     /// <summary>
     /// 获取或创建执行连接。
@@ -1086,9 +1059,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        if (builder is SqlBuilderBase sqlBuilder)
+        if (SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(builder))
         {
-            var snapshot = sqlBuilder.CreateRenderSnapshot();
+            var snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(builder);
             return new SqlPreparedCommand(snapshot.Sql, null, GetDbParameters(snapshot.Builder, snapshot.Sql),
                 snapshot.Builder);
         }
@@ -1278,7 +1251,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         {
             if (_transactionScopeLease != null)
                 _isTransactionScopeChildDisposed = true;
-            SqlQueryRuntimeBridge.Remove(this);
         }
         if (transactionException != null)
             ExceptionDispatchInfo.Capture(transactionException).Throw();
@@ -1315,7 +1287,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor
         {
             if (_transactionScopeLease != null)
                 _isTransactionScopeChildDisposed = true;
-            SqlQueryRuntimeBridge.Remove(this);
         }
         if (transactionException != null)
             ExceptionDispatchInfo.Capture(transactionException).Throw();

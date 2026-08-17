@@ -92,12 +92,17 @@ public abstract class SqlConditionBase : ISqlCondition
     /// 添加参数化条件
     /// </summary>
     /// <param name="builder">字符串生成器</param>
+    /// <remarks>
+    /// 仅在 SQL 条件写入成功后提交参数和缓存参数名称，
+    /// 避免派生条件渲染异常污染后续条件的参数状态。
+    /// </remarks>
     protected virtual void AppendParameterizedCondition(StringBuilder builder)
     {
-        var paramName = _parameterName ??= GenerateParamName();
+        var paramName = _parameterName ?? GenerateParamName();
         var value = GetValue();
-        ParameterManager.Add(paramName, value);
         AppendCondition(builder, Column, paramName);
+        ParameterManager.Add(paramName, value);
+        _parameterName ??= paramName;
     }
 
     /// <summary>

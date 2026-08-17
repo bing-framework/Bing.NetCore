@@ -66,6 +66,29 @@ public sealed class OracleMutationBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：Oracle 不支持多行 Values 时，能力拒绝必须发生在读取调用方实体属性之前。
+    /// </summary>
+    [Fact]
+    public void InsertCombined_WhenMultipleEntitiesAreProvided_ShouldNotReadEntityPropertiesBeforeCapabilityRejection()
+    {
+        // Arrange
+        MutationSample.ResetNameGetterCallCount();
+        var builder = new DefaultSqlEntityMutationCommandBuilder(OracleSqlProvider.Instance, new SqlBuilderServices());
+        var entities = new[]
+        {
+            new MutationSample { Name = "first" },
+            new MutationSample { Name = "second" }
+        };
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.InsertCombined(entities));
+
+        // Assert
+        Assert.Equal("Provider bing.oracle 不支持多行 Values。", exception.Message);
+        Assert.Equal(0, MutationSample.NameGetterCallCount);
+    }
+
+    /// <summary>
     /// 测试 - Oracle 未声明 Update From 能力时，渲染必须明确拒绝。
     /// </summary>
     [Fact]
@@ -134,8 +157,31 @@ public sealed class OracleMutationBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
+        /// 名称 Getter 调用次数。
+        /// </summary>
+        public static int NameGetterCallCount { get; private set; }
+
+        /// <summary>
+        /// 名称后备字段。
+        /// </summary>
+        private string _name;
+
+        /// <summary>
         /// 名称。
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                NameGetterCallCount++;
+                return _name;
+            }
+            set => _name = value;
+        }
+
+        /// <summary>
+        /// 重置名称 Getter 调用次数。
+        /// </summary>
+        public static void ResetNameGetterCallCount() => NameGetterCallCount = 0;
     }
 }

@@ -1,10 +1,10 @@
-﻿using Bing.Data;
+﻿using Bing.Dapper;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -39,9 +39,6 @@ public static class SqliteServiceCollectionExtensions
         services.AddDatabaseTypeConverter<SqliteTypeConverter>(DatabaseType.Sqlite);
         services.AddSqlProviderRuntime(new SqlProviderRuntime(SqliteSqlProvider.Instance.Key,
             typeof(SqliteSqlQuery), typeof(SqliteSqlExecutor), typeof(SqliteSqlMultipleQueryExecutor)));
-        services.TryAddTransient<ISqlQuery, SqliteSqlQuery>();
-        services.TryAddTransient<ISqlExecutor, SqliteSqlExecutor>();
-        services.TryAddTransient<ISqlMultipleQueryExecutor, SqliteSqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

@@ -20,6 +20,16 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     private readonly ConcurrentDictionary<EntityMappingCacheKey, EntityMappingMetadata> _mappingCache = new();
 
     /// <summary>
+    /// 最近最少使用策略下按访问先后保存的最终映射缓存键。
+    /// </summary>
+    private readonly LinkedList<EntityMappingCacheKey> _mappingCacheAccessOrder = new();
+
+    /// <summary>
+    /// 最近最少使用策略下的缓存键节点索引。
+    /// </summary>
+    private readonly Dictionary<EntityMappingCacheKey, LinkedListNode<EntityMappingCacheKey>> _mappingCacheAccessNodes = new();
+
+    /// <summary>
     /// 控制有限容量映射缓存准入的同步锁。
     /// </summary>
     private readonly object _mappingCacheAdmissionLock = new();
@@ -28,6 +38,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 最终实体映射缓存的固定容量；<see langword="null"/> 表示不限制容量。
     /// </summary>
     private readonly int? _mappingCacheCapacity;
+
+    /// <summary>
+    /// 最终映射缓存达到容量后的固定处理策略。
+    /// </summary>
+    private readonly EntityMappingCacheEvictionPolicy _mappingCacheEvictionPolicy;
 
     /// <summary>
     /// 最终实体映射缓存首次查找命中次数。
@@ -43,6 +58,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 最终实体映射因容量策略未写入缓存的次数。
     /// </summary>
     private long _mappingCacheBypassCount;
+
+    /// <summary>
+    /// 最终映射缓存按最近最少使用策略淘汰的次数。
+    /// </summary>
+    private long _mappingCacheEvictionCount;
 
     /// <summary>
     /// 按实体类型缓存原始模型元数据，避免为计算最终缓存键重复调用外部 ORM 元数据提供器。
@@ -86,8 +106,10 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         System.Threading.Interlocked.Read(ref _mappingCacheHitCount),
         System.Threading.Interlocked.Read(ref _mappingCacheMissCount),
         System.Threading.Interlocked.Read(ref _mappingCacheBypassCount),
+        System.Threading.Interlocked.Read(ref _mappingCacheEvictionCount),
         _mappingCache.Count,
-        _mappingCacheCapacity);
+        _mappingCacheCapacity,
+        _mappingCacheEvictionPolicy);
 
     /// <summary>
     /// 初始化一个<see cref="DefaultEntityMappingResolver"/>类型的实例
@@ -105,9 +127,13 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
         _mappingCacheCapacity = _options.EntityMappingCacheCapacity;
+        _mappingCacheEvictionPolicy = _options.EntityMappingCacheEvictionPolicy;
         if (_mappingCacheCapacity.HasValue && _mappingCacheCapacity.Value < 0)
             throw new ArgumentOutOfRangeException(nameof(SqlMetadataOptions.EntityMappingCacheCapacity),
                 _mappingCacheCapacity, "实体最终映射缓存容量不能小于 0。");
+        if (Enum.IsDefined(typeof(EntityMappingCacheEvictionPolicy), _mappingCacheEvictionPolicy) == false)
+            throw new ArgumentOutOfRangeException(nameof(SqlMetadataOptions.EntityMappingCacheEvictionPolicy),
+                _mappingCacheEvictionPolicy, "实体最终映射缓存淘汰策略无效。");
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
         _mappingOptionsIndex = CreateMappingOptionsIndex(_options.EntityMappings);
     }
@@ -177,6 +203,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
         {
             System.Threading.Interlocked.Increment(ref _mappingCacheHitCount);
+            TouchMappingCacheEntry(cacheKey);
             return cachedMapping;
         }
         System.Threading.Interlocked.Increment(ref _mappingCacheMissCount);
@@ -184,7 +211,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     }
 
     /// <summary>
-    /// 获取或创建最终实体映射，并在配置了容量时限制新条目的准入。
+    /// 获取或创建最终实体映射，并在配置了容量时按固定策略限制新条目的准入。
     /// </summary>
     /// <param name="cacheKey">根据最终路由结果生成的映射缓存键。</param>
     /// <param name="model">已缓存的实体模型元数据。</param>
@@ -208,19 +235,75 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         lock (_mappingCacheAdmissionLock)
         {
             if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
+            {
+                TouchMappingCacheEntryCore(cacheKey);
                 return cachedMapping;
+            }
 
-            // 容量已满时不驱逐已缓存的稳定路由，避免动态路由放大缓存竞争。
             if (_mappingCache.Count >= _mappingCacheCapacity.Value)
             {
-                System.Threading.Interlocked.Increment(ref _mappingCacheBypassCount);
-                return CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+                if (_mappingCacheEvictionPolicy == EntityMappingCacheEvictionPolicy.AdmissionOnly)
+                {
+                    System.Threading.Interlocked.Increment(ref _mappingCacheBypassCount);
+                    return CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+                }
+                EvictLeastRecentlyUsedMapping();
             }
 
             var mapping = CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
             _mappingCache.TryAdd(cacheKey, mapping);
+            AddMappingCacheEntryToAccessOrder(cacheKey);
             return mapping;
         }
+    }
+
+    /// <summary>
+    /// 在最近最少使用策略下将指定缓存项标记为最新访问。
+    /// </summary>
+    private void TouchMappingCacheEntry(EntityMappingCacheKey cacheKey)
+    {
+        if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed ||
+            _mappingCacheCapacity.HasValue == false || _mappingCacheCapacity.Value == 0)
+            return;
+        lock (_mappingCacheAdmissionLock)
+            TouchMappingCacheEntryCore(cacheKey);
+    }
+
+    /// <summary>
+    /// 在已持有准入锁时将指定缓存项标记为最新访问。
+    /// </summary>
+    private void TouchMappingCacheEntryCore(EntityMappingCacheKey cacheKey)
+    {
+        if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed ||
+            _mappingCacheAccessNodes.TryGetValue(cacheKey, out var node) == false)
+            return;
+        _mappingCacheAccessOrder.Remove(node);
+        _mappingCacheAccessOrder.AddLast(node);
+    }
+
+    /// <summary>
+    /// 在已持有准入锁时登记最新缓存项。
+    /// </summary>
+    private void AddMappingCacheEntryToAccessOrder(EntityMappingCacheKey cacheKey)
+    {
+        if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed)
+            return;
+        var node = _mappingCacheAccessOrder.AddLast(cacheKey);
+        _mappingCacheAccessNodes.Add(cacheKey, node);
+    }
+
+    /// <summary>
+    /// 在已持有准入锁时移除最近最少使用的最终映射项。
+    /// </summary>
+    private void EvictLeastRecentlyUsedMapping()
+    {
+        var node = _mappingCacheAccessOrder.First;
+        if (node == null)
+            return;
+        _mappingCacheAccessOrder.RemoveFirst();
+        _mappingCacheAccessNodes.Remove(node.Value);
+        _mappingCache.TryRemove(node.Value, out _);
+        System.Threading.Interlocked.Increment(ref _mappingCacheEvictionCount);
     }
 
     /// <summary>

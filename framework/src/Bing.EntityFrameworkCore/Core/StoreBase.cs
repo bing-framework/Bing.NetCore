@@ -150,6 +150,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     [Obsolete("请使用 FindByIdAsync 方法")]
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (id.SafeString().IsEmpty())
             return null;
         return await Set.FindAsync(new[] { id }, cancellationToken);
@@ -200,6 +201,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return await FindByIdsAsync(Conv.ToList<TKey>(ids), cancellationToken);
     }
 
@@ -241,7 +243,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var entities = await FindByIdsNoTrackingAsync(id);
+        var entities = await FindByIdsNoTrackingAsync((IEnumerable<TKey>)new[] { id }, cancellationToken);
         return entities == null || entities.Count == 0 ? null : entities[0];
     }
 
@@ -262,6 +264,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return await FindByIdsNoTrackingAsync(Conv.ToList<TKey>(ids), cancellationToken);
     }
 
@@ -660,6 +663,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entity == null)
             return;
         await RemoveAsync(entity.Id, cancellationToken);

@@ -1,4 +1,4 @@
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 

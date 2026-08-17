@@ -64,6 +64,21 @@ public abstract partial class SqlQueryBase
                 catch (Exception exception)
                 {
                     primaryException = exception;
+                    if (reader != null)
+                    {
+                        try
+                        {
+                            await SqlTransactionAsyncAdapter.DisposeAsync(reader).ConfigureAwait(false);
+                        }
+                        catch (Exception cleanupException)
+                        {
+                            cleanupExceptions.Add(cleanupException);
+                        }
+                        finally
+                        {
+                            reader = null;
+                        }
+                    }
                 }
                 if (primaryException == null)
                 {

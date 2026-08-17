@@ -15,7 +15,7 @@ public abstract partial class SqlQueryBase
     /// <param name="connection">事务连接。</param>
     /// <param name="transaction">事务。</param>
     /// <param name="lease">事务作用域执行租约。</param>
-    private void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
+    internal void SetTransactionContext(DatabaseContext context, IDbConnection connection, IDbTransaction transaction,
         ISqlTransactionScopeLease lease)
     {
         ThrowIfTransactionScopeChildDisposed();

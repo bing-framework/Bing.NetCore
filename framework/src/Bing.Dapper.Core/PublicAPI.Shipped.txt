@@ -11,7 +11,6 @@ Bing.Data.Sql.SqlDbConnectionFactoryRegistration.ProviderKey.get -> string
 Bing.Data.Sql.SqlDbConnectionFactoryRegistration.ProviderKey.init -> void
 Bing.Data.Sql.SqlDbConnectionFactoryRegistration.SqlDbConnectionFactoryRegistration() -> void
 Bing.Data.Sql.SqlExecutorBase
-Bing.Data.Sql.SqlExecutorBase.CreateBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.SqlExecutorBase.SqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
 Bing.Data.Sql.SqlMultipleQueryExecutorBase
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.CreateBatch() -> Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder

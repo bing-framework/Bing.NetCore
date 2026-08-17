@@ -35,11 +35,11 @@ public sealed class ValuesClause : IValuesClause
     /// <inheritdoc />
     public void AddRow(IReadOnlyList<object> values)
     {
+        _context.ValidateOperation(SqlOperationAction.Values);
         if (values == null)
             throw new ArgumentNullException(nameof(values));
         if (_rows.Count > 0 && values.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        _context.ValidateOperation(SqlOperationAction.Values);
         var validation = _context.ParameterManager.Clone();
         var names = new List<string>(values.Count);
         foreach (var value in values)
@@ -57,11 +57,11 @@ public sealed class ValuesClause : IValuesClause
     /// <inheritdoc />
     public void AddRow(IReadOnlyList<SqlParam> parameters)
     {
+        _context.ValidateOperation(SqlOperationAction.Values);
         if (parameters == null)
             throw new ArgumentNullException(nameof(parameters));
         if (_rows.Count > 0 && parameters.Count != ColumnCount)
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        _context.ValidateOperation(SqlOperationAction.Values);
         var validation = _context.ParameterManager.Clone();
         var names = new List<string>(parameters.Count);
         foreach (var parameter in parameters)
@@ -80,12 +80,12 @@ public sealed class ValuesClause : IValuesClause
     /// <inheritdoc />
     public void AddRows(IEnumerable<IReadOnlyList<object>> rows)
     {
+        _context.ValidateOperation(SqlOperationAction.Values);
         if (rows == null)
             throw new ArgumentNullException(nameof(rows));
         var items = rows.ToList();
         if (items.Count == 0)
             return;
-        _context.ValidateOperation(SqlOperationAction.Values);
         var validation = _context.ParameterManager.Clone();
         var columnCount = ColumnCount;
         var hasRow = _rows.Count > 0;

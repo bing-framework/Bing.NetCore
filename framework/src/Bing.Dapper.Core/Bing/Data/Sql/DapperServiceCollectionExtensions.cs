@@ -120,7 +120,6 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlFilter, IsDeletedFilter>());
         services.TryAddSingleton<ISqlEntityMutationCommandBuilderFactory, SqlEntityMutationCommandBuilderFactory>();
-        services.TryAddSingleton<ISqlFluentMutationBuilderFactory, SqlFluentMutationBuilderFactory>();
         services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddTransient<ISqlQuery>(provider =>
             provider.GetRequiredService<ISqlQueryFactory>().Create());

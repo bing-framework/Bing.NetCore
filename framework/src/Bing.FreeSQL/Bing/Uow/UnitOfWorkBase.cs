@@ -207,6 +207,52 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #endregion
 
+    #region SaveChanges(保存更改)
+
+    /// <summary>
+    /// 保存更改。
+    /// </summary>
+    public override int SaveChanges()
+    {
+        var transactionActionManager = Create<ITransactionActionManager>();
+        if (transactionActionManager.Count == 0)
+            return base.SaveChanges();
+        return TransactionCommit(transactionActionManager);
+    }
+
+    /// <summary>
+    /// 手工创建事务提交。
+    /// </summary>
+    /// <param name="transactionActionManager">事务操作管理器。</param>
+    private int TransactionCommit(ITransactionActionManager transactionActionManager)
+    {
+        var transaction = UnitOfWork.GetOrBeginTransaction();
+        int result;
+        try
+        {
+            transactionActionManager.CommitAsync(transaction).GetAwaiter().GetResult();
+            result = base.SaveChanges();
+        }
+        catch (Exception exception)
+        {
+            try
+            {
+                UnitOfWork.Rollback();
+            }
+            catch (Exception rollbackException)
+            {
+                throw new AggregateException(exception, rollbackException);
+            }
+
+            throw;
+        }
+
+        UnitOfWork.Commit();
+        return result;
+    }
+
+    #endregion
+
     #region SaveChangesAsync(异步保存更改)
 
     /// <summary>
@@ -214,21 +260,44 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// </summary>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var transactionActionManager = Create<ITransactionActionManager>();
         if (transactionActionManager.Count == 0)
             return await base.SaveChangesAsync(cancellationToken);
-        return await TransactionCommit(transactionActionManager);
+        return await TransactionCommit(transactionActionManager, cancellationToken);
     }
 
     /// <summary>
     /// 手工创建事务提交
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
-    private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager)
+    /// <param name="cancellationToken">取消令牌</param>
+    private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var transaction = UnitOfWork.GetOrBeginTransaction();
-        await transactionActionManager.CommitAsync(transaction);
-        var result = await base.SaveChangesAsync();
+        int result;
+        try
+        {
+            await transactionActionManager.CommitAsync(transaction);
+            cancellationToken.ThrowIfCancellationRequested();
+            result = await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            try
+            {
+                UnitOfWork.Rollback();
+            }
+            catch (Exception rollbackException)
+            {
+                throw new AggregateException(exception, rollbackException);
+            }
+
+            throw;
+        }
+
         UnitOfWork.Commit();
         return result;
     }

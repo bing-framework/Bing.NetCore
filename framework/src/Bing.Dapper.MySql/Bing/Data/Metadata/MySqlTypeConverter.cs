@@ -12,7 +12,7 @@ public class MySqlTypeConverter : ITypeConverter
     {
         if (string.IsNullOrWhiteSpace(dataType))
             return null;
-        switch (dataType.ToLower())
+        switch (dataType.ToLowerInvariant())
         {
             case "char":
                 return length == 36 ? DbType.Guid : DbType.String;

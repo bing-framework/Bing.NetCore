@@ -473,22 +473,6 @@ Bing.Data.Sql.Builders.Core.SqlClauseContext.ExecutionContext.get -> Bing.Data.S
 Bing.Data.Sql.Builders.Core.SqlClauseContext.ParameterManager.get -> Bing.Data.Sql.Builders.Params.IParameterManager
 Bing.Data.Sql.Builders.Core.SqlClauseContext.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
 Bing.Data.Sql.Builders.Core.SqlClauseContext.Services.get -> Bing.Data.Sql.Builders.Core.SqlBuilderServices
-Bing.Data.Sql.Builders.Core.SqlFilterContext
-Bing.Data.Sql.Builders.Core.SqlFilterContext.ClauseAccessor.get -> Bing.Data.Sql.Builders.ISqlQueryClauseAccessor
-Bing.Data.Sql.Builders.Core.SqlFilterContext.DataFilter.get -> Bing.Data.Filters.IDataFilter
-Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
-Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContextAccessor.get -> Bing.Data.Sql.IDatabaseContextAccessor
-Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContextResolver.get -> Bing.Data.Sql.ISqlDatabaseContextResolver
-Bing.Data.Sql.Builders.Core.SqlFilterContext.Dialect.get -> Bing.Data.Sql.Builders.IDialect
-Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityAliasRegister.get -> Bing.Data.Sql.Builders.IEntityAliasRegister
-Bing.Data.Sql.Builders.Core.SqlFilterContext.JoinSources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
-Bing.Data.Sql.Builders.Core.SqlFilterContext.RootSources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
-Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityMappingResolver.get -> Bing.Data.Sql.Metadata.IEntityMappingResolver
-Bing.Data.Sql.Builders.Core.SqlFilterContext.EntityModelMetadataProvider.get -> Bing.Data.Sql.Metadata.IEntityModelMetadataProvider
-Bing.Data.Sql.Builders.Core.SqlFilterContext.MetadataOptions.get -> Bing.Data.Sql.Configs.SqlMetadataOptions
-Bing.Data.Sql.Builders.Core.SqlFilterContext.Options.get -> Bing.Data.SqlOptions
-Bing.Data.Sql.Builders.Core.SqlFilterContext.ParameterManager.get -> Bing.Data.Sql.Builders.Params.IParameterManager
-Bing.Data.Sql.Builders.Core.SqlFilterContext.SqlFilterContext(Bing.Data.Sql.Builders.IDialect dialect, Bing.Data.Sql.Builders.IEntityAliasRegister entityAliasRegister, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager, Bing.Data.Sql.Builders.ISqlQueryClauseAccessor clause, Bing.Data.Sql.Builders.Core.SqlBuilderServices services, Bing.Data.Sql.DatabaseContext databaseContext = null) -> void
 Bing.Data.Sql.Builders.Core.SqlItem
 Bing.Data.Sql.Builders.Core.SqlItem.Alias.get -> string
 Bing.Data.Sql.Builders.Core.SqlItem.DatabaseName.get -> string
@@ -1059,10 +1043,6 @@ Bing.Data.Sql.Builders.Mutations.ISqlDeleteUsingClauseFactory.CreateDeleteUsing(
 Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder
 Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilderFactory
 Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilderFactory.Create(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder
-Bing.Data.Sql.Builders.Mutations.ISqlFluentMutationBuilderFactory
-Bing.Data.Sql.Builders.Mutations.ISqlFluentMutationBuilderFactory.CreateDelete(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
-Bing.Data.Sql.Builders.Mutations.ISqlFluentMutationBuilderFactory.CreateInsert(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
-Bing.Data.Sql.Builders.Mutations.ISqlFluentMutationBuilderFactory.CreateUpdate(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
 Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
 Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder.Clear() -> void
 Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder.Clone() -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
@@ -1083,8 +1063,8 @@ Bing.Data.Sql.Builders.Mutations.ISqlMutationClauseFactoryProvider.MutationClaus
 Bing.Data.Sql.Builders.Mutations.ISqlReturningClauseFactory
 Bing.Data.Sql.Builders.Mutations.ISqlReturningClauseFactory.CreateReturning(Bing.Data.Sql.Builders.Mutations.Contexts.SqlMutationContext context) -> Bing.Data.Sql.Builders.Mutations.IReturningClause
 Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect
-Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect.GetKeyword(Bing.Data.Sql.Builders.SqlExecutionKind executionKind) -> string
-Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect.GetQualifier(Bing.Data.Sql.Builders.SqlExecutionKind executionKind, string configuredQualifier) -> string
+Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect.GetKeyword(Bing.Data.Sql.SqlExecutionKind executionKind) -> string
+Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect.GetQualifier(Bing.Data.Sql.SqlExecutionKind executionKind, string configuredQualifier) -> string
 Bing.Data.Sql.Builders.Mutations.ISqlReturningDialect.Position.get -> Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition
 Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
 Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder.AllowAllRows.get -> bool
@@ -1109,11 +1089,6 @@ Bing.Data.Sql.Builders.Mutations.IValuesClause.RowCount.get -> int
 Bing.Data.Sql.Builders.Mutations.SqlEntityMutationCommandBuilderFactory
 Bing.Data.Sql.Builders.Mutations.SqlEntityMutationCommandBuilderFactory.Create(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder
 Bing.Data.Sql.Builders.Mutations.SqlEntityMutationCommandBuilderFactory.SqlEntityMutationCommandBuilderFactory() -> void
-Bing.Data.Sql.Builders.Mutations.SqlFluentMutationBuilderFactory
-Bing.Data.Sql.Builders.Mutations.SqlFluentMutationBuilderFactory.CreateDelete(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
-Bing.Data.Sql.Builders.Mutations.SqlFluentMutationBuilderFactory.CreateInsert(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
-Bing.Data.Sql.Builders.Mutations.SqlFluentMutationBuilderFactory.CreateUpdate(Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.Core.SqlBuilderServices services) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
-Bing.Data.Sql.Builders.Mutations.SqlFluentMutationBuilderFactory.SqlFluentMutationBuilderFactory() -> void
 Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition
 Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition.BeforeSource = 1 -> Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition
 Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition.End = 0 -> Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition
@@ -1144,8 +1119,6 @@ Bing.Data.Sql.Builders.Params.IAdvancedParameterManager
 Bing.Data.Sql.Builders.Params.IAdvancedParameterManager.Add(Bing.Data.Sql.Builders.Params.SqlParam parameter) -> void
 Bing.Data.Sql.Builders.Params.IAdvancedParameterManager.ExportValues() -> System.Collections.Generic.IReadOnlyDictionary<string, object>
 Bing.Data.Sql.Builders.Params.IAdvancedParameterManager.GetSqlParams() -> System.Collections.Generic.IReadOnlyDictionary<string, Bing.Data.Sql.Builders.Params.SqlParam>
-Bing.Data.Sql.Builders.Params.IClearParameters
-Bing.Data.Sql.Builders.Params.IClearParameters.ClearParams() -> void
 Bing.Data.Sql.Builders.Params.IFieldValueConverter
 Bing.Data.Sql.Builders.Params.IFieldValueConverter.CanConvert(Bing.Data.Sql.Metadata.ColumnMappingMetadata column, Bing.Data.Sql.DatabaseContext databaseContext) -> bool
 Bing.Data.Sql.Builders.Params.IFieldValueConverter.ConvertFromProvider(object value, Bing.Data.Sql.Metadata.ColumnMappingMetadata column, Bing.Data.Sql.DatabaseContext databaseContext) -> object
@@ -1153,8 +1126,6 @@ Bing.Data.Sql.Builders.Params.IFieldValueConverter.ConvertToProvider(object valu
 Bing.Data.Sql.Builders.Params.IFieldValueConverterSelector
 Bing.Data.Sql.Builders.Params.IFieldValueConverterSelector.ConvertFromProvider(object value, Bing.Data.Sql.Metadata.ColumnMappingMetadata column, Bing.Data.Sql.DatabaseContext databaseContext) -> object
 Bing.Data.Sql.Builders.Params.IFieldValueConverterSelector.ConvertToProvider(object value, Bing.Data.Sql.Metadata.ColumnMappingMetadata column, Bing.Data.Sql.DatabaseContext databaseContext) -> object
-Bing.Data.Sql.Builders.Params.IGetParameter
-Bing.Data.Sql.Builders.Params.IGetParameter.GetParam<T>(string name) -> T
 Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
 Bing.Data.Sql.Builders.Params.IParamLiteralsResolver.GetParamLiterals(object value) -> string
 Bing.Data.Sql.Builders.Params.IParameterManager
@@ -1221,11 +1192,6 @@ Bing.Data.Sql.Builders.SqlAggregateFunction.Count = 0 -> Bing.Data.Sql.Builders.
 Bing.Data.Sql.Builders.SqlAggregateFunction.Max = 3 -> Bing.Data.Sql.Builders.SqlAggregateFunction
 Bing.Data.Sql.Builders.SqlAggregateFunction.Min = 4 -> Bing.Data.Sql.Builders.SqlAggregateFunction
 Bing.Data.Sql.Builders.SqlAggregateFunction.Sum = 1 -> Bing.Data.Sql.Builders.SqlAggregateFunction
-Bing.Data.Sql.Builders.SqlExecutionKind
-Bing.Data.Sql.Builders.SqlExecutionKind.Delete = 3 -> Bing.Data.Sql.Builders.SqlExecutionKind
-Bing.Data.Sql.Builders.SqlExecutionKind.Insert = 1 -> Bing.Data.Sql.Builders.SqlExecutionKind
-Bing.Data.Sql.Builders.SqlExecutionKind.Query = 0 -> Bing.Data.Sql.Builders.SqlExecutionKind
-Bing.Data.Sql.Builders.SqlExecutionKind.Update = 2 -> Bing.Data.Sql.Builders.SqlExecutionKind
 Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Builders.SqlOperationKind.Delete = 5 -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Builders.SqlOperationKind.InsertSelect = 3 -> Bing.Data.Sql.Builders.SqlOperationKind
@@ -1235,10 +1201,10 @@ Bing.Data.Sql.Builders.SqlOperationKind.Select = 1 -> Bing.Data.Sql.Builders.Sql
 Bing.Data.Sql.Builders.SqlOperationKind.Update = 4 -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Builders.SqlValidationContext
 Bing.Data.Sql.Builders.SqlValidationContext.AllowAllRows.get -> bool
-Bing.Data.Sql.Builders.SqlValidationContext.ExecutionKind.get -> Bing.Data.Sql.Builders.SqlExecutionKind
+Bing.Data.Sql.Builders.SqlValidationContext.ExecutionKind.get -> Bing.Data.Sql.SqlExecutionKind
 Bing.Data.Sql.Builders.SqlValidationContext.ParameterCount.get -> int
 Bing.Data.Sql.Builders.SqlValidationContext.Provider.get -> Bing.Data.Sql.Builders.ISqlProvider
-Bing.Data.Sql.Builders.SqlValidationContext.SqlValidationContext(Bing.Data.Sql.Builders.ISqlProvider provider, int parameterCount, bool allowAllRows, Bing.Data.Sql.Builders.SqlExecutionKind executionKind) -> void
+Bing.Data.Sql.Builders.SqlValidationContext.SqlValidationContext(Bing.Data.Sql.Builders.ISqlProvider provider, int parameterCount, bool allowAllRows, Bing.Data.Sql.SqlExecutionKind executionKind) -> void
 Bing.Data.Sql.ColumnStorageKind
 Bing.Data.Sql.ColumnStorageKind.Binary = 5 -> Bing.Data.Sql.ColumnStorageKind
 Bing.Data.Sql.ColumnStorageKind.Boolean = 3 -> Bing.Data.Sql.ColumnStorageKind
@@ -1481,7 +1447,6 @@ Bing.Data.Sql.ISqlBuilder.ClearSqlParams() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlBuilder.ClearUnionBuilders() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlBuilder.ClearWhere() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlBuilder.Clone() -> Bing.Data.Sql.ISqlBuilder
-Bing.Data.Sql.ISqlBuilder.IgnoreFilter<TSqlFilter>() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlBuilder.New() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlBuilder.OperationKind.get -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.ISqlBuilder.Page(Bing.Data.IPager pager) -> Bing.Data.Sql.ISqlBuilder
@@ -1508,22 +1473,11 @@ Bing.Data.Sql.ISqlDbConnectionFactoryResolver.Create(string providerKey, string 
 Bing.Data.Sql.ISqlDbParameterCustomizer
 Bing.Data.Sql.ISqlDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
 Bing.Data.Sql.ISqlDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
-Bing.Data.Sql.ISqlDeleteExecutor
-Bing.Data.Sql.ISqlDeleteExecutor.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlDeleteExecutor.DeleteAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlDeleteExecutor.DeleteBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlDeleteExecutor.DeleteBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor
 Bing.Data.Sql.ISqlExecutor.ExecuteSql(string sql, object param = null, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteSqlAsync(string sql, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlExecutor.CreateBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutorFactory
 Bing.Data.Sql.ISqlExecutorFactory.Create(string dbKey = null) -> Bing.Data.Sql.ISqlExecutor
-Bing.Data.Sql.ISqlInsertExecutor
-Bing.Data.Sql.ISqlInsertExecutor.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlInsertExecutor.InsertAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlInsertExecutor.InsertBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlInsertExecutor.InsertBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlMultipleQueryExecutor
 Bing.Data.Sql.ISqlMultipleQueryExecutor.CreateBatch() -> Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder
 Bing.Data.Sql.ISqlMultipleQueryExecutor.Execute(Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand command, int? timeout = null) -> Bing.Data.Sql.ISqlMultipleQueryResult
@@ -1574,11 +1528,6 @@ Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dbKey = null) -> Bing.Dat
 Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dbKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
 Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dbKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
 Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dbKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
-Bing.Data.Sql.ISqlUpdateExecutor
-Bing.Data.Sql.ISqlUpdateExecutor.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlUpdateExecutor.UpdateAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
-Bing.Data.Sql.ISqlUpdateExecutor.UpdateBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null) -> int
-Bing.Data.Sql.ISqlUpdateExecutor.UpdateBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.Metadata.ColumnIdentifier
 Bing.Data.Sql.Metadata.ColumnIdentifier.ColumnIdentifier() -> void
 Bing.Data.Sql.Metadata.ColumnIdentifier.ColumnIdentifier(string name) -> void
@@ -2392,7 +2341,6 @@ virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.CreateWhereClause() -> Bing.D
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.GetCondition() -> string
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.GetCteKeyWord() -> string
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.GetParamLiteralsResolver() -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
-virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.IgnoreFilter<TSqlFilter>() -> Bing.Data.Sql.ISqlBuilder
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.Init() -> void
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.New() -> Bing.Data.Sql.ISqlBuilder
 virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.ToDebugSql() -> string

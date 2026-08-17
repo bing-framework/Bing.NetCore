@@ -83,6 +83,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <exception cref="ArgumentNullException"></exception>
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
         await Set.AddAsync(entity, cancellationToken);
@@ -96,6 +97,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <exception cref="ArgumentNullException"></exception>
     public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
         await Set.AddRangeAsync(entities, cancellationToken);
@@ -122,7 +124,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        Set.UpdateRangeAsync(entities);
+        Set.UpdateRange(entities);
     }
 
     /// <summary>
@@ -132,6 +134,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         Update(entity);
         return Task.CompletedTask;
     }
@@ -144,6 +147,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <exception cref="ArgumentNullException"></exception>
     public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
         await Set.UpdateRangeAsync(entities, cancellationToken);
@@ -238,6 +242,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var entity = await FindAsync(id, cancellationToken);
         Delete(entity);
     }
@@ -249,6 +254,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entity == null)
             return;
         await RemoveAsync(entity.Id, cancellationToken);
@@ -261,6 +267,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (ids == null)
             return;
         var entities = await FindByIdsAsync(ids, cancellationToken);
@@ -274,6 +281,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             return;
         await RemoveAsync(entities.Select(t => t.Id), cancellationToken);

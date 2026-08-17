@@ -12,7 +12,7 @@ public class PostgreSqlTypeConverter : ITypeConverter
     {
         if (string.IsNullOrWhiteSpace(dataType))
             return null;
-        switch (dataType.ToLower())
+        switch (dataType.ToLowerInvariant())
         {
             case "uuid":
                 return DbType.Guid;

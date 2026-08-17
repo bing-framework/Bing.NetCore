@@ -73,7 +73,7 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
     {
         var list = await _store.FindAllAsync(t => t.Path.StartsWith(parent.Path));
-        return list.Where(t => t.Id.Equals(parent.Id)).Select(ToEntity).ToList();
+        return list.Where(t => !t.Id.Equals(parent.Id)).Select(ToEntity).ToList();
     }
 
     /// <summary>
@@ -81,5 +81,9 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default) => ToEntity(await _store.FindByIdNoTrackingAsync(id, cancellationToken));
+    public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ToEntity(await _store.FindByIdNoTrackingAsync(id, cancellationToken));
+    }
 }

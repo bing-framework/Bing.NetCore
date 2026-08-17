@@ -66,7 +66,11 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default) => ToEntity(await _store.FindByIdAsync(id, cancellationToken));
+    public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return ToEntity(await _store.FindByIdAsync(id, cancellationToken));
+    }
 
     /// <summary>
     /// 查找实体列表
@@ -103,6 +107,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var pos = await _store.FindByIdsAsync(ids, cancellationToken);
         return pos.Select(ToEntity).ToList();
     }
@@ -158,14 +163,22 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default) => await _store.AddAsync(ToPo(entity), cancellationToken);
+    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.AddAsync(ToPo(entity), cancellationToken);
+    }
 
     /// <summary>
     /// 添加实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) => await _store.AddAsync(entities.Select(ToPo), cancellationToken);
+    public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.AddAsync(entities.Select(ToPo), cancellationToken);
+    }
 
     /// <summary>
     /// 修改实体
@@ -220,26 +233,42 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default) => await _store.RemoveAsync(id, cancellationToken);
+    public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.RemoveAsync(id, cancellationToken);
+    }
 
     /// <summary>
     /// 移除实体
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default) => await _store.RemoveAsync(ToPo(entity), cancellationToken);
+    public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.RemoveAsync(ToPo(entity), cancellationToken);
+    }
 
     /// <summary>
     /// 移除实体集合
     /// </summary>
     /// <param name="ids">标识集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default) => await _store.RemoveAsync(ids, cancellationToken);
+    public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.RemoveAsync(ids, cancellationToken);
+    }
 
     /// <summary>
     /// 移除实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) => await _store.RemoveAsync(entities.Select(ToPo), cancellationToken);
+    public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _store.RemoveAsync(entities.Select(ToPo), cancellationToken);
+    }
 }

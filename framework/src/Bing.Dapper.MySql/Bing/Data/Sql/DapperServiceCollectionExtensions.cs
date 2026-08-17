@@ -1,13 +1,13 @@
-﻿using Bing.Data;
+﻿using Bing.Dapper;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Dapper;
-using MySqlConnector;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MySqlConnector;
 
 namespace Bing.Dapper.MySql;
 
@@ -40,9 +40,6 @@ public static class MySqlServiceCollectionExtensions
         services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
         services.AddSqlProviderRuntime(new SqlProviderRuntime(MySqlSqlProvider.Instance.Key, typeof(MySqlQuery),
             typeof(MySqlExecutor), typeof(MySqlMultipleQueryExecutor)));
-        services.TryAddTransient<ISqlQuery, MySqlQuery>();
-        services.TryAddTransient<ISqlExecutor, MySqlExecutor>();
-        services.TryAddTransient<ISqlMultipleQueryExecutor, MySqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

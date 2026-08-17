@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace Bing.Data.Sql.Builders.Core;
 

@@ -55,6 +55,32 @@ public sealed class SqlWriteCommand
     }
 
     /// <summary>
+    /// 复制命令并仅更新受影响行数校验语义。
+    /// </summary>
+    /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
+    /// <returns>保留 SQL、参数和 Provider 执行元数据的命令副本。</returns>
+    internal SqlWriteCommand WithValidateAffectedRows(bool validateAffectedRows)
+    {
+        if (ValidateAffectedRows == validateAffectedRows)
+            return this;
+        return new SqlWriteCommand(this, validateAffectedRows);
+    }
+
+    /// <summary>
+    /// 复制冻结命令的执行元数据。
+    /// </summary>
+    private SqlWriteCommand(SqlWriteCommand command, bool validateAffectedRows)
+    {
+        Sql = command.Sql;
+        _parameters = command._parameters.Select(SqlParameterSnapshot.CloneSqlParameter).ToArray();
+        ProviderKey = command.ProviderKey;
+        ProviderProfile = command.ProviderProfile;
+        OperationKind = command.OperationKind;
+        HasReturning = command.HasReturning;
+        ValidateAffectedRows = validateAffectedRows;
+    }
+
+    /// <summary>
     /// 已生成的 SQL 语句。
     /// </summary>
     public string Sql { get; }
@@ -87,12 +113,12 @@ public sealed class SqlWriteCommand
     /// <summary>
     /// 生成 SQL 时冻结的 Provider 能力档案。
     /// </summary>
-    internal SqlProviderProfile ProviderProfile { get; }
+    public SqlProviderProfile ProviderProfile { get; }
 
     /// <summary>
     /// 为一次执行创建独立的参数集合。
     /// </summary>
-    internal IReadOnlyCollection<SqlParam> CreateParameters() => _parameters
+    public IReadOnlyCollection<SqlParam> CreateParameters() => _parameters
         .Select(SqlParameterSnapshot.CloneSqlParameter)
         .ToArray();
 }

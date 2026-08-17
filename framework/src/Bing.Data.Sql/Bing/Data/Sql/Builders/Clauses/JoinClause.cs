@@ -237,20 +237,66 @@ public class JoinClause : IJoinClause
         .ToList();
 
     /// <summary>
-    /// 向指定查询图表源追加过滤条件。
+    /// 按 SQL 追加顺序导出当前 Join 图，供过滤器放置规划器判断每个来源的保留侧语义。
     /// </summary>
-    /// <param name="sourceId">Join 表源标识。</param>
-    /// <param name="column">已方言转义的列名。</param>
+    /// <param name="rootSources">当前 From 子句中的结构化根来源。</param>
+    /// <returns>按 Join SQL 顺序排列的不可变拓扑边。</returns>
+    internal IReadOnlyList<SqlFilterJoin> GetFilterTopology(IReadOnlyList<TableSource> rootSources)
+    {
+        var leftSourceIds = rootSources?.Select(source => source.SourceId).ToList() ?? new List<string>();
+        var result = new List<SqlFilterJoin>(_params.Count);
+        foreach (var item in _params)
+        {
+            var rightSourceId = item.Source?.SourceId;
+            if (string.IsNullOrWhiteSpace(rightSourceId))
+            {
+                var index = _params.IndexOf(item);
+                var entityType = item.Source?.EntityType ?? item.Type ??
+                    (item.Table as StructuredSqlItem)?.Reference?.EntityType;
+                if (entityType != null)
+                    rightSourceId = $"join_{index}";
+            }
+            result.Add(new SqlFilterJoin(GetFilterJoinKind(item.JoinType), leftSourceIds.ToArray(), rightSourceId));
+            if (string.IsNullOrWhiteSpace(rightSourceId) == false)
+                leftSourceIds.Add(rightSourceId);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 将已规划的过滤谓词追加到指定 Join 的 On 条件。
+    /// </summary>
+    /// <param name="sourceId">目标 Join 右侧来源标识。</param>
+    /// <param name="column">已方言转义的列引用。</param>
     /// <param name="value">参数值。</param>
-    internal void AddFilterCondition(string sourceId, string column, object value)
+    /// <param name="operator">比较运算符。</param>
+    /// <exception cref="InvalidOperationException">指定来源不是可写入 On 的 Join 右侧时抛出。</exception>
+    internal void AddFilterCondition(string sourceId, string column, object value, Operator @operator = Operator.Equal)
     {
         var item = _params.FirstOrDefault(candidate => string.Equals(candidate.Source?.SourceId, sourceId,
             StringComparison.Ordinal));
         if (item == null)
             throw new InvalidOperationException($"未找到过滤器表源 {sourceId}。");
-        if (item.JoinType is "Right Join" or "Full Join" or "Cross Join")
-            throw new NotSupportedException($"无法安全将全局过滤器应用到 {item.JoinType} 表源 {sourceId}。请使用预过滤派生表或显式过滤条件。");
-        item.On(column, value);
+        item.On(column, value, @operator);
+    }
+
+    /// <summary>
+    /// 将 Join SQL 关键字转换为过滤器规划使用的明确 Join 类型。
+    /// </summary>
+    /// <param name="joinType">Join SQL 关键字。</param>
+    /// <returns>对应的结构化 Join 类型。</returns>
+    /// <exception cref="InvalidOperationException">Join 类型不受框架结构化拓扑支持时抛出。</exception>
+    private static SqlFilterJoinKind GetFilterJoinKind(string joinType)
+    {
+        return joinType switch
+        {
+            JoinKey => SqlFilterJoinKind.Inner,
+            LeftJoinKey => SqlFilterJoinKind.Left,
+            RightJoinKey => SqlFilterJoinKind.Right,
+            FullJoinKey => SqlFilterJoinKind.Full,
+            CrossJoinKey => SqlFilterJoinKind.Cross,
+            _ => throw new InvalidOperationException($"不支持为 Join 类型 {joinType} 建立过滤器拓扑。")
+        };
     }
 
     /// <summary>

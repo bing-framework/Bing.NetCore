@@ -31,9 +31,9 @@ public interface ISqlOutputParameterAccessor
 }
 
 /// <summary>
-/// 提供执行完成后输出参数值快照的内部契约。
+/// 提供执行完成后输出参数值快照的运行时契约。
 /// </summary>
-internal interface ISqlOutputParameterSnapshotProvider
+public interface ISqlOutputParameterSnapshotProvider
 {
     /// <summary>
     /// 创建当前输出参数的独立值快照。
@@ -45,7 +45,7 @@ internal interface ISqlOutputParameterSnapshotProvider
 /// <summary>
 /// 输出参数值快照。
 /// </summary>
-internal sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
+public sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
 {
     /// <summary>
     /// 输出参数值。
@@ -56,7 +56,7 @@ internal sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
     /// 初始化输出参数值快照。
     /// </summary>
     /// <param name="values">已在本次执行完成后读取的输出值。</param>
-    internal SqlOutputParameterSnapshot(IEnumerable<KeyValuePair<string, object>> values)
+    public SqlOutputParameterSnapshot(IEnumerable<KeyValuePair<string, object>> values)
     {
         _values = (values ?? Array.Empty<KeyValuePair<string, object>>())
             .Where(item => string.IsNullOrWhiteSpace(item.Key) == false)
@@ -69,7 +69,7 @@ internal sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
     /// <param name="accessor">框架参数绑定器创建的访问器。</param>
     /// <returns>独立的输出参数快照；没有输出参数时返回 null。</returns>
     /// <exception cref="NotSupportedException">访问器无法提供稳定快照时抛出。</exception>
-    internal static ISqlOutputParameterAccessor Create(ISqlOutputParameterAccessor accessor)
+    public static ISqlOutputParameterAccessor Create(ISqlOutputParameterAccessor accessor)
     {
         if (accessor == null)
             return null;
@@ -148,7 +148,7 @@ internal sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
 /// <remarks>
 /// 框架绑定器与执行结果快照均通过该组件转换，避免同步、异步和访问器实现出现不同的类型语义。
 /// </remarks>
-internal static class SqlOutputParameterValueConverter
+public static class SqlOutputParameterValueConverter
 {
     /// <summary>
     /// 尝试转换输出参数值。
@@ -157,7 +157,7 @@ internal static class SqlOutputParameterValueConverter
     /// <param name="rawValue">原始输出值。</param>
     /// <param name="value">转换结果。</param>
     /// <returns>转换成功时返回 true。</returns>
-    internal static bool TryConvert<T>(object rawValue, out T value)
+    public static bool TryConvert<T>(object rawValue, out T value)
     {
         if (rawValue is T typedValue)
         {
@@ -204,7 +204,7 @@ internal static class SqlOutputParameterValueConverter
     /// </summary>
     /// <typeparam name="T">目标 CLR 类型。</typeparam>
     /// <returns>可表示 null 时返回 true。</returns>
-    internal static bool IsNullableType<T>() => typeof(T).IsValueType == false ||
+    public static bool IsNullableType<T>() => typeof(T).IsValueType == false ||
                                                 Nullable.GetUnderlyingType(typeof(T)) != null;
 
     /// <summary>

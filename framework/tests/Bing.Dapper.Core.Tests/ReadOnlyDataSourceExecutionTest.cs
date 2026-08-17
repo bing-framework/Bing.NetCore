@@ -31,7 +31,7 @@ public class ReadOnlyDataSourceExecutionTest
         var command = builder.Object.ToSqlWriteCommand();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteMutation(command));
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteWrite(command));
 
         // Assert
         Assert.Contains("reporting", exception.Message);
@@ -55,7 +55,7 @@ public class ReadOnlyDataSourceExecutionTest
         var command = builder.Object.ToSqlWriteCommand();
 
         // Act
-        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteMutationAsync(command));
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteWriteAsync(command));
 
         // Assert
         Assert.Contains("reporting", exception.Message);

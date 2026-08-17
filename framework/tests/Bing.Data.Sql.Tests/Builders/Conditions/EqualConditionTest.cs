@@ -112,6 +112,33 @@ public class EqualConditionTest
     }
 
     /// <summary>
+    /// 测试目的：参数化条件渲染失败时不得遗留参数；后续条件与失败条件重试必须使用独立参数名称和值。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenParameterizedConditionFails_ShouldRestoreParameterStateBeforeRetry()
+    {
+        // Arrange
+        var condition = new ThrowOnceSqlCondition(_parameterManager, "First", 1);
+        var otherCondition = new EqualSqlCondition(_parameterManager, "Second", 2, true);
+        var failedResult = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => condition.AppendTo(failedResult));
+        var otherResult = GetResult(otherCondition);
+        var retryResult = GetResult(condition);
+
+        // Assert
+        Assert.Equal("Condition rendering failed.", exception.Message);
+        Assert.Equal("Prefix:", failedResult.ToString());
+        Assert.Equal("Second=@_p_1", otherResult);
+        Assert.Equal("First=@_p_2", retryResult);
+        Assert.Equal(2, _parameterManager.GetParams().Count);
+        Assert.Null(_parameterManager.GetValue("@_p_0"));
+        Assert.Equal(2, _parameterManager.GetValue("@_p_1"));
+        Assert.Equal(1, _parameterManager.GetValue("@_p_2"));
+    }
+
+    /// <summary>
     /// 测试 - 获取条件 - 非参数化
     /// </summary>
     [Fact]
@@ -120,6 +147,38 @@ public class EqualConditionTest
         var condition = new EqualSqlCondition(_parameterManager, "a", "b", false);
         Assert.Equal("a=b", GetResult(condition));
         Assert.Empty(_parameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 首次写入条件片段时故意抛出异常的参数化测试条件。
+    /// </summary>
+    private sealed class ThrowOnceSqlCondition : SqlConditionBase
+    {
+        /// <summary>
+        /// 指示下次条件写入是否应抛出异常。
+        /// </summary>
+        private bool _shouldThrow = true;
+
+        /// <summary>
+        /// 初始化一个<see cref="ThrowOnceSqlCondition"/>类型的实例。
+        /// </summary>
+        /// <param name="parameterManager">参数管理器。</param>
+        /// <param name="column">列名。</param>
+        /// <param name="value">条件值。</param>
+        public ThrowOnceSqlCondition(IParameterManager parameterManager, string column, object value)
+            : base(parameterManager, column, value, true)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override void AppendCondition(StringBuilder builder, string column, object value)
+        {
+            builder.Append($"{column}={value}");
+            if (_shouldThrow == false)
+                return;
+            _shouldThrow = false;
+            throw new InvalidOperationException("Condition rendering failed.");
+        }
     }
 
     /// <summary>

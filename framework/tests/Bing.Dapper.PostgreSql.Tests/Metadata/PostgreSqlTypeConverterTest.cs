@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Bing.Data.Metadata;
 using Shouldly;
 using Xunit;
@@ -69,6 +70,30 @@ public class PostgreSqlTypeConverterTest
     {
         _converter.ToDbType("INT4").ShouldBe(DbType.Int32);
         _converter.ToDbType("Int4").ShouldBe(DbType.Int32);
+    }
+
+    /// <summary>
+    /// 测试目的：类型名称转换不得受当前区域文化影响，土耳其语环境中的 INT4 仍应映射为 Int32。
+    /// </summary>
+    [Fact]
+    public void ToDbType_WhenCurrentCultureIsTurkish_ShouldUseInvariantTypeName()
+    {
+        // Arrange
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+            // Act
+            var result = _converter.ToDbType("INT4");
+
+            // Assert
+            result.ShouldBe(DbType.Int32);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     // ═══════════════════════════════════════════════════════════

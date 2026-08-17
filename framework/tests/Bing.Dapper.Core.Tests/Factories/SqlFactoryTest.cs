@@ -156,6 +156,45 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 测试目的：事务工厂拒绝未提供固定上下文的 Query 时，必须释放已经由调用方工厂创建的对象。
+    /// </summary>
+    [Fact]
+    public void Begin_WhenQueryDoesNotProvideDatabaseContext_ShouldDisposeCreatedQuery()
+    {
+        // Arrange
+        var query = new Mock<ISqlQuery>();
+        var scopeFactory = new SqlTransactionScopeFactory(new FixedQueryFactory(query.Object),
+            new ThrowingExecutorFactory());
+
+        // Act and Assert
+        var exception = Assert.Throws<InvalidOperationException>(() => scopeFactory.Begin());
+
+        // Assert
+        Assert.Equal("事务查询对象必须提供固定数据库上下文", exception.Message);
+        query.Verify(item => item.Dispose(), Times.Once);
+    }
+
+    /// <summary>
+    /// 测试目的：异步事务工厂拒绝未提供固定上下文的 Query 时，必须异步释放已经创建的对象。
+    /// </summary>
+    [Fact]
+    public async Task BeginAsync_WhenQueryDoesNotProvideDatabaseContext_ShouldDisposeCreatedQuery()
+    {
+        // Arrange
+        var query = new Mock<ISqlQuery>();
+        query.Setup(item => item.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        var scopeFactory = new SqlTransactionScopeFactory(new FixedQueryFactory(query.Object),
+            new ThrowingExecutorFactory());
+
+        // Act and Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => scopeFactory.BeginAsync());
+
+        // Assert
+        Assert.Equal("事务查询对象必须提供固定数据库上下文", exception.Message);
+        query.Verify(item => item.DisposeAsync(), Times.Once);
+    }
+
+    /// <summary>
     /// 测试目的：显式数据源 Key 应选择对应 Provider 的实现类型与独立配置快照。
     /// </summary>
     [Fact]

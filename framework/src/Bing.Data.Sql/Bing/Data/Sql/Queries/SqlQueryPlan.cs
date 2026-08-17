@@ -7,12 +7,12 @@ using System.Data;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 独立 SQL 查询描述的内部执行计划。
+/// 独立 SQL 查询描述的执行计划。
 /// </summary>
 /// <remarks>
 /// 计划只保存查询输入，不保存连接、事务、诊断或执行状态；这些状态始终由创建它的根查询管理。
 /// </remarks>
-internal sealed class SqlQueryPlan
+public sealed class SqlQueryPlan
 {
     /// <summary>
     /// 当前计划本次参数绑定完成后的输出参数访问器接收器。
@@ -103,7 +103,7 @@ internal sealed class SqlQueryPlan
     /// 通知本次计划已完成参数绑定。
     /// </summary>
     /// <param name="outputParameters">当前绑定器提供的输出参数访问器。</param>
-    internal void NotifyParametersBound(ISqlOutputParameterAccessor outputParameters) =>
+    public void NotifyParametersBound(ISqlOutputParameterAccessor outputParameters) =>
         _outputParametersReceiver?.Invoke(outputParameters);
 
     /// <summary>
@@ -112,7 +112,14 @@ internal sealed class SqlQueryPlan
     /// <remarks>
     /// 过程输出参数必须在事务提交和成功诊断之前复制，避免快照失败被误判为成功执行。
     /// </remarks>
-    internal void NotifyExecutionCompleted() => _outputParametersCompletion?.Invoke();
+    public void NotifyExecutionCompleted() => _outputParametersCompletion?.Invoke();
+
+    /// <summary>
+    /// 创建 Fluent SQL Builder 查询计划。
+    /// </summary>
+    /// <param name="builder">当前查询专属的 SQL Builder。</param>
+    /// <returns>仅包含该 Builder 的查询计划。</returns>
+    public static SqlQueryPlan Create(ISqlBuilder builder) => new(builder, "Id");
 
     /// <summary>
     /// 创建 Fluent SQL Builder 查询计划。
@@ -120,7 +127,26 @@ internal sealed class SqlQueryPlan
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
     /// <returns>仅包含该 Builder 的查询计划。</returns>
-    public static SqlQueryPlan Create(ISqlBuilder builder, string splitOn = "Id") => new(builder, splitOn);
+    public static SqlQueryPlan Create(ISqlBuilder builder, string splitOn) => new(builder, splitOn);
+
+    /// <summary>
+    /// 创建原生 SQL 文本查询计划。
+    /// </summary>
+    /// <param name="commandText">要原样执行的 SQL 文本。</param>
+    /// <param name="parameters">由参数绑定器处理的参数源。</param>
+    /// <returns>包含 SQL 文本和参数源的查询计划。</returns>
+    public static SqlQueryPlan Create(string commandText, object parameters) =>
+        new(commandText, parameters, "Id", System.Data.CommandType.Text);
+
+    /// <summary>
+    /// 创建原生 SQL 文本查询计划。
+    /// </summary>
+    /// <param name="commandText">要原样执行的 SQL 文本。</param>
+    /// <param name="parameters">由参数绑定器处理的参数源。</param>
+    /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
+    /// <returns>包含 SQL 文本和参数源的查询计划。</returns>
+    public static SqlQueryPlan Create(string commandText, object parameters, string splitOn) =>
+        new(commandText, parameters, splitOn, System.Data.CommandType.Text);
 
     /// <summary>
     /// 创建原生 SQL 文本查询计划。
@@ -130,8 +156,8 @@ internal sealed class SqlQueryPlan
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
     /// <param name="commandType">当前计划使用的 ADO.NET 命令类型。</param>
     /// <returns>包含 SQL 文本和参数源的查询计划。</returns>
-    public static SqlQueryPlan Create(string commandText, object parameters, string splitOn = "Id",
-        CommandType commandType = System.Data.CommandType.Text) => new(commandText, parameters, splitOn, commandType);
+    public static SqlQueryPlan Create(string commandText, object parameters, string splitOn, CommandType commandType) =>
+        new(commandText, parameters, splitOn, commandType);
 
     /// <summary>
     /// 创建原生 SQL 查询参数快照。

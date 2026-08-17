@@ -1,3 +1,5 @@
+using Bing.Data.Sql.Configs;
+
 namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
@@ -15,16 +17,20 @@ internal readonly struct EntityMappingCacheStatistics
     /// <param name="cacheHitCount">首次缓存查找命中次数。</param>
     /// <param name="cacheMissCount">首次缓存查找未命中次数。</param>
     /// <param name="cacheBypassCount">因容量策略未写入缓存的次数。</param>
+    /// <param name="cacheEvictionCount">因 LRU 策略淘汰的缓存项数量。</param>
     /// <param name="entryCount">当前缓存条目数。</param>
     /// <param name="capacity">固定缓存容量；<see langword="null"/> 表示无上限。</param>
+    /// <param name="evictionPolicy">达到容量后的缓存处理策略。</param>
     internal EntityMappingCacheStatistics(long cacheHitCount, long cacheMissCount, long cacheBypassCount,
-        int entryCount, int? capacity)
+        long cacheEvictionCount, int entryCount, int? capacity, EntityMappingCacheEvictionPolicy evictionPolicy)
     {
         CacheHitCount = cacheHitCount;
         CacheMissCount = cacheMissCount;
         CacheBypassCount = cacheBypassCount;
+        CacheEvictionCount = cacheEvictionCount;
         EntryCount = entryCount;
         Capacity = capacity;
+        EvictionPolicy = evictionPolicy;
     }
 
     /// <summary>
@@ -43,6 +49,11 @@ internal readonly struct EntityMappingCacheStatistics
     public long CacheBypassCount { get; }
 
     /// <summary>
+    /// 获取因最近最少使用策略淘汰的缓存项数量。
+    /// </summary>
+    public long CacheEvictionCount { get; }
+
+    /// <summary>
     /// 获取当前最终实体映射缓存条目数。
     /// </summary>
     public int EntryCount { get; }
@@ -51,4 +62,9 @@ internal readonly struct EntityMappingCacheStatistics
     /// 获取解析器创建时固定的缓存容量；<see langword="null"/> 表示无上限。
     /// </summary>
     public int? Capacity { get; }
+
+    /// <summary>
+    /// 获取达到容量后的缓存处理策略。
+    /// </summary>
+    public EntityMappingCacheEvictionPolicy EvictionPolicy { get; }
 }

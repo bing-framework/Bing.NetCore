@@ -1,14 +1,14 @@
-﻿using Bing.Data;
+﻿using Bing.Dapper;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Batching;
-using Bing.Dapper;
-using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 
 namespace Bing.Dapper.PostgreSql;
 
@@ -41,9 +41,6 @@ public static class PostgreSqlServiceCollectionExtensions
         services.AddDatabaseTypeConverter<PostgreSqlTypeConverter>(DatabaseType.PgSql);
         services.AddSqlProviderRuntime(new SqlProviderRuntime(PostgreSqlSqlProvider.Instance.Key,
             typeof(PostgreSqlQuery), typeof(PostgreSqlExecutor), typeof(PostgreSqlMultipleQueryExecutor)));
-        services.TryAddTransient<ISqlQuery, PostgreSqlQuery>();
-        services.TryAddTransient<ISqlExecutor, PostgreSqlExecutor>();
-        services.TryAddTransient<ISqlMultipleQueryExecutor, PostgreSqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

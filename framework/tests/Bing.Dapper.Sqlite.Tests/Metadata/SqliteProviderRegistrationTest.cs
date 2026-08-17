@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
@@ -80,6 +81,55 @@ public class SqliteProviderRegistrationTest
 
         // Assert
         Assert.IsType<SqliteTypeConverter>(converter);
+    }
+
+    /// <summary>
+    /// 测试目的：SQLite 类型转换器应识别标准 affinity，忽略大小写，并为未知或空类型提供稳定回退。
+    /// </summary>
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("", null)]
+    [InlineData("INTEGER", DbType.Int64)]
+    [InlineData("real", DbType.Double)]
+    [InlineData("Text", DbType.String)]
+    [InlineData("blob", DbType.Binary)]
+    [InlineData("json", DbType.Object)]
+    public void SqliteTypeConverter_WhenTypeIsResolved_ShouldReturnExpectedDbType(string dataType,
+        DbType? expected)
+    {
+        // Arrange
+        var converter = new SqliteTypeConverter();
+
+        // Act
+        var result = converter.ToDbType(dataType);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    /// <summary>
+    /// 测试目的：类型名称转换不得受当前区域文化影响，土耳其语环境中的 INTEGER 仍应映射为 Int64。
+    /// </summary>
+    [Fact]
+    public void SqliteTypeConverter_WhenCurrentCultureIsTurkish_ShouldUseInvariantTypeName()
+    {
+        // Arrange
+        var converter = new SqliteTypeConverter();
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+            // Act
+            var result = converter.ToDbType("INTEGER");
+
+            // Assert
+            Assert.Equal(DbType.Int64, result);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     /// <summary>

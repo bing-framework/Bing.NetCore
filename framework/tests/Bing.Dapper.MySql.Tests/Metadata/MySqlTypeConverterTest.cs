@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Bing.Data.Metadata;
 
 namespace Bing.Dapper.Tests.Metadata;
@@ -76,6 +77,30 @@ public class MySqlTypeConverterTest
 
         // Assert
         result.ShouldBe(DbType.Int32);
+    }
+
+    /// <summary>
+    /// 测试目的：类型名称转换不得受当前区域文化影响，土耳其语环境中的 INT 仍应映射为 Int32。
+    /// </summary>
+    [Fact]
+    public void ToDbType_WhenCurrentCultureIsTurkish_ShouldUseInvariantTypeName()
+    {
+        // Arrange
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+            // Act
+            var result = _converter.ToDbType("INT");
+
+            // Assert
+            result.ShouldBe(DbType.Int32);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     #endregion

@@ -27,11 +27,12 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// <inheritdoc />
     public ISqlTransactionScope Begin(string dbKey, IsolationLevel isolationLevel)
     {
-        var query = CreateTransactionQuery(dbKey, out var context);
+        ISqlQuery query = null;
         try
         {
+            var context = CreateTransactionQuery(dbKey, out query);
             EnsureTransactionsSupported(context, query);
-            var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
+            var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             var transaction = connection.BeginTransaction(isolationLevel);
@@ -53,11 +54,12 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var query = CreateTransactionQuery(dbKey, out var context);
+        ISqlQuery query = null;
         try
         {
+            var context = CreateTransactionQuery(dbKey, out query);
             EnsureTransactionsSupported(context, query);
-            var connection = SqlQueryRuntimeBridge.GetOrCreateConnection(query);
+            var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
@@ -132,7 +134,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         if (context?.DataSource?.IsReadOnly == true)
             throw new NotSupportedException(
                 $"数据源 {context.DataSource.Key ?? context.DbKey ?? "<default>"} 是只读数据源，不支持写入或事务操作。");
-        var profile = SqlQueryRuntimeBridge.GetProviderProfile(query);
+        var profile = GetRuntimeQuery(query).GetCurrentProviderProfile();
         if (profile.Transaction.SupportsTransactions == false)
             throw new NotSupportedException("当前 SQL Provider 不支持本地事务。请使用不依赖事务的查询操作。");
         if (context?.DataSource?.SupportsTransactions == false)
@@ -143,18 +145,29 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// 创建并解析事务专用 Query，固定其数据库上下文快照。
     /// </summary>
     /// <param name="dbKey">目标数据源键；为空时由 Query Factory 使用当前上下文。</param>
-    /// <param name="context">解析到的固定数据库上下文。</param>
-    /// <returns>拥有本次事务连接生命周期的查询对象。</returns>
-    private ISqlQuery CreateTransactionQuery(string dbKey, out DatabaseContext context)
+    /// <param name="query">拥有本次事务连接生命周期的查询对象。</param>
+    /// <returns>解析到的固定数据库上下文。</returns>
+    private DatabaseContext CreateTransactionQuery(string dbKey, out ISqlQuery query)
     {
         if (_queryFactory is SqlQueryFactory factory)
-            return factory.CreateForTransaction(dbKey, out context);
-        var query = _queryFactory.Create(dbKey);
-        context = query is SqlQueryBase sqlQuery ? sqlQuery.GetDatabaseContext() : null;
+        {
+            query = factory.CreateForTransaction(dbKey, out var factoryContext);
+            return factoryContext;
+        }
+        query = _queryFactory.Create(dbKey);
+        var context = query is SqlQueryBase sqlQuery ? sqlQuery.GetDatabaseContext() : null;
         if (context == null)
             throw new InvalidOperationException("事务查询对象必须提供固定数据库上下文");
-        return query;
+        return context;
     }
+
+    /// <summary>
+    /// 获取 Dapper SQL 查询实现。
+    /// </summary>
+    /// <param name="query">事务作用域使用的查询对象。</param>
+    /// <returns>可访问 Dapper 专用运行时状态的查询对象。</returns>
+    private static SqlQueryBase GetRuntimeQuery(ISqlQuery query) => query as SqlQueryBase ??
+        throw new InvalidOperationException("SQL 事务作用域仅支持 Dapper SQL 查询实现。");
 
     /// <summary>
     /// SQL 事务作用域。
@@ -552,9 +565,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// </remarks>
         private void BindTransactionContext(IDisposable resource)
         {
-            if (resource is not ISqlQuery query)
-                throw new InvalidOperationException("SQL 事务作用域子对象不支持内部运行时资源绑定。");
-            SqlQueryRuntimeBridge.BindTransactionScope(query, _context, _connection, _transaction, _lease);
+            if (resource is not SqlQueryBase query)
+                throw new InvalidOperationException("SQL 事务作用域仅支持 Dapper SQL 查询实现。");
+            query.SetTransactionContext(_context, _connection, _transaction, _lease);
         }
 
         /// <summary>

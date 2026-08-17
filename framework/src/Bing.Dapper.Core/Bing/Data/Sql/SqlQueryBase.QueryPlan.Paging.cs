@@ -1,7 +1,6 @@
 using Bing.Helpers;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
-using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql;
 
@@ -150,8 +149,8 @@ public abstract partial class SqlQueryBase
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source is SqlBuilderBase { RequiresRenderSnapshot: true } builder)
-            return builder.CreateRenderSnapshot().Builder.Clone();
+        if (SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(source))
+            return SqlBuilderRuntimeBridge.CreateExecutionSnapshot(source).Builder.Clone();
         return source.Clone();
     }
 

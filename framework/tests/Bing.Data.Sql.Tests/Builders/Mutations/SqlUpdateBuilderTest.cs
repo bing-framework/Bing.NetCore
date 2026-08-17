@@ -6,8 +6,10 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
 using Bing.Test.Shared;
 
@@ -102,6 +104,9 @@ public sealed class SqlUpdateBuilderTest
         SqlParameterAssert.Equal(command.Parameters, "@_p_0", "Bing", DbType.String);
         SqlParameterAssert.Equal(command.Parameters, "@_p_1", 7, DbType.Int32);
         Assert.All(command.Parameters, item => Assert.Equal(SqlParameterMetadataLevel.Full, item.MetadataLevel));
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
+        Assert.Equal(SqlOperationKind.Update, command.OperationKind);
+        Assert.False(command.HasReturning);
     }
 
     /// <summary>
@@ -139,6 +144,32 @@ public sealed class SqlUpdateBuilderTest
 
         // Assert
         Assert.Equal("Update [samples] As [t] Set [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id]",
+            builder.ToSql());
+        Assert.Empty(builder.GetParameters());
+    }
+
+    /// <summary>
+    /// 测试目的：UpdateFrom 的列对列 In 和 NotIn 条件必须输出完整集合谓词。
+    /// </summary>
+    /// <param name="operator">集合比较操作符。</param>
+    /// <param name="operatorSql">预期 SQL 操作符文本。</param>
+    [Theory]
+    [InlineData(Operator.In, "In")]
+    [InlineData(Operator.NotIn, "Not In")]
+    public void WhereFrom_WhenSetOperatorIsConfigured_ShouldRenderExpectedSql(Operator @operator,
+        string operatorSql)
+    {
+        // Arrange
+        var builder = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+
+        // Act
+        builder.Update(new SqlTableReference { TableName = "samples", Alias = "t" })
+            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
+            .SetFrom("Name", "Name")
+            .WhereFrom("Id", "Id", @operator);
+
+        // Assert
+        Assert.Equal($"Update [samples] As [t] Set [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id] {operatorSql} ([s].[Id])",
             builder.ToSql());
         Assert.Empty(builder.GetParameters());
     }
@@ -291,6 +322,55 @@ public sealed class SqlUpdateBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：自定义 Contributor 应以同一 DataFilter 状态同步控制查询和 Update，且不得参与未声明的 Delete 操作。
+    /// </summary>
+    [Fact]
+    public void DataBoundaryContributor_WhenFilterScopeChanges_ShouldKeepQueryAndWriteBoundariesInSync()
+    {
+        // Arrange
+        const string expectedQuerySql = "Select [c].[Name] \r\nFrom [contributor_mutation_samples] As [c] \r\nWhere [c].[Region]=@_p_0";
+        const string expectedDisabledQuerySql = "Select [c].[Name] \r\nFrom [contributor_mutation_samples] As [c]";
+        const string expectedUpdateSql = "Update [contributor_mutation_samples] Set [Name] = @_p_0 Where [Id]=@_p_1 And [Region]=@_p_2";
+        const string expectedDisabledUpdateSql = "Update [contributor_mutation_samples] Set [Name] = @_p_0 Where [Id]=@_p_1";
+        const string expectedDeleteSql = "Delete From [contributor_mutation_samples] Where [Id]=@_p_0";
+        var dataFilter = new DataFilter();
+        var services = new SqlBuilderServices(dataFilter: dataFilter,
+            filters: new ISqlFilter[] { new RegionUpdateBoundaryFilter() });
+        var query = new TestSqlBuilder(services, TestDialect.Instance);
+        var update = new SqlUpdateBuilder(TestMutationSqlProvider.Instance, services)
+            .Update<ContributorMutationSample>()
+            .Set<ContributorMutationSample, string>(item => item.Name, "Bing")
+            .Where<ContributorMutationSample, int>(item => item.Id, 7);
+        var delete = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, services)
+            .DeleteFrom<ContributorMutationSample>()
+            .Where<ContributorMutationSample, int>(item => item.Id, 7);
+        query.Select<ContributorMutationSample>(item => item.Name).From<ContributorMutationSample>("c");
+
+        // Act
+        var querySql = query.ToSql();
+        var updateCommand = update.BuildCommand();
+        string disabledQuerySql;
+        SqlWriteCommand disabledUpdateCommand;
+        using (dataFilter.Disable<RegionUpdateBoundaryFilter>())
+        {
+            disabledQuerySql = query.ToSql();
+            disabledUpdateCommand = update.BuildCommand();
+        }
+        var deleteCommand = delete.BuildCommand();
+
+        // Assert
+        SqlAssert.Equal(expectedQuerySql, querySql, query.Provider.Key);
+        SqlAssert.Equal(expectedDisabledQuerySql, disabledQuerySql, query.Provider.Key);
+        SqlAssert.Equal(expectedUpdateSql, updateCommand.Sql, TestMutationSqlProvider.Instance.Key, updateCommand.Parameters);
+        SqlAssert.Equal(expectedDisabledUpdateSql, disabledUpdateCommand.Sql, TestMutationSqlProvider.Instance.Key,
+            disabledUpdateCommand.Parameters);
+        SqlAssert.Equal(expectedDeleteSql, deleteCommand.Sql, TestMutationSqlProvider.Instance.Key, deleteCommand.Parameters);
+        SqlParameterAssert.Equal(updateCommand.Parameters, "@_p_2", "region-a", DbType.String);
+        Assert.Equal(2, disabledUpdateCommand.Parameters.Count);
+        Assert.Single(deleteCommand.Parameters);
+    }
+
+    /// <summary>
     /// 测试目的：SetFrom 只接受单段结构化列名，避免把 Raw SQL 注入标识符入口。
     /// </summary>
     [Fact]
@@ -354,5 +434,44 @@ public sealed class SqlUpdateBuilderTest
     {
         public bool IsTenantEntity(Type entityType) => entityType == typeof(SoftDeleteTenantMutationSample);
         public object GetTenantId(SqlTenantFilterContext context) => null;
+    }
+
+    /// <summary>
+    /// 自定义 Contributor 测试实体。
+    /// </summary>
+    [Table("contributor_mutation_samples")]
+    private sealed class ContributorMutationSample
+    {
+        /// <summary>主键。</summary>
+        [Key]
+        public int Id { get; set; }
+
+        /// <summary>区域边界。</summary>
+        public string Region { get; set; }
+
+        /// <summary>可更新名称。</summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 仅为测试实体的查询和 Update 贡献区域边界。
+    /// </summary>
+    private sealed class RegionUpdateBoundaryFilter : ISqlFilter, ISqlDataBoundaryContributor
+    {
+        /// <inheritdoc />
+        public void Filter(SqlFilterContext context)
+        {
+            if (context?.IsEnabled<RegionUpdateBoundaryFilter>() == false)
+                return;
+            foreach (var source in context.Sources.Where(item => item.EntityType == typeof(ContributorMutationSample)))
+                context.AddPredicate(source, context.GetColumn(source, nameof(ContributorMutationSample.Region)), "region-a");
+        }
+
+        /// <inheritdoc />
+        public bool ShouldApply(SqlDataBoundaryContext context) => context?.EntityType == typeof(ContributorMutationSample) &&
+            context.Operation == SqlDataBoundaryOperation.Update && context.IsEnabled<RegionUpdateBoundaryFilter>();
+
+        /// <inheritdoc />
+        public void Apply(SqlDataBoundaryContext context) => context.AddEquals(nameof(ContributorMutationSample.Region), "region-a");
     }
 }

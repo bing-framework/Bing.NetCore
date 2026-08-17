@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using Bing.Aspects;
 using Bing.Auditing;
@@ -187,7 +188,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     protected virtual void ConfiguringLog(DbContextOptionsBuilder builder)
     {
         ConfiguringIgnoreEvent(builder);
-        builder.EnableDetailedErrors().EnableSensitiveDataLogging();
+        builder.EnableDetailedErrors();
     }
 
     /// <summary>
@@ -205,7 +206,6 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
             RelationalEventId.ConnectionClosed,
             CoreEventId.ServiceProviderCreated,
             CoreEventId.ServiceProviderDebugInfo,
-            CoreEventId.SensitiveDataLoggingEnabledWarning,
             CoreEventId.ContextInitialized,
             CoreEventId.ContextDisposed,
             CoreEventId.QueryExecutionPlanned,
@@ -417,8 +417,113 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     public override int SaveChanges()
     {
         SaveChangesBefore();
-        var result = base.SaveChanges();
+        var transactionActionManager = Create<ITransactionActionManager>();
+        var result = transactionActionManager.Count == 0
+            ? base.SaveChanges()
+            : TransactionCommit(transactionActionManager);
         SaveChangesAfter().GetAwaiter().GetResult();
+        return result;
+    }
+
+    /// <summary>
+    /// 手工创建事务提交。
+    /// </summary>
+    /// <param name="transactionActionManager">事务操作管理器。</param>
+    private int TransactionCommit(ITransactionActionManager transactionActionManager)
+    {
+        var connection = Database.GetDbConnection();
+        var openedHere = false;
+        var cleanupExceptions = new List<Exception>();
+        Exception primaryException = null;
+        var result = 0;
+        try
+        {
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+                openedHere = true;
+            }
+            using (var transaction = connection.BeginTransaction())
+            {
+                var shouldRollback = false;
+                try
+                {
+                    transactionActionManager.CommitAsync(transaction).GetAwaiter().GetResult();
+                    Database.UseTransaction(transaction);
+                    result = base.SaveChanges();
+                }
+                catch (Exception exception)
+                {
+                    primaryException = exception;
+                    shouldRollback = true;
+                }
+                if (shouldRollback)
+                {
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception rollbackException)
+                    {
+                        cleanupExceptions.Add(rollbackException);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        transaction.Commit();
+                    }
+                    catch (Exception commitException)
+                    {
+                        primaryException = commitException;
+                    }
+                }
+                try
+                {
+                    Database.UseTransaction(null);
+                }
+                catch (Exception detachException)
+                {
+                    cleanupExceptions.Add(detachException);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            if (primaryException == null)
+                primaryException = exception;
+            else
+                cleanupExceptions.Add(exception);
+        }
+        finally
+        {
+            if (openedHere)
+            {
+                try
+                {
+                    connection.Close();
+                }
+                catch (Exception closeException)
+                {
+                    cleanupExceptions.Add(closeException);
+                }
+            }
+        }
+
+        if (primaryException != null)
+        {
+            if (cleanupExceptions.Count > 0)
+            {
+                cleanupExceptions.Insert(0, primaryException);
+                throw new AggregateException(cleanupExceptions);
+            }
+            ExceptionDispatchInfo.Capture(primaryException).Throw();
+        }
+        if (cleanupExceptions.Count == 1)
+            ExceptionDispatchInfo.Capture(cleanupExceptions[0]).Throw();
+        if (cleanupExceptions.Count > 1)
+            throw new AggregateException(cleanupExceptions);
         return result;
     }
 
@@ -432,6 +537,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="cancellationToken">取消令牌</param>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         SaveChangesBefore();
         var transactionActionManager = Create<ITransactionActionManager>();
         var result = transactionActionManager.Count == 0
@@ -448,23 +554,101 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="cancellationToken">取消令牌</param>
     private async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
     {
-        await using var connection = Database.GetDbConnection();
-        if (connection.State == ConnectionState.Closed)
-            await connection.OpenAsync(cancellationToken);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        var connection = Database.GetDbConnection();
+        var openedHere = false;
+        var cleanupExceptions = new List<Exception>();
+        Exception primaryException = null;
+        var result = 0;
         try
         {
-            await transactionActionManager.CommitAsync(transaction);
-            await Database.UseTransactionAsync(transaction, cancellationToken);
-            var result = await base.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            return result;
+            if (connection.State == ConnectionState.Closed)
+            {
+                await connection.OpenAsync(cancellationToken);
+                openedHere = true;
+            }
+            await using (var transaction = await connection.BeginTransactionAsync(cancellationToken))
+            {
+                var shouldRollback = false;
+                try
+                {
+                    await transactionActionManager.CommitAsync(transaction);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Database.UseTransactionAsync(transaction, cancellationToken);
+                    result = await base.SaveChangesAsync(cancellationToken);
+                }
+                catch (Exception exception)
+                {
+                    primaryException = exception;
+                    shouldRollback = true;
+                }
+                if (shouldRollback)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync(CancellationToken.None);
+                    }
+                    catch (Exception rollbackException)
+                    {
+                        cleanupExceptions.Add(rollbackException);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    catch (Exception commitException)
+                    {
+                        primaryException = commitException;
+                    }
+                }
+                try
+                {
+                    await Database.UseTransactionAsync(null, CancellationToken.None);
+                }
+                catch (Exception detachException)
+                {
+                    cleanupExceptions.Add(detachException);
+                }
+            }
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
+            if (primaryException == null)
+                primaryException = exception;
+            else
+                cleanupExceptions.Add(exception);
         }
+        finally
+        {
+            if (openedHere)
+            {
+                try
+                {
+                    await connection.CloseAsync();
+                }
+                catch (Exception closeException)
+                {
+                    cleanupExceptions.Add(closeException);
+                }
+            }
+        }
+
+        if (primaryException != null)
+        {
+            if (cleanupExceptions.Count > 0)
+            {
+                cleanupExceptions.Insert(0, primaryException);
+                throw new AggregateException(cleanupExceptions);
+            }
+            ExceptionDispatchInfo.Capture(primaryException).Throw();
+        }
+        if (cleanupExceptions.Count == 1)
+            ExceptionDispatchInfo.Capture(cleanupExceptions[0]).Throw();
+        if (cleanupExceptions.Count > 1)
+            throw new AggregateException(cleanupExceptions);
+        return result;
     }
 
     #endregion

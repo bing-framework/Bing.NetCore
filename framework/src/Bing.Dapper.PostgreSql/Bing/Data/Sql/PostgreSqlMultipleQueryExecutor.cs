@@ -1,4 +1,4 @@
-using Bing.Data.Sql.Configs;
+﻿using Bing.Data.Sql.Configs;
 
 namespace Bing.Data.Sql;
 

@@ -9,6 +9,168 @@ Bing.Data.Sql.Builders.Filters.TenantIdFilter
 Bing.Data.Sql.Builders.Filters.TenantIdFilter.TenantIdFilter(Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor contributor) -> void
 Bing.Data.Sql.Builders.Filters.TenantIdFilter.Contributor.get -> Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor
 Bing.Data.Sql.Builders.Filters.TenantIdFilter.Filter(Bing.Data.Sql.Builders.Core.SqlFilterContext context) -> void
+Bing.Data.Sql.Builders.Filters.TenantIdFilter.ShouldApply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> bool
+Bing.Data.Sql.Builders.Filters.TenantIdFilter.Apply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> void
+Bing.Data.Sql.Builders.Filters.IsDeletedFilter.ShouldApply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> bool
+Bing.Data.Sql.Builders.Filters.IsDeletedFilter.Apply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> void
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation.Update = 0 -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation.Delete = 1 -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation.SoftDelete = 2 -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation.Restore = 3 -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation.Purge = 4 -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.ISqlDataBoundaryContributor
+Bing.Data.Sql.Builders.Mutations.ISqlDataBoundaryContributor.ShouldApply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> bool
+Bing.Data.Sql.Builders.Mutations.ISqlDataBoundaryContributor.Apply(Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext context) -> void
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.EntityType.get -> System.Type
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.Target.get -> Bing.Data.Sql.Metadata.SqlTableReference
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.Operation.get -> Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryOperation
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.IsEnabled<TFilter>() -> bool
+Bing.Data.Sql.Builders.Mutations.SqlDataBoundaryContext.AddEquals(string propertyName, object value) -> void
+Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Purge<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Restore<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Purge<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Restore<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.ISqlExecutor.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.InsertAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.InsertBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.InsertBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchInsertOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.UpdateAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.UpdateBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.UpdateBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.Delete<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.DeleteAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.Purge<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.PurgeAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.Restore<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.RestoreAsync<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.ISqlExecutor.DeleteBatch<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.DeleteBatchAsync<TEntity>(System.Collections.Generic.IEnumerable<TEntity> entities, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteOptions options = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.SqlQueryRuntimeBinding
+static Bing.Data.Sql.SqlQueryRuntimeBinding.BindOwnedConnection(Bing.Data.Sql.ISqlQuery query, System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+static Bing.Data.Sql.SqlQueryRuntimeBinding.BindExternalConnection(Bing.Data.Sql.ISqlQuery query, System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+static Bing.Data.Sql.SqlQueryRuntimeBinding.BindExternalTransactionResolver(Bing.Data.Sql.ISqlQuery query, System.Func<System.Data.IDbTransaction> resolver) -> void
+static Bing.Data.Sql.SqlQueryRuntimeBinding.BindDatabaseContext(Bing.Data.Sql.ISqlQuery query, Bing.Data.Sql.DatabaseContext context) -> void
+static Bing.Data.Sql.SqlQueryRuntimeBinding.BindEntityMappingResolver(Bing.Data.Sql.ISqlQuery query, Bing.Data.Sql.Metadata.IEntityMappingResolver resolver) -> void
+Bing.Data.Sql.ISqlQueryBuilderSource
+Bing.Data.Sql.ISqlQueryBuilderSource.CreateIndependentSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.ISqlQueryPlanExecutor
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.First<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> TResult
+Bing.Data.Sql.ISqlQueryPlanExecutor.FirstOrDefault<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> TResult
+Bing.Data.Sql.ISqlQueryPlanExecutor.Single<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> TResult
+Bing.Data.Sql.ISqlQueryPlanExecutor.SingleOrDefault<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> TResult
+Bing.Data.Sql.ISqlQueryPlanExecutor.Scalar<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> TResult
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.FirstAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.FirstOrDefaultAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.SingleAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.SingleOrDefaultAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ScalarAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToPage<TResult>(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager, int? timeout) -> Bing.Data.PagerList<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.AsEnumerable<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout) -> System.Collections.Generic.IEnumerable<TResult>
+Bing.Data.Sql.ISqlQueryPlanExecutor.ToPageAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
+Bing.Data.Sql.ISqlQueryPlanExecutor.AsAsyncEnumerable<TResult>(Bing.Data.Sql.SqlQueryPlan plan, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Collections.Generic.IAsyncEnumerable<TResult>
+Bing.Data.Sql.SqlQueryPlan
+Bing.Data.Sql.SqlQueryPlan.Builder.get -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.SqlQueryPlan.CommandText.get -> string
+Bing.Data.Sql.SqlQueryPlan.Parameters.get -> object
+Bing.Data.Sql.SqlQueryPlan.SplitOn.get -> string
+Bing.Data.Sql.SqlQueryPlan.CommandType.get -> System.Data.CommandType
+Bing.Data.Sql.SqlQueryPlan.IsBuilderPlan.get -> bool
+static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlBuilder builder, string splitOn) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters, string splitOn) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters, string splitOn, System.Data.CommandType commandType) -> Bing.Data.Sql.SqlQueryPlan
+Bing.Data.Sql.ISqlQueryRuntimeBindingController
+Bing.Data.Sql.ISqlQueryRuntimeBindingController.BindOwnedConnection(System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+Bing.Data.Sql.ISqlQueryRuntimeBindingController.BindExternalConnection(System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+Bing.Data.Sql.ISqlQueryRuntimeBindingController.BindExternalTransactionResolver(System.Func<System.Data.IDbTransaction> resolver) -> void
+Bing.Data.Sql.ISqlQueryRuntimeBindingController.BindDatabaseContext(Bing.Data.Sql.DatabaseContext context) -> void
+Bing.Data.Sql.ISqlQueryRuntimeBindingController.BindEntityMappingResolver(Bing.Data.Sql.Metadata.IEntityMappingResolver resolver) -> void
+Bing.Data.Sql.SqlBuilderExecutionSnapshot
+Bing.Data.Sql.SqlBuilderExecutionSnapshot.Sql.get -> string
+Bing.Data.Sql.SqlBuilderExecutionSnapshot.Builder.get -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.SqlBuilderExecutionSnapshot.SqlBuilderExecutionSnapshot(string sql, Bing.Data.Sql.ISqlBuilder builder) -> void
+Bing.Data.Sql.SqlBuilderRuntimeBridge
+static Bing.Data.Sql.SqlBuilderRuntimeBridge.ContainsParameterToken(string sql, string parameterName) -> bool
+static Bing.Data.Sql.SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(Bing.Data.Sql.ISqlBuilder builder) -> bool
+static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateExecutionSnapshot(Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlBuilderExecutionSnapshot
+Bing.Data.Sql.ISqlOutputParameterSnapshotProvider
+Bing.Data.Sql.ISqlOutputParameterSnapshotProvider.CreateSnapshot() -> Bing.Data.Sql.ISqlOutputParameterAccessor
+Bing.Data.Sql.SqlParameterRuntimeBridge
+static Bing.Data.Sql.SqlParameterRuntimeBridge.CreateDefaultResolver() -> Bing.Data.Sql.ISqlParameterResolver
+Bing.Data.Sql.SqlOutputParameterSnapshot
+Bing.Data.Sql.SqlOutputParameterSnapshot.SqlOutputParameterSnapshot(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>> values) -> void
+Bing.Data.Sql.SqlOutputParameterSnapshot.GetValue(string name) -> object
+Bing.Data.Sql.SqlOutputParameterSnapshot.GetValue<T>(string name) -> T
+Bing.Data.Sql.SqlOutputParameterSnapshot.TryGetValue<T>(string name, out T value) -> bool
+static Bing.Data.Sql.SqlOutputParameterSnapshot.Create(Bing.Data.Sql.ISqlOutputParameterAccessor accessor) -> Bing.Data.Sql.ISqlOutputParameterAccessor
+Bing.Data.Sql.SqlOutputParameterValueConverter
+static Bing.Data.Sql.SqlOutputParameterValueConverter.TryConvert<T>(object rawValue, out T value) -> bool
+static Bing.Data.Sql.SqlOutputParameterValueConverter.IsNullableType<T>() -> bool
+Bing.Data.Sql.Mutations.SqlWriteCommand.ProviderProfile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Mutations.SqlWriteCommand.CreateParameters() -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.Builders.Core.SqlBuilderServices.DatabaseIdentityResolver.get -> Bing.Data.Sql.ISqlDatabaseIdentityResolver
+Bing.Data.Sql.Builders.Core.SqlBuilderServices.DatabaseIdentityResolver.set -> void
+Bing.Data.Sql.Builders.Clauses.SelectClause.HasAggregate.get -> bool
+Bing.Data.Sql.SqlMutationRuntimeBridge
+static Bing.Data.Sql.SqlMutationRuntimeBridge.RequiresStructuredUpdate(Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder builder, Bing.Data.Sql.Metadata.SqlTableReference target) -> bool
+Bing.Data.Sql.SqlQueryPlan.NotifyParametersBound(Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void
+Bing.Data.Sql.SqlQueryPlan.NotifyExecutionCompleted() -> void
+Bing.Data.Sql.SqlQueryRuntimeFactory
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateTextQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string commandText, object parameters) -> Bing.Data.Sql.SqlTextQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateProcedureQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string procedure, object parameters) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateSubqueryLambdaQuery<TProjection>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder, Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.Builders.Core.SqlFilterContext
+Bing.Data.Sql.Builders.Core.SqlFilterContext.DatabaseContext.get -> Bing.Data.Sql.DatabaseContext
+Bing.Data.Sql.Builders.Core.SqlFilterContext.Sources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.SqlFilterSource>
+Bing.Data.Sql.Builders.Core.SqlFilterContext.Joins.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.SqlFilterJoin>
+Bing.Data.Sql.Builders.Core.SqlFilterContext.IsEnabled<TFilter>() -> bool
+Bing.Data.Sql.Builders.Core.SqlFilterContext.GetColumn(Bing.Data.Sql.Builders.Core.SqlFilterSource source, string propertyName, bool required = false) -> string
+Bing.Data.Sql.Builders.Core.SqlFilterContext.AddPredicate(Bing.Data.Sql.Builders.Core.SqlFilterSource source, string column, object value) -> void
+Bing.Data.Sql.Builders.Core.SqlFilterSourceKind
+Bing.Data.Sql.Builders.Core.SqlFilterSourceKind.Root = 0 -> Bing.Data.Sql.Builders.Core.SqlFilterSourceKind
+Bing.Data.Sql.Builders.Core.SqlFilterSourceKind.Join = 1 -> Bing.Data.Sql.Builders.Core.SqlFilterSourceKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind.Inner = 0 -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind.Left = 1 -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind.Right = 2 -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind.Full = 3 -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoinKind.Cross = 4 -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterSource
+Bing.Data.Sql.Builders.Core.SqlFilterSource.SourceId.get -> string
+Bing.Data.Sql.Builders.Core.SqlFilterSource.EntityType.get -> System.Type
+Bing.Data.Sql.Builders.Core.SqlFilterSource.Alias.get -> string
+Bing.Data.Sql.Builders.Core.SqlFilterSource.Kind.get -> Bing.Data.Sql.Builders.Core.SqlFilterSourceKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoin
+Bing.Data.Sql.Builders.Core.SqlFilterJoin.Kind.get -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
+Bing.Data.Sql.Builders.Core.SqlFilterJoin.LeftSourceIds.get -> System.Collections.Generic.IReadOnlyList<string>
+Bing.Data.Sql.Builders.Core.SqlFilterJoin.RightSourceId.get -> string
 Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
@@ -215,8 +377,18 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.OrderBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
 Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.get -> int?
 Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheCapacity.set -> void
-Bing.Data.Sql.ISqlExecutor.ExecuteMutation(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> int
-Bing.Data.Sql.ISqlExecutor.ExecuteMutationAsync(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
+Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy
+Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy.AdmissionOnly = 0 -> Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy
+Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy.LeastRecentlyUsed = 1 -> Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy
+Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheEvictionPolicy.get -> Bing.Data.Sql.Configs.EntityMappingCacheEvictionPolicy
+Bing.Data.Sql.Configs.SqlMetadataOptions.EntityMappingCacheEvictionPolicy.set -> void
+Bing.Data.Sql.Configs.SqlMetadataOptions.MutationPlanCacheCapacity.get -> int?
+Bing.Data.Sql.Configs.SqlMetadataOptions.MutationPlanCacheCapacity.set -> void
+Bing.Data.Sql.Configs.SqlMetadataOptions.MutationGetterCacheCapacity.get -> int?
+Bing.Data.Sql.Configs.SqlMetadataOptions.MutationGetterCacheCapacity.set -> void
+Bing.Data.Sql.ISqlExecutor.CreateWriteBuilder() -> Bing.Data.Sql.ISqlBuilder
+Bing.Data.Sql.ISqlExecutor.ExecuteWrite(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> int
+Bing.Data.Sql.ISqlExecutor.ExecuteWriteAsync(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> System.Collections.Generic.List<TResult>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.Builders.IJoinClause.RightJoin(Bing.Data.Sql.Metadata.SqlTableReference reference) -> void

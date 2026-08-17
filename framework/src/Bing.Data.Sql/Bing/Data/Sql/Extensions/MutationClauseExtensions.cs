@@ -21,8 +21,13 @@ public static class MutationClauseExtensions
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">统一 SQL Builder。</param>
     /// <returns>传入的同一个统一 SQL Builder。</returns>
-    public static ISqlBuilder InsertInto<TEntity>(this ISqlBuilder source) where TEntity : class =>
-        InsertInto<ISqlBuilder, TEntity>(source);
+    public static ISqlBuilder InsertInto<TEntity>(this ISqlBuilder source) where TEntity : class
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
+        return InsertInto<ISqlBuilder, TEntity>(source);
+    }
 
     /// <summary>
     /// 设置统一 Builder 的 Insert 目标实体表和目标列。
@@ -36,6 +41,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
         var mappedColumns = GetPropertyNames(columns).Select(propertyName =>
             ResolveWritableColumn<TEntity>(source, propertyName, static item =>
                 item.CanInsert && item.IsKey == false && item.IsDatabaseGenerated == false, "插入").ColumnName).ToArray();
@@ -54,6 +60,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
         var parsed = source.MutationContext.Provider.TableReferenceParser.Parse(table);
         source.InsertClause.Into(new SqlTableReference
         {
@@ -86,6 +93,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        source.MutationContext.ValidateOperation(SqlOperationAction.InsertInto);
         source.InsertClause.Into(ResolveTable<TEntity>(source));
         return source;
     }
@@ -165,6 +173,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        source.MutationContext.ValidateOperation(SqlOperationAction.InsertInto);
         var mappedColumns = GetPropertyNames(columns).Select(propertyName =>
             ResolveWritableColumn<TEntity>(source, propertyName, predicate: static column =>
                 column.CanInsert && column.IsKey == false && column.IsDatabaseGenerated == false, "插入").ColumnName).ToArray();
@@ -244,6 +253,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        source.MutationContext.ValidateOperation(SqlOperationAction.Update);
         source.UpdateClause.UpdateTable(ResolveTable<TEntity>(source));
         return source;
     }
@@ -397,6 +407,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        source.MutationContext.ValidateOperation(SqlOperationAction.Set);
         var mapping = ResolveWritableColumn<TEntity>(source, GetPropertyName(column), static item =>
             item.CanUpdate && item.IsKey == false && item.IsDatabaseGenerated == false, "更新");
         var context = source.MutationContext;
@@ -428,6 +439,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        source.MutationContext.ValidateOperation(SqlOperationAction.DeleteFrom);
         source.DeleteClause.From(ResolveTable<TEntity>(source));
         return source;
     }
@@ -616,7 +628,7 @@ public static class MutationClauseExtensions
         Where<ISqlDeleteBuilder, TEntity, TValue>(source, column, value, @operator);
 
     /// <summary>
-    /// 使用实体映射为统一 Builder 追加参数化 Mutation 条件。
+    /// 根据当前操作状态为统一 Builder 追加参数化条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
     /// <typeparam name="TValue">条件属性值类型。</typeparam>
@@ -625,12 +637,23 @@ public static class MutationClauseExtensions
     /// <param name="value">条件比较值。</param>
     /// <param name="operator">比较运算符。</param>
     /// <returns>传入的同一个 Builder。</returns>
+    /// <remarks>
+    /// Update 和 Delete 使用 Mutation 参数元数据与 Where 子句；其余状态使用查询 Where 子句。
+    /// </remarks>
     public static ISqlBuilder Where<TEntity, TValue>(this ISqlBuilder source,
         Expression<Func<TEntity, TValue>> column, TValue value, Operator @operator = Operator.Equal)
         where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        if (source.OperationKind is not (SqlOperationKind.Update or SqlOperationKind.Delete))
+        {
+            ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.QueryClause);
+            var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
+                column.Parameters);
+            ((ISqlQueryClauseAccessor)source).WhereClause.Where(selector, value, @operator);
+            return source;
+        }
         ((ISqlOperationStateManager)source).UseOperation(SqlOperationAction.MutationWhere);
         return Where<ISqlBuilder, TEntity, TValue>(source, column, value, @operator);
     }
@@ -764,6 +787,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.Returning);
         if (columns == null || columns.Length == 0)
             throw new ArgumentException("Returning 必须包含至少一个返回列。", nameof(columns));
         var accessor = source as IReturningClauseAccessor ??
@@ -787,6 +811,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.Returning);
         var accessor = source as IReturningClauseAccessor ??
             throw new NotSupportedException("当前 SQL Builder 不支持 Returning 子句。");
         var qualifier = GetReturningQualifier(source);

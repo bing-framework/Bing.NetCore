@@ -1,0 +1,51 @@
+Bing.Dapper.PostgreSql.PostgreSqlServiceCollectionExtensions
+Bing.Data.Metadata.PostgreSqlTypeConverter
+Bing.Data.Metadata.PostgreSqlTypeConverter.PostgreSqlTypeConverter() -> void
+Bing.Data.Metadata.PostgreSqlTypeConverter.ToDbType(string dataType, int? length = null) -> System.Data.DbType?
+Bing.Data.Sql.Builders.PostgreSqlBuilder
+Bing.Data.Sql.Builders.PostgreSqlBuilder.PostgreSqlBuilder(Bing.Data.Sql.Builders.Core.SqlBuilderServices services = null, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager = null) -> void
+Bing.Data.Sql.Builders.PostgreSqlDialect
+Bing.Data.Sql.Builders.PostgreSqlParamLiteralsResolver
+Bing.Data.Sql.Builders.PostgreSqlParamLiteralsResolver.GetParamLiterals(object value) -> string
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.Key.get -> string
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Builders.ISqlPaginationRenderer
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.PostgreSqlSqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
+Bing.Data.Sql.PostgreSqlBatchUpdateRenderer
+Bing.Data.Sql.PostgreSqlBatchUpdateRenderer.CanRender(Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateRenderContext context) -> bool
+Bing.Data.Sql.PostgreSqlBatchUpdateRenderer.PostgreSqlBatchUpdateRenderer() -> void
+Bing.Data.Sql.PostgreSqlBatchUpdateRenderer.ProviderKey.get -> string
+Bing.Data.Sql.PostgreSqlBatchUpdateRenderer.Render(Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateRenderContext context) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.PostgreSqlDbParameterCustomizer
+Bing.Data.Sql.PostgreSqlDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
+Bing.Data.Sql.PostgreSqlDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
+Bing.Data.Sql.PostgreSqlDbParameterCustomizer.PostgreSqlDbParameterCustomizer() -> void
+Bing.Data.Sql.PostgreSqlExecutor
+Bing.Data.Sql.PostgreSqlExecutor.PostgreSqlExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.PostgreSqlExecutor> options) -> void
+Bing.Data.Sql.PostgreSqlExecutorBase
+Bing.Data.Sql.PostgreSqlExecutorBase.PostgreSqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.PostgreSqlMultipleQueryExecutor
+Bing.Data.Sql.PostgreSqlMultipleQueryExecutor.PostgreSqlMultipleQueryExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.PostgreSqlMultipleQueryExecutor> options) -> void
+Bing.Data.Sql.PostgreSqlMultipleQueryExecutorBase
+Bing.Data.Sql.PostgreSqlMultipleQueryExecutorBase.PostgreSqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.PostgreSqlQuery
+Bing.Data.Sql.PostgreSqlQuery.PostgreSqlQuery(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.PostgreSqlQuery> options) -> void
+Bing.Data.Sql.PostgreSqlQueryBase
+Bing.Data.Sql.PostgreSqlQueryBase.PostgreSqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+override Bing.Data.Sql.Builders.PostgreSqlBuilder.CreateBuilder(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.Core.SqlBuilderBase
+override Bing.Data.Sql.Builders.PostgreSqlBuilder.GetCteKeyWord() -> string
+override Bing.Data.Sql.Builders.PostgreSqlDialect.ClosingIdentifier.get -> char
+override Bing.Data.Sql.Builders.PostgreSqlDialect.OpeningIdentifier.get -> char
+override Bing.Data.Sql.PostgreSqlExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.PostgreSqlMultipleQueryExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.PostgreSqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+static Bing.Dapper.PostgreSql.PostgreSqlServiceCollectionExtensions.AddPostgreSqlProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Data.Sql.Builders.PostgreSqlDialect.Instance.get -> Bing.Data.Sql.Builders.PostgreSqlDialect
+static Bing.Data.Sql.Builders.PostgreSqlParamLiteralsResolver.Instance.get -> Bing.Data.Sql.Builders.PostgreSqlParamLiteralsResolver
+static Bing.Data.Sql.Builders.PostgreSqlSqlProvider.Instance.get -> Bing.Data.Sql.Builders.PostgreSqlSqlProvider

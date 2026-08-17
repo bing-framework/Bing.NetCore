@@ -3,12 +3,14 @@
     <AssemblyName>Bing.Dapper.Sqlite</AssemblyName>
     <PackageId>Bing.Dapper.Sqlite</PackageId>
     <Description>Bing.Dapper.Sqlite 是Bing应用框架基于Dapper的数据访问封装类库，用于处理Sqlite数据库。</Description>
+    <WarningsAsErrors>$(WarningsAsErrors);RS0016;RS0017;RS0018</WarningsAsErrors>
   </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

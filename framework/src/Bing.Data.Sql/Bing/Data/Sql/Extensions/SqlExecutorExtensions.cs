@@ -46,6 +46,7 @@ public static class SqlExecutorExtensions
         where TEntity : class
     {
         executor.CheckNull(nameof(executor));
+        cancellationToken.ThrowIfCancellationRequested();
         if (map == null)
             return executor.ExecuteSqlAsync(sql, param, timeout, cancellationToken);
         var parameterMap = new SqlParameterMap<TEntity>().UseSource(param);

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Mutations;
@@ -17,11 +18,13 @@ internal static class SqlMutationPlanCaches
     /// 获取映射解析器对应的缓存。
     /// </summary>
     /// <param name="mappingResolver">决定实体映射配置边界的解析器实例。</param>
+    /// <param name="metadataOptions">提供缓存容量配置的元数据选项。</param>
     /// <returns>与该解析器实例绑定的 Mutation 缓存。</returns>
-    public static SqlMutationPlanCache Get(IEntityMappingResolver mappingResolver)
+    public static SqlMutationPlanCache Get(IEntityMappingResolver mappingResolver, SqlMetadataOptions metadataOptions)
     {
         if (mappingResolver == null)
             throw new ArgumentNullException(nameof(mappingResolver));
-        return Caches.GetValue(mappingResolver, _ => new SqlMutationPlanCache());
+        return Caches.GetValue(mappingResolver, _ => new SqlMutationPlanCache(
+            metadataOptions?.MutationPlanCacheCapacity, metadataOptions?.MutationGetterCacheCapacity));
     }
 }

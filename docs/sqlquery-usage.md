@@ -2,14 +2,13 @@
 
 ## 概述
 
-`ISqlQuery` 是 Bing 数据访问层中的 Sql 查询对象，用于基于实体表达式构建类型安全的 Sql，并提供执行与分页等能力。它通过受控的查询描述生成 Sql 语句，同时实现 `IDisposable` 以管理数据库连接、事务等资源。
+`ISqlQuery` 是 Bing 数据访问层中的根查询对象，用于保存连接、事务和诊断状态，并创建独立的查询描述。结构化查询通过类型化描述构建，原生 SQL 通过固定模板和参数对象创建；根对象同时实现 `IDisposable` 和 `IAsyncDisposable` 管理自有资源。
 
 在典型场景中，`ISqlQuery` 主要用于：
 
-- 构建复杂查询：多表 Join、动态条件、分组、排序等；
-- 实现统一的分页查询（同步/异步）；
-- 获取调试 Sql，便于排查问题或与 DBA 协作；
-- 配置查询行为，例如执行后是否自动清理 Sql 和参数、是否输出调试日志等。
+- 创建复杂查询：多表 Join、条件、分组、排序和分页等；
+- 执行结构化、原生 SQL 或存储过程查询；
+- 在独立 Builder 的受控诊断路径中生成已脱敏的调试 SQL。
 
 ---
 
@@ -18,67 +17,27 @@
 `ISqlQuery` 的核心定义位于 `framework/src/Bing.Data.Sql/Bing/Data/Sql/ISqlQuery.cs`：
 
 ```csharp
-public partial interface ISqlQuery : IDisposable
+public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 {
-    /// <summary>
-    /// 配置
-    /// </summary>
-    /// <param name="configAction">配置操作</param>
-    void Config(Action<SqlOptions> configAction);
-
-    /// <summary>
-    /// 分页查询
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">获取列表操作</param>
-    /// <param name="parameter">分页参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    PagerList<TResult> PagerQuery<TResult>(
-        Func<List<TResult>> func,
-        IPager parameter,
-        int? timeout = null);
-
-    /// <summary>
-    /// 分页查询（异步）
-    /// </summary>
-    /// <typeparam name="TResult">返回结果类型</typeparam>
-    /// <param name="func">获取列表操作</param>
-    /// <param name="parameter">分页参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    Task<PagerList<TResult>> PagerQueryAsync<TResult>(
-        Func<Task<List<TResult>>> func,
-        IPager parameter,
-        int? timeout = null);
-
-    /// <summary>
-    /// 流式查询
-    /// </summary>
-    IEnumerable<TEntity> StreamQuery<TEntity>(int? timeout = null);
-
-    /// <summary>
-    /// 异步流式查询
-    /// </summary>
-    IAsyncEnumerable<TEntity> StreamQueryAsync<TEntity>(
-        int? timeout = null,
-        CancellationToken cancellationToken = default);
-
+    SqlQuery<TResult> Query<TResult>();
+    SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null);
+    SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null);
+    SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class;
 }
 ```
 
 ### 重要方法
 
-- `Config(Action<SqlOptions> configAction)`：对当前查询对象进行配置，例如设置执行超时、是否执行后清空等。
-- `PagerQuery` / `PagerQueryAsync`：在给定分页参数 `IPager` 的基础上，统一完成分页逻辑，返回 `PagerList<TResult>`。
-- `StreamQuery` / `StreamQueryAsync`：以非缓冲方式读取结果集，适合导出、大结果集扫描等场景；调用方必须自行控制枚举生命周期。
+- `Query<TResult>()`：创建指定结果类型的独立 Fluent 查询描述。
+- `From<TEntity>()`：创建以实体映射为根来源的强类型 Fluent 查询描述。
+- `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本查询描述，不重写 SQL 文本或自动附加结构化过滤器。
+- `Procedure<TResult>(procedure, parameters)`：创建固定以存储过程命令类型执行的查询描述。
 
 ---
 
 ## 常用扩展方法
 
-`ISqlQuery` 的大部分实际操作能力是通过扩展方法提供的，主要位于：
-
-- `Bing/Data/Sql/Extensions/Extensions.ISqlQuery.Sql.cs`
-- `Bing/Data/Sql/Extensions/Extensions.ISqlQuery.Other.cs`
+原始 Builder 子句能力由 `ISqlBuilder` 及其扩展方法提供；强类型查询描述提供同等的类型化 `Select`、`Where`、`Join`、`OrderBy` 和分页方法。
 
 ### 1. Select / From / Join
 
@@ -86,21 +45,21 @@ public partial interface ISqlQuery : IDisposable
 
 ```csharp
 // 设置列名
-ISqlQuery Select<TEntity>(bool propertyAsAlias);
-ISqlQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false);
-ISqlQuery Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null);
+ISqlBuilder Select<TEntity>(bool propertyAsAlias);
+ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias = false);
+ISqlBuilder Select<TEntity>(Expression<Func<TEntity, object>> column, string columnAlias = null);
 
 // 移除列
-ISqlQuery RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> columns);
-ISqlQuery RemoveSelect<TEntity>(Expression<Func<TEntity, object>> column);
+ISqlBuilder RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> columns);
+ISqlBuilder RemoveSelect<TEntity>(Expression<Func<TEntity, object>> column);
 
 // 设置表名
-ISqlQuery From<TEntity>(string alias = null, string schema = null);
+ISqlBuilder From<TEntity>(string alias = null, string schema = null);
 
 // 连接表
-ISqlQuery Join<TEntity>(string alias = null, string schema = null);
-ISqlQuery LeftJoin<TEntity>(string alias = null, string schema = null);
-ISqlQuery RightJoin<TEntity>(string alias = null, string schema = null);
+ISqlBuilder Join<TEntity>(string alias = null, string schema = null);
+ISqlBuilder LeftJoin<TEntity>(string alias = null, string schema = null);
+ISqlBuilder RightJoin<TEntity>(string alias = null, string schema = null);
 ```
 
 - `propertyAsAlias`：是否将属性名映射为列别名，例如生成 `t.Name AS Name`。
@@ -157,24 +116,24 @@ query.AppendFrom("Orders o")
 用于构建 `WHERE` 和 `JOIN ... ON` 条件。
 
 ```csharp
-ISqlQuery Where<TEntity>(
+ISqlBuilder Where<TEntity>(
     Expression<Func<TEntity, object>> expression,
     object value,
     Operator @operator = Operator.Equal);
 
-ISqlQuery Where<TEntity>(Expression<Func<TEntity, bool>> expression);
+ISqlBuilder Where<TEntity>(Expression<Func<TEntity, bool>> expression);
 
-ISqlQuery Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
-ISqlQuery OrIf<TEntity>(Expression<Func<TEntity, bool>> predicate, bool condition);
-ISqlQuery OrIf<TEntity>(bool condition, params Expression<Func<TEntity, bool>>[] predicates);
-ISqlQuery OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+ISqlBuilder Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
+ISqlBuilder OrIf<TEntity>(Expression<Func<TEntity, bool>> predicate, bool condition);
+ISqlBuilder OrIf<TEntity>(bool condition, params Expression<Func<TEntity, bool>>[] predicates);
+ISqlBuilder OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions);
 
-ISqlQuery On<TLeft, TRight>(
+ISqlBuilder On<TLeft, TRight>(
     Expression<Func<TLeft, object>> left,
     Expression<Func<TRight, object>> right,
     Operator @operator = Operator.Equal);
 
-ISqlQuery On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression);
+ISqlBuilder On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression);
 ```
 
 特点：
@@ -186,11 +145,11 @@ ISqlQuery On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression);
 ### 3. 聚合函数
 
 ```csharp
-ISqlQuery Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
-ISqlQuery Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
-ISqlQuery Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
-ISqlQuery Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
-ISqlQuery Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
+ISqlBuilder Count<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
+ISqlBuilder Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
+ISqlBuilder Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
+ISqlBuilder Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
+ISqlBuilder Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null);
 ```
 
 用途：在 `SELECT` 子句中添加聚合列，例如 `COUNT(o.Id) AS TotalCount`、`SUM(o.Amount)` 等。
@@ -234,52 +193,11 @@ builder.AggregateExpression(
 
 ---
 
-## 运行期控制与清理
+## 查询描述生命周期
 
-`Extensions.ISqlQuery.Other.cs` 中提供了一些常用的运行期控制与清理方法。
+根 `ISqlQuery` 保存连接、事务和诊断状态。每次调用 `Query<TResult>()`、`From<TEntity>()`、`Sql<TResult>(...)` 或 `Procedure<TResult>(...)` 都会创建独立查询描述及其专属 Builder；一个描述完成配置后应只用于一次执行路径，不应在并发操作之间共享。
 
-### 清理行为
-
-```csharp
-ISqlQuery ClearAfterExecution(this ISqlQuery sqlQuery, bool value = true);
-ISqlQuery Clear(this ISqlQuery sqlQuery);
-ISqlQuery ClearSelect(this ISqlQuery sqlQuery);
-ISqlQuery ClearFrom(this ISqlQuery sqlQuery);
-ISqlQuery ClearJoin(this ISqlQuery sqlQuery);
-ISqlQuery ClearWhere(this ISqlQuery sqlQuery);
-ISqlQuery ClearGroupBy(this ISqlQuery sqlQuery);
-ISqlQuery ClearOrderBy(this ISqlQuery sqlQuery);
-ISqlQuery ClearSqlParams(this ISqlQuery sqlQuery);
-ISqlQuery ClearPageParams(this ISqlQuery sqlQuery);
-```
-
-- 默认情况下，执行后会根据配置自动清空 Sql 和参数；
-- 可通过 `ClearAfterExecution(false)` 关闭自动清理，以便多次执行相同查询；
-- 也可以按子句粒度清理，例如只清空 `Where` 条件重新构造。
-
-### 调试与克隆
-
-```csharp
-ISqlBuilder CloneBuilder(this ISqlQuery sqlQuery);
-ISqlBuilder NewBuilder(this ISqlQuery sqlQuery);
-string GetDebugSql(this ISqlQuery sqlQuery);
-```
-
-- `CloneBuilder()`：复制当前 Sql 生成器，保留结构和参数，适合基于当前查询派生出多个变体；
-- `NewBuilder()`：创建一个新的 Sql 生成器，适合在同一上下文中重新构造完全不同的 Sql；
-- `GetDebugSql()`：获取带参数值的调试 Sql 字符串，常用于日志和问题排查。
-
-### 过滤器控制
-
-```csharp
-ISqlQuery IgnoreFilter<TSqlFilter>(this ISqlQuery sqlQuery)
-    where TSqlFilter : ISqlFilter;
-
-ISqlQuery IgnoreDeletedFilter(this ISqlQuery sqlQuery);
-```
-
-- `IgnoreFilter<TSqlFilter>`：忽略特定 Sql 过滤器（如多租户、审计、自定义过滤器等）；
-- `IgnoreDeletedFilter()`：忽略逻辑删除过滤器，适用于需要查询已逻辑删除数据的后台/审计场景。
+`ISqlQuery` 不提供全局的 `Clear*`、`IgnoreFilter*` 或连接替换扩展。需要构造不同 SQL 时，应创建新的独立查询描述；结构化全局过滤器由 Builder 的数据边界策略统一处理，原生 SQL 则保持调用方控制的固定模板与参数化边界。
 
 ---
 
@@ -530,9 +448,9 @@ executor.ExecuteSql<User>(
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 
 ```csharp
-var query = sqlQuery.Sql<User>()
-    .From<User>("u")
-    .Where<User>(x => x.Name, "Tom");
+var query = sqlQuery.From<User>()
+    .From("u")
+    .Where(user => user.Name, "Tom");
 
 query.AddParam<SqlQuery<User>, User>("statusCode", x => x.Status, 1);
 ```
@@ -625,15 +543,15 @@ await foreach (var user in query.StreamAsync<User>(cancellationToken: cancellati
 
 ## 独立查询描述
 
-根 `ISqlQuery` 保存连接、事务和诊断状态，并持有可变 Builder。需要构建并执行单个查询时，使用 `Sql()` 创建独立查询描述：每个描述都有独立 Builder，执行时仍复用根查询的连接、事务、诊断和 Trace 上下文。
+根 `ISqlQuery` 保存连接、事务和诊断状态。需要构建并执行单个查询时，使用 `Query<TResult>()` 或 `From<TEntity>()` 创建独立 Fluent 查询描述；每个描述都有独立 Builder，执行时仍复用根查询的连接、事务、诊断和 Trace 上下文。
 
 ```csharp
-var fluent = sqlQuery.Sql<Order>();
+var fluent = sqlQuery.From<Order>();
 var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new { Id = orderId });
 ```
 
-- `Sql()`：创建未指定映射类型的 Fluent 描述，终结时通过泛型参数指定结果类型，例如 `ToList<Order>()`。
-- `Sql<TResult>()`：创建指定映射类型的 Fluent 描述，支持 `ToList`、`First`、`Single`、`Scalar` 及同步/异步流式终结方法。
+- `Query<TResult>()`：创建指定结果类型的独立 Fluent 描述，适用于以普通 Builder 子句构造查询。
+- `From<TEntity>()`：创建以实体映射初始化的 Lambda Fluent 描述，支持类型化 `Select`、`Where`、`Join`、分页和同步/异步终结方法。
 - `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换。
 
 原生 SQL 仅应使用调用方控制的固定模板，并通过参数对象绑定外部值；不得将外部输入拼接到 SQL 文本、表名、列名、排序字段或其他结构位置。
@@ -645,10 +563,10 @@ var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new
 ```csharp
 public async Task<List<Order>> GetPaidOrdersAsync(ISqlQuery sqlQuery)
 {
-    return await sqlQuery.Sql<Order>()
-        .Select<Order>(x => new object[] { x.Id, x.OrderNo, x.CustomerName, x.Amount })
-        .From<Order>("o")
-        .Where<Order>(x => x.Status, OrderStatus.Paid)
+    return await sqlQuery.From<Order>()
+        .Select(order => new object[] { order.Id, order.OrderNo, order.CustomerName, order.Amount })
+        .From("o")
+        .Where(order => order.Status, OrderStatus.Paid)
         .ToListAsync();
 }
 ```
@@ -660,19 +578,15 @@ public async Task<List<OrderDto>> QueryOrdersAsync(
     ISqlQuery sqlQuery,
     OrderQueryParameter parameter)
 {
-    return await sqlQuery.Sql<OrderDto>()
-        .Select<Order>(x => new object[]
-        {
-            x.Id, x.OrderNo, x.CustomerName, x.Amount, x.Status
-        })
-        .From<Order>("o")
-        .Where<Order>(x => x.Status, parameter.Status)
-        .OrIf<Order>(
-            !string.IsNullOrWhiteSpace(parameter.Keyword),
-            x => x.OrderNo.Contains(parameter.Keyword)
-              || x.CustomerName.Contains(parameter.Keyword))
+    return await sqlQuery.From<Order>()
+        .From("o")
+        .Where(order => order.Status, parameter.Status)
         .Skip(20)
         .Take(20)
+        .Select<OrderDto>(order => new object[]
+        {
+            order.Id, order.OrderNo, order.CustomerName, order.Amount, order.Status
+        })
         .ToListAsync();
 }
 ```
@@ -684,13 +598,15 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
     ISqlQuery sqlQuery,
     Guid orderId)
 {
-    return await sqlQuery.Sql<OrderWithCustomerDto>()
-        .Select<Order>(x => new object[] { x.Id, x.OrderNo, x.Amount })
-        .Select<Customer>(x => new object[] { x.Name, x.Phone })
-        .From<Order>("o")
+    return await sqlQuery.From<Order>()
+        .From("o")
         .LeftJoin<Customer>("c")
-        .On<Order, Customer>(o => o.CustomerId, c => c.Id)
-        .Where<Order>(o => o.Id, orderId)
+        .On((order, customer) => order.CustomerId == customer.Id)
+        .Where((order, customer) => order.Id == orderId)
+        .Select<OrderWithCustomerDto>((order, customer) => new object[]
+        {
+            order.Id, order.OrderNo, order.Amount, customer.Name, customer.Phone
+        })
         .ToListAsync();
 }
 ```
@@ -712,9 +628,9 @@ public Task<Order> GetOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 ## 使用建议
 
 1. **优先使用表达式扩展方法**：通过 `Select/From/Where/Join/...` 的表达式重载构建 Sql，避免硬编码列名，提高类型安全和可维护性。
-2. **合理控制清理行为**：默认自动清理适合大多数场景；需要多次复用查询时，可使用 `ClearAfterExecution(false)` 或手动调用 `Clear*` 系列方法。
-3. **善用 GetDebugSql 进行排查**：在开发和问题排查时，输出 `GetDebugSql()` 的结果便于和实际数据库环境对比验证。
-4. **谨慎忽略过滤器**：`IgnoreDeletedFilter()` 等方法仅应在确有需要的管理/审计场景使用，避免破坏业务数据约束。
+2. **每次操作创建独立描述**：查询描述持有可变 Builder，不应在并发操作之间复用；需要构造另一条 SQL 时创建新的 `Query<TResult>()`、`From<TEntity>()` 或原生 SQL 描述。
+3. **使用调试 SQL 审查参数化结果**：仅在受控诊断路径中调用 Builder 的 `ToDebugSql()`；敏感参数会被遮蔽，外部输入始终应通过参数对象绑定。
+4. **保持结构化过滤边界**：结构化查询由数据边界策略处理；原生 SQL 不自动附加过滤器，调用方必须使用固定模板并显式约束访问范围。
 
 ---
 

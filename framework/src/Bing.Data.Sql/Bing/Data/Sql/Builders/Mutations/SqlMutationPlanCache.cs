@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using System.Linq.Expressions;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Mutations;
@@ -12,12 +12,25 @@ internal sealed class SqlMutationPlanCache
     /// <summary>
     /// Mutation Plan 缓存。
     /// </summary>
-    private readonly ConcurrentDictionary<SqlMutationPlanCacheKey, Lazy<SqlMutationPlan>> _plans = new();
+    private readonly BoundedLazyCache<SqlMutationPlanCacheKey, SqlMutationPlan> _plans;
 
     /// <summary>
     /// 运行时属性 Getter 缓存。
     /// </summary>
-    private readonly ConcurrentDictionary<SqlMutationGetterCacheKey, Lazy<Func<object, object>>> _getters = new();
+    private readonly BoundedLazyCache<SqlMutationGetterCacheKey, Func<object, object>> _getters;
+
+    /// <summary>
+    /// 初始化一个 <see cref="SqlMutationPlanCache"/> 类型的实例。
+    /// </summary>
+    /// <param name="planCacheCapacity">Mutation Plan 缓存容量。</param>
+    /// <param name="getterCacheCapacity">属性 Getter 缓存容量。</param>
+    internal SqlMutationPlanCache(int? planCacheCapacity = null, int? getterCacheCapacity = null)
+    {
+        ValidateCapacity(planCacheCapacity, nameof(SqlMetadataOptions.MutationPlanCacheCapacity));
+        ValidateCapacity(getterCacheCapacity, nameof(SqlMetadataOptions.MutationGetterCacheCapacity));
+        _plans = new BoundedLazyCache<SqlMutationPlanCacheKey, SqlMutationPlan>(planCacheCapacity);
+        _getters = new BoundedLazyCache<SqlMutationGetterCacheKey, Func<object, object>>(getterCacheCapacity);
+    }
 
     /// <summary>
     /// 缓存计划数量。
@@ -28,6 +41,46 @@ internal sealed class SqlMutationPlanCache
     /// 缓存 Getter 数量。
     /// </summary>
     internal int GetterCount => _getters.Count;
+
+    /// <summary>
+    /// Plan 缓存命中次数。
+    /// </summary>
+    internal long PlanCacheHitCount => _plans.HitCount;
+
+    /// <summary>
+    /// Plan 缓存未命中次数。
+    /// </summary>
+    internal long PlanCacheMissCount => _plans.MissCount;
+
+    /// <summary>
+    /// Plan 缓存旁路次数。
+    /// </summary>
+    internal long PlanCacheBypassCount => _plans.BypassCount;
+
+    /// <summary>
+    /// Plan 缓存淘汰次数。
+    /// </summary>
+    internal long PlanCacheEvictionCount => _plans.EvictionCount;
+
+    /// <summary>
+    /// Getter 缓存命中次数。
+    /// </summary>
+    internal long GetterCacheHitCount => _getters.HitCount;
+
+    /// <summary>
+    /// Getter 缓存未命中次数。
+    /// </summary>
+    internal long GetterCacheMissCount => _getters.MissCount;
+
+    /// <summary>
+    /// Getter 缓存旁路次数。
+    /// </summary>
+    internal long GetterCacheBypassCount => _getters.BypassCount;
+
+    /// <summary>
+    /// Getter 缓存淘汰次数。
+    /// </summary>
+    internal long GetterCacheEvictionCount => _getters.EvictionCount;
 
     /// <summary>
     /// 获取或创建 Mutation Plan。
@@ -55,14 +108,15 @@ internal sealed class SqlMutationPlanCache
     {
         if (factory == null)
             throw new ArgumentNullException(nameof(factory));
-        var lazy = _plans.GetOrAdd(key, _ => new Lazy<SqlMutationPlan>(factory, LazyThreadSafetyMode.ExecutionAndPublication));
+        var lazy = _plans.GetOrAdd(key,
+            () => new Lazy<SqlMutationPlan>(factory, LazyThreadSafetyMode.ExecutionAndPublication));
         try
         {
             return lazy.Value;
         }
         catch
         {
-            RemoveIfCurrent(_plans, key, lazy);
+            _plans.RemoveIfCurrent(key, lazy);
             throw;
         }
     }
@@ -82,7 +136,7 @@ internal sealed class SqlMutationPlanCache
         var sourceType = source.GetType();
         var key = new SqlMutationGetterCacheKey(sourceType.TypeHandle,
             column.PropertyName?.Trim().ToUpperInvariant() ?? string.Empty);
-        var lazy = _getters.GetOrAdd(key, _ => new Lazy<Func<object, object>>(
+        var lazy = _getters.GetOrAdd(key, () => new Lazy<Func<object, object>>(
             () => CreateGetter(sourceType, column.PropertyName), LazyThreadSafetyMode.ExecutionAndPublication));
         try
         {
@@ -90,7 +144,7 @@ internal sealed class SqlMutationPlanCache
         }
         catch
         {
-            RemoveIfCurrent(_getters, key, lazy);
+            _getters.RemoveIfCurrent(key, lazy);
             throw;
         }
     }
@@ -114,17 +168,13 @@ internal sealed class SqlMutationPlanCache
     }
 
     /// <summary>
-    /// 仅在字典仍保存当前惰性实例时移除失败缓存项，避免误删并发调用已恢复的新值。
+    /// 验证缓存容量配置。
     /// </summary>
-    /// <typeparam name="TKey">缓存键类型。</typeparam>
-    /// <typeparam name="TValue">缓存值类型。</typeparam>
-    /// <param name="cache">包含惰性缓存值的并发字典。</param>
-    /// <param name="key">失败项的缓存键。</param>
-    /// <param name="current">本次调用观察到的失败惰性实例。</param>
-    private static void RemoveIfCurrent<TKey, TValue>(ConcurrentDictionary<TKey, Lazy<TValue>> cache, TKey key,
-        Lazy<TValue> current)
+    /// <param name="capacity">待验证容量。</param>
+    /// <param name="parameterName">对应公开配置属性名称。</param>
+    private static void ValidateCapacity(int? capacity, string parameterName)
     {
-        if (cache.TryGetValue(key, out var cached) && ReferenceEquals(cached, current))
-            ((ICollection<KeyValuePair<TKey, Lazy<TValue>>>)cache).Remove(new KeyValuePair<TKey, Lazy<TValue>>(key, current));
+        if (capacity.HasValue && capacity.Value < 0)
+            throw new ArgumentOutOfRangeException(parameterName, capacity, "Mutation 缓存容量不能小于 0。");
     }
 }

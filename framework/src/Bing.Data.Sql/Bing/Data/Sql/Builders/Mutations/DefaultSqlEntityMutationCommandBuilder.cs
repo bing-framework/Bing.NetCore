@@ -46,7 +46,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _services = services ?? throw new ArgumentNullException(nameof(services));
         _databaseContext = _services.DatabaseContextResolver.Resolve(_services.Options);
-        _planCache = SqlMutationPlanCaches.Get(_services.EntityMappingResolver);
+        _planCache = SqlMutationPlanCaches.Get(_services.EntityMappingResolver, _services.MetadataOptions);
     }
 
     /// <summary>
@@ -93,6 +93,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             throw new ArgumentException("组合 Insert 实体集合不能为空。", nameof(entities));
         if (entities.Any(entity => entity == null))
             throw new ArgumentException("组合 Insert 实体集合不能包含 null。", nameof(entities));
+        if (entities.Count > 1 && SqlProviderCapabilityResolver.GetProfile(_provider).Mutation.SupportsMultiRowValues == false)
+            throw new NotSupportedException($"Provider {_provider.Key} 不支持多行 Values。");
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Insert, options?.IncludeProperties,
             options?.ExcludeProperties);
         var mapping = plan.Mapping;
@@ -164,11 +166,44 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
+        if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            return SetSoftDeleteState(entity, true, options);
+        return Purge(entity, options);
+    }
+
+    /// <inheritdoc />
+    public SqlWriteCommand Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Delete, null, null);
-        EnsureKeys(plan, typeof(TEntity), "删除");
+        EnsureKeys(plan, typeof(TEntity), "物理清除");
         var mapping = plan.Mapping;
         var builder = new SqlDeleteBuilder(_provider, _services);
+        builder.DataBoundaryOperation = SqlDataBoundaryOperation.Purge;
         builder.DeleteClause.From(mapping.Table);
+        ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
+        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+    }
+
+    /// <inheritdoc />
+    public SqlWriteCommand Restore<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+        if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)) == false)
+            throw new InvalidOperationException($"实体 {typeof(TEntity).Name} 未实现 ISoftDelete，不能恢复。");
+        var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Update, null, null);
+        EnsureKeys(plan, typeof(TEntity), "恢复");
+        var stateColumn = GetSoftDeleteStateColumn(plan);
+        var builder = new SqlUpdateBuilder(_provider, _services)
+        {
+            DataBoundaryOperation = SqlDataBoundaryOperation.Restore
+        };
+        builder.UpdateClause.UpdateTable(plan.Mapping.Table);
+        var stateParameter = _services.ParameterFactory.Create(builder.MutationContext.ParameterManager.GenerateName(), false,
+            stateColumn, _databaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
+        builder.SetClause.Set(stateColumn.ColumnName, stateParameter);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
         return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
     }
@@ -183,6 +218,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             throw new ArgumentException("组合 Delete 实体集合不能为空。", nameof(entities));
         if (entities.Any(entity => entity == null))
             throw new ArgumentException("组合 Delete 实体集合不能包含 null。", nameof(entities));
+        if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            throw new NotSupportedException("逻辑删除实体不支持组合物理 Delete，请逐实体调用 Delete 或显式调用 Purge。");
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Delete, null, null);
         EnsureKeys(plan, typeof(TEntity), "批量 Delete");
         var builder = new SqlDeleteBuilder(_provider, _services);
@@ -196,6 +233,43 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             ConfigurePairedWhere(builder.WhereClause, plan, entities, options, builder.MutationContext.ParameterManager);
         return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
     }
+
+    /// <summary>
+    /// 生成更新逻辑删除状态的实体命令。
+    /// </summary>
+    /// <typeparam name="TEntity">逻辑删除实体类型。</typeparam>
+    /// <param name="entity">包含主键和并发属性值的实体。</param>
+    /// <param name="isDeleted">目标逻辑删除状态。</param>
+    /// <param name="options">可选的 Delete 原始值和并发配置。</param>
+    /// <returns>带参数和并发校验信息的可执行 Update 命令。</returns>
+    private SqlWriteCommand SetSoftDeleteState<TEntity>(TEntity entity, bool isDeleted, SqlDeleteOptions options)
+        where TEntity : class
+    {
+        var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Update, null, null);
+        EnsureKeys(plan, typeof(TEntity), isDeleted ? "逻辑删除" : "恢复");
+        var stateColumn = GetSoftDeleteStateColumn(plan);
+        var builder = new SqlUpdateBuilder(_provider, _services)
+        {
+            DataBoundaryOperation = isDeleted ? SqlDataBoundaryOperation.SoftDelete : SqlDataBoundaryOperation.Restore
+        };
+        builder.UpdateClause.UpdateTable(plan.Mapping.Table);
+        var stateParameter = _services.ParameterFactory.Create(builder.MutationContext.ParameterManager.GenerateName(), isDeleted,
+            stateColumn, _databaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
+        builder.SetClause.Set(stateColumn.ColumnName, stateParameter);
+        ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
+        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+    }
+
+
+    /// <summary>
+    /// 获取逻辑删除状态列映射。
+    /// </summary>
+    /// <param name="plan">当前实体 Mutation 计划。</param>
+    /// <returns>逻辑删除状态列。</returns>
+    private static ColumnMappingMetadata GetSoftDeleteStateColumn(SqlMutationPlan plan) =>
+        plan.Mapping.Columns.Values.FirstOrDefault(column =>
+            string.Equals(column.PropertyName, nameof(ISoftDelete.IsDeleted), StringComparison.OrdinalIgnoreCase)) ??
+        throw new InvalidOperationException($"逻辑删除实体 {plan.Mapping.EntityType.Name} 的属性 {nameof(ISoftDelete.IsDeleted)} 未映射到数据库列。");
 
     /// <summary>
     /// 解析实体的最终映射。
@@ -357,7 +431,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <param name="behavior">调用方指定的并发冲突行为。</param>
     /// <returns>最终可执行命令。</returns>
     private static SqlWriteCommand WithConcurrencyValidation(SqlWriteCommand command, SqlMutationPlan plan,
-        SqlConcurrencyConflictBehavior? behavior) => new(command.Sql, command.Parameters,
+        SqlConcurrencyConflictBehavior? behavior) => command.WithValidateAffectedRows(
         plan.ConcurrencyColumns.Count > 0 && (behavior ?? SqlConcurrencyConflictBehavior.Throw) ==
         SqlConcurrencyConflictBehavior.Throw);
 

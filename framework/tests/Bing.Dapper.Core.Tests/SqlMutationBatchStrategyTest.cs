@@ -167,6 +167,36 @@ public sealed class SqlMutationBatchStrategyTest
     }
 
     /// <summary>
+    /// 测试目的：逻辑删除实体的 DeleteBatch 必须回退为逐实体逻辑 Update，不能生成组合物理 Delete。
+    /// </summary>
+    [Fact]
+    public void DeleteBatch_WhenSoftDeleteEntitiesAreProvided_ShouldExecutePerEntityLogicalDeleteCommands()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider(supportsMultiRowValues: false);
+        using var executor = new RecordingExecutor(provider, DatabaseType.Sqlite);
+
+        // Act
+        var affectedRows = executor.DeleteBatch(new[]
+        {
+            new SoftDeleteUpdateSample { Id = 1 },
+            new SoftDeleteUpdateSample { Id = 2 }
+        }, new SqlBatchDeleteOptions { BatchSize = 2, UseTransaction = false });
+
+        // Assert
+        Assert.Equal(6, affectedRows);
+        Assert.Equal(2, executor.Commands.Count);
+        Assert.All(executor.Commands, command =>
+        {
+            Assert.Equal("Update [soft_delete_update_samples] Set [IsDeleted] = @_p_0 Where [Id] = @_p_1 And [IsDeleted]=@_p_2",
+                command.Sql);
+            Assert.True((bool)command.Parameters[0].Value);
+            Assert.False((bool)command.Parameters[2].Value);
+        });
+        Assert.Equal(new object[] { 1, 2 }, executor.Commands.Select(command => command.Parameters[1].Value));
+    }
+
+    /// <summary>
     /// 测试目的：带并发列的 Combined Delete 影响多行时应按批次实体数校验，不能套用单实体一行规则。
     /// </summary>
     [Fact]

@@ -1,0 +1,43 @@
+Bing.Dapper.SqlServer.SqlServerServiceCollectionExtensions
+Bing.Data.Metadata.SqlServerTypeConverter
+Bing.Data.Metadata.SqlServerTypeConverter.SqlServerTypeConverter() -> void
+Bing.Data.Metadata.SqlServerTypeConverter.ToDbType(string dataType, int? length = null) -> System.Data.DbType?
+Bing.Data.Sql.Builders.SqlServerBuilder
+Bing.Data.Sql.Builders.SqlServerBuilder.SqlServerBuilder(Bing.Data.Sql.Builders.Core.SqlBuilderServices services = null, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager = null) -> void
+Bing.Data.Sql.Builders.SqlServerDialect
+Bing.Data.Sql.Builders.SqlServerSqlProvider
+Bing.Data.Sql.Builders.SqlServerSqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
+Bing.Data.Sql.Builders.SqlServerSqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
+Bing.Data.Sql.Builders.SqlServerSqlProvider.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.Builders.SqlServerSqlProvider.GetKeyword(Bing.Data.Sql.SqlExecutionKind executionKind) -> string
+Bing.Data.Sql.Builders.SqlServerSqlProvider.GetQualifier(Bing.Data.Sql.SqlExecutionKind executionKind, string configuredQualifier) -> string
+Bing.Data.Sql.Builders.SqlServerSqlProvider.Key.get -> string
+Bing.Data.Sql.Builders.SqlServerSqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Builders.ISqlPaginationRenderer
+Bing.Data.Sql.Builders.SqlServerSqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
+Bing.Data.Sql.Builders.SqlServerSqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.Builders.SqlServerSqlProvider.Position.get -> Bing.Data.Sql.Builders.Mutations.SqlReturningClausePosition
+Bing.Data.Sql.Builders.SqlServerSqlProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.SqlServerSqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
+Bing.Data.Sql.SqlServerDbParameterCustomizer
+Bing.Data.Sql.SqlServerDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
+Bing.Data.Sql.SqlServerDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
+Bing.Data.Sql.SqlServerDbParameterCustomizer.SqlServerDbParameterCustomizer() -> void
+Bing.Data.Sql.SqlServerSqlExecutor
+Bing.Data.Sql.SqlServerSqlExecutor.SqlServerSqlExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqlServerSqlExecutor> options) -> void
+Bing.Data.Sql.SqlServerSqlExecutorBase
+Bing.Data.Sql.SqlServerSqlExecutorBase.SqlServerSqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqlServerSqlMultipleQueryExecutor
+Bing.Data.Sql.SqlServerSqlMultipleQueryExecutor.SqlServerSqlMultipleQueryExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqlServerSqlMultipleQueryExecutor> options) -> void
+Bing.Data.Sql.SqlServerSqlMultipleQueryExecutorBase
+Bing.Data.Sql.SqlServerSqlMultipleQueryExecutorBase.SqlServerSqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqlServerSqlQuery
+Bing.Data.Sql.SqlServerSqlQuery.SqlServerSqlQuery(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqlServerSqlQuery> options) -> void
+Bing.Data.Sql.SqlServerSqlQueryBase
+Bing.Data.Sql.SqlServerSqlQueryBase.SqlServerSqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+override Bing.Data.Sql.Builders.SqlServerBuilder.CreateBuilder(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.Core.SqlBuilderBase
+override Bing.Data.Sql.SqlServerSqlExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.SqlServerSqlMultipleQueryExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.SqlServerSqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+static Bing.Dapper.SqlServer.SqlServerServiceCollectionExtensions.AddSqlServerProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Data.Sql.Builders.SqlServerDialect.Instance.get -> Bing.Data.Sql.Builders.SqlServerDialect
+static Bing.Data.Sql.Builders.SqlServerSqlProvider.Instance.get -> Bing.Data.Sql.Builders.SqlServerSqlProvider

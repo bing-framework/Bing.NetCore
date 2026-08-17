@@ -1,0 +1,55 @@
+Bing.Dapper.MySql.MySqlServiceCollectionExtensions
+Bing.Data.Metadata.MySqlTypeConverter
+Bing.Data.Metadata.MySqlTypeConverter.MySqlTypeConverter() -> void
+Bing.Data.Metadata.MySqlTypeConverter.ToDbType(string dataType, int? length = null) -> System.Data.DbType?
+Bing.Data.Sql.Builders.Clauses.MySqlFromClause
+Bing.Data.Sql.Builders.Clauses.MySqlFromClause.MySqlFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.MySqlFromClause.MySqlFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table, Bing.Data.Enums.DatabaseType? providerDatabaseType = null) -> void
+Bing.Data.Sql.Builders.Clauses.MySqlJoinClause
+Bing.Data.Sql.Builders.Clauses.MySqlJoinClause.MySqlJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.MySqlJoinClause.MySqlJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, bool splitStringTableName, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems = null) -> void
+Bing.Data.Sql.Builders.MySqlBuilder
+Bing.Data.Sql.Builders.MySqlBuilder.MySqlBuilder(Bing.Data.Sql.Builders.Core.SqlBuilderServices services = null, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager = null) -> void
+Bing.Data.Sql.Builders.MySqlDialect
+Bing.Data.Sql.Builders.MySqlSqlProvider
+Bing.Data.Sql.Builders.MySqlSqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
+Bing.Data.Sql.Builders.MySqlSqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
+Bing.Data.Sql.Builders.MySqlSqlProvider.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.Builders.MySqlSqlProvider.Key.get -> string
+Bing.Data.Sql.Builders.MySqlSqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Builders.ISqlPaginationRenderer
+Bing.Data.Sql.Builders.MySqlSqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
+Bing.Data.Sql.Builders.MySqlSqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.Builders.MySqlSqlProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.MySqlSqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
+Bing.Data.Sql.MySqlDbParameterCustomizer
+Bing.Data.Sql.MySqlDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
+Bing.Data.Sql.MySqlDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
+Bing.Data.Sql.MySqlDbParameterCustomizer.MySqlDbParameterCustomizer() -> void
+Bing.Data.Sql.MySqlExecutor
+Bing.Data.Sql.MySqlExecutor.MySqlExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.MySqlExecutor> options) -> void
+Bing.Data.Sql.MySqlExecutorBase
+Bing.Data.Sql.MySqlExecutorBase.MySqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.MySqlMultipleQueryExecutor
+Bing.Data.Sql.MySqlMultipleQueryExecutor.MySqlMultipleQueryExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.MySqlMultipleQueryExecutor> options) -> void
+Bing.Data.Sql.MySqlMultipleQueryExecutorBase
+Bing.Data.Sql.MySqlMultipleQueryExecutorBase.MySqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.MySqlQuery
+Bing.Data.Sql.MySqlQuery.MySqlQuery(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.MySqlQuery> options) -> void
+Bing.Data.Sql.MySqlQueryBase
+Bing.Data.Sql.MySqlQueryBase.MySqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+override Bing.Data.Sql.Builders.Clauses.MySqlFromClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table) -> Bing.Data.Sql.Builders.Clauses.FromClause
+override Bing.Data.Sql.Builders.Clauses.MySqlFromClause.CreateSqlItem(string table, string schema, string alias) -> Bing.Data.Sql.Builders.Core.SqlItem
+override Bing.Data.Sql.Builders.Clauses.MySqlFromClause.ParseTableName(string table, string alias) -> (string TableName, string Alias, string Schema)
+override Bing.Data.Sql.Builders.Clauses.MySqlJoinClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems) -> Bing.Data.Sql.Builders.Clauses.JoinClause
+override Bing.Data.Sql.Builders.Clauses.MySqlJoinClause.CreateJoinItem(string joinType, string table, string schema, string alias, System.Type type = null) -> Bing.Data.Sql.Builders.Core.JoinItem
+override Bing.Data.Sql.Builders.Clauses.MySqlJoinClause.ParseTableName(string table, string alias) -> (string TableName, string Alias, string Schema)
+override Bing.Data.Sql.Builders.MySqlBuilder.CreateBuilder(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.Core.SqlBuilderBase
+override Bing.Data.Sql.Builders.MySqlBuilder.GetCteKeyWord() -> string
+override Bing.Data.Sql.Builders.MySqlDialect.ClosingIdentifier.get -> char
+override Bing.Data.Sql.Builders.MySqlDialect.OpeningIdentifier.get -> char
+override Bing.Data.Sql.MySqlExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.MySqlMultipleQueryExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.MySqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+static Bing.Dapper.MySql.MySqlServiceCollectionExtensions.AddMySqlProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Data.Sql.Builders.MySqlDialect.Instance.get -> Bing.Data.Sql.Builders.MySqlDialect
+static Bing.Data.Sql.Builders.MySqlSqlProvider.Instance.get -> Bing.Data.Sql.Builders.MySqlSqlProvider

@@ -221,6 +221,28 @@ public class JoinClauseTest
     }
 
     /// <summary>
+    /// 测试目的：类型化 Join 的列对列 In 和 NotIn 条件必须输出完整集合谓词，不能进入未实现操作符分支。
+    /// </summary>
+    /// <param name="operator">集合比较操作符。</param>
+    /// <param name="operatorSql">预期 SQL 操作符文本。</param>
+    [Theory]
+    [InlineData(Operator.In, "In")]
+    [InlineData(Operator.NotIn, "Not In")]
+    public void On_WhenSetOperatorIsConfigured_ShouldRenderExpectedSql(Operator @operator, string operatorSql)
+    {
+        // Arrange
+        _clause.Join<Sample>("t");
+        _clause.Join<Sample2>("t2");
+
+        // Act
+        _clause.On<Sample, Sample2>(item => item.IntValue, item => item.IntValue, @operator);
+
+        // Assert
+        Assert.Equal($"Join [Sample] As [t] \r\nJoin [Sample2] As [t2] On [t].[IntValue] {operatorSql} ([t2].[IntValue])",
+            GetSql());
+    }
+
+    /// <summary>
     /// 测试 - 表连接条件 - 谓词表达式
     /// </summary>
     [Fact]

@@ -1,0 +1,53 @@
+Bing.Dapper.Oracle.OracleServiceCollectionExtensions
+Bing.Data.Metadata.OracleTypeConverter
+Bing.Data.Metadata.OracleTypeConverter.OracleTypeConverter() -> void
+Bing.Data.Metadata.OracleTypeConverter.ToDbType(string dataType, int? length = null) -> System.Data.DbType?
+Bing.Data.Sql.Builders.Clauses.OracleFromClause
+Bing.Data.Sql.Builders.Clauses.OracleFromClause.OracleFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.OracleFromClause.OracleFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table, Bing.Data.Enums.DatabaseType? providerDatabaseType = null) -> void
+Bing.Data.Sql.Builders.Clauses.OracleJoinClause
+Bing.Data.Sql.Builders.Clauses.OracleJoinClause.OracleJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.OracleJoinClause.OracleJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems) -> void
+Bing.Data.Sql.Builders.OracleBuilder
+Bing.Data.Sql.Builders.OracleBuilder.OracleBuilder(Bing.Data.Sql.Builders.Core.SqlBuilderServices services = null, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager = null) -> void
+Bing.Data.Sql.Builders.OracleDialect
+Bing.Data.Sql.Builders.OracleSqlProvider
+Bing.Data.Sql.Builders.OracleSqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
+Bing.Data.Sql.Builders.OracleSqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
+Bing.Data.Sql.Builders.OracleSqlProvider.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.Builders.OracleSqlProvider.Key.get -> string
+Bing.Data.Sql.Builders.OracleSqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Builders.ISqlPaginationRenderer
+Bing.Data.Sql.Builders.OracleSqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
+Bing.Data.Sql.Builders.OracleSqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.Builders.OracleSqlProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.OracleSqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
+Bing.Data.Sql.OracleDbParameterCustomizer
+Bing.Data.Sql.OracleDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
+Bing.Data.Sql.OracleDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
+Bing.Data.Sql.OracleDbParameterCustomizer.OracleDbParameterCustomizer() -> void
+Bing.Data.Sql.OracleSqlExecutor
+Bing.Data.Sql.OracleSqlExecutor.OracleSqlExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.OracleSqlExecutor> options) -> void
+Bing.Data.Sql.OracleSqlExecutorBase
+Bing.Data.Sql.OracleSqlExecutorBase.OracleSqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.OracleSqlQuery
+Bing.Data.Sql.OracleSqlQuery.OracleSqlQuery(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.OracleSqlQuery> options) -> void
+Bing.Data.Sql.OracleSqlQueryBase
+Bing.Data.Sql.OracleSqlQueryBase.OracleSqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+override Bing.Data.Sql.Builders.Clauses.OracleFromClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table) -> Bing.Data.Sql.Builders.Clauses.FromClause
+override Bing.Data.Sql.Builders.Clauses.OracleFromClause.GetSubqueryAlias(string alias) -> string
+override Bing.Data.Sql.Builders.Clauses.OracleJoinClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems) -> Bing.Data.Sql.Builders.Clauses.JoinClause
+override Bing.Data.Sql.Builders.Clauses.OracleJoinClause.CreateJoinItem(string joinType, string table, string schema, string alias, System.Type type = null) -> Bing.Data.Sql.Builders.Core.JoinItem
+override Bing.Data.Sql.Builders.Clauses.OracleJoinClause.GetSubqueryAlias(string alias) -> string
+override Bing.Data.Sql.Builders.OracleBuilder.CreateBuilder(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.Core.SqlBuilderBase
+override Bing.Data.Sql.Builders.OracleDialect.ClosingIdentifier.get -> char
+override Bing.Data.Sql.Builders.OracleDialect.GenerateName(int paramIndex) -> string
+override Bing.Data.Sql.Builders.OracleDialect.GetParamName(string paramName) -> string
+override Bing.Data.Sql.Builders.OracleDialect.GetParamValue(object paramValue) -> object
+override Bing.Data.Sql.Builders.OracleDialect.GetPrefix() -> string
+override Bing.Data.Sql.Builders.OracleDialect.OpeningIdentifier.get -> char
+override Bing.Data.Sql.Builders.OracleDialect.SupportSelectAs() -> bool
+override Bing.Data.Sql.OracleSqlExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.OracleSqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+static Bing.Dapper.Oracle.OracleServiceCollectionExtensions.AddOracleProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Data.Sql.Builders.OracleDialect.Instance.get -> Bing.Data.Sql.Builders.OracleDialect
+static Bing.Data.Sql.Builders.OracleSqlProvider.Instance.get -> Bing.Data.Sql.Builders.OracleSqlProvider

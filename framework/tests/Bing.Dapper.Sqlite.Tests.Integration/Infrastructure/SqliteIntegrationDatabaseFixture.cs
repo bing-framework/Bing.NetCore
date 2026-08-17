@@ -212,6 +212,11 @@ Create Table If Not Exists samples(
     Amount Decimal Null,
     SecretText Text Null
 );
+Create Table If Not Exists soft_delete_samples(
+    Id Integer Primary Key Autoincrement,
+    Name Text Null,
+    IsDeleted Integer Not Null Default 0
+);
 Create Table If Not Exists Orders(
     Id Integer Not Null,
     TenantId Text Null,
@@ -235,7 +240,7 @@ Create Table If Not Exists HierarchyNodes(
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
-        command.CommandText = "Delete From HierarchyNodes; Delete From Orders; Delete From samples;";
+        command.CommandText = "Delete From HierarchyNodes; Delete From Orders; Delete From soft_delete_samples; Delete From samples;";
         await command.ExecuteNonQueryAsync();
     }
 

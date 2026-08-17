@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Oracle Sql执行器
 /// </summary>
-public class OracleSqlExecutor: OracleSqlExecutorBase
+public class OracleSqlExecutor : OracleSqlExecutorBase
 {
     /// <summary>
     /// 初始化一个<see cref="OracleSqlExecutor"/>类型的实例

@@ -99,7 +99,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
         {
             new FreeSqlEntityModelMetadataProvider(UnitOfWork.Orm)
         });
-        SqlQueryRuntimeBridge.BindEntityMappingResolver(result, new DefaultEntityMappingResolver(
+        SqlQueryRuntimeBinding.BindEntityMappingResolver(result, new DefaultEntityMappingResolver(
             _databaseContextAccessor, _metadataOptions, _typeConverterResolver, metadataProvider));
         return result;
     }
@@ -175,6 +175,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (id.SafeString().IsEmpty())
             return null;
         return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
@@ -187,6 +188,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (id.SafeString().IsEmpty())
             return null;
         return await Set.Select.WhereDynamic(id).ToOneAsync(cancellationToken);
@@ -232,6 +234,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (ids == null)
             return null;
         return await Set.Select.WhereDynamic(ids.ToArray()).ToListAsync(cancellationToken: cancellationToken);
@@ -244,6 +247,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var idList = Conv.ToList<TKey>(ids);
         return await FindByIdsAsync(idList, cancellationToken);
     }
@@ -266,6 +270,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (id == null)
             return null;
         return await Set.Select.NoTracking().WhereDynamic(id).ToOneAsync(cancellationToken);
@@ -311,6 +316,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (ids == null)
             return null;
         return await Set.Select.NoTracking().WhereDynamic(ids.ToArray()).ToListAsync(cancellationToken: cancellationToken);
@@ -323,6 +329,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var idList = Conv.ToList<TKey>(ids);
         return await FindByIdsNoTrackingAsync(idList, cancellationToken);
     }
@@ -340,7 +347,9 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
     public TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action)
     {
-        throw new NotImplementedException();
+        if (action == null)
+            return Single(predicate);
+        return action(Find()).Where(predicate).RestoreToSelect().ToOne();
     }
 
     /// <summary>
@@ -348,7 +357,11 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await Set.Select.Where(predicate).ToOneAsync(cancellationToken);
+    public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await Set.Select.Where(predicate).ToOneAsync(cancellationToken);
+    }
 
     /// <summary>
     /// 查找单个实体
@@ -356,9 +369,13 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="predicate">查询条件</param>
     /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
+    public async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (action == null)
+            return await SingleAsync(predicate, cancellationToken);
+        return await action(Find()).Where(predicate).RestoreToSelect().ToOneAsync(cancellationToken);
     }
 
     /// <summary>
@@ -379,6 +396,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (predicate == null)
             return await Set.Select.ToListAsync(cancellationToken);
         return await Set.Select.Where(predicate).ToListAsync(cancellationToken);
@@ -402,6 +420,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (predicate == null)
             return await Set.Select.NoTracking().ToListAsync(cancellationToken);
         return await Set.Select.NoTracking().Where(predicate).ToListAsync(cancellationToken);
@@ -470,6 +489,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (predicate == null)
             return false;
         return await Set.Select.AnyAsync(predicate, cancellationToken);
@@ -493,6 +513,7 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// <param name="cancellationToken">取消令牌</param>
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (predicate == null)
             return (int)await Set.Select.CountAsync(cancellationToken);
         return (int)await Set.Select.Where(predicate).CountAsync(cancellationToken);
@@ -540,30 +561,84 @@ public abstract class QueryStoreBase<TEntity,TKey> : IQueryStore<TEntity, TKey> 
     /// 查询
     /// </summary>
     /// <param name="query">查询对象</param>
-    public virtual async Task<List<TEntity>> QueryAsync(IQueryBase<TEntity> query) =>
-        await Query(Set.Select.AsQueryable(), query).ToDynamicListAsync<TEntity>();
+    public virtual Task<List<TEntity>> QueryAsync(IQueryBase<TEntity> query) =>
+        QueryAsync(query, CancellationToken.None);
+
+    /// <summary>
+    /// 查询。
+    /// </summary>
+    /// <param name="query">查询对象。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public virtual async Task<List<TEntity>> QueryAsync(IQueryBase<TEntity> query,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await Query(Set.Select.AsQueryable(), query).RestoreToSelect().ToListAsync(cancellationToken);
+    }
 
     /// <summary>
     /// 查询 - 返回未跟踪的实体
     /// </summary>
     /// <param name="query">查询对象</param>
-    public virtual async Task<List<TEntity>> QueryAsNoTrackingAsync(IQueryBase<TEntity> query) => await Query(FindAsNoTracking(), query).ToDynamicListAsync<TEntity>();
+    public virtual Task<List<TEntity>> QueryAsNoTrackingAsync(IQueryBase<TEntity> query) =>
+        QueryAsNoTrackingAsync(query, CancellationToken.None);
+
+    /// <summary>
+    /// 查询 - 返回未跟踪的实体。
+    /// </summary>
+    /// <param name="query">查询对象。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public virtual async Task<List<TEntity>> QueryAsNoTrackingAsync(IQueryBase<TEntity> query,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await Query(FindAsNoTracking(), query).RestoreToSelect().ToListAsync(cancellationToken);
+    }
 
     /// <summary>
     /// 分页查询
     /// </summary>
     /// <param name="query">查询对象</param>
-    public virtual async Task<PagerList<TEntity>> PagerQueryAsync(IQueryBase<TEntity> query) => await Set.Select.AsQueryable().Where(query).ToPagerListAsync(query.GetPager());
+    public virtual Task<PagerList<TEntity>> PagerQueryAsync(IQueryBase<TEntity> query) =>
+        PagerQueryAsync(query, CancellationToken.None);
+
+    /// <summary>
+    /// 分页查询。
+    /// </summary>
+    /// <param name="query">查询对象。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public virtual async Task<PagerList<TEntity>> PagerQueryAsync(IQueryBase<TEntity> query,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await Set.Select.AsQueryable().Where(query).ToPagerListAsync(query.GetPager(), cancellationToken);
+    }
 
     /// <summary>
     /// 分页查询 - 返回未跟踪的实体
     /// </summary>
     /// <param name="query">查询对象</param>
-    public virtual async Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync(IQueryBase<TEntity> query) => await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager());
+    public virtual Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync(IQueryBase<TEntity> query) =>
+        PagerQueryAsNoTrackingAsync(query, CancellationToken.None);
 
-    /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+    /// <summary>
+    /// 分页查询 - 返回未跟踪的实体。
+    /// </summary>
+    /// <param name="query">查询对象。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public virtual async Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync(IQueryBase<TEntity> query,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await FindAsNoTracking().Where(query).ToPagerListAsync(query.GetPager(), cancellationToken);
+    }
+
+    /// <summary>
+    /// 释放已创建的 SQL 查询对象。
+    /// </summary>
     public void Dispose()
     {
-        throw new NotImplementedException();
+        var sqlQuery = Interlocked.Exchange(ref _sqlQuery, null);
+        sqlQuery?.Dispose();
     }
 }

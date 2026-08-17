@@ -3,12 +3,14 @@
     <AssemblyName>Bing.Dapper.MySql</AssemblyName>
     <PackageId>Bing.Dapper.MySql</PackageId>
     <Description>Bing.Dapper.MySql 是Bing应用框架基于Dapper的数据访问封装类库，用于处理MySql数据库。</Description>
+    <WarningsAsErrors>$(WarningsAsErrors);RS0016;RS0017;RS0018</WarningsAsErrors>
   </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.1.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

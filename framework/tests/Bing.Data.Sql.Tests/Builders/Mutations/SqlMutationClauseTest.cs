@@ -9,7 +9,7 @@ using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
-using MutationSqlExecutionKind = Bing.Data.Sql.Builders.SqlExecutionKind;
+using MutationSqlExecutionKind = Bing.Data.Sql.SqlExecutionKind;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
 

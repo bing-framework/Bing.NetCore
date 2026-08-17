@@ -18,16 +18,31 @@ public static partial class QueryableExtensions
     /// <param name="pager">分页对象</param>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public static async Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager) where TEntity : class
+    public static Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
+        where TEntity : class => PageAsync(query, pager, CancellationToken.None);
+
+    /// <summary>
+    /// 分页，包含排序，并将取消令牌传递给总数查询。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="query">数据源</param>
+    /// <param name="pager">分页对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>已应用排序和分页条件的数据源。</returns>
+    /// <exception cref="ArgumentNullException">当数据源或分页对象为空时抛出。</exception>
+    /// <exception cref="ArgumentException">当未设置排序字段时抛出。</exception>
+    public static async Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager,
+        CancellationToken cancellationToken) where TEntity : class
     {
         if (query == null)
             throw new ArgumentNullException(nameof(query));
         if (pager == null)
             throw new ArgumentNullException(nameof(pager));
+        cancellationToken.ThrowIfCancellationRequested();
         Helper.InitOrder(query, pager);
         var select = query.RestoreToSelect();
         if (pager.TotalCount <= 0)
-            pager.TotalCount = (int)await select.CountAsync();
+            pager.TotalCount = (int)await select.CountAsync(cancellationToken);
         var orderedQueryable = Helper.GetOrderedQueryable(query, pager);
         if (orderedQueryable == null)
             throw new ArgumentException("必须设置排序字段");
@@ -45,15 +60,29 @@ public static partial class QueryableExtensions
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
     /// <exception cref="ArgumentNullException"></exception>
-    public static async Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager) where TEntity : class
+    public static Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
+        where TEntity : class => ToPagerListAsync(query, pager, CancellationToken.None);
+
+    /// <summary>
+    /// 转换为分页列表，包含排序分页操作，并将取消令牌传递给总数和数据查询。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="query">数据源</param>
+    /// <param name="pager">分页对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>分页结果。</returns>
+    /// <exception cref="ArgumentNullException">当数据源或分页对象为空时抛出。</exception>
+    public static async Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager,
+        CancellationToken cancellationToken) where TEntity : class
     {
         if (query == null)
             throw new ArgumentNullException(nameof(query));
         if (pager == null)
             throw new ArgumentNullException(nameof(pager));
-        query = await query.PageAsync(pager);
+        cancellationToken.ThrowIfCancellationRequested();
+        query = await query.PageAsync(pager, cancellationToken);
         var select = query.RestoreToSelect();
-        return new PagerList<TEntity>(pager, await select.ToListAsync());
+        return new PagerList<TEntity>(pager, await select.ToListAsync(cancellationToken));
     }
 
     #endregion

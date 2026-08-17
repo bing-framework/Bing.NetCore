@@ -100,6 +100,9 @@ public sealed class SqlInsertBuilderTest
         Assert.Single(command.Parameters);
         Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
         Assert.Equal(1, parameterManager.Count);
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
+        Assert.Equal(SqlOperationKind.InsertValues, command.OperationKind);
+        Assert.False(command.HasReturning);
     }
 
     /// <summary>

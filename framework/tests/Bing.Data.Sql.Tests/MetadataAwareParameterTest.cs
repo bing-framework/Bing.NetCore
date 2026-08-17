@@ -4,6 +4,7 @@ using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
+using Moq;
 using Shouldly;
 
 namespace Bing.Data.Sql.Tests;
@@ -169,6 +170,29 @@ public class MetadataAwareParameterTest
         item.HasExplicitValue.ShouldBeFalse();
         item.ValueResolved.ShouldBeTrue();
         item.Value.ShouldBe("source");
+    }
+
+    /// <summary>
+    /// 测试目的：预取消的原生 SQL 映射调用不得创建参数映射、执行调用方回调或访问执行器。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenCancellationRequested_ShouldNotInvokeParameterMap()
+    {
+        // Arrange
+        var executor = new Mock<ISqlExecutor>();
+        var mapCalled = false;
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.Object.ExecuteSqlAsync<Sample>(
+            "Update samples Set Name=@name", new { name = "Bing" }, _ => mapCalled = true,
+            cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        Assert.False(mapCalled);
+        executor.Verify(item => item.ExecuteSqlAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<int?>(),
+            It.IsAny<CancellationToken>()), Times.Never);
     }
 
     /// <summary>

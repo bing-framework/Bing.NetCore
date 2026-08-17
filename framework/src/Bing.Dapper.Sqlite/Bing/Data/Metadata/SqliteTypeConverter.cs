@@ -12,7 +12,7 @@ public class SqliteTypeConverter : ITypeConverter
     {
         if (string.IsNullOrWhiteSpace(dataType))
             return null;
-        switch (dataType.ToLower())
+        switch (dataType.ToLowerInvariant())
         {
             case "integer":
                 return DbType.Int64;
@@ -25,6 +25,5 @@ public class SqliteTypeConverter : ITypeConverter
             default:
                 return DbType.Object;
         }
-        throw new NotImplementedException(dataType);
     }
 }

@@ -1,0 +1,54 @@
+Bing.Dapper.Sqlite.SqliteServiceCollectionExtensions
+Bing.Data.Metadata.SqliteTypeConverter
+Bing.Data.Metadata.SqliteTypeConverter.SqliteTypeConverter() -> void
+Bing.Data.Metadata.SqliteTypeConverter.ToDbType(string dataType, int? length = null) -> System.Data.DbType?
+Bing.Data.Sql.Builders.Clauses.SqliteFromClause
+Bing.Data.Sql.Builders.Clauses.SqliteFromClause.SqliteFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.SqliteFromClause.SqliteFromClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table, Bing.Data.Enums.DatabaseType? providerDatabaseType = null) -> void
+Bing.Data.Sql.Builders.Clauses.SqliteJoinClause
+Bing.Data.Sql.Builders.Clauses.SqliteJoinClause.SqliteJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
+Bing.Data.Sql.Builders.Clauses.SqliteJoinClause.SqliteJoinClause(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems) -> void
+Bing.Data.Sql.Builders.SqliteBuilder
+Bing.Data.Sql.Builders.SqliteBuilder.SqliteBuilder(Bing.Data.Sql.Builders.Core.SqlBuilderServices services = null, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager = null) -> void
+Bing.Data.Sql.Builders.SqliteDialect
+Bing.Data.Sql.Builders.SqliteSqlProvider
+Bing.Data.Sql.Builders.SqliteSqlProvider.ClauseFactory.get -> Bing.Data.Sql.Builders.ISqlClauseFactory
+Bing.Data.Sql.Builders.SqliteSqlProvider.DatabaseType.get -> Bing.Data.Enums.DatabaseType
+Bing.Data.Sql.Builders.SqliteSqlProvider.Dialect.get -> Bing.Data.Sql.Builders.IDialect
+Bing.Data.Sql.Builders.SqliteSqlProvider.Key.get -> string
+Bing.Data.Sql.Builders.SqliteSqlProvider.PaginationRenderer.get -> Bing.Data.Sql.Builders.ISqlPaginationRenderer
+Bing.Data.Sql.Builders.SqliteSqlProvider.ParameterManagerFactory.get -> Bing.Data.Sql.Builders.IParameterManagerFactory
+Bing.Data.Sql.Builders.SqliteSqlProvider.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
+Bing.Data.Sql.Builders.SqliteSqlProvider.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
+Bing.Data.Sql.Builders.SqliteSqlProvider.TableReferenceParser.get -> Bing.Data.Sql.Builders.ISqlTableReferenceParser
+Bing.Data.Sql.SqliteDbParameterCustomizer
+Bing.Data.Sql.SqliteDbParameterCustomizer.CanHandle(Bing.Data.Enums.DatabaseType databaseType) -> bool
+Bing.Data.Sql.SqliteDbParameterCustomizer.Configure(System.Data.IDbDataParameter dbParameter, Bing.Data.Sql.Builders.Params.SqlParam sqlParameter) -> void
+Bing.Data.Sql.SqliteDbParameterCustomizer.SqliteDbParameterCustomizer() -> void
+Bing.Data.Sql.SqliteSqlExecutor
+Bing.Data.Sql.SqliteSqlExecutor.SqliteSqlExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqliteSqlExecutor> options) -> void
+Bing.Data.Sql.SqliteSqlExecutorBase
+Bing.Data.Sql.SqliteSqlExecutorBase.SqliteSqlExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqliteSqlMultipleQueryExecutor
+Bing.Data.Sql.SqliteSqlMultipleQueryExecutor.SqliteSqlMultipleQueryExecutor(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqliteSqlMultipleQueryExecutor> options) -> void
+Bing.Data.Sql.SqliteSqlMultipleQueryExecutorBase
+Bing.Data.Sql.SqliteSqlMultipleQueryExecutorBase.SqliteSqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+Bing.Data.Sql.SqliteSqlQuery
+Bing.Data.Sql.SqliteSqlQuery.SqliteSqlQuery(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions<Bing.Data.Sql.SqliteSqlQuery> options) -> void
+Bing.Data.Sql.SqliteSqlQueryBase
+Bing.Data.Sql.SqliteSqlQueryBase.SqliteSqlQueryBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
+override Bing.Data.Sql.Builders.Clauses.SqliteFromClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, Bing.Data.Sql.Builders.Core.SqlItem table) -> Bing.Data.Sql.Builders.Clauses.FromClause
+override Bing.Data.Sql.Builders.Clauses.SqliteFromClause.CreateSqlItem(string table, string schema, string alias) -> Bing.Data.Sql.Builders.Core.SqlItem
+override Bing.Data.Sql.Builders.Clauses.SqliteJoinClause.CreateClone(Bing.Data.Sql.Builders.Core.SqlClauseContext context, System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem> joinItems) -> Bing.Data.Sql.Builders.Clauses.JoinClause
+override Bing.Data.Sql.Builders.Clauses.SqliteJoinClause.CreateJoinItem(string joinType, string table, string schema, string alias, System.Type type = null) -> Bing.Data.Sql.Builders.Core.JoinItem
+override Bing.Data.Sql.Builders.SqliteBuilder.CreateBuilder(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.Core.SqlBuilderBase
+override Bing.Data.Sql.Builders.SqliteBuilder.CreateSqlByUnion(System.Text.StringBuilder result) -> void
+override Bing.Data.Sql.Builders.SqliteBuilder.GetCteKeyWord() -> string
+override Bing.Data.Sql.Builders.SqliteDialect.ClosingIdentifier.get -> char
+override Bing.Data.Sql.Builders.SqliteDialect.OpeningIdentifier.get -> char
+override Bing.Data.Sql.SqliteSqlExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.SqliteSqlMultipleQueryExecutorBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+override Bing.Data.Sql.SqliteSqlQueryBase.CreateSqlBuilder() -> Bing.Data.Sql.ISqlBuilder
+static Bing.Dapper.Sqlite.SqliteServiceCollectionExtensions.AddSqliteProvider(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection
+static Bing.Data.Sql.Builders.SqliteDialect.Instance.get -> Bing.Data.Sql.Builders.SqliteDialect
+static Bing.Data.Sql.Builders.SqliteSqlProvider.Instance.get -> Bing.Data.Sql.Builders.SqliteSqlProvider

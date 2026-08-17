@@ -4,7 +4,7 @@
 
 实体 API 调用 `ISqlEntityMutationCommandBuilderFactory`，由 `DefaultSqlEntityMutationCommandBuilder` 读取实体映射并配置 `SqlInsertBuilder`、`SqlUpdateBuilder` 或 `SqlDeleteBuilder`。专用 Builder 按 Clause 顺序输出 SQL 和 `SqlParam` 快照；执行器将快照交给 `DefaultSqlParameterBinder` 和已有诊断链。
 
-Fluent API 直接使用 Provider 的统一 `ISqlBuilder`。其 Mutation 状态渲染为同一命令快照，并通过 `ISqlExecutor.Execute(ISqlBuilder)` 或异步重载进入相同参数绑定与执行链。
+Fluent API 直接使用 Provider 的统一 `ISqlBuilder`。完成 Mutation 后通过 `ToSqlWriteCommand()` 冻结 SQL、参数、Provider 和 Returning 语义，再由 `ISqlExecutor.ExecuteWrite(SqlWriteCommand)` 或异步重载进入相同参数绑定与执行链。
 
 ## 验证边界
 

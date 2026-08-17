@@ -84,8 +84,22 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
     {
         if (render == null)
             throw new ArgumentNullException(nameof(render));
-        var sql = render();
-        return new SqlWriteCommand(sql, GetParameters());
+        return new SqlWriteCommand(render(), GetParameters(), Provider, GetOperationKind(), false);
+    }
+
+    /// <summary>
+    /// 获取当前专用 Builder 对应的不可变写入语义。
+    /// </summary>
+    /// <returns>专用 Builder 的操作类型。</returns>
+    private SqlOperationKind GetOperationKind()
+    {
+        if (this is SqlInsertBuilder)
+            return SqlOperationKind.InsertValues;
+        if (this is SqlUpdateBuilder)
+            return SqlOperationKind.Update;
+        if (this is SqlDeleteBuilder)
+            return SqlOperationKind.Delete;
+        throw new InvalidOperationException($"不支持生成 {GetType().FullName} 的 Mutation 命令。");
     }
 
     /// <summary>

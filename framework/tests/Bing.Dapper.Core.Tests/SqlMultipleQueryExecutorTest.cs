@@ -116,6 +116,29 @@ public class SqlMultipleQueryExecutorTest
     }
 
     /// <summary>
+    /// 测试目的：有效命令已预取消时，取消必须先于 Provider 多结果集能力错误，且不访问连接。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteAsync_WhenCancelledAndMultipleResultsAreUnsupported_ShouldThrowBeforeCapabilityCheck()
+    {
+        // Arrange
+        using var provider = CreateServiceProvider();
+        var connection = new Mock<IDbConnection>();
+        using var executor = new UnsupportedMultipleQueryExecutor(provider, connection.Object);
+        var command = new SqlMultipleQueryCommand("Select 1; Select 2", Array.Empty<SqlParam>());
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act and Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteAsync(command,
+            cancellationToken: cancellationTokenSource.Token));
+
+        // Assert
+        connection.Verify(item => item.Open(), Times.Never);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
+    }
+
+    /// <summary>
     /// 未声明多结果集能力的测试执行器。
     /// </summary>
     private sealed class UnsupportedMultipleQueryExecutor : SqlMultipleQueryExecutorBase

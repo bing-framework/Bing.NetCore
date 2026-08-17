@@ -218,8 +218,12 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal(0, statistics.CacheBypassCount);
         Assert.Equal(1, statistics.EntryCount);
         Assert.Null(statistics.Capacity);
+        Assert.Equal(EntityMappingCacheEvictionPolicy.AdmissionOnly, statistics.EvictionPolicy);
         Assert.All(typeof(EntityMappingCacheStatistics).GetProperties(), property =>
-            Assert.Contains(property.PropertyType, new[] { typeof(long), typeof(int), typeof(int?) }));
+            Assert.Contains(property.PropertyType, new[]
+            {
+                typeof(long), typeof(int), typeof(int?), typeof(EntityMappingCacheEvictionPolicy)
+            }));
     }
 
     /// <summary>
@@ -254,8 +258,49 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal(1, statistics.CacheHitCount);
         Assert.Equal(4, statistics.CacheMissCount);
         Assert.Equal(2, statistics.CacheBypassCount);
+        Assert.Equal(0, statistics.CacheEvictionCount);
         Assert.Equal(2, statistics.EntryCount);
         Assert.Equal(2, statistics.Capacity);
+        Assert.Equal(EntityMappingCacheEvictionPolicy.AdmissionOnly, statistics.EvictionPolicy);
+    }
+
+    /// <summary>
+    /// 测试目的：显式 LRU 策略达到容量后应淘汰最久未使用的最终路由，同时保留最近访问的稳定路由。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenLeastRecentlyUsedPolicyIsConfigured_ShouldEvictLeastRecentlyUsedRoute()
+    {
+        // Arrange
+        var resolver = new RuntimeRouteMappingResolver(new SqlMetadataOptions
+        {
+            EntityMappingCacheCapacity = 2,
+            EntityMappingCacheEvictionPolicy = EntityMappingCacheEvictionPolicy.LeastRecentlyUsed
+        });
+        var context = new DatabaseContext { DbKey = "reporting" };
+        resolver.RouteSuffix = "alpha";
+        var alpha = resolver.Resolve(typeof(CacheSample), context);
+        resolver.RouteSuffix = "beta";
+        var beta = resolver.Resolve(typeof(CacheSample), context);
+
+        // Act
+        resolver.RouteSuffix = "alpha";
+        var recentAlpha = resolver.Resolve(typeof(CacheSample), context);
+        resolver.RouteSuffix = "gamma";
+        var gamma = resolver.Resolve(typeof(CacheSample), context);
+        resolver.RouteSuffix = "beta";
+        var rebuiltBeta = resolver.Resolve(typeof(CacheSample), context);
+
+        // Assert
+        Assert.Same(alpha, recentAlpha);
+        Assert.NotSame(beta, rebuiltBeta);
+        Assert.Equal("cache_samples_gamma", gamma.Table.TableName);
+        Assert.Equal(2, resolver.MappingCacheCount);
+        var statistics = resolver.MappingCacheStatistics;
+        Assert.Equal(1, statistics.CacheHitCount);
+        Assert.Equal(4, statistics.CacheMissCount);
+        Assert.Equal(0, statistics.CacheBypassCount);
+        Assert.Equal(2, statistics.CacheEvictionCount);
+        Assert.Equal(EntityMappingCacheEvictionPolicy.LeastRecentlyUsed, statistics.EvictionPolicy);
     }
 
     /// <summary>
@@ -283,6 +328,7 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal(0, statistics.CacheHitCount);
         Assert.Equal(2, statistics.CacheMissCount);
         Assert.Equal(2, statistics.CacheBypassCount);
+        Assert.Equal(0, statistics.CacheEvictionCount);
         Assert.Equal(0, statistics.EntryCount);
         Assert.Equal(0, statistics.Capacity);
     }
@@ -318,8 +364,49 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal(0, statistics.CacheHitCount);
         Assert.Equal(routeCount, statistics.CacheMissCount);
         Assert.Equal(routeCount - capacity, statistics.CacheBypassCount);
+        Assert.Equal(0, statistics.CacheEvictionCount);
         Assert.True(statistics.EntryCount <= capacity);
         Assert.Equal(capacity, statistics.Capacity);
+    }
+
+    /// <summary>
+    /// 测试目的：并发解析高基数表路由且启用 LRU 时，访问顺序索引必须与缓存项一致并严格保持容量上限。
+    /// </summary>
+    [Fact]
+    public async Task Resolve_WhenDistinctRoutesAreResolvedConcurrentlyWithLru_ShouldEvictAndRemainBounded()
+    {
+        // Arrange
+        const int capacity = 4;
+        const int routeCount = 32;
+        var options = new SqlMetadataOptions
+        {
+            EntityMappingCacheCapacity = capacity,
+            EntityMappingCacheEvictionPolicy = EntityMappingCacheEvictionPolicy.LeastRecentlyUsed
+        };
+        foreach (var index in Enumerable.Range(0, routeCount))
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(CacheSample),
+                TableRouteKey = $"tenant-{index}",
+                TableName = $"cache_samples_{index}"
+            });
+        var resolver = new DefaultEntityMappingResolver(options: options);
+
+        // Act
+        var mappings = await Task.WhenAll(Enumerable.Range(0, routeCount).Select(index => Task.Run(() =>
+            resolver.Resolve(typeof(CacheSample), new DatabaseContext { TenantId = $"tenant-{index}" }))));
+
+        // Assert
+        Assert.Equal(capacity, resolver.MappingCacheCount);
+        Assert.Equal(Enumerable.Range(0, routeCount).Select(index => $"cache_samples_{index}"),
+            mappings.Select(mapping => mapping.Table.TableName));
+        var statistics = resolver.MappingCacheStatistics;
+        Assert.Equal(0, statistics.CacheHitCount);
+        Assert.Equal(routeCount, statistics.CacheMissCount);
+        Assert.Equal(0, statistics.CacheBypassCount);
+        Assert.Equal(routeCount - capacity, statistics.CacheEvictionCount);
+        Assert.Equal(capacity, statistics.EntryCount);
+        Assert.Equal(EntityMappingCacheEvictionPolicy.LeastRecentlyUsed, statistics.EvictionPolicy);
     }
 
     /// <summary>
@@ -334,6 +421,20 @@ public class EntityMappingCacheIsolationTest
 
         // Assert
         Assert.Equal(nameof(SqlMetadataOptions.EntityMappingCacheCapacity), exception.ParamName);
+    }
+
+    /// <summary>
+    /// 测试目的：未知映射缓存淘汰策略必须在解析器创建阶段被拒绝，避免运行期采用不明确的缓存语义。
+    /// </summary>
+    [Fact]
+    public void Constructor_WhenMappingCacheEvictionPolicyIsUnknown_ShouldThrowArgumentOutOfRangeException()
+    {
+        // Act
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => new DefaultEntityMappingResolver(options:
+            new SqlMetadataOptions { EntityMappingCacheEvictionPolicy = (EntityMappingCacheEvictionPolicy)99 }));
+
+        // Assert
+        Assert.Equal(nameof(SqlMetadataOptions.EntityMappingCacheEvictionPolicy), exception.ParamName);
     }
 
     /// <summary>

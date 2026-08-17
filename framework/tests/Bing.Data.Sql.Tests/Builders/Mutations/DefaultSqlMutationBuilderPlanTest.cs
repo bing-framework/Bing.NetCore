@@ -4,6 +4,8 @@ using System.Threading;
 using System.Data;
 using Bing.Data;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Batching;
@@ -69,16 +71,41 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     }
 
     /// <summary>
-    /// 测试 - 实体 Mutation 命令必须沿用专用 Builder 的软删除数据边界。
+    /// 测试目的：实体更新命令附加并发校验后必须保留 Provider 和 Update 执行语义。
     /// </summary>
     [Fact]
-    public void Delete_WhenSoftDeleteEntityIsConfigured_ShouldAppendDataBoundary()
+    public void Update_WhenConcurrencyValidationIsApplied_ShouldPreserveCommandExecutionMetadata()
     {
-        // 目标 SQL：实体主键和 IsDeleted=false 均进入物理 Delete 的 Where。
-        const string expectedSql = "Delete From [soft_delete_mutation_samples] Where [Id] = @_p_0 And [IsDeleted]=@_p_1";
+        // Arrange
+        var builder = CreateBuilder();
+        var entity = new MutationSample { Id = 1, Name = "updated", Amount = 2m, Version = "v1" };
 
-        // 目标参数：@_p_0 = 7；@_p_1 = false。
-        // 结果语义：实体 CRUD 不会绕过 Fluent Mutation 的软删除边界。
+        // Act
+        var command = builder.Update(entity, new SqlUpdateOptions
+        {
+            IncludeProperties = new[] { nameof(MutationSample.Name) }
+        });
+
+        // Assert
+        Assert.Equal("Update [mutation_samples] Set [Name] = @_p_0 Where [Id] = @_p_1 And [Version] = @_p_2", command.Sql);
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
+        Assert.Equal(SqlOperationKind.Update, command.OperationKind);
+        Assert.False(command.HasReturning);
+        Assert.True(command.ValidateAffectedRows);
+        Assert.Equal(new object[] { "updated", 1, "v1" }, command.Parameters.Select(item => item.Value));
+    }
+
+    /// <summary>
+    /// 测试 - 逻辑删除实体的 Delete 必须生成单列 Update，并限定到未删除记录。
+    /// </summary>
+    [Fact]
+    public void Delete_WhenSoftDeleteEntityIsConfigured_ShouldGenerateLogicalDeleteCommand()
+    {
+        // 目标 SQL：Delete 将 IsDeleted 设为 true，并以主键和 IsDeleted=false 防止重复删除。
+        const string expectedSql = "Update [soft_delete_mutation_samples] Set [IsDeleted] = @_p_0 Where [Id] = @_p_1 And [IsDeleted]=@_p_2";
+
+        // 目标参数：@_p_0 = true；@_p_1 = 7；@_p_2 = false。
+        // 结果语义：实体 Delete 不会物理移除软删除实体。
         var builder = CreateBuilder();
         var entity = new SoftDeleteMutationSample { Id = 7, Name = "Bing" };
 
@@ -87,8 +114,66 @@ public sealed class DefaultSqlMutationBuilderPlanTest
 
         // Assert
         SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", true, DbType.Boolean);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", 7, DbType.Int32);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_2", false, DbType.Boolean);
+    }
+
+    /// <summary>
+    /// 测试目的：Purge 必须显式生成物理 Delete，并保留主键条件但不追加 IsDeleted 状态边界。
+    /// </summary>
+    [Fact]
+    public void Purge_WhenSoftDeleteEntityIsConfigured_ShouldGeneratePhysicalDeleteCommand()
+    {
+        // Arrange
+        const string expectedSql = "Delete From [soft_delete_mutation_samples] Where [Id] = @_p_0";
+        var builder = CreateBuilder();
+
+        // Act
+        var command = builder.Purge(new SoftDeleteMutationSample { Id = 7, Name = "Bing", IsDeleted = true });
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
         SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7, DbType.Int32);
-        SqlParameterAssert.Equal(command.Parameters, "@_p_1", false, DbType.Boolean);
+    }
+
+    /// <summary>
+    /// 测试目的：Restore 必须将 IsDeleted 设为 false，并只匹配已删除记录。
+    /// </summary>
+    [Fact]
+    public void Restore_WhenSoftDeleteEntityIsConfigured_ShouldGenerateRestoreCommand()
+    {
+        // Arrange
+        const string expectedSql = "Update [soft_delete_mutation_samples] Set [IsDeleted] = @_p_0 Where [Id] = @_p_1 And [IsDeleted]=@_p_2";
+        var builder = CreateBuilder();
+
+        // Act
+        var command = builder.Restore(new SoftDeleteMutationSample { Id = 7, IsDeleted = true });
+
+        // Assert
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_0", false, DbType.Boolean);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_1", 7, DbType.Int32);
+        SqlParameterAssert.Equal(command.Parameters, "@_p_2", true, DbType.Boolean);
+    }
+
+    /// <summary>
+    /// 测试目的：组合物理 Delete 不得绕过逻辑删除实体的 Delete 语义。
+    /// </summary>
+    [Fact]
+    public void DeleteCombined_WhenSoftDeleteEntityIsProvided_ShouldThrowNotSupportedException()
+    {
+        // Arrange
+        var builder = CreateBuilder();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => builder.DeleteCombined(new[]
+        {
+            new SoftDeleteMutationSample { Id = 7 }
+        }));
+
+        // Assert
+        Assert.Equal("逻辑删除实体不支持组合物理 Delete，请逐实体调用 Delete 或显式调用 Purge。", exception.Message);
     }
 
     /// <summary>
@@ -331,6 +416,90 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     }
 
     /// <summary>
+    /// 测试目的：Plan 缓存达到容量时应淘汰最久未使用项，最近访问的计划必须保留。
+    /// </summary>
+    [Fact]
+    public void PlanCache_WhenCapacityIsReached_ShouldEvictLeastRecentlyUsedPlan()
+    {
+        // Arrange
+        var cache = new SqlMutationPlanCache(planCacheCapacity: 2);
+        var mapping = CreatePlanCacheMapping();
+        var insertKey = SqlMutationPlanCacheKey.Create(mapping, "test.mutation", SqlMutationOperation.Insert, null, null);
+        var updateKey = SqlMutationPlanCacheKey.Create(mapping, "test.mutation", SqlMutationOperation.Update, null, null);
+        var deleteKey = SqlMutationPlanCacheKey.Create(mapping, "test.mutation", SqlMutationOperation.Delete, null, null);
+        var insertPlan = cache.GetOrAdd(insertKey,
+            () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Insert, null, null));
+        var updatePlan = cache.GetOrAdd(updateKey,
+            () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Update, null, null));
+
+        // Act
+        var recentInsertPlan = cache.GetOrAdd(insertKey,
+            () => throw new InvalidOperationException("insert plan should be cached"));
+        cache.GetOrAdd(deleteKey, () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Delete, null, null));
+        var rebuiltUpdatePlan = cache.GetOrAdd(updateKey,
+            () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Update, null, null));
+
+        // Assert
+        Assert.Same(insertPlan, recentInsertPlan);
+        Assert.NotSame(updatePlan, rebuiltUpdatePlan);
+        Assert.Equal(2, cache.PlanCount);
+        Assert.Equal(1, cache.PlanCacheHitCount);
+        Assert.Equal(4, cache.PlanCacheMissCount);
+        Assert.Equal(2, cache.PlanCacheEvictionCount);
+        Assert.Equal(0, cache.PlanCacheBypassCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Plan 缓存容量为零时不得保留项，每次访问均应重新创建计划。
+    /// </summary>
+    [Fact]
+    public void PlanCache_WhenCapacityIsZero_ShouldBypassCache()
+    {
+        // Arrange
+        var cache = new SqlMutationPlanCache(planCacheCapacity: 0);
+        var mapping = CreatePlanCacheMapping();
+        var key = SqlMutationPlanCacheKey.Create(mapping, "test.mutation", SqlMutationOperation.Insert, null, null);
+
+        // Act
+        var first = cache.GetOrAdd(key, () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Insert, null, null));
+        var second = cache.GetOrAdd(key, () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Insert, null, null));
+
+        // Assert
+        Assert.NotSame(first, second);
+        Assert.Equal(0, cache.PlanCount);
+        Assert.Equal(2, cache.PlanCacheMissCount);
+        Assert.Equal(2, cache.PlanCacheBypassCount);
+        Assert.Equal(0, cache.PlanCacheEvictionCount);
+    }
+
+    /// <summary>
+    /// 测试目的：并发写入高基数 Plan 键时，缓存容量不能超过配置上限，且每个被逐出的键仍可安全重建。
+    /// </summary>
+    [Fact]
+    public void PlanCache_WhenConcurrentDistinctKeysExceedCapacity_ShouldRemainBounded()
+    {
+        // Arrange
+        const int capacity = 2;
+        const int keyCount = 32;
+        var cache = new SqlMutationPlanCache(planCacheCapacity: capacity);
+        var mapping = CreatePlanCacheMapping();
+
+        // Act
+        Parallel.For(0, keyCount, index =>
+        {
+            var key = SqlMutationPlanCacheKey.Create(mapping, $"test.mutation.{index}",
+                SqlMutationOperation.Insert, null, null);
+            cache.GetOrAdd(key, () => SqlMutationPlan.Create(mapping, SqlMutationOperation.Insert, null, null));
+        });
+
+        // Assert
+        Assert.Equal(capacity, cache.PlanCount);
+        Assert.Equal(keyCount, cache.PlanCacheMissCount);
+        Assert.Equal(keyCount - capacity, cache.PlanCacheEvictionCount);
+        Assert.Equal(0, cache.PlanCacheBypassCount);
+    }
+
+    /// <summary>
     /// 测试目的：属性 Getter 编译失败时不得缓存异常 Lazy，重复调用仍应重新验证属性并保持缓存为空。
     /// </summary>
     [Fact]
@@ -354,10 +523,71 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     }
 
     /// <summary>
+    /// 测试目的：Getter 缓存达到容量后应淘汰最久未使用项，并在再次访问时重新编译。
+    /// </summary>
+    [Fact]
+    public void GetterCache_WhenCapacityIsReached_ShouldEvictAndRecreateGetter()
+    {
+        // Arrange
+        var cache = new SqlMutationPlanCache(getterCacheCapacity: 1);
+        var nameColumn = new ColumnMappingMetadata { PropertyName = nameof(MutationSample.Name) };
+        var versionColumn = new ColumnMappingMetadata { PropertyName = nameof(MutationSample.Version) };
+        var entity = new MutationSample { Name = "first", Version = "v1" };
+
+        // Act
+        var firstName = cache.GetValue(entity, nameColumn);
+        var version = cache.GetValue(entity, versionColumn);
+        var secondName = cache.GetValue(entity, nameColumn);
+
+        // Assert
+        Assert.Equal("first", firstName);
+        Assert.Equal("v1", version);
+        Assert.Equal("first", secondName);
+        Assert.Equal(1, cache.GetterCount);
+        Assert.Equal(3, cache.GetterCacheMissCount);
+        Assert.Equal(2, cache.GetterCacheEvictionCount);
+        Assert.Equal(0, cache.GetterCacheBypassCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Builder 应从元数据配置读取 Plan 容量，并在高基数列组合下保持有界。
+    /// </summary>
+    [Fact]
+    public void Update_WhenPlanCacheCapacityIsConfigured_ShouldKeepPlanCountBounded()
+    {
+        // Arrange
+        var builder = CreateBuilder(new SqlMetadataOptions { MutationPlanCacheCapacity = 1 });
+        var entity = new MutationSample { Id = 1, Name = "updated", Amount = 2m, Version = "v1" };
+
+        // Act
+        builder.Update(entity, new SqlUpdateOptions { IncludeProperties = new[] { nameof(MutationSample.Name) } });
+        builder.Update(entity, new SqlUpdateOptions { IncludeProperties = new[] { nameof(MutationSample.Amount) } });
+
+        // Assert
+        Assert.Equal(1, builder.PlanCacheCount);
+    }
+
+    /// <summary>
+    /// 测试目的：负数 Mutation 缓存容量必须在创建命令 Builder 时被拒绝，避免不明确的运行时策略。
+    /// </summary>
+    [Fact]
+    public void Insert_WhenMutationPlanCacheCapacityIsNegative_ShouldThrowArgumentOutOfRangeException()
+    {
+        // Arrange
+        var metadataOptions = new SqlMetadataOptions { MutationPlanCacheCapacity = -1 };
+
+        // Act
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => CreateBuilder(metadataOptions));
+
+        // Assert
+        Assert.Equal(nameof(SqlMetadataOptions.MutationPlanCacheCapacity), exception.ParamName);
+    }
+
+    /// <summary>
     /// 创建使用独立映射解析器的实体 Mutation Builder。
     /// </summary>
-    private static DefaultSqlEntityMutationCommandBuilder CreateBuilder() =>
-        new(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+    private static DefaultSqlEntityMutationCommandBuilder CreateBuilder(SqlMetadataOptions metadataOptions = null) =>
+        new(TestMutationSqlProvider.Instance, new SqlBuilderServices(metadataOptions: metadataOptions));
 
     /// <summary>
     /// 创建用于直接缓存测试的稳定映射。

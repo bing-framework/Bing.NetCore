@@ -1,10 +1,10 @@
-﻿using Bing.Data;
+﻿using Bing.Dapper;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -39,9 +39,6 @@ public static class SqlServerServiceCollectionExtensions
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
         services.AddSqlProviderRuntime(new SqlProviderRuntime(SqlServerSqlProvider.Instance.Key,
             typeof(SqlServerSqlQuery), typeof(SqlServerSqlExecutor), typeof(SqlServerSqlMultipleQueryExecutor)));
-        services.TryAddTransient<ISqlQuery, SqlServerSqlQuery>();
-        services.TryAddTransient<ISqlExecutor, SqlServerSqlExecutor>();
-        services.TryAddTransient<ISqlMultipleQueryExecutor, SqlServerSqlMultipleQueryExecutor>();
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

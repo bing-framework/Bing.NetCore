@@ -31,6 +31,7 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     /// <inheritdoc />
     public void Add(string column)
     {
+        _context.ValidateOperation(SqlOperationAction.InsertInto);
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentException("插入列名不能为空。", nameof(column));
         _context.UseOperation(SqlOperationAction.InsertInto);
@@ -40,6 +41,7 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
     /// <inheritdoc />
     public void AddRange(IEnumerable<string> columns)
     {
+        _context.ValidateOperation(SqlOperationAction.InsertInto);
         if (columns == null)
             throw new ArgumentNullException(nameof(columns));
         var items = columns.ToList();
@@ -47,7 +49,6 @@ public sealed class InsertColumnsClause : IInsertColumnsClause
             return;
         if (items.Any(string.IsNullOrWhiteSpace))
             throw new ArgumentException("插入列名不能为空。", "column");
-        _context.ValidateOperation(SqlOperationAction.InsertInto);
         _columns.AddRange(items);
         _context.UseOperation(SqlOperationAction.InsertInto);
     }

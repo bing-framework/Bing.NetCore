@@ -1,3 +1,4 @@
+using Bing.Data;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
@@ -145,6 +146,45 @@ public class SqlOperationStateTest
         Assert.Equal("当前 Builder 已处于 None 状态，不能调用 Returning。", exception.Message);
         Assert.True(builder.ReturningClause.IsEmpty);
         Assert.Equal(SqlOperationKind.None, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态的 Returning 必须在原始列名校验前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void Returning_WhenBuilderIsSelectAndColumnIsInvalid_ShouldThrowStateExceptionWithoutChangingClause()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Returning("Id;"));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 Returning。", exception.Message);
+        Assert.True(builder.ReturningClause.IsEmpty);
+        Assert.Empty(builder.ParameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态的类型化 Returning 必须在空投影访问前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void ReturningTyped_WhenBuilderIsSelectAndExpressionIsNull_ShouldThrowStateExceptionWithoutChangingClause()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id");
+        Expression<Func<Sample, object>> columns = null;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Returning<Sample>(columns));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 Returning。", exception.Message);
+        Assert.True(builder.ReturningClause.IsEmpty);
+        Assert.Empty(builder.ParameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
     }
 
     /// <summary>
@@ -646,6 +686,25 @@ public class SqlOperationStateTest
     }
 
     /// <summary>
+    /// 测试目的：不支持的子查询操作符必须在渲染和合并子查询参数前失败，避免污染父 Builder 参数状态。
+    /// </summary>
+    [Fact]
+    public void WhereSubquery_WhenOperatorIsUnsupported_ShouldNotMergeParameters()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id").From("orders");
+        var subquery = new TestSqlBuilder().Select("Id").From("source_orders").Where("Status", 1);
+        var expectedSql = builder.ToSql();
+
+        // Act
+        Assert.Throws<NotImplementedException>(() => builder.Where("Id", subquery, (Operator)999));
+
+        // Assert
+        Assert.Empty(builder.ParameterManager.GetParams());
+        Assert.Equal(expectedSql, builder.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：空 Where 条件属于无操作输入，不得将空 Builder 切换为 Select 状态。
     /// </summary>
     [Fact]
@@ -774,6 +833,69 @@ public class SqlOperationStateTest
     }
 
     /// <summary>
+    /// 测试目的：Select 状态通过显式泛型 InsertInto 时必须在实体映射前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void InsertIntoTypedGeneric_WhenBuilderIsSelect_ShouldRejectBeforeResolvingMapping()
+    {
+        // Arrange
+        var resolver = new ThrowingMappingResolver();
+        var builder = new TestSqlBuilder(entityMappingResolver: resolver).Select("Id").From("source_samples");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            MutationClauseExtensions.InsertInto<TestSqlBuilder, Sample>(builder));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 InsertInto。", exception.Message);
+        Assert.Equal(0, resolver.ResolveCallCount);
+        Assert.Null(builder.InsertClause.Table);
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态通过显式泛型 Update 时必须在实体映射前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void UpdateTypedGeneric_WhenBuilderIsSelect_ShouldRejectBeforeResolvingMapping()
+    {
+        // Arrange
+        var resolver = new ThrowingMappingResolver();
+        var builder = new TestSqlBuilder(entityMappingResolver: resolver).Select("Id").From("source_samples");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            MutationClauseExtensions.Update<TestSqlBuilder, Sample>(builder));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 Update。", exception.Message);
+        Assert.Equal(0, resolver.ResolveCallCount);
+        Assert.Null(builder.UpdateClause.Table);
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态通过显式泛型 DeleteFrom 时必须在实体映射前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void DeleteFromTypedGeneric_WhenBuilderIsSelect_ShouldRejectBeforeResolvingMapping()
+    {
+        // Arrange
+        var resolver = new ThrowingMappingResolver();
+        var builder = new TestSqlBuilder(entityMappingResolver: resolver).Select("Id").From("source_samples");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            MutationClauseExtensions.DeleteFrom<TestSqlBuilder, Sample>(builder));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 DeleteFrom。", exception.Message);
+        Assert.Equal(0, resolver.ResolveCallCount);
+        Assert.Null(builder.DeleteClause.Table);
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
     /// 测试目的：实体 InsertInto 投影解析失败时，不得保留目标表或待定 Insert 状态。
     /// </summary>
     [Fact]
@@ -793,6 +915,47 @@ public class SqlOperationStateTest
         Assert.Equal(SqlOperationKind.None, builder.OperationKind);
         builder.DeleteFrom(Table).AllowAllRows();
         Assert.Equal(SqlOperationKind.Delete, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态的原始 InsertInto 必须在表名解析前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void InsertInto_WhenBuilderIsSelectAndTableIsInvalid_ShouldThrowStateExceptionWithoutChangingTarget()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.InsertInto("samples;"));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 InsertInto。", exception.Message);
+        Assert.Null(builder.InsertClause.Table);
+        Assert.Empty(builder.InsertColumnsClause.Columns);
+        Assert.Empty(builder.ParameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Select 状态的类型化 InsertInto 必须在投影映射前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void InsertIntoTyped_WhenBuilderIsSelectAndProjectionIsInvalid_ShouldThrowStateExceptionWithoutChangingTarget()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.InsertInto<Sample>(sample => sample.Email.ToUpper()));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 InsertInto。", exception.Message);
+        Assert.Null(builder.InsertClause.Table);
+        Assert.Empty(builder.InsertColumnsClause.Columns);
+        Assert.Empty(builder.ParameterManager.GetParams());
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
     }
 
     /// <summary>
@@ -818,6 +981,115 @@ public class SqlOperationStateTest
         Assert.Equal(1, builder.Pager.Page);
         Assert.Equal(initialPageSize, builder.Pager.PageSize);
         Assert.Equal("Select [Id] \r\nFrom [source_samples]", builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：空 Builder 配置分页后应进入查询状态，禁止后续混用 Mutation。
+    /// </summary>
+    [Fact]
+    public void Take_WhenBuilderIsNone_ShouldUseSelectStateAndRejectUpdate()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+
+        // Act
+        builder.Take(10);
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Update(Table));
+
+        // Assert
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+        Assert.Equal(new object[] { 10 }, builder.ParameterManager.GetParams().Values.ToArray());
+        Assert.Equal("当前 Builder 已处于 Select 状态，不能调用 Update。", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Update 状态不得接受 Skip，且不能写入分页参数。
+    /// </summary>
+    [Fact]
+    public void Skip_WhenBuilderIsUpdate_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Update(Table);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Skip(5));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Paging。", exception.Message);
+        Assert.Equal(SqlOperationKind.Update, builder.OperationKind);
+        Assert.Empty(builder.ParameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：Delete 状态不得接受 Take，且不能写入分页参数。
+    /// </summary>
+    [Fact]
+    public void Take_WhenBuilderIsDelete_ShouldThrowWithoutAddingParameter()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().DeleteFrom(Table);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Take(10));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Delete 状态，不能调用 Paging。", exception.Message);
+        Assert.Equal(SqlOperationKind.Delete, builder.OperationKind);
+        Assert.Empty(builder.ParameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：所有 Insert 运行状态不得接受 Page，避免生成不会参与 Insert SQL 的孤立参数。
+    /// </summary>
+    [Theory]
+    [InlineData("Insert", SqlOperationKind.None)]
+    [InlineData("InsertValues", SqlOperationKind.InsertValues)]
+    [InlineData("InsertSelect", SqlOperationKind.InsertSelect)]
+    public void Page_WhenBuilderIsInsert_ShouldThrowWithoutChangingPagingState(string operationName,
+        SqlOperationKind operationKind)
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().InsertInto(Table);
+        switch (operationName)
+        {
+            case "InsertValues":
+                builder.Columns("Id").Values(1);
+                break;
+            case "InsertSelect":
+                builder.Select("Id").From("source_samples");
+                break;
+        }
+        var initialPager = builder.Pager;
+        var initialParameters = builder.ParameterManager.GetParams().Values.ToArray();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Page(new Pager(2, 10)));
+
+        // Assert
+        Assert.Equal($"当前 Builder 已处于 {operationName} 状态，不能调用 Paging。", exception.Message);
+        Assert.Equal(operationKind, builder.OperationKind);
+        Assert.Same(initialPager, builder.Pager);
+        Assert.Equal(initialParameters, builder.ParameterManager.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：空 Builder 的分页参数写入失败时，不得切换为查询状态。
+    /// </summary>
+    [Fact]
+    public void Take_WhenParameterWriteFailsOnEmptyBuilder_ShouldKeepNoneState()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 0, "test");
+        var builder = new TestSqlBuilder(parameterManager: parameterManager);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Take(10));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 0；尝试添加后数量: 1；最大参数数量: 0。",
+            exception.Message);
+        Assert.Equal(SqlOperationKind.None, builder.OperationKind);
+        Assert.Empty(parameterManager.GetParams());
     }
 
     /// <summary>
@@ -909,6 +1181,27 @@ public class SqlOperationStateTest
     }
 
     /// <summary>
+    /// 测试目的：清除分页配置时只能移除分页参数，必须保留普通查询参数且不能遗留旧分页绑定。
+    /// </summary>
+    [Fact]
+    public void ClearPageParams_WhenPagingWasConfigured_ShouldRemoveOnlyPagingParameters()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder();
+        builder.Select("Id").From("source_samples").Where("Status", 1).OrderBy("Id").Take(10);
+
+        // Act
+        builder.ClearPageParams();
+        var sql = builder.ToSql();
+        builder.Take(20);
+
+        // Assert
+        Assert.DoesNotContain("Limit", sql);
+        Assert.Equal(new object[] { 1, 20 }, builder.ParameterManager.GetParams().Values.ToArray());
+        Assert.Equal(2, builder.ParameterManager.GetParams().Count);
+    }
+
+    /// <summary>
     /// 测试目的：Union 集合在后续枚举失败时不得保留前序已克隆分支或改变父查询结构。
     /// </summary>
     [Fact]
@@ -955,6 +1248,62 @@ public class SqlOperationStateTest
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() => builder.Where("Name", "Bing"));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 InsertValues 状态，不能调用 Where。", exception.Message);
+        Assert.Equal(new object[] { 1 }, builder.ParameterManager.GetParams().Values.ToArray());
+        Assert.Equal(SqlOperationKind.InsertValues, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：统一 Builder 的强类型 Where 在 Select 状态必须使用查询 Where 子句，保留查询状态和参数绑定。
+    /// </summary>
+    [Fact]
+    public void WhereTyped_WhenBuilderIsSelect_ShouldRenderPredicateAndRemainSelect()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Select("Id").From("samples");
+
+        // Act
+        builder.Where<Sample, int>(sample => sample.IntValue, 7);
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [samples] \r\nWhere [IntValue]=@_p_0", builder.ToSql());
+        Assert.Equal(7, builder.ParameterManager.GetValue("@_p_0"));
+        Assert.Equal(SqlOperationKind.Select, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Insert Values 状态下的强类型 Where 必须在参数映射和表达式求值前保持既有查询状态门禁。
+    /// </summary>
+    [Fact]
+    public void WhereTyped_WhenBuilderIsInsertValues_ShouldThrowWithoutAddingParameters()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().InsertInto(Table).Columns("Id").Values(1);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.Where<Sample, int>(sample => sample.IntValue, 7));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 InsertValues 状态，不能调用 Where。", exception.Message);
+        Assert.Equal(new object[] { 1 }, builder.ParameterManager.GetParams().Values.ToArray());
+        Assert.Equal(SqlOperationKind.InsertValues, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：强类型 Where 在 Insert Values 状态必须先拒绝操作，不能因空表达式偏离既有状态门禁异常。
+    /// </summary>
+    [Fact]
+    public void WhereTyped_WhenBuilderIsInsertValuesAndExpressionIsNull_ShouldThrowStateExceptionWithoutAddingParameters()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().InsertInto(Table).Columns("Id").Values(1);
+        Expression<Func<Sample, int>> expression = null;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Where<Sample, int>(expression, 7));
 
         // Assert
         Assert.Equal("当前 Builder 已处于 InsertValues 状态，不能调用 Where。", exception.Message);
@@ -1114,6 +1463,60 @@ public class SqlOperationStateTest
         // Assert
         Assert.Equal("当前 Builder 已处于 InsertSelect 状态，不能调用 Values。", exception.Message);
         Assert.Equal(0, builder.ParameterManager.Count);
+    }
+
+    /// <summary>
+    /// 测试目的：Insert Select 状态调用 Values 时应在枚举调用方集合前被状态门禁拒绝。
+    /// </summary>
+    [Fact]
+    public void Values_WhenBuilderIsInsertSelect_ShouldRejectBeforeEnumeratingRows()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().InsertInto(Table).Columns("Id").Select("Id").From("source_samples");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.ValuesClause.AddRows(ThrowingInsertRows()));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 InsertSelect 状态，不能调用 Values。", exception.Message);
+        Assert.Equal(0, builder.ParameterManager.Count);
+        Assert.Equal(SqlOperationKind.InsertSelect, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Update 状态调用 Insert Columns 时应优先报告状态错误，而不是校验调用方列名。
+    /// </summary>
+    [Fact]
+    public void Columns_WhenBuilderIsUpdateAndColumnIsInvalid_ShouldThrowStateException()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().Update(Table);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Columns(" "));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 InsertInto。", exception.Message);
+        Assert.Empty(builder.InsertColumnsClause.Columns);
+        Assert.Equal(SqlOperationKind.Update, builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 测试目的：Delete 状态调用 Set 时应优先报告状态错误，而不是校验调用方列名。
+    /// </summary>
+    [Fact]
+    public void Set_WhenBuilderIsDeleteAndColumnIsInvalid_ShouldThrowStateException()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder().DeleteFrom(Table);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.Set(" ", "Bing"));
+
+        // Assert
+        Assert.Equal("当前 Builder 已处于 Delete 状态，不能调用 Set。", exception.Message);
+        Assert.Equal(0, builder.SetClause.Count);
+        Assert.Equal(SqlOperationKind.Delete, builder.OperationKind);
     }
 
     /// <summary>
@@ -1279,6 +1682,37 @@ public class SqlOperationStateTest
     {
         yield return new TestSqlBuilder().Select("Id").From("archived_orders");
         throw new InvalidOperationException("Union enumeration failed.");
+    }
+
+    /// <summary>
+    /// 在枚举 Insert Values 行前抛出异常的集合。
+    /// </summary>
+    private static IEnumerable<IReadOnlyList<object>> ThrowingInsertRows()
+    {
+        yield return new object[] { 1 };
+        throw new InvalidOperationException("Insert Values rows must not be enumerated.");
+    }
+
+    /// <summary>
+    /// 用于验证状态拒绝不得触发实体映射的解析器。
+    /// </summary>
+    private sealed class ThrowingMappingResolver : IEntityMappingResolver
+    {
+        /// <summary>
+        /// Resolve 调用次数。
+        /// </summary>
+        public int ResolveCallCount { get; private set; }
+
+        /// <inheritdoc />
+        public EntityDescriptor GetDescriptor(Type entityType) =>
+            throw new InvalidOperationException("Entity descriptor must not be resolved.");
+
+        /// <inheritdoc />
+        public EntityMappingMetadata Resolve(Type entityType, DatabaseContext databaseContext)
+        {
+            ResolveCallCount++;
+            throw new InvalidOperationException("Entity mapping must not be resolved.");
+        }
     }
 
     /// <summary>

@@ -103,7 +103,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
                 var connection = CreateIndependentConnection(dataSource, connectionString);
                 try
                 {
-                    SqlQueryRuntimeBridge.BindOwnedConnection(query, connection, SqlConnectionSource.DataSource);
+                    SqlQueryRuntimeBinding.BindOwnedConnection(query, connection, SqlConnectionSource.DataSource);
                 }
                 catch
                 {
@@ -112,9 +112,9 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
                 }
                 return query;
             }
-            SqlQueryRuntimeBridge.BindExternalConnection(query, unitOfWork.Database.GetDbConnection(),
+            SqlQueryRuntimeBinding.BindExternalConnection(query, unitOfWork.Database.GetDbConnection(),
                 SqlConnectionSource.EntityFrameworkCore);
-            SqlQueryRuntimeBridge.BindExternalTransactionResolver(query,
+            SqlQueryRuntimeBinding.BindExternalTransactionResolver(query,
                 () => unitOfWork.Database.CurrentTransaction?.GetDbTransaction());
             return query;
         }
@@ -135,7 +135,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         if (query == null || dataSource == null)
             return;
         var current = _databaseContextAccessor?.Current;
-        SqlQueryRuntimeBridge.BindDatabaseContext(query, new DatabaseContext
+        SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext
         {
             DbKey = dataSource.Key,
             DataSource = dataSource,
@@ -156,7 +156,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         {
             new EfCoreEntityModelMetadataProvider(unitOfWork.Model)
         });
-        SqlQueryRuntimeBridge.BindEntityMappingResolver(query, new DefaultEntityMappingResolver(
+        SqlQueryRuntimeBinding.BindEntityMappingResolver(query, new DefaultEntityMappingResolver(
             databaseContextAccessor: _databaseContextAccessor, options: _metadataOptions,
             typeConverterResolver: _typeConverterResolver, entityModelMetadataProvider: metadataProvider));
     }

@@ -72,9 +72,11 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     public async Task<ISqlMultipleQueryResult> ExecuteAsync(SqlMultipleQueryCommand command, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
+        if (command == null)
+            throw new ArgumentNullException(nameof(command));
+        cancellationToken.ThrowIfCancellationRequested();
         ValidateCommand(command);
         EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = null;
         Exception primaryException = null;
@@ -98,7 +100,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
                 commandTimeout: timeout, cancellationToken: cancellationToken));
             cancellationToken.ThrowIfCancellationRequested();
             return new SqlMultipleQueryResult(reader, executionLease,
-                (completed, exception) => CompleteExecutionAsync(completed, message, exception, cancellationToken));
+                (completed, exception) => CompleteExecutionAsync(completed, message, exception));
         }
         catch (Exception) when (skippedExecution)
         {
@@ -179,9 +181,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     /// <param name="completed">是否完整读取全部结果集。</param>
     /// <param name="message">执行前诊断消息。</param>
     /// <param name="exception">读取过程中的异常。</param>
-    /// <param name="cancellationToken">原始异步执行使用的取消令牌。</param>
-    private async Task CompleteExecutionAsync(bool completed, DiagnosticsMessage message, Exception exception,
-        CancellationToken cancellationToken)
+    private async Task CompleteExecutionAsync(bool completed, DiagnosticsMessage message, Exception exception)
     {
         var cleanupExceptions = new List<Exception>();
         var lifecycleException = exception;
@@ -189,7 +189,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         {
             try
             {
-                await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                await CompleteQueryTransactionAsync(CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception completionException)
             {

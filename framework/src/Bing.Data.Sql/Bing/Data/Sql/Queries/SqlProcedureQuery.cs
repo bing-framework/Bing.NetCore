@@ -223,6 +223,6 @@ public sealed class SqlProcedureQuery<TResult>
     }
 
     /// <inheritdoc />
-    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(Procedure, _parameters,
-        commandType: System.Data.CommandType.StoredProcedure);
+    private SqlQueryPlan GetPlan() => SqlQueryPlan.Create(Procedure, _parameters, "Id",
+        System.Data.CommandType.StoredProcedure);
 }

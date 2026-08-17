@@ -2,9 +2,9 @@
 
 ## API
 
-`ISqlInsertExecutor`、`ISqlUpdateExecutor` 和 `ISqlDeleteExecutor` 提供同步与异步批量 CRUD。空集合直接返回 `0`，不会创建事务或执行命令。
+`ISqlExecutor` 提供同步与异步批量 CRUD：`InsertBatch`、`UpdateBatch` 与 `DeleteBatch`。空集合直接返回 `0`，不会创建事务或执行命令；逻辑删除实体的 Delete 批量操作按实体更新删除状态。
 
-`ISqlExecutor.Execute(ISqlBuilder)` 与 `ExecuteAsync(ISqlBuilder)` 执行统一 Builder 生成的 `InsertValues`、`InsertSelect`、`Update` 或 `Delete`。`None`、`Select` 和未完成的 Insert 状态会在访问数据库前被拒绝；Builder 的增强参数元数据通过参数绑定器完整保留。
+`ISqlExecutor.CreateWriteBuilder()` 创建独立的统一 Builder。`ToSqlWriteCommand()` 只接受已完成的 `InsertValues`、`InsertSelect`、`Update` 或 `Delete` 状态，并冻结 Provider、SQL 与参数；`ExecuteWrite` 与 `ExecuteWriteAsync` 执行该独立命令。`None`、`Select` 和未完成 Insert 状态在命令创建前被拒绝，Builder 的增强参数元数据通过参数绑定器完整保留。
 
 ## 策略
 

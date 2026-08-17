@@ -1,9 +1,9 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 执行独立 SQL 查询计划的分页与流式内部契约。
+/// 执行独立 SQL 查询计划的分页与流式运行时契约。
 /// </summary>
-internal partial interface ISqlQueryPlanExecutor
+public partial interface ISqlQueryPlanExecutor
 {
     /// <summary>
     /// 同步执行分页查询并返回总数与当前页数据。

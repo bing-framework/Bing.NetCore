@@ -85,7 +85,7 @@ public sealed class ProviderProfileExecutionGateTest
         cancellationTokenSource.Cancel();
 
         // Act and Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteMutationAsync(null,
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteWriteAsync(null,
             cancellationToken: cancellationTokenSource.Token));
         Assert.Equal(0, executor.ExecuteBeforeCount);
     }

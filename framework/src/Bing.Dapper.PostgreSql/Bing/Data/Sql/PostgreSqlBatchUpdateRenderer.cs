@@ -1,8 +1,8 @@
-using System.Text;
-using Bing.Data.Sql.Builders.Mutations.Batching;
-using Bing.Data.Sql.Builders.Mutations;
-using Bing.Data.Sql.Builders.Params;
+﻿using System.Text;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Batching;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 

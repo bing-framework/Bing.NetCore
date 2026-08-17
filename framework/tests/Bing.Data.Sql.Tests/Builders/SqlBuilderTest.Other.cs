@@ -253,103 +253,118 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 全局过滤器遇到 Right Join 的保留侧语义不明确时应拒绝渲染，避免生成错误 SQL。
+    /// 测试 - Right Join 必须将左侧根来源的软删除谓词放入 On，避免最终 Where 删除右侧未匹配行。
     /// </summary>
     [Fact]
-    public void IsDeletedFilter_WhenRightJoinContainsSoftDeleteEntity_ShouldThrowNotSupportedException()
+    public void IsDeletedFilter_WhenRootSourceIsNonPreservedByRightJoin_ShouldAppendPredicateToRightJoinOn()
     {
         // Arrange
+        const string expectedSql = "Select [s5].[StringValue] \r\nFrom [Sample5] As [s5] \r\nRight Join [Sample2] As [s2] On [s5].[IntValue]=[s2].[IntValue] And [s5].[IsDeleted]=@_p_0";
         _builder.Select<Sample5>(t => t.StringValue)
             .From<Sample5>("s5")
-            .Join<Sample6>("s6").On<Sample5, Sample6>((l, r) => l.IntValue == r.IntValue)
-            .LeftJoin<Sample7>("s7").On<Sample6, Sample7>((l, r) => l.IntValue == r.IntValue)
-            .RightJoin<Sample8>("s8").On<Sample7, Sample8>((l, r) => l.IntValue == r.IntValue);
+            .RightJoin<Sample2>("s2").On<Sample5, Sample2>((l, r) => l.IntValue == r.IntValue);
+
+        // Act
+        var sql = _builder.ToSql();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, sql, _builder.Provider.Key);
+        Assert.DoesNotContain("Where [s5].[IsDeleted]", sql, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// 测试 - Right Join 的保留右侧实现软删除时，必须在渲染前拒绝，避免将条件错误放入最终 Where。
+    /// </summary>
+    [Fact]
+    public void IsDeletedFilter_WhenRightJoinPreservedSourceRequiresFiltering_ShouldRejectBeforeRenderingSql()
+    {
+        // Arrange
+        _builder.Select<Sample5>(item => item.StringValue)
+            .From<Sample5>("s5")
+            .RightJoin<Sample8>("s8").On<Sample5, Sample8>((left, right) => left.IntValue == right.IntValue);
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => _builder.ToSql());
 
         // Assert
-        Assert.Contains("Right Join", exception.Message);
-    }
-
-    #endregion
-
-    #region IgnoreFilter
-
-    /// <summary>
-    /// 测试忽略全局过滤器 - From子句的忽略添加过滤器到Where中
-    /// </summary>
-    [Fact]
-    public void Test_IgnoreFilter_1()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [s].[StringValue] ");
-        result.AppendLine("From [Sample5] As [s] ");
-        result.Append("Join [Sample2] As [s2] On [s].[IntValue]=[s2].[IntValue]");
-
-        //执行
-        _builder.Select<Sample5>(t => t.StringValue)
-            .From<Sample5>("s")
-            .Join<Sample2>("s2").On<Sample5, Sample2>((l, r) => l.IntValue == r.IntValue)
-            .IgnoreFilter<IsDeletedFilter>();
-
-        //验证
-        _output.WriteLine(_builder.ToSql());
-        Assert.Equal(result.ToString(), _builder.ToSql());
+        Assert.Contains("Right Join 保留来源", exception.Message, StringComparison.Ordinal);
     }
 
     /// <summary>
-    /// 测试忽略全局过滤器 - Join子句的忽略添加过滤器到Join中
+    /// 测试 - 多级外连接中，前序 Left Join 来源的软删除谓词必须继续保留在其自身 On 条件，不能落入最终 Where 改变后续 Right Join 的保留语义。
     /// </summary>
     [Fact]
-    public void Test_IgnoreFilter_2()
+    public void IsDeletedFilter_WhenNestedOuterJoinsContainJoinedSoftDeleteSource_ShouldKeepPredicateOnOriginatingJoin()
     {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [s].[StringValue] ");
-        result.AppendLine("From [Sample5] As [s] ");
-        result.Append("Join [Sample6] As [s2] On [s].[IntValue]=[s2].[IntValue]");
-
-        //执行
-        _builder.Select<Sample5>(t => t.StringValue)
-            .From<Sample5>("s")
-            .Join<Sample6>("s2").On<Sample5, Sample6>((l, r) => l.IntValue == r.IntValue)
-            .IgnoreFilter<IsDeletedFilter>();
-
-        //验证
-        _output.WriteLine(_builder.ToSql());
-        Assert.Equal(result.ToString(), _builder.ToSql());
-    }
-
-    /// <summary>
-    /// 测试忽略全局过滤器 - Join子句的忽略添加过滤器到Join中 - 多个Join
-    /// </summary>
-    [Fact]
-    public void Test_IgnoreFilter_3()
-    {
-        //结果
-        var result = new StringBuilder();
-        result.AppendLine("Select [s5].[StringValue] ");
-        result.AppendLine("From [Sample5] As [s5] ");
-        result.AppendLine("Join [Sample6] As [s6] On [s5].[IntValue]=[s6].[IntValue] ");
-        result.AppendLine("Left Join [Sample7] As [s7] On [s6].[IntValue]=[s7].[IntValue] ");
-        result.Append("Right Join [Sample8] As [s8] On [s7].[IntValue]=[s8].[IntValue]");
-
-        //执行
-        _builder.Select<Sample5>(t => t.StringValue)
+        // Arrange
+        const string expectedSql = "Select [s5].[StringValue] \r\nFrom [Sample5] As [s5] \r\nLeft Join [Sample6] As [s6] On [s5].[IntValue]=[s6].[IntValue] And [s6].[IsDeleted]=@_p_1 \r\nRight Join [Sample2] As [s2] On [s5].[IntValue]=[s2].[IntValue] And [s5].[IsDeleted]=@_p_0";
+        _builder.Select<Sample5>(item => item.StringValue)
             .From<Sample5>("s5")
-            .Join<Sample6>("s6").On<Sample5, Sample6>((l, r) => l.IntValue == r.IntValue)
-            .LeftJoin<Sample7>("s7").On<Sample6, Sample7>((l, r) => l.IntValue == r.IntValue)
-            .RightJoin<Sample8>("s8").On<Sample7, Sample8>((l, r) => l.IntValue == r.IntValue)
-            .IgnoreFilter<IsDeletedFilter>();
+            .LeftJoin<Sample6>("s6").On<Sample5, Sample6>((left, right) => left.IntValue == right.IntValue)
+            .RightJoin<Sample2>("s2").On<Sample5, Sample2>((left, right) => left.IntValue == right.IntValue);
 
-        //验证
-        _output.WriteLine(_builder.ToSql());
-        Assert.Equal(result.ToString(), _builder.ToSql());
+        // Act
+        var sql = _builder.ToSql();
+
+        // Assert
+        SqlAssert.Equal(expectedSql, sql, _builder.Provider.Key);
+        Assert.DoesNotContain("Where [s5].[IsDeleted]", sql, StringComparison.Ordinal);
+        Assert.DoesNotContain("Where [s6].[IsDeleted]", sql, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// 测试 - Full Join 任一结构化来源要求过滤时，当前渲染器必须在输出 SQL 前拒绝，避免将条件错误下推到 On 或 Where。
+    /// </summary>
+    [Fact]
+    public void IsDeletedFilter_WhenFullJoinSourceRequiresFiltering_ShouldRejectBeforeRenderingSql()
+    {
+        // Arrange
+        _builder.Select<Sample5>(item => item.StringValue)
+            .From<Sample5>("s5")
+            .FullJoin<Sample2>("s2").On<Sample5, Sample2>((left, right) => left.IntValue == right.IntValue);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => _builder.ToSql());
+
+        // Assert
+        Assert.Equal("无法安全将全局过滤器应用到 Full Join 来源 source_0。当前 Provider 渲染器不支持预过滤派生表。", exception.Message);
     }
 
     #endregion
+
+    /// <summary>
+    /// 测试 - 逻辑删除过滤器的嵌套禁用作用域必须仅影响当前异步执行流，并在内外作用域释放后逐层恢复。
+    /// </summary>
+    [Fact]
+    public void IsDeletedFilter_WhenDisableScopesAreNested_ShouldRestoreAfterEachDispose()
+    {
+        // Arrange
+        var dataFilter = new DataFilter();
+        var services = new SqlBuilderServices(dataFilter: dataFilter);
+        var builder = new TestSqlBuilder(services, TestDialect.Instance);
+        builder.Select<Sample5>(item => item.StringValue).From<Sample5>("s");
+
+        // Act
+        string outerDisabled;
+        string innerEnabled;
+        string restoredOuterDisabled;
+        using (dataFilter.Disable<ISoftDelete>())
+        {
+            outerDisabled = builder.ToSql();
+            using (dataFilter.Enable<ISoftDelete>())
+                innerEnabled = builder.ToSql();
+            restoredOuterDisabled = builder.ToSql();
+        }
+        var restoredEnabled = builder.ToSql();
+
+        // Assert
+        const string disabledSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s]";
+        const string enabledSql = "Select [s].[StringValue] \r\nFrom [Sample5] As [s] \r\nWhere [s].[IsDeleted]=@_p_0";
+        SqlAssert.Equal(disabledSql, outerDisabled, builder.Provider.Key);
+        SqlAssert.Equal(enabledSql, innerEnabled, builder.Provider.Key);
+        SqlAssert.Equal(disabledSql, restoredOuterDisabled, builder.Provider.Key);
+        SqlAssert.Equal(enabledSql, restoredEnabled, builder.Provider.Key);
+    }
 
     #region Validate
 

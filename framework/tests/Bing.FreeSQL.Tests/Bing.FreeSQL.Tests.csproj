@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.2.833" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL\Bing.FreeSQL.csproj" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL.MySql\Bing.FreeSQL.MySql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />

@@ -16,12 +16,14 @@ Provider SPI 按职责拆分为独立文件：`ISqlProvider`、`ISqlClauseFactor
 
 Mutation 占位 API 已删除：Insert/Delete 枚举不再暴露未实现的 `ProviderOptimized`，`ISqlMutationBatchPlanner` 不再伪装为可替换 SPI。已有有效枚举整数保持不变，避免配置和序列化值漂移。
 
-`SqlProviderCapabilities.SupportsUpdateFrom` 具有真实消费链：`UpdateFromClause.Validate` 在 SQL 输出前检查能力，PostgreSQL 明确启用，其他 Provider 默认关闭。该能力具有核心、支持 Provider、不支持 Provider和受控真实执行测试，不属于占位标志。
+`SqlProviderProfile.Mutation.SupportsUpdateFrom` 具有真实消费链：`UpdateFromClause.Validate` 在 SQL 输出前检查能力，PostgreSQL 明确启用，其他 Provider 默认关闭。该能力具有核心、支持 Provider、不支持 Provider和受控真实执行测试，不属于占位标志。
 
-`SqlProviderCapabilities.SupportsDeleteUsing` 同样由 `DeleteUsingClause.Validate` 在 SQL 输出前消费，当前仅 PostgreSQL 启用。能力对象保留原三参数 CLR 构造签名并新增四参数重载；既有 Provider 源码和已编译消费者无需因新增标志重编译。DeleteUsing 具有核心、支持 Provider、不支持 Provider、Roslyn 消费者和受控真实执行测试，不属于占位标志。
+`SqlProviderProfile.Mutation.SupportsDeleteUsing` 同样由 `DeleteUsingClause.Validate` 在 SQL 输出前消费，当前仅 PostgreSQL 启用。DeleteUsing 具有核心、支持 Provider、不支持 Provider、Roslyn 消费者和受控真实执行测试，不属于占位标志。
 
-`SqlProviderCapabilities.SupportsReturning` 由 `ReturningClause.Validate` 在 SQL 输出前消费，当前由 PostgreSQL、SQL Server 和 SQLite 启用。能力对象在五参数构造之外继续保留原三参数和四参数 CLR 构造签名。PostgreSQL 与 SQLite 使用默认尾部 Returning；SQL Server 通过 `ISqlReturningDialect` 调整为 `OUTPUT` 的语句位置和 `INSERTED`/`DELETED` 限定符。三者复用结构化列、实体映射、Clone/Clear 和查询物化边界；SQLite 还具有四种 Mutation 的本地真实执行与 3.35+ 运行时校验。该能力具有核心、三种支持 Provider、未支持 Provider、Roslyn 消费者及受控执行测试，不属于占位标志。
+`SqlProviderProfile.Mutation.SupportsReturning` 由 `ReturningClause.Validate` 在 SQL 输出前消费，当前由 PostgreSQL、SQL Server 和 SQLite 启用。PostgreSQL 与 SQLite 使用默认尾部 Returning；SQL Server 通过 `ISqlReturningDialect` 调整为 `OUTPUT` 的语句位置和 `INSERTED`/`DELETED` 限定符。三者复用结构化列、实体映射、Clone/Clear 和查询物化边界；SQLite 还具有四种 Mutation 的本地真实执行与 3.35+ 运行时校验。该能力具有核心、三种支持 Provider、未支持 Provider、Roslyn 消费者及受控执行测试，不属于占位标志。
 
 ## 变更门槛
 
 修改 Provider、Factory、参数限制、标识符解析、映射或 SQL 格式化时，必须更新 `ai_docs/sql-metadata-test-traceability.md` 中“生产符号到测试方法”的映射，并运行对应 Provider 单元测试。涉及外部数据库执行路径时，SQLite 集成测试必须通过；外部 Provider 集成测试仅在安全环境变量、专用测试库和显式重置授权齐备时执行。
+
+`Bing.Dapper.MySql`、`Bing.Dapper.PostgreSql`、`Bing.Dapper.SqlServer`、`Bing.Dapper.Sqlite` 和 `Bing.Dapper.Oracle` 均以 `Microsoft.CodeAnalysis.PublicApiAnalyzers` 的 `PublicAPI.Shipped.txt` 冻结既有公开与受保护 API。`RS0016`、`RS0017` 和 `RS0018` 是项目级构建错误：已发布 API 的兼容变更必须同步维护 Shipped 基线；待发布 API 只能先进入 Unshipped 基线，发布时再迁移。不得通过关闭规则或空基线规避门禁。

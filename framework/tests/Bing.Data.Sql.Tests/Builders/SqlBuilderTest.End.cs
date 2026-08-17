@@ -173,6 +173,32 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试 - 大量参数的调试 SQL 应在一次渲染中完整替换每个独立参数标记，并保留相邻参数名的边界。
+    /// </summary>
+    [Fact]
+    public void ToDebugSql_WhenManyParametersArePresent_ShouldReplaceEveryStandaloneToken()
+    {
+        // Arrange
+        const int parameterCount = 128;
+        var conditions = Enumerable.Range(0, parameterCount)
+            .Select(index => $"[Value{index}]=@p{index}");
+        var builder = _builder.AppendSelect("*").AppendFrom("[Test]")
+            .AppendWhere(string.Join(" And ", conditions));
+        for (var index = 0; index < parameterCount; index++)
+            builder.AddParam($"p{index}", index);
+
+        // Act
+        var result = builder.ToDebugSql(builder.ToSql());
+
+        // Assert
+        for (var index = 0; index < parameterCount; index++)
+        {
+            Assert.Contains($"[Value{index}]={index}", result, StringComparison.Ordinal);
+            Assert.DoesNotContain($"@p{index}", result, StringComparison.Ordinal);
+        }
+    }
+
+    /// <summary>
     /// 测试目的：传入空 SQL 时应明确拒绝，避免调试渲染出现不可诊断的空引用异常。
     /// </summary>
     [Fact]

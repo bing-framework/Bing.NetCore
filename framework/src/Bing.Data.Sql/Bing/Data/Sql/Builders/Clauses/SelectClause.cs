@@ -59,7 +59,7 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 是否包含结构化聚合投影。
     /// </summary>
-    internal bool HasAggregate
+    public bool HasAggregate
     {
         get
         {

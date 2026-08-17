@@ -57,7 +57,7 @@ public sealed class SqliteMutationBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：仅声明并发令牌但未声明主键的实体不得执行 Update 或 Delete，避免并发列被误用为实体写入条件。
+    /// 测试目的：仅声明并发令牌但未声明主键的实体不得执行 Update 或物理清除，避免并发列被误用为实体写入条件。
     /// </summary>
     [Fact]
     public void MutationBuilder_WhenEntityHasConcurrencyTokenButNoKey_ShouldRejectUpdateAndDelete()
@@ -72,7 +72,7 @@ public sealed class SqliteMutationBuilderTest
 
         // Assert
         Assert.Equal("实体 KeylessConcurrencyMutationSample 没有主键，不能执行更新。", updateException.Message);
-        Assert.Equal("实体 KeylessConcurrencyMutationSample 没有主键，不能执行删除。", deleteException.Message);
+        Assert.Equal("实体 KeylessConcurrencyMutationSample 没有主键，不能执行物理清除。", deleteException.Message);
     }
 
     /// <summary>

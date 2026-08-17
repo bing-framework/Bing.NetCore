@@ -24,6 +24,11 @@ public class SqlMetadataBenchmarks
     /// </summary>
     private DefaultEntityMappingResolver _boundedMappingResolver;
 
+    /// <summary>
+    /// 容量已满时用于测量 LRU 淘汰映射解析的解析器。
+    /// </summary>
+    private DefaultEntityMappingResolver _lruMappingResolver;
+
     private DefaultEntityMappingResolver _mappingResolver;
     private readonly DefaultSqlObjectNameFormatter _formatter = new();
     private readonly BenchmarkDialect _dialect = new();
@@ -41,6 +46,25 @@ public class SqlMetadataBenchmarks
         MappingProfile = "uncached",
         DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
     };
+    /// <summary>
+    /// LRU 基线中已缓存的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _lruCachedMappingContext = new()
+    {
+        DbKey = "benchmark",
+        MappingProfile = "cached",
+        DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+    };
+    /// <summary>
+    /// LRU 基线中用于触发淘汰的数据库上下文。
+    /// </summary>
+    private readonly DatabaseContext _lruEvictingMappingContext = new()
+    {
+        DbKey = "benchmark",
+        MappingProfile = "evicting",
+        DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+    };
+    private bool _useLruEvictingContext;
     private readonly SqlTableReference _reference = new()
     {
         Database = "benchmark",
@@ -98,6 +122,26 @@ public class SqlMetadataBenchmarks
             MappingProfile = "cached",
             DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
         });
+        var lruOptions = new SqlMetadataOptions
+        {
+            EntityMappingCacheCapacity = 1,
+            EntityMappingCacheEvictionPolicy = EntityMappingCacheEvictionPolicy.LeastRecentlyUsed
+        };
+        lruOptions.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(BenchmarkEntity),
+            MappingProfile = "cached",
+            TableName = "orders_cached"
+        });
+        lruOptions.EntityMappings.Add(new EntityMappingOptions
+        {
+            EntityType = typeof(BenchmarkEntity),
+            MappingProfile = "evicting",
+            TableName = "orders_evicting"
+        });
+        _lruMappingResolver = new DefaultEntityMappingResolver(options: lruOptions);
+        _lruMappingResolver.Resolve(typeof(BenchmarkEntity), _lruCachedMappingContext);
+        _useLruEvictingContext = true;
         _builder = new BenchmarkBuilder();
         _builder.FromClause.From(_reference);
     }
@@ -136,6 +180,18 @@ public class SqlMetadataBenchmarks
     [Benchmark]
     public EntityMappingMetadata ResolveMappingWhenBoundedCacheIsFull() =>
         _boundedMappingResolver.Resolve(typeof(BenchmarkEntity), _boundedMappingContext);
+
+    /// <summary>
+    /// 测量有界 LRU 缓存交替路由时的淘汰及新映射准入成本。
+    /// </summary>
+    /// <returns>当前路由对应的最终映射元数据。</returns>
+    [Benchmark]
+    public EntityMappingMetadata ResolveMappingWhenLruCacheEvicts()
+    {
+        var context = _useLruEvictingContext ? _lruEvictingMappingContext : _lruCachedMappingContext;
+        _useLruEvictingContext = !_useLruEvictingContext;
+        return _lruMappingResolver.Resolve(typeof(BenchmarkEntity), context);
+    }
 
     /// <summary>
     /// 测量结构化表对象名称格式化性能。

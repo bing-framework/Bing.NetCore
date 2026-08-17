@@ -1,7 +1,7 @@
-using Bing.Data.Enums;
+﻿using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders;
 

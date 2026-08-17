@@ -56,6 +56,39 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：逻辑删除实体的 Delete、Restore 与 Purge 必须分别更新状态、恢复状态和物理移除行。
+    /// </summary>
+    [Fact]
+    public async Task SoftDeleteExecutor_WhenDeleteRestoreAndPurgeAreCalled_ShouldApplyExpectedLifecycle()
+    {
+        // Arrange
+        using var executor = _fixture.CreateExecutor();
+        await executor.ExecuteSqlAsync("Insert Into soft_delete_samples (Name, IsDeleted) Values (@name, @isDeleted)",
+            new { name = "soft-delete", isDeleted = false });
+        using var query = _fixture.CreateQuery();
+        var entity = new SoftDeleteSample
+        {
+            Id = query.Query<int>().Select("Id").From("soft_delete_samples").Where("Name", "soft-delete").Scalar()
+        };
+
+        // Act
+        var logicallyDeleted = await executor.DeleteAsync(entity);
+        var deletedState = query.Query<int>().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar();
+        var restored = executor.Restore(entity);
+        var restoredState = query.Query<int>().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar();
+        var purged = await executor.PurgeAsync(entity);
+        var remaining = query.Query<int>().Select("Id").From("soft_delete_samples").ToList().Count;
+
+        // Assert
+        Assert.Equal(1, logicallyDeleted);
+        Assert.Equal(1, deletedState);
+        Assert.Equal(1, restored);
+        Assert.Equal(0, restoredState);
+        Assert.Equal(1, purged);
+        Assert.Equal(0, remaining);
+    }
+
+    /// <summary>
     /// 测试目的：默认并发策略下原始值不匹配时删除应抛出异常且保留数据。
     /// </summary>
     [Fact]
@@ -222,7 +255,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-a", Name = "copied" });
-        var insertSelect = executor.CreateBuilder()
+        var insertSelect = executor.CreateWriteBuilder()
             .InsertInto("samples")
             .Columns("Name")
             .Select("Name")
@@ -230,13 +263,13 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             .Where("TenantId", "tenant-a");
 
         // Act
-        var inserted = await executor.ExecuteMutationAsync(insertSelect.ToSqlWriteCommand());
-        var updated = executor.ExecuteMutation(insertSelect.New()
+        var inserted = await executor.ExecuteWriteAsync(insertSelect.ToSqlWriteCommand());
+        var updated = executor.ExecuteWrite(insertSelect.New()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("SecretText", "v2")
             .Where("Name", "copied")
             .ToSqlWriteCommand());
-        var deleted = await executor.ExecuteMutationAsync(insertSelect.New()
+        var deleted = await executor.ExecuteWriteAsync(insertSelect.New()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("SecretText", "v2")
             .ToSqlWriteCommand());
@@ -280,7 +313,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             new object[] { "returning-first", 1m, "v1" },
             new object[] { "returning-second", 2m, "v2" }
         };
-        var builder = executor.CreateBuilder()
+        var builder = executor.CreateWriteBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name", "Amount", "SecretText")
             .Values(values)
@@ -304,7 +337,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var command = executor.CreateBuilder()
+        var command = executor.CreateWriteBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name", "Amount", "SecretText")
             .Values("returning-repeat", 1m, "v1")
@@ -334,7 +367,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-returning", Name = "copied-returning" });
-        var builder = executor.CreateBuilder()
+        var builder = executor.CreateWriteBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
             .Select("Name")
@@ -360,7 +393,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("before-update", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateBuilder()
+        var builder = executor.CreateWriteBuilder()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("Name", "after-update")
             .Where("Name", "before-update")
@@ -385,7 +418,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("deleted-returning", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateBuilder()
+        var builder = executor.CreateWriteBuilder()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("Name", "deleted-returning")
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
@@ -408,7 +441,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateBuilder().Select("Id").From("samples");
+        var builder = executor.CreateWriteBuilder().Select("Id").From("samples");
 
         // Act
         var exception = Assert.Throws<ArgumentException>(() => builder.ToSqlWriteCommand());
@@ -426,7 +459,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateBuilder()
+        var builder = executor.CreateWriteBuilder()
             .InsertInto("samples")
             .Columns("Name")
             .Values("returning")
@@ -434,7 +467,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            executor.ExecuteMutationAsync(builder.ToSqlWriteCommand()));
+            executor.ExecuteWriteAsync(builder.ToSqlWriteCommand()));
 
         // Assert
         Assert.Equal("包含 Returning 的 Mutation 必须通过查询结果 API 执行。", exception.Message);
@@ -449,7 +482,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
+        var builder = executor.CreateWriteBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -494,6 +527,24 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         /// </summary>
         [ConcurrencyCheck]
         public string SecretText { get; set; }
+    }
+
+    /// <summary>
+    /// 映射到 SQLite 逻辑删除测试表的实体。
+    /// </summary>
+    [Table("soft_delete_samples")]
+    private sealed class SoftDeleteSample : ISoftDelete
+    {
+        /// <summary>数据库生成的主键。</summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        /// <summary>样例名称。</summary>
+        public string Name { get; set; }
+
+        /// <summary>逻辑删除状态。</summary>
+        public bool IsDeleted { get; set; }
     }
 
     /// <summary>

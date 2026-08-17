@@ -33,4 +33,22 @@ public interface ISqlEntityMutationCommandBuilder
     /// <param name="options">可选的 Delete 原始值和并发配置。</param>
     /// <returns>带参数和并发校验信息的可执行 Delete 命令。</returns>
     SqlWriteCommand Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class;
+
+    /// <summary>
+    /// 生成物理清除实体的 SQL 命令。
+    /// </summary>
+    /// <typeparam name="TEntity">待物理清除实体类型。</typeparam>
+    /// <param name="entity">包含主键和并发属性值的实体。</param>
+    /// <param name="options">可选的 Delete 原始值和并发配置。</param>
+    /// <returns>带参数和并发校验信息的可执行 Delete 命令。</returns>
+    SqlWriteCommand Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class;
+
+    /// <summary>
+    /// 生成恢复逻辑删除实体的 SQL 命令。
+    /// </summary>
+    /// <typeparam name="TEntity">待恢复实体类型。</typeparam>
+    /// <param name="entity">包含主键和并发属性值的实体。</param>
+    /// <param name="options">可选的 Update 原始值和并发配置。</param>
+    /// <returns>带参数和并发校验信息的可执行 Update 命令。</returns>
+    SqlWriteCommand Restore<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class;
 }

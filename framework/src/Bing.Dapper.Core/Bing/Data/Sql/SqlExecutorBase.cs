@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Mutations.Batching;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Mutations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +12,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql执行对象基类
 /// </summary>
-public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
+public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 {
     /// <summary>
     /// 未指定批量大小时使用的最大实体窗口。
@@ -21,8 +22,16 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// </remarks>
     private const int DefaultMutationBatchWindowSize = 256;
 
+    /// <summary>
+    /// 获取 Provider 声明的能力档案。
+    /// </summary>
+    /// <param name="provider">当前 SQL Provider。</param>
+    /// <returns>Provider 未声明档案时返回默认能力配置。</returns>
+    private static SqlProviderProfile GetProviderProfile(ISqlProvider provider) =>
+        (provider as ISqlProviderProfileProvider)?.Profile ?? new SqlProviderProfile();
+
     /// <inheritdoc />
-    public ISqlBuilder CreateBuilder() => CreateIndependentSqlBuilder();
+    public ISqlBuilder CreateWriteBuilder() => CreateIndependentSqlBuilder();
 
     #region 构造函数
 
@@ -85,10 +94,10 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }, cancellationToken).ConfigureAwait(false);
     }
 
-    #region ExecuteMutation(执行写入命令)
+    #region ExecuteWrite(执行写入命令)
 
     /// <inheritdoc />
-    public virtual int ExecuteMutation(SqlWriteCommand command, int? timeout = null)
+    public virtual int ExecuteWrite(SqlWriteCommand command, int? timeout = null)
     {
         EnsureWritableDataSource();
         ValidateExecutableMutationCommand(command);
@@ -109,7 +118,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <inheritdoc />
-    public virtual async Task<int> ExecuteMutationAsync(SqlWriteCommand command, int? timeout = null,
+    public virtual async Task<int> ExecuteWriteAsync(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
@@ -174,7 +183,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         var providerKey = provider.Key?.Trim();
         if (string.Equals(command.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase))
         {
-            if (command.HasReturning && SqlProviderCapabilityResolver.GetProfile(provider).Mutation.SupportsReturning == false)
+            if (command.HasReturning && GetProviderProfile(provider).Mutation.SupportsReturning == false)
                 throw new NotSupportedException($"Provider {providerKey ?? "<未指定>"} 不支持 Mutation Returning。");
             return;
         }
@@ -182,214 +191,6 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     #endregion
-
-    #region Insert(插入实体)
-
-    /// <inheritdoc />
-    public virtual int Insert<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null)
-        where TEntity : class
-    {
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Insert(entity, options);
-        return ExecuteSql(command.Sql, command.Parameters, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> InsertAsync<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null,
-        CancellationToken cancellationToken = default)
-        where TEntity : class
-    {
-        EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Insert(entity, options);
-        return ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual int InsertBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options = null,
-        int? timeout = null) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        options ??= new SqlBatchInsertOptions();
-        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> InsertBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options = null,
-        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-        options ??= new SqlBatchInsertOptions();
-        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
-    }
-
-    #endregion
-
-    #region Update(更新实体)
-
-    /// <inheritdoc />
-    public virtual int Update<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null)
-        where TEntity : class
-    {
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Update(entity, options);
-        return ExecuteMutationCommand(command, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> UpdateAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null,
-        CancellationToken cancellationToken = default)
-        where TEntity : class
-    {
-        EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Update(entity, options);
-        return ExecuteMutationCommandAsync(command, timeout, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual int UpdateBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null,
-        int? timeout = null) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        options ??= new SqlBatchUpdateOptions();
-        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> UpdateBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null,
-        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-        options ??= new SqlBatchUpdateOptions();
-        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
-    }
-
-    #endregion
-
-    #region Delete(删除实体)
-
-    /// <inheritdoc />
-    public virtual int Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null)
-        where TEntity : class
-    {
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Delete(entity, options);
-        return ExecuteMutationCommand(command, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> DeleteAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null,
-        CancellationToken cancellationToken = default)
-        where TEntity : class
-    {
-        EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
-        var command = CreateMutationBuilder().Delete(entity, options);
-        return ExecuteMutationCommandAsync(command, timeout, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual int DeleteBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null,
-        int? timeout = null) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        options ??= new SqlBatchDeleteOptions();
-        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<int> DeleteBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null,
-        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
-    {
-        EnsureMutationBatchExecutionAllowed(entities);
-        EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-        options ??= new SqlBatchDeleteOptions();
-        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options,
-            items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
-    }
-
-    #endregion
-
-    /// <summary>
-    /// 确保批量 Mutation 的实体输入有效且当前数据源允许写入。
-    /// </summary>
-    /// <typeparam name="TEntity">待写入的实体类型。</typeparam>
-    /// <param name="entities">待写入的实体序列。</param>
-    private void EnsureMutationBatchExecutionAllowed<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-    {
-        if (entities == null)
-            throw new ArgumentNullException(nameof(entities));
-        EnsureWritableDataSource();
-    }
-
-    /// <summary>
-    /// 按受控实体窗口惰性生成批量命令。
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型。</typeparam>
-    /// <param name="entities">待处理实体序列。</param>
-    /// <param name="options">当前批量选项。</param>
-    /// <param name="batchFactory">基于单个窗口创建命令的工厂。</param>
-    /// <returns>按需生成的批量命令序列。</returns>
-    /// <remarks>
-    /// 一个窗口内仍使用既有参数和 SQL 长度规划，因而不会放宽 Provider 限制；
-    /// 数据库命令失败或取消后，枚举不会读取下一窗口实体。
-    /// </remarks>
-    private static IEnumerable<SqlMutationBatchCommand> CreateWindowedMutationBatchCommands<TEntity>(
-        IEnumerable<TEntity> entities, SqlMutationBatchOptions options,
-        Func<IEnumerable<TEntity>, IReadOnlyList<SqlMutationBatchCommand>> batchFactory) where TEntity : class
-    {
-        if (batchFactory == null)
-            throw new ArgumentNullException(nameof(batchFactory));
-        foreach (var window in EnumerateMutationWindows(entities, GetMutationBatchWindowSize(options)))
-        {
-            foreach (var batch in batchFactory(window))
-                yield return batch;
-        }
-    }
-
-    /// <summary>
-    /// 获取单次命令生成可保留的最大实体数。
-    /// </summary>
-    /// <param name="options">当前批量选项。</param>
-    /// <returns>调用方指定批次大小或保守默认窗口大小。</returns>
-    private static int GetMutationBatchWindowSize(SqlMutationBatchOptions options)
-    {
-        var windowSize = options?.BatchSize ?? DefaultMutationBatchWindowSize;
-        if (windowSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(options), "批量大小必须大于零。");
-        return windowSize;
-    }
-
-    /// <summary>
-    /// 将输入序列按窗口大小分割，且不读取未请求的后续窗口。
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型。</typeparam>
-    /// <param name="entities">待处理实体序列。</param>
-    /// <param name="windowSize">单个窗口的最大实体数。</param>
-    /// <returns>惰性实体窗口。</returns>
-    private static IEnumerable<IReadOnlyList<TEntity>> EnumerateMutationWindows<TEntity>(IEnumerable<TEntity> entities,
-        int windowSize)
-    {
-        using var enumerator = entities.GetEnumerator();
-        while (enumerator.MoveNext())
-        {
-            var window = new List<TEntity>(windowSize) { enumerator.Current };
-            while (window.Count < windowSize && enumerator.MoveNext())
-                window.Add(enumerator.Current);
-            yield return window;
-        }
-    }
 
     #region ExecuteSql(执行 SQL 文本)
 
@@ -674,7 +475,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (options?.Strategy == SqlBatchInsertStrategy.MultiRowValues)
             return true;
         var provider = ResolveMutationProvider();
-        return SqlProviderCapabilityResolver.GetProfile(provider).Mutation.SupportsMultiRowValues;
+        return GetProviderProfile(provider).Mutation.SupportsMultiRowValues;
     }
 
     /// <summary>
@@ -723,7 +524,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 var context = contextBuilder.CreateUpdateRenderContext(items.Take(1).ToArray(), options.UpdateOptions);
                 if (renderer.CanRender(context))
                 {
-                    if (SqlMutationDataBoundary.RequiresStructuredUpdate(context.Services, context.Mapping.EntityType))
+                    var boundaryProbe = new SqlUpdateBuilder(provider, context.Services);
+                    boundaryProbe.UpdateClause.UpdateTable(context.Mapping.Table);
+                    if (SqlMutationRuntimeBridge.RequiresStructuredUpdate(boundaryProbe, context.Mapping.Table))
                         return CreateMutationBatchCommands(items,
                             entity => CreateMutationBuilder(provider).Update(entity, options.UpdateOptions), options);
                     return CreateProviderOptimizedUpdateBatchCommands(items, options);
@@ -873,6 +676,9 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (items.Count == 0)
             return Array.Empty<SqlMutationBatchCommand>();
         options ??= new SqlBatchDeleteOptions();
+        if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            return CreateMutationBatchCommands(items,
+                entity => CreateMutationBuilder().Delete(entity, options.DeleteOptions), options);
         if (options.Strategy == SqlBatchDeleteStrategy.PerEntity)
             return CreateMutationBatchCommands(items,
                 entity => CreateMutationBuilder().Delete(entity, options.DeleteOptions), options);
@@ -1016,7 +822,7 @@ public abstract class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             throw new ArgumentException("批量 Insert 实体集合不能包含 null。", nameof(entities));
         var provider = ResolveMutationProvider();
         var supportsMultiRowValues =
-            SqlProviderCapabilityResolver.GetProfile(provider).Mutation.SupportsMultiRowValues;
+            GetProviderProfile(provider).Mutation.SupportsMultiRowValues;
         if (supportsMultiRowValues == false)
             throw new NotSupportedException($"Provider {provider.Key} 未声明支持组合式 Insert 批量命令。");
         if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder)

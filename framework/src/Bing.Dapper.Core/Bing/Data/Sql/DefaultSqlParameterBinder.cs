@@ -71,7 +71,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
             databaseContextAccessor: databaseContextAccessor, options: _options);
         _sqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, _options), databaseContextAccessor, _options);
-        _parameterResolver = parameterResolver ?? new DefaultSqlParameterResolver();
+        _parameterResolver = parameterResolver ?? SqlParameterRuntimeBridge.CreateDefaultResolver();
         _dbParameterCustomizers = dbParameterCustomizers?.Where(t => t != null).ToList() ??
                       new List<ISqlDbParameterCustomizer>();
     }

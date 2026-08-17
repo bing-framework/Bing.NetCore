@@ -19,7 +19,7 @@ namespace Bing.Data.Sql.Builders.Core;
 /// <summary>
 /// Sql生成器基类
 /// </summary>
-public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IUnionAccessor,
+public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISqlQueryClauseAccessor, IUnionAccessor,
     ICteAccessor, ISqlOperationStateManager, IReturningClauseAccessor
 {
 
@@ -148,11 +148,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// 是否已添加过滤器
     /// </summary>
     private bool _isAddFilters;
-
-    /// <summary>
-    /// 已排除过滤器集合
-    /// </summary>
-    private List<Type> _excludedFilters;
 
     /// <summary>
     /// 子查询参数重命名映射，确保重复渲染使用同一参数名称。
@@ -447,7 +442,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         Pager = new Pager();
         UnionItems = new List<BuilderItem>();
         CteItems = new List<BuilderItem>();
-        _excludedFilters = new List<Type>();
         _mutationContext = CreateMutationContext();
     }
 
@@ -640,7 +634,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         // 克隆集合
         UnionItems = CloneBuilderItems(sqlBuilder.UnionItems, sqlBuilder);
         CteItems = CloneBuilderItems(sqlBuilder.CteItems, sqlBuilder);
-        _excludedFilters = new List<Type>(sqlBuilder._excludedFilters);
     }
 
     /// <summary>
@@ -784,11 +777,8 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         if (string.IsNullOrEmpty(sql) || parameterNames == null || parameterNames.Count == 0)
             return sql;
 
-        var replacements = parameterNames
-            .Where(item => string.Equals(item.Key, item.Value, StringComparison.Ordinal) == false)
-            .OrderByDescending(item => item.Key.Length)
-            .ToArray();
-        if (replacements.Length == 0)
+        var replacementTrie = ParameterTokenReplacementTrie.Create(parameterNames);
+        if (replacementTrie == null)
             return sql;
 
         var result = new StringBuilder(sql.Length);
@@ -827,11 +817,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             }
             if (current == '$' && TryAppendDollarQuotedSegment(sql, result, ref index))
                 continue;
-            var replacement = replacements.FirstOrDefault(item => IsParameterToken(sql, index, item.Key));
-            if (string.IsNullOrEmpty(replacement.Key) == false)
+            if (replacementTrie.TryGetValue(sql, index, out var parameterName, out var replacement) &&
+                IsParameterToken(sql, index, parameterName))
             {
-                result.Append(replacement.Value);
-                index += replacement.Key.Length;
+                result.Append(replacement);
+                index += parameterName.Length;
                 continue;
             }
             result.Append(current);
@@ -849,6 +839,88 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <returns>仅替换实际参数标记后的 SQL 文本。</returns>
     private static string ReplaceParameterToken(string sql, string sourceName, string targetName) =>
         ReplaceParameterTokens(sql, new Dictionary<string, string> { [sourceName] = targetName });
+
+    /// <summary>
+    /// 参数标记替换 Trie。
+    /// </summary>
+    /// <remarks>
+    /// 将参数名匹配限制为 SQL 文本的一次前向扫描，避免调试 SQL 按参数数量重复遍历整段语句。
+    /// </remarks>
+    private sealed class ParameterTokenReplacementTrie
+    {
+        /// <summary>
+        /// 子节点。
+        /// </summary>
+        private readonly Dictionary<char, ParameterTokenReplacementTrie> _children = new();
+
+        /// <summary>
+        /// 当前节点对应的完整参数名。
+        /// </summary>
+        private string _parameterName;
+
+        /// <summary>
+        /// 当前节点对应的替换文本。
+        /// </summary>
+        private string _replacement;
+
+        /// <summary>
+        /// 从参数替换映射创建 Trie。
+        /// </summary>
+        /// <param name="replacements">参数名与替换文本的映射。</param>
+        /// <returns>至少包含一项有效替换时返回 Trie，否则返回 null。</returns>
+        public static ParameterTokenReplacementTrie Create(IReadOnlyDictionary<string, string> replacements)
+        {
+            if (replacements == null || replacements.Count == 0)
+                return null;
+            var result = new ParameterTokenReplacementTrie();
+            var hasReplacement = false;
+            foreach (var replacement in replacements)
+            {
+                if (string.IsNullOrWhiteSpace(replacement.Key) ||
+                    string.Equals(replacement.Key, replacement.Value, StringComparison.Ordinal))
+                    continue;
+                var node = result;
+                foreach (var character in replacement.Key)
+                {
+                    if (node._children.TryGetValue(character, out var child) == false)
+                    {
+                        child = new ParameterTokenReplacementTrie();
+                        node._children[character] = child;
+                    }
+                    node = child;
+                }
+                node._parameterName = replacement.Key;
+                node._replacement = replacement.Value;
+                hasReplacement = true;
+            }
+            return hasReplacement ? result : null;
+        }
+
+        /// <summary>
+        /// 获取当前位置最长匹配的参数替换项。
+        /// </summary>
+        /// <param name="sql">完整 SQL 文本。</param>
+        /// <param name="index">当前扫描位置。</param>
+        /// <param name="parameterName">匹配的完整参数名。</param>
+        /// <param name="replacement">对应替换文本。</param>
+        /// <returns>存在匹配项时返回 <see langword="true"/>。</returns>
+        public bool TryGetValue(string sql, int index, out string parameterName, out string replacement)
+        {
+            var node = this;
+            parameterName = null;
+            replacement = null;
+            for (var cursor = index; cursor < sql.Length; cursor++)
+            {
+                if (node._children.TryGetValue(sql[cursor], out node) == false)
+                    break;
+                if (node._parameterName == null)
+                    continue;
+                parameterName = node._parameterName;
+                replacement = node._replacement;
+            }
+            return parameterName != null;
+        }
+    }
 
     /// <summary>
     /// 判断 SQL 代码上下文中是否包含独立参数标记，并忽略字符串、注释和标识符中的文本。
@@ -1361,10 +1433,40 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// </summary>
     public ISqlBuilder ClearPageParams()
     {
+        ClearParameters(OffsetParam, LimitParam);
         Pager = new Pager();
         OffsetParam = null;
         LimitParam = null;
         return this;
+    }
+
+    /// <summary>
+    /// 清除指定名称的参数，并保留其他参数的值及 SQL 元数据。
+    /// </summary>
+    /// <param name="parameterNames">待清除的参数名称。</param>
+    private void ClearParameters(params string[] parameterNames)
+    {
+        if (parameterNames == null)
+            return;
+        var names = new HashSet<string>(parameterNames.Where(name => string.IsNullOrWhiteSpace(name) == false),
+            StringComparer.Ordinal);
+        if (names.Count == 0)
+            return;
+        var parameterSnapshot = ParameterManager.Clone();
+        ParameterManager.Clear();
+        var sqlParameters = (parameterSnapshot as IAdvancedParameterManager)?.GetSqlParams();
+        foreach (var parameter in parameterSnapshot.GetParams())
+        {
+            if (names.Contains(parameter.Key))
+                continue;
+            if (sqlParameters != null && sqlParameters.TryGetValue(parameter.Key, out var sqlParameter) &&
+                ParameterManager is IAdvancedParameterManager advancedParameterManager)
+            {
+                advancedParameterManager.Add(CloneSqlParameter(sqlParameter, parameter.Key));
+                continue;
+            }
+            ParameterManager.Add(parameter.Key, parameter.Value);
+        }
     }
 
     /// <summary>
@@ -1415,54 +1517,6 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         EntityResolver = new EntityResolver(EntityMappingResolver, DatabaseContextAccessor, MetadataOptions, Options,
             DatabaseContextResolver, EntityModelMetadataProvider, ExecutionContext.DatabaseContext);
         _mutationContext = CreateMutationContext();
-    }
-
-    #endregion
-
-    #region ToDebugSql(生成调试Sql语句)
-
-    /// <summary>
-    /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
-    /// </summary>
-    public virtual string ToDebugSql() => ToDebugSql(ToSql());
-
-    /// <summary>
-    /// 根据已生成的Sql语句生成调试Sql语句，Sql语句中的参数被替换为参数值
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
-    public virtual string ToDebugSql(string sql)
-    {
-        if (sql == null)
-            throw new ArgumentNullException(nameof(sql));
-        var parameters = ParameterManager.GetParams();
-        foreach (var parameter in parameters)
-        {
-            var literal = IsSensitiveParameterName(parameter.Key)
-                ? "'<redacted>'"
-                : ParamLiteralsResolver.GetParamLiterals(parameter.Value);
-            sql = ReplaceParameterToken(sql, parameter.Key, literal);
-        }
-        return sql;
-    }
-
-    /// <summary>
-    /// 判断参数名称是否包含敏感信息标识。
-    /// </summary>
-    /// <param name="name">参数名称。</param>
-    /// <returns>包含敏感信息标识时返回 true。</returns>
-    private static bool IsSensitiveParameterName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return false;
-        return name.IndexOf("password", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("pwd", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("passphrase", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("secret", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("credential", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("authorization", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("signature", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               name.IndexOf("key", StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     #endregion
@@ -1550,8 +1604,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         if (_isAddFilters || (OperationKind is not (SqlOperationKind.Select or SqlOperationKind.InsertSelect)))
             return false;
-        var activeFilters = Services.Filters.Where(filter => _excludedFilters.Contains(filter.GetType()) == false)
-            .ToList();
+        var activeFilters = Services.Filters.ToList();
         if (activeFilters.Any(filter => filter is not IsDeletedFilter))
             return activeFilters.Count > 0;
         if (activeFilters.Any(filter => filter is IsDeletedFilter) == false)
@@ -1569,8 +1622,10 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             return false;
         return _operationState switch
         {
-            SqlBuilderOperationState.Update => SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table),
-            SqlBuilderOperationState.Delete => SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table),
+            SqlBuilderOperationState.Update => SqlMutationDataBoundary.ShouldApply(MutationContext, UpdateClause.Table,
+                SqlDataBoundaryOperation.Update),
+            SqlBuilderOperationState.Delete => SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table,
+                SqlDataBoundaryOperation.Delete),
             _ => false
         };
     }
@@ -1898,13 +1953,32 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             return;
 
         _isAddFilters = true;
-        var context = new SqlFilterContext(Dialect, AliasRegister, ParameterManager, this, Services,
-            ExecutionContext.DatabaseContext);
+        var context = new SqlFilterContext(Dialect, this, Services, ExecutionContext.DatabaseContext);
         foreach (var filter in Services.Filters)
-        {
-            if (_excludedFilters.Count > 0 && _excludedFilters.Contains(filter.GetType()))
-                continue;
             filter.Filter(context);
+        ApplyFilterPlacements(SqlFilterPlacementPlanner.Plan(context));
+    }
+
+    /// <summary>
+    /// 将完整 Join 拓扑已规划的过滤器谓词提交到最终 Where 或指定 Join On。
+    /// </summary>
+    /// <param name="placements">按过滤器贡献顺序排列的谓词放置决定。</param>
+    private void ApplyFilterPlacements(IEnumerable<SqlFilterPlacement> placements)
+    {
+        if (placements == null)
+            return;
+        foreach (var placement in placements)
+        {
+            var predicate = placement.Predicate;
+            if (string.IsNullOrWhiteSpace(placement.JoinSourceId))
+            {
+                WhereClause.Where(predicate.Column, predicate.Value, predicate.Operator);
+                continue;
+            }
+            if (JoinClause is not JoinClause joinClause)
+                throw new InvalidOperationException($"未找到过滤器来源 {placement.JoinSourceId} 对应的 Join 子句。");
+            joinClause.AddFilterCondition(placement.JoinSourceId, predicate.Column, predicate.Value,
+                predicate.Operator);
         }
     }
 
@@ -1951,6 +2025,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <param name="count">跳过的行数</param>
     public ISqlBuilder Skip(int count)
     {
+        ValidateOperation(SqlOperationAction.Paging);
         if (string.IsNullOrWhiteSpace(OffsetParam))
         {
             var parameterManager = ParameterManager;
@@ -1961,9 +2036,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             parameterManager.Add(parameter, 0);
             parameterManager.Add(parameter, count);
             OffsetParam = parameter;
+            UseOperation(SqlOperationAction.Paging);
             return this;
         }
         ParameterManager.Add(OffsetParam, count);
+        UseOperation(SqlOperationAction.Paging);
         return this;
     }
 
@@ -1986,6 +2063,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     /// <param name="count">获取的行数</param>
     public ISqlBuilder Take(int count)
     {
+        ValidateOperation(SqlOperationAction.Paging);
         if (string.IsNullOrWhiteSpace(LimitParam))
         {
             var parameterManager = ParameterManager;
@@ -1998,6 +2076,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
         else
             ParameterManager.Add(LimitParam, count);
         Pager.PageSize = count;
+        UseOperation(SqlOperationAction.Paging);
         return this;
     }
 
@@ -2020,6 +2099,7 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
     {
         if (pager == null)
             return this;
+        ValidateOperation(SqlOperationAction.Paging);
         var parameterManager = ParameterManager;
         var parameterProbe = parameterManager.Clone();
         var offsetParameter = OffsetParam;
@@ -2044,22 +2124,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             LimitParam = parameterManager.GenerateName();
         parameterManager.Add(LimitParam, pager.PageSize);
         Pager = pager;
+        UseOperation(SqlOperationAction.Paging);
         return this;
     }
 
     #endregion
-
-    /// <summary>
-    /// 忽略过滤器
-    /// </summary>
-    /// <typeparam name="TSqlFilter">Sql过滤器类型</typeparam>
-    public virtual ISqlBuilder IgnoreFilter<TSqlFilter>() where TSqlFilter : ISqlFilter
-    {
-        var filterType = typeof(TSqlFilter);
-        if (!_excludedFilters.Contains(filterType))
-            _excludedFilters.Add(filterType);
-        return this;
-    }
 
     /// <inheritdoc />
     public void SetAllowAllRows(bool allowAllRows)
@@ -2298,7 +2367,11 @@ public abstract class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccessor, ISql
             : _operationState == SqlBuilderOperationState.Delete
                 ? DeleteClause.Table
                 : null;
-        _isMutationDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, table, MutationWhereClause);
+        var operation = _operationState == SqlBuilderOperationState.Delete
+            ? SqlDataBoundaryOperation.Delete
+            : SqlDataBoundaryOperation.Update;
+        _isMutationDataBoundaryApplied = SqlMutationDataBoundary.Apply(MutationContext, table, operation,
+            MutationWhereClause);
     }
 
     /// <summary>

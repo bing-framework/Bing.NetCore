@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
 
 namespace Bing.Data.Sql;
@@ -9,13 +10,104 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 实例包含可变的 Builder、连接和事务状态，不支持并发复用；每个并发操作必须由 Factory 创建独立实例。
 /// </remarks>
-public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecutor, ISqlUpdateExecutor, ISqlDeleteExecutor
+public interface ISqlExecutor : IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    /// 插入单个实体。
+    /// </summary>
+    int Insert<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null) where TEntity : class;
+
+    /// <summary>
+    /// 异步插入单个实体。
+    /// </summary>
+    Task<int> InsertAsync<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null,
+        CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 批量插入实体。
+    /// </summary>
+    int InsertBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options = null, int? timeout = null)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步批量插入实体。
+    /// </summary>
+    Task<int> InsertBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options = null,
+        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 更新单个实体。
+    /// </summary>
+    int Update<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null) where TEntity : class;
+
+    /// <summary>
+    /// 异步更新单个实体。
+    /// </summary>
+    Task<int> UpdateAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null,
+        CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 批量更新实体。
+    /// </summary>
+    int UpdateBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null, int? timeout = null)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步批量更新实体。
+    /// </summary>
+    Task<int> UpdateBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options = null,
+        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 删除单个实体；逻辑删除实体将更新删除状态。
+    /// </summary>
+    int Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null) where TEntity : class;
+
+    /// <summary>
+    /// 异步删除单个实体；逻辑删除实体将更新删除状态。
+    /// </summary>
+    Task<int> DeleteAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null,
+        CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 物理清除单个实体。
+    /// </summary>
+    int Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null) where TEntity : class;
+
+    /// <summary>
+    /// 异步物理清除单个实体。
+    /// </summary>
+    Task<int> PurgeAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null,
+        CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 恢复单个逻辑删除实体。
+    /// </summary>
+    int Restore<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null) where TEntity : class;
+
+    /// <summary>
+    /// 异步恢复单个逻辑删除实体。
+    /// </summary>
+    Task<int> RestoreAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null,
+        CancellationToken cancellationToken = default) where TEntity : class;
+
+    /// <summary>
+    /// 批量删除实体；逻辑删除实体将逐条更新删除状态。
+    /// </summary>
+    int DeleteBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null, int? timeout = null)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步批量删除实体；逻辑删除实体将逐条更新删除状态。
+    /// </summary>
+    Task<int> DeleteBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null,
+        int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class;
+
     /// <summary>
     /// 创建当前执行上下文专属的独立 Mutation SQL 生成器。
     /// </summary>
     /// <returns>不与 Root Executor 或其他操作共享可变状态的 SQL 生成器。</returns>
-    ISqlBuilder CreateBuilder();
+    ISqlBuilder CreateWriteBuilder();
 
     /// <summary>
     /// 执行独立写入命令表示的 Insert、Update 或 Delete 操作。
@@ -23,7 +115,7 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="command">已冻结的写入命令。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <returns>操作影响的行数。</returns>
-    int ExecuteMutation(SqlWriteCommand command, int? timeout = null);
+    int ExecuteWrite(SqlWriteCommand command, int? timeout = null);
 
     /// <summary>
     /// 异步执行独立写入命令表示的 Insert、Update 或 Delete 操作。
@@ -32,7 +124,7 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable, ISqlInsertExecuto
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示操作影响行数的异步操作。</returns>
-    Task<int> ExecuteMutationAsync(SqlWriteCommand command, int? timeout = null,
+    Task<int> ExecuteWriteAsync(SqlWriteCommand command, int? timeout = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

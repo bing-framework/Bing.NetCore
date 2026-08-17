@@ -3,12 +3,14 @@
     <AssemblyName>Bing.Dapper.PostgreSql</AssemblyName>
     <PackageId>Bing.Dapper.PostgreSql</PackageId>
     <Description>Bing.Dapper.PostgreSql 是Bing应用框架基于Dapper的数据访问封装类库，用于处理PostgreSql数据库。</Description>
+    <WarningsAsErrors>$(WarningsAsErrors);RS0016;RS0017;RS0018</WarningsAsErrors>
   </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="6.0.11" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
