@@ -261,8 +261,7 @@ public class SqlQueryDescriptionTest
         var projection = rootQuery.From<MultiSourceUser, MultiSourceReview>()
             .Select<MultiSourceProjection>((user, review) => new object[] { user.Id, review.UserId });
         var transition = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Select((user, review) => new object[] { user.Id, review.UserId })
-            .As<MultiSourceProjection>();
+            .Select((user, review) => new object[] { user.Id, review.UserId });
 
         // Assert
         Assert.IsType<SqlQuery<MultiSourceProjection>>(projection);
@@ -301,7 +300,7 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .SelectDto((user, review) => new MultiSourceProjection
+            .Select((user, review) => new MultiSourceProjection
             {
                 OwnerId = user.Id,
                 ReviewUserId = review.UserId
@@ -342,7 +341,7 @@ public class SqlQueryDescriptionTest
             .Select((user, review) => new object[] { user.Id, review.UserId });
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => query.SelectDto((user, review) =>
+        var exception = Assert.Throws<NotSupportedException>(() => query.Select((user, review) =>
             new MultiSourceProjection { OwnerId = user.Id + 1 }));
 
         // Assert
@@ -389,7 +388,7 @@ public class SqlQueryDescriptionTest
         // Act
         var singleException = Assert.Throws<NotSupportedException>(() => single.SelectSubquery(
             user => new EmptyProjection { }, "empty"));
-        var multiException = Assert.Throws<NotSupportedException>(() => multi.SelectDto(
+        var multiException = Assert.Throws<NotSupportedException>(() => multi.Select(
             (user, review) => new EmptyProjection { }));
 
         // Assert
@@ -457,7 +456,7 @@ public class SqlQueryDescriptionTest
         var expectedSql = query.ToSql();
 
         // Act
-        Assert.Throws<ArgumentOutOfRangeException>(() => query.Aggregate<int>(
+        Assert.Throws<ArgumentOutOfRangeException>(() => query.Aggregate(
             (SqlAggregateFunction)999, user => user.Id));
 
         // Assert

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <RUN_INTEGRATION_TESTS>true</RUN_INTEGRATION_TESTS>
+      <RUN_SQLSERVER_INTEGRATION_TESTS>true</RUN_SQLSERVER_INTEGRATION_TESTS>
+      <ConnectionStrings__SqlServerConnection>Server=127.0.0.1,21433;Database=bing_framework_sqlserver_test;User Id=sa;Password=Bing2019.00;TrustServerCertificate=true;</ConnectionStrings__SqlServerConnection>
+      <ALLOW_DATABASE_RESET_FOR_TESTS>true</ALLOW_DATABASE_RESET_FOR_TESTS>
+      <ConnectionStrings__MySqlConnection>Server=127.0.0.1;Port=13306;Database=bing_dapper_test;User Id=root;Password=bing2019.00;</ConnectionStrings__MySqlConnection>
+      <ConnectionStrings__PostgreSqlConnection>Host=127.0.0.1;Port=5432;Database=bing_framework_postgresql_test;Username=admin;Password=bing2019.00;</ConnectionStrings__PostgreSqlConnection>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

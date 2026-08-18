@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
     <ProjectReference Include="..\Bing.TestShare.MySql\Bing.TestShare.MySql.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 </Project>

@@ -159,7 +159,8 @@ public class SqlQueryApiContractTest
         var typed = methods.Single(method => method.Name == "From" &&
                             method.IsGenericMethodDefinition &&
                             method.GetGenericArguments().Length == 1 &&
-                            method.GetParameters().Length == 0);
+                            method.GetParameters().Length == 1 &&
+                            method.GetParameters()[0].ParameterType == typeof(string));
         var raw = methods.Single(method => method.Name == "Sql" &&
                                           method.IsGenericMethodDefinition &&
                                           method.GetParameters().Length == 2);
@@ -175,20 +176,23 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：多表根查询必须完整公开二至七表入口，并使用对应 arity 的强类型查询描述。
+    /// 测试目的：多表根查询必须完整公开一至十表入口，并使用对应 arity 的强类型查询描述。
     /// </summary>
     [Fact]
-    public void From_WhenMultipleEntitySourcesSupported_ShouldExposeArityTwoThroughSeven()
+    public void From_WhenMultipleEntitySourcesSupported_ShouldExposeArityOneThroughTen()
     {
         // Arrange
         var methods = typeof(ISqlQuery).GetMethods().Where(method => method.Name == "From" &&
-            method.IsGenericMethodDefinition && method.GetParameters().Length == 0).ToList();
+            method.IsGenericMethodDefinition &&
+            (method.GetGenericArguments().Length == 1
+                ? method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType == typeof(string)
+                : method.GetParameters().Length == 0)).ToList();
 
         // Act
         var arities = methods.Select(method => method.GetGenericArguments().Length).OrderBy(count => count).ToArray();
 
         // Assert
-        Assert.Equal(new[] { 1, 2, 3, 4, 5, 6, 7 }, arities);
+        Assert.Equal(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, arities);
         foreach (var method in methods.Where(method => method.GetGenericArguments().Length > 1))
         {
             Assert.Equal("SqlLambdaQuery", method.ReturnType.GetGenericTypeDefinition().Name.Split('`')[0]);
@@ -215,7 +219,7 @@ public class SqlQueryApiContractTest
                 throw new NotSupportedException();
 
             /// <inheritdoc />
-            public SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class => throw new NotSupportedException();
+            public SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class => throw new NotSupportedException();
 
             /// <inheritdoc />
             public SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
@@ -249,6 +253,21 @@ public class SqlQueryApiContractTest
                 TFourth, TFifth, TSixth, TSeventh>() where TFirst : class where TSecond : class where TThird : class
                 where TFourth : class where TFifth : class where TSixth : class where TSeventh : class =>
                 throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>()
+                where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+                where TSixth : class where TSeventh : class where TEighth : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>()
+                where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+                where TSixth : class where TSeventh : class where TEighth : class where TNinth : class => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>()
+                where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+                where TSixth : class where TSeventh : class where TEighth : class where TNinth : class where TTenth : class => throw new NotSupportedException();
 
             /// <inheritdoc />
             public void Dispose()
@@ -338,7 +357,8 @@ public class SqlQueryApiContractTest
     {
         var method = typeof(ISqlQuery).GetMethods().Single(candidate => candidate.Name == "From" &&
             candidate.IsGenericMethodDefinition && candidate.GetGenericArguments().Length == 1 &&
-            candidate.GetParameters().Length == 0);
+            candidate.GetParameters().Length == 1 &&
+            candidate.GetParameters()[0].ParameterType == typeof(string));
 
         Assert.NotNull(method);
         Assert.True(method.IsGenericMethodDefinition);
@@ -428,7 +448,7 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：多表查询应以各元数对应的类型化投影入口和公共 As 入口切换结果映射类型，同时保持后续终结方法使用 SqlQuery 契约。
+    /// 测试目的：多表查询应公开强类型 Select 投影，并且不再保留 SelectDto 或 As 结果切换入口。
     /// </summary>
     [Fact]
     public void MultiLambdaQuery_WhenPublicApiInspected_ShouldExposeProjectionResultTransitions()
@@ -447,30 +467,24 @@ public class SqlQueryApiContractTest
         // Act and Assert
         foreach (var type in types)
         {
-            var select = type.GetMethods().Single(method => method.Name == "Select" &&
+            var projections = type.GetMethods().Where(method => method.Name == "Select" &&
                 method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
-                method.GetParameters().Length == 1);
-            Assert.Equal(typeof(SqlQuery<>), select.ReturnType.GetGenericTypeDefinition());
-
-            var selectDto = type.GetMethods().Single(method => method.Name == "SelectDto" &&
-                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
-                method.GetParameters().Length == 1);
-            Assert.Equal(typeof(SqlQuery<>), selectDto.ReturnType.GetGenericTypeDefinition());
+                method.GetParameters().Length == 1).ToArray();
+            Assert.Equal(2, projections.Length);
+            Assert.All(projections, method => Assert.Equal(typeof(SqlQuery<>), method.ReturnType.GetGenericTypeDefinition()));
 
             var selectSubquery = type.GetMethods().Single(method => method.Name == "SelectSubquery" &&
                 method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
                 method.GetParameters().Length == 2);
             Assert.Equal(typeof(SqlSubquery<>), selectSubquery.ReturnType.GetGenericTypeDefinition());
 
-            var asMethod = type.GetMethods().Single(method => method.Name == "As" &&
-                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
-                method.GetParameters().Length == 0);
-            Assert.Equal(typeof(SqlQuery<>), asMethod.ReturnType.GetGenericTypeDefinition());
+            Assert.DoesNotContain(type.GetMethods(), method => method.Name == "SelectDto");
+            Assert.DoesNotContain(type.GetMethods(), method => method.Name == "As");
         }
     }
 
     /// <summary>
-    /// 测试目的：From 查询应公开受控的类型化连接、分组、投影和聚合成员，并通过 SqlQuery 切换结果映射类型。
+    /// 测试目的：From 查询应公开受控的类型化连接、分组、投影和非泛型聚合成员。
     /// </summary>
     [Fact]
     public void LambdaQuery_WhenPublicApiInspected_ShouldExposeTypedCompositionAndResultTransitions()
@@ -490,8 +504,10 @@ public class SqlQueryApiContractTest
         var crossJoin = lambdaType.GetMethods().Single(method => method.Name == "CrossJoin" &&
             method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
         var on = lambdaType.GetMethods().Single(method => method.Name == "On" && method.IsGenericMethodDefinition);
-        var projection = lambdaType.GetMethods().Single(method => method.Name == "Select" && method.IsGenericMethodDefinition);
-        var aggregate = lambdaType.GetMethods().Single(method => method.Name == "Aggregate" && method.IsGenericMethodDefinition);
+        var projection = lambdaType.GetMethods().Single(method => method.Name == "Select" && method.IsGenericMethodDefinition &&
+            method.GetParameters().Length == 1 && method.ReturnType.IsGenericType &&
+            method.ReturnType.GetGenericTypeDefinition() == typeof(SqlQuery<>));
+        var aggregate = lambdaType.GetMethods().Single(method => method.Name == "Aggregate" && !method.IsGenericMethodDefinition);
 
         // Assert
         Assert.Equal(typeof(SqlLambdaQuery<>), join.ReturnType.GetGenericTypeDefinition());
@@ -501,7 +517,7 @@ public class SqlQueryApiContractTest
         Assert.Equal(typeof(SqlLambdaQuery<,>), crossJoin.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<>), on.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlQuery<>), projection.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlQuery<>), aggregate.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<>), aggregate.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(2, lambdaType.GetMethods().Count(method => method.Name == "GroupBy" && method.DeclaringType == lambdaType));
 
         var selectSubquery = lambdaType.GetMethods().Single(method => method.Name == "SelectSubquery" &&
@@ -612,8 +628,10 @@ public class SqlQueryApiContractTest
         var expectedParameterTypes = new[] { typeof(int?), typeof(CancellationToken) };
 
         // Act
-        var fluent = typeof(SqlQuery<>).GetMethod("ScalarAsync");
-        var text = typeof(SqlTextQuery<>).GetMethod("ScalarAsync");
+        var fluent = typeof(SqlQuery<>).GetMethods().Single(method => method.Name == "ScalarAsync" &&
+            method.IsGenericMethod == false);
+        var text = typeof(SqlTextQuery<>).GetMethods().Single(method => method.Name == "ScalarAsync" &&
+            method.IsGenericMethod == false);
 
         // Assert
         Assert.NotNull(fluent);
@@ -635,10 +653,14 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameters = new[] { typeof(Bing.Data.IPager), typeof(int?), typeof(CancellationToken) };
 
         // Act
-        var sync = typeof(SqlQuery<>).GetMethod("ToPage");
-        var async = typeof(SqlQuery<>).GetMethod("ToPageAsync");
-        var lambdaSync = typeof(SqlLambdaQuery<>).GetMethod("ToPage");
-        var lambdaAsync = typeof(SqlLambdaQuery<>).GetMethod("ToPageAsync");
+        var sync = typeof(SqlQuery<>).GetMethods().Single(method => method.Name == "ToPage" &&
+            method.IsGenericMethod == false);
+        var async = typeof(SqlQuery<>).GetMethods().Single(method => method.Name == "ToPageAsync" &&
+            method.IsGenericMethod == false);
+        var lambdaSync = typeof(SqlLambdaQuery<>).GetMethods().Single(method => method.Name == "ToPage" &&
+            method.IsGenericMethod == false);
+        var lambdaAsync = typeof(SqlLambdaQuery<>).GetMethods().Single(method => method.Name == "ToPageAsync" &&
+            method.IsGenericMethod == false);
 
         // Assert
         Assert.NotNull(sync);
@@ -665,8 +687,10 @@ public class SqlQueryApiContractTest
         var expectedParameterType = typeof(int?);
 
         // Act
-        var fluent = typeof(SqlQuery<>).GetMethod("AsEnumerable");
-        var text = typeof(SqlTextQuery<>).GetMethod("AsEnumerable");
+        var fluent = typeof(SqlQuery<>).GetMethods().Single(method => method.Name == "AsEnumerable" &&
+            method.IsGenericMethod == false);
+        var text = typeof(SqlTextQuery<>).GetMethods().Single(method => method.Name == "AsEnumerable" &&
+            method.IsGenericMethod == false);
 
         // Assert
         Assert.NotNull(fluent);

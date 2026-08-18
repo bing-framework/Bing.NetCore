@@ -1,4 +1,5 @@
 using Bing.Data.Sql;
+using Bing.Data.Sql.Metadata;
 using Bing.Dapper.Tests.Infrastructure;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -100,15 +101,19 @@ public partial class MySqlQueryTest
         var description = query.From<MySqlDottedCompany>()
             .ClearSelect()
             .Select("c.CompanyId,c.Name,m.Name As MerchantName")
-            .From("c")
+            .From(new SqlTableReference
+            {
+                EntityType = typeof(MySqlDottedCompany),
+                TableName = "Merchants.Company",
+                Alias = "c"
+            })
             .LeftJoin<MySqlDottedMerchant>("m")
             .On<MySqlDottedCompany, MySqlDottedMerchant>((company, merchant) => company.MerchantId == merchant.MerchantId)
-            .Where("c.CompanyId", companyId)
-            .As<DottedCompanyJoinResult>();
+            .Where("c.CompanyId", companyId);
 
         // Act
         var sql = description.ToSql();
-        var result = description.FirstOrDefault();
+        var result = description.FirstOrDefault<DottedCompanyJoinResult>();
 
         // Assert
         Assert.Equal("Select `c`.`CompanyId`,`c`.`Name`,`m`.`Name` As `MerchantName` \r\nFrom `Merchants.Company` As `c` \r\nLeft Join `Merchants.Merchant` As `m` On `c`.`MerchantId`=`m`.`MerchantId` \r\nWhere `c`.`CompanyId`=@_p_0", sql);

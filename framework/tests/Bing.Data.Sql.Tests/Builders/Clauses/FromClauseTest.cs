@@ -312,4 +312,67 @@ public class FromClauseTest
         Assert.Equal(new[] { "source_0", "source_1" }, _clause.Sources.Select(source => source.SourceId));
         Assert.Equal(new[] { "source_0", "source_1", "source_2" }, copy.Sources.Select(source => source.SourceId));
     }
+
+    /// <summary>
+    /// 测试目的：1～10 个类型化根来源都应按参数顺序渲染完整 From SQL，并为重复实体生成稳定别名。
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(SetRootsCases))]
+    public void SetRoots_WhenOneThroughTenSourcesProvided_ShouldRenderCompleteSql(Type[] entityTypes, string expectedSql)
+    {
+        // Arrange
+        var clause = new FromClause(TestSqlBuilder.CreateTestClauseContext());
+
+        // Act
+        clause.SetRoots(entityTypes);
+
+        // Assert
+        Assert.Equal(expectedSql, clause.ToSql());
+        Assert.Equal(entityTypes.Length, clause.Sources.Count);
+    }
+
+    /// <summary>
+    /// 测试目的：根来源配置失败时应保留原有来源和别名注册，避免部分提交破坏后续查询。
+    /// </summary>
+    [Fact]
+    public void SetRoots_WhenSourceValidationFails_ShouldKeepExistingSources()
+    {
+        // Arrange
+        var clause = new FromClause(TestSqlBuilder.CreateTestClauseContext());
+        clause.From<Sample>("original");
+
+        // Act
+        Assert.Throws<ArgumentException>(() => clause.SetRoots(new Type[] { typeof(Sample2), null }));
+
+        // Assert
+        Assert.Equal("From [Sample] As [original]", clause.ToSql());
+        Assert.Single(clause.Sources);
+        Assert.Equal(typeof(Sample), clause.Sources[0].EntityType);
+        Assert.Equal("original", clause.Sources[0].Alias);
+    }
+
+    /// <summary>
+    /// 生成 1～10 个根来源的完整 SQL 用例。
+    /// </summary>
+    public static IEnumerable<object[]> SetRootsCases()
+    {
+        var types = new[]
+        {
+            typeof(Sample), typeof(Sample2), typeof(Sample3), typeof(Sample5), typeof(Sample6),
+            typeof(Sample7), typeof(Sample8), typeof(Sample), typeof(Sample2), typeof(Sample3)
+        };
+        for (var count = 1; count <= types.Length; count++)
+        {
+            var names = new Dictionary<Type, int>();
+            var sources = new List<string>();
+            foreach (var type in types.Take(count))
+            {
+                names.TryGetValue(type, out var occurrence);
+                names[type] = ++occurrence;
+                var table = type.Name;
+                sources.Add(occurrence == 1 ? $"[{table}]" : $"[{table}] As [{table}_{occurrence}]");
+            }
+            yield return new object[] { types.Take(count).ToArray(), $"From {string.Join(", ", sources)}" };
+        }
+    }
 }

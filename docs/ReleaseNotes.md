@@ -9,6 +9,16 @@
 * Dapper 自有连接统一由 `ISqlDbConnectionFactoryResolver` 创建，不再通过 `IDatabase` 或 `DefaultDatabase` 回退。
 * `IDatabase` 和 `IDatabaseConnectionAccessor` 继续保留给 EF Core、FreeSQL 等跨 ORM 集成。
 
+### SQL 查询 API 收敛
+
+* 类型化 `From` 支持 1～10 个实体来源；多来源查询默认投影第一来源，重复实体来源生成稳定别名。
+* 删除 SQL 查询链中的 `As<TResult>()` 结果类型转换，DTO 投影统一使用强类型 `Select<TProjection>`。
+* 聚合结果类型通过终结方法指定，新增同步/异步目标类型映射入口，并保留分页、标量、流式和多映射执行路径。
+* 增加 `Distinct()` Lambda 查询操作；类型化根来源配置具备失败回滚语义。
+* 补充 1～10 来源 SQL 单元测试和真实 SQLite 集成测试，并更新 Public API 基线。
+
+本轮验证：`Bing.Data.Sql.Tests` 2354 项、`Bing.Dapper.Core.Tests` 262 项、SQLite 集成测试 246 项全部通过；`Bing.All.sln` Release 构建成功。外部数据库集成仍需按项目 Gate 和受控测试库配置启用。
+
 迁移步骤见 [SQL 事务 API 迁移说明](migrations/sql-transaction-api-vNext.md)。
 
 ## [6.0.0](https://www.nuget.org/packages/Bing.Core/6.0.0)

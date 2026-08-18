@@ -52,14 +52,13 @@ namespace Bing.Admin.Service.Implements.Systems
             if (parameter == null)
                 return new PagerList<AdministratorResponse>();
             Debug.WriteLine($"当前用户: {CurrentUser.UserId}, {CurrentUser.UserName}");
-            var query = SqlQuery.From<User>()
+            var query = SqlQuery.From<User>("a")
                 .ClearSelect()
                 .SelectFrom<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },
                     true)
                 .AppendSelectFrom<UserInfo>(x => new object[] { x.Gender })
                 .AppendSelectFrom<Administrator>(x => new object[] { x.Enabled })
-                .From<User>("a")
                 .Join<UserInfo>("b").On<User, UserInfo>((l, r) => l.Id == r.Id)
                 .Join<Administrator>("c").On<User, Administrator>((l, r) => l.Id == r.Id)
                 .WhereIfNotEmpty<User>(x => x.Nickname.Contains(parameter.Nickname))
@@ -69,13 +68,11 @@ namespace Bing.Admin.Service.Implements.Systems
                 var roleQuery = SqlQuery.From<UserRole>()
                     .ClearSelect()
                     .Select(x => new object[] { x.UserId }, true)
-                    .From()
                     .Where(x => x.RoleId == parameter.RoleId);
                 query.Join(roleQuery, "d").AppendOn("a.UserId = d.UserId");
             }
             var result = await query.OrderBy<User>(x => x.LastModificationTime)
-                .As<AdministratorResponse>()
-                .ToPageAsync(parameter);
+                .ToPageAsync<AdministratorResponse>(parameter);
             var userIds = result.Data.Select(x => Conv.ToGuid(x.Id)).ToList();
             var userRoles = await GetUserRolesAsync(userIds);
             if (userRoles.Any())
@@ -89,18 +86,16 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="id">用户标识</param>
         public async Task<AdministratorResponse> GetById(Guid id)
         {
-            var result = await SqlQuery.From<User>()
+            var result = await SqlQuery.From<User>("a")
                 .ClearSelect()
                 .SelectFrom<User>(
                     x => new object[] { x.Id, x.Nickname, x.UserName, x.LastModificationTime, x.LastModifier },
                     true)
                 .AppendSelectFrom<UserInfo>(x => new object[] { x.Gender })
                 .AppendSelectFrom<Administrator>(x => new object[] { x.Enabled })
-                .From<User>("a")
                 .Join<UserInfo>("b").On<User, UserInfo>((l, r) => l.Id == r.Id)
                 .Join<Administrator>("c").On<User, Administrator>((l, r) => l.Id == r.Id)
-                .As<AdministratorResponse>()
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync<AdministratorResponse>();
             result.Roles = await GetUserRolesAsync(new List<Guid>() { id });
             return result;
         }
@@ -111,15 +106,13 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="userIds">用户编号列表</param>
         private async Task<List<UserRoleResponse>> GetUserRolesAsync(List<Guid> userIds)
         {
-            var userRoles = await SqlQuery.From<UserRole>()
+            var userRoles = await SqlQuery.From<UserRole>("a")
                 .ClearSelect()
                 .SelectFrom<UserRole>(x => new object[] { x.UserId }, true)
                 .AppendSelectFrom<Role>(x => new object[] { x.Id, x.Name, x.Code }, true)
-                .From("a")
                 .Join<Role>("b").On<UserRole, Role>((l, r) => l.RoleId == r.Id)
                 .Where<UserRole>(x => x.UserId, userIds, Operator.In)
-                .As<UserRoleResponse>()
-                .ToListAsync();
+                .ToListAsync<UserRoleResponse>();
             return userRoles;
         }
     }

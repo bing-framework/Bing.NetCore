@@ -38,7 +38,7 @@ Bing.Data.Sql.SqlQueryBase.GetExecutionConnection() -> System.Data.IDbConnection
 Bing.Data.Sql.SqlQueryBase.GetExecutionTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetQueryTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetSql() -> string
-Bing.Data.Sql.SqlQueryBase.From<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlQueryBase.From<TEntity>(string alias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlQueryBase.GroupByClause.get -> Bing.Data.Sql.Builders.IGroupByClause
 Bing.Data.Sql.SqlQueryBase.IsUnion.get -> bool
 Bing.Data.Sql.SqlQueryBase.JoinClause.get -> Bing.Data.Sql.Builders.IJoinClause

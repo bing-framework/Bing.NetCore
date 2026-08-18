@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\framework.tests.props" />
   <PropertyGroup>
     <RootNamespace>Bing.Dapper.Tests</RootNamespace>
@@ -20,4 +20,8 @@
       <DependentUpon>appsettings.json</DependentUpon>
     </Content>
   </ItemGroup>
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 </Project>

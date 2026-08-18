@@ -137,7 +137,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 .From("a")
                 .Where(x => x.ApplicationId == applicationId)
                 .Where(x => x.ParentId == moduleId)
-                .Aggregate<int?>(SqlAggregateFunction.Max, x => x.SortId)
-                .ScalarAsync();
+                .Aggregate(SqlAggregateFunction.Max, x => x.SortId)
+                .ScalarAsync<int?>();
     }
 }

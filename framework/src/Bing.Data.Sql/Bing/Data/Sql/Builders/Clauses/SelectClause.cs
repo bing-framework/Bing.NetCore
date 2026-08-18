@@ -320,6 +320,20 @@ public class SelectClause : ISelectClause
             return;
         _context.UseOperation(SqlOperationAction.Select);
         _columns.AddColumns(columns, typeof(TEntity));
+        FreezeFirstSourceAlias<TEntity>();
+    }
+
+    /// <summary>
+    /// 当默认投影对应第一根来源时，固定其来源别名，避免重复实体类型使用最后注册的别名。
+    /// </summary>
+    private void FreezeFirstSourceAlias<TEntity>()
+    {
+        if (_context.Builder is not ISqlQueryClauseAccessor accessor || accessor.FromClause is not FromClause fromClause)
+            return;
+        var source = fromClause.Sources.FirstOrDefault();
+        if (source?.EntityType != typeof(TEntity) || string.IsNullOrWhiteSpace(source.Alias))
+            return;
+        _columns.FreezeTableAlias(typeof(TEntity), source.Alias);
     }
 
     /// <summary>

@@ -5,6 +5,9 @@ Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth>() -> Bing.Data
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
 Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>
+Bing.Data.Sql.SqlQueryBase.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>() -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>
 Bing.Data.Sql.SqlQueryBase.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>

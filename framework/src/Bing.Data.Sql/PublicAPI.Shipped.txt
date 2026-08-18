@@ -1504,7 +1504,7 @@ Bing.Data.Sql.ISqlParameterSourceResolver
 Bing.Data.Sql.ISqlParameterSourceResolver.CanResolve(object source) -> bool
 Bing.Data.Sql.ISqlParameterSourceResolver.TryResolve(object source, string parameterName, out object value) -> bool
 Bing.Data.Sql.ISqlQuery
-Bing.Data.Sql.ISqlQuery.From<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.ISqlQuery.Procedure<TResult>(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
 Bing.Data.Sql.ISqlQueryFactory
 Bing.Data.Sql.ISqlQueryFactory.Create(string dbKey = null) -> Bing.Data.Sql.ISqlQuery
@@ -1793,15 +1793,12 @@ Bing.Data.Sql.SqlIdentifierQuoteKind.Bracket = 2 -> Bing.Data.Sql.SqlIdentifierQ
 Bing.Data.Sql.SqlIdentifierQuoteKind.DoubleQuote = 3 -> Bing.Data.Sql.SqlIdentifierQuoteKind
 Bing.Data.Sql.SqlIdentifierQuoteKind.None = 0 -> Bing.Data.Sql.SqlIdentifierQuoteKind
 Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Aggregate<TResult>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Aggregate(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.AppendSelect(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.AppendSelect(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.AppendSelect(bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.AppendSelectFrom<TSelect>(System.Linq.Expressions.Expression<System.Func<TSelect, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.As<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.ClearSelect() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.From(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.From<TSource>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Having(string sql) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
@@ -1812,9 +1809,12 @@ Bing.Data.Sql.SqlLambdaQuery<TEntity>.On<TLeft, TRight>(System.Linq.Expressions.
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.OrderBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.OrderBy<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, object>> column, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Distinct() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select<TResult>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.SelectFrom<TSelect>(System.Linq.Expressions.Expression<System.Func<TSelect, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>

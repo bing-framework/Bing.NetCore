@@ -45,7 +45,7 @@ public class QueryStoreBaseTest
 
         // Act
         var query = store.GetSqlQuery();
-        var sql = query.From<StoreSample>().From("s").ToSql();
+        var sql = query.From<StoreSample>("s").ToSql();
 
         // Assert
         Assert.DoesNotContain(typeof(ISqlQuery), scopedServices.RequestedServiceTypes);

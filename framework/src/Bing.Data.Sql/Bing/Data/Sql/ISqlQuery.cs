@@ -48,7 +48,9 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// </summary>
     /// <typeparam name="TEntity">查询结果和实体映射类型。</typeparam>
     /// <returns>已设置实体投影和来源表的独立查询描述。</returns>
-    SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class;
+#pragma warning disable RS0027
+    SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class;
+#pragma warning restore RS0027
 
     /// <summary>
     /// 创建以严格 DTO 类型化派生表作为根来源的独立结构化 SQL 查询描述。
@@ -86,4 +88,16 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// <summary>创建使用七个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
     SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class;
+
+    /// <summary>创建使用八个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
+    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class;
+
+    /// <summary>创建使用九个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
+    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class;
+
+    /// <summary>创建使用十个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
+    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class where TTenth : class;
 }

@@ -40,6 +40,13 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public List<TResult> ToList(int? timeout = null) => _query.ToList<TResult>(timeout);
 
     /// <summary>
+    /// 使用终结方法指定结果映射类型并完整物化结果集。
+    /// </summary>
+#pragma warning disable RS0026
+    public List<TTarget> ToList<TTarget>(int? timeout = null) => _query.ToList<TTarget>(timeout);
+#pragma warning restore RS0026
+
+    /// <summary>
     /// 同步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
@@ -130,11 +137,21 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult First(int? timeout = null) => _query.First<TResult>(timeout);
 
     /// <summary>
+    /// 使用终结方法指定结果映射类型并获取第一行。
+    /// </summary>
+    public TTarget First<TTarget>(int? timeout = null) => _query.First<TTarget>(timeout);
+
+    /// <summary>
     /// 同步执行当前 Fluent 查询并获取第一行或默认值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>第一行或默认值。</returns>
     public TResult FirstOrDefault(int? timeout = null) => _query.FirstOrDefault<TResult>(timeout);
+
+    /// <summary>
+    /// 使用终结方法指定结果映射类型并获取第一行或默认值。
+    /// </summary>
+    public TTarget FirstOrDefault<TTarget>(int? timeout = null) => _query.FirstOrDefault<TTarget>(timeout);
 
     /// <summary>
     /// 同步执行当前 Fluent 查询并获取唯一一行。
@@ -144,6 +161,11 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult Single(int? timeout = null) => _query.Single<TResult>(timeout);
 
     /// <summary>
+    /// 使用终结方法指定结果映射类型并获取唯一一行。
+    /// </summary>
+    public TTarget Single<TTarget>(int? timeout = null) => _query.Single<TTarget>(timeout);
+
+    /// <summary>
     /// 同步执行当前 Fluent 查询并获取唯一一行或默认值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -151,11 +173,21 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult SingleOrDefault(int? timeout = null) => _query.SingleOrDefault<TResult>(timeout);
 
     /// <summary>
+    /// 使用终结方法指定结果映射类型并获取唯一一行或默认值。
+    /// </summary>
+    public TTarget SingleOrDefault<TTarget>(int? timeout = null) => _query.SingleOrDefault<TTarget>(timeout);
+
+    /// <summary>
     /// 同步执行当前 Fluent 查询并获取首行首列值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>首行首列值；无结果时返回默认值。</returns>
     public TResult Scalar(int? timeout = null) => _query.Scalar<TResult>(timeout);
+
+    /// <summary>
+    /// 使用终结方法指定标量结果类型并获取首行首列值。
+    /// </summary>
+    public TTarget Scalar<TTarget>(int? timeout = null) => _query.Scalar<TTarget>(timeout);
 
     /// <summary>
     /// 同步执行当前 Fluent 查询并返回指定页的数据和总行数。
@@ -166,11 +198,22 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public PagerList<TResult> ToPage(IPager pager = null, int? timeout = null) => _query.ToPage<TResult>(pager, timeout);
 
     /// <summary>
+    /// 使用终结方法指定结果映射类型并返回分页结果。
+    /// </summary>
+    public PagerList<TTarget> ToPage<TTarget>(IPager pager = null, int? timeout = null) =>
+        _query.ToPage<TTarget>(pager, timeout);
+
+    /// <summary>
     /// 以同步流方式执行当前 Fluent 查询。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>结果行同步流。</returns>
     public IEnumerable<TResult> AsEnumerable(int? timeout = null) => _query.AsEnumerable<TResult>(timeout);
+
+    /// <summary>
+    /// 使用终结方法指定结果映射类型并以同步流读取。
+    /// </summary>
+    public IEnumerable<TTarget> AsEnumerable<TTarget>(int? timeout = null) => _query.AsEnumerable<TTarget>(timeout);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并完整物化结果集。
@@ -180,6 +223,14 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.ToListAsync<TResult>(timeout, cancellationToken);
+
+    /// <summary>
+    /// 异步使用终结方法指定结果映射类型并完整物化结果集。
+    /// </summary>
+#pragma warning disable RS0026
+    public Task<List<TTarget>> ToListAsync<TTarget>(int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.ToListAsync<TTarget>(timeout, cancellationToken);
+#pragma warning restore RS0026
 
     /// <summary>
     /// 异步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
@@ -283,6 +334,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _query.FirstAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
+    /// 异步使用终结方法指定结果映射类型并获取第一行。
+    /// </summary>
+    public Task<TTarget> FirstAsync<TTarget>(int? timeout = null, CancellationToken cancellationToken = default) =>
+        _query.FirstAsync<TTarget>(timeout, cancellationToken);
+
+    /// <summary>
     /// 异步执行当前 Fluent 查询并获取第一行或默认值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -290,6 +347,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示第一行或默认值的异步操作。</returns>
     public Task<TResult> FirstOrDefaultAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
+
+    /// <summary>
+    /// 异步使用终结方法指定结果映射类型并获取第一行或默认值。
+    /// </summary>
+    public Task<TTarget> FirstOrDefaultAsync<TTarget>(int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.FirstOrDefaultAsync<TTarget>(timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取唯一一行。
@@ -301,6 +364,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _query.SingleAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
+    /// 异步使用终结方法指定结果映射类型并获取唯一一行。
+    /// </summary>
+    public Task<TTarget> SingleAsync<TTarget>(int? timeout = null, CancellationToken cancellationToken = default) =>
+        _query.SingleAsync<TTarget>(timeout, cancellationToken);
+
+    /// <summary>
     /// 异步执行当前 Fluent 查询并获取唯一一行或默认值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -310,6 +379,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _query.SingleOrDefaultAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
+    /// 异步使用终结方法指定结果映射类型并获取唯一一行或默认值。
+    /// </summary>
+    public Task<TTarget> SingleOrDefaultAsync<TTarget>(int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.SingleOrDefaultAsync<TTarget>(timeout, cancellationToken);
+
+    /// <summary>
     /// 异步执行当前 Fluent 查询并获取首行首列值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -317,6 +392,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示首行首列值的异步操作；无结果时返回默认值。</returns>
     public Task<TResult> ScalarAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.ScalarAsync<TResult>(timeout, cancellationToken);
+
+    /// <summary>
+    /// 异步使用终结方法指定标量结果类型并获取首行首列值。
+    /// </summary>
+    public Task<TTarget> ScalarAsync<TTarget>(int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.ScalarAsync<TTarget>(timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并返回指定页的数据和总行数。
@@ -329,6 +410,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
         CancellationToken cancellationToken = default) => _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
 
     /// <summary>
+    /// 异步使用终结方法指定结果映射类型并返回分页结果。
+    /// </summary>
+    public Task<PagerList<TTarget>> ToPageAsync<TTarget>(IPager pager = null, int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.ToPageAsync<TTarget>(pager, timeout, cancellationToken);
+
+    /// <summary>
     /// 以异步流方式执行当前 Fluent 查询。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -336,6 +423,12 @@ public class SqlQuery<TResult> : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>结果行异步流。</returns>
     public IAsyncEnumerable<TResult> AsAsyncEnumerable(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
+
+    /// <summary>
+    /// 异步使用终结方法指定结果映射类型并以异步流读取。
+    /// </summary>
+    public IAsyncEnumerable<TTarget> AsAsyncEnumerable<TTarget>(int? timeout = null,
+        CancellationToken cancellationToken = default) => _query.AsAsyncEnumerable<TTarget>(timeout, cancellationToken);
 
     /// <summary>
     /// 获取当前查询专属的 SQL Builder。

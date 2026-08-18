@@ -60,6 +60,7 @@ public class Startup
         services.AddSqlServerProvider();
         services.AddMySqlProvider();
         services.AddPostgreSqlProvider();
+        services.AddSqlDataSource("default", Bing.Data.Enums.DatabaseType.SqlServer, connectionString);
         services.AddSqlDataSource("mysql", Bing.Data.Enums.DatabaseType.MySql, mySqlConnectionString);
         services.AddSqlDataSource("pgsql", Bing.Data.Enums.DatabaseType.PgSql, postgreSqlConnectionString);
         services.AddSqlDataSource("sqlserver", Bing.Data.Enums.DatabaseType.SqlServer, connectionString);

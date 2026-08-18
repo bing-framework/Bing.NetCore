@@ -253,20 +253,44 @@ public class FromClause : IFromClause
         if (entityTypes.Count == 0)
             throw new ArgumentException("至少需要一个查询根表源。", nameof(entityTypes));
 
-        Clear();
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        var sources = new List<TableSource>(entityTypes.Count);
         var occurrences = new Dictionary<Type, int>();
-        foreach (var entityType in entityTypes)
+        for (var index = 0; index < entityTypes.Count; index++)
         {
+            var entityType = entityTypes[index];
             if (entityType == null)
                 throw new ArgumentException("查询根表源类型不能为空。", nameof(entityTypes));
             occurrences.TryGetValue(entityType, out var occurrence);
             occurrences[entityType] = ++occurrence;
             var alias = occurrence == 1 ? null : $"{Resolver.GetAlias(entityType, null)}_{occurrence}";
-            if (_sources.Count == 0)
-                From(Resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType });
+            var reference = Resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType };
+            var resolvedAlias = Resolver.GetAlias(entityType, reference.Alias);
+            if (index == 0)
+                registerProbe?.Replace(entityType, resolvedAlias);
             else
-                AppendRoot(entityType, alias);
+                registerProbe?.Register(entityType, resolvedAlias);
+            var item = CreateStructuredSqlItem(reference);
+            sources.Add(new TableSource($"source_{index}", item, entityType, resolvedAlias));
         }
+
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
+        for (var index = 0; index < sources.Count; index++)
+        {
+            var source = sources[index];
+            if (index == 0)
+                Register?.Replace(source.EntityType, source.Alias);
+            else
+                Register?.Register(source.EntityType, source.Alias);
+        }
+        if (Register != null)
+            Register.FromType = sources[0].EntityType;
+        _sources.Clear();
+        _sources.AddRange(sources);
+        Table = sources[^1].Item;
     }
 
     /// <summary>

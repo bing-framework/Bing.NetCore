@@ -63,6 +63,21 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
             EntityType = typeof(SqliteStructuredOrderSample),
             TableName = "Orders"
         }));
+        var arityTypes = new[]
+        {
+            typeof(SqliteArity01), typeof(SqliteArity02), typeof(SqliteArity03), typeof(SqliteArity04),
+            typeof(SqliteArity05), typeof(SqliteArity06), typeof(SqliteArity07), typeof(SqliteArity08),
+            typeof(SqliteArity09), typeof(SqliteArity10)
+        };
+        for (var index = 1; index <= arityTypes.Length; index++)
+        {
+            var arityIndex = index;
+            services.ConfigureSqlMetadata(options => options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = arityTypes[arityIndex - 1],
+                TableName = $"Arity{arityIndex:00}"
+            }));
+        }
         services.AddSqlDataSource("default", DatabaseType.Sqlite, FirstConnectionString);
         services.AddSqlDataSource(FirstDatabaseKey, DatabaseType.Sqlite, FirstConnectionString,
             setupAction: descriptor => descriptor.MappingProfile = "first-profile");
@@ -226,7 +241,17 @@ Create Table If Not Exists HierarchyNodes(
     Id Integer Not Null Primary Key,
     ParentId Integer Null,
     Name Text Not Null
-);";
+);
+Create Table If Not Exists Arity01(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity02(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity03(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity04(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity05(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity06(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity07(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity08(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity09(Id Integer Not Null, Name Text Null);
+Create Table If Not Exists Arity10(Id Integer Not Null, Name Text Null);";
         await command.ExecuteNonQueryAsync();
     }
 
@@ -240,7 +265,7 @@ Create Table If Not Exists HierarchyNodes(
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
-        command.CommandText = "Delete From HierarchyNodes; Delete From Orders; Delete From soft_delete_samples; Delete From samples;";
+        command.CommandText = "Delete From Arity01; Delete From Arity02; Delete From Arity03; Delete From Arity04; Delete From Arity05; Delete From Arity06; Delete From Arity07; Delete From Arity08; Delete From Arity09; Delete From Arity10; Delete From HierarchyNodes; Delete From Orders; Delete From soft_delete_samples; Delete From samples;";
         await command.ExecuteNonQueryAsync();
     }
 

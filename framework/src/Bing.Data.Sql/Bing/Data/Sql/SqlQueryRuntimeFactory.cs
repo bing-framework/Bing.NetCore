@@ -78,4 +78,30 @@ public static class SqlQueryRuntimeFactory
         TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(ISqlQueryPlanExecutor executor, ISqlBuilder builder)
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
         where TSixth : class where TSeventh : class => new(executor, builder);
+
+    /// <summary>
+    /// 创建八来源 Lambda 查询描述。
+    /// </summary>
+    public static SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> CreateLambdaQuery<
+        TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(ISqlQueryPlanExecutor executor,
+        ISqlBuilder builder) where TFirst : class where TSecond : class where TThird : class where TFourth : class
+        where TFifth : class where TSixth : class where TSeventh : class where TEighth : class => new(executor, builder);
+
+    /// <summary>
+    /// 创建九来源 Lambda 查询描述。
+    /// </summary>
+    public static SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> CreateLambdaQuery<
+        TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(ISqlQueryPlanExecutor executor,
+        ISqlBuilder builder) where TFirst : class where TSecond : class where TThird : class where TFourth : class
+        where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class =>
+        new(executor, builder);
+
+    /// <summary>
+    /// 创建十来源 Lambda 查询描述。
+    /// </summary>
+    public static SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> CreateLambdaQuery<
+        TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(
+        ISqlQueryPlanExecutor executor, ISqlBuilder builder) where TFirst : class where TSecond : class
+        where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class
+        where TEighth : class where TNinth : class where TTenth : class => new(executor, builder);
 }

@@ -63,8 +63,8 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// <typeparam name="TResult">投影结果映射类型。</typeparam>
     /// <param name="projection">派生表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TResult> SelectDto<TResult>(Expression<Func<TProjection, TResult>> projection) where TResult : class =>
-        SelectDtoCore<TResult>(projection);
+    public SqlQuery<TResult> Select<TResult>(Expression<Func<TProjection, TResult>> projection) where TResult : class =>
+        SelectTypedCore<TResult>(projection);
 
     /// <summary>
     /// 将当前派生根的严格 DTO 投影冻结为新的类型化派生表。

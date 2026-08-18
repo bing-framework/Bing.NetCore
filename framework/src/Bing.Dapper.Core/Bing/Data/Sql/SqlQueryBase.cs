@@ -539,15 +539,18 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         throw new NotSupportedException("插值 SQL 暂不支持集合参数，请使用显式参数化查询。");
     }
 
+#pragma warning disable RS0027
     /// <inheritdoc />
-    public SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class
+    public SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(executor, executor.CreateIndependentSqlBuilder());
-        query.Select().From();
-        return query;
+        var builder = executor.CreateIndependentSqlBuilder();
+        builder.From<TEntity>(alias);
+        builder.Select<TEntity>();
+        return SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(executor, builder);
     }
+#pragma warning restore RS0027
 
     /// <inheritdoc />
     public SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
@@ -592,6 +595,21 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>()
         where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class =>
         CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class =>
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class =>
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>(executor, builder));
+
+    /// <inheritdoc />
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>()
+        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class where TTenth : class =>
+        CreateMultiSourceQuery((executor, builder) => SqlQueryRuntimeFactory.CreateLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>(executor, builder));
 
     /// <summary>
     /// 创建持有独立 Builder 的多根来源查询描述。

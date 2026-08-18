@@ -310,7 +310,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
-        outer.ToSql().ShouldBe("Select * \r\nFrom [Users], [Users] As [Users_2]");
+        outer.ToSql().ShouldBe("Select [Users].[Id],[Users].[Name],[Users].[Payload] \r\nFrom [Users], [Users] As [Users_2]");
     }
 
     /// <summary>
@@ -578,7 +578,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         using var query = Assert.IsType<SqlServerSqlQuery>(factory.Create());
-        var description = query.From<MappedSample>().From("u").Where(item => item.Name, "primary");
+        var description = query.From<MappedSample>("u").Where(item => item.Name, "primary");
 
         // Assert
         query.Options.ConnectionString.ShouldBe("Server=default;Database=test;");
@@ -638,7 +638,7 @@ public class SqlServerRoutingAndExecutionTest
                 ConnectionString = "Server=default;Database=test;"
             }
         };
-        var description = query.From<MappedSample>().From("u").Where(t => t.Name, "abc");
+        var description = query.From<MappedSample>("u").Where(t => t.Name, "abc");
 
         // Assert
         query.Options.ConnectionString.ShouldBe("Server=reporting;Database=test;");
@@ -2552,10 +2552,10 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
         var description = query.From<MappedSample>()
             .Where(t => t.Name, "abc")
-            .Aggregate<int>(SqlAggregateFunction.Count, t => t.Id);
+            .Aggregate(SqlAggregateFunction.Count, t => t.Id);
 
         // Act
-        var result = await description.ScalarAsync();
+        var result = await description.ScalarAsync<int>();
 
         // Assert
         result.ShouldBe(1);

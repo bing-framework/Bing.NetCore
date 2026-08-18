@@ -69,7 +69,7 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    protected SqlQuery<TProjection> SelectDtoCore<TProjection>(LambdaExpression expression)
+    protected SqlQuery<TProjection> SelectTypedCore<TProjection>(LambdaExpression expression)
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
@@ -108,13 +108,6 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
             context?.MappingProfile, context?.TenantId, sqlBuilder?.GetDatabaseIdentity(),
             sqlBuilder?.GetExecutionScope());
     }
-
-    /// <summary>
-    /// 保持当前多表 SQL 结构并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">后续执行时用于映射结果行的类型。</typeparam>
-    /// <returns>使用指定结果映射类型的查询描述。</returns>
-    public SqlQuery<TProjection> As<TProjection>() => WithResult<TProjection>();
 
     /// <summary>
     /// 使用已绑定表源设置多表分组列。
@@ -315,7 +308,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>
@@ -355,8 +351,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">双表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用双表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -567,7 +563,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond), typeof(TThird) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>追加三表布尔筛选表达式。</summary>
@@ -599,8 +598,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">三表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TThird, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用三表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -808,7 +807,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>追加四表布尔筛选表达式。</summary>
@@ -840,8 +842,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">四表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用四表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1039,7 +1041,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>追加五表布尔筛选表达式。</summary>
@@ -1071,8 +1076,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">五表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用五表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1270,7 +1275,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>追加六表布尔筛选表达式。</summary>
@@ -1302,8 +1310,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">六表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用六表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1501,7 +1509,10 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
     {
         if (initializeRoots)
+        {
             GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh) });
+            GetBuilder().Select<TFirst>();
+        }
     }
 
     /// <summary>追加七表布尔筛选表达式。</summary>
@@ -1533,8 +1544,8 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">七表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> SelectDto<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection) =>
-        SelectDtoCore<TProjection>(projection);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection) =>
+        SelectTypedCore<TProjection>(projection);
 
     /// <summary>
     /// 使用七表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1601,4 +1612,119 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
         OrderByCore(columns, desc);
         return this;
     }
+}
+
+public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> : SqlMultiLambdaQuery<TFirst>
+    where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+    where TSixth : class where TSeventh : class where TEighth : class
+{
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder) : this(executor, builder, true) { }
+
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
+    {
+        if (initializeRoots)
+        {
+            GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[]
+            {
+                typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth)
+            });
+            GetBuilder().Select<TFirst>();
+        }
+    }
+
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { WhereCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { SelectCore(columns); return this; }
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) => SelectAsCore<TProjection>(columns);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { GroupByCore(columns); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { HavingCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { OnCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Skip(int count) { SkipCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Take(int count) { TakeCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
+
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(string alias = null, string schema = null) where TNinth : class { JoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { LeftJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { RightJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { FullJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> CrossJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { CrossJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { JoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { LeftJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { RightJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { FullJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> CrossJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { CrossJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+}
+
+public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> : SqlMultiLambdaQuery<TFirst>
+    where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+    where TSixth : class where TSeventh : class where TEighth : class where TNinth : class
+{
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder) : this(executor, builder, true) { }
+
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
+    {
+        if (initializeRoots)
+        {
+            GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[]
+            {
+                typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth)
+            });
+            GetBuilder().Select<TFirst>();
+        }
+    }
+
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { WhereCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { SelectCore(columns); return this; }
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) => SelectAsCore<TProjection>(columns);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { GroupByCore(columns); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { HavingCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { OnCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Skip(int count) { SkipCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Take(int count) { TakeCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
+
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(string alias = null, string schema = null) where TTenth : class { JoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { LeftJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { RightJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { FullJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> CrossJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { CrossJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { JoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { LeftJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { RightJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { FullJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> CrossJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { CrossJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+}
+
+public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> : SqlMultiLambdaQuery<TFirst>
+    where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class
+    where TSixth : class where TSeventh : class where TEighth : class where TNinth : class where TTenth : class
+{
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder) : this(executor, builder, true) { }
+
+    internal SqlLambdaQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder, bool initializeRoots) : base(executor, builder)
+    {
+        if (initializeRoots)
+        {
+            GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).SetRoots(new[]
+            {
+                typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh), typeof(TEighth), typeof(TNinth), typeof(TTenth)
+            });
+            GetBuilder().Select<TFirst>();
+        }
+    }
+
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { WhereCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { SelectCore(columns); return this; }
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) => SelectAsCore<TProjection>(columns);
+    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { GroupByCore(columns); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { HavingCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { OnCore(predicate); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Skip(int count) { SkipCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Take(int count) { TakeCore(count); return this; }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
 }

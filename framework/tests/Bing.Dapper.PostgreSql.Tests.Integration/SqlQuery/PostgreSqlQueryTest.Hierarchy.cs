@@ -18,10 +18,10 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedHierarchyNodesAsync();
         using var query = _fixture.CreateQuery();
-        var tree = query.Query<HierarchyNode>().AppendSelect("id As Id,parent_id As ParentId,name As Name,0 As Depth")
+        var tree = query.Query<HierarchyNode>().AppendSelect("id As \"Id\",parent_id As \"ParentId\",name As \"Name\",0 As \"Depth\"")
             .From("public.integration_hierarchy_nodes").IsNull("parent_id")
-            .UnionAll(query.Query<HierarchyNode>().AppendSelect("n.id As Id,n.parent_id As ParentId,n.name As Name,t.Depth + 1 As Depth")
-                .From("public.integration_hierarchy_nodes", "n").Join("tree", "t").AppendOn("n.parent_id=t.Id"));
+            .UnionAll(query.Query<HierarchyNode>().AppendSelect("n.id As \"Id\",n.parent_id As \"ParentId\",n.name As \"Name\",t.\"Depth\" + 1 As \"Depth\"")
+                .From("public.integration_hierarchy_nodes", "n").Join("tree", "t").AppendOn("n.parent_id=t.\"Id\""));
         var description = query.Query<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
             .From("tree").OrderBy("Depth").OrderBy("Id");
 
