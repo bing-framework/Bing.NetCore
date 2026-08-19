@@ -322,7 +322,7 @@ public sealed class MySqlCrossDatabaseQueryTest
     /// <summary>
     /// 创建结构化跨数据库 LeftJoin 查询。
     /// </summary>
-    private static SqlQuery<CrossDatabaseCompanyResult> CreateStructuredCrossDatabaseJoinQuery(ISqlQuery query,
+    private static SqlFluentQuery<CrossDatabaseCompanyResult> CreateStructuredCrossDatabaseJoinQuery(ISqlQuery query,
         string databaseName, Guid companyId)
     {
         var description = query.Query<CrossDatabaseCompanyResult>().Select("c.CompanyId,c.Name,m.Name As MerchantName");

@@ -74,7 +74,9 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, GetBoundSources(accessor));
+        var columns = expression.Body is MemberInitExpression
+            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, GetBoundSources(accessor))
+            : GetFromClause(accessor).ResolveMultiSourceColumns(expression, GetBoundSources(accessor));
         GetBuilder().ClearSelect();
         accessor.SelectClause.Select(string.Join(", ", columns));
         return WithResult<TProjection>();
@@ -337,15 +339,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     }
 
     /// <summary>
-    /// 设置双表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">双表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置双表投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
@@ -584,15 +577,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     }
 
     /// <summary>
-    /// 设置三表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">三表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置三表投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
@@ -828,15 +812,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     }
 
     /// <summary>
-    /// 设置四表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">四表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置四表投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
@@ -1060,15 +1035,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
         SelectCore(columns);
         return this;
     }
-
-    /// <summary>
-    /// 设置五表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">五表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
 
     /// <summary>
     /// 使用 DTO 成员初始化设置五表投影并切换结果映射类型。
@@ -1296,15 +1262,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     }
 
     /// <summary>
-    /// 设置六表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">六表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置六表投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
@@ -1530,15 +1487,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     }
 
     /// <summary>
-    /// 设置七表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="columns">七表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) =>
-        SelectAsCore<TProjection>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置七表投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
@@ -1634,7 +1582,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) => SelectAsCore<TProjection>(columns);
     public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { GroupByCore(columns); return this; }
@@ -1676,7 +1623,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) => SelectAsCore<TProjection>(columns);
     public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { GroupByCore(columns); return this; }
@@ -1718,7 +1664,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) => SelectAsCore<TProjection>(columns);
     public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { GroupByCore(columns); return this; }

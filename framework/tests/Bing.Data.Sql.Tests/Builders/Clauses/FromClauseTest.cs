@@ -352,6 +352,26 @@ public class FromClauseTest
     }
 
     /// <summary>
+    /// 测试目的：类型化根来源超过十个时应在写入 Builder 状态前拒绝，避免内部入口绕过公开元数限制。
+    /// </summary>
+    [Fact]
+    public void SetRoots_WhenMoreThanTenSourcesProvided_ShouldRejectWithoutChangingExistingSources()
+    {
+        // Arrange
+        var clause = new FromClause(TestSqlBuilder.CreateTestClauseContext());
+        clause.From<Sample>("original");
+
+        // Act
+        var exception = Assert.Throws<ArgumentException>(() => clause.SetRoots(Enumerable.Repeat(typeof(Sample2), 11).ToArray()));
+
+        // Assert
+        Assert.StartsWith("查询根表源最多支持十个来源。", exception.Message, StringComparison.Ordinal);
+        Assert.Equal("From [Sample] As [original]", clause.ToSql());
+        Assert.Single(clause.Sources);
+        Assert.Equal("original", clause.Sources[0].Alias);
+    }
+
+    /// <summary>
     /// 生成 1～10 个根来源的完整 SQL 用例。
     /// </summary>
     public static IEnumerable<object[]> SetRootsCases()

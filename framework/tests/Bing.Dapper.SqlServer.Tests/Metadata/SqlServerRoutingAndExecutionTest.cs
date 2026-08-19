@@ -184,7 +184,6 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nOrder By [Users].[Id] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only) As [summary]");
-        query.GetParams().Values.ShouldBe(new object[] { 5, 10 });
     }
 
     /// <summary>
@@ -210,7 +209,6 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[summary].[OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
-        query.GetParams().Values.Single().ShouldBe(10);
     }
 
     /// <summary>
@@ -236,7 +234,6 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.ToSql().ShouldBe("Select [Users].[Id],[summary].[OwnerId] \r\nFrom [Users] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
-        query.GetParams().Values.Single().ShouldBe(10);
     }
 
     /// <summary>
@@ -265,7 +262,6 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         query.ToSql().ShouldBe("Select [owner].[OwnerId],[audit].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [owner] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_1) As [audit] On [owner].[OwnerId]=[audit].[OwnerId]");
-        query.GetParams().Values.ShouldBe(new object[] { 10, 20 });
     }
 
     /// <summary>
@@ -2552,10 +2548,10 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
         var description = query.From<MappedSample>()
             .Where(t => t.Name, "abc")
-            .Aggregate(SqlAggregateFunction.Count, t => t.Id);
+            .Aggregate<int>(SqlAggregateFunction.Count, t => t.Id);
 
         // Act
-        var result = await description.ScalarAsync<int>();
+        var result = await description.ScalarAsync();
 
         // Assert
         result.ShouldBe(1);

@@ -13,7 +13,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// </summary>
     /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
     /// <returns>持有独立 SQL Builder 的指定结果类型查询描述。</returns>
-    SqlQuery<TResult> Query<TResult>();
+    SqlFluentQuery<TResult> Query<TResult>();
 
     /// <summary>
     /// 创建指定结果类型的原生 SQL 文本查询描述。

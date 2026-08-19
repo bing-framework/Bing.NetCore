@@ -98,8 +98,7 @@ public partial class MySqlQueryTest
         await InitDottedMerchantDataAsync(merchantId, "merchant-typed");
         await InitDottedCompanyDataAsync(companyId, "company-typed", merchantId);
         using var query = _fixture.CreateQuery();
-        var description = query.From<MySqlDottedCompany>()
-            .ClearSelect()
+        var description = query.Query<DottedCompanyJoinResult>()
             .Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From(new SqlTableReference
             {
@@ -107,16 +106,20 @@ public partial class MySqlQueryTest
                 TableName = "Merchants.Company",
                 Alias = "c"
             })
-            .LeftJoin<MySqlDottedMerchant>("m")
-            .On<MySqlDottedCompany, MySqlDottedMerchant>((company, merchant) => company.MerchantId == merchant.MerchantId)
+            .LeftJoin(new SqlTableReference
+            {
+                TableName = "Merchants.Merchant",
+                Alias = "m"
+            })
+            .AppendOn("c.MerchantId=m.MerchantId")
             .Where("c.CompanyId", companyId);
 
         // Act
         var sql = description.ToSql();
-        var result = description.FirstOrDefault<DottedCompanyJoinResult>();
+        var result = description.FirstOrDefault();
 
         // Assert
-        Assert.Equal("Select `c`.`CompanyId`,`c`.`Name`,`m`.`Name` As `MerchantName` \r\nFrom `Merchants.Company` As `c` \r\nLeft Join `Merchants.Merchant` As `m` On `c`.`MerchantId`=`m`.`MerchantId` \r\nWhere `c`.`CompanyId`=@_p_0", sql);
+        Assert.Equal("Select `c`.`CompanyId`,`c`.`Name`,`m`.`Name` As `MerchantName` \r\nFrom `Merchants.Company` As `c` \r\nLeft Join `Merchants.Merchant` As `m` On c.MerchantId=m.MerchantId \r\nWhere `c`.`CompanyId`=@_p_0", sql);
         Assert.Equal(companyId, result.CompanyId);
         Assert.Equal("company-typed", result.Name);
         Assert.Equal("merchant-typed", result.MerchantName);

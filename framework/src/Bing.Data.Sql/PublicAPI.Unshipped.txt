@@ -135,7 +135,7 @@ static Bing.Data.Sql.SqlMutationRuntimeBridge.RequiresStructuredUpdate(Bing.Data
 Bing.Data.Sql.SqlQueryPlan.NotifyParametersBound(Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void
 Bing.Data.Sql.SqlQueryPlan.NotifyExecutionCompleted() -> void
 Bing.Data.Sql.SqlQueryRuntimeFactory
-static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlFluentQuery<TResult>
 static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateTextQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string commandText, object parameters) -> Bing.Data.Sql.SqlTextQuery<TResult>
 static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateProcedureQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string procedure, object parameters) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
 static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
@@ -174,7 +174,7 @@ Bing.Data.Sql.Builders.Core.SqlFilterJoin
 Bing.Data.Sql.Builders.Core.SqlFilterJoin.Kind.get -> Bing.Data.Sql.Builders.Core.SqlFilterJoinKind
 Bing.Data.Sql.Builders.Core.SqlFilterJoin.LeftSourceIds.get -> System.Collections.Generic.IReadOnlyList<string>
 Bing.Data.Sql.Builders.Core.SqlFilterJoin.RightSourceId.get -> string
-Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlQuery<TResult>
+Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlFluentQuery<TResult>
 Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.Builders.Core.TableSource
@@ -220,7 +220,6 @@ Bing.Data.Sql.ISqlQuery.From<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Where(System.Linq.Expressions.Expression<System.Func<TProjection, bool>> predicate) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Select(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
-Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Select<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.Select<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, TResult>> projection) -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.SelectSubquery<TResult>(System.Linq.Expressions.Expression<System.Func<TProjection, TResult>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TResult>
 Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>.GroupBy(System.Linq.Expressions.Expression<System.Func<TProjection, object[]>> columns) -> Bing.Data.Sql.SqlSubqueryLambdaQuery<TProjection>
@@ -244,7 +243,6 @@ Bing.Data.Sql.SqlSubquery<TProjection>.Alias.get -> string
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>.On(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond>
@@ -268,6 +266,7 @@ Bing.Data.Sql.SqlLambdaQuery<TEntity>.RightJoin<TJoin>(string alias = null, stri
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.FullJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.CrossJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Join<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
+Bing.Data.Sql.SqlLambdaQuery<TEntity>.Aggregate<TResult>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlQuery<TResult>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.LeftJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.RightJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.FullJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TProjection>
@@ -283,7 +282,6 @@ Bing.Data.Sql.ISqlQuery.From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>
@@ -305,7 +303,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird>.OrderBy(System.Linq.Expres
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>
@@ -327,7 +324,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>.OrderBy(System.Li
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>
@@ -349,7 +345,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>.OrderBy(S
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>
@@ -371,7 +366,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>.O
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>
@@ -383,7 +377,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>
@@ -405,7 +398,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>
@@ -427,7 +419,6 @@ Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, T
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.Where(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.Select(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>
-Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.SelectSubquery<TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>.GroupBy(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>
@@ -479,6 +470,7 @@ Bing.Data.Sql.SqlProcedureResult<TResult>
 Bing.Data.Sql.SqlProcedureResult<TResult>.OutputParameters.get -> Bing.Data.Sql.ISqlOutputParameterAccessor
 Bing.Data.Sql.SqlProcedureResult<TResult>.Result.get -> TResult
 Bing.Data.Sql.SqlProcedureResult<TResult>.SqlProcedureResult(TResult result, Bing.Data.Sql.ISqlOutputParameterAccessor outputParameters) -> void
+Bing.Data.Sql.SqlFluentQuery<TResult>
 Bing.Data.Sql.Builders.Mutations.Batching.ISqlBatchUpdateRenderer.Render(Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchUpdateRenderContext context) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.Batching.SqlMutationBatchCommand.Commands.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlWriteCommand>
 Bing.Data.Sql.Builders.Mutations.Batching.SqlMutationBatchCommand.SqlMutationBatchCommand(System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Mutations.SqlWriteCommand> commands, int entityCount, bool requiresTransaction, bool validateAffectedRows = false, string operationName = "Mutation") -> void
@@ -490,22 +482,6 @@ Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Delete<T
 Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.DeleteCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy strategy = Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy.Auto) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Insert<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.InsertCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
-Bing.Data.Sql.SqlQuery<TResult>.ToList<TTarget>(int? timeout = null) -> System.Collections.Generic.List<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.First<TTarget>(int? timeout = null) -> TTarget
-Bing.Data.Sql.SqlQuery<TResult>.FirstOrDefault<TTarget>(int? timeout = null) -> TTarget
-Bing.Data.Sql.SqlQuery<TResult>.Single<TTarget>(int? timeout = null) -> TTarget
-Bing.Data.Sql.SqlQuery<TResult>.SingleOrDefault<TTarget>(int? timeout = null) -> TTarget
-Bing.Data.Sql.SqlQuery<TResult>.Scalar<TTarget>(int? timeout = null) -> TTarget
-Bing.Data.Sql.SqlQuery<TResult>.ToPage<TTarget>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.AsEnumerable<TTarget>(int? timeout = null) -> System.Collections.Generic.IEnumerable<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.ToListAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TTarget>>
-Bing.Data.Sql.SqlQuery<TResult>.FirstAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.FirstOrDefaultAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.SingleAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.SingleOrDefaultAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.ScalarAsync<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TTarget>
-Bing.Data.Sql.SqlQuery<TResult>.ToPageAsync<TTarget>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TTarget>>
-Bing.Data.Sql.SqlQuery<TResult>.AsAsyncEnumerable<TTarget>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TTarget>
 Bing.Data.Sql.Builders.Mutations.DefaultSqlEntityMutationCommandBuilder.Update<TEntity>(TEntity entity, Bing.Data.Sql.Mutations.SqlUpdateOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.ISqlCombinedDeleteMutationBuilder.DeleteCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlDeleteOptions options = null, Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy strategy = Bing.Data.Sql.Builders.Mutations.Batching.SqlBatchDeleteStrategy.Auto) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.ISqlCombinedInsertMutationBuilder.InsertCombined<TEntity>(System.Collections.Generic.IReadOnlyCollection<TEntity> entities, Bing.Data.Sql.Mutations.SqlInsertOptions options = null) -> Bing.Data.Sql.Mutations.SqlWriteCommand

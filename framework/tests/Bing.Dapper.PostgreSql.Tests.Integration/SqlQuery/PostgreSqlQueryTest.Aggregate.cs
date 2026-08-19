@@ -195,7 +195,7 @@ public sealed partial class PostgreSqlQueryTest
     /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>包含产品表别名的独立查询描述。</returns>
-    private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
+    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
         query.Query<TResult>().From("public.integration_products", "p");
 
     /// <summary>

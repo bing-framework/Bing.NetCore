@@ -252,11 +252,14 @@ public class FromClause : IFromClause
             throw new ArgumentNullException(nameof(entityTypes));
         if (entityTypes.Count == 0)
             throw new ArgumentException("至少需要一个查询根表源。", nameof(entityTypes));
+        if (entityTypes.Count > 10)
+            throw new ArgumentException("查询根表源最多支持十个来源。", nameof(entityTypes));
 
         _context.ValidateOperation(SqlOperationAction.QueryClause);
         var registerProbe = Register?.Clone();
         ReleaseSourceAliases(registerProbe);
         var sources = new List<TableSource>(entityTypes.Count);
+        var references = new List<SqlTableReference>(entityTypes.Count);
         var occurrences = new Dictionary<Type, int>();
         for (var index = 0; index < entityTypes.Count; index++)
         {
@@ -272,8 +275,16 @@ public class FromClause : IFromClause
                 registerProbe?.Replace(entityType, resolvedAlias);
             else
                 registerProbe?.Register(entityType, resolvedAlias);
+            references.Add(reference);
+        }
+
+        PreflightRootReferences(references);
+        for (var index = 0; index < references.Count; index++)
+        {
+            var reference = references[index];
             var item = CreateStructuredSqlItem(reference);
-            sources.Add(new TableSource($"source_{index}", item, entityType, resolvedAlias));
+            sources.Add(new TableSource($"source_{index}", item, reference.EntityType,
+                Resolver.GetAlias(reference.EntityType, reference.Alias)));
         }
 
         _context.UseOperation(SqlOperationAction.QueryClause);
@@ -291,6 +302,29 @@ public class FromClause : IFromClause
         _sources.Clear();
         _sources.AddRange(sources);
         Table = sources[^1].Item;
+    }
+
+    /// <summary>
+    /// 预检类型化根来源，避免任何来源、别名或操作状态在校验失败前提交。
+    /// </summary>
+    /// <param name="references">按 Lambda 参数顺序排列的结构化表引用。</param>
+    private void PreflightRootReferences(IReadOnlyList<SqlTableReference> references)
+    {
+        var sqlBuilder = Builder as SqlBuilderBase;
+        var databaseContext = sqlBuilder?.GetDatabaseContext() ?? _context.ExecutionContext.DatabaseContext;
+        for (var index = 0; index < references.Count; index++)
+        {
+            var reference = references[index];
+            var databaseType = sqlBuilder?.ResolveProviderDatabaseType(reference) ?? ProviderDatabaseType;
+            if (databaseType == null)
+                throw new InvalidOperationException("无法确定结构化表引用的数据库类型。");
+            TableReferenceValidator.Validate(reference, databaseType.Value);
+            ObjectNameFormatter.Format(reference, Dialect, databaseType);
+            if (index == 0)
+                _context.Services.CrossDatabaseQueryValidator?.ValidateTarget(databaseContext, reference);
+            else
+                _context.Services.CrossDatabaseQueryValidator?.Validate(databaseContext, references[0], reference);
+        }
     }
 
     /// <summary>

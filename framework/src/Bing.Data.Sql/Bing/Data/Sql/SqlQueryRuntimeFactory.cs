@@ -8,7 +8,7 @@ public static class SqlQueryRuntimeFactory
     /// <summary>
     /// 创建结构化查询描述。
     /// </summary>
-    public static SqlQuery<TResult> CreateQuery<TResult>(ISqlQueryPlanExecutor executor, ISqlBuilder builder) =>
+    public static SqlFluentQuery<TResult> CreateQuery<TResult>(ISqlQueryPlanExecutor executor, ISqlBuilder builder) =>
         new(executor, builder);
 
     /// <summary>

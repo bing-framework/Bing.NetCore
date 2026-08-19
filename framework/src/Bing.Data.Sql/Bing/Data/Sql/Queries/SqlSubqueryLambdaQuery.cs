@@ -49,15 +49,6 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     }
 
     /// <summary>
-    /// 设置派生表 DTO 投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TResult">投影结果映射类型。</typeparam>
-    /// <param name="columns">派生表 DTO 投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TResult> Select<TResult>(Expression<Func<TProjection, object[]>> columns) =>
-        SelectAsCore<TResult>(columns);
-
-    /// <summary>
     /// 使用 DTO 成员初始化设置投影并切换结果映射类型。
     /// </summary>
     /// <typeparam name="TResult">投影结果映射类型。</typeparam>

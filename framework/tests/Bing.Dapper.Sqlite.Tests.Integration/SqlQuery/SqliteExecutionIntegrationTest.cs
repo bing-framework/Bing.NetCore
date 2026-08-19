@@ -323,10 +323,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
         var description = query.From<SqliteStructuredTableSample>()
             .ClearSelect()
-            .Select("Name");
+            .Select(sample => sample.Name);
 
         // Act
-        var result = description.Scalar<string>();
+        var result = description.Scalar();
 
         // Assert
         Assert.Equal("typed-from", result);
@@ -2018,12 +2018,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var names = await query.From<SqliteStructuredTableSample>()
-            .Select<string>(sample => new object[] { sample.Name })
-            .OrderBy("Name")
+            .OrderBy(sample => sample.Name)
+            .Select(sample => sample.Name)
             .ToListAsync();
         var count = await query.From<SqliteStructuredTableSample>()
-            .Aggregate(SqlAggregateFunction.Count, sample => sample.Name)
-            .ScalarAsync<int>();
+            .Aggregate<int>(SqlAggregateFunction.Count, sample => sample.Name)
+            .ScalarAsync();
 
         // Assert
         Assert.Equal(new[] { "one", "three", "two" }, names);
@@ -2042,8 +2042,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var description = query.From<SqliteStructuredTableSample>()
-            .Select(sample => new object[] { sample.Name });
-        var result = await description.ToListAsync<string>();
+            .Select(sample => sample.Name);
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Equal("Select `samples`.`Name` \r\nFrom `samples`", description.ToSql());
@@ -2068,7 +2068,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 DisplayName = sample.Name,
                 OptionalAmount = sample.Amount
             });
-        var result = await description.SingleAsync<LambdaMemberInitResult>();
+        var result = await description.SingleAsync();
 
         // Assert
         Assert.Equal("Select `samples`.`Name` As `DisplayName`,`samples`.`Amount` As `OptionalAmount` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0", description.ToSql());
@@ -2110,11 +2110,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var description = query.From<SqliteStructuredTableSample>("sample")
-            .SelectFrom<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
             .Where(sample => sample.Name == "two")
-            .WhereFrom<SqliteStructuredTableSample>(sample => sample.Name == "two")
-            .OrderBy<SqliteStructuredTableSample>(sample => sample.Name);
-        var names = await description.ToListAsync<string>();
+            .OrderBy(sample => sample.Name)
+            .Select(sample => sample.Name);
+        var names = await description.ToListAsync();
 
         // Assert
         Assert.Equal(new[] { "two" }, names);
@@ -2137,67 +2136,67 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         using var query1 = _fixture.CreateQuery();
         var result1 = await query1.From<SqliteArity01>()
-            .Select<SqliteArityResult>(item => new object[] { item.Id })
+            .Select(item => new SqliteArityResult { Id = item.Id })
             .ToListAsync();
 
         using var query2 = _fixture.CreateQuery();
         var result2 = await query2.From<SqliteArity01, SqliteArity02>()
             .Where((first, second) => first.Id == second.Id)
-            .Select<SqliteArityResult>((first, second) => new object[] { first.Id })
+            .Select((first, second) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query3 = _fixture.CreateQuery();
         var result3 = await query3.From<SqliteArity01, SqliteArity02, SqliteArity03>()
             .Where((first, second, third) => first.Id == second.Id && second.Id == third.Id)
-            .Select<SqliteArityResult>((first, second, third) => new object[] { first.Id })
+            .Select((first, second, third) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query4 = _fixture.CreateQuery();
         var result4 = await query4.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04>()
             .Where((first, second, third, fourth) => first.Id == second.Id && third.Id == fourth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth) => new object[] { first.Id })
+            .Select((first, second, third, fourth) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query5 = _fixture.CreateQuery();
         var result5 = await query5.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05>()
             .Where((first, second, third, fourth, fifth) => first.Id == second.Id && fourth.Id == fifth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth) => new object[] { first.Id })
+            .Select((first, second, third, fourth, fifth) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query6 = _fixture.CreateQuery();
         var result6 = await query6.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05, SqliteArity06>()
             .Where((first, second, third, fourth, fifth, sixth) => first.Id == second.Id && fifth.Id == sixth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth, sixth) => new object[] { first.Id })
+            .Select((first, second, third, fourth, fifth, sixth) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query7 = _fixture.CreateQuery();
         var result7 = await query7.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05, SqliteArity06, SqliteArity07>()
             .Where((first, second, third, fourth, fifth, sixth, seventh) => first.Id == second.Id && sixth.Id == seventh.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth, sixth, seventh) => new object[] { first.Id })
+            .Select((first, second, third, fourth, fifth, sixth, seventh) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query8 = _fixture.CreateQuery();
         var result8 = await query8.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05, SqliteArity06, SqliteArity07, SqliteArity08>()
             .Where((first, second, third, fourth, fifth, sixth, seventh, eighth) => first.Id == second.Id && seventh.Id == eighth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth, sixth, seventh, eighth) => new object[] { first.Id })
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query9 = _fixture.CreateQuery();
         var result9 = await query9.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05, SqliteArity06, SqliteArity07, SqliteArity08, SqliteArity09>()
             .Where((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => first.Id == second.Id && eighth.Id == ninth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => new object[] { first.Id })
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => new SqliteArityResult { Id = first.Id })
             .ToListAsync();
 
         using var query10 = _fixture.CreateQuery();
         var description10 = query10.From<SqliteArity01, SqliteArity02, SqliteArity03, SqliteArity04, SqliteArity05, SqliteArity06, SqliteArity07, SqliteArity08, SqliteArity09, SqliteArity10>()
             .Where((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) => first.Id == second.Id && ninth.Id == tenth.Id)
-            .Select<SqliteArityResult>((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) => new object[] { first.Id });
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) => new SqliteArityResult { Id = first.Id });
         var result10 = await description10.ToListAsync();
 
         // Assert
         Assert.All(new[] { result1, result2, result3, result4, result5, result6, result7, result8, result9, result10 },
             result => Assert.Equal(new[] { 1 }, result.Select(item => item.Id)));
-        Assert.Equal("Select `Arity01`.`Id` \r\nFrom `Arity01`, `Arity02`, `Arity03`, `Arity04`, `Arity05`, `Arity06`, `Arity07`, `Arity08`, `Arity09`, `Arity10` \r\nWhere `Arity01`.`Id`=`Arity02`.`Id` And `Arity09`.`Id`=`Arity10`.`Id`", description10.ToSql());
+        Assert.Equal("Select `Arity01`.`Id` As `Id` \r\nFrom `Arity01`, `Arity02`, `Arity03`, `Arity04`, `Arity05`, `Arity06`, `Arity07`, `Arity08`, `Arity09`, `Arity10` \r\nWhere `Arity01`.`Id`=`Arity02`.`Id` And `Arity09`.`Id`=`Arity10`.`Id`", description10.ToSql());
     }
 
     /// <summary>
@@ -2220,17 +2219,20 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var description = query.From<SqliteStructuredTableSample>("s")
-            .Select(sample => new object[] { sample.Id, sample.Name }, true)
             .Join<SqliteStructuredOrderSample>("o")
-            .On<SqliteStructuredTableSample, SqliteStructuredOrderSample>((sample, order) => sample.Id == order.Id)
-            .AppendSelectFrom<SqliteStructuredOrderSample>(order => new object[] { order.TenantId }, true)
-            .OrderBy<SqliteStructuredTableSample>(sample => sample.Id);
-        var result = await description.ToListAsync<LambdaJoinResult>();
+            .On((sample, order) => sample.Id == order.Id)
+            .OrderBy((sample, order) => new object[] { sample.Id })
+            .Select((sample, order) => new LambdaJoinResult
+            {
+                Name = sample.Name,
+                TenantId = order.TenantId
+            });
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Equal(new[] { "one:tenant-1", "two:tenant-2" },
             result.Select(item => $"{item.Name}:{item.TenantId}"));
-        Assert.Equal("Select `s`.`Id`,`s`.`Name`,`o`.`TenantId` \r\nFrom `samples` As `s` \r\nJoin `Orders` As `o` On `s`.`Id`=`o`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
+        Assert.Equal("Select `s`.`Name` As `Name`,`o`.`TenantId` As `TenantId` \r\nFrom `samples` As `s` \r\nJoin `Orders` As `o` On `s`.`Id`=`o`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -2518,12 +2520,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var description = query.From<SqliteStructuredTableSample>("s")
-            .Select(sample => new object[] { sample.Name })
             .Join<SqliteStructuredTableSample>("p")
-            .On<SqliteStructuredTableSample, SqliteStructuredTableSample>((left, right) => left.Id == right.Id)
-            .OrderBy("s.Id")
-            ;
-        var result = await description.ToListAsync<string>();
+            .On((left, right) => left.Id == right.Id)
+            .OrderBy((left, right) => new object[] { left.Id })
+            .Select((left, right) => left.Name);
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Equal("Select `s`.`Name` \r\nFrom `samples` As `s` \r\nJoin `samples` As `p` On `s`.`Id`=`p`.`Id` \r\nOrder By `s`.`Id`", description.ToSql());
@@ -2546,12 +2547,15 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var result = await query.From<SqliteStructuredTableSample>("s")
-            .Select(sample => new object[] { sample.Name }, true)
             .LeftJoin<SqliteStructuredOrderSample>("o")
-            .On<SqliteStructuredTableSample, SqliteStructuredOrderSample>((sample, order) => sample.Id == order.Id)
-            .AppendSelectFrom<SqliteStructuredOrderSample>(order => new object[] { order.TenantId }, true)
-            .OrderBy<SqliteStructuredTableSample>(sample => sample.Id)
-            .ToListAsync<LambdaJoinResult>();
+            .On((sample, order) => sample.Id == order.Id)
+            .OrderBy((sample, order) => new object[] { sample.Id })
+            .Select((sample, order) => new LambdaJoinResult
+            {
+                Name = sample.Name,
+                TenantId = order.TenantId
+            })
+            .ToListAsync();
 
         // Assert
         Assert.Equal(new[] { "one:tenant-1", "two:", "three:" },
@@ -2559,10 +2563,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：Lambda 查询应组合类型化 GroupBy 与 Having，并将聚合结果映射为目标标量类型。
+    /// 测试目的：原始 Fluent 查询应组合字符串 GroupBy 与 Having，并将聚合结果映射为目标标量类型。
     /// </summary>
     [Fact]
-    public async Task Lambda_WhenGroupedWithHaving_ShouldExecuteAggregateResults()
+    public async Task Fluent_WhenGroupedWithHaving_ShouldExecuteAggregateResults()
     {
         // Arrange
         await SeedAsync();
@@ -2570,15 +2574,16 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
 
         // Act
-        var description = query.From<SqliteStructuredTableSample>()
-            .GroupBy(sample => sample.Name)
-            .HavingRaw("Count(*) > 1")
-            .Aggregate(SqlAggregateFunction.Count, sample => sample.Id);
-        var result = await description.ToListAsync<int>();
+        var description = query.Query<int>()
+            .AppendSelect("Count(*)")
+            .From("samples")
+            .GroupBy("Name")
+            .HavingRaw("Count(*) > 1");
+        var result = await description.ToListAsync();
 
         // Assert
         Assert.Equal(new[] { 2 }, result);
-        Assert.Equal("Select Count(`samples`.`Id`) \r\nFrom `samples` \r\nGroup By `samples`.`Name` Having Count(*) > 1",
+        Assert.Equal("Select Count(*) \r\nFrom `samples` \r\nGroup By `Name` Having Count(*) > 1",
             description.ToSql());
     }
 
@@ -2595,11 +2600,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Act
         var description = query.From<SqliteStructuredTableSample>()
-            .Select(sample => new object[] { sample.Name })
             .Distinct()
             .OrderBy(sample => sample.Name)
-            ;
-        var page = await description.ToPageAsync<string>(new Pager(1, 2) { Order = "Name" });
+            .Select(sample => sample.Name);
+        var page = await description.ToPageAsync(new Pager(1, 2) { Order = "Name" });
 
         // Assert
         Assert.Equal(3, page.TotalCount);
@@ -2629,7 +2633,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// </summary>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>按标识排序的样例查询描述。</returns>
-    private static SqlQuery<Sample> CreateSamplesDescription(ISqlQuery query) =>
+    private static SqlFluentQuery<Sample> CreateSamplesDescription(ISqlQuery query) =>
         query.Query<Sample>().Select("Id,Name,Amount").From("samples").OrderBy("Id");
 
     /// <summary>
@@ -2638,7 +2642,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>带样例表别名的聚合查询描述。</returns>
-    private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
+    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
         query.Query<TResult>().From("samples", "s");
 
     /// <summary>

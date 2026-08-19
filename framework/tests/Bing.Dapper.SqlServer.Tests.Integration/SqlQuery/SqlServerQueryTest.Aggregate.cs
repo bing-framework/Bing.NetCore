@@ -103,7 +103,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>SQL Server 独立查询描述。</returns>
-    private static SqlQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
+    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
         query.Query<TResult>().From("dbo.BingSqlAggregateIntegration", "p");
 
     /// <summary>

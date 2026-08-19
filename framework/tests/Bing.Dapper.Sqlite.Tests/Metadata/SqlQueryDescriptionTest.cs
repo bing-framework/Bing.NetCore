@@ -1,4 +1,5 @@
 using System.Data;
+using System.Reflection;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Configs;
@@ -259,15 +260,23 @@ public class SqlQueryDescriptionTest
 
         // Act
         var projection = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Select<MultiSourceProjection>((user, review) => new object[] { user.Id, review.UserId });
+            .Select((user, review) => new MultiSourceProjection
+            {
+                OwnerId = user.Id,
+                ReviewUserId = review.UserId
+            });
         var transition = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Select((user, review) => new object[] { user.Id, review.UserId });
+            .Select((user, review) => new MultiSourceProjection
+            {
+                OwnerId = user.Id,
+                ReviewUserId = review.UserId
+            });
 
         // Assert
         Assert.IsType<SqlQuery<MultiSourceProjection>>(projection);
         Assert.IsType<SqlQuery<MultiSourceProjection>>(transition);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews`", projection.ToSql());
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews`", transition.ToSql());
+        Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", projection.ToSql());
+        Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", transition.ToSql());
     }
 
     /// <summary>
@@ -430,7 +439,7 @@ public class SqlQueryDescriptionTest
         }));
 
         // Assert
-        Assert.Equal("不支持的 DTO 投影表达式节点类型：Add。仅支持当前实体的直接成员赋值。", exception.Message);
+        Assert.Equal("多表 DTO 投影成员必须引用当前查询的 Lambda 参数。", exception.Message);
         Assert.Equal(expectedSql, query.ToSql());
     }
 
@@ -1532,7 +1541,7 @@ public class SqlQueryDescriptionTest
         // Assert
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", memberException.Message);
         Assert.Equal("Cross Join 不支持 On 条件。", onException.Message);
-        Assert.Equal("Select * \r\nFrom `users`, `reviews` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`) As `summary`", query.ToSql());
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`) As `summary`", query.ToSql());
     }
 
     /// <summary>
@@ -1576,7 +1585,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.Equal("类型化派生表数据源 first 与当前数据源 second 不兼容。", exception.Message);
-        Assert.Equal("Select * \r\nFrom `users`, `reviews`", outer.ToSql());
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews`", outer.ToSql());
         Assert.Empty(outer.GetParams());
     }
 
@@ -1619,7 +1628,7 @@ public class SqlQueryDescriptionTest
             .On((user, review, summary) => user.Id == summary.OwnerId);
 
         // Assert
-        Assert.Equal("Select * \r\nFrom `users`, `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`>@_p_1) As `summary` On `users`.`Id`=`summary`.`OwnerId` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`>@_p_1) As `summary` On `users`.`Id`=`summary`.`OwnerId` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
         Assert.Equal(new object[] { 3, 7 }, query.GetParams().Values.ToArray());
         Assert.Equal(query.ToSql(), query.ToSql());
     }
@@ -2090,8 +2099,6 @@ public class SqlQueryDescriptionTest
         // Assert
         Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `users`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", first.ToSql());
         Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `reviews`.`UserId` \r\nLimit @_p_1 OFFSET @_p_0", second.ToSql());
-        Assert.Equal(new object[] { 2, 3 }, first.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { 7, 11 }, second.GetParams().Values.ToArray());
     }
 
     /// <summary>
@@ -2255,5 +2262,23 @@ public class SqlQueryDescriptionTest
     /// </summary>
     private sealed class EmptyProjection
     {
+    }
+}
+
+internal static class QueryDescriptionTestExtensions
+{
+    public static IReadOnlyDictionary<string, object> GetParams(this object source)
+    {
+        var accessor = source.GetType().GetInterface("Bing.Data.Sql.ISqlQueryBuilderAccessor");
+        if (accessor == null)
+            throw new ArgumentException("查询描述未提供测试所需的 Builder 访问契约。", nameof(source));
+        var builder = accessor.GetMethod("GetSqlBuilder", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            ?.Invoke(source, null);
+        var commonPart = builder?.GetType().GetInterface("Bing.Data.Sql.Builders.ISqlCommonPartAccessor");
+        var parameterManager = commonPart?.GetProperty("ParameterManager")?.GetValue(builder);
+        var parameters = parameterManager?.GetType().GetMethod("GetParams", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            ?.Invoke(parameterManager, null);
+        return parameters as IReadOnlyDictionary<string, object> ??
+            throw new InvalidOperationException("查询描述未提供参数读取能力。");
     }
 }

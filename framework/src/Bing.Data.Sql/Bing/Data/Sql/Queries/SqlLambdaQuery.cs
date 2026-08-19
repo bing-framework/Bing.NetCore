@@ -80,7 +80,9 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
         var fromClause = accessor.FromClause as FromClause ??
             throw new NotSupportedException("当前 SQL Provider 不支持强类型 Lambda 投影。");
-        var columns = fromClause.ResolveMultiSourceDtoColumns(projection, new[] { fromClause.Sources[0] });
+        var columns = projection.Body is MemberInitExpression
+            ? fromClause.ResolveMultiSourceDtoColumns(projection, new[] { fromClause.Sources[0] })
+            : fromClause.ResolveMultiSourceColumns(projection, new[] { fromClause.Sources[0] });
         ReplaceSelect(select => select.Select(string.Join(", ", columns)));
         return WithResult<TProjection>();
     }
@@ -142,52 +144,11 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 追加指定实体类型的投影列。
-    /// </summary>
-    /// <typeparam name="TSelect">投影所属实体类型。</typeparam>
-    /// <param name="columns">实体属性投影表达式。</param>
-    /// <param name="propertyAsAlias">是否将实体属性映射为列别名。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> SelectFrom<TSelect>(Expression<Func<TSelect, object[]>> columns,
-        bool propertyAsAlias = false) where TSelect : class
-    {
-        ReplaceSelect(select => select.Select(columns, propertyAsAlias));
-        return this;
-    }
-
-    /// <summary>
-    /// 在当前投影后追加指定实体类型的投影列。
-    /// </summary>
-    /// <typeparam name="TSelect">投影所属实体类型。</typeparam>
-    /// <param name="columns">实体属性投影表达式。</param>
-    /// <param name="propertyAsAlias">是否将实体属性映射为列别名。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> AppendSelectFrom<TSelect>(Expression<Func<TSelect, object[]>> columns,
-        bool propertyAsAlias = false) where TSelect : class
-    {
-        GetBuilder().Select(columns, propertyAsAlias);
-        return this;
-    }
-
-    /// <summary>
     /// 追加当前实体的布尔筛选表达式。
     /// </summary>
     /// <param name="predicate">实体筛选表达式。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> Where(Expression<Func<TEntity, bool>> predicate)
-    {
-        GetBuilder().Where(predicate);
-        return this;
-    }
-
-    /// <summary>
-    /// 追加指定实体的布尔筛选表达式。
-    /// </summary>
-    /// <typeparam name="TSource">筛选所属实体类型。</typeparam>
-    /// <param name="predicate">实体筛选表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> WhereFrom<TSource>(Expression<Func<TSource, bool>> predicate)
-        where TSource : class
     {
         GetBuilder().Where(predicate);
         return this;
@@ -276,10 +237,10 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> Join<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> Join<TJoin>(string alias = null, string schema = null) where TJoin : class
     {
         GetBuilder().Join<TJoin>(alias, schema);
-        return this;
+        return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
@@ -289,10 +250,10 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> LeftJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> LeftJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
     {
         GetBuilder().LeftJoin<TJoin>(alias, schema);
-        return this;
+        return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
@@ -432,20 +393,6 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 为最后一个连接设置类型化条件。
-    /// </summary>
-    /// <typeparam name="TLeft">左侧实体类型。</typeparam>
-    /// <typeparam name="TRight">右侧实体类型。</typeparam>
-    /// <param name="expression">连接条件表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression)
-        where TLeft : class where TRight : class
-    {
-        GetBuilder().On(expression);
-        return this;
-    }
-
-    /// <summary>
     /// 使用实体属性表达式设置分组。
     /// </summary>
     /// <param name="column">分组字段表达式。</param>
@@ -468,42 +415,6 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 设置受信任的原始 Having 条件。
-    /// </summary>
-    /// <param name="sql">Having SQL 条件；外部输入必须通过参数 API 提供。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> HavingRaw(string sql)
-    {
-        ((ISqlQueryClauseAccessor)GetBuilder()).GroupByClause.HavingRaw(sql);
-        return this;
-    }
-
-    /// <summary>
-    /// 设置 Having 条件，并按当前方言解析方括号标识符。
-    /// </summary>
-    /// <param name="sql">Having SQL 条件；外部输入必须通过参数 API 提供。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> Having(string sql)
-    {
-        ((ISqlQueryClauseAccessor)GetBuilder()).GroupByClause.Having(sql);
-        return this;
-    }
-
-    /// <summary>
-    /// 使用当前实体属性投影切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TResult">投影结果类型。</typeparam>
-    /// <param name="columns">实体属性投影表达式。</param>
-    /// <param name="propertyAsAlias">是否将属性名映射为列别名。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TResult> Select<TResult>(Expression<Func<TEntity, object[]>> columns,
-        bool propertyAsAlias = false)
-    {
-        ReplaceSelect(select => select.Select(columns, propertyAsAlias));
-        return WithResult<TResult>();
-    }
-
-    /// <summary>
     /// 使用当前实体属性创建聚合投影。
     /// </summary>
     /// <param name="function">聚合函数。</param>
@@ -516,6 +427,22 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     {
         ReplaceSelect(select => select.Aggregate(function, column, columnAlias, distinct));
         return this;
+    }
+
+    /// <summary>
+    /// 设置类型化聚合投影并冻结结果映射类型。
+    /// </summary>
+    /// <typeparam name="TResult">聚合结果类型。</typeparam>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="column">实体属性表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>固定聚合结果类型的查询描述。</returns>
+    public SqlQuery<TResult> Aggregate<TResult>(SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> column, string columnAlias = null, bool distinct = false)
+    {
+        Aggregate(function, column, columnAlias, distinct);
+        return WithResult<TResult>();
     }
 
     /// <summary>

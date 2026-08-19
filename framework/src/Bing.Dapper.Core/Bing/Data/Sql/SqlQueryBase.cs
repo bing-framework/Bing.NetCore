@@ -370,7 +370,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     ISqlBuilder ISqlQueryBuilderSource.CreateIndependentSqlBuilder() => CreateIndependentSqlBuilder();
 
     /// <inheritdoc />
-    public SqlQuery<TResult> Query<TResult>()
+    public SqlFluentQuery<TResult> Query<TResult>()
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;

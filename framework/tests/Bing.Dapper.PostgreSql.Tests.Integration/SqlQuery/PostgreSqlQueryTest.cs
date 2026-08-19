@@ -506,7 +506,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// </summary>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>不修改根 Builder 的产品查询描述。</returns>
-    private static SqlQuery<IntegrationProduct> CreateProductDescription(ISqlQuery query) =>
+    private static SqlFluentQuery<IntegrationProduct> CreateProductDescription(ISqlQuery query) =>
         query.Query<IntegrationProduct>()
             .AppendSelect("id As Id,code As Code,name As Name,amount As Amount,occurred_at As OccurredAt,payload::text As Payload")
             .From("public.integration_products")

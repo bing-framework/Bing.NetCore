@@ -1363,8 +1363,11 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     {
         if (configure == null)
             throw new ArgumentNullException(nameof(configure));
+        var distinct = _selectClause?.IsDistinct == true;
         var selectClause = CreateSelectClause();
         configure(selectClause);
+        if (distinct)
+            selectClause.Distinct();
         _selectClause = selectClause;
     }
 

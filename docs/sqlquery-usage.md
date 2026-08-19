@@ -19,7 +19,7 @@
 ```csharp
 public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 {
-    SqlQuery<TResult> Query<TResult>();
+    SqlFluentQuery<TResult> Query<TResult>();
     SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null);
     SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null);
     SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class;
@@ -28,10 +28,16 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 
 ### 重要方法
 
-- `Query<TResult>()`：创建指定结果类型的独立 Fluent 查询描述。
+- `Query<TResult>()`：创建指定结果类型的原始字符串 Fluent 查询描述，返回 `SqlFluentQuery<TResult>`。
 - `From<TEntity>()`：创建以实体映射为根来源的强类型 Fluent 查询描述。
 - `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本查询描述，不重写 SQL 文本或自动附加结构化过滤器。
 - `Procedure<TResult>(procedure, parameters)`：创建固定以存储过程命令类型执行的查询描述。
+
+### 查询 DSL 隔离
+
+`SqlFluentQuery<TResult>` 专用于字符串 SQL Builder 操作，例如 `Select("Id,Name")`、`From("orders")`、`AppendWhere(...)`、`HavingRaw(...)`、`SplitOn(...)` 和 Dapper 多映射终结方法。`SqlLambdaQuery<TEntity>` 及其 2～10 来源变体只接受实体映射、Lambda 谓词、类型化 Join、类型化投影和类型化聚合，不暴露原始 `From`、`HavingRaw`、`SplitOn` 或 Dapper 多映射入口。
+
+类型化投影通过 `Select<TProjection>(...)` 显式切换结果类型；不再使用 `.As<TResult>()` 或其他隐式结果类型兼容入口。原生 SQL 文本则使用独立的 `SqlTextQuery<TResult>`，不会与 Fluent Builder 或 Lambda 来源互相继承。
 
 ---
 
@@ -449,10 +455,9 @@ executor.ExecuteSql<User>(
 
 ```csharp
 var query = sqlQuery.From<User>()
-    .From("u")
     .Where(user => user.Name, "Tom");
 
-query.AddParam<SqlQuery<User>, User>("statusCode", x => x.Status, 1);
+query.AddParam("statusCode", x => x.Status, 1);
 ```
 
 该方式适合：
@@ -550,7 +555,7 @@ var fluent = sqlQuery.From<Order>();
 var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new { Id = orderId });
 ```
 
-- `Query<TResult>()`：创建指定结果类型的独立 Fluent 描述，适用于以普通 Builder 子句构造查询。
+- `Query<TResult>()`：创建指定结果类型的 `SqlFluentQuery<TResult>`，适用于以普通 Builder 子句构造查询。
 - `From<TEntity>()`：创建以实体映射初始化的 Lambda Fluent 描述，支持类型化 `Select`、`Where`、`Join`、分页和同步/异步终结方法。
 - `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换。
 
@@ -564,8 +569,6 @@ var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new
 public async Task<List<Order>> GetPaidOrdersAsync(ISqlQuery sqlQuery)
 {
     return await sqlQuery.From<Order>()
-        .Select(order => new object[] { order.Id, order.OrderNo, order.CustomerName, order.Amount })
-        .From("o")
         .Where(order => order.Status, OrderStatus.Paid)
         .ToListAsync();
 }
@@ -579,13 +582,16 @@ public async Task<List<OrderDto>> QueryOrdersAsync(
     OrderQueryParameter parameter)
 {
     return await sqlQuery.From<Order>()
-        .From("o")
         .Where(order => order.Status, parameter.Status)
         .Skip(20)
         .Take(20)
-        .Select<OrderDto>(order => new object[]
+        .Select(order => new OrderDto
         {
-            order.Id, order.OrderNo, order.CustomerName, order.Amount, order.Status
+            Id = order.Id,
+            OrderNo = order.OrderNo,
+            CustomerName = order.CustomerName,
+            Amount = order.Amount,
+            Status = order.Status
         })
         .ToListAsync();
 }
@@ -599,13 +605,16 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
     Guid orderId)
 {
     return await sqlQuery.From<Order>()
-        .From("o")
         .LeftJoin<Customer>("c")
         .On((order, customer) => order.CustomerId == customer.Id)
         .Where((order, customer) => order.Id == orderId)
-        .Select<OrderWithCustomerDto>((order, customer) => new object[]
+        .Select((order, customer) => new OrderWithCustomerDto
         {
-            order.Id, order.OrderNo, order.Amount, customer.Name, customer.Phone
+            Id = order.Id,
+            OrderNo = order.OrderNo,
+            Amount = order.Amount,
+            CustomerName = customer.Name,
+            CustomerPhone = customer.Phone
         })
         .ToListAsync();
 }

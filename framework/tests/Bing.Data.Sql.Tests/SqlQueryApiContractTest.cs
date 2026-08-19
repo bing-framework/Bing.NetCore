@@ -206,7 +206,7 @@ public class SqlQueryApiContractTest
         private sealed class UnsupportedRuntimeBindingQuery : ISqlQuery
         {
             /// <inheritdoc />
-            public SqlQuery<TResult> Query<TResult>() => throw new NotSupportedException();
+            public SqlFluentQuery<TResult> Query<TResult>() => throw new NotSupportedException();
 
             /// <inheritdoc />
             public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null) => throw new NotSupportedException();
@@ -285,6 +285,35 @@ public class SqlQueryApiContractTest
     public void TypedFluentQuery_WhenPublicApiInspected_ShouldNotInheritPublicUntypedDescription()
     {
         Assert.Equal(typeof(object), typeof(SqlQuery<>).BaseType);
+    }
+
+    /// <summary>
+    /// 测试目的：原始 Builder DSL 只存在于 Fluent 查询类型，类型化 Lambda 查询不得继承原始操作 marker 或多映射入口。
+    /// </summary>
+    [Fact]
+    public void LambdaQuery_WhenPublicApiInspected_ShouldBeIsolatedFromRawBuilderDsl()
+    {
+        // Arrange
+        var lambdaMethods = typeof(SqlLambdaQuery<>).GetMethods();
+        var multiLambdaMethods = typeof(SqlLambdaQuery<,>).GetMethods();
+
+        // Assert
+        Assert.True(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlFluentQuery<>)));
+        Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlQuery<>)));
+        Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlLambdaQuery<>)));
+        Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlLambdaQuery<,>)));
+        Assert.DoesNotContain(lambdaMethods, method => method.Name is "From" or "SplitOn");
+        Assert.DoesNotContain(multiLambdaMethods, method => method.Name is "From" or "SplitOn");
+        Assert.DoesNotContain(lambdaMethods, method => method.Name is "SelectFrom" or "AppendSelectFrom" or "WhereFrom");
+        Assert.DoesNotContain(lambdaMethods, method => method.Name == "On" && method.IsGenericMethodDefinition);
+        Assert.DoesNotContain(lambdaMethods, method => (method.Name is "ToList" or "ToListAsync") &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length > 1);
+        Assert.DoesNotContain(multiLambdaMethods, method => (method.Name is "ToList" or "ToListAsync") &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length > 1);
+        Assert.Contains(typeof(SqlFluentQuery<>).GetMethods(), method => method.Name == "ToList" &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 3);
+        Assert.Contains(typeof(SqlFluentQuery<>).GetMethods(), method => method.Name == "ToListAsync" &&
+            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 3);
     }
 
     /// <summary>
@@ -387,6 +416,9 @@ public class SqlQueryApiContractTest
         Assert.Contains(methods, candidate => candidate.Name == "Select");
         Assert.Contains(methods, candidate => candidate.Name == "OrderBy");
         Assert.DoesNotContain(methods, candidate => candidate.Name == "On");
+        Assert.DoesNotContain(methods, candidate => candidate.Name == "Select" &&
+            candidate.IsGenericMethodDefinition && candidate.GetParameters().Length == 1 &&
+            candidate.GetParameters()[0].ParameterType.ToString().Contains("System.Object[]", StringComparison.Ordinal));
 
         var joinNames = new[] { "Join", "LeftJoin", "RightJoin", "FullJoin", "CrossJoin" };
         foreach (var joinName in joinNames)
@@ -448,7 +480,7 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：多表查询应公开强类型 Select 投影，并且不再保留 SelectDto 或 As 结果切换入口。
+    /// 测试目的：多表查询应公开严格 DTO Select 投影，并且不再保留泛型 object[]、SelectDto 或 As 结果切换入口。
     /// </summary>
     [Fact]
     public void MultiLambdaQuery_WhenPublicApiInspected_ShouldExposeProjectionResultTransitions()
@@ -461,7 +493,10 @@ public class SqlQueryApiContractTest
             typeof(SqlLambdaQuery<,,,>),
             typeof(SqlLambdaQuery<,,,,>),
             typeof(SqlLambdaQuery<,,,,,>),
-            typeof(SqlLambdaQuery<,,,,,,>)
+            typeof(SqlLambdaQuery<,,,,,,>),
+            typeof(SqlLambdaQuery<,,,,,,,>),
+            typeof(SqlLambdaQuery<,,,,,,,,>),
+            typeof(SqlLambdaQuery<,,,,,,,,,>)
         };
 
         // Act and Assert
@@ -470,7 +505,7 @@ public class SqlQueryApiContractTest
             var projections = type.GetMethods().Where(method => method.Name == "Select" &&
                 method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1 &&
                 method.GetParameters().Length == 1).ToArray();
-            Assert.Equal(2, projections.Length);
+            Assert.Single(projections);
             Assert.All(projections, method => Assert.Equal(typeof(SqlQuery<>), method.ReturnType.GetGenericTypeDefinition()));
 
             var selectSubquery = type.GetMethods().Single(method => method.Name == "SelectSubquery" &&
@@ -503,19 +538,18 @@ public class SqlQueryApiContractTest
             method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
         var crossJoin = lambdaType.GetMethods().Single(method => method.Name == "CrossJoin" &&
             method.IsGenericMethodDefinition && method.GetParameters().Length == 2);
-        var on = lambdaType.GetMethods().Single(method => method.Name == "On" && method.IsGenericMethodDefinition);
         var projection = lambdaType.GetMethods().Single(method => method.Name == "Select" && method.IsGenericMethodDefinition &&
             method.GetParameters().Length == 1 && method.ReturnType.IsGenericType &&
             method.ReturnType.GetGenericTypeDefinition() == typeof(SqlQuery<>));
         var aggregate = lambdaType.GetMethods().Single(method => method.Name == "Aggregate" && !method.IsGenericMethodDefinition);
 
         // Assert
-        Assert.Equal(typeof(SqlLambdaQuery<>), join.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlLambdaQuery<>), leftJoin.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), join.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery<,>), leftJoin.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<,>), rightJoin.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<,>), fullJoin.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<,>), crossJoin.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlLambdaQuery<>), on.ReturnType.GetGenericTypeDefinition());
+        Assert.DoesNotContain(lambdaType.GetMethods(), method => method.Name == "On");
         Assert.Equal(typeof(SqlQuery<>), projection.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlLambdaQuery<>), aggregate.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(2, lambdaType.GetMethods().Count(method => method.Name == "GroupBy" && method.DeclaringType == lambdaType));
@@ -561,7 +595,7 @@ public class SqlQueryApiContractTest
             new[] { typeof(string), typeof(string), typeof(bool) }));
         Assert.DoesNotContain(selectMethods, method => method.Name == "Count" && method.IsGenericMethod == false);
         Assert.DoesNotContain(groupMethods, method => method.Name == "GroupBy" && method.GetParameters().Length == 2);
-        Assert.NotNull(typeof(SqlLambdaQuery<>).GetMethod("HavingRaw", new[] { typeof(string) }));
+        Assert.Null(typeof(SqlLambdaQuery<>).GetMethod("HavingRaw", new[] { typeof(string) }));
     }
 
     /// <summary>
@@ -575,19 +609,10 @@ public class SqlQueryApiContractTest
 
         // Act
         var clearSelect = lambdaType.GetMethod("ClearSelect");
-        var selectFrom = lambdaType.GetMethods().Single(method => method.Name == "SelectFrom" &&
-            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1);
-        var appendSelectFrom = lambdaType.GetMethods().Single(method => method.Name == "AppendSelectFrom" &&
-            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1);
-        var whereFrom = lambdaType.GetMethods().Single(method => method.Name == "WhereFrom" &&
-            method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1);
-
         // Assert
         Assert.NotNull(clearSelect);
         Assert.Equal(typeof(SqlLambdaQuery<>), clearSelect.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlLambdaQuery<>), selectFrom.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlLambdaQuery<>), appendSelectFrom.ReturnType.GetGenericTypeDefinition());
-        Assert.Equal(typeof(SqlLambdaQuery<>), whereFrom.ReturnType.GetGenericTypeDefinition());
+        Assert.DoesNotContain(lambdaType.GetMethods(), method => method.Name is "SelectFrom" or "AppendSelectFrom" or "WhereFrom");
     }
 
     /// <summary>
@@ -712,9 +737,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetTwoTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetTwoTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetTwoTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetTwoTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetTwoTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetTwoTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
@@ -738,13 +763,13 @@ public class SqlQueryApiContractTest
         var expectedParameterType = typeof(string);
 
         // Act
-        var fluent = typeof(SqlQuery<>).GetMethod("SplitOn");
+        var fluent = typeof(SqlFluentQuery<>).GetMethod("SplitOn");
         var text = typeof(SqlTextQuery<>).GetMethod("SplitOn");
 
         // Assert
         Assert.NotNull(fluent);
         Assert.NotNull(text);
-        Assert.Equal(typeof(SqlQuery<>), fluent.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlFluentQuery<>), fluent.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(SqlTextQuery<>), text.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(expectedParameterType, fluent.GetParameters().Single().ParameterType);
         Assert.Equal(expectedParameterType, text.GetParameters().Single().ParameterType);
@@ -761,9 +786,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetThreeTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetThreeTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetThreeTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetThreeTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetThreeTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetThreeTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
@@ -788,9 +813,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetFourTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetFourTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetFourTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetFourTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetFourTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetFourTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
@@ -815,9 +840,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,,,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetFiveTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetFiveTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetFiveTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetFiveTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetFiveTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetFiveTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
@@ -842,9 +867,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,,,,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetSixTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetSixTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetSixTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetSixTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetSixTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetSixTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
@@ -869,9 +894,9 @@ public class SqlQueryApiContractTest
         var expectedAsyncParameterTypes = new[] { typeof(Func<,,,,,,,>), typeof(Nullable<>), typeof(CancellationToken) };
 
         // Act
-        var fluentSync = GetSevenTypeMappingMethod(typeof(SqlQuery<>), "ToList");
+        var fluentSync = GetSevenTypeMappingMethod(typeof(SqlFluentQuery<>), "ToList");
         var textSync = GetSevenTypeMappingMethod(typeof(SqlTextQuery<>), "ToList");
-        var fluentAsync = GetSevenTypeMappingMethod(typeof(SqlQuery<>), "ToListAsync");
+        var fluentAsync = GetSevenTypeMappingMethod(typeof(SqlFluentQuery<>), "ToListAsync");
         var textAsync = GetSevenTypeMappingMethod(typeof(SqlTextQuery<>), "ToListAsync");
 
         // Assert
