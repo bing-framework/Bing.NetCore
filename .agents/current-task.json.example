@@ -1,0 +1,13 @@
+{
+  "active": true,
+  "taskId": "feature-name-p1",
+  "mode": "plan-execution",
+  "agentSource": "copilot",
+  "planPath": "ai_docs/tasks/feature-name-p1/plan.md",
+  "executionPath": "ai_docs/tasks/feature-name-p1/execution.md",
+  "reviewPath": "ai_docs/tasks/feature-name-p1/review.md",
+  "reviewRound": 0,
+  "status": "implementing",
+  "startedAt": "2026-08-20T10:00:00+08:00",
+  "updatedAt": "2026-08-20T10:00:00+08:00"
+}

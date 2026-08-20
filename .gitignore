@@ -274,3 +274,7 @@ Bing*.xml
 # Local integration-test connection strings and credentials
 framework/tests/**/*.Integration/appsettings.Development.json
 *.local.runsettings
+
+# AI Generated files
+.agents/.env.local
+.agents/runtime/

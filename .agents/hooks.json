@@ -1,0 +1,27 @@
+{
+  "hook-diagnostic": {
+    "enabled": false,
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/hook-diagnostic.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "plan-executor-stop-guard": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./scripts/stop-guard.mjs",
+        "timeout": 20
+      }
+    ]
+  }
+}
