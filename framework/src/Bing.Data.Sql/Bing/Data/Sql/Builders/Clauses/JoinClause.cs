@@ -315,6 +315,171 @@ public class JoinClause : IJoinClause
     /// </summary>
     internal void ValidateLastJoinSupportsOn() => GetLastJoinOrThrow();
 
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化连接表。
+    /// </summary>
+    /// <typeparam name="TEntity">连接表实体类型。</typeparam>
+    /// <param name="joinType">连接类型关键字。</param>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构。</param>
+    internal void Join<TEntity>(string joinType, FromClause fromClause, LambdaExpression predicate,
+        string alias = null, string schema = null) where TEntity : class
+    {
+        if (fromClause == null)
+            throw new ArgumentNullException(nameof(fromClause));
+        if (predicate == null)
+            throw new ArgumentNullException(nameof(predicate));
+
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var entityType = typeof(TEntity);
+        var reference = _resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType };
+        if (string.IsNullOrWhiteSpace(schema) == false)
+            reference = reference with { Schema = schema };
+        var resolvedAlias = _resolver.GetAlias(entityType, reference.Alias);
+        var registerProbe = _register?.Clone();
+        registerProbe?.Register(entityType, resolvedAlias);
+
+        var databaseContext = GetCurrentDatabaseContext();
+        var sourceReference = GetSourceReference(databaseContext);
+        PreflightTypedJoin(reference, databaseContext, sourceReference);
+        var item = CreateStructuredJoinItem(joinType, reference, entityType, sourceReference, databaseContext);
+        var candidateSource = new TableSource($"join_{_params.Count}", item.Table, entityType, resolvedAlias);
+        item.Source = candidateSource;
+
+        var parameterProbe = _parameterManager.Clone();
+        var sources = fromClause.Sources.Concat(GetTypedSources()).Append(candidateSource).ToList();
+        var condition = fromClause.ResolveMultiSourcePredicate(predicate, sources, parameterProbe);
+        item.On(condition);
+
+        fromClause.MergeNewParameters(parameterProbe);
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        item.SetDependency(_helper);
+        _params.Add(item);
+        FreezeExistingProjectionAlias(entityType);
+        _register?.Register(entityType, resolvedAlias);
+    }
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化内连接表。
+    /// </summary>
+    internal void Join<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => Join<TEntity>(JoinKey, fromClause, predicate, alias, schema);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化左外连接表。
+    /// </summary>
+    internal void LeftJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => Join<TEntity>(LeftJoinKey, fromClause, predicate, alias, schema);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化右外连接表。
+    /// </summary>
+    internal void RightJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => Join<TEntity>(RightJoinKey, fromClause, predicate, alias, schema);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化全外连接表。
+    /// </summary>
+    internal void FullJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => Join<TEntity>(FullJoinKey, fromClause, predicate, alias, schema);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化派生表连接。
+    /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="joinType">连接类型关键字。</param>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
+    private void Join<TProjection>(string joinType, FromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class
+    {
+        if (fromClause == null)
+            throw new ArgumentNullException(nameof(fromClause));
+        if (subquery == null)
+            throw new ArgumentNullException(nameof(subquery));
+        if (predicate == null)
+            throw new ArgumentNullException(nameof(predicate));
+
+        subquery.ValidateCompatible(_sqlBuilder);
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = _register?.Clone();
+        registerProbe?.RegisterAlias(subquery.Alias);
+        var subqueryAlias = GetSubqueryAlias(subquery.Alias);
+        var sqlBuilder = _sqlBuilder as SqlBuilderBase;
+
+        void PrepareAndCommit()
+        {
+            var sql = sqlBuilder?.RenderSubquery(subquery.Builder) ?? subquery.Builder.ToSql();
+            var table = SqlItem.Raw($"({sql}){subqueryAlias}");
+            var source = new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
+                subquery.ProjectedMembers);
+            var item = JoinItem.CreateDerived(joinType, table, source);
+            var parameterProbe = _parameterManager.Clone();
+            var sources = fromClause.Sources.Concat(GetTypedSources()).Append(source).ToList();
+            var condition = fromClause.ResolveMultiSourcePredicate(predicate, sources, parameterProbe);
+            item.On(condition);
+
+            fromClause.MergeNewParameters(parameterProbe);
+            _context.UseOperation(SqlOperationAction.QueryClause);
+            item.SetDependency(_helper);
+            _params.Add(item);
+            _register?.RegisterAlias(subquery.Alias);
+        }
+
+        if (sqlBuilder != null)
+            sqlBuilder.ExecuteWithSubqueryRenderRollback(PrepareAndCommit);
+        else
+            PrepareAndCommit();
+    }
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化派生表内连接。
+    /// </summary>
+    internal void Join<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => Join(JoinKey, fromClause, subquery, predicate);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化派生表左外连接。
+    /// </summary>
+    internal void LeftJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => Join(LeftJoinKey, fromClause, subquery, predicate);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化派生表右外连接。
+    /// </summary>
+    internal void RightJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => Join(RightJoinKey, fromClause, subquery, predicate);
+
+    /// <summary>
+    /// 原子添加带 Lambda On 谓词的类型化派生表全外连接。
+    /// </summary>
+    internal void FullJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => Join(FullJoinKey, fromClause, subquery, predicate);
+
+    /// <summary>
+    /// 预检类型化连接表，保证名称、Provider 和跨库约束都在状态提交前完成。
+    /// </summary>
+    /// <param name="reference">待连接的结构化表引用。</param>
+    /// <param name="databaseContext">当前执行数据库上下文。</param>
+    /// <param name="sourceReference">当前根表结构化引用。</param>
+    private void PreflightTypedJoin(SqlTableReference reference, DatabaseContext databaseContext,
+        SqlTableReference sourceReference)
+    {
+        var builder = _sqlBuilder as SqlBuilderBase;
+        var databaseType = builder?.ResolveProviderDatabaseType(reference) ?? _sqlBuilder.Provider?.DatabaseType;
+        if (databaseType == null)
+            throw new InvalidOperationException("无法确定结构化连接表引用的数据库类型。");
+        _tableReferenceValidator.Validate(reference, databaseType.Value);
+        _objectNameFormatter.Format(reference, _dialect, databaseType);
+        if (sourceReference != null)
+            _crossDatabaseQueryValidator?.Validate(databaseContext, sourceReference, reference);
+        else
+            _crossDatabaseQueryValidator?.ValidateTarget(databaseContext, reference);
+    }
+
     #endregion
 
     #region Join(内连接)

@@ -231,10 +231,10 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
-    /// 测试目的：多表投影应在保持参数位置列绑定的同时切换到指定的结果映射类型，As 不应改变既有 SQL。
+    /// 测试目的：多表投影应保持来源元数和参数位置列绑定，结果映射类型由终结操作决定。
     /// </summary>
     [Fact]
-    public void From_WhenProjectionResultTypeSelected_ShouldKeepBoundSqlAndTransitionResultType()
+    public void From_WhenProjectionSelected_ShouldKeepSourceArityAndBoundSql()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -273,8 +273,8 @@ public class SqlQueryDescriptionTest
             });
 
         // Assert
-        Assert.IsType<SqlQuery<MultiSourceProjection>>(projection);
-        Assert.IsType<SqlQuery<MultiSourceProjection>>(transition);
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview>>(projection);
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview>>(transition);
         Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", projection.ToSql());
         Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", transition.ToSql());
     }
@@ -503,7 +503,7 @@ public class SqlQueryDescriptionTest
             .SelectSubquery(user => new MultiSourceProjection { OwnerId = user.Id }, "summary");
         var derivedRoot = rootQuery.From(subquery);
         var originalSql = derivedRoot.ToSql();
-        var joined = rootQuery.From<MultiSourceReview>().Join(subquery);
+        var joined = rootQuery.From<MultiSourceReview>();
         var joinedSql = joined.ToSql();
 
         // Act
@@ -513,14 +513,14 @@ public class SqlQueryDescriptionTest
             summary => new object[] { summary.Profile.OwnerId }));
         var orderException = Assert.Throws<NotSupportedException>(() => derivedRoot.OrderBy(
             summary => new object[] { summary.Profile.OwnerId }));
-        var onException = Assert.Throws<NotSupportedException>(() => joined.On(
+        var joinException = Assert.Throws<NotSupportedException>(() => joined.Join(subquery,
             (review, summary) => review.UserId == summary.Profile.OwnerId));
 
         // Assert
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", whereException.Message);
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", selectException.Message);
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", orderException.Message);
-        Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", onException.Message);
+        Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", joinException.Message);
         Assert.Equal(originalSql, derivedRoot.ToSql());
         Assert.Equal(joinedSql, joined.ToSql());
         Assert.Empty(derivedRoot.GetParams());
@@ -564,8 +564,8 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Join(subquery)
-            .On((user, review, summary) => user.Id == summary.OwnerId && review.UserId == summary.ReviewUserId)
+            .Join(subquery, (user, review, summary) =>
+                user.Id == summary.OwnerId && review.UserId == summary.ReviewUserId)
             .Select((user, review, summary) => new object[] { user.Id, review.UserId, summary.OwnerId });
 
         // Assert
@@ -606,8 +606,7 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceReview>()
-            .Join(subquery)
-            .On((review, summary) => review.UserId == summary.OwnerId)
+            .Join(subquery, (review, summary) => review.UserId == summary.OwnerId)
             .Select((review, summary) => new object[] { review.UserId, summary.OwnerId });
 
         // Assert
@@ -651,14 +650,10 @@ public class SqlQueryDescriptionTest
             .CrossJoin(subquery)
             .Where((review, summary) => review.UserId == summary.OwnerId)
             .Select((review, summary) => new object[] { review.UserId, summary.OwnerId });
-        var crossJoinWithOn = rootQuery.From<MultiSourceReview>().CrossJoin(subquery);
 
         // Assert
         Assert.Equal("Select `reviews`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` \r\nCross Join (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `summary` \r\nWhere `reviews`.`UserId`=`summary`.`OwnerId`", query.ToSql());
         Assert.Equal(7, query.GetParams().Values.Single());
-        var exception = Assert.Throws<InvalidOperationException>(() => crossJoinWithOn.On(
-            (review, summary) => review.UserId == summary.OwnerId));
-        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
     }
 
     /// <summary>
@@ -694,21 +689,15 @@ public class SqlQueryDescriptionTest
             .CrossJoin<MultiSourceReview>("review")
             .Where((user, review) => user.Id == review.UserId)
             .Select((user, review) => new object[] { user.Id, review.UserId });
-        var crossJoinWithOn = rootQuery.From<MultiSourceUser>().CrossJoin<MultiSourceReview>("review");
         var rightJoin = rootQuery.From<MultiSourceUser>()
-            .RightJoin<MultiSourceReview>("review")
-            .On((user, review) => user.Id == review.UserId);
+            .RightJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review");
         var fullJoin = rootQuery.From<MultiSourceUser>()
-            .FullJoin<MultiSourceReview>("review")
-            .On((user, review) => user.Id == review.UserId);
+            .FullJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review");
 
         // Assert
         Assert.Equal("Select `users`.`Id`,`review`.`UserId` \r\nFrom `users` \r\nCross Join `reviews` As `review` \r\nWhere `users`.`Id`=`review`.`UserId`", crossJoin.ToSql());
-        var onException = Assert.Throws<InvalidOperationException>(() => crossJoinWithOn.On(
-            (user, review) => user.Id == review.UserId));
         var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
         var fullJoinException = Assert.Throws<NotSupportedException>(() => fullJoin.ToSql());
-        Assert.Equal("Cross Join 不支持 On 条件。", onException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", rightJoinException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", fullJoinException.Message);
     }
@@ -745,11 +734,9 @@ public class SqlQueryDescriptionTest
 
         // Act
         var rightJoin = rootQuery.From<MultiSourceReview>()
-            .RightJoin(subquery)
-            .On((review, summary) => review.UserId == summary.OwnerId);
+            .RightJoin(subquery, (review, summary) => review.UserId == summary.OwnerId);
         var fullJoin = rootQuery.From<MultiSourceReview>()
-            .FullJoin(subquery)
-            .On((review, summary) => review.UserId == summary.OwnerId);
+            .FullJoin(subquery, (review, summary) => review.UserId == summary.OwnerId);
 
         // Assert
         var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
@@ -787,7 +774,8 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
         var subquery = rootQuery.From<MultiSourceUser>()
             .SelectSubquery(user => new MultiSourceProjection { OwnerId = user.Id }, "summary");
-        var query = rootQuery.From<MultiSourceReview>().LeftJoin(subquery);
+        var query = rootQuery.From<MultiSourceReview>().LeftJoin(subquery,
+            (review, summary) => review.UserId == summary.OwnerId);
         var expectedSql = query.ToSql();
 
         // Act
@@ -838,7 +826,8 @@ public class SqlQueryDescriptionTest
         var expectedSql = outer.ToSql();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+            (review, summary) => review.UserId == summary.OwnerId));
 
         // Assert
         Assert.Equal("类型化派生表数据源 first 与当前数据源 second 不兼容。", exception.Message);
@@ -894,7 +883,8 @@ public class SqlQueryDescriptionTest
             var expectedSql = outer.ToSql();
 
             // Act
-            var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+            var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+                (review, summary) => review.UserId == summary.OwnerId));
 
             // Assert
             Assert.Equal("类型化派生表物理数据库身份与当前查询不兼容。", exception.Message);
@@ -945,7 +935,8 @@ public class SqlQueryDescriptionTest
                 var expectedSql = outer.ToSql();
 
                 // Act
-                var joinException = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+                var joinException = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+                    (review, summary) => review.UserId == summary.OwnerId));
                 var rootException = Assert.Throws<NotSupportedException>(() => outerQuery.From(subquery));
 
                 // Assert
@@ -995,7 +986,8 @@ public class SqlQueryDescriptionTest
             var expectedSql = outer.ToSql();
 
             // Act
-            var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+            var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+                (review, summary) => review.UserId == summary.OwnerId));
 
             // Assert
             Assert.Equal("类型化派生表映射配置 reader 与当前映射配置 <默认> 不兼容。", exception.Message);
@@ -1040,8 +1032,7 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = secondQuery.From<MultiSourceReview>()
-            .Join(subquery)
-            .On((review, summary) => review.UserId == summary.OwnerId)
+            .Join(subquery, (review, summary) => review.UserId == summary.OwnerId)
             .Select((review, summary) => new object[] { review.UserId, summary.OwnerId });
 
         // Assert
@@ -1084,7 +1075,8 @@ public class SqlQueryDescriptionTest
         var expectedSql = outer.ToSql();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+            (review, summary) => review.UserId == summary.OwnerId));
 
         // Assert
         Assert.Equal("类型化派生表物理数据库身份与当前查询不兼容。", exception.Message);
@@ -1183,7 +1175,8 @@ public class SqlQueryDescriptionTest
         var expectedParameters = query.GetParams();
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => query.Join(subquery));
+        var exception = Assert.Throws<InvalidOperationException>(() => query.Join(subquery,
+            (left, right) => left.OwnerId == right.OwnerId));
 
         // Assert
         Assert.Equal("查询中已存在表别名 \"summary\"。", exception.Message);
@@ -1302,8 +1295,7 @@ public class SqlQueryDescriptionTest
             .Where(user => user.Id > 7)
             .SelectSubquery(user => new MultiSourceProjection { OwnerId = user.Id }, "owner");
         var joined = rootQuery.From(owner)
-            .LeftJoin<MultiSourceReview>("review")
-            .On((summary, review) => summary.OwnerId == review.UserId)
+            .LeftJoin<MultiSourceReview>((summary, review) => summary.OwnerId == review.UserId, "review")
             .Where((summary, review) => summary.OwnerId > 9);
         var refined = joined.SelectSubquery((summary, review) => new MultiSourceProjection
         {
@@ -1360,17 +1352,15 @@ public class SqlQueryDescriptionTest
             .Where(user => user.Id > 7)
             .SelectSubquery(user => new MultiSourceProjection { OwnerId = user.Id }, "owner");
         var summary = rootQuery.From(owner)
-            .Join<MultiSourceReview>("review")
-            .On((item, review) => item.OwnerId == review.UserId)
+            .Join<MultiSourceReview>((item, review) => item.OwnerId == review.UserId, "review")
             .CrossJoin<MultiSourcePermission>("permission")
-            .LeftJoin<MultiSourceUser>("reviewer")
-            .On((item, review, permission, reviewer) => reviewer.Id == permission.UserId)
-            .Join<MultiSourceReview>("review2")
-            .On((item, review, permission, reviewer, review2) => reviewer.Id == review2.UserId)
+            .LeftJoin<MultiSourceUser>((item, review, permission, reviewer) => reviewer.Id == permission.UserId,
+                "reviewer")
+            .Join<MultiSourceReview>((item, review, permission, reviewer, review2) => reviewer.Id == review2.UserId,
+                "review2")
             .CrossJoin<MultiSourcePermission>("permission2")
-            .Join<MultiSourceUser>("lastUser")
-            .On((item, review, permission, reviewer, review2, permission2, lastUser) =>
-                lastUser.Id == permission2.UserId)
+            .Join<MultiSourceUser>((item, review, permission, reviewer, review2, permission2, lastUser) =>
+                lastUser.Id == permission2.UserId, "lastUser")
             .Where((item, review, permission, reviewer, review2, permission2, lastUser) =>
                 item.OwnerId > 9 && review.UserId == lastUser.Id)
             .SelectSubquery((item, review, permission, reviewer, review2, permission2, lastUser) =>
@@ -1441,16 +1431,12 @@ public class SqlQueryDescriptionTest
             .CrossJoin(review)
             .Where((summary, item) => summary.OwnerId == item.ReviewUserId)
             .Select((summary, item) => new object[] { summary.OwnerId, item.ReviewUserId });
-        var crossJoinWithOn = rootQuery.From(owner).CrossJoin<MultiSourceReview>("entityReview");
 
         // Assert
         Assert.Equal("Select `owner`.`OwnerId`,`entityReview`.`UserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nCross Join `reviews` As `entityReview` \r\nWhere `owner`.`OwnerId`=`entityReview`.`UserId`", entityCrossJoin.ToSql());
         Assert.Equal(new object[] { 7 }, entityCrossJoin.GetParams().Values.ToArray());
         Assert.Equal("Select `owner`.`OwnerId`,`review`.`ReviewUserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nCross Join (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `reviews` \r\nWhere `reviews`.`UserId`>@_p_1) As `review` \r\nWhere `owner`.`OwnerId`=`review`.`ReviewUserId`", derivedCrossJoin.ToSql());
         Assert.Equal(new object[] { 7, 11 }, derivedCrossJoin.GetParams().Values.ToArray());
-        var exception = Assert.Throws<InvalidOperationException>(() => crossJoinWithOn.On(
-            (summary, item) => summary.OwnerId == item.UserId));
-        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
     }
 
     /// <summary>
@@ -1487,11 +1473,9 @@ public class SqlQueryDescriptionTest
 
         // Act
         var entityRightJoin = rootQuery.From(owner)
-            .RightJoin<MultiSourceReview>("entityReview")
-            .On((summary, item) => summary.OwnerId == item.UserId);
+            .RightJoin<MultiSourceReview>((summary, item) => summary.OwnerId == item.UserId, "entityReview");
         var derivedFullJoin = rootQuery.From(owner)
-            .FullJoin(review)
-            .On((summary, item) => summary.OwnerId == item.ReviewUserId);
+            .FullJoin(review, (summary, item) => summary.OwnerId == item.ReviewUserId);
 
         // Assert
         var rightJoinException = Assert.Throws<NotSupportedException>(() => entityRightJoin.ToSql());
@@ -1501,10 +1485,10 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
-    /// 测试目的：外层多表 Lambda 只能引用派生 DTO 显式投影的成员，且 Cross Join 继续拒绝 On 条件。
+    /// 测试目的：外层多表 Lambda 只能引用派生 DTO 显式投影成员，失败筛选不得改变已完成的原子 Join。
     /// </summary>
     [Fact]
-    public void From_WhenDtoSubqueryMemberIsNotProjectedOrCrossJoined_ShouldRejectBeforeChangingOuterQuery()
+    public void From_WhenJoinedDtoSubqueryMemberIsNotProjected_ShouldRejectWithoutChangingOuterQuery()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -1529,19 +1513,16 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
         var subquery = rootQuery.From<MultiSourceUser, MultiSourceReview>()
             .SelectSubquery((user, review) => new MultiSourceProjection { ReviewUserId = review.UserId }, "summary");
-        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>().Join(subquery);
-        var crossJoin = rootQuery.From<MultiSourceUser, MultiSourceReview>().CrossJoin(subquery);
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>().Join(subquery,
+            (user, review, summary) => review.UserId == summary.ReviewUserId);
 
         // Act
         var memberException = Assert.Throws<NotSupportedException>(() => query.Where(
             (user, review, summary) => summary.OwnerId == user.Id));
-        var onException = Assert.Throws<InvalidOperationException>(() => crossJoin.On(
-            (user, review, summary) => review.UserId == summary.ReviewUserId));
 
         // Assert
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", memberException.Message);
-        Assert.Equal("Cross Join 不支持 On 条件。", onException.Message);
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`) As `summary`", query.ToSql());
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`) As `summary` On `reviews`.`UserId`=`summary`.`ReviewUserId`", query.ToSql());
     }
 
     /// <summary>
@@ -1581,7 +1562,8 @@ public class SqlQueryDescriptionTest
         var outer = secondQuery.From<MultiSourceUser, MultiSourceReview>();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+            (user, review, summary) => user.Id == summary.OwnerId));
 
         // Assert
         Assert.Equal("类型化派生表数据源 first 与当前数据源 second 不兼容。", exception.Message);
@@ -1624,8 +1606,7 @@ public class SqlQueryDescriptionTest
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
             .Where((user, review) => user.Id > 3)
-            .Join(subquery)
-            .On((user, review, summary) => user.Id == summary.OwnerId);
+            .Join(subquery, (user, review, summary) => user.Id == summary.OwnerId);
 
         // Assert
         Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`>@_p_1) As `summary` On `users`.`Id`=`summary`.`OwnerId` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
@@ -1670,10 +1651,8 @@ public class SqlQueryDescriptionTest
         // Act
         var query = rootQuery.From<MultiSourceUser>()
             .Where(user => user.Id > 3)
-            .Join(audit)
-            .On((user, review) => user.Id == review.ReviewUserId)
-            .Join(owner)
-            .On((user, review, summary) => user.Id == summary.OwnerId)
+            .Join(audit, (user, review) => user.Id == review.ReviewUserId)
+            .Join(owner, (user, review, summary) => user.Id == summary.OwnerId)
             .Select((user, review, summary) => new object[] { user.Id, review.ReviewUserId, summary.OwnerId });
         var firstSql = query.ToSql();
         var secondSql = query.ToSql();
@@ -1863,10 +1842,10 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Join<MultiSourceUser>("reviewer")
-            .On((owner, review, reviewer) => owner.Id == review.UserId && reviewer.Id == review.UserId && reviewer.Id > 7)
-            .Join<MultiSourcePermission>("permission")
-            .On((owner, review, reviewer, permission) => reviewer.Id == permission.UserId)
+            .Join<MultiSourceUser>((owner, review, reviewer) =>
+                owner.Id == review.UserId && reviewer.Id == review.UserId && reviewer.Id > 7, "reviewer")
+            .Join<MultiSourcePermission>((owner, review, reviewer, permission) => reviewer.Id == permission.UserId,
+                "permission")
             .Select((owner, review, reviewer, permission) => new object[]
             {
                 owner.Id, review.UserId, reviewer.Id, permission.UserId
@@ -1907,8 +1886,8 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .LeftJoin<MultiSourceUser>("reviewer")
-            .On((owner, review, reviewer) => owner.Id == reviewer.Id && reviewer.Id > 3)
+            .LeftJoin<MultiSourceUser>((owner, review, reviewer) => owner.Id == reviewer.Id && reviewer.Id > 3,
+                "reviewer")
             .Select((owner, review, reviewer) => new object[] { owner.Id, review.UserId, reviewer.Id });
 
         // Assert
@@ -1955,14 +1934,9 @@ public class SqlQueryDescriptionTest
             .CrossJoin<MultiSourcePermission>("permission")
             .Select((user, review, permission) => new object[] { user.Id, review.UserId, permission.UserId })
             .Where((user, review, permission) => review.UserId == permission.UserId);
-        var crossJoinWithOn = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .CrossJoin<MultiSourcePermission>("permission");
 
         // Assert
         Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId` \r\nFrom `users`, `reviews` \r\nCross Join `permissions` As `permission` \r\nWhere `reviews`.`UserId`=`permission`.`UserId`", query.ToSql());
-        var exception = Assert.Throws<InvalidOperationException>(() => crossJoinWithOn.On(
-            (user, review, permission) => review.UserId == permission.UserId));
-        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
     }
 
     /// <summary>
@@ -2001,11 +1975,11 @@ public class SqlQueryDescriptionTest
 
         // Act
         var rightJoin = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .RightJoin<MultiSourcePermission>("permission")
-            .On((user, review, permission) => review.UserId == permission.UserId);
+            .RightJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
+                "permission");
         var fullJoin = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .FullJoin<MultiSourcePermission>("permission")
-            .On((user, review, permission) => review.UserId == permission.UserId);
+            .FullJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
+                "permission");
 
         // Assert
         var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
@@ -2044,8 +2018,7 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .Join<MultiSourceUser>("reviewer")
-            .On((owner, review, reviewer) => owner.Id == reviewer.Id)
+            .Join<MultiSourceUser>((owner, review, reviewer) => owner.Id == reviewer.Id, "reviewer")
             .Select((owner, review, reviewer) => new object[] { owner.Id, review.UserId, reviewer.Id })
             .OrderBy((owner, review, reviewer) => new object[] { reviewer.Id })
             .Skip(5)

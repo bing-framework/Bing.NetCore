@@ -47,8 +47,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample, MappedSample>()
-            .FullJoin<MappedSample>("audit")
-            .On((owner, reviewer, audit) => owner.Id == audit.Id)
+            .FullJoin<MappedSample>((owner, reviewer, audit) => owner.Id == audit.Id, "audit")
             .Select((owner, reviewer, audit) => new object[] { owner.Id, reviewer.Id, audit.Id });
 
         // Assert
@@ -69,8 +68,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample>()
-            .FullJoin<MappedSample>("audit")
-            .On((owner, audit) => owner.Id == audit.Id)
+            .FullJoin<MappedSample>((owner, audit) => owner.Id == audit.Id, "audit")
             .Select((owner, audit) => new object[] { owner.Id, audit.Id });
 
         // Assert
@@ -78,10 +76,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多表 Fluent Cross Join 的 On 表达式必须在解析常量和创建参数前被拒绝，保持查询描述状态不变。
+    /// 测试目的：多表类型化 Cross Join 不应添加连接参数，后置 On 表面由 API 契约测试禁止。
     /// </summary>
     [Fact]
-    public void SqlQueryFactory_Create_WhenCrossJoinOnContainsConstant_ShouldRejectWithoutAddingParameter()
+    public void SqlQueryFactory_Create_WhenTypedCrossJoinConfigured_ShouldNotAddParameter()
     {
         // Arrange
         var services = CreateServices(CreateRoutingMetadataOptions());
@@ -91,12 +89,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = rootQuery.From<MappedSample>()
             .CrossJoin<MappedSample>("audit");
 
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            query.On((owner, audit) => owner.Id == 1));
-
         // Assert
-        Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
         var builder = ((ISqlQueryBuilderAccessor)query).GetSqlBuilder();
         Assert.Empty(builder.GetParams());
         Assert.Equal(
@@ -203,8 +196,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample, MappedSample>()
-            .FullJoin(summary)
-            .On((owner, reviewer, derived) => owner.Id == derived.OwnerId)
+            .FullJoin(summary, (owner, reviewer, derived) => owner.Id == derived.OwnerId)
             .Select((owner, reviewer, derived) => new object[] { owner.Id, reviewer.Id, derived.OwnerId });
 
         // Assert
@@ -228,8 +220,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample>()
-            .FullJoin(summary)
-            .On((sample, derived) => sample.Id == derived.OwnerId)
+            .FullJoin(summary, (sample, derived) => sample.Id == derived.OwnerId)
             .Select((sample, derived) => new object[] { sample.Id, derived.OwnerId });
 
         // Assert
@@ -256,8 +247,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From(owner)
-            .FullJoin(audit)
-            .On((left, right) => left.OwnerId == right.OwnerId)
+            .FullJoin(audit, (left, right) => left.OwnerId == right.OwnerId)
             .Select((left, right) => new object[] { left.OwnerId, right.OwnerId });
 
         // Assert
@@ -302,7 +292,8 @@ public class SqlServerRoutingAndExecutionTest
         var outer = sqlServerQuery.From<MappedSample, MappedSample>();
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery));
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
+            (owner, reviewer, derived) => owner.Id == derived.OwnerId));
 
         // Assert
         exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
@@ -2548,10 +2539,10 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
         var description = query.From<MappedSample>()
             .Where(t => t.Name, "abc")
-            .Aggregate<int>(SqlAggregateFunction.Count, t => t.Id);
+            .Aggregate(SqlAggregateFunction.Count, t => t.Id);
 
         // Act
-        var result = await description.ScalarAsync();
+        var result = await description.ScalarAsync<int>();
 
         // Assert
         result.ShouldBe(1);

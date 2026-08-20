@@ -745,6 +745,33 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
+    /// 在派生表渲染期间执行操作；操作失败时恢复参数和参数重命名映射。
+    /// </summary>
+    /// <remarks>
+    /// 派生表渲染会把独立 Builder 的参数合并到当前 Builder。复合操作应通过本方法包裹其候选阶段，
+    /// 以避免后续验证或表达式解析失败后遗留参数状态。
+    /// </remarks>
+    /// <param name="action">包含派生表渲染的候选操作。</param>
+    internal void ExecuteWithSubqueryRenderRollback(Action action)
+    {
+        if (action == null)
+            throw new ArgumentNullException(nameof(action));
+
+        var parameterSnapshot = ParameterManager.Clone();
+        var parameterNameSnapshot = _subqueryParameterNames.ToDictionary(item => item.Key,
+            item => new Dictionary<string, string>(item.Value), ReferenceComparer<ISqlBuilder>.Instance);
+        try
+        {
+            action();
+        }
+        catch
+        {
+            RestoreQueryRenderSnapshot(parameterSnapshot, parameterNameSnapshot);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// 将子查询参数复制到目标参数管理器；同名参数已存在时保留原值。
     /// </summary>
     /// <param name="target">目标参数管理器。</param>

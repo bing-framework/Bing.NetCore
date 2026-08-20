@@ -49,13 +49,17 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     }
 
     /// <summary>
-    /// 使用 DTO 成员初始化设置投影并切换结果映射类型。
+    /// 使用 DTO 成员初始化设置投影。
     /// </summary>
     /// <typeparam name="TResult">投影结果映射类型。</typeparam>
     /// <param name="projection">派生表 DTO 成员初始化投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TResult> Select<TResult>(Expression<Func<TProjection, TResult>> projection) where TResult : class =>
-        SelectTypedCore<TResult>(projection);
+    /// <returns>当前查询描述。</returns>
+    public SqlSubqueryLambdaQuery<TProjection> Select<TResult>(Expression<Func<TProjection, TResult>> projection)
+        where TResult : class
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 将当前派生根的严格 DTO 投影冻结为新的类型化派生表。
@@ -128,12 +132,14 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// 添加类型化内连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含派生根和连接表的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> Join<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> Join<TJoin>(Expression<Func<TProjection, TJoin, bool>> predicate,
+        string alias = null, string schema = null) where TJoin : class
     {
-        JoinCore<TJoin>(alias, schema);
+        JoinCore<TJoin>(predicate, alias, schema);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -141,12 +147,14 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// 添加类型化左外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含派生根和连接表的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> LeftJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> LeftJoin<TJoin>(Expression<Func<TProjection, TJoin, bool>> predicate,
+        string alias = null, string schema = null) where TJoin : class
     {
-        LeftJoinCore<TJoin>(alias, schema);
+        LeftJoinCore<TJoin>(predicate, alias, schema);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -154,12 +162,14 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// 添加类型化右外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含派生根和连接表的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> RightJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> RightJoin<TJoin>(Expression<Func<TProjection, TJoin, bool>> predicate,
+        string alias = null, string schema = null) where TJoin : class
     {
-        RightJoinCore<TJoin>(alias, schema);
+        RightJoinCore<TJoin>(predicate, alias, schema);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -167,12 +177,14 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// 添加类型化全外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含派生根和连接表的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> FullJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> FullJoin<TJoin>(Expression<Func<TProjection, TJoin, bool>> predicate,
+        string alias = null, string schema = null) where TJoin : class
     {
-        FullJoinCore<TJoin>(alias, schema);
+        FullJoinCore<TJoin>(predicate, alias, schema);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -190,50 +202,58 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     }
 
     /// <summary>
-    /// 添加类型化内连接派生表。
+    /// 添加带连接条件的类型化内连接派生表。
     /// </summary>
     /// <typeparam name="TJoin">连接派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根派生表和连接派生表的连接条件。</param>
     /// <returns>包含两个派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> Join<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> Join<TJoin>(SqlSubquery<TJoin> subquery,
+        Expression<Func<TProjection, TJoin, bool>> predicate) where TJoin : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化左外连接派生表。
+    /// 添加带连接条件的类型化左外连接派生表。
     /// </summary>
     /// <typeparam name="TJoin">连接派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根派生表和连接派生表的连接条件。</param>
     /// <returns>包含两个派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> LeftJoin<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> LeftJoin<TJoin>(SqlSubquery<TJoin> subquery,
+        Expression<Func<TProjection, TJoin, bool>> predicate) where TJoin : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化右外连接派生表。
+    /// 添加带连接条件的类型化右外连接派生表。
     /// </summary>
     /// <typeparam name="TJoin">连接派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根派生表和连接派生表的连接条件。</param>
     /// <returns>包含两个派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> RightJoin<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> RightJoin<TJoin>(SqlSubquery<TJoin> subquery,
+        Expression<Func<TProjection, TJoin, bool>> predicate) where TJoin : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化全外连接派生表。
+    /// 添加带连接条件的类型化全外连接派生表。
     /// </summary>
     /// <typeparam name="TJoin">连接派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根派生表和连接派生表的连接条件。</param>
     /// <returns>包含两个派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TProjection, TJoin> FullJoin<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class
+    public SqlLambdaQuery<TProjection, TJoin> FullJoin<TJoin>(SqlSubquery<TJoin> subquery,
+        Expression<Func<TProjection, TJoin, bool>> predicate) where TJoin : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TProjection, TJoin>(Executor, GetBuilder(), false);
     }
 

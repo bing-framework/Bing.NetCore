@@ -370,9 +370,27 @@ public class FromClause : IFromClause
     internal ICondition ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression,
         IReadOnlyList<TableSource> sources)
     {
+        return ResolveMultiSourcePredicate(expression, sources, _context.ParameterManager);
+    }
+
+    /// <summary>
+    /// 使用指定参数管理器解析多表 Lambda 谓词。
+    /// </summary>
+    /// <param name="expression">多表谓词表达式。</param>
+    /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
+    /// <param name="parameterManager">接收本次解析参数的目标管理器。</param>
+    /// <returns>可追加到 Where、Having 或 On 子句的参数化条件。</returns>
+    /// <remarks>
+    /// 调用方可传入参数副本，在完整解析成功后再通过 <see cref="MergeNewParameters"/> 提交，
+    /// 以保持复合查询操作的原子性。
+    /// </remarks>
+    internal ICondition ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression,
+        IReadOnlyList<TableSource> sources, IParameterManager parameterManager)
+    {
         if (sources == null)
             throw new ArgumentNullException(nameof(sources));
-        var parameterManager = _context.ParameterManager;
+        if (parameterManager == null)
+            throw new ArgumentNullException(nameof(parameterManager));
         var existingParameters = parameterManager.GetParams();
         var snapshot = parameterManager.Clone();
         var condition = new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, snapshot)
@@ -384,6 +402,21 @@ public class FromClause : IFromClause
         AddParameters(validation, snapshot, parameters);
         AddParameters(parameterManager, snapshot, parameters);
         return condition;
+    }
+
+    /// <summary>
+    /// 将参数副本新增的参数合并到当前 Builder。
+    /// </summary>
+    /// <param name="parameterManager">包含候选解析结果的参数管理器。</param>
+    internal void MergeNewParameters(IParameterManager parameterManager)
+    {
+        if (parameterManager == null)
+            throw new ArgumentNullException(nameof(parameterManager));
+        var existingParameters = _context.ParameterManager.GetParams();
+        var parameters = parameterManager.GetParams()
+            .Where(parameter => existingParameters.ContainsKey(parameter.Key) == false)
+            .ToList();
+        AddParameters(_context.ParameterManager, parameterManager, parameters);
     }
 
     /// <summary>

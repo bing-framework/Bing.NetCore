@@ -5,6 +5,7 @@ using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
+using System.Linq.Expressions;
 
 namespace Bing.Data.Sql.Tests.Builders;
 
@@ -506,11 +507,207 @@ public class SqlBuilderSubqueryCompositionTest
     }
 
     /// <summary>
+    /// 测试目的：实体原子 Join 的谓词参数超过上限时，不得提交 Join、候选别名、来源图、Select 或查询操作状态。
+    /// </summary>
+    [Fact]
+    public void TypedEntityJoin_WhenPredicateParameterLimitExceeded_ShouldKeepAllQueryStateUnchanged()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 1, "test");
+        var builder = (TestSqlBuilder)new TestSqlBuilder(parameterManager: parameterManager)
+            .Select("owner.IntValue")
+            .From<Sample>("owner")
+            .Where<Sample>(item => item.IntValue, 1);
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample2, bool>> predicate = (owner, candidate) => owner.IntValue == 2;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join<Sample2>(fromClause, predicate, "candidate"));
+
+        // Assert
+        Assert.Equal("SQL Provider 'test' 的参数数量超出上限。当前参数数量: 1；尝试添加后数量: 2；最大参数数量: 1。",
+            exception.Message);
+        AssertQueryState(expected, builder);
+    }
+
+    /// <summary>
+    /// 测试目的：派生表完成参数渲染后若谓词引用未投影成员，必须回滚渲染参数及全部候选查询状态。
+    /// </summary>
+    [Fact]
+    public void TypedSubqueryJoin_WhenPredicateReferencesUnprojectedMember_ShouldRollbackRenderStateAndAllowRetry()
+    {
+        // Arrange
+        var builder = (TestSqlBuilder)new TestSqlBuilder()
+            .Select("owner.IntValue")
+            .From<Sample>("owner")
+            .Where<Sample>(item => item.IntValue, 1);
+        var child = new TestSqlBuilder()
+            .Select("IntValue")
+            .From("source")
+            .Where("Id", 2);
+        var subquery = new SqlSubquery<Sample>(child, "summary", new[] { nameof(Sample.IntValue) },
+            "test.sqlserver", null, null, null, null, null);
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample, bool>> invalidPredicate = (owner, summary) =>
+            owner.StringValue == summary.StringValue;
+        Expression<Func<Sample, Sample, bool>> validPredicate = (owner, summary) =>
+            owner.IntValue == summary.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() =>
+            joinClause.Join(fromClause, subquery, invalidPredicate));
+
+        // Assert
+        Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", exception.Message);
+        AssertQueryState(expected, builder);
+
+        joinClause.Join(fromClause, subquery, validPredicate);
+
+        Assert.Equal(new object[] { 1, 2 }, builder.GetParams().Values.ToArray());
+        Assert.Equal("Select [owner].[IntValue] \r\nFrom [Sample] As [owner] \r\nJoin (Select [IntValue] \r\nFrom [source] \r\nWhere [Id]=@_p_1) As [summary] On [owner].[IntValue]=[summary].[IntValue] \r\nWhere [owner].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(new[] { "join_0|summary|Bing.Data.Sql.Tests.Samples.Sample|IntValue" },
+            builder.GetTypedJoinSources().Select(DescribeSource));
+    }
+
+    /// <summary>
+    /// 测试目的：类型化派生表 Join 的重复别名必须在渲染前拒绝，且失败后可使用其他别名完成连接。
+    /// </summary>
+    [Fact]
+    public void TypedSubqueryJoin_WhenAliasDuplicatesRoot_ShouldKeepAllQueryStateAndAllowDifferentAlias()
+    {
+        // Arrange
+        var builder = (TestSqlBuilder)new TestSqlBuilder()
+            .Select("owner.IntValue")
+            .From<Sample>("owner")
+            .Where<Sample>(item => item.IntValue, 1);
+        var child = new TestSqlBuilder()
+            .Select("IntValue")
+            .From("source")
+            .Where("Id", 2);
+        var duplicate = new SqlSubquery<Sample>(child, "owner", new[] { nameof(Sample.IntValue) },
+            "test.sqlserver", null, null, null, null, null);
+        var retry = new SqlSubquery<Sample>(child, "summary", new[] { nameof(Sample.IntValue) },
+            "test.sqlserver", null, null, null, null, null);
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample, bool>> predicate = (owner, derived) =>
+            owner.IntValue == derived.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join(fromClause, duplicate, predicate));
+
+        // Assert
+        Assert.Equal("查询中已存在表别名 \"owner\"。", exception.Message);
+        AssertQueryState(expected, builder);
+
+        joinClause.Join(fromClause, retry, predicate);
+
+        Assert.Equal(new object[] { 1, 2 }, builder.GetParams().Values.ToArray());
+        Assert.Equal(new[] { "join_0|summary|Bing.Data.Sql.Tests.Samples.Sample|IntValue" },
+            builder.GetTypedJoinSources().Select(DescribeSource));
+    }
+
+    /// <summary>
+    /// 测试目的：实体 Join 的跨库校验失败必须发生在来源、别名、Select 和查询操作状态提交之前。
+    /// </summary>
+    [Fact]
+    public void TypedEntityJoin_WhenCrossDatabaseValidationFails_ShouldKeepAllQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = (TestSqlBuilder)new TestSqlBuilder(
+                crossDatabaseQueryValidator: new RejectingCrossDatabaseQueryValidator())
+            .Select("owner.IntValue")
+            .From<Sample>("owner")
+            .Where<Sample>(item => item.IntValue, 1);
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample2, bool>> predicate = (owner, candidate) =>
+            owner.IntValue == candidate.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() =>
+            joinClause.Join<Sample2>(fromClause, predicate, "candidate"));
+
+        // Assert
+        Assert.Equal("测试跨库校验拒绝连接。", exception.Message);
+        AssertQueryState(expected, builder);
+    }
+
+    /// <summary>
     /// 创建已写入一个 Set 参数的 Update Builder。
     /// </summary>
     private static TestSqlBuilder CreateUpdateBuilder() => new TestSqlBuilder()
         .Update(new SqlTableReference { TableName = "outer" })
         .Set("Name", "existing");
+
+    /// <summary>
+    /// 捕获原子操作失败后必须保持不变的查询状态。
+    /// </summary>
+    private static QueryState CaptureQueryState(TestSqlBuilder builder)
+    {
+        var fromClause = (FromClause)builder.FromClause;
+        return new QueryState(
+            builder.ToSql(),
+            builder.GetParams().OrderBy(item => item.Key).ToArray(),
+            fromClause.Sources.Select(DescribeSource).ToArray(),
+            builder.GetTypedJoinSources().Select(DescribeSource).ToArray(),
+            builder.SelectClause.ToSql(),
+            builder.OperationKind);
+    }
+
+    /// <summary>
+    /// 断言失败后的查询状态与调用前快照完全一致。
+    /// </summary>
+    private static void AssertQueryState(QueryState expected, TestSqlBuilder builder)
+    {
+        var actual = CaptureQueryState(builder);
+        Assert.Equal(expected.Sql, actual.Sql);
+        Assert.Equal(expected.Parameters, actual.Parameters);
+        Assert.Equal(expected.RootSources, actual.RootSources);
+        Assert.Equal(expected.JoinSources, actual.JoinSources);
+        Assert.Equal(expected.Select, actual.Select);
+        Assert.Equal(expected.Operation, actual.Operation);
+    }
+
+    /// <summary>
+    /// 描述表源的稳定身份、别名、类型和派生表投影白名单。
+    /// </summary>
+    private static string DescribeSource(TableSource source) =>
+        $"{source.SourceId}|{source.Alias}|{source.EntityType?.FullName}|{string.Join(",", source.ProjectedMembers ?? Array.Empty<string>())}";
+
+    /// <summary>
+    /// 原子 Join 失败测试使用的跨库校验器。
+    /// </summary>
+    private sealed class RejectingCrossDatabaseQueryValidator : ISqlCrossDatabaseQueryValidator
+    {
+        /// <inheritdoc />
+        public void Validate(DatabaseContext executionContext, SqlTableReference source, SqlTableReference target) =>
+            throw new NotSupportedException("测试跨库校验拒绝连接。");
+
+        /// <inheritdoc />
+        public void ValidateTarget(DatabaseContext executionContext, SqlTableReference target) =>
+            throw new NotSupportedException("测试跨库校验拒绝连接。");
+    }
+
+    /// <summary>
+    /// 查询状态快照。
+    /// </summary>
+    private sealed record QueryState(
+        string Sql,
+        IReadOnlyList<KeyValuePair<string, object>> Parameters,
+        IReadOnlyList<string> RootSources,
+        IReadOnlyList<string> JoinSources,
+        string Select,
+        SqlOperationKind Operation);
 
     /// <summary>
     /// 严格派生表的最小投影模型。

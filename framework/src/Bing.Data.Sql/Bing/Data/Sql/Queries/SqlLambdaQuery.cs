@@ -68,12 +68,12 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 使用强类型成员初始化表达式设置 DTO 投影，并由表达式返回类型确定结果映射类型。
+    /// 使用强类型成员初始化表达式设置 DTO 投影。
     /// </summary>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
     /// <param name="projection">当前实体的直接成员初始化投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TEntity, TProjection>> projection)
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery<TEntity> Select<TProjection>(Expression<Func<TEntity, TProjection>> projection)
     {
         if (projection == null)
             throw new ArgumentNullException(nameof(projection));
@@ -84,7 +84,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
             ? fromClause.ResolveMultiSourceDtoColumns(projection, new[] { fromClause.Sources[0] })
             : fromClause.ResolveMultiSourceColumns(projection, new[] { fromClause.Sources[0] });
         ReplaceSelect(select => select.Select(string.Join(", ", columns)));
-        return WithResult<TProjection>();
+        return this;
     }
 
     /// <summary>
@@ -172,59 +172,52 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 追加指定实体的参数化属性筛选条件。
+    /// 按条件追加当前实体的参数化属性筛选条件。
     /// </summary>
-    /// <typeparam name="TSource">筛选所属实体类型。</typeparam>
-    /// <param name="column">实体属性表达式。</param>
-    /// <param name="value">比较值。</param>
-    /// <param name="operator">比较运算符。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> Where<TSource>(Expression<Func<TSource, object>> column, object value,
-        Operator @operator = Operator.Equal) where TSource : class
-    {
-        ((ISqlQueryClauseAccessor)GetBuilder()).WhereClause.Where(column, value, @operator);
-        return this;
-    }
-
-    /// <summary>
-    /// 按条件追加指定实体的参数化属性筛选条件。
-    /// </summary>
-    /// <typeparam name="TSource">筛选所属实体类型。</typeparam>
     /// <param name="column">实体属性表达式。</param>
     /// <param name="value">比较值。</param>
     /// <param name="condition">是否追加筛选条件。</param>
     /// <param name="operator">比较运算符。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> WhereIf<TSource>(Expression<Func<TSource, object>> column, object value,
-        bool condition, Operator @operator = Operator.Equal) where TSource : class
+    public SqlLambdaQuery<TEntity> WhereIf(Expression<Func<TEntity, object>> column, object value, bool condition,
+        Operator @operator = Operator.Equal)
     {
         GetBuilder().WhereIf(column, value, condition, @operator);
         return this;
     }
 
     /// <summary>
-    /// 当指定实体的筛选值非空时追加参数化条件。
+    /// 按条件追加当前实体的布尔筛选表达式。
     /// </summary>
-    /// <typeparam name="TSource">筛选所属实体类型。</typeparam>
+    /// <param name="condition">是否追加筛选条件。</param>
+    /// <param name="predicate">实体筛选表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery<TEntity> WhereIf(Expression<Func<TEntity, bool>> predicate, bool condition)
+    {
+        GetBuilder().WhereIf(predicate, condition);
+        return this;
+    }
+
+    /// <summary>
+    /// 当当前实体的筛选值非空时追加参数化条件。
+    /// </summary>
     /// <param name="column">实体属性表达式。</param>
     /// <param name="value">比较值。</param>
     /// <param name="operator">比较运算符。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> WhereIfNotEmpty<TSource>(Expression<Func<TSource, object>> column, object value,
-        Operator @operator = Operator.Equal) where TSource : class
+    public SqlLambdaQuery<TEntity> WhereIfNotEmpty(Expression<Func<TEntity, object>> column, object value,
+        Operator @operator = Operator.Equal)
     {
         GetBuilder().WhereIfNotEmpty(column, value, @operator);
         return this;
     }
 
     /// <summary>
-    /// 当指定实体的布尔筛选表达式非空时追加条件。
+    /// 当当前实体的布尔筛选表达式非空时追加条件。
     /// </summary>
-    /// <typeparam name="TSource">筛选所属实体类型。</typeparam>
     /// <param name="predicate">实体筛选表达式。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> WhereIfNotEmpty<TSource>(Expression<Func<TSource, bool>> predicate)
-        where TSource : class
+    public SqlLambdaQuery<TEntity> WhereIfNotEmpty(Expression<Func<TEntity, bool>> predicate)
     {
         GetBuilder().WhereIfNotEmpty(predicate);
         return this;
@@ -234,12 +227,14 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// 添加类型化内连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="on">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TJoin> Join<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> Join<TJoin>(Expression<Func<TEntity, TJoin, bool>> on,
+        string alias = null, string schema = null) where TJoin : class
     {
-        GetBuilder().Join<TJoin>(alias, schema);
+        GetTypedJoinClause().Join<TJoin>(GetTypedFromClause(), on, alias, schema);
         return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -247,12 +242,14 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// 添加类型化左外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="on">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TJoin> LeftJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> LeftJoin<TJoin>(Expression<Func<TEntity, TJoin, bool>> on,
+        string alias = null, string schema = null) where TJoin : class
     {
-        GetBuilder().LeftJoin<TJoin>(alias, schema);
+        GetTypedJoinClause().LeftJoin<TJoin>(GetTypedFromClause(), on, alias, schema);
         return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -260,12 +257,14 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// 添加类型化右外连接表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="on">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>包含实体来源和连接表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TJoin> RightJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> RightJoin<TJoin>(Expression<Func<TEntity, TJoin, bool>> on,
+        string alias = null, string schema = null) where TJoin : class
     {
-        GetBuilder().RightJoin<TJoin>(alias, schema);
+        GetTypedJoinClause().RightJoin<TJoin>(GetTypedFromClause(), on, alias, schema);
         return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -273,12 +272,14 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// 添加类型化全外连接表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="on">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名称。</param>
     /// <returns>包含实体来源和连接表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TJoin> FullJoin<TJoin>(string alias = null, string schema = null) where TJoin : class
+    public SqlLambdaQuery<TEntity, TJoin> FullJoin<TJoin>(Expression<Func<TEntity, TJoin, bool>> on,
+        string alias = null, string schema = null) where TJoin : class
     {
-        GetBuilder().FullJoin<TJoin>(alias, schema);
+        GetTypedJoinClause().FullJoin<TJoin>(GetTypedFromClause(), on, alias, schema);
         return new SqlLambdaQuery<TEntity, TJoin>(Executor, GetBuilder(), false);
     }
 
@@ -328,54 +329,62 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 添加类型化内连接派生表并切换到双表 Lambda 查询描述。
+    /// 添加带连接条件的类型化内连接派生表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根表和派生表的连接条件。</param>
     /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TProjection> Join<TProjection>(SqlSubquery<TProjection> subquery)
+    public SqlLambdaQuery<TEntity, TProjection> Join<TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TEntity, TProjection, bool>> predicate)
         where TProjection : class
     {
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).Join(subquery);
+        GetTypedJoinClause().Join(GetTypedFromClause(), subquery, predicate);
         return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化左外连接派生表并切换到双表 Lambda 查询描述。
+    /// 添加带连接条件的类型化左外连接派生表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根表和派生表的连接条件。</param>
     /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TProjection> LeftJoin<TProjection>(SqlSubquery<TProjection> subquery)
+    public SqlLambdaQuery<TEntity, TProjection> LeftJoin<TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TEntity, TProjection, bool>> predicate)
         where TProjection : class
     {
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).LeftJoin(subquery);
+        GetTypedJoinClause().LeftJoin(GetTypedFromClause(), subquery, predicate);
         return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化右外连接派生表并切换到双表 Lambda 查询描述。
+    /// 添加带连接条件的类型化右外连接派生表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根表和派生表的连接条件。</param>
     /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TProjection> RightJoin<TProjection>(SqlSubquery<TProjection> subquery)
+    public SqlLambdaQuery<TEntity, TProjection> RightJoin<TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TEntity, TProjection, bool>> predicate)
         where TProjection : class
     {
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).RightJoin(subquery);
+        GetTypedJoinClause().RightJoin(GetTypedFromClause(), subquery, predicate);
         return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
-    /// 添加类型化全外连接派生表并切换到双表 Lambda 查询描述。
+    /// 添加带连接条件的类型化全外连接派生表并切换到双表 Lambda 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">包含根表和派生表的连接条件。</param>
     /// <returns>包含实体来源和派生表来源的双表查询描述。</returns>
-    public SqlLambdaQuery<TEntity, TProjection> FullJoin<TProjection>(SqlSubquery<TProjection> subquery)
+    public SqlLambdaQuery<TEntity, TProjection> FullJoin<TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TEntity, TProjection, bool>> predicate)
         where TProjection : class
     {
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).FullJoin(subquery);
+        GetTypedJoinClause().FullJoin(GetTypedFromClause(), subquery, predicate);
         return new SqlLambdaQuery<TEntity, TProjection>(Executor, GetBuilder(), false);
     }
 
@@ -430,22 +439,6 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
-    /// 设置类型化聚合投影并冻结结果映射类型。
-    /// </summary>
-    /// <typeparam name="TResult">聚合结果类型。</typeparam>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="column">实体属性表达式。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
-    /// <returns>固定聚合结果类型的查询描述。</returns>
-    public SqlQuery<TResult> Aggregate<TResult>(SqlAggregateFunction function,
-        Expression<Func<TEntity, object>> column, string columnAlias = null, bool distinct = false)
-    {
-        Aggregate(function, column, columnAlias, distinct);
-        return WithResult<TResult>();
-    }
-
-    /// <summary>
     /// 使用已成功配置的候选 Select 子句替换当前投影。
     /// </summary>
     /// <param name="configure">配置候选 Select 子句的操作。</param>
@@ -457,26 +450,28 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     }
 
     /// <summary>
+    /// 获取支持类型化 Lambda 绑定的根来源子句。
+    /// </summary>
+    /// <returns>当前查询的 From 子句。</returns>
+    private FromClause GetTypedFromClause() =>
+        ((ISqlQueryClauseAccessor)GetBuilder()).FromClause as FromClause ??
+        throw new NotSupportedException("当前 SQL Provider 不支持类型化 Lambda 根来源。");
+
+    /// <summary>
+    /// 获取支持类型化 Lambda 绑定的连接子句。
+    /// </summary>
+    /// <returns>当前查询的 Join 子句。</returns>
+    private JoinClause GetTypedJoinClause() =>
+        ((ISqlQueryClauseAccessor)GetBuilder()).JoinClause as JoinClause ??
+        throw new NotSupportedException("当前 SQL Provider 不支持类型化 Lambda 连接。");
+
+    /// <summary>
     /// 按当前实体属性排序。
     /// </summary>
     /// <param name="column">实体属性表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> OrderBy(Expression<Func<TEntity, object>> column, bool desc = false)
-    {
-        GetBuilder().OrderBy(column, desc);
-        return this;
-    }
-
-    /// <summary>
-    /// 按指定实体属性排序。
-    /// </summary>
-    /// <typeparam name="TSource">排序所属实体类型。</typeparam>
-    /// <param name="column">实体属性表达式。</param>
-    /// <param name="desc">是否按降序排序。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TEntity> OrderBy<TSource>(Expression<Func<TSource, object>> column, bool desc = false)
-        where TSource : class
     {
         GetBuilder().OrderBy(column, desc);
         return this;

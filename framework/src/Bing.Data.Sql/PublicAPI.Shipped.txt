@@ -1800,24 +1800,16 @@ Bing.Data.Sql.SqlLambdaQuery<TEntity>.AppendSelect(bool propertyAsAlias = false)
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.ClearSelect() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.GroupBy(params System.Linq.Expressions.Expression<System.Func<TEntity, object>>[] columns) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Join<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.LeftJoin<TJoin>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity, TJoin>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.OrderBy(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.OrderBy<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, object>> column, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select(bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Distinct() -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlQuery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Where(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Where<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, object>> column, object value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlLambdaQuery<TEntity>.Where<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.WhereIf<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, object>> column, object value, bool condition, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.WhereIfNotEmpty<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.WhereIfNotEmpty<TSource>(System.Linq.Expressions.Expression<System.Func<TSource, object>> column, object value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlOptionsDatabaseContextExtensions
 Bing.Data.Sql.SqlOptionsExtensions
 Bing.Data.Sql.SqlParameterBindingContext

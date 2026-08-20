@@ -40,13 +40,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 在保留当前独立 Builder 和执行器的前提下切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
-    /// <returns>使用同一查询状态但具有新结果类型的查询描述。</returns>
-    internal SqlQuery<TResult> WithResult<TResult>() => new(_executor, _builder);
-
-    /// <summary>
     /// 获取当前查询专属的 SQL Builder。
     /// </summary>
     /// <remarks>

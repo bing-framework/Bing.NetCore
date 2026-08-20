@@ -46,30 +46,15 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
         var columns = GetFromClause(accessor).ResolveMultiSourceColumns(expression, GetBoundSources(accessor));
-        GetBuilder().ClearSelect();
-        accessor.SelectClause.Select(string.Join(", ", columns));
+        ReplaceSelect(string.Join(", ", columns));
         return this;
     }
 
     /// <summary>
-    /// 使用已绑定表源设置多表投影列并切换结果映射类型。
+    /// 使用 DTO 成员初始化表达式设置多表投影列。
     /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
-    /// <param name="expression">返回 object 数组的多表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    protected SqlQuery<TProjection> SelectAsCore<TProjection>(LambdaExpression expression)
-    {
-        SelectCore(expression);
-        return WithResult<TProjection>();
-    }
-
-    /// <summary>
-    /// 使用 DTO 成员初始化表达式设置多表投影列并切换结果映射类型。
-    /// </summary>
-    /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
-    /// <returns>使用投影结果类型的查询描述。</returns>
-    protected SqlQuery<TProjection> SelectTypedCore<TProjection>(LambdaExpression expression)
+    protected void SelectTypedCore(LambdaExpression expression)
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
@@ -77,9 +62,7 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
         var columns = expression.Body is MemberInitExpression
             ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, GetBoundSources(accessor))
             : GetFromClause(accessor).ResolveMultiSourceColumns(expression, GetBoundSources(accessor));
-        GetBuilder().ClearSelect();
-        accessor.SelectClause.Select(string.Join(", ", columns));
-        return WithResult<TProjection>();
+        ReplaceSelect(string.Join(", ", columns));
     }
 
     /// <summary>
@@ -159,57 +142,68 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
     }
 
     /// <summary>
-    /// 使用已绑定表源设置最后一个连接的 On 条件。
-    /// </summary>
-    /// <param name="expression">多表布尔连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    protected SqlMultiLambdaQuery<TResult> OnCore(LambdaExpression expression)
-    {
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var joinClause = accessor.JoinClause as JoinClause ??
-            throw new NotSupportedException("当前 SQL Provider 不支持多表连接查询。");
-        joinClause.ValidateLastJoinSupportsOn();
-        joinClause.SetBoundOn(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, GetBoundSources(accessor)));
-        return this;
-    }
-
-    /// <summary>
-    /// 添加类型化内连接表。
+    /// 原子添加类型化内连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含当前全部表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
-    protected void JoinCore<TJoin>(string alias, string schema) where TJoin : class =>
-        GetBuilder().Join<TJoin>(alias, schema);
+    protected void JoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
+        GetJoinClause().Join<TJoin>(GetFromClause(), predicate, alias, schema);
 
     /// <summary>
-    /// 添加类型化左外连接表。
+    /// 原子添加类型化左外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含当前全部表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
-    protected void LeftJoinCore<TJoin>(string alias, string schema) where TJoin : class =>
-        GetBuilder().LeftJoin<TJoin>(alias, schema);
+    protected void LeftJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
+        GetJoinClause().LeftJoin<TJoin>(GetFromClause(), predicate, alias, schema);
 
     /// <summary>
-    /// 添加类型化右外连接表。
+    /// 原子添加类型化右外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含当前全部表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
-    protected void RightJoinCore<TJoin>(string alias, string schema) where TJoin : class =>
-        GetBuilder().RightJoin<TJoin>(alias, schema);
+    protected void RightJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
+        GetJoinClause().RightJoin<TJoin>(GetFromClause(), predicate, alias, schema);
 
     /// <summary>
-    /// 添加类型化全外连接表。
+    /// 原子添加类型化全外连接表。
     /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含当前全部表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
-    protected void FullJoinCore<TJoin>(string alias, string schema) where TJoin : class =>
-        GetBuilder().FullJoin<TJoin>(alias, schema);
+    protected void FullJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
+        GetJoinClause().FullJoin<TJoin>(GetFromClause(), predicate, alias, schema);
+
+    /// <summary>
+    /// 原子添加类型化派生表内连接。
+    /// </summary>
+    protected void JoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
+        GetJoinClause().Join(GetFromClause(), subquery, predicate);
+
+    /// <summary>
+    /// 原子添加类型化派生表左外连接。
+    /// </summary>
+    protected void LeftJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
+        GetJoinClause().LeftJoin(GetFromClause(), subquery, predicate);
+
+    /// <summary>
+    /// 原子添加类型化派生表右外连接。
+    /// </summary>
+    protected void RightJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
+        GetJoinClause().RightJoin(GetFromClause(), subquery, predicate);
+
+    /// <summary>
+    /// 原子添加类型化派生表全外连接。
+    /// </summary>
+    protected void FullJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
+        GetJoinClause().FullJoin(GetFromClause(), subquery, predicate);
 
     /// <summary>
     /// 添加类型化交叉连接表。
@@ -221,34 +215,21 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
         GetBuilder().CrossJoin<TJoin>(alias, schema);
 
     /// <summary>
-    /// 添加类型化内连接派生表。
-    /// </summary>
-    protected void JoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).Join(subquery);
-
-    /// <summary>
-    /// 添加类型化左外连接派生表。
-    /// </summary>
-    protected void LeftJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).LeftJoin(subquery);
-
-    /// <summary>
-    /// 添加类型化右外连接派生表。
-    /// </summary>
-    protected void RightJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).RightJoin(subquery);
-
-    /// <summary>
-    /// 添加类型化全外连接派生表。
-    /// </summary>
-    protected void FullJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
-        ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).FullJoin(subquery);
-
-    /// <summary>
     /// 添加类型化交叉连接派生表。
     /// </summary>
     protected void CrossJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
         ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).CrossJoin(subquery);
+
+    /// <summary>
+    /// 使用候选投影原子替换当前 Select 子句。
+    /// </summary>
+    /// <param name="columns">已解析的完整投影列 SQL。</param>
+    private void ReplaceSelect(string columns)
+    {
+        var builder = GetBuilder() as SqlBuilderBase ??
+            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
+        builder.ReplaceSelect(select => select.Select(columns));
+    }
 
     /// <summary>
     /// 设置查询的分页偏移量。
@@ -261,6 +242,21 @@ public abstract class SqlMultiLambdaQuery<TResult> : SqlQuery<TResult> where TRe
     /// </summary>
     /// <param name="count">最多返回的结果行数。</param>
     protected void TakeCore(int count) => GetBuilder().Take(count);
+
+    /// <summary>
+    /// 获取当前查询的类型化根来源子句。
+    /// </summary>
+    /// <returns>支持表源绑定图的 From 子句。</returns>
+    private protected FromClause GetFromClause() =>
+        GetFromClause((ISqlQueryClauseAccessor)GetBuilder());
+
+    /// <summary>
+    /// 获取当前查询的类型化连接子句。
+    /// </summary>
+    /// <returns>支持原子 Lambda Join 的 Join 子句。</returns>
+    private protected JoinClause GetJoinClause() =>
+        ((ISqlQueryClauseAccessor)GetBuilder()).JoinClause as JoinClause ??
+        throw new NotSupportedException("当前 SQL Provider 不支持多表连接查询。");
 
     /// <summary>
     /// 获取支持表源实例图的 From 子句。
@@ -344,25 +340,17 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">双表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond> Select<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用双表 DTO 成员初始化投影创建冻结的类型化派生表。
     /// </summary>
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TProjection>> projection,
         string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
-
-    /// <summary>
-    /// 设置最后一个连接的双表条件。
-    /// </summary>
-    /// <param name="predicate">双表连接条件表达式。</param>
-    /// <returns>当前双表查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond> On(Expression<Func<TFirst, TSecond, bool>> predicate)
-    {
-        OnCore(predicate);
-        return this;
-    }
 
     /// <summary>
     /// 设置双表分组列。
@@ -390,13 +378,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// 添加第三个类型化连接表。
     /// </summary>
     /// <typeparam name="TThird">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含三个表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含三个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> Join<TThird>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird> Join<TThird>(
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate, string alias = null, string schema = null)
         where TThird : class
     {
-        JoinCore<TThird>(alias, schema);
+        JoinCore<TThird>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
@@ -404,13 +394,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// 添加第三个类型化左外连接表。
     /// </summary>
     /// <typeparam name="TThird">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含三个表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含三个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> LeftJoin<TThird>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird> LeftJoin<TThird>(
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate, string alias = null, string schema = null)
         where TThird : class
     {
-        LeftJoinCore<TThird>(alias, schema);
+        LeftJoinCore<TThird>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
@@ -418,13 +410,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// 添加第三个类型化右外连接表。
     /// </summary>
     /// <typeparam name="TThird">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含三个表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含三个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> RightJoin<TThird>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird> RightJoin<TThird>(
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate, string alias = null, string schema = null)
         where TThird : class
     {
-        RightJoinCore<TThird>(alias, schema);
+        RightJoinCore<TThird>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
@@ -432,13 +426,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// 添加第三个类型化全外连接表。
     /// </summary>
     /// <typeparam name="TThird">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含三个表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含三个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> FullJoin<TThird>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird> FullJoin<TThird>(
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate, string alias = null, string schema = null)
         where TThird : class
     {
-        FullJoinCore<TThird>(alias, schema);
+        FullJoinCore<TThird>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
@@ -459,36 +455,40 @@ public sealed class SqlLambdaQuery<TFirst, TSecond> : SqlMultiLambdaQuery<TFirst
     /// <summary>
     /// 添加第三个类型化内连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> Join<TThird>(SqlSubquery<TThird> subquery) where TThird : class
+    public SqlLambdaQuery<TFirst, TSecond, TThird> Join<TThird>(SqlSubquery<TThird> subquery,
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate) where TThird : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第三个类型化左外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> LeftJoin<TThird>(SqlSubquery<TThird> subquery) where TThird : class
+    public SqlLambdaQuery<TFirst, TSecond, TThird> LeftJoin<TThird>(SqlSubquery<TThird> subquery,
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate) where TThird : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第三个类型化右外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> RightJoin<TThird>(SqlSubquery<TThird> subquery) where TThird : class
+    public SqlLambdaQuery<TFirst, TSecond, TThird> RightJoin<TThird>(SqlSubquery<TThird> subquery,
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate) where TThird : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第三个类型化全外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> FullJoin<TThird>(SqlSubquery<TThird> subquery) where TThird : class
+    public SqlLambdaQuery<TFirst, TSecond, TThird> FullJoin<TThird>(SqlSubquery<TThird> subquery,
+        Expression<Func<TFirst, TSecond, TThird, bool>> predicate) where TThird : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird>(Executor, GetBuilder(), false);
     }
 
@@ -582,8 +582,12 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">三表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用三表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -609,27 +613,18 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     }
 
     /// <summary>
-    /// 为最后一个连接设置三表 On 条件。
-    /// </summary>
-    /// <param name="predicate">三表连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird> On(Expression<Func<TFirst, TSecond, TThird, bool>> predicate)
-    {
-        OnCore(predicate);
-        return this;
-    }
-
-    /// <summary>
     /// 添加第四个类型化连接表。
     /// </summary>
     /// <typeparam name="TFourth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含四个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> Join<TFourth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> Join<TFourth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate, string alias = null, string schema = null)
         where TFourth : class
     {
-        JoinCore<TFourth>(alias, schema);
+        JoinCore<TFourth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
@@ -637,13 +632,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// 添加第四个类型化左外连接表。
     /// </summary>
     /// <typeparam name="TFourth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含四个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate, string alias = null, string schema = null)
         where TFourth : class
     {
-        LeftJoinCore<TFourth>(alias, schema);
+        LeftJoinCore<TFourth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
@@ -651,13 +648,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// 添加第四个类型化右外连接表。
     /// </summary>
     /// <typeparam name="TFourth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含四个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate, string alias = null, string schema = null)
         where TFourth : class
     {
-        RightJoinCore<TFourth>(alias, schema);
+        RightJoinCore<TFourth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
@@ -665,13 +664,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// 添加第四个类型化全外连接表。
     /// </summary>
     /// <typeparam name="TFourth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含四个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate, string alias = null, string schema = null)
         where TFourth : class
     {
-        FullJoinCore<TFourth>(alias, schema);
+        FullJoinCore<TFourth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
@@ -692,40 +693,44 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird> : SqlMultiLambdaQuer
     /// <summary>
     /// 添加第四个类型化内连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> Join<TFourth>(SqlSubquery<TFourth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> Join<TFourth>(SqlSubquery<TFourth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate)
         where TFourth : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第四个类型化左外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(SqlSubquery<TFourth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> LeftJoin<TFourth>(SqlSubquery<TFourth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate)
         where TFourth : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第四个类型化右外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(SqlSubquery<TFourth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> RightJoin<TFourth>(SqlSubquery<TFourth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate)
         where TFourth : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>
     /// 添加第四个类型化全外连接派生表。
     /// </summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(SqlSubquery<TFourth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> FullJoin<TFourth>(SqlSubquery<TFourth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate)
         where TFourth : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth>(Executor, GetBuilder(), false);
     }
 
@@ -817,8 +822,12 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">四表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用四表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -844,27 +853,18 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     }
 
     /// <summary>
-    /// 为最后一个连接设置四表 On 条件。
-    /// </summary>
-    /// <param name="predicate">四表连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, bool>> predicate)
-    {
-        OnCore(predicate);
-        return this;
-    }
-
-    /// <summary>
     /// 添加第五个类型化连接表。
     /// </summary>
     /// <typeparam name="TFifth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含五个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> Join<TFifth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> Join<TFifth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate, string alias = null, string schema = null)
         where TFifth : class
     {
-        JoinCore<TFifth>(alias, schema);
+        JoinCore<TFifth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
@@ -872,13 +872,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     /// 添加第五个类型化左外连接表。
     /// </summary>
     /// <typeparam name="TFifth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含五个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> LeftJoin<TFifth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> LeftJoin<TFifth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate, string alias = null, string schema = null)
         where TFifth : class
     {
-        LeftJoinCore<TFifth>(alias, schema);
+        LeftJoinCore<TFifth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
@@ -886,13 +888,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     /// 添加第五个类型化右外连接表。
     /// </summary>
     /// <typeparam name="TFifth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含五个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> RightJoin<TFifth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> RightJoin<TFifth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate, string alias = null, string schema = null)
         where TFifth : class
     {
-        RightJoinCore<TFifth>(alias, schema);
+        RightJoinCore<TFifth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
@@ -900,13 +904,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     /// 添加第五个类型化全外连接表。
     /// </summary>
     /// <typeparam name="TFifth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含五个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> FullJoin<TFifth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> FullJoin<TFifth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate, string alias = null, string schema = null)
         where TFifth : class
     {
-        FullJoinCore<TFifth>(alias, schema);
+        FullJoinCore<TFifth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
@@ -925,34 +931,38 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> : SqlMultiL
     }
 
     /// <summary>添加第五个类型化内连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> Join<TFifth>(SqlSubquery<TFifth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> Join<TFifth>(SqlSubquery<TFifth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate)
         where TFifth : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第五个类型化左外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> LeftJoin<TFifth>(SqlSubquery<TFifth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> LeftJoin<TFifth>(SqlSubquery<TFifth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate)
         where TFifth : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第五个类型化右外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> RightJoin<TFifth>(SqlSubquery<TFifth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> RightJoin<TFifth>(SqlSubquery<TFifth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate)
         where TFifth : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第五个类型化全外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> FullJoin<TFifth>(SqlSubquery<TFifth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> FullJoin<TFifth>(SqlSubquery<TFifth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate)
         where TFifth : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth>(Executor, GetBuilder(), false);
     }
 
@@ -1042,8 +1052,12 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">五表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用五表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1069,27 +1083,18 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     }
 
     /// <summary>
-    /// 为最后一个连接设置五表 On 条件。
-    /// </summary>
-    /// <param name="predicate">五表连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, bool>> predicate)
-    {
-        OnCore(predicate);
-        return this;
-    }
-
-    /// <summary>
     /// 添加第六个类型化连接表。
     /// </summary>
     /// <typeparam name="TSixth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含六个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Join<TSixth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Join<TSixth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate, string alias = null, string schema = null)
         where TSixth : class
     {
-        JoinCore<TSixth>(alias, schema);
+        JoinCore<TSixth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
@@ -1097,13 +1102,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     /// 添加第六个类型化左外连接表。
     /// </summary>
     /// <typeparam name="TSixth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含六个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> LeftJoin<TSixth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> LeftJoin<TSixth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate, string alias = null, string schema = null)
         where TSixth : class
     {
-        LeftJoinCore<TSixth>(alias, schema);
+        LeftJoinCore<TSixth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
@@ -1111,13 +1118,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     /// 添加第六个类型化右外连接表。
     /// </summary>
     /// <typeparam name="TSixth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含六个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> RightJoin<TSixth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> RightJoin<TSixth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate, string alias = null, string schema = null)
         where TSixth : class
     {
-        RightJoinCore<TSixth>(alias, schema);
+        RightJoinCore<TSixth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
@@ -1125,13 +1134,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     /// 添加第六个类型化全外连接表。
     /// </summary>
     /// <typeparam name="TSixth">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含六个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FullJoin<TSixth>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FullJoin<TSixth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate, string alias = null, string schema = null)
         where TSixth : class
     {
-        FullJoinCore<TSixth>(alias, schema);
+        FullJoinCore<TSixth>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
@@ -1150,34 +1161,38 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> : S
     }
 
     /// <summary>添加第六个类型化内连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Join<TSixth>(SqlSubquery<TSixth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Join<TSixth>(SqlSubquery<TSixth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate)
         where TSixth : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第六个类型化左外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> LeftJoin<TSixth>(SqlSubquery<TSixth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> LeftJoin<TSixth>(SqlSubquery<TSixth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate)
         where TSixth : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第六个类型化右外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> RightJoin<TSixth>(SqlSubquery<TSixth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> RightJoin<TSixth>(SqlSubquery<TSixth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate)
         where TSixth : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第六个类型化全外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FullJoin<TSixth>(SqlSubquery<TSixth> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> FullJoin<TSixth>(SqlSubquery<TSixth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate)
         where TSixth : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>(Executor, GetBuilder(), false);
     }
 
@@ -1267,8 +1282,12 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">六表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用六表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1294,27 +1313,19 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     }
 
     /// <summary>
-    /// 为最后一个连接设置六表 On 条件。
-    /// </summary>
-    /// <param name="predicate">六表连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, bool>> predicate)
-    {
-        OnCore(predicate);
-        return this;
-    }
-
-    /// <summary>
     /// 添加第七个类型化连接表。
     /// </summary>
     /// <typeparam name="TSeventh">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含七个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Join<TSeventh>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Join<TSeventh>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate,
+        string alias = null, string schema = null)
         where TSeventh : class
     {
-        JoinCore<TSeventh>(alias, schema);
+        JoinCore<TSeventh>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
@@ -1322,13 +1333,16 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// 添加第七个类型化左外连接表。
     /// </summary>
     /// <typeparam name="TSeventh">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含七个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> LeftJoin<TSeventh>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> LeftJoin<TSeventh>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate,
+        string alias = null, string schema = null)
         where TSeventh : class
     {
-        LeftJoinCore<TSeventh>(alias, schema);
+        LeftJoinCore<TSeventh>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
@@ -1336,13 +1350,16 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// 添加第七个类型化右外连接表。
     /// </summary>
     /// <typeparam name="TSeventh">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含七个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> RightJoin<TSeventh>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> RightJoin<TSeventh>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate,
+        string alias = null, string schema = null)
         where TSeventh : class
     {
-        RightJoinCore<TSeventh>(alias, schema);
+        RightJoinCore<TSeventh>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
@@ -1350,13 +1367,16 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// 添加第七个类型化全外连接表。
     /// </summary>
     /// <typeparam name="TSeventh">连接表实体类型。</typeparam>
+    /// <param name="predicate">包含所有表源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
     /// <returns>包含七个表源的查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FullJoin<TSeventh>(string alias = null, string schema = null)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FullJoin<TSeventh>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate,
+        string alias = null, string schema = null)
         where TSeventh : class
     {
-        FullJoinCore<TSeventh>(alias, schema);
+        FullJoinCore<TSeventh>(predicate, alias, schema);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
@@ -1375,34 +1395,38 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     }
 
     /// <summary>添加第七个类型化内连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Join<TSeventh>(SqlSubquery<TSeventh> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Join<TSeventh>(SqlSubquery<TSeventh> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
         where TSeventh : class
     {
-        JoinCore(subquery);
+        JoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第七个类型化左外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> LeftJoin<TSeventh>(SqlSubquery<TSeventh> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> LeftJoin<TSeventh>(SqlSubquery<TSeventh> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
         where TSeventh : class
     {
-        LeftJoinCore(subquery);
+        LeftJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第七个类型化右外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> RightJoin<TSeventh>(SqlSubquery<TSeventh> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> RightJoin<TSeventh>(SqlSubquery<TSeventh> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
         where TSeventh : class
     {
-        RightJoinCore(subquery);
+        RightJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
     /// <summary>添加第七个类型化全外连接派生表。</summary>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FullJoin<TSeventh>(SqlSubquery<TSeventh> subquery)
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> FullJoin<TSeventh>(SqlSubquery<TSeventh> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
         where TSeventh : class
     {
-        FullJoinCore(subquery);
+        FullJoinCore(subquery, predicate);
         return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>(Executor, GetBuilder(), false);
     }
 
@@ -1492,8 +1516,12 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     /// <typeparam name="TProjection">投影结果映射类型。</typeparam>
     /// <param name="projection">七表 DTO 成员初始化投影表达式。</param>
     /// <returns>使用投影结果类型的查询描述。</returns>
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection) =>
-        SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
 
     /// <summary>
     /// 使用七表 DTO 成员初始化投影创建冻结的类型化派生表。
@@ -1515,17 +1543,6 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
     {
         HavingCore(predicate);
-        return this;
-    }
-
-    /// <summary>
-    /// 为最后一个连接设置七表 On 条件。
-    /// </summary>
-    /// <param name="predicate">七表连接表达式。</param>
-    /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, bool>> predicate)
-    {
-        OnCore(predicate);
         return this;
     }
 
@@ -1560,6 +1577,118 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
         OrderByCore(columns, desc);
         return this;
     }
+
+    /// <summary>
+    /// 原子添加第八个类型化内连接表。
+    /// </summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Join<TEighth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate,
+        string alias = null, string schema = null) where TEighth : class
+    {
+        JoinCore<TEighth>(predicate, alias, schema);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 原子添加第八个类型化左外连接表。
+    /// </summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> LeftJoin<TEighth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate,
+        string alias = null, string schema = null) where TEighth : class
+    {
+        LeftJoinCore<TEighth>(predicate, alias, schema);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 原子添加第八个类型化右外连接表。
+    /// </summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> RightJoin<TEighth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate,
+        string alias = null, string schema = null) where TEighth : class
+    {
+        RightJoinCore<TEighth>(predicate, alias, schema);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 原子添加第八个类型化全外连接表。
+    /// </summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> FullJoin<TEighth>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate,
+        string alias = null, string schema = null) where TEighth : class
+    {
+        FullJoinCore<TEighth>(predicate, alias, schema);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>
+    /// 添加第八个类型化交叉连接表。
+    /// </summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> CrossJoin<TEighth>(
+        string alias = null, string schema = null) where TEighth : class
+    {
+        CrossJoinCore<TEighth>(alias, schema);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>原子添加第八个类型化内连接派生表。</summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Join<TEighth>(
+        SqlSubquery<TEighth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate)
+        where TEighth : class
+    {
+        JoinCore(subquery, predicate);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>原子添加第八个类型化左外连接派生表。</summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> LeftJoin<TEighth>(
+        SqlSubquery<TEighth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate)
+        where TEighth : class
+    {
+        LeftJoinCore(subquery, predicate);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>原子添加第八个类型化右外连接派生表。</summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> RightJoin<TEighth>(
+        SqlSubquery<TEighth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate)
+        where TEighth : class
+    {
+        RightJoinCore(subquery, predicate);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>原子添加第八个类型化全外连接派生表。</summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> FullJoin<TEighth>(
+        SqlSubquery<TEighth> subquery,
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate)
+        where TEighth : class
+    {
+        FullJoinCore(subquery, predicate);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
+
+    /// <summary>添加第八个类型化交叉连接派生表。</summary>
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> CrossJoin<TEighth>(
+        SqlSubquery<TEighth> subquery) where TEighth : class
+    {
+        CrossJoinCore(subquery);
+        return new SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>(Executor,
+            GetBuilder(), false);
+    }
 }
 
 public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> : SqlMultiLambdaQuery<TFirst>
@@ -1582,24 +1711,28 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns) { GroupByCore(columns); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { HavingCore(predicate); return this; }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, bool>> predicate) { OnCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Skip(int count) { SkipCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> Take(int count) { TakeCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
 
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(string alias = null, string schema = null) where TNinth : class { JoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { LeftJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { RightJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { FullJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate, string alias = null, string schema = null) where TNinth : class { JoinCore<TNinth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate, string alias = null, string schema = null) where TNinth : class { LeftJoinCore<TNinth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate, string alias = null, string schema = null) where TNinth : class { RightJoinCore<TNinth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate, string alias = null, string schema = null) where TNinth : class { FullJoinCore<TNinth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> CrossJoin<TNinth>(string alias = null, string schema = null) where TNinth : class { CrossJoinCore<TNinth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { JoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { LeftJoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { RightJoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { FullJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Join<TNinth>(SqlSubquery<TNinth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) where TNinth : class { JoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> LeftJoin<TNinth>(SqlSubquery<TNinth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) where TNinth : class { LeftJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> RightJoin<TNinth>(SqlSubquery<TNinth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) where TNinth : class { RightJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> FullJoin<TNinth>(SqlSubquery<TNinth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) where TNinth : class { FullJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> CrossJoin<TNinth>(SqlSubquery<TNinth> subquery) where TNinth : class { CrossJoinCore(subquery); return new(Executor, GetBuilder(), false); }
 }
 
@@ -1623,24 +1756,28 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns) { GroupByCore(columns); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { HavingCore(predicate); return this; }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, bool>> predicate) { OnCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Skip(int count) { SkipCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> Take(int count) { TakeCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
 
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(string alias = null, string schema = null) where TTenth : class { JoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { LeftJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { RightJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { FullJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate, string alias = null, string schema = null) where TTenth : class { JoinCore<TTenth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate, string alias = null, string schema = null) where TTenth : class { LeftJoinCore<TTenth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate, string alias = null, string schema = null) where TTenth : class { RightJoinCore<TTenth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate, string alias = null, string schema = null) where TTenth : class { FullJoinCore<TTenth>(predicate, alias, schema); return new(Executor, GetBuilder(), false); }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> CrossJoin<TTenth>(string alias = null, string schema = null) where TTenth : class { CrossJoinCore<TTenth>(alias, schema); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { JoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { LeftJoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { RightJoinCore(subquery); return new(Executor, GetBuilder(), false); }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { FullJoinCore(subquery); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Join<TTenth>(SqlSubquery<TTenth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) where TTenth : class { JoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> LeftJoin<TTenth>(SqlSubquery<TTenth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) where TTenth : class { LeftJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> RightJoin<TTenth>(SqlSubquery<TTenth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) where TTenth : class { RightJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> FullJoin<TTenth>(SqlSubquery<TTenth> subquery, Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) where TTenth : class { FullJoinCore(subquery, predicate); return new(Executor, GetBuilder(), false); }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> CrossJoin<TTenth>(SqlSubquery<TTenth> subquery) where TTenth : class { CrossJoinCore(subquery); return new(Executor, GetBuilder(), false); }
 }
 
@@ -1664,11 +1801,15 @@ public sealed class SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSi
 
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Where(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { WhereCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Select(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { SelectCore(columns); return this; }
-    public SqlQuery<TProjection> Select<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection) => SelectTypedCore<TProjection>(projection);
+    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Select<TProjection>(
+        Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection)
+    {
+        SelectTypedCore(projection);
+        return this;
+    }
     public SqlSubquery<TProjection> SelectSubquery<TProjection>(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, TProjection>> projection, string alias) where TProjection : class => SelectSubqueryCore<TProjection>(projection, alias);
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> GroupBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns) { GroupByCore(columns); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Having(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { HavingCore(predicate); return this; }
-    public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> On(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, bool>> predicate) { OnCore(predicate); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Skip(int count) { SkipCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> Take(int count) { TakeCore(count); return this; }
     public SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> OrderBy(Expression<Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth, object[]>> columns, bool desc = false) { OrderByCore(columns, desc); return this; }
