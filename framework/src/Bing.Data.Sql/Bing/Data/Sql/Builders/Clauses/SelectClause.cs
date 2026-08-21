@@ -114,6 +114,21 @@ public class SelectClause : ISelectClause
         new SelectClause(context, columns, distinct);
 
     /// <summary>
+    /// 使用候选 Select 子句替换当前可变状态。
+    /// </summary>
+    /// <param name="source">候选 Select 子句。</param>
+    internal void RestoreFrom(SelectClause source)
+    {
+        if (source == null)
+            return;
+        _columns.Clear();
+        for (var index = 0; index < source._columns.Count; index++)
+            _columns.AddColumn(source._columns[index].Clone());
+        _distinct = source._distinct;
+        _projectionCountKnown = source._projectionCountKnown;
+    }
+
+    /// <summary>
     /// 过滤重复记录
     /// </summary>
     public void Distinct()

@@ -14,6 +14,11 @@ public abstract class SqliteAritySampleBase
     /// 名称。
     /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// 下一个来源的关联标识。
+    /// </summary>
+    public int? NextId { get; set; }
 }
 
 /// <summary>一表测试来源。</summary>
@@ -55,4 +60,25 @@ public sealed class SqliteArityResult
     /// 标识。
     /// </summary>
     public int Id { get; set; }
+}
+
+/// <summary>
+/// 1～10 表连续 Join 的首中尾投影结果模型。
+/// </summary>
+public sealed class SqliteArityJoinResult
+{
+    /// <summary>
+    /// 第一来源名称。
+    /// </summary>
+    public string FirstName { get; set; }
+
+    /// <summary>
+    /// 第五来源名称。
+    /// </summary>
+    public string MiddleName { get; set; }
+
+    /// <summary>
+    /// 第十来源名称。
+    /// </summary>
+    public string LastName { get; set; }
 }

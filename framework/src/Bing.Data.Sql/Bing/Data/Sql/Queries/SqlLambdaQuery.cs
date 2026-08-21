@@ -8,11 +8,11 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 使用实体映射构建的强类型 Lambda SQL 查询描述。
 /// </summary>
-/// <typeparam name="TEntity">查询结果和实体映射类型。</typeparam>
+/// <typeparam name="TEntity">查询来源实体类型。</typeparam>
 /// <remarks>
 /// 此类型仅用于实体查询，避免标量 <see cref="SqlQuery{TResult}"/> 承担实体表达式约束。
 /// </remarks>
-public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : class
+public sealed class SqlLambdaQuery<TEntity> : SqlMultiLambdaQuery where TEntity : class
 {
     /// <summary>
     /// 使用独立 SQL Builder 初始化实体 Lambda 查询描述。
@@ -70,7 +70,7 @@ public sealed class SqlLambdaQuery<TEntity> : SqlQuery<TEntity> where TEntity : 
     /// <summary>
     /// 使用强类型成员初始化表达式设置 DTO 投影。
     /// </summary>
-    /// <typeparam name="TProjection">投影结果类型。</typeparam>
+    /// <typeparam name="TProjection">投影形状类型；最终物化类型由显式 TResult 终结方法指定。</typeparam>
     /// <param name="projection">当前实体的直接成员初始化投影表达式。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery<TEntity> Select<TProjection>(Expression<Func<TEntity, TProjection>> projection)

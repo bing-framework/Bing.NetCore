@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 创建绑定查询执行运行时的查询描述。
 /// </summary>
-public static class SqlQueryRuntimeFactory
+internal static class SqlQueryRuntimeFactory
 {
     /// <summary>
     /// 创建结构化查询描述。

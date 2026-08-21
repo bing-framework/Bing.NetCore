@@ -296,12 +296,21 @@ public class SqlQueryApiContractTest
         // Arrange
         var lambdaMethods = typeof(SqlLambdaQuery<>).GetMethods();
         var multiLambdaMethods = typeof(SqlLambdaQuery<,>).GetMethods();
+        var terminalNames = new[]
+        {
+            "ToList", "First", "FirstOrDefault", "Single", "SingleOrDefault", "Scalar", "ToPage",
+            "AsEnumerable", "ToListAsync", "FirstAsync", "FirstOrDefaultAsync", "SingleAsync",
+            "SingleOrDefaultAsync", "ScalarAsync", "ToPageAsync", "AsAsyncEnumerable"
+        };
 
         // Assert
         Assert.True(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlFluentQuery<>)));
         Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlQuery<>)));
         Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlLambdaQuery<>)));
         Assert.False(typeof(ISqlQueryOperation).IsAssignableFrom(typeof(SqlLambdaQuery<,>)));
+        Assert.Equal(typeof(SqlMultiLambdaQuery), typeof(SqlLambdaQuery<>).BaseType);
+        Assert.Equal(typeof(SqlMultiLambdaQuery), typeof(SqlLambdaQuery<,>).BaseType);
+        Assert.Equal(typeof(SqlMultiLambdaQuery), typeof(SqlSubqueryLambdaQuery<>).BaseType);
         Assert.DoesNotContain(lambdaMethods, method => method.Name is "From" or "SplitOn");
         Assert.DoesNotContain(multiLambdaMethods, method => method.Name is "From" or "SplitOn");
         Assert.DoesNotContain(lambdaMethods, method => method.Name is "SelectFrom" or "AppendSelectFrom" or "WhereFrom");
@@ -310,6 +319,15 @@ public class SqlQueryApiContractTest
             method.IsGenericMethodDefinition && method.GetGenericArguments().Length > 1);
         Assert.DoesNotContain(multiLambdaMethods, method => (method.Name is "ToList" or "ToListAsync") &&
             method.IsGenericMethodDefinition && method.GetGenericArguments().Length > 1);
+        foreach (var terminalName in terminalNames)
+        {
+            Assert.Contains(lambdaMethods, method => method.Name == terminalName &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1);
+            Assert.Contains(multiLambdaMethods, method => method.Name == terminalName &&
+                method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 1);
+        }
+        Assert.DoesNotContain(typeof(SqlQuery<>).GetMethods(), method => method.IsGenericMethodDefinition &&
+            terminalNames.Contains(method.Name));
         Assert.Contains(typeof(SqlFluentQuery<>).GetMethods(), method => method.Name == "ToList" &&
             method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 3);
         Assert.Contains(typeof(SqlFluentQuery<>).GetMethods(), method => method.Name == "ToListAsync" &&
@@ -687,7 +705,7 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：结构化 Fluent 查询描述应公开同步和异步分页终结方法，且 Lambda 描述通过继承获得相同能力。
+    /// 测试目的：Raw 查询以创建时结果类型分页，Lambda 查询必须在终结方法上显式指定结果类型。
     /// </summary>
     [Fact]
     public void FluentQueryDescriptions_WhenPublicApiInspected_ShouldExposePagingTerminals()
@@ -702,9 +720,9 @@ public class SqlQueryApiContractTest
         var async = typeof(SqlQuery<>).GetMethods().Single(method => method.Name == "ToPageAsync" &&
             method.IsGenericMethod == false);
         var lambdaSync = typeof(SqlLambdaQuery<>).GetMethods().Single(method => method.Name == "ToPage" &&
-            method.IsGenericMethod == false);
+            method.IsGenericMethodDefinition);
         var lambdaAsync = typeof(SqlLambdaQuery<>).GetMethods().Single(method => method.Name == "ToPageAsync" &&
-            method.IsGenericMethod == false);
+            method.IsGenericMethodDefinition);
 
         // Assert
         Assert.NotNull(sync);
@@ -717,6 +735,8 @@ public class SqlQueryApiContractTest
         Assert.Equal(expectedAsyncParameters, async.GetParameters().Select(parameter => parameter.ParameterType));
         Assert.Equal(typeof(Bing.Data.PagerList<>), lambdaSync.ReturnType.GetGenericTypeDefinition());
         Assert.Equal(typeof(Task<>), lambdaAsync.ReturnType.GetGenericTypeDefinition());
+        Assert.Single(lambdaSync.GetGenericArguments());
+        Assert.Single(lambdaAsync.GetGenericArguments());
         Assert.Equal(expectedSyncParameters, lambdaSync.GetParameters().Select(parameter => parameter.ParameterType));
         Assert.Equal(expectedAsyncParameters, lambdaAsync.GetParameters().Select(parameter => parameter.ParameterType));
     }

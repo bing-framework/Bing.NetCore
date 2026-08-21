@@ -38,27 +38,11 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     public List<TResult> ToList(int? timeout = null) => _query.ToList<TResult>(timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并完整物化指定类型的结果集。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>最终结果列表。</returns>
-    public List<TNextResult> ToList<TNextResult>(int? timeout = null) => _query.ToList<TNextResult>(timeout);
-
-    /// <summary>
     /// 同步执行当前 Fluent 查询并获取第一行。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>第一行结果。</returns>
     public TResult First(int? timeout = null) => _query.First<TResult>(timeout);
-
-    /// <summary>
-    /// 同步执行当前 Fluent 查询并获取指定类型的第一行。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>第一行结果。</returns>
-    public TNextResult First<TNextResult>(int? timeout = null) => _query.First<TNextResult>(timeout);
 
     /// <summary>
     /// 同步执行当前 Fluent 查询并获取第一行或默认值。
@@ -68,27 +52,11 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     public TResult FirstOrDefault(int? timeout = null) => _query.FirstOrDefault<TResult>(timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并获取指定类型的第一行或默认值。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>第一行结果或默认值。</returns>
-    public TNextResult FirstOrDefault<TNextResult>(int? timeout = null) => _query.FirstOrDefault<TNextResult>(timeout);
-
-    /// <summary>
     /// 同步执行当前 Fluent 查询并获取唯一一行。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>唯一结果行。</returns>
     public TResult Single(int? timeout = null) => _query.Single<TResult>(timeout);
-
-    /// <summary>
-    /// 同步执行当前 Fluent 查询并获取指定类型的唯一结果行。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>唯一结果行。</returns>
-    public TNextResult Single<TNextResult>(int? timeout = null) => _query.Single<TNextResult>(timeout);
 
     /// <summary>
     /// 同步执行当前 Fluent 查询并获取唯一一行或默认值。
@@ -98,28 +66,11 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     public TResult SingleOrDefault(int? timeout = null) => _query.SingleOrDefault<TResult>(timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并获取指定类型的唯一结果行或默认值。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>唯一结果行或默认值。</returns>
-    public TNextResult SingleOrDefault<TNextResult>(int? timeout = null) =>
-        _query.SingleOrDefault<TNextResult>(timeout);
-
-    /// <summary>
     /// 同步执行当前 Fluent 查询并获取首行首列值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>首行首列值；无结果时返回默认值。</returns>
     public TResult Scalar(int? timeout = null) => _query.Scalar<TResult>(timeout);
-
-    /// <summary>
-    /// 同步执行当前 Fluent 查询并获取指定类型的首行首列值。
-    /// </summary>
-    /// <typeparam name="TNextResult">标量结果类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>首行首列值；无结果时返回默认值。</returns>
-    public TNextResult Scalar<TNextResult>(int? timeout = null) => _query.Scalar<TNextResult>(timeout);
 
     /// <summary>
     /// 同步执行当前 Fluent 查询并返回指定页的数据和总行数。
@@ -130,30 +81,11 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     public PagerList<TResult> ToPage(IPager pager = null, int? timeout = null) => _query.ToPage<TResult>(pager, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并返回指定类型的分页结果。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="pager">分页参数；传入 null 时使用当前 Builder 的分页配置。</param>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>包含分页信息和结果行的集合。</returns>
-    public PagerList<TNextResult> ToPage<TNextResult>(IPager pager = null, int? timeout = null) =>
-        _query.ToPage<TNextResult>(pager, timeout);
-
-    /// <summary>
     /// 以同步流方式执行当前 Fluent 查询。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>结果行同步流。</returns>
     public IEnumerable<TResult> AsEnumerable(int? timeout = null) => _query.AsEnumerable<TResult>(timeout);
-
-    /// <summary>
-    /// 以同步流方式执行当前 Fluent 查询并映射为指定类型。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>结果行同步流。</returns>
-    public IEnumerable<TNextResult> AsEnumerable<TNextResult>(int? timeout = null) =>
-        _query.AsEnumerable<TNextResult>(timeout);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并完整物化结果集。
@@ -165,16 +97,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
         _query.ToListAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询并完整物化指定类型的结果集。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示最终结果列表的异步操作。</returns>
-    public Task<List<TNextResult>> ToListAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync<TNextResult>(timeout, cancellationToken);
-
-    /// <summary>
     /// 异步执行当前 Fluent 查询并获取第一行。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -182,16 +104,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     /// <returns>表示第一行结果的异步操作。</returns>
     public Task<TResult> FirstAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.FirstAsync<TResult>(timeout, cancellationToken);
-
-    /// <summary>
-    /// 异步执行当前 Fluent 查询并获取指定类型的第一行。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示第一行结果的异步操作。</returns>
-    public Task<TNextResult> FirstAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.FirstAsync<TNextResult>(timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取第一行或默认值。
@@ -203,16 +115,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
         _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询并获取指定类型的第一行或默认值。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示第一行结果或默认值的异步操作。</returns>
-    public Task<TNextResult> FirstOrDefaultAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.FirstOrDefaultAsync<TNextResult>(timeout, cancellationToken);
-
-    /// <summary>
     /// 异步执行当前 Fluent 查询并获取唯一一行。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -220,16 +122,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     /// <returns>表示唯一结果行的异步操作。</returns>
     public Task<TResult> SingleAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.SingleAsync<TResult>(timeout, cancellationToken);
-
-    /// <summary>
-    /// 异步执行当前 Fluent 查询并获取指定类型的唯一结果行。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示唯一结果行的异步操作。</returns>
-    public Task<TNextResult> SingleAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.SingleAsync<TNextResult>(timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取唯一一行或默认值。
@@ -241,16 +133,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
         _query.SingleOrDefaultAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询并获取指定类型的唯一结果行或默认值。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
-    public Task<TNextResult> SingleOrDefaultAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.SingleOrDefaultAsync<TNextResult>(timeout, cancellationToken);
-
-    /// <summary>
     /// 异步执行当前 Fluent 查询并获取首行首列值。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -258,16 +140,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     /// <returns>表示首行首列值的异步操作；无结果时返回默认值。</returns>
     public Task<TResult> ScalarAsync(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.ScalarAsync<TResult>(timeout, cancellationToken);
-
-    /// <summary>
-    /// 异步执行当前 Fluent 查询并获取指定类型的首行首列值。
-    /// </summary>
-    /// <typeparam name="TNextResult">标量结果类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示首行首列值的异步操作；无结果时返回默认值。</returns>
-    public Task<TNextResult> ScalarAsync<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ScalarAsync<TNextResult>(timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并返回指定页的数据和总行数。
@@ -280,17 +152,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
         CancellationToken cancellationToken = default) => _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询并返回指定类型的分页结果。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="pager">分页参数；传入 null 时使用当前 Builder 的分页配置。</param>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示包含分页信息和结果行集合的异步操作。</returns>
-    public Task<PagerList<TNextResult>> ToPageAsync<TNextResult>(IPager pager = null, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToPageAsync<TNextResult>(pager, timeout, cancellationToken);
-
-    /// <summary>
     /// 以异步流方式执行当前 Fluent 查询。
     /// </summary>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -298,16 +159,6 @@ public class SqlQuery<TResult> : ISqlQueryBuilderAccessor
     /// <returns>结果行异步流。</returns>
     public IAsyncEnumerable<TResult> AsAsyncEnumerable(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
-
-    /// <summary>
-    /// 以异步流方式执行当前 Fluent 查询并映射为指定类型。
-    /// </summary>
-    /// <typeparam name="TNextResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>结果行异步流。</returns>
-    public IAsyncEnumerable<TNextResult> AsAsyncEnumerable<TNextResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.AsAsyncEnumerable<TNextResult>(timeout, cancellationToken);
 
     /// <summary>
     /// 获取当前查询专属的 SQL Builder。

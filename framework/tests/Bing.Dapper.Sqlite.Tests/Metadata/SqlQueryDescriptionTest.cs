@@ -657,7 +657,7 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
-    /// 测试目的：单表实体查询应能以 Cross Join 进入双表 Lambda 链；SQLite 对 Right Join 和 Full Join 仍须在渲染前拒绝。
+    /// 测试目的：单表实体查询应能以 Cross Join 进入双表 Lambda 链；SQLite 对 Right Join 和 Full Join 须在调用阶段拒绝。
     /// </summary>
     [Fact]
     public void From_WhenSingleSourceTypedEntityOuterJoinsConfigured_ShouldBindSourcesAndEnforceCapabilities()
@@ -689,21 +689,18 @@ public class SqlQueryDescriptionTest
             .CrossJoin<MultiSourceReview>("review")
             .Where((user, review) => user.Id == review.UserId)
             .Select((user, review) => new object[] { user.Id, review.UserId });
-        var rightJoin = rootQuery.From<MultiSourceUser>()
-            .RightJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review");
-        var fullJoin = rootQuery.From<MultiSourceUser>()
-            .FullJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review");
-
         // Assert
         Assert.Equal("Select `users`.`Id`,`review`.`UserId` \r\nFrom `users` \r\nCross Join `reviews` As `review` \r\nWhere `users`.`Id`=`review`.`UserId`", crossJoin.ToSql());
-        var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
-        var fullJoinException = Assert.Throws<NotSupportedException>(() => fullJoin.ToSql());
+        var rightJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser>()
+            .RightJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review"));
+        var fullJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser>()
+            .FullJoin<MultiSourceReview>((user, review) => user.Id == review.UserId, "review"));
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", rightJoinException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", fullJoinException.Message);
     }
 
     /// <summary>
-    /// 测试目的：SQLite 不支持的单表类型化派生表 Right Join 和 Full Join 应在渲染前被能力门禁拒绝。
+    /// 测试目的：SQLite 不支持的单表类型化派生表 Right Join 和 Full Join 应在调用阶段被能力门禁拒绝。
     /// </summary>
     [Fact]
     public void From_WhenSingleSourceDtoSubqueryUsesUnsupportedOuterJoin_ShouldRejectBeforeDatabaseAccess()
@@ -733,14 +730,11 @@ public class SqlQueryDescriptionTest
             .SelectSubquery(user => new MultiSourceProjection { OwnerId = user.Id }, "summary");
 
         // Act
-        var rightJoin = rootQuery.From<MultiSourceReview>()
-            .RightJoin(subquery, (review, summary) => review.UserId == summary.OwnerId);
-        var fullJoin = rootQuery.From<MultiSourceReview>()
-            .FullJoin(subquery, (review, summary) => review.UserId == summary.OwnerId);
-
         // Assert
-        var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
-        var fullJoinException = Assert.Throws<NotSupportedException>(() => fullJoin.ToSql());
+        var rightJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceReview>()
+            .RightJoin(subquery, (review, summary) => review.UserId == summary.OwnerId));
+        var fullJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceReview>()
+            .FullJoin(subquery, (review, summary) => review.UserId == summary.OwnerId));
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", rightJoinException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", fullJoinException.Message);
     }
@@ -1440,7 +1434,7 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
-    /// 测试目的：SQLite 不支持的根派生表 Right Join 和 Full Join 应在渲染前拒绝，且实体和派生表连接入口遵循同一能力门禁。
+    /// 测试目的：SQLite 不支持的根派生表 Right Join 和 Full Join 应在调用阶段拒绝，且实体和派生表连接入口遵循同一能力门禁。
     /// </summary>
     [Fact]
     public void From_WhenDtoSubqueryRootUsesUnsupportedOuterJoin_ShouldRejectBeforeDatabaseAccess()
@@ -1472,14 +1466,11 @@ public class SqlQueryDescriptionTest
             .SelectSubquery(item => new MultiSourceProjection { ReviewUserId = item.UserId }, "review");
 
         // Act
-        var entityRightJoin = rootQuery.From(owner)
-            .RightJoin<MultiSourceReview>((summary, item) => summary.OwnerId == item.UserId, "entityReview");
-        var derivedFullJoin = rootQuery.From(owner)
-            .FullJoin(review, (summary, item) => summary.OwnerId == item.ReviewUserId);
-
         // Assert
-        var rightJoinException = Assert.Throws<NotSupportedException>(() => entityRightJoin.ToSql());
-        var fullJoinException = Assert.Throws<NotSupportedException>(() => derivedFullJoin.ToSql());
+        var rightJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From(owner)
+            .RightJoin<MultiSourceReview>((summary, item) => summary.OwnerId == item.UserId, "entityReview"));
+        var fullJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From(owner)
+            .FullJoin(review, (summary, item) => summary.OwnerId == item.ReviewUserId));
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", rightJoinException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", fullJoinException.Message);
     }
@@ -1940,7 +1931,7 @@ public class SqlQueryDescriptionTest
     }
 
     /// <summary>
-    /// 测试目的：不支持 Right Join 和 Full Join 的 SQLite 应在多表类型化连接渲染前拒绝，避免访问数据库。
+    /// 测试目的：不支持 Right Join 和 Full Join 的 SQLite 应在多表类型化连接调用阶段拒绝，避免访问数据库。
     /// </summary>
     [Fact]
     public void From_WhenTypedUnsupportedOuterJoinConfigured_ShouldRejectBeforeDatabaseAccess()
@@ -1974,16 +1965,13 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var rightJoin = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .RightJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
-                "permission");
-        var fullJoin = rootQuery.From<MultiSourceUser, MultiSourceReview>()
-            .FullJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
-                "permission");
-
         // Assert
-        var rightJoinException = Assert.Throws<NotSupportedException>(() => rightJoin.ToSql());
-        var fullJoinException = Assert.Throws<NotSupportedException>(() => fullJoin.ToSql());
+        var rightJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .RightJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
+                "permission"));
+        var fullJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .FullJoin<MultiSourcePermission>((user, review, permission) => review.UserId == permission.UserId,
+                "permission"));
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", rightJoinException.Message);
         Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Full Join。", fullJoinException.Message);
     }
@@ -2072,6 +2060,299 @@ public class SqlQueryDescriptionTest
         // Assert
         Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `users`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", first.ToSql());
         Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `reviews`.`UserId` \r\nLimit @_p_1 OFFSET @_p_0", second.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：单来源 Lambda 应按参数位置绑定首来源，并输出完整参数名和值。
+    /// </summary>
+    [Fact]
+    public void From_WhenOneLambdaSourceConfigured_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser>()
+            .Where(user => user.Id > 1)
+            .Select(user => new object[] { user.Id });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser>>(query);
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 1 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：双来源连续 Join 应绑定首尾来源，并输出完整 Join SQL、参数名和值。
+    /// </summary>
+    [Fact]
+    public void From_WhenTwoSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser>()
+            .Join<MultiSourceReview>((user, review) => user.Id == review.UserId && review.UserId > 2, "review")
+            .Select((user, review) => new object[] { user.Id, review.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview>>(query);
+        Assert.Equal("Select `users`.`Id`,`review`.`UserId` \r\nFrom `users` \r\nJoin `reviews` As `review` On `users`.`Id`=`review`.`UserId` And `review`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 2 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：三来源连续 Join 应绑定首、中、尾来源，并输出完整 Join SQL、参数名和值。
+    /// </summary>
+    [Fact]
+    public void From_WhenThreeSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId && permission.UserId > 3, "permission")
+            .Select((user, review, permission) => new object[] { user.Id, review.UserId, permission.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` And `permission`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 3 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：四来源连续 Join 应绑定中间来源和最后一个重复实体来源，并输出完整别名 SQL。
+    /// </summary>
+    [Fact]
+    public void From_WhenFourSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) =>
+                permission.UserId == reviewer.Id && reviewer.Id > 4, "reviewer")
+            .Select((user, review, permission, reviewer) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 4 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：五来源连续 Join 应保持来源顺序、重复实体别名和尾来源参数绑定。
+    /// </summary>
+    [Fact]
+    public void From_WhenFiveSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) =>
+                permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) =>
+                reviewer.Id == review2.UserId && review2.UserId > 5, "review2")
+            .Select((user, review, permission, reviewer, review2) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` And `review2`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 5 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：六来源连续 Join 应绑定第六个来源，并保持前序参数和完整 SQL 不变。
+    /// </summary>
+    [Fact]
+    public void From_WhenSixSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) =>
+                permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) =>
+                reviewer.Id == review2.UserId, "review2")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2) =>
+                review2.UserId == permission2.UserId && permission2.UserId > 6, "permission2")
+            .Select((user, review, permission, reviewer, review2, permission2) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId, permission2.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` And `permission2`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 6 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：七来源连续 Join 应绑定首、中、尾来源，覆盖重复实体和连续参数位置。
+    /// </summary>
+    [Fact]
+    public void From_WhenSevenSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) =>
+                permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) =>
+                reviewer.Id == review2.UserId, "review2")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2) =>
+                review2.UserId == permission2.UserId, "permission2")
+            .Join<MultiSourceUser>((user, review, permission, reviewer, review2, permission2, reviewer2) =>
+                permission2.UserId == reviewer2.Id && reviewer2.Id > 7, "reviewer2")
+            .Select((user, review, permission, reviewer, review2, permission2, reviewer2) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId, permission2.UserId, reviewer2.Id });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` And `reviewer2`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 7 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：八来源连续 Join 应保持中间来源参数位置和最后重复实体别名。
+    /// </summary>
+    [Fact]
+    public void From_WhenEightSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) =>
+                user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) => permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) => reviewer.Id == review2.UserId, "review2")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2) => review2.UserId == permission2.UserId, "permission2")
+            .Join<MultiSourceUser>((user, review, permission, reviewer, review2, permission2, reviewer2) => permission2.UserId == reviewer2.Id, "reviewer2")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2, permission2, reviewer2, review3) =>
+                reviewer2.Id == review3.UserId && review3.UserId > 8, "review3")
+            .Select((user, review, permission, reviewer, review2, permission2, reviewer2, review3) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId, permission2.UserId, reviewer2.Id, review3.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` And `review3`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 8 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：九来源连续 Join 应绑定最后一个权限来源，并保持完整参数序列。
+    /// </summary>
+    [Fact]
+    public void From_WhenNineSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) => user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) => permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) => reviewer.Id == review2.UserId, "review2")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2) => review2.UserId == permission2.UserId, "permission2")
+            .Join<MultiSourceUser>((user, review, permission, reviewer, review2, permission2, reviewer2) => permission2.UserId == reviewer2.Id, "reviewer2")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2, permission2, reviewer2, review3) => reviewer2.Id == review3.UserId, "review3")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2, reviewer2, review3, permission3) =>
+                review3.UserId == permission3.UserId && permission3.UserId > 9, "permission3")
+            .Select((user, review, permission, reviewer, review2, permission2, reviewer2, review3, permission3) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId, permission2.UserId, reviewer2.Id, review3.UserId, permission3.UserId });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` And `permission3`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 9 }, query.GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：十来源连续 Join 应到达公开上限，绑定首、中、尾来源并保持不存在第十一来源 Join。
+    /// </summary>
+    [Fact]
+    public void From_WhenTenSourcesAreJoinedInUnit_ShouldRenderCompleteSqlAndParameters()
+    {
+        // Arrange
+        var rootQuery = CreateMultiSourceQuery();
+
+        // Act
+        var query = rootQuery.From<MultiSourceUser, MultiSourceReview>()
+            .Join<MultiSourcePermission>((user, review, permission) => user.Id == review.UserId && review.UserId == permission.UserId, "permission")
+            .Join<MultiSourceUser>((user, review, permission, reviewer) => permission.UserId == reviewer.Id, "reviewer")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2) => reviewer.Id == review2.UserId, "review2")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2) => review2.UserId == permission2.UserId, "permission2")
+            .Join<MultiSourceUser>((user, review, permission, reviewer, review2, permission2, reviewer2) => permission2.UserId == reviewer2.Id, "reviewer2")
+            .Join<MultiSourceReview>((user, review, permission, reviewer, review2, permission2, reviewer2, review3) => reviewer2.Id == review3.UserId, "review3")
+            .Join<MultiSourcePermission>((user, review, permission, reviewer, review2, permission2, reviewer2, review3, permission3) => review3.UserId == permission3.UserId, "permission3")
+            .Join<MultiSourceUser>((user, review, permission, reviewer, review2, permission2, reviewer2, review3, permission3, reviewer3) =>
+                permission3.UserId == reviewer3.Id && reviewer3.Id > 10, "reviewer3")
+            .Select((user, review, permission, reviewer, review2, permission2, reviewer2, review3, permission3, reviewer3) =>
+                new object[] { user.Id, review.UserId, permission.UserId, reviewer.Id, review2.UserId, permission2.UserId, reviewer2.Id, review3.UserId, permission3.UserId, reviewer3.Id });
+
+        // Assert
+        Assert.IsType<SqlLambdaQuery<MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser, MultiSourceReview, MultiSourcePermission, MultiSourceUser>>(query);
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId`,`reviewer3`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `users`.`Id`=`reviews`.`UserId` And `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` \r\nJoin `users` As `reviewer3` On `permission3`.`UserId`=`reviewer3`.`Id` And `reviewer3`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
+        Assert.Equal(new object[] { 10 }, query.GetParams().Values.ToArray());
+    }
+
+    private static ISqlQuery CreateMultiSourceQuery()
+    {
+        var services = new ServiceCollection();
+        services.ConfigureSqlMetadata(options =>
+        {
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(MultiSourceUser),
+                DbKey = "sqlite",
+                TableName = "users"
+            });
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(MultiSourceReview),
+                DbKey = "sqlite",
+                TableName = "reviews"
+            });
+            options.EntityMappings.Add(new EntityMappingOptions
+            {
+                EntityType = typeof(MultiSourcePermission),
+                DbKey = "sqlite",
+                TableName = "permissions"
+            });
+        });
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("sqlite", Bing.Data.Enums.DatabaseType.Sqlite, "Data Source=:memory:");
+        return services.BuildServiceProvider().GetRequiredService<ISqlQueryFactory>().Create("sqlite");
     }
 
     /// <summary>

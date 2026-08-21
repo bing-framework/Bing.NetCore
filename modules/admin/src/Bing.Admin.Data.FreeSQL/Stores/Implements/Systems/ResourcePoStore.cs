@@ -47,7 +47,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 .Where((resource, permission) => resource.Id == permission.ResourceId &&
                     resource.Type == ResourceType.Module && resource.ApplicationId == applicationId && resource.Enabled &&
                     roleIds.Contains(permission.RoleId) && permission.IsDeny == false)
-                .ToListAsync();
+                .ToListAsync<ResourcePo>();
             return result.Distinct<ResourcePo>().OrderBy(x => x.SortId).ToList();
         }
 
@@ -61,7 +61,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
                 .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
-                .ToListAsync();
+                .ToListAsync<ResourcePo>();
             return result;
         }
 
@@ -76,7 +76,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
                 .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
-                .ToListAsync();
+                .ToListAsync<ResourcePo>();
             return result;
         }
 
@@ -93,7 +93,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 .Where((resource, permission) => resource.Id == permission.ResourceId &&
                     resource.Type == ResourceType.Operation && resource.ApplicationId == applicationId && resource.Enabled &&
                     roleIds.Contains(permission.RoleId) && permission.IsDeny == false)
-                .ToListAsync();
+                .ToListAsync<ResourcePo>();
             return result.Distinct<ResourcePo>().OrderBy(x => x.SortId).ToList();
         }
 
@@ -107,7 +107,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
                 .Where(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)
-                .ToListAsync();
+                .ToListAsync<ResourcePo>();
             return result;
         }
 
@@ -120,7 +120,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
             await Sql.From<ResourcePo>()
                 .Where(x => x.ApplicationId == applicationId)
                 .Where(x => x.ParentId == moduleId)
-                .Aggregate<int?>(SqlAggregateFunction.Max, x => x.SortId)
-                .ScalarAsync();
+                .Aggregate(SqlAggregateFunction.Max, x => x.SortId)
+                .ScalarAsync<int?>();
     }
 }

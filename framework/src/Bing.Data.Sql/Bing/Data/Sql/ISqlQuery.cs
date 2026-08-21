@@ -46,7 +46,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// <summary>
     /// 创建使用实体映射初始化的独立结构化 SQL 查询描述。
     /// </summary>
-    /// <typeparam name="TEntity">查询结果和实体映射类型。</typeparam>
+    /// <typeparam name="TEntity">查询来源实体类型。</typeparam>
     /// <returns>已设置实体投影和来源表的独立查询描述。</returns>
 #pragma warning disable RS0027
     SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class;
@@ -64,7 +64,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// <summary>
     /// 创建使用两个实体映射初始化的独立结构化 SQL 查询描述。
     /// </summary>
-    /// <typeparam name="TFirst">第一个表源及默认结果映射类型。</typeparam>
+    /// <typeparam name="TFirst">第一个表源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个表源类型。</typeparam>
     /// <returns>已设置两个实体根来源的独立查询描述。</returns>
     SqlLambdaQuery<TFirst, TSecond> From<TFirst, TSecond>() where TFirst : class where TSecond : class;

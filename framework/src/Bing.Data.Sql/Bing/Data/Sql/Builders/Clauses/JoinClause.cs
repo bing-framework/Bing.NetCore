@@ -333,13 +333,13 @@ public class JoinClause : IJoinClause
             throw new ArgumentNullException(nameof(predicate));
 
         _context.ValidateOperation(SqlOperationAction.QueryClause);
+        (_sqlBuilder as SqlBuilderBase)?.ValidateTypedJoinCapability(joinType);
         var entityType = typeof(TEntity);
         var reference = _resolver.GetTableReference(entityType) with { Alias = alias, EntityType = entityType };
         if (string.IsNullOrWhiteSpace(schema) == false)
             reference = reference with { Schema = schema };
         var resolvedAlias = _resolver.GetAlias(entityType, reference.Alias);
         var registerProbe = _register?.Clone();
-        registerProbe?.Register(entityType, resolvedAlias);
 
         var databaseContext = GetCurrentDatabaseContext();
         var sourceReference = GetSourceReference(databaseContext);
@@ -353,12 +353,36 @@ public class JoinClause : IJoinClause
         var condition = fromClause.ResolveMultiSourcePredicate(predicate, sources, parameterProbe);
         item.On(condition);
 
-        fromClause.MergeNewParameters(parameterProbe);
-        _context.UseOperation(SqlOperationAction.QueryClause);
-        item.SetDependency(_helper);
-        _params.Add(item);
-        FreezeExistingProjectionAlias(entityType);
-        _register?.Register(entityType, resolvedAlias);
+        var selectClause = _sqlBuilder.SelectClause as SelectClause;
+        var selectBefore = selectClause?.Clone(_context) as SelectClause;
+        var selectProbe = selectBefore?.Clone(_context) as SelectClause;
+        var aliasBefore = _register?.Clone();
+        var parameterManagerBefore = _parameterManager;
+        var operationBefore = (_sqlBuilder as SqlBuilderBase)?.OperationKind ?? SqlOperationKind.None;
+
+        var itemCommitted = false;
+        try
+        {
+            FreezeExistingProjectionAlias(entityType, selectProbe, _register);
+            registerProbe?.Register(entityType, resolvedAlias);
+            CommitSelectClause(selectProbe);
+            CommitAliasRegister(registerProbe);
+            _context.UseOperation(SqlOperationAction.QueryClause);
+            CommitParameterManager(parameterProbe, fromClause);
+            item.SetDependency(_helper);
+            CommitJoinItem(item);
+            itemCommitted = true;
+        }
+        catch
+        {
+            if (itemCommitted == false)
+                _params.Remove(item);
+            RestoreSelectClause(selectBefore);
+            RestoreAliasRegister(aliasBefore, resolvedAlias);
+            RestoreParameters(parameterManagerBefore);
+            RestoreOperationState(operationBefore);
+            throw;
+        }
     }
 
     /// <summary>
@@ -405,34 +429,56 @@ public class JoinClause : IJoinClause
 
         subquery.ValidateCompatible(_sqlBuilder);
         _context.ValidateOperation(SqlOperationAction.QueryClause);
+        (_sqlBuilder as SqlBuilderBase)?.ValidateTypedJoinCapability(joinType);
         var registerProbe = _register?.Clone();
         registerProbe?.RegisterAlias(subquery.Alias);
         var subqueryAlias = GetSubqueryAlias(subquery.Alias);
         var sqlBuilder = _sqlBuilder as SqlBuilderBase;
+        var parameterManagerBefore = _parameterManager;
+        var subqueryParameterNamesBefore = sqlBuilder?.CloneSubqueryParameterNames();
+        var aliasBefore = _register?.Clone();
+        var operationBefore = sqlBuilder?.OperationKind ?? SqlOperationKind.None;
+        JoinItem item = null;
+        var itemCommitted = false;
 
-        void PrepareAndCommit()
+        try
         {
-            var sql = sqlBuilder?.RenderSubquery(subquery.Builder) ?? subquery.Builder.ToSql();
+            var parameterProbe = parameterManagerBefore.Clone();
+            var subqueryParameterNamesProbe = sqlBuilder?.CloneSubqueryParameterNames();
+            var sql = sqlBuilder?.RenderSubquery(subquery.Builder, parameterProbe,
+                subqueryParameterNamesProbe) ?? subquery.Builder.ToSql();
             var table = SqlItem.Raw($"({sql}){subqueryAlias}");
             var source = new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
                 subquery.ProjectedMembers);
-            var item = JoinItem.CreateDerived(joinType, table, source);
-            var parameterProbe = _parameterManager.Clone();
+            item = JoinItem.CreateDerived(joinType, table, source);
             var sources = fromClause.Sources.Concat(GetTypedSources()).Append(source).ToList();
             var condition = fromClause.ResolveMultiSourcePredicate(predicate, sources, parameterProbe);
             item.On(condition);
 
-            fromClause.MergeNewParameters(parameterProbe);
             _context.UseOperation(SqlOperationAction.QueryClause);
+            if (sqlBuilder != null)
+            {
+                sqlBuilder.ReplaceParameterManager(parameterProbe);
+                sqlBuilder.ReplaceSubqueryParameterNames(subqueryParameterNamesProbe);
+            }
+            else
+                fromClause.MergeNewParameters(parameterProbe);
             item.SetDependency(_helper);
             _params.Add(item);
             _register?.RegisterAlias(subquery.Alias);
+            itemCommitted = true;
         }
-
-        if (sqlBuilder != null)
-            sqlBuilder.ExecuteWithSubqueryRenderRollback(PrepareAndCommit);
-        else
-            PrepareAndCommit();
+        catch
+        {
+            if (itemCommitted == false && item != null)
+                _params.Remove(item);
+            RestoreAliasRegister(aliasBefore, subquery.Alias);
+            RestoreParameters(parameterManagerBefore);
+            if (sqlBuilder != null)
+                sqlBuilder.ReplaceSubqueryParameterNames(subqueryParameterNamesBefore);
+            RestoreOperationState(operationBefore);
+            throw;
+        }
     }
 
     /// <summary>
@@ -548,7 +594,7 @@ public class JoinClause : IJoinClause
             resolvedAlias);
         if (reference.EntityType != null)
         {
-            FreezeExistingProjectionAlias(reference.EntityType);
+            FreezeExistingProjectionAlias(reference.EntityType, _sqlBuilder.SelectClause as SelectClause, _register);
             _register?.Register(reference.EntityType, resolvedAlias);
         }
         else
@@ -662,11 +708,99 @@ public class JoinClause : IJoinClause
     /// 在同一实体重复连接前固定既有投影使用的表别名。
     /// </summary>
     /// <param name="entityType">即将连接的实体类型。</param>
-    private void FreezeExistingProjectionAlias(Type entityType)
+    /// <param name="selectClause">候选 Select 子句。</param>
+    /// <param name="register">用于解析既有实体别名的注册器。</param>
+    internal virtual void FreezeExistingProjectionAlias(Type entityType, SelectClause selectClause,
+        IEntityAliasRegister register)
     {
-        if (_register?.Contains(entityType) != true || _sqlBuilder.SelectClause is not SelectClause selectClause)
+        if (register?.Contains(entityType) != true || selectClause == null)
             return;
-        selectClause.FreezeEntityAlias(entityType, _register.GetAlias(entityType));
+        selectClause.FreezeEntityAlias(entityType, register.GetAlias(entityType));
+    }
+
+    /// <summary>
+    /// 提交候选 Select 子句。
+    /// </summary>
+    /// <param name="selectClause">候选 Select 子句。</param>
+    internal virtual void CommitSelectClause(SelectClause selectClause)
+    {
+        if (_sqlBuilder.SelectClause is SelectClause current && selectClause != null)
+            current.RestoreFrom(selectClause);
+    }
+
+    /// <summary>
+    /// 提交实体别名注册。
+    /// </summary>
+    /// <param name="aliasRegister">候选实体别名注册器。</param>
+    internal virtual void CommitAliasRegister(IEntityAliasRegister aliasRegister)
+    {
+        if (_register is EntityAliasRegister current && aliasRegister is EntityAliasRegister candidate)
+            current.RestoreFrom(candidate);
+    }
+
+    /// <summary>
+    /// 提交连接项。
+    /// </summary>
+    /// <param name="item">候选连接项。</param>
+    internal virtual void CommitJoinItem(JoinItem item) => _params.Add(item);
+
+    /// <summary>
+    /// 提交候选参数状态。
+    /// </summary>
+    /// <param name="parameterManager">候选参数管理器。</param>
+    /// <param name="fromClause">当前 From 子句。</param>
+    internal virtual void CommitParameterManager(IParameterManager parameterManager, FromClause fromClause)
+    {
+        if (_sqlBuilder is SqlBuilderBase builder)
+            builder.ReplaceParameterManager(parameterManager);
+        else
+            fromClause.MergeNewParameters(parameterManager);
+    }
+
+    /// <summary>
+    /// 恢复候选失败前的 Select 状态。
+    /// </summary>
+    /// <param name="selectClause">失败前的 Select 快照。</param>
+    private void RestoreSelectClause(SelectClause selectClause)
+    {
+        if (_sqlBuilder.SelectClause is SelectClause current && selectClause != null)
+            current.RestoreFrom(selectClause);
+    }
+
+    /// <summary>
+    /// 恢复候选失败前的实体别名状态。
+    /// </summary>
+    /// <param name="aliasRegister">失败前的别名快照。</param>
+    /// <param name="alias">本次候选别名。</param>
+    private void RestoreAliasRegister(IEntityAliasRegister aliasRegister, string alias)
+    {
+        if (_register is EntityAliasRegister current && aliasRegister is EntityAliasRegister snapshot)
+        {
+            current.RestoreFrom(snapshot);
+            return;
+        }
+        if (_register is IEntityAliasRegisterLifecycle lifecycle)
+            lifecycle.ReleaseAlias(alias);
+    }
+
+    /// <summary>
+    /// 恢复候选失败前的参数状态。
+    /// </summary>
+    /// <param name="parameterManager">失败前的参数快照。</param>
+    private void RestoreParameters(IParameterManager parameterManager)
+    {
+        if (_sqlBuilder is SqlBuilderBase builder && parameterManager != null)
+            builder.RestoreParameterManager(parameterManager);
+    }
+
+    /// <summary>
+    /// 恢复候选失败前的 Builder 操作状态。
+    /// </summary>
+    /// <param name="operationKind">失败前的操作状态。</param>
+    private void RestoreOperationState(SqlOperationKind operationKind)
+    {
+        if (_sqlBuilder is SqlBuilderBase builder)
+            builder.RestoreOperationState(operationKind);
     }
 
     /// <summary>

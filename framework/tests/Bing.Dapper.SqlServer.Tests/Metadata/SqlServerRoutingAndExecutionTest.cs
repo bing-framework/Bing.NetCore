@@ -112,7 +112,7 @@ public class SqlServerRoutingAndExecutionTest
         var description = query.From<SoftDeleteMappedSample>();
 
         // Act
-        var result = description.ToList();
+        var result = description.ToList<SoftDeleteMappedSample>();
 
         // Assert
         result.Count.ShouldBe(1);
@@ -3053,7 +3053,7 @@ public class SqlServerRoutingAndExecutionTest
         connection.OnScalarExecuted = () => disabledScope = dataFilter.Disable<IsDeletedFilter>();
 
         // Act
-        var result = description.ToPage(new Pager(1, 10, "Id"));
+        var result = description.ToPage<SoftDeleteMappedSample>(new Pager(1, 10, "Id"));
         disabledScope?.Dispose();
 
         // Assert

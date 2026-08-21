@@ -5,7 +5,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL Builder 的受控运行时协作入口。
 /// </summary>
-public static class SqlBuilderRuntimeBridge
+internal static class SqlBuilderRuntimeBridge
 {
     /// <summary>
     /// 判断 SQL 代码上下文是否包含指定参数标记。

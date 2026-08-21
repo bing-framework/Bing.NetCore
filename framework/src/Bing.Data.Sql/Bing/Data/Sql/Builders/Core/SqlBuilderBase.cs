@@ -40,6 +40,11 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     private IParameterManager _parameterManager;
 
     /// <summary>
+    /// Builder 子句共享的可替换参数状态引用。
+    /// </summary>
+    private readonly ParameterManagerState _parameterManagerState;
+
+    /// <summary>
     /// Select子句
     /// </summary>
     private ISelectClause _selectClause;
@@ -242,7 +247,18 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 参数管理器
     /// </summary>
-    public IParameterManager ParameterManager => _parameterManager ??= CreateParameterManager();
+    public IParameterManager ParameterManager
+    {
+        get
+        {
+            if (_parameterManager == null)
+            {
+                _parameterManager = CreateParameterManager();
+                _parameterManagerState.Current = _parameterManager;
+            }
+            return _parameterManager;
+        }
+    }
 
     /// <summary>
     /// Sql方言
@@ -289,6 +305,44 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         SqlBuilderOperationState.Delete => SqlOperationKind.Delete,
         _ => SqlOperationKind.None
     };
+
+    /// <summary>
+    /// 恢复 Join 候选失败前的参数状态。
+    /// </summary>
+    /// <param name="snapshot">参数快照。</param>
+    internal void RestoreParameterManager(IParameterManager snapshot)
+    {
+        ReplaceParameterManager(snapshot);
+    }
+
+    /// <summary>
+    /// 以一次状态替换提交参数管理器，避免调用第三方管理器的部分写入操作。
+    /// </summary>
+    /// <param name="parameterManager">新的完整参数状态。</param>
+    internal void ReplaceParameterManager(IParameterManager parameterManager)
+    {
+        if (parameterManager == null)
+            throw new ArgumentNullException(nameof(parameterManager));
+        _parameterManager = parameterManager;
+        _parameterManagerState.Current = parameterManager;
+    }
+
+    /// <summary>
+    /// 恢复 Join 候选失败前的操作状态。
+    /// </summary>
+    /// <param name="operationKind">操作类型。</param>
+    internal void RestoreOperationState(SqlOperationKind operationKind)
+    {
+        _operationState = operationKind switch
+        {
+            SqlOperationKind.Select => SqlBuilderOperationState.Select,
+            SqlOperationKind.InsertValues => SqlBuilderOperationState.InsertValues,
+            SqlOperationKind.InsertSelect => SqlBuilderOperationState.InsertSelect,
+            SqlOperationKind.Update => SqlBuilderOperationState.Update,
+            SqlOperationKind.Delete => SqlBuilderOperationState.Delete,
+            _ => SqlBuilderOperationState.None
+        };
+    }
 
     /// <inheritdoc />
     public SqlMutationContext MutationContext => _mutationContext ??= CreateMutationContext();
@@ -422,6 +476,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     {
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _parameterManager = ApplyParameterLimit(parameterManager);
+        _parameterManagerState = new ParameterManagerState { Current = _parameterManager };
         Services = services ?? throw new ArgumentNullException(nameof(services));
         MetadataOptions = Services.MetadataOptions;
         Options = Services.Options;
@@ -498,8 +553,12 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 创建绑定到当前 Builder 运行状态的子句上下文。
     /// </summary>
     /// <returns>当前运行依赖的子句上下文。</returns>
-    protected SqlClauseContext CreateClauseContext() => new(this, Provider, EntityResolver, AliasRegister,
-        ParameterManager, ExecutionContext, Services);
+    protected SqlClauseContext CreateClauseContext()
+    {
+        _ = ParameterManager;
+        return new SqlClauseContext(this, Provider, EntityResolver, AliasRegister, _parameterManagerState,
+            ExecutionContext, Services);
+    }
 
     private SqlMutationContext CreateMutationContext()
     {
@@ -583,6 +642,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
             if (ReferenceEquals(_parameterManager, sqlBuilder._parameterManager))
                 throw new InvalidOperationException("参数管理器克隆时不能返回当前实例。");
         }
+        _parameterManagerState.Current = _parameterManager;
         Services = sqlBuilder.Services;
         MetadataOptions = Services.MetadataOptions;
         Options = Services.Options;
@@ -687,11 +747,28 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <param name="builder">子查询生成器。</param>
     protected internal string RenderSubquery(ISqlBuilder builder)
     {
+        return RenderSubquery(builder, ParameterManager, _subqueryParameterNames);
+    }
+
+    /// <summary>
+    /// 使用指定的候选参数和重命名映射渲染子查询。
+    /// </summary>
+    /// <param name="builder">子查询生成器。</param>
+    /// <param name="parameterManager">接收子查询参数的候选管理器。</param>
+    /// <param name="subqueryParameterNames">接收子查询重命名结果的候选映射。</param>
+    /// <returns>参数名称已合并后的 SQL。</returns>
+    internal string RenderSubquery(ISqlBuilder builder, IParameterManager parameterManager,
+        IDictionary<ISqlBuilder, Dictionary<string, string>> subqueryParameterNames)
+    {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
+        if (parameterManager == null)
+            throw new ArgumentNullException(nameof(parameterManager));
+        if (subqueryParameterNames == null)
+            throw new ArgumentNullException(nameof(subqueryParameterNames));
         var snapshot = builder.Clone();
         var sql = snapshot is SqlBuilderBase sqlBuilder ? sqlBuilder.RenderSnapshot() : snapshot.ToSql();
-        return MergeSubqueryParameters(builder, snapshot, sql);
+        return MergeSubqueryParameters(builder, snapshot, sql, parameterManager, subqueryParameterNames);
     }
 
     /// <summary>
@@ -702,7 +779,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <returns>参数名称已合并后的 SQL。</returns>
     internal string MergeSubqueryParameters(ISqlBuilder builder, string sql)
     {
-        return MergeSubqueryParameters(builder, builder, sql);
+        return MergeSubqueryParameters(builder, builder, sql, ParameterManager, _subqueryParameterNames);
     }
 
     /// <summary>
@@ -711,21 +788,28 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <param name="builder">原始子查询生成器，用于缓存参数重命名关系。</param>
     /// <param name="parameterSource">与 SQL 同一渲染快照的参数来源。</param>
     /// <param name="sql">已经生成的子查询 SQL 或条件 SQL。</param>
+    /// <param name="parameterManager">接收子查询参数的目标管理器。</param>
+    /// <param name="subqueryParameterNames">接收子查询重命名结果的目标映射。</param>
     /// <returns>参数名称已合并后的 SQL。</returns>
-    private string MergeSubqueryParameters(ISqlBuilder builder, ISqlBuilder parameterSource, string sql)
+    private string MergeSubqueryParameters(ISqlBuilder builder, ISqlBuilder parameterSource, string sql,
+        IParameterManager parameterManager,
+        IDictionary<ISqlBuilder, Dictionary<string, string>> subqueryParameterNames)
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
+        if (parameterManager == null)
+            throw new ArgumentNullException(nameof(parameterManager));
+        if (subqueryParameterNames == null)
+            throw new ArgumentNullException(nameof(subqueryParameterNames));
         if (parameterSource is not ISqlCommonPartAccessor accessor ||
-            ReferenceEquals(ParameterManager, accessor.ParameterManager))
+            ReferenceEquals(parameterManager, accessor.ParameterManager))
             return sql;
 
         var sourceParameters = accessor.ParameterManager.GetParams();
         var sourceSqlParameters = (accessor.ParameterManager as IAdvancedParameterManager)?.GetSqlParams();
-        var nameMap = _subqueryParameterNames.TryGetValue(builder, out var existingNameMap)
+        var nameMap = subqueryParameterNames.TryGetValue(builder, out var existingNameMap)
             ? new Dictionary<string, string>(existingNameMap)
             : new Dictionary<string, string>();
-        var parameterManager = ParameterManager;
         var parameterProbe = parameterManager.Clone();
         foreach (var parameter in sourceParameters)
         {
@@ -740,8 +824,30 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         }
         foreach (var parameter in sourceParameters)
             AddSubqueryParameter(parameterManager, sourceSqlParameters, parameter.Key, nameMap[parameter.Key], parameter.Value);
-        _subqueryParameterNames[builder] = nameMap;
+        subqueryParameterNames[builder] = nameMap;
         return ReplaceParameterTokens(sql, nameMap);
+    }
+
+    /// <summary>
+    /// 创建当前子查询参数重命名映射的候选副本。
+    /// </summary>
+    /// <returns>独立的子查询参数重命名映射。</returns>
+    internal Dictionary<ISqlBuilder, Dictionary<string, string>> CloneSubqueryParameterNames() =>
+        _subqueryParameterNames.ToDictionary(item => item.Key,
+            item => new Dictionary<string, string>(item.Value), ReferenceComparer<ISqlBuilder>.Instance);
+
+    /// <summary>
+    /// 以一次状态替换子查询参数重命名映射。
+    /// </summary>
+    /// <param name="subqueryParameterNames">新的完整映射。</param>
+    internal void ReplaceSubqueryParameterNames(
+        IReadOnlyDictionary<ISqlBuilder, Dictionary<string, string>> subqueryParameterNames)
+    {
+        if (subqueryParameterNames == null)
+            throw new ArgumentNullException(nameof(subqueryParameterNames));
+        _subqueryParameterNames.Clear();
+        foreach (var item in subqueryParameterNames)
+            _subqueryParameterNames[item.Key] = new Dictionary<string, string>(item.Value);
     }
 
     /// <summary>
@@ -1756,6 +1862,18 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
             ValidateQueryCapability(QueryCapabilities.FullJoin, "Full Join");
         if (IsLimit)
             ValidateQueryCapability(QueryCapabilities.Pagination, "分页");
+    }
+
+    /// <summary>
+    /// 在结构化 Lambda Join 提交前验证 Provider 的 Join 能力。
+    /// </summary>
+    /// <param name="joinType">待验证的 Join 类型。</param>
+    internal void ValidateTypedJoinCapability(string joinType)
+    {
+        if (joinType == "Right Join")
+            ValidateQueryCapability(QueryCapabilities.RightJoin, joinType);
+        else if (joinType == "Full Join")
+            ValidateQueryCapability(QueryCapabilities.FullJoin, joinType);
     }
 
     /// <summary>

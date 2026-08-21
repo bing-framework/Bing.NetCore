@@ -11,7 +11,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 所有 Lambda 成员访问均按派生表投影白名单解析，不能退化为实体映射访问。
 /// </remarks>
-public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TProjection>
+public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery
     where TProjection : class
 {
     /// <summary>
@@ -51,7 +51,7 @@ public sealed class SqlSubqueryLambdaQuery<TProjection> : SqlMultiLambdaQuery<TP
     /// <summary>
     /// 使用 DTO 成员初始化设置投影。
     /// </summary>
-    /// <typeparam name="TResult">投影结果映射类型。</typeparam>
+    /// <typeparam name="TResult">新的投影形状类型；最终物化类型由显式 TResult 终结方法指定。</typeparam>
     /// <param name="projection">派生表 DTO 成员初始化投影表达式。</param>
     /// <returns>当前查询描述。</returns>
     public SqlSubqueryLambdaQuery<TProjection> Select<TResult>(Expression<Func<TProjection, TResult>> projection)

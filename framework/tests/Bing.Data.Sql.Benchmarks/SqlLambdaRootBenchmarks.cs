@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
@@ -13,7 +14,9 @@ namespace Bing.Data.Sql.Benchmarks;
 /// <summary>
 /// 类型化 Lambda 根来源构造与渲染性能基线。
 /// </summary>
-[MemoryDiagnoser]
+[MemoryDiagnoser(displayGenColumns: true)]
+[MedianColumn]
+[Config(typeof(SqlLambdaBenchmarkConfig))]
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlLambdaRootBenchmarks
 {
@@ -28,7 +31,7 @@ public class SqlLambdaRootBenchmarks
     /// <summary>
     /// 类型化根来源数量。
     /// </summary>
-    [Params(1, 2, 7, 10)]
+    [Params(1, 2, 5, 10)]
     public int RootCount { get; set; }
 
     /// <summary>
@@ -46,7 +49,7 @@ public class SqlLambdaRootBenchmarks
     /// 测量类型化根来源重建并渲染 SQL 的成本。
     /// </summary>
     /// <returns>完整 From SQL。</returns>
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public string SetRootsAndRender()
     {
         _builder.Clear();

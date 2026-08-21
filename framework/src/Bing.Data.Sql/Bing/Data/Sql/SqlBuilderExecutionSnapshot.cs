@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Builder 单次执行使用的冻结渲染快照。
 /// </summary>
-public sealed class SqlBuilderExecutionSnapshot
+internal sealed class SqlBuilderExecutionSnapshot
 {
     /// <summary>
     /// 初始化 Builder 执行快照。

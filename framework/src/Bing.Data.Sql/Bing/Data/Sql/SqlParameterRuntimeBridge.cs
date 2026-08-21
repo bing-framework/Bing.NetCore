@@ -3,7 +3,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 参数运行时协作入口。
 /// </summary>
-public static class SqlParameterRuntimeBridge
+internal static class SqlParameterRuntimeBridge
 {
     /// <summary>
     /// 创建默认 SQL 参数解析器。

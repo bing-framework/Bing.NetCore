@@ -79,4 +79,42 @@ internal abstract class ParameterLimitManagerBase
         result.Clear();
         return result;
     }
+
+    /// <summary>
+    /// 恢复包装器内部参数管理器状态。
+    /// </summary>
+    /// <param name="source">参数快照。</param>
+    internal void RestoreFrom(IParameterManager source)
+    {
+        var targetInner = Unwrap(Inner);
+        var sourceInner = Unwrap(source);
+        if (targetInner is ParameterManager target && sourceInner is ParameterManager snapshot)
+        {
+            target.RestoreFrom(snapshot);
+            return;
+        }
+        RestoreByValues(targetInner, sourceInner);
+    }
+
+    /// <summary>
+    /// 获取包装器实际持有的参数管理器。
+    /// </summary>
+    private static IParameterManager Unwrap(IParameterManager manager) =>
+        manager is ParameterLimitManagerBase limit ? Unwrap(limit.Inner) : manager;
+
+    /// <summary>
+    /// 对非内置参数管理器执行可用接口范围内的恢复。
+    /// </summary>
+    private static void RestoreByValues(IParameterManager target, IParameterManager source)
+    {
+        target.Clear();
+        if (target is IAdvancedParameterManager advancedTarget && source is IAdvancedParameterManager advancedSource)
+        {
+            foreach (var parameter in advancedSource.GetSqlParams().Values)
+                advancedTarget.Add(parameter);
+            return;
+        }
+        foreach (var parameter in source.GetParams())
+            target.Add(parameter.Key, parameter.Value);
+    }
 }

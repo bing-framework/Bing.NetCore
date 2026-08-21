@@ -27,8 +27,8 @@ public partial class MySqlQueryTest
         var result = _sqlQuery.From<Product>()
             .ClearSelect()
             .Select(true)
-            .Where<Product>(x => x.Id, new object[] { id, id2 }, Operator.In)
-            .ToList();
+            .Where(x => (object)x.Id, new object[] { id, id2 }, Operator.In)
+            .ToList<Product>();
 
         //断言
         Assert.NotNull(result);

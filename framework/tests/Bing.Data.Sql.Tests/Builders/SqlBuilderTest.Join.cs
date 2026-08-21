@@ -1,4 +1,9 @@
-﻿using Bing.Data.Sql.Tests.Samples;
+﻿using System.Linq.Expressions;
+using Bing.Data.Sql.Tests.Samples;
+using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Test.Shared;
 
 namespace Bing.Data.Sql.Tests.Builders;
@@ -186,6 +191,55 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：类型化 Join 的重复 alias 失败时应保持 SQL、参数和类型化来源图不变。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenAliasDuplicatesFromAlias_ShouldKeepStateUnchanged()
+    {
+        // Arrange
+        _builder.From<Sample>("s");
+        var fromClause = Assert.IsType<FromClause>(_builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(_builder.JoinClause);
+        var sqlBefore = _builder.ToSql();
+        var parametersBefore = _builder.GetParams().ToDictionary(item => item.Key, item => item.Value);
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == right.IntValue), "s"));
+
+        // Assert
+        Assert.Equal("查询中已存在表别名 \"s\"。", exception.Message);
+        Assert.Equal(sqlBefore, _builder.ToSql());
+        Assert.Equal(parametersBefore, _builder.GetParams());
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 Join 的空谓词失败时应保持 SQL、参数和类型化来源图不变。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenPredicateIsNull_ShouldKeepStateUnchanged()
+    {
+        // Arrange
+        _builder.From<Sample>("s");
+        var fromClause = Assert.IsType<FromClause>(_builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(_builder.JoinClause);
+        var sqlBefore = _builder.ToSql();
+        var parametersBefore = _builder.GetParams().ToDictionary(item => item.Key, item => item.Value);
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+
+        // Act
+        var exception = Assert.Throws<ArgumentNullException>(() => joinClause.Join<Sample2>(fromClause, null, "j"));
+
+        // Assert
+        Assert.Equal("predicate", exception.ParamName);
+        Assert.Equal(sqlBefore, _builder.ToSql());
+        Assert.Equal(parametersBefore, _builder.GetParams());
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+    }
+
+    /// <summary>
     /// 测试目的：替换根 From 后，已移除根表的 alias 应可由新的 Join 合法复用。
     /// </summary>
     [Fact]
@@ -303,6 +357,399 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
+    /// 测试目的：重复实体类型化 Join 提交后，既有实体投影必须冻结为根来源别名，不能被新 Join 改写。
+    /// </summary>
+    [Fact]
+    public void Join_WhenSelfJoinTypedProjectionAlreadyExists_ShouldFreezeRootProjectionAlias()
+    {
+        // Arrange
+        _builder.Select<Sample>(sample => new object[] { sample.Email })
+            .From<Sample>("s");
+        var fromClause = Assert.IsType<FromClause>(_builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(_builder.JoinClause);
+
+        // Act
+        joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == right.IntValue), "p");
+
+        // Assert
+        Assert.Equal(
+            "Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample] As [p] On [s].[IntValue]=[p].[IntValue]",
+            _builder.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：投影别名冻结失败时，类型化 Join 不得提交参数、Operation、Join 来源或别名，并且失败后可重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenProjectionAliasFreezeFails_ShouldKeepAllStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var builder = new FreezeFailingSqlBuilder();
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s");
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<FreezeFailingJoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().ToDictionary(item => item.Key, item => item.Value);
+        var operationBefore = builder.OperationKind;
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+        joinClause.FailFreeze = true;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == right.IntValue), "p"));
+
+        // Assert
+        Assert.Equal("测试投影别名冻结失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams());
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+
+        // Retry
+        joinClause.FailFreeze = false;
+        joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == right.IntValue), "p");
+        Assert.Contains("Join [Sample] As [p]", builder.ToSql(), StringComparison.Ordinal);
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：别名注册提交完成后抛异常时，必须恢复真实投影、别名、参数和连接图，并允许重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenAliasRegisterCommitFails_ShouldKeepAllStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var builder = new FreezeFailingSqlBuilder();
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s").Where<Sample>(
+            sample => sample.IntValue, 1);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<FreezeFailingJoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var metadataBefore = CaptureParameterMetadata(builder);
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+        joinClause.FailAliasCommit = true;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == 2), "p"));
+
+        // Assert
+        Assert.Equal("测试别名提交失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(metadataBefore, CaptureParameterMetadata(builder));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+
+        // Retry
+        joinClause.FailAliasCommit = false;
+        joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == 2), "p");
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample] As [p] On [s].[IntValue]=@_p_1 \r\nWhere [s].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(2, builder.GetParams().Count);
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：最终连接项提交完成后抛异常时，必须移除已追加项并恢复全部可变状态，随后可重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenFinalJoinCommitFails_ShouldKeepAllStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var builder = new FreezeFailingSqlBuilder();
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s").Where<Sample>(
+            sample => sample.IntValue, 1);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<FreezeFailingJoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var metadataBefore = CaptureParameterMetadata(builder);
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+        joinClause.FailJoinCommit = true;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == 2), "p"));
+
+        // Assert
+        Assert.Equal("测试连接项提交失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(metadataBefore, CaptureParameterMetadata(builder));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+
+        // Retry
+        joinClause.FailJoinCommit = false;
+        joinClause.Join<Sample>(fromClause,
+            (Expression<Func<Sample, Sample, bool>>)((left, right) => left.IntValue == 2), "p");
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample] As [p] On [s].[IntValue]=@_p_1 \r\nWhere [s].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(2, builder.GetParams().Count);
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：自定义参数管理器的候选 Add 在第二个参数失败时，不得污染真实 Builder，且关闭故障后可重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenCustomParameterProbeFails_ShouldKeepStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var parameterManager = new ThrowingParameterManager(TestDialect.Instance, 1);
+        var builder = new InspectableParameterSqlBuilder(parameterManager);
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s").Where<Sample>(
+            sample => sample.IntValue, 7);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var selectBefore = builder.SelectClause.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceGraphBefore = CaptureSourceGraph(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p"));
+
+        // Assert
+        Assert.Equal("测试参数管理器在第二个参数写入时失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(selectBefore, builder.SelectClause.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceGraphBefore, CaptureSourceGraph(builder));
+        Assert.Single(parameterManager.GetParams());
+        Assert.Equal(7, parameterManager.GetValue("@_p_0"));
+
+        // Retry
+        parameterManager.FailAfterAdds = null;
+        joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p");
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample2] As [p] On [s].[IntValue]=@_p_1 And [p].[IntValue]=@_p_2 \r\nWhere [s].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(new object[] { 7, 1, 2 }, builder.GetParams().Values.ToArray());
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：增强参数管理器的候选 Add 失败时，元数据状态也不得污染真实 Builder，且可按原序号重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenCustomAdvancedParameterProbeFails_ShouldKeepMetadataStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var parameterManager = new ThrowingAdvancedParameterManager(TestDialect.Instance, 1);
+        var builder = new InspectableParameterSqlBuilder(parameterManager);
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s").Where<Sample>(
+            sample => sample.IntValue, 7);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var selectBefore = builder.SelectClause.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var metadataBefore = CaptureParameterMetadata(parameterManager);
+        var sourceGraphBefore = CaptureSourceGraph(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p"));
+
+        // Assert
+        Assert.Equal("测试增强参数管理器在第二个参数写入时失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(selectBefore, builder.SelectClause.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(metadataBefore, CaptureParameterMetadata(parameterManager));
+        Assert.Equal(sourceGraphBefore, CaptureSourceGraph(builder));
+        Assert.Single(parameterManager.GetParams());
+        Assert.Equal(7, parameterManager.GetValue("@_p_0"));
+
+        // Retry
+        parameterManager.FailAfterAdds = null;
+        joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p");
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample2] As [p] On [s].[IntValue]=@_p_1 And [p].[IntValue]=@_p_2 \r\nWhere [s].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(new object[] { 7, 1, 2 }, builder.GetParams().Values.ToArray());
+        Assert.Equal(3, CaptureParameterMetadata(builder).Length);
+        Assert.Single(parameterManager.GetSqlParams());
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化派生表 Join 的子查询参数渲染失败时，不得写入普通第三方参数管理器，且关闭故障后可按原编号重试。
+    /// </summary>
+    [Fact]
+    public void TypedSubqueryJoin_WhenCustomParameterRenderFails_ShouldKeepStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var parameterManager = new ThrowingParameterManager(TestDialect.Instance, 1);
+        var builder = new InspectableParameterSqlBuilder(parameterManager);
+        builder.Select("owner.IntValue").From<Sample>("owner").Where<Sample>(sample => sample.IntValue, 7);
+        var child = new TestSqlBuilder()
+            .Select("IntValue")
+            .From("source")
+            .Where("Id", 2)
+            .Where("Code", "child");
+        var subquery = new SqlSubquery<Sample>(child, "summary", new[] { nameof(Sample.IntValue) },
+            "test.sqlserver", null, null, null, null, null);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(builder.JoinClause);
+        Expression<Func<Sample, Sample, bool>> predicate = (owner, summary) =>
+            owner.IntValue == 3 && owner.IntValue == summary.IntValue;
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceGraphBefore = CaptureSourceGraph(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join(fromClause, subquery, predicate));
+
+        // Assert
+        Assert.Equal("测试参数管理器在第二个参数写入时失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceGraphBefore, CaptureSourceGraph(builder));
+        Assert.Empty(joinClause.GetTypedSources());
+        Assert.Single(parameterManager.GetParams());
+        Assert.Equal(7, parameterManager.GetValue("@_p_0"));
+
+        // Retry
+        parameterManager.FailAfterAdds = null;
+        joinClause.Join(fromClause, subquery, predicate);
+
+        // Assert
+        Assert.Equal(new object[] { 7, 2, "child", 3 }, builder.GetParams().Values.ToArray());
+        Assert.Equal(
+            "Select [owner].[IntValue] \r\nFrom [Sample] As [owner] \r\nJoin (Select [IntValue] \r\nFrom [source] \r\nWhere [Id]=@_p_1 And [Code]=@_p_2) As [summary] On [owner].[IntValue]=@_p_3 And [owner].[IntValue]=[summary].[IntValue] \r\nWhere [owner].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化派生表 Join 的子查询参数渲染失败时，增强第三方参数的元数据不得污染，且可按原编号重试。
+    /// </summary>
+    [Fact]
+    public void TypedSubqueryJoin_WhenCustomAdvancedParameterRenderFails_ShouldKeepMetadataStateUnchangedAndAllowRetry()
+    {
+        // Arrange
+        var parameterManager = new ThrowingAdvancedParameterManager(TestDialect.Instance, 1);
+        var builder = new InspectableParameterSqlBuilder(parameterManager);
+        builder.Select("owner.IntValue").From<Sample>("owner").Where<Sample>(sample => sample.IntValue, 7);
+        var child = new TestSqlBuilder()
+            .Select("IntValue")
+            .From("source")
+            .Where("Id", 2)
+            .Where("Code", "child");
+        var subquery = new SqlSubquery<Sample>(child, "summary", new[] { nameof(Sample.IntValue) },
+            "test.sqlserver", null, null, null, null, null);
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<JoinClause>(builder.JoinClause);
+        Expression<Func<Sample, Sample, bool>> predicate = (owner, summary) =>
+            owner.IntValue == 3 && owner.IntValue == summary.IntValue;
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var aliasesBefore = builder.AliasData.OrderBy(item => item.Key.FullName).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceGraphBefore = CaptureSourceGraph(builder);
+        var metadataBefore = CaptureParameterMetadata(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join(fromClause, subquery, predicate));
+
+        // Assert
+        Assert.Equal("测试增强参数管理器在第二个参数写入时失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(metadataBefore, CaptureParameterMetadata(builder));
+        Assert.Equal(aliasesBefore, builder.AliasData.OrderBy(item => item.Key.FullName));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceGraphBefore, CaptureSourceGraph(builder));
+        Assert.Empty(joinClause.GetTypedSources());
+        Assert.Single(parameterManager.GetParams());
+        Assert.Equal(7, parameterManager.GetValue("@_p_0"));
+
+        // Retry
+        parameterManager.FailAfterAdds = null;
+        joinClause.Join(fromClause, subquery, predicate);
+
+        // Assert
+        Assert.Equal(new object[] { 7, 2, "child", 3 }, builder.GetParams().Values.ToArray());
+        Assert.Equal(
+            "Select [owner].[IntValue] \r\nFrom [Sample] As [owner] \r\nJoin (Select [IntValue] \r\nFrom [source] \r\nWhere [Id]=@_p_1 And [Code]=@_p_2) As [summary] On [owner].[IntValue]=@_p_3 And [owner].[IntValue]=[summary].[IntValue] \r\nWhere [owner].[IntValue]=@_p_0",
+            builder.ToSql());
+        Assert.Equal(4, CaptureParameterMetadata(builder).Length);
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：自定义参数管理器在候选状态提交后失败时，必须恢复旧参数管理器引用并允许使用原序号重试。
+    /// </summary>
+    [Fact]
+    public void TypedJoin_WhenCustomParameterCommitFails_ShouldRestoreStateAndAllowRetry()
+    {
+        // Arrange
+        var parameterManager = new ThrowingParameterManager(TestDialect.Instance);
+        var builder = new CommitFailingSqlBuilder(parameterManager);
+        builder.Select<Sample>(sample => new object[] { sample.Email }).From<Sample>("s");
+        var fromClause = Assert.IsType<FromClause>(builder.FromClause);
+        var joinClause = Assert.IsType<CommitFailingJoinClause>(builder.JoinClause);
+        var sqlBefore = builder.ToSql();
+        var parametersBefore = builder.GetParams().OrderBy(item => item.Key).ToArray();
+        var operationBefore = builder.OperationKind;
+        var sourceCountBefore = joinClause.GetTypedSources().Count;
+        joinClause.FailParameterCommit = true;
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p"));
+
+        // Assert
+        Assert.Equal("测试参数状态提交失败。", exception.Message);
+        Assert.Equal(sqlBefore, builder.ToSql());
+        Assert.Equal(parametersBefore, builder.GetParams().OrderBy(item => item.Key));
+        Assert.Equal(operationBefore, builder.OperationKind);
+        Assert.Equal(sourceCountBefore, joinClause.GetTypedSources().Count);
+        Assert.Empty(parameterManager.GetParams());
+
+        // Retry
+        joinClause.FailParameterCommit = false;
+        joinClause.Join<Sample2>(fromClause,
+            (Expression<Func<Sample, Sample2, bool>>)((left, right) => left.IntValue == 1 &&
+                right.IntValue == 2), "p");
+        Assert.Equal("Select [s].[Email] \r\nFrom [Sample] As [s] \r\nJoin [Sample2] As [p] On [s].[IntValue]=@_p_0 And [p].[IntValue]=@_p_1",
+            builder.ToSql());
+        Assert.Equal(new object[] { 1, 2 }, builder.GetParams().Values.ToArray());
+        Assert.Single(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
     /// 测试目的：Cross Join 不允许通过任意 On 入口附加连接条件。
     /// </summary>
     [Fact]
@@ -317,6 +764,223 @@ public partial class SqlBuilderTest
         // Assert
         Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
     }
+
+    private sealed class FreezeFailingSqlBuilder : TestSqlBuilder
+    {
+        public FreezeFailingSqlBuilder()
+        {
+        }
+
+        protected override IJoinClause CreateJoinClause() => new FreezeFailingJoinClause(CreateClauseContext());
+
+        public IReadOnlyDictionary<Type, string> AliasData => AliasRegister.Data;
+    }
+
+    private sealed class InspectableParameterSqlBuilder : TestSqlBuilder
+    {
+        public InspectableParameterSqlBuilder(IParameterManager parameterManager)
+            : base(parameterManager: parameterManager)
+        {
+        }
+
+        public IReadOnlyDictionary<Type, string> AliasData => AliasRegister.Data;
+    }
+
+    private sealed class FreezeFailingJoinClause : JoinClause
+    {
+        public FreezeFailingJoinClause(SqlClauseContext context) : base(context)
+        {
+        }
+
+        public bool FailFreeze { get; set; }
+
+        public bool FailAliasCommit { get; set; }
+
+        public bool FailJoinCommit { get; set; }
+
+        internal override void FreezeExistingProjectionAlias(Type entityType, SelectClause selectClause,
+            IEntityAliasRegister register)
+        {
+            if (FailFreeze)
+                throw new InvalidOperationException("测试投影别名冻结失败。");
+            base.FreezeExistingProjectionAlias(entityType, selectClause, register);
+        }
+
+        internal override void CommitAliasRegister(IEntityAliasRegister aliasRegister)
+        {
+            base.CommitAliasRegister(aliasRegister);
+            if (FailAliasCommit)
+                throw new InvalidOperationException("测试别名提交失败。");
+        }
+
+        internal override void CommitJoinItem(JoinItem item)
+        {
+            base.CommitJoinItem(item);
+            if (FailJoinCommit)
+                throw new InvalidOperationException("测试连接项提交失败。");
+        }
+    }
+
+    private sealed class CommitFailingSqlBuilder : TestSqlBuilder
+    {
+        public CommitFailingSqlBuilder(IParameterManager parameterManager) : base(parameterManager: parameterManager)
+        {
+        }
+
+        protected override IJoinClause CreateJoinClause() => new CommitFailingJoinClause(CreateClauseContext());
+    }
+
+    private sealed class CommitFailingJoinClause : JoinClause
+    {
+        public CommitFailingJoinClause(SqlClauseContext context) : base(context)
+        {
+        }
+
+        public bool FailParameterCommit { get; set; }
+
+        internal override void CommitParameterManager(IParameterManager parameterManager, FromClause fromClause)
+        {
+            base.CommitParameterManager(parameterManager, fromClause);
+            if (FailParameterCommit)
+                throw new InvalidOperationException("测试参数状态提交失败。");
+        }
+    }
+
+    private sealed class ThrowingParameterManager : IParameterManager
+    {
+        private readonly ParameterManager _inner;
+        private int _addCount;
+
+        public ThrowingParameterManager(IDialect dialect, int? failAfterAdds = null)
+            : this(new ParameterManager(dialect), failAfterAdds)
+        {
+        }
+
+        private ThrowingParameterManager(ParameterManager inner, int? failAfterAdds)
+        {
+            _inner = inner;
+            FailAfterAdds = failAfterAdds;
+        }
+
+        public int? FailAfterAdds { get; set; }
+
+        public string GenerateName() => _inner.GenerateName();
+
+        public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        public int Count => _inner.Count;
+
+        public void Add(string name, object value, Operator? @operator = null)
+        {
+            if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
+                throw new InvalidOperationException("测试参数管理器在第二个参数写入时失败。");
+            _inner.Add(name, value, @operator);
+        }
+
+        public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        public bool Contains(string name) => _inner.Contains(name);
+
+        public object GetValue(string name) => _inner.GetValue(name);
+
+        public IParameterManager Clone() => new ThrowingParameterManager(
+            (ParameterManager)_inner.Clone(), FailAfterAdds);
+
+        public void Clear()
+        {
+            _addCount = 0;
+            _inner.Clear();
+        }
+
+        public IParameterManager CreateEmpty() => new ThrowingParameterManager(
+            (ParameterManager)_inner.CreateEmpty(), FailAfterAdds);
+    }
+
+    private sealed class ThrowingAdvancedParameterManager : IAdvancedParameterManager
+    {
+        private readonly ParameterManager _inner;
+        private int _addCount;
+
+        public ThrowingAdvancedParameterManager(IDialect dialect, int? failAfterAdds = null)
+            : this(new ParameterManager(dialect), failAfterAdds)
+        {
+        }
+
+        private ThrowingAdvancedParameterManager(ParameterManager inner, int? failAfterAdds)
+        {
+            _inner = inner;
+            FailAfterAdds = failAfterAdds;
+        }
+
+        public int? FailAfterAdds { get; set; }
+
+        public string GenerateName() => _inner.GenerateName();
+
+        public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        public int Count => _inner.Count;
+
+        public void Add(string name, object value, Operator? @operator = null)
+        {
+            if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
+                throw new InvalidOperationException("测试增强参数管理器在第二个参数写入时失败。");
+            _inner.Add(name, value, @operator);
+        }
+
+        public void Add(SqlParam parameter)
+        {
+            if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
+                throw new InvalidOperationException("测试增强参数管理器在第二个参数写入时失败。");
+            _inner.Add(parameter);
+        }
+
+        public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => _inner.GetSqlParams();
+
+        public IReadOnlyDictionary<string, object> ExportValues() => _inner.ExportValues();
+
+        public bool Contains(string name) => _inner.Contains(name);
+
+        public object GetValue(string name) => _inner.GetValue(name);
+
+        public IParameterManager Clone() => new ThrowingAdvancedParameterManager(
+            (ParameterManager)_inner.Clone(), FailAfterAdds);
+
+        public void Clear()
+        {
+            _addCount = 0;
+            _inner.Clear();
+        }
+
+        public IParameterManager CreateEmpty() => new ThrowingAdvancedParameterManager(
+            (ParameterManager)_inner.CreateEmpty(), FailAfterAdds);
+    }
+
+    /// <summary>
+    /// 获取参数及其关键元数据的稳定快照。
+    /// </summary>
+    private static string[] CaptureParameterMetadata(TestSqlBuilder builder)
+    {
+        var manager = Assert.IsAssignableFrom<IAdvancedParameterManager>(builder.ParameterManager);
+        return CaptureParameterMetadata(manager);
+    }
+
+    /// <summary>
+    /// 获取增强参数管理器的稳定元数据快照。
+    /// </summary>
+    private static string[] CaptureParameterMetadata(IAdvancedParameterManager manager) =>
+        manager.GetSqlParams().OrderBy(item => item.Key).Select(item =>
+            $"{item.Key}|{item.Value.Value}|{item.Value.OriginalValue}|{item.Value.DbType}|{item.Value.Direction}|" +
+            $"{item.Value.EntityType?.FullName}|{item.Value.PropertyName}|{item.Value.ColumnName}|{item.Value.Source}|" +
+            $"{item.Value.MetadataLevel}|{item.Value.StorageKind}|{item.Value.ConverterKind}|{item.Value.CustomConverterName}").ToArray();
+
+    /// <summary>
+    /// 获取类型化连接来源图的稳定快照。
+    /// </summary>
+    private static string[] CaptureSourceGraph(TestSqlBuilder builder) => builder.GetTypedJoinSources()
+        .Select(source => $"{source.SourceId}|{source.EntityType?.FullName}|{source.Alias}")
+        .ToArray();
 
     /// <summary>
     /// 测试目的：Cross Join 使用含常量的 Lambda On 条件时，必须在解析表达式和创建参数前拒绝，保持 Builder 状态不变。

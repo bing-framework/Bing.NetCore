@@ -234,6 +234,7 @@ public class SqlOperationCompileContractTest
     {
         // Arrange
         const string source = """
+            using Bing.Data.Sql;
             using Bing.Data.Sql.Builders;
             using Bing.Data.Sql.Builders.Mutations;
 

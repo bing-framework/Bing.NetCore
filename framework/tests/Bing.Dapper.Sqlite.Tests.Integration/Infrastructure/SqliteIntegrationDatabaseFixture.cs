@@ -242,16 +242,16 @@ Create Table If Not Exists HierarchyNodes(
     ParentId Integer Null,
     Name Text Not Null
 );
-Create Table If Not Exists Arity01(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity02(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity03(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity04(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity05(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity06(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity07(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity08(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity09(Id Integer Not Null, Name Text Null);
-Create Table If Not Exists Arity10(Id Integer Not Null, Name Text Null);";
+Create Table If Not Exists Arity01(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity02(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity03(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity04(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity05(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity06(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity07(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity08(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity09(Id Integer Not Null, Name Text Null, NextId Integer Null);
+Create Table If Not Exists Arity10(Id Integer Not Null, Name Text Null, NextId Integer Null);";
         await command.ExecuteNonQueryAsync();
     }
 

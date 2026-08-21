@@ -1429,6 +1429,26 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：SQLite 不支持结构化 Lambda Right Join 时，应在 Join 调用阶段拒绝且不提交连接状态。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenRightJoinIsUnsupported_ShouldRejectBeforeJoinCommit()
+    {
+        // Arrange
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteStructuredTableSample>();
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() =>
+            description.RightJoin<SqliteStructuredOrderSample>(
+                (sample, order) => sample.Id == order.Id, "order"));
+
+        // Assert
+        Assert.Equal("Provider bing.sqlite 的当前查询能力配置不支持 Right Join。", exception.Message);
+        Assert.DoesNotContain("Right Join", description.ToSql(), StringComparison.Ordinal);
+    }
+
+    /// <summary>
     /// 测试目的：Intersect 与 Except 分页应在 SQLite 中执行真实集合语义，并通过派生表计算正确总数。
     /// </summary>
     [Fact]
@@ -2000,7 +2020,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             .OrderBy(sample => sample.Name)
             .Skip(1)
             .Take(1)
-            .SingleAsync();
+            .SingleAsync<SqliteStructuredTableSample>();
 
         // Assert
         Assert.Equal("three", result.Name);
@@ -2197,6 +2217,319 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.All(new[] { result1, result2, result3, result4, result5, result6, result7, result8, result9, result10 },
             result => Assert.Equal(new[] { 1 }, result.Select(item => item.Id)));
         Assert.Equal("Select `Arity01`.`Id` As `Id` \r\nFrom `Arity01`, `Arity02`, `Arity03`, `Arity04`, `Arity05`, `Arity06`, `Arity07`, `Arity08`, `Arity09`, `Arity10` \r\nWhere `Arity01`.`Id`=`Arity02`.`Id` And `Arity09`.`Id`=`Arity10`.`Id`", description10.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：十表连续 Lambda Join 应按来源位置绑定每个谓词，过滤干扰行并正确物化首、中、尾投影。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenTenSourcesAreJoinedSequentially_ShouldMaterializeChainWithoutCartesianRows()
+    {
+        // Arrange
+        using (var executor = _fixture.CreateExecutor())
+        {
+            for (var index = 1; index <= 10; index++)
+            {
+                var id = 100 + index;
+                var nextId = index == 10 ? (int?)null : id + 1;
+                await executor.ExecuteSqlAsync(
+                    $"Insert Into Arity{index:00}(Id,Name,NextId) Values (@id,@name,@nextId)",
+                    new { id, name = $"chain-{index:00}", nextId });
+                await executor.ExecuteSqlAsync(
+                    $"Insert Into Arity{index:00}(Id,Name,NextId) Values (@id,@name,@nextId)",
+                    new { id = 900 + index, name = $"noise-{index:00}", nextId = (int?)null });
+            }
+        }
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Join<SqliteArity06>((first, second, third, fourth, fifth, sixth) => fifth.NextId == sixth.Id)
+            .Join<SqliteArity07>((first, second, third, fourth, fifth, sixth, seventh) => sixth.NextId == seventh.Id)
+            .Join<SqliteArity08>((first, second, third, fourth, fifth, sixth, seventh, eighth) => seventh.NextId == eighth.Id)
+            .Join<SqliteArity09>((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => eighth.NextId == ninth.Id)
+            .Join<SqliteArity10>((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) => ninth.NextId == tenth.Id)
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) =>
+                new SqliteArityJoinResult
+                {
+                    FirstName = first.Name,
+                    MiddleName = fifth.Name,
+                    LastName = tenth.Name
+                });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-05", item.MiddleName);
+        Assert.Equal("chain-10", item.LastName);
+        Assert.Equal(
+            "Select `Arity01`.`Name` As `FirstName`,`Arity05`.`Name` As `MiddleName`,`Arity10`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id` \r\nJoin `Arity09` On `Arity08`.`NextId`=`Arity09`.`Id` \r\nJoin `Arity10` On `Arity09`.`NextId`=`Arity10`.`Id`",
+            description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：两表连续 Lambda Join 应按前一来源绑定关系并物化首尾投影。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenTwoSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(2);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Select((first, second) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = first.Name,
+                LastName = second.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-01", item.MiddleName);
+        Assert.Equal("chain-02", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity01`.`Name` As `MiddleName`,`Arity02`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：五表连续 Lambda Join 应保持中间来源位置绑定，并排除每表干扰数据形成的笛卡尔积。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenFiveSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(5);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Select((first, second, third, fourth, fifth) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = third.Name,
+                LastName = fifth.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-03", item.MiddleName);
+        Assert.Equal("chain-05", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity03`.`Name` As `MiddleName`,`Arity05`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：三表连续 Lambda Join 应按前序来源绑定谓词并只物化匹配链。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenThreeSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(3);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Select((first, second, third) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = second.Name,
+                LastName = third.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-02", item.MiddleName);
+        Assert.Equal("chain-03", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity02`.`Name` As `MiddleName`,`Arity03`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：四表连续 Lambda Join 应保持来源位置和中间字段映射稳定。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenFourSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(4);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Select((first, second, third, fourth) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = second.Name,
+                LastName = fourth.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-02", item.MiddleName);
+        Assert.Equal("chain-04", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity02`.`Name` As `MiddleName`,`Arity04`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：六表连续 Lambda Join 应排除各表干扰行并正确物化首、中、尾来源。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenSixSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(6);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Join<SqliteArity06>((first, second, third, fourth, fifth, sixth) => fifth.NextId == sixth.Id)
+            .Select((first, second, third, fourth, fifth, sixth) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = third.Name,
+                LastName = sixth.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-03", item.MiddleName);
+        Assert.Equal("chain-06", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity03`.`Name` As `MiddleName`,`Arity06`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：七表连续 Lambda Join 应保持高元数来源绑定并返回唯一匹配链。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenSevenSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(7);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Join<SqliteArity06>((first, second, third, fourth, fifth, sixth) => fifth.NextId == sixth.Id)
+            .Join<SqliteArity07>((first, second, third, fourth, fifth, sixth, seventh) => sixth.NextId == seventh.Id)
+            .Select((first, second, third, fourth, fifth, sixth, seventh) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = fourth.Name,
+                LastName = seventh.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-04", item.MiddleName);
+        Assert.Equal("chain-07", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity04`.`Name` As `MiddleName`,`Arity07`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：八表连续 Lambda Join 应验证拆分后的八元 API 仍能真实执行并保持来源顺序。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenEightSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(8);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Join<SqliteArity06>((first, second, third, fourth, fifth, sixth) => fifth.NextId == sixth.Id)
+            .Join<SqliteArity07>((first, second, third, fourth, fifth, sixth, seventh) => sixth.NextId == seventh.Id)
+            .Join<SqliteArity08>((first, second, third, fourth, fifth, sixth, seventh, eighth) => seventh.NextId == eighth.Id)
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = fourth.Name,
+                LastName = eighth.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-04", item.MiddleName);
+        Assert.Equal("chain-08", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity04`.`Name` As `MiddleName`,`Arity08`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id`", description.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：九表连续 Lambda Join 应验证高元数投影和每段 Join 条件的实际物化结果。
+    /// </summary>
+    [Fact]
+    public async Task Lambda_WhenNineSourcesAreJoinedSequentially_ShouldMaterializeBoundRows()
+    {
+        // Arrange
+        await SeedArityChainAsync(9);
+
+        // Act
+        using var query = _fixture.CreateQuery();
+        var description = query.From<SqliteArity01>()
+            .Join<SqliteArity02>((first, second) => first.NextId == second.Id)
+            .Join<SqliteArity03>((first, second, third) => second.NextId == third.Id)
+            .Join<SqliteArity04>((first, second, third, fourth) => third.NextId == fourth.Id)
+            .Join<SqliteArity05>((first, second, third, fourth, fifth) => fourth.NextId == fifth.Id)
+            .Join<SqliteArity06>((first, second, third, fourth, fifth, sixth) => fifth.NextId == sixth.Id)
+            .Join<SqliteArity07>((first, second, third, fourth, fifth, sixth, seventh) => sixth.NextId == seventh.Id)
+            .Join<SqliteArity08>((first, second, third, fourth, fifth, sixth, seventh, eighth) => seventh.NextId == eighth.Id)
+            .Join<SqliteArity09>((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => eighth.NextId == ninth.Id)
+            .Select((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => new SqliteArityJoinResult
+            {
+                FirstName = first.Name,
+                MiddleName = fifth.Name,
+                LastName = ninth.Name
+            });
+        var result = await description.ToListAsync<SqliteArityJoinResult>();
+
+        // Assert
+        var item = Assert.Single(result);
+        Assert.Equal("chain-01", item.FirstName);
+        Assert.Equal("chain-05", item.MiddleName);
+        Assert.Equal("chain-09", item.LastName);
+        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity05`.`Name` As `MiddleName`,`Arity09`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id` \r\nJoin `Arity09` On `Arity08`.`NextId`=`Arity09`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -2686,6 +3019,27 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("one");
         await InsertAsync("two");
         await InsertAsync("three");
+    }
+
+    /// <summary>
+    /// 写入指定长度的 Arity 连续 Join 链和每表干扰行。
+    /// </summary>
+    /// <param name="count">链中的表数量。</param>
+    /// <returns>写入任务。</returns>
+    private async Task SeedArityChainAsync(int count)
+    {
+        using var executor = _fixture.CreateExecutor();
+        for (var index = 1; index <= count; index++)
+        {
+            var id = 100 + index;
+            var nextId = index == count ? (int?)null : id + 1;
+            await executor.ExecuteSqlAsync(
+                $"Insert Into Arity{index:00}(Id,Name,NextId) Values (@id,@name,@nextId)",
+                new { id, name = $"chain-{index:00}", nextId });
+            await executor.ExecuteSqlAsync(
+                $"Insert Into Arity{index:00}(Id,Name,NextId) Values (@id,@name,@nextId)",
+                new { id = 900 + index, name = $"noise-{index:00}", nextId = (int?)null });
+        }
     }
 
     /// <summary>

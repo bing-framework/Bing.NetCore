@@ -7,7 +7,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL 写入运行时协作入口。
 /// </summary>
-public static class SqlMutationRuntimeBridge
+internal static class SqlMutationRuntimeBridge
 {
     /// <summary>
     /// 判断批量 Update 是否必须使用结构化逐实体执行以应用数据边界。

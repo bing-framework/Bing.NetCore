@@ -6,6 +6,17 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
+/// Builder 子句共享的可替换参数状态引用。
+/// </summary>
+internal sealed class ParameterManagerState
+{
+    /// <summary>
+    /// 当前参数管理器。
+    /// </summary>
+    public IParameterManager Current { get; set; }
+}
+
+/// <summary>
 /// SQL 子句运行上下文。
 /// </summary>
 /// <remarks>
@@ -41,7 +52,12 @@ public sealed record SqlClauseContext
     /// <summary>
     /// 当前参数管理器。
     /// </summary>
-    public IParameterManager ParameterManager { get; }
+    public IParameterManager ParameterManager => _parameterManagerState.Current;
+
+    /// <summary>
+    /// 当前 Builder 共享的参数状态引用。
+    /// </summary>
+    private readonly ParameterManagerState _parameterManagerState;
 
     /// <summary>
     /// Builder 生命周期内固定的执行上下文。
@@ -66,12 +82,32 @@ public sealed record SqlClauseContext
     internal SqlClauseContext(ISqlBuilder builder, ISqlProvider provider, IEntityResolver entityResolver,
         IEntityAliasRegister aliasRegister, IParameterManager parameterManager,
         SqlBuilderExecutionContext executionContext, SqlBuilderServices services)
+        : this(builder, provider, entityResolver, aliasRegister, new ParameterManagerState { Current = parameterManager },
+            executionContext, services)
+    {
+    }
+
+    /// <summary>
+    /// 使用共享参数状态引用初始化子句上下文。
+    /// </summary>
+    /// <param name="builder">当前 SQL Builder。</param>
+    /// <param name="provider">SQL 提供程序。</param>
+    /// <param name="entityResolver">当前实体解析器。</param>
+    /// <param name="aliasRegister">当前实体别名注册器。</param>
+    /// <param name="parameterManagerState">共享参数状态引用。</param>
+    /// <param name="executionContext">固定执行上下文。</param>
+    /// <param name="services">SQL Builder 共享服务集合。</param>
+    internal SqlClauseContext(ISqlBuilder builder, ISqlProvider provider, IEntityResolver entityResolver,
+        IEntityAliasRegister aliasRegister, ParameterManagerState parameterManagerState,
+        SqlBuilderExecutionContext executionContext, SqlBuilderServices services)
     {
         Builder = builder ?? throw new ArgumentNullException(nameof(builder));
         Provider = provider ?? throw new ArgumentNullException(nameof(provider));
         EntityResolver = entityResolver ?? throw new ArgumentNullException(nameof(entityResolver));
         AliasRegister = aliasRegister ?? throw new ArgumentNullException(nameof(aliasRegister));
-        ParameterManager = parameterManager ?? throw new ArgumentNullException(nameof(parameterManager));
+        _parameterManagerState = parameterManagerState ?? throw new ArgumentNullException(nameof(parameterManagerState));
+        if (_parameterManagerState.Current == null)
+            throw new ArgumentNullException(nameof(parameterManagerState));
         ExecutionContext = executionContext ?? throw new ArgumentNullException(nameof(executionContext));
         Services = services ?? throw new ArgumentNullException(nameof(services));
     }

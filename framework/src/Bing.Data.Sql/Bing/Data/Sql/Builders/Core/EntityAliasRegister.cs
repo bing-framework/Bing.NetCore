@@ -177,6 +177,26 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
         _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)),
         new HashSet<string>(_aliases, StringComparer.OrdinalIgnoreCase), FromType);
 
+    /// <summary>
+    /// 使用候选注册器替换当前可变状态。
+    /// </summary>
+    /// <param name="source">候选别名注册器。</param>
+    internal void RestoreFrom(EntityAliasRegister source)
+    {
+        if (source == null)
+            return;
+        _data.Clear();
+        foreach (var item in source._data)
+            _data[item.Key] = item.Value;
+        _entityAliases.Clear();
+        foreach (var item in source._entityAliases)
+            _entityAliases[item.Key] = new List<string>(item.Value);
+        _aliases.Clear();
+        foreach (var alias in source._aliases)
+            _aliases.Add(alias);
+        FromType = source.FromType;
+    }
+
     /// <inheritdoc />
     void IEntityAliasRegisterLifecycle.ReleaseAlias(string alias)
     {

@@ -61,6 +61,23 @@ public class ParameterManager : IAdvancedParameterManager
             _sqlParams.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
     }
 
+    /// <summary>
+    /// 使用参数快照恢复当前参数状态。
+    /// </summary>
+    /// <param name="source">参数快照。</param>
+    internal void RestoreFrom(ParameterManager source)
+    {
+        if (source == null)
+            return;
+        _paramIndex = source._paramIndex;
+        _params.Clear();
+        foreach (var parameter in source._params)
+            _params[parameter.Key] = parameter.Value;
+        _sqlParams.Clear();
+        foreach (var parameter in source._sqlParams)
+            _sqlParams[parameter.Key] = CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value);
+    }
+
     #endregion
 
     #region 属性

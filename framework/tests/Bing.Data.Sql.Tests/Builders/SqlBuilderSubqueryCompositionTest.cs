@@ -5,6 +5,7 @@ using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
+using Bing.Data.Enums;
 using System.Linq.Expressions;
 
 namespace Bing.Data.Sql.Tests.Builders;
@@ -643,6 +644,81 @@ public class SqlBuilderSubqueryCompositionTest
     }
 
     /// <summary>
+    /// 测试目的：实体映射解析失败时，类型化 Join 不得提交连接、别名、来源图或查询状态。
+    /// </summary>
+    [Fact]
+    public void TypedEntityJoin_WhenMappingResolutionFails_ShouldKeepAllQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder(entityMappingResolver: new RejectingMappingResolver())
+            .Select("owner.Id")
+            .From("owner", "owner");
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample2, bool>> predicate = (owner, candidate) => owner.IntValue == candidate.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join<Sample2>(fromClause, predicate, "candidate"));
+
+        // Assert
+        Assert.Equal("测试实体映射拒绝连接。", exception.Message);
+        AssertQueryState(expected, builder);
+        Assert.Empty(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：结构化表引用校验失败时，类型化 Join 不得写入任何候选查询状态。
+    /// </summary>
+    [Fact]
+    public void TypedEntityJoin_WhenTableReferenceValidationFails_ShouldKeepAllQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder(tableReferenceValidator: new RejectingTableReferenceValidator())
+            .Select("owner.Id")
+            .From("owner", "owner");
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample2, bool>> predicate = (owner, candidate) => owner.IntValue == candidate.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join<Sample2>(fromClause, predicate, "candidate"));
+
+        // Assert
+        Assert.Equal("测试表引用校验拒绝连接。", exception.Message);
+        AssertQueryState(expected, builder);
+        Assert.Empty(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
+    /// 测试目的：对象名格式化失败时，类型化 Join 不得留下别名、参数或部分来源图，并应允许后续重试。
+    /// </summary>
+    [Fact]
+    public void TypedEntityJoin_WhenObjectNameFormattingFails_ShouldKeepAllQueryStateAndAllowRetry()
+    {
+        // Arrange
+        var builder = new TestSqlBuilder(objectNameFormatter: new RejectingObjectNameFormatter())
+            .Select("owner.Id")
+            .From("owner", "owner");
+        var fromClause = (FromClause)builder.FromClause;
+        var joinClause = (JoinClause)builder.JoinClause;
+        Expression<Func<Sample, Sample2, bool>> predicate = (owner, candidate) => owner.IntValue == candidate.IntValue;
+        var expected = CaptureQueryState(builder);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            joinClause.Join<Sample2>(fromClause, predicate, "candidate"));
+
+        // Assert
+        Assert.Equal("测试对象名格式化拒绝连接。", exception.Message);
+        AssertQueryState(expected, builder);
+        Assert.Empty(joinClause.GetTypedSources());
+    }
+
+    /// <summary>
     /// 创建已写入一个 Set 参数的 Update Builder。
     /// </summary>
     private static TestSqlBuilder CreateUpdateBuilder() => new TestSqlBuilder()
@@ -696,6 +772,40 @@ public class SqlBuilderSubqueryCompositionTest
         /// <inheritdoc />
         public void ValidateTarget(DatabaseContext executionContext, SqlTableReference target) =>
             throw new NotSupportedException("测试跨库校验拒绝连接。");
+    }
+
+    /// <summary>
+    /// 原子 Join 测试使用的实体映射解析器。
+    /// </summary>
+    private sealed class RejectingMappingResolver : IEntityMappingResolver
+    {
+        /// <inheritdoc />
+        public EntityDescriptor GetDescriptor(Type entityType) =>
+            throw new InvalidOperationException("测试实体映射拒绝连接。");
+
+        /// <inheritdoc />
+        public EntityMappingMetadata Resolve(Type entityType, DatabaseContext databaseContext) =>
+            throw new InvalidOperationException("测试实体映射拒绝连接。");
+    }
+
+    /// <summary>
+    /// 原子 Join 测试使用的表引用校验器。
+    /// </summary>
+    private sealed class RejectingTableReferenceValidator : ISqlTableReferenceValidator
+    {
+        /// <inheritdoc />
+        public void Validate(SqlTableReference table, DatabaseType databaseType) =>
+            throw new InvalidOperationException("测试表引用校验拒绝连接。");
+    }
+
+    /// <summary>
+    /// 原子 Join 测试使用的对象名格式化器。
+    /// </summary>
+    private sealed class RejectingObjectNameFormatter : ISqlObjectNameFormatter
+    {
+        /// <inheritdoc />
+        public string Format(SqlTableReference reference, IDialect dialect, DatabaseType? databaseType) =>
+            throw new InvalidOperationException("测试对象名格式化拒绝连接。");
     }
 
     /// <summary>

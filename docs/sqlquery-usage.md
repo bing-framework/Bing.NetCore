@@ -37,7 +37,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 
 `SqlFluentQuery<TResult>` 专用于字符串 SQL Builder 操作，例如 `Select("Id,Name")`、`From("orders")`、`AppendWhere(...)`、`HavingRaw(...)`、`SplitOn(...)` 和 Dapper 多映射终结方法。`SqlLambdaQuery<TEntity>` 及其 2～10 来源变体只接受实体映射、Lambda 谓词、类型化 Join、类型化投影和类型化聚合，不暴露原始 `From`、`HavingRaw`、`SplitOn` 或 Dapper 多映射入口。
 
-类型化投影通过 `Select<TProjection>(...)` 显式切换结果类型；不再使用 `.As<TResult>()` 或其他隐式结果类型兼容入口。原生 SQL 文本则使用独立的 `SqlTextQuery<TResult>`，不会与 Fluent Builder 或 Lambda 来源互相继承。
+类型化投影通过 `Select<TProjection>(...)` 声明列形状，但不会切换查询描述的结果类型；Lambda 查询的最终物化类型必须在终结方法上显式指定，例如 `ToList<OrderDto>()`。不再使用 `.As<TResult>()` 或其他隐式结果类型兼容入口。原生 SQL 文本则使用独立的 `SqlTextQuery<TResult>`，不会与 Fluent Builder 或 Lambda 来源互相继承。
 
 ---
 
@@ -329,7 +329,7 @@ await executor.ExecuteSqlAsync(
     new { name = "Tom", id = 1 });
 
 var query = scope.CreateQuery();
-var user = await query.From<User>().Where<User>(x => x.Id, 1).ToEntityAsync<User>();
+    var user = await query.From<User>().Where<User>(x => x.Id, 1).FirstOrDefaultAsync<User>();
 
 await scope.CommitAsync();
 ```
@@ -356,7 +356,7 @@ var executor = scope.CreateExecutor();
 executor.ExecuteSql("update users set name=@name where id=@id", new { name = "Tom", id = 1 });
 
 var query = scope.CreateQuery();
-var user = query.From<User>().Where<User>(x => x.Id, 1).ToEntity<User>();
+    var user = query.From<User>().Where<User>(x => x.Id, 1).FirstOrDefault<User>();
 
 scope.Commit();
 ```
@@ -570,7 +570,7 @@ public async Task<List<Order>> GetPaidOrdersAsync(ISqlQuery sqlQuery)
 {
     return await sqlQuery.From<Order>()
         .Where(order => order.Status, OrderStatus.Paid)
-        .ToListAsync();
+        .ToListAsync<Order>();
 }
 ```
 
@@ -593,7 +593,7 @@ public async Task<List<OrderDto>> QueryOrdersAsync(
             Amount = order.Amount,
             Status = order.Status
         })
-        .ToListAsync();
+        .ToListAsync<OrderDto>();
 }
 ```
 
@@ -605,8 +605,7 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
     Guid orderId)
 {
     return await sqlQuery.From<Order>()
-        .LeftJoin<Customer>("c")
-        .On((order, customer) => order.CustomerId == customer.Id)
+        .LeftJoin<Customer>((order, customer) => order.CustomerId == customer.Id, "c")
         .Where((order, customer) => order.Id == orderId)
         .Select((order, customer) => new OrderWithCustomerDto
         {
@@ -616,7 +615,7 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
             CustomerName = customer.Name,
             CustomerPhone = customer.Phone
         })
-        .ToListAsync();
+        .ToListAsync<OrderWithCustomerDto>();
 }
 ```
 
