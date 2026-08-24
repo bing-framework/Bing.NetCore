@@ -20,6 +20,7 @@ using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Dapper.Sqlite;
+using Bing.Tracing;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,12 +47,14 @@ public class SqlServerRoutingAndExecutionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Act
-        var query = rootQuery.From<MappedSample, MappedSample>()
-            .FullJoin<MappedSample>((owner, reviewer, audit) => owner.Id == audit.Id, "audit")
-            .Select((owner, reviewer, audit) => new object[] { owner.Id, reviewer.Id, audit.Id });
+        var query = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
+            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
+            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .AppendSelect<MappedSample>(reviewer => new object[] { reviewer.Id }, "reviewer")
+            .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
 
         // Assert
-        query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[audit].[Id] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join [Users] As [audit] On [Users].[Id]=[audit].[Id]");
+        query.ToSql().ShouldBe("Select [owner].[Id],[reviewer].[Id],[audit].[Id] \r\nFrom [Users] As [owner], [Users] As [reviewer] \r\nFull Join [Users] As [audit] On [owner].[Id]=[audit].[Id]");
     }
 
     /// <summary>
@@ -67,12 +70,13 @@ public class SqlServerRoutingAndExecutionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Act
-        var query = rootQuery.From<MappedSample>()
-            .FullJoin<MappedSample>((owner, audit) => owner.Id == audit.Id, "audit")
-            .Select((owner, audit) => new object[] { owner.Id, audit.Id });
+        var query = rootQuery.From<MappedSample>("owner")
+            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
+            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
 
         // Assert
-        query.ToSql().ShouldBe("Select [Users].[Id],[audit].[Id] \r\nFrom [Users] \r\nFull Join [Users] As [audit] On [Users].[Id]=[audit].[Id]");
+        query.ToSql().ShouldBe("Select [owner].[Id],[audit].[Id] \r\nFrom [Users] As [owner] \r\nFull Join [Users] As [audit] On [owner].[Id]=[audit].[Id]");
     }
 
     /// <summary>
@@ -110,6 +114,7 @@ public class SqlServerRoutingAndExecutionTest
         };
         using var query = CreateQuery(connection);
         var description = query.From<SoftDeleteMappedSample>();
+        var builder = ((ISqlQueryBuilderAccessor)description).GetSqlBuilder();
 
         // Act
         var result = description.ToList<SoftDeleteMappedSample>();
@@ -122,7 +127,6 @@ public class SqlServerRoutingAndExecutionTest
         var parameter = connection.LastCreatedParameters.Single();
         parameter.ParameterName.ShouldBe("@_p_0");
         parameter.Value.ShouldBe(false);
-        var builder = ((ISqlQueryBuilderAccessor)description).GetSqlBuilder();
         builder.GetParams().ShouldBeEmpty();
     }
 
@@ -137,16 +141,16 @@ public class SqlServerRoutingAndExecutionTest
         services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
-        var summary = rootQuery.From<MappedSample>()
-            .OrderBy(item => item.Id)
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+        var summary = rootQuery.From<MappedSample>("users")
+            .OrderBy<MappedSample>(item => new object[] { item.Id })
+            .SelectSubquery<MappedSample, DerivedMappedSample>(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
 
         // Act
-        var query = rootQuery.From(summary)
-            .Select(item => new object[] { item.OwnerId });
+        var query = rootQuery.FromSubquery(summary)
+            .Select<DerivedMappedSample>(item => new object[] { item.OwnerId });
 
         // Assert
-        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users]) As [summary]");
+        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [users].[Id] As [OwnerId] \r\nFrom [Users] As [users]) As [summary]");
     }
 
     /// <summary>
@@ -165,18 +169,18 @@ public class SqlServerRoutingAndExecutionTest
         services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
-        var summary = rootQuery.From<MappedSample>()
-            .OrderBy(item => item.Id)
+        var summary = rootQuery.From<MappedSample>("users")
+            .OrderBy<MappedSample>(item => new object[] { item.Id })
             .Skip(5)
             .Take(10)
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+            .SelectSubquery<MappedSample, DerivedMappedSample>(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
 
         // Act
-        var query = rootQuery.From(summary)
-            .Select(item => new object[] { item.OwnerId });
+        var query = rootQuery.FromSubquery(summary)
+            .Select<DerivedMappedSample>(item => new object[] { item.OwnerId });
 
         // Assert
-        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nOrder By [Users].[Id] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only) As [summary]");
+        query.ToSql().ShouldBe("Select [summary].[OwnerId] \r\nFrom (Select [users].[Id] As [OwnerId] \r\nFrom [Users] As [users] \r\nOrder By [users].[Id] \r\nOffset @_p_0 Rows Fetch Next @_p_1 Rows Only) As [summary]");
     }
 
     /// <summary>
@@ -190,17 +194,21 @@ public class SqlServerRoutingAndExecutionTest
         services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
-        var summary = rootQuery.From<MappedSample, MappedSample>()
-            .Where((owner, reviewer) => owner.Id > 10)
-            .SelectSubquery((owner, reviewer) => new DerivedMappedSample { OwnerId = owner.Id }, "summary");
+        var summary = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
+            .Where<MappedSample, MappedSample>((owner, reviewer) => owner.Id > 10)
+            .SelectSubquery<MappedSample, MappedSample, DerivedMappedSample>(
+                (owner, reviewer) => new DerivedMappedSample { OwnerId = owner.Id }, "summary");
 
         // Act
-        var query = rootQuery.From<MappedSample, MappedSample>()
-            .FullJoin(summary, (owner, reviewer, derived) => owner.Id == derived.OwnerId)
-            .Select((owner, reviewer, derived) => new object[] { owner.Id, reviewer.Id, derived.OwnerId });
+        var query = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
+            .FullJoin<MappedSample, DerivedMappedSample>(summary,
+                (owner, derived) => owner.Id == derived.OwnerId, "owner")
+            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .AppendSelect<MappedSample>(reviewer => new object[] { reviewer.Id }, "reviewer")
+            .AppendSelect<DerivedMappedSample>(derived => new object[] { derived.OwnerId }, "summary");
 
         // Assert
-        query.ToSql().ShouldBe("Select [Users].[Id],[Users_2].[Id],[summary].[OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users], [Users] As [Users_2] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
+        query.ToSql().ShouldBe("Select [owner].[Id],[reviewer].[Id],[summary].[OwnerId] \r\nFrom [Users] As [owner], [Users] As [reviewer] \r\nFull Join (Select [owner].[Id] As [OwnerId] \r\nFrom [Users] As [owner], [Users] As [reviewer] \r\nWhere [owner].[Id]>@_p_0) As [summary] On [owner].[Id]=[summary].[OwnerId]");
     }
 
     /// <summary>
@@ -214,17 +222,19 @@ public class SqlServerRoutingAndExecutionTest
         services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
-        var summary = rootQuery.From<MappedSample>()
-            .Where(item => item.Id > 10)
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+        var summary = rootQuery.From<MappedSample>("users")
+            .Where<MappedSample>(item => item.Id > 10)
+            .SelectSubquery<MappedSample, DerivedMappedSample>(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
 
         // Act
-        var query = rootQuery.From<MappedSample>()
-            .FullJoin(summary, (sample, derived) => sample.Id == derived.OwnerId)
-            .Select((sample, derived) => new object[] { sample.Id, derived.OwnerId });
+        var query = rootQuery.From<MappedSample>("sample")
+            .FullJoin<MappedSample, DerivedMappedSample>(summary,
+                (sample, derived) => sample.Id == derived.OwnerId, "sample")
+            .Select<MappedSample>(sample => new object[] { sample.Id })
+            .AppendSelect<DerivedMappedSample>(derived => new object[] { derived.OwnerId }, "summary");
 
         // Assert
-        query.ToSql().ShouldBe("Select [Users].[Id],[summary].[OwnerId] \r\nFrom [Users] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [summary] On [Users].[Id]=[summary].[OwnerId]");
+        query.ToSql().ShouldBe("Select [sample].[Id],[summary].[OwnerId] \r\nFrom [Users] As [sample] \r\nFull Join (Select [users].[Id] As [OwnerId] \r\nFrom [Users] As [users] \r\nWhere [users].[Id]>@_p_0) As [summary] On [sample].[Id]=[summary].[OwnerId]");
     }
 
     /// <summary>
@@ -238,20 +248,22 @@ public class SqlServerRoutingAndExecutionTest
         services.AddSqlServerProvider();
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
-        var owner = rootQuery.From<MappedSample>()
-            .Where(item => item.Id > 10)
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "owner");
-        var audit = rootQuery.From<MappedSample>()
-            .Where(item => item.Id > 20)
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "audit");
+        var owner = rootQuery.From<MappedSample>("users")
+            .Where<MappedSample>(item => item.Id > 10)
+            .SelectSubquery<MappedSample, DerivedMappedSample>(item => new DerivedMappedSample { OwnerId = item.Id }, "owner");
+        var audit = rootQuery.From<MappedSample>("users")
+            .Where<MappedSample>(item => item.Id > 20)
+            .SelectSubquery<MappedSample, DerivedMappedSample>(item => new DerivedMappedSample { OwnerId = item.Id }, "audit");
 
         // Act
-        var query = rootQuery.From(owner)
-            .FullJoin(audit, (left, right) => left.OwnerId == right.OwnerId)
-            .Select((left, right) => new object[] { left.OwnerId, right.OwnerId });
+        var query = rootQuery.FromSubquery(owner)
+            .FullJoin<DerivedMappedSample, DerivedMappedSample>(audit,
+                (left, right) => left.OwnerId == right.OwnerId, "owner")
+            .Select<DerivedMappedSample>()
+            .AppendSelect<DerivedMappedSample>(right => new object[] { right.OwnerId }, "audit");
 
         // Assert
-        query.ToSql().ShouldBe("Select [owner].[OwnerId],[audit].[OwnerId] \r\nFrom (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_0) As [owner] \r\nFull Join (Select [Users].[Id] As [OwnerId] \r\nFrom [Users] \r\nWhere [Users].[Id]>@_p_1) As [audit] On [owner].[OwnerId]=[audit].[OwnerId]");
+        query.ToSql().ShouldBe("Select [owner].[OwnerId],[audit].[OwnerId] \r\nFrom (Select [users].[Id] As [OwnerId] \r\nFrom [Users] As [users] \r\nWhere [users].[Id]>@_p_0) As [owner] \r\nFull Join (Select [users].[Id] As [OwnerId] \r\nFrom [Users] As [users] \r\nWhere [users].[Id]>@_p_1) As [audit] On [owner].[OwnerId]=[audit].[OwnerId]");
     }
 
     /// <summary>
@@ -287,17 +299,18 @@ public class SqlServerRoutingAndExecutionTest
         using var provider = services.BuildServiceProvider();
         using var sqlServerQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlserver");
         using var sqliteQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
-        var subquery = sqliteQuery.From<MappedSample, MappedSample>()
-            .SelectSubquery((left, right) => new DerivedMappedSample { OwnerId = left.Id }, "summary");
-        var outer = sqlServerQuery.From<MappedSample, MappedSample>();
+        var subquery = sqliteQuery.From<MappedSample>("left").From<MappedSample>("right")
+            .SelectSubquery<MappedSample, MappedSample, DerivedMappedSample>(
+                (left, right) => new DerivedMappedSample { OwnerId = left.Id }, "summary");
+        var outer = sqlServerQuery.From<MappedSample>("owner").From<MappedSample>("reviewer");
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => outer.Join(subquery,
-            (owner, reviewer, derived) => owner.Id == derived.OwnerId));
+        var exception = Assert.Throws<NotSupportedException>(() => outer.Join<MappedSample, DerivedMappedSample>(
+            subquery, (owner, derived) => owner.Id == derived.OwnerId, "owner"));
 
         // Assert
         exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
-        outer.ToSql().ShouldBe("Select [Users].[Id],[Users].[Name],[Users].[Payload] \r\nFrom [Users], [Users] As [Users_2]");
+        outer.ToSql().ShouldBe("Select [owner].[Id],[owner].[Name],[owner].[Payload] \r\nFrom [Users] As [owner], [Users] As [reviewer]");
     }
 
     /// <summary>
@@ -333,11 +346,12 @@ public class SqlServerRoutingAndExecutionTest
         using var provider = services.BuildServiceProvider();
         using var sqlServerQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlserver");
         using var sqliteQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
-        var subquery = sqliteQuery.From<MappedSample>()
-            .SelectSubquery(item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
+        var subquery = sqliteQuery.From<MappedSample>("users")
+            .SelectSubquery<MappedSample, DerivedMappedSample>(
+                item => new DerivedMappedSample { OwnerId = item.Id }, "summary");
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => sqlServerQuery.From(subquery));
+        var exception = Assert.Throws<NotSupportedException>(() => sqlServerQuery.FromSubquery(subquery));
 
         // Assert
         exception.Message.ShouldBe("类型化派生表 Provider bing.sqlite 与当前 Provider bing.sqlserver 不兼容。");
@@ -565,7 +579,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         using var query = Assert.IsType<SqlServerSqlQuery>(factory.Create());
-        var description = query.From<MappedSample>("u").Where(item => item.Name, "primary");
+        var description = query.From<MappedSample>("u").Where<MappedSample, string>(item => item.Name, "primary");
 
         // Assert
         query.Options.ConnectionString.ShouldBe("Server=default;Database=test;");
@@ -625,7 +639,7 @@ public class SqlServerRoutingAndExecutionTest
                 ConnectionString = "Server=default;Database=test;"
             }
         };
-        var description = query.From<MappedSample>("u").Where(t => t.Name, "abc");
+        var description = query.From<MappedSample>("u").Where<MappedSample, string>(t => t.Name, "abc");
 
         // Assert
         query.Options.ConnectionString.ShouldBe("Server=reporting;Database=test;");
@@ -1863,7 +1877,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         scope.Commit();
-        var exception = Should.Throw<InvalidOperationException>(() => query.Sql<int>("Select 1"));
+        var exception = Should.Throw<InvalidOperationException>(() => query.Sql("Select 1"));
 
         // Assert
         exception.Message.ShouldContain("事务作用域已结束");
@@ -1916,9 +1930,169 @@ public class SqlServerRoutingAndExecutionTest
         before.ShouldNotBeNull();
         after.ShouldNotBeNull();
         before.ShouldNotBeSameAs(after);
-        before.OperationId.ShouldBe(after.OperationId);
+        before.QueryContextId.ShouldBe(after.QueryContextId);
+        before.ExecutionId.ShouldBe(after.ExecutionId);
         after.Connection.DbKey.ShouldBe("primary");
         after.Transaction.TransactionId.ShouldNotBeNullOrWhiteSpace();
+    }
+
+    /// <summary>
+    /// 测试目的：存在 Activity 时，诊断 TraceId 和 SpanId 必须优先使用当前 Activity，不能被 Core 回退值覆盖。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenActivityExists_ShouldPreferActivityTraceAndSpan()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item => message = item,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute);
+        var connection = new CaptureDbConnection();
+        using var executor = CreateExecutor(connection);
+        using var activity = new Activity("sql-diagnostics").SetIdFormat(ActivityIdFormat.W3C).Start();
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "activity" });
+
+        // Assert
+        message.ShouldNotBeNull();
+        message.TraceId.ShouldBe(activity.TraceId.ToString());
+        message.SpanId.ShouldBe(activity.SpanId.ToString());
+    }
+
+    /// <summary>
+    /// 测试目的：仅注入 Logger 时也应创建结构化执行 Scope，不依赖 Trace 级别或 DiagnosticListener 订阅。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenOnlyLoggerIsConfigured_ShouldBeginStructuredScope()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var loggerFactory = new TraceLoggerFactory(false);
+        using var query = CreateTraceQuery(connection, loggerFactory);
+
+        // Act
+        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        var scope = Assert.Single(loggerFactory.Scopes);
+        Assert.False(string.IsNullOrWhiteSpace(scope["QueryContextId"] as string));
+        Assert.False(string.IsNullOrWhiteSpace(scope["ExecutionId"] as string));
+        Assert.Equal("Data", scope["Phase"]);
+    }
+
+    /// <summary>
+    /// 测试目的：DiagnosticListener、Activity、Logger Scope 和 Error 事件必须共享同一 QueryContext、ExecutionId、Parent 和 Phase。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenAllDiagnosticsAreEnabled_ShouldShareExecutionIdentityOnError()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var loggerFactory = new TraceLoggerFactory(false);
+        var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
+        using var query = CreateTraceQuery(connection, loggerFactory);
+        using var activity = new Activity("sql-diagnostics-combined")
+            .SetIdFormat(ActivityIdFormat.W3C).Start();
+
+        // Act
+        Assert.Throws<InvalidOperationException>(() => query.Query<int>()
+            .AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+
+        // Assert
+        var before = Assert.Single(messages.Where(item => item.Operation ==
+            SqlQueryDiagnosticListenerNames.BeforeExecute));
+        var error = Assert.Single(messages.Where(item => item.Operation ==
+            SqlQueryDiagnosticListenerNames.ErrorExecute));
+        var scope = Assert.Single(loggerFactory.Scopes);
+        Assert.Equal(before.QueryContextId, error.QueryContextId);
+        Assert.Equal(before.QueryContextId, scope["QueryContextId"]);
+        Assert.Equal(before.ParentQueryContextId, error.ParentQueryContextId);
+        Assert.Equal(before.ParentQueryContextId, scope["ParentQueryContextId"]);
+        Assert.Equal(before.ExecutionId, error.ExecutionId);
+        Assert.Equal(before.ExecutionId, scope["ExecutionId"]);
+        Assert.Equal(before.Phase, error.Phase);
+        Assert.Equal(before.Phase, scope["Phase"]);
+        Assert.Equal(before.QueryContextId, activity.GetTagItem("bing.sql.query_context_id"));
+        Assert.Equal(before.ExecutionId, activity.GetTagItem("bing.sql.execution_id"));
+        Assert.Equal(before.Phase, activity.GetTagItem("bing.sql.phase"));
+    }
+
+    /// <summary>
+    /// 测试目的：未启用 DiagnosticListener、Activity 和 Logger 时，不应创建执行前诊断消息。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenAllDiagnosticsAreDisabled_ShouldNotCreateExecutionMessage()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        using var query = CreateSqlServerTestRoot<CountingDiagnosticsSqlServerQuery>(
+            CreateSqlServerTestProvider(), options => options.Connection(connection));
+
+        // Act
+        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(0, query.BeforeCount);
+    }
+
+    /// <summary>
+    /// 测试目的：没有 Activity 时，诊断 TraceId、SpanId 和 CorrelationId 应使用 Core 关联标识提供程序。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenActivityIsMissing_ShouldUseCorrelationProvider()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item => message = item,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute);
+        var connection = new CaptureDbConnection();
+        var provider = CreateSqlServerTestProvider(new FixedCorrelationIdProvider("correlation-id"));
+        using var executor = CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.Connection(connection));
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "correlation" });
+
+        // Assert
+        message.ShouldNotBeNull();
+        message.TraceId.ShouldBe("correlation-id");
+        message.SpanId.ShouldBe("correlation-id");
+        message.CorrelationId.ShouldBe("correlation-id");
+    }
+
+    /// <summary>
+    /// 测试目的：没有 Activity 和 Correlation Provider 时，诊断应回退到 TraceIdContext 的链路标识。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenActivityAndCorrelationProviderAreMissing_ShouldUseTraceContext()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item => message = item,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute);
+        var connection = new CaptureDbConnection();
+        using var executor = CreateExecutor(connection);
+        var previous = TraceIdContext.Current;
+        TraceIdContext.Current = new TraceIdContext("trace-context", "root", "parent", "child");
+
+        try
+        {
+            // Act
+            executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "trace-context" });
+        }
+        finally
+        {
+            TraceIdContext.Current = previous;
+        }
+
+        // Assert
+        message.ShouldNotBeNull();
+        message.TraceId.ShouldBe("trace-context");
+        message.SpanId.ShouldBe("child");
+        message.CorrelationId.ShouldBe("trace-context");
     }
 
     /// <summary>
@@ -2538,8 +2712,8 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
         var description = query.From<MappedSample>()
-            .Where(t => t.Name, "abc")
-            .Aggregate(SqlAggregateFunction.Count, t => t.Id);
+            .Where<MappedSample, string>(t => t.Name, "abc")
+            .Aggregate<MappedSample>(SqlAggregateFunction.Count, t => t.Id);
 
         // Act
         var result = await description.ScalarAsync<int>();
@@ -2639,7 +2813,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：同步流在取得后必须冻结 Fluent 查询描述，后续追加条件不得改变首次枚举的执行 SQL。
+    /// 测试目的：同步流取得后应冻结 Fluent 查询描述，后续追加条件必须立即拒绝。
     /// </summary>
     [Fact]
     public void AsEnumerable_WhenDescriptionChangesAfterStreamCreation_ShouldUseInitialBuilderSnapshot()
@@ -2652,12 +2826,14 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         var stream = description.AsEnumerable();
-        description.Where("[Name]", "changed-after-stream-creation");
+        var exception = Assert.Throws<InvalidOperationException>(() => description.Where("[Name]",
+            "changed-after-stream-creation"));
 
         // Act
         var result = stream.ToList();
 
         // Assert
+        Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
         Assert.Single(result);
         Assert.Equal("Select [Id],[Name] \r\nFrom [Users] \r\nWhere [Enabled]=@_p_0", connection.LastCommandText);
         Assert.Single(connection.LastCreatedParameters);
@@ -2689,7 +2865,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步流在取得后必须冻结 Fluent 查询描述，后续追加条件不得改变首次枚举的执行 SQL。
+    /// 测试目的：异步流取得后应冻结 Fluent 查询描述，后续追加条件必须立即拒绝。
     /// </summary>
     [Fact]
     public async Task AsAsyncEnumerable_WhenDescriptionChangesAfterStreamCreation_ShouldUseInitialBuilderSnapshot()
@@ -2702,7 +2878,8 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         var stream = description.AsAsyncEnumerable();
-        description.Where("[Name]", "changed-after-stream-creation");
+        var exception = Assert.Throws<InvalidOperationException>(() => description.Where("[Name]",
+            "changed-after-stream-creation"));
 
         // Act
         var result = new List<MappedSample>();
@@ -2710,6 +2887,7 @@ public class SqlServerRoutingAndExecutionTest
             result.Add(item);
 
         // Assert
+        Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
         Assert.Single(result);
         Assert.Equal("Select [Id],[Name] \r\nFrom [Users] \r\nWhere [Enabled]=@_p_0", connection.LastCommandText);
         Assert.Single(connection.LastCreatedParameters);
@@ -2814,10 +2992,10 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Sql<int>("Select @ApiToken", new Dictionary<string, object>
+        var result = query.Sql("Select @ApiToken", new Dictionary<string, object>
         {
             ["ApiToken"] = "super-secret-token"
-        }).Scalar();
+        }).Scalar<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -2846,7 +3024,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Sql<int>("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
+        var result = query.Sql("Select @pwd, @ClientCredential, @Authorization, @Signature, @Name",
             new Dictionary<string, object>
             {
                 ["pwd"] = "database-password",
@@ -2854,7 +3032,7 @@ public class SqlServerRoutingAndExecutionTest
                 ["Authorization"] = "Bearer access-token",
                 ["Signature"] = "request-signature",
                 ["Name"] = "Bing"
-            }).Scalar();
+            }).Scalar<int>();
 
         // Assert
         result.ShouldBe(1);
@@ -2909,12 +3087,12 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var syncException = Should.Throw<InvalidOperationException>(() =>
-            syncQuery.Sql<int>("Select 1").AsEnumerable().ToList());
+            syncQuery.Sql("Select 1").AsEnumerable<int>().ToList());
         using var asyncQuery = CreateSqlServerTestRoot<ThrowingBeforeSqlServerQuery>(provider,
             options => options.Connection(new CaptureDbConnection()));
         var asyncException = await Should.ThrowAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in asyncQuery.Sql<int>("Select 1").AsAsyncEnumerable())
+            await foreach (var _ in asyncQuery.Sql("Select 1").AsAsyncEnumerable<int>())
             {
             }
         });
@@ -3001,11 +3179,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：Count 成功后的回调修改查询描述时，数据页仍应使用分页开始时冻结的 Builder，
-    /// 防止 Count 与 Data 在同一次分页中执行不同的筛选条件。
+    /// 测试目的：分页 Count 执行期间修改已冻结查询描述时必须拒绝，防止 Count 与 Data 形成隐式分叉。
     /// </summary>
     [Fact]
-    public void ToPage_WhenCountCallbackMutatesDescription_ShouldUseInitialBuilderSnapshot()
+    public void ToPage_WhenCountCallbackMutatesDescription_ShouldRejectMutation()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -3014,13 +3191,11 @@ public class SqlServerRoutingAndExecutionTest
         connection.OnScalarExecuted = () => description.Where("[Name]", "changed-after-count");
 
         // Act
-        var result = description.ToPage(new Pager(1, 10, "Id"));
+        var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage(new Pager(1, 10, "Id")));
 
         // Assert
-        Assert.Equal(1, result.TotalCount);
-        Assert.Equal(2, connection.ExecutedCommandTexts.Count);
-        Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[0]);
-        Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[1]);
+        Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
+        Assert.Single(connection.ExecutedCommandTexts);
     }
 
     /// <summary>
@@ -3100,10 +3275,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步 Count 成功后的回调修改查询描述和调用方 Pager 时，数据页仍应使用调用开始时的快照。
+    /// 测试目的：异步分页 Count 执行期间修改已冻结查询描述时必须拒绝。
     /// </summary>
     [Fact]
-    public async Task ToPageAsync_WhenCountCallbackMutatesInputs_ShouldUseInitialSnapshots()
+    public async Task ToPageAsync_WhenCountCallbackMutatesDescription_ShouldRejectMutation()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -3117,15 +3292,11 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        var result = await description.ToPageAsync(pager);
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ToPageAsync(pager));
 
         // Assert
-        Assert.Equal(1, result.TotalCount);
-        Assert.Equal("Id", result.Order);
-        Assert.Equal(2, connection.ExecutedCommandTexts.Count);
-        Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[0]);
-        Assert.DoesNotContain("changed-after-count", connection.ExecutedCommandTexts[1]);
-        Assert.Contains("Order By [Id]", connection.ExecutedCommandTexts[1]);
+        Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
+        Assert.Single(connection.ExecutedCommandTexts);
     }
 
     /// <summary>
@@ -3338,7 +3509,7 @@ public class SqlServerRoutingAndExecutionTest
         ConfigurePrimaryReadTransaction(query);
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql("Select Count(*) From [Users]").Scalar<int>());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -3363,7 +3534,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
-            query.Sql<int>("Select Count(*) From [Users]").ScalarAsync());
+            query.Sql("Select Count(*) From [Users]").ScalarAsync<int>());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
@@ -3384,7 +3555,7 @@ public class SqlServerRoutingAndExecutionTest
             options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql("Select Count(*) From [Users]").Scalar<int>());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "error hook failed" }, exception.Flatten().InnerExceptions
@@ -3403,7 +3574,7 @@ public class SqlServerRoutingAndExecutionTest
             options => options.Connection(new CaptureDbConnection { ThrowOnScalarExecute = true }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Sql<int>("Select Count(*) From [Users]").Scalar());
+        var exception = Assert.Throws<AggregateException>(() => query.Sql("Select Count(*) From [Users]").Scalar<int>());
 
         // Assert
         Assert.Equal(new[] { "execute failed", "completion hook failed" }, exception.Flatten().InnerExceptions
@@ -4296,7 +4467,7 @@ public class SqlServerRoutingAndExecutionTest
         var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable().ToList());
         var readerDisposeCount = connection.ReaderDisposeCount;
         connection.ThrowOnReaderDispose = false;
-        var result = query.Sql<int>("Select Count(*) From [Users]").Scalar();
+        var result = query.Sql("Select Count(*) From [Users]").Scalar<int>();
 
         // Assert
         Assert.Equal("reader dispose failed", exception.Message);
@@ -4580,9 +4751,11 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 创建包含官方 SQL Server Provider 能力的测试服务提供程序。
     /// </summary>
-    private static ServiceProvider CreateSqlServerTestProvider()
+    private static ServiceProvider CreateSqlServerTestProvider(ICorrelationIdProvider correlationIdProvider = null)
     {
         var services = new ServiceCollection();
+        if (correlationIdProvider != null)
+            services.AddSingleton(correlationIdProvider);
         services.AddSqlServerProvider();
         return services.BuildServiceProvider();
     }
@@ -4833,6 +5006,26 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 统计执行前诊断创建次数的测试查询对象。
+    /// </summary>
+    private sealed class CountingDiagnosticsSqlServerQuery : SqlServerSqlQueryBase
+    {
+        public CountingDiagnosticsSqlServerQuery(IServiceProvider serviceProvider,
+            SqlOptions<CountingDiagnosticsSqlServerQuery> options) : base(serviceProvider, options)
+        {
+        }
+
+        public int BeforeCount { get; private set; }
+
+        protected override DiagnosticsMessage ExecuteBefore(string sql, object parameter,
+            IDbConnection connection, IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null)
+        {
+            BeforeCount++;
+            return base.ExecuteBefore(sql, parameter, connection, parameterMetadata);
+        }
+    }
+
+    /// <summary>
     /// 前置执行钩子固定失败的测试查询对象。
     /// </summary>
     private sealed class ThrowingBeforeSqlServerQuery : SqlServerSqlQueryBase
@@ -5061,6 +5254,11 @@ public class SqlServerRoutingAndExecutionTest
         /// </summary>
         public IReadOnlyList<string> Messages => _logger.Messages;
 
+        /// <summary>
+        /// 已捕获的结构化日志 Scope。
+        /// </summary>
+        public IReadOnlyList<IReadOnlyDictionary<string, object>> Scopes => _logger.Scopes;
+
         /// <inheritdoc />
         public ILogger CreateLogger(string categoryName) => _logger;
 
@@ -5090,8 +5288,20 @@ public class SqlServerRoutingAndExecutionTest
         /// </summary>
         public IReadOnlyList<string> Messages => _messages;
 
+        private readonly List<IReadOnlyDictionary<string, object>> _scopes = new();
+
+        /// <summary>
+        /// 已捕获的结构化日志 Scope。
+        /// </summary>
+        public IReadOnlyList<IReadOnlyDictionary<string, object>> Scopes => _scopes;
+
         /// <inheritdoc />
-        public IDisposable BeginScope<TState>(TState state) => EmptyScope.Instance;
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            if (state is IEnumerable<KeyValuePair<string, object>> fields)
+                _scopes.Add(fields.ToDictionary(item => item.Key, item => item.Value));
+            return EmptyScope.Instance;
+        }
 
         /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel) => _traceEnabled && logLevel == LogLevel.Trace;
@@ -5117,6 +5327,20 @@ public class SqlServerRoutingAndExecutionTest
 
         /// <inheritdoc />
         public void Dispose() { }
+    }
+
+    /// <summary>
+    /// 固定 Core 关联标识的测试提供程序。
+    /// </summary>
+    private sealed class FixedCorrelationIdProvider : ICorrelationIdProvider
+    {
+        private readonly string _correlationId;
+
+        public FixedCorrelationIdProvider(string correlationId) => _correlationId = correlationId;
+
+        public string Get() => _correlationId;
+
+        public IDisposable Change(string correlationId) => EmptyScope.Instance;
     }
 
     /// <summary>

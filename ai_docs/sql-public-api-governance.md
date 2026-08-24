@@ -1,18 +1,35 @@
 # SQL 公共 API 治理
 
-## Lambda V4 公共合同
+## Lambda dev_v6 公共合同
 
-`SqlLambdaQuery<TSource...>` 的泛型参数只表示来源图，不表示结果类型。`SqlMultiLambdaQuery` 是非泛型组合核心；`Select<TProjection>` 只描述投影形状，不切换查询描述的来源元数，也不恢复默认结果类型。
+`SqlLambdaQuery` 是新主路径的非泛型 Lambda 查询描述。根 `ISqlQuery` 通过 `From<TEntity>(alias, schema)` 进入该主路径；当 alias/schema 均为空时必须显式传入 `null, null`。已发布的 `From<TEntity>(string alias = null)` 会优先匹配零/一参数调用并返回 `SqlLambdaQuery<TEntity>`，该入口和 `SqlMultiLambdaQuery` 仅作为兼容路径保留。新代码不再扩散高元数描述类型、`SqlSubqueryLambdaQuery<TProjection>` 或高元数 `ISqlQuery.From`。
 
-Lambda 查询的结果类型必须由终结方法显式指定：`ToList<TResult>`、`First<TResult>`、`FirstOrDefault<TResult>`、`Single<TResult>`、`SingleOrDefault<TResult>`、`Scalar<TResult>`、`ToPage<TResult>`、`AsEnumerable<TResult>` 及其异步/取消对称入口。Lambda 查询不提供无泛型终结方法、`.As<TResult>()`、`SelectAs<TResult>()`、`SelectDto<TResult>()`、`ToEntity<TResult>()` 或后置 `.On(...)`。
+Lambda 查询的结果类型必须由终结方法显式指定：`ToEntity<TResult>`、`ToList<TResult>`、`First<TResult>`、`FirstOrDefault<TResult>`、`Single<TResult>`、`SingleOrDefault<TResult>`、`Scalar<TResult>`、`ToPage<TResult>`、`AsEnumerable<TResult>` 及其异步/取消对称入口；非泛型 Raw 查询提供 `ToEntity<TResult>`、`ToList<TResult>`、`ToDictionary<TResult,TKey,TValue>`、标量和流式终结。查询不提供 `.As<TResult>()`、`SelectAs<TResult>()`、`SelectDto<TResult>()` 或后置 `.On(...)`。
 
-`Query<TResult>()`、`Sql<TResult>()` 和 `SqlInterpolated<TResult>()` 在 Raw 查询创建时固定最终结果类型，Raw 查询不再提供用于重新选择结果类型的 `<TNextResult>` 单结果、分页或流式终结重载。Raw Fluent 的 2～7 对象多映射是独立能力，仍由创建时确定的 `TResult` 承载。
+非泛型 `Sql(...)` 和 `SqlInterpolated(...)` 创建的 Raw 描述在单结果、列表、字典、标量和流式终结方法处选择结果类型；2～7 对象多映射属于低层兼容能力，继续由已发布的 `SqlTextQuery<TResult>`/`SqlFluentQuery<TResult>` 承载。已发布的 `Sql<TResult>()` 和 `SqlInterpolated<TResult>()` 继续作为兼容入口保留，但新代码不得继续扩散该固定结果类型路径。
 
 ## Runtime 边界与发布基线
 
-`SqlQueryRuntimeFactory`、`SqlBuilderRuntimeBridge`、`SqlParameterRuntimeBridge`、`SqlMutationRuntimeBridge` 和 `SqlBuilderExecutionSnapshot` 仅由官方 Dapper 执行链使用，已内部化；`ISqlQueryPlanExecutor`、`ISqlQueryBuilderSource`、`ISqlQueryRuntimeBindingController` 和 `SqlQueryPlan` 是真实跨程序集执行/绑定 SPI，保留最小公开契约。不得为恢复旧调用方式新增兼容转发、过大的 Runtime 接口或关闭 Analyzer。
+`SqlQueryRuntimeFactory`、`SqlParameterRuntimeBridge` 和 `SqlMutationRuntimeBridge` 仅由官方执行链使用并保持内部化；`SqlBuilderRuntimeBridge` 只保留官方跨程序集所需的窄静态入口，`SqlBuilderExecutionSnapshot` 只公开 SQL 与不可变参数快照，绝不公开 Builder、连接、事务或诊断状态。`SqlQueryPlan` 的 Builder 仅为程序集内部状态，跨程序集执行通过计划、快照和 Count/Data 派生入口完成。`ISqlQueryPlanExecutor`、`ISqlQueryBuilderSource`、`ISqlQueryRuntimeBindingController` 和 `SqlQueryPlan` 是真实跨程序集执行/绑定 SPI，保留最小公开契约。不得为恢复旧调用方式新增兼容转发、过大的 Runtime 接口或关闭 Analyzer。
 
-本次 V4 是未发布 API 的有意 Breaking Change：Lambda 旧的无泛型终结迁移为 `.ToList<TEntity>()`、`.First<Dto>()`、`.ToPage<Dto>()` 等显式目标；Raw 旧的 `Query<TResult>().ToList<TNextResult>()` 迁移为入口指定最终类型后调用非泛型终结。`PublicAPI.Shipped.txt` 不回填未发布成员；新公开成员进入 `PublicAPI.Unshipped.txt`，删除成员同步由 API Contract、Analyzer 和消费者编译契约验证。
+本次 dev_v6 只对经发布状态审计确认的未发布高元数来源和表达式收敛为连续 From、二元方法级泛型与原子 Join；已发布一元 Lambda 和 Raw 泛型入口不从 Shipped 基线删除。Raw 新主入口改为非泛型描述并由终结方法选择结果；新公开成员进入 `PublicAPI.Unshipped.txt`。任何已发布符号的删除都必须先有包版本、消费者和批准证据，不能只通过修改 Public API 基线掩盖破坏。
+
+### Shipped/Unshipped 发布审计矩阵
+
+版本依据：仓库 `version.props` 当前为 `7.0.0`；该版本值只作为当前 Shipped 基线的仓库证据，不推断外部包下载或外部消费者实际使用情况。
+
+| 符号/范围 | 基线 | 已发布包版本 | 仓库消费者 | 外部消费者 | 处理批准 |
+| --- | --- | --- | --- | --- | --- |
+| `Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias = null)` | Shipped | `7.0.0` 基线 | Dapper Core、SQLite/SQL Server Provider、API Contract | 未知，按已发布 ABI 处理 | 保留；不得删除 |
+| `Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias, string schema)` | Unshipped | 无已发布版本证据 | 新版 Data.Sql/SQLite/SQL Server/EF Core 消费者、API Contract | 未知 | 非泛型主路径；新代码显式使用，避免与兼容重载发生静态解析歧义 |
+| `Bing.Data.Sql.SqlLambdaQuery<TEntity>` 及 Shipped 一元成员 | Shipped | `7.0.0` 基线 | SQLite/SQL Server 迁移前兼容调用、API Contract | 未知，按已发布 ABI 处理 | 保留兼容入口；新代码不扩散 |
+| `Bing.Data.Sql.SqlMultiLambdaQuery` 兼容基类 | Unshipped | 无已发布版本证据 | 当前兼容包装内部使用 | 未知 | 仅登记为 Unshipped，不宣称已发布 |
+| `Bing.Data.Sql.SqlQueryBase.From<TEntity>(string alias = null)` | Shipped | `7.0.0` 基线 | Dapper Core 及其 Provider 测试 | 未知，按已发布 ABI 处理 | 保留；不得删除 |
+| `Bing.Data.Sql.SqlLambdaQuery` 非泛型描述、连续 `From`、方法级泛型 | Unshipped | 无已发布版本证据 | 新版 Data.Sql/SQLite/SQL Server/EF Core 消费者 | 未知 | 作为未发布主路径登记；不进入 Shipped |
+| Raw 非泛型 `SqlTextQuery` 终结方法及 `ToPage/ToPageAsync` | Unshipped | 无已发布版本证据 | SQLite Integration、API Contract、Dapper Runtime Bridge | 未知 | 作为未发布能力登记；SQLite 真实执行验收 |
+| 高元数 Lambda 类型、3+ 参数表达式和旧生成器 | 计划内删除 | 无已发布版本证据 | 旧迁移测试已移除 | 未知 | 仅在未发布证明成立后删除；当前不从已发布 ABI 删除 |
+
+验收证据：两个 `PublicAPI.Shipped.txt` 与 HEAD 逐字一致；Data.Sql 默认 Analyzer 无 `RS0016/RS0017/RS0018`；旧/新入口分别由 `SqlQueryApiContractTest`、Dapper Core 编译和 SQLite 真实执行覆盖。外部包清单不可由仓库源码推断，故不能写成“外部消费者不存在”。
 
 直接证据：`Bing.Data.Sql.Tests.SqlQueryApiContractTest` 覆盖来源元数、Lambda/Raw 终结、Runtime 绑定和无第 11 来源契约；`Bing.Data.Sql.Analyzers.Tests` 覆盖消费者编译契约；`Bing.Dapper.Core.Tests` 覆盖官方执行链；`Bing.Dapper.Sqlite.Tests` 与其 Integration 项目覆盖 SQL/参数快照和真实执行。
 

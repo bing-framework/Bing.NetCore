@@ -16,9 +16,49 @@ public sealed class DiagnosticsMessage
     public string Operation { get; set; }
 
     /// <summary>
-    /// 操作标识
+    /// 查询上下文标识，同一个查询实例在多次执行中保持不变。
     /// </summary>
-    public string OperationId { get; set; } = Guid.NewGuid().ToString();
+    public string QueryContextId { get; set; }
+
+    /// <summary>
+    /// 父查询上下文标识，用于派生查询或重试链路。
+    /// </summary>
+    public string ParentQueryContextId { get; set; }
+
+    /// <summary>
+    /// 执行标识，同一次执行的 Before、After、Error 消息保持一致。
+    /// </summary>
+    public string ExecutionId { get; set; }
+
+    /// <summary>
+    /// 兼容已发布诊断消费者的旧操作标识；新代码应使用 <see cref="ExecutionId" />。
+    /// </summary>
+    [Obsolete("请改用 ExecutionId。")]
+    public string OperationId
+    {
+        get => ExecutionId;
+        set => ExecutionId = value;
+    }
+
+    /// <summary>
+    /// 当前执行阶段，例如 Data 或 Count。
+    /// </summary>
+    public string Phase { get; set; }
+
+    /// <summary>
+    /// Activity 跟踪标识。
+    /// </summary>
+    public string TraceId { get; set; }
+
+    /// <summary>
+    /// Activity Span 标识。
+    /// </summary>
+    public string SpanId { get; set; }
+
+    /// <summary>
+    /// Core 关联标识回退值。
+    /// </summary>
+    public string CorrelationId { get; set; }
 
     /// <summary>
     /// Sql语句

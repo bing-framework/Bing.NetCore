@@ -30,7 +30,7 @@ public class PostgreSqlProviderRegistrationTest
         using var query = provider.GetRequiredService<ISqlQueryFactory>().Create("pgsql");
 
         // Act
-        var description = query.SqlInterpolated<string>(
+        var description = query.SqlInterpolated(
             $"Select $tag$@p0$tag$ Where Name = {"Bing"}");
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
 

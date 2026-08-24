@@ -20,24 +20,30 @@
 public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 {
     SqlFluentQuery<TResult> Query<TResult>();
-    SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null);
+    SqlTextQuery Sql(string sql, object parameters = null);
+    SqlTextQuery SqlInterpolated(FormattableString sql);
     SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null);
-    SqlLambdaQuery<TEntity> From<TEntity>() where TEntity : class;
+    SqlLambdaQuery From<TEntity>(string alias, string schema) where TEntity : class;
+    SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class;
+    SqlLambdaQuery FromTable(string table, string alias = null, string schema = null);
+    SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class;
 }
 ```
 
 ### 重要方法
 
 - `Query<TResult>()`：创建指定结果类型的原始字符串 Fluent 查询描述，返回 `SqlFluentQuery<TResult>`。
-- `From<TEntity>()`：创建以实体映射为根来源的强类型 Fluent 查询描述。
-- `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本查询描述，不重写 SQL 文本或自动附加结构化过滤器。
+- `From<TEntity>(alias, schema)`：创建非泛型 Lambda 主描述；无别名和架构时显式传入 `null, null`。
+- `From<TEntity>()` / `From<TEntity>(alias)`：已发布的一元泛型兼容入口，返回 `SqlLambdaQuery<TEntity>`；新代码不应依赖其返回类型。
+- `Sql(sql, parameters)`：创建结果类型由终结方法选择的原生 SQL 文本查询描述，不重写 SQL 文本或自动附加结构化过滤器。
+- `SqlInterpolated(sql)`：创建参数化插值 SQL 文本查询描述，结果类型同样由终结方法选择。
 - `Procedure<TResult>(procedure, parameters)`：创建固定以存储过程命令类型执行的查询描述。
 
 ### 查询 DSL 隔离
 
-`SqlFluentQuery<TResult>` 专用于字符串 SQL Builder 操作，例如 `Select("Id,Name")`、`From("orders")`、`AppendWhere(...)`、`HavingRaw(...)`、`SplitOn(...)` 和 Dapper 多映射终结方法。`SqlLambdaQuery<TEntity>` 及其 2～10 来源变体只接受实体映射、Lambda 谓词、类型化 Join、类型化投影和类型化聚合，不暴露原始 `From`、`HavingRaw`、`SplitOn` 或 Dapper 多映射入口。
+`SqlFluentQuery<TResult>` 专用于字符串 SQL Builder 操作，例如 `Select("Id,Name")`、`From("orders")`、`AppendWhere(...)`、`HavingRaw(...)`、`SplitOn(...)` 和 Dapper 多映射终结方法。`SqlLambdaQuery` 只接受实体映射、Lambda 谓词、类型化 Join、类型化投影和类型化聚合，不暴露原始 Builder 或 Dapper 多映射入口。
 
-类型化投影通过 `Select<TProjection>(...)` 声明列形状，但不会切换查询描述的结果类型；Lambda 查询的最终物化类型必须在终结方法上显式指定，例如 `ToList<OrderDto>()`。不再使用 `.As<TResult>()` 或其他隐式结果类型兼容入口。原生 SQL 文本则使用独立的 `SqlTextQuery<TResult>`，不会与 Fluent Builder 或 Lambda 来源互相继承。
+类型化投影通过 `Select<TProjection>(...)` 声明列形状，但不会切换查询描述的结果类型；Lambda 和非泛型 Raw 查询的最终物化类型必须在终结方法上显式指定，例如 `ToList<OrderDto>()` 或 `ToEntity<Order>()`。不再使用 `.As<TResult>()` 或其他隐式结果类型兼容入口。已发布的 `Sql<TResult>`/`SqlTextQuery<TResult>` 入口继续保留用于兼容旧消费者，新代码应使用非泛型 `Sql(...)`。
 
 ---
 
@@ -201,7 +207,9 @@ builder.AggregateExpression(
 
 ## 查询描述生命周期
 
-根 `ISqlQuery` 保存连接、事务和诊断状态。每次调用 `Query<TResult>()`、`From<TEntity>()`、`Sql<TResult>(...)` 或 `Procedure<TResult>(...)` 都会创建独立查询描述及其专属 Builder；一个描述完成配置后应只用于一次执行路径，不应在并发操作之间共享。
+根 `ISqlQuery` 保存连接、事务和诊断状态。每次调用 `Query<TResult>()`、非泛型两参数 `From<TEntity>(alias, schema)`、兼容一元 `From<TEntity>(alias)`、非泛型 `Sql(...)` 或 `Procedure<TResult>(...)` 都会创建独立查询描述及其专属 Builder。描述遵循 Draft、Frozen、Executing、Completed 生命周期；终结执行使用冻结计划，流式执行在枚举结束或 Dispose 后释放租约。
+
+`ToSql()` 不冻结描述。首次终结后修改会抛出 `InvalidOperationException`，同一描述不能并发执行；重复执行复用冻结的结构快照，但每次执行拥有新的 ExecutionId。Count/Data 分页计划共享 QueryContextId，并分别标记执行阶段。
 
 `ISqlQuery` 不提供全局的 `Clear*`、`IgnoreFilter*` 或连接替换扩展。需要构造不同 SQL 时，应创建新的独立查询描述；结构化全局过滤器由 Builder 的数据边界策略统一处理，原生 SQL 则保持调用方控制的固定模板与参数化边界。
 
@@ -266,7 +274,7 @@ public async Task<List<UserDto>> QueryReportingUsersAsync(
     {
         var query = _sqlQueryFactory.Create<ISqlQuery>();
         var result = await query
-            .From<User>()
+            .From<User>(null, null)
             .Where<User>(x => x.Status, UserStatus.Enabled)
             .ToListAsync<UserDto>();
         return result;
@@ -329,7 +337,7 @@ await executor.ExecuteSqlAsync(
     new { name = "Tom", id = 1 });
 
 var query = scope.CreateQuery();
-    var user = await query.From<User>().Where<User>(x => x.Id, 1).FirstOrDefaultAsync<User>();
+    var user = await query.From<User>(null, null).Where<User>(x => x.Id, 1).FirstOrDefaultAsync<User>();
 
 await scope.CommitAsync();
 ```
@@ -356,7 +364,7 @@ var executor = scope.CreateExecutor();
 executor.ExecuteSql("update users set name=@name where id=@id", new { name = "Tom", id = 1 });
 
 var query = scope.CreateQuery();
-    var user = query.From<User>().Where<User>(x => x.Id, 1).FirstOrDefault<User>();
+    var user = query.From<User>(null, null).Where<User>(x => x.Id, 1).FirstOrDefault<User>();
 
 scope.Commit();
 ```
@@ -454,7 +462,7 @@ executor.ExecuteSql<User>(
 ### 2. 使用 `AddParam<TEntity>()` 为 Builder 参数补齐元数据
 
 ```csharp
-var query = sqlQuery.From<User>()
+var query = sqlQuery.From<User>(null, null)
     .Where(user => user.Name, "Tom");
 
 query.AddParam("statusCode", x => x.Status, 1);
@@ -548,16 +556,17 @@ await foreach (var user in query.StreamAsync<User>(cancellationToken: cancellati
 
 ## 独立查询描述
 
-根 `ISqlQuery` 保存连接、事务和诊断状态。需要构建并执行单个查询时，使用 `Query<TResult>()` 或 `From<TEntity>()` 创建独立 Fluent 查询描述；每个描述都有独立 Builder，执行时仍复用根查询的连接、事务、诊断和 Trace 上下文。
+根 `ISqlQuery` 保存连接、事务和诊断状态。需要构建并执行单个查询时，使用 `Query<TResult>()` 或非泛型 `From<TEntity>(alias, schema)` 创建独立 Fluent 查询描述；每个描述都有独立 Builder，执行时仍复用根查询的连接、事务、诊断和 Trace 上下文。已发布的一元 `From<TEntity>()` 只作为兼容入口保留。
 
 ```csharp
-var fluent = sqlQuery.From<Order>();
-var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new { Id = orderId });
+var fluent = sqlQuery.From<Order>(null, null);
+var text = sqlQuery.Sql("Select Id,OrderNo From Orders Where Id=@Id", new { Id = orderId });
 ```
 
 - `Query<TResult>()`：创建指定结果类型的 `SqlFluentQuery<TResult>`，适用于以普通 Builder 子句构造查询。
-- `From<TEntity>()`：创建以实体映射初始化的 Lambda Fluent 描述，支持类型化 `Select`、`Where`、`Join`、分页和同步/异步终结方法。
-- `Sql<TResult>(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换。
+- `From<TEntity>(alias, schema)`：创建以实体映射初始化的非泛型 Lambda Fluent 描述，支持类型化 `Select`、`Where`、`Join`、分页和同步/异步终结方法；无别名时传入 `null, null`。
+- `From<TEntity>()`：已发布的一元泛型兼容入口，新代码不应依赖其返回类型。
+- `Sql(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换；使用 `ToEntity<TResult>`、`ToList<TResult>`、`ToDictionary<TResult,TKey,TValue>` 或对应异步终结方法选择结果类型。
 
 原生 SQL 仅应使用调用方控制的固定模板，并通过参数对象绑定外部值；不得将外部输入拼接到 SQL 文本、表名、列名、排序字段或其他结构位置。
 
@@ -568,7 +577,7 @@ var text = sqlQuery.Sql<Order>("Select Id,OrderNo From Orders Where Id=@Id", new
 ```csharp
 public async Task<List<Order>> GetPaidOrdersAsync(ISqlQuery sqlQuery)
 {
-    return await sqlQuery.From<Order>()
+    return await sqlQuery.From<Order>(null, null)
         .Where(order => order.Status, OrderStatus.Paid)
         .ToListAsync<Order>();
 }
@@ -581,7 +590,7 @@ public async Task<List<OrderDto>> QueryOrdersAsync(
     ISqlQuery sqlQuery,
     OrderQueryParameter parameter)
 {
-    return await sqlQuery.From<Order>()
+    return await sqlQuery.From<Order>(null, null)
         .Where(order => order.Status, parameter.Status)
         .Skip(20)
         .Take(20)
@@ -604,10 +613,10 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
     ISqlQuery sqlQuery,
     Guid orderId)
 {
-    return await sqlQuery.From<Order>()
-        .LeftJoin<Customer>((order, customer) => order.CustomerId == customer.Id, "c")
-        .Where((order, customer) => order.Id == orderId)
-        .Select((order, customer) => new OrderWithCustomerDto
+    return await sqlQuery.From<Order>(null, null)
+        .LeftJoin<Order, Customer>((order, customer) => order.CustomerId == customer.Id, "c")
+        .Where<Order, Customer>((order, customer) => order.Id == orderId)
+        .Select<Order, Customer, OrderWithCustomerDto>((order, customer) => new OrderWithCustomerDto
         {
             Id = order.Id,
             OrderNo = order.OrderNo,
@@ -624,10 +633,10 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
 ```csharp
 public Task<Order> GetOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 {
-    return sqlQuery.Sql<Order>(
+    return sqlQuery.Sql(
             "Select Id,OrderNo,CustomerName,Amount From Orders Where Id=@Id",
             new { Id = orderId })
-        .FirstOrDefaultAsync();
+        .FirstOrDefaultAsync<Order>();
 }
 ```
 
@@ -636,7 +645,7 @@ public Task<Order> GetOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 ## 使用建议
 
 1. **优先使用表达式扩展方法**：通过 `Select/From/Where/Join/...` 的表达式重载构建 Sql，避免硬编码列名，提高类型安全和可维护性。
-2. **每次操作创建独立描述**：查询描述持有可变 Builder，不应在并发操作之间复用；需要构造另一条 SQL 时创建新的 `Query<TResult>()`、`From<TEntity>()` 或原生 SQL 描述。
+2. **每次操作创建独立描述**：查询描述在 Draft 阶段可配置，冻结后只能重复执行；需要构造另一条 SQL 时创建新的 `Query<TResult>()`、非泛型 `From<TEntity>(null, null)` 或非泛型原生 SQL 描述。零/一参数 `From<TEntity>` 仅用于已发布兼容调用。
 3. **使用调试 SQL 审查参数化结果**：仅在受控诊断路径中调用 Builder 的 `ToDebugSql()`；敏感参数会被遮蔽，外部输入始终应通过参数对象绑定。
 4. **保持结构化过滤边界**：结构化查询由数据边界策略处理；原生 SQL 不自动附加过滤器，调用方必须使用固定模板并显式约束访问范围。
 

@@ -26,6 +26,14 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null);
 
     /// <summary>
+    /// 创建结果类型由终结方法决定的原生 SQL 文本查询描述。
+    /// </summary>
+    /// <param name="sql">要原样执行的 SQL 文本。</param>
+    /// <param name="parameters">由后续参数绑定器处理的参数源。</param>
+    /// <returns>保留 SQL 文本和参数源的查询描述。</returns>
+    SqlTextQuery Sql(string sql, object parameters = null);
+
+    /// <summary>
     /// 创建指定结果类型的参数化插值 SQL 文本查询描述。
     /// 原生 SQL 不会自动应用结构化全局过滤器。
     /// </summary>
@@ -35,69 +43,53 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql);
 
     /// <summary>
+    /// 创建结果类型由终结方法决定的参数化插值 SQL 查询描述。
+    /// </summary>
+    /// <param name="sql">包含参数化插值值的 SQL 文本。</param>
+    /// <returns>保留 SQL 文本和插值参数的查询描述。</returns>
+    SqlTextQuery SqlInterpolated(FormattableString sql);
+
+    /// <summary>
     /// 创建指定结果类型的存储过程查询描述。
     /// </summary>
     /// <typeparam name="TResult">后续执行时用于映射结果行的类型。</typeparam>
-    /// <param name="procedure">要执行的存储过程名称。</param>
-    /// <param name="parameters">由参数绑定器处理的输入和输出参数源。</param>
-    /// <returns>固定以 <c>StoredProcedure</c> 命令类型执行的查询描述。</returns>
+    /// <param name="procedure">存储过程名称。</param>
+    /// <param name="parameters">过程输入和输出参数。</param>
+    /// <returns>指定结果类型的存储过程查询描述。</returns>
     SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null);
 
     /// <summary>
     /// 创建使用实体映射初始化的独立结构化 SQL 查询描述。
     /// </summary>
     /// <typeparam name="TEntity">查询来源实体类型。</typeparam>
-    /// <returns>已设置实体投影和来源表的独立查询描述。</returns>
-#pragma warning disable RS0027
+    /// <param name="alias">来源别名。</param>
+    /// <param name="schema">来源架构。</param>
+    /// <returns>可继续追加来源和 Lambda 操作的非泛型查询描述。</returns>
+    SqlLambdaQuery From<TEntity>(string alias, string schema) where TEntity : class;
+
+    /// <summary>
+    /// 创建使用实体映射初始化的已发布一元泛型兼容查询描述。
+    /// </summary>
+    /// <typeparam name="TEntity">查询来源实体类型。</typeparam>
+    /// <param name="alias">来源别名。</param>
+    /// <returns>可继续追加一元 Lambda 操作的泛型查询描述。</returns>
     SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class;
-#pragma warning restore RS0027
+
+    /// <summary>
+    /// 创建使用原始表名初始化的独立结构化 SQL 查询描述。
+    /// </summary>
+    /// <param name="table">表名。</param>
+    /// <param name="alias">来源别名。</param>
+    /// <param name="schema">来源架构。</param>
+    /// <returns>可继续追加来源和 Lambda 操作的非泛型查询描述。</returns>
+    SqlLambdaQuery FromTable(string table, string alias = null, string schema = null);
 
     /// <summary>
     /// 创建以严格 DTO 类型化派生表作为根来源的独立结构化 SQL 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
-    /// <returns>仅允许访问派生表显式投影成员的查询描述。</returns>
-    SqlSubqueryLambdaQuery<TProjection> From<TProjection>(SqlSubquery<TProjection> subquery)
+    /// <returns>可继续追加来源和 Lambda 操作的非泛型查询描述。</returns>
+    SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery)
         where TProjection : class;
-
-    /// <summary>
-    /// 创建使用两个实体映射初始化的独立结构化 SQL 查询描述。
-    /// </summary>
-    /// <typeparam name="TFirst">第一个表源实体类型。</typeparam>
-    /// <typeparam name="TSecond">第二个表源类型。</typeparam>
-    /// <returns>已设置两个实体根来源的独立查询描述。</returns>
-    SqlLambdaQuery<TFirst, TSecond> From<TFirst, TSecond>() where TFirst : class where TSecond : class;
-
-    /// <summary>创建使用三个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird> From<TFirst, TSecond, TThird>()
-        where TFirst : class where TSecond : class where TThird : class;
-
-    /// <summary>创建使用四个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth> From<TFirst, TSecond, TThird, TFourth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class;
-
-    /// <summary>创建使用五个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth> From<TFirst, TSecond, TThird, TFourth, TFifth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class;
-
-    /// <summary>创建使用六个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class;
-
-    /// <summary>创建使用七个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class;
-
-    /// <summary>创建使用八个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class;
-
-    /// <summary>创建使用九个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class;
-
-    /// <summary>创建使用十个实体根来源初始化的独立结构化 SQL 查询描述。</summary>
-    SqlLambdaQuery<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth> From<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TEighth, TNinth, TTenth>()
-        where TFirst : class where TSecond : class where TThird : class where TFourth : class where TFifth : class where TSixth : class where TSeventh : class where TEighth : class where TNinth : class where TTenth : class;
 }

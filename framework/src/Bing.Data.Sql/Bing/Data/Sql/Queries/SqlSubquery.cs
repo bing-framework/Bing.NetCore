@@ -21,9 +21,10 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     /// <param name="tenantId">创建派生表时的租户标识。</param>
     /// <param name="databaseIdentity">创建派生表时的物理数据库身份。</param>
     /// <param name="executionScope">创建派生表的根查询执行作用域。</param>
+    /// <param name="parentQueryContextId">创建派生表的父查询上下文标识。</param>
     internal SqlSubquery(ISqlBuilder builder, string alias, IReadOnlyCollection<string> projectedMembers,
         string providerKey, string dataSourceKey, string mappingProfile, string tenantId,
-        SqlDatabaseIdentity databaseIdentity, object executionScope)
+        SqlDatabaseIdentity databaseIdentity, object executionScope, string parentQueryContextId = null)
     {
         Builder = builder ?? throw new ArgumentNullException(nameof(builder));
         if (string.IsNullOrWhiteSpace(alias))
@@ -36,6 +37,7 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
         TenantId = tenantId;
         DatabaseIdentity = CloneDatabaseIdentity(databaseIdentity);
         ExecutionScope = executionScope;
+        ParentQueryContextId = parentQueryContextId;
     }
 
     /// <summary>
@@ -82,6 +84,11 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     /// 创建派生表的根查询执行作用域令牌。
     /// </summary>
     internal object ExecutionScope { get; }
+
+    /// <summary>
+    /// 创建派生表的父查询上下文标识。
+    /// </summary>
+    internal string ParentQueryContextId { get; }
 
     /// <summary>
     /// 验证派生表可由指定外层 Builder 安全使用。

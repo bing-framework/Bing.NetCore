@@ -23,7 +23,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Sql($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -46,7 +46,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Sql($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -72,8 +72,8 @@ public class BingSql002AnalyzerTest
                 public void Execute(Query query, string name)
                 {
                     var sql = $"Select * From samples Where Name = '{name}'";
-                    query.Sql<string>(sql);
-                    query.Sql<string>("Select * From samples Where Name = '" + $"{name}'");
+                    query.Sql(sql);
+                    query.Sql("Select * From samples Where Name = '" + $"{name}'");
                 }
             }
             """;
@@ -99,10 +99,10 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Query query, string name, bool usePrimary)
                 {
-                    query.Sql<string>((string)$"Select * From samples Where Name = '{name}'");
-                    query.Sql<string>(usePrimary ? $"Select * From samples Where Name = '{name}'" : "Select * From samples");
-                    query.Sql<string>(null ?? $"Select * From samples Where Name = '{name}'");
-                    query.Sql<string>(string.Concat("Select * From samples Where Name = '", $"{name}'"));
+                    query.Sql((string)$"Select * From samples Where Name = '{name}'");
+                    query.Sql(usePrimary ? $"Select * From samples Where Name = '{name}'" : "Select * From samples");
+                    query.Sql(null ?? $"Select * From samples Where Name = '{name}'");
+                    query.Sql(string.Concat("Select * From samples Where Name = '", $"{name}'"));
                 }
             }
             """;
@@ -128,8 +128,8 @@ public class BingSql002AnalyzerTest
             {
                 public void Execute(Query query, string name)
                 {
-                    query.Sql<string>("Select * From samples Where Name = @name", new { name });
-                    query.SqlInterpolated<string>($"Select * From samples Where Name = {name}");
+                    query.Sql("Select * From samples Where Name = @name", new { name });
+                    query.SqlInterpolated($"Select * From samples Where Name = {name}");
                 }
             }
             """;
@@ -152,7 +152,7 @@ public class BingSql002AnalyzerTest
             using QueryAlias = Bing.Data.Sql.Query;
             public class Test
             {
-                public void Execute(QueryAlias query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(QueryAlias query, string name) => query.Sql($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -175,7 +175,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Sql($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -253,7 +253,7 @@ public class BingSql002AnalyzerTest
             using Bing.Data.Sql;
             public class Test
             {
-                public void Execute(Query query, string name) => query.Sql<string>($"Select * From samples Where Name = '{name}'");
+                public void Execute(Query query, string name) => query.Sql($"Select * From samples Where Name = '{name}'");
             }
             """;
 
@@ -290,14 +290,14 @@ public class BingSql002AnalyzerTest
         {
             public interface ISqlQuery
             {
-                object Sql<TResult>(string sql, object parameters = null);
-                object SqlInterpolated<TResult>(System.FormattableString sql);
+                object Sql(string sql, object parameters = null);
+                object SqlInterpolated(System.FormattableString sql);
             }
 
             public sealed class Query : ISqlQuery
             {
-                public object Sql<TResult>(string sql, object parameters = null) => null;
-                public object SqlInterpolated<TResult>(System.FormattableString sql) => null;
+                public object Sql(string sql, object parameters = null) => null;
+                public object SqlInterpolated(System.FormattableString sql) => null;
             }
 
             public interface ISqlExecutor
@@ -326,7 +326,7 @@ public class BingSql002AnalyzerTest
 
             public static class QueryExtensions
             {
-                public static object Sql<TResult>(this ISqlQuery query, string sql, object parameters = null) => null;
+                public static object Sql(this ISqlQuery query, string sql, object parameters = null) => null;
             }
         }
         """;

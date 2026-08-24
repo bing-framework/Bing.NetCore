@@ -56,18 +56,23 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        ValidateQueryBuilder(plan.Builder);
+        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
+            EnsureWritableDataSource();
         var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
+        var queryExecutionStarted = false;
         return SqlQueryPlanLifecycle.Execute(() =>
         {
+            plan.NotifyExecutionStarted();
+            queryExecutionStarted = true;
             if (ExecuteBefore())
             {
                 var preparedPlan = PrepareQueryPlan(plan);
                 var connection = GetExecutionConnection();
                 var transaction = GetQueryTransaction();
-                message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
+                message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                using var logScope = BeginExecutionLogScope(message);
                 WritePlanTraceLog(preparedPlan);
                 result = operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
                 plan.NotifyExecutionCompleted();
@@ -80,7 +85,12 @@ public abstract partial class SqlQueryBase
         {
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
-        }, result => ExecuteQueryPlanAfter(result), () => executionLease?.Dispose());
+        }, result =>
+        {
+            if (queryExecutionStarted)
+                plan.NotifyExecutionFinished();
+            ExecuteQueryPlanAfter(result);
+        }, () => executionLease?.Dispose());
     }
 
     /// <summary>
@@ -103,18 +113,23 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(operation));
         EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        ValidateQueryBuilder(plan.Builder);
+        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
+            EnsureWritableDataSource();
         var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
+        var queryExecutionStarted = false;
         return await SqlQueryPlanLifecycle.ExecuteAsync(async () =>
         {
+            plan.NotifyExecutionStarted();
+            queryExecutionStarted = true;
             if (ExecuteBefore())
             {
                 var preparedPlan = PrepareQueryPlan(plan);
                 var connection = GetExecutionConnection();
                 var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
-                message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
+                message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                using var logScope = BeginExecutionLogScope(message);
                 WritePlanTraceLog(preparedPlan);
                 result = await operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
                 plan.NotifyExecutionCompleted();
@@ -128,7 +143,12 @@ public abstract partial class SqlQueryBase
             await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
                 .ConfigureAwait(false);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, exception));
-        }, result => ExecuteQueryPlanAfter(result), () => executionLease?.Dispose()).ConfigureAwait(false);
+        }, result =>
+        {
+            if (queryExecutionStarted)
+                plan.NotifyExecutionFinished();
+            ExecuteQueryPlanAfter(result);
+        }, () => executionLease?.Dispose()).ConfigureAwait(false);
     }
 
 }

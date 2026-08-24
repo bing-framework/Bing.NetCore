@@ -1,10 +1,10 @@
 using System;
-using System.Linq.Expressions;
+using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
@@ -12,144 +12,166 @@ using Bing.Data.Sql.Configs;
 namespace Bing.Data.Sql.Benchmarks;
 
 /// <summary>
-/// 类型化 Lambda 连续 Join 构造、渲染和复制性能基线。
+/// 公开非泛型 Lambda 查询的 Join、过滤、Clone 和失败路径性能基线。
 /// </summary>
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
 [Config(typeof(SqlLambdaBenchmarkConfig))]
-[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlLambdaJoinBenchmarks
 {
-    private BenchmarkBuilder _builder;
+    private SqlLambdaQuery _query;
 
     /// <summary>
-    /// 连续类型化 Join 的来源数量。
+    /// 连续 Join 的来源数量。
     /// </summary>
     [Params(1, 2, 5, 10)]
     public int JoinCount { get; set; }
 
     /// <summary>
-    /// 初始化指定来源数量的连续 Join 查询。
+    /// 初始化公开 Lambda 查询。
     /// </summary>
     [GlobalSetup]
-    public void Setup()
-    {
-        _builder = new BenchmarkBuilder();
-        BuildJoinQuery();
-    }
+    public void Setup() => _query = BuildQuery();
 
     /// <summary>
-    /// 测量连续类型化 Join 的构建和 SQL 渲染成本。
+    /// 测量连续二元 Join 的构建和 SQL 渲染成本。
     /// </summary>
     [Benchmark(Baseline = true)]
     public string BuildJoinAndRender()
     {
-        _builder.Clear();
-        BuildJoinQuery();
-        return _builder.ToSql();
+        _query = BuildQuery();
+        return _query.ToSql();
     }
 
     /// <summary>
-    /// 测量已构造连续 Join 的重复渲染成本。
+    /// 测量冻结结构的重复渲染成本。
     /// </summary>
     [Benchmark]
-    public string RenderExistingJoin() => _builder.ToSql();
+    public string RenderExistingJoin() => _query.ToSql();
 
     /// <summary>
-    /// 测量带参数条件的连续 Join 构建和渲染成本。
+    /// 测量 WhereIf 为 true 时的构建和渲染成本。
     /// </summary>
     [Benchmark]
-    public string BuildParameterizedJoin()
+    public string WhereIfTrue()
     {
-        _builder.Clear();
-        BuildJoinQuery();
-        _builder.Where("Root01.Id", JoinCount);
-        return _builder.ToSql();
+        var query = BuildQuery();
+        query.WhereIf<Root01>(root => root.Id == JoinCount, true);
+        return query.ToSql();
     }
 
     /// <summary>
-    /// 测量重复实体来源 Join 的构建和渲染成本。
+    /// 测量 WhereIf 为 false 时不改变查询结构的成本。
+    /// </summary>
+    [Benchmark]
+    public string WhereIfFalse()
+    {
+        var query = BuildQuery();
+        query.WhereIf<Root01>(root => root.Id == JoinCount, false);
+        return query.ToSql();
+    }
+
+    /// <summary>
+    /// 测量参数化动态过滤的渲染成本。
+    /// </summary>
+    [Benchmark]
+    public string DynamicFilterRender()
+    {
+        var query = BuildQuery();
+        query.Where<Root01>(root => root.Id == JoinCount);
+        return query.ToSql();
+    }
+
+    /// <summary>
+    /// 测量公开查询描述的 Builder Clone 成本。
+    /// </summary>
+    [Benchmark]
+    public string CloneQuery() => _query.GetBuilder().Clone().ToSql();
+
+    /// <summary>
+    /// 测量重复实体 Join 的别名解析成本。
     /// </summary>
     [Benchmark]
     public string BuildRepeatedEntityJoin()
     {
-        _builder.Clear();
-        var from = (FromClause)_builder.FromClause;
-        from.SetRoots(new[] { typeof(Root01) });
-        _builder.Select("Root01.Id");
-        var joins = (JoinClause)_builder.JoinClause;
-        joins.Join<Root01>(from, (Expression<Func<Root01, Root01, bool>>)((left, right) => left.Id == right.Id), "parent");
-        return _builder.ToSql();
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+            .From<Root01>("parent")
+            .Join<Root01, Root01>((left, right) => left.Id == right.ParentId, "child", "parent");
+        return query.ToSql();
     }
 
     /// <summary>
-    /// 测量连续 Join DTO 投影的构建和渲染成本。
+    /// 测量 Join 失败后异常返回的成本。
     /// </summary>
     [Benchmark]
-    public string BuildDtoProjectionJoin()
+    public string JoinFailure()
     {
-        _builder.Clear();
-        BuildJoinQuery();
-        _builder.ClearSelect().Select("Root01.Id As FirstId,Root10.Id As LastId");
-        return _builder.ToSql();
-    }
-
-    /// <summary>
-    /// 测量连续 Join 查询 Clone 的成本。
-    /// </summary>
-    [Benchmark]
-    public string CloneJoinQuery() => _builder.Clone().ToSql();
-
-    private void BuildJoinQuery()
-    {
-        var from = (FromClause)_builder.FromClause;
-        from.SetRoots(new[] { typeof(Root01) });
-        _builder.Select("Root01.Id");
-        switch (JoinCount)
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+            .From<Root01>("root");
+        try
         {
-            case 1:
-                return;
-            case 2:
-                BuildTwoJoin(from);
-                return;
-            case 5:
-                BuildFiveJoin(from);
-                return;
-            case 10:
-                BuildTenJoin(from);
-                return;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(JoinCount));
+            query.Join<Root01, Root02>((left, right) => left.Id == right.ParentId, "root", "root");
+            return "unexpected";
+        }
+        catch (Exception exception)
+        {
+            return exception.GetType().Name;
         }
     }
 
-    private void BuildTwoJoin(FromClause from)
+    private SqlLambdaQuery BuildQuery()
     {
-        var joins = (JoinClause)_builder.JoinClause;
-        joins.Join<Root02>(from, (Expression<Func<Root01, Root02, bool>>)((first, second) => first.Id == second.ParentId));
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+            .From<Root01>("r1");
+        switch (JoinCount)
+        {
+            case 1:
+                break;
+            case 2:
+                AddJoinsThrough(query, 2);
+                break;
+            case 5:
+                AddJoinsThrough(query, 5);
+                break;
+            case 10:
+                AddJoinsThrough(query, 10);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(JoinCount));
+        }
+        query.Select<Root01>(root => new object[] { root.Id });
+        return query;
     }
 
-    private void BuildFiveJoin(FromClause from)
+    private static void AddJoinsThrough(SqlLambdaQuery query, int count)
     {
-        var joins = (JoinClause)_builder.JoinClause;
-        joins.Join<Root02>(from, (Expression<Func<Root01, Root02, bool>>)((first, second) => first.Id == second.ParentId));
-        joins.Join<Root03>(from, (Expression<Func<Root01, Root02, Root03, bool>>)((first, second, third) => second.Id == third.ParentId));
-        joins.Join<Root04>(from, (Expression<Func<Root01, Root02, Root03, Root04, bool>>)((first, second, third, fourth) => third.Id == fourth.ParentId));
-        joins.Join<Root05>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, bool>>)((first, second, third, fourth, fifth) => fourth.Id == fifth.ParentId));
+        if (count >= 2)
+            query.Join<Root01, Root02>((left, right) => left.Id == right.ParentId);
+        if (count >= 3)
+            query.Join<Root02, Root03>((left, right) => left.Id == right.ParentId);
+        if (count >= 4)
+            query.Join<Root03, Root04>((left, right) => left.Id == right.ParentId);
+        if (count >= 5)
+            query.Join<Root04, Root05>((left, right) => left.Id == right.ParentId);
+        if (count >= 6)
+            query.Join<Root05, Root06>((left, right) => left.Id == right.ParentId);
+        if (count >= 7)
+            query.Join<Root06, Root07>((left, right) => left.Id == right.ParentId);
+        if (count >= 8)
+            query.Join<Root07, Root08>((left, right) => left.Id == right.ParentId);
+        if (count >= 9)
+            query.Join<Root08, Root09>((left, right) => left.Id == right.ParentId);
+        if (count >= 10)
+            query.Join<Root09, Root10>((left, right) => left.Id == right.ParentId);
     }
 
-    private void BuildTenJoin(FromClause from)
+    private static ISqlQueryPlanExecutor CreateExecutor() =>
+        DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+
+    private class NoOpExecutor : DispatchProxy
     {
-        var joins = (JoinClause)_builder.JoinClause;
-        joins.Join<Root02>(from, (Expression<Func<Root01, Root02, bool>>)((first, second) => first.Id == second.ParentId));
-        joins.Join<Root03>(from, (Expression<Func<Root01, Root02, Root03, bool>>)((first, second, third) => second.Id == third.ParentId));
-        joins.Join<Root04>(from, (Expression<Func<Root01, Root02, Root03, Root04, bool>>)((first, second, third, fourth) => third.Id == fourth.ParentId));
-        joins.Join<Root05>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, bool>>)((first, second, third, fourth, fifth) => fourth.Id == fifth.ParentId));
-        joins.Join<Root06>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, Root06, bool>>)((first, second, third, fourth, fifth, sixth) => fifth.Id == sixth.ParentId));
-        joins.Join<Root07>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, Root06, Root07, bool>>)((first, second, third, fourth, fifth, sixth, seventh) => sixth.Id == seventh.ParentId));
-        joins.Join<Root08>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, Root06, Root07, Root08, bool>>)((first, second, third, fourth, fifth, sixth, seventh, eighth) => seventh.Id == eighth.ParentId));
-        joins.Join<Root09>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, Root06, Root07, Root08, Root09, bool>>)((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth) => eighth.Id == ninth.ParentId));
-        joins.Join<Root10>(from, (Expression<Func<Root01, Root02, Root03, Root04, Root05, Root06, Root07, Root08, Root09, Root10, bool>>)((first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth) => ninth.Id == tenth.ParentId));
+        protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+            targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
     }
 
     private sealed class BenchmarkBuilder : SqlBuilderBase
@@ -194,14 +216,14 @@ public class SqlLambdaJoinBenchmarks
         public override string GetPrefix() => "@";
     }
 
-    private sealed class Root01 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root03 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root04 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root05 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root06 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root07 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root08 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root09 { public int Id { get; set; } public int ParentId { get; set; } }
-    private sealed class Root10 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root01 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root03 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root04 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root05 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root06 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root07 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root08 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root09 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root10 { public int Id { get; set; } public int ParentId { get; set; } }
 }

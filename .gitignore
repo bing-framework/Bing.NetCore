@@ -267,7 +267,7 @@ __pycache__/
 /templates/CodeSmith/CodeGenerator/02-Result
 *.DotSettings
 /bus
-/output/netstandard2.0
+
 Bing*.xml
 /global.json
 
@@ -278,3 +278,6 @@ framework/tests/**/*.Integration/appsettings.Development.json
 # AI Generated files
 .agents/.env.local
 .agents/runtime/
+
+# Output Libraries
+output/

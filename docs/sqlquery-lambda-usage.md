@@ -1,11 +1,13 @@
 # Lambda 查询使用
 
+当变量静态类型为 `ISqlQuery` 时，`From<TEntity>()` 和 `From<TEntity>(alias)` 保持已发布的一元泛型兼容返回类型；要进入 dev_v6 非泛型主路径，请显式调用 `From<TEntity>(alias, schema)`，没有别名或架构时传入 `null, null`。下例使用两参数入口，以避免依赖旧兼容返回类型。
+
 ## 单表查询
 
 来源泛型用于描述查询来源，结果类型在终结方法上显式指定：
 
 ```csharp
-var rows = await query.From<User>()
+var rows = await query.From<User>(null, null)
     .Where(user => user.Status, UserStatus.Enabled)
     .OrderBy(user => new object[] { user.Id })
     .ToListAsync<User>();
@@ -14,7 +16,7 @@ var rows = await query.From<User>()
 DTO 投影声明列形状，终结方法声明物化类型：
 
 ```csharp
-var rows = await query.From<User>()
+var rows = await query.From<User>(null, null)
     .Select(user => new UserDto
     {
         Id = user.Id,
@@ -30,25 +32,24 @@ var rows = await query.From<User>()
 Lambda Join 在同一次调用中接收谓词和可选 alias，不再使用后置 `.On(...)`：
 
 ```csharp
-var rows = await query.From<Order>()
-    .LeftJoin<Customer>((order, customer) => order.CustomerId == customer.Id, "customer")
-    .Join<Payment>((order, customer, payment) => order.Id == payment.OrderId)
-    .Select((order, customer, payment) => new OrderDetails
+var rows = await query.From<Order>(null, null)
+    .LeftJoin<Order, Customer>((order, customer) => order.CustomerId == customer.Id, "customer")
+    .Join<Customer, Payment>((customer, payment) => customer.Id == payment.CustomerId)
+    .Select<Customer, Payment, OrderDetails>((customer, payment) => new OrderDetails
     {
-        OrderId = order.Id,
         CustomerName = customer.Name,
         PaymentId = payment.Id
     })
     .ToListAsync<OrderDetails>();
 ```
 
-每个新增来源都会扩展 Lambda 参数列表，最多支持十个来源。连续 Join 的每个谓词应引用当前参数列表中的实际来源；不要依赖逗号来源隐式形成连接条件。
+每次 Join 都使用两个来源的谓词并在调用阶段原子提交；需要继续追加来源时，重复调用二元 `Join<TLeft, TRight>` 或 `LeftJoin<TLeft, TRight>`。投影 Lambda 最多接收两个来源；需要组合更多来源时，应先通过二元投影创建派生表，再使用二元 Join 继续组合，不要编写三元或更高参数的 Lambda。
 
 `CrossJoin<TJoin>()` 不接收谓词。需要 `RightJoin` 或 `FullJoin` 时，调用阶段会按当前 Provider 能力配置拒绝不支持的操作。
 
 ## Raw Fluent 与原生文本
 
-Raw 查询在创建时确定结果类型：
+Raw 文本查询的主入口不固定结果类型，结果类型在终结方法处选择：
 
 ```csharp
 var rows = await query.Query<Order>()
@@ -56,13 +57,13 @@ var rows = await query.Query<Order>()
     .From("Orders")
     .ToListAsync();
 
-var row = await query.Sql<Order>(
+var row = await query.Sql(
     "Select Id,OrderNo From Orders Where Id=@id",
     new { id = orderId })
-    .FirstOrDefaultAsync();
+    .FirstOrDefaultAsync<Order>();
 ```
 
-Raw 查询不接受用于重新选择结果类型的 `<TNextResult>` 终结重载。多对象映射使用 `SqlFluentQuery<TResult>` 的既有映射方法，并保持入口处确定的 `TResult`。
+Raw 查询支持 `ToEntity<TResult>`、`ToList<TResult>`、`ToDictionary<TResult,TKey,TValue>`、标量和同步/异步流式终结方法。2～7 对象多映射仍由已发布的低层泛型描述提供；已发布的泛型 `Sql<TResult>` 兼容入口继续保留，新代码应使用非泛型 `Sql(...)`。
 
 ## 测试和环境
 

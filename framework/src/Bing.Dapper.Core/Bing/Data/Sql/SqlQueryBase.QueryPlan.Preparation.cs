@@ -13,7 +13,7 @@ public abstract partial class SqlQueryBase
     private PreparedQueryPlan PrepareQueryPlan(SqlQueryPlan plan)
     {
         var command = plan.IsBuilderPlan
-            ? PrepareCommand(plan.Builder)
+            ? PrepareCommand(plan)
             : PrepareCommand(plan.CommandText, plan.Parameters);
         if (plan.CommandType == System.Data.CommandType.StoredProcedure)
             ConfigureOutputParameterSupport(command);
@@ -27,6 +27,8 @@ public abstract partial class SqlQueryBase
     /// <param name="preparedPlan">当前已准备的查询计划。</param>
     private void WritePlanTraceLog(PreparedQueryPlan preparedPlan)
     {
+        if (Logger.IsEnabled(LogLevel.Trace) == false)
+            return;
         WriteTraceLog(preparedPlan.Command);
     }
 

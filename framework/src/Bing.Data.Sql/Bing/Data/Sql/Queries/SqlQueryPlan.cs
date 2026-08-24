@@ -10,7 +10,8 @@ namespace Bing.Data.Sql;
 /// 独立 SQL 查询描述的执行计划。
 /// </summary>
 /// <remarks>
-/// 计划只保存查询输入，不保存连接、事务、诊断或执行状态；这些状态始终由创建它的根查询管理。
+/// 计划保存独立查询输入、查询上下文和本次执行标识，但不持有连接、事务、诊断 Scope 或执行资源；
+/// 这些资源始终由创建它的根查询执行器管理。
 /// </remarks>
 public sealed class SqlQueryPlan
 {
@@ -23,6 +24,18 @@ public sealed class SqlQueryPlan
     /// 当前计划执行成功后创建输出参数快照的回调。
     /// </summary>
     private Action _outputParametersCompletion;
+
+    private Action _executionStarted;
+
+    private Action _executionCompleted;
+
+    private string _queryContextId;
+
+    private string _parentQueryContextId;
+
+    private string _executionId;
+
+    private string _phase = "Data";
 
     /// <summary>
     /// 使用 Fluent SQL Builder 创建查询计划。
@@ -58,7 +71,7 @@ public sealed class SqlQueryPlan
     /// <summary>
     /// 当前计划使用的 Fluent SQL Builder；原生文本计划为 null。
     /// </summary>
-    public ISqlBuilder Builder { get; }
+    internal ISqlBuilder Builder { get; }
 
     /// <summary>
     /// 当前计划使用的原生 SQL 文本；Fluent 计划为 null。
@@ -86,6 +99,57 @@ public sealed class SqlQueryPlan
     public bool IsBuilderPlan => Builder != null;
 
     /// <summary>
+    /// 获取当前计划的内部 Builder。
+    /// </summary>
+    /// <returns>当前计划使用的 Builder。</returns>
+    internal ISqlBuilder GetBuilder() => Builder;
+
+    /// <summary>
+    /// 获取当前计划的查询上下文标识。
+    /// </summary>
+    public string QueryContextId => _queryContextId;
+
+    /// <summary>
+    /// 获取父查询上下文标识。
+    /// </summary>
+    public string ParentQueryContextId => _parentQueryContextId;
+
+    /// <summary>
+    /// 获取当前执行标识。
+    /// </summary>
+    public string ExecutionId => _executionId;
+
+    /// <summary>
+    /// 获取当前计划阶段。
+    /// </summary>
+    public string Phase => _phase;
+
+    /// <summary>
+    /// 设置计划的查询上下文，并用于派生 Count/Data 计划的关系传递。
+    /// </summary>
+    /// <param name="queryContextId">查询上下文标识。</param>
+    /// <param name="parentQueryContextId">父查询上下文标识。</param>
+    /// <param name="phase">计划阶段。</param>
+    internal void SetContext(string queryContextId, string parentQueryContextId = null, string phase = "Data")
+    {
+        _queryContextId = queryContextId;
+        _parentQueryContextId = parentQueryContextId;
+        _phase = string.IsNullOrWhiteSpace(phase) ? "Data" : phase;
+    }
+
+    /// <summary>
+    /// 从来源计划复制查询上下文，并设置当前派生计划阶段。
+    /// </summary>
+    /// <param name="source">来源计划。</param>
+    /// <param name="phase">派生计划阶段。</param>
+    internal void CopyContextFrom(SqlQueryPlan source, string phase)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        SetContext(source.QueryContextId, source.ParentQueryContextId, phase);
+    }
+
+    /// <summary>
     /// 在本次计划参数绑定完成后接收输出参数访问器。
     /// </summary>
     /// <param name="receiver">接收绑定参数访问器的回调。</param>
@@ -98,6 +162,31 @@ public sealed class SqlQueryPlan
         _outputParametersReceiver = receiver;
         _outputParametersCompletion = completion;
     }
+
+    /// <summary>
+    /// 设置计划执行生命周期回调。
+    /// </summary>
+    /// <param name="started">执行开始回调。</param>
+    /// <param name="completed">执行完成回调。</param>
+    internal void SetLifecycleCallbacks(Action started, Action completed)
+    {
+        _executionStarted = started;
+        _executionCompleted = completed;
+    }
+
+    /// <summary>
+    /// 通知计划即将执行。
+    /// </summary>
+    public void NotifyExecutionStarted()
+    {
+        _executionId = Guid.NewGuid().ToString();
+        _executionStarted?.Invoke();
+    }
+
+    /// <summary>
+    /// 通知计划执行已结束。
+    /// </summary>
+    public void NotifyExecutionFinished() => _executionCompleted?.Invoke();
 
     /// <summary>
     /// 通知本次计划已完成参数绑定。
@@ -244,10 +333,19 @@ internal static class SqlParameterSnapshot
     /// <param name="parameter">原始增强参数。</param>
     /// <returns>执行专属增强参数。</returns>
     internal static SqlParam CloneSqlParameter(SqlParam parameter)
+        => CloneSqlParameter(parameter, parameter?.Name);
+
+    /// <summary>
+    /// 创建增强 SQL 参数副本并替换参数名称。
+    /// </summary>
+    /// <param name="parameter">源参数。</param>
+    /// <param name="name">目标参数名。</param>
+    /// <returns>带目标名称的执行专属参数。</returns>
+    internal static SqlParam CloneSqlParameter(SqlParam parameter, string name)
     {
         if (parameter == null)
             throw new ArgumentNullException(nameof(parameter));
-        return new SqlParam(parameter.Name, SnapshotValue(parameter.Value), parameter.DbType, parameter.Direction,
+        return new SqlParam(name, SnapshotValue(parameter.Value), parameter.DbType, parameter.Direction,
             parameter.Size, parameter.Precision, parameter.Scale)
         {
             OriginalValue = SnapshotValue(parameter.OriginalValue),

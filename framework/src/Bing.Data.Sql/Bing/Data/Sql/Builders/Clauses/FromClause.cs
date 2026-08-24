@@ -615,6 +615,7 @@ public class FromClause : IFromClause
         Register?.RegisterAlias(subquery.Alias);
         ReplaceSources(SqlItem.Raw($"({sql}){subqueryAlias}"), typeof(TProjection), subquery.Alias,
             subquery.ProjectedMembers);
+        (Builder as SqlBuilderBase)?.RegisterSubqueryParent(subquery.ParentQueryContextId);
     }
 
     /// <summary>

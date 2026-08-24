@@ -257,10 +257,15 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         if (item == null)
             return null;
         var metadata = item.Metadata;
+        var parameterName = metadata != null &&
+                    metadata.Source is not (SqlParameterSource.Unknown or SqlParameterSource.RawSql) &&
+                            string.IsNullOrWhiteSpace(metadata.Name) == false
+            ? metadata.Name
+            : item.Name;
         var column = ResolveColumnMetadata(metadata?.EntityType, metadata?.PropertyName, options);
-        var converted = _sqlParameterFactory.Create(item.Name, item.Value, column, GetDatabaseContext(options),
+        var converted = _sqlParameterFactory.Create(parameterName, item.Value, column, GetDatabaseContext(options),
             metadata?.EntityType, metadata?.Source ?? SqlParameterSource.RawSql);
-        return new SqlParam(item.Name, converted.Value, metadata?.DbType ?? converted.DbType,
+        return new SqlParam(parameterName, converted.Value, metadata?.DbType ?? converted.DbType,
             metadata?.Direction ?? converted.Direction, metadata?.Size ?? converted.Size,
             metadata?.Precision ?? converted.Precision, metadata?.Scale ?? converted.Scale)
         {

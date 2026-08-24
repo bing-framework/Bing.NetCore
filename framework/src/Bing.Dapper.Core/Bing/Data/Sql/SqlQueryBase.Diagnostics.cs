@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Diagnostics;
+using Bing.Tracing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Data.Sql;
 
@@ -21,13 +23,24 @@ public abstract partial class SqlQueryBase
     /// <param name="connection">数据库连接</param>
     /// <param name="parameterMetadata">Sql 增强参数元数据</param>
     protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, IDbConnection connection,
-        IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null)
+        IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null) =>
+        ExecuteBeforeCore(sql, parameter, connection, parameterMetadata, null);
+
+    private protected DiagnosticsMessage ExecuteBeforePlan(string sql, object parameter, IDbConnection connection,
+        IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata, SqlQueryPlan plan) =>
+        ExecuteBeforeCore(sql, parameter, connection, parameterMetadata, plan);
+
+    private DiagnosticsMessage ExecuteBeforeCore(string sql, object parameter, IDbConnection connection,
+        IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata, SqlQueryPlan plan)
     {
-        if (IsExecutionDiagnosticsEnabled() == false)
+        if (IsExecutionContextRequired() == false)
             return null;
         var parameters = CreateParameterDiagnostics(parameter, parameterMetadata);
         var connectionInfo = CreateConnectionDiagnosticInfo(connection);
         var context = Options.GetDatabaseContext();
+        var activity = Activity.Current;
+        var traceContext = TraceIdContext.Current;
+        var correlationId = ServiceProvider.GetService<ICorrelationIdProvider>()?.Get();
         var message = new DiagnosticsMessage
         {
             Sql = sql,
@@ -37,8 +50,15 @@ public abstract partial class SqlQueryBase
             Connection = connectionInfo,
             Transaction = CreateTransactionDiagnosticInfo(GetExecutionTransaction()),
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-            Operation = SqlQueryDiagnosticListenerNames.BeforeExecute
+            Operation = SqlQueryDiagnosticListenerNames.BeforeExecute,
+            QueryContextId = _queryContextId,
+            Phase = "Data",
+            ExecutionId = Guid.NewGuid().ToString(),
+            TraceId = activity?.TraceId.ToString() ?? correlationId ?? traceContext?.TraceId,
+            SpanId = activity?.SpanId.ToString() ?? correlationId ?? traceContext?.ChildId,
+            CorrelationId = correlationId ?? traceContext?.TraceId
         };
+        ApplyPlanDiagnosticContext(message, plan);
         if (_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
             _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
         return message;
@@ -55,7 +75,7 @@ public abstract partial class SqlQueryBase
     private protected DiagnosticsMessage CreateExecutionDiagnostics(ISqlBuilder builder, string sql,
         object dapperParameters, IDbConnection connection)
     {
-        if (IsExecutionDiagnosticsEnabled() == false)
+        if (IsExecutionContextRequired() == false)
             return null;
         var parameters = builder?.GetParams();
         return ExecuteBefore(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
@@ -73,7 +93,7 @@ public abstract partial class SqlQueryBase
     private protected DiagnosticsMessage CreateExecutionDiagnostics(string sql, object parameters,
         object dapperParameters, IDbConnection connection)
     {
-        if (IsExecutionDiagnosticsEnabled() == false)
+        if (IsExecutionContextRequired() == false)
             return null;
         return ExecuteBefore(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
             () => GetSqlParameterDiagnostics(parameters, sql)));
@@ -87,13 +107,35 @@ public abstract partial class SqlQueryBase
     /// <returns>监听器未启用时返回 null；否则返回执行前诊断消息。</returns>
     private protected DiagnosticsMessage CreateExecutionDiagnostics(SqlPreparedCommand command,
         IDbConnection connection)
+        => CreateExecutionDiagnostics(command, connection, null);
+
+    /// <summary>
+    /// 为查询计划创建执行前诊断消息，并保留计划上下文关系。
+    /// </summary>
+    /// <param name="command">当前执行的准备命令。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <param name="plan">当前查询计划。</param>
+    /// <returns>监听器未启用时返回 null；否则返回执行前诊断消息。</returns>
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(SqlPreparedCommand command,
+        IDbConnection connection, SqlQueryPlan plan)
     {
         if (command == null)
             throw new ArgumentNullException(nameof(command));
         return command.IsBuilderCommand
-            ? CreateExecutionDiagnostics(command.Builder, command.Sql, command.DapperParameters, connection)
-            : CreateExecutionDiagnostics(command.Sql, command.ParameterSource, command.DapperParameters, connection);
+            ? CreateExecutionDiagnostics(command.Builder, command.Sql, command.DapperParameters, connection, plan)
+            : CreateExecutionDiagnostics(command.Sql, command.ParameterSource, command.DapperParameters, connection,
+                plan);
     }
+
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(ISqlBuilder builder, string sql,
+        object dapperParameters, IDbConnection connection, SqlQueryPlan plan) =>
+        ExecuteBeforePlan(sql, builder?.GetParams(), connection, GetBoundParameterDiagnostics(dapperParameters,
+            () => GetSqlParameterDiagnostics(builder, sql)), plan);
+
+    private protected DiagnosticsMessage CreateExecutionDiagnostics(string sql, object parameters,
+        object dapperParameters, IDbConnection connection, SqlQueryPlan plan) =>
+        ExecuteBeforePlan(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
+            () => GetSqlParameterDiagnostics(parameters, sql)), plan);
 
     /// <summary>
     /// 判断任一执行生命周期诊断事件是否已启用。
@@ -103,6 +145,61 @@ public abstract partial class SqlQueryBase
         _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute) ||
         _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute) ||
         _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute);
+
+    /// <summary>
+    /// 判断是否至少有一个执行上下文消费方需要创建诊断消息。
+    /// </summary>
+    private bool IsExecutionContextRequired() => IsExecutionDiagnosticsEnabled() || Activity.Current != null ||
+        Logger != Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+
+    /// <summary>
+    /// 将计划上下文写入诊断消息和当前 Activity。
+    /// </summary>
+    /// <param name="message">待补充的诊断消息。</param>
+    /// <param name="plan">当前查询计划。</param>
+    private static void ApplyPlanDiagnosticContext(DiagnosticsMessage message, SqlQueryPlan plan)
+    {
+        if (message == null)
+            return;
+        if (plan != null)
+        {
+            message.QueryContextId = plan.QueryContextId ?? message.QueryContextId;
+            message.ParentQueryContextId = plan.ParentQueryContextId;
+            message.ExecutionId = plan.ExecutionId ?? message.ExecutionId;
+            message.Phase = plan.Phase;
+        }
+        var activity = Activity.Current;
+        activity?.SetTag("bing.sql.query_context_id", message.QueryContextId);
+        activity?.SetTag("bing.sql.execution_id", message.ExecutionId);
+        activity?.SetTag("bing.sql.phase", message.Phase);
+    }
+
+    /// <summary>
+    /// 创建本次执行的日志 Scope，使结构化日志与诊断消息使用相同身份。
+    /// </summary>
+    /// <param name="message">当前执行诊断消息。</param>
+    /// <returns>日志 Scope；未创建消息时返回可释放空对象。</returns>
+    private protected IDisposable BeginExecutionLogScope(DiagnosticsMessage message)
+    {
+        if (message == null)
+            return EmptyDisposable.Instance;
+        return Logger.BeginScope(new Dictionary<string, object>
+        {
+            ["QueryContextId"] = message.QueryContextId,
+            ["ParentQueryContextId"] = message.ParentQueryContextId,
+            ["ExecutionId"] = message.ExecutionId,
+            ["Phase"] = message.Phase
+        });
+    }
+
+    private sealed class EmptyDisposable : IDisposable
+    {
+        internal static EmptyDisposable Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
+    }
 
     /// <summary>
     /// 优先从本次已绑定的参数集创建诊断元数据，避免为诊断再次绑定参数源。
@@ -382,7 +479,13 @@ public abstract partial class SqlQueryBase
         {
             Timestamp = message.Timestamp,
             Operation = message.Operation,
-            OperationId = message.OperationId,
+            QueryContextId = message.QueryContextId,
+            ParentQueryContextId = message.ParentQueryContextId,
+            ExecutionId = message.ExecutionId,
+            Phase = message.Phase,
+            TraceId = message.TraceId,
+            SpanId = message.SpanId,
+            CorrelationId = message.CorrelationId,
             Sql = message.Sql,
             MappingProfile = message.MappingProfile,
             TenantId = message.TenantId,

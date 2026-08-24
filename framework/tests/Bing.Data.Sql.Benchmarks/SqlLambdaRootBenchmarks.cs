@@ -1,8 +1,9 @@
 using System;
-using System.Linq;
+using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using Bing.Data.Enums;
+using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
@@ -17,16 +18,9 @@ namespace Bing.Data.Sql.Benchmarks;
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
 [Config(typeof(SqlLambdaBenchmarkConfig))]
-[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlLambdaRootBenchmarks
 {
-    private readonly Type[] _availableRootTypes =
-    {
-        typeof(Root01), typeof(Root02), typeof(Root03), typeof(Root04), typeof(Root05),
-        typeof(Root06), typeof(Root07), typeof(Root08), typeof(Root09), typeof(Root10)
-    };
-    private BenchmarkBuilder _builder;
-    private Type[] _rootTypes;
+    private SqlLambdaQuery _query;
 
     /// <summary>
     /// 类型化根来源数量。
@@ -40,9 +34,7 @@ public class SqlLambdaRootBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _rootTypes = _availableRootTypes.Take(RootCount).ToArray();
-        _builder = new BenchmarkBuilder();
-        ((FromClause)_builder.FromClause).SetRoots(_rootTypes);
+        _query = BuildQuery();
     }
 
     /// <summary>
@@ -52,9 +44,8 @@ public class SqlLambdaRootBenchmarks
     [Benchmark(Baseline = true)]
     public string SetRootsAndRender()
     {
-        _builder.Clear();
-        ((FromClause)_builder.FromClause).SetRoots(_rootTypes);
-        return _builder.ToSql();
+        _query = BuildQuery();
+        return _query.ToSql();
     }
 
     /// <summary>
@@ -62,7 +53,43 @@ public class SqlLambdaRootBenchmarks
     /// </summary>
     /// <returns>完整 From SQL。</returns>
     [Benchmark]
-    public string RenderExistingRoots() => _builder.ToSql();
+    public string RenderExistingRoots() => _query.ToSql();
+
+    private SqlLambdaQuery BuildQuery()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder());
+        switch (RootCount)
+        {
+            case 1:
+                query.From<Root01>("r1");
+                break;
+            case 2:
+                query.From<Root01>("r1").From<Root02>("r2");
+                break;
+            case 5:
+                query.From<Root01>("r1").From<Root02>("r2").From<Root03>("r3").From<Root04>("r4")
+                    .From<Root05>("r5");
+                break;
+            case 10:
+                query.From<Root01>("r1").From<Root02>("r2").From<Root03>("r3").From<Root04>("r4")
+                    .From<Root05>("r5").From<Root06>("r6").From<Root07>("r7").From<Root08>("r8")
+                    .From<Root09>("r9").From<Root10>("r10");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(RootCount));
+        }
+        query.Select<Root01>(root => new object[] { root.Id });
+        return query;
+    }
+
+    private static ISqlQueryPlanExecutor CreateExecutor() =>
+        DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+
+    private class NoOpExecutor : DispatchProxy
+    {
+        protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+            targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
+    }
 
     private sealed class BenchmarkBuilder : SqlBuilderBase
     {
@@ -106,14 +133,14 @@ public class SqlLambdaRootBenchmarks
         public override string GetPrefix() => "@";
     }
 
-    private sealed class Root01 { }
-    private sealed class Root02 { }
-    private sealed class Root03 { }
-    private sealed class Root04 { }
-    private sealed class Root05 { }
-    private sealed class Root06 { }
-    private sealed class Root07 { }
-    private sealed class Root08 { }
-    private sealed class Root09 { }
-    private sealed class Root10 { }
+    private sealed class Root01 { public int Id { get; set; } }
+    private sealed class Root02 { public int Id { get; set; } }
+    private sealed class Root03 { public int Id { get; set; } }
+    private sealed class Root04 { public int Id { get; set; } }
+    private sealed class Root05 { public int Id { get; set; } }
+    private sealed class Root06 { public int Id { get; set; } }
+    private sealed class Root07 { public int Id { get; set; } }
+    private sealed class Root08 { public int Id { get; set; } }
+    private sealed class Root09 { public int Id { get; set; } }
+    private sealed class Root10 { public int Id { get; set; } }
 }

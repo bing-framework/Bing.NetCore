@@ -100,7 +100,7 @@ public class SqlFactoryTest
         query.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() => query.Sql<int>("Select 1"));
+        Assert.Throws<ObjectDisposedException>(() => query.Sql("Select 1"));
     }
 
     /// <summary>

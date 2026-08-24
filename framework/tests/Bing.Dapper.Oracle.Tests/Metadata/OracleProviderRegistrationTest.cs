@@ -82,7 +82,7 @@ public class OracleProviderRegistrationTest
         var query = provider.GetRequiredService<ISqlQueryFactory>().Create();
 
         // Act
-        var description = query.SqlInterpolated<string>(
+        var description = query.SqlInterpolated(
             $"Select :p0 As ExistingValue, {"value"} As InterpolatedValue From dual");
         var parameters = Assert.IsAssignableFrom<IReadOnlyDictionary<string, object>>(description.Parameters);
 

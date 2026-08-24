@@ -466,6 +466,7 @@ public class JoinClause : IJoinClause
             item.SetDependency(_helper);
             _params.Add(item);
             _register?.RegisterAlias(subquery.Alias);
+            sqlBuilder?.RegisterSubqueryParent(subquery.ParentQueryContextId);
             itemCommitted = true;
         }
         catch
@@ -856,6 +857,7 @@ public class JoinClause : IJoinClause
         AddItem(JoinItem.CreateDerived(joinType, table,
             new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
                 subquery.ProjectedMembers)));
+        (_sqlBuilder as SqlBuilderBase)?.RegisterSubqueryParent(subquery.ParentQueryContextId);
     }
 
 

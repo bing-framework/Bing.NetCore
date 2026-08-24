@@ -54,7 +54,7 @@ public class EfCoreSqlQueryFactoryTest
 
         // Act
         var query = factory.Create(unitOfWork);
-        var sql = query.From<TestEntity>().Where(entity => entity.DisplayName, "Bing").ToSql();
+        var sql = query.From<TestEntity>().Where<TestEntity, string>(entity => entity.DisplayName, "Bing").ToSql();
 
         // Assert
         Assert.Contains("ef_query_users", sql);
@@ -151,7 +151,7 @@ public class EfCoreSqlQueryFactoryTest
         using var query = serviceProvider.GetRequiredService<IEfCoreSqlQueryFactory>().Create(unitOfWork);
 
         // Act
-        var result = query.Sql<int>(sql, new { name = "ef_shared_diagnostics" }).Scalar();
+        var result = query.Sql(sql, new { name = "ef_shared_diagnostics" }).Scalar<int>();
 
         // Assert
         Assert.Equal(0, result);
@@ -185,7 +185,7 @@ public class EfCoreSqlQueryFactoryTest
             .Create(unitOfWork, EfCoreSqlConnectionMode.Independent);
 
         // Act
-        var result = query.Sql<int>(sql, new { name = "ef_independent_diagnostics" }).Scalar();
+        var result = query.Sql(sql, new { name = "ef_independent_diagnostics" }).Scalar<int>();
 
         // Assert
         Assert.Equal(0, result);

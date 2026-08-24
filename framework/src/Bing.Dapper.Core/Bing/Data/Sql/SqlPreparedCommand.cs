@@ -17,12 +17,15 @@ internal sealed class SqlPreparedCommand
     /// <param name="parameterSource">调用方提供的原始参数源。</param>
     /// <param name="dapperParameters">本次执行绑定后的 Dapper 参数。</param>
     /// <param name="builder">生成 SQL 的 Builder。</param>
-    public SqlPreparedCommand(string sql, object parameterSource, object dapperParameters, ISqlBuilder builder = null)
+    /// <param name="debugSql">与 SQL 使用同一快照生成的调试 SQL。</param>
+    public SqlPreparedCommand(string sql, object parameterSource, object dapperParameters, ISqlBuilder builder = null,
+        string debugSql = null)
     {
         Sql = sql;
         ParameterSource = parameterSource;
         DapperParameters = dapperParameters;
         Builder = builder;
+        DebugSql = debugSql ?? sql;
     }
 
     /// <summary>
@@ -44,6 +47,11 @@ internal sealed class SqlPreparedCommand
     /// 生成 SQL 的 Builder；原生 SQL 时为 null。
     /// </summary>
     public ISqlBuilder Builder { get; }
+
+    /// <summary>
+    /// 与 SQL 使用同一快照生成的调试 SQL。
+    /// </summary>
+    public string DebugSql { get; }
 
     /// <summary>
     /// 是否由 SQL Builder 生成。

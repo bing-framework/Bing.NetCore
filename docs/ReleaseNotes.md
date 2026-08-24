@@ -11,11 +11,11 @@
 
 ### SQL 查询 API 收敛
 
-* 类型化 `From` 支持 1～10 个实体来源；多来源查询默认投影第一来源，重复实体来源生成稳定别名。
+* 类型化 `From` 通过连续 `From<TEntity>(alias, schema)` 追加实体来源；公开 Lambda 查询使用非泛型描述，`Join`、`Where`、`Select` 等 Lambda 仅接受一元或二元来源参数，重复实体来源生成稳定别名。
 * 删除 SQL 查询链中的 `As<TResult>()` 结果类型转换，DTO 投影统一使用强类型 `Select<TProjection>`。
 * 聚合结果类型通过终结方法指定，新增同步/异步目标类型映射入口，并保留分页、标量、流式和多映射执行路径。
 * 增加 `Distinct()` Lambda 查询操作；类型化根来源配置具备失败回滚语义。
-* 补充 1～10 来源 SQL 单元测试和真实 SQLite 集成测试，并更新 Public API 基线。
+* 补充覆盖 1～10 个来源的 SQL 单元测试和真实 SQLite 集成测试，并更新 Public API 基线；该范围表示测试覆盖，不表示公开 API 的固定来源元数或上限。
 
 本轮验证：`Bing.Data.Sql.Tests` 2354 项、`Bing.Dapper.Core.Tests` 262 项、SQLite 集成测试 246 项全部通过；`Bing.All.sln` Release 构建成功。外部数据库集成仍需按项目 Gate 和受控测试库配置启用。
 

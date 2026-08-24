@@ -33,8 +33,8 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.From<ResourcePo, Permission>()
-                .Where((resource, permission) => resource.Id == permission.ResourceId &&
+            var result = await Sql.From<ResourcePo>().From<Permission>()
+                .Where<ResourcePo, Permission>((resource, permission) => resource.Id == permission.ResourceId &&
                     resource.Type == ResourceType.Module && resource.ApplicationId == applicationId && resource.Enabled &&
                     roleIds.Contains(permission.RoleId) && permission.IsDeny == false)
                 .ToListAsync<ResourcePo>();
@@ -50,7 +50,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
-                .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
+                .Where<ResourcePo>(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId)
                 .ToListAsync<ResourcePo>();
             return result;
         }
@@ -65,7 +65,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
             if (moduleId == Guid.Empty)
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
-                .Where(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
+                .Where<ResourcePo>(x => x.Type == ResourceType.Module && x.ApplicationId == applicationId && x.ParentId == moduleId)
                 .ToListAsync<ResourcePo>();
             return result;
         }
@@ -79,8 +79,8 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         {
             if (applicationId == Guid.Empty || roleIds == null || roleIds.Count == 0)
                 return new List<ResourcePo>();
-            var result = await Sql.From<ResourcePo, Permission>()
-                .Where((resource, permission) => resource.Id == permission.ResourceId &&
+            var result = await Sql.From<ResourcePo>().From<Permission>()
+                .Where<ResourcePo, Permission>((resource, permission) => resource.Id == permission.ResourceId &&
                     resource.Type == ResourceType.Operation && resource.ApplicationId == applicationId && resource.Enabled &&
                     roleIds.Contains(permission.RoleId) && permission.IsDeny == false)
                 .ToListAsync<ResourcePo>();
@@ -96,7 +96,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
             if (applicationId == Guid.Empty)
                 return new List<ResourcePo>();
             var result = await Sql.From<ResourcePo>()
-                .Where(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)
+                .Where<ResourcePo>(x => x.Type == ResourceType.Operation && x.ApplicationId == applicationId)
                 .ToListAsync<ResourcePo>();
             return result;
         }

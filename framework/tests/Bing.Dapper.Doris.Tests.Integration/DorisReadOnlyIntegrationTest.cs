@@ -43,7 +43,7 @@ public sealed class DorisReadOnlyIntegrationTest : IDisposable
     public async Task ExecuteScalar_WhenSelectingConstant_ShouldReturnOne()
     {
         // Act
-        var value = await _query.Sql<int>("Select 1").ScalarAsync();
+        var value = await _query.Sql("Select 1").ScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, value);
@@ -59,7 +59,7 @@ public sealed class DorisReadOnlyIntegrationTest : IDisposable
         const int expected = 7;
 
         // Act
-        var value = await _query.Sql<int>("Select @value", new { value = expected }).ScalarAsync();
+        var value = await _query.Sql("Select @value", new { value = expected }).ScalarAsync<int>();
 
         // Assert
         Assert.Equal(expected, value);
@@ -72,10 +72,10 @@ public sealed class DorisReadOnlyIntegrationTest : IDisposable
     public async Task ExecuteList_WhenUsingLimitOffset_ShouldReturnExpectedPage()
     {
         // Act
-        var values = await _query.Sql<int>("Select Value From (Select 1 As Value Union All Select 2 As Value) t " +
+        var values = await _query.Sql("Select Value From (Select 1 As Value Union All Select 2 As Value) t " +
                                            "Order By Value Limit @limit OFFSET @offset",
                 new { limit = 1, offset = 1 })
-            .ToListAsync();
+            .ToListAsync<int>();
 
         // Assert
         Assert.Equal(new[] { 2 }, values);

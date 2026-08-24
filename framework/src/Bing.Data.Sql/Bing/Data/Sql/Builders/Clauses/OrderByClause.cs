@@ -111,8 +111,9 @@ public class OrderByClause : IOrderByClause
     {
         var item = new OrderByItem(column, prefix: tableAlias);
         return _items.Exists(t =>
-            t.Column.ToLower() == item.Column.ToLower() &&
-            (item.Prefix.IsEmpty() || t.Prefix?.ToLower() == item.Prefix?.ToLower()));
+            t?.Column != null && item.Column != null &&
+            t.Column.Equals(item.Column, StringComparison.OrdinalIgnoreCase) &&
+            (item.Prefix.IsEmpty() || string.Equals(t.Prefix, item.Prefix, StringComparison.OrdinalIgnoreCase)));
     }
 
     /// <summary>

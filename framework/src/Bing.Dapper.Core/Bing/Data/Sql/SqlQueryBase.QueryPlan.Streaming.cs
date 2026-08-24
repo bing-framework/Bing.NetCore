@@ -36,17 +36,22 @@ public abstract partial class SqlQueryBase
         cancellationToken.ThrowIfCancellationRequested();
         EnsureStreamingSupported();
         EnsureCancellationSupported(cancellationToken);
-        ValidateQueryBuilder(plan.Builder);
+        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
+            EnsureWritableDataSource();
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;
         IDataReader reader = null;
         Func<IDataReader, TResult> parser = null;
+        IDisposable logScope = null;
         var shouldExecute = false;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
+        var queryExecutionStarted = false;
         try
         {
+            plan.NotifyExecutionStarted();
+            queryExecutionStarted = true;
             if (shouldExecute = ExecuteBefore())
             {
                 try
@@ -54,7 +59,8 @@ public abstract partial class SqlQueryBase
                     var preparedPlan = PrepareQueryPlan(plan);
                     var connection = GetExecutionConnection();
                     var transaction = GetQueryTransaction();
-                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
+                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                    logScope = BeginExecutionLogScope(message);
                     WritePlanTraceLog(preparedPlan);
                     reader = await connection.ExecuteReaderAsync(CreateQueryCommandDefinition(preparedPlan.Sql,
                         preparedPlan.DapperParameters, transaction, timeout, buffered: false, cancellationToken,
@@ -149,6 +155,9 @@ public abstract partial class SqlQueryBase
             else
                 SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(message));
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(null));
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => logScope?.Dispose());
+            if (queryExecutionStarted)
+                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, plan.NotifyExecutionFinished);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
             SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         }
@@ -166,16 +175,21 @@ public abstract partial class SqlQueryBase
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         EnsureStreamingSupported();
-        ValidateQueryBuilder(plan.Builder);
+        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
+            EnsureWritableDataSource();
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;
         IEnumerator<TResult> enumerator = null;
+        IDisposable logScope = null;
         var shouldExecute = false;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
+        var queryExecutionStarted = false;
         try
         {
+            plan.NotifyExecutionStarted();
+            queryExecutionStarted = true;
             if (shouldExecute = ExecuteBefore())
             {
                 try
@@ -183,7 +197,8 @@ public abstract partial class SqlQueryBase
                     var preparedPlan = PrepareQueryPlan(plan);
                     var connection = GetExecutionConnection();
                     var transaction = GetQueryTransaction();
-                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection);
+                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                    logScope = BeginExecutionLogScope(message);
                     WritePlanTraceLog(preparedPlan);
                     enumerator = connection.Query<TResult>(preparedPlan.Sql, preparedPlan.DapperParameters, transaction,
                         buffered: false, commandTimeout: timeout, commandType: plan.CommandType).GetEnumerator();
@@ -251,6 +266,9 @@ public abstract partial class SqlQueryBase
             else
                 SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter(message));
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteQueryPlanAfter(null));
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => logScope?.Dispose());
+            if (queryExecutionStarted)
+                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, plan.NotifyExecutionFinished);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
             SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         }

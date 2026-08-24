@@ -155,6 +155,11 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     private bool _isAddFilters;
 
     /// <summary>
+    /// 当前查询引用的类型化子查询父上下文。
+    /// </summary>
+    private string _parentQueryContextId;
+
+    /// <summary>
     /// 子查询参数重命名映射，确保重复渲染使用同一参数名称。
     /// </summary>
     private readonly Dictionary<ISqlBuilder, Dictionary<string, string>> _subqueryParameterNames =
@@ -690,6 +695,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         OffsetParam = sqlBuilder.OffsetParam;
         LimitParam = sqlBuilder.LimitParam;
         _isAddFilters = sqlBuilder._isAddFilters;
+        _parentQueryContextId = sqlBuilder._parentQueryContextId;
 
         // 克隆集合
         UnionItems = CloneBuilderItems(sqlBuilder.UnionItems, sqlBuilder);
@@ -740,6 +746,20 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     /// <returns>当前根查询专属的 SQL 选项实例。</returns>
     internal object GetExecutionScope() => Options;
+
+    /// <summary>
+    /// 当前 Builder 引用的类型化子查询父上下文。
+    /// </summary>
+    internal string ParentQueryContextId => _parentQueryContextId;
+
+    /// <summary>
+    /// 记录类型化子查询的父上下文，重复引用时保留最外层父关系。
+    /// </summary>
+    internal void RegisterSubqueryParent(string parentQueryContextId)
+    {
+        if (string.IsNullOrWhiteSpace(_parentQueryContextId) && string.IsNullOrWhiteSpace(parentQueryContextId) == false)
+            _parentQueryContextId = parentQueryContextId;
+    }
 
     /// <summary>
     /// 渲染子查询并合并独立参数上下文。
@@ -1682,6 +1702,20 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
             return new SqlBuilderRenderSnapshot(ToSql(), this);
         var snapshot = (SqlBuilderBase)Clone();
         return new SqlBuilderRenderSnapshot(snapshot.RenderSnapshot(), snapshot);
+    }
+
+    /// <summary>
+    /// 创建用于派生执行计划的独立 Builder，并提前固化动态过滤和数据边界。
+    /// </summary>
+    /// <returns>已应用执行边界但尚未渲染 SQL 的独立 Builder。</returns>
+    internal ISqlBuilder CreateExecutionBuilderSnapshot()
+    {
+        var snapshot = (SqlBuilderBase)Clone();
+        if (snapshot.ShouldApplyFiltersOnRender())
+            snapshot.EnsureFiltersAdded();
+        if (snapshot.ShouldApplyMutationDataBoundaryOnRender())
+            snapshot.EnsureMutationDataBoundary();
+        return snapshot;
     }
 
     /// <summary>
