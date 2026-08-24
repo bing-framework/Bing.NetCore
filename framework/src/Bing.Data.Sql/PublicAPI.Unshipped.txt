@@ -10,17 +10,47 @@ Bing.Data.Sql.SqlTextQuery.FirstAsync<TResult>(int? timeout = null, System.Threa
 Bing.Data.Sql.SqlTextQuery.Parameters.get -> object
 Bing.Data.Sql.SqlTextQuery.Scalar<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlTextQuery.ScalarAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlTextQuery.SingleOrDefault<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlTextQuery.SingleOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
 Bing.Data.Sql.SqlTextQuery.Single<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlTextQuery.SingleAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
 Bing.Data.Sql.SqlTextQuery.SplitOn(string splitOn) -> Bing.Data.Sql.SqlTextQuery
-Bing.Data.Sql.SqlTextQuery.ToDictionary<TResult, TKey, TValue>(System.Func<TResult, TKey> keySelector, System.Func<TResult, TValue> valueSelector, int? timeout = null) -> System.Collections.Generic.Dictionary<TKey, TValue>
-Bing.Data.Sql.SqlTextQuery.ToDictionaryAsync<TResult, TKey, TValue>(System.Func<TResult, TKey> keySelector, System.Func<TResult, TValue> valueSelector, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<TKey, TValue>>
 Bing.Data.Sql.SqlTextQuery.ToEntity<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlTextQuery.ToEntityAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
 Bing.Data.Sql.SqlTextQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
 Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery
+Bing.Data.Sql.SqlFluentQuery.AsAsyncEnumerable<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
+Bing.Data.Sql.SqlFluentQuery.AsEnumerable<TResult>(int? timeout = null) -> System.Collections.Generic.IEnumerable<TResult>
+Bing.Data.Sql.SqlFluentQuery.First<TResult>(int? timeout = null) -> TResult
+Bing.Data.Sql.SqlFluentQuery.FirstAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlFluentQuery.FirstOrDefault<TResult>(int? timeout = null) -> TResult
+Bing.Data.Sql.SqlFluentQuery.FirstOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlFluentQuery.Scalar<TResult>(int? timeout = null) -> TResult
+Bing.Data.Sql.SqlFluentQuery.ScalarAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlFluentQuery.Single<TResult>(int? timeout = null) -> TResult
+Bing.Data.Sql.SqlFluentQuery.SingleAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlFluentQuery.SplitOn(string splitOn) -> Bing.Data.Sql.SqlFluentQuery
+Bing.Data.Sql.SqlFluentQuery.ToEntity<TResult>(int? timeout = null) -> TResult
+Bing.Data.Sql.SqlFluentQuery.ToEntityAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToSql() -> string
+Bing.Data.Sql.SqlProcedureQuery
+Bing.Data.Sql.SqlProcedureQuery.ExecuteFirst<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteFirstAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteFirstOrDefault<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteFirstOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteList<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<System.Collections.Generic.List<TResult>>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteScalar<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteScalarAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteSingle<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteSingleAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteSingleOrDefault<TResult>(int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<TResult>
+Bing.Data.Sql.SqlProcedureQuery.ExecuteSingleOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<TResult>>
+Bing.Data.Sql.SqlProcedureQuery.Parameters.get -> object
+Bing.Data.Sql.SqlProcedureQuery.Procedure.get -> string
 Bing.Data.Sql.SqlBuilderExecutionSnapshot.SqlBuilderExecutionSnapshot(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters, string debugSql = null) -> void
 Bing.Data.Sql.SqlBuilderExecutionSnapshot.Sql.get -> string
 Bing.Data.Sql.SqlBuilderExecutionSnapshot.DebugSql.get -> string
@@ -63,43 +93,28 @@ Bing.Data.Sql.SqlQueryPlan.ExecutionId.get -> string
 Bing.Data.Sql.SqlQueryPlan.Phase.get -> string
 Bing.Data.Sql.ISqlConditionGroup
 Bing.Data.Sql.ISqlConditionGroup.And<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> void
+Bing.Data.Sql.ISqlConditionGroup.And<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> void
 Bing.Data.Sql.ISqlConditionGroup.And<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> void
+Bing.Data.Sql.ISqlConditionGroup.And<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> void
 Bing.Data.Sql.ISqlConditionGroup.Or<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> void
+Bing.Data.Sql.ISqlConditionGroup.Or<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> void
 Bing.Data.Sql.ISqlConditionGroup.Or<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> void
+Bing.Data.Sql.ISqlConditionGroup.Or<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> void
 Bing.Data.Sql.ISqlConditionGroup.Group(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
+Bing.Data.Sql.ISqlConditionGroup.AndGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
+Bing.Data.Sql.ISqlConditionGroup.OrGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
 Bing.Data.Sql.SqlLambdaQuery.WhereGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Clone() -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.ToEntity<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlLambdaQuery.ToEntityAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlLambdaQuery.ToDictionary<TResult, TKey, TValue>(System.Func<TResult, TKey> keySelector, System.Func<TResult, TValue> valueSelector, int? timeout = null) -> System.Collections.Generic.Dictionary<TKey, TValue>
-Bing.Data.Sql.SqlLambdaQuery.ToDictionaryAsync<TResult, TKey, TValue>(System.Func<TResult, TKey> keySelector, System.Func<TResult, TValue> valueSelector, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.Dictionary<TKey, TValue>>
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlMultiLambdaQuery
-Bing.Data.Sql.SqlMultiLambdaQuery.AsAsyncEnumerable<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.AsEnumerable<TResult>(int? timeout = null) -> System.Collections.Generic.IEnumerable<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.First<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlMultiLambdaQuery.FirstAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.FirstOrDefault<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlMultiLambdaQuery.FirstOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.Scalar<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlMultiLambdaQuery.ScalarAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.Single<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlMultiLambdaQuery.SingleAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.SingleOrDefault<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlMultiLambdaQuery.SingleOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlMultiLambdaQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
-Bing.Data.Sql.SqlMultiLambdaQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
-Bing.Data.Sql.SqlMultiLambdaQuery.ToSql() -> string
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.Select<TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.WhereIf(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, bool condition, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
-Bing.Data.Sql.SqlLambdaQuery<TEntity>.WhereIf(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, bool condition) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlQueryRuntimeFactory
 static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateTextQuery(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string commandText, object parameters) -> Bing.Data.Sql.SqlTextQuery
-static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlFluentQuery<TResult>
-static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateTextQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string commandText, object parameters) -> Bing.Data.Sql.SqlTextQuery<TResult>
-static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateProcedureQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string procedure, object parameters) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateQuery(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlFluentQuery
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateAdvancedQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlFluentQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateAdvancedTextQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string commandText, object parameters) -> Bing.Data.Sql.SqlTextQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateAdvancedProcedureQuery<TResult>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string procedure, object parameters) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
+static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateProcedureQuery(Bing.Data.Sql.ISqlQueryPlanExecutor executor, string procedure, object parameters) -> Bing.Data.Sql.SqlProcedureQuery
 static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor
 Bing.Data.Sql.Builders.Filters.ISqlTenantFilterContributor.IsTenantEntity(System.Type entityType) -> bool
@@ -260,8 +275,6 @@ Bing.Data.Sql.SqlLambdaQuery.Scalar<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlLambdaQuery.ScalarAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
 Bing.Data.Sql.SqlLambdaQuery.Single<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlLambdaQuery.SingleAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlLambdaQuery.SingleOrDefault<TResult>(int? timeout = null) -> TResult
-Bing.Data.Sql.SqlLambdaQuery.SingleOrDefaultAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
 Bing.Data.Sql.SqlLambdaQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
 Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlLambdaQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
@@ -271,26 +284,39 @@ Bing.Data.Sql.SqlLambdaQuery.From<TEntity>(string alias = null, string schema = 
 Bing.Data.Sql.SqlLambdaQuery.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias, string sourceAlias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
+Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.ClearSelect() -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Distinct() -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string alias, string columnAlias, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, bool condition) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, bool condition, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string alias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string alias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string alias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string alias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, string alias, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, string alias, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
@@ -298,21 +324,26 @@ Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubqu
 Bing.Data.Sql.SqlLambdaQuery.CrossJoin<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.CrossJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.GroupBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Having<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Having<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias, string schema) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.Sql(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.ISqlQuery.SqlInterpolated(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery
-Bing.Data.Sql.ISqlQuery.Query<TResult>() -> Bing.Data.Sql.SqlFluentQuery<TResult>
-Bing.Data.Sql.ISqlQuery.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
-Bing.Data.Sql.ISqlQuery.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.ISqlQuery.Query() -> Bing.Data.Sql.SqlFluentQuery
+Bing.Data.Sql.ISqlQuery.Procedure(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery
 Bing.Data.Sql.Builders.Core.TableSource
 Bing.Data.Sql.Builders.Core.TableSource.Alias.get -> string
 Bing.Data.Sql.Builders.Core.TableSource.EntityType.get -> System.Type
@@ -499,4 +530,3 @@ Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.UnionAll.init -> void
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreatePagePlan(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager, Bing.Data.Sql.ISqlBuilder pageBuilder) -> Bing.Data.Sql.SqlQueryPlan
 Bing.Data.Sql.SqlTextQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
 Bing.Data.Sql.SqlTextQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
-static Bing.Data.Sql.SqlQueryRuntimeFactory.CreateLambdaQuery<TEntity>(Bing.Data.Sql.ISqlQueryPlanExecutor executor, Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>

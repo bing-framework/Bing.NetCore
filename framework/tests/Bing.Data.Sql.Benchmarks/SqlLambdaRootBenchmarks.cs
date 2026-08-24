@@ -21,6 +21,8 @@ namespace Bing.Data.Sql.Benchmarks;
 public class SqlLambdaRootBenchmarks
 {
     private SqlLambdaQuery _query;
+    private ISqlQueryPlanExecutor _executor;
+    private SqlBuilderServices _services;
 
     /// <summary>
     /// 类型化根来源数量。
@@ -29,11 +31,19 @@ public class SqlLambdaRootBenchmarks
     public int RootCount { get; set; }
 
     /// <summary>
+    /// IN 参数规模，用于观察参数快照和 SQL 渲染的分配变化。
+    /// </summary>
+    [Params(10, 100, 1000)]
+    public int ParameterCount { get; set; }
+
+    /// <summary>
     /// 初始化指定元数的根来源基线。
     /// </summary>
     [GlobalSetup]
     public void Setup()
     {
+        _executor = CreateExecutor();
+        _services = SqlBuilderServices.CreateDefault();
         _query = BuildQuery();
     }
 
@@ -55,9 +65,23 @@ public class SqlLambdaRootBenchmarks
     [Benchmark]
     public string RenderExistingRoots() => _query.ToSql();
 
+    /// <summary>
+    /// 测量不同规模 IN 参数的构建和 SQL 渲染成本。
+    /// </summary>
+    [Benchmark]
+    public string RenderInParameters()
+    {
+        var values = new object[ParameterCount];
+        for (var index = 0; index < values.Length; index++)
+            values[index] = index;
+        var query = BuildQuery();
+        query.Where<Root01, object>(root => root.Id, values, Operator.In);
+        return query.ToSql();
+    }
+
     private SqlLambdaQuery BuildQuery()
     {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder());
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services));
         switch (RootCount)
         {
             case 1:
@@ -93,18 +117,18 @@ public class SqlLambdaRootBenchmarks
 
     private sealed class BenchmarkBuilder : SqlBuilderBase
     {
-        public BenchmarkBuilder()
-            : this(null)
+        public BenchmarkBuilder(SqlBuilderServices services)
+            : this(services, null)
         {
         }
 
-        private BenchmarkBuilder(IParameterManager parameterManager)
-            : base(BenchmarkSqlProvider.Instance, SqlBuilderServices.CreateDefault(), parameterManager)
+        private BenchmarkBuilder(SqlBuilderServices services, IParameterManager parameterManager)
+            : base(BenchmarkSqlProvider.Instance, services, parameterManager)
         {
         }
 
         protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
-            new BenchmarkBuilder(parameterManager);
+            new BenchmarkBuilder(Services, parameterManager);
     }
 
     private sealed class BenchmarkSqlProvider : ISqlProvider

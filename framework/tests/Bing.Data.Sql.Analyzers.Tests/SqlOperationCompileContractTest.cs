@@ -255,6 +255,211 @@ public class SqlOperationCompileContractTest
     }
 
     /// <summary>
+    /// 测试目的：最终查询入口应返回非泛型描述，并由终结方法选择结果类型。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingNonGenericDescriptionsAndTerminalResults_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item
+            {
+                public int Id { get; set; }
+            }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    SqlLambdaQuery lambda = query.From<Item>("i");
+                    var lambdaRows = lambda.ToList<Item>();
+                    var fluentRows = query.Query().ToList<Item>();
+                    var textRows = query.Sql("Select Id From Items").ToList<Item>();
+                    var procedureRows = query.Procedure("GetItems").ExecuteList<Item>();
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
+    /// 测试目的：最终 Lambda 描述应支持连续 10 个根来源和 2～10 来源的二元 Join 链。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingTenSourcesAndBinaryJoins_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item
+            {
+                public int Id { get; set; }
+                public int NextId { get; set; }
+            }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    var description = query.From<Item>("i1")
+                        .From<Item>("i2")
+                        .From<Item>("i3")
+                        .From<Item>("i4")
+                        .From<Item>("i5")
+                        .From<Item>("i6")
+                        .From<Item>("i7")
+                        .From<Item>("i8")
+                        .From<Item>("i9")
+                        .From<Item>("i10")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j2", "i1")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j3", "j2")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j4", "j3")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j5", "j4")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j6", "j5")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j7", "j6")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j8", "j7")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j9", "j8")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j10", "j9")
+                        .Select<Item, Item>((first, second) => new object[] { first.Id, second.Id }, "i1", "j2")
+                        .ToList<Item>();
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
+    /// 测试目的：已删除的起始阶段泛型 Query 入口不能被消费者编译使用。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingGenericRootQuery_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query) => query.Query<Item>();
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        AssertCompileFailedForMissingExtension(diagnostics, "Query");
+    }
+
+    /// <summary>
+    /// 测试目的：已删除的泛型 Raw、插值 SQL 和 Procedure 起始入口不能被消费者编译使用。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingGenericRawAndProcedureDescriptions_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    query.Sql<Item>("Select 1");
+                    query.SqlInterpolated<Item>($"Select 1");
+                    query.Procedure<Item>("GetItems");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("Sql", StringComparison.Ordinal));
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("Procedure", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// 测试目的：已删除的泛型 Lambda 描述类型不能重新成为公共消费者入口。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingGenericLambdaDescription_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { }
+
+            static class Consumer
+            {
+                static SqlLambdaQuery<Item> Use(ISqlQuery query) => query.From<Item>();
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("SqlLambdaQuery", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 组合公共 API 只允许一元或二元表达式，不重新暴露三元来源入口。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingThreeParameterLambda_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    query.From<Item>("a")
+                        .From<Item>("b")
+                        .From<Item>("c")
+                        .Where<Item, Item, Item>((a, b, c) => a.Id == b.Id && b.Id == c.Id);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("Where", StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// 编译动态 C# 源码并收集诊断信息。
     /// </summary>
     /// <param name="source">待验证公开 SQL 操作契约的 C# 源码。</param>

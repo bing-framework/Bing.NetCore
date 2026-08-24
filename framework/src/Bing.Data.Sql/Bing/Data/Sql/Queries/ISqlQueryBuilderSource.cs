@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;
@@ -8,6 +9,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 该契约仅用于将公开查询描述与具体执行实现解耦，创建结果不得复用根查询的可变 Builder 状态。
 /// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface ISqlQueryBuilderSource
 {
     /// <summary>
@@ -35,6 +37,7 @@ internal interface ISqlQueryBuilderAccessor
 /// <summary>
 /// 执行独立 SQL 查询计划的运行时契约。
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public partial interface ISqlQueryPlanExecutor : ISqlQueryBuilderSource
 {
 

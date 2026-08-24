@@ -174,6 +174,12 @@ public class Helper
             SqlParameterSource.Lambda);
     }
 
+    internal ICondition CreateCondition(string rawColumn, string column, Type entityType, object value,
+        Operator @operator)
+    {
+        return CreateConditionInternal(rawColumn, column, value, @operator, entityType, SqlParameterSource.Lambda);
+    }
+
     /// <summary>
     /// 创建查询条件并添加参数
     /// </summary>

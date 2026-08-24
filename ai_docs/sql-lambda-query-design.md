@@ -2,10 +2,10 @@
 
 ## 结果类型规则
 
-`SqlLambdaQuery` 是 dev_v6 的非泛型 Lambda 主描述，来源通过连续 `From<TEntity>(alias, schema)` 追加，不再编码在查询类型的泛型参数中。由于已发布的 `ISqlQuery.From<TEntity>(string alias = null)` 必须保留，`ISqlQuery` 上的零/一参数调用仍返回 `SqlLambdaQuery<TEntity>` 兼容描述；新代码从根入口进入非泛型主路径时应显式传入 `null, null` 或实际 alias/schema。投影只描述列形状，最终结果类型由终结方法显式指定：
+`SqlLambdaQuery` 是当前唯一的非泛型 Lambda 查询描述，来源通过连续 `From<TEntity>(alias = null, schema = null)` 追加，不再编码在查询类型的泛型参数中。批准的主版本 Breaking Change 删除 `SqlLambdaQuery<TEntity>`、公开 `SqlMultiLambdaQuery` 和 Legacy 转发路径。投影只描述列形状，最终结果类型由终结方法显式指定：
 
 ```csharp
-var query = sqlQuery.From<Order>(null, null)
+var query = sqlQuery.From<Order>("o")
     .Select(order => new OrderSummary
     {
         Id = order.Id,
@@ -15,14 +15,14 @@ var query = sqlQuery.From<Order>(null, null)
 var rows = await query.ToListAsync<OrderSummary>();
 ```
 
-Lambda 与非泛型 Raw 查询的列表、单行、标量、分页和同步/异步流方法均在终结方法显式接收 `TResult`。已发布的泛型 Raw 入口和低层多映射类型仅作为兼容路径保留；Dapper 2～7 对象多映射继续通过低层泛型描述提供。
+Lambda 与非泛型 Raw 查询的列表、单行、标量、分页和同步/异步流方法均在终结方法显式接收 `TResult`。起始阶段泛型 Raw 入口已删除；Dapper 2～7 对象多映射仅通过隐藏的 Advanced 泛型描述提供。
 
 ## 来源与 Join
 
-根入口支持连续 `From<TEntity>(alias, schema)`、`FromTable(...)` 和 `FromSubquery(...)`。类型化 Join 使用二元方法泛型，将新增来源和完整谓词作为一次操作提交：
+根入口支持连续 `From<TEntity>(alias, schema)`、`FromTable(...)` 和 `FromSubquery(...)`。类型化 Join 使用二元方法泛型，将新增来源和完整谓词作为一次操作提交；同类型来源通过显式 alias 定位：
 
 ```csharp
-var rows = await sqlQuery.From<Order>(null, null)
+var rows = await sqlQuery.From<Order>("o")
     .Join<Order, Customer>((order, customer) => order.CustomerId == customer.Id)
     .Join<Customer, Invoice>((customer, invoice) => customer.Id == invoice.CustomerId)
     .Select<Customer, Invoice>((customer, invoice) => new object[]
@@ -41,7 +41,7 @@ Join 在调用阶段完成 Provider 能力、别名、映射、表引用、参�
 
 Right/Full Join 是否可用由冻结的 `SqlProviderProfile` 决定。SQLite 和 MySQL 的不支持能力应在对应 Lambda Join 调用时拒绝；SQL Server 等支持 Provider 才能生成相应 SQL。原始 Builder 的低层能力校验仍在 SQL 渲染验证阶段执行。
 
-结构化 Lambda 不接受外部原始 SQL。需要原生文本时，新代码使用 `Sql(固定模板, 参数对象)`，所有外部值通过参数绑定，不拼接到 SQL、表名、列名或排序表达式中；已发布的 `Sql<TResult>` 仅供兼容调用方和低层多映射使用。
+结构化 Lambda 不接受外部原始 SQL。需要原生文本时，新代码使用 `Sql(固定模板, 参数对象)`，所有外部值通过参数绑定，不拼接到 SQL、表名、列名或排序表达式中；低层多映射仅通过隐藏 Advanced 路径使用，普通入口不再固定起始结果类型。
 
 ## 生命周期与验证
 

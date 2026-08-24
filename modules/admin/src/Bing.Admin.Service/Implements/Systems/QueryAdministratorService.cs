@@ -52,7 +52,7 @@ namespace Bing.Admin.Service.Implements.Systems
             if (parameter == null)
                 return new PagerList<AdministratorResponse>();
             Debug.WriteLine($"当前用户: {CurrentUser.UserId}, {CurrentUser.UserName}");
-            var query = SqlQuery.Query<AdministratorResponse>()
+            var query = SqlQuery.Query()
                 .Select("a.Id,a.Nickname,a.UserName,a.LastModificationTime,a.LastModifier,b.Gender,c.Enabled")
                 .From("Users", "a")
                 .Join("UserInfo", "b")
@@ -71,7 +71,7 @@ namespace Bing.Admin.Service.Implements.Systems
                     .Where("RoleId", parameter.RoleId);
                 query = query.Join(roleQuery, "d").AppendOn("a.Id = d.UserId");
             }
-            var result = await query.OrderBy("a.LastModificationTime").ToPageAsync(parameter);
+            var result = await query.OrderBy("a.LastModificationTime").ToPageAsync<AdministratorResponse>(parameter);
             var userIds = result.Data.Select(x => Conv.ToGuid(x.Id)).ToList();
             var userRoles = await GetUserRolesAsync(userIds);
             if (userRoles.Any())
@@ -85,7 +85,7 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="id">用户标识</param>
         public async Task<AdministratorResponse> GetById(Guid id)
         {
-            var result = await SqlQuery.Query<AdministratorResponse>()
+            var result = await SqlQuery.Query()
                 .Select("a.Id,a.Nickname,a.UserName,a.LastModificationTime,a.LastModifier,b.Gender,c.Enabled")
                 .From("Users", "a")
                 .Join("UserInfo", "b")
@@ -93,7 +93,7 @@ namespace Bing.Admin.Service.Implements.Systems
                 .Join("Administrator", "c")
                 .AppendOn("a.Id = c.Id")
                 .Where("a.Id", id)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync<AdministratorResponse>();
             result.Roles = await GetUserRolesAsync(new List<Guid>() { id });
             return result;
         }
@@ -104,13 +104,13 @@ namespace Bing.Admin.Service.Implements.Systems
         /// <param name="userIds">用户编号列表</param>
         private async Task<List<UserRoleResponse>> GetUserRolesAsync(List<Guid> userIds)
         {
-            var userRoles = await SqlQuery.Query<UserRoleResponse>()
+            var userRoles = await SqlQuery.Query()
                 .Select("a.UserId,b.Id,b.Name,b.Code")
                 .From("UserRole", "a")
                 .Join("Role", "b")
                 .AppendOn("a.RoleId = b.Id")
                 .Where("a.UserId", userIds, Operator.In)
-                .ToListAsync();
+                .ToListAsync<UserRoleResponse>();
             return userRoles;
         }
     }

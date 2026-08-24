@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Mutations;
@@ -13,6 +14,7 @@ namespace Bing.Data.Sql;
 /// 计划保存独立查询输入、查询上下文和本次执行标识，但不持有连接、事务、诊断 Scope 或执行资源；
 /// 这些资源始终由创建它的根查询执行器管理。
 /// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class SqlQueryPlan
 {
     /// <summary>

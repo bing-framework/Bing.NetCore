@@ -198,6 +198,28 @@ public class SelectClause : ISelectClause
     }
 
     /// <summary>
+    /// 添加带显式表别名的实体表达式聚合列。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="expression">列名表达式。</param>
+    /// <param name="tableAlias">聚合列所属表别名。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    internal void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
+        string tableAlias, string columnAlias, bool distinct) where TEntity : class
+    {
+        _context.ValidateOperation(SqlOperationAction.Select);
+        SqlAggregateArgumentValidator.ValidateFunction(function);
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        _columns.AddStructuredAggregationColumnWithAlias(function,
+            SqlAggregateArgumentValidator.ParseStructuredColumn(_resolver.GetColumn(expression)), tableAlias,
+            columnAlias, distinct, typeof(TEntity), useDefaultAlias: false);
+        _context.UseOperation(SqlOperationAction.Select);
+    }
+
+    /// <summary>
     /// 添加原始聚合参数。
     /// </summary>
     /// <param name="function">聚合函数。</param>

@@ -38,7 +38,6 @@ Bing.Data.Sql.SqlQueryBase.GetExecutionConnection() -> System.Data.IDbConnection
 Bing.Data.Sql.SqlQueryBase.GetExecutionTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetQueryTransaction() -> System.Data.IDbTransaction
 Bing.Data.Sql.SqlQueryBase.GetSql() -> string
-Bing.Data.Sql.SqlQueryBase.From<TEntity>(string alias = null) -> Bing.Data.Sql.SqlLambdaQuery<TEntity>
 Bing.Data.Sql.SqlQueryBase.GroupByClause.get -> Bing.Data.Sql.Builders.IGroupByClause
 Bing.Data.Sql.SqlQueryBase.IsUnion.get -> bool
 Bing.Data.Sql.SqlQueryBase.JoinClause.get -> Bing.Data.Sql.Builders.IJoinClause
@@ -49,7 +48,6 @@ Bing.Data.Sql.SqlQueryBase.OrderByClause.get -> Bing.Data.Sql.Builders.IOrderByC
 Bing.Data.Sql.SqlQueryBase.ParamLiteralsResolver.get -> Bing.Data.Sql.Builders.Params.IParamLiteralsResolver
 Bing.Data.Sql.SqlQueryBase.ParameterManager.get -> Bing.Data.Sql.Builders.Params.IParameterManager
 Bing.Data.Sql.SqlQueryBase.Params.get -> System.Collections.Generic.IReadOnlyDictionary<string, object>
-Bing.Data.Sql.SqlQueryBase.Procedure<TResult>(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.RollbackQueryTransaction() -> void
 Bing.Data.Sql.SqlQueryBase.SelectClause.get -> Bing.Data.Sql.Builders.ISelectClause
 Bing.Data.Sql.SqlQueryBase.ServiceProvider.get -> System.IServiceProvider

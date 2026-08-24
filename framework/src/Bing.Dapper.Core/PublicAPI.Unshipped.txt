@@ -1,8 +1,13 @@
-Bing.Data.Sql.SqlQueryBase.Query<TResult>() -> Bing.Data.Sql.SqlFluentQuery<TResult>
-Bing.Data.Sql.SqlQueryBase.Sql<TResult>(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.From<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlAdvancedQueryExtensions
+static Bing.Data.Sql.SqlAdvancedQueryExtensions.Procedure<TResult>(this Bing.Data.Sql.ISqlQuery query, string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery<TResult>
+static Bing.Data.Sql.SqlAdvancedQueryExtensions.Query<TResult>(this Bing.Data.Sql.ISqlQuery query) -> Bing.Data.Sql.SqlFluentQuery<TResult>
+static Bing.Data.Sql.SqlAdvancedQueryExtensions.Sql<TResult>(this Bing.Data.Sql.ISqlQuery query, string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery<TResult>
+static Bing.Data.Sql.SqlAdvancedQueryExtensions.SqlInterpolated<TResult>(this Bing.Data.Sql.ISqlQuery query, System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
+Bing.Data.Sql.SqlQueryBase.Query() -> Bing.Data.Sql.SqlFluentQuery
 Bing.Data.Sql.SqlQueryBase.Sql(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery
-Bing.Data.Sql.SqlQueryBase.SqlInterpolated<TResult>(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery<TResult>
 Bing.Data.Sql.SqlQueryBase.SqlInterpolated(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery
+Bing.Data.Sql.SqlQueryBase.Procedure(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery
 Bing.Data.Sql.SqlQueryBase.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlQueryBase.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlProviderRuntime

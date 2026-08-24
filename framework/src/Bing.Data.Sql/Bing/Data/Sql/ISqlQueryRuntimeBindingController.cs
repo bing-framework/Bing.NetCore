@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Data;
 using Bing.Data.Sql.Metadata;
 
@@ -9,6 +10,7 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 由 SQL 查询实现提供，仅供 <see cref="SqlQueryRuntimeBinding"/> 调用。
 /// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface ISqlQueryRuntimeBindingController
 {
     /// <summary>

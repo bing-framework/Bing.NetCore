@@ -1,8 +1,10 @@
+using System.Reflection;
 using Bing.Data.Sql.Tests.Samples;
 using Bing.Data.Enums;
 using Bing.Data.Filters;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Moq;
@@ -61,6 +63,473 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
+    /// 测试目的：同类型多来源必须通过显式 alias 绑定，且 Lambda 参数名称变化不应改变 SQL 来源解析结果。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenSameEntitySourcesUseExplicitAliases_ShouldBindStableSources()
+    {
+        // Arrange
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new TestSqlBuilder())
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample>(ignored => new object[] { ignored.IntValue }, "right")
+            .Where<Sample, int>(value => value.IntValue, 7, "left");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select [right].[IntValue] \r\nFrom [Sample] As [left], [Sample] As [right] \r\nWhere [left].[IntValue]=@_p_0",
+            sql);
+    }
+
+    /// <summary>
+    /// 测试目的：双来源表达式应按显式来源顺序绑定，支持同类型自连接而不依赖参数变量名。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSameEntitySourcesUseExplicitAliases_ShouldBindExpressionParameters()
+    {
+        // Arrange
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new TestSqlBuilder())
+            .From<Sample>("parent")
+            .From<Sample>("child")
+            .Select<Sample, Sample>((firstValue, secondValue) =>
+                new object[] { firstValue.IntValue, secondValue.IntValue }, "parent", "child")
+            .Where<Sample, Sample>((firstValue, secondValue) =>
+                firstValue.IntValue == secondValue.IntValue, "parent", "child");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select [parent].[IntValue],[child].[IntValue] \r\nFrom [Sample] As [parent], [Sample] As [child] \r\nWhere [parent].[IntValue]=[child].[IntValue]",
+            sql);
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式来源的投影、条件、分组和排序应按 alias 绑定不同来源，并渲染完整 SQL。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceAliasesAreExplicit_ShouldRenderCompleteSqlAcrossClauses()
+    {
+        // Arrange
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample, Sample>((firstValue, secondValue) =>
+                new object[] { firstValue.IntValue, secondValue.IntValue }, "left", "right")
+            .Where<Sample, Sample>((firstValue, secondValue) =>
+                firstValue.IntValue == secondValue.IntValue, "left", "right")
+            .GroupBy<Sample, Sample>((firstValue, secondValue) =>
+                new object[] { firstValue.IntValue, secondValue.IntValue }, "left", "right")
+            .OrderBy<Sample, Sample>((firstValue, secondValue) =>
+                new object[] { secondValue.IntValue }, "left", "right");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select [left].[IntValue],[right].[IntValue] \r\nFrom [Sample] As [left], [Sample] As [right] \r\nWhere [left].[IntValue]=[right].[IntValue] \r\nGroup By [left].[IntValue],[right].[IntValue] \r\nOrder By [right].[IntValue]",
+            sql);
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 Select 列投影不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceSelectAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.Select<Sample, Sample>(
+            (firstValue, secondValue) => new object[] { firstValue.IntValue, secondValue.IntValue },
+            "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 DTO 投影不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceTypedSelectAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.Select<Sample, Sample, SampleProjection>(
+            (firstValue, secondValue) => new SampleProjection { IntValue = firstValue.IntValue },
+            "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 SelectSubquery 来源不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceSelectSubqueryAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query =>
+        {
+            _ = query.SelectSubquery<Sample, Sample, SampleProjection>(
+                (firstValue, secondValue) => new SampleProjection { IntValue = firstValue.IntValue },
+                "summary", "left", "left");
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 Where 来源不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceWhereAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.Where<Sample, Sample>(
+            (firstValue, secondValue) => firstValue.IntValue == secondValue.IntValue, "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 GroupBy 来源不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceGroupByAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.GroupBy<Sample, Sample>(
+            (firstValue, secondValue) => new object[] { firstValue.IntValue, secondValue.IntValue },
+            "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 OrderBy 来源不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceOrderByAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.OrderBy<Sample, Sample>(
+            (firstValue, secondValue) => new object[] { firstValue.IntValue, secondValue.IntValue },
+            "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：二元显式 Having 来源不能将两个 Lambda 参数绑定到同一表源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceHavingAliasesAreDuplicated_ShouldKeepQueryStateUnchanged()
+    {
+        AssertDuplicateExplicitAliasBindingFails(query => query.Having<Sample, Sample>(
+            (firstValue, secondValue) => firstValue.IntValue > secondValue.IntValue, "left", "left"));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源聚合必须使用显式 alias，而不能绑定到最后注册的来源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenAggregateUsesExplicitAlias_ShouldBindSelectedSource()
+    {
+        // Arrange
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new TestSqlBuilder())
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Aggregate<Sample>(SqlAggregateFunction.Sum, value => value.IntValue, "left", "Total");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select Sum([left].[IntValue]) As [Total] \r\nFrom [Sample] As [left], [Sample] As [right]",
+            sql);
+    }
+
+    /// <summary>
+    /// 测试目的：显式 alias 缺失时应立即失败，且不得修改查询 SQL 或参数状态。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenExplicitAliasIsMissing_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new TestSqlBuilder())
+            .From<Sample>("source")
+            .Select<Sample>(item => new object[] { item.IntValue });
+        var beforeSql = query.ToSql();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.Where<Sample>(
+            item => item.IntValue == 1, "missing"));
+
+        // Assert
+        Assert.Contains("查询来源不唯一", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 Where 且未提供 alias 时必须失败，不能按来源注册顺序静默绑定。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenWhereUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Where<Sample>(item => item.IntValue == 1));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于值型 Where 且未提供 alias 时必须失败，不能静默使用最后注册来源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenValueWhereUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Where<Sample, int>(item => item.IntValue, 1));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于值型 IN 条件且未提供 alias 时必须失败，不能写入参数或条件。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenValueWhereInUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Where<Sample, object>(item => item.IntValue,
+            new object[] { 1, 2 }, Operator.In));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 WhereIf(true) 值条件且未提供 alias 时必须失败，不能静默绑定来源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenValueWhereIfUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.WhereIf(true, (Sample item) => item.IntValue, 1));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于默认实体投影且未提供 alias 时必须失败，不能冻结首个或最后一个来源。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenDefaultSelectUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Select<Sample>());
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源创建 SelectSubquery 且未提供来源 alias 时必须失败，并保持查询形状不变。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenSelectSubqueryUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample>(item => new object[] { item.IntValue }, "left");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetShapeVersion(query);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.SelectSubquery<Sample, SampleProjection>(
+            renamed => new SampleProjection { IntValue = renamed.IntValue }, "summary"));
+
+        // Assert
+        Assert.Contains("查询来源不唯一", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetShapeVersion(query));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：SelectSubquery 单来源显式 alias 应绑定指定来源并输出完整派生表 SQL。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenSelectSubqueryUsesExplicitSourceAlias_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right");
+
+        // Act
+        var summary = query.SelectSubquery<Sample, SampleProjection>(
+            renamed => new SampleProjection { IntValue = renamed.IntValue }, "summary", "right");
+        var outer = CreateLambdaQuery()
+            .FromSubquery(summary)
+            .Select<SampleProjection>(item => new object[] { item.IntValue });
+
+        // Assert
+        Assert.Equal(
+            "Select [summary].[IntValue] \r\nFrom (Select [right].[IntValue] As [IntValue] \r\nFrom [Sample] As [left], [Sample] As [right]) As [summary]",
+            outer.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：SelectSubquery 双来源显式 alias 应按 alias 而非 Lambda 参数名绑定完整投影 SQL。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenTwoSourceSelectSubqueryAliasesAreExplicit_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right");
+
+        // Act
+        var summary = query.SelectSubquery<Sample, Sample, SampleProjection>(
+            (renamedFirst, renamedSecond) => new SampleProjection { IntValue = renamedSecond.IntValue },
+            "summary", "left", "right");
+        var outer = CreateLambdaQuery()
+            .FromSubquery(summary)
+            .Select<SampleProjection>(item => new object[] { item.IntValue });
+
+        // Assert
+        Assert.Equal(
+            "Select [summary].[IntValue] \r\nFrom (Select [right].[IntValue] As [IntValue] \r\nFrom [Sample] As [left], [Sample] As [right]) As [summary]",
+            outer.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 Select 且未提供 alias 时必须失败，不能替换已有投影。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenSelectUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Select<Sample>(item => new object[] { item.IntValue }));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 AppendSelect 且未提供 alias 时必须失败，不能追加错误列。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenAppendSelectUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.AppendSelect<Sample>(
+            item => new object[] { item.StringValue }));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 GroupBy 且未提供 alias 时必须失败，不能修改分组状态。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenGroupByUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.GroupBy<Sample>(
+            item => new object[] { item.IntValue }));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 OrderBy 且未提供 alias 时必须失败，不能修改排序状态。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenOrderByUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.OrderBy<Sample>(
+            item => new object[] { item.IntValue }));
+    }
+
+    /// <summary>
+    /// 测试目的：同类型多来源用于 Having 且未提供 alias 时必须失败，不能修改 Having 状态。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenHavingUsesAmbiguousSourceWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        AssertAmbiguousSourceMutationFails(query => query.Having<Sample>(item => item.IntValue > 0));
+    }
+
+    /// <summary>
+    /// 测试目的：最终非泛型 public API 的 1～10 个根来源必须按显式 alias 和参数顺序渲染完整 SQL。
+    /// </summary>
+    [Theory]
+    [InlineData(1, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(2, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(3, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(4, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(5, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(6, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5], [Sample] As [r6] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(7, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5], [Sample] As [r6], [Sample] As [r7] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(8, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5], [Sample] As [r6], [Sample] As [r7], [Sample] As [r8] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(9, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5], [Sample] As [r6], [Sample] As [r7], [Sample] As [r8], [Sample] As [r9] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(10, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2], [Sample] As [r3], [Sample] As [r4], [Sample] As [r5], [Sample] As [r6], [Sample] As [r7], [Sample] As [r8], [Sample] As [r9], [Sample] As [r10] \r\nWhere [r1].[IntValue]=@_p_0")]
+    public void Lambda_WhenOneThroughTenSourcesAreAdded_ShouldRenderCompleteSql(int count, string expectedSql)
+    {
+        // Arrange
+        var query = CreateLambdaQuery().From<Sample>("r1");
+        for (var index = 2; index <= count; index++)
+            query.From<Sample>($"r{index}");
+        query.Select<Sample>(item => new object[] { item.IntValue }, "r1")
+            .Where<Sample, int>(item => item.IntValue, count, "r1");
+
+        // Act
+        var sql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(new[] { "@_p_0" }, parameters.Keys.ToArray());
+        Assert.Equal(new object[] { count }, parameters.Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：最终非泛型 public API 的 2～10 个连续 Join 必须按显式左右 alias 渲染完整 SQL 和参数快照。
+    /// </summary>
+    [Theory]
+    [InlineData(2, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(3, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(4, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(5, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(6, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nJoin [Sample] As [r6] On [r5].[IntValue]=[r6].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(7, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nJoin [Sample] As [r6] On [r5].[IntValue]=[r6].[IntValue] \r\nJoin [Sample] As [r7] On [r6].[IntValue]=[r7].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(8, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nJoin [Sample] As [r6] On [r5].[IntValue]=[r6].[IntValue] \r\nJoin [Sample] As [r7] On [r6].[IntValue]=[r7].[IntValue] \r\nJoin [Sample] As [r8] On [r7].[IntValue]=[r8].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(9, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nJoin [Sample] As [r6] On [r5].[IntValue]=[r6].[IntValue] \r\nJoin [Sample] As [r7] On [r6].[IntValue]=[r7].[IntValue] \r\nJoin [Sample] As [r8] On [r7].[IntValue]=[r8].[IntValue] \r\nJoin [Sample] As [r9] On [r8].[IntValue]=[r9].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    [InlineData(10, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nJoin [Sample] As [r4] On [r3].[IntValue]=[r4].[IntValue] \r\nJoin [Sample] As [r5] On [r4].[IntValue]=[r5].[IntValue] \r\nJoin [Sample] As [r6] On [r5].[IntValue]=[r6].[IntValue] \r\nJoin [Sample] As [r7] On [r6].[IntValue]=[r7].[IntValue] \r\nJoin [Sample] As [r8] On [r7].[IntValue]=[r8].[IntValue] \r\nJoin [Sample] As [r9] On [r8].[IntValue]=[r9].[IntValue] \r\nJoin [Sample] As [r10] On [r9].[IntValue]=[r10].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
+    public void Lambda_WhenTwoThroughTenSourcesAreJoined_ShouldRenderCompleteSql(int count, string expectedSql)
+    {
+        // Arrange
+        var query = CreateLambdaQuery().From<Sample>("r1");
+        for (var index = 2; index <= count; index++)
+        {
+            query.Join<Sample, Sample>((left, right) => left.IntValue == right.IntValue,
+                rightAlias: $"r{index}", leftAlias: $"r{index - 1}");
+        }
+        query.Select<Sample>(item => new object[] { item.IntValue }, "r1")
+            .Where<Sample, int>(item => item.IntValue, count, "r1");
+
+        // Act
+        var sql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal(expectedSql, sql);
+        Assert.Equal(new[] { "@_p_0" }, parameters.Keys.ToArray());
+        Assert.Equal(new object[] { count }, parameters.Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：SplitOn 虽不改变 SQL 文本，但会改变执行计划语义，修改后必须失效实例缓存并作用于后续计划。
+    /// </summary>
+    [Fact]
+    public void SplitOn_WhenChanged_ShouldInvalidateCacheAndUpdateExecutionPlan()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var executor = new Mock<ISqlQueryPlanExecutor>();
+        SqlQueryPlan capturedPlan = null;
+        executor.Setup(item => item.ToList<Sample>(It.IsAny<SqlQueryPlan>(), It.IsAny<int?>()))
+            .Returns((SqlQueryPlan plan, int? _) =>
+            {
+                capturedPlan = plan;
+                return new List<Sample>();
+            });
+        builder.From<Sample>("s").Select<Sample>(item => new object[] { item.IntValue });
+        var query = new SqlQuery(executor.Object, builder);
+
+        // Act
+        var firstSql = query.ToSql();
+        query.SplitOn("ReviewId");
+        var secondSql = query.ToSql();
+        query.ToList<Sample>();
+
+        // Assert
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+        Assert.NotNull(capturedPlan);
+        Assert.Equal("ReviewId", capturedPlan.SplitOn);
+    }
+
+    /// <summary>
     /// 测试目的：动态软删除过滤状态变化后不得命中上一次环境的 SQL 缓存。
     /// </summary>
     [Fact]
@@ -114,6 +583,31 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
+    /// 测试目的：不同规模的 IN 参数展开必须保持参数名称唯一、数量准确且 SQL 可渲染。
+    /// </summary>
+    [Theory]
+    [InlineData(10)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    public void Where_WhenInParameterSetScales_ShouldKeepUniqueParameterSnapshot(int count)
+    {
+        // Arrange
+        var values = Enumerable.Range(0, count).Cast<object>().ToArray();
+        var query = CreateQuery(new Mock<ISqlQueryPlanExecutor>())
+            .Where<Sample, object>(item => item.IntValue, values, Operator.In);
+
+        // Act
+        var sql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal(count, parameters.Count);
+        Assert.Equal(count, parameters.Keys.Distinct(StringComparer.Ordinal).Count());
+        var parameterTokens = string.Join(",", Enumerable.Range(0, count).Select(index => $"@_p_{index}"));
+        Assert.Equal($"Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere [s].[IntValue] In ({parameterTokens})", sql);
+    }
+
+    /// <summary>
     /// 测试目的：WhereIf(false) 不得改变查询形状，WhereIf(true) 只在成功提交后追加一次条件。
     /// </summary>
     [Fact]
@@ -124,13 +618,59 @@ public class SqlQueryLifecycleTest
         var trueQuery = CreateQuery(new Mock<ISqlQueryPlanExecutor>());
 
         // Act
-        falseQuery.WhereIf<Sample>(item => item.IntValue == 7, false);
-        trueQuery.WhereIf<Sample>(item => item.IntValue == 7, true);
+        falseQuery.WhereIf(false, (Sample item) => item.IntValue == 7);
+        trueQuery.WhereIf(true, (Sample item) => item.IntValue == 7);
 
         // Assert
         Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s]", falseQuery.ToSql());
         Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere [s].[IntValue]=@_p_0",
             trueQuery.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：参数型 WhereIf(false) 不得写入参数或改变查询形状。
+    /// </summary>
+    [Fact]
+    public void WhereIf_WhenParameterConditionIsFalse_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var query = CreateQuery(new Mock<ISqlQueryPlanExecutor>());
+        var beforeSql = query.ToSql();
+
+        // Act
+        query.WhereIf(false, (Sample item) => item.StringValue, "ignored");
+        var afterSql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Empty(parameters);
+    }
+
+    /// <summary>
+    /// 测试目的：参数数量上限导致 Where 失败时，不得遗留参数、条件或已失效的缓存版本。
+    /// </summary>
+    [Fact]
+    public void Where_WhenParameterLimitIsExceeded_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 0, "test");
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new TestSqlBuilder(parameterManager: parameterManager))
+            .From<Sample>("s")
+            .Select<Sample>(item => new object[] { item.IntValue });
+        var beforeSql = query.ToSql();
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.Where<Sample, string>(
+            item => item.StringValue, "blocked"));
+        var afterSql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Contains("参数数量", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Empty(parameters);
     }
 
     /// <summary>
@@ -149,7 +689,7 @@ public class SqlQueryLifecycleTest
 
         // Act
         Assert.Throws<InvalidOperationException>(() => query.Join<Sample, Sample>(
-            (left, right) => left.IntValue == right.IntValue, alias: "r", leftAlias: "missing"));
+            (left, right) => left.IntValue == right.IntValue, rightAlias: "r", leftAlias: "missing"));
         var afterSql = query.ToSql();
         var afterParameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
 
@@ -301,6 +841,58 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
+    /// 测试目的：来源和 Clone 均处于 Draft 时，双向追加条件必须保持 SQL 与参数状态独立。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenSourceAndCloneAreMutated_ShouldKeepBothStatesIndependent()
+    {
+        // Arrange
+        var source = CreateQuery(new Mock<ISqlQueryPlanExecutor>());
+        var clone = source.Clone();
+
+        // Act
+        source.Where<Sample>(item => item.IntValue == 7);
+        clone.Where<Sample>(item => item.IntValue == 8);
+
+        // Assert
+        Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere [s].[IntValue]=@_p_0",
+            source.ToSql());
+        Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere [s].[IntValue]=@_p_0",
+            clone.ToSql());
+        Assert.Equal(7, GetSingleParameterValue(source));
+        Assert.Equal(8, GetSingleParameterValue(clone));
+    }
+
+    /// <summary>
+    /// 测试目的：同一查询模板的独立 Clone 并发执行时，参数快照和执行上下文不得相互覆盖。
+    /// </summary>
+    [Fact]
+    public async Task Clone_WhenExecutedConcurrently_ShouldKeepParameterSnapshotsIsolated()
+    {
+        // Arrange
+        var values = new System.Collections.Concurrent.ConcurrentBag<int>();
+        var executor = new Mock<ISqlQueryPlanExecutor>();
+        executor.Setup(item => item.ToList<Sample>(It.IsAny<SqlQueryPlan>(), It.IsAny<int?>()))
+            .Returns((SqlQueryPlan plan, int? _) =>
+            {
+                var parameters = ((ISqlCommonPartAccessor)plan.GetBuilder()).ParameterManager.GetParams();
+                values.Add(Assert.IsType<int>(parameters.Values.Single()));
+                return new List<Sample>();
+            });
+        var source = CreateQuery(executor);
+        var first = source.Clone().Where<Sample>(item => item.IntValue == 7);
+        var second = source.Clone().Where<Sample>(item => item.IntValue == 8);
+
+        // Act
+        await Task.WhenAll(
+            Task.Run(() => first.ToList<Sample>()),
+            Task.Run(() => second.ToList<Sample>()));
+
+        // Assert
+        Assert.Equal(new[] { 7, 8 }, values.OrderBy(item => item).ToArray());
+    }
+
+    /// <summary>
     /// 测试目的：首次终结执行应冻结查询描述，之后继续修改必须立即拒绝。
     /// </summary>
     [Fact]
@@ -447,6 +1039,76 @@ public class SqlQueryLifecycleTest
             .From<Sample>("s")
             .Select<Sample>(item => new object[] { item.IntValue });
 
+    private static SqlLambdaQuery CreateLambdaQuery() =>
+        SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, new TestSqlBuilder());
+
+    private static void AssertAmbiguousSourceMutationFails(Func<SqlLambdaQuery, SqlLambdaQuery> mutation)
+    {
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample>(item => new object[] { item.IntValue }, "left");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetShapeVersion(query);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => mutation(query));
+
+        Assert.Contains("查询来源不唯一", exception.Message, StringComparison.Ordinal);
+        Assert.Equal("Select [left].[IntValue] \r\nFrom [Sample] As [left], [Sample] As [right]", beforeSql);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetShapeVersion(query));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+    }
+
+    private static void AssertDuplicateExplicitAliasBindingFails(Action<SqlLambdaQuery> mutation)
+    {
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample>(item => new object[] { item.IntValue }, "left");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetShapeVersion(query);
+        var beforeCachedSql = GetCachedSql(query);
+        var beforeCachedVersion = GetCachedVersion(query);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => mutation(query));
+
+        Assert.Contains("同一查询来源", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetShapeVersion(query));
+        Assert.Equal(beforeCachedSql, GetCachedSql(query));
+        Assert.Equal(beforeCachedVersion, GetCachedVersion(query));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+    }
+
+    private static long GetShapeVersion(SqlLambdaQuery query)
+    {
+        var coreField = typeof(SqlLambdaQuery).GetField("_core", BindingFlags.Instance | BindingFlags.NonPublic);
+        var core = coreField?.GetValue(query);
+        var innerQueryField = core?.GetType().GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
+        var innerQuery = innerQueryField?.GetValue(core);
+        var shapeVersionField = innerQuery?.GetType().GetField("_shapeVersion",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(shapeVersionField);
+        return (long)shapeVersionField.GetValue(innerQuery);
+    }
+
+    private static long GetCachedVersion(SqlLambdaQuery query) => GetQueryField<long>(query, "_cachedVersion");
+
+    private static string GetCachedSql(SqlLambdaQuery query) => GetQueryField<string>(query, "_cachedSql");
+
+    private static T GetQueryField<T>(SqlLambdaQuery query, string fieldName)
+    {
+        var coreField = typeof(SqlLambdaQuery).GetField("_core", BindingFlags.Instance | BindingFlags.NonPublic);
+        var core = coreField?.GetValue(query);
+        var innerQueryField = core?.GetType().GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
+        var innerQuery = innerQueryField?.GetValue(core);
+        var field = innerQuery?.GetType().GetField(fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(field);
+        return (T)field.GetValue(innerQuery);
+    }
+
     private static SqlLambdaQuery CreateEnvironmentQuery(ISqlQueryPlanExecutor executor,
         SqlMetadataOptions metadata, IDialect dialect, string dbKey, string mappingProfile, string tenantId)
     {
@@ -470,12 +1132,20 @@ public class SqlQueryLifecycleTest
             .Select<Sample>(item => new object[] { item.StringValue });
     }
 
+    private sealed class SampleProjection
+    {
+        public int IntValue { get; set; }
+    }
+
     private static object GetParameterValue(SqlLambdaQuery query)
     {
         var snapshot = ((SqlBuilderBase)query.GetBuilder()).CreateExecutionBuilderSnapshot();
         _ = snapshot.ToSql();
         return ((ISqlCommonPartAccessor)snapshot).ParameterManager.GetParams().Values.Single();
     }
+
+    private static object GetSingleParameterValue(SqlLambdaQuery query) =>
+        ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams().Values.Single();
 
     /// <summary>
     /// 按真实执行器的生命周期回调顺序执行受控操作。

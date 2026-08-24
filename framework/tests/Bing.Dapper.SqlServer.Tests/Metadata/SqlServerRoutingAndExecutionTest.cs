@@ -49,7 +49,7 @@ public class SqlServerRoutingAndExecutionTest
         // Act
         var query = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
             .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
-            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .Select<MappedSample>(owner => new object[] { owner.Id }, "owner")
             .AppendSelect<MappedSample>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
 
@@ -72,7 +72,7 @@ public class SqlServerRoutingAndExecutionTest
         // Act
         var query = rootQuery.From<MappedSample>("owner")
             .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
-            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .Select<MappedSample>(owner => new object[] { owner.Id }, "owner")
             .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
 
         // Assert
@@ -195,15 +195,15 @@ public class SqlServerRoutingAndExecutionTest
         using var provider = services.BuildServiceProvider();
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create();
         var summary = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
-            .Where<MappedSample, MappedSample>((owner, reviewer) => owner.Id > 10)
+            .Where<MappedSample, MappedSample>((owner, reviewer) => owner.Id > 10, "owner", "reviewer")
             .SelectSubquery<MappedSample, MappedSample, DerivedMappedSample>(
-                (owner, reviewer) => new DerivedMappedSample { OwnerId = owner.Id }, "summary");
+                (owner, reviewer) => new DerivedMappedSample { OwnerId = owner.Id }, "summary", "owner", "reviewer");
 
         // Act
         var query = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
             .FullJoin<MappedSample, DerivedMappedSample>(summary,
                 (owner, derived) => owner.Id == derived.OwnerId, "owner")
-            .Select<MappedSample>(owner => new object[] { owner.Id })
+            .Select<MappedSample>(owner => new object[] { owner.Id }, "owner")
             .AppendSelect<MappedSample>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<DerivedMappedSample>(derived => new object[] { derived.OwnerId }, "summary");
 
@@ -259,7 +259,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = rootQuery.FromSubquery(owner)
             .FullJoin<DerivedMappedSample, DerivedMappedSample>(audit,
                 (left, right) => left.OwnerId == right.OwnerId, "owner")
-            .Select<DerivedMappedSample>()
+            .Select<DerivedMappedSample>(item => new object[] { item.OwnerId }, "owner")
             .AppendSelect<DerivedMappedSample>(right => new object[] { right.OwnerId }, "audit");
 
         // Assert
@@ -301,7 +301,7 @@ public class SqlServerRoutingAndExecutionTest
         using var sqliteQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
         var subquery = sqliteQuery.From<MappedSample>("left").From<MappedSample>("right")
             .SelectSubquery<MappedSample, MappedSample, DerivedMappedSample>(
-                (left, right) => new DerivedMappedSample { OwnerId = left.Id }, "summary");
+                (left, right) => new DerivedMappedSample { OwnerId = left.Id }, "summary", "left", "right");
         var outer = sqlServerQuery.From<MappedSample>("owner").From<MappedSample>("reviewer");
 
         // Act
@@ -1960,14 +1960,14 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：仅注入 Logger 时也应创建结构化执行 Scope，不依赖 Trace 级别或 DiagnosticListener 订阅。
+    /// 测试目的：Trace 日志启用时应创建结构化执行 Scope，并使用执行诊断的统一身份。
     /// </summary>
     [Fact]
-    public void ExecuteSql_WhenOnlyLoggerIsConfigured_ShouldBeginStructuredScope()
+    public void ExecuteSql_WhenTraceLoggerIsEnabled_ShouldBeginStructuredScope()
     {
         // Arrange
         var connection = new CaptureDbConnection();
-        var loggerFactory = new TraceLoggerFactory(false);
+        var loggerFactory = new TraceLoggerFactory(true);
         using var query = CreateTraceQuery(connection, loggerFactory);
 
         // Act
@@ -1981,6 +1981,26 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：Logger 已注册但 Trace 未启用时，不应创建执行诊断消息或日志 Scope。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenLoggerIsRegisteredButTraceIsDisabled_ShouldSkipDiagnosticsAndScope()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection();
+        var loggerFactory = new TraceLoggerFactory(false);
+        using var query = CreateSqlServerTestRoot<CountingDiagnosticsSqlServerQuery>(
+            CreateTraceProvider(loggerFactory), options => options.Connection(connection));
+
+        // Act
+        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+
+        // Assert
+        Assert.Equal(0, query.BeforeCount);
+        Assert.Empty(loggerFactory.Scopes);
+    }
+
+    /// <summary>
     /// 测试目的：DiagnosticListener、Activity、Logger Scope 和 Error 事件必须共享同一 QueryContext、ExecutionId、Parent 和 Phase。
     /// </summary>
     [Fact]
@@ -1991,7 +2011,7 @@ public class SqlServerRoutingAndExecutionTest
         using var observer = new SqlDiagnosticObserver(messages.Add,
             name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
                 name == SqlQueryDiagnosticListenerNames.ErrorExecute);
-        var loggerFactory = new TraceLoggerFactory(false);
+        var loggerFactory = new TraceLoggerFactory(true);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateTraceQuery(connection, loggerFactory);
         using var activity = new Activity("sql-diagnostics-combined")
@@ -4631,11 +4651,21 @@ public class SqlServerRoutingAndExecutionTest
     /// <returns>未重写日志写入行为的查询对象。</returns>
     private static InspectableSqlServerQuery CreateTraceQuery(CaptureDbConnection connection, ILoggerFactory loggerFactory)
     {
+        var provider = CreateTraceProvider(loggerFactory);
+        return CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider, options => options.Connection(connection));
+    }
+
+    /// <summary>
+    /// 创建注入指定日志工厂的 SQL Server 测试服务提供程序。
+    /// </summary>
+    /// <param name="loggerFactory">日志工厂。</param>
+    /// <returns>已注册 SQL Server Provider 和日志工厂的服务提供程序。</returns>
+    private static ServiceProvider CreateTraceProvider(ILoggerFactory loggerFactory)
+    {
         var services = new ServiceCollection();
         services.AddSingleton(loggerFactory);
         services.AddSqlServerProvider();
-        var provider = services.BuildServiceProvider();
-        return CreateSqlServerTestRoot<InspectableSqlServerQuery>(provider, options => options.Connection(connection));
+        return services.BuildServiceProvider();
     }
 
     /// <summary>

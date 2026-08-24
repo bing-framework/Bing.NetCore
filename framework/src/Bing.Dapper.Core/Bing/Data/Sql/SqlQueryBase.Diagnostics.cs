@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Tracing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Bing.Data.Sql;
 
@@ -150,7 +151,7 @@ public abstract partial class SqlQueryBase
     /// 判断是否至少有一个执行上下文消费方需要创建诊断消息。
     /// </summary>
     private bool IsExecutionContextRequired() => IsExecutionDiagnosticsEnabled() || Activity.Current != null ||
-        Logger != Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+        Logger.IsEnabled(LogLevel.Trace);
 
     /// <summary>
     /// 将计划上下文写入诊断消息和当前 Activity。
@@ -181,7 +182,7 @@ public abstract partial class SqlQueryBase
     /// <returns>日志 Scope；未创建消息时返回可释放空对象。</returns>
     private protected IDisposable BeginExecutionLogScope(DiagnosticsMessage message)
     {
-        if (message == null)
+        if (message == null || Logger.IsEnabled(LogLevel.Trace) == false)
             return EmptyDisposable.Instance;
         return Logger.BeginScope(new Dictionary<string, object>
         {

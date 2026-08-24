@@ -206,6 +206,27 @@ public class ColumnCollection
             column.DatabaseName, tableType));
     }
 
+    /// <summary>
+    /// 添加带显式表别名的结构化聚合列。
+    /// </summary>
+    /// <param name="function">聚合函数。</param>
+    /// <param name="column">已解析的结构化列路径。</param>
+    /// <param name="tableAlias">聚合列所属表别名。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <param name="tableType">实体类型。</param>
+    /// <param name="useDefaultAlias">未指定结果别名时是否使用列路径叶子名称。</param>
+    internal void AddStructuredAggregationColumnWithAlias(SqlAggregateFunction function, SqlIdentifierPath column,
+        string tableAlias, string columnAlias = null, bool distinct = false, Type tableType = null,
+        bool useDefaultAlias = true)
+    {
+        if (column == null)
+            throw new ArgumentNullException(nameof(column));
+        AddColumn(ColumnItem.CreateAggregate(function, column.Name, tableAlias,
+            string.IsNullOrEmpty(columnAlias) && useDefaultAlias ? column.LeafName : columnAlias, distinct,
+            column.DatabaseName, tableType));
+    }
+
     #endregion
 
     #region RemoveColumns(移除列集合)

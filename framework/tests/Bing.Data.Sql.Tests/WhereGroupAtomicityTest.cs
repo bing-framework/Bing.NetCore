@@ -38,6 +38,32 @@ public class WhereGroupAtomicityTest
     }
 
     /// <summary>
+    /// 测试目的：OrGroup 应以 Or 接入外层，并保留嵌套组内部的逻辑优先级。
+    /// </summary>
+    [Fact]
+    public void WhereGroup_WhenOrGroupIsNested_ShouldPreserveLogicalPrecedence()
+    {
+        // Arrange
+        var query = CreateQuery();
+
+        // Act
+        query.WhereGroup(group =>
+        {
+            group.And<Sample>(item => item.IntValue == 1);
+            group.OrGroup(nested =>
+            {
+                nested.And<Sample>(item => item.IntValue == 2);
+                nested.Or<Sample>(item => item.IntValue == 3);
+            });
+        });
+
+        // Assert
+        Assert.Equal(
+            "Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere ([s].[IntValue]=@_p_0 Or ([s].[IntValue]=@_p_1 Or [s].[IntValue]=@_p_2))",
+            query.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：空条件组不应改变 SQL、参数、来源和 Shape 缓存状态。
     /// </summary>
     [Fact]
@@ -75,6 +101,66 @@ public class WhereGroupAtomicityTest
         // Assert
         Assert.Contains("未找到表达式参数", exception.Message, StringComparison.Ordinal);
         Assert.Equal(before, after);
+    }
+
+    /// <summary>
+    /// 测试目的：条件组引用重复实体且未提供 alias 时应失败，不得依赖 Lambda 参数名选择来源。
+    /// </summary>
+    [Fact]
+    public void WhereGroup_WhenSameEntitySourceIsAmbiguousWithoutAlias_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var query = CreateDuplicateQuery();
+        var before = Capture(query);
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.WhereGroup(group =>
+            group.And<Sample>(renamed => renamed.IntValue == 1)));
+        var after = Capture(query);
+
+        // Assert
+        Assert.Contains("查询来源不唯一", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(before, after);
+    }
+
+    /// <summary>
+    /// 测试目的：条件组单来源显式 alias 应绑定指定来源并生成完整 SQL。
+    /// </summary>
+    [Fact]
+    public void WhereGroup_WhenSingleSourceAliasIsExplicit_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var query = CreateDuplicateQuery();
+
+        // Act
+        query.WhereGroup(group => group.And<Sample>(renamed => renamed.IntValue == 1, "right"));
+
+        // Assert
+        Assert.Equal(
+            "Select [left].[IntValue] \r\nFrom [Sample] As [left], [Sample] As [right] \r\nWhere [right].[IntValue]=@_p_0",
+            query.ToSql());
+        Assert.Equal(new object[] { 1 }, query.GetBuilder().GetParams().Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：条件组双来源显式 alias 应按 alias 而非 Lambda 参数名绑定完整比较条件。
+    /// </summary>
+    [Fact]
+    public void WhereGroup_WhenTwoSourceAliasesAreExplicit_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var query = CreateDuplicateQuery();
+
+        // Act
+        query.WhereGroup(group => group.Or<Sample, Sample>(
+            (renamedFirst, renamedSecond) => renamedFirst.IntValue == renamedSecond.IntValue,
+            "left", "right"));
+
+        // Assert
+        Assert.Equal(
+            "Select [left].[IntValue] \r\nFrom [Sample] As [left], [Sample] As [right] \r\nWhere [left].[IntValue]=[right].[IntValue]",
+            query.ToSql());
+        Assert.Empty(query.GetBuilder().GetParams());
     }
 
     /// <summary>
@@ -128,6 +214,12 @@ public class WhereGroupAtomicityTest
         SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder ?? new TestSqlBuilder())
             .From<Sample>("s")
             .Select<Sample>(item => new object[] { item.IntValue });
+
+    private static SqlLambdaQuery CreateDuplicateQuery() =>
+        SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, new TestSqlBuilder())
+            .From<Sample>("left")
+            .From<Sample>("right")
+            .Select<Sample>(item => new object[] { item.IntValue }, "left");
 
     /// <summary>
     /// 捕获条件组操作前后的可观察状态和实例 Shape 缓存状态。

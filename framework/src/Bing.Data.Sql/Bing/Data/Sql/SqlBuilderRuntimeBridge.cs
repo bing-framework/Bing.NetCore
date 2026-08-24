@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders;
@@ -12,6 +13,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// SQL Builder 的受控运行时协作入口。
 /// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SqlBuilderRuntimeBridge
 {
     /// <summary>

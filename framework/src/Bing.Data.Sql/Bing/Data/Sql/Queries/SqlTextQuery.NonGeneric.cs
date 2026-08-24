@@ -58,19 +58,6 @@ public sealed class SqlTextQuery
         _executor.ToPage<TResult>(GetPlan(), pager, timeout);
 
     /// <summary>
-    /// 查询全部结果并构造字典。
-    /// </summary>
-    public Dictionary<TKey, TValue> ToDictionary<TResult, TKey, TValue>(Func<TResult, TKey> keySelector,
-        Func<TResult, TValue> valueSelector, int? timeout = null)
-    {
-        if (keySelector == null)
-            throw new ArgumentNullException(nameof(keySelector));
-        if (valueSelector == null)
-            throw new ArgumentNullException(nameof(valueSelector));
-        return ToList<TResult>(timeout).ToDictionary(keySelector, valueSelector);
-    }
-
-    /// <summary>
     /// 获取第一行或默认值。
     /// </summary>
     public TResult FirstOrDefault<TResult>(int? timeout = null) =>
@@ -80,12 +67,6 @@ public sealed class SqlTextQuery
     /// 获取第一行，零行抛出异常。
     /// </summary>
     public TResult First<TResult>(int? timeout = null) => _executor.First<TResult>(GetPlan(), timeout);
-
-    /// <summary>
-    /// 获取唯一一行或默认值。
-    /// </summary>
-    public TResult SingleOrDefault<TResult>(int? timeout = null) =>
-        _executor.SingleOrDefault<TResult>(GetPlan(), timeout);
 
     /// <summary>
     /// 获取唯一一行，零行或多行抛出异常。
@@ -124,21 +105,6 @@ public sealed class SqlTextQuery
         cancellationToken);
 
     /// <summary>
-    /// 异步查询全部结果并构造字典。
-    /// </summary>
-    public async Task<Dictionary<TKey, TValue>> ToDictionaryAsync<TResult, TKey, TValue>(
-        Func<TResult, TKey> keySelector, Func<TResult, TValue> valueSelector, int? timeout = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (keySelector == null)
-            throw new ArgumentNullException(nameof(keySelector));
-        if (valueSelector == null)
-            throw new ArgumentNullException(nameof(valueSelector));
-        var items = await ToListAsync<TResult>(timeout, cancellationToken).ConfigureAwait(false);
-        return items.ToDictionary(keySelector, valueSelector);
-    }
-
-    /// <summary>
     /// 异步获取第一行或默认值。
     /// </summary>
     public Task<TResult> FirstOrDefaultAsync<TResult>(int? timeout = null,
@@ -150,13 +116,6 @@ public sealed class SqlTextQuery
     /// </summary>
     public Task<TResult> FirstAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _executor.FirstAsync<TResult>(GetPlan(), timeout,
-        cancellationToken);
-
-    /// <summary>
-    /// 异步获取唯一一行或默认值。
-    /// </summary>
-    public Task<TResult> SingleOrDefaultAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(), timeout,
         cancellationToken);
 
     /// <summary>

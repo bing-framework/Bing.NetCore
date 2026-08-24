@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Data;
 using Bing.Data.Sql.Metadata;
 
@@ -10,6 +11,7 @@ namespace Bing.Data.Sql;
 /// 仅供 ORM 集成在创建查询后绑定连接、事务解析器、数据库上下文或实体映射。
 /// 不暴露查询执行、Builder 或事务作用域内部状态。
 /// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
 public static class SqlQueryRuntimeBinding
 {
     /// <summary>

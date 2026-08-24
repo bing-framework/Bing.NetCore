@@ -268,7 +268,7 @@ public class SqlQueryDescriptionTest
         // Act
         var first = query.ToSql();
         var second = query.ToSql();
-        query.WhereIf<MultiSourceUser>(user => user.Id > 1, false);
+        query.WhereIf<MultiSourceUser>(false, user => user.Id > 1);
 
         // Assert
         Assert.Equal(first, second);
@@ -304,13 +304,13 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var projection = rootQuery.From<MultiSourceUser>(null, null).From<MultiSourceReview>()
+        var projection = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
             .Select<MultiSourceUser, MultiSourceReview, MultiSourceProjection>((user, review) => new MultiSourceProjection
             {
                 OwnerId = user.Id,
                 ReviewUserId = review.UserId
             });
-        var transition = rootQuery.From<MultiSourceUser>(null, null).From<MultiSourceReview>()
+        var transition = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
             .Select<MultiSourceUser, MultiSourceReview, MultiSourceProjection>((user, review) => new MultiSourceProjection
             {
                 OwnerId = user.Id,
@@ -1403,8 +1403,8 @@ public class SqlQueryDescriptionTest
             .CrossJoin<MultiSourcePermission>("permission2")
             .Join<MultiSourcePermission, MultiSourceUser>((permission2, lastUser) =>
                 lastUser.Id == permission2.UserId, "lastUser", "permission2")
-            .Where<MultiSourceProjection, MultiSourceReview>((owner, review) => owner.OwnerId > 9)
-            .Select<MultiSourceProjection, MultiSourceReview>((owner, review) => new object[] { owner.OwnerId, review.UserId })
+            .Where<MultiSourceProjection, MultiSourceReview>((owner, review) => owner.OwnerId > 9, "owner", "review")
+            .Select<MultiSourceProjection, MultiSourceReview>((owner, review) => new object[] { owner.OwnerId, review.UserId }, "owner", "review")
             .AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<MultiSourceReview>(review2 => new object[] { review2.UserId }, "review2")
@@ -1453,12 +1453,12 @@ public class SqlQueryDescriptionTest
         // Act
         var entityCrossJoin = rootQuery.FromSubquery(owner)
             .CrossJoin<MultiSourceReview>("entityReview")
-            .Where<MultiSourceProjection, MultiSourceReview>((owner, item) => owner.OwnerId == item.UserId)
-            .Select<MultiSourceProjection, MultiSourceReview>((owner, item) => new object[] { owner.OwnerId, item.UserId });
+            .Where<MultiSourceProjection, MultiSourceReview>((owner, item) => owner.OwnerId == item.UserId, "owner", "entityReview")
+            .Select<MultiSourceProjection, MultiSourceReview>((owner, item) => new object[] { owner.OwnerId, item.UserId }, "owner", "entityReview");
         var derivedCrossJoin = rootQuery.FromSubquery(owner)
             .CrossJoin<MultiSourceProjection>(review)
-            .Where<MultiSourceProjection, MultiSourceProjection>((owner, review) => owner.OwnerId == review.ReviewUserId)
-            .Select<MultiSourceProjection, MultiSourceProjection>((owner, review) => new object[] { owner.OwnerId, review.ReviewUserId });
+            .Where<MultiSourceProjection, MultiSourceProjection>((owner, review) => owner.OwnerId == review.ReviewUserId, "owner", "review")
+            .Select<MultiSourceProjection, MultiSourceProjection>((owner, review) => new object[] { owner.OwnerId, review.ReviewUserId }, "owner", "review");
 
         // Assert
         Assert.Equal("Select `owner`.`OwnerId`,`entityReview`.`UserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nCross Join `reviews` As `entityReview` \r\nWhere `owner`.`OwnerId`=`entityReview`.`UserId`", entityCrossJoin.ToSql());
@@ -1675,7 +1675,7 @@ public class SqlQueryDescriptionTest
             .SelectSubquery<MultiSourceUser, MultiSourceProjection>(user => new MultiSourceProjection { OwnerId = user.Id }, "owner");
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>(null, null)
+        var query = rootQuery.From<MultiSourceUser>()
             .Where<MultiSourceUser>(user => user.Id > 3)
             .Join<MultiSourceUser, MultiSourceProjection>(audit, (user, review) => user.Id == review.ReviewUserId)
             .Join<MultiSourceUser, MultiSourceProjection>(owner, (user, summary) => user.Id == summary.OwnerId)
@@ -1728,13 +1728,13 @@ public class SqlQueryDescriptionTest
 
         // Act
         var summary = rootQuery.From<MultiSourceUser>("first").From<MultiSourceUser>("seventh")
-            .Where<MultiSourceUser, MultiSourceUser>((first, seventh) => first.Id == seventh.Id)
+            .Where<MultiSourceUser, MultiSourceUser>((first, seventh) => first.Id == seventh.Id, "first", "seventh")
             .SelectSubquery<MultiSourceUser, MultiSourceUser, HighArityProjection>((first, seventh) => new HighArityProjection
             {
                 FirstId = first.Id,
                 FourthId = seventh.Id,
                 SeventhId = seventh.Id
-            }, "summary");
+            }, "summary", "first", "seventh");
         var query = rootQuery.FromSubquery(summary)
             .Where<HighArityProjection>(item => item.SeventhId > 13)
             .Select<HighArityProjection>(item => new object[] { item.FirstId, item.FourthId, item.SeventhId });
@@ -1766,8 +1766,8 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser>("owner").From<MultiSourceUser>("reviewer")
-            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id })
-            .Where<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id);
+            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id }, "owner", "reviewer")
+            .Where<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id, "owner", "reviewer");
 
         // Assert
         Assert.Equal("Select `owner`.`Id`,`reviewer`.`Id` \r\nFrom `users` As `owner`, `users` As `reviewer` \r\nWhere `owner`.`Id`=`reviewer`.`Id`", query.ToSql());
@@ -1794,9 +1794,9 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser>("owner").From<MultiSourceUser>("reviewer")
-            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id })
-            .GroupBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id })
-            .OrderBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { reviewer.Id, owner.Id }, true);
+            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id }, "owner", "reviewer")
+            .GroupBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id }, "owner", "reviewer")
+            .OrderBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { reviewer.Id, owner.Id }, "owner", "reviewer", true);
 
         // Assert
         Assert.Equal("Select `owner`.`Id`,`reviewer`.`Id` \r\nFrom `users` As `owner`, `users` As `reviewer` \r\nGroup By `owner`.`Id`,`reviewer`.`Id` \r\nOrder By `reviewer`.`Id` Desc,`owner`.`Id` Desc", query.ToSql());
@@ -1823,9 +1823,9 @@ public class SqlQueryDescriptionTest
 
         // Act
         var query = rootQuery.From<MultiSourceUser>("owner").From<MultiSourceUser>("reviewer")
-            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id })
-            .GroupBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id })
-            .Having<MultiSourceUser, MultiSourceUser>((owner, reviewer) => reviewer.Id > 10 && owner.Id > 0);
+            .Select<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id }, "owner", "reviewer")
+            .GroupBy<MultiSourceUser, MultiSourceUser>((owner, reviewer) => new object[] { owner.Id, reviewer.Id }, "owner", "reviewer")
+            .Having<MultiSourceUser, MultiSourceUser>((owner, reviewer) => reviewer.Id > 10 && owner.Id > 0, "owner", "reviewer");
 
         // Assert
         Assert.Equal("Select `owner`.`Id`,`reviewer`.`Id` \r\nFrom `users` As `owner`, `users` As `reviewer` \r\nGroup By `owner`.`Id`,`reviewer`.`Id` Having `reviewer`.`Id`>@_p_0 And `owner`.`Id`>@_p_1", query.ToSql());
@@ -1872,8 +1872,8 @@ public class SqlQueryDescriptionTest
                 "reviewer")
             .Join<MultiSourceUser, MultiSourcePermission>((reviewer, permission) => reviewer.Id == permission.UserId,
                 "permission", "reviewer")
-            .Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId)
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId })
+            .Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
+            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission");
 
@@ -1914,7 +1914,7 @@ public class SqlQueryDescriptionTest
         var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
             .LeftJoin<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id && reviewer.Id > 3,
                 "reviewer")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId })
+            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer");
 
         // Assert
@@ -2044,9 +2044,9 @@ public class SqlQueryDescriptionTest
         // Act
         var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
             .Join<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id, "reviewer")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId })
+            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
-            .OrderBy<MultiSourceUser>(reviewer => new object[] { reviewer.Id })
+            .OrderBy<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .Skip(5)
             .Take(10);
 
@@ -2110,7 +2110,7 @@ public class SqlQueryDescriptionTest
         var rootQuery = CreateMultiSourceQuery();
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>(null, null)
+        var query = rootQuery.From<MultiSourceUser>()
             .Where<MultiSourceUser>(user => user.Id > 1)
             .Select<MultiSourceUser>(user => new object[] { user.Id });
 
@@ -2131,7 +2131,7 @@ public class SqlQueryDescriptionTest
         var rootQuery = CreateMultiSourceQuery();
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>(null, null)
+        var query = rootQuery.From<MultiSourceUser>()
             .Join<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId && review.UserId > 2, "review")
             .Select<MultiSourceUser, MultiSourceReview>((user, review) => new object[] { user.Id, review.UserId });
 
@@ -2299,7 +2299,7 @@ public class SqlQueryDescriptionTest
         if (sourceCount < 3 || sourceCount > 10)
             throw new ArgumentOutOfRangeException(nameof(sourceCount));
 
-        var query = rootQuery.From<MultiSourceUser>(null, null).From<MultiSourceReview>();
+        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>();
         if (sourceCount == 3)
             query.Join<MultiSourceReview, MultiSourcePermission>((review, permission) =>
                 review.UserId == permission.UserId && permission.UserId > 3, "permission", "reviews");
@@ -2347,8 +2347,8 @@ public class SqlQueryDescriptionTest
             query.Join<MultiSourcePermission, MultiSourceUser>((permission3, reviewer3) =>
                 permission3.UserId == reviewer3.Id && reviewer3.Id > 10, "reviewer3", "permission3");
 
-        query.Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId)
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId });
+        query.Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
+            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews");
         if (sourceCount >= 3)
             query.AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission");
         if (sourceCount >= 4)

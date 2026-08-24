@@ -11,11 +11,15 @@
 
 ### SQL 查询 API 收敛
 
-* 类型化 `From` 通过连续 `From<TEntity>(alias, schema)` 追加实体来源；公开 Lambda 查询使用非泛型描述，`Join`、`Where`、`Select` 等 Lambda 仅接受一元或二元来源参数，重复实体来源生成稳定别名。
+* `ISqlQuery` 只保留非泛型 `From<TEntity>(alias = null, schema = null)`；删除 `SqlLambdaQuery<TEntity>`、公开 `SqlMultiLambdaQuery` 和 Legacy 转发路径。连续 `From<TEntity>` 追加实体来源，重复实体来源通过显式 alias 定位。
+* `Query()`、`Sql()`、`SqlInterpolated()` 和 `Procedure()` 返回非泛型描述；结果类型后置到 `ToEntity<TResult>`、`ToList<TResult>`、分页、标量、流式和 Procedure Execute 终结方法。旧的起始阶段泛型入口不再作为普通公共路径。
 * 删除 SQL 查询链中的 `As<TResult>()` 结果类型转换，DTO 投影统一使用强类型 `Select<TProjection>`。
-* 聚合结果类型通过终结方法指定，新增同步/异步目标类型映射入口，并保留分页、标量、流式和多映射执行路径。
+* `WhereIf` 统一为条件优先；条件组提供明确的 `AndGroup`/`OrGroup`；高层删除与 `ToEntity` 重复的 `SingleOrDefault` 和先完整列表再转换的 `ToDictionary`，字典结果请使用 `ToList<TResult>().ToDictionary(...)`。
+* 聚合、Where、Select、GroupBy、OrderBy、Having 和 Join 支持显式来源 alias；公开 Lambda 表达式最多一元或二元来源参数。
 * 增加 `Distinct()` Lambda 查询操作；类型化根来源配置具备失败回滚语义。
 * 补充覆盖 1～10 个来源的 SQL 单元测试和真实 SQLite 集成测试，并更新 Public API 基线；该范围表示测试覆盖，不表示公开 API 的固定来源元数或上限。
+
+上述收敛属于主版本 Breaking Change，不新增 `[Obsolete]` 包装层。迁移示例：`query.Query<Order>()` 改为 `query.Query().ToList<Order>()`，`query.From<Order>(null, null)` 改为 `query.From<Order>()`，`query.Sql<Order>(sql)` 改为 `query.Sql(sql).ToList<Order>()`；原高层 `ToDictionary` 改为先物化列表后执行 LINQ 转换。
 
 本轮验证：`Bing.Data.Sql.Tests` 2354 项、`Bing.Dapper.Core.Tests` 262 项、SQLite 集成测试 246 项全部通过；`Bing.All.sln` Release 构建成功。外部数据库集成仍需按项目 Gate 和受控测试库配置启用。
 

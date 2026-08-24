@@ -482,6 +482,42 @@ public class FromClause : IFromClause
     }
 
     /// <summary>
+    /// 根据指定表源解析单列 Lambda 表达式。
+    /// </summary>
+    /// <param name="expression">返回实体成员的列表达式。</param>
+    /// <param name="source">显式绑定的查询表源。</param>
+    /// <returns>按当前方言格式化的列 SQL。</returns>
+    internal string ResolveMultiSourceColumn(System.Linq.Expressions.LambdaExpression expression, TableSource source)
+    {
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        return GetSqlColumn(UnwrapConversion(expression.Body), source);
+    }
+
+    /// <summary>
+    /// 按指定表源解析单列值条件，并保留列映射元数据参数。
+    /// </summary>
+    /// <param name="expression">返回实体成员的列表达式。</param>
+    /// <param name="source">显式绑定的表源实例。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">条件运算符。</param>
+    /// <returns>包含显式来源列和元数据参数的条件。</returns>
+    internal ICondition ResolveMultiSourceValueCondition(System.Linq.Expressions.LambdaExpression expression,
+        TableSource source, object value, Operator @operator)
+    {
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        var member = UnwrapConversion(expression.Body);
+        var rawColumn = Resolver.GetColumn(member, source.EntityType);
+        var column = GetSqlColumn(member, source);
+        return new Helper(_context).CreateCondition(rawColumn, column, source.EntityType, value, @operator);
+    }
+
+    /// <summary>
     /// 解析多表 DTO 成员初始化投影，并使用目标成员名作为结果列别名。
     /// </summary>
     /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>

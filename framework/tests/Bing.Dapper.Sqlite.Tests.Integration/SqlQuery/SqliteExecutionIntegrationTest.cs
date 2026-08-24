@@ -243,12 +243,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             new { name = "missing" }).ToEntity<Sample>();
         var list = query.Sql("Select Id,Name,Amount From samples Order By Id").ToList<Sample>();
         var dictionary = query.Sql("Select Id,Name,Amount From samples Order By Id")
-            .ToDictionary<Sample, string, int>(item => item.Name, item => item.Id);
+            .ToList<Sample>().ToDictionary(item => item.Name, item => item.Id);
         var asyncEntity = await query.Sql("Select Id,Name,Amount From samples Where Name=@name",
             new { name = "two" }).ToEntityAsync<Sample>();
         var asyncList = await query.Sql("Select Id,Name,Amount From samples Order By Id").ToListAsync<Sample>();
-        var asyncDictionary = await query.Sql("Select Id,Name,Amount From samples Order By Id")
-            .ToDictionaryAsync<Sample, string, int>(item => item.Name, item => item.Id);
+        var asyncDictionary = (await query.Sql("Select Id,Name,Amount From samples Order By Id")
+            .ToListAsync<Sample>()).ToDictionary(item => item.Name, item => item.Id);
 
         // Assert
         Assert.Equal("one", entity.Name);
@@ -419,7 +419,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var messages = new List<DiagnosticsMessage>();
         using var observer = new SqliteDiagnosticObserver(messages.Add);
         using var query = _fixture.CreateQuery();
-        var source = query.From<SqliteStructuredTableSample>(null, null)
+        var source = query.From<SqliteStructuredTableSample>()
             .Where<SqliteStructuredTableSample>(sample => sample.Id > 0);
 
         // Act
@@ -471,7 +471,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         using var observer = new SqliteDiagnosticObserver(messages.Add);
         var dataFilter = _fixture.ServiceProvider.GetRequiredService<IDataFilter>();
         using var query = _fixture.CreateQuery();
-        var source = query.From<SqliteSoftDeleteSample>(null, null)
+        var source = query.From<SqliteSoftDeleteSample>()
             .OrderBy<SqliteSoftDeleteSample>(item => new object[] { item.Id });
         var clone = source.Clone();
 
@@ -1368,7 +1368,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var firstMissing = await query.Sql("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefaultAsync<Sample>();
         var missing = await query.Sql("Select Id,Name,Amount From samples Where Name = @name",
-            new { name = "missing" }).SingleOrDefaultAsync<Sample>();
+            new { name = "missing" }).ToEntityAsync<Sample>();
 
         // Assert
         Assert.Equal(new[] { "one", "two", "three" }, list.Select(item => item.Name));
@@ -1398,7 +1398,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var firstMissing = query.Sql("Select Id,Name,Amount From samples Where Name = @name",
             new { name = "missing" }).FirstOrDefault<Sample>();
         var singleMissing = query.Sql("Select Id,Name,Amount From samples Where Name = @name",
-            new { name = "missing" }).SingleOrDefault<Sample>();
+            new { name = "missing" }).ToEntity<Sample>();
 
         // Assert
         Assert.Equal(new[] { "one", "two", "three" }, list.Select(item => item.Name));
@@ -2936,7 +2936,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
                 new { id = samples[1].Id, tenantId = "tenant-2", name = "order-two" });
         }
-        var summarySource = query.From<SqliteStructuredTableSample>(null, null)
+        var summarySource = query.From<SqliteStructuredTableSample>()
             .From<SqliteStructuredOrderSample>();
         var summaryParentQueryContextId = summarySource.QueryContextId;
         SqlSubquery<LambdaSubqueryResult> summary = summarySource
@@ -3210,8 +3210,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         var description = query.From<SqliteStructuredTableSample>("s")
             .Join<SqliteStructuredTableSample, SqliteStructuredTableSample>((s, p) => s.Id == p.Id, "p")
-            .OrderBy<SqliteStructuredTableSample, SqliteStructuredTableSample>((s, p) => new object[] { s.Id })
-            .Select<SqliteStructuredTableSample, SqliteStructuredTableSample, string>((s, p) => s.Name);
+            .OrderBy<SqliteStructuredTableSample, SqliteStructuredTableSample>((s, p) => new object[] { s.Id }, "s", "p")
+            .Select<SqliteStructuredTableSample, SqliteStructuredTableSample, string>((s, p) => s.Name, "s", "p");
         var result = await description.ToListAsync<string>();
 
         // Assert

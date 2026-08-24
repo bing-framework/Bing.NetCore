@@ -2,7 +2,9 @@ using System;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
+using Bing.Data;
 using Bing.Data.Enums;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
@@ -20,6 +22,13 @@ namespace Bing.Data.Sql.Benchmarks;
 public class SqlLambdaJoinBenchmarks
 {
     private SqlLambdaQuery _query;
+    private ISqlQueryPlanExecutor _executor;
+    private SqlBuilderServices _services;
+
+    /// <summary>
+    /// Benchmark 共享的数据过滤状态，用于测量过滤开关变化下的动态渲染。
+    /// </summary>
+    private DataFilter _dataFilter;
 
     /// <summary>
     /// 连续 Join 的来源数量。
@@ -31,7 +40,13 @@ public class SqlLambdaJoinBenchmarks
     /// 初始化公开 Lambda 查询。
     /// </summary>
     [GlobalSetup]
-    public void Setup() => _query = BuildQuery();
+    public void Setup()
+    {
+        _executor = CreateExecutor();
+        _dataFilter = new DataFilter();
+        _services = new SqlBuilderServices(dataFilter: _dataFilter);
+        _query = BuildQuery();
+    }
 
     /// <summary>
     /// 测量连续二元 Join 的构建和 SQL 渲染成本。
@@ -56,7 +71,7 @@ public class SqlLambdaJoinBenchmarks
     public string WhereIfTrue()
     {
         var query = BuildQuery();
-        query.WhereIf<Root01>(root => root.Id == JoinCount, true);
+        query.WhereIf(true, (Root01 root) => root.Id == JoinCount);
         return query.ToSql();
     }
 
@@ -67,7 +82,7 @@ public class SqlLambdaJoinBenchmarks
     public string WhereIfFalse()
     {
         var query = BuildQuery();
-        query.WhereIf<Root01>(root => root.Id == JoinCount, false);
+        query.WhereIf(false, (Root01 root) => root.Id == JoinCount);
         return query.ToSql();
     }
 
@@ -78,15 +93,15 @@ public class SqlLambdaJoinBenchmarks
     public string DynamicFilterRender()
     {
         var query = BuildQuery();
-        query.Where<Root01>(root => root.Id == JoinCount);
-        return query.ToSql();
+        using (_dataFilter.Disable<ISoftDelete>())
+            return query.ToSql();
     }
 
     /// <summary>
     /// 测量公开查询描述的 Builder Clone 成本。
     /// </summary>
     [Benchmark]
-    public string CloneQuery() => _query.GetBuilder().Clone().ToSql();
+    public string CloneQuery() => _query.Clone().ToSql();
 
     /// <summary>
     /// 测量重复实体 Join 的别名解析成本。
@@ -94,7 +109,7 @@ public class SqlLambdaJoinBenchmarks
     [Benchmark]
     public string BuildRepeatedEntityJoin()
     {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
             .From<Root01>("parent")
             .Join<Root01, Root01>((left, right) => left.Id == right.ParentId, "child", "parent");
         return query.ToSql();
@@ -106,7 +121,7 @@ public class SqlLambdaJoinBenchmarks
     [Benchmark]
     public string JoinFailure()
     {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
             .From<Root01>("root");
         try
         {
@@ -121,7 +136,7 @@ public class SqlLambdaJoinBenchmarks
 
     private SqlLambdaQuery BuildQuery()
     {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(CreateExecutor(), new BenchmarkBuilder())
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
             .From<Root01>("r1");
         switch (JoinCount)
         {
@@ -176,18 +191,18 @@ public class SqlLambdaJoinBenchmarks
 
     private sealed class BenchmarkBuilder : SqlBuilderBase
     {
-        public BenchmarkBuilder()
-            : this(null)
+        public BenchmarkBuilder(SqlBuilderServices services)
+            : this(services, null)
         {
         }
 
-        private BenchmarkBuilder(IParameterManager parameterManager)
-            : base(BenchmarkSqlProvider.Instance, SqlBuilderServices.CreateDefault(), parameterManager)
+        private BenchmarkBuilder(SqlBuilderServices services, IParameterManager parameterManager)
+            : base(BenchmarkSqlProvider.Instance, services, parameterManager)
         {
         }
 
         protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
-            new BenchmarkBuilder(parameterManager);
+            new BenchmarkBuilder(Services, parameterManager);
     }
 
     private sealed class BenchmarkSqlProvider : ISqlProvider
@@ -216,7 +231,15 @@ public class SqlLambdaJoinBenchmarks
         public override string GetPrefix() => "@";
     }
 
-    private class Root01 { public int Id { get; set; } public int ParentId { get; set; } }
+    /// <summary>
+    /// 支持软删除过滤的 Benchmark 根实体。
+    /// </summary>
+    private class Root01 : ISoftDelete
+    {
+        public int Id { get; set; }
+        public int ParentId { get; set; }
+        public bool IsDeleted { get; set; }
+    }
     private class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
     private class Root03 { public int Id { get; set; } public int ParentId { get; set; } }
     private class Root04 { public int Id { get; set; } public int ParentId { get; set; } }

@@ -136,6 +136,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         if (string.IsNullOrWhiteSpace(splitOn))
             throw new ArgumentException("多映射分段列不能为空。", nameof(splitOn));
         _splitOn = splitOn;
+        Touch();
         return this;
     }
 

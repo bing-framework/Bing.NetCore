@@ -121,6 +121,23 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
+    /// 使用显式表源解析单列参数条件并追加到 Where 子句。
+    /// </summary>
+    /// <param name="column">返回条件列的 Lambda 表达式。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">条件运算符。</param>
+    /// <param name="source">显式绑定的查询表源。</param>
+    internal SqlLambdaQueryCore WhereValueCore(LambdaExpression column, object value, Operator @operator,
+        TableSource source)
+    {
+        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
+        var condition = GetFromClause(accessor).ResolveMultiSourceValueCondition(column, source, value, @operator);
+        accessor.WhereClause.Where(condition);
+        Touch();
+        return this;
+    }
+
+    /// <summary>
     /// 在独立 Builder 候选上解析并一次性提交嵌套条件组。
     /// </summary>
     internal SqlLambdaQueryCore WhereGroupCore(Action<ISqlConditionGroup> configure)
@@ -131,9 +148,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         var candidate = sourceBuilder.Clone();
         candidate.ClearWhere().ClearSqlParams();
         var candidateAccessor = (ISqlQueryClauseAccessor)candidate;
-        var group = new SqlConditionGroup(expression =>
+        var group = new SqlConditionGroup((expression, aliases) =>
         {
-            var sources = ResolveConditionSources(candidateAccessor, expression);
+            var sources = ResolveConditionSources(candidateAccessor, expression, aliases);
             return GetFromClause(candidateAccessor).ResolveMultiSourcePredicate(expression, sources);
         });
         configure(group);
@@ -146,18 +163,27 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     }
 
     private static IReadOnlyList<TableSource> ResolveConditionSources(ISqlQueryClauseAccessor accessor,
-        LambdaExpression expression)
+        LambdaExpression expression, IReadOnlyList<string> aliases)
     {
         var available = GetBoundSources(accessor).ToList();
+        if (aliases != null && aliases.Count != expression.Parameters.Count)
+            throw new ArgumentException("条件组来源别名数量必须与表达式参数数量一致。", nameof(aliases));
         var selected = new List<TableSource>(expression.Parameters.Count);
-        foreach (var parameter in expression.Parameters)
+        for (var index = 0; index < expression.Parameters.Count; index++)
         {
-            var source = available.FirstOrDefault(item => item.EntityType == parameter.Type &&
-                selected.Contains(item) == false &&
-                (string.IsNullOrWhiteSpace(parameter.Name) || string.Equals(item.Alias, parameter.Name,
-                    StringComparison.OrdinalIgnoreCase) || available.Count(item2 => item2.EntityType == parameter.Type) == 1));
-            if (source == null)
+            var parameter = expression.Parameters[index];
+            var alias = aliases?[index];
+            var candidates = available.Where(item => item.EntityType == parameter.Type &&
+                selected.Contains(item) == false);
+            if (string.IsNullOrWhiteSpace(alias) == false)
+                candidates = candidates.Where(item => string.Equals(item.Alias, alias,
+                    StringComparison.OrdinalIgnoreCase));
+            var matchingSources = candidates.ToList();
+            if (matchingSources.Count == 0 && string.IsNullOrWhiteSpace(alias))
                 throw new InvalidOperationException($"未找到表达式参数 {parameter.Name} 对应的查询来源。");
+            if (matchingSources.Count != 1)
+                throw new InvalidOperationException($"实体 {parameter.Type.Name} 的查询来源不唯一，请提供有效别名。");
+            var source = matchingSources[0];
             selected.Add(source);
         }
         return selected;
@@ -229,13 +255,16 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     }
 
     /// <summary>使用严格 DTO 成员初始化投影创建冻结的类型化派生表。</summary>
-    internal SqlSubquery<TProjection> SelectSubqueryCore<TProjection>(LambdaExpression expression, string alias)
+    internal SqlSubquery<TProjection> SelectSubqueryCore<TProjection>(LambdaExpression expression, string alias,
+        IReadOnlyList<TableSource> sources)
         where TProjection : class
     {
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
+        if (sources == null)
+            throw new ArgumentNullException(nameof(sources));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, GetBoundSources(accessor),
+        var columns = GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources,
             out var projectedMembers);
         var builder = GetBuilder().Clone();
         var subqueryAccessor = (ISqlQueryClauseAccessor)builder;

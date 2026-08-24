@@ -1,4 +1,7 @@
+using System.ComponentModel;
+using System.Data.Common;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders.Operations;
@@ -22,54 +25,41 @@ public class SqlQueryApiContractTest
         Assert.Null(typeof(ISqlQuery).GetMethod("Config"));
     }
 
-    /// <summary>
-    /// 测试目的：Root 查询应同时保留已发布一元泛型兼容入口和两参数非泛型主入口，且不能混淆两者的静态返回类型。
-    /// </summary>
+    /// <summary>测试目的：Root 查询只公开唯一的非泛型 Lambda From<TEntity> 入口。</summary>
     [Fact]
     public void From_WhenPublicApiInspected_ShouldExposeNonGenericLambdaEntryPoints()
     {
         var type = typeof(ISqlQuery);
         var fromMethods = type.GetMethods().Where(method => method.Name == "From" && method.IsGenericMethodDefinition)
             .ToArray();
-        var fromEntity = fromMethods.Single(method => method.ReturnType == typeof(SqlLambdaQuery));
-        var fromLegacyEntity = fromMethods.Single(method => method.ReturnType.IsGenericType &&
-            method.ReturnType.GetGenericTypeDefinition() == typeof(SqlLambdaQuery<>));
+        var fromEntity = fromMethods.Single();
         var fromTable = type.GetMethod("FromTable");
         var fromSubquery = type.GetMethods().Single(method => method.Name == "FromSubquery");
 
         Assert.Equal(typeof(SqlLambdaQuery), fromEntity.ReturnType);
         Assert.Equal(new[] { typeof(string), typeof(string) },
             fromEntity.GetParameters().Select(parameter => parameter.ParameterType));
+        Assert.All(fromEntity.GetParameters(), parameter => Assert.True(parameter.HasDefaultValue));
         Assert.Equal(typeof(SqlLambdaQuery), fromTable.ReturnType);
         Assert.Equal(typeof(SqlLambdaQuery), fromSubquery.ReturnType);
-        Assert.Single(fromLegacyEntity.GetParameters());
-        Assert.Equal(typeof(string), fromLegacyEntity.GetParameters()[0].ParameterType);
-        Assert.Equal(typeof(SqlLambdaQuery<>), fromLegacyEntity.ReturnType.GetGenericTypeDefinition());
-        Assert.All(fromMethods, method => Assert.Single(method.GetGenericArguments()));
     }
 
-    /// <summary>
-    /// 测试目的：零参数或单参数 From<TEntity> 必须保持 Shipped 泛型兼容语义，两参数调用才进入非泛型描述主路径。
-    /// </summary>
+    /// <summary>测试目的：From<TEntity>()、From<TEntity>(alias) 和双参数调用必须解析为同一非泛型返回类型。</summary>
     [Fact]
-    public void From_WhenOverloadsAreResolved_ShouldKeepCompatibilityAndMainPathDistinct()
+    public void From_WhenOverloadsAreResolved_ShouldUseTheSameNonGenericPath()
     {
         var fromMethods = typeof(ISqlQuery).GetMethods()
             .Where(method => method.Name == "From" && method.IsGenericMethodDefinition)
             .ToArray();
-        var mainPath = fromMethods.Single(method => method.ReturnType == typeof(SqlLambdaQuery));
-        var compatibilityPath = fromMethods.Single(method => method.ReturnType.IsGenericType &&
-            method.ReturnType.GetGenericTypeDefinition() == typeof(SqlLambdaQuery<>));
+        var from = Assert.Single(fromMethods);
 
-        Assert.Equal(2, mainPath.GetParameters().Length);
-        Assert.DoesNotContain(mainPath.GetParameters(), parameter => parameter.HasDefaultValue);
-        Assert.Single(compatibilityPath.GetParameters());
-        Assert.True(compatibilityPath.GetParameters()[0].HasDefaultValue);
-        Assert.Equal(typeof(SqlLambdaQuery<>), compatibilityPath.ReturnType.GetGenericTypeDefinition());
+        Assert.Equal(typeof(SqlLambdaQuery), from.ReturnType);
+        Assert.Equal(2, from.GetParameters().Length);
+        Assert.All(from.GetParameters(), parameter => Assert.True(parameter.HasDefaultValue));
     }
 
     /// <summary>
-    /// 测试目的：查询程序集只应公开非泛型主描述和一元泛型兼容描述，不得公开高元数 Lambda 类型。
+    /// 测试目的：查询程序集只应公开非泛型 Lambda 描述，不得导出泛型或多元兼容包装器。
     /// </summary>
     [Fact]
     public void LambdaQuery_WhenPublicTypesInspected_ShouldExposeOnlyNonGenericDescription()
@@ -79,9 +69,8 @@ public class SqlQueryApiContractTest
             .ToArray();
 
         Assert.Contains(lambdaTypes, type => type == typeof(SqlLambdaQuery) && type.IsPublic);
-        Assert.Contains(lambdaTypes, type => type == typeof(SqlLambdaQuery<>) && type.IsPublic);
-        Assert.DoesNotContain(lambdaTypes, type => type.IsGenericTypeDefinition && type.IsPublic &&
-            type != typeof(SqlLambdaQuery<>));
+        Assert.DoesNotContain(lambdaTypes, type => type.IsGenericTypeDefinition && type.IsPublic);
+        Assert.DoesNotContain(typeof(ISqlQuery).Assembly.GetTypes(), type => type.Name == "SqlMultiLambdaQuery");
     }
 
     /// <summary>
@@ -113,6 +102,24 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
+    /// 测试目的：类型化 Join 的右侧来源参数必须明确命名为 rightAlias，避免调用方误把它当作通用别名。
+    /// </summary>
+    [Fact]
+    public void Join_WhenPublicApiInspected_ShouldNameRightSourceExplicitly()
+    {
+        var joinMethods = typeof(SqlLambdaQuery).GetMethods()
+            .Where(method => method.Name is "Join" or "LeftJoin" or "RightJoin" or "FullJoin")
+            .Where(method => method.IsGenericMethodDefinition && method.GetGenericArguments().Length == 2)
+            .Where(method => method.GetParameters().First().ParameterType.IsGenericType &&
+                method.GetParameters().First().ParameterType.GetGenericTypeDefinition() == typeof(Expression<>))
+            .ToArray();
+
+        Assert.NotEmpty(joinMethods);
+        Assert.All(joinMethods, method => Assert.Contains(method.GetParameters(), parameter =>
+            parameter.Name == "rightAlias"));
+    }
+
+    /// <summary>
     /// 测试目的：查询描述仍应公开结果类型由终结方法决定的同步和异步物化入口。
     /// </summary>
     [Fact]
@@ -134,17 +141,94 @@ public class SqlQueryApiContractTest
         var rootType = typeof(ISqlQuery);
         var textType = typeof(SqlTextQuery);
 
+        Assert.Equal(typeof(SqlFluentQuery), rootType.GetMethod("Query")?.ReturnType);
+        Assert.DoesNotContain(rootType.GetMethods(), method => method.Name == "Query" && method.IsGenericMethod);
         Assert.Equal(typeof(SqlTextQuery), rootType.GetMethods().Single(method => method.Name == "Sql" &&
             method.IsGenericMethod == false).ReturnType);
         Assert.Equal(typeof(SqlTextQuery), rootType.GetMethods().Single(method => method.Name == "SqlInterpolated" &&
             method.IsGenericMethod == false).ReturnType);
+        Assert.Equal(typeof(SqlProcedureQuery), rootType.GetMethod("Procedure")?.ReturnType);
+        Assert.DoesNotContain(rootType.GetMethods(), method => method.Name == "Procedure" && method.IsGenericMethod);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToEntity" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToList" && method.IsGenericMethodDefinition);
-        Assert.Contains(textType.GetMethods(), method => method.Name == "ToDictionary" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToPage" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToListAsync" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToPageAsync" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "AsAsyncEnumerable" && method.IsGenericMethodDefinition);
+        Assert.Contains(typeof(SqlProcedureQuery).GetMethods(), method => method.Name == "ExecuteList" &&
+            method.IsGenericMethodDefinition);
+        Assert.Contains(typeof(SqlProcedureQuery).GetMethods(), method => method.Name == "ExecuteScalar" &&
+            method.IsGenericMethodDefinition);
+    }
+
+    /// <summary>
+    /// 测试目的：非泛型查询描述只保留唯一推荐的基数与集合终结语义。
+    /// </summary>
+    [Fact]
+    public void QueryDescriptions_WhenPublicApiInspected_ShouldNotExposeDuplicateHighLevelTerminals()
+    {
+        var types = new[] { typeof(SqlLambdaQuery), typeof(SqlFluentQuery), typeof(SqlTextQuery),
+            typeof(SqlProcedureQuery) };
+
+        Assert.All(types, type =>
+        {
+            Assert.DoesNotContain(type.GetMethods(), method => method.Name == "SingleOrDefault");
+            Assert.DoesNotContain(type.GetMethods(), method => method.Name == "ToDictionary");
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：运行时 SPI 保持跨程序集可用，但不得作为普通查询用户的 IntelliSense 推荐入口。
+    /// </summary>
+    [Fact]
+    public void RuntimeContracts_WhenPublicApiInspected_ShouldBeHiddenFromIntelliSense()
+    {
+        var runtimeTypes = new[]
+        {
+            typeof(ISqlQueryBuilderSource),
+            typeof(ISqlQueryPlanExecutor),
+            typeof(ISqlQueryRuntimeBindingController),
+            typeof(SqlQueryPlan),
+            typeof(SqlBuilderRuntimeBridge),
+            typeof(SqlQueryRuntimeFactory),
+            typeof(SqlQueryRuntimeBinding)
+        };
+
+        Assert.All(runtimeTypes, type => Assert.Equal(EditorBrowsableState.Never,
+            type.GetCustomAttributes(typeof(EditorBrowsableAttribute), false)
+                .Cast<EditorBrowsableAttribute>().Single().State));
+    }
+
+    /// <summary>
+    /// 测试目的：生产程序集的友元只能指向测试或 Benchmark，避免生产实现依赖内部访问绕过 Runtime SPI。
+    /// </summary>
+    [Fact]
+    public void RuntimeContracts_WhenFriendAssembliesInspected_ShouldContainOnlyTestConsumers()
+    {
+        var friends = typeof(ISqlQuery).Assembly
+            .GetCustomAttributes<InternalsVisibleToAttribute>()
+            .Select(attribute => attribute.AssemblyName)
+            .ToArray();
+
+        Assert.NotEmpty(friends);
+        Assert.All(friends, friend =>
+        {
+            Assert.True(friend.Contains(".Tests", StringComparison.Ordinal) ||
+                friend.EndsWith(".Benchmarks", StringComparison.Ordinal));
+        });
+    }
+
+    /// <summary>
+    /// 测试目的：公开 SQL 查询计划只能暴露不可变描述和身份信息，不得通过属性泄露 Builder、连接或事务。
+    /// </summary>
+    [Fact]
+    public void RuntimeContracts_WhenQueryPlanPropertiesInspected_ShouldNotExposeExecutionResources()
+    {
+        var publicProperties = typeof(SqlQueryPlan).GetProperties();
+
+        Assert.DoesNotContain(publicProperties, property => typeof(ISqlBuilder).IsAssignableFrom(property.PropertyType));
+        Assert.DoesNotContain(publicProperties, property => typeof(DbConnection).IsAssignableFrom(property.PropertyType));
+        Assert.DoesNotContain(publicProperties, property => typeof(DbTransaction).IsAssignableFrom(property.PropertyType));
     }
 
     /// <summary>
@@ -163,6 +247,8 @@ public class SqlQueryApiContractTest
 
     private sealed class UnsupportedRuntimeBindingQuery : ISqlQuery
     {
+        public SqlFluentQuery Query() => throw new NotSupportedException();
+
         public SqlFluentQuery<TResult> Query<TResult>() => throw new NotSupportedException();
 
         public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null) =>
@@ -175,10 +261,10 @@ public class SqlQueryApiContractTest
 
         public SqlTextQuery SqlInterpolated(FormattableString sql) => throw new NotSupportedException();
 
-        public SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null) =>
+        public SqlProcedureQuery Procedure(string procedure, object parameters = null) =>
             throw new NotSupportedException();
 
-        public SqlLambdaQuery<TEntity> From<TEntity>(string alias = null) where TEntity : class =>
+        public SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null) =>
             throw new NotSupportedException();
 
         public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class =>
