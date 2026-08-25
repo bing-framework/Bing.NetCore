@@ -273,8 +273,8 @@ public sealed class ProviderProfileExecutionGateTest
         parameters.Add("result", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => query.Procedure<int>("GetReport", parameters)
-            .ExecuteList());
+        var exception = Assert.Throws<NotSupportedException>(() => query.Procedure("GetReport", parameters)
+            .ExecuteList<int>());
 
         // Assert
         Assert.Contains("不支持存储过程输出参数", exception.Message);

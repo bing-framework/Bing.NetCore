@@ -697,9 +697,10 @@ public class SqlOperationStateTest
         var expectedSql = builder.ToSql();
 
         // Act
-        Assert.Throws<NotImplementedException>(() => builder.Where("Id", subquery, (Operator)999));
+        var exception = Assert.Throws<NotSupportedException>(() => builder.Where("Id", subquery, (Operator)999));
 
         // Assert
+        Assert.Contains("值 999", exception.Message);
         Assert.Empty(builder.ParameterManager.GetParams());
         Assert.Equal(expectedSql, builder.ToSql());
     }

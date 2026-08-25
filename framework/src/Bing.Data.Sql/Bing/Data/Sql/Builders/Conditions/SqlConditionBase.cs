@@ -85,7 +85,8 @@ public abstract class SqlConditionBase : ISqlCondition
     /// <param name="sqlBuilder">Sql生成器</param>
     protected virtual void AppendSqlBuilder(StringBuilder builder, string column, ISqlBuilder sqlBuilder)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException(
+            $"条件类型 {GetType().Name} 当前不支持将 ISqlBuilder 作为右值。请使用支持子查询的 In、NotIn 或 Exists 条件。");
     }
 
     /// <summary>

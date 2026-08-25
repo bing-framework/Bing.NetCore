@@ -33,7 +33,7 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 连续 Join 的来源数量。
     /// </summary>
-    [Params(1, 2, 5, 10)]
+    [Params(1, 2, 5, 10, 20, 50)]
     public int JoinCount { get; set; }
 
     /// <summary>
@@ -104,6 +104,12 @@ public class SqlLambdaJoinBenchmarks
     public string CloneQuery() => _query.Clone().ToSql();
 
     /// <summary>
+    /// 测量创建 Join 查询执行快照的成本。
+    /// </summary>
+    [Benchmark]
+    public string CreateExecutionSnapshot() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(_query.GetBuilder()).Sql;
+
+    /// <summary>
     /// 测量重复实体 Join 的别名解析成本。
     /// </summary>
     [Benchmark]
@@ -151,6 +157,10 @@ public class SqlLambdaJoinBenchmarks
             case 10:
                 AddJoinsThrough(query, 10);
                 break;
+            case 20:
+            case 50:
+                AddRawJoinsThrough(query, JoinCount);
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(JoinCount));
         }
@@ -178,6 +188,12 @@ public class SqlLambdaJoinBenchmarks
             query.Join<Root08, Root09>((left, right) => left.Id == right.ParentId);
         if (count >= 10)
             query.Join<Root09, Root10>((left, right) => left.Id == right.ParentId);
+    }
+
+    private static void AddRawJoinsThrough(SqlLambdaQuery query, int count)
+    {
+        for (var index = 2; index <= count; index++)
+            query.GetBuilder().Join($"Root{index}", $"r{index}").AppendOn($"r{index}.Id=r{index - 1}.Id");
     }
 
     private static ISqlQueryPlanExecutor CreateExecutor() =>

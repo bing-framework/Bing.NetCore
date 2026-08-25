@@ -19,10 +19,10 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.amount", "Count");
+        var description = CreateAggregateDescription(query).CountColumn("p.amount", "Count");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(3, result);
@@ -37,10 +37,10 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.amount", "Count", distinct: true);
+        var description = CreateAggregateDescription(query).CountColumn("p.amount", "Count", distinct: true);
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -57,11 +57,11 @@ public sealed partial class PostgreSqlQueryTest
 
         // Act
         using var query = _fixture.CreateQuery();
-        var sum = CreateAggregateDescription<decimal>(query).Sum("p.amount", "Total").Scalar();
-        var distinctSum = CreateAggregateDescription<decimal>(query).Sum("p.amount", "Total", distinct: true).Scalar();
-        var average = CreateAggregateDescription<decimal>(query).Avg("p.amount", "Average").Scalar();
-        var distinctAverage = CreateAggregateDescription<decimal>(query).Avg("p.amount", "Average", distinct: true)
-            .Scalar();
+        var sum = CreateAggregateDescription(query).Sum("p.amount", "Total").Scalar<decimal>();
+        var distinctSum = CreateAggregateDescription(query).Sum("p.amount", "Total", distinct: true).Scalar<decimal>();
+        var average = CreateAggregateDescription(query).Avg("p.amount", "Average").Scalar<decimal>();
+        var distinctAverage = CreateAggregateDescription(query).Avg("p.amount", "Average", distinct: true)
+            .Scalar<decimal>();
 
         // Assert
         Assert.Equal(40m, sum);
@@ -81,8 +81,8 @@ public sealed partial class PostgreSqlQueryTest
 
         // Act
         using var query = _fixture.CreateQuery();
-        var maximum = CreateAggregateDescription<decimal>(query).Max("p.amount", "Maximum", distinct: true).Scalar();
-        var minimum = CreateAggregateDescription<decimal>(query).Min("p.amount", "Minimum", distinct: true).Scalar();
+        var maximum = CreateAggregateDescription(query).Max("p.amount", "Maximum", distinct: true).Scalar<decimal>();
+        var minimum = CreateAggregateDescription(query).Min("p.amount", "Minimum", distinct: true).Scalar<decimal>();
 
         // Assert
         Assert.Equal(20m, maximum);
@@ -98,10 +98,10 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.user_id", "UserCount", distinct: true);
+        var description = CreateAggregateDescription(query).CountColumn("p.user_id", "UserCount", distinct: true);
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -116,14 +116,14 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var sumQuery = CreateAggregateDescription<decimal>(query)
+        var sumQuery = CreateAggregateDescription(query)
             .AggregateExpression(SqlAggregateFunction.Sum, "[p].[amount] * 2", "DoubleTotal");
-        var countQuery = CreateAggregateDescription<int>(query).AggregateExpression(SqlAggregateFunction.Count,
+        var countQuery = CreateAggregateDescription(query).AggregateExpression(SqlAggregateFunction.Count,
             "Case When [p].[amount] Is Not Null Then [p].[user_id] End", "EnabledUsers", distinct: true);
 
         // Act
-        var sum = sumQuery.Scalar();
-        var count = countQuery.Scalar();
+        var sum = sumQuery.Scalar<decimal>();
+        var count = countQuery.Scalar<int>();
 
         // Assert
         Assert.Equal(80m, sum);
@@ -139,12 +139,12 @@ public sealed partial class PostgreSqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<PostgreSqlAggregateResult>(query)
+        var description = CreateAggregateDescription(query)
             .CountColumn("p.user_id", "UserCount", distinct: true)
             .Sum("p.amount", "DistinctAmount", distinct: true);
 
         // Act
-        var result = description.FirstOrDefault();
+        var result = description.FirstOrDefault<PostgreSqlAggregateResult>();
 
         // Assert
         Assert.Equal(2, result.UserCount);
@@ -161,10 +161,10 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-first");
         await InsertProductAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Query<int>().CountColumn("p.id", "Count").From("public.integration_products", "p");
+        var description = query.Query().CountColumn("p.id", "Count").From("public.integration_products", "p");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -180,10 +180,10 @@ public sealed partial class PostgreSqlQueryTest
         await InsertProductAsync(Guid.NewGuid(), "sum-qualified-first", amount: 12.5m);
         await InsertProductAsync(Guid.NewGuid(), "sum-qualified-second", amount: 7.5m);
         using var query = _fixture.CreateQuery();
-        var description = query.Query<decimal>().Sum("p.amount", "Total").From("public.integration_products", "p");
+        var description = query.Query().Sum("p.amount", "Total").From("public.integration_products", "p");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<decimal>();
 
         // Assert
         Assert.Equal(20m, result);
@@ -192,11 +192,10 @@ public sealed partial class PostgreSqlQueryTest
     /// <summary>
     /// 创建聚合测试独立查询描述。
     /// </summary>
-    /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>包含产品表别名的独立查询描述。</returns>
-    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Query<TResult>().From("public.integration_products", "p");
+    private static SqlFluentQuery CreateAggregateDescription(ISqlQuery query) =>
+        query.Query().From("public.integration_products", "p");
 
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。

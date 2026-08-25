@@ -106,7 +106,7 @@ public class SqliteMultiDataSourceExecutionTest
                 CreateTableAndInsert(executorFactory, "first");
                 using var query = queryFactory.Create();
                 // Act
-                var result = query.Query<Sample>().Select("Id,Name").From("samples").AsEnumerable().ToList();
+                var result = query.Query().Select("Id,Name").From("samples").AsEnumerable<Sample>().ToList();
 
                 // Assert
                 Assert.Single(result);
@@ -140,8 +140,8 @@ public class SqliteMultiDataSourceExecutionTest
                 CreateTableAndInsert(executorFactory, "first");
                 using (var query = queryFactory.Create())
                 {
-                    using var enumerator = query.Query<Sample>().Select("Id,Name").From("samples")
-                        .AsEnumerable().GetEnumerator();
+                    using var enumerator = query.Query().Select("Id,Name").From("samples")
+                        .AsEnumerable<Sample>().GetEnumerator();
                     Assert.True(enumerator.MoveNext());
                     Assert.Equal("first", enumerator.Current.Name);
                 }
@@ -186,8 +186,8 @@ public class SqliteMultiDataSourceExecutionTest
                     // Act
                     await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
                     {
-                        await foreach (var _ in query.Query<Sample>().Select("Id,Name").From("samples")
-                                           .AsAsyncEnumerable(cancellationToken: cancellationTokenSource.Token))
+                        await foreach (var _ in query.Query().Select("Id,Name").From("samples")
+                                           .AsAsyncEnumerable<Sample>(cancellationToken: cancellationTokenSource.Token))
                             cancellationTokenSource.Cancel();
                     });
                 }
@@ -331,7 +331,7 @@ public class SqliteMultiDataSourceExecutionTest
         using (databaseScopeManager.Use(dbKey))
         using (var query = queryFactory.Create())
         {
-            return query.Query<Sample>().Select("Name").From("samples").AsEnumerable().Single().Name;
+            return query.Query().Select("Name").From("samples").AsEnumerable<Sample>().Single().Name;
         }
     }
 

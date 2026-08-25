@@ -64,7 +64,19 @@ var row = await query.Sql(
     .FirstOrDefaultAsync<Order>();
 ```
 
-Raw 查询支持 `ToEntity<TResult>`、`ToList<TResult>`、`First<TResult>`、`FirstOrDefault<TResult>`、`Single<TResult>`、标量和同步/异步流式终结方法。`SingleOrDefault` 与 `ToEntity` 的语义重复，已删除；字典结果请先调用 `ToList<TResult>()` 再使用 LINQ `ToDictionary`。2～7 对象多映射继续保留在隐藏的 Advanced 泛型路径中；普通代码使用非泛型 `Sql(...)`、`Query()` 和 `Procedure(...)`。
+Raw 查询支持 `ToEntity<TResult>`、`ToList<TResult>`、`First<TResult>`、`FirstOrDefault<TResult>`、`Single<TResult>`、标量和同步/异步流式终结方法。`SingleOrDefault` 与 `ToEntity` 的语义重复，已删除；字典结果请先调用 `ToList<TResult>()` 再使用 LINQ `ToDictionary`。2～7 对象多映射直接由非泛型 `SqlFluentQuery` 和 `SqlTextQuery` 的 `ToList`/`ToListAsync` 终结方法提供，映射输入类型在方法泛型参数中声明，最终结果类型位于末尾。
+
+```csharp
+var rows = await query.Query()
+    .Select("o.Id, c.Id, o.OrderNo")
+    .From("Orders", "o")
+    .Join("Customers", "c")
+    .AppendOn("c.Id=o.CustomerId")
+    .SplitOn("Id")
+    .ToListAsync<Order, Customer, OrderWithCustomer>((order, customer) =>
+        new OrderWithCustomer(order, customer),
+        cancellationToken: cancellationToken);
+```
 
 ## 同类型来源
 
@@ -87,14 +99,14 @@ var rows = await query.From<User>("parent")
 | 旧用法 | 最终用法 |
 | --- | --- |
 | `query.From<User>(null, null)` | `query.From<User>()` |
-| `query.Query<User>()` | `query.Query().ToList<User>()` 或其他终结方法 |
-| `query.Sql<User>(sql, parameters)` | `query.Sql(sql, parameters).ToList<User>()` 或其他终结方法 |
-| `query.Procedure<User>(name, parameters)` | `query.Procedure(name, parameters).ExecuteList<User>()` 或其他 Execute 终结方法 |
+| 起始阶段带结果类型的 Fluent 调用 | `query.Query().ToList<User>()` 或其他终结方法 |
+| 起始阶段带结果类型的原生 SQL 调用 | `query.Sql(sql, parameters).ToList<User>()` 或其他终结方法 |
+| 起始阶段带结果类型的过程调用 | `query.Procedure(name, parameters).ExecuteList<User>()` 或其他 Execute 终结方法 |
 | `query.From<User>().SingleOrDefault<User>()` | `query.From<User>().ToEntity<User>()` |
 | `query.Sql(sql).ToDictionary<User, TKey, TValue>(...)` | `query.Sql(sql).ToList<User>().ToDictionary(...)` |
 | `WhereIf(predicate, condition)` | `WhereIf(condition, predicate)` |
 
-上述删除和重命名属于主版本 Breaking Change，不提供 `[Obsolete]` 转发层。需要 Dapper 多映射时使用隐藏的 Advanced 泛型路径，不把固定结果类型入口作为普通查询代码的主路径。
+上述删除和重命名属于主版本 Breaking Change，不提供 `[Obsolete]` 转发层。查询描述实例包含可变 Builder 状态，不应在并发任务之间共享；异步枚举和事务范围应使用 `CancellationToken` 与 `await using` 确保 Reader、连接和事务按拥有权释放。
 
 ## 测试和环境
 

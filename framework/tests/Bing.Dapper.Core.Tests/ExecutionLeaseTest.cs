@@ -26,13 +26,13 @@ public class ExecutionLeaseTest
         var query = new ReentrantQuery(provider) { VerifyReentrantOperation = true };
 
         // Act
-        var result = query.Procedure<object>("sample").ExecuteScalar();
+        var result = query.Procedure("sample").ExecuteScalar<object>();
 
         // Assert
         Assert.Null(result.Result);
         Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
             query.ReentrantException.Message);
-        Assert.Null(query.Procedure<object>("sample").ExecuteScalar().Result);
+        Assert.Null(query.Procedure("sample").ExecuteScalar<object>().Result);
     }
 
     /// <summary>
@@ -47,11 +47,11 @@ public class ExecutionLeaseTest
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
-            query.Procedure<object>("sample").ExecuteScalar());
+            query.Procedure("sample").ExecuteScalar<object>());
 
         // Assert
         Assert.Equal("受控执行前异常。", exception.Message);
-        Assert.Null(query.Procedure<object>("sample").ExecuteScalar().Result);
+        Assert.Null(query.Procedure("sample").ExecuteScalar<object>().Result);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class ExecutionLeaseTest
         query.Dispose();
 
         // Act and Assert
-        Assert.Throws<ObjectDisposedException>(() => query.Procedure<object>("sample"));
+        Assert.Throws<ObjectDisposedException>(() => query.Procedure("sample"));
     }
 
     /// <summary>
@@ -86,12 +86,12 @@ public class ExecutionLeaseTest
 
             // Assert
             Assert.Equal("当前 SQL Query 或 Executor 正在执行，不能释放 Root 对象。", exception.Message);
-            Assert.NotNull(query.Procedure<object>("sample"));
+            Assert.NotNull(query.Procedure("sample"));
         }
         query.Dispose();
 
         // Assert
-        Assert.Throws<ObjectDisposedException>(() => query.Procedure<object>("sample"));
+        Assert.Throws<ObjectDisposedException>(() => query.Procedure("sample"));
     }
 
     /// <summary>
@@ -105,13 +105,13 @@ public class ExecutionLeaseTest
         var query = new ReentrantQuery(provider) { VerifyReentrantOperation = true };
 
         // Act
-        var result = await query.Procedure<object>("sample").ExecuteScalarAsync();
+        var result = await query.Procedure("sample").ExecuteScalarAsync<object>();
 
         // Assert
         Assert.Null(result.Result);
         Assert.Equal("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。",
             query.ReentrantException.Message);
-        Assert.Null((await query.Procedure<object>("sample").ExecuteScalarAsync()).Result);
+        Assert.Null((await query.Procedure("sample").ExecuteScalarAsync<object>()).Result);
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ public class ExecutionLeaseTest
             {
                 VerifyReentrantOperation = false;
                 ReentrantException = Assert.Throws<InvalidOperationException>(() =>
-                    Procedure<object>("sample").ExecuteScalar());
+                    Procedure("sample").ExecuteScalar<object>());
             }
             return false;
         }

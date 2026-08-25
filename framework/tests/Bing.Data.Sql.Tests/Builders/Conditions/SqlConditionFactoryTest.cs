@@ -26,4 +26,23 @@ public sealed class SqlConditionFactoryTest
         // Assert
         Assert.Equal(expectedSql, condition.GetCondition());
     }
+
+    /// <summary>
+    /// 测试目的：条件工厂遇到没有实现映射的操作符时应抛出带操作符值和支持列表的 NotSupportedException。
+    /// </summary>
+    [Fact]
+    public void Create_WhenOperatorIsUnknown_ShouldThrowDetailedNotSupportedException()
+    {
+        // Arrange
+        var @operator = (Operator)999;
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() =>
+            SqlConditionFactory.Create("[t].[Id]", "[s].[Id]", @operator));
+
+        // Assert
+        Assert.Contains("值 999", exception.Message);
+        Assert.Contains("Equal", exception.Message);
+        Assert.Contains("NotIn", exception.Message);
+    }
 }

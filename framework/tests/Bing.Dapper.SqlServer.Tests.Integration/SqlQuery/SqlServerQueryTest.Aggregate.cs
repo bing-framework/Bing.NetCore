@@ -49,16 +49,16 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
 
         // Act
         using var query = _fixture.CreateQuery();
-        var countAll = await CreateAggregateDescription<int>(query).CountAll().ScalarAsync();
-        var distinctUsers = await CreateAggregateDescription<int>(query).CountColumn("p.UserId", distinct: true).ScalarAsync();
-        var total = await CreateAggregateDescription<decimal>(query).Sum("p.Amount").ScalarAsync();
-        var conditionalTotal = await CreateAggregateDescription<decimal>(query).AggregateExpression(SqlAggregateFunction.Sum,
+        var countAll = await CreateAggregateDescription(query).CountAll().ScalarAsync<int>();
+        var distinctUsers = await CreateAggregateDescription(query).CountColumn("p.UserId", distinct: true).ScalarAsync<int>();
+        var total = await CreateAggregateDescription(query).Sum("p.Amount").ScalarAsync<decimal>();
+        var conditionalTotal = await CreateAggregateDescription(query).AggregateExpression(SqlAggregateFunction.Sum,
                 "Case When [p].[Amount]>@MinAmount Then [p].[Amount] Else 0 End")
             .AddParam("MinAmount", 15)
-            .ScalarAsync();
-        var enabledTotal = await CreateAggregateDescription<decimal>(query).AggregateRaw(SqlAggregateFunction.Sum,
+            .ScalarAsync<decimal>();
+        var enabledTotal = await CreateAggregateDescription(query).AggregateRaw(SqlAggregateFunction.Sum,
                 "Case When p.Enabled=1 Then p.Amount Else 0 End")
-            .ScalarAsync();
+            .ScalarAsync<decimal>();
 
         // Assert
         Assert.Equal(4, countAll);
@@ -100,11 +100,10 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     /// <summary>
     /// 创建指向受控聚合集成测试表的独立查询描述。
     /// </summary>
-    /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>SQL Server 独立查询描述。</returns>
-    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Query<TResult>().From("dbo.BingSqlAggregateIntegration", "p");
+    private static SqlFluentQuery CreateAggregateDescription(ISqlQuery query) =>
+        query.Query().From("dbo.BingSqlAggregateIntegration", "p");
 
     /// <summary>
     /// SQL Server Output 物化模型。

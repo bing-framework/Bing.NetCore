@@ -36,7 +36,7 @@ public class SqlServerQueryTest
     {
         // Arrange
         // Act
-        var result = await _sqlQuery.Query<int>().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync();
+        var result = await _sqlQuery.Query().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync<int>();
 
         // Assert
         _output.WriteLine($"SELECT 1 = {result}");

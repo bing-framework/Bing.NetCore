@@ -125,8 +125,8 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         // Act
         var affectedRows = await executor.ExecuteWriteAsync(builder.ToSqlWriteCommand());
         using var query = _fixture.CreateQuery();
-        var name = await query.Query<string>().Select("name").From("public.integration_products").Where("id", id)
-            .ScalarAsync();
+        var name = await query.Query().Select("name").From("public.integration_products").Where("id", id)
+            .ScalarAsync<string>();
 
         // Assert
         Assert.Equal(1, affectedRows);
@@ -163,14 +163,14 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         // Act
         var affectedRows = await executor.ExecuteWriteAsync(builder.ToSqlWriteCommand());
         using var matchedQuery = _fixture.CreateQuery();
-        var matchedCount = await matchedQuery.Query<int>().AppendSelect("Count(*)").From("public.integration_products")
-            .Where("id", matchedId).ScalarAsync();
+        var matchedCount = await matchedQuery.Query().AppendSelect("Count(*)").From("public.integration_products")
+            .Where("id", matchedId).ScalarAsync<int>();
         using var unmatchedQuery = _fixture.CreateQuery();
-        var unmatchedCount = await unmatchedQuery.Query<int>().AppendSelect("Count(*)").From("public.integration_products")
-            .Where("id", unmatchedId).ScalarAsync();
+        var unmatchedCount = await unmatchedQuery.Query().AppendSelect("Count(*)").From("public.integration_products")
+            .Where("id", unmatchedId).ScalarAsync<int>();
         using var sourceQuery = _fixture.CreateQuery();
-        var sourceCount = await sourceQuery.Query<int>().AppendSelect("Count(*)").From("public.integration_product_updates")
-            .Where("id", matchedId).ScalarAsync();
+        var sourceCount = await sourceQuery.Query().AppendSelect("Count(*)").From("public.integration_product_updates")
+            .Where("id", matchedId).ScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, affectedRows);

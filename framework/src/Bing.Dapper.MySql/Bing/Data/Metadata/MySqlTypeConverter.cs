@@ -54,6 +54,7 @@ public class MySqlTypeConverter : ITypeConverter
             case "blob":
                 return DbType.Binary;
         }
-        throw new NotImplementedException(dataType);
+        throw new NotSupportedException(
+            $"MySQL 数据类型 '{dataType}' 当前没有映射到 DbType。请扩展 MySqlTypeConverter 映射，或使用已支持的数据类型。");
     }
 }

@@ -57,13 +57,16 @@ public class MySqlTypeConverterTest
     #region Unknown Type
 
     /// <summary>
-    /// 测试目的：传入未知类型时应抛出 NotImplementedException，确保未映射类型不被静默忽略。
+    /// 测试目的：传入未知类型时应抛出带 Provider 和类型信息的 NotSupportedException。
     /// </summary>
     [Fact]
-    public void ToDbType_UnknownType_ShouldThrowNotImplementedException()
+    public void ToDbType_UnknownType_ShouldThrowNotSupportedException()
     {
         // Act & Assert
-        Should.Throw<NotImplementedException>(() => _converter.ToDbType("unknown_type"));
+        var exception = Should.Throw<NotSupportedException>(() => _converter.ToDbType("unknown_type"));
+        exception.Message.ShouldContain("MySQL");
+        exception.Message.ShouldContain("unknown_type");
+        exception.Message.ShouldContain("扩展 MySqlTypeConverter 映射");
     }
 
     /// <summary>

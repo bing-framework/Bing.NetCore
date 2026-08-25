@@ -28,8 +28,8 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var first = rootQuery.Query<int>().Select("Id").From("users").Where("Id", 1);
-        var second = rootQuery.Query<string>().Select("Name").From("users").Where("Name", "Bing");
+        var first = rootQuery.Query().Select("Id").From("users").Where("Id", 1);
+        var second = rootQuery.Query().Select("Name").From("users").Where("Name", "Bing");
 
         // Assert
         Assert.NotEqual(first.ToSql(), second.ToSql());
@@ -178,7 +178,7 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var query = rootQuery.Query<QueryParameterSample>().AddParam("status", (QueryParameterSample item) => item.Status, "active");
+        var query = rootQuery.Query().AddParam("status", (QueryParameterSample item) => item.Status, "active");
         var parameter = query.GetSqlParams().Single().Value;
 
         // Assert

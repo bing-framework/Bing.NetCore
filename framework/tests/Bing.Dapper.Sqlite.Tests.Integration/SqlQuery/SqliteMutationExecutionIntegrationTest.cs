@@ -39,7 +39,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Act
         var inserted = await executor.InsertAsync(entity);
         using var identityQuery = _fixture.CreateQuery();
-        entity.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "created").Scalar();
+        entity.Id = identityQuery.Query().Select("Id").From("samples").Where("Name", "created").Scalar<int>();
         entity.Name = "updated";
         var updated = executor.Update(entity, new SqlUpdateOptions<MutationSample>
         {
@@ -68,16 +68,16 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         using var query = _fixture.CreateQuery();
         var entity = new SoftDeleteSample
         {
-            Id = query.Query<int>().Select("Id").From("soft_delete_samples").Where("Name", "soft-delete").Scalar()
+            Id = query.Query().Select("Id").From("soft_delete_samples").Where("Name", "soft-delete").Scalar<int>()
         };
 
         // Act
         var logicallyDeleted = await executor.DeleteAsync(entity);
-        var deletedState = query.Query<int>().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar();
+        var deletedState = query.Query().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar<int>();
         var restored = executor.Restore(entity);
-        var restoredState = query.Query<int>().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar();
+        var restoredState = query.Query().Select("IsDeleted").From("soft_delete_samples").Where("Id", entity.Id).Scalar<int>();
         var purged = await executor.PurgeAsync(entity);
-        var remaining = query.Query<int>().Select("Id").From("soft_delete_samples").ToList().Count;
+        var remaining = query.Query().Select("Id").From("soft_delete_samples").ToList<int>().Count;
 
         // Assert
         Assert.Equal(1, logicallyDeleted);
@@ -99,7 +99,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         using var executor = _fixture.CreateExecutor();
         await executor.InsertAsync(entity);
         using var identityQuery = _fixture.CreateQuery();
-        entity.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "protected").Scalar();
+        entity.Id = identityQuery.Query().Select("Id").From("samples").Where("Name", "protected").Scalar<int>();
 
         // Act
         var exception = Assert.Throws<Bing.Exceptions.ConcurrencyException>(() => executor.Delete(entity,
@@ -122,9 +122,9 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var second = new MutationSample { Name = "delete-second", Amount = 2m, SecretText = "v2" };
         await executor.InsertBatchAsync(new[] { first, second });
         using (var query = _fixture.CreateQuery())
-            first.Id = query.Query<int>().Select("Id").From("samples").Where("Name", first.Name).Scalar();
+            first.Id = query.Query().Select("Id").From("samples").Where("Name", first.Name).Scalar<int>();
         using (var query = _fixture.CreateQuery())
-            second.Id = query.Query<int>().Select("Id").From("samples").Where("Name", second.Name).Scalar();
+            second.Id = query.Query().Select("Id").From("samples").Where("Name", second.Name).Scalar<int>();
 
         // Act
         var affectedRows = await executor.DeleteBatchAsync(new[] { first, second }, new SqlBatchDeleteOptions
@@ -205,8 +205,8 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         var second = new MutationSample { Name = "second", Amount = 2m, SecretText = "v1" };
         await executor.InsertBatchAsync(new[] { first, second });
         using var identityQuery = _fixture.CreateQuery();
-        first.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "first").Scalar();
-        second.Id = identityQuery.Query<int>().Select("Id").From("samples").Where("Name", "second").Scalar();
+        first.Id = identityQuery.Query().Select("Id").From("samples").Where("Name", "first").Scalar<int>();
+        second.Id = identityQuery.Query().Select("Id").From("samples").Where("Name", "second").Scalar<int>();
         first.Name = "first-updated";
         second.Name = "second-not-updated";
         second.SecretText = "other";

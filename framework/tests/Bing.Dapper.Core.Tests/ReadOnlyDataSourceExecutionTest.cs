@@ -94,7 +94,7 @@ public class ReadOnlyDataSourceExecutionTest
         using var query = new ReadOnlyTestQuery(CreateServiceProvider(), CreateOptions(connection.Object));
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => query.Procedure<int>("ReadReport"));
+        var exception = Assert.Throws<NotSupportedException>(() => query.Procedure("ReadReport"));
 
         // Assert
         Assert.Contains("reporting", exception.Message);

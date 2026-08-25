@@ -316,11 +316,12 @@ public class WhereClauseTest
     public void Where_WhenStringOperatorIsUnknown_ShouldThrowWithoutAddingParameters()
     {
         // Act
-        var exception = Assert.Throws<NotImplementedException>(() =>
+        var exception = Assert.Throws<NotSupportedException>(() =>
             _clause.Where("IntValue", 1, (Operator)999));
 
         // Assert
-        Assert.Equal("运算符  尚未实现", exception.Message);
+        Assert.Contains("值 999", exception.Message);
+        Assert.Contains("当前条件工厂不支持", exception.Message);
         Assert.Empty(_parameterManager.GetParams());
         Assert.Null(GetSql());
     }
@@ -332,11 +333,12 @@ public class WhereClauseTest
     public void Where_WhenTypedOperatorIsUnknown_ShouldThrowWithoutAddingParameters()
     {
         // Act
-        var exception = Assert.Throws<NotImplementedException>(() =>
+        var exception = Assert.Throws<NotSupportedException>(() =>
             _clause.Where<Sample>(sample => sample.IntValue, 1, (Operator)999));
 
         // Assert
-        Assert.Equal("运算符  尚未实现", exception.Message);
+        Assert.Contains("值 999", exception.Message);
+        Assert.Contains("当前条件工厂不支持", exception.Message);
         Assert.Empty(_parameterManager.GetParams());
         Assert.Null(GetSql());
     }

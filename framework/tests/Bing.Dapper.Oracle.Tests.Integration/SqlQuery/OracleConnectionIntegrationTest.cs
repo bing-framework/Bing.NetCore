@@ -21,7 +21,7 @@ public sealed class OracleConnectionIntegrationTest
     [Trait("Database", "Oracle")]
     public async Task ExecuteScalar_ShouldReturnOneFromDual()
     {
-        var result = await _query.Query<int>().Select("1").From("DUAL").ScalarAsync();
+        var result = await _query.Query().Select("1").From("DUAL").ScalarAsync<int>();
 
         Assert.Equal(1, result);
     }

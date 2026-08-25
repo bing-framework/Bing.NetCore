@@ -46,16 +46,19 @@ public class SqlServerTypeConverterTest
     }
 
     // ═══════════════════════════════════════════════════════════
-    // 负例：未知类型抛出 NotImplementedException
+    // 负例：未知类型抛出 NotSupportedException
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：未知类型应抛出 NotImplementedException，便于发现未覆盖的类型映射。
+    /// 测试目的：未知类型应抛出带 Provider 和类型信息的 NotSupportedException。
     /// </summary>
     [Fact]
-    public void ToDbType_UnknownType_ShouldThrowNotImplementedException()
+    public void ToDbType_UnknownType_ShouldThrowNotSupportedException()
     {
-        Should.Throw<NotImplementedException>(() => _converter.ToDbType("unknown_type"));
+        var exception = Should.Throw<NotSupportedException>(() => _converter.ToDbType("unknown_type"));
+        exception.Message.ShouldContain("SQL Server");
+        exception.Message.ShouldContain("unknown_type");
+        exception.Message.ShouldContain("扩展 SqlServerTypeConverter 映射");
     }
 
     // ═══════════════════════════════════════════════════════════

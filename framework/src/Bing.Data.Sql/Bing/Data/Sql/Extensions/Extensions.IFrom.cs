@@ -102,15 +102,14 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述设置子查询表。
+    /// 使用 Fluent 查询描述设置子查询表。
     /// </summary>
     /// <typeparam name="T">支持 From 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <param name="alias">子查询表别名。</param>
     /// <returns>追加子查询后的源对象。</returns>
-    public static T From<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IFrom =>
+    public static T From<T>(this T source, SqlFluentQuery query, string alias) where T : IFrom =>
         From(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
@@ -121,13 +120,12 @@ public static partial class Extensions
     private static ISqlBuilder GetOperationBuilder(object source) => SqlQueryOperationAccessor.GetBuilder(source);
 
     /// <summary>
-    /// 获取指定结果类型查询描述专属的内部 Builder。
+    /// 获取查询描述专属的内部 Builder。
     /// </summary>
-    /// <typeparam name="TResult">查询描述的结果类型。</typeparam>
     /// <param name="query">查询描述。</param>
     /// <param name="parameterName">调用方参数名称。</param>
     /// <returns>仅供框架内部组合使用的子查询 Builder。</returns>
-    private static ISqlBuilder GetQueryBuilder<TResult>(SqlQuery<TResult> query, string parameterName)
+    private static ISqlBuilder GetQueryBuilder(SqlFluentQuery query, string parameterName)
     {
         if (query == null)
             throw new ArgumentNullException(parameterName);

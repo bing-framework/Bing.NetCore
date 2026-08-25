@@ -20,10 +20,10 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.Price", "Count");
+        var description = CreateAggregateDescription(query).CountColumn("p.Price", "Count");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(3, result);
@@ -40,10 +40,10 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.Price", "Count", distinct: true);
+        var description = CreateAggregateDescription(query).CountColumn("p.Price", "Count", distinct: true);
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -62,11 +62,11 @@ public partial class MySqlQueryTest
 
         // Act
         using var query = _fixture.CreateQuery();
-        var sum = CreateAggregateDescription<decimal>(query).Sum("p.Price", "Total").Scalar();
-        var distinctSum = CreateAggregateDescription<decimal>(query).Sum("p.Price", "Total", distinct: true).Scalar();
-        var average = CreateAggregateDescription<decimal>(query).Avg("p.Price", "Average").Scalar();
-        var distinctAverage = CreateAggregateDescription<decimal>(query).Avg("p.Price", "Average", distinct: true)
-            .Scalar();
+        var sum = CreateAggregateDescription(query).Sum("p.Price", "Total").Scalar<decimal>();
+        var distinctSum = CreateAggregateDescription(query).Sum("p.Price", "Total", distinct: true).Scalar<decimal>();
+        var average = CreateAggregateDescription(query).Avg("p.Price", "Average").Scalar<decimal>();
+        var distinctAverage = CreateAggregateDescription(query).Avg("p.Price", "Average", distinct: true)
+            .Scalar<decimal>();
 
         // Assert
         Assert.Equal(40m, sum);
@@ -88,8 +88,8 @@ public partial class MySqlQueryTest
 
         // Act
         using var query = _fixture.CreateQuery();
-        var maximum = CreateAggregateDescription<decimal>(query).Max("p.Price", "Maximum", distinct: true).Scalar();
-        var minimum = CreateAggregateDescription<decimal>(query).Min("p.Price", "Minimum", distinct: true).Scalar();
+        var maximum = CreateAggregateDescription(query).Max("p.Price", "Maximum", distinct: true).Scalar<decimal>();
+        var minimum = CreateAggregateDescription(query).Min("p.Price", "Minimum", distinct: true).Scalar<decimal>();
 
         // Assert
         Assert.Equal(20m, maximum);
@@ -107,10 +107,10 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<int>(query).CountColumn("p.UserId", "UserCount", distinct: true);
+        var description = CreateAggregateDescription(query).CountColumn("p.UserId", "UserCount", distinct: true);
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -127,14 +127,14 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var sumQuery = CreateAggregateDescription<decimal>(query)
+        var sumQuery = CreateAggregateDescription(query)
             .AggregateExpression(SqlAggregateFunction.Sum, "[p].[Price] * 2", "DoubleTotal");
-        var countQuery = CreateAggregateDescription<int>(query).AggregateExpression(SqlAggregateFunction.Count,
+        var countQuery = CreateAggregateDescription(query).AggregateExpression(SqlAggregateFunction.Count,
             "Case When [p].[Enabled]=1 Then [p].[UserId] End", "EnabledUsers", distinct: true);
 
         // Act
-        var sum = sumQuery.Scalar();
-        var count = countQuery.Scalar();
+        var sum = sumQuery.Scalar<decimal>();
+        var count = countQuery.Scalar<int>();
 
         // Assert
         Assert.Equal(80m, sum);
@@ -152,12 +152,12 @@ public partial class MySqlQueryTest
         // Arrange
         await SeedAggregateDataAsync();
         using var query = _fixture.CreateQuery();
-        var description = CreateAggregateDescription<MySqlAggregateResult>(query)
+        var description = CreateAggregateDescription(query)
             .CountColumn("p.UserId", "UserCount", distinct: true)
             .Sum("p.Price", "DistinctAmount", distinct: true);
 
         // Act
-        var result = description.FirstOrDefault();
+        var result = description.FirstOrDefault<MySqlAggregateResult>();
 
         // Assert
         Assert.Equal(2, result.UserCount);
@@ -176,10 +176,10 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-first");
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-second");
         using var query = _fixture.CreateQuery();
-        var description = query.Query<int>().CountColumn("p.ProductId", "Count").From("Product", "p");
+        var description = query.Query().CountColumn("p.ProductId", "Count").From("Product", "p");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(2, result);
@@ -201,10 +201,10 @@ public partial class MySqlQueryTest
         await _sqlExecutor.ExecuteSqlAsync("Insert Product(ProductId,Code,Price) Values(@productId,@code,@price)",
             new { productId = secondId, code = "sum-qualified-second", price = 7.5m });
         using var query = _fixture.CreateQuery();
-        var description = query.Query<decimal>().Sum("p.Price", "Total").From("Product", "p");
+        var description = query.Query().Sum("p.Price", "Total").From("Product", "p");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<decimal>();
 
         // Assert
         Assert.Equal(20m, result);
@@ -213,11 +213,10 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 创建聚合测试独立查询描述。
     /// </summary>
-    /// <typeparam name="TResult">聚合结果映射类型。</typeparam>
     /// <param name="query">承载连接和事务资源的根查询。</param>
     /// <returns>包含 Product 表别名的独立查询描述。</returns>
-    private static SqlFluentQuery<TResult> CreateAggregateDescription<TResult>(ISqlQuery query) =>
-        query.Query<TResult>().From("Product", "p");
+    private static SqlFluentQuery CreateAggregateDescription(ISqlQuery query) =>
+        query.Query().From("Product", "p");
 
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。

@@ -41,7 +41,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 
 `SqlFluentQuery` 专用于字符串 SQL Builder 操作，例如 `Select("Id,Name")`、`From("orders")`、`AppendWhere(...)`、`HavingRaw(...)`、`SplitOn(...)` 和结果类型后置的终结方法。`SqlLambdaQuery` 只接受实体映射、Lambda 谓词、类型化 Join、类型化投影和类型化聚合，不暴露原始 Builder 或 Dapper 多映射入口。
 
-类型化投影通过 `Select<TProjection>(...)` 声明列形状，但不会切换查询描述的结果类型；Lambda 和非泛型 Raw 查询的最终物化类型必须在终结方法上显式指定，例如 `ToList<OrderDto>()` 或 `ToEntity<Order>()`。不再使用 `.As<TResult>()`、泛型 Root Query 或其他隐式结果类型兼容入口。低层泛型多映射能力仅保留在 Advanced 路径，新代码应使用非泛型 `Query()`、`Sql(...)` 和 `Procedure(...)`。
+类型化投影通过 `Select<TProjection>(...)` 声明列形状，但不会切换查询描述的结果类型；Lambda 和非泛型 Raw 查询的最终物化类型必须在终结方法上显式指定，例如 `ToList<OrderDto>()` 或 `ToEntity<Order>()`。不再使用 `.As<TResult>()`、泛型 Root Query 或其他隐式结果类型兼容入口。Dapper 2～7 多映射由非泛型 `Query()` 和 `Sql(...)` 的 `ToList`/`ToListAsync` 终结方法承载，`SplitOn` 用于指定分段列；`Procedure(...)` 的结果类型位于 `Execute*<TResult>` 终结方法。
 
 ---
 
@@ -565,6 +565,21 @@ var text = sqlQuery.Sql("Select Id,OrderNo From Orders Where Id=@Id", new { Id =
 - `From<TEntity>(alias, schema)`：创建以实体映射初始化的非泛型 Lambda 描述，支持类型化 `Select`、`Where`、`Join`、分页和同步/异步终结方法。
 - `Sql(sql, parameters)`：创建原生 SQL 文本描述。文本和参数源按原样传递给参数绑定器，不进行 SQL 重写或标识符转换；使用 `ToEntity<TResult>`、`ToList<TResult>`、`FirstOrDefault<TResult>` 等终结方法选择结果类型。
 - `Procedure(procedure, parameters)`：创建存储过程描述，使用 `ExecuteList<TResult>`、`ExecuteScalar<TResult>` 等终结方法选择结果类型。
+
+### Dapper 多映射
+
+结果类型和各段输入类型都在终结方法声明，查询描述本身不携带固定结果类型。同步和异步版本共享 SQL、参数、`SplitOn`、超时和取消合同：
+
+```csharp
+var rows = await sqlQuery.Sql(
+        "Select o.Id, c.Id, o.OrderNo From Orders o Join Customers c On c.Id=o.CustomerId")
+    .SplitOn("Id")
+    .ToListAsync<Order, Customer, OrderWithCustomer>(
+        (order, customer) => new OrderWithCustomer(order, customer),
+        cancellationToken: cancellationToken);
+```
+
+需要执行过程中持有连接、事务或流式 Reader 时，查询和结果枚举应保持在 `await using` 范围内；同一个查询描述不得由多个并发操作共享。
 
 原生 SQL 仅应使用调用方控制的固定模板，并通过参数对象绑定外部值；不得将外部输入拼接到 SQL 文本、表名、列名、排序字段或其他结构位置。
 

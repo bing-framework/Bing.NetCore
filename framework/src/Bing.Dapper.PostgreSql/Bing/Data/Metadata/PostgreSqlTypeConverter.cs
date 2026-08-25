@@ -50,6 +50,7 @@ public class PostgreSqlTypeConverter : ITypeConverter
             case "bytea":
                 return DbType.Binary;
         }
-        throw new NotImplementedException(dataType);
+        throw new NotSupportedException(
+            $"PostgreSQL 数据类型 '{dataType}' 当前没有映射到 DbType。请扩展 PostgreSqlTypeConverter 映射，或使用已支持的数据类型。");
     }
 }

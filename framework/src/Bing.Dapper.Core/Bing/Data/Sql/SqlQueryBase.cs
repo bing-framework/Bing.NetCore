@@ -384,24 +384,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         return SqlQueryRuntimeFactory.CreateQuery(executor, executor.CreateIndependentSqlBuilder());
     }
 
-    internal SqlFluentQuery<TResult> Query<TResult>()
-    {
-        EnsureExecutionAvailable();
-        var executor = (ISqlQueryPlanExecutor)this;
-        return SqlQueryRuntimeFactory.CreateAdvancedQuery<TResult>(executor, executor.CreateIndependentSqlBuilder());
-    }
-
     /// <inheritdoc />
     public SqlTextQuery Sql(string sql, object parameters = null)
     {
         EnsureExecutionAvailable();
         return SqlQueryRuntimeFactory.CreateTextQuery((ISqlQueryPlanExecutor)this, sql, parameters);
-    }
-
-    internal SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null)
-    {
-        EnsureExecutionAvailable();
-        return SqlQueryRuntimeFactory.CreateAdvancedTextQuery<TResult>((ISqlQueryPlanExecutor)this, sql, parameters);
     }
 
     /// <inheritdoc />
@@ -426,27 +413,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         return Sql(commandText, parameters);
     }
 
-    internal SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql)
-    {
-        EnsureExecutionAvailable();
-        if (sql == null)
-            throw new ArgumentNullException(nameof(sql));
-
-        var parameterPrefix = GetCurrentProvider().Dialect.GetPrefix();
-        var arguments = sql.GetArguments();
-        var parameters = new Dictionary<string, object>(arguments.Length);
-        var parameterNames = new Dictionary<int, string>(arguments.Length);
-        for (var index = 0; index < arguments.Length; index++)
-        {
-            EnsureInterpolatedParameterIsSupported(arguments[index]);
-            var parameterName = GetInterpolatedParameterName(sql.Format, index, parameterPrefix);
-            parameterNames.Add(index, parameterName);
-            parameters.Add(parameterName, arguments[index]);
-        }
-        var commandText = CreateInterpolatedCommandText(sql.Format, parameterNames, parameterPrefix);
-        return Sql<TResult>(commandText, parameters);
-    }
-
     /// <inheritdoc />
     public SqlProcedureQuery Procedure(string procedure, object parameters = null)
     {
@@ -457,17 +423,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         EnsureOutputParametersSupported(parameters);
         var executor = (ISqlQueryPlanExecutor)this;
         return SqlQueryRuntimeFactory.CreateProcedureQuery(executor, GetProcedure(procedure), parameters);
-    }
-
-    internal SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null)
-    {
-        EnsureExecutionAvailable();
-        if (string.IsNullOrWhiteSpace(procedure))
-            throw new ArgumentException("存储过程名称不能为空。", nameof(procedure));
-        EnsureStoredProceduresSupported();
-        EnsureOutputParametersSupported(parameters);
-        var executor = (ISqlQueryPlanExecutor)this;
-        return SqlQueryRuntimeFactory.CreateAdvancedProcedureQuery<TResult>(executor, GetProcedure(procedure), parameters);
     }
 
     /// <summary>

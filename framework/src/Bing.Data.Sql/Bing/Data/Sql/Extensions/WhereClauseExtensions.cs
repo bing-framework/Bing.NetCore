@@ -10,13 +10,12 @@ namespace Bing.Data.Sql;
 public static class WhereClauseExtensions
 {
     /// <summary>
-    /// 获取指定结果类型查询描述专属的内部 Builder。
+    /// 获取查询描述专属的内部 Builder。
     /// </summary>
-    /// <typeparam name="TResult">查询描述的结果类型。</typeparam>
     /// <param name="query">查询描述。</param>
     /// <param name="parameterName">调用方参数名称。</param>
     /// <returns>仅供框架内部组合使用的子查询 Builder。</returns>
-    private static ISqlBuilder GetQueryBuilder<TResult>(SqlQuery<TResult> query, string parameterName)
+    private static ISqlBuilder GetQueryBuilder(SqlFluentQuery query, string parameterName)
     {
         if (query == null)
             throw new ArgumentNullException(parameterName);
@@ -461,15 +460,14 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述设置 In 子查询条件。
+    /// 使用 Fluent 查询描述设置 In 子查询条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="column">参与 In 条件的列名。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <returns>追加条件后的源对象。</returns>
-    public static T In<T, TResult>(this T source, string column, SqlQuery<TResult> query) where T : IWhere =>
+    public static T In<T>(this T source, string column, SqlFluentQuery query) where T : IWhere =>
         In(source, column, GetQueryBuilder(query, nameof(query)));
 
     #endregion
@@ -528,15 +526,14 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述设置 Not In 子查询条件。
+    /// 使用 Fluent 查询描述设置 Not In 子查询条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="column">参与 Not In 条件的列名。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <returns>追加条件后的源对象。</returns>
-    public static T NotIn<T, TResult>(this T source, string column, SqlQuery<TResult> query) where T : IWhere =>
+    public static T NotIn<T>(this T source, string column, SqlFluentQuery query) where T : IWhere =>
         NotIn(source, column, GetQueryBuilder(query, nameof(query)));
 
     #endregion
@@ -576,14 +573,13 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述设置 Exists 子查询条件。
+    /// 使用 Fluent 查询描述设置 Exists 子查询条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <returns>追加条件后的源对象。</returns>
-    public static T Exists<T, TResult>(this T source, SqlQuery<TResult> query) where T : IWhere =>
+    public static T Exists<T>(this T source, SqlFluentQuery query) where T : IWhere =>
         Exists(source, GetQueryBuilder(query, nameof(query)));
 
     #endregion
@@ -623,14 +619,13 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述设置 Not Exists 子查询条件。
+    /// 使用 Fluent 查询描述设置 Not Exists 子查询条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <returns>追加条件后的源对象。</returns>
-    public static T NotExists<T, TResult>(this T source, SqlQuery<TResult> query) where T : IWhere =>
+    public static T NotExists<T>(this T source, SqlFluentQuery query) where T : IWhere =>
         NotExists(source, GetQueryBuilder(query, nameof(query)));
 
     #endregion

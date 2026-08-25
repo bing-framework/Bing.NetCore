@@ -965,10 +965,10 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection { OnScalarExecuted = cancellationTokenSource.Cancel };
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Query<int>().Select("Count(*)").From("[Users]");
+        var description = query.Query().Select("Count(*)").From("[Users]");
 
         // Act and Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ScalarAsync(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ScalarAsync<int>(
             cancellationToken: cancellationTokenSource.Token));
 
         // Assert
@@ -987,12 +987,12 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
         // Act and Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ToPageAsync(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description.ToPageAsync<MappedSample>(
             cancellationToken: cancellationTokenSource.Token));
 
         // Assert
@@ -1971,7 +1971,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateTraceQuery(connection, loggerFactory);
 
         // Act
-        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>();
 
         // Assert
         var scope = Assert.Single(loggerFactory.Scopes);
@@ -1993,7 +1993,7 @@ public class SqlServerRoutingAndExecutionTest
             CreateTraceProvider(loggerFactory), options => options.Connection(connection));
 
         // Act
-        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>();
 
         // Assert
         Assert.Equal(0, query.BeforeCount);
@@ -2018,8 +2018,8 @@ public class SqlServerRoutingAndExecutionTest
             .SetIdFormat(ActivityIdFormat.W3C).Start();
 
         // Act
-        Assert.Throws<InvalidOperationException>(() => query.Query<int>()
-            .AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+        Assert.Throws<InvalidOperationException>(() => query.Query()
+            .AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>());
 
         // Assert
         var before = Assert.Single(messages.Where(item => item.Operation ==
@@ -2052,7 +2052,7 @@ public class SqlServerRoutingAndExecutionTest
             CreateSqlServerTestProvider(), options => options.Connection(connection));
 
         // Act
-        query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>();
 
         // Assert
         Assert.Equal(0, query.BeforeCount);
@@ -2564,7 +2564,7 @@ public class SqlServerRoutingAndExecutionTest
             // Assert
             transactionScope.DbKey.ShouldBe("default");
             transactionScope.DatabaseType.ShouldBe(DatabaseType.SqlServer);
-            query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar().ShouldBe(1);
+            query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>().ShouldBe(1);
             executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "scope" }).ShouldBe(1);
             var runtime = (ISqlTransactionScopeRuntime)transactionScope;
             runtime.Connection.ShouldBeSameAs(connection);
@@ -2592,7 +2592,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         connection.State.ShouldBe(ConnectionState.Open);
-        Should.Throw<InvalidOperationException>(() => query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+        Should.Throw<InvalidOperationException>(() => query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>());
     }
 
     /// <summary>
@@ -2611,7 +2611,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = scope.CreateQuery();
 
         // Act
-        using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
+        using (var enumerator = query.Query().Select("Id,Name").From("Users").AsEnumerable<MappedSample>().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             var exception = Should.Throw<InvalidOperationException>(() => scope.Commit());
@@ -2645,7 +2645,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = scope.CreateQuery();
 
         // Act
-        using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable().GetEnumerator())
+        using (var enumerator = query.Query().Select("Id,Name").From("Users").AsEnumerable<MappedSample>().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             var exception = Should.Throw<InvalidOperationException>(scope.Dispose);
@@ -2678,8 +2678,8 @@ public class SqlServerRoutingAndExecutionTest
         var query = scope.CreateQuery();
 
         // Act
-        await using (var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users")
-                         .AsAsyncEnumerable().GetAsyncEnumerator())
+        await using (var enumerator = query.Query().Select("Id,Name").From("Users")
+                 .AsAsyncEnumerable<MappedSample>().GetAsyncEnumerator())
         {
             (await enumerator.MoveNextAsync()).ShouldBeTrue();
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.DisposeAsync().AsTask());
@@ -2714,7 +2714,7 @@ public class SqlServerRoutingAndExecutionTest
         executor.Dispose();
 
         // Assert
-        Should.Throw<ObjectDisposedException>(() => query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+        Should.Throw<ObjectDisposedException>(() => query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>());
         Should.Throw<ObjectDisposedException>(() => executor.ExecuteSql("Update [Users] Set [Name]=@name",
             new { name = "after-dispose" }));
         connection.State.ShouldBe(ConnectionState.Open);
@@ -2755,10 +2755,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -2776,10 +2776,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = await description.ScalarAsync();
+        var result = await description.ScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -2798,10 +2798,10 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var result = await description.ScalarAsync();
+        var result = await description.ScalarAsync<int>();
 
         // Assert
         result.ShouldBe(1);
@@ -2820,10 +2820,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act
-        var result = description.AsEnumerable().ToList();
+        var result = description.AsEnumerable<MappedSample>().ToList();
 
         // Assert
         Assert.Single(result);
@@ -2844,8 +2844,8 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "stream" })
         };
         using var query = CreateOwnedQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
-        var stream = description.AsEnumerable();
+        var description = query.Query().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var stream = description.AsEnumerable<MappedSample>();
         var exception = Assert.Throws<InvalidOperationException>(() => description.Where("[Name]",
             "changed-after-stream-creation"));
 
@@ -2870,11 +2870,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" }) };
         using var query = CreateCountingQuery(connection, false);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act
         var result = new List<MappedSample>();
-        await foreach (var item in description.AsAsyncEnumerable())
+        await foreach (var item in description.AsAsyncEnumerable<MappedSample>())
             result.Add(item);
 
         // Assert
@@ -2896,8 +2896,8 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
         };
         using var query = CreateOwnedQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
-        var stream = description.AsAsyncEnumerable();
+        var description = query.Query().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var stream = description.AsAsyncEnumerable<MappedSample>();
         var exception = Assert.Throws<InvalidOperationException>(() => description.Where("[Name]",
             "changed-after-stream-creation"));
 
@@ -2924,10 +2924,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, false);
-        var syncDescription = syncQuery.Query<int>().Select("Count(*)").From("[Users]");
+        var syncDescription = syncQuery.Query().Select("Count(*)").From("[Users]");
 
         // Act
-        var syncResult = syncDescription.Scalar();
+        var syncResult = syncDescription.Scalar<int>();
 
         // Assert
         Assert.Equal(1, syncResult);
@@ -2937,10 +2937,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, false);
-        var asyncDescription = asyncQuery.Query<int>().Select("Count(*)").From("[Users]");
+        var asyncDescription = asyncQuery.Query().Select("Count(*)").From("[Users]");
 
         // Act
-        var asyncResult = await asyncDescription.ScalarAsync();
+        var asyncResult = await asyncDescription.ScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, asyncResult);
@@ -2957,11 +2957,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]")
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]")
             .AppendWhere("[Name]=@name").AddParam("name", "trace");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -2981,11 +2981,11 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         var loggerFactory = new TraceLoggerFactory(true);
         using var query = CreateTraceQuery(connection, loggerFactory);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[ApiToken]=@ApiToken")
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").AppendWhere("[ApiToken]=@ApiToken")
             .AddParam("ApiToken", "super-secret-token");
 
         // Act
-        var result = description.Scalar();
+        var result = description.Scalar<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -3084,7 +3084,7 @@ public class SqlServerRoutingAndExecutionTest
         var rootParameters = query.RootParameters;
 
         // Act
-        var result = query.Query<int>().Select("Count(*)").From("[Users]").Scalar();
+        var result = query.Query().Select("Count(*)").From("[Users]").Scalar<int>();
 
         // Assert
         Assert.Equal(1, result);
@@ -3136,10 +3136,10 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act and Assert
-        var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage(pager));
+        var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage<MappedSample>(pager));
 
         // Assert
         Assert.Equal("execute failed", exception.Message);
@@ -3161,11 +3161,11 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateOwnedQuery(connection);
         ConfigurePrimaryReadTransaction(query);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act and Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            description.ToPageAsync(pager, cancellationToken: cancellationTokenSource.Token));
+            description.ToPageAsync<MappedSample>(pager, cancellationToken: cancellationTokenSource.Token));
 
         // Assert
         Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
@@ -3186,10 +3186,10 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateSecondPlanSkippingQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act
-        var page = description.ToPage(new Pager(1, 10, "Id"));
+        var page = description.ToPage<MappedSample>(new Pager(1, 10, "Id"));
 
         // Assert
         Assert.Equal(1, page.TotalCount);
@@ -3207,11 +3207,11 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var description = query.Query().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         connection.OnScalarExecuted = () => description.Where("[Name]", "changed-after-count");
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage(new Pager(1, 10, "Id")));
+        var exception = Assert.Throws<InvalidOperationException>(() => description.ToPage<MappedSample>(new Pager(1, 10, "Id")));
 
         // Assert
         Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
@@ -3273,7 +3273,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
         connection.OnScalarExecuted = () =>
         {
             pager.Order = "Name Desc";
@@ -3281,7 +3281,7 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        var result = description.ToPage(pager);
+        var result = description.ToPage<MappedSample>(pager);
 
         // Assert
         Assert.Equal(1, result.TotalCount);
@@ -3304,7 +3304,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var query = CreateOwnedQuery(connection);
         var pager = new Pager(1, 10, "Id");
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
+        var description = query.Query().Select("Id,Name").From("[Users]").Where("[Enabled]", true);
         connection.OnScalarExecuted = () =>
         {
             description.Where("[Name]", "changed-after-count");
@@ -3312,7 +3312,7 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ToPageAsync(pager));
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ToPageAsync<MappedSample>(pager));
 
         // Assert
         Assert.Equal("查询已冻结，不能继续修改查询描述。", exception.Message);
@@ -3331,10 +3331,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-trace" })
         };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
+        var description = query.Query().Select("Id,Name").From("[Users]").Where("[Name]", "async-trace");
 
         // Act
-        var result = await description.ToListAsync();
+        var result = await description.ToListAsync<MappedSample>();
 
         // Assert
         Assert.Single(result);
@@ -3353,10 +3353,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var syncConnection = new CaptureDbConnection();
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Query<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
+        var syncDescription = syncQuery.Query().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
-        var syncResult = syncDescription.Scalar();
+        var syncResult = syncDescription.Scalar<int>();
 
         // Assert
         Assert.Equal(1, syncResult);
@@ -3367,10 +3367,10 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var asyncConnection = new CaptureDbConnection();
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Query<int>().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
+        var asyncDescription = asyncQuery.Query().Select("Count(*)").From("[Users]").Where("[Enabled]", true);
 
         // Act
-        var asyncResult = await asyncDescription.ScalarAsync();
+        var asyncResult = await asyncDescription.ScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, asyncResult);
@@ -3391,10 +3391,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-stream" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Query().Select("Id,Name").From("[Users]");
 
         // Act
-        var syncResult = syncDescription.AsEnumerable().ToList();
+        var syncResult = syncDescription.AsEnumerable<MappedSample>().ToList();
 
         // Assert
         Assert.Single(syncResult);
@@ -3408,11 +3408,11 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-stream" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Query().Select("Id,Name").From("[Users]");
 
         // Act
         var asyncResult = new List<MappedSample>();
-        await foreach (var item in asyncDescription.AsAsyncEnumerable())
+        await foreach (var item in asyncDescription.AsAsyncEnumerable<MappedSample>())
             asyncResult.Add(item);
 
         // Assert
@@ -3434,10 +3434,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "sync-page" })
         };
         using var syncQuery = CreateCountingQuery(syncConnection, true);
-        var syncDescription = syncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var syncDescription = syncQuery.Query().Select("Id,Name").From("[Users]");
 
         // Act
-        var syncResult = syncDescription.ToPage(new Pager(1, 20, "Id"));
+        var syncResult = syncDescription.ToPage<MappedSample>(new Pager(1, 20, "Id"));
 
         // Assert
         Assert.Single(syncResult.Data);
@@ -3451,10 +3451,10 @@ public class SqlServerRoutingAndExecutionTest
             ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "async-page" })
         };
         using var asyncQuery = CreateCountingQuery(asyncConnection, true);
-        var asyncDescription = asyncQuery.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var asyncDescription = asyncQuery.Query().Select("Id,Name").From("[Users]");
 
         // Act
-        var asyncResult = await asyncDescription.ToPageAsync(new Pager(1, 20, "Id"));
+        var asyncResult = await asyncDescription.ToPageAsync<MappedSample>(new Pager(1, 20, "Id"));
 
         // Assert
         Assert.Single(asyncResult.Data);
@@ -3475,10 +3475,10 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => description.Scalar());
+        var exception = Assert.Throws<InvalidOperationException>(() => description.Scalar<int>());
 
         // Assert
         Assert.Equal("execute failed", exception.Message);
@@ -3500,10 +3500,10 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnScalarExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]");
+        var description = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]");
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ScalarAsync());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => description.ScalarAsync<int>());
 
         // Assert
         Assert.Equal("execute failed", exception.Message);
@@ -3613,12 +3613,12 @@ public class SqlServerRoutingAndExecutionTest
             name => name == SqlQueryDiagnosticListenerNames.ErrorExecute);
         var connection = new CaptureDbConnection { ThrowOnExecute = true };
         using var query = CreateCountingQuery(connection, true);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("[Users]");
+        var description = query.Query().Select("Id,Name").From("[Users]");
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in description.AsAsyncEnumerable())
+            await foreach (var _ in description.AsAsyncEnumerable<MappedSample>())
             {
             }
         });
@@ -3643,7 +3643,7 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection { ScalarResult = 7 };
         var query = CreateQuery(connection);
         // Act
-        var result = query.Procedure<int>("usp_users_count", new { name = "abc" }).ExecuteScalar();
+        var result = query.Procedure("usp_users_count", new { name = "abc" }).ExecuteScalar<int>();
 
         // Assert
         result.Result.ShouldBe(7);
@@ -3673,7 +3673,7 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        var description = query.Procedure<int>("usp_report", parameters);
+        var description = query.Procedure("usp_report", parameters);
         payload[0] = 9;
         identifiers[0] = 8;
         ((IDictionary<string, object>)parameters["filter"])["Payload"] = new byte[] { 7 };
@@ -3802,7 +3802,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = query.Procedure<MappedSample>("usp_users_query", new { Name = "Charlie" }).ExecuteList();
+        var result = query.Procedure("usp_users_query", new { Name = "Charlie" }).ExecuteList<MappedSample>();
 
         // Assert
         result.Result.Count.ShouldBe(1);
@@ -3829,10 +3829,10 @@ public class SqlServerRoutingAndExecutionTest
         var parameters = new DynamicParameters();
         parameters.Add("name", "Delta");
         parameters.Add("code", dbType: DbType.String, direction: ParameterDirection.Output, size: 20);
-        var description = query.Procedure<MappedSample>("usp_users_query", parameters);
+        var description = query.Procedure("usp_users_query", parameters);
 
         // Act
-        var result = await description.ExecuteSingleAsync();
+        var result = await description.ExecuteSingleAsync<MappedSample>();
 
         // Assert
         result.Result.Name.ShouldBe("Delta");
@@ -3856,10 +3856,10 @@ public class SqlServerRoutingAndExecutionTest
         parameters.Add("input", "request", DbType.String, ParameterDirection.Input);
         parameters.Add("result", dbType: DbType.Int32, direction: ParameterDirection.Output);
         parameters.Add("state", 1, DbType.Int32, ParameterDirection.InputOutput);
-        var description = query.Procedure<int>("usp_output", parameters);
+        var description = query.Procedure("usp_output", parameters);
 
         // Act
-        var result = description.ExecuteScalar();
+        var result = description.ExecuteScalar<int>();
 
         // Assert
         result.Result.ShouldBe(1);
@@ -3883,15 +3883,15 @@ public class SqlServerRoutingAndExecutionTest
         asyncConnection.OutputParameterValues["result"] = 9;
         using var syncQuery = CreateQuery(syncConnection);
         using var asyncQuery = CreateQuery(asyncConnection);
-        var syncDescription = syncQuery.Procedure<int>("usp_sync", new SqlParameterCollection()
+        var syncDescription = syncQuery.Procedure("usp_sync", new SqlParameterCollection()
             .AddOutput("result", DbType.Int32)
             .Add(new SqlParam("state", 1, DbType.Int32, ParameterDirection.InputOutput)));
-        var asyncDescription = asyncQuery.Procedure<int>("usp_async", new SqlParameterCollection()
+        var asyncDescription = asyncQuery.Procedure("usp_async", new SqlParameterCollection()
             .AddOutput("result", DbType.Int32));
 
         // Act
-        var syncResult = syncDescription.ExecuteScalar();
-        var asyncResult = await asyncDescription.ExecuteScalarAsync();
+        var syncResult = syncDescription.ExecuteScalar<int>();
+        var asyncResult = await asyncDescription.ExecuteScalarAsync<int>();
 
         // Assert
         Assert.Equal(1, syncResult.Result);
@@ -3913,14 +3913,14 @@ public class SqlServerRoutingAndExecutionTest
         // Arrange
         var connection = new CaptureDbConnection { ScalarResult = 1 };
         using var query = CreateQuery(connection);
-        var description = query.Procedure<int>("usp_output", new SqlParameterCollection()
+        var description = query.Procedure("usp_output", new SqlParameterCollection()
             .AddOutput("result", DbType.Int32));
 
         // Act
         connection.OutputParameterValues["result"] = 7;
-        var first = description.ExecuteScalar();
+        var first = description.ExecuteScalar<int>();
         connection.OutputParameterValues["result"] = 9;
-        var second = description.ExecuteScalar();
+        var second = description.ExecuteScalar<int>();
 
         // Assert
         Assert.Equal(7, first.OutputParameters.GetValue<int>("result"));
@@ -3948,7 +3948,7 @@ public class SqlServerRoutingAndExecutionTest
         connection.OutputParameterValues["payload"] = payload;
         connection.OutputParameterValues["numbers"] = numbers;
         using var query = CreateQuery(connection);
-        var description = query.Procedure<int>("usp_output", new SqlParameterCollection()
+        var description = query.Procedure("usp_output", new SqlParameterCollection()
             .AddOutput("id", DbType.String)
             .AddOutput("timestamp", DbType.String)
             .AddOutput("duration", DbType.String)
@@ -3956,7 +3956,7 @@ public class SqlServerRoutingAndExecutionTest
             .AddOutput("numbers", DbType.Object));
 
         // Act
-        var result = description.ExecuteScalar();
+        var result = description.ExecuteScalar<int>();
         payload[0] = 9;
         numbers[0] = 8;
 
@@ -3982,7 +3982,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = query.Procedure<MappedSample>("usp_users_with_role").ExecuteList();
+        var result = query.Procedure("usp_users_with_role").ExecuteList<MappedSample>();
 
         // Assert
         result.Result.Count.ShouldBe(1);
@@ -4011,10 +4011,10 @@ public class SqlServerRoutingAndExecutionTest
         };
 
         // Act
-        var first = CreateQuery(firstConnection).Procedure<MappedSample>("usp_users").ExecuteFirst();
-        var empty = CreateQuery(emptyConnection).Procedure<MappedSample>("usp_users").ExecuteFirstOrDefault();
+        var first = CreateQuery(firstConnection).Procedure("usp_users").ExecuteFirst<MappedSample>();
+        var empty = CreateQuery(emptyConnection).Procedure("usp_users").ExecuteFirstOrDefault<MappedSample>();
         var exception = Should.Throw<InvalidOperationException>(() =>
-            CreateQuery(multipleConnection).Procedure<MappedSample>("usp_users").ExecuteSingle());
+            CreateQuery(multipleConnection).Procedure("usp_users").ExecuteSingle<MappedSample>());
 
         // Assert
         first.Result.Name.ShouldBe("First");
@@ -4039,7 +4039,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = await query.Procedure<MappedSample>("usp_users_single").ExecuteFirstAsync();
+        var result = await query.Procedure("usp_users_single").ExecuteFirstAsync<MappedSample>();
 
         // Assert
         result.Result.ShouldNotBeNull();
@@ -4064,10 +4064,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        var result = await description.ToListAsync();
+        var result = await description.ToListAsync<MappedSample>();
 
         // Assert
         query.LastQueryCommandFlags.ShouldBe(CommandFlags.Buffered);
@@ -4093,7 +4093,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = await query.Procedure<MappedSample>("usp_users_query").ExecuteListAsync();
+        var result = await query.Procedure("usp_users_query").ExecuteListAsync<MappedSample>();
 
         // Assert
         query.LastQueryCommandFlags.ShouldBe(CommandFlags.Buffered);
@@ -4118,7 +4118,7 @@ public class SqlServerRoutingAndExecutionTest
         var query = CreateQuery(connection);
 
         // Act
-        var result = query.Procedure<MappedSample>("usp_users_query").ExecuteList();
+        var result = query.Procedure("usp_users_query").ExecuteList<MappedSample>();
 
         // Assert
         result.Result.Count.ShouldBe(2);
@@ -4143,10 +4143,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        var result = description.AsEnumerable().ToList();
+        var result = description.AsEnumerable<MappedSample>().ToList();
 
         // Assert
         result.Count.ShouldBe(2);
@@ -4171,10 +4171,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        using (var enumerator = description.AsEnumerable().GetEnumerator())
+        using (var enumerator = description.AsEnumerable<MappedSample>().GetEnumerator())
         {
             enumerator.MoveNext().ShouldBeTrue();
             enumerator.Current.Name.ShouldBe("Alice");
@@ -4202,10 +4202,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        using (var enumerator = description.AsEnumerable().GetEnumerator())
+        using (var enumerator = description.AsEnumerable<MappedSample>().GetEnumerator())
             enumerator.MoveNext().ShouldBeTrue();
 
         // Assert
@@ -4228,7 +4228,7 @@ public class SqlServerRoutingAndExecutionTest
         using var query = CreateQuery(connection);
 
         // Act
-        var result = query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar();
+        var result = query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>();
 
         // Assert
         result.ShouldBe(1);
@@ -4252,7 +4252,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
-            query.Query<int>().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar());
+            query.Query().AppendSelect("Count(*)").AppendFrom("[Users]").Scalar<int>());
 
         // Assert
         exception.Message.ShouldBe("execute failed");
@@ -4275,10 +4275,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        await foreach (var item in description.AsAsyncEnumerable())
+        await foreach (var item in description.AsAsyncEnumerable<MappedSample>())
         {
             item.Name.ShouldBe("Alice");
             break;
@@ -4304,10 +4304,10 @@ public class SqlServerRoutingAndExecutionTest
                 new MappedSample { Id = 2, Name = "Bob" })
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        await foreach (var item in description.AsAsyncEnumerable())
+        await foreach (var item in description.AsAsyncEnumerable<MappedSample>())
         {
             item.Name.ShouldBe("Alice");
             break;
@@ -4334,13 +4334,13 @@ public class SqlServerRoutingAndExecutionTest
         table.Rows.Add("invalid-id", "Alice");
         var connection = new CaptureDbConnection { ResultSet = table };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
         Exception exception = null;
         try
         {
-            await foreach (var _ in description.AsAsyncEnumerable())
+            await foreach (var _ in description.AsAsyncEnumerable<MappedSample>())
             {
             }
         }
@@ -4372,12 +4372,12 @@ public class SqlServerRoutingAndExecutionTest
             ThrowOnReaderParserInitialization = true
         };
         var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var _ in description.AsAsyncEnumerable())
+            await foreach (var _ in description.AsAsyncEnumerable<MappedSample>())
             {
             }
         });
@@ -4405,8 +4405,8 @@ public class SqlServerRoutingAndExecutionTest
             options => options.Connection(new CaptureDbConnection { ResultSet = table }));
 
         // Act
-        var exception = Assert.Throws<AggregateException>(() => query.Query<MappedSample>()
-            .Select("Id,Name").From("Users").AsEnumerable().ToList());
+        var exception = Assert.Throws<AggregateException>(() => query.Query()
+            .Select("Id,Name").From("Users").AsEnumerable<MappedSample>().ToList());
 
         // Assert
         Assert.Equal("error hook failed", exception.Flatten().InnerExceptions.Last().Message);
@@ -4431,7 +4431,7 @@ public class SqlServerRoutingAndExecutionTest
         // Act
         var exception = await Assert.ThrowsAsync<AggregateException>(async () =>
         {
-            await foreach (var _ in query.Query<MappedSample>().Select("Id,Name").From("Users").AsAsyncEnumerable())
+            await foreach (var _ in query.Query().Select("Id,Name").From("Users").AsAsyncEnumerable<MappedSample>())
             {
             }
         });
@@ -4458,7 +4458,7 @@ public class SqlServerRoutingAndExecutionTest
         // Act
         var exception = Assert.Throws<InvalidOperationException>(() =>
         {
-            using var enumerator = query.Query<MappedSample>().Select("Id,Name").From("Users").AsEnumerable()
+            using var enumerator = query.Query().Select("Id,Name").From("Users").AsEnumerable<MappedSample>()
                 .GetEnumerator();
             enumerator.MoveNext();
         });
@@ -4481,10 +4481,10 @@ public class SqlServerRoutingAndExecutionTest
             ThrowOnReaderDispose = true
         };
         using var query = CreateQuery(connection);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable().ToList());
+        var exception = Assert.Throws<InvalidOperationException>(() => description.AsEnumerable<MappedSample>().ToList());
         var readerDisposeCount = connection.ReaderDisposeCount;
         connection.ThrowOnReaderDispose = false;
         var result = query.Sql("Select Count(*) From [Users]").Scalar<int>();
@@ -4505,10 +4505,10 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         var query = CreateQuery(connection);
         ConfigurePrimaryReadTransaction(query);
-        var description = query.Query<MappedSample>().Select("Id,Name").From("Users");
+        var description = query.Query().Select("Id,Name").From("Users");
 
         // Act
-        var exception = Should.Throw<InvalidOperationException>(() => description.AsEnumerable().ToList());
+        var exception = Should.Throw<InvalidOperationException>(() => description.AsEnumerable<MappedSample>().ToList());
 
         // Assert
         exception.Message.ShouldContain("PrimaryReadStrategy.Transaction");
@@ -4940,7 +4940,7 @@ public class SqlServerRoutingAndExecutionTest
     {
         // Arrange
         using var query = CreateOwnedQuery(new CaptureDbConnection());
-        _ = query.Query<int>();
+        _ = query.Query();
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() => SqlQueryRuntimeBinding.BindDatabaseContext(query,

@@ -112,6 +112,26 @@ public class EqualConditionTest
     }
 
     /// <summary>
+    /// 测试目的：未实现子查询右值的条件必须抛出 NotSupportedException，并回滚已写入的缓冲区内容。
+    /// </summary>
+    [Fact]
+    public void AppendTo_WhenDefaultSubqueryRenderingIsUsed_ShouldThrowNotSupportedExceptionAndRollback()
+    {
+        // Arrange
+        var subquery = new Mock<ISqlBuilder>();
+        var condition = new UnsupportedSqlBuilderCondition(_parameterManager, "Id", subquery.Object);
+        var result = new StringBuilder("Prefix:");
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => condition.AppendTo(result));
+
+        // Assert
+        Assert.Contains("不支持将 ISqlBuilder 作为右值", exception.Message);
+        Assert.Equal("Prefix:", result.ToString());
+        Assert.Empty(_parameterManager.GetParams());
+    }
+
+    /// <summary>
     /// 测试目的：参数化条件渲染失败时不得遗留参数；后续条件与失败条件重试必须使用独立参数名称和值。
     /// </summary>
     [Fact]
@@ -179,6 +199,24 @@ public class EqualConditionTest
             _shouldThrow = false;
             throw new InvalidOperationException("Condition rendering failed.");
         }
+    }
+
+    /// <summary>
+    /// 使用基类默认子查询分支的测试条件。
+    /// </summary>
+    private sealed class UnsupportedSqlBuilderCondition : SqlConditionBase
+    {
+        /// <summary>
+        /// 初始化测试条件。
+        /// </summary>
+        public UnsupportedSqlBuilderCondition(IParameterManager parameterManager, string column, object value)
+            : base(parameterManager, column, value, true)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override void AppendCondition(StringBuilder builder, string column, object value) =>
+            builder.Append($"{column}={value}");
     }
 
     /// <summary>

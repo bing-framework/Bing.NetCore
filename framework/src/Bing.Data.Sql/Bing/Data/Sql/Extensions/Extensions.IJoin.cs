@@ -121,15 +121,14 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述添加内连接子查询。
+    /// 使用 Fluent 查询描述添加内连接子查询。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <param name="alias">子查询别名。</param>
     /// <returns>追加连接后的源对象。</returns>
-    public static T Join<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+    public static T Join<T>(this T source, SqlFluentQuery query, string alias) where T : IJoin =>
         Join(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
@@ -210,15 +209,14 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述添加左连接子查询。
+    /// 使用 Fluent 查询描述添加左连接子查询。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <param name="alias">子查询别名。</param>
     /// <returns>追加连接后的源对象。</returns>
-    public static T LeftJoin<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+    public static T LeftJoin<T>(this T source, SqlFluentQuery query, string alias) where T : IJoin =>
         LeftJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
@@ -316,15 +314,14 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述添加右连接子查询。
+    /// 使用 Fluent 查询描述添加右连接子查询。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
-    /// <typeparam name="TResult">子查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="query">作为子查询使用的独立查询描述。</param>
     /// <param name="alias">子查询别名。</param>
     /// <returns>追加连接后的源对象。</returns>
-    public static T RightJoin<T, TResult>(this T source, SqlQuery<TResult> query, string alias) where T : IJoin =>
+    public static T RightJoin<T>(this T source, SqlFluentQuery query, string alias) where T : IJoin =>
         RightJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>

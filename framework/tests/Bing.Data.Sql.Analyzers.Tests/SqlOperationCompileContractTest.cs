@@ -427,6 +427,81 @@ public class SqlOperationCompileContractTest
     }
 
     /// <summary>
+    /// 测试目的：非泛型 Fluent 和 Raw SQL 描述应支持 Dapper 2、3、7 段多映射，并由终结方法选择结果类型。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingTwoThreeAndSevenWayMappings_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class Consumer
+            {
+                static Item Map2(Item first, Item second) => new Item { Id = first.Id + second.Id };
+                static Item Map3(Item first, Item second, Item third) => new Item { Id = first.Id + second.Id + third.Id };
+                static Item Map7(Item first, Item second, Item third, Item fourth, Item fifth, Item sixth, Item seventh) =>
+                    new Item { Id = first.Id + second.Id + third.Id + fourth.Id + fifth.Id + sixth.Id + seventh.Id };
+
+                static void Use(ISqlQuery query)
+                {
+                    query.Query().ToList<Item, Item, Item>(Map2);
+                    query.Query().ToList<Item, Item, Item, Item>(Map3);
+                    query.Query().ToList<Item, Item, Item, Item, Item, Item, Item, Item>(Map7);
+                    query.Query().ToListAsync<Item, Item, Item>(Map2);
+                    query.Query().ToListAsync<Item, Item, Item, Item>(Map3);
+                    query.Query().ToListAsync<Item, Item, Item, Item, Item, Item, Item, Item>(Map7);
+
+                    query.Sql("Select 1").ToList<Item, Item, Item>(Map2);
+                    query.Sql("Select 1").ToList<Item, Item, Item, Item>(Map3);
+                    query.Sql("Select 1").ToList<Item, Item, Item, Item, Item, Item, Item, Item>(Map7);
+                    query.Sql("Select 1").ToListAsync<Item, Item, Item>(Map2);
+                    query.Sql("Select 1").ToListAsync<Item, Item, Item, Item>(Map3);
+                    query.Sql("Select 1").ToListAsync<Item, Item, Item, Item, Item, Item, Item, Item>(Map7);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
+    /// 测试目的：第三方代码仅依赖 ISqlQuery 时，应能使用非泛型 Root 描述和终结泛型，不需要强转 SqlQueryBase。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenThirdPartyConsumerUsesISqlQuery_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class ThirdPartyConsumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    var rows = query.Query().ToList<Item>();
+                    var value = query.Sql("Select Id From Items").Scalar<int>();
+                    var procedure = query.Procedure("GetItems").ExecuteList<Item>();
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
     /// 测试目的：Lambda 组合公共 API 只允许一元或二元表达式，不重新暴露三元来源入口。
     /// </summary>
     [Fact]
@@ -473,6 +548,7 @@ public class SqlOperationCompileContractTest
             .Cast<MetadataReference>()
             .ToList();
         references.Add(MetadataReference.CreateFromFile(typeof(ISqlBuilder).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(SqlQueryBase).Assembly.Location));
         var compilation = CSharpCompilation.Create(
             "SqlOperationCompileContract",
             new[] { syntaxTree },

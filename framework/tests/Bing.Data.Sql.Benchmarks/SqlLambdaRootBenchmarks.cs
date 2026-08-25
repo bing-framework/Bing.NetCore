@@ -27,7 +27,7 @@ public class SqlLambdaRootBenchmarks
     /// <summary>
     /// 类型化根来源数量。
     /// </summary>
-    [Params(1, 2, 5, 10)]
+    [Params(1, 2, 5, 10, 20, 50)]
     public int RootCount { get; set; }
 
     /// <summary>
@@ -66,6 +66,12 @@ public class SqlLambdaRootBenchmarks
     public string RenderExistingRoots() => _query.ToSql();
 
     /// <summary>
+    /// 测量创建 SQL 与参数一致执行快照的成本。
+    /// </summary>
+    [Benchmark]
+    public string CreateExecutionSnapshot() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(_query.GetBuilder()).Sql;
+
+    /// <summary>
     /// 测量不同规模 IN 参数的构建和 SQL 渲染成本。
     /// </summary>
     [Benchmark]
@@ -98,6 +104,12 @@ public class SqlLambdaRootBenchmarks
                 query.From<Root01>("r1").From<Root02>("r2").From<Root03>("r3").From<Root04>("r4")
                     .From<Root05>("r5").From<Root06>("r6").From<Root07>("r7").From<Root08>("r8")
                     .From<Root09>("r9").From<Root10>("r10");
+                break;
+            case 20:
+            case 50:
+                query.From<Root01>("r1");
+                for (var index = 2; index <= RootCount; index++)
+                    query.FromTable($"Root{index}", $"r{index}");
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(RootCount));

@@ -38,17 +38,17 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
         // Arrange
         await SeedHierarchyNodesAsync();
         using var query = _fixture.CreateQuery();
-        var tree = query.Query<HierarchyNode>().AppendSelect("Id,ParentId,Name,0 As Depth")
+        var tree = query.Query().AppendSelect("Id,ParentId,Name,0 As Depth")
             .From("dbo.BingSqlHierarchyIntegration").IsNull("ParentId")
-            .UnionAll(query.Query<HierarchyNode>().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
+            .UnionAll(query.Query().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
                 .From("dbo.BingSqlHierarchyIntegration", "n").Join("tree", "t").AppendOn("n.ParentId=t.Id"));
-        var description = query.Query<HierarchyNode>().With("tree", tree).Select("Id,ParentId,Name,Depth")
+        var description = query.Query().With("tree", tree).Select("Id,ParentId,Name,Depth")
             .From("tree").OrderBy("Depth").OrderBy("Id");
 
         // Act
         var sql = description.ToSql();
-        var firstResult = await description.ToListAsync();
-        var secondResult = await description.ToListAsync();
+        var firstResult = await description.ToListAsync<HierarchyNode>();
+        var secondResult = await description.ToListAsync<HierarchyNode>();
 
         // Assert
         Assert.StartsWith("With ", sql);

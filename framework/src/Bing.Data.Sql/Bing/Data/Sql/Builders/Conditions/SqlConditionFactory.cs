@@ -28,7 +28,12 @@ public static class SqlConditionFactory
             case Operator.Ends:
                 return;
             default:
-                throw new NotImplementedException($"运算符 {@operator.Description()} 尚未实现");
+                var description = @operator.Description();
+                var operatorName = string.IsNullOrWhiteSpace(description)
+                    ? $"值 {(int)@operator}"
+                    : $"{description}（值 {(int)@operator}）";
+                throw new NotSupportedException(
+                    $"运算符 {operatorName} 当前条件工厂不支持。请使用已支持的 Equal、NotEqual、Greater、GreaterEqual、Less、LessEqual、In、NotIn、Contains、Starts 或 Ends 运算符。");
         }
     }
 

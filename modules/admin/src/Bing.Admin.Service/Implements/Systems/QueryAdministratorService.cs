@@ -65,7 +65,7 @@ namespace Bing.Admin.Service.Implements.Systems
                 query = query.Where("c.Enabled", parameter.Enabled.Value);
             if (!parameter.RoleId.IsEmpty())
             {
-                var roleQuery = SqlQuery.Query<UserRole>()
+                var roleQuery = SqlQuery.Query()
                     .Select("UserId")
                     .From("UserRole")
                     .Where("RoleId", parameter.RoleId);

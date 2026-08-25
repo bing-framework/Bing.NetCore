@@ -151,6 +151,10 @@ public class SqlQueryApiContractTest
         Assert.DoesNotContain(rootType.GetMethods(), method => method.Name == "Procedure" && method.IsGenericMethod);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToEntity" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToList" && method.IsGenericMethodDefinition);
+        Assert.Contains(textType.GetMethods(), method => method.Name == "ToList" && method.IsGenericMethodDefinition &&
+            method.GetGenericArguments().Length == 3);
+        Assert.Contains(textType.GetMethods(), method => method.Name == "ToListAsync" && method.IsGenericMethodDefinition &&
+            method.GetGenericArguments().Length == 3);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToPage" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToListAsync" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToPageAsync" && method.IsGenericMethodDefinition);
@@ -249,22 +253,11 @@ public class SqlQueryApiContractTest
     {
         public SqlFluentQuery Query() => throw new NotSupportedException();
 
-        public SqlFluentQuery<TResult> Query<TResult>() => throw new NotSupportedException();
-
-        public SqlTextQuery<TResult> Sql<TResult>(string sql, object parameters = null) =>
-            throw new NotSupportedException();
-
         public SqlTextQuery Sql(string sql, object parameters = null) => throw new NotSupportedException();
-
-        public SqlTextQuery<TResult> SqlInterpolated<TResult>(FormattableString sql) =>
-            throw new NotSupportedException();
 
         public SqlTextQuery SqlInterpolated(FormattableString sql) => throw new NotSupportedException();
 
         public SqlProcedureQuery Procedure(string procedure, object parameters = null) =>
-            throw new NotSupportedException();
-
-        public SqlProcedureQuery<TResult> Procedure<TResult>(string procedure, object parameters = null) =>
             throw new NotSupportedException();
 
         public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class =>

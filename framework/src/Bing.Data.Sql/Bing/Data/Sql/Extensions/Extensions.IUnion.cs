@@ -67,14 +67,13 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述执行 Union。
+    /// 使用 Fluent 查询描述执行 Union。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
-    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="queries">要参与 Union 的查询描述。</param>
     /// <returns>追加联合项后的源对象。</returns>
-    public static T Union<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+    public static T Union<T>(this T source, params SqlFluentQuery[] queries) where T : IUnion =>
         Union(source, GetQueryBuilders(queries));
 
     #endregion
@@ -108,14 +107,13 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述执行 Union All。
+    /// 使用 Fluent 查询描述执行 Union All。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
-    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="queries">要参与 Union All 的查询描述。</param>
     /// <returns>追加联合项后的源对象。</returns>
-    public static T UnionAll<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+    public static T UnionAll<T>(this T source, params SqlFluentQuery[] queries) where T : IUnion =>
         UnionAll(source, GetQueryBuilders(queries));
 
     #endregion
@@ -149,14 +147,13 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述执行 Intersect。
+    /// 使用 Fluent 查询描述执行 Intersect。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
-    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="queries">要参与 Intersect 的查询描述。</param>
     /// <returns>追加联合项后的源对象。</returns>
-    public static T Intersect<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+    public static T Intersect<T>(this T source, params SqlFluentQuery[] queries) where T : IUnion =>
         Intersect(source, GetQueryBuilders(queries));
 
     #endregion
@@ -190,23 +187,21 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用指定结果类型的 Fluent 查询描述执行 Except。
+    /// 使用 Fluent 查询描述执行 Except。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
-    /// <typeparam name="TResult">联合查询描述的结果类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="queries">要参与 Except 的查询描述。</param>
     /// <returns>追加联合项后的源对象。</returns>
-    public static T Except<T, TResult>(this T source, params SqlQuery<TResult>[] queries) where T : IUnion =>
+    public static T Except<T>(this T source, params SqlFluentQuery[] queries) where T : IUnion =>
         Except(source, GetQueryBuilders(queries));
 
     /// <summary>
-    /// 将指定结果类型查询描述转换为其专属 Builder 列表。
+    /// 将查询描述转换为其专属 Builder 列表。
     /// </summary>
-    /// <typeparam name="TResult">查询描述的结果类型。</typeparam>
     /// <param name="queries">查询描述列表。</param>
     /// <returns>与查询描述一一对应的 Builder 列表。</returns>
-    private static IEnumerable<ISqlBuilder> GetQueryBuilders<TResult>(IEnumerable<SqlQuery<TResult>> queries) =>
+    private static IEnumerable<ISqlBuilder> GetQueryBuilders(IEnumerable<SqlFluentQuery> queries) =>
         queries?.Select(query => GetQueryBuilder(query, nameof(queries)));
 
     #endregion

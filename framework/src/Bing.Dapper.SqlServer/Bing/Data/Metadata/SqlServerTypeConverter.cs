@@ -68,6 +68,7 @@ public class SqlServerTypeConverter : ITypeConverter
             case "sql_variant":
                 return DbType.Object;
         }
-        throw new NotImplementedException(dataType);
+        throw new NotSupportedException(
+            $"SQL Server 数据类型 '{dataType}' 当前没有映射到 DbType。请扩展 SqlServerTypeConverter 映射，或使用已支持的数据类型。");
     }
 }

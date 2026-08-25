@@ -554,7 +554,7 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <param name="query">待执行的查询对象。</param>
     /// <returns>SQLite 元数据项数量。</returns>
-    private static int ExecuteCount(ISqlQuery query) => query.Query<int>().CountAll().From("sqlite_master").Scalar();
+    private static int ExecuteCount(ISqlQuery query) => query.Query().CountAll().From("sqlite_master").Scalar<int>();
 
     /// <summary>
     /// 创建服务提供程序

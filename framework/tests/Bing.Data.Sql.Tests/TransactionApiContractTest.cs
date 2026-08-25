@@ -136,7 +136,7 @@ public class TransactionApiContractTest
     public void QueryDescriptionAsyncTerminals_ShouldExposeOptionalCancellationToken()
     {
         // Arrange
-        var methods = typeof(SqlQuery<int>).GetMethods().Where(method => method.Name is
+        var methods = typeof(SqlFluentQuery).GetMethods().Where(method => method.Name is
             "ToListAsync" or "FirstAsync" or "FirstOrDefaultAsync" or "SingleAsync" or "SingleOrDefaultAsync" or
             "ScalarAsync" or "ToPageAsync" or "AsAsyncEnumerable").ToList();
 

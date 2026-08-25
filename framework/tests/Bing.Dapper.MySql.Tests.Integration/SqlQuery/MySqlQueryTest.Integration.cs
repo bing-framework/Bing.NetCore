@@ -44,7 +44,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "scalar-first");
         await InitProductDataAsync(Guid.NewGuid(), "scalar-second");
 
-        var result = _sqlQuery.Query<int>().CountAll().From("Product").Scalar();
+        var result = _sqlQuery.Query().CountAll().From("Product").Scalar<int>();
 
         Assert.Equal(2, result);
     }
@@ -204,7 +204,7 @@ public partial class MySqlQueryTest
         await InitProductDataAsync(Guid.NewGuid(), "after-materialization");
 
         Assert.Equal(3, result.Count);
-        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
     }
 
     /// <summary>
@@ -257,7 +257,7 @@ public partial class MySqlQueryTest
 
         await InitProductDataAsync(Guid.NewGuid(), "after-stream");
 
-        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
     }
 
     /// <summary>
@@ -282,7 +282,7 @@ public partial class MySqlQueryTest
         });
 
         await InitProductDataAsync(Guid.NewGuid(), "after-cancel");
-        Assert.Equal(4, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(4, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
     }
 
     /// <summary>
@@ -301,7 +301,7 @@ public partial class MySqlQueryTest
             scope.Commit();
         }
 
-        Assert.Equal(1, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(1, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
         return Task.CompletedTask;
     }
 
@@ -321,7 +321,7 @@ public partial class MySqlQueryTest
             scope.Rollback();
         }
 
-        Assert.Equal(0, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(0, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
         return Task.CompletedTask;
     }
 
@@ -338,7 +338,7 @@ public partial class MySqlQueryTest
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
                 new { productId = Guid.NewGuid(), code = "implicit-rollback" });
 
-        Assert.Equal(0, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(0, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
         return Task.CompletedTask;
     }
 
@@ -356,11 +356,11 @@ public partial class MySqlQueryTest
         {
             executor.ExecuteSql("Insert Product(ProductId, Code) Values(@productId, @code)",
                 new { productId = Guid.NewGuid(), code = "shared" });
-            Assert.Equal(1, query.Query<int>().CountAll().From("Product").Scalar());
+            Assert.Equal(1, query.Query().CountAll().From("Product").Scalar<int>());
             scope.Commit();
         }
 
-        Assert.Equal(1, _sqlQuery.Query<int>().CountAll().From("Product").Scalar());
+        Assert.Equal(1, _sqlQuery.Query().CountAll().From("Product").Scalar<int>());
         return Task.CompletedTask;
     }
 
@@ -378,8 +378,8 @@ public partial class MySqlQueryTest
             "Insert ParameterSample(ParameterSampleId, JsonValue, DecimalValue) Values(@id, @json, @decimal)",
             new { id, json, @decimal = 1.25m });
 
-        var result = _sqlQuery.Query<string>().Select("JsonValue").From("ParameterSample")
-            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
+        var result = _sqlQuery.Query().Select("JsonValue").From("ParameterSample")
+            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar<string>();
 
         Assert.Equal(json, result);
     }
@@ -397,8 +397,8 @@ public partial class MySqlQueryTest
         await _sqlExecutor.ExecuteSqlAsync(
             "Insert ParameterSample(ParameterSampleId, DecimalValue) Values(@id, @value)", new { id, value });
 
-        var result = _sqlQuery.Query<decimal>().Select("DecimalValue").From("ParameterSample")
-            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
+        var result = _sqlQuery.Query().Select("DecimalValue").From("ParameterSample")
+            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar<decimal>();
 
         Assert.Equal(value, result);
     }
@@ -417,8 +417,8 @@ public partial class MySqlQueryTest
             "Insert ParameterSample(ParameterSampleId, DecimalValue, DateTimeValue) Values(@id, @decimal, @value)",
             new { id, @decimal = 1m, value });
 
-        var result = _sqlQuery.Query<DateTime>().Select("DateTimeValue").From("ParameterSample")
-            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar();
+        var result = _sqlQuery.Query().Select("DateTimeValue").From("ParameterSample")
+            .AppendWhere("ParameterSampleId=@id").AddParam("id", id).Scalar<DateTime>();
 
         Assert.Equal(value, result);
     }
