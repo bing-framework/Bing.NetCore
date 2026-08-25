@@ -64,3 +64,16 @@ task-state review-fix --source antigravity
 → execution.md
 → task-finish
 ```
+
+
+## V4.2 Agent Profile
+
+同步：
+
+```bash
+node .agents/scripts/sync-agent-profiles.mjs <profile> --target antigravity
+```
+
+模型写入 Workspace Custom Agent 的 `model:` frontmatter。
+
+思考等级保留为 `session` 策略，不写入未经当前版本确认的 Agent effort 字段。

@@ -1,5 +1,6 @@
 ---
 name: plan-writer
+model: "gpt-5.6-sol"
 description: 分析当前仓库与需求，生成 ai_docs/tasks/<taskId>/plan.md；只规划，不实施代码。
 argument-hint: 输入 taskId 和需求。
 tools:
@@ -24,3 +25,10 @@ handoffs:
 不要修改业务代码、测试、配置或数据库。
 
 完成后可通过“开始实施” Handoff 进入 `plan-executor`。
+
+
+## Agent Runtime Profile
+
+本文件的 `model:` 由 `.agents/scripts/sync-agent-profiles.mjs` 管理。不要在多个 Agent 中手工重复维护模型。
+
+Copilot IDE 的思考等级当前按模型/会话能力处理；期望值记录在 `.agents/runtime-profiles/copilot.json`。

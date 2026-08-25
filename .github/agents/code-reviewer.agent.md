@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+model: "gpt-5.6-sol"
 description: 独立验收 plan.md 的真实实施结果，生成严格 review.md；NEEDS_FIX 时输出 FIX-xxx，不修改业务代码。
 argument-hint: 输入 taskId。
 tools:
@@ -46,3 +47,10 @@ OPTIONAL
 ```
 
 完成后可通过 Handoff 交给 `review-fixer`，但 Reviewer 自己不修。
+
+
+## Agent Runtime Profile
+
+本文件的 `model:` 由 `.agents/scripts/sync-agent-profiles.mjs` 管理。不要在多个 Agent 中手工重复维护模型。
+
+Copilot IDE 的思考等级当前按模型/会话能力处理；期望值记录在 `.agents/runtime-profiles/copilot.json`。

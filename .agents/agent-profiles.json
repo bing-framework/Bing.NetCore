@@ -1,0 +1,335 @@
+{
+  "version": 2,
+  "displayName": "Universal Agent 运行时配置",
+  "description": "统一管理 Copilot、Codex、Antigravity 在不同工作角色下使用的模型和思考等级策略。",
+  "defaultProfile": "balanced",
+  "notes": {
+    "copilotModel": "请填写 VS Code Copilot 模型选择器中实际显示的模型名称，或当前项目已注册的自定义模型名称。",
+    "codexModel": "请填写当前 Codex 安装环境中实际可用的 OpenAI/Codex 模型标识。",
+    "antigravityModel": "请填写当前 Antigravity 安装环境中可用的 Custom Agent 模型名称或别名。",
+    "effort": "不同 Harness 对思考等级的应用方式不同：Codex 可按角色原生配置；Copilot IDE 主要按模型/会话记忆；Antigravity 当前按会话或安装版本支持能力应用。",
+    "sourceOfTruth": "本文件是 Agent 模型与思考等级策略的唯一人工维护源。下游 Copilot/Codex/Antigravity 配置应通过 sync-agent-profiles.mjs 生成或同步。"
+  },
+  "capabilities": {
+    "copilot": {
+      "agentModel": "native",
+      "agentEffort": "remembered"
+    },
+    "codex": {
+      "agentModel": "native",
+      "agentEffort": "native"
+    },
+    "antigravity": {
+      "agentModel": "native",
+      "agentEffort": "session"
+    }
+  },
+  "workflowRoles": {
+    "create-plan": "plan-writer",
+    "execute-plan": "plan-executor",
+    "review-plan": "code-reviewer",
+    "fix-review": "review-fixer"
+  },
+  "profiles": {
+    "fast": {
+      "displayName": "快速模式",
+      "description": "优先响应速度和模型使用成本，适合简单改动、常规维护和低风险任务。",
+      "notes": "不建议用于复杂架构设计、跨模块重构、关键数据迁移或高风险代码审查。",
+      "roles": {
+        "plan-writer": {
+          "displayName": "计划规划器",
+          "description": "负责读取需求、项目规则和真实源码，生成可执行的 plan.md。",
+          "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
+          "copilot": {
+            "model": "GPT-5.6 Luna",
+            "effort": "low"
+          },
+          "codex": {
+            "model": "gpt-5.6-luna",
+            "effort": "low"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "low"
+          }
+        },
+        "plan-executor": {
+          "displayName": "计划执行器",
+          "description": "负责按照已批准的 plan.md 完成真实代码实现、测试、验证和 execution.md。",
+          "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
+          "copilot": {
+            "model": "GPT-5.6 Terra",
+            "effort": "medium"
+          },
+          "codex": {
+            "model": "gpt-5.6-terra",
+            "effort": "medium"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "medium"
+          }
+        },
+        "code-reviewer": {
+          "displayName": "代码审查器",
+          "description": "负责独立检查 plan.md 的真实实施结果、Git Diff、测试和运行证据，生成 review.md。",
+          "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
+          "copilot": {
+            "model": "GPT-5.6 Terra",
+            "effort": "medium"
+          },
+          "codex": {
+            "model": "gpt-5.6-terra",
+            "effort": "medium"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "medium"
+          }
+        },
+        "review-fixer": {
+          "displayName": "审查修复器",
+          "description": "负责根据 review.md 中的 FIX 项完成修复和回归验证。",
+          "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
+          "copilot": {
+            "model": "GPT-5.6 Luna",
+            "effort": "medium"
+          },
+          "codex": {
+            "model": "gpt-5.6-luna",
+            "effort": "medium"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "medium"
+          }
+        }
+      }
+    },
+    "balanced": {
+      "displayName": "均衡模式",
+      "description": "在执行质量、推理深度和模型使用成本之间取得平衡，适合作为日常开发默认配置。",
+      "notes": "推荐作为默认 Profile；规划和 Review 保持较高推理质量，执行和修复兼顾效率。",
+      "roles": {
+        "plan-writer": {
+          "displayName": "计划规划器",
+          "description": "负责读取需求、项目规则和真实源码，生成可执行的 plan.md。",
+          "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
+          "copilot": {
+            "model": "gpt-5.6-sol",
+            "effort": "medium"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "medium"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "low"
+          }
+        },
+        "plan-executor": {
+          "displayName": "计划执行器",
+          "description": "负责按照已批准的 plan.md 完成真实代码实现、测试、验证和 execution.md。",
+          "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
+          "copilot": {
+            "model": "gpt-5.6-luna",
+            "effort": "high"
+          },
+          "codex": {
+            "model": "gpt-5.6-luna",
+            "effort": "high"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "low"
+          }
+        },
+        "code-reviewer": {
+          "displayName": "代码审查器",
+          "description": "负责独立检查 plan.md 的真实实施结果、Git Diff、测试和运行证据，生成 review.md。",
+          "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
+          "copilot": {
+            "model": "gpt-5.6-sol",
+            "effort": "medium"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "medium"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "low"
+          }
+        },
+        "review-fixer": {
+          "displayName": "审查修复器",
+          "description": "负责根据 review.md 中的 FIX 项完成修复和回归验证。",
+          "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
+          "copilot": {
+            "model": "gpt-5.6-luna",
+            "effort": "high"
+          },
+          "codex": {
+            "model": "gpt-5.6-luna",
+            "effort": "high"
+          },
+          "antigravity": {
+            "model": "flash",
+            "effort": "low"
+          }
+        }
+      }
+    },
+    "quality": {
+      "displayName": "质量优先",
+      "description": "优先使用更强模型和更高思考等级，适合复杂功能、重构、性能优化和关键 Review。",
+      "notes": "执行时间和模型消耗通常高于均衡模式，建议用于中高复杂度任务。",
+      "roles": {
+        "plan-writer": {
+          "displayName": "计划规划器",
+          "description": "负责读取需求、项目规则和真实源码，生成可执行的 plan.md。",
+          "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "high"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "plan-executor": {
+          "displayName": "计划执行器",
+          "description": "负责按照已批准的 plan.md 完成真实代码实现、测试、验证和 execution.md。",
+          "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "high"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "code-reviewer": {
+          "displayName": "代码审查器",
+          "description": "负责独立检查 plan.md 的真实实施结果、Git Diff、测试和运行证据，生成 review.md。",
+          "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "xhigh"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "review-fixer": {
+          "displayName": "审查修复器",
+          "description": "负责根据 review.md 中的 FIX 项完成修复和回归验证。",
+          "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "high"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "high"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        }
+      }
+    },
+    "max-quality": {
+      "displayName": "最高质量",
+      "description": "在当前 Harness 已确认支持的能力范围内，尽可能使用更高质量模型和更高思考等级。",
+      "notes": "适合架构设计、复杂根因分析和关键代码审查；不建议作为普通日常任务的默认配置。",
+      "roles": {
+        "plan-writer": {
+          "displayName": "计划规划器",
+          "description": "负责读取需求、项目规则和真实源码，生成可执行的 plan.md。",
+          "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "xhigh"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "plan-executor": {
+          "displayName": "计划执行器",
+          "description": "负责按照已批准的 plan.md 完成真实代码实现、测试、验证和 execution.md。",
+          "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "xhigh"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "code-reviewer": {
+          "displayName": "代码审查器",
+          "description": "负责独立检查 plan.md 的真实实施结果、Git Diff、测试和运行证据，生成 review.md。",
+          "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "xhigh"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        },
+        "review-fixer": {
+          "displayName": "审查修复器",
+          "description": "负责根据 review.md 中的 FIX 项完成修复和回归验证。",
+          "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
+          "copilot": {
+            "model": "GPT-5.6 Sol",
+            "effort": "xhigh"
+          },
+          "codex": {
+            "model": "gpt-5.6-sol",
+            "effort": "xhigh"
+          },
+          "antigravity": {
+            "model": "pro",
+            "effort": "high"
+          }
+        }
+      }
+    }
+  }
+}

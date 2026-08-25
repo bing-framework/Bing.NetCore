@@ -1,0 +1,27 @@
+{
+  "profile": "balanced",
+  "target": "antigravity",
+  "generatedAt": "2026-08-25T04:52:22.616Z",
+  "capability": {
+    "agentModel": "native",
+    "agentEffort": "session"
+  },
+  "roles": {
+    "plan-writer": {
+      "model": "pro",
+      "effort": "low"
+    },
+    "plan-executor": {
+      "model": "flash",
+      "effort": "low"
+    },
+    "code-reviewer": {
+      "model": "pro",
+      "effort": "low"
+    },
+    "review-fixer": {
+      "model": "flash",
+      "effort": "low"
+    }
+  }
+}

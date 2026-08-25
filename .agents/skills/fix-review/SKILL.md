@@ -1,6 +1,6 @@
 ---
 name: fix-review
-description: 根据 ai_docs/tasks/<taskId>/review.md 中 NEEDS_FIX 的结构化 FIX-xxx 项继续修复。适用于 Copilot、Antigravity、Codex；默认处理 MUST_FIX，保留 review.md 为 Reviewer 独立证据，修复记录写入 execution.md，不自动 git commit/push/PR。
+description: 根据 ai_docs/tasks/<taskId>/review.md 中 NEEDS_FIX 的结构化 FIX-xxx 项继续修复。适用于 Copilot、Antigravity、Codex；默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX，OPTIONAL 默认跳过；保留 review.md 为 Reviewer 独立证据，不自动 git commit/push/PR。
 ---
 
 # Fix Review
@@ -117,7 +117,7 @@ node .agents/scripts/task-state.mjs review-fix <taskId> --source codex
 执行：
 
 ```bash
-node .agents/scripts/task-state.mjs review-fix <taskId> --source <当前执行器>
+node .agents/scripts/task-state.mjs review-fix <taskId> --source <当前执行器> --fix-scope recommended
 ```
 
 脚本会：
@@ -173,11 +173,60 @@ SHOULD_FIX
 OPTIONAL
 ```
 
-默认：
+## 5.1 fixScope
+
+支持三种修复范围：
+
+```text
+must
+recommended
+all
+```
+
+含义：
+
+| fixScope | MUST_FIX | SHOULD_FIX | OPTIONAL |
+|---|---|---|---|
+| `must` | 修复 | 跳过 | 跳过 |
+| `recommended` | 修复 | 修复 | 跳过 |
+| `all` | 修复 | 修复 | 修复 |
+
+**默认：`recommended`。**
+
+因此用户未明确指定时：
 
 - `MUST_FIX`：必须处理；
-- `SHOULD_FIX`：仅当与 MUST_FIX 同根因、属于必要依赖或用户明确要求时处理；
-- `OPTIONAL`：不自动处理。
+- `SHOULD_FIX`：必须处理；
+- `OPTIONAL`：默认跳过。
+
+只有用户明确要求“只修 MUST_FIX”时才使用：
+
+```text
+--fix-scope must
+```
+
+用户明确要求“连 OPTIONAL 一起修”时使用：
+
+```text
+--fix-scope all
+```
+
+SHOULD_FIX 不得仅因为“不是阻塞问题”就静默跳过。
+
+如果某个 SHOULD_FIX 存在以下情况，可以不直接修改：
+
+- 明显超出 plan.md；
+- 会引入 Breaking Change；
+- 需要产品/架构决策；
+- 需要不可逆数据迁移；
+- Reviewer 证据与真实代码不符。
+
+但必须在 execution.md 明确记录：
+
+- FIX ID；
+- 状态：DEFERRED/BLOCKED/PARTIAL；
+- 未执行原因；
+- 继续处理所需条件。
 
 不要把 Reviewer 所有建议都变成无边界重构。
 
@@ -185,7 +234,7 @@ OPTIONAL
 
 ## 6. 单个 FIX 循环
 
-对每个 MUST_FIX：
+对当前 `fixScope` **纳入处理范围的每个 FIX**：
 
 ```text
 读取 Review 证据
@@ -231,7 +280,7 @@ REVIEW_FIX 禁止：
 
 对每个 FIX 先跑最小验证。
 
-全部 MUST_FIX 完成后，按项目适用性运行：
+全部 MUST_FIX + 当前 fixScope 纳入的 SHOULD_FIX 完成后，按项目适用性运行：
 
 1. FIX 专项测试；
 2. 相关回归测试；
@@ -255,6 +304,7 @@ REVIEW_FIX 禁止：
 ### Round N
 
 - Review 状态：NEEDS_FIX
+- Fix Scope：recommended
 - Review 文件：`ai_docs/tasks/<taskId>/review.md`
 
 #### FIX-001
@@ -286,7 +336,7 @@ REVIEW_FIX 禁止：
 
 ## 10. Review Fix 终态
 
-本轮所有 MUST_FIX 完成并必要验证通过：
+本轮 fixScope 纳入范围的所有 FIX 完成并必要验证通过：
 
 ```text
 <!-- AI_EXECUTION_STATUS: COMPLETED -->
@@ -306,7 +356,9 @@ FAILED
 
 这里的 `COMPLETED` 仅表示：
 
-> Executor 已完成当前 Review 要求的修复。
+> Executor 已完成当前 `fixScope` 要求处理的 Review 修复项。
+
+默认 `recommended` 下，这意味着 MUST_FIX + SHOULD_FIX 已全部完成或有明确合法处理结论。
 
 不代表 Reviewer 已经 PASS。
 

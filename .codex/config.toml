@@ -1,0 +1,22 @@
+# BEGIN UNIVERSAL_AGENT_WORKFLOW_PROFILE
+# profile = balanced
+# 由 .agents/scripts/sync-agent-profiles.mjs 自动生成
+# 请勿手工修改此区块；请修改 .agents/agent-profiles.json 后重新同步。
+
+[agents.plan_writer]
+description = "负责读取项目上下文并生成 ai_docs/tasks/<taskId>/plan.md；只规划，不实施。"
+config_file = "agents/plan-writer.toml"
+
+[agents.plan_executor]
+description = "负责执行既定 plan.md，完成代码、测试、execution.md 与任务收口。"
+config_file = "agents/plan-executor.toml"
+
+[agents.code_reviewer]
+description = "负责独立验收 plan/execution/Git Diff，输出结构化 review.md。"
+config_file = "agents/code-reviewer.toml"
+
+[agents.review_fixer]
+description = "负责修复 review.md 的 NEEDS_FIX；默认处理 MUST_FIX + SHOULD_FIX。"
+config_file = "agents/review-fixer.toml"
+
+# END UNIVERSAL_AGENT_WORKFLOW_PROFILE

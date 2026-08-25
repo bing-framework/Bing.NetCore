@@ -60,3 +60,16 @@ node .agents/scripts/task-finish.mjs <taskId>
 ```
 
 因此无需 Antigravity Hook，也能发送当前项目的飞书 Card。
+
+
+## V4.2 Agent Profile
+
+Codex 是当前三种 Harness 中模型 + reasoning effort 自动化最完整的一层。
+
+同步：
+
+```bash
+node .agents/scripts/sync-agent-profiles.mjs <profile> --target codex
+```
+
+生成 `.codex/config.toml` 的 Agent role 声明，以及每个 role 的 TOML 配置。

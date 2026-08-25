@@ -79,6 +79,29 @@ function normalizeAgentSource(value) {
   return normalized || 'unknown';
 }
 
+
+function normalizeFixScope(value) {
+  const normalized = String(value || 'recommended')
+    .trim()
+    .toLowerCase();
+
+  if (!['must', 'recommended', 'all'].includes(normalized)) {
+    throw new Error(
+      `fixScope 无效：${value}。只允许 must / recommended / all。`,
+    );
+  }
+
+  return normalized;
+}
+
+function getFixScope() {
+  return normalizeFixScope(
+    readOption('--fix-scope') ||
+      process.env.AI_FIX_SCOPE ||
+      'recommended',
+  );
+}
+
 function getAgentSource() {
   return normalizeAgentSource(
     readOption('--source') ||
@@ -86,6 +109,23 @@ function getAgentSource() {
       process.env.AGENT_SOURCE ||
       'unknown',
   );
+}
+
+function getActiveAgentProfile(workspaceRoot) {
+  const generated = path.join(
+    workspaceRoot,
+    '.agents',
+    'generated',
+    'agent-profile.json',
+  );
+
+  try {
+    if (!existsSync(generated)) return null;
+    const value = JSON.parse(readFileSync(generated, 'utf8'));
+    return value?.profile || null;
+  } catch {
+    return null;
+  }
 }
 
 function safeReadJson(filePath) {
@@ -214,12 +254,16 @@ function buildRuntime({
   paths,
   startedAt,
   agentSource,
+  agentProfile = null,
+  fixScope = null,
 }) {
   return {
     active: true,
     taskId,
     mode,
     agentSource,
+    agentProfile,
+    fixScope,
     planPath: paths.planRelative,
     executionPath: paths.executionRelative,
     reviewPath: paths.reviewRelative,
@@ -266,6 +310,8 @@ function startPlan(workspaceRoot, taskId) {
     paths,
     startedAt: now,
     agentSource: getAgentSource(),
+    agentProfile: getActiveAgentProfile(workspaceRoot),
+    fixScope: null,
   });
 
   safeWriteJson(paths.runtimeFile, runtime);
@@ -294,6 +340,22 @@ function startReviewFix(workspaceRoot, taskId) {
     existing?.taskId === taskId &&
     existing?.mode === 'review-fix'
   ) {
+    const requestedScope = getFixScope();
+    if (existing.fixScope !== requestedScope) {
+      const updated = {
+        ...existing,
+        fixScope: requestedScope,
+        updatedAt: new Date().toISOString(),
+      };
+      safeWriteJson(paths.runtimeFile, updated);
+      printJson({
+        reused: true,
+        message: '当前 review-fix 已处于 active 状态；已更新 fixScope，不重复增加 reviewRound。',
+        runtime: updated,
+      });
+      return;
+    }
+
     printJson({
       reused: true,
       message: '当前 review-fix 已处于 active 状态，不重复增加 reviewRound。',
@@ -321,6 +383,8 @@ function startReviewFix(workspaceRoot, taskId) {
     paths,
     startedAt: now,
     agentSource: getAgentSource(),
+    agentProfile: getActiveAgentProfile(workspaceRoot),
+    fixScope: getFixScope(),
   });
 
   safeWriteJson(paths.runtimeFile, runtime);
@@ -371,7 +435,7 @@ function main() {
     [
       '用法：',
       '  node .agents/scripts/task-state.mjs start <taskId> [--source copilot|antigravity|codex]',
-      '  node .agents/scripts/task-state.mjs review-fix <taskId> [--source copilot|antigravity|codex]',
+      '  node .agents/scripts/task-state.mjs review-fix <taskId> [--source copilot|antigravity|codex] [--fix-scope must|recommended|all]',
       '  node .agents/scripts/task-state.mjs status',
     ].join('\n'),
   );

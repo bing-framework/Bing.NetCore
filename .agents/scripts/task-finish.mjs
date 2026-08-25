@@ -295,7 +295,10 @@ async function main() {
 
   const notifyAllowed =
     !process.argv.includes('--no-notify') &&
-    parseBoolean(env.STOP_GUARD_NOTIFY, true);
+    parseBoolean(
+      env.AI_WORKFLOW_NOTIFY,
+      parseBoolean(env.STOP_GUARD_NOTIFY, true),
+    );
 
   if (notifyAllowed) {
     try {
@@ -307,7 +310,9 @@ async function main() {
         reviewRound: Number.isInteger(finalized.reviewRound)
           ? finalized.reviewRound
           : 0,
+        fixScope: finalized.fixScope || undefined,
         agentSource: finalized.agentSource || 'unknown',
+        agentProfile: finalized.agentProfile || undefined,
         terminationReason: 'explicit_finish',
         executionPath,
         extraLines: buildExtraLines(finalized, terminal),

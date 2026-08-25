@@ -118,6 +118,46 @@ function normalizeStatus(status) {
 
 function getStatusPresentation(status) {
   switch (normalizeStatus(status)) {
+    case 'PLAN_CREATED':
+      return {
+        icon: '📋',
+        title: '实施计划已生成',
+        label: 'PLAN_CREATED',
+        template: 'blue',
+      };
+
+    case 'REVIEW_PASS':
+      return {
+        icon: '✅',
+        title: 'Review 已通过',
+        label: 'PASS',
+        template: 'green',
+      };
+
+    case 'REVIEW_PASS_WITH_ISSUES':
+      return {
+        icon: 'ℹ️',
+        title: 'Review 通过但仍有非阻塞项',
+        label: 'PASS_WITH_ISSUES',
+        template: 'blue',
+      };
+
+    case 'REVIEW_NEEDS_FIX':
+      return {
+        icon: '🛠️',
+        title: 'Review 需要继续修复',
+        label: 'NEEDS_FIX',
+        template: 'orange',
+      };
+
+    case 'REVIEW_BLOCKED':
+      return {
+        icon: '⛔',
+        title: 'Review 被阻塞',
+        label: 'BLOCKED',
+        template: 'orange',
+      };
+
     case 'COMPLETED':
       return {
         icon: '✅',
@@ -230,6 +270,14 @@ function getModeLabel(mode) {
     return 'PLAN_EXECUTION';
   }
 
+  if (normalized === 'plan') {
+    return 'PLAN';
+  }
+
+  if (normalized === 'review') {
+    return 'REVIEW';
+  }
+
   return sanitizeNotificationText(mode, 100) || 'UNKNOWN';
 }
 
@@ -240,7 +288,9 @@ export function buildFeishuText({
   taskId,
   mode,
   reviewRound,
+  fixScope,
   agentSource,
+  agentProfile,
   modelName,
   terminationReason,
   executionPath,
@@ -261,8 +311,16 @@ export function buildFeishuText({
     lines.push(`执行器：${String(agentSource).toUpperCase()}`);
   }
 
+  if (agentProfile) {
+    lines.push(`Agent Profile：${agentProfile}`);
+  }
+
   if (getModeLabel(mode) === 'REVIEW_FIX' && Number.isInteger(reviewRound) && reviewRound > 0) {
     lines.push(`修复轮次：Round ${reviewRound}`);
+  }
+
+  if (fixScope) {
+    lines.push(`修复范围：${String(fixScope).toUpperCase()}`);
   }
 
   if (modelName) {
@@ -304,7 +362,9 @@ export function buildFeishuCard({
   taskId,
   mode,
   reviewRound,
+  fixScope,
   agentSource,
+  agentProfile,
   modelName,
   terminationReason,
   executionPath,
@@ -318,9 +378,11 @@ export function buildFeishuCard({
     mdRow('任务', taskId),
     mdRow('模式', getModeLabel(mode)),
     agentSource ? mdRow('执行器', String(agentSource).toUpperCase()) : null,
+    agentProfile ? mdRow('Agent Profile', agentProfile) : null,
     getModeLabel(mode) === 'REVIEW_FIX' && Number.isInteger(reviewRound) && reviewRound > 0
       ? mdRow('修复轮次', `Round ${reviewRound}`)
       : null,
+    fixScope ? mdRow('修复范围', String(fixScope).toUpperCase()) : null,
     mdRow('状态', `${p.icon} ${p.label}`),
   ].filter(Boolean);
 
@@ -527,7 +589,9 @@ async function runCli() {
       taskId: 'feishu-card-test',
       mode: 'review-fix',
       reviewRound: 1,
+      fixScope: 'recommended',
       agentSource: 'copilot',
+      agentProfile: 'balanced',
       modelName: 'manual-test',
       terminationReason: 'manual_test',
       executionPath: 'ai_docs/tasks/feishu-card-test/execution.md',

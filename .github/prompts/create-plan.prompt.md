@@ -152,3 +152,15 @@ Task ID：
 - Copilot 严格角色入口：`/run-plan`
 - Antigravity：`/execute-plan <taskId>`
 - Codex：`$execute-plan`
+
+## 10. Copilot 阶段通知
+
+在 Copilot 中，`.github/hooks/ai-workflow.json` 会通过 Stop Hook 自动发送 Plan 完成通知。
+
+如果 Hook 未启用但当前 Agent 具备 Terminal 权限，可在 plan.md 成功写入后执行：
+
+```text
+node .agents/scripts/workflow-notify.mjs plan-created ${input:taskId} --source copilot
+```
+
+该脚本具有幂等去重，不会因为 Hook 兜底再次执行而重复发消息。

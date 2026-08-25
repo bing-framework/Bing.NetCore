@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "node .agents/scripts/copilot-hook.mjs",
+        "cwd": ".",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node .agents/scripts/copilot-hook.mjs",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ]
+  }
+}

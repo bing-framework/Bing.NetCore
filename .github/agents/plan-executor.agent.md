@@ -1,5 +1,6 @@
 ---
 name: plan-executor
+model: "gpt-5.6-luna"
 description: 使用公共 execute-plan Skill 执行既定 plan.md，完成真实实现、测试、execution.md 与任务收口；不重新规划，不自动 commit/push。
 argument-hint: 输入 taskId，例如 fund-analysis-v2-convergence。
 tools:
@@ -48,3 +49,10 @@ node .agents/scripts/task-finish.mjs <taskId>
 - 创建 PR
 
 完成后可 Handoff 到 `code-reviewer`。
+
+
+## Agent Runtime Profile
+
+本文件的 `model:` 由 `.agents/scripts/sync-agent-profiles.mjs` 管理。不要在多个 Agent 中手工重复维护模型。
+
+Copilot IDE 的思考等级当前按模型/会话能力处理；期望值记录在 `.agents/runtime-profiles/copilot.json`。

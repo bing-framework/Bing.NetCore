@@ -16,10 +16,10 @@ argument-hint: "输入 taskId"
 Copilot Review Fix 注册：
 
 ```text
-node .agents/scripts/task-state.mjs review-fix ${input:taskId} --source copilot
+node .agents/scripts/task-state.mjs review-fix ${input:taskId} --source copilot --fix-scope recommended
 ```
 
-只处理 MUST_FIX 及必要依赖。
+默认 fixScope=recommended：处理全部 MUST_FIX + SHOULD_FIX；OPTIONAL 默认跳过。
 
 不要修改 review.md。
 

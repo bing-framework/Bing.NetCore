@@ -254,9 +254,9 @@ FIX-002
 - 明确修复要求
 - 修复后的验证方式
 
-如果存在任意 `MUST_FIX`，最终状态必须保持 `NEEDS_FIX`。
+如果存在任意未解决的 `MUST_FIX` 或 `SHOULD_FIX`，最终状态必须保持 `NEEDS_FIX`。
 
-`PASS_WITH_ISSUES` 不得包含未解决的 `MUST_FIX`。
+`PASS_WITH_ISSUES` 只允许剩余 `OPTIONAL` 级别问题，不得包含未解决的 `MUST_FIX` 或 `SHOULD_FIX`。
 
 ## 13. 复审识别
 
@@ -304,7 +304,7 @@ Git Diff     = 真实变更
 ## 15. Review 后续路由
 
 - `PASS`：结束。
-- `PASS_WITH_ISSUES`：默认结束，由用户决定是否继续。
+- `PASS_WITH_ISSUES`：只允许剩余 OPTIONAL；默认结束，由用户决定是否继续。
 - `BLOCKED`：说明阻塞，不自动修。
 - `NEEDS_FIX`：生成 FIX-xxx 后停止。
 
@@ -314,3 +314,15 @@ NEEDS_FIX 后可选择：
 - Copilot 严格角色入口：`/repair-review`
 - Antigravity：`/fix-review <taskId>`
 - Codex：`$fix-review`
+
+## 16. Copilot 阶段通知
+
+`.github/hooks/ai-workflow.json` 的 Stop Hook 会在 `review.md` 成功生成后自动发送 Review 完成通知。
+
+如 Hook 未启用但当前 Agent 可使用 Terminal，也可显式执行：
+
+```text
+node .agents/scripts/workflow-notify.mjs review-completed ${input:taskId} --source copilot
+```
+
+通知会自动展示 Review 状态以及 MUST_FIX / SHOULD_FIX / OPTIONAL 数量，并通过通知账本去重。

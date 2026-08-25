@@ -1,4 +1,4 @@
-# Universal Agent Workflow V4
+# Universal Agent Workflow V4.2
 
 一套任务协议，同时服务：
 
@@ -87,3 +87,20 @@ Review
 - `CODEX.md`
 - `PROTOCOL.md`
 - `TROUBLESHOOTING.md`
+
+
+Agent 模型与思考等级统一配置见 `AGENT-PROFILES.md`。
+
+
+## 工作路线
+
+本工作流支持两条闭环路线：
+
+1. 纯 Copilot / Codex 自闭环；
+2. Copilot / Codex 负责 Plan + Review，Antigravity 负责 Execute + Review Fix。
+
+详见：
+
+```text
+docs/ai-workflow/ROUTES.md
+```

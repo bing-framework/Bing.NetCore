@@ -1,0 +1,27 @@
+{
+  "profile": "balanced",
+  "target": "copilot",
+  "generatedAt": "2026-08-25T04:52:22.554Z",
+  "capability": {
+    "agentModel": "native",
+    "agentEffort": "remembered"
+  },
+  "roles": {
+    "plan-writer": {
+      "model": "gpt-5.6-sol",
+      "effort": "medium"
+    },
+    "plan-executor": {
+      "model": "gpt-5.6-luna",
+      "effort": "high"
+    },
+    "code-reviewer": {
+      "model": "gpt-5.6-sol",
+      "effort": "medium"
+    },
+    "review-fixer": {
+      "model": "gpt-5.6-luna",
+      "effort": "high"
+    }
+  }
+}
