@@ -38,30 +38,19 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private bool _operationInProgress;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlMultipleQueryResult"/>类型的实例。
+    /// 初始化支持同步和异步完成的<see cref="SqlMultipleQueryResult"/>类型的实例。
     /// </summary>
     /// <param name="reader">Dapper 结果集读取器。</param>
     /// <param name="executionLease">当前执行租约。</param>
-    /// <param name="complete">执行完成回调。</param>
-    public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease, Action<bool, Exception> complete)
+    /// <param name="complete">同步释放时使用的完成回调。</param>
+    /// <param name="completeAsync">异步释放时使用的完成回调。</param>
+    public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+        Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync)
     {
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
         _complete = complete ?? throw new ArgumentNullException(nameof(complete));
-    }
-
-    /// <summary>
-    /// 初始化一个支持异步完成的<see cref="SqlMultipleQueryResult"/>类型的实例。
-    /// </summary>
-    /// <param name="reader">Dapper 结果集读取器。</param>
-    /// <param name="executionLease">当前执行租约。</param>
-    /// <param name="complete">异步执行完成回调。</param>
-    public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
-        Func<bool, Exception, Task> complete)
-    {
-        _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-        _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
-        _completeAsync = complete ?? throw new ArgumentNullException(nameof(complete));
+        _completeAsync = completeAsync ?? throw new ArgumentNullException(nameof(completeAsync));
     }
 
     /// <inheritdoc />
@@ -282,12 +271,11 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private void Complete(bool completed, Exception exception, ICollection<Exception> cleanupExceptions)
     {
         var complete = Interlocked.Exchange(ref _complete, null);
+        Interlocked.Exchange(ref _completeAsync, null);
         try
         {
             if (complete != null)
                 complete(completed, exception);
-            else
-                Interlocked.Exchange(ref _completeAsync, null)?.Invoke(completed, exception).GetAwaiter().GetResult();
         }
         catch (Exception completionException)
         {

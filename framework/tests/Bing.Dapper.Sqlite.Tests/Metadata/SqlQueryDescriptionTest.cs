@@ -246,7 +246,7 @@ public class SqlQueryDescriptionTest
             {
                 group.And<MultiSourceUser>(user => user.Id > 1);
                 group.Or<MultiSourceUser>(user => user.Id == 2);
-                group.Group(nested => nested.And<MultiSourceUser>(user => user.Id < 10));
+                group.AndGroup(nested => nested.And<MultiSourceUser>(user => user.Id < 10));
             });
 
         // Assert

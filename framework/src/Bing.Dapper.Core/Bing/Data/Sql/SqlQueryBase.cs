@@ -27,7 +27,8 @@ namespace Bing.Data.Sql;
 /// <remarks>
 /// 实例持有可变的 Sql 生成器、连接和事务状态，不能被多个并发操作共享。每个独立操作应使用独立实例。
 /// </remarks>
-public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, ISqlQueryRuntimeBindingController
+public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, ISqlQueryBuilderSource,
+    ISqlQueryRuntimeBindingController
 {
     #region 字段
 
@@ -381,7 +382,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        return SqlQueryRuntimeFactory.CreateQuery(executor, executor.CreateIndependentSqlBuilder());
+        var builderSource = (ISqlQueryBuilderSource)this;
+        return SqlQueryRuntimeFactory.CreateQuery(executor, builderSource.CreateIndependentSqlBuilder());
     }
 
     /// <inheritdoc />
@@ -551,7 +553,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     {
         EnsureExecutionAvailable();
         var executor = (ISqlQueryPlanExecutor)this;
-        var builder = executor.CreateIndependentSqlBuilder();
+        var builder = ((ISqlQueryBuilderSource)this).CreateIndependentSqlBuilder();
         builder.From<TEntity>(alias, schema);
         builder.Select<TEntity>();
         return SqlQueryRuntimeFactory.CreateLambdaQuery(executor, builder);
@@ -564,7 +566,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         if (string.IsNullOrWhiteSpace(table))
             throw new ArgumentException("表名不能为空。", nameof(table));
         var executor = (ISqlQueryPlanExecutor)this;
-        var builder = executor.CreateIndependentSqlBuilder();
+        var builder = ((ISqlQueryBuilderSource)this).CreateIndependentSqlBuilder();
         SqlBuilderRuntimeBridge.AppendRoot(builder,
             new SqlTableReference { TableName = table, Alias = alias, Schema = schema });
         return SqlQueryRuntimeFactory.CreateLambdaQuery(executor, builder);
@@ -578,7 +580,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         if (subquery == null)
             throw new ArgumentNullException(nameof(subquery));
         var executor = (ISqlQueryPlanExecutor)this;
-        var builder = executor.CreateIndependentSqlBuilder();
+        var builder = ((ISqlQueryBuilderSource)this).CreateIndependentSqlBuilder();
         SqlBuilderRuntimeBridge.FromSubquery(builder, subquery);
         return SqlQueryRuntimeFactory.CreateLambdaQuery(executor, builder);
     }
@@ -684,8 +686,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// Query 和 Executor 保存可变的 Builder、连接与事务状态；同一实例只允许一个执行操作。
     /// </remarks>
     /// <returns>必须在操作结束时释放的执行租约。</returns>
+    internal Func<IDisposable> ExecutionLeaseFactory { get; set; }
+
     protected IDisposable AcquireExecutionLease()
     {
+        if (ExecutionLeaseFactory != null)
+            return ExecutionLeaseFactory();
         var transactionScopeExecutionLease = _transactionScopeLease?.AcquireExecutionLease();
         try
         {

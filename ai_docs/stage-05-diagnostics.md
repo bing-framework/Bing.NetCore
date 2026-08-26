@@ -40,7 +40,7 @@
 ## 2026-07-17 事件快照隔离
 
 - `BeforeExecute`、`AfterExecute` 与 `ErrorExecute` 分别发布深拷贝诊断载荷；后续事件不会修改订阅方已接收的 `BeforeExecute` 对象。
-- 每个事件保留相同的 `OperationId`、SQL、参数、连接和事务快照，`AfterExecute` 只在自己的载荷上补充耗时，`ErrorExecute` 只在自己的载荷上补充异常。
+- 每个事件保留相同的 `ExecutionId`、SQL、参数、连接和事务快照，`AfterExecute` 只在自己的载荷上补充耗时，`ErrorExecute` 只在自己的载荷上补充异常。
 - SQL Server 捕获式 Provider 测试验证 Before/After 对象、参数、连接和事务快照均不共享引用。
 
 ## 本轮补充

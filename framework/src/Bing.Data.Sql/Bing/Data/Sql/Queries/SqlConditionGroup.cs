@@ -50,9 +50,6 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
         string firstAlias, string secondAlias)
         where TFirst : class where TSecond : class => Add(predicate, or: true, new[] { firstAlias, secondAlias });
 
-    public void Group(Action<ISqlConditionGroup> configure)
-        => AndGroup(configure);
-
     public void AndGroup(Action<ISqlConditionGroup> configure)
     {
         if (configure == null)

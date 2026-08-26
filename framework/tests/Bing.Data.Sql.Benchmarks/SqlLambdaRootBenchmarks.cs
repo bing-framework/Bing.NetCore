@@ -13,10 +13,11 @@ using Bing.Data.Sql.Configs;
 namespace Bing.Data.Sql.Benchmarks;
 
 /// <summary>
-/// 类型化 Lambda 根来源构造与渲染性能基线。
+/// 类型化 Lambda 根来源与原始表来源压力场景的构造和渲染性能基线。
 /// </summary>
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 [Config(typeof(SqlLambdaBenchmarkConfig))]
 public class SqlLambdaRootBenchmarks
 {
@@ -25,7 +26,7 @@ public class SqlLambdaRootBenchmarks
     private SqlBuilderServices _services;
 
     /// <summary>
-    /// 类型化根来源数量。
+    /// 根来源数量；1、2、5、10 为类型化来源，20、50 为原始表来源压力场景。
     /// </summary>
     [Params(1, 2, 5, 10, 20, 50)]
     public int RootCount { get; set; }
@@ -48,11 +49,11 @@ public class SqlLambdaRootBenchmarks
     }
 
     /// <summary>
-    /// 测量类型化根来源重建并渲染 SQL 的成本。
+    /// 测量根来源重建并渲染 SQL 的成本。
     /// </summary>
     /// <returns>完整 From SQL。</returns>
     [Benchmark(Baseline = true)]
-    public string SetRootsAndRender()
+    public string BuildRootsAndRender()
     {
         _query = BuildQuery();
         return _query.ToSql();

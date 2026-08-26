@@ -31,16 +31,6 @@ public sealed class DiagnosticsMessage
     public string ExecutionId { get; set; }
 
     /// <summary>
-    /// 兼容已发布诊断消费者的旧操作标识；新代码应使用 <see cref="ExecutionId" />。
-    /// </summary>
-    [Obsolete("请改用 ExecutionId。")]
-    public string OperationId
-    {
-        get => ExecutionId;
-        set => ExecutionId = value;
-    }
-
-    /// <summary>
     /// 当前执行阶段，例如 Data 或 Count。
     /// </summary>
     public string Phase { get; set; }

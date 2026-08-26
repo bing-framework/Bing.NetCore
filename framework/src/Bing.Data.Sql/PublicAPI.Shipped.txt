@@ -1331,8 +1331,6 @@ Bing.Data.Sql.Diagnostics.DiagnosticsMessage.MappingProfile.get -> string
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.MappingProfile.set -> void
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Operation.get -> string
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Operation.set -> void
-Bing.Data.Sql.Diagnostics.DiagnosticsMessage.OperationId.get -> string
-Bing.Data.Sql.Diagnostics.DiagnosticsMessage.OperationId.set -> void
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Parameters.get -> Bing.Data.Sql.Diagnostics.SqlParameterDiagnosticSnapshot
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Parameters.set -> void
 Bing.Data.Sql.Diagnostics.DiagnosticsMessage.Sql.get -> string

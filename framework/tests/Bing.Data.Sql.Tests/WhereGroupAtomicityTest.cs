@@ -26,7 +26,7 @@ public class WhereGroupAtomicityTest
         {
             group.And<Sample>(item => item.IntValue > 2);
             group.Or<Sample>(item => item.IntValue == 3);
-            group.Group(nested => nested.And<Sample>(item => item.IntValue < 10));
+            group.AndGroup(nested => nested.And<Sample>(item => item.IntValue < 10));
         });
 
         // Assert

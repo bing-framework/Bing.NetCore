@@ -1,4 +1,5 @@
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Multiple;
 using Bing.Dapper.Tests.Infrastructure;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -112,11 +113,109 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
         Assert.Equal(1, count[0]);
     }
 
+    /// <summary>
+    /// 测试目的：异步创建的多结果集使用同步 Dispose 时不得同步等待异步完成回调，且释放后执行器应可复用。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteAsync_WhenResultIsDisposedSynchronously_ShouldReleaseExecutionResources()
+    {
+        // Arrange
+        await _fixture.InsertSampleAsync("first", 1m, "secret-1");
+        using var executor = _fixture.CreateMultipleQueryExecutor();
+        var command = CreateTwoResultCommand(executor);
+
+        // Act
+        var result = await executor.ExecuteAsync(command);
+        result.Dispose();
+
+        // Assert
+        using var nextResult = executor.Execute(command);
+        Assert.Single(nextResult.Read<SampleName>());
+        Assert.Single(nextResult.Read<int>());
+    }
+
+    /// <summary>
+    /// 测试目的：同步创建的多结果集使用异步 Dispose 时应完成异步事务和租约清理，且释放后执行器应可复用。
+    /// </summary>
+    [Fact]
+    public async Task Execute_WhenResultIsDisposedAsynchronously_ShouldReleaseExecutionResources()
+    {
+        // Arrange
+        await _fixture.InsertSampleAsync("first", 1m, "secret-1");
+        using var executor = _fixture.CreateMultipleQueryExecutor();
+        var command = CreateTwoResultCommand(executor);
+
+        // Act
+        var result = executor.Execute(command);
+        await result.DisposeAsync();
+
+        // Assert
+        using var nextResult = await executor.ExecuteAsync(command);
+        Assert.Single(await nextResult.ReadAsync<SampleName>(CancellationToken.None));
+        Assert.Single(await nextResult.ReadAsync<int>(CancellationToken.None));
+    }
+
+    /// <summary>
+    /// 测试目的：结果读取映射失败时应自动关闭读取器并归还执行租约，使同一执行器可以再次执行。
+    /// </summary>
+    [Fact]
+    public async Task Read_WhenMaterializationFails_ShouldReleaseExecutionResources()
+    {
+        // Arrange
+        await _fixture.InsertSampleAsync("first", 1m, "secret-1");
+        using var executor = _fixture.CreateMultipleQueryExecutor();
+        var command = executor.CreateBatch()
+            .Append("Select Name From samples")
+            .Append("Select Count(*) From samples")
+            .Build();
+        using (var result = executor.Execute(command))
+        {
+            // Act
+            Assert.ThrowsAny<Exception>(() => result.Read<int>());
+        }
+
+        // Assert
+        using var nextResult = executor.Execute(command);
+        Assert.Single(nextResult.Read<SampleName>());
+        Assert.Single(nextResult.Read<int>());
+    }
+
+    /// <summary>
+    /// 测试目的：同步和异步重复释放都应保持幂等，不得重复完成事务或归还租约。
+    /// </summary>
+    [Fact]
+    public async Task Dispose_WhenCalledRepeatedly_ShouldRemainIdempotent()
+    {
+        // Arrange
+        await _fixture.InsertSampleAsync("first", 1m, "secret-1");
+        using var executor = _fixture.CreateMultipleQueryExecutor();
+        var command = CreateTwoResultCommand(executor);
+        var result = await executor.ExecuteAsync(command);
+
+        // Act
+        result.Dispose();
+        result.Dispose();
+        await result.DisposeAsync();
+
+        // Assert
+        using var nextResult = executor.Execute(command);
+        Assert.Single(nextResult.Read<SampleName>());
+        Assert.Single(nextResult.Read<int>());
+    }
+
     /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
     /// <inheritdoc />
     public Task DisposeAsync() => Task.CompletedTask;
+
+    /// <summary>
+    /// 创建固定的两个结果集命令。
+    /// </summary>
+    private static SqlMultipleQueryCommand CreateTwoResultCommand(ISqlMultipleQueryExecutor executor) => executor.CreateBatch()
+        .Append("Select Name From samples")
+        .Append("Select Count(*) From samples")
+        .Build();
 
     /// <summary>
     /// 多结果集样例名称投影。

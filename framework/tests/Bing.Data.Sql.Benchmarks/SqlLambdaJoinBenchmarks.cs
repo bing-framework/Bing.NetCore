@@ -18,6 +18,7 @@ namespace Bing.Data.Sql.Benchmarks;
 /// </summary>
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 [Config(typeof(SqlLambdaBenchmarkConfig))]
 public class SqlLambdaJoinBenchmarks
 {
@@ -33,7 +34,7 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 连续 Join 的来源数量。
     /// </summary>
-    [Params(1, 2, 5, 10, 20, 50)]
+    [Params(1, 2, 5, 10)]
     public int JoinCount { get; set; }
 
     /// <summary>
@@ -157,10 +158,6 @@ public class SqlLambdaJoinBenchmarks
             case 10:
                 AddJoinsThrough(query, 10);
                 break;
-            case 20:
-            case 50:
-                AddRawJoinsThrough(query, JoinCount);
-                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(JoinCount));
         }
@@ -188,12 +185,6 @@ public class SqlLambdaJoinBenchmarks
             query.Join<Root08, Root09>((left, right) => left.Id == right.ParentId);
         if (count >= 10)
             query.Join<Root09, Root10>((left, right) => left.Id == right.ParentId);
-    }
-
-    private static void AddRawJoinsThrough(SqlLambdaQuery query, int count)
-    {
-        for (var index = 2; index <= count; index++)
-            query.GetBuilder().Join($"Root{index}", $"r{index}").AppendOn($"r{index}.Id=r{index - 1}.Id");
     }
 
     private static ISqlQueryPlanExecutor CreateExecutor() =>

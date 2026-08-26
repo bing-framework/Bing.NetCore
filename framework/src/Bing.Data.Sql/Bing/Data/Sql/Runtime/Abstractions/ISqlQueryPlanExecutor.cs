@@ -7,7 +7,7 @@ namespace Bing.Data.Sql;
 /// 执行独立 SQL 查询计划的运行时契约。
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public partial interface ISqlQueryPlanExecutor : ISqlQueryBuilderSource
+public partial interface ISqlQueryPlanExecutor
 {
 
     /// <summary>

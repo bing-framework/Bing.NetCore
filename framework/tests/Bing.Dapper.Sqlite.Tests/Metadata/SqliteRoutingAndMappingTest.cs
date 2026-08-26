@@ -14,6 +14,23 @@ namespace Bing.Dapper.Tests.Metadata;
 public class SqliteRoutingAndMappingTest
 {
     /// <summary>
+    /// 测试目的：SQLite 离线 SQL 合同必须完整保留数据库段、表别名、列引用和参数占位符。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenQualifiedTableAndPredicateConfigured_ShouldRenderCompleteSqliteSql()
+    {
+        // Arrange
+        var builder = new SqliteBuilder();
+
+        // Act
+        var sql = builder.Select("u.Id").From("audit.Users", "u").Where("u.Enabled", true).ToSql();
+
+        // Assert
+        Assert.Equal("Select `u`.`Id` \r\nFrom `audit`.`Users` As `u` \r\nWhere `u`.`Enabled`=@_p_0", sql);
+        Assert.Equal(true, builder.GetParam("@_p_0"));
+    }
+
+    /// <summary>
     /// 测试 - Sqlite Builder 应使用 SqlOptions 绑定的多库上下文解析表名与列名。
     /// </summary>
     [Fact]

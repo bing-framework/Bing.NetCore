@@ -18,7 +18,7 @@ internal static class BingSqlDiagnosticDescriptors
     public static readonly DiagnosticDescriptor UnsafeInterpolatedSql = new(
         UnsafeInterpolatedSqlId,
         "插值 SQL 未参数化",
-        "插值字符串传入普通 SQL string 入口会拼接值，请改用 SqlInterpolated<T>() 或参数对象。",
+        "插值字符串传入普通 SQL string 入口会拼接值，请改用 SqlInterpolated(...) 或参数对象。",
         "Bing.Data.Sql.Security",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true,

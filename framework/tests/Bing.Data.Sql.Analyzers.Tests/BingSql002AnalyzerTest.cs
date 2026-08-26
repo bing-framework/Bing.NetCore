@@ -33,6 +33,12 @@ public class BingSql002AnalyzerTest
         // Assert
         var diagnostic = Assert.Single(diagnostics);
         Assert.Equal("BINGSQL002", diagnostic.Id);
+        Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity);
+        Assert.Equal("插值 SQL 未参数化", diagnostic.Descriptor.Title.ToString());
+        Assert.Equal("插值字符串传入普通 SQL string 入口会拼接值，请改用 SqlInterpolated(...) 或参数对象。",
+            diagnostic.GetMessage());
+        Assert.Contains("FormattableString", diagnostic.Descriptor.Description.ToString(), StringComparison.Ordinal);
+        AssertDiagnosticStartsAtSourceExpression(diagnostic, source, 3, "$\"");
     }
 
     /// <summary>
@@ -84,6 +90,8 @@ public class BingSql002AnalyzerTest
         // Assert
         Assert.Equal(2, diagnostics.Length);
         Assert.All(diagnostics, diagnostic => Assert.Equal("BINGSQL002", diagnostic.Id));
+        AssertDiagnosticStartsAtSourceExpression(diagnostics[0], source, 6, "sql");
+        AssertDiagnosticStartsAtSourceExpression(diagnostics[1], source, 7, "\"Select");
     }
 
     /// <summary>
@@ -280,6 +288,19 @@ public class BingSql002AnalyzerTest
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(new UnsafeInterpolatedSqlAnalyzer());
         return (await compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync())
             .OrderBy(diagnostic => diagnostic.Location.SourceSpan.Start).ToImmutableArray();
+    }
+
+    /// <summary>
+    /// 断言诊断从实际传入 SQL 入口的表达式起始位置报告，避免定位漂移到调用方法或接收对象。
+    /// </summary>
+    private static void AssertDiagnosticStartsAtSourceExpression(Diagnostic diagnostic, string source, int line,
+        string expectedToken)
+    {
+        var sourceLine = source.Split('\n')[line].TrimEnd('\r');
+        var expectedColumn = sourceLine.IndexOf(expectedToken, StringComparison.Ordinal);
+        Assert.True(expectedColumn >= 0);
+        Assert.Equal(line, diagnostic.Location.GetLineSpan().StartLinePosition.Line);
+        Assert.Equal(expectedColumn, diagnostic.Location.GetLineSpan().StartLinePosition.Character);
     }
 
     /// <summary>

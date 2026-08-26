@@ -1949,6 +1949,20 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 SampleName = sample.Name,
                 RelatedName = name.Name
             });
+        var fluentAsync = await query.Query().Select("s.Id,s.Name,s.Amount,s.Id,s.Name").From("samples", "s")
+            .OrderBy("s.Id").ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -1962,6 +1976,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one", "two:two", "three:three" },
             fluent.Select(item => $"{item.SampleName}:{item.RelatedName}"));
+        Assert.Equal(new[] { "one:one", "two:two", "three:three" },
+            fluentAsync.Select(item => $"{item.SampleName}:{item.RelatedName}"));
+        Assert.Equal(new[] { "one:one", "three:three" },
+            textSync.Select(item => $"{item.SampleName}:{item.RelatedName}"));
         Assert.Equal(new[] { "one:one", "three:three" }, text.Select(item => $"{item.SampleName}:{item.RelatedName}"));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql(
                 "Select Id,Name,Amount,Id,Name From samples")
@@ -1993,6 +2011,25 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 SecondName = second.Name,
                 ThirdName = third.Name
             });
+        var fluentAsync = await query.Query()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToListAsync<Sample, SampleName, SampleName, SampleTriple>((sample, second, third) => new SampleTriple
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name
+            });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SampleName, SampleTriple>((sample, second, third) => new SampleTriple
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name
+            });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -2006,6 +2043,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one:one", "two:two:two", "three:three:three" },
             fluent.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
+        Assert.Equal(new[] { "one:one:one", "two:two:two", "three:three:three" },
+            fluentAsync.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
+        Assert.Equal(new[] { "one:one:one", "three:three:three" },
+            textSync.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
         Assert.Equal(new[] { "one:one:one", "three:three:three" },
             text.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}"));
     }
@@ -2032,6 +2073,27 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                 ThirdName = third.Name,
                 FourthName = fourth.Name
             });
+        var fluentAsync = await query.Query()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleQuad>((sample, second, third, fourth) => new SampleQuad
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name,
+                FourthName = fourth.Name
+            });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleQuad>((sample, second, third, fourth) => new SampleQuad
+            {
+                FirstName = sample.Name,
+                SecondName = second.Name,
+                ThirdName = third.Name,
+                FourthName = fourth.Name
+            });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -2046,6 +2108,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one:one:one", "two:two:two:two", "three:three:three:three" },
             fluent.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
+        Assert.Equal(new[] { "one:one:one:one", "two:two:two:two", "three:three:three:three" },
+            fluentAsync.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
+        Assert.Equal(new[] { "one:one:one:one", "three:three:three:three" },
+            textSync.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
         Assert.Equal(new[] { "one:one:one:one", "three:three:three:three" },
             text.Select(item => $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}"));
     }
@@ -2074,6 +2140,31 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FourthName = fourth.Name,
                     FifthName = fifth.Name
                 });
+        var fluentAsync = await query.Query()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleQuint>((sample, second, third, fourth, fifth) =>
+                new SampleQuint
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name
+                });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName, SampleQuint>((sample, second, third, fourth, fifth) =>
+                new SampleQuint
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name
+                });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -2090,6 +2181,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one:one:one:one", "two:two:two:two:two", "three:three:three:three:three" },
             fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one", "two:two:two:two:two", "three:three:three:three:three" },
+            fluentAsync.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one", "three:three:three:three:three" },
+            textSync.Select(item =>
                 $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}"));
         Assert.Equal(new[] { "one:one:one:one:one", "three:three:three:three:three" },
             text.Select(item =>
@@ -2121,6 +2218,33 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     FifthName = fifth.Name,
                     SixthName = sixth.Name
                 });
+        var fluentAsync = await query.Query()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleSext>(
+                (sample, second, third, fourth, fifth, sixth) => new SampleSext
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name
+                });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleSext>(
+                (sample, second, third, fourth, fifth, sixth) => new SampleSext
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name
+                });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -2138,6 +2262,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one:one:one:one:one", "two:two:two:two:two:two", "three:three:three:three:three:three" },
             fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one", "two:two:two:two:two:two", "three:three:three:three:three:three" },
+            fluentAsync.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one", "three:three:three:three:three:three" },
+            textSync.Select(item =>
                 $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}"));
         Assert.Equal(new[] { "one:one:one:one:one:one", "three:three:three:three:three:three" },
             text.Select(item =>
@@ -2170,6 +2300,35 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     SixthName = sixth.Name,
                     SeventhName = seventh.Name
                 });
+        var fluentAsync = await query.Query()
+            .Select("s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name")
+            .From("samples", "s")
+            .OrderBy("s.Id")
+            .ToListAsync<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName, SampleSept>(
+                (sample, second, third, fourth, fifth, sixth, seventh) => new SampleSept
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name,
+                    SeventhName = seventh.Name
+                });
+        var textSync = query.Sql(
+                "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
+                new { name = "two" })
+            .ToList<Sample, SampleName, SampleName, SampleName, SampleName, SampleName, SampleName, SampleSept>(
+                (sample, second, third, fourth, fifth, sixth, seventh) => new SampleSept
+                {
+                    FirstName = sample.Name,
+                    SecondName = second.Name,
+                    ThirdName = third.Name,
+                    FourthName = fourth.Name,
+                    FifthName = fifth.Name,
+                    SixthName = sixth.Name,
+                    SeventhName = seventh.Name
+                });
         var text = await query.Sql(
                 "Select s.Id,s.Name,s.Amount,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name,s.Id,s.Name From samples s Where s.Name <> @name Order By s.Id",
                 new { name = "two" })
@@ -2188,6 +2347,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one:one:one:one:one:one:one", "two:two:two:two:two:two:two", "three:three:three:three:three:three:three" },
             fluent.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}:{item.SeventhName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one:one", "two:two:two:two:two:two:two", "three:three:three:three:three:three:three" },
+            fluentAsync.Select(item =>
+                $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}:{item.SeventhName}"));
+        Assert.Equal(new[] { "one:one:one:one:one:one:one", "three:three:three:three:three:three:three" },
+            textSync.Select(item =>
                 $"{item.FirstName}:{item.SecondName}:{item.ThirdName}:{item.FourthName}:{item.FifthName}:{item.SixthName}:{item.SeventhName}"));
         Assert.Equal(new[] { "one:one:one:one:one:one:one", "three:three:three:three:three:three:three" },
             text.Select(item =>
@@ -2329,6 +2494,161 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.Equal(new[] { "one", "two", "three" }, fluent);
         Assert.Equal(new[] { "one", "two", "three" }, text);
+    }
+
+    /// <summary>
+    /// 测试目的：双对象多映射在空结果集上应返回空集合，且 Fluent 与文本同步/异步路径均能释放执行资源。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenTwoTypeMappedResultIsEmpty_ShouldReturnEmptyForAllExecutionPaths()
+    {
+        // Arrange
+        using var query = _fixture.CreateQuery();
+        const string sql = "Select Id,Name,Amount,Id,Name From samples Where 1 = 0";
+
+        // Act
+        var fluent = query.Query().Select("Id,Name,Amount,Id,Name").From("samples")
+            .Where("Id", -1)
+            .ToList<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
+        var fluentAsync = await query.Query().Select("Id,Name,Amount,Id,Name").From("samples")
+            .Where("Id", -1)
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            });
+        var text = query.Sql(sql).ToList<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+        {
+            SampleName = sample.Name,
+            RelatedName = name.Name
+        });
+        var textAsync = await query.Sql(sql).ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+        {
+            SampleName = sample.Name,
+            RelatedName = name.Name
+        });
+
+        // Assert
+        Assert.Empty(fluent);
+        Assert.Empty(fluentAsync);
+        Assert.Empty(text);
+        Assert.Empty(textAsync);
+    }
+
+    /// <summary>
+    /// 测试目的：map 委托返回 null 时应保留对应行的 null 结果，不应被执行器错误地转换或丢弃。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenMapReturnsNull_ShouldPreserveNullResultAndAllowRetry()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluent = query.Query().Select("Id,Name,Amount,Id,Name").From("samples").OrderBy("Id")
+            .ToList<Sample, SampleName, SamplePair>((sample, name) => null);
+        var text = await query.Sql("Select Id,Name,Amount,Id,Name From samples Order By Id")
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => null);
+        var retry = await query.Sql("Select Name From samples Order By Id").ToListAsync<string>();
+
+        // Assert
+        Assert.Equal(3, fluent.Count);
+        Assert.All(fluent, Assert.Null);
+        Assert.Equal(3, text.Count);
+        Assert.All(text, Assert.Null);
+        Assert.Equal(new[] { "one", "two", "three" }, retry);
+    }
+
+    /// <summary>
+    /// 测试目的：map 委托抛出异常时应保留业务异常、释放执行资源，并允许同一查询继续执行。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenMapThrows_ShouldPreserveExceptionAndAllowRetry()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+
+        // Act
+        var fluentException = Assert.Throws<InvalidOperationException>(() => query.Query()
+            .Select("Id,Name,Amount,Id,Name").From("samples")
+            .ToList<Sample, SampleName, SamplePair>((sample, name) => throw new InvalidOperationException("map failed")));
+        var textException = await Assert.ThrowsAsync<InvalidOperationException>(() => query.Sql(
+                "Select Id,Name,Amount,Id,Name From samples")
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => throw new InvalidOperationException("map failed")));
+        var retry = query.Query().Select("Name").From("samples").OrderBy("Id").ToList<string>();
+
+        // Assert
+        Assert.Equal("map failed", fluentException.Message);
+        Assert.Equal("map failed", textException.Message);
+        Assert.Equal(new[] { "one", "two", "three" }, retry);
+    }
+
+    /// <summary>
+    /// 测试目的：映射字段发生类型转换失败时应传播转换异常，并在失败后释放资源供后续查询重试。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenMappedValueCannotConvert_ShouldReleaseResourcesForRetry()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        const string sql = "Select 'not-a-number' As Id,Name,Amount,Id,Name From samples";
+
+        // Act
+        var fluentException = Assert.ThrowsAny<Exception>(() => query.Query()
+            .Select("'not-a-number' As Id,Name,Amount,Id,Name").From("samples")
+            .ToList<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            }));
+        var textException = await Assert.ThrowsAnyAsync<Exception>(() => query.Sql(sql)
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair
+            {
+                SampleName = sample.Name,
+                RelatedName = name.Name
+            }));
+        var retry = await query.Sql("Select Count(*) From samples").SingleAsync<int>();
+
+        // Assert
+        Assert.NotNull(fluentException);
+        Assert.NotNull(textException);
+        Assert.Equal(3, retry);
+    }
+
+    /// <summary>
+    /// 测试目的：Fluent 与文本异步多映射在预取消令牌下应立即取消，并保持 query 可再次执行。
+    /// </summary>
+    [Fact]
+    public async Task QueryDescriptions_WhenAsyncMappingIsPreCancelled_ShouldCancelBothPathsAndAllowRetry()
+    {
+        // Arrange
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act
+        var fluentException = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Query()
+            .Select("Id,Name,Amount,Id,Name").From("samples")
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair(),
+                cancellationToken: cancellationTokenSource.Token));
+        var textException = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => query.Sql(
+                "Select Id,Name,Amount,Id,Name From samples")
+            .ToListAsync<Sample, SampleName, SamplePair>((sample, name) => new SamplePair(),
+                cancellationToken: cancellationTokenSource.Token));
+        var retry = await query.Sql("Select Count(*) From samples").SingleAsync<int>();
+
+        // Assert
+        Assert.NotNull(fluentException);
+        Assert.NotNull(textException);
+        Assert.Equal(3, retry);
     }
 
     /// <summary>

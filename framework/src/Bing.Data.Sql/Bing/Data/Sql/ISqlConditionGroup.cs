@@ -53,11 +53,6 @@ public interface ISqlConditionGroup
         string firstAlias, string secondAlias)
         where TFirst : class where TSecond : class;
 
-    /// <summary>
-    /// 追加嵌套条件组。
-    /// </summary>
-    void Group(Action<ISqlConditionGroup> configure);
-
     /// <summary>按 And 追加嵌套条件组。</summary>
     void AndGroup(Action<ISqlConditionGroup> configure);
 

@@ -50,7 +50,8 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
             WriteTraceLog(preparedCommand);
             var reader = connection.QueryMultiple(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
             return new SqlMultipleQueryResult(reader, executionLease,
-                (completed, exception) => CompleteExecution(completed, message, exception));
+                (completed, exception) => CompleteExecution(completed, message, exception),
+                (completed, exception) => CompleteExecutionAsync(completed, message, exception));
         }
         catch (Exception) when (skippedExecution)
         {
@@ -100,6 +101,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
                 commandTimeout: timeout, cancellationToken: cancellationToken));
             cancellationToken.ThrowIfCancellationRequested();
             return new SqlMultipleQueryResult(reader, executionLease,
+                (completed, exception) => CompleteExecution(completed, message, exception),
                 (completed, exception) => CompleteExecutionAsync(completed, message, exception));
         }
         catch (Exception) when (skippedExecution)

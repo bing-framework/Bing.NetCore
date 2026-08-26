@@ -154,19 +154,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult ToEntity<TResult>(int? timeout = null) => _executor.SingleOrDefault<TResult>(GetPlan(), timeout);
 
     /// <summary>
-    /// 查询全部结果并按指定键和值构造字典。
-    /// </summary>
-    public Dictionary<TKey, TValue> ToDictionary<TResult, TKey, TValue>(Func<TResult, TKey> keySelector,
-        Func<TResult, TValue> valueSelector, int? timeout = null)
-    {
-        if (keySelector == null)
-            throw new ArgumentNullException(nameof(keySelector));
-        if (valueSelector == null)
-            throw new ArgumentNullException(nameof(valueSelector));
-        return ToList<TResult>(timeout).ToDictionary(keySelector, valueSelector);
-    }
-
-    /// <summary>
     /// 同步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
@@ -283,15 +270,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult Single<TResult>(int? timeout = null) => _executor.Single<TResult>(GetPlan(), timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并获取唯一一行或默认值。
-    /// </summary>
-    /// <typeparam name="TResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <returns>唯一结果行或默认值。</returns>
-    public TResult SingleOrDefault<TResult>(int? timeout = null) =>
-        _executor.SingleOrDefault<TResult>(GetPlan(), timeout);
-
-    /// <summary>
     /// 同步执行当前 Fluent 查询并获取首行首列值。
     /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
@@ -334,21 +312,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(), timeout,
         cancellationToken);
-
-    /// <summary>
-    /// 异步查询全部结果并按指定键和值构造字典。
-    /// </summary>
-    public async Task<Dictionary<TKey, TValue>> ToDictionaryAsync<TResult, TKey, TValue>(
-        Func<TResult, TKey> keySelector, Func<TResult, TValue> valueSelector, int? timeout = null,
-        CancellationToken cancellationToken = default)
-    {
-        if (keySelector == null)
-            throw new ArgumentNullException(nameof(keySelector));
-        if (valueSelector == null)
-            throw new ArgumentNullException(nameof(valueSelector));
-        var items = await ToListAsync<TResult>(timeout, cancellationToken).ConfigureAwait(false);
-        return items.ToDictionary(keySelector, valueSelector);
-    }
 
     /// <summary>
     /// 异步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
@@ -482,17 +445,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示唯一结果行的异步操作。</returns>
     public Task<TResult> SingleAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _executor.SingleAsync<TResult>(GetPlan(), timeout, cancellationToken);
-
-    /// <summary>
-    /// 异步执行当前 Fluent 查询并获取唯一一行或默认值。
-    /// </summary>
-    /// <typeparam name="TResult">结果行映射类型。</typeparam>
-    /// <param name="timeout">执行超时时间，单位为秒。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
-    public Task<TResult> SingleOrDefaultAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(), timeout,
-        cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取首行首列值。

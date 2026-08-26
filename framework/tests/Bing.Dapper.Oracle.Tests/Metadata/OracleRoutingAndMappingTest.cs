@@ -14,6 +14,23 @@ namespace Bing.Dapper.Tests.Metadata;
 public class OracleRoutingAndMappingTest
 {
     /// <summary>
+    /// 测试目的：Oracle 离线 SQL 合同必须完整保留 Schema、表别名、列引用和参数占位符。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenQualifiedTableAndPredicateConfigured_ShouldRenderCompleteOracleSql()
+    {
+        // Arrange
+        var builder = new OracleBuilder();
+
+        // Act
+        var sql = builder.Select("u.Id").From("audit.Users", "u").Where("u.Enabled", true).ToSql();
+
+        // Assert
+        Assert.Equal("Select \"u\".\"Id\" \r\nFrom \"audit\".\"Users\" \"u\" \r\nWhere \"u\".\"Enabled\"=:p_0", sql);
+        Assert.Equal(1, builder.GetParam("p_0"));
+    }
+
+    /// <summary>
     /// 测试 - Oracle Builder 应使用 SqlOptions 绑定的多库上下文解析表名与列名。
     /// </summary>
     [Fact]

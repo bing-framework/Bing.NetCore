@@ -182,6 +182,16 @@ public class SqlQueryApiContractTest
     }
 
     /// <summary>
+    /// 测试目的：已删除的兼容条件组和诊断标识不得重新出现在公开契约中。
+    /// </summary>
+    [Fact]
+    public void RemovedCompatibilityMembers_WhenPublicApiInspected_ShouldBeAbsent()
+    {
+        Assert.Null(typeof(ISqlConditionGroup).GetMethod("Group"));
+        Assert.Null(typeof(Bing.Data.Sql.Diagnostics.DiagnosticsMessage).GetProperty("OperationId"));
+    }
+
+    /// <summary>
     /// 测试目的：运行时 SPI 保持跨程序集可用，但不得作为普通查询用户的 IntelliSense 推荐入口。
     /// </summary>
     [Fact]
@@ -201,6 +211,19 @@ public class SqlQueryApiContractTest
         Assert.All(runtimeTypes, type => Assert.Equal(EditorBrowsableState.Never,
             type.GetCustomAttributes(typeof(EditorBrowsableAttribute), false)
                 .Cast<EditorBrowsableAttribute>().Single().State));
+    }
+
+    /// <summary>
+    /// 测试目的：执行器公共契约只负责执行计划，Builder 创建职责必须通过独立 Source 契约提供。
+    /// </summary>
+    [Fact]
+    public void RuntimeContracts_WhenPlanExecutorInspected_ShouldNotInheritBuilderSource()
+    {
+        Assert.DoesNotContain(typeof(ISqlQueryPlanExecutor).GetInterfaces(), type =>
+            type == typeof(ISqlQueryBuilderSource));
+        Assert.Single(typeof(ISqlQueryBuilderSource).GetMethods());
+        Assert.Equal(nameof(ISqlQueryBuilderSource.CreateIndependentSqlBuilder),
+            typeof(ISqlQueryBuilderSource).GetMethods().Single().Name);
     }
 
     /// <summary>

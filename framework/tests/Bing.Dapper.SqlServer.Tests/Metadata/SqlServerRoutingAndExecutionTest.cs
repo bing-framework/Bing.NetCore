@@ -35,6 +35,23 @@ namespace Bing.Dapper.Tests.Metadata;
 public class SqlServerRoutingAndExecutionTest
 {
     /// <summary>
+    /// 测试目的：SQL Server 离线 SQL 合同必须完整保留 Schema、表别名、列引用和参数占位符。
+    /// </summary>
+    [Fact]
+    public void Builder_WhenQualifiedTableAndPredicateConfigured_ShouldRenderCompleteSqlServerSql()
+    {
+        // Arrange
+        var builder = new SqlServerBuilder();
+
+        // Act
+        var sql = builder.Select("u.Id").From("audit.Users", "u").Where("u.Enabled", true).ToSql();
+
+        // Assert
+        Assert.Equal("Select [u].[Id] \r\nFrom [audit].[Users] As [u] \r\nWhere [u].[Enabled]=@_p_0", sql);
+        Assert.Equal(true, builder.GetParam("@_p_0"));
+    }
+
+    /// <summary>
     /// 测试目的：支持 Full Join 的 SQL Server 应为多表类型化连接生成完整方言 SQL，并按参数位置绑定同类型来源。
     /// </summary>
     [Fact]
@@ -1509,6 +1526,42 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：多结果集同步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时，
+    /// 主异常及全部清理异常必须按生命周期顺序聚合，且每项资源只清理一次。
+    /// </summary>
+    [Fact]
+    public void ExecuteMultiple_WhenAllCleanupResourcesFail_ShouldPreserveLeaseFailureOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnReaderDispose = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        executor.ThrowOnExecutionLeaseDispose = true;
+        executor.ConfigureExecutionLease();
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = executor.Execute(command);
+        var exception = Assert.Throws<AggregateException>(result.Dispose);
+
+        // Assert
+        Assert.Equal(new[] { "reader dispose failed", "rollback failed", "error hook failed",
+            "completion hook failed", "execution lease dispose failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.ReaderDisposeCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+        Assert.Equal(1, executor.ExecutionLeaseDisposeCount);
+    }
+
+    /// <summary>
     /// 测试目的：多结果集异步命令完成后发生取消时，执行器必须释放已获取的读取器并回滚短事务，不能返回可提交的结果对象。
     /// </summary>
     [Fact]
@@ -1562,6 +1615,43 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：多结果集异步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时，
+    /// 异步清理必须保持同步路径相同的异常顺序和一次性资源释放语义。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenAllCleanupResourcesFail_ShouldPreserveLeaseFailureOrder()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ThrowOnReaderDispose = true,
+            ThrowOnTransactionRollback = true
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        executor.ThrowOnErrorHook = true;
+        executor.ThrowOnCompletionHook = true;
+        executor.ThrowOnExecutionLeaseDispose = true;
+        executor.ConfigureExecutionLease();
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = await executor.ExecuteAsync(command);
+        var exception = await Assert.ThrowsAsync<AggregateException>(() => result.DisposeAsync().AsTask());
+
+        // Assert
+        Assert.Equal(new[] { "reader dispose failed", "rollback failed", "error hook failed",
+            "completion hook failed", "execution lease dispose failed" },
+            exception.Flatten().InnerExceptions.Select(item => item.Message));
+        Assert.Equal(1, connection.AsyncReaderDisposeCount);
+        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(1, executor.ErrorHookCount);
+        Assert.Equal(1, executor.CompletionHookCount);
+        Assert.Equal(1, executor.ExecutionLeaseDisposeCount);
+    }
+
+    /// <summary>
     /// 测试目的：异步多结果集完整消费并异步释放后，主库短事务必须使用原生异步开始和提交成员。
     /// </summary>
     [Fact]
@@ -1588,6 +1678,95 @@ public class SqlServerRoutingAndExecutionTest
         connection.LastTransaction.CommitCount.ShouldBe(0);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：异步创建的多结果集同步释放时，应使用同步事务完成路径，且完成 Hook 和租约只能释放一次。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenConsumedAndDisposedSynchronously_ShouldUseSyncCompletionOnce()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = await executor.ExecuteAsync(command);
+        var rows = await result.ReadAsync<MappedSample>();
+        result.Dispose();
+        result.Dispose();
+
+        // Assert
+        rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.ReaderDisposeCount.ShouldBe(1);
+        executor.ErrorHookCount.ShouldBe(0);
+        executor.CompletionHookCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：同步创建的多结果集异步释放时，应使用异步事务完成路径且不重复提交事务。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultiple_WhenConsumedAndDisposedAsynchronously_ShouldUseAsyncCompletionOnce()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection
+        {
+            ResultSet = CreateMappedSampleTable(new MappedSample { Id = 1, Name = "Alice" })
+        };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = executor.Execute(command);
+        var rows = result.Read<MappedSample>();
+        await result.DisposeAsync();
+        await result.DisposeAsync();
+
+        // Assert
+        rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.ReaderDisposeCount.ShouldBe(1);
+        connection.AsyncReaderDisposeCount.ShouldBe(0);
+        executor.ErrorHookCount.ShouldBe(0);
+        executor.CompletionHookCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 测试目的：异步创建的多结果集同步提前释放时，应使用同步回滚路径并保留回滚失败异常。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteMultipleAsync_WhenDisposedSynchronouslyBeforeConsumptionAndRollbackFails_ShouldPreserveRollbackException()
+    {
+        // Arrange
+        var connection = new CaptureDbConnection { ThrowOnTransactionRollback = true };
+        var executor = CreateLifecycleMultipleExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+        var command = new SqlMultipleQueryCommand("Select Id,Name From [Users]", Array.Empty<SqlParam>());
+
+        // Act
+        var result = await executor.ExecuteAsync(command);
+        var exception = Assert.Throws<InvalidOperationException>(result.Dispose);
+
+        // Assert
+        exception.Message.ShouldBe("rollback failed");
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        executor.ErrorHookCount.ShouldBe(1);
+        executor.CompletionHookCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -5603,6 +5782,17 @@ public class SqlServerRoutingAndExecutionTest
         /// </summary>
         public int CompletionHookCount { get; private set; }
 
+        /// <summary>
+        /// 是否让执行租约释放时抛出异常。
+        /// </summary>
+        public bool ThrowOnExecutionLeaseDispose { get; set; }
+
+        /// <summary>
+        /// 执行租约释放次数。
+        /// </summary>
+        public int ExecutionLeaseDisposeCount { get; private set; }
+
+        /// <inheritdoc />
         /// <inheritdoc />
         protected override bool ExecuteBefore() => SkipBeforeExecution == false && base.ExecuteBefore();
 
@@ -5623,6 +5813,36 @@ public class SqlServerRoutingAndExecutionTest
                 throw new InvalidOperationException("completion hook failed");
             base.ExecuteAfter(result);
         }
+
+        /// <summary>
+        /// 配置可控执行租约释放行为。
+        /// </summary>
+        public void ConfigureExecutionLease()
+        {
+            ExecutionLeaseFactory = () => new TestExecutionLease(() =>
+            {
+                ExecutionLeaseDisposeCount++;
+                if (ThrowOnExecutionLeaseDispose)
+                    throw new InvalidOperationException("execution lease dispose failed");
+            });
+        }
+    }
+
+    /// <summary>
+    /// 支持注入释放异常的测试执行租约。
+    /// </summary>
+    private sealed class TestExecutionLease : IDisposable
+    {
+        private Action _dispose;
+
+        /// <summary>
+        /// 初始化可控执行租约。
+        /// </summary>
+        /// <param name="dispose">释放回调。</param>
+        public TestExecutionLease(Action dispose) => _dispose = dispose;
+
+        /// <inheritdoc />
+        public void Dispose() => Interlocked.Exchange(ref _dispose, null)?.Invoke();
     }
 
     /// <summary>

@@ -137,7 +137,6 @@ Bing.Data.Sql.ISqlConditionGroup.Or<TEntity>(System.Linq.Expressions.Expression<
 Bing.Data.Sql.ISqlConditionGroup.Or<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> void
 Bing.Data.Sql.ISqlConditionGroup.Or<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> void
 Bing.Data.Sql.ISqlConditionGroup.Or<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> void
-Bing.Data.Sql.ISqlConditionGroup.Group(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
 Bing.Data.Sql.ISqlConditionGroup.AndGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
 Bing.Data.Sql.ISqlConditionGroup.OrGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> void
 Bing.Data.Sql.SqlLambdaQuery.WhereGroup(System.Action<Bing.Data.Sql.ISqlConditionGroup> configure) -> Bing.Data.Sql.SqlLambdaQuery

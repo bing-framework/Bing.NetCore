@@ -36,10 +36,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
 
     internal TResult ToEntity<TResult>(int? timeout = null) => _query.ToEntity<TResult>(timeout);
 
-    internal Dictionary<TKey, TValue> ToDictionary<TResult, TKey, TValue>(Func<TResult, TKey> keySelector,
-        Func<TResult, TValue> valueSelector, int? timeout = null) =>
-        _query.ToDictionary(keySelector, valueSelector, timeout);
-
     /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的第一行。</summary>
     public TResult First<TResult>(int? timeout = null) => _query.First<TResult>(timeout);
 
@@ -50,8 +46,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public TResult Single<TResult>(int? timeout = null) => _query.Single<TResult>(timeout);
 
     /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的唯一一行或默认值。</summary>
-    public TResult SingleOrDefault<TResult>(int? timeout = null) => _query.SingleOrDefault<TResult>(timeout);
-
     /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的首行首列值。</summary>
     public TResult Scalar<TResult>(int? timeout = null) => _query.Scalar<TResult>(timeout);
 
@@ -68,11 +62,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.ToEntityAsync<TResult>(timeout, cancellationToken);
 
-    internal Task<Dictionary<TKey, TValue>> ToDictionaryAsync<TResult, TKey, TValue>(Func<TResult, TKey> keySelector,
-        Func<TResult, TValue> valueSelector, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToDictionaryAsync(keySelector, valueSelector, timeout,
-        cancellationToken);
-
     /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的第一行。</summary>
     public Task<TResult> FirstAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.FirstAsync<TResult>(timeout, cancellationToken);
@@ -86,9 +75,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         _query.SingleAsync<TResult>(timeout, cancellationToken);
 
     /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的唯一一行或默认值。</summary>
-    public Task<TResult> SingleOrDefaultAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.SingleOrDefaultAsync<TResult>(timeout, cancellationToken);
-
     /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的首行首列值。</summary>
     public Task<TResult> ScalarAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.ScalarAsync<TResult>(timeout, cancellationToken);
