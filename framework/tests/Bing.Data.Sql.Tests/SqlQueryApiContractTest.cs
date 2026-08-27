@@ -25,23 +25,22 @@ public class SqlQueryApiContractTest
         Assert.Null(typeof(ISqlQuery).GetMethod("Config"));
     }
 
-    /// <summary>测试目的：Root 查询只公开唯一的非泛型 Lambda From<TEntity> 入口。</summary>
+    /// <summary>测试目的：Root 查询只公开类型化和子查询 Lambda From 入口。</summary>
     [Fact]
-    public void From_WhenPublicApiInspected_ShouldExposeNonGenericLambdaEntryPoints()
+    public void From_WhenPublicApiInspected_ShouldExposeTypedAndSubqueryEntryPointsOnly()
     {
         var type = typeof(ISqlQuery);
         var fromMethods = type.GetMethods().Where(method => method.Name == "From" && method.IsGenericMethodDefinition)
             .ToArray();
         var fromEntity = fromMethods.Single();
-        var fromTable = type.GetMethod("FromTable");
         var fromSubquery = type.GetMethods().Single(method => method.Name == "FromSubquery");
 
         Assert.Equal(typeof(SqlLambdaQuery), fromEntity.ReturnType);
         Assert.Equal(new[] { typeof(string), typeof(string) },
             fromEntity.GetParameters().Select(parameter => parameter.ParameterType));
         Assert.All(fromEntity.GetParameters(), parameter => Assert.True(parameter.HasDefaultValue));
-        Assert.Equal(typeof(SqlLambdaQuery), fromTable.ReturnType);
         Assert.Equal(typeof(SqlLambdaQuery), fromSubquery.ReturnType);
+        Assert.Null(type.GetMethod("FromTable"));
     }
 
     /// <summary>测试目的：From<TEntity>()、From<TEntity>(alias) 和双参数调用必须解析为同一非泛型返回类型。</summary>
@@ -114,9 +113,13 @@ public class SqlQueryApiContractTest
                 method.GetParameters().First().ParameterType.GetGenericTypeDefinition() == typeof(Expression<>))
             .ToArray();
 
-        Assert.NotEmpty(joinMethods);
-        Assert.All(joinMethods, method => Assert.Contains(method.GetParameters(), parameter =>
-            parameter.Name == "rightAlias"));
+        Assert.Equal(8, joinMethods.Length);
+        Assert.All(joinMethods.GroupBy(method => method.Name), group => Assert.Equal(2, group.Count()));
+        Assert.Contains(joinMethods, method => method.GetParameters().Length == 2 &&
+            method.GetParameters()[1].Name == "rightAlias");
+        Assert.Contains(joinMethods, method => method.GetParameters().Length == 2 &&
+            method.GetParameters()[1].ParameterType == typeof(SqlJoinOptions));
+        Assert.True(typeof(SqlJoinOptions).IsValueType);
     }
 
     /// <summary>
@@ -130,6 +133,7 @@ public class SqlQueryApiContractTest
         Assert.Contains(type.GetMethods(), method => method.Name == "ToPage" && method.IsGenericMethodDefinition);
         Assert.Contains(type.GetMethods(), method => method.Name == "ToListAsync" && method.IsGenericMethodDefinition);
         Assert.Null(type.GetMethod("As"));
+        Assert.Null(type.GetMethod("ClearSelect"));
     }
 
     /// <summary>
@@ -284,9 +288,6 @@ public class SqlQueryApiContractTest
             throw new NotSupportedException();
 
         public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class =>
-            throw new NotSupportedException();
-
-        public SqlLambdaQuery FromTable(string table, string alias = null, string schema = null) =>
             throw new NotSupportedException();
 
         public SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery)

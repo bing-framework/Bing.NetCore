@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
@@ -18,7 +19,6 @@ namespace Bing.Data.Sql.Benchmarks;
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
-[Config(typeof(SqlLambdaBenchmarkConfig))]
 public class SqlLambdaRootBenchmarks
 {
     private SqlLambdaQuery _query;
@@ -26,16 +26,10 @@ public class SqlLambdaRootBenchmarks
     private SqlBuilderServices _services;
 
     /// <summary>
-    /// 根来源数量；1、2、5、10 为类型化来源，20、50 为原始表来源压力场景。
+    /// 类型化根来源数量。
     /// </summary>
-    [Params(1, 2, 5, 10, 20, 50)]
+    [Params(1, 2, 5, 10)]
     public int RootCount { get; set; }
-
-    /// <summary>
-    /// IN 参数规模，用于观察参数快照和 SQL 渲染的分配变化。
-    /// </summary>
-    [Params(10, 100, 1000)]
-    public int ParameterCount { get; set; }
 
     /// <summary>
     /// 初始化指定元数的根来源基线。
@@ -72,20 +66,6 @@ public class SqlLambdaRootBenchmarks
     [Benchmark]
     public string CreateExecutionSnapshot() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(_query.GetBuilder()).Sql;
 
-    /// <summary>
-    /// 测量不同规模 IN 参数的构建和 SQL 渲染成本。
-    /// </summary>
-    [Benchmark]
-    public string RenderInParameters()
-    {
-        var values = new object[ParameterCount];
-        for (var index = 0; index < values.Length; index++)
-            values[index] = index;
-        var query = BuildQuery();
-        query.Where<Root01, object>(root => root.Id, values, Operator.In);
-        return query.ToSql();
-    }
-
     private SqlLambdaQuery BuildQuery()
     {
         var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services));
@@ -105,12 +85,6 @@ public class SqlLambdaRootBenchmarks
                 query.From<Root01>("r1").From<Root02>("r2").From<Root03>("r3").From<Root04>("r4")
                     .From<Root05>("r5").From<Root06>("r6").From<Root07>("r7").From<Root08>("r8")
                     .From<Root09>("r9").From<Root10>("r10");
-                break;
-            case 20:
-            case 50:
-                query.From<Root01>("r1");
-                for (var index = 2; index <= RootCount; index++)
-                    query.FromTable($"Root{index}", $"r{index}");
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(RootCount));
@@ -180,4 +154,123 @@ public class SqlLambdaRootBenchmarks
     private sealed class Root08 { public int Id { get; set; } }
     private sealed class Root09 { public int Id { get; set; } }
     private sealed class Root10 { public int Id { get; set; } }
+}
+
+/// <summary>
+/// 类型化 Lambda IN 参数规模基线，不与根来源数量形成交叉参数矩阵。
+/// </summary>
+[MemoryDiagnoser(displayGenColumns: true)]
+[MedianColumn]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqlLambdaInBenchmarks
+{
+    private ISqlQueryPlanExecutor _executor;
+    private object[] _values;
+
+    /// <summary>
+    /// IN 参数数量。
+    /// </summary>
+    [Params(0, 1, 10, 100, 500, 1000, 2100)]
+    public int ParameterCount { get; set; }
+
+    /// <summary>
+    /// 初始化 Lambda 查询执行器。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        _executor = DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+        _values = CreateValues();
+    }
+
+    /// <summary>
+    /// 测量输入值创建和 boxing 成本。
+    /// </summary>
+    [Benchmark]
+    public object[] CreateInValues() => CreateValues();
+
+    /// <summary>
+    /// 测量使用预构造值绑定并渲染 IN 参数的成本。
+    /// </summary>
+    [Benchmark]
+    public string BindExistingInValuesAndRender()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new Bing.Data.Sql.Builders.SqlServerBuilder())
+            .From<ParameterRoot>("p")
+            .Select<ParameterRoot>(root => new object[] { root.Id });
+        query.Where<ParameterRoot, object>(root => root.Id, _values, Operator.In);
+        return query.ToSql();
+    }
+
+    /// <summary>
+    /// 测量创建值、构建查询、绑定和渲染 IN 参数的完整成本。
+    /// </summary>
+    [Benchmark(Baseline = true)]
+    public string BuildInValuesAndRender()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new Bing.Data.Sql.Builders.SqlServerBuilder())
+            .From<ParameterRoot>("p")
+            .Select<ParameterRoot>(root => new object[] { root.Id });
+        query.Where<ParameterRoot, object>(root => root.Id, CreateValues(), Operator.In);
+        return query.ToSql();
+    }
+
+    private object[] CreateValues()
+    {
+        var values = new object[ParameterCount];
+        for (var index = 0; index < values.Length; index++)
+            values[index] = index;
+        return values;
+    }
+
+    private class NoOpExecutor : DispatchProxy
+    {
+        protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+            targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
+    }
+
+    private sealed class ParameterRoot { public int Id { get; set; } }
+}
+
+/// <summary>
+/// Raw Fluent 来源压力基线，独立测量 20 和 50 个原始来源。
+/// </summary>
+[MemoryDiagnoser(displayGenColumns: true)]
+[MedianColumn]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqlRawFromBenchmarks
+{
+    private ISqlQueryPlanExecutor _executor;
+
+    /// <summary>
+    /// 原始来源数量。
+    /// </summary>
+    [Params(20, 50)]
+    public int SourceCount { get; set; }
+
+    /// <summary>
+    /// 初始化 Raw Fluent 查询执行器。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup() => _executor = DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+
+    /// <summary>
+    /// 测量 Raw Fluent 追加多来源并渲染 SQL 的成本。
+    /// </summary>
+    [Benchmark]
+    public string BuildRawSourcesAndRender()
+    {
+        var sources = string.Join(", ", Enumerable.Range(1, SourceCount)
+            .Select(index => $"[RawTable{index}] As [r{index}]"));
+        return SqlQueryRuntimeFactory.CreateQuery(_executor, new Bing.Data.Sql.Builders.SqlServerBuilder())
+            .Select("Id")
+            .AppendFrom(sources)
+            .ToSql();
+    }
+
+    private class NoOpExecutor : DispatchProxy
+    {
+        protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+            targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
+    }
 }

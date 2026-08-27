@@ -50,7 +50,9 @@ public static partial class Extensions
             unionBuilder.ClearPageParams();
             items.Add(new BuilderItem(operation, unionBuilder));
         }
-        accessor.UnionItems.AddRange(items);
+        if (items.Count == 0)
+            return;
+        SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.UnionItems.AddRange(items));
     }
 
     /// <summary>

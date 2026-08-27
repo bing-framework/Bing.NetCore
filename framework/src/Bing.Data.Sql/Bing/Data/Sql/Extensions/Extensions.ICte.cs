@@ -23,7 +23,10 @@ public static partial class Extensions
         if (string.IsNullOrWhiteSpace(name) || builder == null)
             return source;
         if (GetOperationBuilder(source) is ICteAccessor accessor)
-            accessor.CteItems.Add(new BuilderItem(name, builder.Clone()));
+        {
+            var item = new BuilderItem(name, builder.Clone());
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.CteItems.Add(item));
+        }
         return source;
     }
 

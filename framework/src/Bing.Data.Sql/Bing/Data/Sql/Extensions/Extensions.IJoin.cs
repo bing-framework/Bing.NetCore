@@ -20,8 +20,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.Join(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.Join(table, alias));
         return source;
     }
 
@@ -37,8 +36,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.Join(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.Join(table));
         return source;
     }
 
@@ -54,8 +52,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.LeftJoin(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.LeftJoin(table));
         return source;
     }
 
@@ -72,8 +69,9 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendJoin(sql);
+        if (string.IsNullOrWhiteSpace(sql))
+            return source;
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendJoin(sql));
         return source;
     }
 
@@ -99,8 +97,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.Join(builder, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.Join(builder, alias));
         return source;
     }
 
@@ -115,8 +112,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.Join(action, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.Join(action, alias));
         return source;
     }
 
@@ -142,8 +138,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.LeftJoin(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.LeftJoin(table, alias));
         return source;
     }
 
@@ -160,8 +155,9 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendLeftJoin(sql);
+        if (string.IsNullOrWhiteSpace(sql))
+            return source;
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendLeftJoin(sql));
         return source;
     }
 
@@ -187,8 +183,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.LeftJoin(builder, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.LeftJoin(builder, alias));
         return source;
     }
 
@@ -203,8 +198,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.LeftJoin(action, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.LeftJoin(action, alias));
         return source;
     }
 
@@ -230,8 +224,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.RightJoin(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.RightJoin(table, alias));
         return source;
     }
 
@@ -247,8 +240,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.RightJoin(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.RightJoin(table));
         return source;
     }
 
@@ -265,8 +257,9 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendRightJoin(sql);
+        if (string.IsNullOrWhiteSpace(sql))
+            return source;
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendRightJoin(sql));
         return source;
     }
 
@@ -292,8 +285,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.RightJoin(builder, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.RightJoin(builder, alias));
         return source;
     }
 
@@ -308,8 +300,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.RightJoin(action, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.RightJoin(action, alias));
         return source;
     }
 
@@ -345,8 +336,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.FullJoin(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.FullJoin(table, alias));
         return source;
     }
 
@@ -363,8 +353,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.FullJoin(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.FullJoin(table));
         return source;
     }
 
@@ -379,8 +368,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendFullJoin(sql);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendFullJoin(sql));
         return source;
     }
 
@@ -405,8 +393,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.CrossJoin(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.CrossJoin(table, alias));
         return source;
     }
 
@@ -423,8 +410,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.CrossJoin(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.CrossJoin(table));
         return source;
     }
 
@@ -439,8 +425,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendCrossJoin(sql);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendCrossJoin(sql));
         return source;
     }
 
@@ -454,8 +439,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.On(condition);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.On(condition));
         return source;
     }
 
@@ -472,8 +456,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.On(left, value, @operator);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.On(left, value, @operator));
         return source;
     }
 
@@ -489,8 +472,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.JoinClause.AppendOn(sql);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.JoinClause.AppendOn(sql));
         return source;
     }
 }

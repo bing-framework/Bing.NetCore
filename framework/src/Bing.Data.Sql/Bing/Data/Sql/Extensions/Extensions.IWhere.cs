@@ -19,8 +19,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.WhereClause.And(condition);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.WhereClause.And(condition));
         return source;
     }
 
@@ -35,8 +34,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.WhereClause.Or(condition);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.WhereClause.Or(condition));
         return source;
     }
 

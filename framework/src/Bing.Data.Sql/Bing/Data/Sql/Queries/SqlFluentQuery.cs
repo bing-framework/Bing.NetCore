@@ -176,4 +176,7 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
 
     /// <inheritdoc />
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _query.GetBuilder();
+
+    /// <inheritdoc />
+    void ISqlQueryBuilderAccessor.MarkChanged() => _query.Touch();
 }

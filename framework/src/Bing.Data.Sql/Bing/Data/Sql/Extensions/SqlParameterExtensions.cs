@@ -28,8 +28,9 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
-            accessor.ParameterManager.Add(name, value);
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor &&
+            string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(name)) == false)
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Add(name, value));
         return source;
     }
 
@@ -53,10 +54,14 @@ public static class SqlParameterExtensions
             return source;
         if (accessor.ParameterManager is IAdvancedParameterManager advancedParameterManager)
         {
-            advancedParameterManager.Add(CreateSqlParam(source, name, property, value));
+            var parameter = CreateSqlParam(source, name, property, value);
+            if (parameter != null &&
+                string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(parameter.Name)) == false)
+                SqlQueryOperationAccessor.MutateBuilder(source, _ => advancedParameterManager.Add(parameter));
             return source;
         }
-        accessor.ParameterManager.Add(name, value);
+        if (string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(name)) == false)
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Add(name, value));
         return source;
     }
 
@@ -142,8 +147,8 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor)
-            accessor.ParameterManager.Clear();
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor && accessor.ParameterManager.Count > 0)
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Clear());
         return source;
     }
 

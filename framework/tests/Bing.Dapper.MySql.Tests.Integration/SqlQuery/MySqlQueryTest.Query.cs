@@ -25,7 +25,6 @@ public partial class MySqlQueryTest
 
         // 获取对象
         var result = _sqlQuery.From<Product>()
-            .ClearSelect()
             .Select<Product>(true)
             .Where<Product, object>(x => (object)x.Id, new object[] { id, id2 }, Operator.In)
             .ToList<Product>();

@@ -1,6 +1,6 @@
 version: 1.0.0.{build}
 image:
-  - Visual Studio 2017
+  - Visual Studio 2022
 pull_requests:
   do_not_increment_build_number: true
 branches:
@@ -18,9 +18,16 @@ build_script:
 test_script:
   # 常规 CI 只运行无需凭据的单元测试和 SQLite 集成测试。
   # 外部 Provider 测试由受保护的专用构建注入连接字符串和 RUN_*_INTEGRATION_TESTS=true。
-  - cmd: set RUN_INTEGRATION_TESTS=false&& set RUN_MYSQL_INTEGRATION_TESTS=false&& set RUN_POSTGRESQL_INTEGRATION_TESTS=false&& set RUN_SQLSERVER_INTEGRATION_TESTS=false&& set RUN_ORACLE_INTEGRATION_TESTS=false&& dotnet test -c Release
+  - cmd: set RUN_INTEGRATION_TESTS=false&& set RUN_MYSQL_INTEGRATION_TESTS=false&& set RUN_POSTGRESQL_INTEGRATION_TESTS=false&& set RUN_SQLSERVER_INTEGRATION_TESTS=false&& set RUN_ORACLE_INTEGRATION_TESTS=false&& dotnet test -c Release --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+  - cmd: dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release -- --ci-smoke --filter "*SqlCiSmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci"
+  - cmd: dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release -- --e2e-smoke --filter "*SqliteDapperE2ESmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci-e2e"
 artifacts:
   - path: '**\*.nupkg'
+  - path: '**\TestResults\*.trx'
+  - path: '**\TestResults\**\coverage.cobertura.xml'
+  - path: '**\PublicAPI.*.txt'
+  - path: 'BenchmarkDotNet.Artifacts\ci\**'
+  - path: 'BenchmarkDotNet.Artifacts\ci-e2e\**'
 nuget:
   disable_publish_on_pr: true
 #deploy:

@@ -12,6 +12,47 @@ namespace Bing.Data.Sql;
 internal static class SqlQueryOperationAccessor
 {
     /// <summary>
+    /// 在查询描述的统一 mutation 边界内修改 Clause，并在成功后只通知一次查询缓存失效。
+    /// </summary>
+    /// <param name="source">Fluent 操作源。</param>
+    /// <param name="mutation">要执行的 Clause 修改。</param>
+    internal static void Mutate(object source, Action<ISqlQueryClauseAccessor> mutation)
+    {
+        if (mutation == null)
+            throw new ArgumentNullException(nameof(mutation));
+        var accessor = GetClauseAccessor(source);
+        mutation(accessor);
+        MarkChanged(source);
+    }
+
+    /// <summary>
+    /// 在查询描述的统一 Builder mutation 边界内修改非 Clause 状态，并在成功后只通知一次查询缓存失效。
+    /// </summary>
+    /// <param name="source">Fluent 操作源。</param>
+    /// <param name="mutation">要执行的 Builder 修改。</param>
+    internal static void MutateBuilder(object source, Action<object> mutation)
+    {
+        if (mutation == null)
+            throw new ArgumentNullException(nameof(mutation));
+        var target = (object)GetBuilder(source) ?? source as ISqlCommonPartAccessor;
+        if (target == null)
+            throw new InvalidOperationException(
+                $"Fluent 操作源 '{source?.GetType().FullName}' 必须使用 {nameof(ISqlBuilder)} 或 {nameof(ISqlCommonPartAccessor)}。");
+        mutation(target);
+        MarkChanged(source);
+    }
+
+    /// <summary>
+    /// 在 mutation 成功后通知独立查询描述清理其 SQL 缓存。
+    /// </summary>
+    /// <param name="source">Fluent 操作源。</param>
+    private static void MarkChanged(object source)
+    {
+        if (source is ISqlQueryBuilderAccessor queryAccessor)
+            queryAccessor.MarkChanged();
+    }
+
+    /// <summary>
     /// 获取操作源实际使用的 SQL Builder。
     /// </summary>
     /// <param name="source">Fluent 操作源。</param>

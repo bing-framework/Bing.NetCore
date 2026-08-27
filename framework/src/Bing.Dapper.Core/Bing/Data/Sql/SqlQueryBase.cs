@@ -560,19 +560,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <inheritdoc />
-    public SqlLambdaQuery FromTable(string table, string alias = null, string schema = null)
-    {
-        EnsureExecutionAvailable();
-        if (string.IsNullOrWhiteSpace(table))
-            throw new ArgumentException("表名不能为空。", nameof(table));
-        var executor = (ISqlQueryPlanExecutor)this;
-        var builder = ((ISqlQueryBuilderSource)this).CreateIndependentSqlBuilder();
-        SqlBuilderRuntimeBridge.AppendRoot(builder,
-            new SqlTableReference { TableName = table, Alias = alias, Schema = schema });
-        return SqlQueryRuntimeFactory.CreateLambdaQuery(executor, builder);
-    }
-
-    /// <inheritdoc />
     public SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery)
         where TProjection : class
     {

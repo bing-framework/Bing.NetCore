@@ -44,14 +44,33 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <param name="executionLease">当前执行租约。</param>
     /// <param name="complete">同步释放时使用的完成回调。</param>
     /// <param name="completeAsync">异步释放时使用的完成回调。</param>
-    public SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+    internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
         Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync)
+        : this(reader, executionLease, complete, completeAsync, currentReader => currentReader.IsConsumed,
+            currentReader => currentReader.Dispose(), currentReader => SqlTransactionAsyncAdapter.DisposeAsync(currentReader))
+    {
+    }
+
+    internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+        Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
+        Func<SqlMapper.GridReader, bool> isConsumed,
+        Action<SqlMapper.GridReader> disposeReader,
+        Func<SqlMapper.GridReader, Task> disposeReaderAsync)
     {
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
         _complete = complete ?? throw new ArgumentNullException(nameof(complete));
         _completeAsync = completeAsync ?? throw new ArgumentNullException(nameof(completeAsync));
+        IsConsumed = isConsumed ?? throw new ArgumentNullException(nameof(isConsumed));
+        DisposeReader = disposeReader ?? throw new ArgumentNullException(nameof(disposeReader));
+        DisposeReaderAsync = disposeReaderAsync ?? throw new ArgumentNullException(nameof(disposeReaderAsync));
     }
+
+    private Func<SqlMapper.GridReader, bool> IsConsumed { get; }
+
+    private Action<SqlMapper.GridReader> DisposeReader { get; }
+
+    private Func<SqlMapper.GridReader, Task> DisposeReaderAsync { get; }
 
     /// <inheritdoc />
     public List<dynamic> Read() => Read(reader => reader.Read().ToList());
@@ -77,8 +96,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         var completed = false;
         try
         {
-            completed = reader.IsConsumed;
-            reader.Dispose();
+            completed = IsConsumed(reader);
+            DisposeReader(reader);
         }
         catch (Exception currentException)
         {
@@ -105,8 +124,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         var completed = false;
         try
         {
-            completed = reader.IsConsumed;
-            await SqlTransactionAsyncAdapter.DisposeAsync(reader).ConfigureAwait(false);
+            completed = IsConsumed(reader);
+            await DisposeReaderAsync(reader).ConfigureAwait(false);
         }
         catch (Exception currentException)
         {
@@ -291,6 +310,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private async Task CompleteAsync(bool completed, Exception exception, ICollection<Exception> cleanupExceptions)
     {
         var completeAsync = Interlocked.Exchange(ref _completeAsync, null);
+        var complete = Interlocked.Exchange(ref _complete, null);
         if (completeAsync != null)
         {
             try
@@ -304,7 +324,6 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
         else
         {
-            var complete = Interlocked.Exchange(ref _complete, null);
             try
             {
                 complete?.Invoke(completed, exception);

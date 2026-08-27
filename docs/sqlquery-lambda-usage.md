@@ -34,7 +34,7 @@ Lambda Join 在同一次调用中接收谓词和可选 alias，不再使用后�
 ```csharp
 var rows = await query.From<Order>("order")
     .LeftJoin<Order, Customer>((order, customer) => order.CustomerId == customer.Id,
-        rightAlias: "customer", leftAlias: "order")
+        new SqlJoinOptions { RightAlias = "customer", LeftAlias = "order" })
     .Join<Customer, Payment>((customer, payment) => customer.Id == payment.CustomerId)
     .Select<Customer, Payment, OrderDetails>((customer, payment) => new OrderDetails
     {

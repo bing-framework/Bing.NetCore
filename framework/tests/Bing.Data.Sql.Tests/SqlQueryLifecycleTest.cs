@@ -63,6 +63,305 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
+    /// 测试目的：Raw Fluent 扩展在首次 ToSql 后追加条件时必须失效查询缓存，并保持执行参数与 SQL 一致。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenWhereIsAddedAfterToSql_ShouldInvalidateCachedSql()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+
+        // Act
+        var beforeSql = query.ToSql();
+        query.Where("Status", 1);
+        var afterSql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders]", beforeSql);
+        Assert.Equal("Select [Id] \r\nFrom [Orders] \r\nWhere [Status]=@_p_0", afterSql);
+        Assert.Equal(new[] { "@_p_0" }, parameters.Keys.ToArray());
+        Assert.Equal(new object[] { 1 }, parameters.Values.ToArray());
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Raw Fluent 空白追加操作必须保持 SQL、参数和缓存版本不变。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenBlankAppendIsUsed_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+
+        // Act
+        query.AppendWhere("   ");
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Raw Fluent 查询在首次渲染后追加 Union 时必须失效缓存并渲染新的完整 SQL。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenUnionIsAddedAfterToSql_ShouldInvalidateCachedSql()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var union = builder.New().Select("Id").From("ArchivedOrders");
+        var beforeSql = query.ToSql();
+
+        // Act
+        query.Union(union);
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders]", beforeSql);
+        Assert.Equal("(Select [Id] \r\nFrom [Orders] \r\n) \r\nUnion \r\n(Select [Id] \r\nFrom [ArchivedOrders] \r\n)",
+            afterSql);
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Raw Fluent 查询在首次渲染后追加 CTE 时必须失效缓存并渲染新的完整 SQL。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenCteIsAddedAfterToSql_ShouldInvalidateCachedSql()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("active_orders");
+        var cte = builder.New().Select("Id").From("Orders");
+        var beforeSql = query.ToSql();
+
+        // Act
+        query.With("active_orders", cte);
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [active_orders]", beforeSql);
+        Assert.Equal("With [active_orders] \r\nAs (Select [Id] \r\nFrom [Orders])\r\nSelect [Id] \r\nFrom [active_orders]",
+            afterSql);
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Raw Fluent 查询在首次渲染后绑定参数时必须失效缓存，并保留 SQL 与参数的一致状态。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenParameterIsAddedAfterToSql_ShouldInvalidateCachedSql()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders")
+            .AppendWhere("Status=@status");
+        var beforeSql = query.ToSql();
+
+        // Act
+        query.AddParam("status", 1);
+        var afterSql = query.ToSql();
+        var parameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders] \r\nWhere Status=@status", beforeSql);
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(1, parameters["@status"]);
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：清空已有参数必须通过 mutation gateway 失效缓存，并让后续执行看到空参数快照。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenParametersAreClearedAfterToSql_ShouldInvalidateCachedSqlAndSnapshot()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders")
+            .AppendWhere("Status=@status")
+            .AddParam("status", 1);
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        query.ClearParams();
+        var afterSql = query.ToSql();
+        var parameters = query.GetParams();
+        var executionSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(query.GetBuilder());
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders] \r\nWhere Status=@status", beforeSql);
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(afterSql, executionSnapshot.Sql);
+        Assert.Empty(executionSnapshot.Parameters);
+        Assert.Equal(beforeShapeVersion + 1, GetFluentShapeVersion(query));
+        Assert.NotEqual(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(parameters);
+        Assert.Equal(3, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：清空空参数集合必须是 no-op，不得改变版本、缓存或渲染次数。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenParametersAreAlreadyEmpty_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        query.ClearParams();
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(query.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Union 的空输入、CTE 的空名称和参数的空名称均不得改变查询缓存状态。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenCompositeMutationIsNoOp_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+
+        // Act
+        query.Union(Array.Empty<ISqlBuilder>());
+        query.With("   ", builder.New().Select("Id").From("Orders"));
+        query.AddParam("   ", 1);
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+    }
+
+    /// <summary>
+    /// 测试目的：Union 子 Builder 克隆失败时不得提交联合项、参数或缓存版本变化。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenUnionCloneFails_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.Union(new ThrowingCloneBuilder("union clone failed")));
+
+        // Assert
+        Assert.Equal("union clone failed", exception.Message);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：CTE 子 Builder 克隆失败时不得提交 CTE 项或缓存版本变化。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenCteCloneFails_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            query.With("active_orders", new ThrowingCloneBuilder("cte clone failed")));
+
+        // Assert
+        Assert.Equal("cte clone failed", exception.Message);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：参数数量上限导致 AddParam 失败时不得写入参数或使查询缓存失效。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenParameterLimitIsExceeded_ShouldKeepQueryStateUnchanged()
+    {
+        // Arrange
+        var parameterManager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 0, "test");
+        var builder = new CountingTestSqlBuilder(parameterManager);
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders")
+            .AppendWhere("Status=@status");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        var exception = Assert.Throws<InvalidOperationException>(() => query.AddParam("status", 1));
+
+        // Assert
+        Assert.Contains("参数数量超出上限", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(beforeSql, query.ToSql());
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
     /// 测试目的：同类型多来源必须通过显式 alias 绑定，且 Lambda 参数名称变化不应改变 SQL 来源解析结果。
     /// </summary>
     [Fact]
@@ -482,7 +781,7 @@ public class SqlQueryLifecycleTest
         for (var index = 2; index <= count; index++)
         {
             query.Join<Sample, Sample>((left, right) => left.IntValue == right.IntValue,
-                rightAlias: $"r{index}", leftAlias: $"r{index - 1}");
+                new SqlJoinOptions { RightAlias = $"r{index}", LeftAlias = $"r{index - 1}" });
         }
         query.Select<Sample>(item => new object[] { item.IntValue }, "r1")
             .Where<Sample, int>(item => item.IntValue, count, "r1");
@@ -495,6 +794,33 @@ public class SqlQueryLifecycleTest
         Assert.Equal(expectedSql, sql);
         Assert.Equal(new[] { "@_p_0" }, parameters.Keys.ToArray());
         Assert.Equal(new object[] { count }, parameters.Values.ToArray());
+    }
+
+    /// <summary>
+    /// 测试目的：类型化 Join 的 SqlJoinOptions.Schema 必须影响右侧表引用，并保持完整 SQL 与 On 来源 alias 一致。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenJoinOptionsSpecifySchema_ShouldRenderCompleteSql()
+    {
+        // Arrange
+        var query = CreateLambdaQuery()
+            .From<Sample>("left")
+            .Join<Sample, Sample>((first, second) => first.IntValue == second.IntValue,
+                new SqlJoinOptions
+                {
+                    RightAlias = "right",
+                    LeftAlias = "left",
+                    Schema = "reporting"
+                })
+            .Select<Sample>(item => new object[] { item.IntValue }, "left");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select [left].[IntValue] \r\nFrom [Sample] As [left] \r\nJoin [reporting].[Sample] As [right] On [left].[IntValue]=[right].[IntValue]",
+            sql);
     }
 
     /// <summary>
@@ -689,7 +1015,8 @@ public class SqlQueryLifecycleTest
 
         // Act
         Assert.Throws<InvalidOperationException>(() => query.Join<Sample, Sample>(
-            (left, right) => left.IntValue == right.IntValue, rightAlias: "r", leftAlias: "missing"));
+            (left, right) => left.IntValue == right.IntValue,
+            new SqlJoinOptions { RightAlias = "r", LeftAlias = "missing" }));
         var afterSql = query.ToSql();
         var afterParameters = ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams();
 
@@ -1093,6 +1420,25 @@ public class SqlQueryLifecycleTest
         return (long)shapeVersionField.GetValue(innerQuery);
     }
 
+    private static long GetFluentShapeVersion(SqlFluentQuery query)
+    {
+        var innerQueryField = typeof(SqlFluentQuery).GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
+        var innerQuery = innerQueryField?.GetValue(query);
+        var shapeVersionField = innerQuery?.GetType().GetField("_shapeVersion",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(shapeVersionField);
+        return (long)shapeVersionField.GetValue(innerQuery);
+    }
+
+    private static T GetFluentQueryField<T>(SqlFluentQuery query, string fieldName)
+    {
+        var innerQueryField = typeof(SqlFluentQuery).GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
+        var innerQuery = innerQueryField?.GetValue(query);
+        var field = innerQuery?.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(field);
+        return (T)field.GetValue(innerQuery);
+    }
+
     private static long GetCachedVersion(SqlLambdaQuery query) => GetQueryField<long>(query, "_cachedVersion");
 
     private static string GetCachedSql(SqlLambdaQuery query) => GetQueryField<string>(query, "_cachedSql");
@@ -1196,11 +1542,20 @@ public class SqlQueryLifecycleTest
     /// </summary>
     private sealed class CountingTestSqlBuilder : TestSqlBuilder
     {
-        public CountingTestSqlBuilder() : this(new RenderCounters())
+        public CountingTestSqlBuilder() : this(new RenderCounters(), null)
         {
         }
 
-        private CountingTestSqlBuilder(RenderCounters counters) => Counters = counters;
+        public CountingTestSqlBuilder(IParameterManager parameterManager) : this(new RenderCounters(), parameterManager)
+        {
+        }
+
+        private CountingTestSqlBuilder(RenderCounters counters) : this(counters, null)
+        {
+        }
+
+        private CountingTestSqlBuilder(RenderCounters counters, IParameterManager parameterManager)
+            : base(parameterManager: parameterManager) => Counters = counters;
 
         public RenderCounters Counters { get; }
 
@@ -1220,6 +1575,18 @@ public class SqlQueryLifecycleTest
         public sealed class RenderCounters
         {
             public int ToSqlCallCount { get; set; }
+        }
+    }
+
+    private sealed class ThrowingCloneBuilder : TestSqlBuilder
+    {
+        private readonly string _message;
+
+        public ThrowingCloneBuilder(string message) => _message = message;
+
+        public override ISqlBuilder Clone()
+        {
+            throw new InvalidOperationException(_message);
         }
     }
 

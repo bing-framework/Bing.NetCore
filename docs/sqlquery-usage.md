@@ -24,7 +24,6 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     SqlTextQuery SqlInterpolated(FormattableString sql);
     SqlProcedureQuery Procedure(string procedure, object parameters = null);
     SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class;
-    SqlLambdaQuery FromTable(string table, string alias = null, string schema = null);
     SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class;
 }
 ```
@@ -33,6 +32,7 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 
 - `Query()`：创建结果类型由终结方法选择的字符串 Fluent 查询描述。
 - `From<TEntity>(alias, schema)`：创建非泛型 Lambda 描述；连续调用会追加根来源。
+- `Query().From(table, alias)`：创建 Raw Fluent 描述并设置字符串表来源；原始表名不再进入类型化 Lambda 根 API。
 - `Procedure(procedure, parameters)`：创建结果类型由 Execute 终结方法选择的存储过程描述。
 - `Sql(sql, parameters)`：创建结果类型由终结方法选择的原生 SQL 文本查询描述，不重写 SQL 文本或自动附加结构化过滤器。
 - `SqlInterpolated(sql)`：创建参数化插值 SQL 文本查询描述，结果类型同样由终结方法选择。
@@ -628,7 +628,7 @@ public async Task<List<OrderWithCustomerDto>> GetOrderWithCustomerAsync(
 {
     return await sqlQuery.From<Order>("order")
         .LeftJoin<Order, Customer>((order, customer) => order.CustomerId == customer.Id,
-            rightAlias: "customer", leftAlias: "order")
+            new SqlJoinOptions { RightAlias = "customer", LeftAlias = "order" })
         .Where<Order, Customer>((order, customer) => order.Id == orderId,
             firstAlias: "order", secondAlias: "customer")
         .Select<Order, Customer, OrderWithCustomerDto>((order, customer) => new OrderWithCustomerDto

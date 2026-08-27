@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Bing.Data.Enums;
@@ -363,7 +364,26 @@ public class ParameterManagerSnapshotBenchmarks
 
 internal static class Program
 {
-    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+    private static void Main(string[] args)
+    {
+        if (args.Contains("--ci-smoke", StringComparer.OrdinalIgnoreCase))
+        {
+            var benchmarkArgs = args
+                .Where(argument => string.Equals(argument, "--ci-smoke", StringComparison.OrdinalIgnoreCase) == false)
+                .ToArray();
+            BenchmarkSwitcher.FromTypes(new[] { typeof(SqlCiSmokeBenchmarks) }).Run(benchmarkArgs);
+            return;
+        }
+        if (args.Contains("--e2e-smoke", StringComparer.OrdinalIgnoreCase))
+        {
+            var benchmarkArgs = args
+                .Where(argument => string.Equals(argument, "--e2e-smoke", StringComparison.OrdinalIgnoreCase) == false)
+                .ToArray();
+            BenchmarkSwitcher.FromTypes(new[] { typeof(SqliteDapperE2ESmokeBenchmarks) }).Run(benchmarkArgs);
+            return;
+        }
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+    }
 }
 
 /// <summary>

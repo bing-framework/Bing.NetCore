@@ -17,8 +17,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Distinct();
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Distinct());
         return source;
     }
 
@@ -33,8 +32,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.CountAll(alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.CountAll(alias));
         return source;
     }
 
@@ -52,8 +50,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.CountColumn(column, alias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.CountColumn(column, alias, distinct));
         return source;
     }
 
@@ -72,8 +69,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Aggregate(function, column, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Aggregate(function, column, columnAlias, distinct));
         return source;
     }
 
@@ -92,8 +88,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.AggregateRaw(function, argumentSql, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.AggregateRaw(function, argumentSql, columnAlias, distinct));
         return source;
     }
 
@@ -112,8 +107,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.AggregateExpression(function, expressionSql, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.AggregateExpression(function, expressionSql, columnAlias, distinct));
         return source;
     }
 
@@ -129,8 +123,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Sum(column, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Sum(column, columnAlias, distinct));
         return source;
     }
 
@@ -146,8 +139,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Avg(column, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Avg(column, columnAlias, distinct));
         return source;
     }
 
@@ -163,8 +155,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Max(column, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Max(column, columnAlias, distinct));
         return source;
     }
 
@@ -180,8 +171,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.SelectClause.Min(column, columnAlias, distinct);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.SelectClause.Min(column, columnAlias, distinct));
         return source;
     }
 }

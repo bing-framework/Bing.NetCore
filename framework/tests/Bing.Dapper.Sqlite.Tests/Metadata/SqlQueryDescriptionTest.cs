@@ -1397,12 +1397,13 @@ public class SqlQueryDescriptionTest
             .Join<MultiSourceProjection, MultiSourceReview>((item, review) => item.OwnerId == review.UserId, "review")
             .CrossJoin<MultiSourcePermission>("permission")
             .LeftJoin<MultiSourcePermission, MultiSourceUser>((permission, reviewer) => reviewer.Id == permission.UserId,
-                "reviewer", "permission")
+                new SqlJoinOptions { RightAlias = "reviewer", LeftAlias = "permission" })
             .Join<MultiSourceUser, MultiSourceReview>((reviewer, review2) => reviewer.Id == review2.UserId,
-                "review2", "reviewer")
+                new SqlJoinOptions { RightAlias = "review2", LeftAlias = "reviewer" })
             .CrossJoin<MultiSourcePermission>("permission2")
             .Join<MultiSourcePermission, MultiSourceUser>((permission2, lastUser) =>
-                lastUser.Id == permission2.UserId, "lastUser", "permission2")
+                lastUser.Id == permission2.UserId,
+                new SqlJoinOptions { RightAlias = "lastUser", LeftAlias = "permission2" })
             .Where<MultiSourceProjection, MultiSourceReview>((owner, review) => owner.OwnerId > 9, "owner", "review")
             .Select<MultiSourceProjection, MultiSourceReview>((owner, review) => new object[] { owner.OwnerId, review.UserId }, "owner", "review")
             .AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission")
@@ -1871,7 +1872,7 @@ public class SqlQueryDescriptionTest
             .Join<MultiSourceUser, MultiSourceUser>((user, reviewer) => user.Id == reviewer.Id && reviewer.Id > 7,
                 "reviewer")
             .Join<MultiSourceUser, MultiSourcePermission>((reviewer, permission) => reviewer.Id == permission.UserId,
-                "permission", "reviewer")
+                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviewer" })
             .Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
             .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
@@ -2302,50 +2303,65 @@ public class SqlQueryDescriptionTest
         var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>();
         if (sourceCount == 3)
             query.Join<MultiSourceReview, MultiSourcePermission>((review, permission) =>
-                review.UserId == permission.UserId && permission.UserId > 3, "permission", "reviews");
+                review.UserId == permission.UserId && permission.UserId > 3,
+                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviews" });
         else
             query.Join<MultiSourceReview, MultiSourcePermission>((review, permission) =>
-                review.UserId == permission.UserId, "permission", "reviews");
+                review.UserId == permission.UserId,
+                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviews" });
 
         if (sourceCount == 4)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission, reviewer) =>
-                permission.UserId == reviewer.Id && reviewer.Id > 4, "reviewer", "permission");
+                permission.UserId == reviewer.Id && reviewer.Id > 4,
+                new SqlJoinOptions { RightAlias = "reviewer", LeftAlias = "permission" });
         else if (sourceCount >= 4)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission, reviewer) =>
-                permission.UserId == reviewer.Id, "reviewer", "permission");
+                permission.UserId == reviewer.Id,
+                new SqlJoinOptions { RightAlias = "reviewer", LeftAlias = "permission" });
         if (sourceCount == 5)
             query.Join<MultiSourceUser, MultiSourceReview>((reviewer, review2) =>
-                reviewer.Id == review2.UserId && review2.UserId > 5, "review2", "reviewer");
+                reviewer.Id == review2.UserId && review2.UserId > 5,
+                new SqlJoinOptions { RightAlias = "review2", LeftAlias = "reviewer" });
         else if (sourceCount >= 5)
             query.Join<MultiSourceUser, MultiSourceReview>((reviewer, review2) =>
-                reviewer.Id == review2.UserId, "review2", "reviewer");
+                reviewer.Id == review2.UserId,
+                new SqlJoinOptions { RightAlias = "review2", LeftAlias = "reviewer" });
         if (sourceCount == 6)
             query.Join<MultiSourceReview, MultiSourcePermission>((review2, permission2) =>
-                review2.UserId == permission2.UserId && permission2.UserId > 6, "permission2", "review2");
+                review2.UserId == permission2.UserId && permission2.UserId > 6,
+                new SqlJoinOptions { RightAlias = "permission2", LeftAlias = "review2" });
         else if (sourceCount >= 6)
             query.Join<MultiSourceReview, MultiSourcePermission>((review2, permission2) =>
-                review2.UserId == permission2.UserId, "permission2", "review2");
+                review2.UserId == permission2.UserId,
+                new SqlJoinOptions { RightAlias = "permission2", LeftAlias = "review2" });
         if (sourceCount == 7)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission2, reviewer2) =>
-                permission2.UserId == reviewer2.Id && reviewer2.Id > 7, "reviewer2", "permission2");
+                permission2.UserId == reviewer2.Id && reviewer2.Id > 7,
+                new SqlJoinOptions { RightAlias = "reviewer2", LeftAlias = "permission2" });
         else if (sourceCount >= 7)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission2, reviewer2) =>
-                permission2.UserId == reviewer2.Id, "reviewer2", "permission2");
+                permission2.UserId == reviewer2.Id,
+                new SqlJoinOptions { RightAlias = "reviewer2", LeftAlias = "permission2" });
         if (sourceCount == 8)
             query.Join<MultiSourceUser, MultiSourceReview>((reviewer2, review3) =>
-                reviewer2.Id == review3.UserId && review3.UserId > 8, "review3", "reviewer2");
+                reviewer2.Id == review3.UserId && review3.UserId > 8,
+                new SqlJoinOptions { RightAlias = "review3", LeftAlias = "reviewer2" });
         else if (sourceCount >= 8)
             query.Join<MultiSourceUser, MultiSourceReview>((reviewer2, review3) =>
-                reviewer2.Id == review3.UserId, "review3", "reviewer2");
+                reviewer2.Id == review3.UserId,
+                new SqlJoinOptions { RightAlias = "review3", LeftAlias = "reviewer2" });
         if (sourceCount == 9)
             query.Join<MultiSourceReview, MultiSourcePermission>((review3, permission3) =>
-                review3.UserId == permission3.UserId && permission3.UserId > 9, "permission3", "review3");
+                review3.UserId == permission3.UserId && permission3.UserId > 9,
+                new SqlJoinOptions { RightAlias = "permission3", LeftAlias = "review3" });
         else if (sourceCount >= 9)
             query.Join<MultiSourceReview, MultiSourcePermission>((review3, permission3) =>
-                review3.UserId == permission3.UserId, "permission3", "review3");
+                review3.UserId == permission3.UserId,
+                new SqlJoinOptions { RightAlias = "permission3", LeftAlias = "review3" });
         if (sourceCount >= 10)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission3, reviewer3) =>
-                permission3.UserId == reviewer3.Id && reviewer3.Id > 10, "reviewer3", "permission3");
+                permission3.UserId == reviewer3.Id && reviewer3.Id > 10,
+                new SqlJoinOptions { RightAlias = "reviewer3", LeftAlias = "permission3" });
 
         query.Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
             .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews");

@@ -11,6 +11,10 @@
 
 ### SQL 查询 API 收敛
 
+* RC 加固：Raw Fluent 扩展统一经过查询 mutation gateway，`ToSql()` 后的结构变更会正确失效缓存；空白追加和条件为 false 的操作保持 no-op 语义。
+* 删除高层 `FromTable` 和 `ClearSelect()`；字符串表来源迁移到 `Query().From(string, alias)`，类型化投影直接使用 `Select(...)` 替换。
+* 类型化 `Join`、`LeftJoin`、`RightJoin`、`FullJoin` 普通入口仅接收右侧 alias；左侧 alias 和 schema 通过 `SqlJoinOptions` 提供。
+* `CompleteAsync()` 在执行开始即清空同步和异步 completion callback，避免交叉完成和 retained delegate。
 * `ISqlQuery` 只保留非泛型 `From<TEntity>(alias = null, schema = null)`；删除 `SqlLambdaQuery<TEntity>`、公开 `SqlMultiLambdaQuery` 和 Legacy 转发路径。连续 `From<TEntity>` 追加实体来源，重复实体来源通过显式 alias 定位。
 * `Query()`、`Sql()`、`SqlInterpolated()` 和 `Procedure()` 返回非泛型描述；结果类型后置到 `ToEntity<TResult>`、`ToList<TResult>`、分页、标量、流式和 Procedure Execute 终结方法。Dapper 2～7 多映射通过非泛型 Fluent/Raw 描述的 `ToList` 和 `ToListAsync` 终结重载提供。旧的起始阶段泛型入口不再作为普通公共路径。
 * 删除 SQL 查询链中的 `As<TResult>()` 结果类型转换，DTO 投影统一使用强类型 `Select<TProjection>`。

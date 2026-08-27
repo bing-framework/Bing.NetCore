@@ -651,7 +651,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         await InsertAsync("typed-from");
         using var query = _fixture.CreateQuery();
         var description = query.From<SqliteStructuredTableSample>()
-            .ClearSelect()
             .Select<SqliteStructuredTableSample, string>(sample => sample.Name);
 
         // Act

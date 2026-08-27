@@ -18,8 +18,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.GroupByClause.GroupBy(columns);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.GroupByClause.GroupBy(columns));
         return source;
     }
 
@@ -34,8 +33,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.GroupByClause.HavingRaw(sql);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.GroupByClause.HavingRaw(sql));
         return source;
     }
 
@@ -50,8 +48,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.GroupByClause.Having(sql);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.GroupByClause.Having(sql));
         return source;
     }
 
@@ -66,8 +63,9 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.GroupByClause.AppendSql(sql);
+        if (string.IsNullOrWhiteSpace(sql))
+            return source;
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.GroupByClause.AppendSql(sql));
         return source;
     }
 

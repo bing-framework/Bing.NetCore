@@ -89,6 +89,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
 
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => GetBuilder();
 
+    /// <inheritdoc />
+    void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
+
     /// <summary>使用已绑定表源解析多表谓词并追加到 Where 子句。</summary>
     internal SqlLambdaQueryCore WhereCore(LambdaExpression expression)
     {

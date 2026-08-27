@@ -19,7 +19,6 @@ namespace Bing.Data.Sql.Benchmarks;
 [MemoryDiagnoser(displayGenColumns: true)]
 [MedianColumn]
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
-[Config(typeof(SqlLambdaBenchmarkConfig))]
 public class SqlLambdaJoinBenchmarks
 {
     private SqlLambdaQuery _query;
@@ -32,10 +31,10 @@ public class SqlLambdaJoinBenchmarks
     private DataFilter _dataFilter;
 
     /// <summary>
-    /// 连续 Join 的来源数量。
+    /// 连续 Join 的来源数量；1 表示一个根来源，后续值各增加对应数量的 Join。
     /// </summary>
     [Params(1, 2, 5, 10)]
-    public int JoinCount { get; set; }
+    public int SourceCount { get; set; }
 
     /// <summary>
     /// 初始化公开 Lambda 查询。
@@ -72,7 +71,7 @@ public class SqlLambdaJoinBenchmarks
     public string WhereIfTrue()
     {
         var query = BuildQuery();
-        query.WhereIf(true, (Root01 root) => root.Id == JoinCount);
+        query.WhereIf(true, (Root01 root) => root.Id == SourceCount);
         return query.ToSql();
     }
 
@@ -83,7 +82,7 @@ public class SqlLambdaJoinBenchmarks
     public string WhereIfFalse()
     {
         var query = BuildQuery();
-        query.WhereIf(false, (Root01 root) => root.Id == JoinCount);
+        query.WhereIf(false, (Root01 root) => root.Id == SourceCount);
         return query.ToSql();
     }
 
@@ -110,42 +109,11 @@ public class SqlLambdaJoinBenchmarks
     [Benchmark]
     public string CreateExecutionSnapshot() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(_query.GetBuilder()).Sql;
 
-    /// <summary>
-    /// 测量重复实体 Join 的别名解析成本。
-    /// </summary>
-    [Benchmark]
-    public string BuildRepeatedEntityJoin()
-    {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
-            .From<Root01>("parent")
-            .Join<Root01, Root01>((left, right) => left.Id == right.ParentId, "child", "parent");
-        return query.ToSql();
-    }
-
-    /// <summary>
-    /// 测量 Join 失败后异常返回的成本。
-    /// </summary>
-    [Benchmark]
-    public string JoinFailure()
-    {
-        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
-            .From<Root01>("root");
-        try
-        {
-            query.Join<Root01, Root02>((left, right) => left.Id == right.ParentId, "root", "root");
-            return "unexpected";
-        }
-        catch (Exception exception)
-        {
-            return exception.GetType().Name;
-        }
-    }
-
     private SqlLambdaQuery BuildQuery()
     {
         var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
             .From<Root01>("r1");
-        switch (JoinCount)
+        switch (SourceCount)
         {
             case 1:
                 break;
@@ -159,7 +127,7 @@ public class SqlLambdaJoinBenchmarks
                 AddJoinsThrough(query, 10);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(JoinCount));
+                throw new ArgumentOutOfRangeException(nameof(SourceCount));
         }
         query.Select<Root01>(root => new object[] { root.Id });
         return query;
@@ -256,4 +224,70 @@ public class SqlLambdaJoinBenchmarks
     private class Root08 { public int Id { get; set; } public int ParentId { get; set; } }
     private class Root09 { public int Id { get; set; } public int ParentId { get; set; } }
     private class Root10 { public int Id { get; set; } public int ParentId { get; set; } }
+}
+
+/// <summary>
+/// 固定输入的 Join 边界路径基线，避免与来源数量参数形成无关交叉矩阵。
+/// </summary>
+[MemoryDiagnoser(displayGenColumns: true)]
+[MedianColumn]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqlLambdaFixedJoinBenchmarks
+{
+    private ISqlQueryPlanExecutor _executor;
+    private SqlBuilderServices _services;
+
+    /// <summary>
+    /// 初始化固定 Join 场景。
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        _executor = DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+        _services = new SqlBuilderServices();
+    }
+
+    /// <summary>
+    /// 测量重复实体 Join 的别名解析成本。
+    /// </summary>
+    [Benchmark]
+    public string BuildRepeatedEntityJoin()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor,
+                new Bing.Data.Sql.Builders.SqlServerBuilder(_services))
+            .From<Root01>("parent")
+            .Join<Root01, Root01>((left, right) => left.Id == right.ParentId,
+                new SqlJoinOptions { RightAlias = "child", LeftAlias = "parent" });
+        return query.ToSql();
+    }
+
+    /// <summary>
+    /// 测量 Join 失败后异常返回的成本。
+    /// </summary>
+    [Benchmark]
+    public string JoinFailure()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor,
+                new Bing.Data.Sql.Builders.SqlServerBuilder(_services))
+            .From<Root01>("root");
+        try
+        {
+            query.Join<Root01, Root02>((left, right) => left.Id == right.ParentId,
+                new SqlJoinOptions { RightAlias = "root", LeftAlias = "root" });
+            return "unexpected";
+        }
+        catch (Exception exception)
+        {
+            return exception.GetType().Name;
+        }
+    }
+
+    private class NoOpExecutor : DispatchProxy
+    {
+        protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+            targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
+    }
+
+    private class Root01 { public int Id { get; set; } public int ParentId { get; set; } }
+    private class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
 }

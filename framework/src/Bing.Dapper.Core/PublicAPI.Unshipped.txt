@@ -3,7 +3,6 @@ Bing.Data.Sql.SqlQueryBase.Query() -> Bing.Data.Sql.SqlFluentQuery
 Bing.Data.Sql.SqlQueryBase.Sql(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.SqlQueryBase.SqlInterpolated(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.SqlQueryBase.Procedure(string procedure, object parameters = null) -> Bing.Data.Sql.SqlProcedureQuery
-Bing.Data.Sql.SqlQueryBase.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlQueryBase.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlProviderRuntime
 Bing.Data.Sql.SqlProviderRuntime.SqlProviderRuntime(string providerKey, System.Type queryType, System.Type executorType, System.Type multipleQueryExecutorType = null) -> void

@@ -39,6 +39,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
 
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => GetBuilder();
 
+    /// <inheritdoc />
+    void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
+
     private void ReplaceSelect(string columns) => _core.ReplaceSelect(columns);
 
     private void WhereCore(LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
@@ -129,29 +132,6 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
         GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).AppendRoot<TEntity>(alias, schema);
-        Touch();
-        return this;
-    }
-
-    /// <summary>
-    /// 追加原始表来源。
-    /// </summary>
-    /// <param name="table">表名。</param>
-    /// <param name="alias">表别名。</param>
-    /// <param name="schema">表架构名。</param>
-    /// <returns>当前查询描述。</returns>
-    /// <exception cref="ArgumentException">当 <paramref name="table"/> 为空白时抛出。</exception>
-    public SqlLambdaQuery FromTable(string table, string alias = null, string schema = null)
-    {
-        if (string.IsNullOrWhiteSpace(table))
-            throw new ArgumentException("表名不能为空。", nameof(table));
-        var reference = new SqlTableReference
-        {
-            TableName = table,
-            Schema = schema,
-            Alias = alias
-        };
-        GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).AppendRoot(reference);
         Touch();
         return this;
     }
@@ -327,7 +307,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Select<TEntity>(bool propertyAsAlias = false) where TEntity : class
     {
         ResolveSource<TEntity>(null);
-        GetBuilder().Select<TEntity>(propertyAsAlias);
+        var builder = GetBuilder() as SqlBuilderBase ??
+            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
+        builder.ReplaceSelect(select => select.Select<TEntity>(propertyAsAlias));
         Touch();
         return this;
     }
@@ -379,16 +361,6 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class
     {
         AppendSelectTypedCore(projection, new[] { ResolveSource<TEntity>(alias) });
-        return this;
-    }
-
-    /// <summary>
-    /// 清空当前投影。
-    /// </summary>
-    public SqlLambdaQuery ClearSelect()
-    {
-        GetBuilder().ClearSelect();
-        Touch();
         return this;
     }
 
@@ -588,14 +560,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
-    /// <param name="leftAlias">左侧来源别名；传入 null 时按当前来源解析。</param>
-    /// <param name="schema">右侧来源架构名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Join<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null, string leftAlias = null, string schema = null)
+        string rightAlias = null)
         where TLeft : class where TRight : class
     {
-        JoinCore<TRight>(predicate, ResolveSource<TLeft>(leftAlias), rightAlias, schema);
+        JoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
+        return this;
+    }
+
+    /// <summary>
+    /// 使用高级来源选项添加内连接。
+    /// </summary>
+    public SqlLambdaQuery Join<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
+        SqlJoinOptions options)
+        where TLeft : class where TRight : class
+    {
+        JoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
         return this;
     }
 
@@ -606,14 +587,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
-    /// <param name="leftAlias">左侧来源别名；传入 null 时按当前来源解析。</param>
-    /// <param name="schema">右侧来源架构名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null, string leftAlias = null, string schema = null)
+        string rightAlias = null)
         where TLeft : class where TRight : class
     {
-        LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(leftAlias), rightAlias, schema);
+        LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
+        return this;
+    }
+
+    /// <summary>
+    /// 使用高级来源选项添加左外连接。
+    /// </summary>
+    public SqlLambdaQuery LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
+        SqlJoinOptions options)
+        where TLeft : class where TRight : class
+    {
+        LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
         return this;
     }
 
@@ -624,14 +614,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
-    /// <param name="leftAlias">左侧来源别名；传入 null 时按当前来源解析。</param>
-    /// <param name="schema">右侧来源架构名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null, string leftAlias = null, string schema = null)
+        string rightAlias = null)
         where TLeft : class where TRight : class
     {
-        RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(leftAlias), rightAlias, schema);
+        RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
+        return this;
+    }
+
+    /// <summary>
+    /// 使用高级来源选项添加右外连接。
+    /// </summary>
+    public SqlLambdaQuery RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
+        SqlJoinOptions options)
+        where TLeft : class where TRight : class
+    {
+        RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
         return this;
     }
 
@@ -642,14 +641,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
-    /// <param name="leftAlias">左侧来源别名；传入 null 时按当前来源解析。</param>
-    /// <param name="schema">右侧来源架构名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null, string leftAlias = null, string schema = null)
+        string rightAlias = null)
         where TLeft : class where TRight : class
     {
-        FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(leftAlias), rightAlias, schema);
+        FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
+        return this;
+    }
+
+    /// <summary>
+    /// 使用高级来源选项添加全外连接。
+    /// </summary>
+    public SqlLambdaQuery FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
+        SqlJoinOptions options)
+        where TLeft : class where TRight : class
+    {
+        FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
         return this;
     }
 

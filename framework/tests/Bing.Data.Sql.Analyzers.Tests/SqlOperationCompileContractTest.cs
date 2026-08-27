@@ -319,15 +319,24 @@ public class SqlOperationCompileContractTest
                         .From<Item>("i8")
                         .From<Item>("i9")
                         .From<Item>("i10")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j2", "i1")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j3", "j2")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j4", "j3")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j5", "j4")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j6", "j5")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j7", "j6")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j8", "j7")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j9", "j8")
-                        .Join<Item, Item>((first, second) => first.NextId == second.Id, "j10", "j9")
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j2", LeftAlias = "i1" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j3", LeftAlias = "j2" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j4", LeftAlias = "j3" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j5", LeftAlias = "j4" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j6", LeftAlias = "j5" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j7", LeftAlias = "j6" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j8", LeftAlias = "j7" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j9", LeftAlias = "j8" })
+                        .Join<Item, Item>((first, second) => first.NextId == second.Id,
+                            new SqlJoinOptions { RightAlias = "j10", LeftAlias = "j9" })
                         .Select<Item, Item>((first, second) => new object[] { first.Id, second.Id }, "i1", "j2")
                         .ToList<Item>();
                 }
@@ -532,6 +541,112 @@ public class SqlOperationCompileContractTest
         Assert.Contains(diagnostics, diagnostic =>
             diagnostic.Severity == DiagnosticSeverity.Error &&
             diagnostic.GetMessage().Contains("Where", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// 测试目的：实体 Join 使用普通右别名时，显式传入 null 应无歧义地编译为普通入口。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenJoinUsesNullRightAlias_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    query.From<Item>("left")
+                        .Join<Item, Item>((left, right) => left.Id == right.Id, null)
+                        .LeftJoin<Item, Item>((left, right) => left.Id == right.Id, null)
+                        .RightJoin<Item, Item>((left, right) => left.Id == right.Id, null)
+                        .FullJoin<Item, Item>((left, right) => left.Id == right.Id, null);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
+    /// 测试目的：四类实体 Join 均应支持普通右别名和 SqlJoinOptions，并允许通过 options 指定 schema。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenJoinUsesAliasesAndSchemaOptions_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    query.From<Item>("left")
+                        .Join<Item, Item>((left, right) => left.Id == right.Id, "inner")
+                        .LeftJoin<Item, Item>((left, right) => left.Id == right.Id, "left_join")
+                        .RightJoin<Item, Item>((left, right) => left.Id == right.Id, "right_join")
+                        .FullJoin<Item, Item>((left, right) => left.Id == right.Id, "full_join")
+                        .Join<Item, Item>((left, right) => left.Id == right.Id,
+                            new SqlJoinOptions { RightAlias = "inner_options", LeftAlias = "left", Schema = "reporting" })
+                        .LeftJoin<Item, Item>((left, right) => left.Id == right.Id,
+                            new SqlJoinOptions { RightAlias = "left_options", LeftAlias = "left", Schema = "reporting" })
+                        .RightJoin<Item, Item>((left, right) => left.Id == right.Id,
+                            new SqlJoinOptions { RightAlias = "right_options", LeftAlias = "left", Schema = "reporting" })
+                        .FullJoin<Item, Item>((left, right) => left.Id == right.Id,
+                            new SqlJoinOptions { RightAlias = "full_options", LeftAlias = "left", Schema = "reporting" });
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
+    /// 测试目的：删除的高层 FromTable、ClearSelect 和旧三字符串 Join 入口不得被第三方代码编译使用。
+    /// </summary>
+    [Fact]
+    public void QueryApi_WhenUsingRemovedLegacyMembers_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+
+            sealed class Item { public int Id { get; set; } }
+
+            static class Consumer
+            {
+                static void Use(ISqlQuery query)
+                {
+                    query.FromTable("Items", "i");
+                    query.From<Item>("i").ClearSelect();
+                    query.From<Item>("i").Join<Item, Item>((left, right) => left.Id == right.Id, "r", "l");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("FromTable", StringComparison.Ordinal));
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("ClearSelect", StringComparison.Ordinal));
+        Assert.True(diagnostics.Count(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error) >= 3);
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ Lambda 与非泛型 Raw 查询的列表、单行、标量、分页和同步/异�
 
 ## 来源与 Join
 
-根入口支持连续 `From<TEntity>(alias, schema)`、`FromTable(...)` 和 `FromSubquery(...)`。类型化 Join 使用二元方法泛型，将新增来源和完整谓词作为一次操作提交；同类型来源通过显式 alias 定位：
+根入口支持连续 `From<TEntity>(alias, schema)` 和 `FromSubquery(...)`。字符串表来源统一使用 `Query().From(table, alias)` 的 Raw Fluent API。类型化 Join 使用二元方法泛型，将新增来源和完整谓词作为一次操作提交；同类型来源通过显式 alias 定位：
 
 ```csharp
 var rows = await sqlQuery.From<Order>("o")

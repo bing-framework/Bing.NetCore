@@ -92,6 +92,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <inheritdoc />
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _builder;
 
+    /// <inheritdoc />
+    void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
+
     /// <summary>
     /// 生成当前查询的 SQL 文本。
     /// </summary>

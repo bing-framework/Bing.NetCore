@@ -41,15 +41,6 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class;
 
     /// <summary>
-    /// 创建使用原始表名初始化的独立结构化 SQL 查询描述。
-    /// </summary>
-    /// <param name="table">表名。</param>
-    /// <param name="alias">来源别名。</param>
-    /// <param name="schema">来源架构。</param>
-    /// <returns>可继续追加来源和 Lambda 操作的非泛型查询描述。</returns>
-    SqlLambdaQuery FromTable(string table, string alias = null, string schema = null);
-
-    /// <summary>
     /// 创建以严格 DTO 类型化派生表作为根来源的独立结构化 SQL 查询描述。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>

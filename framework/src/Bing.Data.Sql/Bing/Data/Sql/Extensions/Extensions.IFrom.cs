@@ -20,8 +20,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.FromClause.From(table, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.From(table, alias));
         return source;
     }
 
@@ -37,8 +36,7 @@ public static partial class Extensions
             throw new ArgumentNullException(nameof(source));
         if (table == null)
             throw new ArgumentNullException(nameof(table));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.FromClause.From(table);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.From(table));
         return source;
     }
 
@@ -54,8 +52,9 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.FromClause.AppendSql(sql);
+        if (string.IsNullOrWhiteSpace(sql))
+            return source;
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.AppendSql(sql));
         return source;
     }
 
@@ -80,8 +79,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.FromClause.From(builder, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.From(builder, alias));
         return source;
     }
 
@@ -96,8 +94,7 @@ public static partial class Extensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (SqlQueryOperationAccessor.GetClauseAccessor(source) is { } accessor)
-            accessor.FromClause.From(action, alias);
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.From(action, alias));
         return source;
     }
 

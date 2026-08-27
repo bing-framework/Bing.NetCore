@@ -1,4 +1,12 @@
 Bing.Data.Sql.SqlBuilderExecutionSnapshot
+Bing.Data.Sql.SqlJoinOptions
+Bing.Data.Sql.SqlJoinOptions.SqlJoinOptions() -> void
+Bing.Data.Sql.SqlJoinOptions.RightAlias.get -> string
+Bing.Data.Sql.SqlJoinOptions.RightAlias.init -> void
+Bing.Data.Sql.SqlJoinOptions.LeftAlias.get -> string
+Bing.Data.Sql.SqlJoinOptions.LeftAlias.init -> void
+Bing.Data.Sql.SqlJoinOptions.Schema.get -> string
+Bing.Data.Sql.SqlJoinOptions.Schema.init -> void
 Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.SqlTextQuery.AsAsyncEnumerable<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
 static Bing.Data.Sql.Extensions.With<T>(this T source, string name, Bing.Data.Sql.SqlFluentQuery query) -> T
@@ -314,7 +322,6 @@ Bing.Data.Sql.SqlLambdaQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int?
 Bing.Data.Sql.SqlLambdaQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
 Bing.Data.Sql.SqlLambdaQuery.ToSql() -> string
 Bing.Data.Sql.SqlLambdaQuery.From<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
@@ -332,7 +339,6 @@ Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(bool propertyAsAlias = false) -> Bi
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.ClearSelect() -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Distinct() -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string alias, string columnAlias, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
@@ -346,10 +352,14 @@ Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expres
 Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, string alias, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null, string leftAlias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
@@ -371,7 +381,6 @@ Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<
 Bing.Data.Sql.SqlLambdaQuery.Skip(int count) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Take(int count) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.From<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.ISqlQuery.FromTable(string table, string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.FromSubquery<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.ISqlQuery.Sql(string sql, object parameters = null) -> Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.ISqlQuery.SqlInterpolated(System.FormattableString sql) -> Bing.Data.Sql.SqlTextQuery

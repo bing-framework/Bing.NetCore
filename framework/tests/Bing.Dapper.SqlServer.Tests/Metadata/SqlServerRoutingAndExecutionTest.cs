@@ -65,7 +65,8 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample>("owner").From<MappedSample>("reviewer")
-            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
+            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id,
+                new SqlJoinOptions { RightAlias = "audit", LeftAlias = "owner" })
             .Select<MappedSample>(owner => new object[] { owner.Id }, "owner")
             .AppendSelect<MappedSample>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
@@ -88,7 +89,8 @@ public class SqlServerRoutingAndExecutionTest
 
         // Act
         var query = rootQuery.From<MappedSample>("owner")
-            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id, "audit", "owner")
+            .FullJoin<MappedSample, MappedSample>((owner, audit) => owner.Id == audit.Id,
+                new SqlJoinOptions { RightAlias = "audit", LeftAlias = "owner" })
             .Select<MappedSample>(owner => new object[] { owner.Id }, "owner")
             .AppendSelect<MappedSample>(audit => new object[] { audit.Id }, "audit");
 

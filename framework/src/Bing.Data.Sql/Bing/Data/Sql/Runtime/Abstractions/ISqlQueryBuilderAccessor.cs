@@ -15,4 +15,9 @@ internal interface ISqlQueryBuilderAccessor
     /// </summary>
     /// <returns>当前查询描述的独立 SQL Builder。</returns>
     ISqlBuilder GetSqlBuilder();
+
+    /// <summary>
+    /// 标记查询结构已成功变更。
+    /// </summary>
+    void MarkChanged();
 }
