@@ -30,6 +30,8 @@ public sealed class IntegrationTestGateTest : IDisposable
     private const string MySqlConnectionVariable = "ConnectionStrings__MySqlConnection";
     private const string DorisConnectionVariable = "ConnectionStrings__DorisConnection";
     private const string PostgreSqlConnectionVariable = "ConnectionStrings__PostgreSqlConnection";
+    private const string SqlServerConnectionVariable = "ConnectionStrings__SqlServerConnection";
+    private const string LegacyPostgreSqlVariable = "RUN_PGSQL_INTEGRATION_TESTS";
     private readonly Dictionary<string, string> _originalValues = new();
 
     /// <summary>
@@ -48,6 +50,8 @@ public sealed class IntegrationTestGateTest : IDisposable
         ClearEnvironmentVariable(MySqlConnectionVariable);
         ClearEnvironmentVariable(DorisConnectionVariable);
         ClearEnvironmentVariable(PostgreSqlConnectionVariable);
+        ClearEnvironmentVariable(SqlServerConnectionVariable);
+        ClearEnvironmentVariable(LegacyPostgreSqlVariable);
     }
 
     /// <summary>
@@ -131,6 +135,62 @@ public sealed class IntegrationTestGateTest : IDisposable
         SetEnvironmentVariable(MySqlVariable, "TrUe");
 
         Assert.Null(IntegrationTestGate.GetSkipReason("MySql"));
+    }
+
+    /// <summary>
+    /// 测试目的：全局开关显式为 false 时，Provider 专属 true 仍必须启用对应测试。
+    /// </summary>
+    [Fact]
+    public void GetSkipReason_WhenGlobalIsFalseAndProviderIsTrue_ShouldEnableProvider()
+    {
+        // Arrange
+        SetEnvironmentVariable(IntegrationTestGate.GlobalEnvironmentVariable, "false");
+        SetEnvironmentVariable(PostgreSqlVariable, "true");
+
+        // Act and Assert
+        Assert.Null(IntegrationTestGate.GetSkipReason("PostgreSql"));
+    }
+
+    /// <summary>
+    /// 测试目的：除 true 外的开关值不得意外启用集成测试。
+    /// </summary>
+    /// <param name="value">待验证的环境变量值。</param>
+    [Theory]
+    [InlineData("false")]
+    [InlineData("1")]
+    [InlineData("yes")]
+    [InlineData("on")]
+    [InlineData("")]
+    [InlineData("invalid")]
+    public void GetSkipReason_WhenProviderValueIsNotTrue_ShouldKeepProviderDisabled(string value)
+    {
+        // Arrange
+        SetEnvironmentVariable(SqlServerVariable, value);
+
+        // Act
+        var skipReason = IntegrationTestGate.GetSkipReason("SqlServer");
+
+        // Assert
+        Assert.NotNull(skipReason);
+        Assert.Contains(SqlServerVariable, skipReason);
+    }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 只接受规范 RUN_POSTGRESQL_INTEGRATION_TESTS 变量，不接受未文档化的别名。
+    /// </summary>
+    [Fact]
+    public void GetSkipReason_WhenOnlyLegacyPostgreSqlVariableIsTrue_ShouldKeepProviderDisabled()
+    {
+        // Arrange
+        SetEnvironmentVariable(LegacyPostgreSqlVariable, "true");
+
+        // Act
+        var skipReason = IntegrationTestGate.GetSkipReason("PostgreSql");
+
+        // Assert
+        Assert.NotNull(skipReason);
+        Assert.Contains(PostgreSqlVariable, skipReason);
+        Assert.DoesNotContain(LegacyPostgreSqlVariable, skipReason);
     }
 
     /// <summary>
@@ -324,7 +384,7 @@ public sealed class IntegrationTestGateTest : IDisposable
         // Assert
         Assert.Contains("Doris", exception.Message);
         Assert.Contains(DorisConnectionVariable, exception.Message);
-        Assert.Contains("integration.doris.runsettings.example", exception.Message);
+        Assert.Contains("docs/testing/database-integration-tests.md", exception.Message);
         Assert.DoesNotContain("Password", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -353,7 +413,7 @@ public sealed class IntegrationTestGateTest : IDisposable
 
         Assert.Contains("PostgreSql", exception.Message);
         Assert.Contains(PostgreSqlConnectionVariable, exception.Message);
-        Assert.Contains("integration.postgresql.runsettings.example", exception.Message);
+        Assert.Contains("docs/testing/database-integration-tests.md", exception.Message);
         Assert.DoesNotContain("Password", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -370,6 +430,24 @@ public sealed class IntegrationTestGateTest : IDisposable
                 "Server=127.0.0.1;Database=master;User Id=test;Password=secret-value", "MySql"));
 
         Assert.DoesNotContain("secret-value", exception.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Server 专属连接字符串必须优先于默认连接字符串，并被环境隔离清理。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenSqlServerConnectionIsConfigured_ShouldUseProviderSpecificConnectionString()
+    {
+        // Arrange
+        const string sqlServerConnectionString = "Server=127.0.0.1;Database=bing_sqlserver_test;User Id=test";
+        SetEnvironmentVariable(SqlServerConnectionVariable, sqlServerConnectionString);
+        SetEnvironmentVariable(DefaultConnectionVariable, "Server=127.0.0.1;Database=default_test;User Id=test");
+
+        // Act
+        var result = IntegrationTestConnectionStringResolver.Resolve("SqlServer");
+
+        // Assert
+        Assert.Equal(sqlServerConnectionString, result);
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Dapper.PostgreSql;
 using Bing.Dapper.SqlServer;
+using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -18,9 +19,8 @@ namespace Bing.Dapper.Tests;
 /// 集成测试启动配置。
 /// 连接字符串通过以下任一方式提供（优先级从高到低）：
 /// 1. 环境变量：ConnectionStrings__SqlServerConnection
-/// 2. 环境变量：ConnectionStrings__DefaultConnection（兼容旧配置）
-/// 3. appsettings.Development.json（本地开发，不提交到 Git）
-/// 4. appsettings.json（默认为空，确保无硬编码凭据）
+/// 2. appsettings.Development.json（本地开发，不提交到 Git）
+/// 3. appsettings.json 的 SqlServerConnection 或 DefaultConnection（本地兼容）
 /// 前置条件：
 /// - SQL Server 实例可访问
 /// - 数据库账号有 CREATE / DROP / DML 权限
@@ -50,21 +50,47 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
-        var connectionString = context.Configuration.GetConnectionString("SqlServerConnection") ??
-                       context.Configuration.GetConnectionString("DefaultConnection");
-        var mySqlConnectionString = context.Configuration.GetConnectionString("MySqlConnection");
-        var postgreSqlConnectionString = context.Configuration.GetConnectionString("PostgreSqlConnection");
+        var connectionString = ResolveSqlServerConnectionString(context.Configuration);
 
-        // 如果连接字符串为空，SqlQuery/SqlExecutor 将无法正常工作，
-        // 但 Startup 本身不应抛异常，测试通过 [IntegrationFact] 跳过机制保护。
+    // 如果连接字符串为空，SqlQuery/SqlExecutor 将无法正常工作，
+    // 但 Startup 本身不应抛异常，测试通过 [IntegrationFact] 跳过机制保护。
         services.AddSqlServerProvider();
-        services.AddMySqlProvider();
-        services.AddPostgreSqlProvider();
-        services.AddSqlDataSource("default", Bing.Data.Enums.DatabaseType.SqlServer, connectionString);
-        services.AddSqlDataSource("mysql", Bing.Data.Enums.DatabaseType.MySql, mySqlConnectionString);
-        services.AddSqlDataSource("pgsql", Bing.Data.Enums.DatabaseType.PgSql, postgreSqlConnectionString);
-        services.AddSqlDataSource("sqlserver", Bing.Data.Enums.DatabaseType.SqlServer, connectionString);
+        services.AddSqlDataSource("default", DatabaseType.SqlServer, connectionString);
+        if (IsGlobalMultiProviderRunEnabled())
+        {
+            services.AddMySqlProvider();
+            services.AddPostgreSqlProvider();
+            services.AddSqlDataSource("mysql", DatabaseType.MySql,
+                ResolveConnectionString(context.Configuration, "MySqlConnection"));
+            services.AddSqlDataSource("pgsql", DatabaseType.PgSql,
+                ResolveConnectionString(context.Configuration, "PostgreSqlConnection"));
+            services.AddSqlDataSource("sqlserver", DatabaseType.SqlServer, connectionString);
+        }
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
         services.AddBing();
     }
+
+    /// <summary>
+    /// 解析 SQL Server 连接字符串，优先使用专属配置，保留本地默认连接兼容。
+    /// </summary>
+    /// <param name="configuration">配置。</param>
+    /// <returns>SQL Server 连接字符串。</returns>
+    internal static string ResolveSqlServerConnectionString(IConfiguration configuration) =>
+        ResolveConnectionString(configuration, "SqlServerConnection");
+
+    /// <summary>
+    /// 解析指定 Provider 连接字符串，未配置专属键时回退本地默认连接。
+    /// </summary>
+    /// <param name="configuration">配置。</param>
+    /// <param name="connectionName">Provider 专属连接名称。</param>
+    /// <returns>Provider 连接字符串。</returns>
+    private static string ResolveConnectionString(IConfiguration configuration, string connectionName) =>
+        configuration.GetConnectionString(connectionName) ?? configuration.GetConnectionString("DefaultConnection");
+
+    /// <summary>
+    /// 判断是否为本地显式的全局多 Provider 兼容运行。
+    /// </summary>
+    /// <returns>是全局兼容运行时返回 true。</returns>
+    private static bool IsGlobalMultiProviderRunEnabled() => string.Equals(
+        Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS"), "true", StringComparison.OrdinalIgnoreCase);
 }

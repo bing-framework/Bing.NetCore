@@ -4,9 +4,9 @@ SQLite 集成测试始终执行，使用临时文件数据库，不需要额外�
 
 ## 本地运行
 
-1. 复制 `tests/runsettings/integration.<provider>.runsettings.example` 为同目录的 `integration.<provider>.local.runsettings`。
-2. 将其中的 `replace-me` 改为本地测试账号，并确认数据库名是专用测试库。
-3. 在 Visual Studio 中选择该 `.runsettings` 文件，或使用 `dotnet test --settings <path>` 运行对应项目。
+1. 在对应 Provider 项目目录创建忽略的 `integration.local.runsettings`，或仅在终端设置 Provider 专属环境变量。
+2. 本地配置只提供对应 `ConnectionStrings__<Provider>Connection`、对应 `RUN_<PROVIDER>_INTEGRATION_TESTS=true` 和 `ALLOW_DATABASE_RESET_FOR_TESTS=true`；确认数据库名是专用测试库。
+3. 在 Visual Studio 中选择该 `.runsettings` 文件，或使用 `dotnet test --settings <path>` 显式运行对应项目。项目不会自动加载目录中的 `integration.runsettings`；现有文件是本地用户配置，只能由用户显式选择，CI 不使用该文件。
 
 本地配置文件被 `.gitignore` 忽略，不能提交密码或连接字符串。
 
@@ -20,7 +20,7 @@ SQLite 集成测试始终执行，使用临时文件数据库，不需要额外�
 
 Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受全局变量，并要求同时提供 MySQL、PostgreSQL 和 SQL Server 的连接配置。
 
-连接字符串优先使用 `ConnectionStrings__<Provider>Connection`，例如 `ConnectionStrings__MySqlConnection`；未配置时可兼容回退到 `ConnectionStrings__DefaultConnection`。缺失配置会给出变量名称和示例 runsettings，不会显示密码。
+连接字符串优先使用 `ConnectionStrings__<Provider>Connection`，例如 `ConnectionStrings__MySqlConnection`；本地旧配置可临时回退到 `ConnectionStrings__DefaultConnection`。受保护 Provider CI 禁止该回退，必须只注入对应 Provider 专属变量。缺失配置只给出变量名称和本地显式 settings 指引，不会显示密码。
 
 ## 数据库安全
 
@@ -32,7 +32,7 @@ Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受�
 
 ## CI
 
-常规 CI 显式关闭所有外部 Provider 门控，只运行无凭据测试和 SQLite 集成测试。外部数据库测试应放在独立、受保护的构建中：连接字符串通过 CI 密钥注入，Provider 门控只在该构建中设为 `true`，日志不得输出连接字符串或凭据。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
+常规 CI 清除所有外部 Provider gate、连接和 reset 变量，只运行无凭据测试和 SQLite 集成测试。AppVeyor 由 `PROVIDER_TEST_LANE=common|mysql|postgresql|sqlserver` 选择入口；默认是 `common`。后三者只能在受保护环境中设置，并仅通过 CI 密钥注入自身 Provider 的 gate、连接和 reset 授权。不得设置 `RUN_INTEGRATION_TESTS=true` 或 `ConnectionStrings__DefaultConnection`。使用 `eng/ci/Invoke-ProviderIntegrationTests.ps1` 运行后必须生成每 Provider/TFM 独立 TRX；零测试、全部 Skip 或 core Provider Skip 均视为失败。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
 
 ## SQLite 边界覆盖
 

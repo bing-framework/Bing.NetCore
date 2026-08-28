@@ -29,7 +29,21 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 | SQL Server | `RUN_SQLSERVER_INTEGRATION_TESTS=true` | `ConnectionStrings__SqlServerConnection` |
 | Oracle | `RUN_ORACLE_INTEGRATION_TESTS=true` | `ConnectionStrings__OracleConnection` |
 
-`RUN_INTEGRATION_TESTS=true` 启用全部外部 Provider。连接字符串应通过 CI 密钥或本地 `.runsettings` 注入，日志、异常和测试输出不得回显密码。
+`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥或用户显式选择的本地 runsettings 注入，日志、异常和测试输出不得回显密码。项目不会自动加载目录中的 `integration.runsettings`，避免普通构建继承本地连接或 gate。Provider CI 禁止 `ConnectionStrings__DefaultConnection` 回退。
+
+## 受保护 Provider CI
+
+每个 Provider lane 必须在 build 完成后使用 `--no-build` 调用同一个 runner，并仅注入自身的 Provider gate、专属连接字符串和 `ALLOW_DATABASE_RESET_FOR_TESTS=true`：
+
+```powershell
+.\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net8.0 -Configuration Release
+.\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider PostgreSql -Framework net8.0 -Configuration Release
+.\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release
+```
+
+AppVeyor 使用 `PROVIDER_TEST_LANE=mysql`、`postgresql` 或 `sqlserver` 选择对应调用路径；这些变量和 Provider 专属密钥只能在受保护的远端作业中配置。未设置时仅运行 `common` lane。
+
+runner 在连接前验证规范 gate、专属连接字符串、reset 授权和安全测试数据库名，并为每个 Provider/TFM 写入独立 TRX/JSON 摘要。发现零测试、全部 Skip、core Provider Skip、全局 gate 或默认连接字符串时，runner 以非零退出。MySQL 跨库测试允许在未启用独立跨库配置时单独 Skip，不得掩盖 MySQL core 测试的执行结果。
 
 ## 验收重点
 

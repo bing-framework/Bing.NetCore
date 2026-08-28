@@ -28,6 +28,7 @@ public abstract class SqliteDapperE2EBenchmarkBase
     private ISqlQueryFactory _queryFactory;
     private ISqlQueryFactory _traceQueryFactory;
     private ISqlMultipleQueryExecutor _multipleQueryExecutor;
+    private NoOpDiagnosticObserver _diagnosticObserver;
 
     /// <summary>
     /// SQLite 样例行数。
@@ -48,6 +49,7 @@ public abstract class SqliteDapperE2EBenchmarkBase
         _queryFactory = _serviceProvider.GetRequiredService<ISqlQueryFactory>();
         _traceQueryFactory = _traceServiceProvider.GetRequiredService<ISqlQueryFactory>();
         _multipleQueryExecutor = _serviceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
+        _diagnosticObserver = new NoOpDiagnosticObserver();
         SeedDatabase(connectionString);
         ValidateRepresentativePaths();
     }
@@ -264,10 +266,19 @@ public abstract class SqliteDapperE2EBenchmarkBase
     }
 
     /// <summary>
-    /// 测量启用 DiagnosticListener 订阅时的查询诊断路径。
+    /// 测量已订阅 DiagnosticListener 时的稳态查询诊断路径。
     /// </summary>
     [Benchmark]
     public int QueryWithDiagnosticListener()
+    {
+        return QueryToList();
+    }
+
+    /// <summary>
+    /// 测量建立 DiagnosticListener 订阅后执行一次查询的成本。
+    /// </summary>
+    [Benchmark]
+    public int SubscribeDiagnosticListenerAndQuery()
     {
         using var observer = new NoOpDiagnosticObserver();
         return QueryToList();
@@ -294,6 +305,8 @@ public abstract class SqliteDapperE2EBenchmarkBase
     [GlobalCleanup]
     public void Cleanup()
     {
+        _diagnosticObserver?.Dispose();
+        _diagnosticObserver = null;
         _multipleQueryExecutor?.Dispose();
         _multipleQueryExecutor = null;
         _serviceProvider?.Dispose();
@@ -338,6 +351,7 @@ public abstract class SqliteDapperE2EBenchmarkBase
         Ensure(QueryToEntityCardinalityFailure(), 1, nameof(QueryToEntityCardinalityFailure));
         Ensure(QueryWithActivity(), RowCount, nameof(QueryWithActivity));
         Ensure(QueryWithDiagnosticListener(), RowCount, nameof(QueryWithDiagnosticListener));
+        Ensure(SubscribeDiagnosticListenerAndQuery(), RowCount, nameof(SubscribeDiagnosticListenerAndQuery));
         Ensure(QueryWithTrace(), RowCount, nameof(QueryWithTrace));
     }
 

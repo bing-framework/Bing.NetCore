@@ -1,8 +1,7 @@
 language: csharp
-sudo: true
 mono: none
-dotnet: 2.2
-dist: xenial
+dist: focal
+dotnet: 8.0
 os:
 #- osx
 - linux
@@ -12,7 +11,9 @@ branches:
 script:
 - dotnet restore
 - dotnet build -c Release
-- dotnet test -c Release -v n
+- dotnet test ./framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj -c Release -f net8.0 --no-restore --nologo
+- dotnet test ./framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj -c Release -f net8.0 --no-restore --nologo
+- dotnet test ./framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj -c Release -f net8.0 --no-restore --nologo
 #deploy:
 #  skip_cleanup: true
 #  provider: script

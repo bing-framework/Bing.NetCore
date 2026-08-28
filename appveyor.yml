@@ -16,11 +16,29 @@ build:
 build_script:
   - cmd: dotnet build -c Release
 test_script:
-  # 常规 CI 只运行无需凭据的单元测试和 SQLite 集成测试。
-  # 外部 Provider 测试由受保护的专用构建注入连接字符串和 RUN_*_INTEGRATION_TESTS=true。
-  - cmd: set RUN_INTEGRATION_TESTS=false&& set RUN_MYSQL_INTEGRATION_TESTS=false&& set RUN_POSTGRESQL_INTEGRATION_TESTS=false&& set RUN_SQLSERVER_INTEGRATION_TESTS=false&& set RUN_ORACLE_INTEGRATION_TESTS=false&& dotnet test -c Release --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
-  - cmd: dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release -- --ci-smoke --filter "*SqlCiSmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci"
-  - cmd: dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release -- --e2e-smoke --filter "*SqliteDapperE2ESmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci-e2e"
+  - ps: |
+      $lane = if ([string]::IsNullOrWhiteSpace($env:PROVIDER_TEST_LANE)) { 'common' } else { $env:PROVIDER_TEST_LANE }
+      switch ($lane) {
+        'common' {
+          # 普通 lane 不继承受保护 Provider 的连接、gate 或 reset 授权。
+          'RUN_INTEGRATION_TESTS', 'RUN_MYSQL_INTEGRATION_TESTS', 'RUN_POSTGRESQL_INTEGRATION_TESTS',
+          'RUN_SQLSERVER_INTEGRATION_TESTS', 'RUN_ORACLE_INTEGRATION_TESTS', 'ALLOW_DATABASE_RESET_FOR_TESTS',
+          'ConnectionStrings__DefaultConnection', 'ConnectionStrings__MySqlConnection',
+          'ConnectionStrings__PostgreSqlConnection', 'ConnectionStrings__SqlServerConnection' |
+            ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
+          dotnet test -c Release --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+          if ($LASTEXITCODE -ne 0) { throw 'Common test lane failed.' }
+          dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release --no-build -- --ci-smoke --filter "*SqlCiSmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci"
+          if ($LASTEXITCODE -ne 0) { throw 'CI benchmark smoke failed.' }
+          dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release --no-build -- --e2e-smoke --filter "*SqliteDapperE2ESmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci-e2e"
+          if ($LASTEXITCODE -ne 0) { throw 'E2E benchmark smoke failed.' }
+        }
+        'mysql' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net8.0 -Configuration Release }
+        'postgresql' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider PostgreSql -Framework net8.0 -Configuration Release }
+        'sqlserver' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release }
+        default { throw "Unsupported PROVIDER_TEST_LANE '$lane'." }
+      }
+      if ($LASTEXITCODE -ne 0) { throw "Provider test lane '$lane' failed." }
 artifacts:
   - path: '**\*.nupkg'
   - path: '**\TestResults\*.trx'
@@ -28,6 +46,7 @@ artifacts:
   - path: '**\PublicAPI.*.txt'
   - path: 'BenchmarkDotNet.Artifacts\ci\**'
   - path: 'BenchmarkDotNet.Artifacts\ci-e2e\**'
+  - path: 'artifacts\provider-test-results\**'
 nuget:
   disable_publish_on_pr: true
 #deploy:

@@ -241,6 +241,7 @@ public class SqlLambdaInBenchmarks
 public class SqlRawFromBenchmarks
 {
     private ISqlQueryPlanExecutor _executor;
+    private string _sources;
 
     /// <summary>
     /// 原始来源数量。
@@ -252,21 +253,32 @@ public class SqlRawFromBenchmarks
     /// 初始化 Raw Fluent 查询执行器。
     /// </summary>
     [GlobalSetup]
-    public void Setup() => _executor = DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+    public void Setup()
+    {
+        _executor = DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
+        _sources = string.Join(", ", Enumerable.Range(1, SourceCount)
+            .Select(index => $"[RawTable{index}] As [r{index}]"));
+    }
 
     /// <summary>
-    /// 测量 Raw Fluent 追加多来源并渲染 SQL 的成本。
+    /// 测量预构造 Raw Fluent 多来源追加并渲染 SQL 的成本。
     /// </summary>
     [Benchmark]
     public string BuildRawSourcesAndRender()
     {
-        var sources = string.Join(", ", Enumerable.Range(1, SourceCount)
-            .Select(index => $"[RawTable{index}] As [r{index}]"));
         return SqlQueryRuntimeFactory.CreateQuery(_executor, new Bing.Data.Sql.Builders.SqlServerBuilder())
             .Select("Id")
-            .AppendFrom(sources)
+            .AppendFrom(_sources)
             .ToSql();
     }
+
+    /// <summary>
+    /// 测量原始来源字符串生成成本，避免将其混入查询渲染基线。
+    /// </summary>
+    /// <returns>构造出的 Raw 来源字符串。</returns>
+    [Benchmark]
+    public string BuildRawSourceString() => string.Join(", ", Enumerable.Range(1, SourceCount)
+        .Select(index => $"[RawTable{index}] As [r{index}]"));
 
     private class NoOpExecutor : DispatchProxy
     {
