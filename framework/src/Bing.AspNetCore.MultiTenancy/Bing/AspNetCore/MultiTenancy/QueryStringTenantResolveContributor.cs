@@ -4,26 +4,20 @@ using Microsoft.AspNetCore.Http;
 namespace Bing.AspNetCore.MultiTenancy;
 
 /// <summary>
-/// 基于查询字符串的租户解析构造器
+/// 从 HTTP 查询字符串解析租户的贡献者。
 /// </summary>
 public class QueryStringTenantResolveContributor : HttpTenantResolveContributorBase
 {
     /// <summary>
-    /// 构造器名称
+    /// 用于诊断和解析链路记录的贡献者名称。
     /// </summary>
     public const string ContributorName = "QueryString";
 
-    /// <summary>
-    /// 名称
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => ContributorName;
 
-    /// <summary>
-    /// 从 <see cref="HttpContext"/> 中获取租户标识、租户名称、null
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="httpContext">Http上下文</param>
-    /// <returns>租户标识、租户名称、null</returns>
+    /// <inheritdoc />
+    /// <remarks>查询参数存在但值为空白时会终止后续解析；参数不存在时返回 <c>null</c> 以继续解析链。</remarks>
     protected override Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext)
     {
         if (httpContext.Request.QueryString.HasValue)

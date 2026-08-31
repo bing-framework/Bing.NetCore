@@ -216,6 +216,7 @@ public class ParameterManager : IAdvancedParameterManager
     /// </summary>
     /// <param name="value">参数值</param>
     /// <param name="operator">运算符</param>
+    /// <returns>根据运算符应用通配符后的参数值。</returns>
     private object GetValue(object value, Operator? @operator)
     {
         if (string.IsNullOrWhiteSpace(value.SafeString()))
@@ -300,6 +301,7 @@ public class ParameterManager : IAdvancedParameterManager
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前参数管理器的独立副本。</returns>
     public virtual IParameterManager Clone() => new ParameterManager(this);
 
     /// <summary>

@@ -1,25 +1,25 @@
 ﻿namespace Bing.EventBus;
 
 /// <summary>
-/// 事件处理释放包装器
+/// 保存事件处理器和可选释放操作的默认包装器。
 /// </summary>
 public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper
 {
     /// <summary>
-    /// 释放操作
+    /// 释放处理器关联资源的可选操作。
     /// </summary>
     private readonly Action _disposeAction;
 
     /// <summary>
-    /// 事件处理器
+    /// <inheritdoc />
     /// </summary>
     public IEventHandler EventHandler { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="EventHandlerDisposeWrapper"/>类型的实例
+    /// 使用事件处理器和可选资源释放操作初始化 <see cref="EventHandlerDisposeWrapper"/> 的实例。
     /// </summary>
-    /// <param name="eventHandler">事件处理器</param>
-    /// <param name="disposeAction">释放操作</param>
+    /// <param name="eventHandler">要包装的事件处理器。</param>
+    /// <param name="disposeAction">释放包装器时执行的可选资源释放操作。</param>
     public EventHandlerDisposeWrapper(IEventHandler eventHandler, Action disposeAction = null)
     {
         EventHandler = eventHandler;
@@ -27,7 +27,7 @@ public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper
     }
 
     /// <summary>
-    /// 释放
+    /// 执行构造时提供的资源释放操作。
     /// </summary>
     public void Dispose() => _disposeAction?.Invoke();
 }

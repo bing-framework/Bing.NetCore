@@ -57,6 +57,7 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     /// 尝试添加
     /// </summary>
     /// <typeparam name="T">泛型类型</typeparam>
+    /// <returns>类型尚未存在并添加成功时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool TryAdd<T>() where T : TBaseType
     {
         if (Contains<T>())
@@ -90,19 +91,21 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     /// 获取指定类型索引值
     /// </summary>
     /// <param name="item">类型</param>
+    /// <returns>指定类型在列表中的索引；不存在时返回 -1。</returns>
     public int IndexOf(Type item) => _typeList.IndexOf(item);
 
     /// <summary>
     /// 包含
     /// </summary>
     /// <typeparam name="T">泛型类型</typeparam>
+    /// <returns>列表包含指定类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Contains<T>() where T : TBaseType => Contains(typeof(T));
 
     /// <summary>
     /// 包含
     /// </summary>
     /// <param name="item">类型</param>
-    /// <returns></returns>
+    /// <returns>列表包含指定类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Contains(Type item) => _typeList.Contains(item);
 
     /// <summary>
@@ -115,6 +118,7 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     /// 移除
     /// </summary>
     /// <param name="item">类型</param>
+    /// <returns>类型存在并移除成功时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Remove(Type item) => _typeList.Remove(item);
 
     /// <summary>
@@ -138,11 +142,13 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     /// <summary>
     /// 获取迭代器集合
     /// </summary>
+    /// <returns>用于遍历列表中类型的泛型枚举器。</returns>
     public IEnumerator<Type> GetEnumerator() => _typeList.GetEnumerator();
 
     /// <summary>
     /// 获取迭代器
     /// </summary>
+    /// <returns>用于遍历列表中类型的非泛型枚举器。</returns>
     IEnumerator IEnumerable.GetEnumerator() => _typeList.GetEnumerator();
 
     /// <summary>

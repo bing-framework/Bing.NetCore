@@ -31,6 +31,7 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
     /// <summary>
     /// 重写已实现所有项的查找
     /// </summary>
+    /// <returns>当前应用程序域中符合筛选条件的程序集数组。</returns>
     protected override Assembly[] FindAllItems()
     {
         return AssemblyManager.AllAssemblies;
@@ -90,6 +91,7 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
     /// 加载程序集
     /// </summary>
     /// <param name="files">文件集合</param>
+    /// <returns>成功加载的程序集数组。</returns>
     protected static Assembly[] LoadAssemblies(IEnumerable<string> files)
     {
         var assemblies = new List<Assembly>();
@@ -113,6 +115,7 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
     /// 程序集是否匹配
     /// </summary>
     /// <param name="assemblyName">程序集名称</param>
+    /// <returns>程序集符合筛选条件时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool Match(string assemblyName)
     {
         var applicationName = Assembly.GetEntryAssembly().GetName().Name;

@@ -44,6 +44,8 @@ public sealed class UnsafeInterpolatedSqlAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// 判断目标是否为 ISqlQuery 或 ISqlExecutor 实现上的普通字符串 SQL 入口。
     /// </summary>
+    /// <param name="method">待检查的方法符号。</param>
+    /// <returns>是受支持的普通 SQL 文本入口时返回 <see langword="true"/>。</returns>
     private static bool IsSqlTextEntryPoint(IMethodSymbol method)
     {
         if (method.Name is not ("Sql" or "ExecuteSql" or "ExecuteSqlAsync"))
@@ -77,6 +79,10 @@ public sealed class UnsafeInterpolatedSqlAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// 判断表达式是否包含实际插值值，支持字符串拼接和局部变量初始化。
     /// </summary>
+    /// <param name="expression">待检查的表达式。</param>
+    /// <param name="semanticModel">用于解析局部变量和调用符号的语义模型。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表达式包含实际插值值时返回 <see langword="true"/>。</returns>
     private static bool ContainsInterpolatedValue(ExpressionSyntax expression, SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {

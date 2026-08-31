@@ -6,15 +6,15 @@ using Bing.Users;
 namespace Bing.Auditing;
 
 /// <summary>
-/// 设计属性设置其
+/// 为支持审计接口的对象填充创建、修改和删除属性。
 /// </summary>
 public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
 {
     /// <summary>
-    /// 初始化一个<see cref="AuditPropertySetter"/>类型的实例
+    /// 使用当前用户和时钟服务初始化 <see cref="AuditPropertySetter"/> 的实例。
     /// </summary>
-    /// <param name="currentUser">当前用户</param>
-    /// <param name="clock">时钟（可在测试中替换为 FakeClock）</param>
+    /// <param name="currentUser">提供当前用户标识和名称的服务。</param>
+    /// <param name="clock">提供当前时间的服务，可在测试中替换为测试时钟。</param>
     public AuditPropertySetter(ICurrentUser currentUser, IClock clock)
     {
         CurrentUser = currentUser;
@@ -22,19 +22,19 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 当前用户
+    /// 获取提供当前审计主体信息的用户服务。
     /// </summary>
     protected ICurrentUser CurrentUser { get; }
 
     /// <summary>
-    /// 时钟
+    /// 获取提供审计时间戳的时钟服务。
     /// </summary>
     protected IClock Clock { get; }
 
     /// <summary>
-    /// 设置创建属性
+    /// 为目标对象填充尚未设置的创建时间、创建人标识和创建人名称。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <param name="targetObject">要填充创建审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
     public virtual void SetCreationProperties(object targetObject)
     {
         if (targetObject == null)
@@ -45,9 +45,9 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置修改属性
+    /// 为目标对象填充最后修改时间、最后修改人标识和最后修改人名称。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <param name="targetObject">要填充修改审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
     public virtual void SetModificationProperties(object targetObject)
     {
         if (targetObject == null)
@@ -58,9 +58,9 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置删除属性
+    /// 为目标对象填充删除时间、删除人标识和删除人名称。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <param name="targetObject">要填充删除审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
     public virtual void SetDeletionProperties(object targetObject)
     {
         if (targetObject == null)
@@ -71,9 +71,9 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置创建时间
+    /// 为支持创建时间的对象设置尚未赋值的创建时间。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <param name="targetObject">可能实现 <see cref="IHasCreationTime"/> 的目标对象。</param>
     protected virtual void SetCreationTime(object targetObject)
     {
         if (targetObject is not IHasCreationTime objectWithCreationTime)
@@ -82,9 +82,10 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置创建人标识
+    /// 为支持创建审计的对象设置尚未赋值的创建人标识。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <remarks>仅在当前用户标识有效且目标对象的创建人标识为默认值时写入；根据目标审计接口的泛型标识类型进行转换。</remarks>
+    /// <param name="targetObject">可能实现创建审计接口的目标对象。</param>
     protected virtual void SetCreatorId(object targetObject)
     {
         if (string.IsNullOrWhiteSpace(CurrentUser.UserId))
@@ -163,9 +164,9 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置修改人标识
+    /// 按目标审计接口的标识类型设置最后修改人标识。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <param name="targetObject">可能实现修改审计接口的目标对象。</param>
     protected virtual void SetLastModifierId(object targetObject)
     {
         if (string.IsNullOrWhiteSpace(CurrentUser.UserId))
@@ -226,9 +227,10 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 设置删除人标识
+    /// 为支持删除审计的对象设置尚未赋值的删除人标识。
     /// </summary>
-    /// <param name="targetObject">目标对象</param>
+    /// <remarks>仅在当前用户标识有效且目标对象的删除人标识为默认值时写入；根据目标审计接口的泛型标识类型进行转换。</remarks>
+    /// <param name="targetObject">可能实现删除审计接口的目标对象。</param>
     protected virtual void SetDeleterId(object targetObject)
     {
         if (string.IsNullOrWhiteSpace(CurrentUser.UserId))
@@ -297,8 +299,9 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     }
 
     /// <summary>
-    /// 获取用户名称
+    /// 获取用于审计字段的当前用户显示名称。
     /// </summary>
+    /// <returns>当前用户全名；全名为空时返回用户名。</returns>
     protected virtual string GetUserName()
     {
         var name = CurrentUser.GetFullName();

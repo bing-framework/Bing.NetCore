@@ -3,9 +3,9 @@
 namespace Bing.DependencyInjection;
 
 /// <summary>
-/// 缓存服务提供程序，缓存包含了 <see cref="ServiceLifetime.Transient"/>、<see cref="ServiceLifetime.Scoped"/>。<br />
-/// 该服务的生命周期为 <see cref="ServiceLifetime.Scoped"/>。
+/// 表示供作用域内复用的缓存服务提供程序。
 /// </summary>
+/// <remarks>默认实现 <see cref="CachedServiceProvider"/> 为 Scoped；其缓存仅属于当前提供器实例，可缓存 Transient 和 Scoped 服务的首次解析结果。</remarks>
 public interface ICachedServiceProvider : ICachedServiceProviderBase
 {
 }

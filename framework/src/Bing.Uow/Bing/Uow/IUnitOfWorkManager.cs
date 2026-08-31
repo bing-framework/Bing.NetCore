@@ -27,5 +27,6 @@ public interface IUnitOfWorkManager : IScopedDependency
     /// <summary>
     /// 获取工作单元集合
     /// </summary>
+    /// <returns>当前已注册的工作单元集合。</returns>
     IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks();
 }

@@ -213,14 +213,29 @@ public static class SqlBuilderRuntimeBridge
         return pagePlan;
     }
 
+    /// <summary>
+    /// 获取用于分页派生的执行 Builder 副本。
+    /// </summary>
+    /// <param name="plan">原始查询计划。</param>
+    /// <returns>可安全修改且不影响原计划的分页 Builder。</returns>
     private static ISqlBuilder GetPagingBuilder(SqlQueryPlan plan) =>
         CloneExecutionBuilder(plan.GetBuilder());
 
+    /// <summary>
+    /// 创建用于执行的 Builder 快照。
+    /// </summary>
+    /// <param name="builder">待复制的 SQL Builder。</param>
+    /// <returns>用于执行的独立 Builder 快照。</returns>
     private static ISqlBuilder CloneExecutionBuilder(ISqlBuilder builder)
         => builder is SqlBuilderBase sqlBuilder
             ? sqlBuilder.CreateExecutionBuilderSnapshot()
             : builder.Clone();
 
+    /// <summary>
+    /// 获取 Builder 当前参数的独立快照。
+    /// </summary>
+    /// <param name="builder">待读取参数的 SQL Builder。</param>
+    /// <returns>当前 Builder 的参数快照集合。</returns>
     private static IReadOnlyCollection<SqlParam> GetParameterSnapshot(ISqlBuilder builder)
     {
         if (builder is not ISqlCommonPartAccessor accessor)
@@ -239,6 +254,13 @@ public static class SqlBuilderRuntimeBridge
             .ToArray();
     }
 
+    /// <summary>
+    /// 验证并规范化原生 SQL 分页排序表达式。
+    /// </summary>
+    /// <param name="order">逗号分隔的排序列及可选 <c>ASC</c>/<c>DESC</c> 方向。</param>
+    /// <returns>格式化后的安全排序表达式。</returns>
+    /// <exception cref="ArgumentException">排序为空、包含非法标识符或使用不支持的排序方向时抛出。</exception>
+    /// <remarks>仅接受字母、数字、下划线和点号组成的标识符，避免未参数化排序片段进入分页 SQL。</remarks>
     private static string ValidateRawPageOrder(string order)
     {
         if (string.IsNullOrWhiteSpace(order))
@@ -258,6 +280,11 @@ public static class SqlBuilderRuntimeBridge
         return string.Join(", ", result);
     }
 
+    /// <summary>
+    /// 判断文本是否仅由安全的点分隔标识符组成。
+    /// </summary>
+    /// <param name="value">待检查的标识符文本。</param>
+    /// <returns>文本符合安全标识符格式时返回 <see langword="true"/>。</returns>
     private static bool IsSafeIdentifier(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -268,6 +295,13 @@ public static class SqlBuilderRuntimeBridge
             segment.Skip(1).All(character => char.IsLetterOrDigit(character) || character == '_'));
     }
 
+    /// <summary>
+    /// 生成不与原生 SQL 可执行上下文中参数标记冲突的分页参数名。
+    /// </summary>
+    /// <param name="parameterManager">生成候选参数名称的参数管理器。</param>
+    /// <param name="sql">需要检查参数标记冲突的原生 SQL。</param>
+    /// <param name="suffix">保留的分页参数命名后缀；当前实现不参与参数名生成。</param>
+    /// <returns>未出现在原生 SQL 可执行上下文中的参数名称。</returns>
     private static string NextRawPageParameter(IParameterManager parameterManager, string sql, string suffix)
     {
         while (true)
@@ -281,6 +315,8 @@ public static class SqlBuilderRuntimeBridge
     /// <summary>
     /// 将结构化实体表追加为根来源。
     /// </summary>
+    /// <param name="builder">要追加根来源的 SQL Builder。</param>
+    /// <param name="reference">结构化实体表引用。</param>
     public static void AppendRoot(ISqlBuilder builder, SqlTableReference reference)
     {
         if (builder == null)
@@ -293,6 +329,9 @@ public static class SqlBuilderRuntimeBridge
     /// <summary>
     /// 将类型化派生表设置为根来源。
     /// </summary>
+    /// <typeparam name="TProjection">派生表投影类型。</typeparam>
+    /// <param name="builder">要设置根来源的 SQL Builder。</param>
+    /// <param name="subquery">类型化派生表。</param>
     public static void FromSubquery<TProjection>(ISqlBuilder builder, SqlSubquery<TProjection> subquery)
         where TProjection : class
     {
@@ -303,10 +342,24 @@ public static class SqlBuilderRuntimeBridge
         ((FromClause)((ISqlQueryClauseAccessor)builder).FromClause).From(subquery);
     }
 
+    /// <summary>
+    /// 为原生 SQL 分页合并来源参数与分页参数的映射对象。
+    /// </summary>
     private sealed class SqlRawPagingParameterMap : ISqlParameterMap
     {
+        /// <summary>
+        /// 合并后的分页参数项集合。
+        /// </summary>
         private readonly IReadOnlyCollection<SqlParameterMapItem> _items;
 
+        /// <summary>
+        /// 初始化一个 <see cref="SqlRawPagingParameterMap"/> 类型的实例。
+        /// </summary>
+        /// <param name="source">原生 SQL 的来源参数。</param>
+        /// <param name="offsetName">分页偏移量参数名称。</param>
+        /// <param name="offset">分页偏移量。</param>
+        /// <param name="limitName">分页大小参数名称。</param>
+        /// <param name="limit">分页大小。</param>
         public SqlRawPagingParameterMap(object source, string offsetName, int offset, string limitName, int limit)
         {
             if (source is ISqlParameterMap parameterMap)
@@ -321,10 +374,25 @@ public static class SqlBuilderRuntimeBridge
             }
         }
 
+        /// <summary>
+        /// 获取原生 SQL 的来源参数对象。
+        /// </summary>
         public object Source { get; }
 
+        /// <summary>
+        /// 获取合并后的参数项集合。
+        /// </summary>
+        /// <returns>包含来源参数和分页参数的参数项集合。</returns>
         public IReadOnlyCollection<SqlParameterMapItem> GetItems() => _items;
 
+        /// <summary>
+        /// 创建偏移量和分页大小参数项。
+        /// </summary>
+        /// <param name="offsetName">分页偏移量参数名称。</param>
+        /// <param name="offset">分页偏移量。</param>
+        /// <param name="limitName">分页大小参数名称。</param>
+        /// <param name="limit">分页大小。</param>
+        /// <returns>创建的分页参数项集合。</returns>
         private static IEnumerable<SqlParameterMapItem> CreateItems(string offsetName, int offset, string limitName,
             int limit)
         {
@@ -332,6 +400,12 @@ public static class SqlBuilderRuntimeBridge
             yield return CreateItem(limitName, limit);
         }
 
+        /// <summary>
+        /// 创建一个带有显式值的 SQL 参数项。
+        /// </summary>
+        /// <param name="name">参数名称。</param>
+        /// <param name="value">参数值。</param>
+        /// <returns>创建的 SQL 参数项。</returns>
         private static SqlParameterMapItem CreateItem(string name, int value) => new()
         {
             Name = name,

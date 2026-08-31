@@ -14,11 +14,13 @@ public interface IFinder<out TItem>
     /// </summary>
     /// <param name="predicate">筛选条件</param>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>符合筛选条件的项目数组。</returns>
     TItem[] Find(Func<TItem, bool> predicate, bool fromCache = false);
 
     /// <summary>
     /// 查找所有项
     /// </summary>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>查找到的全部项目数组。</returns>
     TItem[] FindAll(bool fromCache = false);
 }

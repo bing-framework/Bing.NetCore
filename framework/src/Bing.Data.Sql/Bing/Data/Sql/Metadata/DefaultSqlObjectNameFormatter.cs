@@ -48,6 +48,9 @@ public sealed class DefaultSqlObjectNameFormatter : ISqlObjectNameFormatter
     /// <summary>
     /// 追加单个名称段。
     /// </summary>
+    /// <param name="builder">正在构建的 SQL 对象名称。</param>
+    /// <param name="dialect">SQL 方言。</param>
+    /// <param name="part">待追加的名称段。</param>
     private static void AppendPart(StringBuilder builder, IDialect dialect, string part)
     {
         if (string.IsNullOrWhiteSpace(part))

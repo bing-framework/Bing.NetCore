@@ -44,6 +44,7 @@ public class IdentityUserManager<TUser, TKey> : AspNetUserManager<TUser> where T
     /// <param name="tokenProvider">令牌提供程序</param>
     /// <param name="token">令牌</param>
     /// <param name="newPassword">新密码</param>
+    /// <returns>表示密码重置结果的异步操作。</returns>
     public virtual async Task<IdentityResult> ResetPasswordAsync(TUser user, string tokenProvider, string token,
         string newPassword)
     {
@@ -63,6 +64,7 @@ public class IdentityUserManager<TUser, TKey> : AspNetUserManager<TUser> where T
     /// </summary>
     /// <param name="user">用户</param>
     /// <param name="newPassword">新密码</param>
+    /// <returns>表示密码修改结果的异步操作。</returns>
     public virtual async Task<IdentityResult> UpdatePasswordAsync(TUser user, string newPassword)
     {
         ThrowIfDisposed();

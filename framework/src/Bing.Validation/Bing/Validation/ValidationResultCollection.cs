@@ -110,24 +110,16 @@ public class ValidationResultCollection : IValidationResult
         UpdateResultFlaggedByStrategy(collection);
     }
 
-    /// <summary>
-    /// 验证结果计数
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _results.Count;
 
-    /// <summary>
-    /// 是否已验证
-    /// </summary>
+    /// <inheritdoc />
     public bool IsValid => _results.Count == 0;
 
-    /// <summary>
-    /// 错误码
-    /// </summary>
+    /// <inheritdoc />
     public long ErrorCode { get; set; } = 1001;
 
-    /// <summary>
-    /// 标识
-    /// </summary>
+    /// <inheritdoc />
     public string Flag { get; set; } = "__EMPTY_FLG";
 
     /// <summary>
@@ -135,10 +127,7 @@ public class ValidationResultCollection : IValidationResult
     /// </summary>
     public static ValidationResultCollection Success { get; } = new();
 
-    /// <summary>
-    /// 添加
-    /// </summary>
-    /// <param name="result">验证结果</param>
+    /// <inheritdoc />
     public void Add(ValidationResult result)
     {
         if (result == null)
@@ -146,10 +135,7 @@ public class ValidationResultCollection : IValidationResult
         _results.Add(result);
     }
 
-    /// <summary>
-    /// 添加集合
-    /// </summary>
-    /// <param name="results">验证结果集合</param>
+    /// <inheritdoc />
     public void AddRange(IEnumerable<ValidationResult> results)
     {
         if (results == null)
@@ -157,9 +143,7 @@ public class ValidationResultCollection : IValidationResult
         _results.AddRange(results);
     }
 
-    /// <summary>
-    /// 转换为消息
-    /// </summary>
+    /// <inheritdoc />
     public string ToMessage()
     {
         var builder = new StringBuilder();
@@ -174,9 +158,7 @@ public class ValidationResultCollection : IValidationResult
         return builder.ToString();
     }
 
-    /// <summary>
-    /// 转换为验证消息集合
-    /// </summary>
+    /// <inheritdoc />
     public IEnumerable<string> ToValidationMessages()
     {
         return IsValid ? Enumerable.Empty<string>() : __getErrorStringList();
@@ -193,6 +175,7 @@ public class ValidationResultCollection : IValidationResult
     /// 获取错误字符串
     /// </summary>
     /// <param name="spaceCount">空格数量</param>
+    /// <returns>按指定缩进格式生成的验证错误字符串。</returns>
     private StringBuilder GetErrorString(int spaceCount = 0)
     {
         var space = ' '.Repeat(spaceCount);
@@ -203,18 +186,18 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 获取迭代器
+    /// 获取验证结果枚举器。
     /// </summary>
+    /// <returns>验证结果枚举器。</returns>
     public IEnumerator<ValidationResult> GetEnumerator() => _results.GetEnumerator();
 
     /// <summary>
-    /// 获取迭代器
+    /// 获取非泛型验证结果枚举器。
     /// </summary>
+    /// <returns>验证结果枚举器。</returns>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    /// <summary>
-    /// 输出字符串
-    /// </summary>
+    /// <inheritdoc />
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -273,6 +256,7 @@ public class ValidationResultCollection : IValidationResult
     /// 过滤
     /// </summary>
     /// <param name="filter">过滤操作</param>
+    /// <returns>过滤后的验证结果集合；过滤后没有结果时返回 <see langword="null"/>。</returns>
     internal ValidationResultCollection Filter(Action<IEnumerable<ValidationResult>> filter)
     {
         var ret = _results;
@@ -284,6 +268,7 @@ public class ValidationResultCollection : IValidationResult
     /// 过滤
     /// </summary>
     /// <param name="strategyName">策略名称</param>
+    /// <returns>指定策略对应的验证结果集合；没有匹配结果时返回 <see langword="null"/>。</returns>
     internal ValidationResultCollection Filter(string strategyName)
     {
         if (string.IsNullOrWhiteSpace(strategyName))

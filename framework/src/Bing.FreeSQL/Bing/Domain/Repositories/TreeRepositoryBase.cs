@@ -33,6 +33,7 @@ public abstract class TreeRepositoryBase<TEntity> : TreeRepositoryBase<TEntity, 
     /// 生成排序号
     /// </summary>
     /// <param name="parentId">父标识</param>
+    /// <returns>下一个可用的排序号。</returns>
     public override async Task<int> GenerateSortIdAsync(Guid? parentId)
     {
         var maxSortId = await Find(x => x.ParentId == parentId).RestoreToSelect().MaxAsync(x => x.SortId);
@@ -68,12 +69,14 @@ public abstract class TreeRepositoryBase<TEntity, TKey, TParentId> : RepositoryB
     /// 生成排序号
     /// </summary>
     /// <param name="parentId">父标识</param>
+    /// <returns>下一个可用的排序号。</returns>
     public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
     /// <summary>
     /// 获取全部下级实体
     /// </summary>
     /// <param name="parent">父实体</param>
+    /// <returns>包含全部后代实体的异步任务。</returns>
     public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
     {
         var list = await FindAllAsync(t => t.Path.StartsWith(parent.Path));

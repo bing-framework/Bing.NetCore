@@ -12,6 +12,7 @@ public static class BingAspNetCoreServiceCollectionExtensions
     /// 获取<see cref="IWebHostEnvironment"/>环境信息
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>已注册的 Web 主机环境；未注册时返回开发环境的空实现。</returns>
     public static IWebHostEnvironment GetWebHostEnvironment(this IServiceCollection services)
     {
         var hostingEnvironment = services.GetSingletonInstanceOrNull<IWebHostEnvironment>();
@@ -22,6 +23,7 @@ public static class BingAspNetCoreServiceCollectionExtensions
         /// 获取<see cref="IHostingEnvironment"/>环境信息
         /// </summary>
         /// <param name="services">服务集合</param>
+        /// <returns>已注册的主机环境。</returns>
         public static IHostingEnvironment GetHostingEnvironment(this IServiceCollection services) => services.GetSingletonInstance<IHostingEnvironment>();
 #endif
 }

@@ -14,6 +14,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="columns">分组字段，范例：a.Id,b.Name</param>
+    /// <returns>设置 GroupBy 子句后的源对象。</returns>
     public static T GroupBy<T>(this T source, string columns) where T : IGroupBy
     {
         if (source == null)

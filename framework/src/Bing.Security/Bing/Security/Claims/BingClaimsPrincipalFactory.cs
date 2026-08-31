@@ -29,7 +29,7 @@ public class BingClaimsPrincipalFactory : IBingClaimsPrincipalFactory, ITransien
     /// 初始化一个<see cref="BingClaimsPrincipalFactory"/> 类型的实例
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
-    /// <param name="bingClaimOptions"></param>
+    /// <param name="bingClaimOptions">身份主体工厂配置选项。</param>
     public BingClaimsPrincipalFactory(IServiceProvider serviceProvider, IOptions<BingClaimsPrincipalFactoryOptions> bingClaimOptions)
     {
         ServiceProvider = serviceProvider;
@@ -49,12 +49,12 @@ public class BingClaimsPrincipalFactory : IBingClaimsPrincipalFactory, ITransien
     }
 
     /// <summary>
-    /// 内部创建 <see cref="ClaimsPrincipal"/> 实例的方法。
+    /// 根据指定选项和贡献者模式创建并扩展身份主体。
     /// </summary>
-    /// <param name="options">包含贡献者的工厂选项。</param>
-    /// <param name="existsClaimsPrincipal">可选的现有 <see cref="ClaimsPrincipal"/>。</param>
-    /// <param name="isDynamic">是否使用动态贡献者。</param>
-    /// <returns>返回创建的 <see cref="ClaimsPrincipal"/>。</returns>
+    /// <param name="options">包含静态和动态身份主体贡献者配置的选项。</param>
+    /// <param name="existsClaimsPrincipal">可选的现有身份主体；未提供时创建使用 Bing 认证类型的新身份主体。</param>
+    /// <param name="isDynamic">是否使用静态贡献者列表；为 <see langword="true"/> 时使用 <see cref="BingClaimsPrincipalFactoryOptions.Contributors"/>，否则使用 <see cref="BingClaimsPrincipalFactoryOptions.DynamicContributors"/>。</param>
+    /// <returns>表示异步创建操作的任务，结果为扩展后的 <see cref="ClaimsPrincipal"/>。</returns>
     public virtual async Task<ClaimsPrincipal> InternalCreateAsync(BingClaimsPrincipalFactoryOptions options, ClaimsPrincipal existsClaimsPrincipal = null, bool isDynamic = false)
     {
         var claimsPrincipal = existsClaimsPrincipal ?? new ClaimsPrincipal(new ClaimsIdentity(AuthenticationType, BingClaimTypes.UserName, BingClaimTypes.Role));

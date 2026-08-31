@@ -35,5 +35,6 @@ public interface IQueryHandler<in TQuery, TResult> : IQueryHandler
     /// </summary>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示查询处理结果的异步操作。</returns>
     Task<TResult> HandleAsync(TQuery query, CancellationToken cancellationToken = default);
 }

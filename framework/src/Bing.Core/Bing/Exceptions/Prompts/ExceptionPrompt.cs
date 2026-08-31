@@ -31,6 +31,7 @@ public static class ExceptionPrompt
     /// </summary>
     /// <param name="exception">异常</param>
     /// <param name="isProduction">是否生产环境</param>
+    /// <returns>根据异常提示组件和运行环境生成的提示文本；异常为空时返回 <see langword="null"/>。</returns>
     public static string GetPrompt(Exception exception, bool isProduction)
     {
         if (exception == null)
@@ -48,6 +49,7 @@ public static class ExceptionPrompt
     /// 获取异常提示
     /// </summary>
     /// <param name="exception">异常</param>
+    /// <returns>第一个非空异常提示；没有匹配提示时返回空字符串。</returns>
     private static string GetExceptionPrompt(Exception exception)
     {
         foreach (var prompt in _prompts)
@@ -63,6 +65,7 @@ public static class ExceptionPrompt
     /// 获取原始异常
     /// </summary>
     /// <param name="exception">异常</param>
+    /// <returns>处理后的原始异常；异常为空时返回 <see langword="null"/>。</returns>
     public static Exception GetException(Exception exception)
     {
         if (exception is null)

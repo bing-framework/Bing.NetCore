@@ -15,5 +15,6 @@ public interface IResultFactory : ISingletonDependency
     /// <param name="message">消息</param>
     /// <param name="data">数据</param>
     /// <param name="httpStatusCode">Http状态码</param>
+    /// <returns>创建的 MVC 操作结果。</returns>
     IActionResult Create(string code, string message, dynamic data, int? httpStatusCode);
 }

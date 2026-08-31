@@ -39,5 +39,6 @@ public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, 
     /// <summary>
     /// 获取工作单元
     /// </summary>
+    /// <returns>当前仓储使用的工作单元。</returns>
     public IUnitOfWork GetUnitOfWork() => UnitOfWork;
 }

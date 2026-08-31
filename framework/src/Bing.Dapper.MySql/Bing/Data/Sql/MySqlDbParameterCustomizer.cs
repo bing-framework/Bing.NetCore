@@ -11,6 +11,7 @@ namespace Bing.Data.Sql;
 public sealed class MySqlDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
+    /// <returns>数据库类型由当前定制器处理时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.MySql ||
                                                        databaseType == DatabaseType.Doris;
 

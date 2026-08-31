@@ -1,24 +1,20 @@
 ﻿namespace Bing.Security.Encryption;
 
 /// <summary>
-/// 空加密器
+/// 不执行加密或解密操作的空对象加密器。
 /// </summary>
 public class NullEncryptor : IEncryptor
 {
     /// <summary>
-    /// 空加密器实例
+    /// 获取可复用的空对象加密器实例。
     /// </summary>
     public static readonly IEncryptor Instance = new NullEncryptor();
 
-    /// <summary>
-    /// 加密
-    /// </summary>
-    /// <param name="data">原始数据</param>
+    /// <inheritdoc />
+    /// <remarks>当前实现始终返回空字符串，不保留输入内容。</remarks>
     public string Encrypt(string data) => string.Empty;
 
-    /// <summary>
-    /// 解密
-    /// </summary>
-    /// <param name="data">已加密数据</param>
+    /// <inheritdoc />
+    /// <remarks>当前实现始终返回空字符串，不还原输入内容。</remarks>
     public string Decrypt(string data) => string.Empty;
 }

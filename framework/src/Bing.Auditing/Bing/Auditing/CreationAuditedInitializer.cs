@@ -3,37 +3,37 @@
 namespace Bing.Auditing;
 
 /// <summary>
-/// 创建操作审计初始化器
+/// 初始化实体的创建时间、创建人和创建人标识。
 /// </summary>
 public sealed class CreationAuditedInitializer
 {
     /// <summary>
-    /// 实体
+    /// 待初始化的实体对象。
     /// </summary>
     private readonly object _entity;
 
     /// <summary>
-    /// 用户标识
+    /// 创建人的字符串标识。
     /// </summary>
     private readonly string _userId;
 
     /// <summary>
-    /// 用户名称
+    /// 创建人的名称。
     /// </summary>
     private readonly string _userName;
 
     /// <summary>
-    /// 操作时间
+    /// 指定的创建时间；为空时使用当前时间。
     /// </summary>
     private readonly DateTime? _dateTime;
 
     /// <summary>
-    /// 初始化一个<see cref="CreationAuditedInitializer"/>类型的实例
+    /// 使用实体和创建人审计信息初始化一个 <see cref="CreationAuditedInitializer"/> 实例。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
-    /// <param name="dateTime">操作时间</param>
+    /// <param name="entity">待初始化的实体对象。</param>
+    /// <param name="userId">创建人的字符串标识。</param>
+    /// <param name="userName">创建人的名称。</param>
+    /// <param name="dateTime">指定的创建时间；为空时使用当前时间。</param>
     private CreationAuditedInitializer(object entity, string userId, string userName, DateTime? dateTime)
     {
         _entity = entity;
@@ -43,24 +43,24 @@ public sealed class CreationAuditedInitializer
     }
 
     /// <summary>
-    /// 初始化
+    /// 初始化实体的创建审计信息。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
+    /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
+    /// <param name="userId">创建人的字符串标识。</param>
+    /// <param name="userName">创建人的名称。</param>
     public static void Init(object entity, string userId, string userName) => new CreationAuditedInitializer(entity, userId, userName, null).Init();
 
     /// <summary>
-    /// 初始化
+    /// 使用指定时间初始化实体的创建审计信息。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
-    /// <param name="dateTime">操作时间</param>
+    /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
+    /// <param name="userId">创建人的字符串标识。</param>
+    /// <param name="userName">创建人的名称。</param>
+    /// <param name="dateTime">创建时间；为空时使用当前时间。</param>
     public static void Init(object entity, string userId, string userName, DateTime? dateTime) => new CreationAuditedInitializer(entity, userId, userName,dateTime).Init();
 
     /// <summary>
-    /// 初始化
+    /// 按创建审计契约初始化实体的时间、人员名称和人员标识。
     /// </summary>
     public void Init()
     {

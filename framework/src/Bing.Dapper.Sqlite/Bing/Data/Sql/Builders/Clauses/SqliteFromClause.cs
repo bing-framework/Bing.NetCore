@@ -27,10 +27,12 @@ public class SqliteFromClause : FromClause
     }
 
     /// <inheritdoc />
+    /// <returns>根据表名、架构名和别名创建的 SQLite SQL 项。</returns>
     protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
         SqlItem.Parse(table, schema, alias);
 
     /// <inheritdoc />
+    /// <returns>当前 From 子句的 SQLite 副本。</returns>
     protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new SqliteFromClause(context, table, ProviderDatabaseType);
 }

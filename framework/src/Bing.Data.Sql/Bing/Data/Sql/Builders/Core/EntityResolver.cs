@@ -50,7 +50,7 @@ public class EntityResolver : IEntityResolver
     private readonly DatabaseContext _databaseContext;
 
     /// <summary>
-    /// 初始化一个<see cref="EntityResolver"/>类型的实例
+    /// 初始化一个 <see cref="EntityResolver"/> 类型的实例。
     /// </summary>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -89,6 +89,7 @@ public class EntityResolver : IEntityResolver
     /// 获取表
     /// </summary>
     /// <param name="entity">实体类型</param>
+    /// <returns>实体映射对应的表名；无法解析映射或表名时返回 <see langword="null"/>。</returns>
     public string GetTable(Type entity)
     {
         var mapping = GetMapping(entity);
@@ -99,6 +100,7 @@ public class EntityResolver : IEntityResolver
     /// 获取结构化表引用
     /// </summary>
     /// <param name="entity">实体类型</param>
+    /// <returns>实体映射对应的结构化表引用；无法解析映射时返回 <see langword="null"/>。</returns>
     public SqlTableReference GetTableReference(Type entity)
     {
         var mapping = GetMapping(entity);
@@ -109,6 +111,7 @@ public class EntityResolver : IEntityResolver
     /// 获取架构
     /// </summary>
     /// <param name="entity">实体类型</param>
+    /// <returns>实体映射对应的架构名；无法解析映射或架构名时返回 <see langword="null"/>。</returns>
     public string GetSchema(Type entity)
     {
         var mapping = GetMapping(entity);
@@ -120,6 +123,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <returns>按实体映射生成的列名列表。</returns>
     public string GetColumns<TEntity>(bool propertyAsAlias)
     {
         var type = typeof(TEntity);
@@ -131,6 +135,7 @@ public class EntityResolver : IEntityResolver
     /// 获取属性列表
     /// </summary>
     /// <param name="type">类型</param>
+    /// <returns>类型中未标记为 <see cref="NotMappedAttribute"/> 的属性列表。</returns>
     private List<PropertyInfo> GetProperties(Type type)
     {
         var result = new List<PropertyInfo>();
@@ -151,6 +156,7 @@ public class EntityResolver : IEntityResolver
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="columns">列名表达式</param>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <returns>按表达式和实体映射生成的列名列表。</returns>
     public string GetColumns<TEntity>(Expression<Func<TEntity, object[]>> columns, bool propertyAsAlias)
     {
         var names = Lambdas.GetLastNames(columns);
@@ -163,6 +169,7 @@ public class EntityResolver : IEntityResolver
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="names">列名集合</param>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <returns>按列名集合和实体映射生成的列名列表。</returns>
     private string GetColumns<TEntity>(List<string> names, bool propertyAsAlias)
     {
         var entityType = typeof(TEntity);
@@ -180,6 +187,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="column">列名表达式</param>
+    /// <returns>表达式对应的实体列名；无法解析表达式时返回 <see langword="null"/>。</returns>
     public string GetColumn<TEntity>(Expression<Func<TEntity, object>> column) => GetExpressionColumn<TEntity>(column);
 
     /// <summary>
@@ -187,6 +195,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
+    /// <returns>表达式对应的列 SQL；无法识别表达式时返回 <see langword="null"/>。</returns>
     private string GetExpressionColumn<TEntity>(Expression expression)
     {
         if (expression == null)
@@ -213,6 +222,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
+    /// <returns>表达式对应的单列名。</returns>
     private string GetSingleColumn<TEntity>(Expression expression)
     {
         var name = Lambdas.GetLastName(expression);
@@ -224,6 +234,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列表表达式</param>
+    /// <returns>由字典列表表达式生成的列 SQL。</returns>
     private string GetDictionaryColumns<TEntity>(ListInitExpression expression)
     {
         var dictionary = GetDictionaryByListInitExpression(expression);
@@ -234,6 +245,7 @@ public class EntityResolver : IEntityResolver
     /// 获取字典
     /// </summary>
     /// <param name="expression">列表表达式</param>
+    /// <returns>从列表初始化表达式解析出的键值对字典。</returns>
     private IDictionary<object, string> GetDictionaryByListInitExpression(ListInitExpression expression)
     {
         var result = new Dictionary<object, string>();
@@ -253,6 +265,7 @@ public class EntityResolver : IEntityResolver
     /// 获取键值对
     /// </summary>
     /// <param name="arguments">参数表达式</param>
+    /// <returns>解析出的键值对；参数不足或为空时返回 <see langword="null"/>。</returns>
     private KeyValuePair<object, string>? GetKeyValue(IEnumerable<Expression> arguments)
     {
         if (arguments == null)
@@ -268,6 +281,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="dictionary">字典</param>
+    /// <returns>按实体元数据生成的列 SQL；字典为空时返回 <see langword="null"/>。</returns>
     private string GetColumnsByMatedata<TEntity>(IDictionary<object, string> dictionary)
     {
         string result = null;
@@ -280,6 +294,7 @@ public class EntityResolver : IEntityResolver
     /// 通过字典创建列
     /// </summary>
     /// <param name="dictionary">字典</param>
+    /// <returns>按字典内容生成的列 SQL；字典为空时返回 <see langword="null"/>。</returns>
     private string GetColumns(IDictionary<object, string> dictionary)
     {
         string result = null;
@@ -294,6 +309,7 @@ public class EntityResolver : IEntityResolver
     /// <param name="expression">表达式</param>
     /// <param name="entity">实体类型</param>
     /// <param name="right">是否取右侧操作数</param>
+    /// <returns>表达式对应的实体列名。</returns>
     public string GetColumn(Expression expression, Type entity, bool right = false)
     {
         var column = Lambdas.GetLastName(expression, right);
@@ -315,7 +331,7 @@ public class EntityResolver : IEntityResolver
     /// <summary>
     /// 获取数据库上下文
     /// </summary>
-    /// <returns>数据库上下文</returns>
+    /// <returns>按固定快照、解析器、配置、访问器和默认配置顺序取得的数据库上下文。</returns>
     private DatabaseContext GetDatabaseContext() =>
         _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
         _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
@@ -350,6 +366,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <param name="expression">表达式</param>
     /// <param name="right">是否取右侧操作数</param>
+    /// <returns>表达式操作数对应的实体类型；无法解析成员表达式时返回 <see langword="null"/>。</returns>
     public Type GetType(Expression expression, bool right = false)
     {
         var memberExpression = Lambdas.GetMemberExpression(expression, right);

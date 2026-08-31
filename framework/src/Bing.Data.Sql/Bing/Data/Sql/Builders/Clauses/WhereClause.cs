@@ -108,6 +108,7 @@ public class WhereClause : IWhereClause
     /// 获取合并参数上下文后的子查询 SQL。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
+    /// <returns>已合并参数的子查询 SQL。</returns>
     private string GetSubquerySql(ISqlBuilder builder)
     {
         Context.ValidateOperation(SqlOperationAction.QueryClause);
@@ -226,6 +227,7 @@ public class WhereClause : IWhereClause
     /// <summary>
     /// 创建保留参数元数据的写入缓冲区。
     /// </summary>
+    /// <returns>用于预检和延迟提交参数的缓冲区。</returns>
     private BufferedParameterManager CreateBufferedParameterManager() =>
         Context.ParameterManager is IAdvancedParameterManager advancedParameterManager
             ? new BufferedAdvancedParameterManager(advancedParameterManager)
@@ -1031,6 +1033,7 @@ public class WhereClause : IWhereClause
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="includeTime">是否包含时间</param>
+    /// <returns>经范围纠正后的最小日期；未指定最小值时返回 <see langword="null"/>。</returns>
     private DateTime? GetMin(DateTime? min, DateTime? max, bool includeTime)
     {
         if (min == null)
@@ -1063,6 +1066,7 @@ public class WhereClause : IWhereClause
     /// </summary>
     /// <param name="boundary">包含边界</param>
     /// <param name="includeTime">是否包含时间</param>
+    /// <returns>最终使用的范围边界。</returns>
     private Boundary GetBoundary(Boundary? boundary, bool includeTime)
     {
         if (boundary != null)
@@ -1104,6 +1108,7 @@ public class WhereClause : IWhereClause
     /// <summary>
     /// 输出Sql。
     /// </summary>
+    /// <returns>当前 Where 子句的 SQL 文本；没有条件时返回 <see langword="null"/>。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();
@@ -1114,6 +1119,7 @@ public class WhereClause : IWhereClause
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>当前查询条件的 SQL 文本；没有条件时返回 <see langword="null"/>。</returns>
     public string GetCondition() => _condition?.GetCondition();
 
     #endregion

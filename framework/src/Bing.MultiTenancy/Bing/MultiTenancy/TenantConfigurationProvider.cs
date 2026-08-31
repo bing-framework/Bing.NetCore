@@ -5,7 +5,7 @@ using Microsoft.Extensions.Localization;
 namespace Bing.MultiTenancy;
 
 /// <summary>
-/// 租户配置提供程序
+/// 解析当前租户并加载其配置的默认提供程序。
 /// </summary>
 public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransientDependency
 {
@@ -60,6 +60,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     /// 获取租户配置
     /// </summary>
     /// <param name="saveResolveResult">是否保存解析结果。默认：false</param>
+    /// <returns>包含当前租户配置的异步任务；未解析到租户时任务结果为 <see langword="null"/>。</returns>
     public virtual async Task<TenantConfiguration?> GetAsync(bool saveResolveResult = false)
     {
         var resolveResult = await TenantResolver.ResolveTenantIdOrNameAsync();
@@ -86,9 +87,11 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     }
 
     /// <summary>
-    /// 查找租户
+    /// 按租户标识或名称查找租户配置。
     /// </summary>
-    /// <param name="tenantIdOrName">租户标识、租户名称</param>
+    /// <param name="tenantIdOrName">待查找的租户标识或名称。</param>
+    /// <returns>匹配的租户配置；找不到时返回 <c>null</c>。</returns>
+    /// <remarks>可解析为 <see cref="Guid"/> 的输入优先按租户标识查询，其余输入按租户名称查询。</remarks>
     protected virtual async Task<TenantConfiguration?> FindTenantAsync(string tenantIdOrName)
     {
         if (Guid.TryParse(tenantIdOrName, out var parsedTenantId))

@@ -12,5 +12,6 @@ public interface IExceptionToErrorInfoConverter
     /// </summary>
     /// <param name="exception">异常</param>
     /// <param name="options">配置操作</param>
+    /// <returns>转换后的远程服务错误信息。</returns>
     RemoteServiceErrorInfo Convert(Exception exception, Action<BingExceptionHandlingOptions> options = null);
 }

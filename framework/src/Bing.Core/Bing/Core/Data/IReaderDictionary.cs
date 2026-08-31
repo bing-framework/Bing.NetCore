@@ -11,5 +11,6 @@ public interface IReaderDictionary<in TKey, out TValue>
     /// 读取
     /// </summary>
     /// <param name="key">键</param>
+    /// <returns>与指定键关联的值。</returns>
     TValue Reader(TKey key);
 }

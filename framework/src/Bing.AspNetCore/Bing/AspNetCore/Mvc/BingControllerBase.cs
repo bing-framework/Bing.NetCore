@@ -40,6 +40,7 @@ public abstract class BingControllerBase : ControllerBase
     /// <param name="data">数据</param>
     /// <param name="message">消息</param>
     /// <param name="statusCode">Http状态码</param>
+    /// <returns>表示成功结果的操作结果。</returns>
     protected virtual IActionResult Success(object data = null, string message = null, int? statusCode = 200)
     {
         message ??= Bing.Properties.R.Success;
@@ -51,6 +52,7 @@ public abstract class BingControllerBase : ControllerBase
     /// </summary>
     /// <param name="message">消息</param>
     /// <param name="statusCode">Http状态码</param>
+    /// <returns>表示失败结果的操作结果。</returns>
     protected virtual IActionResult Fail(string message, int? statusCode = 200)
     {
         return CreateResult(Bing.AspNetCore.Mvc.StatusCode.Fail.ToString("d"), message, null, statusCode);

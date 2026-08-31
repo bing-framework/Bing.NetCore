@@ -4,23 +4,23 @@ using Bing.ExceptionHandling;
 namespace Bing.Http.Clients;
 
 /// <summary>
-/// 远程调用异常
+/// 表示调用远程服务失败并携带远程错误信息的异常。
 /// </summary>
 [Serializable]
 public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttpStatusCode
 {
     /// <summary>
-    /// 标识
+    /// 远程调用异常使用的内部标识。
     /// </summary>
     private const string FLAG = "__REMOTE_CALL_FLG";
 
     /// <summary>
-    /// 默认错误消息
+    /// 未指定远程错误消息时使用的默认错误消息。
     /// </summary>
     private const string DEFAULT_ERROR_MSG = "远程调用异常";
 
     /// <summary>
-    /// 默认错误码
+    /// 远程调用异常使用的默认错误码。
     /// </summary>
     private const long ERROR_CODE = 1020;
 

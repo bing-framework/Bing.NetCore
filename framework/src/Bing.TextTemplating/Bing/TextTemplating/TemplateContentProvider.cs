@@ -8,22 +8,22 @@ using Microsoft.Extensions.Options;
 namespace Bing.TextTemplating;
 
 /// <summary>
-/// 模板内容提供程序
+/// 使用已注册内容贡献者获取模板内容的默认提供程序。
 /// </summary>
 public class TemplateContentProvider : ITemplateContentProvider, ITransientDependency
 {
     /// <summary>
-    /// 服务作用域工厂
+    /// 获取用于解析内容贡献者的服务作用域工厂。
     /// </summary>
     public IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 文本模板选项配置
+    /// 获取文本模板选项配置。
     /// </summary>
     public BingTextTemplatingOptions Options { get; }
 
     /// <summary>
-    /// 模板定义管理器
+    /// 用于按名称获取模板定义的管理器。
     /// </summary>
     private readonly ITemplateDefinitionManager _templateDefinitionManager;
 
@@ -43,13 +43,7 @@ public class TemplateContentProvider : ITemplateContentProvider, ITransientDepen
         Options = options.Value;
     }
 
-    /// <summary>
-    /// 获取模板内容
-    /// </summary>
-    /// <param name="templateName">模板名称</param>
-    /// <param name="cultureName">区域性名称</param>
-    /// <param name="tryDefaults">尝试默认值</param>
-    /// <param name="useCurrentCultureIfCultureNameIsNull">如果当前区域性名称为空，则默认使用当前区域</param>
+    /// <inheritdoc />
     public virtual Task<string> GetContentOrNullAsync(string templateName, string cultureName = null, bool tryDefaults = true,
         bool useCurrentCultureIfCultureNameIsNull = true)
     {
@@ -57,13 +51,9 @@ public class TemplateContentProvider : ITemplateContentProvider, ITransientDepen
         return GetContentOrNullAsync(template, cultureName);
     }
 
-    /// <summary>
-    /// 获取模板内容
-    /// </summary>
-    /// <param name="templateDefinition">模板定义</param>
-    /// <param name="cultureName">区域性名称</param>
-    /// <param name="tryDefaults">尝试默认值</param>
-    /// <param name="useCurrentCultureIfCultureNameIsNull">如果当前区域性名称为空，则默认使用当前区域</param>
+    /// <inheritdoc />
+    /// <exception cref="Warning">未注册模板内容贡献者时抛出。</exception>
+    /// <remarks>贡献者在独立 DI 作用域中按配置的逆序执行；该作用域会在异步操作完成后释放。</remarks>
     public virtual async Task<string> GetContentOrNullAsync(TemplateDefinition templateDefinition, string cultureName = null, bool tryDefaults = true, bool useCurrentCultureIfCultureNameIsNull = true)
     {
         Check.NotNull(templateDefinition, nameof(templateDefinition));
@@ -85,9 +75,11 @@ public class TemplateContentProvider : ITemplateContentProvider, ITransientDepen
     }
 
     /// <summary>
-    /// 创建模板内容构造者
+    /// 从当前服务作用域创建已配置的模板内容贡献者。
     /// </summary>
-    /// <param name="serviceProvider">服务提供程序</param>
+    /// <param name="serviceProvider">用于解析贡献者的当前服务作用域服务提供程序。</param>
+    /// <returns>按逆序配置排列的模板内容贡献者数组。</returns>
+    /// <remarks>配置类型未注册或不兼容时，依赖注入解析异常会向调用方传播。</remarks>
     protected virtual ITemplateContentContributor[] CreateTemplateContentContributors(IServiceProvider serviceProvider)
     {
         return Options.ContentContributors
@@ -97,10 +89,11 @@ public class TemplateContentProvider : ITemplateContentProvider, ITransientDepen
     }
 
     /// <summary>
-    /// 获取模板内容
+    /// 依次从模板内容贡献者获取模板内容。
     /// </summary>
-    /// <param name="contributors">模板内容构造者数组</param>
-    /// <param name="context">模板内容构造者上下文</param>
+    /// <param name="contributors">按优先级排列的模板内容贡献者数组。</param>
+    /// <param name="context">传递给每个贡献者的模板内容上下文。</param>
+    /// <returns>首个非 <c>null</c> 的模板内容；所有贡献者均未提供内容时返回 <c>null</c>。</returns>
     protected virtual async Task<string> GetContentOrNullAsync(ITemplateContentContributor[] contributors, TemplateContentContributorContext context)
     {
         foreach (var contributor in contributors)

@@ -101,14 +101,20 @@ public sealed class SqlMutationBatchPlanner
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 按顺序枚举每批应处理的实体数量。
+        /// </summary>
+        /// <returns>按顺序枚举每批应处理的实体数量。</returns>
         public IEnumerator<int> GetEnumerator()
         {
             for (var index = 0; index < Count; index++)
                 yield return this[index];
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 按顺序枚举每批应处理的实体数量。
+        /// </summary>
+        /// <returns>按顺序枚举每批应处理的实体数量。</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

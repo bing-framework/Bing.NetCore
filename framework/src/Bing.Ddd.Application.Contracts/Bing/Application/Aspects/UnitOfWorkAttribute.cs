@@ -7,18 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Application.Aspects;
 
 /// <summary>
-/// 工作单元拦截器
+/// 提供工作单元拦截能力，在目标调用成功后提交当前工作单元。
 /// </summary>
 public class UnitOfWorkAttribute : InterceptorBase, IScopeInterceptor
 {
     /// <summary>
-    /// 作用域，当嵌套使用工作单元拦截器时，设置为Scope.Aspect，只有最外层工作单元拦截器生效
+    /// 获取或设置拦截器作用域；使用 <see cref="Scope.Aspect"/> 时，嵌套拦截器仅由最外层生效。
     /// </summary>
     public Scope Scope { get; set; } = Scope.Aspect;
 
     /// <summary>
-    /// 执行
+    /// 执行目标方法，并在成功返回后提交工作单元及执行提交后回调。
     /// </summary>
+    /// <param name="context">当前拦截上下文。</param>
+    /// <param name="next">目标方法的后续执行委托。</param>
     public override async Task Invoke(AspectContext context, AspectDelegate next)
     {
         await next(context);

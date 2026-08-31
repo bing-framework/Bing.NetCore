@@ -242,6 +242,8 @@ internal abstract class SqlFactoryBase
     /// <summary>
     /// 从冻结上下文解析 Provider Key。
     /// </summary>
+    /// <param name="context">用于解析 Provider 的数据库上下文。</param>
+    /// <returns>解析得到的 SQL Provider Key。</returns>
     private string ResolveProviderKey(DatabaseContext context)
     {
         if (_providerResolver == null)

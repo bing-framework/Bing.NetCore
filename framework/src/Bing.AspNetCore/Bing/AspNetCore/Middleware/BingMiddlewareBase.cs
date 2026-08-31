@@ -14,6 +14,7 @@ public abstract class BingMiddlewareBase : IMiddleware
     /// </summary>
     /// <param name="context">当前HTTP请求的上下文</param>
     /// <param name="next">下一个请求委托</param>
+    /// <returns>表示异步判断操作的任务，结果指示是否应跳过后续处理。</returns>
     protected virtual Task<bool> ShouldSkipAsync(HttpContext context, RequestDelegate next)
     {
         var endpoint = context.GetEndpoint();

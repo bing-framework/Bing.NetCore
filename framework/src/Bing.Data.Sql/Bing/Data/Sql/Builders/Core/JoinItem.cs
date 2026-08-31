@@ -56,12 +56,17 @@ public class JoinItem : IJoinOn
     /// <param name="table">表项。</param>
     /// <param name="type">表实体类型。</param>
     /// <param name="condition">连接条件。</param>
+    /// <returns>创建的连接项。</returns>
     public static JoinItem Create(string joinType, SqlItem table, Type type = null, ICondition condition = null) =>
         new(joinType, table, type, condition);
 
     /// <summary>
     /// 创建保留 DTO 投影绑定信息的类型化派生表连接项。
     /// </summary>
+    /// <param name="joinType">连接类型。</param>
+    /// <param name="table">派生表项。</param>
+    /// <param name="source">类型化派生表的来源绑定信息。</param>
+    /// <returns>创建的类型化派生表连接项。</returns>
     internal static JoinItem CreateDerived(string joinType, SqlItem table, TableSource source) =>
         new(joinType, table, source?.EntityType, null, source);
 
@@ -101,7 +106,7 @@ public class JoinItem : IJoinOn
         Create(joinType, SqlItem.Raw(sql, alias), type);
 
     /// <summary>
-    /// 初始化一个<see cref="JoinItem"/>类型的实例
+    /// 初始化一个 <see cref="JoinItem"/> 类型的实例。
     /// </summary>
     /// <param name="joinType">连接类型</param>
     /// <param name="table">表</param>
@@ -204,6 +209,8 @@ public class JoinItem : IJoinOn
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <param name="helper">克隆结果使用的辅助操作。</param>
+    /// <returns>当前连接项的独立副本。</returns>
     internal JoinItem Clone(Helper helper)
     {
         var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
@@ -222,6 +229,7 @@ public class JoinItem : IJoinOn
     /// 获取Join语句
     /// </summary>
     /// <param name="dialect">Sql方言</param>
+    /// <returns>按指定 SQL 方言渲染的 Join SQL。</returns>
     public string ToSql(IDialect dialect = null)
     {
         var table = Table.ToSql(dialect);
@@ -231,6 +239,7 @@ public class JoinItem : IJoinOn
     /// <summary>
     /// 获取 On 语句。
     /// </summary>
+    /// <returns>连接条件 SQL；未设置连接条件时返回 <see langword="null"/>。</returns>
     private string GetOn()
     {
         if (Condition == null)
@@ -255,6 +264,7 @@ public class JoinItem : IJoinOn
     /// <summary>
     /// 是否已在原始 Join 文本中提供 On 条件。
     /// </summary>
+    /// <returns>原始 Join 文本包含独立 <c>On</c> 关键字时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool HasRawOnCondition()
     {
         if (Table?.IsRaw != true || string.IsNullOrWhiteSpace(Table.Name))

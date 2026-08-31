@@ -1,27 +1,27 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql参数元数据等级
+/// 表示 SQL 参数绑定时可用的元数据完整程度。
 /// </summary>
 public enum SqlParameterMetadataLevel
 {
     /// <summary>
-    /// 无元数据
+    /// 没有可用的参数来源或类型等元数据。
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// 弱元数据
+    /// 仅有不足以完整描述参数的弱元数据。
     /// </summary>
     Weak = 1,
 
     /// <summary>
-    /// 部分元数据
+    /// 已解析部分参数元数据，但仍缺少完整映射信息。
     /// </summary>
     Partial = 2,
 
     /// <summary>
-    /// 完整元数据
+    /// 已获得可用于完整绑定和诊断的参数元数据。
     /// </summary>
     Full = 3
 }

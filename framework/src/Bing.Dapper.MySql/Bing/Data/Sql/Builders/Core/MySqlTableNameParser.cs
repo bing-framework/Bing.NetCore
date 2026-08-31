@@ -41,6 +41,8 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 验证限定表名中的标识符引用方式一致。
     /// </summary>
+    /// <param name="components">已解析的标识符段集合。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
     private static void ValidateQuoteConsistency(IReadOnlyCollection<MySqlIdentifierComponent> components,
         string parameterName)
     {
@@ -53,6 +55,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 解析由句点分隔的表名段。
     /// </summary>
+    /// <param name="value">待解析的表名字符串。</param>
+    /// <param name="index">当前解析位置，方法返回时更新为已解析位置。</param>
+    /// <returns>解析得到的 MySQL 标识符段集合。</returns>
     private static List<MySqlIdentifierComponent> ParseComponents(string value, ref int index)
     {
         var result = new List<MySqlIdentifierComponent>();
@@ -78,6 +83,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 解析反引号包围的标识符段。
     /// </summary>
+    /// <param name="value">待解析的表名字符串。</param>
+    /// <param name="index">当前解析位置，方法返回时更新为已解析位置。</param>
+    /// <returns>解析得到的反引号标识符段。</returns>
     private static MySqlIdentifierComponent ParseQuotedComponent(string value, ref int index)
     {
         index++;
@@ -110,6 +118,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 解析未加引号的标识符段。
     /// </summary>
+    /// <param name="value">待解析的表名字符串。</param>
+    /// <param name="index">当前解析位置，方法返回时更新为已解析位置。</param>
+    /// <returns>解析得到的未加引号标识符段。</returns>
     private static MySqlIdentifierComponent ParseUnquotedComponent(string value, ref int index)
     {
         var start = index;
@@ -125,6 +136,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 解析字符串内的可选别名。
     /// </summary>
+    /// <param name="value">待解析的表名字符串。</param>
+    /// <param name="index">当前解析位置，方法返回时更新为已解析位置。</param>
+    /// <returns>解析得到的嵌入别名；不存在别名时返回 <see langword="null"/>。</returns>
     private static string ParseEmbeddedAlias(string value, ref int index)
     {
         if (index >= value.Length)
@@ -149,6 +163,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 读取别名标识符。
     /// </summary>
+    /// <param name="value">待解析的表名字符串。</param>
+    /// <param name="index">当前读取位置，方法返回时更新为已读取位置。</param>
+    /// <returns>读取到的别名标识符。</returns>
     private static string ReadToken(string value, ref int index)
     {
         if (value[index] == '`')
@@ -162,6 +179,9 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 规范化独立传入的标识符。
     /// </summary>
+    /// <param name="value">待规范化的标识符。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
+    /// <returns>去除外围空白和反引号后的标识符；输入为空白时返回原值。</returns>
     private static string NormalizeIdentifier(string value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -181,6 +201,10 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 验证标识符。
     /// </summary>
+    /// <param name="value">待验证的标识符。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
+    /// <param name="allowDot">是否允许句点分隔符。</param>
+    /// <param name="allowBacktick">是否允许反引号字符。</param>
     private static void ValidateIdentifier(string value, string parameterName, bool allowDot, bool allowBacktick = false)
     {
         if (value == null)
@@ -197,6 +221,8 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 验证不能作为对象名或别名使用的 SQL 关键字。
     /// </summary>
+    /// <param name="value">待验证的标识符。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
     private static void ValidateReservedKeyword(string value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -213,6 +239,8 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 验证可能改变语义的字符。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
     private static void ValidateUnsafeCharacters(string value, string parameterName)
     {
         if (value.Any(char.IsControl) || value.IndexOf(';') >= 0 || value.Contains("--") ||
@@ -223,6 +251,8 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 跳过空白字符。
     /// </summary>
+    /// <param name="value">待扫描的字符串。</param>
+    /// <param name="index">当前扫描位置，方法返回时更新为第一个非空白字符位置。</param>
     private static void SkipWhiteSpace(string value, ref int index)
     {
         while (index < value.Length && char.IsWhiteSpace(value[index]))
@@ -232,6 +262,8 @@ internal static class MySqlTableNameParser
     /// <summary>
     /// 验证别名冲突。
     /// </summary>
+    /// <param name="explicitAlias">显式传入的别名。</param>
+    /// <param name="embeddedAlias">字符串表名中解析出的别名。</param>
     private static void ValidateAliasConflict(string explicitAlias, string embeddedAlias)
     {
         if (string.IsNullOrWhiteSpace(explicitAlias) || string.IsNullOrWhiteSpace(embeddedAlias))
@@ -248,6 +280,8 @@ internal static class MySqlTableNameParser
         /// <summary>
         /// 初始化标识符段。
         /// </summary>
+        /// <param name="value">标识符值。</param>
+        /// <param name="quoted">是否由反引号包围。</param>
         public MySqlIdentifierComponent(string value, bool quoted)
         {
             Value = value;

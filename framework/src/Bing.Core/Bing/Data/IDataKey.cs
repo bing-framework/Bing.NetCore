@@ -1,12 +1,12 @@
 ﻿namespace Bing.Data;
 
 /// <summary>
-/// 数据标识
+/// 定义具有字符串数据标识的对象契约。
 /// </summary>
 public interface IDataKey
 {
     /// <summary>
-    /// 标识
+    /// 获取或设置对象的业务标识。
     /// </summary>
     string Id { get; set; }
 }

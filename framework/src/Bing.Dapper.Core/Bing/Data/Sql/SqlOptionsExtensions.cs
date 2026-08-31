@@ -14,6 +14,7 @@ public static class DapperSqlOptionsExtensions
     /// 注册字符串类型处理器
     /// </summary>
     /// <param name="options">源</param>
+    /// <returns>完成类型处理器注册的 SQL 配置。</returns>
     public static SqlOptions RegisterStringTypeHandler(this SqlOptions options)
     {
         SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
@@ -24,6 +25,7 @@ public static class DapperSqlOptionsExtensions
     /// 注册Guid类型处理器
     /// </summary>
     /// <param name="options">源</param>
+    /// <returns>完成类型处理器注册的 SQL 配置。</returns>
     public static SqlOptions RegisterGuidTypeHandler(this SqlOptions options)
     {
         if (options.DatabaseType == DatabaseType.Oracle)

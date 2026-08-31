@@ -11,7 +11,7 @@ public static class EventBusExtensions
     /// <param name="eventBus">事件总线</param>
     /// <param name="events">事件集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">事件总线为空时抛出。</exception>
     public static async Task PublishAsync(this IEventBus eventBus, IEnumerable<IEvent> events, CancellationToken cancellationToken = default)
     {
         if (eventBus == null)

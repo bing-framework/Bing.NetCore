@@ -51,6 +51,16 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     {
     }
 
+    /// <summary>
+    /// 使用指定生命周期回调初始化多结果集读取结果。
+    /// </summary>
+    /// <param name="reader">Dapper 结果集读取器。</param>
+    /// <param name="executionLease">当前执行租约。</param>
+    /// <param name="complete">同步释放时使用的完成回调。</param>
+    /// <param name="completeAsync">异步释放时使用的完成回调。</param>
+    /// <param name="isConsumed">判断读取器是否已完整消费的函数。</param>
+    /// <param name="disposeReader">释放读取器的操作。</param>
+    /// <param name="disposeReaderAsync">异步释放读取器的操作。</param>
     internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
         Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
         Func<SqlMapper.GridReader, bool> isConsumed,
@@ -66,10 +76,19 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         DisposeReaderAsync = disposeReaderAsync ?? throw new ArgumentNullException(nameof(disposeReaderAsync));
     }
 
+    /// <summary>
+    /// 判断读取器是否已完整消费。
+    /// </summary>
     private Func<SqlMapper.GridReader, bool> IsConsumed { get; }
 
+    /// <summary>
+    /// 释放读取器的同步操作。
+    /// </summary>
     private Action<SqlMapper.GridReader> DisposeReader { get; }
 
+    /// <summary>
+    /// 释放读取器的异步操作。
+    /// </summary>
     private Func<SqlMapper.GridReader, Task> DisposeReaderAsync { get; }
 
     /// <inheritdoc />
@@ -114,7 +133,9 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 异步释放多结果集读取器及其执行资源。
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (TryBeginDispose(out var reader) == false)
@@ -194,10 +215,6 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
     }
 
-    /// <summary>
-    /// 获取当前可用读取器。
-    /// </summary>
-    /// <returns>Dapper 结果集读取器。</returns>
     /// <summary>
     /// 原子取得当前结果集的读取所有权。
     /// </summary>
@@ -307,6 +324,9 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     /// <summary>
     /// 异步执行一次完成回调并归还租约。
     /// </summary>
+    /// <param name="completed">是否完整读取全部结果集。</param>
+    /// <param name="exception">读取异常。</param>
+    /// <param name="cleanupExceptions">当前生命周期已捕获的清理异常。</param>
     private async Task CompleteAsync(bool completed, Exception exception, ICollection<Exception> cleanupExceptions)
     {
         var completeAsync = Interlocked.Exchange(ref _completeAsync, null);

@@ -3,43 +3,44 @@
 namespace Bing.Validation;
 
 /// <summary>
-/// 可验证模型
+/// 定义可执行验证的模型。
 /// </summary>
 public interface IVerifyModel
 {
     /// <summary>
-    /// 验证
+    /// 执行模型验证。
     /// </summary>
+    /// <returns>包含本次验证结果的集合。</returns>
     IValidationResult Validate();
 }
 
 /// <summary>
-/// 可验证模型
+/// 定义可配置验证策略的模型。
 /// </summary>
-/// <typeparam name="TObject">对象类型</typeparam>
+/// <typeparam name="TObject">由验证策略处理的模型类型。</typeparam>
 public interface IVerifyModel<out TObject> : IVerifyModel 
     where TObject : class, IVerifyModel
 {
     /// <summary>
-    /// 设置验证处理器
+    /// 设置验证完成后的结果处理器。
     /// </summary>
-    /// <param name="handler">验证处理器</param>
+    /// <param name="handler">用于处理验证结果的回调处理器。</param>
     void SetValidationCallback(IValidationCallbackHandler handler);
 
     /// <summary>
-    /// 使用全局验证规则
+    /// 配置模型使用全局注册的验证规则。
     /// </summary>
     void UseValidationRules();
 
     /// <summary>
-    /// 使用验证策略
+    /// 添加单个验证策略。
     /// </summary>
-    /// <param name="strategy">验证策略</param>
+    /// <param name="strategy">要添加的验证策略。</param>
     void UseStrategy(IValidationStrategy<TObject> strategy);
 
     /// <summary>
-    /// 使用验证策略集合
+    /// 添加多个验证策略。
     /// </summary>
-    /// <param name="strategies">验证策略集合</param>
+    /// <param name="strategies">要添加的验证策略集合。</param>
     void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies);
 }

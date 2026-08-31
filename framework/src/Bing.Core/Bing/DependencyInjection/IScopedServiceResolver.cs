@@ -21,23 +21,27 @@ public interface IScopedServiceResolver
     /// 获取指定服务类型的实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>解析到的指定服务实例；未注册时返回 <see langword="null"/>。</returns>
     T GetService<T>();
 
     /// <summary>
     /// 获取指定服务类型的实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>解析到的指定服务实例；未注册时返回 <see langword="null"/>。</returns>
     object GetService(Type serviceType);
 
     /// <summary>
     /// 获取指定服务类型的所有实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>指定服务类型的全部已注册实例。</returns>
     IEnumerable<T> GetServices<T>();
 
     /// <summary>
     /// 获取指定服务类型的所有实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>指定服务类型的全部已注册实例。</returns>
     IEnumerable<object> GetServices(Type serviceType);
 }

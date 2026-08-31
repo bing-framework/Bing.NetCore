@@ -18,6 +18,7 @@ public static class QueryStoreExtensions
     /// <typeparam name="TKey">键类型</typeparam>
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
+    /// <returns>应用查询条件后的实体列表。</returns>
     public static List<TEntity> Query<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query)
         where TEntity : class, IKey<TKey>
     {
@@ -31,6 +32,7 @@ public static class QueryStoreExtensions
     /// <typeparam name="TKey">键类型</typeparam>
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
+    /// <returns>应用查询条件后的未跟踪实体列表。</returns>
     public static List<TEntity> QueryAsNoTracking<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query)
         where TEntity : class, IKey<TKey>
     {
@@ -44,6 +46,7 @@ public static class QueryStoreExtensions
     /// <typeparam name="TKey">键类型</typeparam>
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
+    /// <returns>应用查询条件和分页设置后的分页实体列表。</returns>
     public static PagerList<TEntity> PagerQuery<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query)
         where TEntity : class, IKey<TKey>
     {
@@ -57,6 +60,7 @@ public static class QueryStoreExtensions
     /// <typeparam name="TKey">键类型</typeparam>
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
+    /// <returns>应用查询条件和分页设置后的未跟踪分页实体列表。</returns>
     public static PagerList<TEntity> PagerQueryAsNoTracking<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query)
         where TEntity : class, IKey<TKey>
     {
@@ -71,6 +75,7 @@ public static class QueryStoreExtensions
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为应用查询条件后的实体列表。</returns>
     public static async Task<List<TEntity>> QueryAsync<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query, CancellationToken cancellationToken = default)
         where TEntity : class, IKey<TKey>
     {
@@ -86,6 +91,7 @@ public static class QueryStoreExtensions
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为应用查询条件后的未跟踪实体列表。</returns>
     public static async Task<List<TEntity>> QueryAsNoTrackingAsync<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query, CancellationToken cancellationToken = default)
         where TEntity : class, IKey<TKey>
     {
@@ -101,6 +107,7 @@ public static class QueryStoreExtensions
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为应用查询条件和分页设置后的分页实体列表。</returns>
     public static async Task<PagerList<TEntity>> PagerQueryAsync<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query, CancellationToken cancellationToken = default)
         where TEntity : class, IKey<TKey>
     {
@@ -116,6 +123,7 @@ public static class QueryStoreExtensions
     /// <param name="store">查询存储器</param>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为应用查询条件和分页设置后的未跟踪分页实体列表。</returns>
     public static async Task<PagerList<TEntity>> PagerQueryAsNoTrackingAsync<TEntity, TKey>(this IQueryStore<TEntity, TKey> store, IQueryBase<TEntity> query, CancellationToken cancellationToken = default)
         where TEntity : class, IKey<TKey>
     {
@@ -126,8 +134,11 @@ public static class QueryStoreExtensions
     /// <summary>
     /// 获取查询结果
     /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <typeparam name="TKey">键类型</typeparam>
     /// <param name="queryable">数据源</param>
     /// <param name="query">查询对象</param>
+    /// <returns>应用查询条件和排序设置后的查询数据源。</returns>
     private static IQueryable<TEntity> Query<TEntity, TKey>(IQueryable<TEntity> queryable, IQueryBase<TEntity> query)
         where TEntity : class, IKey<TKey>
     {

@@ -31,6 +31,7 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo> : TreeCompactRepos
     /// 生成排序号
     /// </summary>
     /// <param name="parentId">父标识</param>
+    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
     public override async Task<int> GenerateSortIdAsync(Guid? parentId)
     {
         var maxSortId = await _store.Find(t => t.ParentId == parentId).MaxAsync(t => t.SortId);
@@ -64,12 +65,14 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     /// 生成排序号
     /// </summary>
     /// <param name="parentId">父标识</param>
+    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
     public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
     /// <summary>
     /// 获取全部下级实体
     /// </summary>
     /// <param name="parent">父实体</param>
+    /// <returns>表示异步操作的任务，结果为指定父实体的全部下级实体。</returns>
     public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
     {
         var list = await _store.FindAllAsync(t => t.Path.StartsWith(parent.Path));
@@ -81,6 +84,7 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体；未找到时返回 null。</returns>
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

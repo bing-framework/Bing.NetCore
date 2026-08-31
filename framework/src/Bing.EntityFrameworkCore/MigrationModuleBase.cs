@@ -33,5 +33,6 @@ public abstract class MigrationModuleBase<TDbContext> : BingModule
     /// 重写实现获取数据上下文实例
     /// </summary>
     /// <param name="scopedProvider">服务提供者</param>
+    /// <returns>由服务提供程序创建的数据上下文实例。</returns>
     protected abstract TDbContext CreateDbContext(IServiceProvider scopedProvider);
 }

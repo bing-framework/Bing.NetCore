@@ -13,5 +13,6 @@ public interface IHttpExceptionStatusCodeFinder
     /// </summary>
     /// <param name="httpContext">Http上下文</param>
     /// <param name="exception">异常</param>
+    /// <returns>与异常对应的 HTTP 状态码。</returns>
     HttpStatusCode GetStatusCode(HttpContext httpContext, Exception exception);
 }

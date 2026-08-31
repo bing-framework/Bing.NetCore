@@ -18,6 +18,7 @@ internal static class Helper
     /// 将对象转换成字典
     /// </summary>
     /// <param name="obj">对象</param>
+    /// <returns>包含对象公共实例属性名称和值的字典。</returns>
     public static Dictionary<string, object> ToDictionary(object obj)
     {
         var type = obj.GetType();
@@ -34,6 +35,7 @@ internal static class Helper
     /// 创建字典生成器
     /// </summary>
     /// <param name="type">类型</param>
+    /// <returns>根据指定类型公共实例属性生成字典的委托。</returns>
     private static Func<object, Dictionary<string, object>> CreateDictionaryGenerator(Type type)
     {
         var dm = new DynamicMethod($"Dictionary{Guid.NewGuid()}", typeof(Dictionary<string, object>),

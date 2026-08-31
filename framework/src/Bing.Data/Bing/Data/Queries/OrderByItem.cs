@@ -29,5 +29,6 @@ public class OrderByItem
     /// <summary>
     /// 创建排序字符串
     /// </summary>
+    /// <returns>当前排序项对应的排序字符串。</returns>
     public string Generate() => Desc ? $"{Name} desc" : Name;
 }

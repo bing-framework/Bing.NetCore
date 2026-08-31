@@ -21,12 +21,12 @@ public static class AssemblyManager
     };
 
     /// <summary>
-    /// 全部程序集
+    /// 获取按程序集筛选规则收集的全部程序集。
     /// </summary>
     private static Assembly[] _allAssemblies;
 
     /// <summary>
-    /// 全部类型
+    /// 获取已收集程序集中的全部类型。
     /// </summary>
     private static Type[] _allTypes;
 
@@ -47,7 +47,7 @@ public static class AssemblyManager
     public static Func<AssemblyName, bool> AssemblyFilterFunc { private get; set; }
 
     /// <summary>
-    /// 全部程序集
+    /// 获取按程序集筛选规则收集的全部程序集。
     /// </summary>
     public static Assembly[] AllAssemblies
     {
@@ -60,7 +60,7 @@ public static class AssemblyManager
     }
 
     /// <summary>
-    /// 全部类型
+    /// 获取已收集程序集中的全部类型。
     /// </summary>
     public static Type[] AllTypes
     {
@@ -73,9 +73,9 @@ public static class AssemblyManager
     }
 
     /// <summary>
-    /// 初始化
+    /// 加载依赖上下文中的程序集并重新构建程序集和类型缓存。
     /// </summary>
-    /// <exception cref="BingFrameworkException"></exception>
+    /// <exception cref="BingFrameworkException">程序集筛选委托未配置时抛出。</exception>
     public static void Init()
     {
         if (AssemblyFilterFunc == null)
@@ -102,10 +102,10 @@ public static class AssemblyManager
     }
 
     /// <summary>
-    /// 加载程序集到当前应用程序域
+    /// 尝试将指定程序集加载到当前应用程序域。
     /// </summary>
-    /// <param name="assemblyName">文件路径</param>
-    /// <param name="currentDomainAssemblies">当前已经加载的应用程序域</param>
+    /// <param name="assemblyName">要加载的程序集名称。</param>
+    /// <param name="currentDomainAssemblies">当前已经加载的程序集快照。</param>
     private static void LoadAssembly(AssemblyName assemblyName, Assembly[] currentDomainAssemblies)
     {
         try
@@ -127,6 +127,7 @@ public static class AssemblyManager
     /// 是否过滤程序集
     /// </summary>
     /// <param name="assemblyName">程序集名称</param>
+    /// <returns>程序集被过滤时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private static bool IsSkip(AssemblyName assemblyName)
     {
         var applicationName = Assembly.GetEntryAssembly()?.GetName().Name;
@@ -141,25 +142,28 @@ public static class AssemblyManager
     /// 是否过滤程序集
     /// </summary>
     /// <param name="assembly">程序集</param>
+    /// <returns>程序集被过滤时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private static bool IsSkip(Assembly assembly) => IsSkip(assembly.GetName());
 
     /// <summary>
     /// 查找指定条件的类型
     /// </summary>
     /// <param name="predicate">条件</param>
+    /// <returns>符合条件的类型数组。</returns>
     public static Type[] FindTypes(Func<Type, bool> predicate) => AllTypes.Where(predicate).ToArray();
 
     /// <summary>
     /// 查找指定基类的实现类型
     /// </summary>
     /// <typeparam name="TBaseType">基类类型</typeparam>
-    /// <returns></returns>
+    /// <returns>继承指定基类的非重复类型集合。</returns>
     public static Type[] FindTypesByBase<TBaseType>() => FindTypesByBase(typeof(TBaseType));
 
     /// <summary>
     /// 查找指定基类的实现类型
     /// </summary>
     /// <param name="baseType">基类类型</param>
+    /// <returns>继承指定基类的非重复类型集合。</returns>
     public static Type[] FindTypesByBase(Type baseType)
     {
         return AllTypes.Where(type => type.IsDeriveClassFrom(baseType)).Distinct().ToArray();
@@ -170,6 +174,7 @@ public static class AssemblyManager
     /// </summary>
     /// <typeparam name="TAttribute">特性类型</typeparam>
     /// <param name="inherit">是否搜索此成员的继承链来查找特性</param>
+    /// <returns>标记指定特性的非重复类型集合。</returns>
     public static Type[] FindTypesByAttribute<TAttribute>(bool inherit = true) => FindTypesByAttribute(typeof(TAttribute), inherit);
 
     /// <summary>
@@ -177,6 +182,7 @@ public static class AssemblyManager
     /// </summary>
     /// <param name="attributeType">特性类型</param>
     /// <param name="inherit">是否搜索此成员的继承链来查找特性</param>
+    /// <returns>标记指定特性的非重复类型集合。</returns>
     public static Type[] FindTypesByAttribute(Type attributeType, bool inherit = true)
     {
         return AllTypes.Where(type => type.IsDefined(attributeType, inherit)).Distinct().ToArray();

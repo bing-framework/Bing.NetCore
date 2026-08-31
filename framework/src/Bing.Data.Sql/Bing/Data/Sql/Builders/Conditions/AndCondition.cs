@@ -40,6 +40,7 @@ public class AndCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>返回由非空左右条件使用 <c>And</c> 连接形成的 SQL 条件；一侧为空时返回另一侧。</returns>
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_left))

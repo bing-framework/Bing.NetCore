@@ -24,5 +24,6 @@ public class OrCondition<TEntity> : ICondition<TEntity> where TEntity : class
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>组合后的查询条件表达式。</returns>
     public virtual Expression<Func<TEntity, bool>> GetCondition() => Predicate;
 }

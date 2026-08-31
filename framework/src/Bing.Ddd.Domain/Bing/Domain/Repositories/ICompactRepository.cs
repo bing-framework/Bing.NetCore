@@ -28,6 +28,7 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的实体；未找到时返回 null。</returns>
     TEntity Find(object id);
 
     /// <summary>
@@ -35,30 +36,35 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步查找结果的任务；未找到时结果为 null。</returns>
     Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(params TKey[] ids);
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(IEnumerable<TKey> ids);
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(string ids);
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示异步查找结果的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(params TKey[] ids);
 
     /// <summary>
@@ -66,12 +72,14 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     /// </summary>
     /// <param name="ids">标识列表</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步查找结果的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>表示异步查找结果的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(string ids);
 
     #endregion
@@ -82,24 +90,28 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>实体存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Exists(TKey id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>所有指定实体存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Exists(TKey[] ids);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>表示实体存在性判断结果的异步操作。</returns>
     Task<bool> ExistsAsync(TKey id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示实体存在性判断结果的异步操作。</returns>
     Task<bool> ExistsAsync(TKey[] ids);
 
     #endregion

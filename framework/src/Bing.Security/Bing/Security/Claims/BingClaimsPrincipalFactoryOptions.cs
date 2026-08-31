@@ -4,14 +4,14 @@ using Bing.Collections;
 namespace Bing.Security.Claims;
 
 /// <summary>
-/// 身份主体工厂选项
+/// 配置身份主体创建时的静态、动态 Claims 贡献者和声明映射策略。
 /// </summary>
 public class BingClaimsPrincipalFactoryOptions
 {
     /// <summary>
-    /// 静态 身份主体 贡献者列表，用于 固定身份信息的扩展。
+    /// 获取静态身份主体贡献者类型列表，用于扩展稳定的身份信息。
     /// </summary>
-    /// /// <remarks>
+    /// <remarks>
     /// 适用于：<br />
     /// - 普通用户身份认证（OAuth2、Cookie 认证等）。<br />
     /// - 用户角色、权限固定的情况。
@@ -19,7 +19,7 @@ public class BingClaimsPrincipalFactoryOptions
     public ITypeList<IBingClaimsPrincipalContributor> Contributors { get; }
 
     /// <summary>
-    /// 动态 身份主体 贡献者列表，用于 身份认证后可动态扩展 Claims。
+    /// 获取动态身份主体贡献者类型列表，用于在认证后计算或扩展 Claims。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
@@ -29,7 +29,7 @@ public class BingClaimsPrincipalFactoryOptions
     public ITypeList<IBingDynamicClaimsPrincipalContributor> DynamicContributors { get; }
 
     /// <summary>
-    /// 需要 动态更新 的 Claims 名称列表。
+    /// 获取需要动态更新的 Claims 名称列表。
     /// </summary>
     /// <remarks>
     /// 默认包含：<br />
@@ -41,7 +41,7 @@ public class BingClaimsPrincipalFactoryOptions
     public List<string> DynamicClaims { get; }
 
     /// <summary>
-    /// 是否启用 远程刷新 Claims 机制，默认值：true。
+    /// 获取或设置是否启用远程刷新 Claims 机制，默认值为 <c>true</c>。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
@@ -51,7 +51,7 @@ public class BingClaimsPrincipalFactoryOptions
     public bool IsRemoteRefreshEnabled { get; set; }
 
     /// <summary>
-    /// 远程刷新 Claims 的 URL 地址。
+    /// 获取或设置远程刷新 Claims 使用的相对 URL，默认值为 <c>/api/account/dynamic-claims/refresh</c>。
     /// </summary>
     /// <remarks>
     /// 默认值：`/api/account/dynamic-claims/refresh`<br />
@@ -60,7 +60,7 @@ public class BingClaimsPrincipalFactoryOptions
     public string RemoteRefreshUrl { get; set; }
 
     /// <summary>
-    /// Claims 映射关系表，用于转换 OpenID Connect / OAuth2 的 Claims 名称。
+    /// 获取或设置框架 Claims 类型到外部 OpenID Connect 或 OAuth2 Claims 名称的映射表。
     /// </summary>
     /// <remarks>
     /// 默认映射：<br />
@@ -73,7 +73,7 @@ public class BingClaimsPrincipalFactoryOptions
     public Dictionary<string, List<string>> ClaimsMap { get; set; }
 
     /// <summary>
-    /// 是否 启用动态 Claims 计算，默认值：false。
+    /// 获取或设置是否启用动态 Claims 计算，默认值为 <c>false</c>。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
@@ -84,7 +84,7 @@ public class BingClaimsPrincipalFactoryOptions
     public bool IsDynamicClaimsEnabled { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="BingClaimsPrincipalFactoryOptions"/> 类型的实例。
+    /// 初始化 <see cref="BingClaimsPrincipalFactoryOptions"/> 的实例及默认贡献者、Claims 列表和映射。
     /// </summary>
     public BingClaimsPrincipalFactoryOptions()
     {

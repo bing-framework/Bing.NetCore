@@ -28,6 +28,7 @@ public static class ObjectMapperExtensions
     /// </summary>
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
+    /// <returns>映射后的目标对象。</returns>
     public static TDestination MapTo<TDestination>(this object source) where TDestination : new()
     {
         CheckMapper();
@@ -41,6 +42,7 @@ public static class ObjectMapperExtensions
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
+    /// <returns>填充后的目标对象。</returns>
     public static TDestination MapTo<TSource, TDestination>(this TSource source, TDestination destination)
     {
         CheckMapper();
@@ -65,6 +67,7 @@ public static class ObjectMapperExtensions
     /// </summary>
     /// <typeparam name="TDestination">目标元素类型，范例：Sample，不用加List</typeparam>
     /// <param name="source">源集合</param>
+    /// <returns>映射后的目标对象列表。</returns>
     public static List<TDestination> MapToList<TDestination>(this System.Collections.IEnumerable source) => MapTo<List<TDestination>>(source);
 
     #endregion

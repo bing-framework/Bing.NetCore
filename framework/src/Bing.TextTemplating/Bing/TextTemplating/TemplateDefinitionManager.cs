@@ -9,22 +9,22 @@ using Microsoft.Extensions.Options;
 namespace Bing.TextTemplating;
 
 /// <summary>
-/// 模板定义管理器
+/// 发现、缓存并查询文本模板定义的默认管理器。
 /// </summary>
 public class TemplateDefinitionManager : ITemplateDefinitionManager, ISingletonDependency
 {
     /// <summary>
-    /// 模板定义字典
+    /// 延迟创建并缓存的模板定义字典。
     /// </summary>
     protected Lazy<IDictionary<string, TemplateDefinition>> TemplateDefinitions { get; }
 
     /// <summary>
-    /// 文本模板选项配置
+    /// 获取文本模板选项配置。
     /// </summary>
     protected BingTextTemplatingOptions Options { get; }
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取用于创建模板定义提供者作用域的根服务提供程序。
     /// </summary>
     protected IServiceProvider ServiceProvider { get; }
 
@@ -42,10 +42,7 @@ public class TemplateDefinitionManager : ITemplateDefinitionManager, ISingletonD
         TemplateDefinitions = new Lazy<IDictionary<string, TemplateDefinition>>();
     }
 
-    /// <summary>
-    /// 获取模板定义
-    /// </summary>
-    /// <param name="name">模板名称</param>
+    /// <inheritdoc />
     public virtual TemplateDefinition Get(string name)
     {
         Check.NotNull(name, nameof(name));
@@ -55,20 +52,17 @@ public class TemplateDefinitionManager : ITemplateDefinitionManager, ISingletonD
         return template;
     }
 
-    /// <summary>
-    /// 获取全部模板定义
-    /// </summary>
+    /// <inheritdoc />
     public virtual IReadOnlyList<TemplateDefinition> GetAll() => TemplateDefinitions.Value.Values.ToImmutableList();
 
-    /// <summary>
-    /// 获取模板定义
-    /// </summary>
-    /// <param name="name">模板名称</param>
+    /// <inheritdoc />
     public virtual TemplateDefinition GetOrNull(string name) => TemplateDefinitions.Value.GetOrDefault(name);
 
     /// <summary>
-    /// 创建文本模板定义字典
+    /// 在临时 DI 作用域中创建模板定义字典。
     /// </summary>
+    /// <returns>由已配置定义提供者构建的模板定义字典。</returns>
+    /// <remarks>所有提供者先依次执行预定义阶段，再执行定义和后定义阶段；服务作用域随方法结束释放。</remarks>
     protected virtual IDictionary<string, TemplateDefinition> CreateTextTemplateDefinitions()
     {
         var templates = new Dictionary<string, TemplateDefinition>();

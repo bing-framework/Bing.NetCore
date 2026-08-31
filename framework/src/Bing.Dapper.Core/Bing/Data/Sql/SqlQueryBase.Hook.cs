@@ -4,8 +4,9 @@
 public partial class SqlQueryBase
 {
     /// <summary>
-    /// 执行前操作，返回false停止执行
+    /// 执行前操作。
     /// </summary>
+    /// <returns>允许继续执行时返回 <see langword="true"/>；返回 <see langword="false"/> 时停止执行。</returns>
     protected virtual bool ExecuteBefore() => true;
 
     /// <summary>

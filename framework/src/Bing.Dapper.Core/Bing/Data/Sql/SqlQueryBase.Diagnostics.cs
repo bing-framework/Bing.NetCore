@@ -23,14 +23,33 @@ public abstract partial class SqlQueryBase
     /// <param name="parameter">Sql参数</param>
     /// <param name="connection">数据库连接</param>
     /// <param name="parameterMetadata">Sql 增强参数元数据</param>
+    /// <returns>执行前诊断消息；没有启用诊断或跟踪消费方时返回 null。</returns>
     protected virtual DiagnosticsMessage ExecuteBefore(string sql, object parameter, IDbConnection connection,
         IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null) =>
         ExecuteBeforeCore(sql, parameter, connection, parameterMetadata, null);
 
+    /// <summary>
+    /// 为查询计划创建执行前诊断消息。
+    /// </summary>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="parameter">当前执行的原始参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <param name="parameterMetadata">已绑定的 SQL 参数诊断元数据。</param>
+    /// <param name="plan">当前查询计划。</param>
+    /// <returns>执行前诊断消息；没有启用诊断或跟踪消费方时返回 null。</returns>
     private protected DiagnosticsMessage ExecuteBeforePlan(string sql, object parameter, IDbConnection connection,
         IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata, SqlQueryPlan plan) =>
         ExecuteBeforeCore(sql, parameter, connection, parameterMetadata, plan);
 
+    /// <summary>
+    /// 构造执行前诊断消息并写入查询计划上下文。
+    /// </summary>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="parameter">当前执行的原始参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <param name="parameterMetadata">已绑定的 SQL 参数诊断元数据。</param>
+    /// <param name="plan">当前查询计划；无计划时传入 null。</param>
+    /// <returns>构造的执行前诊断消息；无需诊断上下文时返回 null。</returns>
     private DiagnosticsMessage ExecuteBeforeCore(string sql, object parameter, IDbConnection connection,
         IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata, SqlQueryPlan plan)
     {
@@ -128,11 +147,29 @@ public abstract partial class SqlQueryBase
                 plan);
     }
 
+    /// <summary>
+    /// 为 Builder 查询计划创建包含计划上下文的执行前诊断消息。
+    /// </summary>
+    /// <param name="builder">当前 SQL Builder。</param>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="dapperParameters">本次执行已绑定的 Dapper 参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <param name="plan">当前查询计划。</param>
+    /// <returns>执行前诊断消息；没有启用诊断或跟踪消费方时返回 null。</returns>
     private protected DiagnosticsMessage CreateExecutionDiagnostics(ISqlBuilder builder, string sql,
         object dapperParameters, IDbConnection connection, SqlQueryPlan plan) =>
         ExecuteBeforePlan(sql, builder?.GetParams(), connection, GetBoundParameterDiagnostics(dapperParameters,
             () => GetSqlParameterDiagnostics(builder, sql)), plan);
 
+    /// <summary>
+    /// 为原生参数查询计划创建包含计划上下文的执行前诊断消息。
+    /// </summary>
+    /// <param name="sql">当前执行的 SQL 文本。</param>
+    /// <param name="parameters">调用方提供的原始参数。</param>
+    /// <param name="dapperParameters">本次执行已绑定的 Dapper 参数。</param>
+    /// <param name="connection">当前数据库连接。</param>
+    /// <param name="plan">当前查询计划。</param>
+    /// <returns>执行前诊断消息；没有启用诊断或跟踪消费方时返回 null。</returns>
     private protected DiagnosticsMessage CreateExecutionDiagnostics(string sql, object parameters,
         object dapperParameters, IDbConnection connection, SqlQueryPlan plan) =>
         ExecuteBeforePlan(sql, parameters, connection, GetBoundParameterDiagnostics(dapperParameters,
@@ -150,6 +187,7 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 判断是否至少有一个执行上下文消费方需要创建诊断消息。
     /// </summary>
+    /// <returns>需要创建执行诊断上下文时返回 <see langword="true"/>。</returns>
     private bool IsExecutionContextRequired() => IsExecutionDiagnosticsEnabled() || Activity.Current != null ||
         Logger.IsEnabled(LogLevel.Trace);
 
@@ -193,10 +231,19 @@ public abstract partial class SqlQueryBase
         });
     }
 
+    /// <summary>
+    /// 不执行任何操作的空释放对象。
+    /// </summary>
     private sealed class EmptyDisposable : IDisposable
     {
+        /// <summary>
+        /// 空释放对象的共享实例。
+        /// </summary>
         internal static EmptyDisposable Instance { get; } = new();
 
+        /// <summary>
+        /// 释放空对象；此方法不执行任何操作。
+        /// </summary>
         public void Dispose()
         {
         }

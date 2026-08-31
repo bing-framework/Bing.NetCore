@@ -1,27 +1,27 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// SQL 连接来源
+/// 标识 SQL 执行使用的连接来源，以便确定连接生命周期和诊断信息。
 /// </summary>
 public enum SqlConnectionSource
 {
     /// <summary>
-    /// 未知来源
+    /// 无法确定连接来源。
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// SQL 数据源配置
+    /// 连接由 SQL 数据源配置解析或创建。
     /// </summary>
     DataSource,
 
     /// <summary>
-    /// 外部提供的连接
+    /// 连接由调用方或外部组件提供。
     /// </summary>
     External,
 
     /// <summary>
-    /// Entity Framework Core 连接
+    /// 连接由 Entity Framework Core 上下文提供。
     /// </summary>
     EntityFrameworkCore
 }

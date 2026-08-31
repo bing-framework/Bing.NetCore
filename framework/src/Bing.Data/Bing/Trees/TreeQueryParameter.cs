@@ -5,28 +5,28 @@ using Bing.Extensions;
 namespace Bing.Trees;
 
 /// <summary>
-/// 树型查询参数
+/// 提供支持父节点、层级、路径和启用状态过滤的树形查询参数实现。
 /// </summary>
-/// <typeparam name="TParentId">父标识类型</typeparam>
+/// <typeparam name="TParentId">父节点标识类型。</typeparam>
 public class TreeQueryParameter<TParentId> : QueryParameter, ITreeQueryParameter<TParentId>
 {
     /// <summary>
-    /// 父编号
+    /// 获取或设置父节点标识。
     /// </summary>
     public TParentId ParentId { get; set; }
 
     /// <summary>
-    /// 级数
+    /// 获取或设置节点层级；为空时不按层级过滤。
     /// </summary>
     public int? Level { get; set; }
 
     /// <summary>
-    /// 路径
+    /// 保存经过规范化的物化路径查询条件。
     /// </summary>
     private string _path = string.Empty;
 
     /// <summary>
-    /// 路径
+    /// 获取或设置物化路径查询条件；获取时会去除首尾空白，空值按空字符串返回。
     /// </summary>
     public string Path
     {
@@ -35,19 +35,20 @@ public class TreeQueryParameter<TParentId> : QueryParameter, ITreeQueryParameter
     }
 
     /// <summary>
-    /// 启用
+    /// 获取或设置启用状态查询条件；为空时不按状态过滤。
     /// </summary>
     [Display(Name = "启用")]
     public bool? Enabled { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="TreeQueryParameter{TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreeQueryParameter{TParentId}"/> 实例，并设置默认排序字段。
     /// </summary>
     protected TreeQueryParameter() => Order = "SortId";
 
     /// <summary>
-    /// 是否搜索
+    /// 判断当前参数是否包含可用于查询的有效条件。
     /// </summary>
+    /// <returns>存在有效查询条件时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public virtual bool IsSearch()
     {
         var items = Reflection.Reflections.GetPublicProperties(this);
@@ -55,10 +56,11 @@ public class TreeQueryParameter<TParentId> : QueryParameter, ITreeQueryParameter
     }
 
     /// <summary>
-    /// 是否搜索属性
+    /// 判断指定属性是否应作为查询条件。
     /// </summary>
-    /// <param name="name">属性名</param>
-    /// <param name="value">属性值</param>
+    /// <param name="name">属性名称。</param>
+    /// <param name="value">属性值。</param>
+    /// <returns>属性值非空且不是分页或排序控制属性时返回 <see langword="true"/>。</returns>
     protected virtual bool IsSearchProperty(string name, object value)
     {
         if (value.SafeString().IsEmpty())

@@ -140,6 +140,7 @@ public class PagerList<T> : IPagerBase
     /// </summary>
     /// <typeparam name="TResult">目标元素类型</typeparam>
     /// <param name="converter">转换方法</param>
+    /// <returns>保留当前分页信息并转换元素类型后的分页集合。</returns>
     public PagerList<TResult> Convert<TResult>(Func<T, TResult> converter) => Convert(Data.Select(converter));
 
     /// <summary>
@@ -147,5 +148,6 @@ public class PagerList<T> : IPagerBase
     /// </summary>
     /// <typeparam name="TResult">目标元素类型</typeparam>
     /// <param name="data">数据</param>
+    /// <returns>使用指定数据并保留当前分页信息的分页集合。</returns>
     public PagerList<TResult> Convert<TResult>(IEnumerable<TResult> data) => new(Page, PageSize, TotalCount, Order, data);
 }

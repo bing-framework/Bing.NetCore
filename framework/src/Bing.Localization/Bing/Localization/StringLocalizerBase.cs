@@ -62,6 +62,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// </summary>
     /// <param name="name">资源名称</param>
     /// <param name="arguments">参数列表</param>
+    /// <returns>格式化后的本地化字符串；找不到资源时返回标记为未找到的结果。</returns>
     protected virtual LocalizedString GetResult(string name, params object[] arguments)
     {
         LocalizedString result = null;
@@ -81,6 +82,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
+    /// <returns>缓存或资源存储中的本地化字符串。</returns>
     protected virtual LocalizedString GetLocalizedStringByCache(CultureInfo culture, string name)
     {
         var key = CacheHelper.GetCacheKey(culture.Name, Type, name);
@@ -98,6 +100,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
+    /// <returns>本地化字符串；资源不存在时返回标记为未找到的结果。</returns>
     protected virtual LocalizedString GetLocalizedString(CultureInfo culture, string name)
     {
         var value = GetValue(culture, name, Type);
@@ -112,6 +115,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
     /// <param name="type">资源类型</param>
+    /// <returns>指定区域、资源名称和资源类型对应的文本；不存在时返回 null 或空字符串。</returns>
     protected abstract string GetValue(CultureInfo culture, string name, string type);
 
     /// <summary>
@@ -120,6 +124,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// <param name="result">本地化字符串结果</param>
     /// <param name="name">资源名称</param>
     /// <param name="arguments">参数列表</param>
+    /// <returns>应用参数格式化后的本地化字符串。</returns>
     protected virtual LocalizedString FormatResult(LocalizedString result, string name, params object[] arguments)
     {
         if (result == null)
@@ -135,5 +140,6 @@ public abstract class StringLocalizerBase : IStringLocalizer
     /// 获取全部本地化字符串
     /// </summary>
     /// <param name="includeParentCultures">是否包含父区域</param>
+    /// <returns>当前资源类型的全部本地化字符串。</returns>
     public abstract IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures);
 }

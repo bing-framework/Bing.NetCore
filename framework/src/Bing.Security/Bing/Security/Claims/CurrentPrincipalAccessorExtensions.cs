@@ -12,6 +12,7 @@ public static class CurrentPrincipalAccessorExtensions
     /// </summary>
     /// <param name="currentPrincipalAccessor">当前安全主体访问器</param>
     /// <param name="claim">声明</param>
+    /// <returns>用于恢复原安全主体的释放对象。</returns>
     public static IDisposable Change(this ICurrentPrincipalAccessor currentPrincipalAccessor, Claim claim) => currentPrincipalAccessor.Change(new[] { claim });
 
     /// <summary>
@@ -19,6 +20,7 @@ public static class CurrentPrincipalAccessorExtensions
     /// </summary>
     /// <param name="currentPrincipalAccessor">当前安全主体访问器</param>
     /// <param name="claims">声明集合</param>
+    /// <returns>用于恢复原安全主体的释放对象。</returns>
     public static IDisposable Change(this ICurrentPrincipalAccessor currentPrincipalAccessor, IEnumerable<Claim> claims) => currentPrincipalAccessor.Change(new ClaimsIdentity(claims));
 
     /// <summary>
@@ -26,5 +28,6 @@ public static class CurrentPrincipalAccessorExtensions
     /// </summary>
     /// <param name="currentPrincipalAccessor">当前安全主体访问器</param>
     /// <param name="claimsIdentity">声明身份</param>
+    /// <returns>用于恢复原安全主体的释放对象。</returns>
     public static IDisposable Change(this ICurrentPrincipalAccessor currentPrincipalAccessor, ClaimsIdentity claimsIdentity) => currentPrincipalAccessor.Change(new ClaimsPrincipal(claimsIdentity));
 }

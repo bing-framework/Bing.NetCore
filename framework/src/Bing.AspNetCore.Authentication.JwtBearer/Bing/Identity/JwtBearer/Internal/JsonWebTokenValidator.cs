@@ -17,6 +17,8 @@ internal sealed class JsonWebTokenValidator : IJsonWebTokenValidator
     /// <param name="encodeJwt">加密后的Jwt令牌</param>
     /// <param name="options">Jwt选项配置</param>
     /// <param name="validatePayload">校验负载</param>
+    /// <returns>JWT 格式、HMAC-SHA256 签名和自定义负载校验均通过时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <remarks>本方法不校验 <c>exp</c> 和 <c>nbf</c> 有效期声明。</remarks>
     public bool Validate(string encodeJwt, JwtOptions options, Func<IDictionary<string, string>, JwtOptions, bool> validatePayload)
     {
         if (string.IsNullOrWhiteSpace(options.Secret))
@@ -44,8 +46,10 @@ internal sealed class JsonWebTokenValidator : IJsonWebTokenValidator
     }
 
     /// <summary>
-    /// 生成时间戳
+    /// 将日期时间转换为 Unix 时间戳秒数。
     /// </summary>
+    /// <param name="date">要转换的日期时间。</param>
+    /// <returns>自 1970 年 1 月 1 日 UTC 起经过的秒数。</returns>
     private long ToUnixEpochDate(DateTime date) =>
         (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
             .TotalSeconds);

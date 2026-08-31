@@ -111,6 +111,7 @@ public class CSRedisDistributedLock : IDistributedLock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>执行方法返回的结果；未提供执行方法时返回默认值。</returns>
     public T ExecuteWithLock<T>(string key, string value, TimeSpan expiration, Func<T> executeAction, T defaultValue = default)
     {
         if (executeAction == null)
@@ -128,6 +129,7 @@ public class CSRedisDistributedLock : IDistributedLock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>包含执行方法返回结果的异步任务；未提供执行方法时任务结果为默认值。</returns>
     public async Task<T> ExecuteWithLockAsync<T>(string key, string value, TimeSpan expiration, Func<Task<T>> executeAction,
         T defaultValue = default)
     {

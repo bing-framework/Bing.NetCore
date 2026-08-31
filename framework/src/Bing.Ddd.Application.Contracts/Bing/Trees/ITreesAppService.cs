@@ -1,10 +1,10 @@
 ﻿namespace Bing.Trees;
 
 /// <summary>
-/// 树型服务
+/// 定义使用默认 GUID 父节点标识的树形应用服务契约。
 /// </summary>
-/// <typeparam name="TDto">数据传输对象类型</typeparam>
-/// <typeparam name="TQueryParameter">查询参数类型</typeparam>
+/// <typeparam name="TDto">树形数据传输对象类型。</typeparam>
+/// <typeparam name="TQueryParameter">树形查询参数类型。</typeparam>
 public interface ITreesAppService<TDto, in TQueryParameter> : ITreesAppService<TDto, TQueryParameter, Guid?>
     where TDto : class, ITreeNode, new()
     where TQueryParameter : class, ITreeQueryParameter
@@ -12,43 +12,43 @@ public interface ITreesAppService<TDto, in TQueryParameter> : ITreesAppService<T
 }
 
 /// <summary>
-/// 树型应用服务
+/// 定义树形数据的删除、启用、禁用和排序操作契约。
 /// </summary>
-/// <typeparam name="TDto">数据传输对象类型</typeparam>
-/// <typeparam name="TQueryParameter">查询参数类型</typeparam>
-/// <typeparam name="TParentId">父标识类型</typeparam>
+/// <typeparam name="TDto">树形数据传输对象类型。</typeparam>
+/// <typeparam name="TQueryParameter">树形查询参数类型。</typeparam>
+/// <typeparam name="TParentId">父节点标识类型。</typeparam>
 public interface ITreesAppService<TDto, in TQueryParameter, TParentId> : ITreesQueryAppService<TDto, TQueryParameter, TParentId>
     where TDto : class, ITreeNode, new()
     where TQueryParameter : class, ITreeQueryParameter<TParentId>
 {
     /// <summary>
-    /// 删除
+    /// 异步删除指定标识对应的树节点。
     /// </summary>
-    /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
+    /// <param name="ids">以逗号分隔的节点标识列表，例如 <c>1,2</c>。</param>
     Task DeleteAsync(string ids);
 
     /// <summary>
-    /// 启用
+    /// 异步启用指定标识对应的树节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
     Task EnableAsync(string ids);
 
     /// <summary>
-    /// 禁用
+    /// 异步禁用指定标识对应的树节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
     Task DisableAsync(string ids);
 
     /// <summary>
-    /// 交换排序
+    /// 异步交换两个树节点的排序号。
     /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="swapId">目标标识</param>
+    /// <param name="id">第一个节点标识。</param>
+    /// <param name="swapId">要交换排序号的目标节点标识。</param>
     Task SwapSortAsync(Guid id, Guid swapId);
 
     /// <summary>
-    /// 修正排序
+    /// 异步按查询结果重新修正树节点的排序号。
     /// </summary>
-    /// <param name="parameter">查询参数</param>
+    /// <param name="parameter">用于筛选待修正节点的查询参数。</param>
     Task FixSortIdAsync(TQueryParameter parameter);
 }

@@ -103,6 +103,14 @@ public abstract partial class SqlExecutorBase
     /// <inheritdoc />
     public virtual Task<int> DeleteBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class => ExecuteDeleteBatchAsync(entities, options, timeout, cancellationToken);
 
+    /// <summary>
+    /// 执行实体批量 Insert。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待插入实体集合。</param>
+    /// <param name="options">批量 Insert 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <returns>实际受影响的行数。</returns>
     private int ExecuteInsertBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options, int? timeout) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -110,6 +118,15 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
+    /// <summary>
+    /// 异步执行实体批量 Insert。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待插入实体集合。</param>
+    /// <param name="options">批量 Insert 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示实际受影响行数的异步操作。</returns>
     private Task<int> ExecuteInsertBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchInsertOptions options, int? timeout, CancellationToken cancellationToken) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -119,6 +136,14 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
+    /// <summary>
+    /// 执行实体批量 Update。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待更新实体集合。</param>
+    /// <param name="options">批量 Update 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <returns>实际受影响的行数。</returns>
     private int ExecuteUpdateBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options, int? timeout) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -126,6 +151,15 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options, items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
+    /// <summary>
+    /// 异步执行实体批量 Update。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待更新实体集合。</param>
+    /// <param name="options">批量 Update 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示实际受影响行数的异步操作。</returns>
     private Task<int> ExecuteUpdateBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchUpdateOptions options, int? timeout, CancellationToken cancellationToken) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -135,6 +169,14 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options, items => CreateUpdateBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
+    /// <summary>
+    /// 执行实体批量 Delete。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待删除实体集合。</param>
+    /// <param name="options">批量 Delete 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <returns>实际受影响的行数。</returns>
     private int ExecuteDeleteBatch<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options, int? timeout) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -142,6 +184,15 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options, items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
+    /// <summary>
+    /// 异步执行实体批量 Delete。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待删除实体集合。</param>
+    /// <param name="options">批量 Delete 选项。</param>
+    /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示实际受影响行数的异步操作。</returns>
     private Task<int> ExecuteDeleteBatchAsync<TEntity>(IEnumerable<TEntity> entities, SqlBatchDeleteOptions options, int? timeout, CancellationToken cancellationToken) where TEntity : class
     {
         EnsureMutationBatchExecutionAllowed(entities);
@@ -151,6 +202,11 @@ public abstract partial class SqlExecutorBase
         return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options, items => CreateDeleteBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
+    /// <summary>
+    /// 验证批量 Mutation 输入和当前数据源是否允许写入。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待处理实体集合。</param>
     private void EnsureMutationBatchExecutionAllowed<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
     {
         if (entities == null)
@@ -158,6 +214,14 @@ public abstract partial class SqlExecutorBase
         EnsureWritableDataSource();
     }
 
+    /// <summary>
+    /// 按窗口物化实体并生成批量 Mutation 命令。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待处理实体集合。</param>
+    /// <param name="options">批量 Mutation 选项。</param>
+    /// <param name="batchFactory">根据单个窗口创建命令批次的委托。</param>
+    /// <returns>按原始顺序延迟输出的 Mutation 命令批次。</returns>
     private static IEnumerable<SqlMutationBatchCommand> CreateWindowedMutationBatchCommands<TEntity>(IEnumerable<TEntity> entities, SqlMutationBatchOptions options, Func<IEnumerable<TEntity>, IReadOnlyList<SqlMutationBatchCommand>> batchFactory) where TEntity : class
     {
         if (batchFactory == null)
@@ -167,6 +231,11 @@ public abstract partial class SqlExecutorBase
                 yield return batch;
     }
 
+    /// <summary>
+    /// 获取批量 Mutation 的实体窗口大小。
+    /// </summary>
+    /// <param name="options">批量 Mutation 选项。</param>
+    /// <returns>用于分段枚举实体的窗口大小。</returns>
     private static int GetMutationBatchWindowSize(SqlMutationBatchOptions options)
     {
         var windowSize = options?.BatchSize ?? DefaultMutationBatchWindowSize;
@@ -175,6 +244,13 @@ public abstract partial class SqlExecutorBase
         return windowSize;
     }
 
+    /// <summary>
+    /// 将实体集合按指定窗口大小分段枚举。
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待分段枚举的实体集合。</param>
+    /// <param name="windowSize">每个窗口的最大实体数量。</param>
+    /// <returns>按原始顺序排列的实体窗口序列。</returns>
     private static IEnumerable<IReadOnlyList<TEntity>> EnumerateMutationWindows<TEntity>(IEnumerable<TEntity> entities, int windowSize)
     {
         using var enumerator = entities.GetEnumerator();

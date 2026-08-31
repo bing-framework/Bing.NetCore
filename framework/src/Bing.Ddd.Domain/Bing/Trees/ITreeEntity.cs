@@ -26,5 +26,6 @@ public interface ITreeEntity<in TEntity, TKey, TParentId> : IAggregateRoot<TEnti
     /// 从路径中获取所有上级节点编号
     /// </summary>
     /// <param name="excludeSelf">是否排除当前节点，默认排除自身</param>
+    /// <returns>当前节点路径中的上级节点标识列表。</returns>
     List<TKey> GetParentIdsFromPath(bool excludeSelf = true);
 }

@@ -7,12 +7,33 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// <typeparam name="TValue">缓存值类型。</typeparam>
 internal sealed class BoundedLazyCache<TKey, TValue>
 {
+    /// <summary>
+    /// 保护缓存状态的同步对象。
+    /// </summary>
     private readonly object _syncRoot = new();
+    /// <summary>
+    /// 缓存条目映射。
+    /// </summary>
     private readonly Dictionary<TKey, CacheEntry> _entries = new();
+    /// <summary>
+    /// 按最近使用顺序保存缓存键。
+    /// </summary>
     private readonly LinkedList<TKey> _accessOrder = new();
+    /// <summary>
+    /// 缓存命中次数。
+    /// </summary>
     private long _hitCount;
+    /// <summary>
+    /// 缓存未命中次数。
+    /// </summary>
     private long _missCount;
+    /// <summary>
+    /// 因容量为零而旁路缓存的次数。
+    /// </summary>
     private long _bypassCount;
+    /// <summary>
+    /// 按最近最少使用策略淘汰条目的次数。
+    /// </summary>
     private long _evictionCount;
 
     /// <summary>
@@ -142,12 +163,19 @@ internal sealed class BoundedLazyCache<TKey, TValue>
         }
     }
 
+    /// <summary>
+    /// 将缓存条目标记为最近使用。
+    /// </summary>
+    /// <param name="entry">待更新的缓存条目。</param>
     private void Touch(CacheEntry entry)
     {
         _accessOrder.Remove(entry.Node);
         _accessOrder.AddLast(entry.Node);
     }
 
+    /// <summary>
+    /// 移除最近最少使用的缓存条目。
+    /// </summary>
     private void EvictLeastRecentlyUsed()
     {
         var node = _accessOrder.First;
@@ -158,16 +186,30 @@ internal sealed class BoundedLazyCache<TKey, TValue>
         _evictionCount++;
     }
 
+    /// <summary>
+    /// 缓存中的惰性值及其访问顺序节点。
+    /// </summary>
     private sealed class CacheEntry
     {
+        /// <summary>
+        /// 初始化一个 <see cref="CacheEntry"/> 类型的实例。
+        /// </summary>
+        /// <param name="value">缓存惰性值。</param>
+        /// <param name="node">访问顺序链表节点。</param>
         public CacheEntry(Lazy<TValue> value, LinkedListNode<TKey> node)
         {
             Value = value;
             Node = node;
         }
 
+        /// <summary>
+        /// 缓存惰性值。
+        /// </summary>
         public Lazy<TValue> Value { get; }
 
+        /// <summary>
+        /// 对应的访问顺序链表节点。
+        /// </summary>
         public LinkedListNode<TKey> Node { get; }
     }
 }

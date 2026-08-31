@@ -11,7 +11,7 @@ namespace Bing.Data.Queries.Conditions;
 public class DateSegmentCondition<TEntity, TProperty> : DateTimeSegmentCondition<TEntity, TProperty> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个<see cref="DateSegmentCondition{TEntity,TProperty}"/>类型的实例
+    /// 初始化一个 <see cref="DateSegmentCondition{TEntity,TProperty}"/> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>
@@ -28,6 +28,7 @@ public class DateSegmentCondition<TEntity, TProperty> : DateTimeSegmentCondition
     /// <summary>
     /// 获取最小值表达式
     /// </summary>
+    /// <returns>表示最小值的表达式。</returns>
     protected override Expression GetMinValueExpression()
     {
         var minValue = GetMinValue().SafeValue().Date;
@@ -39,6 +40,7 @@ public class DateSegmentCondition<TEntity, TProperty> : DateTimeSegmentCondition
     /// <summary>
     /// 获取最大值表达式
     /// </summary>
+    /// <returns>表示最大值的表达式。</returns>
     protected override Expression GetMaxValueExpression()
     {
         var maxValue = GetMaxValue().SafeValue().Date;
@@ -51,11 +53,13 @@ public class DateSegmentCondition<TEntity, TProperty> : DateTimeSegmentCondition
     /// 创建左操作符
     /// </summary>
     /// <param name="boundary">查询边界</param>
+    /// <returns>左边界对应的操作符。</returns>
     protected override Operator CreateLeftOperator(Boundary? boundary) => Operator.GreaterEqual;
 
     /// <summary>
     /// 创建右操作符
     /// </summary>
     /// <param name="boundary">查询边界</param>
+    /// <returns>右边界对应的操作符。</returns>
     protected override Operator CreateRightOperator(Boundary? boundary) => Operator.Less;
 }

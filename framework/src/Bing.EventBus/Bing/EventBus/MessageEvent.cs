@@ -38,6 +38,7 @@ public class MessageEvent : IMessageEvent
     /// <summary>
     /// 输出日志
     /// </summary>
+    /// <returns>包含事件标识、时间、名称、回调和数据的文本。</returns>
     public override string ToString()
     {
         var result = new StringBuilder();

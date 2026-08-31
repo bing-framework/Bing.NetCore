@@ -7,26 +7,26 @@ using Microsoft.Extensions.Logging;
 namespace Bing.AspNetCore.MultiTenancy;
 
 /// <summary>
-/// 基于请求头的租户解析构造器
+/// 根据请求头解析租户标识的租户解析贡献者。
 /// </summary>
 public class HeaderTenantResolveContributor : HttpTenantResolveContributorBase
 {
     /// <summary>
-    /// 构造器名称
+    /// 获取该租户解析贡献者使用的稳定名称。
     /// </summary>
     public const string ContributorName = "Header";
 
     /// <summary>
-    /// 名称
+    /// 获取该租户解析贡献者的名称。
     /// </summary>
     public override string Name => ContributorName;
 
     /// <summary>
-    /// 从 <see cref="HttpContext"/> 中获取租户标识、租户名称、null
+    /// 异步从请求头中提取租户标识或名称。
     /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="httpContext">Http上下文</param>
-    /// <returns>租户标识、租户名称、null</returns>
+    /// <param name="context">租户解析上下文。</param>
+    /// <param name="httpContext">当前 HTTP 请求上下文。</param>
+    /// <returns>表示解析操作的任务，结果为第一个租户请求头值；请求头缺失或没有值时返回 <see langword="null"/>。</returns>
     protected override Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext)
     {
         if (httpContext.Request.Headers.IsNullOrEmpty())
@@ -41,10 +41,10 @@ public class HeaderTenantResolveContributor : HttpTenantResolveContributorBase
     }
 
     /// <summary>
-    /// 记录日志
+    /// 记录租户请求头存在多个值时的诊断日志。
     /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="text">日志内容</param>
+    /// <param name="context">租户解析上下文。</param>
+    /// <param name="text">日志内容。</param>
     protected virtual void Log(ITenantResolveContext context, string text)
     {
         context.ServiceProvider

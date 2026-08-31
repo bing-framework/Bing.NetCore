@@ -8,6 +8,7 @@ namespace Bing.Data.Sql;
 public abstract partial class SqlQueryBase
 {
     /// <inheritdoc />
+    /// <returns>按指定分页参数物化的结果列表。</returns>
     PagerList<TResult> ISqlQueryPlanExecutor.ToPage<TResult>(SqlQueryPlan plan, IPager pager, int? timeout)
     {
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
@@ -62,6 +63,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <inheritdoc />
+    /// <returns>表示按指定分页参数异步物化结果列表的任务。</returns>
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
@@ -126,6 +128,8 @@ public abstract partial class SqlQueryBase
     /// <remarks>
     /// 兼容未采用 <see cref="Pager.IsTotalCountKnown"/> 的第三方 <see cref="IPager"/>：其非零总数沿用既有语义视为已知。
     /// </remarks>
+    /// <param name="pager">待判断的分页参数。</param>
+    /// <returns>需要自动计算总数时返回 <see langword="true"/>。</returns>
     private static bool IsPlanTotalCountUnknown(IPager pager) => pager is Pager knownPager
         ? knownPager.IsTotalCountKnown == false
         : pager.TotalCount == 0;

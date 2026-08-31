@@ -24,6 +24,7 @@ public static partial class Extensions
     /// <param name="dataConfigAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="sqlServerSetupAction">SqlServer配置操作</param>
+    /// <returns>完成 SQL Server 工作单元注册后的服务集合。</returns>
     public static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(
         this IServiceCollection services,
         DbConnection connection,
@@ -46,6 +47,7 @@ public static partial class Extensions
     /// <param name="dataConfigAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="sqlServerSetupAction">SqlServer配置操作</param>
+    /// <returns>完成 SQL Server 工作单元注册后的服务集合。</returns>
     public static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(
         this IServiceCollection services,
         string connection,
@@ -69,6 +71,7 @@ public static partial class Extensions
     /// <param name="dataConfigSetupAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="sqlServerSetupAction">SqlServer配置操作</param>
+    /// <returns>完成 SQL Server 工作单元注册后的服务集合。</returns>
     private static IServiceCollection AddSqlServerUnitOfWork<TService, TImplementation>(IServiceCollection services,
         string connectionString,
         DbConnection connection,

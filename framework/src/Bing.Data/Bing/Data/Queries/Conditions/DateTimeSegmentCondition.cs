@@ -11,7 +11,7 @@ namespace Bing.Data.Queries.Conditions;
 public class DateTimeSegmentCondition<TEntity, TProperty> : SegmentConditionBase<TEntity, TProperty, DateTime> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个<see cref="DateTimeSegmentCondition{TEntity,TProperty}"/>类型的实例
+    /// 初始化一个 <see cref="DateTimeSegmentCondition{TEntity,TProperty}"/> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>
@@ -30,12 +30,14 @@ public class DateTimeSegmentCondition<TEntity, TProperty> : SegmentConditionBase
     /// </summary>
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
+    /// <returns>最小值大于最大值时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected override bool IsMinGreaterMax(DateTime? min, DateTime? max) => min > max;
 
     /// <summary>
     /// 创建 DateTime.Parse(string) 表达式
     /// </summary>
     /// <param name="value">日期值</param>
+    /// <returns>表示指定日期值的表达式；无法获取解析方法时返回 <see langword="null"/>。</returns>
     protected Expression CreateDateTimeExpression(object value)
     {
         var parse = typeof(DateTime).GetMethod("Parse", new[] { typeof(string) });
@@ -48,10 +50,12 @@ public class DateTimeSegmentCondition<TEntity, TProperty> : SegmentConditionBase
     /// <summary>
     /// 获取最小值表达式
     /// </summary>
+    /// <returns>表示最小日期时间值的表达式。</returns>
     protected override Expression GetMinValueExpression() => CreateDateTimeExpression(GetMinValue());
 
     /// <summary>
     /// 获取最大值表达式
     /// </summary>
+    /// <returns>表示最大日期时间值的表达式。</returns>
     protected override Expression GetMaxValueExpression() => CreateDateTimeExpression(GetMaxValue());
 }

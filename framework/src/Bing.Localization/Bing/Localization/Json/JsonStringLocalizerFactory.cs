@@ -39,7 +39,7 @@ public class JsonStringLocalizerFactory : IStringLocalizerFactory
     /// <param name="pathResolver">路径解析器</param>
     /// <param name="loggerFactory">日志工厂</param>
     /// <param name="cache">缓存</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">路径解析器或日志工厂为空时抛出。</exception>
     public JsonStringLocalizerFactory(IOptions<JsonLocalizationOptions> options, IPathResolver pathResolver, ILoggerFactory loggerFactory, IMemoryCache cache = null)
     {
         _options = options;
@@ -50,6 +50,7 @@ public class JsonStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
+    /// <returns>指定资源类型对应的 JSON 本地化查找器。</returns>
     public IStringLocalizer Create(Type resourceSource)
     {
         resourceSource.CheckNull(nameof(resourceSource));
@@ -60,6 +61,7 @@ public class JsonStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
+    /// <returns>指定资源基名称和程序集位置对应的 JSON 本地化查找器。</returns>
     public IStringLocalizer Create(string baseName, string location)
     {
         location ??= new AssemblyName(GetType().Assembly.FullName).Name;

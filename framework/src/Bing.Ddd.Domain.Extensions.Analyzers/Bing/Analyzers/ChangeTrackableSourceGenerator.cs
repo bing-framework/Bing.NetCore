@@ -64,6 +64,9 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     /// <summary>
     /// 检查类是否继承自 DomainObjectBase
     /// </summary>
+    /// <param name="classSymbol">待检查的类符号。</param>
+    /// <param name="domainBaseSymbol">DomainObjectBase 的符号定义。</param>
+    /// <returns>如果类继承自 DomainObjectBase，则返回 true；否则返回 false。</returns>
     private bool IsDomainObjectBase(INamedTypeSymbol classSymbol, INamedTypeSymbol domainBaseSymbol)
     {
         for (var baseType = classSymbol.BaseType; baseType != null; baseType = baseType.BaseType)
@@ -79,6 +82,9 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     /// <summary>
     /// 确定是否需要生成 ChangeTracking 代码
     /// </summary>
+    /// <param name="classDecl">待检查的类语法节点。</param>
+    /// <param name="classSymbol">待检查的类符号。</param>
+    /// <returns>需要生成时返回 true；否则返回 false。</returns>
     private bool ShouldGenerateChangeTracking(ClassDeclarationSyntax classDecl, INamedTypeSymbol classSymbol)
     {
         if (!classDecl.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
@@ -130,6 +136,10 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     /// </summary>
     struct BuilderPropertyInfo
     {
+        /// <summary>
+        /// 根据属性符号初始化生成器属性信息。
+        /// </summary>
+        /// <param name="property">待转换的属性符号。</param>
         public BuilderPropertyInfo(IPropertySymbol property) : this()
         {
             Type = property.Type.ToString();
@@ -138,14 +148,30 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
             BackingFieldName = $"_{ParameterName}";
         }
 
+        /// <summary>
+        /// 属性名称。
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 属性类型文本。
+        /// </summary>
         public string Type { get; set; }
+
+        /// <summary>
+        /// 对应的参数名称。
+        /// </summary>
         public string ParameterName { get; set; }
+
+        /// <summary>
+        /// 对应的后备字段名称。
+        /// </summary>
         public string BackingFieldName { get; set; }
 
         /// <summary>
         /// 判断属性是否应跳过生成器
         /// </summary>
+        /// <returns>不应生成变更跟踪代码时返回 true；否则返回 false。</returns>
         public bool IsSkipGenerator()
         {
             if (Name == "Version" || Name == "IsDeleted")
@@ -158,6 +184,7 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     /// 获取类的公共实例属性
     /// </summary>
     /// <param name="classSymbol">类符号</param>
+    /// <returns>按名称排序的公共实例属性信息。</returns>
     private List<BuilderPropertyInfo> GetPublicInstanceProperties(INamedTypeSymbol classSymbol)
     {
         var properties = new List<BuilderPropertyInfo>();
@@ -173,8 +200,17 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     }
 }
 
+/// <summary>
+/// 为源代码生成提供文本格式化扩展。
+/// </summary>
 internal static class Extensions
 {
+    /// <summary>
+    /// 为多行文本的后续行添加指定级别的缩进。
+    /// </summary>
+    /// <param name="source">待缩进的文本对象。</param>
+    /// <param name="identLevels">缩进级别，每级四个空格。</param>
+    /// <returns>应用缩进后的文本。</returns>
     public static string Ident(this object source, int identLevels)
     {
         var lines = source.ToString().TrimStart(' ').Split('\n');
@@ -182,11 +218,27 @@ internal static class Extensions
         return string.Join("\n", lines.Select((x, i) => $"""{(i > 0 ? ident : "")}{x}"""));
     }
 
+    /// <summary>
+    /// 使用模板渲染序列中的每个元素。
+    /// </summary>
+    /// <typeparam name="T">序列元素类型。</typeparam>
+    /// <param name="source">待渲染的元素序列。</param>
+    /// <param name="template">将元素转换为文本的模板。</param>
+    /// <param name="separator">元素文本之间的分隔符。</param>
+    /// <returns>拼接后的文本。</returns>
     public static string Render<T>(this IEnumerable<T> source, Func<T, string> template, string separator = "")
     {
         return string.Join(separator, source.Select(template));
     }
 
+    /// <summary>
+    /// 使用带索引的模板渲染序列中的每个元素。
+    /// </summary>
+    /// <typeparam name="T">序列元素类型。</typeparam>
+    /// <param name="source">待渲染的元素序列。</param>
+    /// <param name="template">将元素及其索引转换为文本的模板。</param>
+    /// <param name="separator">元素文本之间的分隔符。</param>
+    /// <returns>拼接后的文本。</returns>
     public static string Render<T>(this IEnumerable<T> source, Func<T, int, string> template, string separator = "")
     {
         return string.Join(separator, source.Select(template));

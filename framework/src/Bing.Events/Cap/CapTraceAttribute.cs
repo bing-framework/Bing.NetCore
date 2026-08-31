@@ -12,6 +12,7 @@ namespace Bing.Events.Cap;
 [AttributeUsage(AttributeTargets.Method)]
 public class CapTraceAttribute : InterceptorBase
 {
+    /// <inheritdoc />
     public override async Task Invoke(AspectContext context, AspectDelegate next)
     {
         var parameters = context.GetParameters();
@@ -32,6 +33,7 @@ public class CapTraceAttribute : InterceptorBase
     /// <summary>
     /// 初始化跟踪标识上下文
     /// </summary>
+    /// <param name="capHeader">包含跟踪标识的 CAP 消息头。</param>
     private static void InitTraceIdContext(CapHeader capHeader)
     {
         if (!capHeader.TryGetValue(Headers.TraceId, out var traceId))

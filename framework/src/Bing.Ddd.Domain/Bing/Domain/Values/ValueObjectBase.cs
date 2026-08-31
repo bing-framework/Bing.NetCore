@@ -15,12 +15,14 @@ public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObj
     /// 相等性比较
     /// </summary>
     /// <param name="other">值对象</param>
+    /// <returns>当前值对象与指定值对象相等时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Equals(TValueObject other) => this == other;
 
     /// <summary>
     /// 相等性比较
     /// </summary>
     /// <param name="other">值对象</param>
+    /// <returns>当前值对象与指定对象相等时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public override bool Equals(object other) => Equals(other as TValueObject);
 
     /// <summary>
@@ -28,6 +30,7 @@ public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObj
     /// </summary>
     /// <param name="left">值对象</param>
     /// <param name="right">值对象</param>
+    /// <returns>两个值对象的所有属性值均相等时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool operator ==(ValueObjectBase<TValueObject> left, ValueObjectBase<TValueObject> right)
     {
         if ((object)left == null && (object)right == null)
@@ -48,6 +51,7 @@ public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObj
     /// <summary>
     /// 获取哈希
     /// </summary>
+    /// <returns>基于值对象属性计算的哈希代码。</returns>
     public override int GetHashCode()
     {
         var properties = GetType().GetTypeInfo().GetProperties();
@@ -59,5 +63,6 @@ public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObj
     /// <summary>
     /// 克隆副本
     /// </summary>
+    /// <returns>当前值对象的浅表副本。</returns>
     public virtual TValueObject Clone() => Conv.To<TValueObject>(MemberwiseClone());
 }

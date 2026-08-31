@@ -30,12 +30,14 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
     /// </summary>
     /// <param name="predicate">筛选条件</param>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>符合筛选条件的项目数组。</returns>
     public virtual TItem[] Find(Func<TItem, bool> predicate, bool fromCache = false) => FindAll(fromCache).Where(predicate).ToArray();
 
     /// <summary>
     /// 查找所有项
     /// </summary>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>查找到的全部项目数组，并在需要时更新缓存。</returns>
     public virtual TItem[] FindAll(bool fromCache = false)
     {
         lock (_lockObj)
@@ -54,5 +56,6 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
     /// <summary>
     /// 执行所有项目的查找工作
     /// </summary>
+    /// <returns>查找到的全部项目数组。</returns>
     protected abstract TItem[] FindAllItems();
 }

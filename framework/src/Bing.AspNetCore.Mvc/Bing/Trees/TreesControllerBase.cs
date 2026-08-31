@@ -51,6 +51,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// <summary>
     /// 获取加载模式
     /// </summary>
+    /// <returns>当前树控制器使用的加载模式。</returns>
     protected virtual LoadMode GetLoadMode() => LoadMode.Sync;
 
     /// <summary>
@@ -62,6 +63,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// /api/customer/1
     /// </remarks>
     /// <param name="id">标识</param>
+    /// <returns>表示查询结果的异步操作。</returns>
     [HttpGet("{id}")]
     public virtual async Task<IActionResult> GetAsync(string id)
     {
@@ -78,6 +80,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// /api/customer/1
     /// </remarks>
     /// <param name="id">标识</param>
+    /// <returns>表示删除结果的异步操作。</returns>
     [HttpDelete("{id}")]
     public virtual async Task<IActionResult> DeleteAsync(string id)
     {
@@ -95,6 +98,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// body："'1,2,3'"
     /// </remarks>
     /// <param name="ids">标识列表，多个Id用逗号分隔，范例：1,2,3</param>
+    /// <returns>表示批量删除结果的异步操作。</returns>
     [HttpPost("delete")]
     public virtual async Task<IActionResult> BatchDeleteAsync([FromBody] string ids)
     {
@@ -103,9 +107,10 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     }
 
     /// <summary>
-    /// 启用
+    /// 批量启用指定标识对应的树节点，并返回更新后的节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
+    /// <returns>表示启用结果的异步操作。</returns>
     [HttpPost("enable")]
     public virtual async Task<IActionResult> EnableAsync([FromBody] string ids)
     {
@@ -115,9 +120,10 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     }
 
     /// <summary>
-    /// 冻结
+    /// 批量禁用指定标识对应的树节点，并返回更新后的节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
+    /// <returns>表示禁用结果的异步操作。</returns>
     [HttpPost("disable")]
     public virtual async Task<IActionResult> DisableAsync([FromBody] string ids)
     {
@@ -127,15 +133,16 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     }
 
     /// <summary>
-    /// 交换排序
+    /// 交换两个树节点的排序号。
     /// </summary>
-    /// <param name="ids">两个Id的标识列表，用逗号分隔，范例：1,2</param>
+    /// <param name="ids">两个节点标识组成的逗号分隔字符串，例如 <c>1,2</c>。</param>
     /// <remarks>
     /// 调用范例:
     /// POST
     /// /api/customer/SwapSort
     /// body: "'1,2'"
     /// </remarks>
+    /// <returns>表示交换排序结果的异步操作。</returns>
     [HttpPost("SwapSort")]
     public virtual async Task<IActionResult> SwapSortAsync([FromBody] string ids)
     {
@@ -150,6 +157,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 修正排序
     /// </summary>
     /// <param name="parameter">查询参数</param>
+    /// <returns>表示修正排序结果的异步操作。</returns>
     [HttpPost("fix")]
     public virtual async Task<IActionResult> FixAsync([FromBody] TQuery parameter)
     {
@@ -168,6 +176,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// /api/role?name=a
     /// </remarks>
     /// <param name="query">查询参数</param>
+    /// <returns>表示树查询结果的异步操作。</returns>
     [HttpGet]
     public virtual async Task<IActionResult> QueryAsync([FromQuery] TQuery query)
     {
@@ -220,6 +229,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 获取操作
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>当前请求对应的树加载操作。</returns>
     protected LoadOperation? GetOperation(TQuery query)
     {
         var operation = Request.Query["operation"].SafeString().ToLower();
@@ -232,6 +242,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 首次加载
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示首次加载结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> FirstLoad(TQuery query)
     {
         if (GetLoadMode() == LoadMode.Sync)
@@ -243,6 +254,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 同步首次查询
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示同步首次查询结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> SyncFirstLoad(TQuery query)
     {
         var data = await Query(query);
@@ -253,6 +265,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 查询
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示查询结果的异步操作，结果为数据传输对象列表。</returns>
     private async Task<List<TDto>> Query(TQuery query)
     {
         var data = await _service.QueryAsync(query);
@@ -274,12 +287,14 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// </summary>
     /// <param name="data">数据列表</param>
     /// <param name="async">是否异步</param>
+    /// <returns>转换后的树型结果。</returns>
     protected abstract TTreeResult ToResult(List<TDto> data, bool async = false);
 
     /// <summary>
     /// 异步首次加载
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示异步首次加载结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> AsyncFirstLoad(TQuery query)
     {
         query.Level = 1;
@@ -291,6 +306,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 加载子节点
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示子节点加载结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> LoadChildren(TQuery query)
     {
         if (query.ParentId == null)
@@ -304,6 +320,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 异步加载子节点
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示异步子节点加载结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> AsyncLoadChildren(TQuery query)
     {
         var queryParam = await GetAsyncLoadChildrenQuery(query);
@@ -315,6 +332,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 获取异步加载子节点查询参数
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示异步子节点查询参数结果的异步操作。</returns>
     protected virtual Task<TQuery> GetAsyncLoadChildrenQuery(TQuery query)
     {
         query.Level = null;
@@ -326,6 +344,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 同步加载子节点
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示同步子节点加载结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> SyncLoadChildren(TQuery query)
     {
         var parentId = query.ParentId.SafeString();
@@ -340,6 +359,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 获取同步加载子节点查询参数
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示同步子节点查询参数结果的异步操作。</returns>
     protected virtual async Task<TQuery> GetSyncLoadChildrenQuery(TQuery query)
     {
         var parent = await _service.GetByIdAsync(query.ParentId);
@@ -353,6 +373,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     /// 搜索
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示树搜索结果的异步操作。</returns>
     protected virtual async Task<TTreeResult> Search(TQuery query)
     {
         var data = await _service.QueryAsync(query);

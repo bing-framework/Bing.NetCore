@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
     /// 注册Json本地化
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>已注册 JSON 本地化服务的服务集合。</returns>
     public static IServiceCollection AddJsonLocalization(this IServiceCollection services) =>
         AddJsonLocalization(services, "Resources");
 
@@ -22,6 +23,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="resourcesPath">资源路径</param>
+    /// <returns>已注册 JSON 本地化服务的服务集合。</returns>
     public static IServiceCollection AddJsonLocalization(this IServiceCollection services, string resourcesPath) =>
         services.AddJsonLocalization(t => t.ResourcesPath = resourcesPath);
 
@@ -30,6 +32,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">Json本地化配置操作</param>
+    /// <returns>已注册 JSON 本地化服务的服务集合。</returns>
     public static IServiceCollection AddJsonLocalization(this IServiceCollection services, Action<JsonLocalizationOptions> setupAction)
     {
         var options = new JsonLocalizationOptions();
@@ -52,6 +55,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <typeparam name="TStore">本地化资源存储器类型</typeparam>
     /// <param name="services">服务集合</param>
+    /// <returns>已注册存储型本地化服务的服务集合。</returns>
     public static IServiceCollection AddStoreLocalization<TStore>(this IServiceCollection services)
         where TStore : ILocalizedStore => services.AddStoreLocalization<TStore>(options => options.Expiration = 28800);
 
@@ -61,6 +65,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TStore">本地化资源存储器类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">本地化配置操作</param>
+    /// <returns>已注册存储型本地化服务的服务集合。</returns>
     public static IServiceCollection AddStoreLocalization<TStore>(this IServiceCollection services, Action<LocalizationOptions> setupAction)
         where TStore : ILocalizedStore
     {

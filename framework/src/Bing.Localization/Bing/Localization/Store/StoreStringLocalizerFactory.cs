@@ -43,6 +43,7 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
+    /// <returns>指定资源类型对应的存储型本地化查找器。</returns>
     public IStringLocalizer Create(Type resourceSource)
     {
         resourceSource.CheckNull(nameof(resourceSource));
@@ -51,6 +52,7 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
+    /// <returns>指定资源基名称对应的存储型本地化查找器。</returns>
     public IStringLocalizer Create(string baseName, string location)
     {
         return new StoreStringLocalizer(_loggerFactory.CreateLogger<StoreStringLocalizer>(), _cache, _store, baseName, _options);

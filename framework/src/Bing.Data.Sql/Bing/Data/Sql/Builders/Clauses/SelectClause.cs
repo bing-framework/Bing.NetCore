@@ -84,6 +84,9 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 使用运行上下文和克隆状态初始化 Select 子句。
     /// </summary>
+    /// <param name="context">子句运行上下文。</param>
+    /// <param name="columns">已复制的列集合。</param>
+    /// <param name="distinct">是否启用去重。</param>
     protected SelectClause(SqlClauseContext context, ColumnCollection columns, bool distinct)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -363,6 +366,7 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 当默认投影对应第一根来源时，固定其来源别名，避免重复实体类型使用最后注册的别名。
     /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
     private void FreezeFirstSourceAlias<TEntity>()
     {
         if (_context.Builder is not ISqlQueryClauseAccessor accessor || accessor.FromClause is not FromClause fromClause)
@@ -605,6 +609,7 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 输出Sql。
     /// </summary>
+    /// <returns>当前 Select 子句的 SQL 文本。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();
@@ -615,10 +620,12 @@ public class SelectClause : ISelectClause
     /// <summary>
     /// 获取Distinct
     /// </summary>
+    /// <returns>启用去重时返回 <c>Distinct </c>，否则返回 <see langword="null"/>。</returns>
     private string GetDistinct() => _distinct ? "Distinct " : null;
 
     /// <summary>
     /// 获取列名
     /// </summary>
+    /// <returns>当前投影列 SQL；未指定列时返回通配符。</returns>
     protected virtual string GetColumns() => _columns.Count == 0 ? "*" : _columns.ToSql(_dialect, _register);
 }

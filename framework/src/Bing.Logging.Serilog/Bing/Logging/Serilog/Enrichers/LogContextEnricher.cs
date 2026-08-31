@@ -43,6 +43,7 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 移除默认设置的部分属性
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
     private void RemoveProperties(LogEvent logEvent)
     {
         logEvent.RemovePropertyIfPresent("ActionId");
@@ -55,6 +56,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加跟踪号
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddTraceId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         var traceId = _context.TraceId;
@@ -70,6 +73,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加会话标识
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddSessionId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (string.IsNullOrWhiteSpace(_context.SessionId))
@@ -81,6 +86,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加用户标识
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddUserId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (string.IsNullOrWhiteSpace(_context.UserId))
@@ -92,6 +99,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加租户标识
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddTenantId(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (string.IsNullOrWhiteSpace(_context.TenantId))
@@ -103,6 +112,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加应用程序
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddApplication(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (string.IsNullOrWhiteSpace(_context.Application))
@@ -114,6 +125,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加执行环境
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddEnvironment(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (string.IsNullOrWhiteSpace(_context.Environment))
@@ -125,6 +138,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加扩展数据
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddExtraData(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (_context.Data.Count == 0)
@@ -141,6 +156,8 @@ internal class LogContextEnricher : ILogEventEnricher
     /// <summary>
     /// 添加标签
     /// </summary>
+    /// <param name="logEvent">日志事件。</param>
+    /// <param name="propertyFactory">日志事件属性工厂。</param>
     private void AddTags(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (_context.Tags.Count == 0)

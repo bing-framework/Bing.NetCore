@@ -28,10 +28,12 @@ public class SqliteJoinClause : JoinClause
     }
 
     /// <inheritdoc />
+    /// <returns>根据连接信息创建的 SQLite 连接项。</returns>
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
         JoinItem.CreateTable(joinType, table, schema, alias, type);
 
     /// <inheritdoc />
+    /// <returns>当前连接子句的 SQLite 副本。</returns>
     protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
         new SqliteJoinClause(context, joinItems);
 }

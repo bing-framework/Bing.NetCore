@@ -52,5 +52,6 @@ public class TreeCondition<TEntity, TParentId> : ICondition<TEntity>
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>当前树型查询条件表达式。</returns>
     public Expression<Func<TEntity, bool>> GetCondition() => Condition;
 }

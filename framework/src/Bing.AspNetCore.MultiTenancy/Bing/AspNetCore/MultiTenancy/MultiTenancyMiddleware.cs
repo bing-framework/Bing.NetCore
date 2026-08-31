@@ -60,6 +60,8 @@ public class MultiTenancyMiddleware : Microsoft.AspNetCore.Http.IMiddleware, ITr
     /// <summary>
     /// 执行中间件拦截逻辑
     /// </summary>
+    /// <param name="context">当前 HTTP 请求上下文。</param>
+    /// <param name="next">下一个请求委托。</param>
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         TenantConfiguration tenant = null;

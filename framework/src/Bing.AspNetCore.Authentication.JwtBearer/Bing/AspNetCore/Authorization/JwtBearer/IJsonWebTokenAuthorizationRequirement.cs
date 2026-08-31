@@ -12,6 +12,7 @@ public interface IJsonWebTokenAuthorizationRequirement : IAuthorizationRequireme
     /// 设置校验函数
     /// </summary>
     /// <param name="func">校验函数</param>
+    /// <returns>当前授权要求实例。</returns>
     IJsonWebTokenAuthorizationRequirement SetValidateFunc(
         Func<IDictionary<string, string>, JwtOptions, bool> func);
 }

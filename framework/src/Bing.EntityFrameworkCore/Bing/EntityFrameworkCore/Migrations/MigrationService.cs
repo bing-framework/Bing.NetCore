@@ -25,7 +25,7 @@ public class MigrationService : IMigrationService
     /// </summary>
     /// <param name="logger">日志</param>
     /// <param name="migrationFileService">迁移文件服务</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">迁移文件服务为空时抛出。</exception>
     public MigrationService(ILogger<MigrationService> logger, IMigrationFileService migrationFileService)
     {
         _logger = logger ?? NullLogger<MigrationService>.Instance;

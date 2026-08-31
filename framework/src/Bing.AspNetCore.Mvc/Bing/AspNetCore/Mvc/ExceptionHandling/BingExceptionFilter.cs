@@ -39,6 +39,7 @@ public class BingExceptionFilter : IAsyncExceptionFilter, ITransientDependency
     /// 是否应该处理异常
     /// </summary>
     /// <param name="context">异常上下文</param>
+    /// <returns>应处理异常时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool ShouldHandleException(ExceptionContext context)
     {
         if (context.ActionDescriptor.IsControllerAction() && context.ActionDescriptor.HasObjectResult())

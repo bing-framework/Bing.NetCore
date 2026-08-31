@@ -18,7 +18,8 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>添加 Exceptionless 接收器后的日志配置。</returns>
+    /// <exception cref="ArgumentNullException">日志配置或 API 密钥为空时抛出。</exception>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         string apiKey,
@@ -43,7 +44,8 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>添加 Exceptionless 接收器后的日志配置。</returns>
+    /// <exception cref="ArgumentNullException">日志配置或 API 密钥为空时抛出。</exception>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         string apiKey,
@@ -68,6 +70,7 @@ public static partial class LoggerSinkConfigurationExtensions
     /// <param name="includeProperties">是否包含属性列表</param>
     /// <param name="restrictedToMinimumLevel">最小日志事件级别</param>
     /// <param name="client">Exceptionless客户端</param>
+    /// <returns>添加 Exceptionless 接收器后的日志配置。</returns>
     public static LoggerConfiguration Exceptionless(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         Func<EventBuilder, EventBuilder> additionalOperation = null,

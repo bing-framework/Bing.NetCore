@@ -1,46 +1,46 @@
 ﻿namespace Bing.EventBus;
 
 /// <summary>
-/// 瞬时事件处理器工厂
+/// 按指定处理器类型创建瞬时事件处理器的泛型工厂。
 /// </summary>
-/// <typeparam name="THandler">事件处理器</typeparam>
+/// <typeparam name="THandler">具有公共无参构造函数的事件处理器类型。</typeparam>
 public class TransientEventHandlerFactory<THandler> : TransientEventHandlerFactory, IEventHandlerFactory where THandler : IEventHandler, new()
 {
     /// <summary>
-    /// 初始化一个<see cref="TransientEventHandlerFactory"/>类型的实例
+    /// 初始化 <see cref="TransientEventHandlerFactory{THandler}"/> 的实例。
     /// </summary>
     public TransientEventHandlerFactory() : base(typeof(THandler))
     {
     }
 
     /// <summary>
-    /// 创建事件处理器
+    /// 创建泛型参数指定的瞬时事件处理器。
     /// </summary>
+    /// <returns>新创建的事件处理器实例。</returns>
     protected override IEventHandler CreateHandler() => new THandler();
 }
 
 /// <summary>
-/// 瞬时事件处理器工厂
+/// 按运行时处理器类型创建瞬时事件处理器的工厂。
 /// </summary>
 public class TransientEventHandlerFactory : IEventHandlerFactory
 {
     /// <summary>
-    /// 事件处理器类型
+    /// 获取要实例化的事件处理器类型。
     /// </summary>
     public Type HandlerType { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="TransientEventHandlerFactory"/>类型的实例
+    /// 使用指定事件处理器类型初始化 <see cref="TransientEventHandlerFactory"/> 的实例。
     /// </summary>
-    /// <param name="handlerType">事件处理器类型</param>
+    /// <param name="handlerType">每次获取处理器时要实例化的事件处理器类型。</param>
     public TransientEventHandlerFactory(Type handlerType)
     {
         HandlerType = handlerType;
     }
 
-    /// <summary>
-    /// 获取事件处理器
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>返回包装器会在释放时释放实现 <see cref="IDisposable"/> 的瞬时处理器。</remarks>
     public virtual IEventHandlerDisposeWrapper GetHandler()
     {
         var handler = CreateHandler();
@@ -49,10 +49,7 @@ public class TransientEventHandlerFactory : IEventHandlerFactory
             () => (handler as IDisposable)?.Dispose());
     }
 
-    /// <summary>
-    /// 是否在当前工厂
-    /// </summary>
-    /// <param name="handlerFactories">事件处理器工厂列表</param>
+    /// <inheritdoc />
     public bool IsInFactories(List<IEventHandlerFactory> handlerFactories)
     {
         return handlerFactories
@@ -61,8 +58,9 @@ public class TransientEventHandlerFactory : IEventHandlerFactory
     }
 
     /// <summary>
-    /// 创建事件处理器
+    /// 创建新的瞬时事件处理器实例。
     /// </summary>
+    /// <returns>按 <see cref="HandlerType"/> 创建的事件处理器实例。</returns>
     protected virtual IEventHandler CreateHandler()
     {
         return (IEventHandler)Activator.CreateInstance(HandlerType);

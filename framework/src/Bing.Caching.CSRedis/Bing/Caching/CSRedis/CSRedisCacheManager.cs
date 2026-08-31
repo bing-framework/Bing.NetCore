@@ -83,6 +83,7 @@ public class CSRedisCacheManager : IRedisCache
     /// 获取过期时间间隔
     /// </summary>
     /// <param name="options">缓存配置</param>
+    /// <returns>缓存项的有效期。</returns>
     private TimeSpan GetExpiration(CacheOptions options)
     {
         var result = options?.Expiration;
@@ -111,6 +112,7 @@ public class CSRedisCacheManager : IRedisCache
     /// </summary>
     /// <param name="bytes">字节数组</param>
     /// <param name="type">类型</param>
+    /// <returns>反序列化后的对象。</returns>
     internal object Deserialize(byte[] bytes, Type type)
     {
         using var ms = new MemoryStream(bytes);
@@ -157,6 +159,8 @@ public class CSRedisCacheManager : IRedisCache
     /// <summary>
     /// 转换为缓存键字符串集合
     /// </summary>
+    /// <param name="keys">缓存键集合</param>
+    /// <returns>缓存键字符串集合。</returns>
     private IEnumerable<string> ToKeys(IEnumerable<CacheKey> keys)
     {
         keys.CheckNull(nameof(keys));
@@ -203,7 +207,8 @@ public class CSRedisCacheManager : IRedisCache
     /// 处理缓存键前缀
     /// </summary>
     /// <param name="prefix">前缀</param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentException">前缀为通配符 <c>*</c> 时抛出。</exception>
+    /// <returns>处理后的缓存键前缀。</returns>
     private string HandlePrefix(string prefix)
     {
         // Forbid
@@ -227,6 +232,7 @@ public class CSRedisCacheManager : IRedisCache
     /// 查询Redis缓存键
     /// </summary>
     /// <param name="pattern">查询模式</param>
+    /// <returns>匹配查询模式的缓存键数组。</returns>
     private string[] SearchRedisKeys(string pattern)
     {
         var keys = new List<string>();
@@ -338,6 +344,7 @@ public class CSRedisCacheManager : IRedisCache
     /// </summary>
     /// <typeparam name="T">值元素类型</typeparam>
     /// <param name="items">字典</param>
+    /// <returns>以字符串缓存键为键的缓存项字典。</returns>
     private IDictionary<string, T> ToItems<T>(IDictionary<CacheKey, T> items)
     {
         items.CheckNull(nameof(items));
@@ -484,7 +491,8 @@ public class CSRedisCacheManager : IRedisCache
     /// 处理缓存键模式
     /// </summary>
     /// <param name="pattern">缓存键模式</param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentException">缓存键模式为通配符 <c>*</c> 时抛出。</exception>
+    /// <returns>处理后的缓存键模式。</returns>
     private string HandleKeyPattern(string pattern)
     {
         if(pattern.Equals("*"))

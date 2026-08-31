@@ -3,31 +3,31 @@
 namespace Bing.Auditing;
 
 /// <summary>
-/// 删除操作审计初始化器
+/// 初始化实体的删除时间、删除人和删除人标识。
 /// </summary>
 public sealed class DeletionAuditedInitializer
 {
     /// <summary>
-    /// 实体
+    /// 待初始化的实体对象。
     /// </summary>
     private readonly object _entity;
 
     /// <summary>
-    /// 用户标识
+    /// 删除人的字符串标识。
     /// </summary>
     private readonly string _userId;
 
     /// <summary>
-    /// 用户名称
+    /// 删除人的名称。
     /// </summary>
     private readonly string _userName;
 
     /// <summary>
-    /// 初始化一个<see cref="DeletionAuditedInitializer"/>类型的实例
+    /// 使用实体和删除人审计信息初始化一个 <see cref="DeletionAuditedInitializer"/> 实例。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
+    /// <param name="entity">待初始化的实体对象。</param>
+    /// <param name="userId">删除人的字符串标识。</param>
+    /// <param name="userName">删除人的名称。</param>
     private DeletionAuditedInitializer(object entity, string userId, string userName)
     {
         _entity = entity;
@@ -36,15 +36,15 @@ public sealed class DeletionAuditedInitializer
     }
 
     /// <summary>
-    /// 初始化
+    /// 初始化实体的删除审计信息。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
+    /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
+    /// <param name="userId">删除人的字符串标识。</param>
+    /// <param name="userName">删除人的名称。</param>
     public static void Init(object entity, string userId, string userName) => new DeletionAuditedInitializer(entity, userId, userName).Init();
 
     /// <summary>
-    /// 初始化
+    /// 按删除审计契约初始化实体的删除时间、人员名称和人员标识。
     /// </summary>
     public void Init()
     {

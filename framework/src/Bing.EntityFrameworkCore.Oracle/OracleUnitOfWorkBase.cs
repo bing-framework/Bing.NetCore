@@ -23,5 +23,6 @@ public abstract class OracleUnitOfWorkBase : UnitOfWorkBase
     /// 获取映射实例列表
     /// </summary>
     /// <param name="assembly">程序集</param>
+    /// <returns>指定程序集中的映射实例集合。</returns>
     protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 }

@@ -46,18 +46,21 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// 将持久化对象转成实体
     /// </summary>
     /// <param name="po">持久化对象</param>
+    /// <returns>转换后的实体。</returns>
     protected abstract TEntity ToEntity(TPo po);
 
     /// <summary>
     /// 将实体转换成持久化对象
     /// </summary>
     /// <param name="entity">实体</param>
+    /// <returns>转换后的持久化对象。</returns>
     protected abstract TPo ToPo(TEntity entity);
 
     /// <summary>
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>匹配的实体；未找到时返回 <see langword="null"/>。</returns>
     public virtual TEntity Find(object id) => ToEntity(_store.FindById(id));
 
     /// <summary>
@@ -65,6 +68,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含匹配实体的异步任务；未找到时任务结果为 <see langword="null"/>。</returns>
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -75,24 +79,28 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>匹配的实体列表。</returns>
     public virtual List<TEntity> FindByIds(params TKey[] ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>匹配的实体列表。</returns>
     public virtual List<TEntity> FindByIds(IEnumerable<TKey> ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>匹配的实体列表。</returns>
     public virtual List<TEntity> FindByIds(string ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>包含匹配实体列表的异步任务。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(params TKey[] ids)
     {
         var pos = await _store.FindByIdsAsync(ids);
@@ -104,6 +112,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// </summary>
     /// <param name="ids">标识列表</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含匹配实体列表的异步任务。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -115,6 +124,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>包含匹配实体列表的异步任务。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
     {
         var pos = await _store.FindByIdsAsync(ids);
@@ -125,24 +135,28 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>存在匹配实体时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public virtual bool Exists(TKey id) => _store.Exists(id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>存在任一匹配实体时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public virtual bool Exists(TKey[] ids) => _store.Exists(ids);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>包含存在性结果的异步任务。</returns>
     public virtual async Task<bool> ExistsAsync(TKey id) => await _store.ExistsAsync(id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>包含存在性结果的异步任务。</returns>
     public virtual async Task<bool> ExistsAsync(TKey[] ids) => await _store.ExistsAsync(ids);
 
     /// <summary>

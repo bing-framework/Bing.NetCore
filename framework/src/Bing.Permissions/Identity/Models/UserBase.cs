@@ -12,7 +12,7 @@ namespace Bing.Permissions.Identity.Models;
 public partial class UserBase<TUser, TKey>
 {
     /// <summary>
-    /// 加密器
+    /// 获取或设置用于处理用户密码的加密器；该属性不映射到数据库。
     /// </summary>
     [NotMapped]
     public IEncryptor Encryptor { get; set; }
@@ -20,7 +20,7 @@ public partial class UserBase<TUser, TKey>
     #region Init(初始化)
 
     /// <summary>
-    /// 初始化
+    /// 初始化用户实体，并在必要时根据手机号或邮箱补充用户名。
     /// </summary>
     public override void Init()
     {
@@ -49,8 +49,9 @@ public partial class UserBase<TUser, TKey>
     #region Validate(验证)
 
     /// <summary>
-    /// 验证
+    /// 验证用户实体；用户名为空时先抛出验证警告。
     /// </summary>
+    /// <returns>验证成功时返回基类生成的验证结果。</returns>
     public override IValidationResult Validate()
     {
         if (UserName.IsEmpty())
@@ -63,10 +64,10 @@ public partial class UserBase<TUser, TKey>
     #region SetPassword(设置密码)
 
     /// <summary>
-    /// 设置密码
+    /// 根据配置保存加密后的原始密码，或清空原始密码字段。
     /// </summary>
-    /// <param name="password">密码</param>
-    /// <param name="storeOriginalPassword">是否存储原始密码</param>
+    /// <param name="password">待处理的原始密码。</param>
+    /// <param name="storeOriginalPassword">是否保存加密后的原始密码。</param>
     public void SetPassword(string password, bool? storeOriginalPassword)
     {
         if (storeOriginalPassword.SafeValue())
@@ -84,6 +85,7 @@ public partial class UserBase<TUser, TKey>
     /// <summary>
     /// 获取加密器
     /// </summary>
+    /// <returns>当前用户使用的加密器。</returns>
     protected virtual IEncryptor GetEncryptor() => Encryptor ?? NullEncryptor.Instance;
 
     #endregion
@@ -112,6 +114,7 @@ public partial class UserBase<TUser, TKey>
     /// <summary>
     /// 获取密码
     /// </summary>
+    /// <returns>解密后的用户密码。</returns>
     public string GetPassword() => GetEncryptor().Decrypt(Password);
 
     #endregion
@@ -121,6 +124,7 @@ public partial class UserBase<TUser, TKey>
     /// <summary>
     /// 获取安全码
     /// </summary>
+    /// <returns>解密后的用户安全码。</returns>
     public string GetSafePassword() => GetEncryptor().Decrypt(SafePassword);
 
     #endregion

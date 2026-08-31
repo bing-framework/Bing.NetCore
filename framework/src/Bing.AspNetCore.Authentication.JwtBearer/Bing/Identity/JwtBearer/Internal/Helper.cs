@@ -14,6 +14,7 @@ internal static class Helper
     /// 转换为声明列表
     /// </summary>
     /// <param name="dictionary">字典</param>
+    /// <returns>由字典键值转换得到的声明集合；字典值为 <see langword="null"/> 时对应声明值为空字符串。</returns>
     public static IEnumerable<Claim> ToClaims(IDictionary<string, string> dictionary) =>
         dictionary.Keys.Select(key => new Claim(key, dictionary[key]?.ToString()));
 
@@ -24,6 +25,7 @@ internal static class Helper
     /// <param name="claims">声明列表</param>
     /// <param name="options">Jwt选项配置</param>
     /// <param name="tokenType">Jwt令牌类型</param>
+    /// <returns>包含已签名令牌字符串及其 UTC 过期时间的元组。</returns>
     public static (string token, DateTime expires) CreateToken(JwtSecurityTokenHandler tokenHandler, IEnumerable<Claim> claims,
         JwtOptions options, JsonWebTokenType tokenType)
     {

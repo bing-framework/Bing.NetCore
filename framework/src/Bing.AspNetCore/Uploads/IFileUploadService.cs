@@ -14,6 +14,7 @@ public interface IFileUploadService
     /// </summary>
     /// <param name="param">参数</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件的描述信息。</returns>
     Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
@@ -21,6 +22,7 @@ public interface IFileUploadService
     /// </summary>
     /// <param name="param">参数</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件描述信息的集合。</returns>
     Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
@@ -37,5 +39,6 @@ public interface IFileUploadService
     /// <param name="formFile">表单文件</param>
     /// <param name="savePath">保存路径</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件的 MD5 哈希值。</returns>
     Task<string> SaveWithMd5Async(IFormFile formFile, string savePath, CancellationToken cancellationToken = default(CancellationToken));
 }

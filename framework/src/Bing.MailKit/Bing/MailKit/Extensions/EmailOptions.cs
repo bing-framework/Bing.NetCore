@@ -4,17 +4,17 @@ using Bing.MailKit.Configs;
 namespace Bing.MailKit.Extensions;
 
 /// <summary>
-/// 邮件配置
+/// 聚合邮件内容和 MailKit 传输层配置。
 /// </summary>
 public class EmailOptions
 {
     /// <summary>
-    /// 电子邮件配置
+    /// 获取或设置邮件主题、发件人及收件人等邮件内容配置。
     /// </summary>
     public EmailConfig EmailConfig { get; set; } = new EmailConfig();
 
     /// <summary>
-    /// MailKit 配置
+    /// 获取或设置 MailKit SMTP 连接和传输配置。
     /// </summary>
     public MailKitConfig MailKitConfig { get; set; } = new MailKitConfig();
 }

@@ -80,6 +80,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     /// /api/customer
     /// </remarks>
     /// <param name="request">创建参数</param>
+    /// <returns>表示创建结果的异步操作。</returns>
     [HttpPost]
     public virtual async Task<IActionResult> CreateAsync([FromBody] TCreateRequest request)
     {
@@ -107,6 +108,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     /// </remarks>
     /// <param name="id">标识</param>
     /// <param name="request">修改参数</param>
+    /// <returns>表示修改结果的异步操作。</returns>
     [HttpPut("{id?}")]
     public virtual async Task<IActionResult> UpdateAsync(string id, [FromBody] TUpdateRequest request)
     {
@@ -138,6 +140,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     /// /api/customers/1
     /// </remarks>
     /// <param name="id">标识</param>
+    /// <returns>表示删除结果的异步操作。</returns>
     [HttpDelete("{id}")]
     public virtual async Task<IActionResult> DeleteAsync(string id)
     {
@@ -155,6 +158,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     /// body："'1,2,3'"
     /// </remarks>
     /// <param name="ids">标识列表，多个Id用逗号分隔，范例：1,2,3</param>
+    /// <returns>表示批量删除结果的异步操作。</returns>
     [HttpPost("delete")]
     public virtual async Task<IActionResult> BatchDeleteAsync([FromBody] string ids)
     {

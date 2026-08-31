@@ -9,6 +9,7 @@ internal static class LogLevelSwitcher
     /// 转换日志级别
     /// </summary>
     /// <param name="level">MS日志级别</param>
+    /// <returns>对应的 Exceptionless 日志级别。</returns>
     public static global::Exceptionless.Logging.LogLevel Switch(Microsoft.Extensions.Logging.LogLevel level)
     {
         return level switch
@@ -28,6 +29,7 @@ internal static class LogLevelSwitcher
     /// 转换日志级别
     /// </summary>
     /// <param name="level">Serilog日志级别</param>
+    /// <returns>对应的 Exceptionless 日志级别。</returns>
     public static global::Exceptionless.Logging.LogLevel Switch(Serilog.Events.LogEventLevel level)
     {
         return level switch

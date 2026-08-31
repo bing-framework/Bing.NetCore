@@ -69,6 +69,7 @@ public static class LockExtensions
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>锁执行结果；未获取到锁或执行方法为空时返回默认值。</returns>
     public static T ExecuteWithLock<T>(this ILock @lock, string key, TimeSpan expiration, Func<T> executeAction, T defaultValue = default) => 
         @lock.ExecuteWithLock(key, "1", expiration, executeAction, defaultValue);
 
@@ -81,6 +82,7 @@ public static class LockExtensions
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>表示锁执行结果的异步操作；未获取到锁或执行方法为空时返回默认值。</returns>
     public static async Task<T> ExecuteWithLockAsync<T>(this ILock @lock, string key, TimeSpan expiration, Func<Task<T>> executeAction, T defaultValue = default) =>
         await @lock.ExecuteWithLockAsync(key, "1", expiration, executeAction, defaultValue);
 }

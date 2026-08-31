@@ -4,42 +4,32 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Core.Modularity;
 
 /// <summary>
-/// Bing 模块基类，所有模块应继承此类。
+/// 为 Bing 模块提供默认生命周期行为的基类。
 /// </summary>
 public abstract class BingModule : IBingModule
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
     public virtual ModuleLevel Level => ModuleLevel.Business;
 
-    /// <summary>
-    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
-    /// 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为>0的顺序值
-    /// </summary>
+    /// <inheritdoc />
     public virtual int Order => 0;
 
-    /// <summary>
-    /// 是否已启用
-    /// </summary>
+    /// <inheritdoc />
     public virtual bool Enabled { get; protected set; }
 
-    /// <summary>
-    /// 添加服务。将模块服务添加到依赖注入服务容器中
-    /// </summary>
-    /// <param name="services">服务集合</param>
+    /// <inheritdoc />
+    /// <remarks>默认实现不注册额外服务，直接返回 <paramref name="services"/>。</remarks>
     public virtual IServiceCollection AddServices(IServiceCollection services) => services;
 
-    /// <summary>
-    /// 应用模块服务
-    /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    /// <inheritdoc />
+    /// <remarks>默认实现仅将 <see cref="Enabled"/> 标记为 <c>true</c>。</remarks>
     public virtual void UseModule(IServiceProvider provider) => Enabled = true;
 
     /// <summary>
-    /// 获取当前模块的依赖模块类型
+    /// 获取指定模块直接和间接依赖的模块类型。
     /// </summary>
-    /// <param name="moduleType">模块类型</param>
+    /// <param name="moduleType">要检查的模块类型；为空时使用当前实例的类型。</param>
+    /// <returns>去重后的依赖模块类型数组。</returns>
     internal Type[] GetDependModuleTypes(Type moduleType = null)
     {
         moduleType ??= GetType();
@@ -66,10 +56,10 @@ public abstract class BingModule : IBingModule
     #region 辅助方法
 
     /// <summary>
-    /// 判断给定类型是否是 <see cref="IBingModule"/> 模块类型。
+    /// 判断给定类型是否为可实例化的 <see cref="IBingModule"/> 模块类型。
     /// </summary>
-    /// <param name="type">待验证的类型</param>
-    /// <returns>如果是有效的 Bing 模块类型，则返回 <c>true</c>，否则返回 <c>false</c></returns>
+    /// <param name="type">待验证的类型。</param>
+    /// <returns>有效的非抽象、非泛型模块类型时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public static bool IsBingModule(Type type)
     {
         if (type == null)
@@ -82,9 +72,10 @@ public abstract class BingModule : IBingModule
     }
 
     /// <summary>
-    /// 检查模块类型是否<see cref="IBingModule"/>类型
+    /// 验证模块类型是否为可实例化的 <see cref="IBingModule"/>。
     /// </summary>
-    /// <param name="moduleType">模块类型</param>
+    /// <param name="moduleType">待验证的模块类型。</param>
+    /// <exception cref="ArgumentException">类型不是有效模块类型时抛出。</exception>
     internal static void CheckBingModuleType(Type moduleType)
     {
         if (!IsBingModule(moduleType))

@@ -20,6 +20,7 @@ public class DefaultCorrelationIdProvider : ICorrelationIdProvider
     private string CorrelationId => _currentCorrelationId.Value;
 
     /// <inheritdoc />
+    /// <returns>当前异步上下文中的关联 ID。</returns>
     public virtual string Get() => CorrelationId;
 
     /// <inheritdoc />

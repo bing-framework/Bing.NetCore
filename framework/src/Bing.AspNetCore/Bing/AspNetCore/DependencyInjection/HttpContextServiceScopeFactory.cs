@@ -35,6 +35,7 @@ public class HttpContextServiceScopeFactory : IHybridServiceScopeFactory
     /// <summary>
     /// 创建依赖注入服务的作用域。如果当前操作处于HttpRequest作用域中，直接使用HttpReqeust的作用域，否则创建新的作用域
     /// </summary>
+    /// <returns>当前 HTTP 请求的服务作用域；不在请求作用域中时返回新创建的服务作用域。</returns>
     public virtual IServiceScope CreateScope()
     {
         var httpContext = HttpContextAccessor?.HttpContext;

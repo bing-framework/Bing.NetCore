@@ -19,6 +19,7 @@ public class ExtraPropertiesValueConverter : ValueConverter<ExtraPropertyDiction
     /// 扩展属性转换为json
     /// </summary>
     /// <param name="extraProperties">扩展属性</param>
+    /// <returns>扩展属性字典对应的 JSON 字符串。</returns>
     private static string PropertiesToJson(ExtraPropertyDictionary extraProperties)
     {
         return JsonHelper.ToJson(extraProperties);
@@ -28,6 +29,7 @@ public class ExtraPropertiesValueConverter : ValueConverter<ExtraPropertyDiction
     /// json转换为扩展属性
     /// </summary>
     /// <param name="json">json</param>
+    /// <returns>从 JSON 解析出的扩展属性字典；输入为空或无法解析时返回空字典。</returns>
     private static ExtraPropertyDictionary JsonToProperties(string json)
     {
         if (string.IsNullOrWhiteSpace(json) || json == "{}")

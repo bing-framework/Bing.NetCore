@@ -52,6 +52,7 @@ public abstract class EventBusBase : IEventBus
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
     /// <param name="action">事件处理委托</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public virtual IDisposable Subscribe<TEvent>(Func<TEvent, Task> action) where TEvent : class
     {
         return Subscribe(typeof(TEvent), new ActionEventHandler<TEvent>(action));
@@ -62,6 +63,7 @@ public abstract class EventBusBase : IEventBus
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
     /// <typeparam name="THandler">事件处理器类型</typeparam>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public virtual IDisposable Subscribe<TEvent, THandler>() where TEvent : class where THandler : IEventHandler, new()
     {
         return Subscribe(typeof(TEvent), new TransientEventHandlerFactory<THandler>());
@@ -72,6 +74,7 @@ public abstract class EventBusBase : IEventBus
     /// </summary>
     /// <param name="eventType">事件类型</param>
     /// <param name="handler">事件处理器</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public virtual IDisposable Subscribe(Type eventType, IEventHandler handler)
     {
         return Subscribe(eventType, new SingleInstanceHandlerFactory(handler));
@@ -82,6 +85,7 @@ public abstract class EventBusBase : IEventBus
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
     /// <param name="factory">事件处理器工厂</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public virtual IDisposable Subscribe<TEvent>(IEventHandlerFactory factory) where TEvent : class
     {
         return Subscribe(typeof(TEvent), factory);
@@ -92,6 +96,7 @@ public abstract class EventBusBase : IEventBus
     /// </summary>
     /// <param name="eventType">事件类型</param>
     /// <param name="factory">事件处理器工厂</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public abstract IDisposable Subscribe(Type eventType, IEventHandlerFactory factory);
 
     /// <summary>
@@ -242,15 +247,17 @@ public abstract class EventBusBase : IEventBus
     /// 获取事件处理器工厂列表
     /// </summary>
     /// <param name="eventType">事件类型</param>
+    /// <returns>与指定事件类型匹配的处理器工厂集合。</returns>
     protected abstract IEnumerable<EventTypeWithEventHandlerFactories> GetHandlerFactories(Type eventType);
 
     /// <summary>
-    /// 触发事件处理器
+    /// 执行指定事件处理器工厂创建的本地事件处理器。
     /// </summary>
-    /// <param name="asyncEventHandlerFactory">事件处理器工厂</param>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="eventData">事件数据</param>
-    /// <param name="exceptions">异常列表</param>
+    /// <param name="asyncEventHandlerFactory">创建事件处理器及其资源释放包装器的工厂。</param>
+    /// <param name="eventType">当前发布事件的运行时类型。</param>
+    /// <param name="eventData">传递给事件处理器的事件数据。</param>
+    /// <param name="exceptions">收集处理器失败异常的列表。</param>
+    /// <remarks>处理器包装器始终在执行后释放；反射调用的 <see cref="TargetInvocationException"/> 会记录其内部异常，其他异常直接追加到异常列表，由上层统一处理。</remarks>
     protected virtual async Task TriggerHandlerAsync(IEventHandlerFactory asyncEventHandlerFactory, Type eventType, object eventData, List<Exception> exceptions)
     {
         using (var eventHandlerWrapper = asyncEventHandlerFactory.GetHandler())
@@ -350,6 +357,7 @@ public abstract class EventBusBase : IEventBus
         /// <summary>
         /// 获取等待器
         /// </summary>
+        /// <returns>当前同步上下文移除器实例。</returns>
         public SynchronizationContextRemover GetAwaiter() => this;
 
         /// <summary>

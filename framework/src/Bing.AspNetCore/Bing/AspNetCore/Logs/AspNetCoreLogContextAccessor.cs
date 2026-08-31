@@ -49,6 +49,7 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
     /// <summary>
     /// 创建日志上下文
     /// </summary>
+    /// <returns>包含当前 HTTP 请求和用户信息的日志上下文。</returns>
     protected override LogContext Create()
     {
         var context = base.Create();
@@ -71,6 +72,7 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
     /// <summary>
     /// 获取跟踪标识
     /// </summary>
+    /// <returns>当前请求的跟踪标识；无法获取时返回新生成的标识。</returns>
     protected override string GetTraceId()
     {
         if (TraceIdContext.Current != null)

@@ -16,7 +16,7 @@ internal sealed class TokenPayloadStore : ITokenPayloadStore
     /// <summary>
     /// 初始化一个<see cref="TokenPayloadStore"/>类型的实例
     /// </summary>
-    /// <param name="cache"></param>
+    /// <param name="cache">用于存储令牌负载的缓存。</param>
     public TokenPayloadStore(ICache cache) => _cache = cache;
 
     /// <summary>
@@ -43,6 +43,7 @@ internal sealed class TokenPayloadStore : ITokenPayloadStore
     /// 获取Payload
     /// </summary>
     /// <param name="token">令牌</param>
+    /// <returns>令牌对应的负载字典；缓存未命中或令牌已过期时返回 <see langword="null"/>。</returns>
     public async Task<IDictionary<string, string>> GetAsync(string token) =>
         await _cache.GetAsync<IDictionary<string, string>>(GetPayloadKey(token));
 
@@ -50,5 +51,6 @@ internal sealed class TokenPayloadStore : ITokenPayloadStore
     /// 获取Payload缓存键
     /// </summary>
     /// <param name="token">令牌</param>
+    /// <returns>用于存储令牌负载的缓存键。</returns>
     private static string GetPayloadKey(string token) => $"jwt:token:payload:{token}";
 }

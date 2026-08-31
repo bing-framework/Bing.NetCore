@@ -27,5 +27,6 @@ public static class ValidationMe
     /// <summary>
     /// 公开验证回调处理器
     /// </summary>
+    /// <returns>当前注册的默认验证回调处理器。</returns>
     internal static IValidationCallbackHandler ExposeCallbackHandler() => DefaultCallbackHandler;
 }

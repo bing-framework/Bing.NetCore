@@ -9,6 +9,7 @@ public static partial class BingHttpContextExtensions
     /// 获取远程IP地址
     /// </summary>
     /// <param name="context">Http上下文</param>
+    /// <returns>请求的远程 IP 地址；无法获取时返回 null。</returns>
     public static string GetRemoteIpAddress(this HttpContext context)
     {
         var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();

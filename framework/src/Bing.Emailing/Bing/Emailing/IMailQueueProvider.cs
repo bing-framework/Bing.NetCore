@@ -25,5 +25,6 @@ public interface IMailQueueProvider
     /// 尝试出队，获取电子邮件
     /// </summary>
     /// <param name="box">电子邮件</param>
+    /// <returns>成功取出邮件时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool TryDequeue(out EmailBox box);
 }

@@ -43,12 +43,14 @@ public abstract class SeedDataInitializerBase<TEntity, TKey> : ISeedDataInitiali
     /// <summary>
     /// 重写以提供要初始化的种子数据
     /// </summary>
+    /// <returns>待初始化的种子数据数组。</returns>
     protected abstract TEntity[] SeedData();
 
     /// <summary>
     /// 重写以提供判断某个实体是否存在的表达式
     /// </summary>
     /// <param name="entity">要判断的实体</param>
+    /// <returns>用于判断实体是否已存在的查询表达式。</returns>
     protected abstract Expression<Func<TEntity, bool>> ExistingExpression(TEntity entity);
 
     /// <summary>

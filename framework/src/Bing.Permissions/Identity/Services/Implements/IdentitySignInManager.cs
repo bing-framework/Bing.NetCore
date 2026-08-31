@@ -60,6 +60,7 @@ public class IdentitySignInManager<TUser, TKey> : SignInManager<TUser> where TUs
     /// 是否允许登录
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示是否允许登录结果的异步操作。</returns>
     public override async Task<bool> CanSignInAsync(TUser user)
     {
         if (user.Enabled == false)

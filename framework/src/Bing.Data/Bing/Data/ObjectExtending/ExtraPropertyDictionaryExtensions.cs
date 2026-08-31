@@ -13,6 +13,7 @@ public static class ExtraPropertyDictionaryExtensions
     /// <typeparam name="TProperty">属性类型</typeparam>
     /// <param name="source">扩展属性字典</param>
     /// <param name="name">属性名</param>
+    /// <returns>指定名称的属性值；属性不存在或无法转换时返回默认值。</returns>
     public static TProperty GetProperty<TProperty>(this ExtraPropertyDictionary source, string name)
     {
         if (source == null)
@@ -28,6 +29,7 @@ public static class ExtraPropertyDictionaryExtensions
     /// <param name="source">扩展属性字典</param>
     /// <param name="name">属性名</param>
     /// <param name="value">属性值</param>
+    /// <returns>更新后的扩展属性字典。</returns>
     public static ExtraPropertyDictionary SetProperty(this ExtraPropertyDictionary source, string name, object value)
     {
         if (source == null)
@@ -42,6 +44,7 @@ public static class ExtraPropertyDictionaryExtensions
     /// </summary>
     /// <param name="source">扩展属性字典</param>
     /// <param name="name">属性名</param>
+    /// <returns>移除属性后的扩展属性字典。</returns>
     public static ExtraPropertyDictionary RemoveProperty(this ExtraPropertyDictionary source, string name)
     {
         if (source == null)

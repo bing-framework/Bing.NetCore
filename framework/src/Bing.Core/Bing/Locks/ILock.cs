@@ -66,6 +66,7 @@ public interface ILock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>锁执行结果；未获取到锁或执行方法为空时返回默认值。</returns>
     T ExecuteWithLock<T>(string key, string value, TimeSpan expiration, Func<T> executeAction, T defaultValue = default);
 
     /// <summary>
@@ -77,5 +78,6 @@ public interface ILock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>表示锁执行结果的异步操作；未获取到锁或执行方法为空时返回默认值。</returns>
     Task<T> ExecuteWithLockAsync<T>(string key, string value, TimeSpan expiration, Func<Task<T>> executeAction, T defaultValue = default);
 }

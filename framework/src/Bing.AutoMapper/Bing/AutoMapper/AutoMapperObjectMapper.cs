@@ -62,6 +62,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <typeparam name="TSource">源类型</typeparam>
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
+    /// <returns>映射后的目标对象。</returns>
     public TDestination Map<TSource, TDestination>(TSource source) => Map<TSource, TDestination>(source, default);
 
     /// <summary>
@@ -71,6 +72,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
+    /// <returns>映射后的目标对象。</returns>
     public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
     {
         if (source == null)
@@ -85,12 +87,14 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="obj">对象</param>
+    /// <returns>对象的实际元素类型。</returns>
     private Type GetType<T>(T obj) => GetType(obj == null ? typeof(T) : obj.GetType());
 
     /// <summary>
     /// 获取类型
     /// </summary>
     /// <param name="type">类型</param>
+    /// <returns>指定类型的实际元素类型。</returns>
     private static Type GetType(Type type) => Reflection.Reflections.GetElementType(type);
 
     /// <summary>
@@ -102,6 +106,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
     /// <param name="i">迭代次数</param>
+    /// <returns>映射后的目标对象。</returns>
     private TDestination GetResult<TDestination>(Type sourceType, Type destinationType, object source, TDestination destination, int i)
     {
         try
@@ -133,6 +138,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// </summary>
     /// <param name="sourceType">源类型</param>
     /// <param name="destinationType">目标类型</param>
+    /// <returns>存在映射配置时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool Exists(Type sourceType, Type destinationType) =>
         _configuration.Internal().FindTypeMapFor(sourceType, destinationType) != null;
 
@@ -142,6 +148,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
+    /// <returns>映射后的目标对象。</returns>
     private TDestination GetResult<TDestination>(object source, TDestination destination) => _mapper.Map(source, destination);
 
     /// <summary>
@@ -175,6 +182,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     /// <typeparam name="TOutputDto">输出Dto类型</typeparam>
     /// <param name="source">源类型</param>
     /// <param name="membersToExpand">成员展开</param>
+    /// <returns>将数据源映射为目标类型后的查询数据源。</returns>
     public IQueryable<TOutputDto> ToOutput<TOutputDto>(IQueryable source, params Expression<Func<TOutputDto, object>>[] membersToExpand) => source.ProjectTo(_configuration, membersToExpand);
 
     #endregion

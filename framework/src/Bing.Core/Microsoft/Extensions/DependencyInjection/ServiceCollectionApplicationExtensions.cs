@@ -17,6 +17,7 @@ public static class ServiceCollectionApplicationExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">服务配置项操作</param>
+    /// <returns>已完成核心服务和模块注册的 Bing 构建器。</returns>
     public static IBingBuilder AddBing(this IServiceCollection services, Action<BingOptions> setupAction = null)
     {
         Check.NotNull(services, nameof(services));

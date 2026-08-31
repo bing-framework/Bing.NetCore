@@ -104,6 +104,9 @@ internal sealed class SqlMutationPlanCache
     /// <remarks>
     /// 此重载供内部测试验证并发初始化与异常恢复，不应由生产调用方绕过标准映射计划创建。
     /// </remarks>
+    /// <param name="key">Mutation Plan 缓存键。</param>
+    /// <param name="factory">创建 Mutation Plan 的工厂。</param>
+    /// <returns>缓存中的 Mutation Plan 或新创建的计划。</returns>
     internal SqlMutationPlan GetOrAdd(SqlMutationPlanCacheKey key, Func<SqlMutationPlan> factory)
     {
         if (factory == null)

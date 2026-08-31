@@ -24,6 +24,7 @@ public static class SqlParameterExtensions
     /// <param name="source">源</param>
     /// <param name="name">参数名</param>
     /// <param name="value">参数值</param>
+    /// <returns>添加参数后的源对象。</returns>
     public static T AddParam<T>(this T source, string name, object value = null)
         where T : ISqlParameter
     {
@@ -43,6 +44,7 @@ public static class SqlParameterExtensions
     /// <param name="name">参数名</param>
     /// <param name="property">实体属性表达式</param>
     /// <param name="value">参数值</param>
+    /// <returns>添加参数后的源对象。</returns>
     public static T AddParam<T, TEntity>(this T source, string name, Expression<Func<TEntity, object>> property,
         object value = null)
         where T : ISqlParameter
@@ -73,6 +75,7 @@ public static class SqlParameterExtensions
     /// 获取参数列表
     /// </summary>
     /// <param name="source">源</param>
+    /// <returns>当前 SQL 生成器中的普通参数集合；源不包含生成器时返回默认值。</returns>
     public static IReadOnlyDictionary<string, object> GetParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
@@ -85,6 +88,7 @@ public static class SqlParameterExtensions
     /// 获取增强参数列表
     /// </summary>
     /// <param name="source">源</param>
+    /// <returns>当前 SQL 生成器中的增强参数集合；源不包含生成器时返回默认值。</returns>
     public static IReadOnlyDictionary<string, SqlParam> GetSqlParams(this ISqlParameter source)
     {
         source.CheckNull(nameof(source));
@@ -113,6 +117,7 @@ public static class SqlParameterExtensions
     /// <typeparam name="T">值类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="name">参数名</param>
+    /// <returns>指定名称的参数值；不存在时返回类型默认值。</returns>
     public static T GetParam<T>(this ISqlParameter source, string name)
     {
         source.CheckNull(nameof(source));
@@ -126,6 +131,7 @@ public static class SqlParameterExtensions
     /// </summary>
     /// <param name="source">源</param>
     /// <param name="name">参数名</param>
+    /// <returns>指定名称的参数值；不存在时返回 <see langword="null"/>。</returns>
     public static object GetParam(this ISqlParameter source, string name)
     {
         source.CheckNull(nameof(source));
@@ -143,6 +149,7 @@ public static class SqlParameterExtensions
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
+    /// <returns>清空参数后的源对象。</returns>
     public static T ClearParams<T>(this T source)
         where T : ISqlParameter
     {

@@ -21,6 +21,7 @@ public class BingCoreModule : BingModule
     /// 添加服务。将模块服务添加到依赖注入服务容器中
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>已添加核心服务的原服务集合。</returns>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         services.TryAddSingleton<StartupLogger>();

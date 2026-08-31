@@ -14,6 +14,7 @@ public static partial class ModelBuilderExtensions
     /// 设置简单下划线表名约定
     /// </summary>
     /// <param name="modelBuilder">实体生成器</param>
+    /// <returns>完成表名约定配置后的模型生成器。</returns>
     public static ModelBuilder SetSimpleUnderscoreTableNameConvention(this ModelBuilder modelBuilder)
     {
         var underscoreRegex = new Regex(@"((?<=.)[A-Z][a-zA-Z]*)|((?<=[a-zA-Z])\d+)");
@@ -33,6 +34,7 @@ public static partial class ModelBuilderExtensions
     /// 设置关闭所有主外键关系的级联删除
     /// </summary>
     /// <param name="modelBuilder">实体生成器</param>
+    /// <returns>完成级联删除约定配置后的模型生成器。</returns>
     public static ModelBuilder SetOneToManyCascadeDeleteConvention(this ModelBuilder modelBuilder)
     {
         foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(x => x.GetForeignKeys()))
@@ -44,6 +46,7 @@ public static partial class ModelBuilderExtensions
     /// 全局逻辑删除查询过滤器
     /// </summary>
     /// <param name="modelBuilder">实体生成器</param>
+    /// <returns>完成全局逻辑删除过滤器配置后的模型生成器。</returns>
     public static ModelBuilder HasGlobalDeleteQueryFilter(this ModelBuilder modelBuilder)
     {
         modelBuilder.Model.GetEntityTypes().Where(entityType => typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))

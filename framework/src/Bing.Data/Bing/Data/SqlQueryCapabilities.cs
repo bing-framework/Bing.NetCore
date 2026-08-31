@@ -31,42 +31,42 @@ public enum SqlQueryCapabilityState
 public sealed class SqlQueryCapabilities
 {
     /// <summary>
-    /// 是否支持公用表表达式。
+    /// 公用表表达式（CTE）能力状态。
     /// </summary>
     public SqlQueryCapabilityState Cte { get; set; }
 
     /// <summary>
-    /// 是否支持 Union。
+    /// Union 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Union { get; set; }
 
     /// <summary>
-    /// 是否支持 Union All。
+    /// Union All 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState UnionAll { get; set; }
 
     /// <summary>
-    /// 是否支持 Intersect。
+    /// Intersect 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Intersect { get; set; }
 
     /// <summary>
-    /// 是否支持 Except。
+    /// Except 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Except { get; set; }
 
     /// <summary>
-    /// 是否支持 Right Join。
+    /// Right Join 连接能力状态。
     /// </summary>
     public SqlQueryCapabilityState RightJoin { get; set; }
 
     /// <summary>
-    /// 是否支持 Full Join。
+    /// Full Join 连接能力状态。
     /// </summary>
     public SqlQueryCapabilityState FullJoin { get; set; }
 
     /// <summary>
-    /// 是否支持 Skip、Take 和 Page 分页语法。
+    /// Skip、Take 和 Page 分页能力状态。
     /// </summary>
     public SqlQueryCapabilityState Pagination { get; set; }
 }

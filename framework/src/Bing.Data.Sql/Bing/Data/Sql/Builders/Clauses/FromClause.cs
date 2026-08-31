@@ -510,6 +510,9 @@ public class FromClause : IFromClause
     /// <summary>
     /// 根据已绑定的表源实例生成列 SQL。
     /// </summary>
+    /// <param name="expression">待解析的实体成员表达式。</param>
+    /// <param name="source">表达式绑定的表源实例。</param>
+    /// <returns>按当前方言格式化的列 SQL。</returns>
     private string GetSqlColumn(System.Linq.Expressions.Expression expression, TableSource source)
     {
         var member = expression as System.Linq.Expressions.MemberExpression;
@@ -666,6 +669,7 @@ public class FromClause : IFromClause
     /// <summary>
     /// 使用已深复制的根表源替换克隆实例的初始状态。
     /// </summary>
+    /// <param name="sources">已深复制的根表源列表。</param>
     private void SetSources(List<TableSource> sources)
     {
         _sources.Clear();
@@ -676,6 +680,7 @@ public class FromClause : IFromClause
     /// <summary>
     /// 输出Sql。
     /// </summary>
+    /// <returns>当前 From 子句的 SQL 文本；没有有效来源时返回 <see langword="null"/>。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();

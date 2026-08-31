@@ -18,5 +18,6 @@ public interface IQueryProcessor
     /// <typeparam name="TResult">结果类型</typeparam>
     /// <param name="request">查询请求</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示查询处理结果的异步操作。</returns>
     Task<TResult> ProcessAsync<TResult>(IQuery<TResult> request, CancellationToken cancellationToken = default);
 }

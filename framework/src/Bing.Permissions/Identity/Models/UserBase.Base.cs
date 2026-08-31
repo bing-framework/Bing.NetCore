@@ -29,6 +29,9 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     [StringLength(256, ErrorMessage = "标准化用户名输入过长，不能超过256位")]
     public string NormalizedUserName { get; set; }
 
+    /// <summary>
+    /// 获取或设置用户昵称。
+    /// </summary>
     [Display(Name = "昵称")]
     [StringLength(256, ErrorMessage = "昵称输入过长，不能超过256位")]
     public string Nickname { get; set; }
@@ -108,7 +111,7 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     public bool TwoFactorEnabled { get; set; }
 
     /// <summary>
-    /// 启用
+    /// 获取或设置用户是否启用。
     /// </summary>
     [Display(Name = "启用")]
     public bool Enabled { get; set; }
@@ -277,6 +280,7 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     /// <summary>
     /// 添加变更列表
     /// </summary>
+    /// <param name="other">用于比较的用户对象。</param>
     protected override void AddChanges(TUser other)
     {
         AddChange(t => t.Id, other.Id);

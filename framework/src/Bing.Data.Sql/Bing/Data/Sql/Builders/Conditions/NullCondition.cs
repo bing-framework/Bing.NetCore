@@ -18,5 +18,6 @@ public class NullCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>始终返回 <see langword="null"/>。</returns>
     public string GetCondition() => null;
 }

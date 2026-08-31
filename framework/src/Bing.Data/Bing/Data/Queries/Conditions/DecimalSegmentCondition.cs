@@ -29,5 +29,6 @@ public class DecimalSegmentCondition<TEntity, TProperty> : SegmentConditionBase<
     /// </summary>
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
+    /// <returns>最小值大于最大值时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected override bool IsMinGreaterMax(decimal? min, decimal? max) => min > max;
 }

@@ -17,6 +17,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// </summary>
     /// <param name="exception">异常</param>
     /// <param name="options">配置操作</param>
+    /// <returns>转换后的远程服务错误信息。</returns>
     public RemoteServiceErrorInfo Convert(Exception exception, Action<BingExceptionHandlingOptions> options = null)
     {
         var exceptionHandlingOptions = CreateDefaultOptions();
@@ -35,6 +36,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// </summary>
     /// <param name="exception">异常</param>
     /// <param name="options">异常处理选项配置</param>
+    /// <returns>不包含自动解析错误码的远程服务错误信息。</returns>
     protected virtual RemoteServiceErrorInfo CreateErrorInfoWithoutCode(Exception exception, BingExceptionHandlingOptions options)
     {
         if (options.SendExceptionDetailsToClients)
@@ -84,6 +86,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// 尝试从异常中获取实际的异常对象。
     /// </summary>
     /// <param name="exception">异常</param>
+    /// <returns>适合转换的实际异常；无法解包时返回输入异常。</returns>
     protected virtual Exception TryToGetActualException(Exception exception)
     {
         if (exception is AggregateException aggException && aggException.InnerException != null)
@@ -102,6 +105,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// </summary>
     /// <param name="exception">异常</param>
     /// <param name="sendStackTraceToClients">是否发送异常详情到客户端</param>
+    /// <returns>包含异常详情的远程服务错误信息。</returns>
     protected virtual RemoteServiceErrorInfo CreateDetailedErrorInfoFromException(Exception exception, bool sendStackTraceToClients)
     {
         var detailBuilder = new StringBuilder();
@@ -117,6 +121,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// 创建实体未找到的错误信息
     /// </summary>
     /// <param name="exception">实体未找到异常</param>
+    /// <returns>描述实体未找到情况的远程服务错误信息。</returns>
     protected virtual RemoteServiceErrorInfo CreateEntityNotFoundError(EntityNotFoundException exception)
     {
         if (exception.EntityType != null)
@@ -166,6 +171,7 @@ public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConvert
     /// <summary>
     /// 创建默认的异常处理选项配置
     /// </summary>
+    /// <returns>默认异常处理选项。</returns>
     protected virtual BingExceptionHandlingOptions CreateDefaultOptions()
     {
         return new BingExceptionHandlingOptions

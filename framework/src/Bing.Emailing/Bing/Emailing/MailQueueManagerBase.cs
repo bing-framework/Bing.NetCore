@@ -4,37 +4,37 @@ using Microsoft.Extensions.Logging;
 namespace Bing.Emailing;
 
 /// <summary>
-/// 邮件队列管理器基类
+/// 在后台线程中消费邮件队列的管理器基类。
 /// </summary>
 public abstract class MailQueueManagerBase : IMailQueueManager
 {
     /// <summary>
-    /// 邮件队列提供程序
+    /// 提供待发送邮件出队操作的队列提供程序。
     /// </summary>
     private readonly IMailQueueProvider _mailQueueProvider;
 
     /// <summary>
-    /// 电子邮件配置提供器
+    /// 提供队列空闲轮询间隔等邮件配置的提供器。
     /// </summary>
     private readonly IEmailConfigProvider _emailConfigProvider;
 
     /// <summary>
-    /// 尝试停止运行
+    /// 标记后台邮件发送循环应停止的标志。
     /// </summary>
     private bool _tryStop;
 
     /// <summary>
-    /// 线程
+    /// 承载后台邮件发送循环的线程。
     /// </summary>
     private Thread _thread;
 
     /// <summary>
-    /// 是否正在运行
+    /// 获取或设置后台邮件发送线程是否正在运行。
     /// </summary>
     public bool IsRunning { get; protected set; } = false;
 
     /// <summary>
-    /// 队列数
+    /// 获取当前待发送邮件数量。
     /// </summary>
     public int Count => _mailQueueProvider.Count;
 
@@ -81,8 +81,9 @@ public abstract class MailQueueManagerBase : IMailQueueManager
     }
 
     /// <summary>
-    /// 开始发送邮件
+    /// 在后台线程中循环消费并发送队列中的邮件。
     /// </summary>
+    /// <remarks>停止标志设置后退出循环；队列为空时按 <see cref="EmailConfig.SleepInterval"/> 休眠。队列或发送过程发生异常时记录错误、终止当前工作线程，并在退出前复位运行状态。</remarks>
     protected void StartSendMail()
     {
         var sw = new Stopwatch();

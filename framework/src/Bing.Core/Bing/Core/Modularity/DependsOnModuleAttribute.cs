@@ -20,5 +20,6 @@ public class DependsOnModuleAttribute : Attribute, IDependedTypesProvider
     /// <summary>
     /// 获取依赖类型
     /// </summary>
+    /// <returns>当前模块声明的依赖模块类型数组。</returns>
     public Type[] GetDependedTypes() => DependedModuleTypes;
 }

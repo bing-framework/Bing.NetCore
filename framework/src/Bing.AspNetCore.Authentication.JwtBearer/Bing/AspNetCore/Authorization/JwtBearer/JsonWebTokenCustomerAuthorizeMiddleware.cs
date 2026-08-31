@@ -11,7 +11,7 @@ namespace Bing.AspNetCore.Authorization.JwtBearer;
 public class JsonWebTokenCustomerAuthorizeMiddleware
 {
     /// <summary>
-    /// 方法
+    /// 请求处理管道中的后续中间件委托。
     /// </summary>
     private readonly RequestDelegate _next;
 
@@ -58,7 +58,7 @@ public class JsonWebTokenCustomerAuthorizeMiddleware
     }
 
     /// <summary>
-    /// 执行中间件拦截逻辑
+    /// 执行 JWT 客户端授权检查；匿名路径直接放行，其余请求必须提供并通过 Bearer 令牌校验。
     /// </summary>
     /// <param name="context">Http上下文</param>
     public async Task Invoke(HttpContext context)

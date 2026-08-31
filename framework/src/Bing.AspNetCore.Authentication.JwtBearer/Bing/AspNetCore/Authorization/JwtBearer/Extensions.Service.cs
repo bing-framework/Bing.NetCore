@@ -22,6 +22,7 @@ public static partial class Extensions
     /// </summary>
     /// <param name="builder">应用程序生成器</param>
     /// <param name="action">操作</param>
+    /// <returns>已注册 JWT 客户授权中间件的应用程序生成器。</returns>
     public static IApplicationBuilder UseJwtCustomerAuthorize(this IApplicationBuilder builder,
         Action<IJsonWebTokenCustomerAuthorizeOption> action = null)
     {
@@ -70,12 +71,14 @@ public static partial class Extensions
     /// 获取Jwt身份认证选项
     /// </summary>
     /// <param name="configuration">配置</param>
+    /// <returns>从配置中读取的 JWT 身份认证选项。</returns>
     private static JwtOptions GetOptions(IConfiguration configuration) => configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
 
     /// <summary>
     /// 获取验证参数
     /// </summary>
     /// <param name="options">Jwt选项配置</param>
+    /// <returns>根据 JWT 配置创建的令牌验证参数。</returns>
     private static TokenValidationParameters GetValidationParameters(JwtOptions options)
     {
         return new TokenValidationParameters

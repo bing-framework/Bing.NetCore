@@ -13,11 +13,13 @@ public interface ISqlTransactionScope : ISqlTransactionContext, IDisposable, IAs
     /// <summary>
     /// 创建 SQL 查询对象
     /// </summary>
+    /// <returns>绑定到当前事务作用域的 SQL 查询对象。</returns>
     ISqlQuery CreateQuery();
 
     /// <summary>
     /// 创建 SQL 执行器
     /// </summary>
+    /// <returns>绑定到当前事务作用域的 SQL 执行器。</returns>
     ISqlExecutor CreateExecutor();
 
     /// <summary>
@@ -29,7 +31,6 @@ public interface ISqlTransactionScope : ISqlTransactionContext, IDisposable, IAs
     /// 异步提交事务
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>任务</returns>
     Task CommitAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -41,6 +42,5 @@ public interface ISqlTransactionScope : ISqlTransactionContext, IDisposable, IAs
     /// 异步回滚事务
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>任务</returns>
     Task RollbackAsync(CancellationToken cancellationToken = default);
 }

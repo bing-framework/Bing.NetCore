@@ -22,6 +22,7 @@ public class MapperProfileTypeFinder:FinderBase<Type>, IMapperProfileTypeFinder
     /// <summary>
     /// 执行所有项目的查找工作
     /// </summary>
+    /// <returns>实现 <see cref="IObjectMapperProfile"/> 的具体类型数组。</returns>
     protected override Type[] FindAllItems()
     {
         var types = _allAssemblyFinder.FindAll(true)

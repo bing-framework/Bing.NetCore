@@ -109,22 +109,26 @@ public class CurrentUser : ICurrentUser, ITransientDependency
     /// 查找声明
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>指定类型的第一个声明；未找到时返回 null。</returns>
     public virtual Claim FindClaim(string claimType) => _principalAccessor.Principal?.Claims.FirstOrDefault(c => c.Type == claimType);
 
     /// <summary>
     /// 查找声明列表
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>指定类型的声明数组；未找到时返回空数组。</returns>
     public virtual Claim[] FindClaims(string claimType) => _principalAccessor.Principal?.Claims.Where(c => c.Type == claimType).ToArray() ?? EmptyClaimsArray;
 
     /// <summary>
     /// 获取所有声明列表
     /// </summary>
+    /// <returns>当前安全主体的全部声明；不存在安全主体时返回空数组。</returns>
     public virtual Claim[] GetAllClaims() => _principalAccessor.Principal?.Claims.ToArray() ?? EmptyClaimsArray;
 
     /// <summary>
     /// 是否包含指定角色
     /// </summary>
     /// <param name="roleName">角色名</param>
+    /// <returns>当前用户属于指定角色时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public virtual bool IsInRole(string roleName) => FindClaims(BingClaimTypes.Role).Any(c => c.Value == roleName);
 }

@@ -20,6 +20,7 @@ public sealed class PostgreSqlParamLiteralsResolver : IParamLiteralsResolver
     public static PostgreSqlParamLiteralsResolver Instance { get; } = new();
 
     /// <inheritdoc />
+    /// <returns>适用于 PostgreSQL SQL 文本的参数字面值。</returns>
     public string GetParamLiterals(object value)
     {
         if (value == null)

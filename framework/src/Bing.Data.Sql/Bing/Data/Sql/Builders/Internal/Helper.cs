@@ -89,6 +89,7 @@ internal sealed class Helper
     /// </summary>
     /// <param name="expression">表达式</param>
     /// <param name="type">实体类型</param>
+    /// <returns>按实体映射和 SQL 方言处理后的列名；表达式为空时返回 <see langword="null"/>。</returns>
     internal string GetColumn(Expression expression, Type type)
     {
         if (expression == null)
@@ -101,6 +102,7 @@ internal sealed class Helper
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
+    /// <returns>按实体映射和 SQL 方言处理后的列名；表达式为空时返回 <see langword="null"/>。</returns>
     internal string GetColumn<TEntity>(Expression<Func<TEntity, object>> expression)
     {
         if (expression == null)
@@ -113,6 +115,7 @@ internal sealed class Helper
     /// </summary>
     /// <param name="column">列名</param>
     /// <param name="type">实体类型</param>
+    /// <returns>按实体别名和 SQL 方言处理后的列名；列名为空时原样返回。</returns>
     internal string GetColumn(string column, Type type)
     {
         if (string.IsNullOrWhiteSpace(column))
@@ -124,6 +127,7 @@ internal sealed class Helper
     /// 获取处理后的列名
     /// </summary>
     /// <param name="column">列名</param>
+    /// <returns>按 SQL 方言处理后的列名；列名为空时原样返回。</returns>
     internal string GetColumn(string column)
     {
         if (string.IsNullOrWhiteSpace(column))
@@ -135,6 +139,7 @@ internal sealed class Helper
     /// 获取值
     /// </summary>
     /// <param name="expression">表达式</param>
+    /// <returns>从表达式解析出的值；表达式为空时返回 <see langword="null"/>。</returns>
     internal object GetValue(Expression expression)
     {
         if (expression == null)
@@ -149,10 +154,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建查询条件并添加参数
+    /// 创建查询条件并将其参数写入参数管理器。
     /// </summary>
     /// <param name="expression">列名</param>
     /// <param name="type">实体类型</param>
+    /// <returns>根据表达式创建的查询条件。</returns>
     internal ICondition CreateCondition(Expression expression, Type type)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
@@ -167,6 +173,7 @@ internal sealed class Helper
     /// <param name="type">实体类型</param>
     /// <param name="value">参数值</param>
     /// <param name="operator">运算符</param>
+    /// <returns>根据表达式和值创建的查询条件。</returns>
     internal ICondition CreateCondition(Expression expression, Type type, object value, Operator @operator)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
@@ -174,6 +181,15 @@ internal sealed class Helper
             SqlParameterSource.Lambda);
     }
 
+    /// <summary>
+    /// 使用原始列名、格式化列名和实体类型创建查询条件。
+    /// </summary>
+    /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
+    /// <param name="column">已格式化的列名。</param>
+    /// <param name="entityType">实体类型。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">运算符。</param>
+    /// <returns>根据指定列信息创建的查询条件。</returns>
     internal ICondition CreateCondition(string rawColumn, string column, Type entityType, object value,
         Operator @operator)
     {
@@ -186,6 +202,7 @@ internal sealed class Helper
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
+    /// <returns>根据列名和值创建的查询条件；参数管理器不可用时返回 <see langword="null"/>。</returns>
     internal ICondition CreateCondition(string column, object value, Operator @operator)
     {
         if (string.IsNullOrWhiteSpace(column))
@@ -198,12 +215,13 @@ internal sealed class Helper
     /// <summary>
     /// 创建查询条件并添加参数
     /// </summary>
-    /// <param name="rawColumn">原始列名</param>
-    /// <param name="column">格式化后的列名</param>
-    /// <param name="value">参数值</param>
-    /// <param name="operator">运算符</param>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="source">参数来源</param>
+    /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
+    /// <param name="column">已格式化并用于生成 SQL 的列名。</param>
+    /// <param name="value">条件参数值；集合值由 <c>In</c>/<c>NotIn</c> 分支单独展开。</param>
+    /// <param name="operator">条件运算符。</param>
+    /// <param name="entityType">可选的实体类型，用于解析列映射元数据。</param>
+    /// <param name="source">参数元数据来源。</param>
+    /// <returns>根据指定列、值和运算符创建的查询条件。</returns>
     private ICondition CreateConditionInternal(string rawColumn, string column, object value, Operator @operator,
         Type entityType, SqlParameterSource source)
     {
@@ -226,9 +244,10 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 验证 In 和 NotIn 条件值。
+    /// 验证 <c>In</c> 和 <c>NotIn</c> 条件值是否为可枚举集合。
     /// </summary>
-    /// <param name="value">条件值。</param>
+    /// <param name="value">条件值；允许为空，字符串和字节数组不视为集合条件。</param>
+    /// <exception cref="ArgumentException">值不是可枚举集合，或值为字符串、字节数组时抛出。</exception>
     private static void ValidateInConditionValue(object value)
     {
         if (value == null)
@@ -238,10 +257,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 验证关系比较条件值。
+    /// 验证关系比较条件是否提供了必需的非空值。
     /// </summary>
     /// <param name="value">条件值。</param>
-    /// <param name="operator">运算符。</param>
+    /// <param name="operator">关系运算符。</param>
+    /// <exception cref="ArgumentNullException">关系比较运算符对应的值为空时抛出。</exception>
     private static void ValidateComparisonConditionValue(object value, Operator @operator)
     {
         if (value != null)
@@ -251,10 +271,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 是否In条件
+    /// 判断当前运算和值是否应按集合 <c>In</c> 条件处理。
     /// </summary>
-    /// <param name="operator">运算符</param>
-    /// <param name="value">值</param>
+    /// <param name="operator">待判断的运算符。</param>
+    /// <param name="value">待判断的条件值。</param>
+    /// <returns>运算符为 <c>In</c>，或 <c>Contains</c> 且值为集合时返回 <see langword="true"/>。</returns>
     private bool IsInCondition(Operator @operator, object value)
     {
         if (@operator == Operator.In)
@@ -265,10 +286,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 是否Not In条件
+    /// 判断当前运算是否应按集合 <c>NotIn</c> 条件处理。
     /// </summary>
-    /// <param name="operator">运算符</param>
-    /// <param name="value">值</param>
+    /// <param name="operator">待判断的运算符。</param>
+    /// <param name="value">条件值；该判断仅用于保持与统一条件创建流程一致。</param>
+    /// <returns>运算符为 <c>NotIn</c> 时返回 <see langword="true"/>。</returns>
     private bool IsNotInCondition(Operator @operator, object value)
     {
         if (@operator == Operator.NotIn)
@@ -277,14 +299,15 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建In条件
+    /// 创建 <c>In</c> 或 <c>NotIn</c> 条件，并为集合中的每个值生成独立参数。
     /// </summary>
-    /// <param name="rawColumn">原始列名</param>
-    /// <param name="column">列名</param>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="values">值列表</param>
-    /// <param name="notIn">是否Not In条件</param>
-    /// <param name="source">参数来源</param>
+    /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
+    /// <param name="column">已格式化并用于生成 SQL 的列名。</param>
+    /// <param name="entityType">可选的实体类型，用于解析列映射元数据。</param>
+    /// <param name="values">条件值集合；为空时生成不含参数的空集合条件。</param>
+    /// <param name="notIn">是否生成 <c>NotIn</c> 条件。</param>
+    /// <param name="source">参数元数据来源。</param>
+    /// <returns>包含已生成参数名称的 <c>In</c> 或 <c>NotIn</c> 条件。</returns>
     private ICondition CreateInCondition(string rawColumn, string column, Type entityType, IEnumerable values,
         bool notIn = false, SqlParameterSource source = SqlParameterSource.Unknown)
     {
@@ -311,14 +334,14 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 添加参数
+    /// 将参数添加到当前实例的参数管理器，并尽可能附加 SQL 参数元数据。
     /// </summary>
-    /// <param name="paramName">参数名</param>
-    /// <param name="value">参数值</param>
-    /// <param name="operator">运算符</param>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="rawColumn">原始列名</param>
-    /// <param name="source">参数来源</param>
+    /// <param name="paramName">参数名称。</param>
+    /// <param name="value">参数值。</param>
+    /// <param name="operator">参数关联的条件运算符。</param>
+    /// <param name="entityType">可选的实体类型。</param>
+    /// <param name="rawColumn">可选的原始列名。</param>
+    /// <param name="source">参数元数据来源。</param>
     private void AddParameter(string paramName, object value, Operator? @operator, Type entityType, string rawColumn,
         SqlParameterSource source) => AddParameter(_parameterManager, paramName, value, @operator, entityType,
         rawColumn, source);
@@ -344,16 +367,16 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 尝试添加增强参数
+    /// 尝试根据实体列映射创建并添加带完整 SQL 元数据的参数。
     /// </summary>
     /// <param name="parameterManager">目标参数管理器。</param>
-    /// <param name="paramName">参数名</param>
-    /// <param name="value">参数值</param>
-    /// <param name="operator">运算符</param>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="rawColumn">原始列名</param>
-    /// <param name="source">参数来源</param>
-    /// <returns>是否添加成功</returns>
+    /// <param name="paramName">参数名称。</param>
+    /// <param name="value">原始参数值。</param>
+    /// <param name="operator">参数关联的条件运算符。</param>
+    /// <param name="entityType">用于解析列映射的实体类型。</param>
+    /// <param name="rawColumn">实体属性名或数据库列名。</param>
+    /// <param name="source">参数元数据来源。</param>
+    /// <returns>成功创建并添加增强参数时返回 <see langword="true"/>；缺少增强参数能力或映射时返回 <see langword="false"/>。</returns>
     private bool TryAddAdvancedParameter(IParameterManager parameterManager, string paramName, object value,
         Operator? @operator, Type entityType, string rawColumn, SqlParameterSource source)
     {
@@ -377,11 +400,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 解析列映射元数据
+    /// 根据实体类型和属性名或列名解析列映射元数据。
     /// </summary>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="rawColumn">原始列名</param>
-    /// <returns>列映射元数据</returns>
+    /// <param name="entityType">待解析映射的实体类型。</param>
+    /// <param name="rawColumn">实体属性名或数据库列名。</param>
+    /// <returns>找到匹配映射时返回列元数据，否则返回 <c>null</c>。</returns>
     private ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string rawColumn)
     {
         var mapping = _entityMappingResolver.Resolve(entityType, GetDatabaseContext());
@@ -395,19 +418,19 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 获取数据库上下文
+    /// 按执行上下文、解析器、选项和默认值的优先级获取数据库上下文。
     /// </summary>
-    /// <returns>数据库上下文</returns>
+    /// <returns>当前 SQL 条件构造使用的数据库上下文。</returns>
     private DatabaseContext GetDatabaseContext() =>
         _databaseContext ?? _databaseContextResolver?.Resolve(_sqlOptions) ?? _sqlOptions.GetDatabaseContext() ??
         _databaseContextAccessor?.Current ?? _options.DefaultDatabaseContext;
 
     /// <summary>
-    /// 获取参数值
+    /// 根据条件运算符转换实际提交的参数值。
     /// </summary>
-    /// <param name="value">原始值</param>
-    /// <param name="operator">运算符</param>
-    /// <returns>参数值</returns>
+    /// <param name="value">原始条件值。</param>
+    /// <param name="operator">条件运算符。</param>
+    /// <returns>应用 <c>Contains</c>、<c>Starts</c> 或 <c>Ends</c> 通配符后的参数值。</returns>
     private object GetParameterValue(object value, Operator? @operator)
     {
         if (string.IsNullOrWhiteSpace(value.SafeString()))
@@ -426,10 +449,11 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 获取参数名
+    /// 生成条件参数名称，并处理允许空值的相等性运算。
     /// </summary>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">条件运算符。</param>
+    /// <returns>生成的参数名称；参数管理器不可用时返回空字符串，空值用于相等或不等比较时返回 <c>null</c>。</returns>
     internal string GenerateParamName(object value, Operator @operator)
     {
         if (_parameterManager == null)
@@ -449,6 +473,7 @@ internal sealed class Helper
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>根据最小值、最大值和边界创建的范围条件。</returns>
     internal ICondition Between(string column, object min, object max, Boundary boundary)
     {
         return BetweenInternal(column, GetColumn(column), null, min, max, boundary, SqlParameterSource.SqlBuilder);
@@ -462,6 +487,7 @@ internal sealed class Helper
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>根据实体表达式、范围值和边界创建的范围条件。</returns>
     internal ICondition Between(Expression expression, Type type, object min, object max, Boundary boundary)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
@@ -479,6 +505,7 @@ internal sealed class Helper
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
     /// <param name="source">参数来源</param>
+    /// <returns>根据格式化列名、范围值和边界创建的范围条件。</returns>
     private ICondition BetweenInternal(string rawColumn, string column, Type entityType, object min, object max,
         Boundary boundary, SqlParameterSource source)
     {
@@ -507,5 +534,6 @@ internal sealed class Helper
     /// </summary>
     /// <param name="sql">Sql语句</param>
     /// <param name="dialect">Sql方言</param>
+    /// <returns>将方括号标识符替换为当前方言标识符后的 SQL 文本。</returns>
     internal static string ResolveSql(string sql, IDialect dialect) => sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
 }

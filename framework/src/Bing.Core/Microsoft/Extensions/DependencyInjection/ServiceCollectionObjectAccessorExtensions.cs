@@ -49,10 +49,10 @@ public static class ServiceCollectionObjectAccessorExtensions
     /// <exception cref="Exception">如果同一类型的对象访问器已经注册，则抛出异常。</exception>
     public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services, ObjectAccessor<T> accessor)
     {
-        // 检查服务集合中是否已经存在相同类型的对象访问器。
         if (services.Any(s => s.ServiceType == typeof(ObjectAccessor<T>)))
             throw new Exception($"An object accessor is registered before for type: {typeof(T).AssemblyQualifiedName}");
 
+        // 检查服务集合中是否已经存在相同类型的对象访问器。
         // 在服务集合的最前面插入一个单例服务描述符，代表这个对象访问器。
         // 这样做确保了这个访问器可以被优先解析，减少查找时间。
         services.Insert(0, ServiceDescriptor.Singleton(typeof(ObjectAccessor<T>), accessor));

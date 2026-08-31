@@ -126,15 +126,18 @@ public sealed class ChangeTrackingContext
     /// <summary>
     /// 获取变更值集合
     /// </summary>
+    /// <returns>当前上下文中的变更值描述符集合。</returns>
     public ChangedValueDescriptorCollection GetChangedValueDescriptor() => _changedValueCollection;
 
     /// <summary>
     /// 输出
     /// </summary>
+    /// <returns>当前上下文中的变更信息文本。</returns>
     public string Output() => _changedValueCollection.ToString();
 
     /// <summary>
     /// 输出字符串
     /// </summary>
+    /// <returns>当前上下文中的变更信息文本。</returns>
     public override string ToString() => Output();
 }

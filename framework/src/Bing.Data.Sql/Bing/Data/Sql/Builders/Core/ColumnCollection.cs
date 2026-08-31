@@ -62,6 +62,7 @@ public class ColumnCollection
     /// </summary>
     /// <param name="column">列</param>
     /// <param name="tableAlias">表别名</param>
+    /// <returns>根据列名和表别名创建的列项。</returns>
     private ColumnItem CreateItem(string column, string tableAlias)
     {
         var item = new SqlItem(column, tableAlias);
@@ -92,6 +93,7 @@ public class ColumnCollection
     /// <param name="column">列名</param>
     /// <param name="tableType">表类型</param>
     /// <param name="columnAlias">列别名</param>
+    /// <returns>根据列名、表类型和列别名创建的列项。</returns>
     private ColumnItem CreateItem(string column, Type tableType, string columnAlias = null)
     {
         var item = new SqlItem(column, alias: columnAlias);
@@ -275,6 +277,7 @@ public class ColumnCollection
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前列集合的独立副本。</returns>
     public ColumnCollection Clone() => new ColumnCollection(_items.Select(t => t.Clone()).ToList());
 
     #endregion
@@ -286,6 +289,7 @@ public class ColumnCollection
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="register">实体别名注册器</param>
+    /// <returns>按指定 SQL 方言和实体别名注册器渲染的列列表。</returns>
     public string ToSql(IDialect dialect, IEntityAliasRegister register)
     {
         var result = new StringBuilder();

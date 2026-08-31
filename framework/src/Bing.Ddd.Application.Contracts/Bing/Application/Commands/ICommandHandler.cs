@@ -35,5 +35,6 @@ public interface ICommandHandler<in TCommand, TResult> : ICommandHandler
     /// </summary>
     /// <param name="command">命令对象</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示命令处理结果的异步操作。</returns>
     Task<TResult> HandleAsync(TCommand command, CancellationToken cancellationToken = default);
 }

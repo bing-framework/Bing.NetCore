@@ -13,6 +13,7 @@ public static class ILogExtensions
     /// <param name="log">日志操作</param>
     /// <param name="message">消息</param>
     /// <param name="args">日志消息参数</param>
+    /// <returns>追加消息后的日志对象。</returns>
     public static ILog Append(this ILog log, string message, params object[] args)
     {
         if (log is null)
@@ -28,6 +29,7 @@ public static class ILogExtensions
     /// <param name="message">消息</param>
     /// <param name="condition">条件，值为true时，则添加消息</param>
     /// <param name="args">日志消息参数</param>
+    /// <returns>处理后的日志对象。</returns>
     public static ILog AppendIf(this ILog log, string message, bool condition, params object[] args)
     {
         if (log is null)
@@ -43,6 +45,7 @@ public static class ILogExtensions
     /// <param name="log">日志操作</param>
     /// <param name="message">消息</param>
     /// <param name="args">日志消息参数</param>
+    /// <returns>追加消息后的日志对象。</returns>
     public static ILog AppendLine(this ILog log, string message, params object[] args)
     {
         if (log is null)
@@ -59,7 +62,7 @@ public static class ILogExtensions
     /// <param name="message">消息</param>
     /// <param name="condition">条件，值为true时，则添加消息</param>
     /// <param name="args">日志消息参数</param>
-    /// <returns></returns>
+    /// <returns>追加消息后的日志对象。</returns>
     public static ILog AppendLineIf(this ILog log, string message, bool condition, params object[] args)
     {
         if (log is null)
@@ -81,6 +84,7 @@ public static class ILogExtensions
     /// 消息换行
     /// </summary>
     /// <param name="log">日志操作</param>
+    /// <returns>换行后的日志对象。</returns>
     public static ILog Line(this ILog log)
     {
         if (log is null)
@@ -99,6 +103,7 @@ public static class ILogExtensions
     /// <param name="log">日志</param>
     /// <param name="propertyName">属性名</param>
     /// <param name="propertyValue">属性值</param>
+    /// <returns>设置扩展属性后的日志对象。</returns>
     public static ILog ExtraProperty(this ILog log, string propertyName, object propertyValue) =>
         log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
 
@@ -109,6 +114,7 @@ public static class ILogExtensions
     /// <param name="propertyName">属性名</param>
     /// <param name="propertyValue">属性值</param>
     /// <param name="condition">条件，值为true时，则添加扩展属性</param>
+    /// <returns>处理后的日志对象。</returns>
     public static ILog ExtraPropertyIf(this ILog log, string propertyName, object propertyValue, bool condition) =>
         !condition ? log : log.Set(x => x.Context.SetExtraProperty(propertyName, propertyValue));
 
@@ -121,6 +127,7 @@ public static class ILogExtensions
     /// </summary>
     /// <param name="log">日志</param>
     /// <param name="tags">标签列表</param>
+    /// <returns>设置标签后的日志对象。</returns>
     public static ILog Tags(this ILog log, params string[] tags) => log.Set(x => x.Context.SetTags(tags));
 
     /// <summary>
@@ -129,6 +136,7 @@ public static class ILogExtensions
     /// <param name="log">日志</param>
     /// <param name="condition">条件，值为true时，则添加标签列表</param>
     /// <param name="tags">标签列表</param>
+    /// <returns>处理后的日志对象。</returns>
     public static ILog TagsIf(this ILog log, bool condition, params string[] tags) =>
         !condition ? log : log.Set(x => x.Context.SetTags(tags));
 
@@ -137,6 +145,7 @@ public static class ILogExtensions
     /// </summary>
     /// <param name="log">日志</param>
     /// <param name="tag">标签</param>
+    /// <returns>设置标签后的日志对象。</returns>
     public static ILog Tag(this ILog log, string tag) => log.Set(x => x.Context.SetTags(tag));
 
     /// <summary>
@@ -145,6 +154,7 @@ public static class ILogExtensions
     /// <param name="log">日志</param>
     /// <param name="tag">标签</param>
     /// <param name="condition">条件，值为true时，则添加标签</param>
+    /// <returns>处理后的日志对象。</returns>
     public static ILog TagIf(this ILog log, string tag, bool condition) =>
         !condition ? log : log.Set(x => x.Context.SetTags(tag));
 

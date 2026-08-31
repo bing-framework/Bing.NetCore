@@ -28,6 +28,7 @@ public class RouteAnalyzer : IRouteAnalyzer
     /// <summary>
     /// 获取所有路由信息
     /// </summary>
+    /// <returns>应用中 MVC 和 Razor Page 操作描述对应的路由、调用入口及视图信息集合。</returns>
     public IEnumerable<RouteInformation> GetAllRouteInformations()
     {
         var list = new List<RouteInformation>();
@@ -81,6 +82,7 @@ public class RouteAnalyzer : IRouteAnalyzer
     /// </summary>
     /// <param name="routeInformation">路由信息</param>
     /// <param name="controllerActionDescriptor">控制器</param>
+    /// <remarks>根据控制器或操作上的 <see cref="RazorHtmlAttribute"/> 填充视图文件、模板和局部视图信息。</remarks>
     private void SetHtmlInfo(RouteInformation routeInformation,
         ControllerActionDescriptor controllerActionDescriptor)
     {

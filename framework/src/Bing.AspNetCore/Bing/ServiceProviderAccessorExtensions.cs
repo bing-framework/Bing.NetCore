@@ -13,5 +13,6 @@ public static class ServiceProviderAccessorExtensions
     /// 获取Http上下文
     /// </summary>
     /// <param name="serviceProviderAccessor">服务提供程序访问器</param>
+    /// <returns>当前请求的 HTTP 上下文。</returns>
     public static HttpContext GetHttpContext(this IServiceProviderAccessor serviceProviderAccessor) => serviceProviderAccessor.ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
 }

@@ -6,17 +6,16 @@ namespace Bing.Data.Sql;
 public interface IDatabaseScopeManager
 {
     /// <summary>
-    /// 使用指定数据库上下文
+    /// 在当前异步执行流中进入指定数据库的数据上下文作用域。
     /// </summary>
-    /// <param name="dbKey">数据库标识</param>
-    /// <returns>数据库上下文作用域</returns>
+    /// <param name="dbKey">要使用的数据库标识。</param>
+    /// <returns>释放后恢复父数据库上下文的作用域。</returns>
     IDatabaseScope Use(string dbKey);
 
     /// <summary>
-    /// 使用指定数据库上下文
+    /// 在当前异步执行流中按指定选项进入数据库上下文作用域。
     /// </summary>
-    /// <param name="options">数据库上下文作用域选项</param>
-    /// <returns>数据库上下文作用域</returns>
+    /// <param name="options">数据库标识和读取偏好等作用域选项；可以为 <c>null</c>。</param>
+    /// <returns>释放后恢复父数据库上下文的作用域。</returns>
     IDatabaseScope Use(DatabaseScopeOptions options);
-
 }

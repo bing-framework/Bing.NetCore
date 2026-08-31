@@ -11,6 +11,7 @@ public interface IJsonWebTokenCustomerAuthorizeOption
     /// 设置匿名访问路径
     /// </summary>
     /// <param name="urls">路径列表</param>
+    /// <returns>已保存的匿名访问路径列表。</returns>
     List<string> SetAnonymousPaths(IList<string> urls);
 
     /// <summary>

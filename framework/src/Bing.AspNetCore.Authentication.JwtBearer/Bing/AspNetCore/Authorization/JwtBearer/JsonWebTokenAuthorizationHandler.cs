@@ -49,6 +49,8 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     /// <summary>
     /// 重载异步处理
     /// </summary>
+    /// <param name="context">授权处理上下文。</param>
+    /// <param name="requirement">JWT 授权要求。</param>
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, JsonWebTokenAuthorizationRequirement requirement)
     {
         if (_options.ThrowEnabled)
@@ -62,6 +64,8 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     /// <summary>
     /// 抛异常处理方式
     /// </summary>
+    /// <param name="context">授权处理上下文。</param>
+    /// <param name="requirement">JWT 授权要求。</param>
     protected virtual async Task ThrowExceptionHandleAsync(AuthorizationHandlerContext context,
         JsonWebTokenAuthorizationRequirement requirement)
     {
@@ -93,6 +97,8 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     /// <summary>
     /// 结果处理方式
     /// </summary>
+    /// <param name="context">授权处理上下文。</param>
+    /// <param name="requirement">JWT 授权要求。</param>
     protected virtual async Task ResultHandleAsync(AuthorizationHandlerContext context,
         JsonWebTokenAuthorizationRequirement requirement)
     {
@@ -161,6 +167,7 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     /// 获取Payload
     /// </summary>
     /// <param name="encodeJwt">加密后的Jwt令牌</param>
+    /// <returns>JWT 负载字典。</returns>
     private IDictionary<string, string> GetPayload(string encodeJwt)
     {
         var jwtArray = encodeJwt.Split('.');

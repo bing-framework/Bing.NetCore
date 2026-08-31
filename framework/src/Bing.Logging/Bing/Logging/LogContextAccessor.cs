@@ -4,13 +4,12 @@ using Bing.Tracing;
 namespace Bing.Logging;
 
 /// <summary>
-/// 日志上下文访问器
+/// 创建并缓存当前执行上下文日志上下文的默认访问器。
 /// </summary>
 public class LogContextAccessor : ILogContextAccessor
 {
-    /// <summary>
-    /// 日志上下文
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>非 Web 上下文的跟踪标识发生变化时，会创建新的日志上下文以保持跟踪关联一致。</remarks>
     public LogContext Context
     {
         get
@@ -27,12 +26,14 @@ public class LogContextAccessor : ILogContextAccessor
     }
 
     /// <summary>
-    /// 创建日志上下文
+    /// 创建包含新跟踪标识和当前主机名的日志上下文。
     /// </summary>
+    /// <returns>新的日志上下文。</returns>
     protected virtual LogContext Create() => new() { TraceId = GetTraceId(), Host = Dns.GetHostName() };
 
     /// <summary>
-    /// 获取跟踪标识
+    /// 获取用于新日志上下文的跟踪标识。
     /// </summary>
+    /// <returns>新生成的不含分隔符的随机 GUID 标识。</returns>
     protected virtual string GetTraceId() => Guid.NewGuid().ToString("N");
 }

@@ -9,6 +9,7 @@ public interface ILoggerWrapper
     /// 是否启用
     /// </summary>
     /// <param name="logLevel">日志级别</param>
+    /// <returns>指定日志级别已启用时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     bool IsEnabled(LogLevel logLevel);
 
     /// <summary>
@@ -37,6 +38,7 @@ public interface ILoggerWrapper
     /// </summary>
     /// <typeparam name="TState">日志状态类型</typeparam>
     /// <param name="state">日志状态</param>
+    /// <returns>用于结束当前日志范围的释放句柄。</returns>
     IDisposable BeginScope<TState>(TState state);
 
     /// <summary>

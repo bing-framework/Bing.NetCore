@@ -12,6 +12,7 @@ internal static class BingModuleHelper
     /// </summary>
     /// <param name="startupModuleType">启动模块类型</param>
     /// <param name="logger">日志</param>
+    /// <returns>启动模块及其依赖模块的类型列表。</returns>
     public static List<Type> FindAllModuleTypes(Type startupModuleType, ILogger logger)
     {
         var moduleTypes = new List<Type>();
@@ -24,6 +25,7 @@ internal static class BingModuleHelper
     /// 查找依赖的模块类型
     /// </summary>
     /// <param name="moduleType">模块类型</param>
+    /// <returns>指定模块直接依赖的模块类型列表。</returns>
     public static List<Type> FindDependedModuleTypes(Type moduleType)
     {
         BingModule.CheckBingModuleType(moduleType);

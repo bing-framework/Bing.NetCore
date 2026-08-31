@@ -50,7 +50,7 @@ public static class AspectCoreExtensions
     /// <summary>
     /// 忽略拦截接口
     /// </summary>
-    /// <param name="configuration"></param>
+    /// <param name="configuration">拦截器配置对象。</param>
     public static void IgnoreAspectInterfaces(this IAspectConfiguration configuration)
     {
         var interfaces = AssemblyManager.FindTypes(x => x.IsInterface && x.HasAttribute<IgnoreAspectAttribute>()).Distinct().ToArray();
@@ -63,6 +63,7 @@ public static class AspectCoreExtensions
     /// </summary>
     /// <param name="type">类型</param>
     /// <param name="isEnableAopProxy">是否启用IAopProxy接口标记</param>
+    /// <returns>类型应创建 AOP 代理时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     private static bool IsProxy(Type type, bool isEnableAopProxy)
     {
         if (type == null)

@@ -22,5 +22,6 @@ public class DefaultCondition<TEntity> : ICondition<TEntity> where TEntity : cla
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>构造函数传入的查询条件表达式。</returns>
     public Expression<Func<TEntity, bool>> GetCondition() => _condition;
 }

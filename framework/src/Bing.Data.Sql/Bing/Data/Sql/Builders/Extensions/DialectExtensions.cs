@@ -13,12 +13,15 @@ public static partial class DialectExtensions
     /// <param name="dialect">Sql方言</param>
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
+    /// <returns>带可选别名的列 SQL。</returns>
     public static string GetColumn(this IDialect dialect, string column, string columnAlias) => columnAlias.IsEmpty() ? column : $"{column} {GetAs(dialect)}{columnAlias}";
 
     /// <summary>
     /// 获取As关键字
     /// </summary>
     /// <param name="dialect">Sql方言</param>
+    /// <param name="dialect">Sql方言。</param>
+    /// <returns>当前方言支持别名关键字时返回 <c>As </c>，否则返回 <see langword="null"/>。</returns>
     private static string GetAs(IDialect dialect) => dialect == null ? null : dialect.SupportSelectAs() ? "As " : null;
 
     /// <summary>
@@ -26,5 +29,6 @@ public static partial class DialectExtensions
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="name">名称</param>
+    /// <returns>按方言转义的名称；方言为空时返回原名称。</returns>
     public static string GetSafeName(this IDialect dialect, string name) => dialect == null ? name : dialect.SafeName(name);
 }

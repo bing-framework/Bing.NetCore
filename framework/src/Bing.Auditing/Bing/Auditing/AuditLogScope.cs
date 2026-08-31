@@ -1,21 +1,19 @@
 ﻿namespace Bing.Auditing;
 
 /// <summary>
-/// 审计日志作用域
+/// 保存当前操作审计日志的默认作用域实现。
 /// </summary>
 public class AuditLogScope : IAuditLogScope
 {
     /// <summary>
-    /// 初始化一个<see cref="AuditLogScope"/>类型的实例
+    /// 使用指定审计日志初始化 <see cref="AuditLogScope"/> 的实例。
     /// </summary>
-    /// <param name="log">审计日志</param>
+    /// <param name="log">要暴露给当前作用域的审计日志。</param>
     public AuditLogScope(AuditLogInfo log)
     {
         Log = log;
     }
 
-    /// <summary>
-    /// 审计日志
-    /// </summary>
+    /// <inheritdoc />
     public AuditLogInfo Log { get; }
 }

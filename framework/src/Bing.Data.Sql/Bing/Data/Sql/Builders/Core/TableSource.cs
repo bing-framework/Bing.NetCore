@@ -63,5 +63,6 @@ public sealed class TableSource
     /// <summary>
     /// 复制当前表源并保留稳定身份。
     /// </summary>
+    /// <returns>当前表源的独立副本。</returns>
     internal TableSource Clone() => new(SourceId, Item.Clone(), EntityType, Alias, ProjectedMembers);
 }

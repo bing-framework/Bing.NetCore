@@ -374,7 +374,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <returns>绑定当前 Provider 的独立 SQL Builder。</returns>
     protected virtual ISqlBuilder CreateIndependentSqlBuilder() => CreateSqlBuilder(GetCurrentProvider());
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 创建供运行时绑定使用的独立 SQL Builder。
+    /// </summary>
+    /// <returns>绑定当前 Provider 的独立 SQL Builder。</returns>
     ISqlBuilder ISqlQueryBuilderSource.CreateIndependentSqlBuilder() => CreateIndependentSqlBuilder();
 
     /// <inheritdoc />
@@ -675,6 +678,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <returns>必须在操作结束时释放的执行租约。</returns>
     internal Func<IDisposable> ExecutionLeaseFactory { get; set; }
 
+    /// <summary>
+    /// 获取当前实例的执行租约。
+    /// </summary>
+    /// <returns>用于在操作结束时释放执行占用的租约。</returns>
     protected IDisposable AcquireExecutionLease()
     {
         if (ExecutionLeaseFactory != null)
@@ -742,17 +749,22 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         }
     }
 
+    /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
         BindConnection(connection, SqlResourceOwnership.Owned, source);
 
+    /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
         BindConnection(connection, SqlResourceOwnership.External, source);
 
+    /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
         BindExternalTransactionResolver(resolver);
 
+    /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindDatabaseContext(DatabaseContext context) => BindDatabaseContext(context);
 
+    /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindEntityMappingResolver(IEntityMappingResolver resolver) =>
         BindEntityMappingResolver(resolver);
 
@@ -944,6 +956,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>当前 SQL Builder 生成的 SQL 文本。</returns>
     protected string GetSql() => SqlBuilder.ToSql();
 
     /// <summary>
@@ -1394,6 +1407,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// </summary>
     /// <typeparam name="T">参数值类型</typeparam>
     /// <param name="name">参数名</param>
+    /// <returns>指定参数转换后的值；参数不存在时返回类型默认值。</returns>
     protected virtual T GetParam<T>(string name)
     {
         return (T)ParameterManager?.GetValue(name);
@@ -1421,5 +1435,6 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <summary>
     /// 获取存储过程命令类型
     /// </summary>
+    /// <returns>当前查询使用的存储过程命令类型。</returns>
     protected virtual CommandType GetProcedureCommandType() => CommandType.StoredProcedure;
 }

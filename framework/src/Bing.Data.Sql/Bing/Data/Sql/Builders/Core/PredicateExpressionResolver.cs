@@ -37,6 +37,7 @@ public class PredicateExpressionResolver
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">谓词表达式</param>
+    /// <returns>解析得到的查询条件；表达式为空时返回空条件实例。</returns>
     public ICondition Resolve<TEntity>(Expression<Func<TEntity, bool>> expression)
     {
         if (expression == null)
@@ -49,6 +50,7 @@ public class PredicateExpressionResolver
     /// </summary>
     /// <param name="expression">表达式</param>
     /// <param name="type">实体类型</param>
+    /// <returns>表达式对应的查询条件。</returns>
     private ICondition ResolveExpression(Expression expression, Type type)
     {
         switch (expression.NodeType)
@@ -72,6 +74,7 @@ public class PredicateExpressionResolver
     /// </summary>
     /// <param name="expression">二元表达式</param>
     /// <param name="type">实体类型</param>
+    /// <returns>由左右表达式使用 <c>Or</c> 连接形成的查询条件。</returns>
     private ICondition ResolveOrExpression(BinaryExpression expression, Type type)
     {
         var left = ResolveExpression(expression.Left, type);
@@ -84,6 +87,7 @@ public class PredicateExpressionResolver
     /// </summary>
     /// <param name="expression">二元表达式</param>
     /// <param name="type">实体类型</param>
+    /// <returns>由左右表达式使用 <c>And</c> 连接形成的查询条件。</returns>
     private ICondition ResolveAndExpression(BinaryExpression expression, Type type)
     {
         var left = ResolveExpression(expression.Left, type);

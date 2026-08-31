@@ -25,23 +25,27 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// <summary>
     /// 获取未跟踪查询对象
     /// </summary>
+    /// <returns>不跟踪实体的查询数据源。</returns>
     IQueryable<TEntity> FindAsNoTracking();
 
     /// <summary>
     /// 获取查询对象
     /// </summary>
+    /// <returns>跟踪实体的查询数据源。</returns>
     IQueryable<TEntity> Find();
 
     /// <summary>
     /// 查找
     /// </summary>
     /// <param name="criteria">查询条件</param>
+    /// <returns>应用查询条件后的实体查询数据源。</returns>
     IQueryable<TEntity> Find(ICondition<TEntity> criteria);
 
     /// <summary>
     /// 查找
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>应用查询条件后的实体查询数据源。</returns>
     IQueryable<TEntity> Find([NotNull] Expression<Func<TEntity, bool>> predicate);
 
     #endregion
@@ -52,6 +56,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 查找实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的实体；未找到时返回 null。</returns>
     [Obsolete("请使用 FindById 方法")]
     TEntity Find(object id);
 
@@ -59,6 +64,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 通过标识查找实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的实体；未找到时返回 null。</returns>
     TEntity FindById(object id);
 
     /// <summary>
@@ -66,6 +72,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体；未找到时返回 null。</returns>
     [Obsolete("请使用 FindByIdAsync 方法")]
     Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default);
 
@@ -74,30 +81,35 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体；未找到时返回 null。</returns>
     Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 通过标识列表查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(params TKey[] ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(IEnumerable<TKey> ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>指定标识对应的实体列表。</returns>
     List<TEntity> FindByIds(string ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(params TKey[] ids);
 
     /// <summary>
@@ -105,6 +117,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="ids">标识列表</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -112,12 +125,14 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
     Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 通过标识查找实体，不跟踪
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的未跟踪实体；未找到时返回 null。</returns>
     TEntity FindByIdNoTracking(TKey id);
 
     /// <summary>
@@ -125,30 +140,35 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体；未找到时返回 null。</returns>
     Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 通过标识列表查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的未跟踪实体列表。</returns>
     List<TEntity> FindByIdsNoTracking(params TKey[] ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识对应的未跟踪实体列表。</returns>
     List<TEntity> FindByIdsNoTracking(IEnumerable<TKey> ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
+    /// <returns>指定标识对应的未跟踪实体列表。</returns>
     List<TEntity> FindByIdsNoTracking(string ids);
 
     /// <summary>
     /// 通过标识列表查找实体列表，不跟踪
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表。</returns>
     Task<List<TEntity>> FindByIdsNoTrackingAsync(params TKey[] ids);
 
     /// <summary>
@@ -156,6 +176,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="ids">标识列表</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表。</returns>
     Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -163,6 +184,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表。</returns>
     Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default);
 
     #endregion
@@ -173,6 +195,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 查找单个实体
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>符合条件的第一个实体；未找到时返回 null。</returns>
     TEntity Single(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
@@ -180,6 +203,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
+    /// <returns>经查询操作处理后符合条件的第一个实体；未找到时返回 null。</returns>
     TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action);
 
     /// <summary>
@@ -187,6 +211,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为符合条件的第一个实体；未找到时返回 null。</returns>
     Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -195,6 +220,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// <param name="predicate">查询条件</param>
     /// <param name="action">访问IQueryable的回调函数,用于执行Include等操作</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为经查询操作处理后符合条件的第一个实体；未找到时返回 null。</returns>
     Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default);
 
     #endregion
@@ -205,6 +231,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 查找实体列表
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>符合条件的实体列表。</returns>
     List<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate = null);
 
     /// <summary>
@@ -212,12 +239,14 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为符合条件的实体列表。</returns>
     Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 查找实体列表，不跟踪
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>符合条件的未跟踪实体列表。</returns>
     List<TEntity> FindAllNoTracking(Expression<Func<TEntity, bool>> predicate = null);
 
     /// <summary>
@@ -225,6 +254,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为符合条件的未跟踪实体列表。</returns>
     Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default);
 
     #endregion
@@ -235,30 +265,35 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的实体存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Exists(TKey id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>指定标识集合中存在匹配实体时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Exists(TKey[] ids);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>表示异步判断操作的任务，结果指示指定标识对应的实体是否存在。</returns>
     Task<bool> ExistsAsync(TKey id);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示异步判断操作的任务，结果指示指定标识集合中是否存在匹配实体。</returns>
     Task<bool> ExistsAsync(TKey[] ids);
 
     /// <summary>
     /// 判断是否存在
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>存在符合条件的实体时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Exists([NotNull] Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
@@ -266,6 +301,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步判断操作的任务，结果指示是否存在符合条件的实体。</returns>
     Task<bool> ExistsAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     #endregion
@@ -276,6 +312,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// 查找数量
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>符合条件的实体数量。</returns>
     int Count(Expression<Func<TEntity, bool>> predicate = null);
 
     /// <summary>
@@ -283,6 +320,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为符合条件的实体数量。</returns>
     Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default);
 
     #endregion

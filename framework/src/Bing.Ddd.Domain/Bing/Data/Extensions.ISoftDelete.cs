@@ -11,6 +11,7 @@ public static partial class SoftDeleteExtensions
     /// 是否空对象或是否已删除
     /// </summary>
     /// <param name="entity">逻辑删除实体</param>
+    /// <returns>实体为空或已标记为删除时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool IsNullOrDeleted(this ISoftDelete entity) => entity == null || entity.IsDeleted;
 
     /// <summary>

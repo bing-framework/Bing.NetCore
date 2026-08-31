@@ -34,6 +34,7 @@ public class DefaultMailKitSmtpBuilder : IMailKitSmtpBuilder
     /// <summary>
     /// 生成SMTP客户端
     /// </summary>
+    /// <returns>已配置的 SMTP 客户端。</returns>
     public virtual SmtpClient Build()
     {
         var client = new SmtpClient();
@@ -68,6 +69,7 @@ public class DefaultMailKitSmtpBuilder : IMailKitSmtpBuilder
     /// <summary>
     /// 获取安全套接字选项
     /// </summary>
+    /// <returns>根据 MailKit 和电子邮件配置确定的安全套接字选项。</returns>
     protected virtual SecureSocketOptions GetSecureSocketOption()
     {
         var config = this._mailKitConfigProvider.GetConfig();

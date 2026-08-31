@@ -85,6 +85,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <param name="purpose">用途</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示生成令牌结果的异步操作。</returns>
     public virtual async Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "")
     {
         var user = await GetUserOrDefault(phone);
@@ -95,6 +96,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 获取用户
     /// </summary>
     /// <param name="phone">手机号</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时创建临时用户。</returns>
     private async Task<TUser> GetUserOrDefault(string phone)
     {
         var user = await this.FindByPhoneAsync(phone);
@@ -112,6 +114,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <summary>
     /// 创建安全戳
     /// </summary>
+    /// <returns>新生成的安全戳。</returns>
     protected virtual string CreateSecurityStamp() => "56df9984-bc05-460a-a4ce-9dec3922a5e9";
 
     /// <summary>
@@ -121,6 +124,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <param name="purpose">用途</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示生成令牌结果的异步操作。</returns>
     public virtual async Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "")
     {
         user.CheckNotNull(nameof(user));
@@ -135,6 +139,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// </summary>
     /// <param name="purpose">用途</param>
     /// <param name="application">应用程序</param>
+    /// <returns>组合后的令牌用途。</returns>
     private string GetPurpose(string purpose, string application) => $"{purpose}_{application}";
 
     #endregion
@@ -149,6 +154,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示令牌验证结果的异步操作。</returns>
     public virtual async Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "", string provider = "")
     {
         var user = await GetUserOrDefault(phone);
@@ -163,6 +169,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示令牌验证结果的异步操作。</returns>
     public virtual async Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "", string provider = "")
     {
         user.CheckNotNull(nameof(user));
@@ -196,6 +203,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// </summary>
     /// <param name="phone">手机号</param>
     /// <param name="application">应用程序</param>
+    /// <returns>表示生成注册令牌结果的异步操作。</returns>
     public virtual async Task<string> GenerateRegisterTokenAsync(string phone, string application = "") =>
         await GenerateTokenAsync(phone, TokenPurpose.PhoneRegister, application);
 
@@ -209,6 +217,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <param name="phone">手机号</param>
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
+    /// <returns>表示注册令牌验证结果的异步操作。</returns>
     public virtual async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "") =>
         await VerifyTokenAsync(phone, TokenPurpose.PhoneRegister, token, application);
 
@@ -235,6 +244,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 生成电子邮件确认令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成电子邮件确认令牌结果的异步操作。</returns>
     public virtual async Task<string> GenerateEmailConfirmationTokenAsync(TUser user) =>
         await Manager.GenerateEmailConfirmationTokenAsync(user);
 
@@ -261,6 +271,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 生成电子邮件重置密码令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成电子邮件重置密码令牌结果的异步操作。</returns>
     public virtual async Task<string> GenerateEmailPasswordResetTokenAsync(TUser user) =>
         await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider,
             UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -290,6 +301,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 生成手机号重置密码令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成手机号重置密码令牌结果的异步操作。</returns>
     public virtual async Task<string> GeneratePhonePasswordResetTokenAsync(TUser user) =>
         await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultPhoneProvider,
             UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -348,6 +360,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 通过用户名查找
     /// </summary>
     /// <param name="userName">用户名</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     public virtual async Task<TUser> FindByNameAsync(string userName) => await Manager.FindByNameAsync(userName);
 
     #endregion
@@ -358,6 +371,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 通过电子邮件查找
     /// </summary>
     /// <param name="email">电子邮件</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     public virtual async Task<TUser> FindByEmailAsync(string email) => await Manager.FindByEmailAsync(email);
 
     #endregion
@@ -368,6 +382,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// 通过手机号查找
     /// </summary>
     /// <param name="phone">手机号</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     public virtual async Task<TUser> FindByPhoneAsync(string phone) =>
         await UserRepository.SingleAsync(t => t.PhoneNumber == phone);
 

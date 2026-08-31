@@ -26,18 +26,23 @@ public sealed class OracleDialect : DialectBase
     public override char ClosingIdentifier => '"';
 
     /// <inheritdoc />
+    /// <returns>Oracle 参数前缀。</returns>
     public override string GetPrefix() => ":";
 
     /// <inheritdoc />
+    /// <returns>Oracle 是否支持 Select 别名语法。</returns>
     public override bool SupportSelectAs() => false;
 
     /// <inheritdoc />
+    /// <returns>按索引生成的 Oracle 参数名。</returns>
     public override string GenerateName(int paramIndex) => $"{GetPrefix()}p_{paramIndex}";
 
     /// <inheritdoc />
+    /// <returns>去除前导冒号后的参数名。</returns>
     public override string GetParamName(string paramName) => paramName.StartsWith(":") ? paramName.TrimStart(':') : paramName;
 
     /// <inheritdoc />
+    /// <returns>转换后的 Oracle 参数值。</returns>
     public override object GetParamValue(object paramValue)
     {
         if (paramValue == null)

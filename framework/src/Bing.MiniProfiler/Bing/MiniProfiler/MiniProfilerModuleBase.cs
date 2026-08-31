@@ -27,6 +27,7 @@ public abstract class MiniProfilerModuleBase : Bing.AspNetCore.AspNetCoreBingMod
     /// 添加服务。将模块服务添加到依赖注入服务容器中
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>完成 MiniProfiler 注册后的服务集合。</returns>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         var action = GetMiniProfilerAction(services);
@@ -48,6 +49,7 @@ public abstract class MiniProfilerModuleBase : Bing.AspNetCore.AspNetCoreBingMod
     /// 重写以获取MiniProfiler的选项
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>MiniProfiler 配置操作。</returns>
     protected virtual Action<MiniProfilerOptions> GetMiniProfilerAction(IServiceCollection services)
     {
         return options =>

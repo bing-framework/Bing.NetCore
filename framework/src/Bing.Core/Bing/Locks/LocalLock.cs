@@ -47,7 +47,7 @@ public class LocalLock : ILock
     /// <param name="key">锁定标识</param>
     /// <param name="value">当前占用值</param>
     /// <param name="expiration">锁定时间间隔</param>
-    /// <returns>true:成功锁定; false:之前已被锁定</returns>
+    /// <returns>表示尝试获取锁结果的异步操作；成功获取锁时结果为 <see langword="true"/>，否则为 <see langword="false"/>。</returns>
     public Task<bool> LockTakeAsync(string key, string value, TimeSpan expiration) => Task.FromResult(LockTake(key, value, expiration));
 
     /// <summary>
@@ -139,6 +139,7 @@ public class LocalLock : ILock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>锁执行结果；未获取到锁或执行方法为空时返回默认值。</returns>
     public T ExecuteWithLock<T>(string key, string value, TimeSpan expiration, Func<T> executeAction, T defaultValue = default)
     {
         if (executeAction == null)
@@ -166,6 +167,7 @@ public class LocalLock : ILock
     /// <param name="expiration">锁定时间间隔</param>
     /// <param name="executeAction">执行的方法</param>
     /// <param name="defaultValue">默认值</param>
+    /// <returns>表示锁执行结果的异步操作；未获取到锁或执行方法为空时返回默认值。</returns>
     public async Task<T> ExecuteWithLockAsync<T>(string key, string value, TimeSpan expiration, Func<Task<T>> executeAction, T defaultValue = default)
     {
         if (executeAction == null)

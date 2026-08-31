@@ -32,7 +32,6 @@ public class RemoteStreamContentOutputFormatter : OutputFormatter
     /// 异步写入HTTP响应体。
     /// </summary>
     /// <param name="context">包含格式化器输出的上下文。</param>
-    /// <returns>一个异步操作。</returns>
     public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
     {
         var remoteStream = (IRemoteStreamContent)context.Object;

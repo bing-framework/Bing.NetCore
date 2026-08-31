@@ -12,20 +12,15 @@ public class TransactionActionManager : ITransactionActionManager
     /// </summary>
     private readonly List<Func<IDbTransaction, Task>> _actions;
 
-    /// <summary>
-    /// 事务操作数量
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _actions.Count;
 
     /// <summary>
-    /// 初始化一个<see cref="TransactionActionManager"/>类型的实例
+    /// 初始化一个 <see cref="TransactionActionManager"/> 类型的实例。
     /// </summary>
     public TransactionActionManager() => _actions = new List<Func<IDbTransaction, Task>>();
 
-    /// <summary>
-    /// 注册事务操作
-    /// </summary>
-    /// <param name="action">事务操作</param>
+    /// <inheritdoc />
     public void Register(Func<IDbTransaction, Task> action)
     {
         if (action == null)
@@ -33,10 +28,7 @@ public class TransactionActionManager : ITransactionActionManager
         _actions.Add(action);
     }
 
-    /// <summary>
-    /// 提交
-    /// </summary>
-    /// <param name="transaction">事务</param>
+    /// <inheritdoc />
     public async Task CommitAsync(IDbTransaction transaction)
     {
         foreach (var action in _actions)

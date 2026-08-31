@@ -56,22 +56,26 @@ public interface ICurrentUser
     /// 查找声明
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>匹配的声明；未找到时返回 <see langword="null"/>。</returns>
     Claim FindClaim(string claimType);
 
     /// <summary>
     /// 查找声明列表
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>匹配的声明列表；未找到时返回空数组。</returns>
     Claim[] FindClaims(string claimType);
 
     /// <summary>
     /// 获取所有声明列表
     /// </summary>
+    /// <returns>当前身份主体包含的全部声明；未设置身份主体时返回空数组。</returns>
     Claim[] GetAllClaims();
 
     /// <summary>
     /// 是否包含指定角色
     /// </summary>
     /// <param name="roleName">角色名</param>
+    /// <returns>当前用户属于指定角色时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool IsInRole(string roleName);
 }

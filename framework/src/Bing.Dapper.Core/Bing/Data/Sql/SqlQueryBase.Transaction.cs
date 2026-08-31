@@ -105,6 +105,7 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 获取查询事务。
     /// </summary>
+    /// <returns>当前查询使用的事务；无需事务时返回 null。</returns>
     protected IDbTransaction GetQueryTransaction()
     {
         _transactionScopeLease?.EnsureActive();
@@ -233,6 +234,7 @@ public abstract partial class SqlQueryBase
     /// 开始事务
     /// </summary>
     /// <param name="isolationLevel">事务隔离级别</param>
+    /// <returns>已开始或复用的内部事务。</returns>
     private IDbTransaction BeginTransactionImpl(IsolationLevel? isolationLevel)
     {
         Exception primaryException = null;
@@ -267,6 +269,9 @@ public abstract partial class SqlQueryBase
     /// <summary>
     /// 异步开始事务。
     /// </summary>
+    /// <param name="isolationLevel">事务隔离级别。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示已开始或复用内部事务的异步操作。</returns>
     private async Task<IDbTransaction> BeginTransactionImplAsync(IsolationLevel? isolationLevel,
         CancellationToken cancellationToken)
     {

@@ -13,6 +13,7 @@ public static class ServiceCollectionCommonExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="services">服务集合</param>
+    /// <returns>服务集合中存在指定服务类型注册时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool IsAdded<T>(this IServiceCollection services) => services.IsAdded(typeof(T));
 
     /// <summary>
@@ -20,6 +21,7 @@ public static class ServiceCollectionCommonExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="type">类型</param>
+    /// <returns>服务集合中存在指定服务类型注册时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool IsAdded(this IServiceCollection services, Type type) => services.Any(x => x.ServiceType == type);
 
     /// <summary>
@@ -29,6 +31,7 @@ public static class ServiceCollectionCommonExtensions
     /// <typeparam name="TImplement">服务实现类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="lifetime">生命周期</param>
+    /// <returns>完成服务替换后的服务集合。</returns>
     public static IServiceCollection Replace<TService, TImplement>(this IServiceCollection services, ServiceLifetime lifetime)
     {
         var descriptor = new ServiceDescriptor(typeof(TService), typeof(TImplement), lifetime);
@@ -41,6 +44,7 @@ public static class ServiceCollectionCommonExtensions
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="services">服务集合</param>
+    /// <returns>已注册的单例服务对象；未找到时返回默认值。</returns>
     public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services)
     {
         var descriptor = services.FirstOrDefault(x => x.ServiceType == typeof(T) && x.Lifetime == ServiceLifetime.Singleton);
@@ -56,7 +60,8 @@ public static class ServiceCollectionCommonExtensions
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="services">服务集合</param>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <returns>已注册的单例服务对象。</returns>
+    /// <exception cref="InvalidOperationException">未找到指定类型的单例服务时抛出。</exception>
     public static T GetSingletonInstance<T>(this IServiceCollection services)
     {
         var instance = services.GetSingletonInstanceOrNull<T>();
@@ -70,6 +75,7 @@ public static class ServiceCollectionCommonExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="toAddDescriptor">服务描述</param>
+    /// <returns>已存在或新添加的服务描述。</returns>
     public static ServiceDescriptor GetOrAdd(this IServiceCollection services, ServiceDescriptor toAddDescriptor)
     {
         var descriptor = services.FirstOrDefault(x => x.ServiceType == toAddDescriptor.ServiceType);
@@ -85,6 +91,7 @@ public static class ServiceCollectionCommonExtensions
     /// <typeparam name="TTypeFinder">类型查找器类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="factory">实例工厂</param>
+    /// <returns>已注册或新创建的类型查找器。</returns>
     public static TTypeFinder GetOrAddTypeFinder<TTypeFinder>(this IServiceCollection services,
         Func<IAllAssemblyFinder, TTypeFinder> factory) where TTypeFinder : class
     {
@@ -99,6 +106,7 @@ public static class ServiceCollectionCommonExtensions
     /// 获取或添加所有程序集查找器
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>已注册或新创建的所有程序集查找器。</returns>
     public static IAllAssemblyFinder GetOrAddAllAssemblyFinder(this IServiceCollection services)
     {
         var allAssemblyFinder = services.GetOrAddSingletonInstance<IAllAssemblyFinder>(() => new AppDomainAllAssemblyFinder());
@@ -111,6 +119,7 @@ public static class ServiceCollectionCommonExtensions
     /// <typeparam name="TServiceType">服务类型</typeparam>
     /// <param name="services">服务集合</param>
     /// <param name="factory">实例工厂</param>
+    /// <returns>已注册或新创建的服务实例。</returns>
     public static TServiceType GetOrAddSingletonInstance<TServiceType>(this IServiceCollection services,
         Func<TServiceType> factory) where TServiceType : class
     {
@@ -129,6 +138,7 @@ public static class ServiceCollectionCommonExtensions
     /// <param name="services">服务集合</param>
     /// <param name="types">类型集合</param>
     /// <param name="serviceLifetime">服务生命周期</param>
+    /// <returns>完成服务注册后的服务集合。</returns>
     public static IServiceCollection BatchRegisterService(this IServiceCollection services, Type[] types,
         ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
     {

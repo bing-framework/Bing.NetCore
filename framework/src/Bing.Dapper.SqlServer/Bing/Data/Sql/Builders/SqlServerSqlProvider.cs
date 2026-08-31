@@ -81,9 +81,11 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
     public SqlReturningClausePosition Position => SqlReturningClausePosition.BeforeSource;
 
     /// <inheritdoc />
+    /// <returns>SQL Server Returning 子句使用的关键字。</returns>
     public string GetKeyword(SqlExecutionKind executionKind) => "Output";
 
     /// <inheritdoc />
+    /// <returns>SQL Server Returning 子句使用的限定对象名。</returns>
     public string GetQualifier(SqlExecutionKind executionKind, string configuredQualifier) =>
         executionKind == SqlExecutionKind.Delete ? "Deleted" : "Inserted";
 
@@ -95,6 +97,7 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
 internal sealed class SqlServerPaginationRenderer : ISqlPaginationRenderer
 {
     /// <inheritdoc />
+    /// <returns>SQL Server Offset/Fetch 分页 SQL 片段。</returns>
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
 }

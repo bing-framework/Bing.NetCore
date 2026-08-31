@@ -4,7 +4,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql.Builders.Conditions;
 
 /// <summary>
-/// Sql查询条件基类
+/// 提供 SQL 查询条件的参数、列和值管理及渲染基础能力。
 /// </summary>
 public abstract class SqlConditionBase : ISqlCondition
 {
@@ -14,12 +14,12 @@ public abstract class SqlConditionBase : ISqlCondition
     private string _parameterName;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlConditionBase"/>类型的实例
+    /// 使用参数管理器、列和值初始化一个 <see cref="SqlConditionBase"/> 实例。
     /// </summary>
-    /// <param name="parameterManager">参数管理器</param>
-    /// <param name="column">列名</param>
-    /// <param name="value">值</param>
-    /// <param name="isParameterization">是否参数化</param>
+    /// <param name="parameterManager">用于保存参数的参数管理器。</param>
+    /// <param name="column">条件左侧列名。</param>
+    /// <param name="value">条件右侧值或子查询。</param>
+    /// <param name="isParameterization">是否将右侧值作为 SQL 参数处理。</param>
     protected SqlConditionBase(IParameterManager parameterManager, string column, object value, bool isParameterization)
     {
         ParameterManager = parameterManager ?? throw new ArgumentNullException(nameof(parameterManager));
@@ -31,17 +31,17 @@ public abstract class SqlConditionBase : ISqlCondition
     }
 
     /// <summary>
-    /// 参数管理器
+    /// 获取条件使用的参数管理器。
     /// </summary>
     protected IParameterManager ParameterManager { get; }
 
     /// <summary>
-    /// 列名
+    /// 获取条件左侧列名。
     /// </summary>
     protected string Column { get; }
 
     /// <summary>
-    /// 值
+    /// 获取条件右侧值或子查询。
     /// </summary>
     protected object Value { get; }
 
@@ -109,11 +109,13 @@ public abstract class SqlConditionBase : ISqlCondition
     /// <summary>
     /// 创建参数名
     /// </summary>
+    /// <returns>返回由参数管理器生成的新参数名称。</returns>
     protected virtual string GenerateParamName() => ParameterManager.GenerateName();
 
     /// <summary>
     /// 获取参数值
     /// </summary>
+    /// <returns>返回当前条件的右侧值。</returns>
     protected virtual object GetValue() => Value;
 
     /// <summary>

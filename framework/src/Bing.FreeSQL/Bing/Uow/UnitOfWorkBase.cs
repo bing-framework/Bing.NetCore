@@ -97,6 +97,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// 创建实例
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
+    /// <returns>从服务提供程序解析的实例；未解析到服务时返回默认值。</returns>
     private T Create<T>()
     {
         var result = _serviceProvider.GetService(typeof(T));
@@ -110,7 +111,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     #region OnConfiguring(配置)
 
     /// <summary>
-    /// 配置
+    /// 配置当前工作单元使用的 FreeSql CodeFirst 映射。
     /// </summary>
     /// <param name="builder">配置生成器</param>
     protected override void OnConfiguring(DbContextOptionsBuilder builder) => base.OnConfiguring(builder);
@@ -133,16 +134,19 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 获取映射配置列表
     /// </summary>
+    /// <returns>当前工作单元对应的映射配置集合。</returns>
     private IEnumerable<IMap> GetMaps() => _maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
 
     /// <summary>
     /// 获取映射接口类型
     /// </summary>
+    /// <returns>用于映射缓存的类型。</returns>
     protected virtual Type GetMapType() => this.GetType();
 
     /// <summary>
     /// 从程序集获取映射配置列表
     /// </summary>
+    /// <returns>当前程序集集合中的映射配置集合。</returns>
     private IEnumerable<IMap> GetMapsFromAssemblies()
     {
         var result = new List<IMap>();
@@ -155,11 +159,13 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// 获取映射实例列表
     /// </summary>
     /// <param name="assembly">程序集</param>
+    /// <returns>指定程序集中的映射实例集合。</returns>
     protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 
     /// <summary>
     /// 获取定义映射配置的程序集列表
     /// </summary>
+    /// <returns>包含映射配置的程序集数组。</returns>
     protected virtual Assembly[] GetAssemblies() => new[] {GetType().Assembly};
 
     #endregion
@@ -169,6 +175,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 提交，返回影响的行数
     /// </summary>
+    /// <returns>保存更改影响的行数。</returns>
     public int Commit()
     {
         try
@@ -191,6 +198,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// 提交，返回影响的行数
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含保存更改影响行数的异步任务。</returns>
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -212,6 +220,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 保存更改。
     /// </summary>
+    /// <returns>保存更改影响的行数。</returns>
     public override int SaveChanges()
     {
         var transactionActionManager = Create<ITransactionActionManager>();
@@ -224,6 +233,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// 手工创建事务提交。
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器。</param>
+    /// <returns>保存更改影响的行数。</returns>
     private int TransactionCommit(ITransactionActionManager transactionActionManager)
     {
         var transaction = UnitOfWork.GetOrBeginTransaction();
@@ -258,6 +268,8 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 异步保存更改
     /// </summary>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含保存更改影响行数的异步任务。</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -272,6 +284,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>包含保存更改影响行数的异步任务。</returns>
     private async Task<int> TransactionCommit(ITransactionActionManager transactionActionManager,
         CancellationToken cancellationToken)
     {
@@ -307,6 +320,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     /// <summary>
     /// 获取数据库连接
     /// </summary>
+    /// <returns>当前事务使用的数据库连接；未创建事务时返回 <see langword="null"/>。</returns>
     public IDbConnection GetConnection() => base.UnitOfWork.GetOrBeginTransaction()?.Connection;
 
 }

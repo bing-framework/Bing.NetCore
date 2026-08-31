@@ -43,6 +43,7 @@ public static class SqlConditionFactory
     /// <param name="left">左操作数</param>
     /// <param name="right">右操作数</param>
     /// <param name="operator">操作符</param>
+    /// <returns>返回与指定运算符匹配的 SQL 条件实例。</returns>
     public static ICondition Create(string left, string right, Operator @operator)
     {
         ValidateSupported(@operator);

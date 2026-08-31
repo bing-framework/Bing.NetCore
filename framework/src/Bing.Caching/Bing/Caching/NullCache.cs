@@ -1,13 +1,16 @@
 ﻿namespace Bing.Caching;
 
 /// <summary>
-/// 空缓存
+/// 不持久化缓存数据的空对象缓存实现。
 /// </summary>
 public sealed class NullCache : ILocalCache
 {
     /// <summary>
-    /// 缓存空实例
+    /// 获取全局共享的空缓存实例。
     /// </summary>
+    /// <remarks>
+    /// 该实例是进程内共享的无操作单例。读取始终视为未命中，写入、删除和清理不产生持久化副作用；带数据获取委托的读取会直接调用该委托，不会缓存返回值。
+    /// </remarks>
     public static readonly ILocalCache Instance = new NullCache();
 
     /// <inheritdoc />

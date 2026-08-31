@@ -36,5 +36,6 @@ public readonly struct LogCallerInfo : ILogCallerInfo
     /// <summary>
     /// 转换为参数
     /// </summary>
+    /// <returns>包含调用成员名称、文件路径和行号的动态参数对象。</returns>
     public dynamic ToParams() => new { MemberName, FilePath, LineNumber };
 }

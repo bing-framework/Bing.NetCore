@@ -130,6 +130,7 @@ public abstract class BingException : Exception, IHasErrorCode
     /// <summary>
     /// 获取完整的消息
     /// </summary>
+    /// <returns>包含错误码、错误标识和异常消息的完整文本。</returns>
     public virtual string GetFullMessage() => $"{Code}:({Flag}){Message}";
 
     /// <summary>

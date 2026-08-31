@@ -24,6 +24,7 @@ public class AttributeTypeFinderBase<TAttributeType> : FinderBase<Type>, ITypeFi
     /// <summary>
     /// 执行所有项目的查找工作
     /// </summary>
+    /// <returns>符合特性筛选条件的类型数组。</returns>
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);

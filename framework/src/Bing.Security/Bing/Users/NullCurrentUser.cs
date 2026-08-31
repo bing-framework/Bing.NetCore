@@ -73,23 +73,27 @@ public class NullCurrentUser : ICurrentUser
     /// 查找声明
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>始终返回 null。</returns>
     public Claim FindClaim(string claimType) => null;
 
     /// <summary>
     /// 查找声明列表
     /// </summary>
     /// <param name="claimType">声明类型</param>
+    /// <returns>始终返回空声明数组。</returns>
     public Claim[] FindClaims(string claimType) => EmptyClaimsArray;
 
     /// <summary>
     /// 获取所有声明列表
     /// </summary>
+    /// <returns>始终返回空声明数组。</returns>
     public Claim[] GetAllClaims() => EmptyClaimsArray;
 
     /// <summary>
     /// 是否包含指定角色
     /// </summary>
     /// <param name="roleName">角色名</param>
+    /// <returns>始终返回 <see langword="false"/>。</returns>
     public bool IsInRole(string roleName) => false;
 
     /// <summary>

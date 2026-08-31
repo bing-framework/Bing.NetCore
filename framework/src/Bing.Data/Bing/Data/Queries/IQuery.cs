@@ -21,13 +21,14 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// 添加查询条件
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>添加条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Where(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
     /// 添加查询条件
     /// </summary>
     /// <param name="condition">查询条件</param>
-    /// <returns></returns>
+    /// <returns>添加条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Where(ICondition<TEntity> condition);
 
     /// <summary>
@@ -35,6 +36,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
+    /// <returns>添加条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> WhereIf(Expression<Func<TEntity, bool>> predicate, bool condition);
 
     /// <summary>
@@ -42,6 +44,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// </summary>
     /// <param name="predicate">查询条件，如果参数值为空，则忽略该查询条件，范例：t => t.Name == "" ，该查询条件被忽略。
     /// 注意：一次仅能添加一个条件，范例：t => t.Name =="a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+    /// <returns>添加条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> WhereIfNotEmpty(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
@@ -52,6 +55,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界，默认：包含两边</param>
+    /// <returns>添加范围条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, int? min,
         int? max, Boundary boundary = Boundary.Both);
 
@@ -63,6 +67,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界，默认：包含两边</param>
+    /// <returns>添加范围条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, double? min,
         double? max, Boundary boundary = Boundary.Both);
 
@@ -74,6 +79,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界，默认：包含两边</param>
+    /// <returns>添加范围条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min,
         decimal? max, Boundary boundary = Boundary.Both);
 
@@ -86,6 +92,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// <param name="max">最大值</param>
     /// <param name="includeTime">是否包含时间，默认：包含</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>添加范围条件后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Between<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min,
         DateTime? max, bool includeTime = true, Boundary? boundary = null);
 
@@ -95,6 +102,7 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// <typeparam name="TProperty">属性类型</typeparam>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="desc">是否降序</param>
+    /// <returns>添加排序后的当前查询对象。</returns>
     IQuery<TEntity, TKey> OrderBy<TProperty>(Expression<Func<TEntity, TProperty>> propertyExpression,
         bool desc = false);
 
@@ -103,29 +111,34 @@ public interface IQuery<TEntity, TKey> : IQueryBase<TEntity> where TEntity : cla
     /// </summary>
     /// <param name="propertyName">排序属性</param>
     /// <param name="desc">是否降序</param>
+    /// <returns>添加排序后的当前查询对象。</returns>
     IQuery<TEntity, TKey> OrderBy(string propertyName, bool desc = false);
 
     /// <summary>
     /// 与连接
     /// </summary>
     /// <param name="predicate">查询条件</param>
+    /// <returns>与指定条件连接后的当前查询对象。</returns>
     IQuery<TEntity, TKey> And(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
     /// 与连接
     /// </summary>
     /// <param name="query">查询对象</param>
+    /// <returns>与指定查询连接后的当前查询对象。</returns>
     IQuery<TEntity, TKey> And(IQuery<TEntity, TKey> query);
 
     /// <summary>
     /// 或连接
     /// </summary>
     /// <param name="predicates">查询条件</param>
+    /// <returns>与指定条件进行或连接后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Or(params Expression<Func<TEntity, bool>>[] predicates);
 
     /// <summary>
     /// 或连接
     /// </summary>
     /// <param name="query">查询对象</param>
+    /// <returns>与指定查询进行或连接后的当前查询对象。</returns>
     IQuery<TEntity, TKey> Or(IQuery<TEntity, TKey> query);
 }

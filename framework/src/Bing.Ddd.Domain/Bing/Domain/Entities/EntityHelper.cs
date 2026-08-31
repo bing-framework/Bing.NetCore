@@ -7,14 +7,14 @@ using Bing.Reflection;
 namespace Bing.Domain.Entities;
 
 /// <summary>
-/// 实体帮助类
+/// 提供实体标识生成、相等性判断和类型识别的全局辅助方法。
 /// </summary>
 public static class EntityHelper
 {
     #region ID生成相关
 
     /// <summary>
-    /// ID生成器字典
+    /// 保存标识类型与其当前生成委托的映射。
     /// </summary>
     private static readonly IDictionary<Type, Func<object>> _idGenerators = new Dictionary<Type, Func<object>>
     {
@@ -25,36 +25,41 @@ public static class EntityHelper
     };
 
     /// <summary>
-    /// Guid 生成函数，允许外部自定义生成方式。
+    /// 获取或设置 <see cref="Guid"/> 标识生成委托。
     /// </summary>
+    /// <remarks>默认使用 <see cref="Guid.NewGuid"/>；替换会影响后续所有 Guid 标识生成。</remarks>
     public static Func<Guid> GuidGenerateFunc { get; set; } = Guid.NewGuid;
 
     /// <summary>
-    /// String ID 生成函数（默认为 Guid 字符串）。
+    /// 获取或设置字符串标识生成委托。
     /// </summary>
+    /// <remarks>默认调用 <see cref="GuidGenerateFunc"/> 并转换为字符串。</remarks>
     public static Func<string> StringGenerateFunc { get; set; } = () => GuidGenerateFunc().ToString();
 
     /// <summary>
-    /// Long ID 生成函数（默认为雪花 ID）。
+    /// 获取或设置 <see cref="long"/> 标识生成委托。
     /// </summary>
+    /// <remarks>默认值为 <c>null</c>；调用生成时由委托调用行为决定结果。</remarks>
     public static Func<long> LongGenerateFunc { get; set; }
 
     /// <summary>
-    /// Int ID 生成函数（默认不支持）。
+    /// 获取或设置 <see cref="int"/> 标识生成委托。
     /// </summary>
+    /// <remarks>默认委托在调用时抛出 <see cref="InvalidOperationException"/>。</remarks>
     public static Func<int> IntGenerateFunc { get; set; } = () => throw new InvalidOperationException("不支持 Int 作为 ID，请使用 Guid, string 或 long。");
 
     /// <summary>
-    /// 生成唯一标识 ID，默认使用 Guid 类型。
+    /// 生成 <see cref="Guid"/> 标识。
     /// </summary>
-    /// <returns>生成的 Guid 值</returns>
+    /// <returns>当前 Guid 生成委托产生的标识。</returns>
     public static Guid CreateGuid() => CreateKey<Guid>();
 
     /// <summary>
-    /// 生成唯一标识 ID，支持 Guid、string、long 类型。
+    /// 生成指定类型的标识。
     /// </summary>
-    /// <typeparam name="TKey">ID 类型</typeparam>
-    /// <returns>生成的 ID 值</returns>
+    /// <typeparam name="TKey">要生成的标识类型。</typeparam>
+    /// <returns>当前为 <typeparamref name="TKey"/> 注册的生成委托产生的标识。</returns>
+    /// <exception cref="InvalidOperationException">未注册标识类型的生成器时抛出。</exception>
     public static TKey CreateKey<TKey>()
     {
         if (_idGenerators.TryGetValue(typeof(TKey), out var generator))
@@ -63,11 +68,11 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 注册自定义 ID 生成器
+    /// 注册或替换指定标识类型的生成委托。
     /// </summary>
-    /// <typeparam name="TKey">ID 类型</typeparam>
-    /// <param name="generator">生成器函数</param>
-    /// <exception cref="ArgumentNullException">当<paramref name="generator"/>为null时抛出</exception>
+    /// <typeparam name="TKey">要注册的标识类型。</typeparam>
+    /// <param name="generator">生成标识的委托，不能为 <c>null</c>。</param>
+    /// <exception cref="ArgumentNullException"><paramref name="generator"/> 为 <c>null</c> 时抛出。</exception>
     public static void RegisterIdGenerator<TKey>(Func<TKey> generator)
     {
         Check.NotNull(generator, nameof(generator));
@@ -79,23 +84,24 @@ public static class EntityHelper
     #region 实体相等性比较
 
     /// <summary>
-    /// 判断实体类型是否为多租户实体。
+    /// 获取或设置判断两个实体是否需要按多租户规则比较的委托。
     /// </summary>
+    /// <remarks>默认始终返回 <c>false</c>；替换会影响后续 <see cref="EntityEquals"/> 调用。</remarks>
     public static Func<IEntity, IEntity, bool> IsMultiTenantEntity { get; set; } = (_, _) => false;
 
     /// <summary>
-    /// 在不同租户下是否允许相同 ID 作为相等的规则（默认：不允许）。
+    /// 获取或设置多租户实体间是否允许相同标识视为相等的委托。
     /// </summary>
+    /// <remarks>默认始终返回 <c>false</c>。</remarks>
     public static Func<IEntity, IEntity, bool> AllowSameIdAcrossTenants { get; set; } = (_, _) => false;
 
     /// <summary>
-    /// 判断两个 <see cref="IEntity"/> 实例是否相等。
+    /// 判断两个 <see cref="IEntity"/> 实例是否表示同一实体。
     /// </summary>
-    /// <param name="entity1">第一个实体对象。</param>
-    /// <param name="entity2">第二个实体对象。</param>
-    /// <returns>
-    /// 如果两个实体对象相等，则返回 <c>true</c>；否则返回 <c>false</c>。
-    /// </returns>
+    /// <param name="entity1">第一个实体。</param>
+    /// <param name="entity2">第二个实体。</param>
+    /// <returns>引用相同，或类型兼容且键值相等的实体返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// <remarks>任一实体为 <c>null</c> 时返回 <c>false</c>；两个实体均使用默认键时不视为相等，多租户规则由可替换委托决定。</remarks>
     public static bool EntityEquals(IEntity entity1, IEntity entity2)
     {
         // 基本检查
@@ -163,11 +169,11 @@ public static class EntityHelper
     #region 实体和值对象类型检查
 
     /// <summary>
-    /// 判断指定的类型是否实现了 <see cref="IEntity"/> 接口。
+    /// 判断指定类型是否实现 <see cref="IEntity"/>。
     /// </summary>
     /// <param name="type">要检查的类型。</param>
-    /// <returns>是否为实体类型。如果类型实现了<see cref="IEntity"/>接口，则返回true；否则返回false</returns>
-    /// <exception cref="ArgumentNullException">当<paramref name="type"/>为null时抛出</exception>
+    /// <returns>实现 <see cref="IEntity"/> 时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> 为 <c>null</c> 时抛出。</exception>
     public static bool IsEntity(Type type)
     {
         Check.NotNull(type, nameof(type));
@@ -175,12 +181,12 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 判断指定的类型是否实现了 <see cref="IEntity{TKey}"/> 接口
+    /// 判断指定类型是否实现 <see cref="IEntity{TKey}"/> 并输出标识类型。
     /// </summary>
-    /// <param name="type">要检查的类型</param>
-    /// <param name="keyType">如果找到，则输出键类型；否则为null</param>
-    /// <returns>是否为带主键的实体类型</returns>
-    /// <exception cref="ArgumentNullException">当<paramref name="type"/>为null时抛出</exception>
+    /// <param name="type">要检查的类型。</param>
+    /// <param name="keyType">实现单一标识实体接口时输出标识类型；否则为 <c>null</c>。</param>
+    /// <returns>实现单一标识实体接口时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> 为 <c>null</c> 时抛出。</exception>
     public static bool IsEntityWithId(Type type, out Type keyType)
     {
         Check.NotNull(type, nameof(type));
@@ -207,19 +213,19 @@ public static class EntityHelper
     public static bool IsEntityWithId(Type type) => IsEntityWithId(type, out _);
 
     /// <summary>
-    /// 值对象判断谓词
+    /// 获取或设置判断类型是否为值对象的谓词。
     /// </summary>
     /// <remarks>
-    /// 用于判断一个类型是否为值对象类型。默认实现为检查是否继承自<see cref="ValueObjectBase{T}"/>。
+    /// 默认通过 <see cref="ValueObjectBase{T}"/> 类型关系判断；替换会影响后续 <see cref="IsValueObject(Type)"/> 调用。
     /// </remarks>
     public static Func<Type, bool> IsValueObjectPredicate { get; set; } = type => typeof(ValueObjectBase<>).IsAssignableFrom(type);
 
     /// <summary>
-    /// 是否值对象类型
+    /// 判断类型是否为值对象。
     /// </summary>
-    /// <param name="type">类型</param>
-    /// <returns>是否为值对象</returns>
-    /// <exception cref="ArgumentNullException">当<paramref name="type"/>为null时抛出</exception>
+    /// <param name="type">要检查的类型。</param>
+    /// <returns>当前值对象谓词返回 <c>true</c> 时为 <c>true</c>；否则为 <c>false</c>。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> 为 <c>null</c> 时抛出。</exception>
     public static bool IsValueObject(Type type)
     {
         Check.NotNull(type, nameof(type));
@@ -227,18 +233,18 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 是否值对象
+    /// 判断对象实例的类型是否为值对象。
     /// </summary>
-    /// <param name="obj">对象实例</param>
-    /// <returns>是否为值对象</returns>
+    /// <param name="obj">要检查的对象实例。</param>
+    /// <returns>对象非空且其类型满足当前值对象谓词时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public static bool IsValueObject(object obj) => obj != null && IsValueObject(obj.GetType());
 
     /// <summary>
-    /// 检查指定的类型是否为实体
+    /// 验证指定类型是否实现 <see cref="IEntity"/>。
     /// </summary>
-    /// <param name="type">类型</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="type">待验证的类型。</param>
+    /// <exception cref="ArgumentNullException"><paramref name="type"/> 为 <c>null</c> 时抛出。</exception>
+    /// <exception cref="ArgumentException">类型未实现 <see cref="IEntity"/> 时抛出。</exception>
     public static void CheckEntity(Type type)
     {
         Check.NotNull(type, nameof(type));
@@ -251,15 +257,11 @@ public static class EntityHelper
     #region 主键检查
 
     /// <summary>
-    /// 判断实体是否有默认标识值
+    /// 判断单一标识实体是否使用默认标识值。
     /// </summary>
-    /// <typeparam name="TKey">标识类型</typeparam>
-    /// <param name="entity">实体</param>
-    /// <returns>
-    /// 如果实体的标识为默认值，则返回true；否则返回false。
-    /// 对于整数类型（int、long）的标识，小于等于0视为默认值。
-    /// 对于其他类型，等于类型默认值视为默认值。
-    /// </returns>
+    /// <typeparam name="TKey">实体标识类型。</typeparam>
+    /// <param name="entity">要检查的实体。</param>
+    /// <returns>标识等于类型默认值，或为小于等于零的 <see cref="int"/> / <see cref="long"/> 时返回 <c>true</c>。</returns>
     public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
     {
         if (EqualityComparer<TKey>.Default.Equals(entity.Id, default!))
@@ -283,11 +285,11 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 判断实体是否有默认键值
+    /// 判断实体的全部复合键是否均为默认值。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <returns>是否为默认值</returns>
-    /// <exception cref="ArgumentNullException">当<paramref name="entity"/>为null时抛出</exception>
+    /// <param name="entity">要检查的实体。</param>
+    /// <returns>实体的全部键均为默认值时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="entity"/> 为 <c>null</c> 时抛出。</exception>
     public static bool HasDefaultKeys(IEntity entity)
     {
         Check.NotNull(entity, nameof(entity));

@@ -23,5 +23,6 @@ public class HttpContextCurrentPrincipalAccessor : ThreadCurrentPrincipalAccesso
     /// <summary>
     /// 获取安全主体
     /// </summary>
+    /// <returns>当前 HTTP 上下文中的安全主体；不存在时返回基类提供的安全主体。</returns>
     protected override ClaimsPrincipal GetClaimsPrincipal() => _httpContextAccessor.HttpContext?.User ?? base.GetClaimsPrincipal();
 }

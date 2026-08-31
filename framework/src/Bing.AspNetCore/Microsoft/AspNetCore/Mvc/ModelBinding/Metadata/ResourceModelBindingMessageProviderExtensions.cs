@@ -27,15 +27,21 @@ public static class ResourceModelBindingMessageProviderExtensions
     /// <summary>
     /// 0个参字符串格式化
     /// </summary>
+    /// <param name="resource">格式化资源。</param>
+    /// <returns>返回固定资源文本的字符串工厂。</returns>
     private static Func<string> Zero(string resource) => () => resource;
 
     /// <summary>
     /// 1个参数字符串格式化
     /// </summary>
+    /// <param name="resource">格式化资源。</param>
+    /// <returns>接收一个参数并返回格式化文本的字符串工厂。</returns>
     private static Func<string, string> One(string resource) => arg => string.Format(resource, arg);
 
     /// <summary>
     /// 2个参数字符串格式化
     /// </summary>
+    /// <param name="resource">格式化资源。</param>
+    /// <returns>接收两个参数并返回格式化文本的字符串工厂。</returns>
     private static Func<string, string, string> Two(string resource) => (arg1, arg2) => string.Format(resource, arg1, arg2);
 }

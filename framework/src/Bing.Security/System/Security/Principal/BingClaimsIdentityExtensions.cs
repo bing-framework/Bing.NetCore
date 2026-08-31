@@ -17,6 +17,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找用户标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>解析出的用户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindUserId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -32,6 +33,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找用户标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>解析出的用户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindUserId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -52,6 +54,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找用户标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>解析出的租户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindTenantId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -67,6 +70,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找用户标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>解析出的租户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindTenantId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -87,6 +91,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找客户端标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>客户端标识；未找到时返回 null。</returns>
     public static string FindClientId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -100,6 +105,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找客户端标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>客户端标识；未找到时返回 null。</returns>
     public static string FindClientId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -118,6 +124,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找版本标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>解析出的版本标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindEditionId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -133,6 +140,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找版本标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>解析出的版本标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindEditionId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -153,6 +161,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找模拟租户标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>解析出的模拟租户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindImpersonatorTenantId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -168,6 +177,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找模拟租户标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>解析出的模拟租户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindImpersonatorTenantId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -188,6 +198,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找模拟用户标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>解析出的模拟用户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindImpersonatorUserId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -203,6 +214,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找模拟用户标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>解析出的模拟用户标识；声明不存在或不是有效 GUID 时返回 null。</returns>
     public static Guid? FindImpersonatorUserId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -223,6 +235,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找会话标识
     /// </summary>
     /// <param name="principal">声明主体</param>
+    /// <returns>会话标识；未找到时返回 null。</returns>
     public static string FindSessionId(this ClaimsPrincipal principal)
     {
         Check.NotNull(principal, nameof(principal));
@@ -236,6 +249,7 @@ public static class BingClaimsIdentityExtensions
     /// 查找会话标识
     /// </summary>
     /// <param name="identity">标识</param>
+    /// <returns>会话标识；未找到时返回 null。</returns>
     public static string FindSessionId(this IIdentity identity)
     {
         Check.NotNull(identity, nameof(identity));
@@ -255,6 +269,7 @@ public static class BingClaimsIdentityExtensions
     /// </summary>
     /// <param name="claimsIdentity">声明标识</param>
     /// <param name="claim">声明</param>
+    /// <returns>添加声明后的声明标识。</returns>
     public static ClaimsIdentity AddIfNotContains(this ClaimsIdentity claimsIdentity, Claim claim)
     {
         Check.NotNull(claimsIdentity, nameof(claimsIdentity));
@@ -268,6 +283,7 @@ public static class BingClaimsIdentityExtensions
     /// </summary>
     /// <param name="claimsIdentity">声明标识</param>
     /// <param name="claim">声明</param>
+    /// <returns>添加或替换声明后的声明标识。</returns>
     public static ClaimsIdentity AddOrReplace(this ClaimsIdentity claimsIdentity, Claim claim)
     {
         Check.NotNull(claimsIdentity, nameof(claimsIdentity));
@@ -282,6 +298,7 @@ public static class BingClaimsIdentityExtensions
     /// </summary>
     /// <param name="principal">声明主体</param>
     /// <param name="identity">声明标识</param>
+    /// <returns>添加声明标识后的声明主体。</returns>
     public static ClaimsPrincipal AddIdentityIfNotContains(this ClaimsPrincipal principal, ClaimsIdentity identity)
     {
         Check.NotNull(principal, nameof(principal));

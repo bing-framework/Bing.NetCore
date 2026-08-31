@@ -19,5 +19,6 @@ public class SqlCondition : ICondition
     /// <summary>
     ///  获取查询条件
     /// </summary>
+    /// <returns>当前保存的原始 SQL 条件。</returns>
     public string GetCondition() => _condition;
 }

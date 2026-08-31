@@ -11,5 +11,6 @@ public interface IJsonWebTokenValidator
     /// <param name="encodeJwt">加密后的Jwt令牌</param>
     /// <param name="options">Jwt选项配置</param>
     /// <param name="validatePayload">校验负载</param>
+    /// <returns>令牌有效且负载验证通过时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     bool Validate(string encodeJwt, JwtOptions options, Func<IDictionary<string, string>, JwtOptions, bool> validatePayload);
 }

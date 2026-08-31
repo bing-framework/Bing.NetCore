@@ -5,7 +5,7 @@ using Bing.Trees;
 namespace Bing;
 
 /// <summary>
-/// 树型扩展
+/// 提供树形实体路径和排序处理的扩展方法。
 /// </summary>
 public static partial class TreeExtensions
 {
@@ -42,10 +42,10 @@ public static partial class TreeExtensions
     }
 
     /// <summary>
-    /// 交换排序
+    /// 交换两个节点的排序号。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="swapEntity">交换实体</param>
+    /// <param name="entity">第一个节点。</param>
+    /// <param name="swapEntity">要交换排序号的第二个节点。</param>
     public static void SwapSort(this ISortId entity, ISortId swapEntity)
     {
         var sortId = entity.SortId;
@@ -60,6 +60,7 @@ public static partial class TreeExtensions
     /// <typeparam name="TKey">标识类型</typeparam>
     /// <typeparam name="TParentId">父标识类型</typeparam>
     /// <param name="entities">实体列表</param>
+    /// <returns>缺失的父标识字符串列表。</returns>
     public static List<string> GetMissingParentIds<TEntity, TKey, TParentId>(this IEnumerable<TEntity> entities)
         where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
     {

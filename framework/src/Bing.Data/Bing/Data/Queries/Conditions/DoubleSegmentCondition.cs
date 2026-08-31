@@ -29,5 +29,6 @@ public class DoubleSegmentCondition<TEntity, TProperty> : SegmentConditionBase<T
     /// </summary>
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
+    /// <returns>最小值大于最大值时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected override bool IsMinGreaterMax(double? min, double? max) => min > max;
 }

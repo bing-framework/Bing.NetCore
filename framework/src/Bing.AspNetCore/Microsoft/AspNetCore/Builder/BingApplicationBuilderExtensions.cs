@@ -67,12 +67,14 @@ public static partial class BingApplicationBuilderExtensions
     /// 注册跟踪标识中间件
     /// </summary>
     /// <param name="app">应用程序构建器</param>
+    /// <returns>返回原应用程序构建器，以支持继续配置中间件管道。</returns>
     public static IApplicationBuilder UseCorrelationId(this IApplicationBuilder app) => app.UseMiddleware<BingCorrelationIdMiddleware>();
 
     /// <summary>
     /// 注册异常日志中间件
     /// </summary>
     /// <param name="app">应用程序构建器</param>
+    /// <returns>返回原应用程序构建器，以支持继续配置中间件管道。</returns>
     public static IApplicationBuilder UseBingExceptionHandling(this IApplicationBuilder app)
     {
         if (app.Properties.ContainsKey(ExceptionHandlingMiddlewareMarker))
@@ -85,12 +87,14 @@ public static partial class BingApplicationBuilderExtensions
     /// 注册声明映射中间件
     /// </summary>
     /// <param name="app">应用程序构建器</param>
+    /// <returns>返回原应用程序构建器，以支持继续配置中间件管道。</returns>
     public static IApplicationBuilder UseBingClaimsMap(this IApplicationBuilder app) => app.UseMiddleware<BingClaimsMapMiddleware>();
 
     /// <summary>
     /// Bing框架初始化，适用于AspNetCore环境
     /// </summary>
     /// <param name="app">应用程序构建器</param>
+    /// <returns>完成 Bing 模块初始化后的应用程序构建器。</returns>
     public static IApplicationBuilder UseBing(this IApplicationBuilder app)
     {
         var provider = app.ApplicationServices;

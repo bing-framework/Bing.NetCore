@@ -4,24 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.MultiTenancy;
 
 /// <summary>
-/// 当前用户租户解析构造器
+/// 从当前已认证用户解析租户的贡献者。
 /// </summary>
 public class CurrentUserTenantResolveContributor : TenantResolveContributorBase
 {
     /// <summary>
-    /// 构造器名称
+    /// 用于诊断和解析链路记录的贡献者名称。
     /// </summary>
     public const string ContributorName = "CurrentUser";
 
-    /// <summary>
-    /// 名称
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => ContributorName;
 
-    /// <summary>
-    /// 解析
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
+    /// <inheritdoc />
+    /// <remarks>仅在当前用户已认证时写入其租户标识，并将解析上下文标记为已处理。</remarks>
     public override Task ResolveAsync(ITenantResolveContext context)
     {
         var currentUser = context.ServiceProvider.GetRequiredService<ICurrentUser>();

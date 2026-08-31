@@ -24,6 +24,7 @@ public static partial class Extensions
     /// <param name="dataConfigAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="pgSqlSetupAction">PgSql配置操作</param>
+    /// <returns>完成 PostgreSQL 工作单元注册后的服务集合。</returns>
     public static IServiceCollection AddPgSqlUnitOfWork<TService, TImplementation>(
         this IServiceCollection services,
         DbConnection connection,
@@ -46,6 +47,7 @@ public static partial class Extensions
     /// <param name="dataConfigAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="pgSqlSetupAction">PgSql配置操作</param>
+    /// <returns>完成 PostgreSQL 工作单元注册后的服务集合。</returns>
     public static IServiceCollection AddPgSqlUnitOfWork<TService, TImplementation>(
         this IServiceCollection services,
         string connection,
@@ -69,6 +71,7 @@ public static partial class Extensions
     /// <param name="dataConfigSetupAction">数据配置操作</param>
     /// <param name="setupAction">工作单元配置操作</param>
     /// <param name="pgSqlSetupAction">PgSql配置操作</param>
+    /// <returns>完成 PostgreSQL 工作单元注册后的服务集合。</returns>
     private static IServiceCollection AddPgSqlUnitOfWork<TService, TImplementation>(IServiceCollection services,
         string connectionString,
         DbConnection connection,

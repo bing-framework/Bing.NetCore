@@ -25,6 +25,7 @@ public class AspNetCoreModule : Bing.Core.Modularity.BingModule
     /// 添加服务。将模块服务添加到依赖注入服务容器中
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>完成模块服务注册后的服务集合。</returns>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         // 注册 HttpContextAccessor，提供 HttpContext 访问

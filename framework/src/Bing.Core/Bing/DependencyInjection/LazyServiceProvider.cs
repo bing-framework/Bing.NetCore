@@ -4,24 +4,24 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.DependencyInjection;
 
 /// <summary>
-/// Lazy延迟加载服务提供程序
+/// 使用服务提供程序延迟解析并缓存可选服务的默认实现。
 /// </summary>
 public class LazyServiceProvider : ILazyServiceProvider, ITransientDependency
 {
     /// <summary>
-    /// 缓存服务字典
+    /// 获取以服务类型为键的延迟解析缓存。
     /// </summary>
     protected ConcurrentDictionary<Type, Lazy<object>> CachedServices { get; }
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取用于解析服务的底层服务提供程序。
     /// </summary>
     protected IServiceProvider ServiceProvider { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="LazyServiceProvider"/>类型的实例
+    /// 使用服务提供程序初始化 <see cref="LazyServiceProvider"/> 的实例。
     /// </summary>
-    /// <param name="serviceProvider">服务提供程序</param>
+    /// <param name="serviceProvider">用于解析服务的服务提供程序。</param>
     public LazyServiceProvider(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
@@ -29,28 +29,17 @@ public class LazyServiceProvider : ILazyServiceProvider, ITransientDependency
         CachedServices.TryAdd(typeof(IServiceProvider), new Lazy<object>(() => ServiceProvider));
     }
 
-    /// <summary>
-    /// 获取请求服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
+    /// <inheritdoc />
     public virtual T LazyGetRequiredService<T>() => (T)LazyGetRequiredService(typeof(T));
 
-    /// <summary>
-    /// 获取请求服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
+    /// <inheritdoc />
     public virtual object LazyGetRequiredService(Type serviceType) => ServiceProvider.GetRequiredService(serviceType);
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
+    /// <inheritdoc />
     public virtual T LazyGetService<T>() => (T)LazyGetService(typeof(T));
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
+    /// <inheritdoc />
+    /// <remarks>首次解析结果会按服务类型缓存，包含未注册服务的 <c>null</c> 结果。</remarks>
     public virtual object LazyGetService(Type serviceType)
     {
         return CachedServices.GetOrAdd(
@@ -59,35 +48,20 @@ public class LazyServiceProvider : ILazyServiceProvider, ITransientDependency
         ).Value;
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <param name="defaultValue">默认服务</param>
+    /// <inheritdoc />
     public virtual T LazyGetService<T>(T defaultValue) => (T)LazyGetService(typeof(T), defaultValue);
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="defaultValue">默认服务</param>
+    /// <inheritdoc />
     public virtual object LazyGetService(Type serviceType, object defaultValue) => LazyGetService(serviceType) ?? defaultValue;
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <param name="factory">服务实例工厂</param>
+    /// <inheritdoc />
     public virtual T LazyGetService<T>(Func<IServiceProvider, object> factory)
     {
         return (T)LazyGetService(typeof(T), factory);
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="factory">服务实例工厂</param>
+    /// <inheritdoc />
+    /// <remarks>服务类型尚未存在缓存时调用 <paramref name="factory"/>；已有缓存时不会调用该工厂。</remarks>
     public virtual object LazyGetService(Type serviceType, Func<IServiceProvider, object> factory)
     {
         return CachedServices.GetOrAdd(

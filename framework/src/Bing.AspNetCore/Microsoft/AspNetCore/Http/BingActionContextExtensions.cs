@@ -11,5 +11,6 @@ public static partial class BingActionContextExtensions
     /// 获取远程IP地址
     /// </summary>
     /// <param name="context">Action上下文</param>
+    /// <returns>请求的远程 IP 地址；无法获取时返回 null。</returns>
     public static string GetRemoteIpAddress(this ActionContext context) => context.HttpContext.GetRemoteIpAddress();
 }

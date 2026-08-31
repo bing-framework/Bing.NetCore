@@ -79,6 +79,7 @@ public sealed class StructuredSqlItem : SqlItem
     }
 
     /// <inheritdoc />
+    /// <returns>按指定 SQL 方言渲染的结构化表 SQL。</returns>
     public override string ToSql(IDialect dialect = null)
     {
         if (dialect == null)
@@ -105,6 +106,7 @@ public sealed class StructuredSqlItem : SqlItem
     }
 
     /// <inheritdoc />
+    /// <returns>当前结构化 SQL 项的独立副本。</returns>
     public override SqlItem Clone() => new StructuredSqlItem(Reference, _objectNameFormatter, _databaseContext,
         _providerDatabaseType, _tableReferenceValidator, _crossDatabaseQueryValidator, _sourceReference);
 }

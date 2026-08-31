@@ -29,5 +29,6 @@ public struct NullLogCallerInfo : ILogCallerInfo
     /// <summary>
     /// 转换为参数
     /// </summary>
+    /// <returns>空值。</returns>
     public dynamic ToParams() => null;
 }

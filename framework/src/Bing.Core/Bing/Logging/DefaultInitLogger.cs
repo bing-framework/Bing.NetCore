@@ -35,8 +35,10 @@ public class DefaultInitLogger<T> : IInitLogger<T>
     }
 
     /// <inheritdoc />
+    /// <returns>日志级别不为 <see cref="LogLevel.None"/> 时返回 <see langword="true"/>。</returns>
     public virtual bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
     /// <inheritdoc />
+    /// <returns>用于释放日志作用域的对象。</returns>
     public virtual IDisposable BeginScope<TState>(TState state) => NullDisposable.Instance;
 }

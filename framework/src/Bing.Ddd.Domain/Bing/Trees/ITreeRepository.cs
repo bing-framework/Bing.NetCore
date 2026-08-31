@@ -24,11 +24,13 @@ public interface ITreeRepository<TEntity, in TKey, in TParentId> : IRepository<T
     /// 生成排序号
     /// </summary>
     /// <param name="parentId">父标识</param>
+    /// <returns>表示生成排序号结果的异步操作。</returns>
     Task<int> GenerateSortIdAsync(TParentId parentId);
 
     /// <summary>
     /// 获取全部下级实体
     /// </summary>
     /// <param name="parent">父实体</param>
+    /// <returns>表示获取全部下级实体结果的异步操作。</returns>
     Task<List<TEntity>> GetAllChildrenAsync(TEntity parent);
 }

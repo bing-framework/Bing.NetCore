@@ -40,6 +40,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     /// <summary>
     /// 获取树型表格结果
     /// </summary>
+    /// <returns>树型表格节点结果列表。</returns>
     public List<TNode> GetResult()
     {
         if (_data == null)
@@ -53,6 +54,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     /// 是否根节点
     /// </summary>
     /// <param name="dto">节点</param>
+    /// <returns>节点为根节点时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool IsRoot(TNode dto)
     {
         if (_data.Any(t => t.ParentId.IsEmpty()))
@@ -116,6 +118,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     /// 是否叶节点
     /// </summary>
     /// <param name="node">节点</param>
+    /// <returns>节点为叶节点时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool IsLeaf(TNode node)
     {
         if (node.Id.IsEmpty())
@@ -127,5 +130,6 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     /// 获取节点直接下级
     /// </summary>
     /// <param name="node">节点</param>
+    /// <returns>节点的直接下级列表。</returns>
     private List<TNode> GetChildren(TNode node) => _data.Where(t => t.ParentId == node.Id).OrderBy(t => t.SortId).ToList();
 }

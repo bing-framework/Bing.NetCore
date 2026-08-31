@@ -72,6 +72,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
+    /// <returns>当前文化下的本地化字符串；未找到资源时标记为未找到。</returns>
     protected override LocalizedString GetLocalizedString(CultureInfo culture, string name)
     {
         var value = GetValue(culture, name, _resourcesBaseName) ?? GetValue(culture, name, null);
@@ -86,6 +87,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
     /// <param name="type">资源类型</param>
+    /// <returns>资源值；未找到资源时返回 null。</returns>
     protected override string GetValue(CultureInfo culture, string name, string type)
     {
         var resources = GetResourcesByCache(culture, type);
@@ -102,6 +104,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="resourcesBaseName">资源基名称</param>
+    /// <returns>缓存中的资源键值对集合。</returns>
     protected virtual IEnumerable<KeyValuePair<string, string>> GetResourcesByCache(CultureInfo culture, string resourcesBaseName) =>
         _resourcesCache.GetOrAdd($"{culture.Name}_{resourcesBaseName}", _ => GetResources(culture, resourcesBaseName));
 
@@ -110,6 +113,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="resourcesBaseName">资源基名称</param>
+    /// <returns>读取到的资源键值对集合；资源文件不存在时返回 null。</returns>
     protected virtual IEnumerable<KeyValuePair<string, string>> GetResources(CultureInfo culture, string resourcesBaseName)
     {
         var path = _pathResolver.GetJsonResourcePath(_resourcesRootPath, resourcesBaseName, culture);
@@ -127,6 +131,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// 加载Json资源
     /// </summary>
     /// <param name="filePath">文件路径</param>
+    /// <returns>JSON 资源键值对；文件不存在时返回 null。</returns>
     private static IDictionary<string, string> LoadJsonResources(string filePath)
     {
         if (File.Exists(filePath) == false)
@@ -140,6 +145,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// 获取全部本地化字符串
     /// </summary>
     /// <param name="includeParentCultures">是否包含父区域</param>
+    /// <returns>当前文化及可选父文化的本地化字符串集合。</returns>
     public override IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var result = new List<LocalizedString>();
@@ -158,6 +164,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     /// 转换为<see cref="LocalizedString"/>集合
     /// </summary>
     /// <param name="resources">资源集合</param>
+    /// <returns>转换后的本地化字符串集合。</returns>
     protected virtual IEnumerable<LocalizedString> ToLocalizedStrings(IEnumerable<KeyValuePair<string, string>> resources)
     {
         var result = new List<LocalizedString>();

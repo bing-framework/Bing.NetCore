@@ -95,7 +95,7 @@ public class ValidationContext<TObject> where TObject : class, IVerifyModel<TObj
     }
 
     /// <summary>
-    /// 验证
+    /// 执行 DataAnnotation 验证和已注册策略，并按处理器配置处理验证结果。
     /// </summary>
     /// <param name="appendAction">追加操作</param>
     public void Validate(Action<ValidationResultCollection> appendAction = null)
@@ -114,7 +114,7 @@ public class ValidationContext<TObject> where TObject : class, IVerifyModel<TObj
     }
 
     /// <summary>
-    /// 验证并引发异常
+    /// 验证当前对象，并在存在错误时按指定异常类型引发异常。
     /// </summary>
     /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="appendAction">追加操作</param>
@@ -128,5 +128,6 @@ public class ValidationContext<TObject> where TObject : class, IVerifyModel<TObj
     /// <summary>
     /// 获取验证结果集合
     /// </summary>
+    /// <returns>当前验证结果集合；尚未执行验证时返回 <see langword="null"/>。</returns>
     public ValidationResultCollection GetValidationResultCollection() => ResultCollection;
 }

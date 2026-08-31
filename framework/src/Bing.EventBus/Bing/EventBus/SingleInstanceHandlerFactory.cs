@@ -1,33 +1,29 @@
 ﻿namespace Bing.EventBus;
 
 /// <summary>
-/// 单例事件处理器工厂
+/// 返回调用方提供的单例事件处理器的工厂。
 /// </summary>
 public class SingleInstanceHandlerFactory : IEventHandlerFactory
 {
     /// <summary>
-    /// 事件处理器实例
+    /// 获取由此工厂重复返回的单例事件处理器实例。
     /// </summary>
     public IEventHandler HandlerInstance { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="SingleInstanceHandlerFactory"/>类型的实例
+    /// 使用指定单例事件处理器初始化 <see cref="SingleInstanceHandlerFactory"/> 的实例。
     /// </summary>
-    /// <param name="handler">事件处理器实例</param>
+    /// <param name="handler">要由工厂返回的单例事件处理器。</param>
     public SingleInstanceHandlerFactory(IEventHandler handler)
     {
         HandlerInstance = handler;
     }
 
-    /// <summary>
-    /// 获取事件处理器
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>返回包装器不拥有单例处理器实例的生命周期。</remarks>
     public IEventHandlerDisposeWrapper GetHandler() => new EventHandlerDisposeWrapper(HandlerInstance);
 
-    /// <summary>
-    /// 是否在当前工厂
-    /// </summary>
-    /// <param name="handlerFactories">事件处理器工厂列表</param>
+    /// <inheritdoc />
     public bool IsInFactories(List<IEventHandlerFactory> handlerFactories)
     {
         return handlerFactories

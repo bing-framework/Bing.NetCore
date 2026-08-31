@@ -58,6 +58,8 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// <summary>
     /// 递归解析条件表达式。
     /// </summary>
+    /// <param name="expression">待解析的条件表达式。</param>
+    /// <returns>表达式对应的参数化 SQL 条件。</returns>
     private ICondition ResolveExpression(Expression expression)
     {
         if (expression is BinaryExpression binary)
@@ -82,6 +84,8 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// <summary>
     /// 解析比较表达式。
     /// </summary>
+    /// <param name="expression">待解析的二元表达式。</param>
+    /// <returns>比较表达式对应的参数化 SQL 条件。</returns>
     private ICondition ResolveComparison(BinaryExpression expression)
     {
         var @operator = GetOperator(expression.NodeType);
@@ -93,12 +97,16 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// <summary>
     /// 解析列或参数操作数。
     /// </summary>
+    /// <param name="expression">待解析的操作数表达式。</param>
+    /// <returns>列 SQL 或参数占位符。</returns>
     private string ResolveOperand(Expression expression) =>
         _bindings.TryGetSource(expression, out var source) ? ResolveColumn(expression, source) : AddParameter(Lambdas.GetValue(expression));
 
     /// <summary>
     /// 解析绑定列。
     /// </summary>
+    /// <param name="expression">待解析的列表达式。</param>
+    /// <returns>列 SQL。</returns>
     private string ResolveColumn(Expression expression)
     {
         if (_bindings.TryGetSource(expression, out var source) == false)
@@ -109,11 +117,16 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// <summary>
     /// 使用来源绑定解析列。
     /// </summary>
+    /// <param name="expression">待解析的列表达式。</param>
+    /// <param name="source">列所属的表来源。</param>
+    /// <returns>按表来源解析出的列 SQL。</returns>
     private string ResolveColumn(Expression expression, TableSource source) => _getColumn(expression, source);
 
     /// <summary>
     /// 创建参数并返回 SQL 占位符。
     /// </summary>
+    /// <param name="value">参数值。</param>
+    /// <returns>新参数的名称；参数值为 <see langword="null"/> 时返回 <see langword="null"/>。</returns>
     private string AddParameter(object value)
     {
         if (value == null)
@@ -126,6 +139,8 @@ internal sealed class MultiSourcePredicateExpressionResolver
     /// <summary>
     /// 将表达式节点转换为 SQL 比较运算符。
     /// </summary>
+    /// <param name="nodeType">表达式节点类型。</param>
+    /// <returns>对应的 SQL 比较运算符。</returns>
     private static Operator GetOperator(ExpressionType nodeType) => nodeType switch
     {
         ExpressionType.Equal => Operator.Equal,

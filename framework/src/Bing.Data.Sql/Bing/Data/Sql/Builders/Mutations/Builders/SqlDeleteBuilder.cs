@@ -81,6 +81,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// <summary>
     /// 在当前状态下渲染 Delete 子句，不追加新的数据边界。
     /// </summary>
+    /// <param name="builder">接收 Delete SQL 的字符串构建器。</param>
     private void AppendCore(StringBuilder builder)
     {
         Validate();
@@ -169,12 +170,14 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// <summary>
     /// 判断当前渲染是否需要使用独立副本追加数据边界。
     /// </summary>
+    /// <returns>尚未追加边界且当前目标存在适用边界时返回 <see langword="true"/>。</returns>
     private bool ShouldRenderDataBoundarySnapshot() => _isDataBoundaryApplied == false &&
         SqlMutationDataBoundary.ShouldApply(MutationContext, DeleteClause.Table, DataBoundaryOperation);
 
     /// <summary>
     /// 渲染当前 Delete 状态。
     /// </summary>
+    /// <returns>当前 Delete 状态生成的 SQL 文本。</returns>
     private string RenderCore() => Render(AppendCore);
 
     /// <summary>

@@ -8,5 +8,6 @@ public interface ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>当前条件的 SQL 片段。</returns>
     string GetCondition();
 }

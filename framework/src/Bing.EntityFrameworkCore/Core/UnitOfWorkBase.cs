@@ -45,7 +45,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 配置
+    /// 缓存用于配置基础实体属性的反射方法信息。
     /// </summary>
     private static readonly MethodInfo _configureBasePropertiesMethodInfo = typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureBaseProperties), BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -92,6 +92,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 创建实例
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
+    /// <returns>解析到的指定类型服务实例；未找到时返回默认值。</returns>
     private T Create<T>()
     {
         var result = _serviceProvider.GetService(typeof(T));
@@ -152,11 +153,13 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 获取用户标识
     /// </summary>
+    /// <returns>当前用户标识。</returns>
     protected virtual string GetUserId() => CurrentUser.UserId;
 
     /// <summary>
     /// 获取用户名称
     /// </summary>
+    /// <returns>当前用户名称；全名为空时返回用户名。</returns>
     protected virtual string GetUserName()
     {
         var name = CurrentUser.GetFullName();
@@ -168,10 +171,10 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     #region OnConfiguring(配置)
 
     /// <summary>
-    /// 配置
+    /// 配置每次创建 DbContext 时执行的基础选项。
     /// </summary>
     /// <param name="builder">配置生成器</param>
-    /// <remarks>每次新 DbContext 对象都会调用</remarks>
+    /// <remarks>每次创建新的 DbContext 对象时都会调用。</remarks>
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         ConfiguringLog(builder);
@@ -239,16 +242,19 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 获取映射配置列表
     /// </summary>
+    /// <returns>当前工作单元使用的映射配置集合。</returns>
     private IEnumerable<IMap> GetMaps() => _maps.GetOrAdd(GetMapType(), GetMapsFromAssemblies());
 
     /// <summary>
     /// 获取映射接口类型
     /// </summary>
+    /// <returns>当前工作单元对应的映射接口类型。</returns>
     protected virtual Type GetMapType() => this.GetType();
 
     /// <summary>
     /// 从程序集获取映射配置列表
     /// </summary>
+    /// <returns>从相关程序集发现的映射配置集合。</returns>
     private IEnumerable<IMap> GetMapsFromAssemblies()
     {
         var result = new List<IMap>();
@@ -261,11 +267,13 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 获取映射实例列表
     /// </summary>
     /// <param name="assembly">程序集</param>
+    /// <returns>指定程序集中的映射实例集合。</returns>
     protected virtual IEnumerable<IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 
     /// <summary>
     /// 获取定义映射配置的程序集列表
     /// </summary>
+    /// <returns>包含映射配置的程序集数组。</returns>
     protected virtual Assembly[] GetAssemblies() => new[] { GetType().Assembly };
 
     #endregion
@@ -329,6 +337,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 创建过滤器表达式
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <returns>适用于指定实体类型的全局过滤表达式；无需过滤时返回 null。</returns>
     protected virtual Expression<Func<TEntity, bool>> CreateFilterExpression<TEntity>() where TEntity : class
     {
         return GetSoftDeleteFilterExpression<TEntity>();
@@ -338,6 +347,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 获取逻辑删除过滤器表达式
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <returns>适用于指定实体类型的逻辑删除过滤表达式；过滤器不适用时返回 null。</returns>
     protected virtual Expression<Func<TEntity, bool>> GetSoftDeleteFilterExpression<TEntity>() where TEntity : class
     {
         var filter = FilterManager.GetFilter<ISoftDelete>();
@@ -355,6 +365,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 提交，返回影响的行数
     /// </summary>
+    /// <returns>本次提交影响的实体行数。</returns>
     public int Commit()
     {
         try
@@ -385,6 +396,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 异步提交，返回影响的行数
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步提交操作的任务，结果为本次提交影响的实体行数。</returns>
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -414,6 +426,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 保存更改
     /// </summary>
+    /// <returns>保存更改影响的实体行数。</returns>
     public override int SaveChanges()
     {
         SaveChangesBefore();
@@ -429,6 +442,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 手工创建事务提交。
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器。</param>
+    /// <returns>事务提交并保存更改影响的实体行数。</returns>
     private int TransactionCommit(ITransactionActionManager transactionActionManager)
     {
         var connection = Database.GetDbConnection();
@@ -535,6 +549,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// 异步保存更改
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步保存操作的任务，结果为保存更改影响的实体行数。</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -552,6 +567,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步事务提交操作的任务，结果为事务提交并保存更改影响的实体行数。</returns>
     private async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
     {
         var connection = Database.GetDbConnection();
@@ -748,6 +764,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 获取版本号
     /// </summary>
+    /// <returns>新生成的实体版本号。</returns>
     protected virtual byte[] GetVersion() => Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
 
     #endregion
@@ -757,6 +774,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <summary>
     /// 获取数据库连接
     /// </summary>
+    /// <returns>当前工作单元使用的数据库连接。</returns>
     public IDbConnection GetConnection() => Database.GetDbConnection();
 
     #endregion

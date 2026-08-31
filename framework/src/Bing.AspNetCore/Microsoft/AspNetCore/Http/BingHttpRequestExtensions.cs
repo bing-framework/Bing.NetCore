@@ -22,6 +22,7 @@ public static class BingHttpRequestExtensions
     /// 是否Ajax请求
     /// </summary>
     /// <param name="request">Http请求</param>
+    /// <returns>请求为 Ajax 请求时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool IsAjax(this HttpRequest request)
     {
         Check.NotNull(request, nameof(request));
@@ -36,6 +37,7 @@ public static class BingHttpRequestExtensions
     /// </summary>
     /// <param name="request">Http请求</param>
     /// <param name="contentType">内容类型</param>
+    /// <returns>请求的 Accept 标头包含指定内容类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool CanAccept(this HttpRequest request, string contentType)
     {
         Check.NotNull(request, nameof(request));

@@ -12,6 +12,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// 添加日志上下文扩展属性
     /// </summary>
     /// <param name="source">日志扩展配置</param>
+    /// <returns>添加日志上下文扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithLogContext(this LoggerEnrichmentConfiguration source)
     {
         if (source == null)
@@ -23,6 +24,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// 添加日志级别扩展属性
     /// </summary>
     /// <param name="source">日志扩展配置</param>
+    /// <returns>添加日志级别扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithLogLevel(this LoggerEnrichmentConfiguration source)
     {
         if (source == null)
@@ -35,6 +37,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// </summary>
     /// <param name="source">日志扩展配置</param>
     /// <param name="keyValue">键值对</param>
+    /// <returns>添加键值扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithProperty(this LoggerEnrichmentConfiguration source, KeyValuePair<string, object> keyValue)
     {
         if (source == null)
@@ -50,6 +53,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// <param name="source">日志扩展配置</param>
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
+    /// <returns>添加函数扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithFunction(this LoggerEnrichmentConfiguration source, string key, Func<LogEvent, string> func)
     {
         if (source == null)
@@ -67,6 +71,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// <param name="source">日志扩展配置</param>
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
+    /// <returns>添加函数扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithFunction(this LoggerEnrichmentConfiguration source, string key, Func<string> func)
     {
         if (source == null)
@@ -85,6 +90,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
     /// <param name="parameter">参数</param>
+    /// <returns>添加函数扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithFunction(this LoggerEnrichmentConfiguration source, string key, Func<object, string> func, object parameter)
     {
         if (source == null)
@@ -103,6 +109,7 @@ public static class LoggerEnrichmentConfigurationExtensions
     /// </summary>
     /// <param name="source">日志扩展配置</param>
     /// <param name="environmentVariable">环境变量</param>
+    /// <returns>添加环境变量扩展器后的日志配置。</returns>
     public static LoggerConfiguration WithEnvironment(this LoggerEnrichmentConfiguration source, string environmentVariable)
     {
         if (source == null)

@@ -16,6 +16,7 @@ internal class DefaultFileUploadService : IFileUploadService
     /// </summary>
     /// <param name="param">参数</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件的描述信息。</returns>
     public async Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (param.FormFile == null || param.FormFile.Length < 1)
@@ -37,6 +38,7 @@ internal class DefaultFileUploadService : IFileUploadService
     /// <param name="relativePath">相对路径</param>
     /// <param name="rootPath">根路径</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件的描述信息。</returns>
     private async Task<FileDescriptor> SaveAsync(IFormFile formFile, string relativePath, string rootPath,
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -68,6 +70,7 @@ internal class DefaultFileUploadService : IFileUploadService
     /// </summary>
     /// <param name="param">参数</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件描述信息的集合。</returns>
     public async Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (param.FormFiles == null || !param.FormFiles.Any())
@@ -112,6 +115,7 @@ internal class DefaultFileUploadService : IFileUploadService
     /// <param name="formFile">表单文件</param>
     /// <param name="savePath">保存路径</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务，结果为已保存文件的 MD5 哈希值。</returns>
     public async Task<string> SaveWithMd5Async(IFormFile formFile, string savePath,
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -129,6 +133,7 @@ internal class DefaultFileUploadService : IFileUploadService
     /// MD5哈希
     /// </summary>
     /// <param name="stream">流</param>
+    /// <returns>流内容的 MD5 哈希值；流为 null 时返回空字符串。</returns>
     private static string Md5(Stream stream)
     {
         if (stream == null)

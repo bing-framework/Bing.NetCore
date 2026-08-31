@@ -25,6 +25,7 @@ public class WhereIfNotEmptyCondition<TEntity> : ICondition<TEntity>
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>当前非空查询条件表达式；条件为空或表达式值为空文本时返回 <see langword="null"/>。</returns>
     public Expression<Func<TEntity, bool>> GetCondition()
     {
         if (_condition == null)

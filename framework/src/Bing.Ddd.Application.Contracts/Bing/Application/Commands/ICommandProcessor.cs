@@ -18,5 +18,6 @@ public interface ICommandProcessor
     /// <typeparam name="TResult">结果类型</typeparam>
     /// <param name="request">命令请求</param>
     /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示命令处理结果的异步操作。</returns>
     Task<TResult> ProcessAsync<TResult>(ICommand<TResult> request, CancellationToken cancellationToken = default);
 }

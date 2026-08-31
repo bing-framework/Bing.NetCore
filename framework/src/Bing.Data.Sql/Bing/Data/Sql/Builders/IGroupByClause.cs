@@ -59,5 +59,6 @@ public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause
     /// <summary>
     /// 获取Sql
     /// </summary>
+    /// <returns>当前 Group By 子句生成的 SQL。</returns>
     string ToSql();
 }

@@ -5,14 +5,9 @@
 /// </summary>
 public abstract class TenantResolveContributorBase : ITenantResolveContributor
 {
-    /// <summary>
-    /// 名称
-    /// </summary>
+    /// <inheritdoc />
     public abstract string Name { get; }
 
-    /// <summary>
-    /// 解析
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
+    /// <inheritdoc />
     public abstract Task ResolveAsync(ITenantResolveContext context);
 }

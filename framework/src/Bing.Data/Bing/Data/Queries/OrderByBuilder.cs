@@ -32,5 +32,6 @@ public class OrderByBuilder
     /// <summary>
     /// 生成排序字符串
     /// </summary>
+    /// <returns>由排序项组成的排序字符串。</returns>
     public string Generate() => _items.Select(t => t.Generate()).ToList().Join();
 }

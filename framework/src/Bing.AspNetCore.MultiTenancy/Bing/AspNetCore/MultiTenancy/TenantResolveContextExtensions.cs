@@ -13,6 +13,7 @@ public static class TenantResolveContextExtensions
     /// 获取多租户配置
     /// </summary>
     /// <param name="context">租户解析上下文</param>
+    /// <returns>当前服务容器中的多租户配置。</returns>
     public static MultiTenancyOptions GetMultiTenancyOptions(this ITenantResolveContext context) =>
         context.ServiceProvider.GetRequiredService<IOptions<MultiTenancyOptions>>().Value;
 }

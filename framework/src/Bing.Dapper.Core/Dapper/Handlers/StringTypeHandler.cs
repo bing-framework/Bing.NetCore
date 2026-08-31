@@ -21,5 +21,6 @@ public class StringTypeHandler : SqlMapper.TypeHandler<string>
     /// 转换值
     /// </summary>
     /// <param name="value">值</param>
+    /// <returns>转换后的字符串；输入为空时返回 null。</returns>
     public override string Parse(object value) => value?.ToString();
 }

@@ -84,6 +84,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 创建Sql查询对象
     /// </summary>
+    /// <returns>基于共享 EF Core 连接创建的 SQL 查询对象。</returns>
     protected virtual ISqlQuery CreateSqlQuery()
     {
         return CreateEfCoreSqlQueryFactory().Create(UnitOfWork, EfCoreSqlConnectionMode.Shared);
@@ -92,6 +93,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 创建独立 SQL 查询对象
     /// </summary>
+    /// <returns>基于独立 EF Core 连接创建的 SQL 查询对象。</returns>
     protected virtual ISqlQuery CreateIndependentSqlQuery()
     {
         return CreateEfCoreSqlQueryFactory().Create(UnitOfWork, EfCoreSqlConnectionMode.Independent);
@@ -100,6 +102,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 创建 EF Core SQL 查询工厂
     /// </summary>
+    /// <returns>已解析的 EF Core SQL 查询工厂。</returns>
     protected virtual IEfCoreSqlQueryFactory CreateEfCoreSqlQueryFactory()
     {
         var factory = UnitOfWork.ServiceProvider?.GetService(typeof(IEfCoreSqlQueryFactory)) as IEfCoreSqlQueryFactory;
@@ -116,9 +119,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region Find(查找实体)
 
     /// <inheritdoc />
+    /// <returns>不跟踪实体的查询数据源。</returns>
     public IQueryable<TEntity> FindAsNoTracking() => Set.AsNoTracking();
 
     /// <inheritdoc />
+    /// <returns>跟踪实体的查询数据源。</returns>
     public IQueryable<TEntity> Find()
     {
         ThrowIfDisposed();
@@ -126,9 +131,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>应用查询条件后的实体查询数据源。</returns>
     public IQueryable<TEntity> Find(ICondition<TEntity> criteria) => Find().Where(criteria);
 
     /// <inheritdoc />
+    /// <returns>应用查询条件后的实体查询数据源。</returns>
     public IQueryable<TEntity> Find(Expression<Func<TEntity, bool>> predicate) => Find().Where(predicate);
 
     #endregion
@@ -136,10 +143,12 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindById(通过标识查找实体)
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体；标识为空或未找到时返回 null。</returns>
     [Obsolete("请使用 FindById 方法")]
     public virtual TEntity Find(object id) => id.SafeString().IsEmpty() ? null : Set.Find(id);
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体；标识为空或未找到时返回 null。</returns>
     public virtual TEntity FindById(object id) => id.SafeString().IsEmpty() ? null : Set.Find(id);
 
     #endregion
@@ -147,6 +156,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdAsync(通过标识查找实体)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体；标识为空或未找到时返回 null。</returns>
     [Obsolete("请使用 FindByIdAsync 方法")]
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
@@ -157,6 +167,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体；标识为空或未找到时返回 null。</returns>
     public virtual async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -170,15 +181,18 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIds(通过标识列表查找实体列表)
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体列表；标识集合为空时返回 null。</returns>
     public virtual List<TEntity> FindByIds(params TKey[] ids) => FindByIds((IEnumerable<TKey>)ids);
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体列表；标识集合为空时返回 null。</returns>
     public virtual List<TEntity> FindByIds(IEnumerable<TKey> ids)
     {
         return ids == null ? null : Find(t => ids.Contains(t.Id)).ToList();
     }
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体列表；标识字符串为空时返回空结果或 null，取决于转换结果。</returns>
     public virtual List<TEntity> FindByIds(string ids)
     {
         return FindByIds(Conv.ToList<TKey>(ids));
@@ -189,9 +203,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdsAsync(通过标识列表查找实体列表)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(params TKey[] ids) => await FindByIdsAsync((IEnumerable<TKey>)ids);
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表；标识集合为空时返回 null。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -199,6 +215,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -210,6 +227,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdNoTracking(通过标识查找实体，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的未跟踪实体；未找到时返回 null。</returns>
     public virtual TEntity FindByIdNoTracking(TKey id)
     {
         var entities = FindByIdsNoTracking(id);
@@ -221,15 +239,18 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdsNoTracking(通过标识列表查找实体列表，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的未跟踪实体列表。</returns>
     public virtual List<TEntity> FindByIdsNoTracking(params TKey[] ids) => FindByIdsNoTracking((IEnumerable<TKey>)ids);
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的未跟踪实体列表；标识集合为空时返回 null。</returns>
     public virtual List<TEntity> FindByIdsNoTracking(IEnumerable<TKey> ids)
     {
         return ids == null ? null : FindAsNoTracking().Where(t => ids.Contains(t.Id)).ToList();
     }
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的未跟踪实体列表。</returns>
     public virtual List<TEntity> FindByIdsNoTracking(string ids)
     {
         return FindByIdsNoTracking(Conv.ToList<TKey>(ids));
@@ -240,6 +261,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdNoTrackingAsync(通过标识查找实体，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体；未找到时返回 null。</returns>
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -252,9 +274,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindByIdsNoTrackingAsync(通过标识列表查找实体列表，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表。</returns>
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(params TKey[] ids) => await FindByIdsNoTrackingAsync((IEnumerable<TKey>)ids);
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表；标识集合为空时返回 null。</returns>
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -262,6 +286,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体列表。</returns>
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -273,9 +298,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region Single(查找单个实体)
 
     /// <inheritdoc />
+    /// <returns>符合条件的第一个实体；未找到时返回 null。</returns>
     public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate) => Find().FirstOrDefault(predicate);
 
     /// <inheritdoc />
+    /// <returns>经查询操作处理后符合条件的第一个实体；未找到时返回 null。</returns>
     public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action)
     {
         if (action == null)
@@ -288,6 +315,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region SingleAsync(查找单个实体)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为符合条件的第一个实体；未找到时返回 null。</returns>
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -295,6 +323,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为经查询操作处理后符合条件的第一个实体；未找到时返回 null。</returns>
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -308,6 +337,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindAll(查找实体列表)
 
     /// <inheritdoc />
+    /// <returns>符合条件的实体列表。</returns>
     public virtual List<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate = null)
     {
         return predicate == null ? Find().ToList() : Find(predicate).ToList();
@@ -318,6 +348,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindAllAsync(查找实体列表)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为符合条件的实体列表。</returns>
     public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -331,6 +362,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindAllNoTracking(查找实体列表，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>符合条件的未跟踪实体列表。</returns>
     public virtual List<TEntity> FindAllNoTracking(Expression<Func<TEntity, bool>> predicate = null)
     {
         return predicate == null ? FindAsNoTracking().ToList() : FindAsNoTracking().Where(predicate).ToList();
@@ -341,6 +373,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region FindAllNoTrackingAsync(查找实体列表，不跟踪)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为符合条件的未跟踪实体列表。</returns>
     public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -354,6 +387,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region Exists(判断是否存在)
 
     /// <inheritdoc />
+    /// <returns>指定标识对应的实体存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Exists(TKey id)
     {
         if (id.SafeString().IsEmpty())
@@ -362,12 +396,14 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>指定标识集合中存在匹配实体时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public virtual bool Exists(TKey[] ids)
     {
         return ids != null && Exists(t => ids.Contains(t.Id));
     }
 
     /// <inheritdoc />
+    /// <returns>存在符合条件的实体时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public virtual bool Exists(Expression<Func<TEntity, bool>> predicate)
     {
         return predicate != null && Find().Any(predicate);
@@ -378,6 +414,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region ExistsAsync(判断是否存在)
 
     /// <inheritdoc />
+    /// <returns>表示异步判断操作的任务，结果指示指定标识对应的实体是否存在。</returns>
     public async Task<bool> ExistsAsync(TKey id)
     {
         if (id.SafeString().IsEmpty())
@@ -386,12 +423,14 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步判断操作的任务，结果指示指定标识集合中是否存在匹配实体。</returns>
     public virtual async Task<bool> ExistsAsync(params TKey[] ids)
     {
         return ids != null && await ExistsAsync(t => ids.Contains(t.Id));
     }
 
     /// <inheritdoc />
+    /// <returns>表示异步判断操作的任务，结果指示是否存在符合条件的实体。</returns>
     public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -403,6 +442,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region Count(查找数量)
 
     /// <inheritdoc />
+    /// <returns>符合条件的实体数量。</returns>
     public virtual int Count(Expression<Func<TEntity, bool>> predicate = null)
     {
         return predicate == null ? Find().Count() : Find().Count(predicate);
@@ -413,6 +453,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region CountAsync(查找数量)
 
     /// <inheritdoc />
+    /// <returns>表示异步操作的任务，结果为符合条件的实体数量。</returns>
     public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -475,7 +516,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Update(TEntity entity)
     {
         ThrowIfDisposed();
@@ -517,7 +558,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// 抛出并发异常
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ConcurrencyException"></exception>
+    /// <exception cref="ConcurrencyException">实体版本号与持久化版本不一致时抛出。</exception>
     private static void ThrowConcurrencyException(TEntity entity) => throw new ConcurrencyException($"Type:{typeof(TEntity)}, Id:{entity.Id}");
 
     /// <summary>
@@ -541,7 +582,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// 修改实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Update(IEnumerable<TEntity> entities)
     {
         if (entities == null)
@@ -695,7 +736,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 已释放则抛出异常
     /// </summary>
-    /// <exception cref="ObjectDisposedException"></exception>
+    /// <exception cref="ObjectDisposedException">当前存储对象已释放时抛出。</exception>
     protected void ThrowIfDisposed()
     {
         if (_disposed)

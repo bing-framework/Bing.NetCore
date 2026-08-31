@@ -4,15 +4,15 @@ using Bing.Text;
 namespace Bing.Caching;
 
 /// <summary>
-/// 缓存名称 特性
+/// 为缓存项类型指定缓存名称覆盖值。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct)]
 public class CacheNameAttribute : Attribute
 {
     /// <summary>
-    /// 初始化一个<see cref="CacheNameAttribute"/>类型的实例
+    /// 使用指定缓存名称初始化 <see cref="CacheNameAttribute"/> 的实例。
     /// </summary>
-    /// <param name="name">名称</param>
+    /// <param name="name">覆盖默认类型名推导规则的缓存名称。</param>
     public CacheNameAttribute(string name)
     {
         Check.NotNull(name, nameof(name));
@@ -20,27 +20,25 @@ public class CacheNameAttribute : Attribute
     }
 
     /// <summary>
-    /// 名称
+    /// 获取应用于目标缓存项类型的缓存名称覆盖值。
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// 获取给定类型的缓存名称
+    /// 获取指定缓存项类型的最终缓存名称。
     /// </summary>
-    /// <typeparam name="TCacheItem">缓存项的类型</typeparam>
+    /// <typeparam name="TCacheItem">要解析缓存名称的缓存项类型。</typeparam>
     /// <returns>
-    /// 如果指定类型上存在<see cref="CacheNameAttribute"/>特性，则返回该特性指定的缓存名称；
-    /// 否则，返回类型的全名去除"CacheItem"后缀后的结果。
+    /// 指定类型存在 <see cref="CacheNameAttribute"/> 时返回该特性指定的名称；否则返回移除 <c>CacheItem</c> 后缀后的类型全名。
     /// </returns>
     public static string GetCacheName<TCacheItem>() => GetCacheName(typeof(TCacheItem));
 
     /// <summary>
-    /// 获取给定类型的缓存名称
+    /// 获取指定缓存项类型的最终缓存名称。
     /// </summary>
-    /// <param name="cacheItemType">缓存项的类型</param>
+    /// <param name="cacheItemType">要解析缓存名称的缓存项类型。</param>
     /// <returns>
-    /// 如果指定类型上存在<see cref="CacheNameAttribute"/>特性，则返回该特性指定的缓存名称；
-    /// 否则，返回类型的全名去除"CacheItem"后缀后的结果。
+    /// 指定类型存在 <see cref="CacheNameAttribute"/> 时返回该特性指定的名称；否则返回移除 <c>CacheItem</c> 后缀后的类型全名。
     /// </returns>
     public static string GetCacheName(Type cacheItemType)
     {

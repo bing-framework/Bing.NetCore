@@ -1,22 +1,22 @@
 ﻿namespace Bing.Permissions.Identity.Results;
 
 /// <summary>
-/// 登录状态
+/// 表示登录操作的处理结果。
 /// </summary>
 public enum SignInState
 {
     /// <summary>
-    /// 登录成功
+    /// 登录凭据验证成功。
     /// </summary>
     Succeeded,
 
     /// <summary>
-    /// 失败
+    /// 登录失败。
     /// </summary>
     Failed,
 
     /// <summary>
-    /// 需要两阶段认证
+    /// 登录已进入需要第二因素验证的阶段。
     /// </summary>
     TwoFactor
 }

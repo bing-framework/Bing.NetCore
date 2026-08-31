@@ -13,5 +13,6 @@ public interface IAuditingManager
     /// <summary>
     /// 开始作用范围
     /// </summary>
+    /// <returns>当前审计日志作用域的保存句柄。</returns>
     IAuditLogSaveHandle BeginScope();
 }

@@ -58,6 +58,7 @@ public class OrderByClause : IOrderByClause
     /// 克隆
     /// </summary>
     /// <param name="context">重绑定后的子句运行上下文。</param>
+    /// <returns>使用指定运行上下文创建的独立 Order By 子句。</returns>
     public virtual IOrderByClause Clone(SqlClauseContext context) =>
         CreateClone(context, new List<OrderByItem>(_items));
 
@@ -107,6 +108,7 @@ public class OrderByClause : IOrderByClause
     /// </summary>
     /// <param name="column">排序列</param>
     /// <param name="tableAlias">表别名</param>
+    /// <returns>已存在匹配排序项时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected bool Exists(string column, string tableAlias)
     {
         var item = new OrderByItem(column, prefix: tableAlias);
@@ -165,9 +167,9 @@ public class OrderByClause : IOrderByClause
     }
 
     /// <summary>
-    /// 验证
+    /// 在分页查询中验证排序项是否存在。
     /// </summary>
-    /// <param name="isPage">是否分页</param>
+    /// <param name="isPage">是否处于分页查询。</param>
     public void Validate(bool isPage)
     {
         if (isPage == false)
@@ -202,6 +204,7 @@ public class OrderByClause : IOrderByClause
     /// <summary>
     /// 获取Sql。
     /// </summary>
+    /// <returns>当前 Order By 子句的 SQL 文本；没有排序项时返回 <see langword="null"/>。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();

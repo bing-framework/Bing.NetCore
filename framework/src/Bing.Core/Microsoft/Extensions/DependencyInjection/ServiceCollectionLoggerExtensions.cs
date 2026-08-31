@@ -22,6 +22,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="services">服务集合</param>
     /// <param name="oldDescriptors">旧的服务描述集合</param>
     /// <param name="logName">日志名称</param>
+    /// <returns>完成日志记录后的服务集合。</returns>
     public static IServiceCollection ServiceLogDebug(this IServiceCollection services, ServiceDescriptor[] oldDescriptors, string logName)
     {
         var list = services.Except(oldDescriptors);
@@ -46,6 +47,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="services">服务集合</param>
     /// <param name="logName">日志名称</param>
     /// <param name="lifetime">生命周期</param>
+    /// <returns>完成日志记录后的服务集合。</returns>
     public static IServiceCollection ServiceLogDebug<TServiceType, TImplementType>(this IServiceCollection services, string logName, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
         Type serviceType = typeof(TServiceType), implementType = typeof(TImplementType);
@@ -60,6 +62,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="implementType">服务实现类型</param>
     /// <param name="logName">日志名称</param>
     /// <param name="lifetime">生命周期</param>
+    /// <returns>完成日志记录后的服务集合。</returns>
     public static IServiceCollection ServiceLogDebug(this IServiceCollection services, Type serviceType, Type implementType, string logName, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
         var lifetimeType = lifetime == ServiceLifetime.Singleton ? "单例" : lifetime == ServiceLifetime.Scoped ? "作用域" : "瞬时";
@@ -72,6 +75,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="services">服务集合</param>
     /// <param name="message">消息</param>
     /// <param name="logName">日志名称</param>
+    /// <returns>完成日志记录后的服务集合。</returns>
     public static IServiceCollection LogDebug(this IServiceCollection services, string message, string logName)
     {
         var logger = services.GetOrAddSingletonInstance(() => new StartupLogger());
@@ -85,6 +89,7 @@ public static class ServiceCollectionLoggerExtensions
     /// <param name="services">服务集合</param>
     /// <param name="message">消息</param>
     /// <param name="logName">日志名称</param>
+    /// <returns>完成日志记录后的服务集合。</returns>
     public static IServiceCollection LogInformation(this IServiceCollection services, string message, string logName)
     {
         var logger = services.GetOrAddSingletonInstance(() => new StartupLogger());

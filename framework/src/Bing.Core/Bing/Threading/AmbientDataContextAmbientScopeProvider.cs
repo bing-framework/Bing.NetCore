@@ -6,42 +6,38 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Bing.Threading;
 
 /// <summary>
-/// 环境数据上下文环境范围提供程序
+/// 基于 <see cref="IAmbientDataContext"/> 保存嵌套环境范围值的提供程序。
 /// </summary>
-/// <typeparam name="T">泛型类型</typeparam>
+/// <typeparam name="T">环境范围值的类型。</typeparam>
 public class AmbientDataContextAmbientScopeProvider<T> : IAmbientScopeProvider<T>
 {
     /// <summary>
-    /// 日志
+    /// 获取或设置用于记录范围处理诊断信息的日志记录器。
     /// </summary>
     public ILogger<AmbientDataContextAmbientScopeProvider<T>> Logger { get; set; }
 
     /// <summary>
-    /// 范围字典
+    /// 保存所有活动范围项的共享字典。
     /// </summary>
     // ReSharper disable once InconsistentNaming
     private static readonly ConcurrentDictionary<string, ScopeItem> ScopeDictionary = new();
 
     /// <summary>
-    /// 环境数据上下文
+    /// 保存当前执行环境的数据上下文。
     /// </summary>
     private readonly IAmbientDataContext _dataContext;
 
     /// <summary>
-    /// 初始化一个<see cref="AmbientDataContextAmbientScopeProvider{T}"/>类型的实例
+    /// 使用环境数据上下文初始化 <see cref="AmbientDataContextAmbientScopeProvider{T}"/> 的实例。
     /// </summary>
-    /// <param name="dataContext">环境数据上下文</param>
+    /// <param name="dataContext">保存当前范围标识的环境数据上下文。</param>
     public AmbientDataContextAmbientScopeProvider(IAmbientDataContext dataContext)
     {
         _dataContext = dataContext ?? throw new ArgumentNullException(nameof(dataContext));
         Logger = NullLogger<AmbientDataContextAmbientScopeProvider<T>>.Instance;
     }
 
-    /// <summary>
-    /// 获取值
-    /// </summary>
-    /// <param name="contextKey">上下文键名</param>
-    /// <returns>对象值</returns>
+    /// <inheritdoc />
     public T GetValue(string contextKey)
     {
         var item = GetCurrentItem(contextKey);
@@ -50,11 +46,8 @@ public class AmbientDataContextAmbientScopeProvider<T> : IAmbientScopeProvider<T
         return item.Value;
     }
 
-    /// <summary>
-    /// 开始范围
-    /// </summary>
-    /// <param name="contextKey">上下文键名</param>
-    /// <param name="value">对象值</param>
+    /// <inheritdoc />
+    /// <remarks>释放范围时删除当前范围项，并恢复创建该范围时捕获的外层范围标识。</remarks>
     public IDisposable BeginScope(string contextKey, T value)
     {
         var item = new ScopeItem(value, GetCurrentItem(contextKey));
@@ -76,39 +69,40 @@ public class AmbientDataContextAmbientScopeProvider<T> : IAmbientScopeProvider<T
     }
 
     /// <summary>
-    /// 获取当前项
+    /// 根据当前环境上下文中的范围标识获取范围项。
     /// </summary>
-    /// <param name="contextKey">上下文键名</param>
+    /// <param name="contextKey">用于读取范围标识的上下文键。</param>
+    /// <returns>当前范围项；未建立范围或项已移除时返回 <c>null</c>。</returns>
     private ScopeItem GetCurrentItem(string contextKey)
     {
         return _dataContext.GetData(contextKey) is string objKey ? ScopeDictionary.GetOrDefault(objKey) : null;
     }
 
     /// <summary>
-    /// 范围项
+    /// 表示一个范围值及其创建时捕获的外层范围项。
     /// </summary>
     private class ScopeItem
     {
         /// <summary>
-        /// 标识
+        /// 获取用于在共享字典中定位范围项的唯一标识。
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        /// 外部范围项
+        /// 获取创建当前范围时捕获的外层范围项。
         /// </summary>
         public ScopeItem Outer { get; }
 
         /// <summary>
-        /// 值
+        /// 获取当前范围保存的值。
         /// </summary>
         public T Value { get; }
 
         /// <summary>
-        /// 初始化一个<see cref="ScopeItem"/>类型的实例
+        /// 使用范围值和外层范围项初始化 <see cref="ScopeItem"/> 的实例。
         /// </summary>
-        /// <param name="value">值</param>
-        /// <param name="outer">外部范围项</param>
+        /// <param name="value">当前范围保存的值。</param>
+        /// <param name="outer">创建当前范围前的外层范围项。</param>
         public ScopeItem(T value, ScopeItem outer = null)
         {
             Id = Guid.NewGuid().ToString();

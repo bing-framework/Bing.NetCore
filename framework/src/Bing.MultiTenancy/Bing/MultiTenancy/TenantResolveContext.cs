@@ -19,18 +19,15 @@ public class TenantResolveContext : ITenantResolveContext
     /// </summary>
     public IServiceProvider ServiceProvider { get; }
 
-    /// <summary>
-    /// 租户ID或者租户名称
-    /// </summary>
+    /// <inheritdoc />
     public string? TenantIdOrName { get; set; }
 
-    /// <summary>
-    /// 是否已处理
-    /// </summary>
+    /// <inheritdoc />
     public bool Handled { get; set; }
 
     /// <summary>
-    /// 是否已经解析租户或主机
+    /// 确定当前上下文是否已解析候选租户或已终止解析链。
     /// </summary>
+    /// <returns>已存在候选租户或上下文已标记为处理完成时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public bool HasResolvedTenantOrHost() => Handled || TenantIdOrName != null;
 }

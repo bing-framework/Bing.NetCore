@@ -39,7 +39,7 @@ public class OrderByItem
     public string Prefix { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="OrderByItem"/>类型的实例
+    /// 初始化一个 <see cref="OrderByItem"/> 类型的实例。
     /// </summary>
     /// <param name="order">排序列</param>
     /// <param name="desc">是否降序</param>
@@ -71,6 +71,7 @@ public class OrderByItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="register">实体别名注册器</param>
+    /// <returns>按指定 SQL 方言渲染的排序 SQL。</returns>
     public string ToSql(IDialect dialect, IEntityAliasRegister register)
     {
         if (Raw)
@@ -83,6 +84,7 @@ public class OrderByItem
     /// 获取前缀
     /// </summary>
     /// <param name="register">实体别名注册器</param>
+    /// <returns>当前排序项使用的表前缀。</returns>
     private string GetPrefix(IEntityAliasRegister register)
     {
         if (string.IsNullOrWhiteSpace(Prefix) == false)

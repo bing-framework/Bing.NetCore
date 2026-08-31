@@ -236,5 +236,6 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     /// <summary>
     /// 输出Sql
     /// </summary>
+    /// <returns>当前 Select 子句生成的 SQL。</returns>
     string ToSql();
 }

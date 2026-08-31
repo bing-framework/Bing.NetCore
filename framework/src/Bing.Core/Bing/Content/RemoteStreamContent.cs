@@ -1,33 +1,33 @@
 ﻿namespace Bing.Content;
 
 /// <summary>
-/// 远程流内容
+/// 使用现有流作为远程内容的默认实现。
 /// </summary>
 public class RemoteStreamContent : IRemoteStreamContent
 {
     /// <summary>
-    /// 流
+    /// 保存作为内容返回的源流。
     /// </summary>
     private readonly Stream _stream;
 
     /// <summary>
-    /// 是否释放流
+    /// 指示释放当前内容时是否同时释放源流。
     /// </summary>
     private readonly bool _disposeStream;
 
     /// <summary>
-    /// 是否已释放
+    /// 指示当前内容是否已执行流释放。
     /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// 初始化一个<see cref="RemoteStreamContent"/>类型的实例
+    /// 使用内容流和可选元数据初始化 <see cref="RemoteStreamContent"/> 的实例。
     /// </summary>
-    /// <param name="stream">流</param>
-    /// <param name="fileName">文件名（可选）。</param>
-    /// <param name="contentType">内容的MIME类型（可选）。</param>
-    /// <param name="readOnlyLength">内容的长度（可选）。如果未提供，则尝试从流中获取。</param>
-    /// <param name="disposeStream">指示释放 <see cref="RemoteStreamContent"/> 时是否应释放流。</param>
+    /// <param name="stream">作为内容返回的源流。</param>
+    /// <param name="fileName">可选的内容文件名。</param>
+    /// <param name="contentType">可选的 MIME 类型；为空时使用默认 MIME 类型。</param>
+    /// <param name="readOnlyLength">可选的内容长度；未提供时仅为可定位流计算当前剩余长度。</param>
+    /// <param name="disposeStream">释放当前对象时是否同时释放 <paramref name="stream"/>，默认值为 <c>true</c>。</param>
     public RemoteStreamContent(Stream stream, string fileName = null, string contentType = null, long? readOnlyLength = null, bool disposeStream = true)
     {
         _stream = stream;
@@ -48,9 +48,11 @@ public class RemoteStreamContent : IRemoteStreamContent
     public virtual long? ContentLength { get; }
 
     /// <inheritdoc />
+    /// <remarks>原样返回构造时提供的流，不调整其当前位置。</remarks>
     public virtual Stream GetStream() => _stream;
 
     /// <inheritdoc />
+    /// <remarks>仅在构造时启用流释放且尚未释放时处置源流。</remarks>
     public virtual void Dispose()
     {
         if (_disposed || !_disposeStream)

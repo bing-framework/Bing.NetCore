@@ -40,6 +40,7 @@ public class RequestScopedServiceResolver : IScopedServiceResolver
     /// 获取指定服务类型的实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>当前请求作用域中的服务实例；无法解析时返回默认值。</returns>
     public T GetService<T>() => ResolveEnabled
         ? EmptyRequestService ? default : ScopedProvider.GetService<T>()
         : default;
@@ -48,6 +49,7 @@ public class RequestScopedServiceResolver : IScopedServiceResolver
     /// 获取指定服务类型的实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>当前请求作用域中的服务实例；无法解析时返回 null。</returns>
     public object GetService(Type serviceType) => ResolveEnabled
         ? EmptyRequestService ? null : ScopedProvider.GetService(serviceType)
         : null;
@@ -56,6 +58,7 @@ public class RequestScopedServiceResolver : IScopedServiceResolver
     /// 获取指定服务类型的所有实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>当前请求作用域中解析到的服务实例集合；无请求作用域时返回空集合。</returns>
     public IEnumerable<T> GetServices<T>() => ResolveEnabled
         ? EmptyRequestService ? new List<T>() : ScopedProvider.GetServices<T>()
         : new List<T>();
@@ -64,6 +67,7 @@ public class RequestScopedServiceResolver : IScopedServiceResolver
     /// 获取指定服务类型的所有实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>当前请求作用域中解析到的服务实例集合；无请求作用域时返回空集合。</returns>
     public IEnumerable<object> GetServices(Type serviceType) => ResolveEnabled
         ? EmptyRequestService ? new List<object>() : ScopedProvider.GetServices(serviceType)
         : new List<object>();

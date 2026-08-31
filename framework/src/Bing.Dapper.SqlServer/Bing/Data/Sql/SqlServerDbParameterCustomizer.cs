@@ -11,6 +11,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlServerDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
+    /// <returns>数据库类型为 SQL Server 时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.SqlServer;
 
     /// <inheritdoc />

@@ -23,6 +23,7 @@ public class DependencyTypeFinder : FinderBase<Type>, IDependencyTypeFinder
     /// <summary>
     /// 重写已实现所有项的查找
     /// </summary>
+    /// <returns>符合依赖注入注册条件的实现类型数组。</returns>
     protected override Type[] FindAllItems()
     {
         var baseTypes = new[] {typeof(ISingletonDependency), typeof(IScopedDependency), typeof(ITransientDependency)};

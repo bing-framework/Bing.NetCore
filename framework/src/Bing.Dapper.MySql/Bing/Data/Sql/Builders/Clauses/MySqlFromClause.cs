@@ -35,6 +35,7 @@ public class MySqlFromClause : FromClause
     /// <param name="table">表名</param>
     /// <param name="schema">架构名</param>
     /// <param name="alias">别名</param>
+    /// <returns>根据 Provider 类型创建的 SQL 项。</returns>
     protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
         ProviderDatabaseType != Bing.Data.Enums.DatabaseType.MySql
             ? SqlItem.Parse(table, schema, alias)
@@ -55,6 +56,7 @@ public class MySqlFromClause : FromClause
     }
 
     /// <inheritdoc />
+    /// <returns>当前 From 子句的 MySQL 副本。</returns>
     protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new MySqlFromClause(context, table, ProviderDatabaseType);
 }

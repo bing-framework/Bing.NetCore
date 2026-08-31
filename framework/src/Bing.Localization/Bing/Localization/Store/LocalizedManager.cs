@@ -49,6 +49,7 @@ public class LocalizedManager : ILocalizedManager
     /// <summary>
     /// 获取区域文化列表
     /// </summary>
+    /// <returns>当前 UI 区域文化及存储器提供的区域文化名称集合。</returns>
     protected virtual List<string> GetCultures()
     {
         var result = new List<string> { Culture.GetCurrentUICultureName() };

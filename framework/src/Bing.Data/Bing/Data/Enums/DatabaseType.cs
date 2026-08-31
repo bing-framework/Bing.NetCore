@@ -1,37 +1,37 @@
 ﻿namespace Bing.Data.Enums;
 
 /// <summary>
-/// 数据库类型
+/// 标识 SQL 数据源使用的数据库类型。
 /// </summary>
 public enum DatabaseType
 {
     /// <summary>
-    /// Sql Server数据库
+    /// SQL Server 数据库。
     /// </summary>
     SqlServer,
 
     /// <summary>
-    /// MySql数据库
+    /// MySQL 数据库。
     /// </summary>
     MySql,
 
     /// <summary>
-    /// PostgreSQL数据库
+    /// PostgreSQL 数据库。
     /// </summary>
     PgSql,
 
     /// <summary>
-    /// Oracle数据库
+    /// Oracle 数据库。
     /// </summary>
     Oracle,
 
     /// <summary>
-    /// Sqlite数据库
+    /// SQLite 数据库。
     /// </summary>
     Sqlite,
 
     /// <summary>
-    /// Doris数据库
+    /// Apache Doris 数据库。
     /// </summary>
     Doris
 }

@@ -16,8 +16,9 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
+    /// <returns>包含排序和分页条件的查询对象异步任务。</returns>
+    /// <exception cref="ArgumentNullException">数据源或分页对象为空时抛出。</exception>
+    /// <exception cref="ArgumentException">未设置排序字段时抛出。</exception>
     public static Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
         where TEntity : class => PageAsync(query, pager, CancellationToken.None);
 
@@ -59,7 +60,8 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>包含分页结果的异步任务。</returns>
+    /// <exception cref="ArgumentNullException">数据源或分页对象为空时抛出。</exception>
     public static Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager)
         where TEntity : class => ToPagerListAsync(query, pager, CancellationToken.None);
 

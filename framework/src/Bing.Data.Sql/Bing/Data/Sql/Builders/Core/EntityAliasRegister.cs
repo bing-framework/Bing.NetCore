@@ -49,8 +49,10 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="EntityAliasRegister"/>类型的实例
+    /// 初始化一个 <see cref="EntityAliasRegister"/> 类型的实例。
     /// </summary>
+    /// <param name="data">初始实体别名映射。</param>
+    /// <param name="fromType">From 子句使用的实体类型。</param>
     public EntityAliasRegister(IDictionary<Type, string> data = null, Type fromType = null)
     {
         _data = data == null ? new Dictionary<Type, string>() : new Dictionary<Type, string>(data);
@@ -136,6 +138,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     /// 是否包含实体
     /// </summary>
     /// <param name="entity">实体类型</param>
+    /// <returns>包含指定实体类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool Contains(Type entity) => entity != null && Data.ContainsKey(entity);
 
     #endregion
@@ -146,6 +149,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     /// 获取实体别名
     /// </summary>
     /// <param name="entity">实体类型</param>
+    /// <returns>指定实体的当前别名；实体为空或未注册时返回 <see langword="null"/>。</returns>
     public string GetAlias(Type entity)
     {
         if (entity == null)
@@ -173,6 +177,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前别名注册状态的独立副本。</returns>
     public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(_data),
         _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)),
         new HashSet<string>(_aliases, StringComparer.OrdinalIgnoreCase), FromType);

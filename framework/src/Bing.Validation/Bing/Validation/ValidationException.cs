@@ -201,11 +201,13 @@ public class ValidationException : BingException
     /// <summary>
     /// 获取完整的消息
     /// </summary>
+    /// <returns>包含验证消息明细的完整异常消息。</returns>
     public override string GetFullMessage() => ToString();
 
     /// <summary>
     /// 输出字符串
     /// </summary>
+    /// <returns>包含基础消息和验证消息明细的字符串。</returns>
     public override string ToString()
     {
         var sb = new StringBuilder();

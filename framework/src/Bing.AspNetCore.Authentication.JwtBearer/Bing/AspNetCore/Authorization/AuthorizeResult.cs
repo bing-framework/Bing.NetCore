@@ -3,36 +3,36 @@
 namespace Bing.AspNetCore.Authorization;
 
 /// <summary>
-/// 授权结果
+/// 表示授权处理返回的 JSON 结果。
 /// </summary>
 public class AuthorizeResult : JsonResult
 {
     /// <summary>
-    /// 状态码
+    /// 获取授权处理结果状态码。
     /// </summary>
     public int Code { get; }
 
     /// <summary>
-    /// 消息
+    /// 获取授权处理结果消息。
     /// </summary>
     public string Message { get; }
 
     /// <summary>
-    /// 数据
+    /// 获取授权处理结果携带的数据。
     /// </summary>
     public dynamic Data { get; }
 
     /// <summary>
-    /// 操作时间
+    /// 获取结果创建时的操作时间。
     /// </summary>
     public DateTime OperationTime { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="AuthorizeResult"/>类型的实例
+    /// 使用状态码、消息和可选数据初始化一个 <see cref="AuthorizeResult"/> 实例。
     /// </summary>
-    /// <param name="code">状态码</param>
-    /// <param name="message">消息</param>
-    /// <param name="data">数据</param>
+    /// <param name="code">授权处理结果状态码。</param>
+    /// <param name="message">授权处理结果消息。</param>
+    /// <param name="data">授权处理结果携带的数据，可为空。</param>
     public AuthorizeResult(int code, string message, dynamic data = null) : base(null)
     {
         Code = code;
@@ -42,8 +42,10 @@ public class AuthorizeResult : JsonResult
     }
 
     /// <summary>
-    /// 执行结果
+    /// 将授权结果写入 MVC 执行上下文并异步执行 JSON 结果。
     /// </summary>
+    /// <param name="context">当前 MVC 操作执行上下文。</param>
+    /// <exception cref="ArgumentNullException">执行上下文为空时抛出。</exception>
     public override Task ExecuteResultAsync(ActionContext context)
     {
         if (context == null)

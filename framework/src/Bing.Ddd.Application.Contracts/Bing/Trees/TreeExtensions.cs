@@ -14,6 +14,7 @@ public static class TreeExtensions
     /// </summary>
     /// <param name="node">树节点</param>
     /// <param name="excludeSelf">是否排除当前节点，默认排除自身</param>
+    /// <returns>当前节点路径中的上级节点标识列表。</returns>
     public static List<string> GetParentIdsFromPath(this ITreeNode node, bool excludeSelf = true)
     {
         if (node == null || node.Path.IsEmpty())
@@ -29,6 +30,7 @@ public static class TreeExtensions
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="entities">实体列表</param>
+    /// <returns>缺失的父标识字符串列表。</returns>
     public static List<string> GetMissingParentIds<TEntity>(this IEnumerable<TEntity> entities)
         where TEntity : class, ITreeNode
     {

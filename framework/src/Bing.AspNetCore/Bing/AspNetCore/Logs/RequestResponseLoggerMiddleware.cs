@@ -132,6 +132,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 格式化请求头
     /// </summary>
     /// <param name="headers">请求头</param>
+    /// <returns>请求头名称和值组成的字典。</returns>
     private Dictionary<string, string> FormatHeaders(IHeaderDictionary headers)
     {
         var pairs = new Dictionary<string, string>();
@@ -144,6 +145,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 格式化Cookies
     /// </summary>
     /// <param name="cookies">Cookie集合</param>
+    /// <returns>Cookie 名称和值组成的字典。</returns>
     private Dictionary<string, string> FormatCookies(IRequestCookieCollection cookies)
     {
         var pairs = new Dictionary<string, string>();
@@ -156,6 +158,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 格式化查询字符串
     /// </summary>
     /// <param name="queryString">查询字符串</param>
+    /// <returns>查询字符串中的键值对列表。</returns>
     private List<KeyValuePair<string, string>> FormatQueries(string queryString)
     {
         var pairs = new List<KeyValuePair<string, string>>();
@@ -174,6 +177,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 从请求中读取正文内容
     /// </summary>
     /// <param name="request">Http请求</param>
+    /// <returns>请求正文文本。</returns>
     private async Task<string> ReadBodyFromRequest(HttpRequest request)
     {
         // 确保可以多次读取请求的正文，用于管道中的下一个中间件
@@ -193,6 +197,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 从响应中读取正文内容
     /// </summary>
     /// <param name="context">Http上下文</param>
+    /// <returns>响应正文文本；不记录响应正文时返回空字符串。</returns>
     private async Task<string> ReadBodyFromResponse(HttpContext context)
     {
         if (string.IsNullOrWhiteSpace(context.Response.ContentType) || !_options.WithResponse)
@@ -243,6 +248,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 过滤静态文件
     /// </summary>
     /// <param name="context">Http上下文</param>
+    /// <returns>应过滤静态文件请求时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool FilterStaticFiles(HttpContext context)
     {
         if (!string.IsNullOrWhiteSpace(context.Request.ContentType) && context.Request.ContentType.Contains("application/grpc"))
@@ -258,6 +264,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     /// 过滤请求
     /// </summary>
     /// <param name="context">Http上下文</param>
+    /// <returns>应过滤当前请求时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool FilterRequest(HttpContext context)
     {
         // 过滤上传文件请求

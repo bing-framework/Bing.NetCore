@@ -24,5 +24,6 @@ public class NullStringLocalizer : IStringLocalizer
     }
 
     /// <inheritdoc />
+    /// <returns>空的本地化字符串集合。</returns>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => new List<LocalizedString>();
 }

@@ -127,6 +127,9 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     /// <summary>
     /// 判断派生表与外层查询是否可安全使用同一物理数据库。
     /// </summary>
+    /// <param name="builder">外层查询 Builder。</param>
+    /// <param name="databaseIdentity">外层查询的物理数据库身份。</param>
+    /// <returns>如果派生表与外层查询可使用同一物理数据库，则返回 <see langword="true"/>。</returns>
     private bool CanUseSamePhysicalDatabase(SqlBuilderBase builder, SqlDatabaseIdentity databaseIdentity)
     {
         if (DatabaseIdentity == null || databaseIdentity == null)
@@ -139,6 +142,9 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     /// <summary>
     /// 比较可能为空的隔离上下文值。
     /// </summary>
+    /// <param name="left">左侧上下文值。</param>
+    /// <param name="right">右侧上下文值。</param>
+    /// <returns>两个上下文值相同或均为空时返回 <see langword="true"/>。</returns>
     private static bool IsSameContextValue(string left, string right) => string.Equals(
         string.IsNullOrWhiteSpace(left) ? string.Empty : left,
         string.IsNullOrWhiteSpace(right) ? string.Empty : right,
@@ -147,11 +153,15 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     /// <summary>
     /// 格式化隔离上下文值用于诊断。
     /// </summary>
+    /// <param name="value">待格式化的上下文值。</param>
+    /// <returns>用于诊断的上下文文本。</returns>
     private static string GetContextValue(string value) => string.IsNullOrWhiteSpace(value) ? "<默认>" : value;
 
     /// <summary>
     /// 创建物理数据库身份的不可变快照。
     /// </summary>
+    /// <param name="source">源数据库身份。</param>
+    /// <returns>数据库身份快照；源值为 <see langword="null"/> 时返回 <see langword="null"/>。</returns>
     private static SqlDatabaseIdentity CloneDatabaseIdentity(SqlDatabaseIdentity source)
     {
         if (source == null)

@@ -22,12 +22,14 @@ public class LocalizedTypeAttribute : Attribute
     /// 获取本地化资源类型，如果未设置则返回类型名
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
+    /// <returns>配置的本地化资源类型；未配置时返回类型名称。</returns>
     public static string GetResourceType<T>() => GetResourceType(typeof(T));
 
     /// <summary>
     /// 获取本地化资源类型，如果未设置则返回类型名
     /// </summary>
     /// <param name="type">类型</param>
+    /// <returns>配置的本地化资源类型；类型为空时返回 null，未配置时返回类型名称。</returns>
     public static string GetResourceType(Type type)
     {
         if (type == null)

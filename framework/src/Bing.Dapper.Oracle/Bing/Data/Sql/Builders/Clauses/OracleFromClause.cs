@@ -27,9 +27,11 @@ public class OracleFromClause : FromClause
     }
 
     /// <inheritdoc />
+    /// <returns>当前 From 子句的 Oracle 副本。</returns>
     protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new OracleFromClause(context, table, ProviderDatabaseType);
 
     /// <inheritdoc />
+    /// <returns>带 Oracle 标识符转义的子查询别名文本。</returns>
     protected override string GetSubqueryAlias(string alias) => $" {Dialect.SafeName(alias)}";
 }

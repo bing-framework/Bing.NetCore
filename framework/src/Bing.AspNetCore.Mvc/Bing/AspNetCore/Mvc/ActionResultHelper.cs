@@ -30,7 +30,9 @@ public static class ActionResultHelper
     /// 是否对象结果
     /// </summary>
     /// <param name="returnType">返回类型</param>
-    /// <param name="excludeTypes"></param>
+    /// <param name="excludeTypes">需要排除的结果类型。</param>
+    /// <returns>返回类型应按对象结果处理时返回 <see langword="true"/>；命中排除类型或不属于对象结果时返回 <see langword="false"/>。</returns>
+    /// <remarks>异步返回类型会先解包后判断。</remarks>
     public static bool IsObjectResult(Type returnType, params Type[] excludeTypes)
     {
         returnType = AsyncHelper.UnwrapTask(returnType);

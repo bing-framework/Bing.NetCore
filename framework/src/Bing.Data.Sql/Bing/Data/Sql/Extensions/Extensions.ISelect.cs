@@ -13,6 +13,7 @@ public static partial class Extensions
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
+    /// <returns>设置去重投影后的源对象。</returns>
     public static T Distinct<T>(this T source) where T : ISelect
     {
         if (source == null)
@@ -119,6 +120,7 @@ public static partial class Extensions
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Sum 聚合后的源对象。</returns>
     public static T Sum<T>(this T source, string column, string columnAlias = null, bool distinct = false) where T : ISelect
     {
         if (source == null)
@@ -135,6 +137,7 @@ public static partial class Extensions
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Avg 聚合后的源对象。</returns>
     public static T Avg<T>(this T source, string column, string columnAlias = null, bool distinct = false) where T : ISelect
     {
         if (source == null)
@@ -151,6 +154,7 @@ public static partial class Extensions
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Max 聚合后的源对象。</returns>
     public static T Max<T>(this T source, string column, string columnAlias = null, bool distinct = false) where T : ISelect
     {
         if (source == null)
@@ -167,6 +171,7 @@ public static partial class Extensions
     /// <param name="column">列名</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Min 聚合后的源对象。</returns>
     public static T Min<T>(this T source, string column, string columnAlias = null, bool distinct = false) where T : ISelect
     {
         if (source == null)

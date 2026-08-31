@@ -24,6 +24,7 @@ public abstract class DialectBase : IDialect
     /// 安全名称
     /// </summary>
     /// <param name="name">名称</param>
+    /// <returns>按当前方言转义后的安全名称。</returns>
     public virtual string SafeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -38,41 +39,48 @@ public abstract class DialectBase : IDialect
     /// <summary>
     /// 过滤名称
     /// </summary>
-    /// <param name="name">明后才能</param>
+    /// <param name="name">待过滤的名称。</param>
+    /// <returns>移除名称首尾常见标识符包裹符后的文本。</returns>
     protected string FilterName(string name) => name.Trim().TrimStart('[').TrimEnd(']').TrimStart('`').TrimEnd('`').TrimStart('"').TrimEnd('"');
 
     /// <summary>
     /// 获取安全名称
     /// </summary>
     /// <param name="name">名称</param>
+    /// <returns>按当前方言转义后的名称。</returns>
     protected virtual string GetSafeName(string name) =>
         $"{OpeningIdentifier}{name.Replace(ClosingIdentifier.ToString(), new string(ClosingIdentifier, 2))}{ClosingIdentifier}";
 
     /// <summary>
     /// 获取参数前缀
     /// </summary>
+    /// <returns>当前方言使用的参数前缀。</returns>
     public virtual string GetPrefix() => "@";
 
     /// <summary>
     /// Select子句是否支持As关键字
     /// </summary>
+    /// <returns>支持 <c>As</c> 关键字时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public virtual bool SupportSelectAs() => true;
 
     /// <summary>
     /// 生成参数名
     /// </summary>
     /// <param name="paramIndex">参数索引</param>
+    /// <returns>根据参数索引生成的参数名称。</returns>
     public virtual string GenerateName(int paramIndex) => $"{GetPrefix()}_p_{paramIndex}";
 
     /// <summary>
     /// 获取参数名
     /// </summary>
     /// <param name="paramName">参数名</param>
+    /// <returns>按当前方言格式化后的参数名称。</returns>
     public virtual string GetParamName(string paramName) => paramName;
 
     /// <summary>
     /// 获取参数值
     /// </summary>
     /// <param name="paramValue">参数值</param>
+    /// <returns>按当前方言转换后的参数值。</returns>
     public virtual object GetParamValue(object paramValue) => paramValue;
 }

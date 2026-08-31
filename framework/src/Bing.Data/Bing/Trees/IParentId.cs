@@ -1,13 +1,13 @@
 ﻿namespace Bing.Trees;
 
 /// <summary>
-/// 树型父标识
+/// 定义具有父节点标识的树节点契约。
 /// </summary>
-/// <typeparam name="TParentId">父标识类型</typeparam>
+/// <typeparam name="TParentId">父节点标识类型。</typeparam>
 public interface IParentId<TParentId>
 {
     /// <summary>
-    /// 父标识
+    /// 获取或设置父节点标识。
     /// </summary>
     TParentId ParentId { get; set; }
 }

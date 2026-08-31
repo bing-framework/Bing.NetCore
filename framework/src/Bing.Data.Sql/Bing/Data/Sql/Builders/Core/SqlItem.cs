@@ -7,14 +7,14 @@ using Bing.Extensions;
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
-/// Sql项
+/// 表示可包含数据库名、前缀、名称和别名的 SQL 项。
 /// </summary>
 public class SqlItem
 {
     #region 字段
 
     /// <summary>
-    /// 名称
+    /// 保存 SQL 项名称文本。
     /// </summary>
     private string _name;
 
@@ -43,7 +43,7 @@ public class SqlItem
     public string Prefix => _prefix.SafeString();
 
     /// <summary>
-    /// 名称，范例：t.a As b，值为 a
+    /// 获取 SQL 项名称；原始项保留原始文本，结构化项读取时规范化空值。
     /// </summary>
     public string Name => IsRaw ? _name : _name.SafeString();
 
@@ -103,7 +103,7 @@ public class SqlItem
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="SqlItem"/>类型的实例
+    /// 初始化一个 <see cref="SqlItem"/> 类型的实例。
     /// </summary>
     /// <param name="name">名称</param>
     /// <param name="prefix">前缀</param>
@@ -183,6 +183,7 @@ public class SqlItem
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前 SQL 项的独立副本。</returns>
     public virtual SqlItem Clone()
     {
         var result = new SqlItem(Name, Prefix, Alias, IsRaw, false, false)
@@ -200,6 +201,7 @@ public class SqlItem
     /// 获取Sql
     /// </summary>
     /// <param name="dialect">Sql方言</param>
+    /// <returns>按指定 SQL 方言渲染的 SQL；名称为空时返回 <see langword="null"/>。</returns>
     public virtual string ToSql(IDialect dialect = null)
     {
         if (string.IsNullOrWhiteSpace(Name))
@@ -215,6 +217,7 @@ public class SqlItem
     /// 获取列
     /// </summary>
     /// <param name="dialect">Sql方言</param>
+    /// <returns>按指定 SQL 方言转义的数据库名、前缀和名称组合。</returns>
     protected string GetColumn(IDialect dialect)
     {
         var result = new StringBuilder();
@@ -230,6 +233,7 @@ public class SqlItem
     /// <summary>
     /// 获取名称
     /// </summary>
+    /// <returns>由前缀和名称组成的未转义文本。</returns>
     protected string GetName() => string.IsNullOrWhiteSpace(Prefix) ? Name : $"{Prefix}.{Name}";
 
     /// <summary>
@@ -237,6 +241,7 @@ public class SqlItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="name">名称</param>
+    /// <returns>按指定 SQL 方言转义的名称。</returns>
     protected string GetSafeName(IDialect dialect, string name) => dialect.GetSafeName(name);
 
     #endregion

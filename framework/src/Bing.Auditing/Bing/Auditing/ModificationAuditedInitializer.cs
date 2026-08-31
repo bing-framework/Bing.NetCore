@@ -3,37 +3,37 @@
 namespace Bing.Auditing;
 
 /// <summary>
-/// 修改操作审计初始化器
+/// 初始化实体的最后修改时间、修改人和修改人标识。
 /// </summary>
 public sealed class ModificationAuditedInitializer
 {
     /// <summary>
-    /// 实体
+    /// 待初始化的实体对象。
     /// </summary>
     private readonly object _entity;
 
     /// <summary>
-    /// 用户标识
+    /// 修改人的字符串标识。
     /// </summary>
     private readonly string _userId;
 
     /// <summary>
-    /// 用户名称
+    /// 修改人的名称。
     /// </summary>
     private readonly string _userName;
 
     /// <summary>
-    /// 操作时间
+    /// 指定的最后修改时间；为空时使用当前时间。
     /// </summary>
     private readonly DateTime? _dateTime;
 
     /// <summary>
-    /// 初始化一个<see cref="ModificationAuditedInitializer"/>类型的实例
+    /// 使用实体和修改人审计信息初始化一个 <see cref="ModificationAuditedInitializer"/> 实例。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
-    /// <param name="dateTime">操作时间</param>
+    /// <param name="entity">待初始化的实体对象。</param>
+    /// <param name="userId">修改人的字符串标识。</param>
+    /// <param name="userName">修改人的名称。</param>
+    /// <param name="dateTime">指定的最后修改时间；为空时使用当前时间。</param>
     private ModificationAuditedInitializer(object entity, string userId, string userName, DateTime? dateTime)
     {
         _entity = entity;
@@ -43,24 +43,24 @@ public sealed class ModificationAuditedInitializer
     }
 
     /// <summary>
-    /// 初始化
+    /// 初始化实体的修改审计信息。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
+    /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
+    /// <param name="userId">修改人的字符串标识。</param>
+    /// <param name="userName">修改人的名称。</param>
     public static void Init(object entity, string userId, string userName) => new ModificationAuditedInitializer(entity, userId, userName, null).Init();
 
     /// <summary>
-    /// 初始化
+    /// 使用指定时间初始化实体的修改审计信息。
     /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名称</param>
-    /// <param name="dateTime">操作时间</param>
+    /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
+    /// <param name="userId">修改人的字符串标识。</param>
+    /// <param name="userName">修改人的名称。</param>
+    /// <param name="dateTime">最后修改时间；为空时使用当前时间。</param>
     public static void Init(object entity, string userId, string userName, DateTime? dateTime) => new ModificationAuditedInitializer(entity, userId, userName, dateTime).Init();
 
     /// <summary>
-    /// 初始化
+    /// 按修改审计契约初始化实体的时间、人员名称和人员标识。
     /// </summary>
     public void Init()
     {

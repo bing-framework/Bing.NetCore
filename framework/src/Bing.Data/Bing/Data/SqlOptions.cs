@@ -4,12 +4,12 @@ using Bing.Data.Enums;
 namespace Bing.Data;
 
 /// <summary>
-/// Sql配置
+/// 配置 SQL 查询或执行操作使用的连接和 Provider 行为。
 /// </summary>
 public class SqlOptions
 {
     /// <summary>
-    /// 数据库类型，默认为Sql Server
+    /// 获取或设置数据库类型；默认值为 SQL Server。
     /// </summary>
     public DatabaseType DatabaseType { get; set; } = DatabaseType.SqlServer;
 
@@ -19,13 +19,16 @@ public class SqlOptions
     public bool IncludeTenantIdInDiagnostics { get; set; }
 
     /// <summary>
-    /// 数据库连接字符串
+    /// 获取或设置用于创建数据库连接的连接字符串。
     /// </summary>
     public string ConnectionString { get; set; }
 
     /// <summary>
-    /// 数据库连接
+    /// 获取或设置调用方提供的数据库连接实例。
     /// </summary>
+    /// <remarks>
+    /// 设置该属性时，调用方负责连接实例的生命周期；未设置时由执行路径根据连接字符串和数据源配置解析连接。
+    /// </remarks>
     public IDbConnection Connection { get; set; }
 
     /// <summary>
@@ -38,9 +41,9 @@ public class SqlOptions
 }
 
 /// <summary>
-/// Sql配置
+/// 配置指定实体类型使用的 SQL 查询或执行操作。
 /// </summary>
-/// <typeparam name="T">泛型类型</typeparam>
+/// <typeparam name="T">关联的实体或结果类型。</typeparam>
 public class SqlOptions<T> : SqlOptions where T : class
 {
 }

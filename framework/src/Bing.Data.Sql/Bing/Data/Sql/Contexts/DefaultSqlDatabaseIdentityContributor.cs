@@ -30,6 +30,12 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         };
     }
 
+    /// <summary>
+    /// 从 SQL Server 连接字符串解析可比较的物理数据库身份。
+    /// </summary>
+    /// <param name="builder">已解析的 SQL Server 连接字符串。</param>
+    /// <returns>包含服务器、实例或端口及数据库名称的物理数据库身份。</returns>
+    /// <exception cref="InvalidOperationException">缺少服务器地址或数据库名称时抛出。</exception>
     private static SqlDatabaseIdentity ResolveSqlServer(DbConnectionStringBuilder builder)
     {
         var endpoint = GetValue(builder, "Server", "Data Source", "DataSource", "Address", "Addr", "Network Address");
@@ -47,6 +53,15 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         };
     }
 
+    /// <summary>
+    /// 从使用主机与数据库名称的连接字符串解析物理数据库身份。
+    /// </summary>
+    /// <param name="databaseType">要写入身份的数据库类型。</param>
+    /// <param name="builder">已解析的连接字符串。</param>
+    /// <param name="defaultPort">连接字符串未显式指定端口时使用的默认端口。</param>
+    /// <param name="serverKeys">按优先级读取服务器地址的连接字符串键。</param>
+    /// <returns>包含服务器、端口和数据库名称的物理数据库身份。</returns>
+    /// <exception cref="InvalidOperationException">缺少服务器地址或数据库名称时抛出。</exception>
     private static SqlDatabaseIdentity ResolveServerDatabase(DatabaseType databaseType,
         DbConnectionStringBuilder builder, int defaultPort, params string[] serverKeys)
     {
@@ -63,6 +78,12 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         };
     }
 
+    /// <summary>
+    /// 从 Oracle 连接字符串解析物理数据库身份。
+    /// </summary>
+    /// <param name="builder">已解析的 Oracle 连接字符串。</param>
+    /// <returns>可唯一识别目标时可比较的 Oracle 身份；别名或歧义目标返回不可比较身份。</returns>
+    /// <exception cref="InvalidOperationException">缺少数据源时抛出。</exception>
     private static SqlDatabaseIdentity ResolveOracle(DbConnectionStringBuilder builder)
     {
         var dataSource = Normalize(GetValue(builder, "Data Source", "DataSource", "Server"));
@@ -116,9 +137,20 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         };
     }
 
+    /// <summary>
+    /// 判断 Oracle 连接是否只指定了一个数据库目标。
+    /// </summary>
+    /// <param name="serviceName">Oracle 服务名。</param>
+    /// <param name="sid">Oracle SID。</param>
+    /// <returns>仅指定服务名或 SID 之一时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private static bool HasSingleOracleDatabaseTarget(string serviceName, string sid) =>
         string.IsNullOrWhiteSpace(serviceName) != string.IsNullOrWhiteSpace(sid);
 
+    /// <summary>
+    /// 从 SQLite 连接字符串解析物理数据库身份。
+    /// </summary>
+    /// <param name="builder">已解析的 SQLite 连接字符串。</param>
+    /// <returns>SQLite 文件或内存数据库的物理身份。</returns>
     private static SqlDatabaseIdentity ResolveSqlite(DbConnectionStringBuilder builder)
     {
         var dataSource = GetValue(builder, "Data Source", "DataSource", "Filename");
@@ -166,6 +198,12 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         };
     }
 
+    /// <summary>
+    /// 解析 SQL Server 的服务器、实例和端口端点。
+    /// </summary>
+    /// <param name="value">连接字符串中的服务器端点。</param>
+    /// <param name="configuredPort">连接字符串中单独配置的端口。</param>
+    /// <returns>解析出的服务器、实例和端口；无法提供端点时服务器和实例为空。</returns>
     private static (string Server, string Instance, int? Port) ParseSqlServerEndpoint(string value, int? configuredPort)
     {
         var endpoint = Normalize(value);
@@ -186,6 +224,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             : (Normalize(endpoint.Substring(0, instanceIndex)), Normalize(endpoint.Substring(instanceIndex + 1)), port);
     }
 
+    /// <summary>
+    /// 规范化 SQL Server 主机名称并移除外围方括号。
+    /// </summary>
+    /// <param name="value">原始主机名称。</param>
+    /// <returns>去除空白和外围方括号后的主机名称。</returns>
     private static string NormalizeSqlServerHost(string value)
     {
         var host = Normalize(value);
@@ -194,6 +237,12 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             : host;
     }
 
+    /// <summary>
+    /// 解析通用主机端点及其可选端口。
+    /// </summary>
+    /// <param name="value">原始主机端点。</param>
+    /// <param name="configuredPort">连接字符串中单独配置的端口。</param>
+    /// <returns>解析出的服务器和端口；未提供端点时服务器为空。</returns>
     private static (string Server, int? Port) ParseHostEndpoint(string value, int? configuredPort)
     {
         var endpoint = Normalize(value);
@@ -212,6 +261,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return (endpoint, configuredPort);
     }
 
+    /// <summary>
+    /// 解析 Oracle 的主机、端口和服务端点格式。
+    /// </summary>
+    /// <param name="value">原始 Oracle 端点。</param>
+    /// <returns>解析成功时返回服务器、端口和数据库名称，否则返回 <see langword="null"/>。</returns>
     private static (string Server, int? Port, string Database)? ParseOracleEndpoint(string value)
     {
         var endpoint = Normalize(value);
@@ -230,9 +284,21 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             : (parsedHost.Server, parsedHost.Port, database);
     }
 
+    /// <summary>
+    /// 判断数据源是否具有 Oracle TNS 描述符格式特征。
+    /// </summary>
+    /// <param name="value">待判断的数据源文本。</param>
+    /// <returns>包含 TNS 描述符结构字符时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private static bool IsOracleTnsDescriptor(string value) => string.IsNullOrWhiteSpace(value) == false &&
         value.IndexOfAny(new[] { '(', ')', '=' }) >= 0;
 
+    /// <summary>
+    /// 尝试从受限 Oracle TNS 描述符解析唯一物理数据库身份。
+    /// </summary>
+    /// <param name="value">待解析的 TNS 描述符文本。</param>
+    /// <param name="identity">解析成功时输出的 Oracle 物理数据库身份。</param>
+    /// <returns>描述符只包含唯一 TCP 地址及唯一服务名或 SID 时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// <remarks>格式不完整、节点重复、包含未知节点或目标存在歧义时拒绝解析，以避免将不确定的目标视为相同数据库。</remarks>
     private static bool TryParseOracleTnsDescriptor(string value, out SqlDatabaseIdentity identity)
     {
         identity = null;
@@ -293,6 +359,13 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return true;
     }
 
+    /// <summary>
+    /// 从 TNS 节点提取并验证允许的标量字段。
+    /// </summary>
+    /// <param name="node">要读取子节点的 TNS 节点。</param>
+    /// <param name="allowedNames">允许出现的字段名称集合。</param>
+    /// <param name="fields">验证成功时输出的字段字典。</param>
+    /// <returns>所有子节点均为名称唯一、非空且位于白名单内的标量字段时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     private static bool TryGetTnsFields(OracleTnsDescriptorNode node, IReadOnlyCollection<string> allowedNames,
         out Dictionary<string, string> fields)
     {
@@ -311,16 +384,40 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return true;
     }
 
+    /// <summary>
+    /// 判断文本是否为不含端口、实例或描述符语法的简单主机名。
+    /// </summary>
+    /// <param name="value">待判断的主机文本。</param>
+    /// <returns>文本符合简单主机名格式时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private static bool IsSimpleHost(string value) => string.IsNullOrWhiteSpace(value) == false &&
         value.IndexOfAny(new[] { '/', '\\', ':', '(', ')', '=' }) < 0;
 
+    /// <summary>
+    /// 解析受限 Oracle TNS 描述符语法的内部解析器。
+    /// </summary>
     private sealed class OracleTnsDescriptorParser
     {
+        /// <summary>
+        /// 待解析的 TNS 描述符文本。
+        /// </summary>
         private readonly string _value;
+
+        /// <summary>
+        /// 当前解析游标位置。
+        /// </summary>
         private int _position;
 
+        /// <summary>
+        /// 初始化一个 <see cref="OracleTnsDescriptorParser"/> 类型的实例。
+        /// </summary>
+        /// <param name="value">待解析的 TNS 描述符文本。</param>
         public OracleTnsDescriptorParser(string value) => _value = value;
 
+        /// <summary>
+        /// 解析完整的 TNS 描述符并确认输入已被完全消费。
+        /// </summary>
+        /// <param name="node">解析成功时输出的根节点。</param>
+        /// <returns>输入符合受限 TNS 节点语法且没有剩余字符时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
         public bool TryParse(out OracleTnsDescriptorNode node)
         {
             node = null;
@@ -331,6 +428,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             return _position == _value.Length;
         }
 
+        /// <summary>
+        /// 从当前游标位置解析一个括号包裹的 TNS 节点。
+        /// </summary>
+        /// <param name="node">解析成功时输出的节点。</param>
+        /// <returns>节点满足 <c>名称=标量值</c> 或 <c>名称=子节点列表</c> 的受限语法时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
         private bool TryParseNode(out OracleTnsDescriptorNode node)
         {
             node = null;
@@ -385,6 +487,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             return true;
         }
 
+        /// <summary>
+        /// 读取并消费当前位置的指定字符。
+        /// </summary>
+        /// <param name="expected">预期读取的字符。</param>
+        /// <returns>当前位置为指定字符并已成功消费时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
         private bool Read(char expected)
         {
             if (_position >= _value.Length || _value[_position] != expected)
@@ -393,6 +500,9 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             return true;
         }
 
+        /// <summary>
+        /// 跳过当前游标前的空白字符。
+        /// </summary>
         private void SkipWhitespace()
         {
             while (_position < _value.Length && char.IsWhiteSpace(_value[_position]))
@@ -400,8 +510,17 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         }
     }
 
+    /// <summary>
+    /// Oracle TNS 描述符的语法树节点。
+    /// </summary>
     private sealed class OracleTnsDescriptorNode
     {
+        /// <summary>
+        /// 初始化一个 <see cref="OracleTnsDescriptorNode"/> 类型的实例。
+        /// </summary>
+        /// <param name="name">节点名称。</param>
+        /// <param name="value">标量节点值；复合节点为空。</param>
+        /// <param name="children">复合节点的子节点列表；标量节点为空。</param>
         public OracleTnsDescriptorNode(string name, string value, List<OracleTnsDescriptorNode> children)
         {
             Name = name;
@@ -409,11 +528,28 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
             Children = children;
         }
 
+        /// <summary>
+        /// 节点名称。
+        /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// 标量节点值；复合节点为空。
+        /// </summary>
         public string Value { get; }
+
+        /// <summary>
+        /// 复合节点的子节点列表；标量节点为空。
+        /// </summary>
         public List<OracleTnsDescriptorNode> Children { get; }
     }
 
+    /// <summary>
+    /// 从 SQLite 文件 URI 查询字符串读取指定选项值。
+    /// </summary>
+    /// <param name="dataSource">SQLite 数据源 URI。</param>
+    /// <param name="name">要查找的选项名称。</param>
+    /// <returns>解码后的选项值；数据源不是 URI、没有该选项或选项值为空时返回 <c>null</c>。</returns>
     private static string GetSqliteUriOption(string dataSource, string name)
     {
         if (dataSource?.StartsWith("file:", StringComparison.OrdinalIgnoreCase) != true)
@@ -430,6 +566,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return null;
     }
 
+    /// <summary>
+    /// 获取 SQLite 内存数据库 URI 中用于共享内存识别的名称。
+    /// </summary>
+    /// <param name="dataSource">SQLite 数据源文本。</param>
+    /// <returns>解码后的内存数据库名称；匿名 <c>:memory:</c> 数据源或空名称返回 <c>null</c>。</returns>
     private static string GetSqliteMemoryName(string dataSource)
     {
         if (string.Equals(dataSource, ":memory:", StringComparison.OrdinalIgnoreCase))
@@ -441,6 +582,11 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return string.IsNullOrWhiteSpace(name) ? null : Uri.UnescapeDataString(name.Trim());
     }
 
+    /// <summary>
+    /// 从 SQLite 文件 URI 获取解码后的文件路径。
+    /// </summary>
+    /// <param name="dataSource">以 <c>file:</c> 开头的 SQLite 数据源 URI。</param>
+    /// <returns>解码后的文件路径；URI 未包含路径时返回 <c>null</c>。</returns>
     private static string GetSqliteFilePath(string dataSource)
     {
         if (dataSource.StartsWith("file://", StringComparison.OrdinalIgnoreCase) &&
@@ -452,12 +598,23 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return string.IsNullOrWhiteSpace(path) ? null : Uri.UnescapeDataString(path.Trim());
     }
 
+    /// <summary>
+    /// 验证数据库身份比较所需的连接字符串字段。
+    /// </summary>
+    /// <param name="value">待验证的字段值。</param>
+    /// <param name="fieldName">字段的中文名称。</param>
     private static void EnsureRequired(string value, string fieldName)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new InvalidOperationException($"数据库连接字符串缺少{fieldName}，无法安全比较物理数据库身份。");
     }
 
+    /// <summary>
+    /// 按优先级读取连接字符串中的第一个非空值。
+    /// </summary>
+    /// <param name="builder">已解析的连接字符串。</param>
+    /// <param name="keys">按优先级排列的连接字符串键。</param>
+    /// <returns>第一个非空键值；没有可用值时返回 <see langword="null"/>。</returns>
     private static string GetValue(DbConnectionStringBuilder builder, params string[] keys)
     {
         foreach (var key in keys)
@@ -468,7 +625,17 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         return null;
     }
 
+    /// <summary>
+    /// 解析有效的 TCP 端口号。
+    /// </summary>
+    /// <param name="value">待解析的端口文本。</param>
+    /// <returns>范围为 1 到 65535 的端口号；文本无效时返回 <see langword="null"/>。</returns>
     private static int? ParsePort(string value) => int.TryParse(value, out var port) && port > 0 && port <= 65535 ? port : null;
 
+    /// <summary>
+    /// 清理连接字符串字段的空白内容。
+    /// </summary>
+    /// <param name="value">待规范化的文本。</param>
+    /// <returns>去除首尾空白后的文本；空白文本返回 <see langword="null"/>。</returns>
     private static string Normalize(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

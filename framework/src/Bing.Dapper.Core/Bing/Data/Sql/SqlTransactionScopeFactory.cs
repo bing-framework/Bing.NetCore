@@ -10,11 +10,21 @@ namespace Bing.Data.Sql;
 /// </summary>
 public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 {
-    private readonly ISqlQueryFactory _queryFactory;
-    private readonly ISqlExecutorFactory _executorFactory;
     /// <summary>
-    /// 初始化一个<see cref="SqlTransactionScopeFactory"/>类型的实例。
+    /// 创建事务查询对象的工厂。
     /// </summary>
+    private readonly ISqlQueryFactory _queryFactory;
+
+    /// <summary>
+    /// 创建事务执行器的工厂。
+    /// </summary>
+    private readonly ISqlExecutorFactory _executorFactory;
+
+    /// <summary>
+    /// 初始化一个 <see cref="SqlTransactionScopeFactory"/> 类型的实例。
+    /// </summary>
+    /// <param name="queryFactory">创建事务查询对象的工厂。</param>
+    /// <param name="executorFactory">创建事务执行器的工厂。</param>
     public SqlTransactionScopeFactory(ISqlQueryFactory queryFactory, ISqlExecutorFactory executorFactory)
     {
         _queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
@@ -98,7 +108,6 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     /// <param name="operationException">开始事务时发生的异常。</param>
     /// <param name="query">拥有连接生命周期的查询对象。</param>
-    /// <returns>表示资源释放完成的异步操作。</returns>
     private static async Task ThrowAfterBeginFailureAsync(Exception operationException, ISqlQuery query)
     {
         try
@@ -174,21 +183,64 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     private sealed class SqlTransactionScope : ISqlTransactionScope, ISqlTransactionScopeRuntime
     {
+        /// <summary>
+        /// 拥有事务连接生命周期的根查询对象。
+        /// </summary>
         private readonly ISqlQuery _ownerQuery;
+
+        /// <summary>
+        /// 当前事务使用的数据库连接。
+        /// </summary>
         private readonly IDbConnection _connection;
+
+        /// <summary>
+        /// 当前事务。
+        /// </summary>
         private readonly IDbTransaction _transaction;
+
+        /// <summary>
+        /// 创建事务子查询的工厂。
+        /// </summary>
         private readonly ISqlQueryFactory _queryFactory;
+
+        /// <summary>
+        /// 创建事务子执行器的工厂。
+        /// </summary>
         private readonly ISqlExecutorFactory _executorFactory;
+
+        /// <summary>
+        /// 当前事务作用域创建的子资源集合。
+        /// </summary>
         private readonly List<IDisposable> _children = new();
+
+        /// <summary>
+        /// 保护事务执行期间资源访问的租约。
+        /// </summary>
         private readonly SqlTransactionScopeLease _lease;
+
+        /// <summary>
+        /// 当前事务作用域冻结的数据库上下文。
+        /// </summary>
         private readonly DatabaseContext _context;
 
         /// <summary>
         /// 保护作用域状态、子对象集合和资源释放状态的同步锁。
         /// </summary>
         private readonly object _syncRoot = new();
+
+        /// <summary>
+        /// 当前事务作用域状态。
+        /// </summary>
         private SqlTransactionScopeState _state;
+
+        /// <summary>
+        /// 是否已完成事务资源释放。
+        /// </summary>
         private bool _resourcesReleased;
+
+        /// <summary>
+        /// 是否已由调用方显式释放当前作用域。
+        /// </summary>
         private bool _isExplicitlyDisposed;
 
         /// <summary>
@@ -234,10 +286,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <inheritdoc />
         public IsolationLevel IsolationLevel => _transaction.IsolationLevel;
 
+        /// <inheritdoc />
         DatabaseContext ISqlTransactionScopeRuntime.DatabaseContext => DatabaseContextSnapshot.Create(_context);
 
+        /// <inheritdoc />
         IDbConnection ISqlTransactionScopeRuntime.Connection => _connection;
 
+        /// <inheritdoc />
         IDbTransaction ISqlTransactionScopeRuntime.Transaction => _transaction;
 
         /// <inheritdoc />
@@ -375,7 +430,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 异步释放事务作用域及其拥有的事务资源。
+        /// </summary>
         /// <remarks>
         /// 若当前作用域创建的子 Query 或 Executor 持有活动执行租约，释放会抛出异常且不改变作用域状态、租约或事务资源。
         /// 调用方释放子对象后可重试。
@@ -407,7 +464,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 异步释放事务作用域及其拥有的事务资源。
+        /// </summary>
         /// <remarks>
         /// 若当前作用域创建的子 Query 或 Executor 持有活动执行租约，释放会抛出异常且不改变作用域状态、租约或事务资源。
         /// 调用方释放子对象后可重试。
@@ -498,6 +557,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
+        /// <summary>
+        /// 验证事务作用域可以进入指定的完成状态。
+        /// </summary>
+        /// <param name="expectedState">本次完成操作期望到达的终态。</param>
         private void EnsureCanComplete(SqlTransactionScopeState expectedState)
         {
             if (_isExplicitlyDisposed)
@@ -506,6 +569,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 throw new InvalidOperationException("SQL 事务作用域已完成，不能重复提交或回滚。");
         }
 
+        /// <summary>
+        /// 确保事务作用域仍可创建和绑定子对象。
+        /// </summary>
         private void ThrowIfInactive()
         {
             if (_isExplicitlyDisposed || _resourcesReleased)
@@ -606,6 +672,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
+        /// <summary>
+        /// 释放事务作用域资源并传播操作或清理异常。
+        /// </summary>
+        /// <param name="operationException">完成操作期间发生的主异常。</param>
         private void ThrowAfterCleanup(Exception operationException)
         {
             var exceptions = new List<Exception>();
@@ -622,6 +692,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             ThrowCollected(exceptions);
         }
 
+        /// <summary>
+        /// 异步释放事务作用域资源并传播操作或清理异常。
+        /// </summary>
+        /// <param name="operationException">完成操作期间发生的主异常。</param>
         private async Task ThrowAfterCleanupAsync(Exception operationException)
         {
             var exceptions = new List<Exception>();
@@ -638,6 +712,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             ThrowCollected(exceptions);
         }
 
+        /// <summary>
+        /// 释放事务作用域创建的全部子资源并收集异常。
+        /// </summary>
+        /// <param name="exceptions">用于收集释放异常的列表。</param>
         private void DisposeChildren(List<Exception> exceptions)
         {
             foreach (var child in _children)
@@ -645,6 +723,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _children.Clear();
         }
 
+        /// <summary>
+        /// 异步释放事务作用域创建的全部子资源并收集异常。
+        /// </summary>
+        /// <param name="exceptions">用于收集释放异常的列表。</param>
         private async Task DisposeChildrenAsync(List<Exception> exceptions)
         {
             foreach (var child in _children)
@@ -652,18 +734,33 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _children.Clear();
         }
 
+        /// <summary>
+        /// 执行同步清理操作并收集其异常。
+        /// </summary>
+        /// <param name="action">待执行的清理操作。</param>
+        /// <param name="exceptions">用于收集清理异常的列表。</param>
         private static void TryCleanup(Action action, List<Exception> exceptions)
         {
             try { action(); }
             catch (Exception exception) { AddException(exceptions, exception); }
         }
 
+        /// <summary>
+        /// 执行异步清理操作并收集其异常。
+        /// </summary>
+        /// <param name="action">待执行的异步清理操作。</param>
+        /// <param name="exceptions">用于收集清理异常的列表。</param>
         private static async Task TryCleanupAsync(Func<Task> action, List<Exception> exceptions)
         {
             try { await action().ConfigureAwait(false); }
             catch (Exception exception) { AddException(exceptions, exception); }
         }
 
+        /// <summary>
+        /// 将异常展开并追加到异常集合。
+        /// </summary>
+        /// <param name="exceptions">用于收集异常的列表。</param>
+        /// <param name="exception">待追加的异常。</param>
         private static void AddException(List<Exception> exceptions, Exception exception)
         {
             if (exception == null)
@@ -674,6 +771,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
                 exceptions.Add(exception);
         }
 
+        /// <summary>
+        /// 按数量重新抛出收集到的异常。
+        /// </summary>
+        /// <param name="exceptions">已收集的异常列表。</param>
         private static void ThrowCollected(List<Exception> exceptions)
         {
             if (exceptions.Count == 1)
@@ -683,11 +784,29 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         }
     }
 
+    /// <summary>
+    /// 事务作用域的生命周期状态。
+    /// </summary>
     private enum SqlTransactionScopeState
     {
+        /// <summary>
+        /// 事务仍处于活动状态。
+        /// </summary>
         Active,
+
+        /// <summary>
+        /// 事务已提交。
+        /// </summary>
         Committed,
+
+        /// <summary>
+        /// 事务已回滚。
+        /// </summary>
         RolledBack,
+
+        /// <summary>
+        /// 事务完成或清理失败。
+        /// </summary>
         Faulted,
     }
 }
@@ -723,7 +842,6 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="connection">待打开的数据库连接。</param>
     /// <param name="cancellationToken">打开操作使用的取消令牌。</param>
-    /// <returns>表示连接已打开的异步操作。</returns>
     public static Task OpenAsync(IDbConnection connection, CancellationToken cancellationToken)
     {
         if (connection is DbConnection dbConnection)
@@ -757,7 +875,6 @@ internal static class SqlTransactionAsyncAdapter
     /// 异步关闭连接；未公开异步关闭成员时回退为同步关闭。
     /// </summary>
     /// <param name="connection">待关闭的数据库连接。</param>
-    /// <returns>表示连接已关闭的异步操作。</returns>
     public static async Task CloseAsync(IDbConnection connection)
     {
         var invocation = await TryInvokeAsync(connection, "CloseAsync").ConfigureAwait(false);
@@ -770,7 +887,6 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="transaction">待提交的数据库事务。</param>
     /// <param name="cancellationToken">提交操作使用的取消令牌。</param>
-    /// <returns>表示提交完成的异步操作。</returns>
     public static Task CommitAsync(IDbTransaction transaction, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -782,7 +898,6 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="transaction">待回滚的数据库事务。</param>
     /// <param name="cancellationToken">回滚操作使用的取消令牌。</param>
-    /// <returns>表示回滚完成的异步操作。</returns>
     public static Task RollbackAsync(IDbTransaction transaction, CancellationToken cancellationToken) =>
         InvokeOrRunAsync(transaction, "RollbackAsync", transaction.Rollback, cancellationToken);
 
@@ -790,7 +905,6 @@ internal static class SqlTransactionAsyncAdapter
     /// 优先异步释放资源；不支持异步释放时回退为同步释放。
     /// </summary>
     /// <param name="resource">待释放的资源；可为 <see langword="null"/>。</param>
-    /// <returns>表示资源释放完成的异步操作。</returns>
     public static async Task DisposeAsync(object resource)
     {
         if (resource is IAsyncDisposable asyncDisposable)
@@ -802,6 +916,13 @@ internal static class SqlTransactionAsyncAdapter
             disposable.Dispose();
     }
 
+    /// <summary>
+    /// 调用对象的异步成员；不存在时执行同步回退操作。
+    /// </summary>
+    /// <param name="target">目标对象。</param>
+    /// <param name="methodName">异步成员名称。</param>
+    /// <param name="fallback">异步成员不存在时执行的同步操作。</param>
+    /// <param name="cancellationToken">调用操作使用的取消令牌。</param>
     private static async Task InvokeOrRunAsync(object target, string methodName, Action fallback,
         CancellationToken cancellationToken)
     {
@@ -840,6 +961,12 @@ internal static class SqlTransactionAsyncAdapter
         }
     }
 
+    /// <summary>
+    /// 判断反射方法的参数类型是否与实际参数匹配。
+    /// </summary>
+    /// <param name="parameters">反射方法声明的参数信息。</param>
+    /// <param name="arguments">准备传入的实际参数。</param>
+    /// <returns>全部参数兼容时返回 true；否则返回 false。</returns>
     private static bool ParametersMatch(ParameterInfo[] parameters, object[] arguments)
     {
         for (var index = 0; index < parameters.Length; index++)
@@ -850,6 +977,11 @@ internal static class SqlTransactionAsyncAdapter
         return true;
     }
 
+    /// <summary>
+    /// 等待异步调用结果并提取其最终值。
+    /// </summary>
+    /// <param name="result">反射调用返回的异步或同步结果。</param>
+    /// <returns>异步操作完成后的结果值；无结果或输入为空时返回 null。</returns>
     private static async Task<object> AwaitResult(object result)
     {
         if (result is Task task)

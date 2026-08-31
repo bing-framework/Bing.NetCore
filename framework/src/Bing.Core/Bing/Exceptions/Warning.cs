@@ -62,12 +62,14 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     /// 获取错误消息
     /// </summary>
     /// <param name="isProduction">是否生产环境</param>
+    /// <returns>当前警告的错误消息。</returns>
     public virtual string GetMessage(bool isProduction = true) => GetMessage(this);
 
     /// <summary>
     /// 获取错误消息
     /// </summary>
     /// <param name="ex">异常</param>
+    /// <returns>异常及其内部异常的消息拼接结果。</returns>
     public static string GetMessage(Exception ex)
     {
         var result = new StringBuilder();
@@ -92,12 +94,14 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     /// <summary>
     /// 获取异常列表
     /// </summary>
+    /// <returns>当前警告及其内部异常组成的列表。</returns>
     public IList<Exception> GetExceptions() => GetExceptions(this);
 
     /// <summary>
     /// 获取异常列表
     /// </summary>
     /// <param name="ex">异常</param>
+    /// <returns>指定异常及其内部异常组成的列表。</returns>
     public static IList<Exception> GetExceptions(Exception ex)
     {
         var result = new List<Exception>();
@@ -122,6 +126,7 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     /// 获取友好提示
     /// </summary>
     /// <param name="level">日志级别</param>
+    /// <returns>适合指定日志级别展示的友好提示。</returns>
     public string GetPrompt(LogLevel level)
     {
         if (level == LogLevel.Error)

@@ -22,5 +22,6 @@ public abstract class MySqlUnitOfWorkBase : UnitOfWorkBase
     /// 获取映射实例列表
     /// </summary>
     /// <param name="assembly">程序集</param>
+    /// <returns>指定程序集中的映射实例集合。</returns>
     protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 }

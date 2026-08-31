@@ -13,11 +13,21 @@ namespace Bing.Data.Sql;
 /// </remarks>
 internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
 {
+    /// <summary>
+    /// 查询描述的生命周期阶段。
+    /// </summary>
     private enum QueryPhase
     {
+        /// <summary>可继续修改查询结构的草稿阶段。</summary>
         Draft,
+
+        /// <summary>已生成执行计划且不能继续修改的冻结阶段。</summary>
         Frozen,
+
+        /// <summary>正在执行查询的阶段。</summary>
         Executing,
+
+        /// <summary>执行已完成的阶段。</summary>
         Completed
     }
 
@@ -36,14 +46,29 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// </summary>
     private string _splitOn = "Id";
 
+    /// <summary>
+    /// 当前查询描述的生命周期阶段。
+    /// </summary>
     private QueryPhase _phase = QueryPhase.Draft;
 
+    /// <summary>
+    /// 当前查询执行租约标记，用于禁止同一描述并发执行。
+    /// </summary>
     private int _executionLease;
 
+    /// <summary>
+    /// 查询结构版本号，用于判断缓存的 SQL 是否仍然有效。
+    /// </summary>
     private long _shapeVersion;
 
+    /// <summary>
+    /// 已缓存 SQL 对应的查询结构版本号。
+    /// </summary>
     private long _cachedVersion = -1;
 
+    /// <summary>
+    /// 当前查询结构版本对应的缓存 SQL 文本。
+    /// </summary>
     private string _cachedSql;
 
     /// <summary>
@@ -87,9 +112,13 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// </summary>
     internal string QueryContextId { get; } = Guid.NewGuid().ToString();
 
+    /// <summary>
+    /// 创建当前查询的父查询上下文标识。
+    /// </summary>
     private readonly string _parentQueryContextId;
 
     /// <inheritdoc />
+    /// <returns>当前查询使用的 SQL Builder。</returns>
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _builder;
 
     /// <inheritdoc />
@@ -101,6 +130,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>当前 Builder 渲染出的 SQL 文本。</returns>
     public string ToSql() => RenderSql();
 
+    /// <summary>
+    /// 标记查询结构已发生变化并使缓存 SQL 失效。
+    /// </summary>
     internal void Touch()
     {
         _shapeVersion++;
@@ -108,6 +140,10 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _cachedSql = null;
     }
 
+    /// <summary>
+    /// 渲染当前查询 SQL，并在不需要执行快照时复用缓存结果。
+    /// </summary>
+    /// <returns>当前查询的 SQL 文本。</returns>
     internal string RenderSql()
     {
         if (SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(_builder))
@@ -119,6 +155,10 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         return _cachedSql;
     }
 
+    /// <summary>
+    /// 克隆当前查询描述及其 Builder 状态。
+    /// </summary>
+    /// <returns>拥有独立 Builder 状态的查询描述副本。</returns>
     internal SqlQuery Clone()
     {
         var clone = new SqlQuery(_executor, _builder.Clone(), QueryContextId)
@@ -154,6 +194,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <summary>
     /// 查询至多一行，零行返回默认值，多行抛出异常。
     /// </summary>
+    /// <typeparam name="TResult">结果行映射类型。</typeparam>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>查询到的唯一结果；没有结果时返回类型默认值。</returns>
     public TResult ToEntity<TResult>(int? timeout = null) => _executor.SingleOrDefault<TResult>(GetPlan(), timeout);
 
     /// <summary>
@@ -312,6 +355,10 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <summary>
     /// 异步查询至多一行，零行返回默认值，多行抛出异常。
     /// </summary>
+    /// <typeparam name="TResult">结果行映射类型。</typeparam>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含查询结果的异步任务；没有结果时任务结果为类型默认值。</returns>
     public Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(), timeout,
         cancellationToken);
@@ -496,6 +543,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         return plan;
     }
 
+    /// <summary>
+    /// 标记查询开始执行并获取执行租约。
+    /// </summary>
     private void BeginExecution()
     {
         if (Interlocked.CompareExchange(ref _executionLease, 1, 0) != 0)
@@ -503,12 +553,18 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _phase = QueryPhase.Executing;
     }
 
+    /// <summary>
+    /// 标记查询执行完成并释放执行租约。
+    /// </summary>
     private void CompleteExecution()
     {
         _phase = QueryPhase.Completed;
         Volatile.Write(ref _executionLease, 0);
     }
 
+    /// <summary>
+    /// 确认当前查询仍处于可修改的草稿阶段。
+    /// </summary>
     private void EnsureDraft()
     {
         if (_phase != QueryPhase.Draft)

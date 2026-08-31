@@ -40,6 +40,7 @@ public class MySqlJoinClause : JoinClause
     }
 
     /// <inheritdoc />
+    /// <returns>根据 Provider 类型创建的连接项。</returns>
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
         _splitStringTableName
             ? JoinItem.CreateTable(joinType, table, schema, alias, type)
@@ -60,6 +61,7 @@ public class MySqlJoinClause : JoinClause
     }
 
     /// <inheritdoc />
+    /// <returns>当前连接子句的 MySQL 副本。</returns>
     protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
         new MySqlJoinClause(context, _splitStringTableName, joinItems);
 }

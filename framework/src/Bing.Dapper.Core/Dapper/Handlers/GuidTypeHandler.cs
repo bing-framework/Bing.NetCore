@@ -27,6 +27,7 @@ public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
     /// 转换值
     /// </summary>
     /// <param name="value">值</param>
+    /// <returns>转换后的 Guid 值；输入为空时返回空 Guid。</returns>
     public override Guid Parse(object value)
     {
         if (value == null)

@@ -1,24 +1,24 @@
 ﻿namespace Bing.Threading;
 
 /// <summary>
-/// 环境数据上下文
+/// 定义按当前执行上下文保存和读取环境数据的能力。
 /// </summary>
 /// <remarks>
-/// 应用程序中共享上下文信息的模式，允许从一个地方设置和存储上下文，在整个应用程序中使用该上下文，而无需显示地将其传递给每个方法和类。
+/// 用于在同一逻辑异步调用链中传递上下文信息，避免逐层显式传递参数。具体实现决定数据的传播和隔离方式。
 /// </remarks>
 public interface IAmbientDataContext
 {
     /// <summary>
-    /// 设置数据
+    /// 在当前执行上下文中设置指定键的数据。
     /// </summary>
-    /// <param name="key">键名</param>
-    /// <param name="value">对象值</param>
+    /// <param name="key">用于定位上下文数据的稳定键。</param>
+    /// <param name="value">要保存的对象值；可为 <c>null</c>。</param>
     void SetData(string key, object value);
 
     /// <summary>
-    /// 获取数据
+    /// 从当前执行上下文中获取指定键的数据。
     /// </summary>
-    /// <param name="key">键名</param>
-    /// <returns>对象值</returns>
+    /// <param name="key">用于定位上下文数据的稳定键。</param>
+    /// <returns>当前执行上下文中的对象值；未设置时返回 <c>null</c>。</returns>
     object GetData(string key);
 }

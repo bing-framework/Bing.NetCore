@@ -6,14 +6,12 @@ using Microsoft.Extensions.Logging;
 namespace Bing.AspNetCore.MultiTenancy;
 
 /// <summary>
-/// 基于Http实现的租户解析构造器基类
+/// 为基于 HTTP 请求来源的租户解析贡献者提供公共流程。
 /// </summary>
 public abstract class HttpTenantResolveContributorBase : TenantResolveContributorBase
 {
-    /// <summary>
-    /// 解析
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
+    /// <inheritdoc />
+    /// <remarks>当前实现仅在存在 HTTP 上下文时解析租户，并记录解析过程中的异常而不向上游传播。</remarks>
     public override async Task ResolveAsync(ITenantResolveContext context)
     {
         var httpContext = context.GetHttpContext();
@@ -32,10 +30,10 @@ public abstract class HttpTenantResolveContributorBase : TenantResolveContributo
     }
 
     /// <summary>
-    /// 从 <see cref="HttpContext"/> 中解析
+    /// 从 HTTP 上下文解析候选租户并写入租户解析上下文。
     /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="httpContext">Http上下文</param>
+    /// <param name="context">要写入候选租户的解析上下文。</param>
+    /// <param name="httpContext">当前 HTTP 请求上下文。</param>
     protected virtual async Task ResolveFromHttpContextAsync(ITenantResolveContext context, HttpContext httpContext)
     {
         var tenantIdOrName = await GetTenantIdOrNameFromHttpContextOrNullAsync(context, httpContext);
@@ -44,17 +42,18 @@ public abstract class HttpTenantResolveContributorBase : TenantResolveContributo
     }
 
     /// <summary>
-    /// 从 <see cref="HttpContext"/> 中获取租户标识、租户名称、null
+    /// 从 HTTP 上下文的特定来源获取候选租户标识或名称。
     /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="httpContext">Http上下文</param>
-    /// <returns>租户标识、租户名称、null</returns>
+    /// <param name="context">可由实现读取或更新的租户解析上下文。</param>
+    /// <param name="httpContext">包含请求 Cookie、查询参数、路由值等信息的 HTTP 上下文。</param>
+    /// <returns>解析出的候选租户标识或名称；当前来源未提供租户信息时返回 <c>null</c>。</returns>
     protected abstract Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext);
 
     /// <summary>
-    /// 获取租户键名
+    /// 获取当前解析上下文配置的租户键名。
     /// </summary>
-    /// <param name="context">租户解析上下文</param>
+    /// <param name="context">用于获取多租户选项的租户解析上下文。</param>
+    /// <returns>当前解析过程使用的租户键名。</returns>
     protected string GetTenantKey(ITenantResolveContext context)
     {
         var options = context.GetMultiTenancyOptions();

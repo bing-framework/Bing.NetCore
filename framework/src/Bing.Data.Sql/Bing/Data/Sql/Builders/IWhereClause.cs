@@ -428,5 +428,6 @@ public interface IWhereClause : ICondition, ISqlClause, ISqlClauseCloneable<IWhe
     /// <summary>
     /// 输出Sql
     /// </summary>
+    /// <returns>当前 Where 子句生成的 SQL。</returns>
     string ToSql();
 }

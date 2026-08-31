@@ -52,5 +52,6 @@ public class MailKitEmailSender : EmailSenderBase, IMailKitEmailSender
     /// <summary>
     /// 生成SMTP客户端
     /// </summary>
+    /// <returns>已配置的 SMTP 客户端。</returns>
     protected virtual SmtpClient BuildSmtpClient() => _smtpBuilder.Build();
 }

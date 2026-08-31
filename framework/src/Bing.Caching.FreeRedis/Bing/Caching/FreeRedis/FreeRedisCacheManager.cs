@@ -18,6 +18,7 @@ public class FreeRedisCacheManager : IRedisCache
     /// <summary>
     /// 初始化一个<see cref="FreeRedisCacheManager"/>类型的实例
     /// </summary>
+    /// <param name="client">Redis 客户端。</param>
     public FreeRedisCacheManager(RedisClient client)
     {
         if (client.Serialize == null || client.Deserialize == null)
@@ -86,6 +87,7 @@ public class FreeRedisCacheManager : IRedisCache
     /// 获取过期时间间隔
     /// </summary>
     /// <param name="options">缓存配置</param>
+    /// <returns>缓存项的过期时间；未指定配置时默认为八小时。</returns>
     private TimeSpan GetExpiration(CacheOptions options)
     {
         var result = options?.Expiration;
@@ -146,6 +148,8 @@ public class FreeRedisCacheManager : IRedisCache
     /// <summary>
     /// 转换为缓存键字符串集合
     /// </summary>
+    /// <param name="keys">缓存键集合。</param>
+    /// <returns>已验证并转换为字符串的缓存键集合。</returns>
     private IEnumerable<string> ToKeys(IEnumerable<CacheKey> keys)
     {
         keys.CheckNull(nameof(keys));
@@ -192,7 +196,8 @@ public class FreeRedisCacheManager : IRedisCache
     /// 处理缓存键前缀
     /// </summary>
     /// <param name="prefix">前缀</param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <returns>可用于 Redis 查询的缓存键模式。</returns>
+    /// <exception cref="ArgumentException">前缀为通配符 <c>*</c> 时抛出。</exception>
     private string HandlePrefix(string prefix)
     {
         // Forbid
@@ -216,6 +221,7 @@ public class FreeRedisCacheManager : IRedisCache
     /// 查询Redis缓存键
     /// </summary>
     /// <param name="pattern">查询模式</param>
+    /// <returns>匹配查询模式的去重缓存键数组。</returns>
     private string[] SearchRedisKeys(string pattern)
     {
         var keys = new List<string>();
@@ -327,6 +333,7 @@ public class FreeRedisCacheManager : IRedisCache
     /// </summary>
     /// <typeparam name="T">值元素类型</typeparam>
     /// <param name="items">字典</param>
+    /// <returns>以字符串缓存键为键的缓存项字典。</returns>
     private IDictionary<string, T> ToItems<T>(IDictionary<CacheKey, T> items)
     {
         items.CheckNull(nameof(items));
@@ -473,7 +480,8 @@ public class FreeRedisCacheManager : IRedisCache
     /// 处理缓存键模式
     /// </summary>
     /// <param name="pattern">缓存键模式</param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <returns>可用于 Redis 扫描的缓存键模式。</returns>
+    /// <exception cref="ArgumentException">缓存键模式为通配符 <c>*</c> 时抛出。</exception>
     private string HandleKeyPattern(string pattern)
     {
         if (pattern.Equals("*"))

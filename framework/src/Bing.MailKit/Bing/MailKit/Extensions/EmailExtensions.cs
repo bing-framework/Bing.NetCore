@@ -14,6 +14,7 @@ public static partial class EmailExtensions
     /// 转换成MimeMessage
     /// </summary>
     /// <param name="mail">邮件消息</param>
+    /// <returns>转换后的 MIME 邮件消息。</returns>
     public static MimeMessage ToMimeMessage(this MailMessage mail)
     {
         if (mail == null)
@@ -170,6 +171,7 @@ public static partial class EmailExtensions
     /// 获取MimePart
     /// </summary>
     /// <param name="item">附件基类</param>
+    /// <returns>转换后的 MIME 部件。</returns>
     private static MimePart GetMimePart(AttachmentBase item)
     {
         var mimeType = item.ContentType.ToString();
@@ -245,12 +247,14 @@ public static partial class EmailExtensions
     /// 转换成邮箱地址
     /// </summary>
     /// <param name="address">邮箱地址</param>
+    /// <returns>转换后的邮箱地址；输入为空时返回 null。</returns>
     private static MailboxAddress ToMailboxAddress(this MailAddress address) => address == null ? null : new MailboxAddress(address.DisplayName, address.Address);
 
     /// <summary>
     /// 转换成Internet地址列表
     /// </summary>
     /// <param name="addresses">邮箱地址集合</param>
+    /// <returns>转换后的 Internet 地址列表；输入为空时返回 null。</returns>
     private static InternetAddressList ToInternetAddressList(this MailAddressCollection addresses)
     {
         if (addresses == null)

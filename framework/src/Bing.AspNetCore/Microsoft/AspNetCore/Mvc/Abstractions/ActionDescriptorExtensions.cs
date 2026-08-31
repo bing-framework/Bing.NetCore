@@ -14,6 +14,7 @@ public static class ActionDescriptorExtensions
     /// 获取Action路径
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>根据操作描述符生成的 HTTP 方法和路由路径。</returns>
     public static string GetActionPath(this ActionDescriptor actionDescriptor)
     {
         var controllerAction = actionDescriptor as ControllerActionDescriptor;
@@ -39,6 +40,7 @@ public static class ActionDescriptorExtensions
     /// 获取Area名称
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>操作所属区域名称；未配置时返回空字符串。</returns>
     public static string GetAreaName(this ActionDescriptor actionDescriptor)
     {
         if (actionDescriptor.RouteValues.TryGetValue("area", out var area))
@@ -50,6 +52,7 @@ public static class ActionDescriptorExtensions
     /// 获取Controller名称
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>操作所属控制器名称；未配置时返回空字符串。</returns>
     public static string GetControllerName(this ActionDescriptor actionDescriptor)
     {
         if (actionDescriptor.RouteValues.TryGetValue("controller", out var controller))
@@ -61,6 +64,7 @@ public static class ActionDescriptorExtensions
     /// 获取Action名称
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>操作名称；未配置时返回空字符串。</returns>
     public static string GetActionName(this ActionDescriptor actionDescriptor)
     {
         if (actionDescriptor.RouteValues.TryGetValue("action", out var action))

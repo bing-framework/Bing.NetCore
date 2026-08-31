@@ -1,42 +1,42 @@
 ﻿namespace Bing.Data.Sql.Diagnostics;
 
 /// <summary>
-/// 诊断常量
+/// 定义 SQL 查询 <c>DiagnosticListener</c> 使用的稳定名称。
 /// </summary>
 public class SqlQueryDiagnosticListenerNames
 {
     /// <summary>
-    /// 前缀
+    /// SQL 查询诊断事件名称的统一前缀，用于构造和筛选本组件发布的事件。
     /// </summary>
     public const string Prefix = "Bing.SqlQuery.";
 
     /// <summary>
-    /// 监听名称
+    /// SQL 查询诊断监听器的固定名称，供诊断基础设施创建和订阅对应的监听器。
     /// </summary>
     public const string DiagnosticListenerName = "SqlQueryDiagnosticListener";
 
     /// <summary>
-    /// 执行前
+    /// SQL 命令执行前发布的诊断事件名称。
     /// </summary>
     public const string BeforeExecute = Prefix + "ExecuteBefore";
 
     /// <summary>
-    /// 执行后
+    /// SQL 命令执行完成后发布的诊断事件名称。
     /// </summary>
     public const string AfterExecute = Prefix + "ExecuteAfter";
 
     /// <summary>
-    /// 执行异常
+    /// SQL 命令执行发生异常时发布的诊断事件名称。
     /// </summary>
     public const string ErrorExecute = Prefix + "ExecuteError";
 
     /// <summary>
-    /// 执行数据库连接释放
+    /// SQL 命令执行完成后释放数据库连接时发布的诊断事件名称。
     /// </summary>
     public const string DisposeExecute = Prefix + "ExecuteDispose";
 
     /// <summary>
-    /// 数据库连接释放异常
+    /// 释放数据库连接发生异常时发布的诊断事件名称。
     /// </summary>
     public const string DisposeException = Prefix + "DisposeException";
 }

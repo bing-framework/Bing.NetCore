@@ -18,6 +18,7 @@ public static class Extensions
     /// <param name="services">服务集合</param>
     /// <param name="action">配置操作</param>
     /// <param name="builderSetup">CAP构建器配置操作</param>
+    /// <returns>完成 CAP 事件总线注册后的服务集合。</returns>
     public static IServiceCollection AddCapEventBus(this IServiceCollection services, Action<CapOptions> action, Action<CapBuilder> builderSetup = null)
     {
         services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();

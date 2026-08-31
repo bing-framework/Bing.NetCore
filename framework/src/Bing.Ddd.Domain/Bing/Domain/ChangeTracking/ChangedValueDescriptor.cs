@@ -43,5 +43,6 @@ public record ChangedValueDescriptor
     /// <summary>
     /// 输出变更信息
     /// </summary>
+    /// <returns>当前变更值描述的文本表示。</returns>
     public override string ToString() => $"{PropertyName}({Description}),旧值:{OldValue},新值:{NewValue}";
 }

@@ -27,6 +27,8 @@ public class BingExceptionPageFilter : IAsyncPageFilter, ITransientDependency
     /// <summary>
     /// Razor Page处理程序执行过程中拦截操作。
     /// </summary>
+    /// <param name="context">页面处理器执行中上下文。</param>
+    /// <param name="next">下一个页面处理器执行委托。</param>
     public async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
     {
         if (context.HandlerMethod == null || !ShouldHandleException(context))
@@ -45,6 +47,7 @@ public class BingExceptionPageFilter : IAsyncPageFilter, ITransientDependency
     /// 是否应该处理异常
     /// </summary>
     /// <param name="context">页面处理器执行中上下文</param>
+    /// <returns>应处理异常时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool ShouldHandleException(PageHandlerExecutingContext context)
     {
         if (context.ActionDescriptor.IsPageAction() && ActionResultHelper.IsObjectResult(context.HandlerMethod!.MethodInfo.ReturnType, typeof(void)))

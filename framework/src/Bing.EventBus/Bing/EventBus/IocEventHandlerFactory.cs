@@ -3,34 +3,33 @@
 namespace Bing.EventBus;
 
 /// <summary>
-/// 基于依赖注入的事件处理器工厂
+/// 从独立依赖注入服务作用域创建事件处理器的工厂。
 /// </summary>
 public class IocEventHandlerFactory : IEventHandlerFactory, IDisposable
 {
     /// <summary>
-    /// 事件处理器类型
+    /// 获取要从服务容器解析的事件处理器类型。
     /// </summary>
     public Type HandlerType { get; }
 
     /// <summary>
-    /// 服务作用域工厂
+    /// 获取用于创建处理器独立服务作用域的工厂。
     /// </summary>
     protected IServiceScopeFactory ScopeFactory { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="IocEventHandlerFactory"/>类型的实例
+    /// 使用服务作用域工厂和事件处理器类型初始化 <see cref="IocEventHandlerFactory"/> 的实例。
     /// </summary>
-    /// <param name="scopeFactory">服务作用域工厂</param>
-    /// <param name="handlerType">事件处理器类型</param>
+    /// <param name="scopeFactory">创建处理器独立服务作用域的工厂。</param>
+    /// <param name="handlerType">要从服务容器解析的事件处理器类型。</param>
     public IocEventHandlerFactory(IServiceScopeFactory scopeFactory, Type handlerType)
     {
         ScopeFactory = scopeFactory;
         HandlerType = handlerType;
     }
 
-    /// <summary>
-    /// 获取事件处理器
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>返回包装器会在释放时释放为该处理器创建的依赖注入服务作用域。</remarks>
     public IEventHandlerDisposeWrapper GetHandler()
     {
         var scope = ScopeFactory.CreateScope();
@@ -39,10 +38,7 @@ public class IocEventHandlerFactory : IEventHandlerFactory, IDisposable
             () => scope.Dispose());
     }
 
-    /// <summary>
-    /// 是否在当前工厂
-    /// </summary>
-    /// <param name="handlerFactories">事件处理器工厂列表</param>
+    /// <inheritdoc />
     public bool IsInFactories(List<IEventHandlerFactory> handlerFactories)
     {
         return handlerFactories
@@ -51,8 +47,9 @@ public class IocEventHandlerFactory : IEventHandlerFactory, IDisposable
     }
 
     /// <summary>
-    /// 释放资源
+    /// 释放工厂资源。
     /// </summary>
+    /// <remarks>当前工厂不持有需释放的资源；处理器服务作用域由 <see cref="GetHandler"/> 返回的包装器释放。</remarks>
     public void Dispose()
     {
     }

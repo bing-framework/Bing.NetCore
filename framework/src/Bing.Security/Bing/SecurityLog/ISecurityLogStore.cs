@@ -1,13 +1,13 @@
 ﻿namespace Bing.SecurityLog;
 
 /// <summary>
-/// 安全日志存储器
+/// 定义安全日志记录的存储目标。
 /// </summary>
 public interface ISecurityLogStore
 {
     /// <summary>
-    /// 保存
+    /// 异步保存已构建的安全日志记录。
     /// </summary>
-    /// <param name="securityLogInfo">安全日志信息</param>
+    /// <param name="securityLogInfo">要保存的安全日志记录。</param>
     Task SaveAsync(SecurityLogInfo securityLogInfo);
 }

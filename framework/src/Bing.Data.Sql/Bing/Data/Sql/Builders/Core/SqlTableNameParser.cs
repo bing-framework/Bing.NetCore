@@ -57,6 +57,9 @@ internal static class SqlTableNameParser
     /// <summary>
     /// 去除完整标识符的成对引号。
     /// </summary>
+    /// <param name="identifier">待去除引号的标识符。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
+    /// <returns>去除成对引号后的标识符。</returns>
     private static string Unquote(string identifier, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(identifier))
@@ -76,6 +79,8 @@ internal static class SqlTableNameParser
     /// <summary>
     /// 验证单个动态标识符。
     /// </summary>
+    /// <param name="identifier">待验证的标识符。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
     private static void ValidateIdentifier(string identifier, string parameterName)
     {
         if (identifier == null)

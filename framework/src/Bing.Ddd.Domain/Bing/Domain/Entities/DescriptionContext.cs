@@ -7,24 +7,24 @@ using Bing.Helpers;
 namespace Bing.Domain.Entities;
 
 /// <summary>
-/// 描述上下文，提供对对象属性和描述信息的管理。
+/// 在内存中按添加顺序收集并格式化对象描述片段。
 /// </summary>
 public sealed class DescriptionContext
 {
     /// <summary>
-    /// 字符串拼接器
+    /// 保存当前描述片段的可变字符串缓冲区。
     /// </summary>
     private readonly StringBuilder _stringBuilder;
 
     /// <summary>
-    /// 初始化一个<see cref="DescriptionContext"/>类型的实例
+    /// 初始化空的描述上下文。
     /// </summary>
     public DescriptionContext() => _stringBuilder = new StringBuilder();
 
     /// <summary>
-    /// 添加描述信息。
+    /// 添加原始描述片段。
     /// </summary>
-    /// <param name="description">描述</param>
+    /// <param name="description">要追加的描述；空白文本会被忽略。</param>
     public void Add(string description)
     {
         if (string.IsNullOrWhiteSpace(description))
@@ -33,11 +33,12 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 添加带有名称的描述信息。
+    /// 添加名称和值组成的描述片段。
     /// </summary>
-    /// <typeparam name="TValue">值类型</typeparam>
-    /// <param name="name">属性名称</param>
-    /// <param name="value">属性值</param>
+    /// <typeparam name="TValue">属性值类型。</typeparam>
+    /// <param name="name">显示名称；空白名称会被忽略。</param>
+    /// <param name="value">属性值；空值、默认值或空白字符串会被忽略。</param>
+    /// <remarks>有效值以 <c>名称:值,</c> 的形式写入缓冲区，最终输出会移除结尾逗号。</remarks>
     public void Add<TValue>(string name, TValue value)
     {
         if (string.IsNullOrWhiteSpace(name) || value == null || value.Equals(default(TValue)) || string.IsNullOrWhiteSpace(value.ToString()))
@@ -46,11 +47,11 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 添加基于属性表达式的描述信息。
+    /// 根据属性表达式的显示名称或描述添加对应描述片段。
     /// </summary>
-    /// <typeparam name="T">实体类型</typeparam>
-    /// <typeparam name="TProperty">属性类型</typeparam>
-    /// <param name="expression">属性表达式，范例：t => t.Name</param>
+    /// <typeparam name="T">属性所属对象类型。</typeparam>
+    /// <typeparam name="TProperty">属性值类型。</typeparam>
+    /// <param name="expression">用于定位属性元数据的成员访问表达式，例如 <c>t => t.Name</c>。</param>
     public void Add<T, TProperty>(Expression<Func<T, TProperty>> expression)
     {
         var member = Lambdas.GetMember(expression);
@@ -62,14 +63,14 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 刷新缓存，清除所有描述信息。
+    /// 清除当前已收集的全部描述片段。
     /// </summary>
     public void FlushCache() => _stringBuilder.Clear();
 
     /// <summary>
-    /// 获取格式化后的描述信息。
+    /// 获取当前格式化后的描述文本。
     /// </summary>
-    /// <returns>格式化的描述字符串</returns>
+    /// <returns>无描述时返回空字符串；否则返回移除末尾逗号后的描述文本。</returns>
     public string Output()
     {
         if (_stringBuilder.Length == 0)
@@ -78,8 +79,8 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 返回描述信息的字符串表示形式。
+    /// 返回当前描述文本。
     /// </summary>
-    /// <returns>描述信息字符串</returns>
+    /// <returns><see cref="Output"/> 生成的描述文本。</returns>
     public override string ToString() => Output();
 }

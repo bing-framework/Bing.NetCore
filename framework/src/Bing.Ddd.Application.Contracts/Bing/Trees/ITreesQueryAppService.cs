@@ -27,5 +27,6 @@ public interface ITreesQueryAppService<TDto, in TQueryParameter, TParentId> : IQ
     /// 通过标识查找列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示实体查询结果的异步操作，结果为树节点数据传输对象列表。</returns>
     Task<List<TDto>> FindByIdsAsync(string ids);
 }

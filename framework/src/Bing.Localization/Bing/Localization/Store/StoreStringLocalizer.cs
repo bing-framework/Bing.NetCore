@@ -37,6 +37,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// </summary>
     /// <param name="name">资源名称</param>
     /// <param name="arguments">参数列表</param>
+    /// <returns>格式化后的本地化字符串。</returns>
     protected override LocalizedString GetResult(string name, params object[] arguments)
     {
         var culture = Culture.GetCurrentUICulture();
@@ -50,6 +51,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// <param name="culture">区域文化</param>
     /// <param name="name">资源名称</param>
     /// <param name="type">资源类型</param>
+    /// <returns>资源值；未找到资源时返回 null。</returns>
     protected override string GetValue(CultureInfo culture, string name, string type)
     {
         var result = _store.GetValue(culture.Name, type, name);
@@ -61,6 +63,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// 获取全部本地化字符串
     /// </summary>
     /// <param name="includeParentCultures">是否包含父区域</param>
+    /// <returns>当前文化及可选父文化的本地化字符串集合。</returns>
     public override IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var result = new List<LocalizedString>();
@@ -79,6 +82,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// 获取全部本地化字符串
     /// </summary>
     /// <param name="culture">区域文化</param>
+    /// <returns>指定文化下的全部本地化字符串。</returns>
     protected virtual IEnumerable<LocalizedString> GetAllStrings(string culture)
     {
         var result = new List<LocalizedString>();
@@ -94,6 +98,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// </summary>
     /// <param name="culture">区域文化</param>
     /// <param name="type">资源类型</param>
+    /// <returns>指定文化和资源类型下的本地化字符串集合。</returns>
     protected virtual IEnumerable<LocalizedString> GetAllStrings(string culture, string type)
     {
         var resources = _store.GetResources(culture, type);
@@ -104,6 +109,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     /// 转换为 <see cref="LocalizedString"/> 集合
     /// </summary>
     /// <param name="resources">资源键值对集合</param>
+    /// <returns>转换后的本地化字符串集合。</returns>
     protected virtual IEnumerable<LocalizedString> ToLocalizedStrings(IEnumerable<KeyValuePair<string, string>> resources)
     {
         var result = new List<LocalizedString>();

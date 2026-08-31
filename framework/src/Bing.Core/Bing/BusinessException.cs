@@ -62,6 +62,7 @@ public class BusinessException : Exception, IBusinessException, IHasErrorCode, I
     /// </summary>
     /// <param name="name">键名</param>
     /// <param name="value">值</param>
+    /// <returns>当前业务异常实例，便于继续配置异常数据。</returns>
     public BusinessException WithData(string name, object value)
     {
         Data[name] = value;

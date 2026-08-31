@@ -3,14 +3,14 @@
 namespace Bing.DependencyInjection;
 
 /// <summary>
-/// 缓存服务提供程序基类
+/// 按服务类型缓存依赖注入解析结果的基类。
 /// </summary>
 public abstract class CachedServiceProviderBase : ICachedServiceProviderBase
 {
     /// <summary>
-    /// 初始化一个<see cref="CachedServiceProviderBase"/>类型的实例
+    /// 使用服务提供程序初始化 <see cref="CachedServiceProviderBase"/> 的实例。
     /// </summary>
-    /// <param name="serviceProvider">服务提供程序</param>
+    /// <param name="serviceProvider">用于解析服务的服务提供程序。</param>
     protected CachedServiceProviderBase(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
@@ -19,59 +19,45 @@ public abstract class CachedServiceProviderBase : ICachedServiceProviderBase
     }
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取用于解析服务的底层服务提供程序。
     /// </summary>
     protected IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// 缓存服务字典
+    /// 获取以服务类型为键的延迟解析缓存。
     /// </summary>
     protected ConcurrentDictionary<Type, Lazy<object>> CacheServices { get; }
 
     /// <summary>
-    /// 获取服务
+    /// 从底层服务提供程序获取并缓存指定类型的服务。
     /// </summary>
-    /// <param name="serviceType">服务类型</param>
+    /// <param name="serviceType">要解析的服务类型。</param>
+    /// <returns>首次解析后缓存的服务实例；服务未注册时可能为 <c>null</c>。</returns>
+    /// <remarks>同一服务类型的解析委托仅执行一次，包含未注册服务返回的 <c>null</c> 结果。</remarks>
     public object GetService(Type serviceType)
     {
         return CacheServices.GetOrAdd(serviceType, _ => new Lazy<object>(() => ServiceProvider.GetService(serviceType))).Value;
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <param name="defaultValue">默认服务</param>
+    /// <inheritdoc />
     public T GetService<T>(T defaultValue)
     {
         return (T)GetService(typeof(T), defaultValue);
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="defaultValue">默认服务</param>
+    /// <inheritdoc />
     public object GetService(Type serviceType, object defaultValue)
     {
         return GetService(serviceType) ?? defaultValue;
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <param name="factory">服务实例工厂</param>
+    /// <inheritdoc />
     public T GetService<T>(Func<IServiceProvider, object> factory)
     {
         return (T)GetService(typeof(T), factory);
     }
 
-    /// <summary>
-    /// 获取服务
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <param name="factory">服务实例工厂</param>
+    /// <inheritdoc />
     public object GetService(Type serviceType, Func<IServiceProvider, object> factory)
     {
         return CacheServices.GetOrAdd(serviceType, _ => new System.Lazy<object>(() => factory(ServiceProvider))).Value;

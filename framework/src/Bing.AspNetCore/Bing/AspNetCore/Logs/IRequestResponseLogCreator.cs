@@ -13,5 +13,6 @@ public interface IRequestResponseLogCreator
     /// <summary>
     /// 输出Json字符串
     /// </summary>
+    /// <returns>请求响应日志的 JSON 字符串。</returns>
     string ToJsonString();
 }

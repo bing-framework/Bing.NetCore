@@ -130,18 +130,21 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// 转换为实体
     /// </summary>
     /// <param name="request">请求参数</param>
+    /// <returns>由请求参数转换得到的实体。</returns>
     protected virtual TEntity ToEntity(TRequest request) => request.MapTo<TEntity>();
 
     /// <summary>
     /// 创建参数转换为实体
     /// </summary>
     /// <param name="request">创建参数</param>
+    /// <returns>由创建参数转换得到的实体。</returns>
     protected override TEntity ToEntityFromCreateRequest(TCreateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
     /// <summary>
     /// 修改参数转换为实体
     /// </summary>
     /// <param name="request">修改参数</param>
+    /// <returns>由修改参数转换得到的实体。</returns>
     protected override TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
     #endregion
@@ -152,7 +155,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// 保存
     /// </summary>
     /// <param name="request">请求参数</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">请求参数或转换后的实体为空时抛出。</exception>
     public virtual async Task SaveAsync(TRequest request)
     {
         if (request == null)
@@ -185,6 +188,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// </summary>
     /// <param name="request">请求参数</param>
     /// <param name="entity">实体</param>
+    /// <returns>请求对应实体为新实体时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     protected virtual bool IsNew(TRequest request, TEntity entity) => string.IsNullOrWhiteSpace(request.Id) || entity.Id.Equals(default(TKey));
 
     /// <summary>
@@ -209,6 +213,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// <param name="addList">新增列表</param>
     /// <param name="updateList">修改列表</param>
     /// <param name="deleteList">删除列表</param>
+    /// <returns>表示批量保存结果的异步操作，结果为新增和修改后的数据传输对象列表。</returns>
     public virtual async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
     {
         if (addList == null && updateList == null && deleteList == null)
@@ -233,6 +238,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// 转换成实体集合
     /// </summary>
     /// <param name="dtos">请求参数集合</param>
+    /// <returns>由请求参数转换得到的非重复实体列表。</returns>
     private List<TEntity> ToEntities(List<TRequest> dtos) => dtos.Select(ToEntity).Distinct().ToList();
 
     /// <summary>
@@ -342,6 +348,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// </summary>
     /// <param name="addList">新增列表</param>
     /// <param name="updateList">修改列表</param>
+    /// <returns>新增和修改实体对应的数据传输对象列表。</returns>
     protected virtual List<TDto> GetResult(List<TEntity> addList, List<TEntity> updateList) => addList.Concat(updateList).Select(ToDto).ToList();
 
     #endregion
@@ -392,12 +399,14 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 创建参数转换为实体
     /// </summary>
     /// <param name="request">创建参数</param>
+    /// <returns>由创建参数转换得到的实体。</returns>
     protected virtual TEntity ToEntityFromCreateRequest(TCreateRequest request) => request.MapTo<TEntity>();
 
     /// <summary>
     /// 修改参数转换为实体
     /// </summary>
     /// <param name="request">修改参数</param>
+    /// <returns>由修改参数转换得到的实体。</returns>
     protected virtual TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => request.MapTo<TEntity>();
 
     #endregion
@@ -434,7 +443,8 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 创建
     /// </summary>
     /// <param name="request">创建参数</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">创建请求或转换后的实体为空时抛出。</exception>
+    /// <returns>新创建实体的标识字符串。</returns>
     public virtual async Task<string> CreateAsync(TCreateRequest request)
     {
         if (request == null)
@@ -480,7 +490,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">未找到待更新的旧实体时抛出。</exception>
     protected void Update(TEntity entity)
     {
         var oldEntity = FindOldEntity(entity.Id);
@@ -496,12 +506,14 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 查找旧实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>指定标识对应的旧实体；未找到时返回 null。</returns>
     protected virtual TEntity FindOldEntity(TKey id) => _repository.FindById(id);
 
     /// <summary>
     /// 查找旧实体
     /// </summary>
     /// <param name="id">标识</param>
+    /// <returns>表示旧实体查询结果的异步操作；未找到时结果为 null。</returns>
     protected virtual async Task<TEntity> FindOldEntityAsync(TKey id) => await _repository.FindByIdAsync(id);
 
     /// <summary>
@@ -525,7 +537,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 修改
     /// </summary>
     /// <param name="request">修改参数</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">修改请求或转换后的实体为空时抛出。</exception>
     public virtual async Task UpdateAsync(TUpdateRequest request)
     {
         if (request == null)
@@ -540,7 +552,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">未找到待更新的旧实体时抛出。</exception>
     protected async Task UpdateAsync(TEntity entity)
     {
         var oldEntity = await FindOldEntityAsync(entity.Id);

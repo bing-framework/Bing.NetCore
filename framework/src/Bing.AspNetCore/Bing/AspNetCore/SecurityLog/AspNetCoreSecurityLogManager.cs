@@ -79,6 +79,7 @@ public class AspNetCoreSecurityLogManager : DefaultSecurityLogManager
     /// <summary>
     /// 创建
     /// </summary>
+    /// <returns>表示异步操作的任务，结果为包含当前请求和用户信息的安全日志。</returns>
     protected override async Task<SecurityLogInfo> CreateAsync()
     {
         var securityLogInfo = await base.CreateAsync();

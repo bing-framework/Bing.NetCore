@@ -11,6 +11,7 @@ public interface ICorrelationIdProvider
     /// <summary>
     /// 获取当前关联ID的值。
     /// </summary>
+    /// <returns>当前关联 ID。</returns>
     string Get();
 
     /// <summary>

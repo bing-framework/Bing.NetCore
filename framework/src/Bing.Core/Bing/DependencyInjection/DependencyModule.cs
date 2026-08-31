@@ -27,6 +27,7 @@ public class DependencyModule : BingModule
     /// 添加服务。将模块服务添加到依赖注入服务容器中
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>已完成依赖注入服务注册的原服务集合。</returns>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         // 服务定位器设置
@@ -124,6 +125,7 @@ public class DependencyModule : BingModule
     /// 重写以实现 从类型获取要注册的 <see cref="ServiceLifetime"/> 生命周期类型
     /// </summary>
     /// <param name="type">依赖注入实现类型</param>
+    /// <returns>解析到的服务生命周期；无法解析时返回 <see langword="null"/>。</returns>
     protected virtual ServiceLifetime? GetLifetimeOrNull(Type type)
     {
         var attribute = type.GetAttribute<DependencyAttribute>();
@@ -142,6 +144,7 @@ public class DependencyModule : BingModule
     /// 重写以实现 获取实现类型的所有可注册服务接口
     /// </summary>
     /// <param name="type">依赖注入实现类型</param>
+    /// <returns>实现类型可注册的服务接口数组。</returns>
     protected virtual Type[] GetImplementedInterfaces(Type type)
     {
         var exceptInterfaces = new[] { typeof(IDisposable) };
@@ -158,11 +161,11 @@ public class DependencyModule : BingModule
     }
 
     /// <summary>
-    /// 添加单一服务
+    /// 根据依赖注入特性将单个服务描述添加到服务集合。
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="descriptor">描述</param>
-    /// <param name="dependencyAttribute">依赖注入行为特性</param>
+    /// <param name="services">要写入服务描述的服务集合。</param>
+    /// <param name="descriptor">待注册的服务描述。</param>
+    /// <param name="dependencyAttribute">控制替换、尝试添加或普通添加行为的依赖注入特性。</param>
     private static void AddSingleService(IServiceCollection services, ServiceDescriptor descriptor, DependencyAttribute dependencyAttribute)
     {
         if (dependencyAttribute?.ReplaceExisting == true)

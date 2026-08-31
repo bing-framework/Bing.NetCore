@@ -24,5 +24,6 @@ public class DefaultDatabase : IDatabase
     /// <summary>
     /// 获取数据库连接
     /// </summary>
+    /// <returns>数据库连接实例。</returns>
     public IDbConnection GetConnection() => _connection;
 }

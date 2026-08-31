@@ -84,6 +84,7 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
 internal sealed class PostgreSqlPaginationRenderer : ISqlPaginationRenderer
 {
     /// <inheritdoc />
+    /// <returns>PostgreSQL Limit/Offset 分页 SQL 片段。</returns>
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Limit {limitParameterName} OFFSET {offsetParameterName}";
 }

@@ -14,5 +14,6 @@ public static class BingAspNetCoreSerilogApplicationBuilderExtensions
     /// 【重要】必须在 IApplicationBuilder.UseAuthentication() 之后注册该中间件，否则无法获取到当前用户信息。
     /// </remarks>
     /// <param name="app">应用程序构建器</param>
+    /// <returns>注册日志增强中间件后的应用程序构建器。</returns>
     public static IApplicationBuilder UseBingSerilogEnrichers(this IApplicationBuilder app) => app.UseMiddleware<BingSerilogMiddleware>();
 }

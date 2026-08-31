@@ -55,6 +55,9 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 	/// <summary>
 	/// 验证同一连接中两个结构化表的关系。
 	/// </summary>
+	/// <param name="executionContext">执行数据库上下文。</param>
+	/// <param name="source">来源表引用。</param>
+	/// <param name="target">目标表引用。</param>
 	private void ValidateCrossDatabase(DatabaseContext executionContext, SqlTableReference source,
 		SqlTableReference target)
 	{
@@ -75,6 +78,8 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 	/// <summary>
 	/// 解析跨数据库校验使用的数据库类型。
 	/// </summary>
+	/// <param name="executionContext">执行数据库上下文。</param>
+	/// <returns>数据库类型；无法确定时返回 <see langword="null"/>。</returns>
 	private static DatabaseType? ResolveDatabaseType(DatabaseContext executionContext)
 	{
 		return executionContext?.DataSource?.DatabaseType;
@@ -83,5 +88,7 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 	/// <summary>
 	/// 判断字符串是否包含有效值。
 	/// </summary>
+	/// <param name="value">待判断的字符串。</param>
+	/// <returns>字符串包含非空白字符时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
 	private static bool HasValue(string value) => string.IsNullOrWhiteSpace(value) == false;
 }

@@ -1,48 +1,48 @@
 ﻿namespace Bing.Http;
 
 /// <summary>
-/// 远程服务错误信息
+/// 表示远程服务调用失败时返回的结构化错误信息。
 /// </summary>
 [Serializable]
 public class RemoteServiceErrorInfo
 {
     /// <summary>
-    /// 错误码
+    /// 获取或设置可供客户端识别的错误码。
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// 错误消息
+    /// 获取或设置面向调用方的错误消息。
     /// </summary>
     public string Message { get; set; }
 
     /// <summary>
-    /// 错误详情
+    /// 获取或设置错误的补充详情；不应包含未脱敏的敏感信息。
     /// </summary>
     public string Details { get; set; }
 
     /// <summary>
-    /// 数据
+    /// 获取或设置与错误关联的附加数据字典。
     /// </summary>
     public IDictionary Data { get; set; }
 
     /// <summary>
-    /// 验证错误
+    /// 获取或设置远程服务返回的字段级验证错误列表。
     /// </summary>
     public RemoteServiceValidationErrorInfo[] ValidationErrors { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="RemoteServiceErrorInfo"/>类型的实例
+    /// 初始化 <see cref="RemoteServiceErrorInfo"/> 的空实例。
     /// </summary>
     public RemoteServiceErrorInfo() { }
 
     /// <summary>
-    /// 初始化一个<see cref="RemoteServiceErrorInfo"/>类型的实例
+    /// 使用消息、详情、错误码和附加数据初始化 <see cref="RemoteServiceErrorInfo"/> 的实例。
     /// </summary>
-    /// <param name="message">错误消息</param>
-    /// <param name="details">错误详情</param>
-    /// <param name="code">错误码</param>
-    /// <param name="data">数据</param>
+    /// <param name="message">面向调用方的错误消息。</param>
+    /// <param name="details">错误补充详情，可为空。</param>
+    /// <param name="code">可选的客户端错误码。</param>
+    /// <param name="data">可选的附加错误数据。</param>
     public RemoteServiceErrorInfo(string message, string details = null, string code = null, IDictionary data = null)
     {
         Message = message;

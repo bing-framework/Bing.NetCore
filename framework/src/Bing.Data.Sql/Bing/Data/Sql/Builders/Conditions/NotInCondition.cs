@@ -32,6 +32,7 @@ public class NotInCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>返回由列名和值集合组成的 <c>Not In</c> SQL 条件；列名或值集合为空时返回 <see langword="null"/>。</returns>
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_name) || _values == null)

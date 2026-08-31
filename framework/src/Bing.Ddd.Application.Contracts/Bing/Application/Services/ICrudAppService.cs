@@ -46,6 +46,7 @@ public interface ICrudAppService<TDto, in TCreateRequest, in TUpdateRequest, in 
     /// 创建
     /// </summary>
     /// <param name="request">请求参数</param>
+    /// <returns>表示创建结果的异步操作，结果为新实体标识字符串。</returns>
     [UnitOfWork]
     Task<string> CreateAsync([Valid] TCreateRequest request);
 
@@ -85,5 +86,6 @@ public interface ICrudAppService<TDto, TRequest, in TCreateRequest, in TUpdateRe
     /// <param name="addList">新增列表</param>
     /// <param name="updateList">修改列表</param>
     /// <param name="deleteList">删除列表</param>
+    /// <returns>表示批量保存结果的异步操作，结果为新增和修改后的数据传输对象列表。</returns>
     Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList);
 }

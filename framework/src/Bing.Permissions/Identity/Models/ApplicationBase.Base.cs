@@ -6,10 +6,10 @@ using Bing.Domain.Entities;
 namespace Bing.Permissions.Identity.Models;
 
 /// <summary>
-/// 应用程序基类
+/// 提供应用程序编码、名称、注册和审计信息的实体基类。
 /// </summary>
-/// <typeparam name="TApplication">应用程序类型</typeparam>
-/// <typeparam name="TKey">应用程序标识类型</typeparam>
+/// <typeparam name="TApplication">具体应用程序实体类型。</typeparam>
+/// <typeparam name="TKey">应用程序标识类型。</typeparam>
 [Display(Name = "应用程序")]
 public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoot<TApplication, TKey>, ISoftDelete, IAuditedObject
     where TApplication : ApplicationBase<TApplication, TKey>
@@ -17,7 +17,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     #region 属性
 
     /// <summary>
-    /// 应用程序编码
+    /// 获取或设置应用程序编码，最长 50 个字符。
     /// </summary>
     [Display(Name = "应用程序编码")]
     [Required(ErrorMessage = "应用程序编码不能为空")]
@@ -25,7 +25,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     public string Code { get; set; }
 
     /// <summary>
-    /// 应用程序名称
+    /// 获取或设置应用程序名称，最长 200 个字符。
     /// </summary>
     [Display(Name = "应用程序名称")]
     [Required(ErrorMessage = "应用程序名称不能为空")]
@@ -33,53 +33,53 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     public string Name { get; set; }
 
     /// <summary>
-    /// 启用
+    /// 获取或设置应用程序是否启用。
     /// </summary>
     [Display(Name = "启用")]
     [Required(ErrorMessage = "启用不能为空")]
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// 启用注册
+    /// 获取或设置应用程序是否允许注册。
     /// </summary>
     [Display(Name = "启用注册")]
     [Required(ErrorMessage = "启用注册不能为空")]
     public bool RegisterEnabled { get; set; }
 
     /// <summary>
-    /// 备注
+    /// 获取或设置应用程序备注，最长 500 个字符。
     /// </summary>
     [Display(Name = "备注")]
     [StringLength(500)]
     public string Remark { get; set; }
 
     /// <summary>
-    /// 是否删除
+    /// 获取或设置应用程序是否已软删除。
     /// </summary>
     [Display(Name = "是否删除")]
     [Required(ErrorMessage = "是否删除不能为空")]
     public bool IsDeleted { get; set; }
 
     /// <summary>
-    /// 创建时间
+    /// 获取或设置应用程序创建时间。
     /// </summary>
     [Display(Name = "创建时间")]
     public DateTime? CreationTime { get; set; }
 
     /// <summary>
-    /// 创建人标识
+    /// 获取或设置创建该应用程序的用户标识。
     /// </summary>
     [Display(Name = "创建人标识")]
     public Guid? CreatorId { get; set; }
 
     /// <summary>
-    /// 最后修改时间
+    /// 获取或设置应用程序最后修改时间。
     /// </summary>
     [Display(Name = "最后修改时间")]
     public DateTime? LastModificationTime { get; set; }
 
     /// <summary>
-    /// 最后修改人标识
+    /// 获取或设置最后修改该应用程序的用户标识。
     /// </summary>
     [Display(Name = "最后修改人标识")]
     public Guid? LastModifierId { get; set; }
@@ -89,9 +89,9 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
+    /// 使用指定标识初始化一个应用程序实体。
     /// </summary>
-    /// <param name="id">标识</param>
+    /// <param name="id">应用程序标识。</param>
     protected ApplicationBase(TKey id) : base(id) { }
 
     #endregion
@@ -122,6 +122,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     /// <summary>
     /// 添加变更列表
     /// </summary>
+    /// <param name="other">用于比较的应用对象。</param>
     protected override void AddChanges(TApplication other)
     {
         AddChange(t => t.Id, other.Id);

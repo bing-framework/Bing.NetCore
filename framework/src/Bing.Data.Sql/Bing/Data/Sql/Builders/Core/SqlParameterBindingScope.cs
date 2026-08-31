@@ -71,6 +71,8 @@ internal sealed class SqlParameterBindingScope
     /// <summary>
     /// 向内查找表达式引用的 Lambda 参数。
     /// </summary>
+    /// <param name="expression">待查找的表达式。</param>
+    /// <returns>表达式引用的 Lambda 参数；未找到时返回 <see langword="null"/>。</returns>
     private static ParameterExpression FindParameter(Expression expression)
     {
         while (expression != null)

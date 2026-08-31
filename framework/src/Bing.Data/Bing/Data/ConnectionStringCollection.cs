@@ -24,6 +24,7 @@ public class ConnectionStringCollection : Dictionary<string, string>
     /// 获取连接字符串
     /// </summary>
     /// <param name="name">连接字符串名称</param>
+    /// <returns>指定名称的连接字符串；名称为空或未找到时返回默认连接字符串。</returns>
     public string GetConnectionString(string name) => string.IsNullOrWhiteSpace(name)
         ? Default
         : TryGetValue(name, out var value) ? value : Default;

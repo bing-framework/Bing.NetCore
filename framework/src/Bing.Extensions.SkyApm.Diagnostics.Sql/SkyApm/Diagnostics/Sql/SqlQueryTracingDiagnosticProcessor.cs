@@ -99,6 +99,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// 创建SegmentContext
     /// </summary>
     /// <param name="sql">Sql语句</param>
+    /// <returns>已配置数据库跟踪信息的本地段上下文。</returns>
     private SegmentContext CreateLocalSegmentContext(string sql)
     {
         var operationName = sql?.Split(' ').FirstOrDefault();
@@ -142,6 +143,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// 构建参数变量
     /// </summary>
     /// <param name="message">诊断消息</param>
+    /// <returns>用于跟踪标签的参数变量文本。</returns>
     private string BuildParameterVariables(DiagnosticsMessage message)
     {
         if (message?.Parameters?.Items != null && message.Parameters.Items.Count > 0)
@@ -154,6 +156,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// </summary>
     /// <param name="parameters">参数诊断信息集合</param>
     /// <param name="logParameterValues">是否记录参数值</param>
+    /// <returns>拼接后的参数变量文本。</returns>
     private static string FormatParameters(IEnumerable<SqlParameterDiagnosticInfo> parameters, bool logParameterValues)
     {
         return parameters.Select(x => FormatParameter(x.Name, logParameterValues && x.IsSensitive == false ? x.Value : "?"))
@@ -165,6 +168,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     /// </summary>
     /// <param name="name">参数名</param>
     /// <param name="value">参数值</param>
+    /// <returns>参数名和值组成的诊断文本。</returns>
     public static string FormatParameter(string name, object value)
     {
         var builder = new StringBuilder();

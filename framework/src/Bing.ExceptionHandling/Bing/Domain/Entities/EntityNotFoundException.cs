@@ -1,32 +1,32 @@
 ﻿namespace Bing.Domain.Entities;
 
 /// <summary>
-/// 实体未找到异常
+/// 表示按指定类型或标识查找实体失败的异常。
 /// </summary>
 public class EntityNotFoundException : BingException
 {
     /// <summary>
-    /// 标识
+    /// 实体未找到异常使用的内部标识。
     /// </summary>
     private const string FLAG = "__ENTITY_NOT_FOUND_FLG";
 
     /// <summary>
-    /// 默认错误消息
+    /// 未指定实体信息时使用的默认错误消息。
     /// </summary>
     private const string DEFAULT_ERROR_MSG = "The specified entity could not be found.";
 
     /// <summary>
-    /// 默认错误码
+    /// 实体未找到异常使用的默认错误码。
     /// </summary>
     private const long ERROR_CODE = 1010;
 
     /// <summary>
-    /// 实体类型
+    /// 获取或设置未找到的实体类型。
     /// </summary>
     public Type EntityType { get; set; }
 
     /// <summary>
-    /// 实体标识
+    /// 获取或设置未找到的实体标识；未按标识查询时为空。
     /// </summary>
     public object Id { get; set; }
 
@@ -104,6 +104,7 @@ public class EntityNotFoundException : BingException
     /// <param name="entityType">实体类型</param>
     /// <param name="id">实体标识</param>
     /// <param name="message">自定义消息</param>
+    /// <returns>实体未找到异常的消息文本。</returns>
     private static string GetMessage(Type entityType, object id, string message)
     {
         if (string.IsNullOrWhiteSpace(message))

@@ -169,6 +169,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     /// <summary>
     /// 添加变更列表
     /// </summary>
+    /// <param name="other">用于比较的角色对象。</param>
     protected override void AddChanges(TRole other)
     {
         AddChange(t => t.Id, other.Id);

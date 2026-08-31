@@ -31,6 +31,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="condition">条件</param>
+    /// <returns>追加查询条件后的源对象。</returns>
     public static T Where<T>(this T source, ICondition condition)
         where T : IWhere
     {
@@ -48,6 +49,7 @@ public static class WhereClauseExtensions
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加查询条件后的源对象。</returns>
     public static T Where<T>(this T source, string column, object value, Operator @operator = Operator.Equal)
         where T : IWhere
     {
@@ -65,6 +67,7 @@ public static class WhereClauseExtensions
     /// <param name="column">列名</param>
     /// <param name="builder">子查询Sql生成器</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加子查询条件后的源对象。</returns>
     public static T Where<T>(this T source, string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
         where T : IWhere
     {
@@ -82,6 +85,7 @@ public static class WhereClauseExtensions
     /// <param name="column">列名</param>
     /// <param name="action">子查询操作</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加子查询条件后的源对象。</returns>
     public static T Where<T>(this T source, string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
         where T : IWhere
     {
@@ -104,6 +108,7 @@ public static class WhereClauseExtensions
     /// <param name="value">值</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
+    /// <returns>条件成立时追加查询条件后的源对象。</returns>
     public static T WhereIf<T>(this T source, string column, object value, bool condition, Operator @operator = Operator.Equal) where T : IWhere => condition ? Where(source, column, value, @operator) : source;
 
     /// <summary>
@@ -115,6 +120,7 @@ public static class WhereClauseExtensions
     /// <param name="builder">子查询Sql生成器</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
+    /// <returns>条件成立时追加子查询条件后的源对象。</returns>
     public static T WhereIf<T>(this T source, string column, ISqlBuilder builder, bool condition, Operator @operator = Operator.Equal) where T : IWhere => condition ? Where(source, column, builder, @operator) : source;
 
     /// <summary>
@@ -126,6 +132,7 @@ public static class WhereClauseExtensions
     /// <param name="action">子查询操作</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
+    /// <returns>条件成立时追加子查询条件后的源对象。</returns>
     public static T WhereIf<T>(this T source, string column, Action<ISqlBuilder> action, bool condition, Operator @operator = Operator.Equal) where T : IWhere => condition ? Where(source, column, action, @operator) : source;
 
     #endregion
@@ -140,6 +147,7 @@ public static class WhereClauseExtensions
     /// <param name="column">列名</param>
     /// <param name="value">值。如果值为空，则忽略该查询条件</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加非空查询条件后的源对象。</returns>
     public static T WhereIfNotEmpty<T>(this T source, string column, object value, Operator @operator = Operator.Equal)
         where T : IWhere
     {
@@ -162,6 +170,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加相等条件后的源对象。</returns>
     public static T Equal<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -181,6 +190,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加不相等条件后的源对象。</returns>
     public static T NotEqual<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -200,6 +210,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加大于条件后的源对象。</returns>
     public static T Greater<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -219,6 +230,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加大于等于条件后的源对象。</returns>
     public static T GreaterEqual<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -238,6 +250,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加小于条件后的源对象。</returns>
     public static T Less<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -257,6 +270,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加小于等于条件后的源对象。</returns>
     public static T LessEqual<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -276,6 +290,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加包含匹配条件后的源对象。</returns>
     public static T Contains<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -295,6 +310,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加前缀匹配条件后的源对象。</returns>
     public static T Starts<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -314,6 +330,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
+    /// <returns>追加后缀匹配条件后的源对象。</returns>
     public static T Ends<T>(this T source, string column, object value)
         where T : IWhere
     {
@@ -332,6 +349,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
+    /// <returns>追加 Is Null 条件后的源对象。</returns>
     public static T IsNull<T>(this T source, string column)
         where T : IWhere
     {
@@ -351,6 +369,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
+    /// <returns>追加 Is Not Null 条件后的源对象。</returns>
     public static T IsNotNull<T>(this T source, string column)
         where T : IWhere
     {
@@ -370,6 +389,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
+    /// <returns>追加空值或空字符串条件后的源对象。</returns>
     public static T IsEmpty<T>(this T source, string column)
         where T : IWhere
     {
@@ -389,6 +409,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
+    /// <returns>追加非空条件后的源对象。</returns>
     public static T IsNotEmpty<T>(this T source, string column)
         where T : IWhere
     {
@@ -409,6 +430,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="values">值集合</param>
+    /// <returns>追加 In 条件后的源对象。</returns>
     public static T In<T>(this T source, string column, IEnumerable<object> values)
         where T : IWhere
     {
@@ -425,6 +447,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 In 子查询条件后的源对象。</returns>
     public static T In<T>(this T source, string column, ISqlBuilder builder)
         where T : IWhere
     {
@@ -441,6 +464,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 In 子查询条件后的源对象。</returns>
     public static T In<T>(this T source, string column, Action<ISqlBuilder> action)
         where T : IWhere
     {
@@ -472,6 +496,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="values">值集合</param>
+    /// <returns>追加 Not In 条件后的源对象。</returns>
     public static T NotIn<T>(this T source, string column, IEnumerable<object> values)
         where T : IWhere
     {
@@ -488,6 +513,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 Not In 子查询条件后的源对象。</returns>
     public static T NotIn<T>(this T source, string column, ISqlBuilder builder)
         where T : IWhere
     {
@@ -504,6 +530,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="column">列名</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 Not In 子查询条件后的源对象。</returns>
     public static T NotIn<T>(this T source, string column, Action<ISqlBuilder> action)
         where T : IWhere
     {
@@ -534,6 +561,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 Exists 条件后的源对象。</returns>
     public static T Exists<T>(this T source, ISqlBuilder builder)
         where T : IWhere
     {
@@ -549,6 +577,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 Exists 条件后的源对象。</returns>
     public static T Exists<T>(this T source, Action<ISqlBuilder> action)
         where T : IWhere
     {
@@ -578,6 +607,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 Not Exists 条件后的源对象。</returns>
     public static T NotExists<T>(this T source, ISqlBuilder builder)
         where T : IWhere
     {
@@ -593,6 +623,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 Not Exists 条件后的源对象。</returns>
     public static T NotExists<T>(this T source, Action<ISqlBuilder> action)
         where T : IWhere
     {
@@ -625,6 +656,7 @@ public static class WhereClauseExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, int? min, int? max, Boundary boundary = Boundary.Both)
         where T : IWhere
     {
@@ -643,6 +675,7 @@ public static class WhereClauseExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, long? min, long? max, Boundary boundary = Boundary.Both)
         where T : IWhere
     {
@@ -661,6 +694,7 @@ public static class WhereClauseExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, float? min, float? max, Boundary boundary = Boundary.Both)
         where T : IWhere
     {
@@ -679,6 +713,7 @@ public static class WhereClauseExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, double? min, double? max, Boundary boundary = Boundary.Both)
         where T : IWhere
     {
@@ -697,6 +732,7 @@ public static class WhereClauseExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
         where T : IWhere
     {
@@ -716,6 +752,7 @@ public static class WhereClauseExtensions
     /// <param name="max">最大值</param>
     /// <param name="includeTime">是否包含时间</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加日期范围条件后的源对象。</returns>
     public static T Between<T>(this T source, string column, DateTime? min, DateTime? max, bool includeTime = true, Boundary? boundary = null)
         where T : IWhere
     {
@@ -735,6 +772,7 @@ public static class WhereClauseExtensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="sql">SQL 条件文本；方括号标识符会按当前方言解析，参数须由调用方显式提供。</param>
+    /// <returns>追加 Where 条件后的源对象。</returns>
     public static T AppendWhere<T>(this T source, string sql)
         where T : IWhere
     {
@@ -753,6 +791,7 @@ public static class WhereClauseExtensions
     /// <param name="source">源</param>
     /// <param name="sql">SQL 条件文本；方括号标识符会按当前方言解析，参数须由调用方显式提供。</param>
     /// <param name="condition">该值为true时添加Sql，否则忽略</param>
+    /// <returns>条件成立时追加 Where 条件后的源对象。</returns>
     public static T AppendWhere<T>(this T source, string sql, bool condition) where T : IWhere => condition ? AppendWhere(source, sql) : source;
 
     #endregion

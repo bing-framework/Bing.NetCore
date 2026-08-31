@@ -13,6 +13,7 @@ public static class ValidationExceptionExtensions
     /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="resultCollection">验证结果集合</param>
     /// <param name="appendAction">追加操作</param>
+    /// <returns>由验证结果集合创建的指定类型异常。</returns>
     public static TException ToException<TException>(this ValidationResultCollection resultCollection, Action<TException, ValidationResultCollection> appendAction = null) 
         where TException : BingException, new()
     {
@@ -30,6 +31,7 @@ public static class ValidationExceptionExtensions
     /// </summary>
     /// <param name="resultCollection">验证结果集合</param>
     /// <param name="appendAction">追加操作</param>
+    /// <returns>由验证结果集合创建的验证异常。</returns>
     public static ValidationException ToException(this ValidationResultCollection resultCollection, Action<ValidationException, ValidationResultCollection> appendAction = null)
     {
         if (resultCollection == null)
@@ -45,6 +47,7 @@ public static class ValidationExceptionExtensions
     /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="result">验证结果</param>
     /// <param name="appendAction">追加操作</param>
+    /// <returns>由验证结果创建的指定类型异常。</returns>
     public static TException ToException<TException>(this IValidationResult result, Action<TException, ValidationResultCollection> appendAction = null) 
         where TException : BingException, new()
     {
@@ -64,6 +67,7 @@ public static class ValidationExceptionExtensions
     /// </summary>
     /// <param name="result">验证结果</param>
     /// <param name="appendAction">追加操作</param>
+    /// <returns>由验证结果创建的验证异常。</returns>
     public static ValidationException ToException(this IValidationResult result, Action<ValidationException, ValidationResultCollection> appendAction = null)
     {
         switch (result)
@@ -81,7 +85,9 @@ public static class ValidationExceptionExtensions
     /// <summary>
     /// 创建基础异常
     /// </summary>
+    /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="result">验证结果</param>
+    /// <returns>由验证结果创建的指定类型异常。</returns>
     private static TException CreateBasicException<TException>(IValidationResult result) 
         where TException : BingException, new()
     {
@@ -94,6 +100,7 @@ public static class ValidationExceptionExtensions
     /// 创建验证异常
     /// </summary>
     /// <param name="result">验证结果</param>
+    /// <returns>由验证结果创建的验证异常。</returns>
     private static ValidationException CreateValidationException(IValidationResult result)
     {
         var exception = new ValidationException(result.ErrorCode, result.ToMessage(), result.ToValidationMessages(),

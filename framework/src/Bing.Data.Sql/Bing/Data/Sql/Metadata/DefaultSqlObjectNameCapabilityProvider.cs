@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Metadata;
 public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapabilityProvider
 {
     /// <summary>
-    /// MySql 与 Doris 对象名称能力。
+    /// MySQL 与 Doris 共用的对象名称能力：支持架构名，最多允许两段对象名称。
     /// </summary>
     private static readonly SqlObjectNameCapabilities MySqlCapabilities = new()
     {
@@ -17,7 +17,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     };
 
     /// <summary>
-    /// SQL Server 对象名称能力。
+    /// SQL Server 对象名称能力：支持数据库名和架构名，最多允许三段对象名称。
     /// </summary>
     private static readonly SqlObjectNameCapabilities SqlServerCapabilities = new()
     {
@@ -27,7 +27,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     };
 
     /// <summary>
-    /// PostgreSql 对象名称能力。
+    /// PostgreSQL 对象名称能力：支持架构名，最多允许两段对象名称。
     /// </summary>
     private static readonly SqlObjectNameCapabilities PostgreSqlCapabilities = new()
     {
@@ -36,7 +36,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     };
 
     /// <summary>
-    /// Oracle 对象名称能力。
+    /// Oracle 对象名称能力：支持架构名，最多允许两段对象名称。
     /// </summary>
     private static readonly SqlObjectNameCapabilities OracleCapabilities = new()
     {
@@ -45,7 +45,7 @@ public sealed class DefaultSqlObjectNameCapabilityProvider : ISqlObjectNameCapab
     };
 
     /// <summary>
-    /// SQLite 对象名称能力。
+    /// SQLite 对象名称能力：不支持数据库名和架构名限定，最多允许单段对象名称。
     /// </summary>
     private static readonly SqlObjectNameCapabilities SqliteCapabilities = new()
     {

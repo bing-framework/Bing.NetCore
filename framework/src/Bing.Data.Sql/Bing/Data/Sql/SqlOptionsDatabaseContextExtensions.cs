@@ -4,21 +4,22 @@ using Bing.Data;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql 配置数据库上下文扩展
+/// 为 <see cref="SqlOptions"/> 附加数据库上下文的扩展方法。
 /// </summary>
 public static class SqlOptionsDatabaseContextExtensions
 {
     /// <summary>
-    /// 数据库上下文存储
+    /// 按 <see cref="SqlOptions"/> 实例弱引用关联的数据库上下文存储。
     /// </summary>
+    /// <remarks>该表用于附加上下文而不改变配置对象结构，且不会阻止配置实例及其关联上下文被回收。</remarks>
     private static readonly ConditionalWeakTable<SqlOptions, DatabaseContextHolder> Contexts = new();
 
     /// <summary>
-    /// 设置数据库上下文
+    /// 为 SQL 配置设置数据库上下文快照。
     /// </summary>
-    /// <param name="options">Sql 配置</param>
-    /// <param name="context">数据库上下文</param>
-    /// <returns>Sql 配置</returns>
+    /// <param name="options">要附加上下文的 SQL 配置。</param>
+    /// <param name="context">要保存的数据库上下文；为 <c>null</c> 时移除已有上下文。</param>
+    /// <returns>当前 SQL 配置，以支持链式调用。</returns>
     public static SqlOptions SetDatabaseContext(this SqlOptions options, DatabaseContext context)
     {
         if (options == null)
@@ -30,10 +31,10 @@ public static class SqlOptionsDatabaseContextExtensions
     }
 
     /// <summary>
-    /// 获取数据库上下文
+    /// 获取 SQL 配置关联的数据库上下文快照。
     /// </summary>
-    /// <param name="options">Sql 配置</param>
-    /// <returns>数据库上下文</returns>
+    /// <param name="options">要读取上下文的 SQL 配置。</param>
+    /// <returns>独立的数据库上下文快照；未关联上下文或配置为 <c>null</c> 时返回 <c>null</c>。</returns>
     public static DatabaseContext GetDatabaseContext(this SqlOptions options)
     {
         if (options == null)
@@ -42,28 +43,28 @@ public static class SqlOptionsDatabaseContextExtensions
     }
 
     /// <summary>
-    /// 克隆数据库上下文
+    /// 创建数据库上下文的独立快照。
     /// </summary>
-    /// <param name="context">数据库上下文</param>
-    /// <returns>数据库上下文</returns>
+    /// <param name="context">要复制的数据库上下文。</param>
+    /// <returns>复制后的数据库上下文快照。</returns>
     internal static DatabaseContext Clone(DatabaseContext context)
     {
         return DatabaseContextSnapshot.Create(context);
     }
 
     /// <summary>
-    /// 数据库上下文持有者
+    /// 保存弱引用表值的数据库上下文快照。
     /// </summary>
     private sealed class DatabaseContextHolder
     {
         /// <summary>
-        /// 初始化一个<see cref="DatabaseContextHolder"/>类型的实例
+        /// 使用指定上下文快照初始化 <see cref="DatabaseContextHolder"/> 的实例。
         /// </summary>
-        /// <param name="context">数据库上下文</param>
+        /// <param name="context">要保存的数据库上下文快照。</param>
         public DatabaseContextHolder(DatabaseContext context) => Context = context;
 
         /// <summary>
-        /// 数据库上下文
+        /// 获取保存的数据库上下文快照。
         /// </summary>
         public DatabaseContext Context { get; }
     }

@@ -33,12 +33,14 @@ public class DirectoryAssemblyFinder : IAssemblyFinder
     /// </summary>
     /// <param name="predicate">筛选条件</param>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>符合筛选条件的程序集数组。</returns>
     public Assembly[] Find(Func<Assembly, bool> predicate, bool fromCache = false) => FindAll(fromCache).Where(predicate).ToArray();
 
     /// <summary>
     /// 查找所有项
     /// </summary>
     /// <param name="fromCache">是否来自缓存</param>
+    /// <returns>目录中的程序集数组。</returns>
     public Assembly[] FindAll(bool fromCache = false)
     {
         if (fromCache && _assemblyCacheDict.ContainsKey(_path))

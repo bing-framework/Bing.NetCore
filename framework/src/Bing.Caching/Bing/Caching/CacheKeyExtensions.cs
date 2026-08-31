@@ -9,7 +9,7 @@ public static class CacheKeyExtensions
     /// 验证缓存键
     /// </summary>
     /// <param name="cacheKey">缓存键</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">缓存键为空或其键值为空白时抛出。</exception>
     public static void Validate(this CacheKey cacheKey)
     {
         if (cacheKey == null)

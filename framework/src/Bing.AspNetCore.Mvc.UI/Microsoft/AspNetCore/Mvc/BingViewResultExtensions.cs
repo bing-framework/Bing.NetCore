@@ -18,6 +18,7 @@ public static class BingViewResultExtensions
     /// </summary>
     /// <param name="result">视图结果</param>
     /// <param name="httpContext">Http上下文</param>
+    /// <returns>渲染后的 HTML 文本。</returns>
     public static string ToHtml(this ViewResult result, HttpContext httpContext)
     {
         var feature = httpContext.Features.Get<IRoutingFeature>();

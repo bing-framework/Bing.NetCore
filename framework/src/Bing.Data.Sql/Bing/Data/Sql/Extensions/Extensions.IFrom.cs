@@ -16,6 +16,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
+    /// <returns>设置 From 子句后的源对象。</returns>
     public static T From<T>(this T source, string table, string alias = null) where T : IFrom
     {
         if (source == null)
@@ -30,6 +31,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="table">结构化表引用。</param>
+    /// <returns>设置 From 子句后的源对象。</returns>
     public static T From<T>(this T source, SqlTableReference table) where T : IFrom
     {
         if (source == null)
@@ -48,6 +50,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始 From 文本；空白文本将被忽略。</param>
+    /// <returns>追加 From 子句后的源对象。</returns>
     public static T AppendFrom<T>(this T source, string sql) where T : IFrom
     {
         if (source == null)
@@ -65,6 +68,7 @@ public static partial class Extensions
     /// <param name="source">源。</param>
     /// <param name="sql">原始 From 文本。</param>
     /// <param name="condition">是否添加。</param>
+    /// <returns>条件成立时追加 From 子句后的源对象。</returns>
     public static T AppendFrom<T>(this T source, string sql, bool condition) where T : IFrom =>
         condition ? AppendFrom(source, sql) : source;
 
@@ -75,6 +79,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">表别名</param>
+    /// <returns>设置子查询 From 子句后的源对象。</returns>
     public static T From<T>(this T source, ISqlBuilder builder, string alias) where T : IFrom
     {
         if (source == null)
@@ -90,6 +95,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">表别名</param>
+    /// <returns>设置子查询 From 子句后的源对象。</returns>
     public static T From<T>(this T source, Action<ISqlBuilder> action, string alias) where T : IFrom
     {
         if (source == null)

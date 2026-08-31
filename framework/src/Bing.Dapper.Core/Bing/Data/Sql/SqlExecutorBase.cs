@@ -144,6 +144,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 验证写入命令是否可通过非 Returning 执行入口执行。
     /// </summary>
+    /// <param name="command">待验证的写入命令。</param>
     private void ValidateExecutableMutationCommand(SqlWriteCommand command)
     {
         if (command == null)
@@ -159,6 +160,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 验证写入命令是否为包含 Returning 的 Mutation。
     /// </summary>
+    /// <param name="command">待验证的写入命令。</param>
     private void ValidateReturningMutationCommand(SqlWriteCommand command)
     {
         if (command == null)
@@ -667,6 +669,10 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 根据实体集合和当前策略生成 Delete 批次。
     /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待删除实体集合。</param>
+    /// <param name="options">批量 Delete 策略、容量和并发选项。</param>
+    /// <returns>按当前策略生成的 Delete 命令批次。</returns>
     private IReadOnlyList<SqlMutationBatchCommand> CreateDeleteBatchCommands<TEntity>(IEnumerable<TEntity> entities,
         SqlBatchDeleteOptions options) where TEntity : class
     {
@@ -765,6 +771,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 将组合命令的并发校验提升到批次层，避免按单实体一行规则误判。
     /// </summary>
+    /// <param name="command">待处理的写入命令。</param>
+    /// <returns>移除单实体受影响行数校验后的命令；无需移除时返回原命令。</returns>
     private static SqlWriteCommand WithoutSingleEntityAffectedRowsValidation(SqlWriteCommand command) =>
         command.ValidateAffectedRows
             ? new SqlWriteCommand(command.Sql, command.Parameters)
@@ -773,6 +781,11 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 将实体映射为按参数及 SQL 长度限制分组的 Mutation 命令。
     /// </summary>
+    /// <typeparam name="TEntity">实体类型。</typeparam>
+    /// <param name="entities">待处理实体集合。</param>
+    /// <param name="commandFactory">为单个实体创建写入命令的委托。</param>
+    /// <param name="options">批量 Mutation 选项。</param>
+    /// <returns>按当前限制分组的 Mutation 命令批次。</returns>
     private IReadOnlyList<SqlMutationBatchCommand> CreateMutationBatchCommands<TEntity>(
         IEnumerable<TEntity> entities, Func<TEntity, SqlWriteCommand> commandFactory, SqlMutationBatchOptions options)
         where TEntity : class
@@ -1061,6 +1074,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 验证带并发令牌的优化批量命令是否更新了全部目标实体。
     /// </summary>
+    /// <param name="batch">待验证的批量命令。</param>
+    /// <param name="affectedRows">实际受影响的行数。</param>
     private static void ValidateAffectedRows(SqlMutationBatchCommand batch, int affectedRows)
     {
         if (batch.ValidateAffectedRows && affectedRows != batch.EntityCount)
@@ -1097,6 +1112,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <summary>
     /// 验证单体带并发令牌的命令是否影响了一行。
     /// </summary>
+    /// <param name="command">待验证的单体写入命令。</param>
+    /// <param name="affectedRows">实际受影响的行数。</param>
     private static void ValidateAffectedRows(SqlWriteCommand command, int affectedRows)
     {
         if (command.ValidateAffectedRows && affectedRows != 1)

@@ -116,8 +116,17 @@ public sealed class SetClause : ISetClause, IColumnSetClause
             throw new InvalidOperationException("Update 未指定 Set 赋值。");
     }
 
+    /// <summary>
+    /// 表示一个 Update Set 赋值项。
+    /// </summary>
     private sealed class SetItem
     {
+        /// <summary>
+        /// 初始化一个 <see cref="SetItem"/> 类型的实例。
+        /// </summary>
+        /// <param name="column">待赋值的目标列名。</param>
+        /// <param name="value">参数名称或源列表达式。</param>
+        /// <param name="isParameter">是否将值解释为参数名称。</param>
         public SetItem(string column, string value, bool isParameter)
         {
             Column = column;
@@ -125,10 +134,19 @@ public sealed class SetClause : ISetClause, IColumnSetClause
             IsParameter = isParameter;
         }
 
+        /// <summary>
+        /// 待赋值的目标列名。
+        /// </summary>
         public string Column { get; }
 
+        /// <summary>
+        /// 参数名称或源列表达式。
+        /// </summary>
         public string Value { get; }
 
+        /// <summary>
+        /// 是否将值解释为参数名称。
+        /// </summary>
         public bool IsParameter { get; }
     }
 }

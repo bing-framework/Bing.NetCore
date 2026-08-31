@@ -389,6 +389,9 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     protected bool AllowAllRows { get; private set; }
 
+    /// <summary>
+    /// 获取当前 Provider 提供的 Mutation 子句工厂；未提供时使用默认工厂。
+    /// </summary>
     private ISqlMutationClauseFactory MutationClauseFactory => _mutationClauseFactory ??=
         (Provider as ISqlMutationClauseFactoryProvider)?.MutationClauseFactory ?? new DefaultSqlMutationClauseFactory();
 
@@ -512,6 +515,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 创建参数管理器
     /// </summary>
+    /// <returns>按当前 SQL Provider 创建并应用参数数量限制的参数管理器。</returns>
     protected virtual IParameterManager CreateParameterManager()
     {
         var parameterManager = Provider.ParameterManagerFactory.Create(Dialect);
@@ -565,6 +569,10 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
             ExecutionContext, Services);
     }
 
+    /// <summary>
+    /// 创建绑定到当前 Builder 的 Mutation 上下文。
+    /// </summary>
+    /// <returns>当前 Builder 使用的 Mutation 上下文。</returns>
     private SqlMutationContext CreateMutationContext()
     {
         var result = new SqlMutationContext(Provider, ParameterManager, Services, ExecutionContext)
@@ -577,36 +585,43 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 创建Select子句
     /// </summary>
+    /// <returns>当前 Provider 创建的 Select 子句。</returns>
     protected virtual ISelectClause CreateSelectClause() => Provider.ClauseFactory.CreateSelect(CreateClauseContext());
 
     /// <summary>
     /// 创建From子句
     /// </summary>
+    /// <returns>当前 Provider 创建的 From 子句。</returns>
     protected virtual IFromClause CreateFromClause() => Provider.ClauseFactory.CreateFrom(CreateClauseContext());
 
     /// <summary>
     /// 创建Join子句
     /// </summary>
+    /// <returns>当前 Provider 创建的 Join 子句。</returns>
     protected virtual IJoinClause CreateJoinClause() => Provider.ClauseFactory.CreateJoin(CreateClauseContext());
 
     /// <summary>
     /// 创建Where子句
     /// </summary>
+    /// <returns>当前 Provider 创建的 Where 子句。</returns>
     protected virtual IWhereClause CreateWhereClause() => Provider.ClauseFactory.CreateWhere(CreateClauseContext());
 
     /// <summary>
     /// 创建分组子句
     /// </summary>
+    /// <returns>当前 Provider 创建的分组子句。</returns>
     protected virtual IGroupByClause CreateGroupByClause() => Provider.ClauseFactory.CreateGroupBy(CreateClauseContext());
 
     /// <summary>
     /// 创建排序子句
     /// </summary>
+    /// <returns>当前 Provider 创建的排序子句。</returns>
     protected virtual IOrderByClause CreateOrderByClause() => Provider.ClauseFactory.CreateOrderBy(CreateClauseContext());
 
     /// <summary>
     /// 获取参数字面值解析器
     /// </summary>
+    /// <returns>当前 SQL Provider 的参数字面值解析器。</returns>
     protected virtual IParamLiteralsResolver GetParamLiteralsResolver() => Provider.ParamLiteralsResolver;
 
     #endregion
@@ -616,6 +631,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前 SQL Builder 的独立副本。</returns>
     public virtual ISqlBuilder Clone()
     {
         var result = CreateBuilder(null);
@@ -755,6 +771,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 记录类型化子查询的父上下文，重复引用时保留最外层父关系。
     /// </summary>
+    /// <param name="parentQueryContextId">父查询上下文标识。</param>
     internal void RegisterSubqueryParent(string parentQueryContextId)
     {
         if (string.IsNullOrWhiteSpace(_parentQueryContextId) && string.IsNullOrWhiteSpace(parentQueryContextId) == false)
@@ -765,6 +782,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 渲染子查询并合并独立参数上下文。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
+    /// <returns>参数名称已合并后的子查询 SQL。</returns>
     protected internal string RenderSubquery(ISqlBuilder builder)
     {
         return RenderSubquery(builder, ParameterManager, _subqueryParameterNames);
@@ -1362,6 +1380,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     /// <param name="parameter">源参数。</param>
     /// <param name="name">目标参数名。</param>
+    /// <returns>使用目标参数名创建的参数副本。</returns>
     private static SqlParam CloneSqlParameter(SqlParam parameter, string name)
     {
         return new SqlParam(name, parameter.Value, parameter.DbType, parameter.Direction, parameter.Size,
@@ -1442,6 +1461,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空并初始化
     /// </summary>
+    /// <returns>已清空并重新初始化的当前 Builder。</returns>
     public ISqlBuilder Clear()
     {
         var aliasRegister = new EntityAliasRegister();
@@ -1499,6 +1519,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空Select子句
     /// </summary>
+    /// <returns>已清空 Select 子句的当前 Builder。</returns>
     public ISqlBuilder ClearSelect()
     {
         _selectClause = CreateSelectClause();
@@ -1527,6 +1548,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空From子句
     /// </summary>
+    /// <returns>已清空 From 子句的当前 Builder。</returns>
     public ISqlBuilder ClearFrom()
     {
         var fromClause = CreateFromClause();
@@ -1538,6 +1560,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空Join子句
     /// </summary>
+    /// <returns>已清空 Join 子句的当前 Builder。</returns>
     public ISqlBuilder ClearJoin()
     {
         var joinClause = CreateJoinClause();
@@ -1549,6 +1572,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空Where子句
     /// </summary>
+    /// <returns>已清空 Where 子句的当前 Builder。</returns>
     public ISqlBuilder ClearWhere()
     {
         var whereClause = CreateWhereClause();
@@ -1560,6 +1584,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空GroupBy子句
     /// </summary>
+    /// <returns>已清空 GroupBy 子句的当前 Builder。</returns>
     public ISqlBuilder ClearGroupBy()
     {
         _groupByClause = CreateGroupByClause();
@@ -1569,6 +1594,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空OrderBy子句
     /// </summary>
+    /// <returns>已清空 OrderBy 子句的当前 Builder。</returns>
     public ISqlBuilder ClearOrderBy()
     {
         _orderByClause = CreateOrderByClause();
@@ -1578,6 +1604,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空Sql参数
     /// </summary>
+    /// <returns>已清空 SQL 参数的当前 Builder。</returns>
     public ISqlBuilder ClearSqlParams()
     {
         ParameterManager.Clear();
@@ -1587,6 +1614,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空分页参数
     /// </summary>
+    /// <returns>已清空分页参数的当前 Builder。</returns>
     public ISqlBuilder ClearPageParams()
     {
         ClearParameters(OffsetParam, LimitParam);
@@ -1628,6 +1656,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空联合操作项
     /// </summary>
+    /// <returns>已清空联合操作项的当前 Builder。</returns>
     public ISqlBuilder ClearUnionBuilders()
     {
         UnionItems = new List<BuilderItem>();
@@ -1637,6 +1666,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 清空公用表表达式
     /// </summary>
+    /// <returns>已清空公用表表达式的当前 Builder。</returns>
     public ISqlBuilder ClearCte()
     {
         CteItems = new List<BuilderItem>();
@@ -1650,6 +1680,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 创建Sql生成器
     /// </summary>
+    /// <returns>使用当前 Provider 和执行上下文创建的独立 SQL Builder。</returns>
     public virtual ISqlBuilder New()
     {
         var result = CreateBuilder(CreateEmptyParameterManager());
@@ -1682,6 +1713,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 生成Sql语句
     /// </summary>
+    /// <returns>当前 Builder 生成的 SQL 文本。</returns>
     public virtual string ToSql()
     {
         if (ShouldRenderFromSnapshot())
@@ -1770,6 +1802,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 判断当前语句是否需要在独立渲染快照中应用全局过滤器。
     /// </summary>
+    /// <returns>需要应用动态过滤器时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool ShouldApplyFiltersOnRender()
     {
         if (_isAddFilters || (OperationKind is not (SqlOperationKind.Select or SqlOperationKind.InsertSelect)))
@@ -1786,6 +1819,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 判断当前 Mutation 是否需要在独立渲染快照中追加默认数据边界。
     /// </summary>
+    /// <returns>需要追加默认数据边界时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool ShouldApplyMutationDataBoundaryOnRender()
     {
         if (_isMutationDataBoundaryApplied)
@@ -1803,6 +1837,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 获取当前查询中可由默认过滤器处理的根表和 Join 表来源。
     /// </summary>
+    /// <returns>当前查询中可由默认过滤器处理的表来源集合。</returns>
     private IEnumerable<TableSource> GetFilterSources()
     {
         if (FromClause is FromClause fromClause)
@@ -1818,12 +1853,12 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 初始化
+    /// 根据当前分页排序设置初始化查询 Builder。
     /// </summary>
     public virtual void Init() => OrderByClause.OrderBy(Pager?.Order);
 
     /// <summary>
-    /// 验证
+    /// 验证当前 Builder 的查询能力、数据来源和分页排序约束。
     /// </summary>
     public virtual void Validate()
     {
@@ -2029,6 +2064,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 获取CTE关键字
     /// </summary>
+    /// <returns>当前 Builder 使用的 CTE 关键字。</returns>
     protected virtual string GetCteKeyWord() => "With";
 
     /// <summary>
@@ -2177,6 +2213,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 创建分页Sql
     /// </summary>
+    /// <returns>按当前分页参数和 Provider 方言生成的分页 SQL。</returns>
     protected virtual string CreateLimitSql()
     {
         if (string.IsNullOrWhiteSpace(OffsetParam) == false)
@@ -2195,6 +2232,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>当前 Builder 的查询条件 SQL；没有条件时返回 <see langword="null"/>。</returns>
     public virtual string GetCondition() => WhereClause.GetCondition();
 
     #endregion
@@ -2205,6 +2243,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 设置跳过行数
     /// </summary>
     /// <param name="count">跳过的行数</param>
+    /// <returns>已设置跳过行数的当前 Builder。</returns>
     public ISqlBuilder Skip(int count)
     {
         ValidateOperation(SqlOperationAction.Paging);
@@ -2229,6 +2268,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 获取跳过行数的参数名
     /// </summary>
+    /// <returns>跳过行数对应的参数名。</returns>
     protected string GetOffsetParam()
     {
         if (string.IsNullOrWhiteSpace(OffsetParam) == false)
@@ -2243,6 +2283,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 设置获取行数
     /// </summary>
     /// <param name="count">获取的行数</param>
+    /// <returns>已设置获取行数的当前 Builder。</returns>
     public ISqlBuilder Take(int count)
     {
         ValidateOperation(SqlOperationAction.Paging);
@@ -2265,6 +2306,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 获取限制行数的参数名
     /// </summary>
+    /// <returns>限制行数对应的参数名。</returns>
     protected string GetLimitParam()
     {
         if (string.IsNullOrWhiteSpace(LimitParam) == false)
@@ -2277,6 +2319,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 设置分页
     /// </summary>
     /// <param name="pager">分页参数</param>
+    /// <returns>已设置分页参数的当前 Builder；输入为空时返回当前 Builder。</returns>
     public ISqlBuilder Page(IPager pager)
     {
         if (pager == null)
@@ -2439,6 +2482,9 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         _ => "Select"
     };
 
+    /// <summary>
+    /// 获取 Mutation Where 子句。
+    /// </summary>
     private IMutationWhereClause MutationWhereClause =>
         ((IMutationWhereClauseAccessor)this).WhereClause;
 
@@ -2616,6 +2662,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 将当前 Builder 的 SQL 追加到缓冲区。
     /// </summary>
+    /// <param name="builder">用于接收 SQL 的字符串生成器。</param>
     private void AppendToCore(StringBuilder builder)
     {
         var startIndex = builder.Length;
@@ -2645,6 +2692,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <summary>
     /// 渲染查询 SQL，并在初始化或验证失败时恢复分页临时追加前的排序状态。
     /// </summary>
+    /// <param name="builder">用于接收 SQL 的字符串生成器。</param>
     private void AppendQuery(StringBuilder builder)
     {
         var orderBySnapshot = _orderByClause?.Clone(CreateClauseContext());

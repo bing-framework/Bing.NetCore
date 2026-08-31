@@ -11,6 +11,7 @@ public interface IObjectMapper
     /// <typeparam name="TSource">源类型</typeparam>
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
+    /// <returns>映射后的目标对象。</returns>
     TDestination Map<TSource, TDestination>(TSource source);
 
     /// <summary>
@@ -20,5 +21,6 @@ public interface IObjectMapper
     /// <typeparam name="TDestination">目标类型</typeparam>
     /// <param name="source">源对象</param>
     /// <param name="destination">目标对象</param>
+    /// <returns>填充后的目标对象。</returns>
     TDestination Map<TSource, TDestination>(TSource source, TDestination destination);
 }

@@ -14,6 +14,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="condition">条件</param>
+    /// <returns>追加 And 条件后的源对象。</returns>
     public static T And<T>(this T source, ICondition condition)
         where T : IWhere
     {
@@ -29,6 +30,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="condition">条件</param>
+    /// <returns>追加 Or 条件后的源对象。</returns>
     public static T Or<T>(this T source, ICondition condition)
         where T : IWhere
     {
@@ -45,5 +47,6 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="predicate">条件</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
+    /// <returns>条件成立时追加 Or 条件后的源对象。</returns>
     public static T OrIf<T>(this T source, ICondition predicate, bool condition) where T : IWhere => condition ? Or(source, predicate) : source;
 }

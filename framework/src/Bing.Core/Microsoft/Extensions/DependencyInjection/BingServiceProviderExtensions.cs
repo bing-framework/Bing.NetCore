@@ -22,6 +22,7 @@ public static partial class BingServiceProviderExtensions
     /// <typeparam name="T">类型</typeparam>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="name">名称</param>
+    /// <returns>名称以指定字符串开头的服务实例；未找到时返回 null。</returns>
     public static T GetStartWith<T>(this IServiceProvider serviceProvider, string name) where T : class
     {
         var services = serviceProvider.GetServices<T>();
@@ -34,6 +35,7 @@ public static partial class BingServiceProviderExtensions
     /// <typeparam name="T">类型</typeparam>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="name">名称</param>
+    /// <returns>名称以指定字符串结尾的服务实例；未找到时返回 null。</returns>
     public static T GetEndsWith<T>(this IServiceProvider serviceProvider, string name) where T : class
     {
         var services = serviceProvider.GetServices<T>();
@@ -44,6 +46,7 @@ public static partial class BingServiceProviderExtensions
     /// 获取所有模块信息
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
+    /// <returns>按模块级别、顺序和类型名称排序后的模块数组。</returns>
     public static BingModule[] GetAllModules(this IServiceProvider serviceProvider) =>
         serviceProvider.GetServices<BingModule>()
             .OrderBy(m => m.Level)
@@ -55,6 +58,7 @@ public static partial class BingServiceProviderExtensions
     /// Bing模块初始化，适用于非AspNetCore环境
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
+    /// <returns>完成 Bing 模块初始化后的服务提供程序。</returns>
     public static IServiceProvider UseBing(this IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetLogger(FrameworkLog);

@@ -43,11 +43,13 @@ public class HttpContextWebClientInfoProvider : IWebClientInfoProvider, ITransie
     /// <summary>
     /// 获取浏览器信息
     /// </summary>
+    /// <returns>当前请求的 User-Agent 信息；无请求上下文时返回 null。</returns>
     protected virtual string GetBrowserInfo() => HttpContextAccessor.HttpContext?.Request?.Headers?["User-Agent"];
 
     /// <summary>
     /// 获取客户端IP地址
     /// </summary>
+    /// <returns>当前请求的客户端 IP 地址；无法获取时返回 null。</returns>
     protected virtual string GetClientIpAddress()
     {
         try

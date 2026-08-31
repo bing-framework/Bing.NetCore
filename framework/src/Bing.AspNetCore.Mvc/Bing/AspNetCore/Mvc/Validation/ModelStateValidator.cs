@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace Bing.AspNetCore.Mvc.Validation;
 
 /// <summary>
-/// 实体状态验证器
+/// 将 MVC 模型状态错误转换为框架验证结果的默认实现。
 /// </summary>
 public class ModelStateValidator : IModelStateValidator
 {
     /// <summary>
-    /// 验证
+    /// 验证指定的 MVC 模型状态并收集其中的错误。
     /// </summary>
-    /// <param name="modelState">实体状态字典</param>
+    /// <param name="modelState">MVC 模型状态字典。</param>
     public virtual void Validate(ModelStateDictionary modelState)
     {
         var validationResult = new ValidationResultCollection();
@@ -22,10 +22,10 @@ public class ModelStateValidator : IModelStateValidator
     }
 
     /// <summary>
-    /// 添加错误
+    /// 将模型状态中的错误添加到指定验证结果集合。
     /// </summary>
-    /// <param name="validationResult">验证结果</param>
-    /// <param name="modelState">实体状态字典</param>
+    /// <param name="validationResult">用于接收验证错误的结果集合。</param>
+    /// <param name="modelState">MVC 模型状态字典。</param>
     public virtual void AddErrors(IValidationResult validationResult, ModelStateDictionary modelState)
     {
         if(modelState.IsValid)

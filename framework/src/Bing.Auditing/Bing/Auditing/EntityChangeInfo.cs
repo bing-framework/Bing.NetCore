@@ -3,49 +3,49 @@
 namespace Bing.Auditing;
 
 /// <summary>
-/// 实体变更信息
+/// 表示一次实体变更及其属性级变更明细。
 /// </summary>
 [Serializable]
 public class EntityChangeInfo : IHasExtraProperties
 {
     /// <summary>
-    /// 变更时间
+    /// 获取或设置实体变更发生的时间。
     /// </summary>
-    /// <remarks>当实体被改变的时间。</remarks>
+    /// <remarks>用于记录实体变更事件的时间点。</remarks>
     public DateTime ChangeTime { get; set; }
 
     /// <summary>
-    /// 变更类型
+    /// 获取或设置实体变更类型。
     /// </summary>
     public EntityChangeInfo ChangeType { get; set; }
 
     /// <summary>
-    /// 实体租户ID
+    /// 获取或设置发生变更的实体所属租户标识。
     /// </summary>
-    /// <remarks>实体所属的租户ID。</remarks>
+    /// <remarks>非多租户实体或无法解析租户时可为空。</remarks>
     public string EntityTenantId { get; set; }
 
     /// <summary>
-    /// 实体ID
+    /// 获取或设置发生变更的实体标识文本。
     /// </summary>
-    /// <remarks>变更实体的ID</remarks>
+    /// <remarks>以字符串保存，以兼容不同实体标识类型。</remarks>
     public string EntityId { get; set; }
 
     /// <summary>
-    /// 实体类型全名称
+    /// 获取或设置发生变更的实体类型全名。
     /// </summary>
-    /// <remarks>实体类型的完整命名空间。</remarks>
+    /// <remarks>包含命名空间的 CLR 类型名称，用于审计记录中的类型识别。</remarks>
     public string EntityTypeFullName { get; set; }
 
     /// <summary>
-    /// 实体变更属性列表
+    /// 获取或设置该实体的属性级变更列表。
     /// </summary>
     public List<EntityPropertyChangeInfo> PropertyChanges { get; set; }
 
     /// <summary>
-    /// 合并
+    /// 将另一份同一实体的属性变更合并到当前记录。
     /// </summary>
-    /// <param name="changeInfo">实体变更信息</param>
+    /// <param name="changeInfo">要合并的实体变更信息；同名属性已存在时使用其最新值。</param>
     public virtual void Merge(EntityChangeInfo changeInfo)
     {
         foreach (var propertyChange in changeInfo.PropertyChanges)

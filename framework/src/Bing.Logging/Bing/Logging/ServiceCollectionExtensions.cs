@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="setupAction">安装配置</param>
+    /// <returns>已注册 Bing 日志服务的日志构建器。</returns>
     public static BingLoggingBuilder AddBingLogging(this IServiceCollection services, Action<BingLoggingOptions> setupAction = null)
     {
         services.TryAddSingleton<ILogFactory, LogFactory>();

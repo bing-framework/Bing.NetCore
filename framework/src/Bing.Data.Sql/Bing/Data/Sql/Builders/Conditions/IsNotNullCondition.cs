@@ -19,5 +19,6 @@ public class IsNotNullCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>返回列名对应的 <c>Is Not Null</c> SQL 条件；列名为空时返回 <see langword="null"/>。</returns>
     public string GetCondition() => string.IsNullOrWhiteSpace(_name) ? null : $"{_name} Is Not Null";
 }

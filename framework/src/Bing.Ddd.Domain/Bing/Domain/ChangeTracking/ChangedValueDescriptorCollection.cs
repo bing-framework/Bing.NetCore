@@ -41,11 +41,13 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     /// <summary>
     /// 获取迭代器
     /// </summary>
+    /// <returns>变更值描述符的泛型枚举器。</returns>
     public IEnumerator<ChangedValueDescriptor> GetEnumerator() => _list.GetEnumerator();
 
     /// <summary>
     /// 获取迭代器
     /// </summary>
+    /// <returns>变更值描述符的枚举器。</returns>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
@@ -120,6 +122,7 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     /// <summary>
     /// 输出变更信息
     /// </summary>
+    /// <returns>当前变更值集合的文本表示。</returns>
     public override string ToString()
     {
         if (!_list.Any())

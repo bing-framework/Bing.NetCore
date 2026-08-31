@@ -7,7 +7,7 @@ using Bing.Data.Sql.Builders.Params;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 默认 SQL 参数绑定解析器
+/// 将常见参数源解析为 SQL 参数绑定项的默认解析器。
 /// </summary>
 internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
 {
@@ -51,10 +51,11 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
     }
 
     /// <summary>
-    /// 提取原始参数项
+    /// 从参数源提取原始参数绑定项。
     /// </summary>
-    /// <param name="source">参数源</param>
-    /// <returns>参数绑定项集合</returns>
+    /// <param name="source">参数源，可以是 <see cref="SqlParam"/> 序列、字典或普通对象。</param>
+    /// <returns>按参数源类型解析得到的参数绑定项集合。</returns>
+    /// <remarks>依次识别 <see cref="SqlParam"/> 序列、只读泛型字典、泛型字典、非泛型字典和普通对象；普通对象仅读取公共实例的非索引可读属性。</remarks>
     private IEnumerable<SqlParameterBindingItem> ExtractItems(object source)
     {
         if (source == null)

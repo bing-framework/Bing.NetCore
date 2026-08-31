@@ -9,6 +9,7 @@ public static class ValidationHandleExceptionExtensions
     /// 处理
     /// </summary>
     /// <param name="collection">验证结果集合</param>
+    /// <returns>绑定指定验证结果集合的处理操作。</returns>
     public static ValidationHandleOperation Handle(this ValidationResultCollection collection) => new ValidationHandleOperation(collection);
 
     /// <summary>
@@ -16,6 +17,7 @@ public static class ValidationHandleExceptionExtensions
     /// </summary>
     /// <param name="op">验证处理操作</param>
     /// <param name="handler">验证处理器</param>
+    /// <returns>已执行处理器的验证处理操作。</returns>
     public static ValidationHandleOperation HandleAll(this ValidationHandleOperation op, IValidationCallbackHandler handler)
     {
         if (op == null)

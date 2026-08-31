@@ -9,5 +9,6 @@ public interface IGetObject<out T>
     /// <summary>
     /// 获取对象
     /// </summary>
+    /// <returns>获取到的对象。</returns>
     T Get();
 }

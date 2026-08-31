@@ -31,6 +31,10 @@ internal sealed class SqlMutationPlan
     /// <summary>
     /// 初始化一个 <see cref="SqlMutationPlan"/> 类型的实例。
     /// </summary>
+    /// <param name="mapping">实体表和列映射。</param>
+    /// <param name="writeColumns">当前操作应写入的列。</param>
+    /// <param name="keys">主键列。</param>
+    /// <param name="concurrencyColumns">并发令牌列。</param>
     private SqlMutationPlan(EntityMappingMetadata mapping, IReadOnlyList<ColumnMappingMetadata> writeColumns,
         IReadOnlyList<ColumnMappingMetadata> keys, IReadOnlyList<ColumnMappingMetadata> concurrencyColumns)
     {

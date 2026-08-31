@@ -5,26 +5,28 @@ using Bing.Utils.Json;
 namespace Bing.Logging.Core;
 
 /// <summary>
-/// 日志事件上下文
+/// 保存单条日志事件的标签、参数、扩展属性和调用者信息。
 /// </summary>
 public class LogEventContext
 {
     #region Tags(标签列表)
 
     /// <summary>
-    /// 标签列表
+    /// 保存按插入顺序排列且已去重的标签。
     /// </summary>
     private readonly List<string> _tags = new();
 
     /// <summary>
-    /// 标签列表
+    /// 获取日志事件的只读标签列表。
     /// </summary>
     internal IReadOnlyList<string> Tags => _tags;
 
     /// <summary>
-    /// 设置标签列表
+    /// 添加日志标签并返回当前上下文。
     /// </summary>
-    /// <param name="tags">标签列表</param>
+    /// <param name="tags">要添加的标签列表。</param>
+    /// <returns>当前日志事件上下文，以支持链式调用。</returns>
+    /// <remarks>忽略 <c>null</c>、空白和已存在的标签，保留首次添加顺序。</remarks>
     public LogEventContext SetTags(params string[] tags)
     {
         if (tags == null)
@@ -45,14 +47,16 @@ public class LogEventContext
     #region Parameters(参数列表)
 
     /// <summary>
-    /// 参数列表
+    /// 保存日志事件关联的非空参数。
     /// </summary>
     private readonly List<object> _parameters = new();
 
     /// <summary>
-    /// 设置参数
+    /// 添加单个日志参数并返回当前上下文。
     /// </summary>
-    /// <param name="parameter">参数</param>
+    /// <param name="parameter">要关联到日志事件的参数。</param>
+    /// <returns>当前日志事件上下文，以支持链式调用。</returns>
+    /// <remarks><c>null</c> 参数会被忽略。</remarks>
     public LogEventContext SetParameter(object parameter)
     {
         if (parameter == null)
@@ -62,9 +66,10 @@ public class LogEventContext
     }
 
     /// <summary>
-    /// 设置参数列表
+    /// 添加多个日志参数并返回当前上下文。
     /// </summary>
-    /// <param name="parameters">参数列表</param>
+    /// <param name="parameters">要关联到日志事件的参数列表。</param>
+    /// <returns>当前日志事件上下文，以支持链式调用。</returns>
     public LogEventContext SetParameters(params object[] parameters)
     {
         foreach (var parameter in parameters)
@@ -73,7 +78,7 @@ public class LogEventContext
     }
 
     /// <summary>
-    /// 参数列表
+    /// 获取日志事件关联的只读参数列表。
     /// </summary>
     internal IReadOnlyList<object> Parameters => _parameters;
 
@@ -82,15 +87,17 @@ public class LogEventContext
     #region ExtraProperties(扩展属性)
 
     /// <summary>
-    /// 扩展属性
+    /// 保存日志事件的命名空间化扩展属性。
     /// </summary>
     private readonly ContextData _extraProperties = new();
 
     /// <summary>
-    /// 设置扩展属性
+    /// 设置日志事件扩展属性并返回当前上下文。
     /// </summary>
-    /// <param name="name">名称</param>
-    /// <param name="value">值</param>
+    /// <param name="name">扩展属性名称。</param>
+    /// <param name="value">扩展属性值。</param>
+    /// <returns>当前日志事件上下文，以支持链式调用。</returns>
+    /// <remarks>空名称和 <c>null</c> 值会被忽略；有效键以前缀命名空间化，且默认不作为普通输出字段直接公开。</remarks>
     public LogEventContext SetExtraProperty(string name, object value)
     {
         if (value is null)
@@ -102,7 +109,7 @@ public class LogEventContext
     }
 
     /// <summary>
-    /// 扩展属性
+    /// 获取扩展属性容器。
     /// </summary>
     public ContextData ExtraProperties => _extraProperties;
 
@@ -111,16 +118,18 @@ public class LogEventContext
     #region CallerInfo(调用者信息)
 
     /// <summary>
-    /// 调用者信息
+    /// 保存日志调用者信息，默认使用空调用者信息对象。
     /// </summary>
     private ILogCallerInfo _callerInfo = NullLogCallerInfo.Instance;
 
     /// <summary>
-    /// 设置调用者信息
+    /// 设置日志调用者信息并返回当前上下文。
     /// </summary>
-    /// <param name="memberName">调用方法名称</param>
-    /// <param name="sourceFilePath">调用文件路径</param>
-    /// <param name="sourceLineNumber">调用代码行号</param>
+    /// <param name="memberName">调用成员名称。</param>
+    /// <param name="sourceFilePath">调用源文件路径。</param>
+    /// <param name="sourceLineNumber">调用源代码行号。</param>
+    /// <returns>当前日志事件上下文，以支持链式调用。</returns>
+    /// <remarks>三个参数均未提供有效值时保留当前调用者信息。</remarks>
     public LogEventContext SetCallerInfo(string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0)
     {
         if (!string.IsNullOrWhiteSpace(memberName) || !string.IsNullOrWhiteSpace(sourceFilePath) || sourceLineNumber > 0)
@@ -129,7 +138,7 @@ public class LogEventContext
     }
 
     /// <summary>
-    /// 日志调用者信息
+    /// 获取当前日志调用者信息。
     /// </summary>
     public ILogCallerInfo LogCallerInfo => _callerInfo;
 
@@ -138,8 +147,9 @@ public class LogEventContext
     #region ExposeScopeState(公开作用域状态)
 
     /// <summary>
-    /// 公开作用域状态
+    /// 创建可公开到日志作用域的上下文字典。
     /// </summary>
+    /// <returns>包含标签、可公开扩展属性和调用者信息的作用域状态字典。</returns>
     public IDictionary<string, object> ExposeScopeState()
     {
         var dict = new Dictionary<string, object>();

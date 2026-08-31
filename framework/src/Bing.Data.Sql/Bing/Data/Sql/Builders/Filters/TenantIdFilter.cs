@@ -57,6 +57,8 @@ public sealed class TenantIdFilter : ISqlFilter, ISqlDataBoundaryContributor
     /// <summary>
     /// 为结构化来源贡献租户边界谓词。
     /// </summary>
+    /// <param name="context">SQL 筛选上下文。</param>
+    /// <param name="source">待处理的 SQL 表来源。</param>
     private void ApplyQuery(SqlFilterContext context, SqlFilterSource source)
     {
         if (source?.EntityType == null || string.IsNullOrWhiteSpace(source.Alias) ||
@@ -69,6 +71,9 @@ public sealed class TenantIdFilter : ISqlFilter, ISqlDataBoundaryContributor
     /// <summary>
     /// 获取适用实体的当前租户值，缺失时拒绝继续构建 SQL。
     /// </summary>
+    /// <param name="entityType">租户实体类型。</param>
+    /// <param name="databaseContext">当前数据库上下文。</param>
+    /// <returns>当前租户值。</returns>
     private object GetTenantId(Type entityType, DatabaseContext databaseContext)
     {
         var value = Contributor.GetTenantId(new SqlTenantFilterContext(entityType, databaseContext));

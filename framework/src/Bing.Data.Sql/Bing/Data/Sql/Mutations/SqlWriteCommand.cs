@@ -36,6 +36,12 @@ public sealed class SqlWriteCommand
     /// <summary>
     /// 使用已冻结的 Provider 和 Mutation 语义初始化命令。
     /// </summary>
+    /// <param name="sql">已生成的 SQL 语句。</param>
+    /// <param name="parameters">已生成的参数集合。</param>
+    /// <param name="provider">生成 SQL 的 Provider。</param>
+    /// <param name="operationKind">写入操作类型。</param>
+    /// <param name="hasReturning">是否包含 Returning 或 Output 子句。</param>
+    /// <param name="validateAffectedRows">是否在实际受影响行数不符合预期时抛出并发异常。</param>
     internal SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
         SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows = false)
     {
@@ -69,6 +75,8 @@ public sealed class SqlWriteCommand
     /// <summary>
     /// 复制冻结命令的执行元数据。
     /// </summary>
+    /// <param name="command">待复制的冻结命令。</param>
+    /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
     private SqlWriteCommand(SqlWriteCommand command, bool validateAffectedRows)
     {
         Sql = command.Sql;
@@ -118,6 +126,7 @@ public sealed class SqlWriteCommand
     /// <summary>
     /// 为一次执行创建独立的参数集合。
     /// </summary>
+    /// <returns>当前命令参数的独立快照集合。</returns>
     public IReadOnlyCollection<SqlParam> CreateParameters() => _parameters
         .Select(SqlParameterSnapshot.CloneSqlParameter)
         .ToArray();

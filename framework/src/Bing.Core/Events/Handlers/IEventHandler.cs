@@ -1,7 +1,7 @@
 ﻿namespace Bing.Events.Handlers;
 
 /// <summary>
-/// 事件处理器
+/// 所有事件处理器的非泛型标记契约。
 /// </summary>
 public interface IEventHandler
 {

@@ -4,54 +4,54 @@ using Bing.Validation;
 namespace Bing.Domain.Entities.Auditing;
 
 /// <summary>
-/// 审计聚合根
+/// 为聚合根提供创建和最后修改审计字段。
 /// </summary>
-/// <typeparam name="TEntity">实体类型</typeparam>
+/// <typeparam name="TEntity">具体聚合根类型。</typeparam>
 [Serializable]
 public abstract class AuditedAggregateRoot<TEntity> : CreationAuditedAggregateRoot<TEntity>, IAuditedObject
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 最后修改时间
+    /// 获取或设置聚合根最后一次修改的时间。
     /// </summary>
     public virtual DateTime? LastModificationTime { get; set; }
 
     /// <summary>
-    /// 最后修改人标识
+    /// 获取或设置最后修改该聚合根的用户标识。
     /// </summary>
     public virtual Guid? LastModifierId { get; set; }
 }
 
 /// <summary>
-/// 审计聚合根
+/// 为具有指定标识类型的聚合根提供创建和修改审计字段。
 /// </summary>
-/// <typeparam name="TEntity">实体类型</typeparam>
-/// <typeparam name="TKey">标识类型</typeparam>
+/// <typeparam name="TEntity">具体聚合根类型。</typeparam>
+/// <typeparam name="TKey">聚合根标识类型。</typeparam>
 [Serializable]
 public abstract class AuditedAggregateRoot<TEntity, TKey> : CreationAuditedAggregateRoot<TEntity, TKey>, IAuditedObject<TKey>
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 最后修改时间
+    /// 获取或设置聚合根最后一次修改的时间。
     /// </summary>
     public virtual DateTime? LastModificationTime { get; set; }
 
     /// <summary>
-    /// 最后修改人标识
+    /// 获取或设置最后修改该聚合根的用户标识。
     /// </summary>
     public virtual TKey LastModifierId { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="AuditedAggregateRoot{TEntity,TKey}"/>类型的实例
+    /// 初始化 <see cref="AuditedAggregateRoot{TEntity,TKey}"/> 的实例。
     /// </summary>
     protected AuditedAggregateRoot()
     {
     }
 
     /// <summary>
-    /// 初始化一个<see cref="AuditedAggregateRoot{TEntity,TKey}"/>类型的实例
+    /// 使用指定标识初始化 <see cref="AuditedAggregateRoot{TEntity,TKey}"/> 的实例。
     /// </summary>
-    /// <param name="id">标识</param>
+    /// <param name="id">聚合根标识。</param>
     protected AuditedAggregateRoot(TKey id) : base(id)
     {
     }

@@ -146,7 +146,7 @@ public class JoinClause : IJoinClause
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="JoinClause"/>类型的实例
+    /// 初始化一个 <see cref="JoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public JoinClause(SqlClauseContext context)
@@ -205,6 +205,7 @@ public class JoinClause : IJoinClause
     /// 查找连接项
     /// </summary>
     /// <param name="type">表实体类型</param>
+    /// <returns>指定实体类型对应的连接条件；未找到时返回 <see langword="null"/>。</returns>
     public IJoinOn Find(Type type) => _params.Find(t => t.Type == type);
 
     /// <summary>
@@ -388,24 +389,44 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化内连接表。
     /// </summary>
+    /// <typeparam name="TEntity">连接表实体类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名。</param>
     internal void Join<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(JoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化左外连接表。
     /// </summary>
+    /// <typeparam name="TEntity">连接表实体类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名。</param>
     internal void LeftJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(LeftJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化右外连接表。
     /// </summary>
+    /// <typeparam name="TEntity">连接表实体类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名。</param>
     internal void RightJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(RightJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化全外连接表。
     /// </summary>
+    /// <typeparam name="TEntity">连接表实体类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
+    /// <param name="alias">连接表别名。</param>
+    /// <param name="schema">连接表架构名。</param>
     internal void FullJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(FullJoinKey, fromClause, predicate, alias, schema);
 
@@ -485,24 +506,40 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化派生表内连接。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
     internal void Join<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(JoinKey, fromClause, subquery, predicate);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化派生表左外连接。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
     internal void LeftJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(LeftJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化派生表右外连接。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
     internal void RightJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(RightJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
     /// 原子添加带 Lambda On 谓词的类型化派生表全外连接。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="fromClause">当前查询的根来源子句。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
+    /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
     internal void FullJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(FullJoinKey, fromClause, subquery, predicate);
 
@@ -610,6 +647,7 @@ public class JoinClause : IJoinClause
     /// <param name="schema">架构名</param>
     /// <param name="alias">别名</param>
     /// <param name="type">类型</param>
+    /// <returns>创建的连接项。</returns>
     protected virtual JoinItem CreateJoinItem(string joinType, string table, string schema, string alias,
         Type type = null) => JoinItem.CreateTable(joinType, table, schema, alias, type);
 
@@ -670,6 +708,7 @@ public class JoinClause : IJoinClause
     /// <param name="type">实体类型</param>
     /// <param name="sourceReference">From 子句的结构化表引用</param>
     /// <param name="databaseContext">执行数据库上下文</param>
+    /// <returns>创建的结构化连接项。</returns>
     protected virtual JoinItem CreateStructuredJoinItem(string joinType, SqlTableReference reference, Type type,
         SqlTableReference sourceReference, DatabaseContext databaseContext)
     {
@@ -697,6 +736,7 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 获取当前数据库上下文
     /// </summary>
+    /// <returns>当前查询使用的数据库上下文；无法解析时返回 <see langword="null"/>。</returns>
     private DatabaseContext GetCurrentDatabaseContext()
     {
         if (_sqlBuilder is SqlBuilderBase builder)
@@ -814,6 +854,8 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 内连接严格 DTO 派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void Join<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(JoinKey, subquery);
 
@@ -839,6 +881,9 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 添加保留投影成员绑定信息的类型化派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="joinType">连接类型关键字。</param>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     private void JoinSubquery<TProjection>(string joinType, SqlSubquery<TProjection> subquery)
         where TProjection : class
     {
@@ -945,6 +990,8 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 左外连接严格 DTO 派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void LeftJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(LeftJoinKey, subquery);
 
@@ -997,6 +1044,8 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 右外连接严格 DTO 派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void RightJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(RightJoinKey, subquery);
 
@@ -1030,6 +1079,8 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 全外连接严格 DTO 派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void FullJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(FullJoinKey, subquery);
 
@@ -1053,6 +1104,8 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 交叉连接严格 DTO 派生表。
     /// </summary>
+    /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
+    /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(CrossJoinKey, subquery);
 
@@ -1115,6 +1168,7 @@ public class JoinClause : IJoinClause
     /// <param name="column">列名</param>
     /// <param name="selfJoin">是否为同实体自连接。</param>
     /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>带实体别名限定的列引用。</returns>
     private string GetColumn<TEntity>(Expression<Func<TEntity, object>> column, bool selfJoin = false,
         bool right = false) => GetColumn(typeof(TEntity), _resolver.GetColumn(column), selfJoin, right);
 
@@ -1125,6 +1179,7 @@ public class JoinClause : IJoinClause
     /// <param name="column">列名</param>
     /// <param name="selfJoin">是否为同实体自连接。</param>
     /// <param name="right">是否为连接条件右侧。</param>
+    /// <returns>带实体别名限定的列引用。</returns>
     private string GetColumn(Type entity, string column, bool selfJoin = false, bool right = false) =>
         $"{GetAlias(entity, selfJoin, right)}.{column}";
 
@@ -1157,6 +1212,7 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="group">条件组</param>
     /// <param name="parameterManager">用于解析当前条件组的参数管理器。</param>
+    /// <returns>按条件表达式顺序创建的连接项集合。</returns>
     private List<OnItem> GetOnItems(List<Expression> group, IParameterManager parameterManager) =>
         @group.Select(expression =>
         {
@@ -1176,6 +1232,7 @@ public class JoinClause : IJoinClause
     /// <param name="right">是否取右侧操作数</param>
     /// <param name="selfJoin">是否为同实体自连接。</param>
     /// <param name="parameterManager">用于解析闭包值的参数管理器。</param>
+    /// <returns>解析后的列项或参数项。</returns>
     private SqlItem GetColumn(Expression expression, bool right, bool selfJoin, IParameterManager parameterManager)
     {
         var type = _resolver.GetType(expression, right);
@@ -1235,6 +1292,7 @@ public class JoinClause : IJoinClause
     /// 获取最后一个连接项。
     /// </summary>
     /// <exception cref="InvalidOperationException">不存在可追加 On 条件的连接项。</exception>
+    /// <returns>当前最后一个连接项。</returns>
     private JoinItem GetLastJoinOrThrow()
     {
         var join = _params.LastOrDefault();
@@ -1286,6 +1344,7 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 输出Sql。
     /// </summary>
+    /// <returns>当前连接子句的 SQL 文本；没有连接项时返回空字符串。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();

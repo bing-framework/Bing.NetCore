@@ -53,12 +53,13 @@ public interface IFromClause : ISqlClause, ISqlClauseCloneable<IFromClause>
     void AppendSql(string sql);
 
     /// <summary>
-    /// 验证
+    /// 验证 From 子句是否满足当前 Builder 的来源约束。
     /// </summary>
     void Validate();
 
     /// <summary>
-    /// 输出Sql
+    /// 获取当前 From 子句生成的 SQL；没有来源时返回空文本或空值，具体由实现决定。
     /// </summary>
+    /// <returns>当前 From 子句生成的 SQL；没有来源时返回空文本或空值。</returns>
     string ToSql();
 }

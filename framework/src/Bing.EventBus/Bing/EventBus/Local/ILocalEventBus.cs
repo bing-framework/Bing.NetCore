@@ -10,5 +10,6 @@ public interface ILocalEventBus : IEventBus
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
     /// <param name="handler">本地事件处理器</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     IDisposable Subscribe<TEvent>(ILocalEventHandler<TEvent> handler) where TEvent : class;
 }

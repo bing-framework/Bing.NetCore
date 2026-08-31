@@ -24,7 +24,7 @@ public class CacheManager : ICache
     #region 构造方法
 
     /// <summary>
-    /// 初始化EasyCaching缓存服务
+    /// 初始化一个 <see cref="CacheManager"/> 类型的实例。
     /// </summary>
     /// <param name="provider">EasyCaching缓存提供器</param>
     /// <param name="hybridProvider">EasyCaching 2级缓存提供器</param>
@@ -102,6 +102,8 @@ public class CacheManager : ICache
     /// <summary>
     /// 转换为缓存键字符串集合
     /// </summary>
+    /// <param name="keys">缓存键集合</param>
+    /// <returns>缓存键字符串集合。</returns>
     private IEnumerable<string> ToKeys(IEnumerable<CacheKey> keys)
     {
         keys.CheckNull(nameof(keys));
@@ -119,7 +121,7 @@ public class CacheManager : ICache
     }
 
     /// <summary>
-    /// 验证
+    /// 验证当前缓存管理器是否配置了支持二级缓存操作的缓存提供程序。
     /// </summary>
     private void Validate()
     {
@@ -127,14 +129,28 @@ public class CacheManager : ICache
             throw new NotSupportedException("2级缓存不支持该操作");
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 获取缓存值；缓存不存在时使用指定函数生成并写入缓存。
+    /// </summary>
+    /// <typeparam name="T">缓存数据类型。</typeparam>
+    /// <param name="key">缓存键。</param>
+    /// <param name="action">缓存未命中时用于获取值的函数。</param>
+    /// <param name="options">缓存选项，包括过期时间等。</param>
+    /// <returns>与指定缓存键关联的值。</returns>
     public T Get<T>(CacheKey key, Func<T> action, CacheOptions options = null)
     {
         key.Validate();
         return Get(key.Key, action, options);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 获取缓存值；缓存不存在时使用指定函数生成并写入缓存。
+    /// </summary>
+    /// <typeparam name="T">缓存数据类型。</typeparam>
+    /// <param name="key">缓存键。</param>
+    /// <param name="action">缓存未命中时用于获取值的函数。</param>
+    /// <param name="options">缓存选项，包括过期时间等。</param>
+    /// <returns>与指定缓存键关联的值。</returns>
     public T Get<T>(string key, Func<T> action, CacheOptions options = null)
     {
         var result = _provider.Get(key, action, GetExpiration(options));
@@ -144,6 +160,8 @@ public class CacheManager : ICache
     /// <summary>
     /// 获取过期时间间隔
     /// </summary>
+    /// <param name="options">缓存配置</param>
+    /// <returns>缓存项的有效期。</returns>
     private TimeSpan GetExpiration(CacheOptions options)
     {
         var result = options?.Expiration;
@@ -189,14 +207,30 @@ public class CacheManager : ICache
         return result.Values.Select(t => t.Value).ToList();
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 异步获取缓存值；缓存不存在时使用指定函数异步生成并写入缓存。
+    /// </summary>
+    /// <typeparam name="T">缓存数据类型。</typeparam>
+    /// <param name="key">缓存键。</param>
+    /// <param name="action">缓存未命中时用于异步获取值的函数。</param>
+    /// <param name="options">缓存选项，包括过期时间等。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示缓存值的异步操作。</returns>
     public async Task<T> GetAsync<T>(CacheKey key, Func<Task<T>> action, CacheOptions options = null, CancellationToken cancellationToken = default)
     {
         key.Validate();
         return await GetAsync(key.Key, action, options, cancellationToken);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// 异步获取缓存值；缓存不存在时使用指定函数异步生成并写入缓存。
+    /// </summary>
+    /// <typeparam name="T">缓存数据类型。</typeparam>
+    /// <param name="key">缓存键。</param>
+    /// <param name="action">缓存未命中时用于异步获取值的函数。</param>
+    /// <param name="options">缓存选项，包括过期时间等。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示缓存值的异步操作。</returns>
     public async Task<T> GetAsync<T>(string key, Func<Task<T>> action, CacheOptions options = null, CancellationToken cancellationToken = default)
     {
         var result = await _provider.GetAsync(key, action, GetExpiration(options), cancellationToken);
@@ -290,6 +324,9 @@ public class CacheManager : ICache
     /// <summary>
     /// 转换为缓存项集合
     /// </summary>
+    /// <typeparam name="T">值元素类型</typeparam>
+    /// <param name="items">字典</param>
+    /// <returns>以字符串缓存键为键的缓存项字典。</returns>
     private IDictionary<string, T> ToItems<T>(IDictionary<CacheKey, T> items)
     {
         items.CheckNull(nameof(items));

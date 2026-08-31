@@ -5,24 +5,24 @@ using Bing.Helpers;
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
-/// 名称项，处理名称中包含符号.
+/// 表示可拆分数据库名、对象前缀和对象名称的结构化名称项。
 /// </summary>
 public class NameItem
 {
     #region 属性
 
     /// <summary>
-    /// 数据库名称
+    /// 获取或设置数据库名称部分。
     /// </summary>
     public string DatabaseName { get; private set; }
 
     /// <summary>
-    /// 前缀
+    /// 保存对象名称的前缀部分。
     /// </summary>
     private string _prefix;
 
     /// <summary>
-    /// 前缀
+    /// 获取或设置对象名称的前缀；读取时空值按空字符串处理。
     /// </summary>
     public string Prefix
     {
@@ -31,12 +31,12 @@ public class NameItem
     }
 
     /// <summary>
-    /// 名称
+    /// 保存对象名称部分。
     /// </summary>
     private string _name;
 
     /// <summary>
-    /// 名称
+    /// 获取或设置对象名称；读取时空值按空字符串处理。
     /// </summary>
     public string Name
     {
@@ -49,9 +49,9 @@ public class NameItem
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="NameItem"/>类型的实例
+    /// 解析指定的数据库对象名称并初始化结构化名称项。
     /// </summary>
-    /// <param name="name">名称</param>
+    /// <param name="name">包含数据库名、前缀和对象名的名称文本。</param>
     public NameItem(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -76,21 +76,24 @@ public class NameItem
     }
 
     /// <summary>
-    /// 是否复杂名称
+    /// 判断名称是否包含需要特殊解析的引用符号。
     /// </summary>
-    /// <param name="name">名称</param>
+    /// <param name="name">待判断的名称文本。</param>
+    /// <returns>包含方括号、反引号或双引号时返回 <see langword="true"/>。</returns>
     private bool IsComplex(string name) => name.Contains("[") || name.Contains("`") || name.Contains("\"");
 
     /// <summary>
-    /// 分割句点
+    /// 按句点拆分未引用的名称段。
     /// </summary>
-    /// <param name="name">名称</param>
+    /// <param name="name">待拆分的名称文本。</param>
+    /// <returns>拆分后的名称段。</returns>
     private List<string> ResolveBySplit(string name) => name.Split('.').ToList();
 
     /// <summary>
     /// 通过正则表达式进行解析
     /// </summary>
     /// <param name="name">名称</param>
+    /// <returns>按引用符号解析出的名称段。</returns>
     private List<string> ResolveByPattern(string name)
     {
         var pattern = "^(([\\[`\"]\\S+?[\\]`\"]).)?(([\\[`\"]\\S+[\\]`\"]).)?([\\[`\"]\\S+[\\]`\"])$";
@@ -107,6 +110,7 @@ public class NameItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="prefix">前缀</param>
+    /// <returns>按指定 SQL 方言渲染的完整对象名称。</returns>
     public string ToSql(IDialect dialect, string prefix = null)
     {
         var name = GetName(dialect, prefix);
@@ -118,12 +122,14 @@ public class NameItem
     /// 获取前缀
     /// </summary>
     /// <param name="prefix">前缀</param>
+    /// <returns>当前对象使用的前缀；未设置对象前缀时返回传入的前缀。</returns>
     private string GetPrefix(string prefix) => string.IsNullOrWhiteSpace(Prefix) ? prefix : Prefix;
 
     /// <summary>
     /// 获取前缀
     /// </summary>
     /// <param name="dialect">Sql方言</param>
+    /// <returns>按 SQL 方言转义后的数据库名称；未设置数据库名称时返回 <see langword="null"/>。</returns>
     private string GetDatabase(IDialect dialect)
     {
         if (string.IsNullOrWhiteSpace(DatabaseName) == false)
@@ -136,6 +142,7 @@ public class NameItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="prefix">前缀</param>
+    /// <returns>按 SQL 方言转义后的对象名称及其前缀。</returns>
     private string GetName(IDialect dialect, string prefix)
     {
         prefix = GetPrefix(prefix);
@@ -146,6 +153,7 @@ public class NameItem
     /// 获取名称
     /// </summary>
     /// <param name="prefix">前缀</param>
+    /// <returns>未转义的对象名称及其前缀。</returns>
     private string GetName(string prefix)
     {
         prefix = GetPrefix(prefix);

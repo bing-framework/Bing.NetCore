@@ -33,6 +33,9 @@ public sealed class SqlDeleteOptions<TEntity> : SqlDeleteOptions where TEntity :
     /// <summary>
     /// 从简单成员访问表达式解析实体属性名。
     /// </summary>
+    /// <typeparam name="TValue">实体属性值类型。</typeparam>
+    /// <param name="selector">实体属性访问表达式。</param>
+    /// <returns>实体属性的 CLR 名称。</returns>
     private static string GetPropertyName<TValue>(Expression<Func<TEntity, TValue>> selector)
     {
         if (selector == null)

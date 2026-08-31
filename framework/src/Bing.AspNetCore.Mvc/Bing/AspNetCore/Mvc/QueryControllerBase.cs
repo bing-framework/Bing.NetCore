@@ -39,6 +39,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// /api/customers/1
     /// </remarks>
     /// <param name="id">标识</param>
+    /// <returns>表示查询结果的异步操作。</returns>
     [HttpGet("{id}")]
     public virtual async Task<IActionResult> GetAsync(string id)
     {
@@ -55,6 +56,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// /api/customers?name=a
     /// </remarks>
     /// <param name="query">查询参数</param>
+    /// <returns>表示分页查询结果的异步操作。</returns>
     [HttpGet]
     public virtual async Task<IActionResult> PagerQueryAsync([FromQuery] TQuery query)
     {
@@ -75,6 +77,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// 转换分页查询结果
     /// </summary>
     /// <param name="result">分页查询结果</param>
+    /// <returns>转换后的分页查询结果。</returns>
     protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result) => result;
 
     /// <summary>
@@ -86,6 +89,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// /api/customers/query?name=a
     /// </remarks>
     /// <param name="query">查询参数</param>
+    /// <returns>表示查询结果的异步操作。</returns>
     [HttpGet("query")]
     public virtual async Task<IActionResult> QueryAsync([FromQuery] TQuery query)
     {
@@ -106,12 +110,14 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// 转换查询结果
     /// </summary>
     /// <param name="result">查询结果</param>
+    /// <returns>转换后的查询结果。</returns>
     protected virtual dynamic ToQueryResult(List<TDto> result) => result;
 
     /// <summary>
     /// 获取项列表
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示项列表查询结果的异步操作。</returns>
     [HttpGet("items")]
     public virtual async Task<IActionResult> GetItemsAsync([FromQuery] TQuery query)
     {
@@ -128,5 +134,6 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     /// 将Dto转换为列表项
     /// </summary>
     /// <param name="dto">数据传输对象</param>
+    /// <returns>转换后的列表项。</returns>
     protected virtual Item ToItem(TDto dto) => throw new NotImplementedException("ToItem方法未实现，请重写控制器 ToItem 方法");
 }

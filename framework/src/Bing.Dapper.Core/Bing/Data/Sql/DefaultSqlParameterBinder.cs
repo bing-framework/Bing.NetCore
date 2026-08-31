@@ -391,6 +391,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         /// <param name="command">命令对象</param>
         /// <param name="parameter">Sql 参数</param>
         /// <param name="customizers">数据库参数定制器集合</param>
+        /// <returns>已添加到命令对象的数据库参数。</returns>
         private static IDbDataParameter AddParameter(IDbCommand command, SqlParam parameter,
             IEnumerable<ISqlDbParameterCustomizer> customizers)
         {

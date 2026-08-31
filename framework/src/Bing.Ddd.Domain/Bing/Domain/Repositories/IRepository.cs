@@ -14,6 +14,7 @@ public interface IRepository
     /// <summary>
     /// 获取工作单元
     /// </summary>
+    /// <returns>当前仓储使用的工作单元。</returns>
     IUnitOfWork GetUnitOfWork();
 
     #endregion

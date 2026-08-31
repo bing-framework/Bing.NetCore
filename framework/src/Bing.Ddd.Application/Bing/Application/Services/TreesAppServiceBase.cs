@@ -13,6 +13,7 @@ namespace Bing.Application.Services;
 /// <typeparam name="TEntity">实体类型</typeparam>
 /// <typeparam name="TDto">数据传输对象类型</typeparam>
 /// <typeparam name="TQueryParameter">查询参数类型</typeparam>
+    /// <returns>表示直接下级子节点查询结果的异步操作。</returns>
 public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter>
     : TreesAppServiceBase<TEntity, TDto, TQueryParameter, Guid, Guid?>, ITreesAppService<TDto, TQueryParameter>
     where TEntity : class, IParentId<Guid?>, IPath, IEnabled, ISortId, IKey<Guid>, IVersion, new()
@@ -36,12 +37,14 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter>
     /// </summary>
     /// <param name="queryable">查询条件</param>
     /// <param name="parameter">查询参数</param>
+    /// <returns>应用树形条件后的查询数据源。</returns>
     protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity>(parameter));
 
     /// <summary>
     /// 获取直接下级子节点列表
     /// </summary>
     /// <param name="parameter">查询参数</param>
+    /// <returns>表示直接下级子节点查询结果的异步操作。</returns>
     protected override async Task<List<TEntity>> GetChildren(TQueryParameter parameter) => await _store.FindAllAsync(t => t.ParentId == parameter.ParentId);
 }
 
@@ -86,12 +89,14 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     /// </summary>
     /// <param name="queryable">查询条件</param>
     /// <param name="parameter">查询参数</param>
+    /// <returns>应用树形条件后的查询数据源。</returns>
     protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity, TParentId>(parameter));
 
     /// <summary>
     /// 查找实体列表
     /// </summary>
     /// <param name="ids">标识列表</param>
+    /// <returns>表示实体查询结果的异步操作，结果为对应的数据传输对象列表。</returns>
     public virtual async Task<List<TDto>> FindByIdsAsync(string ids)
     {
         var entities = await _store.FindByIdsNoTrackingAsync(ids);
@@ -99,16 +104,16 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     }
 
     /// <summary>
-    /// 启用
+    /// 异步启用指定标识对应的树节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
     public virtual async Task EnableAsync(string ids) => await Enable(Conv.ToList<TKey>(ids), true);
 
     /// <summary>
-    /// 启用
+    /// 按指定状态批量更新树节点，并在成功后提交工作单元。
     /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <param name="enabled">启用/禁用</param>
+    /// <param name="ids">待更新的节点标识列表。</param>
+    /// <param name="enabled">目标启用状态。</param>
     private async Task Enable(List<TKey> ids, bool enabled)
     {
         if (ids == null || ids.Count == 0)
@@ -133,12 +138,14 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     /// 允许启用
     /// </summary>
     /// <param name="entity">实体</param>
+    /// <returns>表示是否允许启用实体结果的异步操作。</returns>
     protected virtual Task<bool> AllowEnable(TEntity entity) => Task.FromResult(true);
 
     /// <summary>
     /// 允许禁用
     /// </summary>
     /// <param name="entity">实体</param>
+    /// <returns>表示是否允许禁用实体结果的异步操作。</returns>
     protected virtual Task<bool> AllowDisable(TEntity entity) => Task.FromResult(true);
 
     /// <summary>
@@ -153,16 +160,16 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     }
 
     /// <summary>
-    /// 冻结
+    /// 异步禁用指定标识对应的树节点。
     /// </summary>
-    /// <param name="ids">标识列表</param>
+    /// <param name="ids">以逗号分隔的节点标识列表。</param>
     public virtual Task DisableAsync(string ids) => Enable(Conv.ToList<TKey>(ids), false);
 
     /// <summary>
-    /// 交换排序
+    /// 异步交换两个树节点的排序号。
     /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="swapId">目标标识</param>
+    /// <param name="id">第一个节点标识。</param>
+    /// <param name="swapId">要交换排序号的目标节点标识。</param>
     public virtual async Task SwapSortAsync(Guid id, Guid swapId)
     {
         var entity = await _store.FindByIdAsync(id);
@@ -176,9 +183,9 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     }
 
     /// <summary>
-    /// 修正排序
+    /// 异步按查询结果重新修正树节点的排序号。
     /// </summary>
-    /// <param name="parameter">查询参数</param>
+    /// <param name="parameter">用于筛选待修正节点的查询参数。</param>
     public virtual async Task FixSortIdAsync(TQueryParameter parameter)
     {
         var children = await GetChildren(parameter);
@@ -195,5 +202,6 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     /// 获取直接下级节点列表
     /// </summary>
     /// <param name="parameter">查询参数</param>
+    /// <returns>表示直接下级节点查询结果的异步操作。</returns>
     protected abstract Task<List<TEntity>> GetChildren(TQueryParameter parameter);
 }

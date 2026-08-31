@@ -121,6 +121,7 @@ public class MessageEventBus : IMessageEventBus
     /// <summary>
     /// 初始化跟踪标识上下文
     /// </summary>
+    /// <param name="headers">待补充跟踪标识的消息头集合。</param>
     private static void InitTraceIdContext(IDictionary<string, string> headers)
     {
         if (TraceIdContext.Current == null)

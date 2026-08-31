@@ -1,47 +1,47 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql参数来源
+/// 标识 SQL 参数的创建来源，供诊断和参数元数据追踪使用。
 /// </summary>
 public enum SqlParameterSource
 {
     /// <summary>
-    /// 未知来源
+    /// 未记录或无法确定参数来源。
     /// </summary>
     Unknown = 0,
 
     /// <summary>
-    /// 基础参数管理器
+    /// 参数由基础参数管理器或通用参数扩展创建。
     /// </summary>
     Basic = 1,
 
     /// <summary>
-    /// Lambda 表达式
+    /// 参数由 Lambda 表达式解析产生。
     /// </summary>
     Lambda = 2,
 
     /// <summary>
-    /// 原生 Sql
+    /// 参数由原生 SQL 文本操作产生。
     /// </summary>
     RawSql = 3,
 
     /// <summary>
-    /// Sql 生成器
+    /// 参数由结构化 SQL 构建链产生。
     /// </summary>
     SqlBuilder = 4,
 
     /// <summary>
-    /// 手工添加
+    /// 参数由调用方显式手工添加。
     /// </summary>
     Manual = 5,
 
     /// <summary>
-    /// 存储过程
+    /// 参数由存储过程调用产生。
     /// </summary>
     Procedure = 6,
 
     /// <summary>
-    /// 系统过滤器
+    /// 参数由系统级查询过滤器产生。
     /// </summary>
     SystemFilter = 7
 }

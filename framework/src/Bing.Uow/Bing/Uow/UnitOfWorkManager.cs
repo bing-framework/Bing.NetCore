@@ -49,5 +49,6 @@ public class UnitOfWorkManager : IUnitOfWorkManager
     /// <summary>
     /// 获取工作单元集合
     /// </summary>
+    /// <returns>当前已注册的工作单元集合。</returns>
     public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks() => _unitOfWorks;
 }

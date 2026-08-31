@@ -80,7 +80,7 @@ public class BingSerilogMiddleware : IMiddleware, ITransientDependency
     }
 
     /// <summary>
-    /// 添加当前客户端相关的日志事件增强器
+    /// 将当前客户端标识添加为 Serilog 结构化日志属性；标识为空时不添加属性。
     /// </summary>
     /// <param name="context">当前 HTTP 请求上下文</param>
     /// <param name="enrichers">日志事件增强器集合</param>
@@ -94,7 +94,7 @@ public class BingSerilogMiddleware : IMiddleware, ITransientDependency
     }
 
     /// <summary>
-    /// 添加关联ID相关的日志事件增强器
+    /// 将当前请求的关联标识添加为 Serilog 结构化日志属性；标识为空时不添加属性。
     /// </summary>
     /// <param name="context">当前 HTTP 请求上下文</param>
     /// <param name="enrichers">日志事件增强器集合</param>

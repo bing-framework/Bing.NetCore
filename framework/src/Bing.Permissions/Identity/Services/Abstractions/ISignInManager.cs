@@ -18,6 +18,7 @@ public interface ISignInManager<in TUser, TKey> : IDomainService where TUser : U
     /// <param name="password">密码</param>
     /// <param name="isPersistent">cookie是否持久保留。设置为false，当关闭浏览器则cookie失效</param>
     /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+    /// <returns>表示登录结果的异步操作。</returns>
     Task<SignInResult> SignInAsync(TUser user, string password, bool isPersistent = false,
         bool lockoutOnFailure = true);
 

@@ -15,6 +15,7 @@ public interface IJoinClause : ISqlClause, ISqlClauseCloneable<IJoinClause>
     /// 查找连接项
     /// </summary>
     /// <param name="type">表实体类型</param>
+    /// <returns>指定实体类型对应的连接项；未找到时返回 <see langword="null"/>。</returns>
     IJoinOn Find(Type type);
 
     /// <summary>
@@ -244,5 +245,6 @@ public interface IJoinClause : ISqlClause, ISqlClauseCloneable<IJoinClause>
     /// <summary>
     /// 输出Sql
     /// </summary>
+    /// <returns>当前连接子句生成的 SQL。</returns>
     string ToSql();
 }

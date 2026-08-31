@@ -27,5 +27,6 @@ internal class StringLocalizer:IStringLocalizer
     public LocalizedString this[string name, params object[] arguments] => _localizer[name, arguments];
 
     /// <inheritdoc />
+    /// <returns>当前资源查找器能够提供的全部本地化字符串。</returns>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => _localizer.GetAllStrings(includeParentCultures);
 }

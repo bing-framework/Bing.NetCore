@@ -22,6 +22,7 @@ public sealed class ParamLiteralsResolver : IParamLiteralsResolver
     /// 获取参数字面值
     /// </summary>
     /// <param name="value">参数值</param>
+    /// <returns>可嵌入 SQL 的参数字面值文本。</returns>
     public string GetParamLiterals(object value)
     {
         if (value == null)

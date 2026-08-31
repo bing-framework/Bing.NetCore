@@ -109,6 +109,7 @@ public class Pager : IPager
     /// <summary>
     /// 获取总页数
     /// </summary>
+    /// <returns>根据总记录数和每页记录数计算得到的总页数；总记录数不能整除页大小时向上取整。</returns>
     public int GetPageCount()
     {
         if (TotalCount % PageSize == 0)
@@ -119,21 +120,25 @@ public class Pager : IPager
     /// <summary>
     /// 获取跳过的行数
     /// </summary>
+    /// <returns>根据当前页码和页大小计算得到的跳过记录数。</returns>
     public int GetSkipCount() => PageSize * (Page - 1);
 
     /// <summary>
     /// 获取起始行数
     /// </summary>
+    /// <returns>当前页第一条记录的序号，从 1 开始。</returns>
     public int GetStartNumber() => (Page - 1) * PageSize + 1;
 
     /// <summary>
     /// 获取结束行数
     /// </summary>
+    /// <returns>当前页最后一条记录的序号。</returns>
     public int GetEndNumber() => Page * PageSize;
 
     /// <summary>
     /// 重写 生成字符串
     /// </summary>
+    /// <returns>包含页码、页大小和排序条件的分页描述字符串。</returns>
     public override string ToString()
     {
         _description = new StringBuilder();

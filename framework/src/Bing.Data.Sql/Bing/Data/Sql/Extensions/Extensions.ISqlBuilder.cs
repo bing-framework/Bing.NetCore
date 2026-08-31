@@ -21,6 +21,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="alias">聚合结果别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Count 聚合后的 SQL 生成器。</returns>
     public static ISqlBuilder Count<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         string alias = null, bool distinct = false) where TEntity : class
     {
@@ -60,6 +61,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Sum 聚合后的 SQL 生成器。</returns>
     public static ISqlBuilder Sum<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
@@ -78,6 +80,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Avg 聚合后的 SQL 生成器。</returns>
     public static ISqlBuilder Avg<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
@@ -96,6 +99,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Max 聚合后的 SQL 生成器。</returns>
     public static ISqlBuilder Max<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
@@ -114,6 +118,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="columnAlias">列别名</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <returns>添加 Min 聚合后的 SQL 生成器。</returns>
     public static ISqlBuilder Min<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
@@ -130,6 +135,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <returns>设置实体投影后的 SQL 生成器。</returns>
     public static ISqlBuilder Select<TEntity>(this ISqlBuilder source, bool propertyAsAlias = false)
         where TEntity : class
     {
@@ -147,6 +153,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="columns">列名。范例：t => new object[] { t.Id, t.Name }</param>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <returns>设置指定列投影后的 SQL 生成器。</returns>
     public static ISqlBuilder Select<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object[]>> columns,
         bool propertyAsAlias = false) where TEntity : class
     {
@@ -165,6 +172,7 @@ public static partial class Extensions
     /// <param name="column">列名。范例：t => t.Name，支持字典批量设置列和列别名，
     /// 范例：Select&lt;Sample&gt;( t => new Dictionary&lt;object, string&gt; { { t.Email, "e" }, { t.Url, "u" } } );</param>
     /// <param name="columnAlias">列别名</param>
+    /// <returns>设置指定列投影后的 SQL 生成器。</returns>
     public static ISqlBuilder Select<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> column,
         string columnAlias = null)
         where TEntity : class
@@ -182,6 +190,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="columns">列名。范例：t => new object[] { t.Id, t.Name }</param>
+    /// <returns>移除指定投影列后的 SQL 生成器。</returns>
     public static ISqlBuilder RemoveSelect<TEntity>(this ISqlBuilder source,
         Expression<Func<TEntity, object[]>> columns) where TEntity : class
     {
@@ -198,6 +207,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="column">列名。范例：t => t.Name，支持字典批量设置列和列别名</param>
+    /// <returns>移除指定投影列后的 SQL 生成器。</returns>
     public static ISqlBuilder RemoveSelect<TEntity>(this ISqlBuilder source,
         Expression<Func<TEntity, object>> column) where TEntity : class
     {
@@ -219,6 +229,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
+    /// <returns>设置 From 子句后的 SQL 生成器。</returns>
     public static ISqlBuilder From<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
         where TEntity : class
     {
@@ -255,6 +266,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
+    /// <returns>追加内连接后的 SQL 生成器。</returns>
     public static ISqlBuilder Join<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
         where TEntity : class
     {
@@ -287,6 +299,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
+    /// <returns>追加左外连接后的 SQL 生成器。</returns>
     public static ISqlBuilder LeftJoin<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
         where TEntity : class
     {
@@ -321,6 +334,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
+    /// <returns>追加右外连接后的 SQL 生成器。</returns>
     public static ISqlBuilder RightJoin<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
         where TEntity : class
     {
@@ -459,10 +473,13 @@ public static partial class Extensions
     /// <summary>
     /// 设置连接条件
     /// </summary>
+    /// <typeparam name="TLeft">左侧实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧实体类型。</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="left">左表列名,范例：t => t.Name</param>
     /// <param name="right">右表列名,范例：t => t.Name</param>
     /// <param name="operator">条件运算符</param>
+    /// <returns>设置连接条件后的 SQL 生成器。</returns>
     public static ISqlBuilder On<TLeft, TRight>(this ISqlBuilder source, Expression<Func<TLeft, object>> left,
         Expression<Func<TRight, object>> right,
         Operator @operator = Operator.Equal) where TLeft : class where TRight : class
@@ -477,8 +494,11 @@ public static partial class Extensions
     /// <summary>
     /// 设置连接条件
     /// </summary>
+    /// <typeparam name="TLeft">左侧实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧实体类型。</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">条件表达式,范例：(l,r) => l.Id == r.OrderId</param>
+    /// <returns>设置连接条件后的 SQL 生成器。</returns>
     public static ISqlBuilder On<TLeft, TRight>(this ISqlBuilder source,
         Expression<Func<TLeft, TRight, bool>> expression) where TLeft : class where TRight : class
     {
@@ -499,6 +519,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="conditions">查询条件</param>
+    /// <returns>追加 Or 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Or<TEntity>(this ISqlBuilder source, params Expression<Func<TEntity, bool>>[] conditions)
         where TEntity : class
     {
@@ -516,6 +537,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="predicate">查询条件</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
+    /// <returns>条件成立时追加 Or 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder OrIf<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, bool>> predicate, bool condition)
         where TEntity : class =>
         OrIf(source, condition, predicate);
@@ -527,6 +549,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="predicates">查询条件</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
+    /// <returns>条件成立时追加 Or 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder OrIf<TEntity>(this ISqlBuilder source, bool condition, params Expression<Func<TEntity, bool>>[] predicates)
         where TEntity : class =>
         condition ? source.Or(predicates) : source;
@@ -537,6 +560,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="conditions">查询条件,如果表达式中的值为空，则忽略该查询条件</param>
+    /// <returns>追加非空 Or 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder OrIfNotEmpty<TEntity>(this ISqlBuilder source, params Expression<Func<TEntity, bool>>[] conditions)
         where TEntity : class
     {
@@ -555,6 +579,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Where<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         object value, Operator @operator = Operator.Equal)
         where TEntity : class
@@ -572,6 +597,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">查询条件表达式。范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
+    /// <returns>追加查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Where<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, bool>> expression)
         where TEntity : class
     {
@@ -590,6 +616,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="builder">子查询Sql生成器</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Where<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, ISqlBuilder builder,
         Operator @operator = Operator.Equal)
         where TEntity : class
@@ -609,6 +636,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式</param>
     /// <param name="action">子查询操作</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Where<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression,
         Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
         where TEntity : class
@@ -641,6 +669,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">查询条件表达式,范例：t => t.Name.Contains("a") &amp;&amp; ( t.Code == "b" || t.Age > 1 )</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
+    /// <returns>条件成立时追加查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder WhereIf<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, bool>> expression, bool condition)
         where TEntity : class =>
         condition ? source.Where(expression) : source;
@@ -654,6 +683,7 @@ public static partial class Extensions
     /// <param name="subBuilder">子查询Sql生成器</param>
     /// <param name="condition">该值为true时添加查询条件，否则忽略</param>
     /// <param name="operator">运算符</param>
+    /// <returns>条件成立时追加子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder WhereIf<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, ISqlBuilder subBuilder,
         bool condition, Operator @operator = Operator.Equal)
         where TEntity : class =>
@@ -682,6 +712,7 @@ public static partial class Extensions
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值,如果值为空，则忽略该查询条件</param>
     /// <param name="operator">运算符</param>
+    /// <returns>追加非空查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder WhereIfNotEmpty<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal)
         where TEntity : class
     {
@@ -698,6 +729,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">查询条件表达式。如果参数值为空，则忽略该查询条件</param>
+    /// <returns>追加非空查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder WhereIfNotEmpty<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, bool>> expression)
         where TEntity : class
     {
@@ -715,6 +747,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加相等条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Equal<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -730,6 +763,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加不相等条件后的 SQL 生成器。</returns>
     public static ISqlBuilder NotEqual<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -745,6 +779,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加大于条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Greater<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -760,6 +795,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加小于条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Less<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -775,6 +811,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加大于等于条件后的 SQL 生成器。</returns>
     public static ISqlBuilder GreaterEqual<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -790,6 +827,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加小于等于条件后的 SQL 生成器。</returns>
     public static ISqlBuilder LessEqual<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -805,6 +843,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加包含匹配条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Contains<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -820,6 +859,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加前缀匹配条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Starts<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -835,6 +875,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="value">值</param>
+    /// <returns>追加后缀匹配条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Ends<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, object value)
         where TEntity : class
     {
@@ -849,6 +890,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
+    /// <returns>追加 Is Null 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder IsNull<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression)
         where TEntity : class
     {
@@ -865,6 +907,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
+    /// <returns>追加 Is Not Null 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder IsNotNull<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression)
         where TEntity : class
     {
@@ -881,6 +924,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
+    /// <returns>追加空值或空字符串条件后的 SQL 生成器。</returns>
     public static ISqlBuilder IsEmpty<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression)
         where TEntity : class
     {
@@ -897,6 +941,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
+    /// <returns>追加非空条件后的 SQL 生成器。</returns>
     public static ISqlBuilder IsNotEmpty<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression)
         where TEntity : class
     {
@@ -914,6 +959,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="values">值集合</param>
+    /// <returns>追加 In 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder In<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
         where TEntity : class
     {
@@ -931,6 +977,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 In 子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder In<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, ISqlBuilder builder)
         where TEntity : class
     {
@@ -948,6 +995,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 In 子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder In<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action)
         where TEntity : class
     {
@@ -965,6 +1013,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="values">值集合</param>
+    /// <returns>追加 Not In 条件后的 SQL 生成器。</returns>
     public static ISqlBuilder NotIn<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
         where TEntity : class
     {
@@ -982,6 +1031,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 Not In 子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder NotIn<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, ISqlBuilder builder)
         where TEntity : class
     {
@@ -999,6 +1049,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="expression">列名表达式。范例：t => t.Name</param>
     /// <param name="action">子查询操作</param>
+    /// <returns>追加 Not In 子查询条件后的 SQL 生成器。</returns>
     public static ISqlBuilder NotIn<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action)
         where TEntity : class
     {
@@ -1018,6 +1069,7 @@ public static partial class Extensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1037,6 +1089,7 @@ public static partial class Extensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1056,6 +1109,7 @@ public static partial class Extensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1075,6 +1129,7 @@ public static partial class Extensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1094,6 +1149,7 @@ public static partial class Extensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1114,6 +1170,7 @@ public static partial class Extensions
     /// <param name="max">最大值</param>
     /// <param name="includeTime">是否包含时间</param>
     /// <param name="boundary">包含边界</param>
+    /// <returns>追加日期范围条件后的 SQL 生成器。</returns>
     public static ISqlBuilder Between<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime = true, Boundary? boundary = Boundary.Both)
         where TEntity : class
     {
@@ -1134,6 +1191,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="column">分组字段。范例：a.Id,b.Name</param>
+    /// <returns>追加分组条件后的 SQL 生成器。</returns>
     public static ISqlBuilder GroupBy<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> column)
         where TEntity : class
     {
@@ -1150,6 +1208,7 @@ public static partial class Extensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
     /// <param name="columns">分组字段</param>
+    /// <returns>追加分组条件后的 SQL 生成器。</returns>
     public static ISqlBuilder GroupBy<TEntity>(this ISqlBuilder source, params Expression<Func<TEntity, object>>[] columns)
         where TEntity : class
     {
@@ -1171,6 +1230,7 @@ public static partial class Extensions
     /// <param name="source">Sql生成器</param>
     /// <param name="column">排序列。范例：t => t.Name</param>
     /// <param name="desc">是否倒排</param>
+    /// <returns>追加排序条件后的 SQL 生成器。</returns>
     public static ISqlBuilder OrderBy<TEntity>(this ISqlBuilder source, Expression<Func<TEntity, object>> column, bool desc = false)
         where TEntity : class
     {

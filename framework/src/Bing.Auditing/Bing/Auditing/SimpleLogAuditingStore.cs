@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Bing.Auditing;
 
 /// <summary>
-/// 简单的日志审计存储器
+/// 将审计日志写入应用程序日志的默认审计存储实现。
 /// </summary>
 [Dependency(ServiceLifetime.Singleton, TryAdd = true)]
 public class SimpleLogAuditingStore : IAuditingStore
 {
     /// <summary>
-    /// 初始化一个<see cref="SimpleLogAuditingStore"/>类型的实例
+    /// 初始化 <see cref="SimpleLogAuditingStore"/> 的实例，并使用空日志记录器。
     /// </summary>
     public SimpleLogAuditingStore()
     {
@@ -20,14 +20,12 @@ public class SimpleLogAuditingStore : IAuditingStore
     }
 
     /// <summary>
-    /// 日志
+    /// 获取或设置用于写入审计日志的日志记录器。
     /// </summary>
     public ILogger<SimpleLogAuditingStore> Logger { get; set; }
 
-    /// <summary>
-    /// 保存
-    /// </summary>
-    /// <param name="auditInfo">审计日志信息</param>
+    /// <inheritdoc />
+    /// <remarks>当前实现仅将审计日志文本写入信息级日志，不执行持久化存储。</remarks>
     public Task SaveAsync(AuditLogInfo auditInfo)
     {
         Logger.LogInformation(auditInfo.ToString());

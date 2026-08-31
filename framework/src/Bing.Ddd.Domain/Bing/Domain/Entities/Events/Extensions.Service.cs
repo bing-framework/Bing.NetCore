@@ -5,20 +5,21 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Bing.Domain.Entities.Events;
 
 /// <summary>
-/// 领域事件扩展
+/// 提供领域事件调度器和处理器的依赖注入注册扩展。
 /// </summary>
 public static class Extensions
 {
     /// <summary>
-    /// 领域事件处理器基础类型
+    /// 用于识别领域事件处理器的泛型接口类型。
     /// </summary>
     private static readonly Type _eventHandlerBaseType = typeof(IDomainEventHandler<>);
 
     /// <summary>
-    /// 注册领域事件调度器
+    /// 从指定类型所属程序集注册领域事件调度器及处理器。
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="types">类型列表</param>
+    /// <param name="services">服务集合。</param>
+    /// <param name="types">用于定位待扫描程序集的类型集合。</param>
+    /// <returns>传入的服务集合。</returns>
     public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection services, Type[] types)
     {
         var assemblies = types.Select(x => x.Assembly).ToArray();
@@ -27,9 +28,10 @@ public static class Extensions
     }
 
     /// <summary>
-    /// 注册领域事件调度器
+    /// 从当前服务集合关联的全部程序集注册领域事件调度器及处理器。
     /// </summary>
-    /// <param name="services">服务集合</param>
+    /// <param name="services">服务集合。</param>
+    /// <returns>传入的服务集合。</returns>
     public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection services)
     {
         var allAssemblyFinder = services.GetOrAddAllAssemblyFinder();
@@ -37,10 +39,11 @@ public static class Extensions
     }
 
     /// <summary>
-    /// 注册领域事件调度器
+    /// 从指定程序集注册领域事件调度器及处理器。
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="assemblies">程序集列表</param>
+    /// <param name="services">服务集合。</param>
+    /// <param name="assemblies">要扫描的程序集集合。</param>
+    /// <returns>传入的服务集合。</returns>
     public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection services, Assembly[] assemblies)
     {
         services.TryAddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
@@ -50,10 +53,11 @@ public static class Extensions
     }
 
     /// <summary>
-    /// 注册领域事件处理器
+    /// 扫描程序集并注册其中的领域事件处理器。
     /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <param name="assemblies">程序集列表</param>
+    /// <param name="services">服务集合。</param>
+    /// <param name="assemblies">要扫描的程序集集合。</param>
+    /// <exception cref="BingFrameworkException">单个处理器实现多个领域事件处理器接口时抛出。</exception>
     private static void RegisterEventHandler(this IServiceCollection services, params Assembly[] assemblies)
     {
         var store = new DomainEventHandlerTypeStore();

@@ -26,6 +26,7 @@ public static partial class Extensions
     /// <param name="connection">连接字符串</param>
     /// <param name="setupAction">配置操作</param>
     /// <param name="freeSqlSetupAction">FreeSql配置操作</param>
+    /// <returns>已添加工作单元服务的服务集合。</returns>
     public static IServiceCollection AddMySqlUnitOfWork<TUnitOfWork, TUnitOfWorkImplementation>(this IServiceCollection services
         , string connection
         , Action<IServiceProvider, FreeSqlBuilder> setupAction = null

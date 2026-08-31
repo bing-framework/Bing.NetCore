@@ -14,6 +14,7 @@ public class RequestResponseLoggerErrorFilter : Attribute, IExceptionFilter
     /// 获取请求响应日志
     /// </summary>
     /// <param name="context">Http上下文</param>
+    /// <returns>当前请求对应的请求响应日志。</returns>
     private RequestResponseLog GetLog(HttpContext context)
     {
         return context.RequestServices.GetRequiredService<IRequestResponseLogCreator>().Log;

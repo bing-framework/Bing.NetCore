@@ -44,6 +44,7 @@ public class SignInManager<TUser, TKey> : ISignInManager<TUser, TKey> where TUse
     /// <param name="password">密码</param>
     /// <param name="isPersistent">cookie是否持久保留。设置为false，当关闭浏览器则cookie失效</param>
     /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+    /// <returns>表示登录结果的异步操作。</returns>
     public virtual async Task<SignInResult> SignInAsync(TUser user, string password, bool isPersistent = false, bool lockoutOnFailure = true)
     {
         if (user == null)
@@ -58,6 +59,7 @@ public class SignInManager<TUser, TKey> : ISignInManager<TUser, TKey> where TUse
     /// <param name="password">密码</param>
     ///  <param name="isPersistent">cookie是否持久保留，设置为false，当关闭浏览器则cookie失效</param>
     /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
+    /// <returns>表示密码登录结果的异步操作。</returns>
     private async Task<SignInResult> PasswordSignIn(TUser user, string password, bool isPersistent = false,
         bool lockoutOnFailure = true)
     {

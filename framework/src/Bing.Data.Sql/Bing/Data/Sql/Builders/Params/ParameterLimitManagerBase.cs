@@ -99,12 +99,16 @@ internal abstract class ParameterLimitManagerBase
     /// <summary>
     /// 获取包装器实际持有的参数管理器。
     /// </summary>
+    /// <param name="manager">待展开的参数管理器。</param>
+    /// <returns>递归移除参数数量限制装饰器后的内部管理器。</returns>
     private static IParameterManager Unwrap(IParameterManager manager) =>
         manager is ParameterLimitManagerBase limit ? Unwrap(limit.Inner) : manager;
 
     /// <summary>
     /// 对非内置参数管理器执行可用接口范围内的恢复。
     /// </summary>
+    /// <param name="target">接收恢复结果的参数管理器。</param>
+    /// <param name="source">提供恢复数据的参数管理器。</param>
     private static void RestoreByValues(IParameterManager target, IParameterManager source)
     {
         target.Clear();

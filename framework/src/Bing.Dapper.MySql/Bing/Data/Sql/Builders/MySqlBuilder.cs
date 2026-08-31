@@ -24,6 +24,7 @@ public class MySqlBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    /// <returns>使用指定参数管理器创建的 MySQL Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new MySqlBuilder(Services, parameterManager);
 
@@ -31,6 +32,7 @@ public class MySqlBuilder : SqlBuilderBase
     /// <remarks>
     /// MySQL 8 的递归公用表表达式使用 <c>With Recursive</c> 语法；该关键字同样可用于普通 CTE。
     /// </remarks>
+    /// <returns>MySQL CTE 使用的关键字文本。</returns>
     protected override string GetCteKeyWord() => "With Recursive";
 
 }

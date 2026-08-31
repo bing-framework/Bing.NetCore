@@ -15,6 +15,7 @@ public static class ExceptionlessClientExtensions
     /// </summary>
     /// <param name="client">Exceptionless客户端</param>
     /// <param name="log">Serilog日志事件</param>
+    /// <returns>根据日志事件创建的 Exceptionless 事件构建器。</returns>
     public static EventBuilder CreateFromLogEvent(this ExceptionlessClient client, LogEvent log)
     {
         var message = log.RenderMessage();
@@ -44,6 +45,7 @@ public static class ExceptionlessClientExtensions
     /// 获取来源
     /// </summary>
     /// <param name="log">日志事件</param>
+    /// <returns>日志事件中的来源上下文；不存在时返回 <see langword="null"/>。</returns>
     internal static string GetSource(this LogEvent log)
     {
         if (log.Properties.TryGetValue(Constants.SourceContextPropertyName, out var value))

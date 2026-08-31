@@ -149,6 +149,7 @@ public class Log : ILog
     /// 设置日志事件描述符
     /// </summary>
     /// <param name="action">操作</param>
+    /// <returns>当前日志操作实例。</returns>
     public ILog Set(Action<LogEventDescriptor> action)
     {
         if (action == null)
@@ -241,7 +242,7 @@ public class Log : ILog
     #region 辅助方法
 
     /// <summary>
-    /// 初始化
+    /// 初始化日志对象并将上下文状态转换为可写入的日志内容。
     /// </summary>
     protected virtual void Init()
     {
@@ -285,6 +286,7 @@ public class Log : ILog
     /// <summary>
     /// 获取日志消息
     /// </summary>
+    /// <returns>根据当前日志属性和消息生成的日志消息模板。</returns>
     protected virtual string GetMessage()
     {
         if (LogProperties.Count == 0)
@@ -309,6 +311,7 @@ public class Log : ILog
     /// <summary>
     /// 获取日志消息参数
     /// </summary>
+    /// <returns>用于格式化日志消息的参数数组。</returns>
     protected virtual object[] GetMessageArgs()
     {
         if (LogProperties.Count == 0)
@@ -320,9 +323,11 @@ public class Log : ILog
     }
 
     /// <summary>
-    /// 写日志
+    /// 在当前描述符作用域内写入累计的日志状态。
     /// </summary>
-    /// <param name="level">日志级别</param>
+    /// <param name="level">本次写入使用的日志级别。</param>
+    /// <returns>当前日志操作对象，以支持链式调用。</returns>
+    /// <remarks>底层日志写入失败时会记录关键级别错误而不向调用方传播；无论成功或失败，方法结束时都会清空累计状态以便实例复用。</remarks>
     protected virtual ILog WriteLog(LogLevel level)
     {
         try
@@ -356,6 +361,7 @@ public class Log : ILog
     /// <summary>
     /// 获取日志内容
     /// </summary>
+    /// <returns>当前日志属性字典；没有属性时返回 <see langword="null"/>。</returns>
     protected IDictionary<string, object> GetContent() => LogProperties.Count == 0 ? null : LogProperties;
 
     /// <summary>
@@ -363,6 +369,7 @@ public class Log : ILog
     /// </summary>
     /// <param name="content">日志内容</param>
     /// <param name="exception">异常</param>
+    /// <returns>根据异常或日志内容生成的格式化消息。</returns>
     protected virtual string GetFormatMessage(IDictionary<string, object> content, Exception exception)
     {
         if (exception != null)
@@ -376,6 +383,7 @@ public class Log : ILog
     /// 获取格式化消息
     /// </summary>
     /// <param name="content">日志内容</param>
+    /// <returns>由日志内容键值对生成的格式化消息。</returns>
     protected virtual string GetFormatMessage(IDictionary<string, object> content)
     {
         var result = new StringBuilder();

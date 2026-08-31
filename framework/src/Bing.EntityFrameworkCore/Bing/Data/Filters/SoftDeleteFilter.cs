@@ -12,6 +12,7 @@ public class SoftDeleteFilter : FilterBase<ISoftDelete>
     /// 获取过滤表达式
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <returns>用于筛选未标记为已删除实体的表达式。</returns>
     public override Expression<Func<TEntity, bool>> GetExpression<TEntity>() where TEntity : class
     {
         return entity => !EF.Property<bool>(entity, "IsDeleted");

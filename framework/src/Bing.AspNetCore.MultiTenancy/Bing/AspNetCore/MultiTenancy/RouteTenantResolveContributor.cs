@@ -5,26 +5,20 @@ using Microsoft.AspNetCore.Routing;
 namespace Bing.AspNetCore.MultiTenancy;
 
 /// <summary>
-/// 基于路由的租户解析构造器
+/// 从 HTTP 路由值解析租户的贡献者。
 /// </summary>
 public class RouteTenantResolveContributor : HttpTenantResolveContributorBase
 {
     /// <summary>
-    /// 构造器名称
+    /// 用于诊断和解析链路记录的贡献者名称。
     /// </summary>
     public const string ContributorName = "Route";
 
-    /// <summary>
-    /// 名称
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => ContributorName;
 
-    /// <summary>
-    /// 从 <see cref="HttpContext"/> 中获取租户标识、租户名称、null
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
-    /// <param name="httpContext">Http上下文</param>
-    /// <returns>租户标识、租户名称、null</returns>
+    /// <inheritdoc />
+    /// <remarks>使用当前租户键读取路由值；不存在路由值时返回 <c>null</c>。</remarks>
     protected override Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext)
     {
         var key = GetTenantKey(context);

@@ -14,6 +14,7 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <param name="currentUser">当前用户</param>
     /// <param name="claimType">声明类型</param>
+    /// <returns>指定声明的值；未找到时返回 null。</returns>
     public static string FindClaimValue(this ICurrentUser currentUser, string claimType) => currentUser.FindClaim(claimType)?.Value;
 
     /// <summary>
@@ -22,6 +23,7 @@ public static class CurrentUserExtensions
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
     /// <param name="claimType">声明类型</param>
+    /// <returns>指定声明转换后的值；未找到或无法转换时返回默认值。</returns>
     public static T FindClaimValue<T>(this ICurrentUser currentUser, string claimType)
         where T : struct
     {
@@ -35,6 +37,7 @@ public static class CurrentUserExtensions
     /// 获取用户标识
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为 <see cref="Guid"/> 的用户标识。</returns>
     public static Guid GetUserId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.UserId);
 
     /// <summary>
@@ -42,12 +45,14 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为指定类型的用户标识。</returns>
     public static T GetUserId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.UserId);
 
     /// <summary>
     /// 获取用户名
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户名称；无法从声明中获取时使用用户对象中的名称。</returns>
     public static string GetUserName(this ICurrentUser currentUser)
     {
         var result = currentUser.FindClaim(BingClaimTypes.UserName)?.Value;
@@ -62,6 +67,7 @@ public static class CurrentUserExtensions
     /// 获取姓名
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户全名；未找到时返回 null。</returns>
     public static string GetFullName(this ICurrentUser currentUser)
     {
         var result = currentUser.FindClaim(BingClaimTypes.FullName)?.Value;
@@ -74,6 +80,7 @@ public static class CurrentUserExtensions
     /// 获取电子邮件
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户的电子邮件；未找到时返回 null。</returns>
     public static string GetEmail(this ICurrentUser currentUser)
     {
         var result = currentUser.FindClaim(BingClaimTypes.Email)?.Value;
@@ -86,6 +93,7 @@ public static class CurrentUserExtensions
     /// 获取手机号码
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户的手机号码；未找到时返回 null。</returns>
     public static string GetPhoneNumber(this ICurrentUser currentUser)
     {
         var result = currentUser.FindClaim(BingClaimTypes.PhoneNumber)?.Value;
@@ -136,6 +144,7 @@ public static class CurrentUserExtensions
     /// 获取应用程序标识
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为 <see cref="Guid"/> 的应用程序标识。</returns>
     public static Guid GetApplicationId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.FindClaim(BingClaimTypes.ApplicationId)?.Value);
 
     /// <summary>
@@ -143,18 +152,21 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为指定类型的应用程序标识。</returns>
     public static T GetApplicationId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.FindClaim(BingClaimTypes.ApplicationId)?.Value);
 
     /// <summary>
     /// 获取应用程序编码
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户所属的应用程序编码；未找到时返回 null。</returns>
     public static string GetApplicationCode(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.ApplicationCode)?.Value;
 
     /// <summary>
     /// 获取应用程序名称
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户所属的应用程序名称；未找到时返回 null。</returns>
     public static string GetApplicationName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.ApplicationName)?.Value;
 
     #endregion
@@ -165,6 +177,7 @@ public static class CurrentUserExtensions
     /// 获取租户标识
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为 <see cref="Guid"/> 的租户标识。</returns>
     public static Guid GetTenantId(this ICurrentUser currentUser) => Conv.ToGuid(currentUser.FindClaim(BingClaimTypes.TenantId)?.Value);
 
     /// <summary>
@@ -172,18 +185,21 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为指定类型的租户标识。</returns>
     public static T GetTenantId<T>(this ICurrentUser currentUser) => Conv.To<T>(currentUser.FindClaim(BingClaimTypes.TenantId)?.Value);
 
     /// <summary>
     /// 获取租户编码
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户所属的租户编码；未找到时返回 null。</returns>
     public static string GetTenantCode(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantCode)?.Value;
 
     /// <summary>
     /// 获取租户名称
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户所属的租户名称；未找到时返回 null。</returns>
     public static string GetTenantName(this ICurrentUser currentUser) => currentUser.FindClaim(BingClaimTypes.TenantName)?.Value;
 
     #endregion
@@ -283,6 +299,7 @@ public static class CurrentUserExtensions
     /// 获取角色标识列表
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户的角色标识列表。</returns>
     public static List<Guid> GetRoleIds(this ICurrentUser currentUser) => GetRoleIds<Guid>(currentUser);
 
     /// <summary>
@@ -290,6 +307,7 @@ public static class CurrentUserExtensions
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>转换为指定类型的角色标识列表。</returns>
     public static List<T> GetRoleIds<T>(this ICurrentUser currentUser)
     {
         var result = currentUser.FindClaimValue(BingClaimTypes.RoleIds);
@@ -302,12 +320,14 @@ public static class CurrentUserExtensions
     /// 获取角色编码列表
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户的角色编码数组；未找到时返回空数组或 null，取决于声明访问器实现。</returns>
     public static string[] GetRoleCodes(this ICurrentUser currentUser) => currentUser.FindClaims(BingClaimTypes.RoleCodes)?.Select(x => x.Value).ToArray();
 
     /// <summary>
     /// 获取角色名称列表
     /// </summary>
     /// <param name="currentUser">当前用户</param>
+    /// <returns>当前用户的角色名称数组；未找到时返回空数组或 null，取决于声明访问器实现。</returns>
     public static string[] GetRoleNames(this ICurrentUser currentUser) => currentUser.FindClaims(BingClaimTypes.RoleNames)?.Select(x => x.Value).ToArray();
 
     #endregion

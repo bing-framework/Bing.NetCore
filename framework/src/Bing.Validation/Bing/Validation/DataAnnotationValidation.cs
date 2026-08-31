@@ -3,14 +3,16 @@
 namespace Bing.Validation;
 
 /// <summary>
-/// DataAnnotation 验证操作
+/// 提供基于 DataAnnotation 特性的对象验证功能。
 /// </summary>
 public static class DataAnnotationValidation
 {
     /// <summary>
-    /// 验证
+    /// 使用 DataAnnotation 特性验证指定对象的全部可验证属性。
     /// </summary>
-    /// <param name="target">验证目标</param>
+    /// <param name="target">待验证的对象。</param>
+    /// <returns>验证结果集合；验证通过时返回有效且不包含错误的集合。</returns>
+    /// <exception cref="ArgumentNullException">验证目标为空时抛出。</exception>
     public static ValidationResultCollection Validate(object target)
     {
         if (target == null)

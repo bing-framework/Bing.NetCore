@@ -5,36 +5,36 @@ using Newtonsoft.Json;
 namespace Bing.AspNetCore.Mvc.Models;
 
 /// <summary>
-/// 操作描述
+/// 表示控制器操作的方法名称、描述及反射信息。
 /// </summary>
 public class ActionDescriptor
 {
     /// <summary>
-    /// 控制器描述
+    /// 获取当前操作所属的控制器描述。
     /// </summary>
     public ControllerDescriptor Controller { get; protected set; }
 
     /// <summary>
-    /// 名称
+    /// 获取操作方法名称。
     /// </summary>
     public string Name { get; protected set; }
 
     /// <summary>
-    /// 描述
+    /// 获取操作的显示描述；未配置 <see cref="DescriptionAttribute"/> 时为空。
     /// </summary>
     public string Description { get; protected set; }
 
     /// <summary>
-    /// 方法信息
+    /// 获取操作方法的反射信息；该成员不会参与 JSON 序列化。
     /// </summary>
     [JsonIgnore]
     public MethodInfo MethodInfo { get; protected set; }
 
     /// <summary>
-    /// 初始化一个<see cref="ActionDescriptor"/>类型的实例
+    /// 使用控制器描述和方法反射信息初始化 <see cref="ActionDescriptor"/> 的实例。
     /// </summary>
-    /// <param name="controller">控制器</param>
-    /// <param name="methodInfo">方法信息</param>
+    /// <param name="controller">操作所属的控制器描述。</param>
+    /// <param name="methodInfo">操作方法的反射信息。</param>
     public ActionDescriptor(ControllerDescriptor controller, MethodInfo methodInfo)
     {
         Controller = controller;
@@ -43,7 +43,7 @@ public class ActionDescriptor
     }
 
     /// <summary>
-    /// 初始化
+    /// 从方法反射信息初始化操作名称和描述。
     /// </summary>
     private void Init()
     {
@@ -52,7 +52,7 @@ public class ActionDescriptor
     }
 
     /// <summary>
-    /// 初始化描述
+    /// 读取方法上的 <see cref="DescriptionAttribute"/> 并初始化操作描述。
     /// </summary>
     protected virtual void InitDescription()
     {

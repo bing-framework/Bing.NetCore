@@ -9,6 +9,6 @@ public interface IAuditSerializer
     /// 序列化
     /// </summary>
     /// <param name="obj">对象</param>
-    /// <returns></returns>
+    /// <returns>对象序列化后的文本。</returns>
     string Serialize(object obj);
 }

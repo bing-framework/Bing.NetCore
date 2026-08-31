@@ -19,48 +19,19 @@ public abstract class EmailSenderBase : IEmailSender
     /// <param name="provider">电子邮件配置提供器</param>
     protected EmailSenderBase(IEmailConfigProvider provider) => ConfigProvider = provider ?? throw new ArgumentNullException(nameof(provider));
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="to">收件人</param>
-    /// <param name="subject">邮件主题</param>
-    /// <param name="body">正文</param>
-    /// <param name="isBodyHtml">是否html内容</param>
+    /// <inheritdoc />
     public virtual void Send(string to, string subject, string body, bool isBodyHtml = true) => Send(new MailMessage {To = {to}, Subject = subject, Body = body, IsBodyHtml = isBodyHtml});
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="to">收件人</param>
-    /// <param name="subject">邮件主题</param>
-    /// <param name="body">正文</param>
-    /// <param name="isBodyHtml">是否html内容</param>
+    /// <inheritdoc />
     public virtual async Task SendAsync(string to, string subject, string body, bool isBodyHtml = true) => await SendAsync(new MailMessage {To = {to}, Subject = subject, Body = body, IsBodyHtml = isBodyHtml});
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="from">发件人</param>
-    /// <param name="to">收件人</param>
-    /// <param name="subject">邮件主题</param>
-    /// <param name="body">正文</param>
-    /// <param name="isBodyHtml">是否html内容</param>
+    /// <inheritdoc />
     public virtual void Send(string @from, string to, string subject, string body, bool isBodyHtml = true) => Send(new MailMessage(@from, to, subject, body) { IsBodyHtml = isBodyHtml });
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="from">发件人</param>
-    /// <param name="to">收件人</param>
-    /// <param name="subject">邮件主题</param>
-    /// <param name="body">正文</param>
-    /// <param name="isBodyHtml">是否html内容</param>
+    /// <inheritdoc />
     public virtual async Task SendAsync(string @from, string to, string subject, string body, bool isBodyHtml = true) => await SendAsync(new MailMessage(@from, to, subject, body) { IsBodyHtml = isBodyHtml });
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="box">邮件</param>
+    /// <inheritdoc />
     public virtual void Send(EmailBox box)
     {
         var mail = new MailMessage();
@@ -77,10 +48,7 @@ public abstract class EmailSenderBase : IEmailSender
         Send(mail);
     }
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="box">邮件</param>
+    /// <inheritdoc />
     public virtual async Task SendAsync(EmailBox box)
     {
         var mail = new MailMessage();
@@ -97,11 +65,7 @@ public abstract class EmailSenderBase : IEmailSender
         await SendAsync(mail);
     }
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="mail">邮件消息</param>
-    /// <param name="normalize">是否规范化邮件，如果是，则设置发件人地址/名称并使邮件编码为UTF-8</param>
+    /// <inheritdoc />
     public virtual void Send(MailMessage mail, bool normalize = true)
     {
         if (normalize)
@@ -109,11 +73,7 @@ public abstract class EmailSenderBase : IEmailSender
         SendEmail(mail);
     }
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="mail">邮件消息</param>
-    /// <param name="normalize">是否规范化邮件，如果是，则设置发件人地址/名称并使邮件编码为UTF-8</param>
+    /// <inheritdoc />
     public virtual async Task SendAsync(MailMessage mail, bool normalize = true)
     {
         if (normalize)
@@ -134,10 +94,11 @@ public abstract class EmailSenderBase : IEmailSender
     protected abstract Task SendEmailAsync(MailMessage mail);
 
     /// <summary>
-    /// 处理附件
+    /// 将邮件附件加入目标 <see cref="AttachmentCollection"/>。
     /// </summary>
-    /// <param name="attachments">附件集合</param>
-    /// <param name="attachmentCollection">附件集合对象</param>
+    /// <param name="attachments">要转换的附件集合；为空时不执行任何操作。</param>
+    /// <param name="attachmentCollection">接收 <see cref="Attachment"/> 实例的邮件附件集合。</param>
+    /// <remarks>每个附件流被交由创建的 <see cref="Attachment"/> 使用；调用方仍应协调 <see cref="IAttachment"/> 实例的资源释放。</remarks>
     protected virtual void HandlerAttachments(IList<IAttachment> attachments, AttachmentCollection attachmentCollection)
     {
         if (attachments == null || !attachments.Any())

@@ -10,9 +10,7 @@ public sealed class AsyncLocalDatabaseContextAccessor : IDatabaseContextAccessor
     /// </summary>
     private readonly AsyncLocal<DatabaseContext> _current = new();
 
-    /// <summary>
-    /// 当前数据库上下文
-    /// </summary>
+    /// <inheritdoc />
     public DatabaseContext Current
     {
         get => DatabaseContextSnapshot.Create(_current.Value);

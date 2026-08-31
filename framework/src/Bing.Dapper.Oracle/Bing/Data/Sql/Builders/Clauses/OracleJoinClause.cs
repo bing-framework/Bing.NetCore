@@ -30,13 +30,16 @@ public class OracleJoinClause : JoinClause
     }
 
     /// <inheritdoc />
+    /// <returns>根据连接信息创建的 Oracle 连接项。</returns>
     protected override JoinItem CreateJoinItem(string joinType, string table, string schema, string alias, Type type = null) =>
         JoinItem.CreateAtomicTable(joinType, table, schema, alias, type);
 
     /// <inheritdoc />
+    /// <returns>当前连接子句的 Oracle 副本。</returns>
     protected override JoinClause CreateClone(SqlClauseContext context, List<JoinItem> joinItems) =>
         new OracleJoinClause(context, joinItems);
 
     /// <inheritdoc />
+    /// <returns>带 Oracle 标识符转义的子查询别名文本。</returns>
     protected override string GetSubqueryAlias(string alias) => $" {_dialect.SafeName(alias)}";
 }

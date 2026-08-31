@@ -25,6 +25,7 @@ public class SqliteBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    /// <returns>使用指定参数管理器创建的 SQLite Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqliteBuilder(Services, parameterManager);
 
@@ -32,6 +33,7 @@ public class SqliteBuilder : SqlBuilderBase
     /// <remarks>
     /// SQLite 的递归公用表表达式使用 <c>With Recursive</c> 语法；该关键字同样可用于普通 CTE。
     /// </remarks>
+    /// <returns>SQLite CTE 使用的关键字文本。</returns>
     protected override string GetCteKeyWord() => "With Recursive";
 
     /// <summary>

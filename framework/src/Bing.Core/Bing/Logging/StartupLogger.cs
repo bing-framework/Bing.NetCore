@@ -79,32 +79,32 @@ public class StartupLogger
     }
 
     /// <summary>
-    /// 日志信息
+    /// 表示启动阶段待记录的日志信息。
     /// </summary>
     public class LogInfo
     {
         /// <summary>
-        /// 日志级别
+        /// 获取或设置日志级别。
         /// </summary>
         public LogLevel LogLevel { get; set; }
 
         /// <summary>
-        /// 消息
+        /// 获取或设置日志消息。
         /// </summary>
         public string Message { get; set; }
 
         /// <summary>
-        /// 异常
+        /// 获取或设置关联异常；没有异常时为空。
         /// </summary>
         public Exception Exception { get; set; }
 
         /// <summary>
-        /// 日志名
+        /// 获取或设置日志类别名称。
         /// </summary>
         public string LogName { get; set; }
 
         /// <summary>
-        /// 创建时间
+        /// 获取或设置日志创建时间。
         /// </summary>
         public DateTime CreatedTime { get; set; }
     }

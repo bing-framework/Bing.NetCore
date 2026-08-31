@@ -22,7 +22,7 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <param name="name">名称</param>
     /// <param name="value">值</param>
     /// <param name="output">是否输出</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">名称为空时抛出。</exception>
     public void AddItem(string name, object value, bool output = true)
     {
         if (value is null)
@@ -95,11 +95,13 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <summary>
     /// 导出上游的上下文数据
     /// </summary>
+    /// <returns>当前上下文记录的上游上下文数据；未导入上游数据时返回 <see langword="null"/>。</returns>
     internal ContextData ExportUpstreamContextData() => CurrentUpstreamContextPointer;
 
     /// <summary>
     /// 输出字符串
     /// </summary>
+    /// <returns>包含可输出上下文项的 JSON 风格文本。</returns>
     public override string ToString()
     {
         if (Count == 0)
@@ -122,5 +124,6 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前上下文数据的浅复制实例。</returns>
     public ContextData Copy() => new(this);
 }

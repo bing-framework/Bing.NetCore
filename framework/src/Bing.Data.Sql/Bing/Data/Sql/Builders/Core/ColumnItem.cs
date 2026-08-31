@@ -160,6 +160,7 @@ public class ColumnItem
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     /// <param name="register">实体别名注册器</param>
+    /// <returns>按指定 SQL 方言和实体别名注册器渲染的列 SQL。</returns>
     public string ToSql(IDialect dialect, IEntityAliasRegister register)
     {
         if (AggregateFunction.HasValue)
@@ -221,6 +222,7 @@ public class ColumnItem
     /// 获取表别名
     /// </summary>
     /// <param name="register">实体别名注册器</param>
+    /// <returns>当前列使用的表别名；未指定别名且无法从注册器获取时返回 <see langword="null"/>。</returns>
     private string GetTableAlias(IEntityAliasRegister register) => string.IsNullOrWhiteSpace(TableAlias) == false
         ? TableAlias
         : register != null && register.Contains(TableType) ? register.GetAlias(TableType) : null;
@@ -228,6 +230,7 @@ public class ColumnItem
     /// <summary>
     /// 克隆
     /// </summary>
+    /// <returns>当前列项的独立副本。</returns>
     public ColumnItem Clone()
     {
         return new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, _aggregate);

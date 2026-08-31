@@ -10,5 +10,6 @@ public class ThreadCurrentPrincipalAccessor : CurrentPrincipalAccessorBase
     /// <summary>
     /// 获取安全主体
     /// </summary>
+    /// <returns>当前线程的安全主体；不是 <see cref="ClaimsPrincipal"/> 时返回 null。</returns>
     protected override ClaimsPrincipal GetClaimsPrincipal() => Thread.CurrentPrincipal as ClaimsPrincipal;
 }

@@ -23,17 +23,20 @@ public class TemplateDefinitionContext : ITemplateDefinitionContext
     /// 获取指定名称的模板定义列表
     /// </summary>
     /// <param name="name">模板名称</param>
+    /// <returns>当前上下文中的模板定义列表。</returns>
     public virtual IReadOnlyList<TemplateDefinition> GetAll(string name) => Templates.Values.ToImmutableList();
 
     /// <summary>
     /// 获取指定名称的模板定义
     /// </summary>
     /// <param name="name">模板名称</param>
+    /// <returns>指定名称对应的模板定义；未找到时返回 <see langword="null"/>。</returns>
     public virtual TemplateDefinition GetOrNull(string name) => Templates.GetOrDefault(name);
 
     /// <summary>
     /// 获取全部的模板定义列表
     /// </summary>
+    /// <returns>当前上下文中的全部模板定义列表。</returns>
     public virtual IReadOnlyList<TemplateDefinition> GetAll() => Templates.Values.ToImmutableList();
 
     /// <summary>

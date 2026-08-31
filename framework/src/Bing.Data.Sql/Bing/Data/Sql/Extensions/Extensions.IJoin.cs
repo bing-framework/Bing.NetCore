@@ -16,6 +16,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加内连接后的源对象。</returns>
     public static T Join<T>(this T source, string table, string alias = null) where T : IJoin
     {
         if (source == null)
@@ -30,6 +31,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="table">结构化表引用。</param>
+    /// <returns>追加内连接后的源对象。</returns>
     public static T Join<T>(this T source, SqlTableReference table) where T : IJoin
     {
         if (source == null)
@@ -46,6 +48,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="table">结构化表引用。</param>
+    /// <returns>追加左连接后的源对象。</returns>
     public static T LeftJoin<T>(this T source, SqlTableReference table) where T : IJoin
     {
         if (source == null)
@@ -93,6 +96,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询内连接后的源对象。</returns>
     public static T Join<T>(this T source, ISqlBuilder builder, string alias) where T : IJoin
     {
         if (source == null)
@@ -108,6 +112,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询内连接后的源对象。</returns>
     public static T Join<T>(this T source, Action<ISqlBuilder> action, string alias) where T : IJoin
     {
         if (source == null)
@@ -134,6 +139,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加左外连接后的源对象。</returns>
     public static T LeftJoin<T>(this T source, string table, string alias = null) where T : IJoin
     {
         if (source == null)
@@ -179,6 +185,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询左连接后的源对象。</returns>
     public static T LeftJoin<T>(this T source, ISqlBuilder builder, string alias) where T : IJoin
     {
         if (source == null)
@@ -194,6 +201,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询左连接后的源对象。</returns>
     public static T LeftJoin<T>(this T source, Action<ISqlBuilder> action, string alias) where T : IJoin
     {
         if (source == null)
@@ -220,6 +228,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加右外连接后的源对象。</returns>
     public static T RightJoin<T>(this T source, string table, string alias = null) where T : IJoin
     {
         if (source == null)
@@ -234,6 +243,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="table">结构化表引用。</param>
+    /// <returns>追加右连接后的源对象。</returns>
     public static T RightJoin<T>(this T source, SqlTableReference table) where T : IJoin
     {
         if (source == null)
@@ -281,6 +291,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="builder">Sql生成器</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询右连接后的源对象。</returns>
     public static T RightJoin<T>(this T source, ISqlBuilder builder, string alias) where T : IJoin
     {
         if (source == null)
@@ -296,6 +307,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="action">子查询操作</param>
     /// <param name="alias">别名</param>
+    /// <returns>追加子查询右连接后的源对象。</returns>
     public static T RightJoin<T>(this T source, Action<ISqlBuilder> action, string alias) where T : IJoin
     {
         if (source == null)
@@ -435,6 +447,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="condition">连接条件</param>
+    /// <returns>设置连接条件后的源对象。</returns>
     public static T On<T>(this T source, ICondition condition) where T : IJoin
     {
         if (source == null)
@@ -451,6 +464,7 @@ public static partial class Extensions
     /// <param name="left">左表列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">条件运算符</param>
+    /// <returns>设置连接条件后的源对象。</returns>
     public static T On<T>(this T source, string left, object value, Operator @operator = Operator.Equal)
         where T : IJoin
     {

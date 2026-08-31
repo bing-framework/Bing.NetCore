@@ -260,6 +260,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 在最近最少使用策略下将指定缓存项标记为最新访问。
     /// </summary>
+    /// <param name="cacheKey">待更新访问顺序的映射缓存键。</param>
     private void TouchMappingCacheEntry(EntityMappingCacheKey cacheKey)
     {
         if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed ||
@@ -272,6 +273,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 在已持有准入锁时将指定缓存项标记为最新访问。
     /// </summary>
+    /// <param name="cacheKey">待更新访问顺序的映射缓存键。</param>
     private void TouchMappingCacheEntryCore(EntityMappingCacheKey cacheKey)
     {
         if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed ||
@@ -284,6 +286,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <summary>
     /// 在已持有准入锁时登记最新缓存项。
     /// </summary>
+    /// <param name="cacheKey">待登记访问顺序的映射缓存键。</param>
     private void AddMappingCacheEntryToAccessOrder(EntityMappingCacheKey cacheKey)
     {
         if (_mappingCacheEvictionPolicy != EntityMappingCacheEvictionPolicy.LeastRecentlyUsed)

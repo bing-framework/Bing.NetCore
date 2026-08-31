@@ -22,11 +22,13 @@ public interface IBingBuilder
     /// 添加指定模块
     /// </summary>
     /// <typeparam name="TModule">要添加的模块类型</typeparam>
+    /// <returns>当前构建器实例。</returns>
     IBingBuilder AddModule<TModule>() where TModule : BingModule;
 
     /// <summary>
     /// 添加加载的所有模块，并可排除指定的模块类型
     /// </summary>
     /// <param name="exceptModuleTypes">要排除的模块类型</param>
+    /// <returns>当前构建器实例。</returns>
     IBingBuilder AddModules(params Type[] exceptModuleTypes);
 }

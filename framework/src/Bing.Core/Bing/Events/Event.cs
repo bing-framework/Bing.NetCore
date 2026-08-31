@@ -4,18 +4,20 @@ using Bing.Utils.Json;
 namespace Bing.Events;
 
 /// <summary>
-/// 事件
+/// 提供默认标识、发生时间和名称解析行为的事件基类。
 /// </summary>
 public class Event : IEvent
 {
     /// <summary>
-    /// 事件名称
+    /// 保存构造时指定的显式事件名称。
     /// </summary>
     private readonly string _eventName;
 
     /// <summary>
-    /// 初始化一个<see cref="Event"/>类型的实例
+    /// 使用可选的显式事件名称初始化 <see cref="Event"/> 的实例。
     /// </summary>
+    /// <param name="eventName">优先于事件类型特性解析结果使用的可选事件名称。</param>
+    /// <remarks>构造时生成新的 GUID 标识，并将发生时间设置为当前本地时间。</remarks>
     public Event(string eventName = default)
     {
         Id =  Guid.NewGuid().ToString();
@@ -23,19 +25,14 @@ public class Event : IEvent
         _eventName = eventName;
     }
 
-    /// <summary>
-    /// 事件标识
-    /// </summary>
+    /// <inheritdoc />
     public string Id { get; set; }
 
-    /// <summary>
-    /// 事件时间
-    /// </summary>
+    /// <inheritdoc />
     public DateTime Time { get; }
 
-    /// <summary>
-    /// 获取事件名称
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>优先返回构造时指定的名称；否则普通类型使用 <see cref="EventNameAttribute"/>，泛型类型使用 <see cref="GenericEventNameAttribute"/> 解析。</remarks>
     public virtual string GetEventName()
     {
         var eventName = _eventName;
@@ -54,8 +51,9 @@ public class Event : IEvent
     }
 
     /// <summary>
-    /// 输出日志
+    /// 返回包含事件标识、发生时间和 JSON 数据的多行文本。
     /// </summary>
+    /// <returns>当前事件的诊断文本表示。</returns>
     public override string ToString()
     {
         var result = new StringBuilder();

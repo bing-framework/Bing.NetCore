@@ -15,6 +15,7 @@ public static partial class Extensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="configuration">配置</param>
+    /// <returns>已注册选项配置服务的原服务集合。</returns>
     public static IServiceCollection AddOptionsType(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions();

@@ -29,5 +29,6 @@ public class NotEqualCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>返回由左右操作数和不等于运算符组成的 SQL 条件。</returns>
     public string GetCondition() => $"{_left}<>{_right}";
 }

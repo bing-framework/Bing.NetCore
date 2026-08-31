@@ -32,6 +32,7 @@ public class OrIfNotEmptyCondition<TEntity> : ICondition<TEntity>
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>过滤空条件后按 OR 合并的表达式；没有有效条件时返回 <see langword="null"/>。</returns>
     public Expression<Func<TEntity, bool>> GetCondition()
     {
         Expression<Func<TEntity, bool>> result = null;

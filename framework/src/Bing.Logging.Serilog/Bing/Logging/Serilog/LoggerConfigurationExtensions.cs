@@ -13,6 +13,7 @@ public static class LoggerConfigurationExtensions
     /// </summary>
     /// <param name="source">Serilog日志配置</param>
     /// <param name="configuration">配置</param>
+    /// <returns>应用日志级别配置后的 Serilog 日志配置。</returns>
     public static LoggerConfiguration ConfigLogLevel(this LoggerConfiguration source, IConfiguration configuration)
     {
         if (source == null)

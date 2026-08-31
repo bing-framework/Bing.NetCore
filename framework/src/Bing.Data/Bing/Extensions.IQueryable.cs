@@ -20,7 +20,8 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="condition">查询条件对象</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源或查询条件为空时抛出。</exception>
     public static IQueryable<TEntity> Where<TEntity>(this IQueryable<TEntity> query, ICondition<TEntity> condition)
         where TEntity : class
     {
@@ -45,7 +46,8 @@ public static partial class QueryableExtensions
     /// <param name="query">数据源</param>
     /// <param name="predicate">查询条件</param>
     /// <param name="condition">判断条件，该值为true时添加查询条件，否则忽略</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>根据判断条件应用查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> WhereIf<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate, bool condition)
         where TEntity : class
     {
@@ -64,7 +66,8 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="predicate">查询条件，如果参数为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用有效查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> WhereIfNotEmpty<TEntity>(this IQueryable<TEntity> query, Expression<Func<TEntity, bool>> predicate)
         where TEntity : class
     {
@@ -90,7 +93,8 @@ public static partial class QueryableExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用范围查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, int? min, int? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -109,7 +113,8 @@ public static partial class QueryableExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用范围查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, double? min, double? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -128,7 +133,8 @@ public static partial class QueryableExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用范围查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, decimal? min, decimal? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -147,7 +153,8 @@ public static partial class QueryableExtensions
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用范围查询条件后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<TEntity> Between<TEntity, TProperty>(this IQueryable<TEntity> query, Expression<Func<TEntity, TProperty>> propertyExpression, DateTime? min, DateTime? max, Boundary boundary = Boundary.Both)
         where TEntity : class
     {
@@ -166,8 +173,9 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="ArgumentException"></exception>
+    /// <returns>应用排序和分页后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源或分页对象为空时抛出。</exception>
+    /// <exception cref="ArgumentException">未设置排序字段时抛出。</exception>
     public static IQueryable<TEntity> Page<TEntity>(this IQueryable<TEntity> query, IPager pager)
     {
         if (query == null)
@@ -194,7 +202,8 @@ public static partial class QueryableExtensions
     /// <param name="query">数据源</param>
     /// <param name="skipCount">跳行的行数</param>
     /// <param name="maxResultCount">每页显示行数</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用分页后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static IQueryable<T> PageBy<T>(this IQueryable<T> query, int skipCount, int maxResultCount)
     {
         if (query == null)
@@ -210,7 +219,8 @@ public static partial class QueryableExtensions
     /// <param name="query">数据源</param>
     /// <param name="skipCount">跳过的行数</param>
     /// <param name="maxResultCount">每页显示行数</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>应用分页后的数据源。</returns>
+    /// <exception cref="ArgumentNullException">数据源为空时抛出。</exception>
     public static TQueryable PageBy<T,TQueryable>(this TQueryable query,int skipCount,int maxResultCount) where TQueryable : IQueryable<T>
     {
         if (query == null)
@@ -228,7 +238,8 @@ public static partial class QueryableExtensions
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <returns>包含分页信息和当前页数据的分页列表。</returns>
+    /// <exception cref="ArgumentNullException">数据源或分页对象为空时抛出。</exception>
     public static PagerList<TEntity> ToPagerList<TEntity>(this IQueryable<TEntity> query, IPager pager)
     {
         if (query == null)

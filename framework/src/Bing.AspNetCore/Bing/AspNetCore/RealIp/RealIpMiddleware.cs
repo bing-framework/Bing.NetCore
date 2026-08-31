@@ -65,6 +65,7 @@ public class RealIpMiddleware : IMiddleware
     /// </summary>
     /// <param name="headers">请求头字典</param>
     /// <param name="key">请求头</param>
+    /// <returns>解析出的 IP 地址；请求头不存在或值无法解析时返回 null。</returns>
     private IPAddress TryGetIpAddress(IHeaderDictionary headers, string key)
     {
         if (headers.ContainsKey(key))
@@ -103,13 +104,14 @@ public class RealIpMiddleware : IMiddleware
 }
 
 /// <summary>
-/// 真实IP选项
+/// 配置真实客户端 IP 所在的请求头名称。
 /// </summary>
 public class RealIpOptions
 {
     /// <summary>
-    /// 请求头键名
+    /// 获取或设置承载真实客户端 IP 的请求头名称。
     /// </summary>
+    /// <remarks>仅应在请求经过可信代理并且应用已建立请求头信任边界时启用对应配置，否则请求方可伪造该值。</remarks>
     public string HeaderKey { get; set; }
 }
 
@@ -119,9 +121,10 @@ public class RealIpOptions
 public class RealIpFilter : IStartupFilter
 {
     /// <summary>
-    /// 配置
+    /// 配置真实客户端 IP 中间件的请求管道。
     /// </summary>
-    /// <param name="next">方法</param>
+    /// <param name="next">后续请求管道委托。</param>
+    /// <returns>已添加真实 IP 中间件的请求管道配置委托。</returns>
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
     {
         app.UseMiddleware<RealIpMiddleware>();

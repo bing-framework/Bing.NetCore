@@ -83,6 +83,9 @@ public sealed class SqlBuilderFactory : ISqlBuilderFactory
     /// <summary>
     /// 规范化 Provider Key。
     /// </summary>
+    /// <param name="providerKey">Provider 标识。</param>
+    /// <param name="parameterName">发生参数错误时使用的参数名。</param>
+    /// <returns>去除首尾空白后的 Provider 标识。</returns>
     private static string NormalizeProviderKey(string providerKey, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(providerKey))

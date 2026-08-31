@@ -70,6 +70,7 @@ public sealed class ServiceLocator : Disposable
     /// <summary>
     /// 当前是否处于<see cref="ServiceLifetime.Scoped"/>生命周期中
     /// </summary>
+    /// <returns>当前存在可用的作用域服务提供程序时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public static bool InScoped() => Instance.ScopedProvider != null;
 
     #endregion
@@ -107,6 +108,8 @@ public sealed class ServiceLocator : Disposable
     /// <summary>
     /// 获取所有已注册的<see cref="ServiceDescriptor"/>对象
     /// </summary>
+    /// <returns>当前应用程序服务集合中的服务描述序列。</returns>
+    /// <exception cref="InvalidOperationException">应用程序服务集合尚未初始化时抛出。</exception>
     public IEnumerable<ServiceDescriptor> GetServiceDescriptors()
     {
         Check.NotNull(_services, nameof(_services));
@@ -121,6 +124,7 @@ public sealed class ServiceLocator : Disposable
     /// 解析指定类型的服务实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>解析到的服务实例；服务提供程序不可用或未注册时返回默认值。</returns>
     public T GetService<T>()
     {
         if (!IsProviderEnabled)
@@ -139,6 +143,7 @@ public sealed class ServiceLocator : Disposable
     /// 解析指定类型的服务实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>解析到的服务实例；服务提供程序不可用或未注册时返回 <see langword="null"/>。</returns>
     public object GetService(Type serviceType)
     {
         if (!IsProviderEnabled)
@@ -161,6 +166,7 @@ public sealed class ServiceLocator : Disposable
     /// 解析指定类型的所有服务实例
     /// </summary>
     /// <typeparam name="T">服务类型</typeparam>
+    /// <returns>按当前作用域或根服务提供程序解析出的全部服务实例。</returns>
     public IEnumerable<T> GetServices<T>()
     {
         Check.NotNull(_services, nameof(_services));
@@ -176,6 +182,7 @@ public sealed class ServiceLocator : Disposable
     /// 解析指定类型的所有服务实例
     /// </summary>
     /// <param name="serviceType">服务类型</param>
+    /// <returns>按当前作用域或根服务提供程序解析出的全部服务实例。</returns>
     public IEnumerable<object> GetServices(Type serviceType)
     {
         Check.NotNull(_services, nameof(_services));

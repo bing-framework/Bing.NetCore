@@ -54,7 +54,7 @@ public class GroupByClause : IGroupByClause
     public string GroupColumns => _group.Select(t => t.ToSql(_dialect)).Join();
 
     /// <summary>
-    /// 初始化一个<see cref="GroupByClause"/>类型的实例
+    /// 初始化一个 <see cref="GroupByClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="group">分组字段</param>
@@ -75,6 +75,7 @@ public class GroupByClause : IGroupByClause
     /// 克隆
     /// </summary>
     /// <param name="context">重绑定后的子句运行上下文。</param>
+    /// <returns>使用指定运行上下文创建的独立 Group By 子句。</returns>
     public virtual IGroupByClause Clone(SqlClauseContext context) => CreateClone(context,
         _group.Select(item => item.Clone()).ToList(), _having);
 
@@ -240,6 +241,7 @@ public class GroupByClause : IGroupByClause
     /// <summary>
     /// 获取Sql。
     /// </summary>
+    /// <returns>当前 Group By 子句的 SQL 文本；未设置分组时返回 <see langword="null"/>。</returns>
     public string ToSql()
     {
         var result = new StringBuilder();

@@ -45,6 +45,7 @@ public class SegmentCondition : ICondition
     /// <summary>
     /// 获取查询条件
     /// </summary>
+    /// <returns>返回根据边界设置生成的范围 SQL 条件；列名为空时返回 <see langword="null"/>。</returns>
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_name))
@@ -56,6 +57,7 @@ public class SegmentCondition : ICondition
     /// <summary>
     /// 创建左条件
     /// </summary>
+    /// <returns>返回左边界条件；最小值为空时返回空条件实例。</returns>
     private ICondition CreateLeftCondition()
     {
         if (string.IsNullOrWhiteSpace(_min))
@@ -66,6 +68,7 @@ public class SegmentCondition : ICondition
     /// <summary>
     /// 创建左操作符
     /// </summary>
+    /// <returns>返回由边界设置决定的左侧比较运算符。</returns>
     private Operator CreateLeftOperator()
     {
         return _boundary switch
@@ -79,6 +82,7 @@ public class SegmentCondition : ICondition
     /// <summary>
     /// 创建右条件
     /// </summary>
+    /// <returns>返回右边界条件；最大值为空时返回空条件实例。</returns>
     private ICondition CreateRightCondition()
     {
         if (string.IsNullOrWhiteSpace(_max))
@@ -89,6 +93,7 @@ public class SegmentCondition : ICondition
     /// <summary>
     /// 创建右操作符
     /// </summary>
+    /// <returns>返回由边界设置决定的右侧比较运算符。</returns>
     private Operator CreateRightOperator()
     {
         return _boundary switch

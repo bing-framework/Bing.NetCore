@@ -35,6 +35,7 @@ public static class ActionDescriptorExtensions
     /// 获取指定操作描述符所代表的的方法的返回类型。
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>操作方法声明的返回类型。</returns>
     public static Type GetReturnType(this ActionDescriptor actionDescriptor) => actionDescriptor.GetMethodInfo().ReturnType;
 
     /// <summary>
@@ -48,12 +49,14 @@ public static class ActionDescriptorExtensions
     /// 判断一个操作描述符是否为MVC的控制器操作描述符。
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>如果操作描述符是 <see cref="ControllerActionDescriptor"/>，返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool IsControllerAction(this ActionDescriptor actionDescriptor) => actionDescriptor is ControllerActionDescriptor;
 
     /// <summary>
     /// 判断一个操作描述符是否为Razor Page的页面操作描述符。
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
+    /// <returns>如果操作描述符是 <see cref="PageActionDescriptor"/>，返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool IsPageAction(this ActionDescriptor actionDescriptor) => actionDescriptor is PageActionDescriptor;
 
     /// <summary>

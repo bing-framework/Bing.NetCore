@@ -1,38 +1,34 @@
 ﻿namespace Bing.MultiTenancy;
 
 /// <summary>
-/// 基于Action的租户解析构造器
+/// 通过调用方提供的委托解析租户的贡献者。
 /// </summary>
 public class ActionTenantResolveContributor : TenantResolveContributorBase
 {
     /// <summary>
-    /// 构造器名称
+    /// 用于诊断和解析链路记录的贡献者名称。
     /// </summary>
     public const string ContributorName = "Action";
 
-    /// <summary>
-    /// 名称
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => ContributorName;
 
     /// <summary>
-    /// 解析操作
+    /// 保存调用方提供的同步租户解析操作。
     /// </summary>
     private readonly Action<ITenantResolveContext> _resolveAction;
 
     /// <summary>
-    /// 初始化一个<see cref="ActionTenantResolveContributor"/>类型的实例
+    /// 使用指定解析委托初始化 <see cref="ActionTenantResolveContributor"/> 的实例。
     /// </summary>
-    /// <param name="resolveAction">解析操作</param>
+    /// <param name="resolveAction">用于更新租户解析上下文的同步操作。</param>
     public ActionTenantResolveContributor(Action<ITenantResolveContext> resolveAction)
     {
         _resolveAction = resolveAction ?? throw new ArgumentNullException(nameof(resolveAction));
     }
 
-    /// <summary>
-    /// 解析
-    /// </summary>
-    /// <param name="context">租户解析上下文</param>
+    /// <inheritdoc />
+    /// <remarks>当前实现同步调用构造时提供的委托，然后返回已完成任务。</remarks>
     public override Task ResolveAsync(ITenantResolveContext context)
     {
         _resolveAction(context);

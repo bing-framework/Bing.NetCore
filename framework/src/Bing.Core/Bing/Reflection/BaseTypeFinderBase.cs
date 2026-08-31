@@ -23,6 +23,7 @@ public abstract class BaseTypeFinderBase<TBaseType> : FinderBase<Type>, ITypeFin
     /// <summary>
     /// 重写已实现所有项的查找
     /// </summary>
+    /// <returns>继承指定基类的类型数组。</returns>
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);

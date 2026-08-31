@@ -15,6 +15,7 @@ public static class ServiceCollectionConfigurationExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="configuration">配置对象</param>
+    /// <returns>完成配置替换后的服务集合。</returns>
     public static IServiceCollection ReplaceConfiguration(this IServiceCollection services, IConfiguration configuration) =>
         services.Replace(ServiceDescriptor.Singleton<IConfiguration>(configuration));
 
@@ -23,7 +24,7 @@ public static class ServiceCollectionConfigurationExtensions
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <returns>返回找到的 <see cref="IConfiguration"/> 对象。</returns>
-    /// <exception cref="BingFrameworkException"></exception>
+    /// <exception cref="BingFrameworkException">服务集合中未找到配置对象时抛出。</exception>
     public static IConfiguration GetConfiguration(this IServiceCollection services) =>
         services.GetConfigurationOrNull() ?? throw new BingFrameworkException("Could not find an implementation of " + typeof(IConfiguration).AssemblyQualifiedName + " in the service collection.");
 

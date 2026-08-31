@@ -27,16 +27,34 @@ public sealed class SqlQueryPlan
     /// </summary>
     private Action _outputParametersCompletion;
 
+    /// <summary>
+    /// 计划开始执行时调用的生命周期回调。
+    /// </summary>
     private Action _executionStarted;
 
+    /// <summary>
+    /// 计划执行完成时调用的生命周期回调。
+    /// </summary>
     private Action _executionCompleted;
 
+    /// <summary>
+    /// 当前计划所属的查询上下文标识。
+    /// </summary>
     private string _queryContextId;
 
+    /// <summary>
+    /// 当前计划继承的父查询上下文标识。
+    /// </summary>
     private string _parentQueryContextId;
 
+    /// <summary>
+    /// 当前计划本次执行的标识。
+    /// </summary>
     private string _executionId;
 
+    /// <summary>
+    /// 当前计划阶段名称。
+    /// </summary>
     private string _phase = "Data";
 
     /// <summary>

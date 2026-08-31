@@ -55,7 +55,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 添加实体
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Add(TEntity entity)
     {
         if (entity == null)
@@ -67,7 +67,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 添加实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Add(IEnumerable<TEntity> entities)
     {
         if (entities == null)
@@ -80,7 +80,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -94,7 +94,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -107,7 +107,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 修改实体
     /// </summary>
     /// <param name="entity">实体</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Update(TEntity entity)
     {
         if (entity == null)
@@ -119,7 +119,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// 修改实体集合
     /// </summary>
     /// <param name="entities">实体集合</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Update(IEnumerable<TEntity> entities)
     {
         if (entities == null)
@@ -144,7 +144,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

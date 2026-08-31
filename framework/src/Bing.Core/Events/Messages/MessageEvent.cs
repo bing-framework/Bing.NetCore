@@ -28,8 +28,9 @@ public class MessageEvent : Event, IMessageEvent
     public bool Send { get; set; }
 
     /// <summary>
-    /// 输出日志
+    /// 输出包含事件标识、时间、消息信息和序列化数据的日志文本。
     /// </summary>
+    /// <returns>包含事件信息的日志文本。</returns>
     public override string ToString()
     {
         var result = new StringBuilder();
@@ -44,8 +45,16 @@ public class MessageEvent : Event, IMessageEvent
     }
 }
 
+/// <summary>
+/// 携带强类型消息数据的消息事件。
+/// </summary>
+/// <typeparam name="T">消息数据类型。</typeparam>
 public class MessageEvent<T> : MessageEvent
 {
+    /// <summary>
+    /// 使用指定消息数据初始化 <see cref="MessageEvent{T}"/> 的实例。
+    /// </summary>
+    /// <param name="data">消息负载数据。</param>
     public MessageEvent(T data)
     {
         Data = data;

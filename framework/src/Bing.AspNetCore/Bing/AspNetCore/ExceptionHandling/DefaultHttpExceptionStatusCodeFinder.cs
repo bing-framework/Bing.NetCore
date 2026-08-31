@@ -33,6 +33,7 @@ public class DefaultHttpExceptionStatusCodeFinder : IHttpExceptionStatusCodeFind
     /// </summary>
     /// <param name="httpContext">Http上下文</param>
     /// <param name="exception">异常</param>
+    /// <returns>与异常对应的 HTTP 状态码。</returns>
     public virtual HttpStatusCode GetStatusCode(HttpContext httpContext, Exception exception)
     {
         // 如果设置了Http状态码，则返回指定Http状态码

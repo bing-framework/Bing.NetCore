@@ -13,6 +13,7 @@ public static partial class Extensions
     /// 注册默认事件总线服务
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>完成默认事件总线注册后的服务集合。</returns>
     public static IServiceCollection AddDefaultEventBus(this IServiceCollection services)
     {
         services.TryAddSingleton<IEventHandlerManager, EventHandlerManager>();

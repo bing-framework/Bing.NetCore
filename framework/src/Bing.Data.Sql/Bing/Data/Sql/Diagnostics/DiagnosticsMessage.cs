@@ -86,7 +86,7 @@ public sealed class DiagnosticsMessage
     public long? ElapsedMilliseconds { get; set; }
 
     /// <summary>
-    /// 异常
+    /// 获取或设置执行期间捕获的异常；执行成功时为空。
     /// </summary>
     public Exception Exception { get; set; }
 }

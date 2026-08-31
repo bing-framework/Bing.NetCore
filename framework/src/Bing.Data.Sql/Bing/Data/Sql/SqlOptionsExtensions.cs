@@ -13,6 +13,7 @@ public static partial class SqlOptionsExtensions
     /// </summary>
     /// <param name="options">源</param>
     /// <param name="connectionString">数据库连接字符串</param>
+    /// <returns>配置后的 SQL 选项。</returns>
     public static SqlOptions ConnectionString(this SqlOptions options, string connectionString)
     {
         options.CheckNull(nameof(options));
@@ -25,6 +26,7 @@ public static partial class SqlOptionsExtensions
     /// </summary>
     /// <param name="options">源</param>
     /// <param name="connection">数据库连接</param>
+    /// <returns>配置后的 SQL 选项。</returns>
     public static SqlOptions Connection(this SqlOptions options, IDbConnection connection)
     {
         options.CheckNull(nameof(options));

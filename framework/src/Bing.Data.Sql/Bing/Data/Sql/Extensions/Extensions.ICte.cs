@@ -16,6 +16,7 @@ public static partial class Extensions
     /// <param name="source">源</param>
     /// <param name="name">公用表达式CTE的名称</param>
     /// <param name="builder">Sql生成器</param>
+    /// <returns>追加 CTE 后的源对象。</returns>
     public static T With<T>(this T source, string name, ISqlBuilder builder) where T : ICte
     {
         if (source == null)

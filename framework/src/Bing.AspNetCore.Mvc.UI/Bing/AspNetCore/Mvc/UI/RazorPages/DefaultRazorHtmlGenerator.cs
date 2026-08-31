@@ -58,6 +58,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
     /// 渲染视图为字符串
     /// </summary>
     /// <param name="info">路由信息</param>
+    /// <returns>表示渲染结果的异步操作，结果为视图 HTML 字符串。</returns>
     public async Task<string> RenderToStringAsync(RouteInformation info)
     {
         var razorViewEngine = ServiceLocator.Instance.GetService<IRazorViewEngine>();
@@ -106,6 +107,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
     /// 获取路径
     /// </summary>
     /// <param name="info">路由信息</param>
+    /// <returns>根据路由信息生成的视图输出路径。</returns>
     protected virtual string GetPath(RouteInformation info)
     {
         var area = info.AreaName.SafeString();
@@ -121,6 +123,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
     /// <param name="razorViewEngine">Razor视图引擎</param>
     /// <param name="actionContext">操作上下文</param>
     /// <param name="info">路由信息</param>
+    /// <returns>根据路由信息查找到的 Razor 视图结果。</returns>
     protected virtual ViewEngineResult GetView(IRazorViewEngine razorViewEngine, ActionContext actionContext, RouteInformation info)
     {
         return razorViewEngine.FindView(actionContext, info.ViewName.IsEmpty() ? info.ActionName : info.ViewName,
@@ -131,6 +134,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
     /// 获取路由数据
     /// </summary>
     /// <param name="info">路由信息</param>
+    /// <returns>根据路由信息构造的路由数据。</returns>
     protected virtual RouteData GetRouteData(RouteInformation info)
     {
         var routeData = new RouteData();

@@ -38,6 +38,7 @@ public class FilterManager : IFilterManager
     /// 启用过滤器
     /// </summary>
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <returns>用于恢复过滤器原启用状态的释放对象。</returns>
     public IDisposable EnableFilter<TFilterType>() where TFilterType : class
     {
         return _dataFilter.Enable<TFilterType>();
@@ -47,6 +48,7 @@ public class FilterManager : IFilterManager
     /// 禁用过滤器
     /// </summary>
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <returns>用于恢复过滤器原启用状态的释放对象。</returns>
     public IDisposable DisableFilter<TFilterType>() where TFilterType : class
     {
         return _dataFilter.Disable<TFilterType>();
@@ -56,6 +58,7 @@ public class FilterManager : IFilterManager
     /// 获取过滤器
     /// </summary>
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <returns>指定类型的过滤器；未注册时返回 null。</returns>
     public IFilter GetFilter<TFilterType>() where TFilterType : class
     {
         return GetFilter(typeof(TFilterType));
@@ -65,6 +68,7 @@ public class FilterManager : IFilterManager
     /// 获取过滤器
     /// </summary>
     /// <param name="filterType">过滤器类型</param>
+    /// <returns>指定类型的过滤器；未注册或类型为空时返回 null。</returns>
     public IFilter GetFilter(Type filterType)
     {
         if (filterType == null)
@@ -82,6 +86,7 @@ public class FilterManager : IFilterManager
     /// 实体是否启用过滤器
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <returns>指定实体类型的软删除过滤器已启用时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool IsEntityEnabled<TEntity>()
     {
         var filter = GetFilter<ISoftDelete>();
@@ -92,6 +97,7 @@ public class FilterManager : IFilterManager
     /// 过滤器是否启用
     /// </summary>
     /// <typeparam name="TFilterType">过滤器类型</typeparam>
+    /// <returns>指定类型过滤器已注册且启用时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool IsEnabled<TFilterType>() where TFilterType : class
     {
         return GetFilter<TFilterType>() != null && _dataFilter.IsEnabled<TFilterType>();

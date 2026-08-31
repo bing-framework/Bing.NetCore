@@ -17,6 +17,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
+    /// <returns>追加 Union 项后的源对象。</returns>
     public static T Union<T>(this T source, params ISqlBuilder[] builders)
         where T : IUnion
     {
@@ -61,6 +62,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
+    /// <returns>追加 Union 项后的源对象。</returns>
     public static T Union<T>(this T source, IEnumerable<ISqlBuilder> builders)
         where T : IUnion
     {
@@ -88,6 +90,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
+    /// <returns>追加 Union All 项后的源对象。</returns>
     public static T UnionAll<T>(this T source, params ISqlBuilder[] builders)
         where T : IUnion
     {
@@ -101,6 +104,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
+    /// <returns>追加 Union All 项后的源对象。</returns>
     public static T UnionAll<T>(this T source, IEnumerable<ISqlBuilder> builders)
         where T : IUnion
     {
@@ -128,6 +132,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
+    /// <returns>追加 Intersect 项后的源对象。</returns>
     public static T Intersect<T>(this T source, params ISqlBuilder[] builders)
         where T : IUnion
     {
@@ -141,6 +146,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
+    /// <returns>追加 Intersect 项后的源对象。</returns>
     public static T Intersect<T>(this T source, IEnumerable<ISqlBuilder> builders)
         where T : IUnion
     {
@@ -168,6 +174,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
+    /// <returns>追加 Except 项后的源对象。</returns>
     public static T Except<T>(this T source, params ISqlBuilder[] builders)
         where T : IUnion
     {
@@ -181,6 +188,7 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
+    /// <returns>追加 Except 项后的源对象。</returns>
     public static T Except<T>(this T source, IEnumerable<ISqlBuilder> builders)
         where T : IUnion
     {

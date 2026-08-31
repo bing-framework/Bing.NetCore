@@ -17,7 +17,7 @@ public class BingRemoteStreamContentModelBinder<TRemoteStreamContent> : IModelBi
     /// 绑定模型数据，用于处理文件上传场景。
     /// </summary>
     /// <param name="bindingContext">模型绑定上下文</param>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentNullException">模型绑定上下文为空时抛出。</exception>
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
         if (bindingContext == null)

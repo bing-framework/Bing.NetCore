@@ -11,6 +11,7 @@ public sealed class DataFilter : IDataFilter
     private readonly AsyncLocal<FilterOverride[]> _overrides = new();
 
     /// <inheritdoc />
+    /// <typeparam name="TFilter">要检查的数据过滤器类型。</typeparam>
     public bool IsEnabled<TFilter>() where TFilter : class
     {
         var filterType = typeof(TFilter);

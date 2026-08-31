@@ -1,25 +1,25 @@
 ﻿namespace Bing.Emailing.Attachments;
 
 /// <summary>
-/// 内存流附件
+/// 使用调用方提供的内存流作为邮件附件的实现。
 /// </summary>
 public class MemoryStreamAttachment : IAttachment
 {
     /// <summary>
-    /// 内存流
+    /// 保存附件内容的内存流。
     /// </summary>
     private readonly MemoryStream _stream;
 
     /// <summary>
-    /// 文件名
+    /// 保存邮件中显示的附件文件名。
     /// </summary>
     private readonly string _fileName;
 
     /// <summary>
-    /// 初始化一个<see cref="MemoryStreamAttachment"/>类型的实例
+    /// 使用内存流和文件名初始化 <see cref="MemoryStreamAttachment"/> 的实例。
     /// </summary>
-    /// <param name="stream">内存流</param>
-    /// <param name="fileName">文件名</param>
+    /// <param name="stream">作为附件内容的内存流。</param>
+    /// <param name="fileName">邮件中显示的附件文件名。</param>
     public MemoryStreamAttachment(MemoryStream stream, string fileName)
     {
         _stream = stream;
@@ -27,17 +27,14 @@ public class MemoryStreamAttachment : IAttachment
     }
 
     /// <summary>
-    /// 释放资源
+    /// 释放调用方提供的内存流。
     /// </summary>
     public void Dispose() => _stream.Dispose();
 
-    /// <summary>
-    /// 获取文件流
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>返回构造时提供的同一内存流，流的生命周期由当前附件实例管理。</remarks>
     public Stream GetFileStream() => _stream;
 
-    /// <summary>
-    /// 获取文件名称
-    /// </summary>
+    /// <inheritdoc />
     public string GetName() => _fileName;
 }

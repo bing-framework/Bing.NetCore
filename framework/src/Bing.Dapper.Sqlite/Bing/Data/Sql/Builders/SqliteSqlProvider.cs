@@ -83,21 +83,27 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
     private sealed class SqliteClauseFactory : ISqlClauseFactory
     {
         /// <inheritdoc />
+        /// <returns>SQLite Select 子句实例。</returns>
         public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
 
         /// <inheritdoc />
+        /// <returns>SQLite From 子句实例。</returns>
         public IFromClause CreateFrom(SqlClauseContext context) => new SqliteFromClause(context);
 
         /// <inheritdoc />
+        /// <returns>SQLite Join 子句实例。</returns>
         public IJoinClause CreateJoin(SqlClauseContext context) => new SqliteJoinClause(context);
 
         /// <inheritdoc />
+        /// <returns>SQLite Where 子句实例。</returns>
         public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
 
         /// <inheritdoc />
+        /// <returns>SQLite Group By 子句实例。</returns>
         public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
 
         /// <inheritdoc />
+        /// <returns>SQLite Order By 子句实例。</returns>
         public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
     }
 }
@@ -108,6 +114,7 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
 internal sealed class SqlitePaginationRenderer : ISqlPaginationRenderer
 {
     /// <inheritdoc />
+    /// <returns>SQLite Limit/Offset 分页 SQL 片段。</returns>
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Limit {limitParameterName} OFFSET {offsetParameterName}";
 }

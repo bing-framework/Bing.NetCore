@@ -18,6 +18,7 @@ public class BingModuleTypeFinder : BaseTypeFinderBase<BingModule>, IBingModuleT
     /// <summary>
     /// 重写已实现所有项的查找
     /// </summary>
+    /// <returns>扫描到的模块类型数组。</returns>
     protected override Type[] FindAllItems()
     {
         // 排除被继承的Module实类

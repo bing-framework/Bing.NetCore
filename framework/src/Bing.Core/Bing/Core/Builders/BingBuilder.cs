@@ -41,6 +41,7 @@ public class BingBuilder : IBingBuilder
     /// 获取所有模块
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <returns>按模块层级和顺序排序的模块实例列表。</returns>
     private static List<BingModule> GetAllModules(IServiceCollection services)
     {
         var moduleTypeFinder = services.GetOrAddTypeFinder<IBingModuleTypeFinder>(assemblyFinder => new BingModuleTypeFinder(assemblyFinder));
@@ -76,12 +77,14 @@ public class BingBuilder : IBingBuilder
     /// 添加指定模块。执行此功能后将仅加载指定的模块
     /// </summary>
     /// <typeparam name="TModule">要添加的模块类型</typeparam>
+    /// <returns>当前构建器实例。</returns>
     public IBingBuilder AddModule<TModule>() where TModule : BingModule => AddModule(typeof(TModule));
 
     /// <summary>
     /// 添加模块
     /// </summary>
     /// <param name="type">类型</param>
+    /// <returns>添加模块及其依赖后的当前构建器实例。</returns>
     private IBingBuilder AddModule(Type type)
     {
         if (!type.IsBaseOn(typeof(BingModule)))
@@ -129,6 +132,7 @@ public class BingBuilder : IBingBuilder
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="module">模块</param>
+    /// <returns>已注册模块服务的原服务集合。</returns>
     private static IServiceCollection AddModule(IServiceCollection services, BingModule module)
     {
         var type = module.GetType();
@@ -160,6 +164,7 @@ public class BingBuilder : IBingBuilder
     /// 添加加载的所有模块，并可排除指定的模块类型
     /// </summary>
     /// <param name="exceptModuleTypes">要排除的模块类型</param>
+    /// <returns>当前构建器实例。</returns>
     public IBingBuilder AddModules(params Type[] exceptModuleTypes)
     {
         var source = _sourceModules.ToArray();

@@ -30,7 +30,8 @@ public class JsonWebToken
     public long RefreshUtcExpires { get; set; }
 
     /// <summary>
-    /// 是否已过期
+    /// 判断访问令牌是否已过期。
     /// </summary>
+    /// <returns>令牌过期时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool IsExpired() => Conv.To<long>(DateTime.UtcNow.ToJsGetTime()) > AccessTokenUtcExpires;
 }

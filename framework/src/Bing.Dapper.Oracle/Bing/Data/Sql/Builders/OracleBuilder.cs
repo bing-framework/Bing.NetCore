@@ -24,6 +24,7 @@ public class OracleBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    /// <returns>使用指定参数管理器创建的 Oracle Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new OracleBuilder(Services, parameterManager);
 

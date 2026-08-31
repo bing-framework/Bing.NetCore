@@ -17,6 +17,7 @@ public static class Helper
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="predicate">查询条件,如果参数值为空，则忽略该查询条件，范例：t => t.Name == ""，该查询条件被忽略。
     /// 注意：一次仅能添加一个条件，范例：t => t.Name == "a" &amp;&amp; t.Mobile == "123"，不支持，将抛出异常</param>
+    /// <returns>有效的查询条件表达式；条件为空时返回 <see langword="null"/>。</returns>
     public static Expression<Func<TEntity, bool>> GetWhereIfNotEmptyExpression<TEntity>(
         Expression<Func<TEntity, bool>> predicate) where TEntity : class
     {
@@ -71,6 +72,7 @@ public static class Helper
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">查询对象</param>
     /// <param name="pager">分页</param>
+    /// <returns>应用排序条件后的查询对象；未设置排序时返回已有的有序查询对象。</returns>
     public static IOrderedQueryable<TEntity> GetOrderedQueryable<TEntity>(IQueryable<TEntity> source, IPager pager)
     {
         if (string.IsNullOrWhiteSpace(pager.Order))

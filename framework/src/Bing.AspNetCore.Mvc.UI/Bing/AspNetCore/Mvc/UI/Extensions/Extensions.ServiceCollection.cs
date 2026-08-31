@@ -11,7 +11,8 @@ public static class BingServiceCollectionExtensions
     /// <summary>
     /// 注册Razor静态Html生成器
     /// </summary>
-    /// <param name="services"></param>
+    /// <param name="services">服务集合。</param>
+    /// <returns>已注册 Razor HTML 生成服务的服务集合。</returns>
     public static IServiceCollection AddRazorHtml(this IServiceCollection services)
     {
         services.AddScoped<IRouteAnalyzer, RouteAnalyzer>();

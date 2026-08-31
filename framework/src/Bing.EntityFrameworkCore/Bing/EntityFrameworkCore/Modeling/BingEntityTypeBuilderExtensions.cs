@@ -62,6 +62,7 @@ public static class BingEntityTypeBuilderExtensions
     /// <summary>
     /// 尝试配置扩展属性
     /// </summary>
+    /// <typeparam name="T">实体类型</typeparam>
     /// <param name="builder">实体类型生成器</param>
     public static void ConfigureExtraProperties<T>(this EntityTypeBuilder<T> builder) 
         where T : class, IHasExtraProperties

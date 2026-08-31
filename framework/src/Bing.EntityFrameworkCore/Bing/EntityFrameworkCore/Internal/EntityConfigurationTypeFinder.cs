@@ -57,6 +57,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     /// 获取指定上下文类型的实体配置注册信息
     /// </summary>
     /// <param name="dbContextType">数据上下文类型</param>
+    /// <returns>指定数据上下文类型对应的实体配置注册信息；未找到时返回空字典。</returns>
     public Dictionary<Type, EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType)
     {
         return _entityMapDbContextDict.ContainsKey(dbContextType) ? _entityRegistersDict[dbContextType] : _empty;
@@ -77,17 +78,20 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     /// <summary>
     /// 获取全部数据上下文的实体类型
     /// </summary>
+    /// <returns>已发现的数据上下文类型集合。</returns>
     public IEnumerable<Type> GetAllDbContextTypes() => _dbContextTypes;
 
     /// <summary>
     /// 判断实体是否配置到 <see cref="DbContext"/> 当中
     /// </summary>
     /// <typeparam name="T">实体类型</typeparam>
+    /// <returns>实体类型已配置到数据上下文时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool HasDbContextForEntity<T>() => HasDbContextForEntity(typeof(T));
 
     /// <summary>
     /// 判断实体是否配置到 <see cref="DbContext"/> 当中
     /// </summary>
     /// <param name="type">实体类型</param>
+    /// <returns>实体类型已配置到数据上下文时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     public bool HasDbContextForEntity(Type type) => _entityMapDbContextDict.ContainsKey(type);
 }

@@ -49,6 +49,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// </summary>
     /// <param name="eventType">事件类型</param>
     /// <param name="factory">事件处理器工厂</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
     {
         GetOrCreateHandlerFactories(eventType).LockAndRun(factories =>
@@ -124,6 +125,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// </summary>
     /// <typeparam name="TEvent">事件类型</typeparam>
     /// <param name="handler">本地事件处理器</param>
+    /// <returns>用于取消本次订阅的释放句柄。</returns>
     public virtual IDisposable Subscribe<TEvent>(ILocalEventHandler<TEvent> handler) where TEvent : class
     {
         return Subscribe(typeof(TEvent), handler);
@@ -149,9 +151,11 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     }
 
     /// <summary>
-    /// 获取事件处理器工厂列表
+    /// 获取可处理指定事件类型的事件处理器工厂列表快照。
     /// </summary>
-    /// <param name="eventType">事件类型</param>
+    /// <param name="eventType">要发布的事件类型。</param>
+    /// <returns>匹配目标事件类型或可赋值基类型/接口订阅的工厂列表快照。</returns>
+    /// <remarks>返回数组不会在当前方法返回后继续枚举并发字典，从而避免订阅变更影响当前分发枚举。</remarks>
     protected override IEnumerable<EventTypeWithEventHandlerFactories> GetHandlerFactories(Type eventType)
     {
         var handlerFactoryList = new List<EventTypeWithEventHandlerFactories>();
@@ -164,6 +168,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// 获取或创建事件处理器工厂列表
     /// </summary>
     /// <param name="eventType">事件类型</param>
+    /// <returns>指定事件类型对应的事件处理器工厂列表。</returns>
     private List<IEventHandlerFactory> GetOrCreateHandlerFactories(Type eventType)
     {
         return HandlerFactories.GetOrAdd(eventType, (type) => new List<IEventHandlerFactory>());
@@ -174,6 +179,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// </summary>
     /// <param name="targetEventType">目标事件类型</param>
     /// <param name="handlerEventType">处理器事件类型</param>
+    /// <returns>处理器事件类型可处理目标事件类型时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     private static bool ShouldTriggerEventForHandler(Type targetEventType, Type handlerEventType)
     {
         if (handlerEventType == targetEventType)

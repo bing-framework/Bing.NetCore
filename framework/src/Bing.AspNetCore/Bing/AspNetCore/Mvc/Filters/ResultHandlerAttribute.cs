@@ -62,6 +62,7 @@ public class ResultHandlerAttribute : ResultFilterAttribute
     /// 是否忽略结果处理
     /// </summary>
     /// <param name="context">结果执行上下文</param>
+    /// <returns>应忽略结果处理时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool HasIgnoreResultHandler(ResultExecutingContext context)
     {
         // 控制器过滤
@@ -81,6 +82,7 @@ public class ResultHandlerAttribute : ResultFilterAttribute
     /// 是否忽略处理
     /// </summary>
     /// <param name="result">操作结果</param>
+    /// <returns>应忽略结果处理时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool HasIgnoreHandle(IActionResult result)
     {
         if (result is ApiResult)

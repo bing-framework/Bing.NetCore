@@ -21,6 +21,7 @@ public class PostgreSqlBuilder : SqlBuilderBase
         : base(PostgreSqlSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
+    /// <returns>使用指定参数管理器创建的 PostgreSQL Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new PostgreSqlBuilder(Services, parameterManager);
 
@@ -28,5 +29,6 @@ public class PostgreSqlBuilder : SqlBuilderBase
     /// <remarks>
     /// PostgreSQL 递归公用表表达式必须以 <c>With Recursive</c> 开始；该关键字同样兼容非递归 CTE。
     /// </remarks>
+    /// <returns>PostgreSQL CTE 使用的关键字文本。</returns>
     protected override string GetCteKeyWord() => "With Recursive";
 }

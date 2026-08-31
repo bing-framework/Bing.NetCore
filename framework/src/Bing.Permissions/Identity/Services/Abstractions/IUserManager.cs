@@ -24,6 +24,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// <param name="purpose">用途</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示生成令牌结果的异步操作。</returns>
     Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "");
 
     /// <summary>
@@ -33,6 +34,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// <param name="purpose">用途</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示生成令牌结果的异步操作。</returns>
     Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "");
 
     /// <summary>
@@ -43,6 +45,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示令牌验证结果的异步操作。</returns>
     Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "",
         string provider = "");
 
@@ -54,6 +57,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
     /// <param name="provider">令牌提供器</param>
+    /// <returns>表示令牌验证结果的异步操作。</returns>
     Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "",
         string provider = "");
 
@@ -69,6 +73,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// </summary>
     /// <param name="phone">手机号</param>
     /// <param name="application">应用程序</param>
+    /// <returns>表示生成注册令牌结果的异步操作。</returns>
     Task<string> GenerateRegisterTokenAsync(string phone, string application = "");
 
     /// <summary>
@@ -77,12 +82,14 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// <param name="phone">手机号</param>
     /// <param name="token">令牌</param>
     /// <param name="application">应用程序</param>
+    /// <returns>表示注册令牌验证结果的异步操作。</returns>
     Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "");
 
     /// <summary>
     /// 生成电子邮件确认令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成电子邮件确认令牌结果的异步操作。</returns>
     Task<string> GenerateEmailConfirmationTokenAsync(TUser user);
 
     /// <summary>
@@ -103,6 +110,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// 生成电子邮件重置密码令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成电子邮件重置密码令牌结果的异步操作。</returns>
     Task<string> GenerateEmailPasswordResetTokenAsync(TUser user);
 
     /// <summary>
@@ -117,6 +125,7 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// 生成手机号重置密码令牌
     /// </summary>
     /// <param name="user">用户</param>
+    /// <returns>表示生成手机号重置密码令牌结果的异步操作。</returns>
     Task<string> GeneratePhonePasswordResetTokenAsync(TUser user);
 
     /// <summary>
@@ -146,17 +155,20 @@ public interface IUserManager<TUser, TKey> : IDomainService where TUser : UserBa
     /// 通过用户名查找
     /// </summary>
     /// <param name="userName">用户名</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     Task<TUser> FindByNameAsync(string userName);
 
     /// <summary>
     /// 通过电子邮件查找
     /// </summary>
     /// <param name="email">电子邮件</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     Task<TUser> FindByEmailAsync(string email);
 
     /// <summary>
     /// 通过手机号查找
     /// </summary>
     /// <param name="phone">手机号</param>
+    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
     Task<TUser> FindByPhoneAsync(string phone);
 }

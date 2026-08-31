@@ -21,6 +21,7 @@ public class SqlServerBuilder : SqlBuilderBase
         : base(SqlServerSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
+    /// <returns>使用指定参数管理器创建的 SQL Server Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqlServerBuilder(Services, parameterManager);
 }

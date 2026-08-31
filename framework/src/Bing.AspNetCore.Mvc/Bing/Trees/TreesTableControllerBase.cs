@@ -51,6 +51,7 @@ public abstract class TreesTableControllerBase<TDto, TQuery, TParentId> : TreesC
     /// /api/role?name=a
     /// </remarks>
     /// <param name="query">查询参数</param>
+    /// <returns>表示树型表格查询结果的异步操作。</returns>
     [HttpGet]
     public override async Task<IActionResult> QueryAsync(TQuery query)
     {
@@ -79,12 +80,14 @@ public abstract class TreesTableControllerBase<TDto, TQuery, TParentId> : TreesC
     /// </summary>
     /// <param name="data">数据列表</param>
     /// <param name="async">是否异步</param>
+    /// <returns>转换后的分页树型表格结果。</returns>
     protected override PagerList<TDto> ToResult(List<TDto> data, bool async = false) => new PagerList<TDto>(GetTreeTableResult(data, async).GetResult());
 
     /// <summary>
     /// 异步首次加载
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示异步首次加载结果的异步操作。</returns>
     protected override async Task<PagerList<TDto>> AsyncFirstLoad(TQuery query)
     {
         query.Level = 1;
@@ -98,12 +101,14 @@ public abstract class TreesTableControllerBase<TDto, TQuery, TParentId> : TreesC
     /// </summary>
     /// <param name="data">数据</param>
     /// <param name="async">是否异步</param>
+    /// <returns>树型表格结果。</returns>
     protected abstract ITreeTableResult<TDto> GetTreeTableResult(IEnumerable<TDto> data, bool async);
 
     /// <summary>
     /// 获取同步加载子节点查询参数
     /// </summary>
     /// <param name="query">查询参数</param>
+    /// <returns>表示同步加载子节点查询参数的异步操作。</returns>
     protected override async Task<TQuery> GetSyncLoadChildrenQuery(TQuery query)
     {
         var parent = await _service.GetByIdAsync(query.ParentId);

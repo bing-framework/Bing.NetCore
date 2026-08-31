@@ -23,5 +23,6 @@ public interface ITokenPayloadStore
     /// 获取Payload
     /// </summary>
     /// <param name="token">令牌</param>
+    /// <returns>包含令牌负载字典的异步任务；未找到时结果为 <see langword="null"/>。</returns>
     Task<IDictionary<string, string>> GetAsync(string token);
 }

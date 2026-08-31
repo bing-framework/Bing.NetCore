@@ -43,6 +43,7 @@ public class MigrationFileService : IMigrationFileService
     /// 设置迁移目录绝对路径。即：Migrations目录的绝对路径
     /// </summary>
     /// <param name="path">迁移目录绝对路径</param>
+    /// <returns>当前迁移文件服务实例。</returns>
     public IMigrationFileService MigrationsPath(string path)
     {
         _migrationsPath = path;
@@ -53,6 +54,7 @@ public class MigrationFileService : IMigrationFileService
     /// 设置迁移名称
     /// </summary>
     /// <param name="name">迁移名称。范例：init</param>
+    /// <returns>当前迁移文件服务实例。</returns>
     public IMigrationFileService MigrationName(string name)
     {
         _migrationName = name;
@@ -62,6 +64,7 @@ public class MigrationFileService : IMigrationFileService
     /// <summary>
     /// 是否移除所有外键，将删除迁移文件中的外键设置
     /// </summary>
+    /// <returns>当前迁移文件服务实例。</returns>
     public IMigrationFileService RemoveForeignKeys()
     {
         _isRemoveForeignKeys = true;
@@ -71,6 +74,7 @@ public class MigrationFileService : IMigrationFileService
     /// <summary>
     /// 获取迁移文件路径
     /// </summary>
+    /// <returns>迁移文件绝对路径；未找到时返回 null。</returns>
     public string GetFilePath()
     {
         if (string.IsNullOrWhiteSpace(_migrationsPath))
@@ -89,6 +93,7 @@ public class MigrationFileService : IMigrationFileService
     /// </summary>
     /// <param name="path">目录路径</param>
     /// <param name="searchPattern">搜索模式</param>
+    /// <returns>匹配搜索模式的文件信息列表。</returns>
     private static List<FileInfo> GetAllFiles(string path, string searchPattern)
     {
         return Directory.GetFiles(path, searchPattern, SearchOption.AllDirectories)
@@ -99,6 +104,7 @@ public class MigrationFileService : IMigrationFileService
     /// <summary>
     /// 获取文件内容
     /// </summary>
+    /// <returns>迁移文件内容；未找到文件时返回 null。</returns>
     public string GetContent()
     {
         var filePath = GetFilePath();
