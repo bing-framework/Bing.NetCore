@@ -32,6 +32,12 @@ Lambda 查询的结果类型必须由终结方法显式指定：`ToEntity<TResul
 
 直接证据：`Bing.Data.Sql.Tests.SqlQueryApiContractTest` 覆盖来源元数、Lambda/Raw 终结、Runtime 绑定和无第 11 来源契约；`Bing.Data.Sql.Analyzers.Tests` 覆盖消费者编译契约；`Bing.Dapper.Core.Tests` 覆盖官方执行链；`Bing.Dapper.Sqlite.Tests` 与其 Integration 项目覆盖 SQL/参数快照和真实执行。
 
+### Builder 内部协作边界
+
+`Bing.Data.Sql.Builders.Internal.Helper` 聚合 Clause 运行上下文、方言、实体解析、参数和元数据协作，仅由 Bing.Data.Sql 程序集内部的 `WhereClause`、`JoinClause`、`PredicateExpressionResolver` 及其 Clause 组合路径使用。它不是 Provider SPI，也不是第三方扩展入口。`JoinItem.SetDependency(Helper)` 和 `JoinItem.Clone(Helper)` 同样只服务内部 Join 克隆与条件构造，因此在 7.0.0 主版本中一并内部化。
+
+该收敛是已批准的 Breaking Change：不得为旧 `Helper` 新增 facade、`InternalsVisibleTo` 或转发包装。第三方必须通过 `ISqlBuilder`、公开 Fluent API 和已声明的 Provider SPI 扩展；`SqlOperationCompileContractTest.BuilderInternals_WhenUsedByThirdPartyConsumer_ShouldNotCompile` 负责验证该边界，`JoinItemTest.Test_1` 负责验证内部 clone/render 行为未变。
+
 ## 公开 SPI
 
 Provider SPI 按职责拆分为独立文件：`ISqlProvider`、`ISqlClauseFactory`、`ISqlTableReferenceParser`、`ISqlPaginationRenderer`、`IParameterManagerFactory`、`ISqlParameterLimitProvider` 和 `ISqlBuilderFactory`。Mutation 的有效扩展点为 `ISqlMutationClauseFactoryProvider`、可选 `ISqlUpdateFromClauseFactory`、可选 `ISqlDeleteUsingClauseFactory`、可选 `ISqlReturningClauseFactory`、可选 `ISqlReturningDialect`、`ISqlBatchUpdateRenderer` 及按操作拆分的参数绑定接口。拆分不改变命名空间或程序集可见性。

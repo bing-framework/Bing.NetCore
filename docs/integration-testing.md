@@ -32,7 +32,7 @@ Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受�
 
 ## CI
 
-常规 CI 清除所有外部 Provider gate、连接和 reset 变量，只运行无凭据测试和 SQLite 集成测试。AppVeyor 由 `PROVIDER_TEST_LANE=common|mysql|postgresql|sqlserver` 选择入口；默认是 `common`。后三者只能在受保护环境中设置，并仅通过 CI 密钥注入自身 Provider 的 gate、连接和 reset 授权。不得设置 `RUN_INTEGRATION_TESTS=true` 或 `ConnectionStrings__DefaultConnection`。使用 `eng/ci/Invoke-ProviderIntegrationTests.ps1` 运行后必须生成每 Provider/TFM 独立 TRX；零测试、全部 Skip 或 core Provider Skip 均视为失败。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
+常规 CI 清除所有外部 Provider gate、连接和 reset 变量，只运行无凭据测试和 SQLite 集成测试。AppVeyor 由 `PROVIDER_TEST_LANE=common|mysql|postgresql|sqlserver` 选择入口；默认是 `common`。后三者只能在远端受保护作业中设置，并仅通过作业作用域 CI 密钥注入自身 Provider 的 gate、连接和 reset 授权。仓库不能安全地创建无密 Provider matrix；实际 job materialization、secret scope 与 trusted-lane 策略需由维护者在远端配置并留存无密执行证据。不得设置 `RUN_INTEGRATION_TESTS=true` 或 `ConnectionStrings__DefaultConnection`。使用 `eng/ci/Invoke-ProviderIntegrationTests.ps1` 运行后必须生成每 Provider/TFM 独立 TRX；零测试、全部 Skip 或 core Provider Skip 均视为失败。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
 
 ## SQLite 边界覆盖
 

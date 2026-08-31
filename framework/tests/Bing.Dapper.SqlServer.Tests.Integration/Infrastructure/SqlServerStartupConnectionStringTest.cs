@@ -9,6 +9,7 @@ namespace Bing.Dapper.Tests.Infrastructure;
 /// <summary>
 /// SQL Server 集成测试启动配置测试。
 /// </summary>
+[Collection(SqlServerEnvironmentVariableTestCollection.Name)]
 public sealed class SqlServerStartupConnectionStringTest
 {
     /// <summary>

@@ -325,13 +325,11 @@ Bing.Data.Sql.Builders.Core.FormattedSqlItem
 Bing.Data.Sql.Builders.Core.FormattedSqlItem.FormattedSqlItem(string sql) -> void
 Bing.Data.Sql.Builders.Core.JoinItem
 Bing.Data.Sql.Builders.Core.JoinItem.AppendOn(string sql, Bing.Data.Sql.Builders.IDialect dialect) -> void
-Bing.Data.Sql.Builders.Core.JoinItem.Clone(Bing.Data.Sql.Builders.Internal.Helper helper) -> Bing.Data.Sql.Builders.Core.JoinItem
 Bing.Data.Sql.Builders.Core.JoinItem.Condition.get -> Bing.Data.Sql.Builders.ICondition
 Bing.Data.Sql.Builders.Core.JoinItem.JoinType.get -> string
 Bing.Data.Sql.Builders.Core.JoinItem.On(Bing.Data.Sql.Builders.ICondition condition) -> void
 Bing.Data.Sql.Builders.Core.JoinItem.On(System.Collections.Generic.List<System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.OnItem>> items, Bing.Data.Sql.Builders.IDialect dialect) -> void
 Bing.Data.Sql.Builders.Core.JoinItem.On(string column, object value, Bing.Operator operator = Bing.Operator.Equal) -> void
-Bing.Data.Sql.Builders.Core.JoinItem.SetDependency(Bing.Data.Sql.Builders.Internal.Helper helper) -> void
 Bing.Data.Sql.Builders.Core.JoinItem.Table.get -> Bing.Data.Sql.Builders.Core.SqlItem
 Bing.Data.Sql.Builders.Core.JoinItem.ToSql(Bing.Data.Sql.Builders.IDialect dialect = null) -> string
 Bing.Data.Sql.Builders.Core.JoinItem.Type.get -> System.Type
@@ -719,19 +717,6 @@ Bing.Data.Sql.Builders.IWhereClause.Where<TEntity>(System.Linq.Expressions.Expre
 Bing.Data.Sql.Builders.IWhereClause.WhereIfNotEmpty(string column, object value, Bing.Operator operator = Bing.Operator.Equal) -> void
 Bing.Data.Sql.Builders.IWhereClause.WhereIfNotEmpty<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> expression) -> void
 Bing.Data.Sql.Builders.IWhereClause.WhereIfNotEmpty<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value, Bing.Operator operator = Bing.Operator.Equal) -> void
-Bing.Data.Sql.Builders.Internal.Helper
-Bing.Data.Sql.Builders.Internal.Helper.Between(System.Linq.Expressions.Expression expression, System.Type type, object min, object max, Bing.Data.Queries.Boundary boundary) -> Bing.Data.Sql.Builders.ICondition
-Bing.Data.Sql.Builders.Internal.Helper.Between(string column, object min, object max, Bing.Data.Queries.Boundary boundary) -> Bing.Data.Sql.Builders.ICondition
-Bing.Data.Sql.Builders.Internal.Helper.CreateCondition(System.Linq.Expressions.Expression expression, System.Type type) -> Bing.Data.Sql.Builders.ICondition
-Bing.Data.Sql.Builders.Internal.Helper.CreateCondition(System.Linq.Expressions.Expression expression, System.Type type, object value, Bing.Operator operator) -> Bing.Data.Sql.Builders.ICondition
-Bing.Data.Sql.Builders.Internal.Helper.CreateCondition(string column, object value, Bing.Operator operator) -> Bing.Data.Sql.Builders.ICondition
-Bing.Data.Sql.Builders.Internal.Helper.GenerateParamName(object value, Bing.Operator operator) -> string
-Bing.Data.Sql.Builders.Internal.Helper.GetColumn(System.Linq.Expressions.Expression expression, System.Type type) -> string
-Bing.Data.Sql.Builders.Internal.Helper.GetColumn(string column) -> string
-Bing.Data.Sql.Builders.Internal.Helper.GetColumn(string column, System.Type type) -> string
-Bing.Data.Sql.Builders.Internal.Helper.GetColumn<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression) -> string
-Bing.Data.Sql.Builders.Internal.Helper.GetValue(System.Linq.Expressions.Expression expression) -> object
-Bing.Data.Sql.Builders.Internal.Helper.Helper(Bing.Data.Sql.Builders.Core.SqlClauseContext context) -> void
 Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder
 Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder.Append(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters = null) -> Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder
 Bing.Data.Sql.Builders.Multiple.ISqlMultipleQueryBatchBuilder.Build() -> Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand
@@ -1921,7 +1906,6 @@ override Bing.Data.Sql.Metadata.DataAnnotationsEntityModelMetadataProvider.GetMe
 override Bing.Data.Sql.SqlDatabaseIdentity.Equals(object obj) -> bool
 override Bing.Data.Sql.SqlDatabaseIdentity.GetHashCode() -> int
 readonly Bing.Data.Sql.Builders.Clauses.FromClause.ProviderDatabaseType -> Bing.Data.Enums.DatabaseType?
-readonly Bing.Data.Sql.Builders.Clauses.JoinClause._helper -> Bing.Data.Sql.Builders.Internal.Helper
 readonly Bing.Data.Sql.Builders.Clauses.JoinClause._params -> System.Collections.Generic.List<Bing.Data.Sql.Builders.Core.JoinItem>
 static Bing.Data.Sql.Builders.Conditions.SqlConditionFactory.Create(string left, string right, Bing.Operator operator) -> Bing.Data.Sql.Builders.ICondition
 static Bing.Data.Sql.Builders.Core.ColumnItem.CreateAggregate(Bing.Data.Sql.Builders.SqlAggregateFunction function, string name, string tableAlias = null, string columnAlias = null, bool distinct = false, string databaseName = null, System.Type tableType = null) -> Bing.Data.Sql.Builders.Core.ColumnItem
@@ -1946,7 +1930,6 @@ static Bing.Data.Sql.Builders.Extensions.DialectExtensions.GetSafeName(this Bing
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetAlias(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity, string alias) -> string
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetTableAndSchema(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity) -> string
 static Bing.Data.Sql.Builders.Extensions.EntityResolverExtensions.GetTableReference(this Bing.Data.Sql.Builders.IEntityResolver resolver, System.Type entity) -> Bing.Data.Sql.Metadata.SqlTableReference
-static Bing.Data.Sql.Builders.Internal.Helper.ResolveSql(string sql, Bing.Data.Sql.Builders.IDialect dialect) -> string
 static Bing.Data.Sql.Builders.Mutations.Clauses.MutationTableClauseBase.ValidateTable(Bing.Data.Sql.Metadata.SqlTableReference table, string operation) -> void
 static Bing.Data.Sql.Builders.Params.ParamLiteralsResolver.Instance.get -> Bing.Data.Sql.Builders.Params.ParamLiteralsResolver
 static Bing.Data.Sql.DatabaseContextAccessorExtensions.Update(this Bing.Data.Sql.IDatabaseContextAccessor accessor, System.Func<Bing.Data.Sql.DatabaseContext, Bing.Data.Sql.DatabaseContext> updater) -> Bing.Data.Sql.DatabaseContext

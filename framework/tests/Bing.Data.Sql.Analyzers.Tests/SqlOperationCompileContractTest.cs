@@ -650,6 +650,37 @@ public class SqlOperationCompileContractTest
     }
 
     /// <summary>
+    /// 测试目的：第三方消费者不得依赖内部 Helper 或 JoinItem 的内部注入和克隆协作。
+    /// </summary>
+    [Fact]
+    public void BuilderInternals_WhenUsedByThirdPartyConsumer_ShouldNotCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql.Builders.Core;
+            using Bing.Data.Sql.Builders.Internal;
+
+            static class Consumer
+            {
+                static void Use()
+                {
+                    var helper = new Helper(null);
+                    JoinItem.CreateTable("Join", "Orders").SetDependency(helper);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("Helper", StringComparison.Ordinal));
+        Assert.Contains(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error &&
+            diagnostic.GetMessage().Contains("SetDependency", StringComparison.Ordinal));
+    }
+
+    /// <summary>
     /// 编译动态 C# 源码并收集诊断信息。
     /// </summary>
     /// <param name="source">待验证公开 SQL 操作契约的 C# 源码。</param>

@@ -41,7 +41,7 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release
 ```
 
-AppVeyor 使用 `PROVIDER_TEST_LANE=mysql`、`postgresql` 或 `sqlserver` 选择对应调用路径；这些变量和 Provider 专属密钥只能在受保护的远端作业中配置。未设置时仅运行 `common` lane。
+AppVeyor 使用 `PROVIDER_TEST_LANE=mysql`、`postgresql` 或 `sqlserver` 选择对应调用路径；未设置时仅运行 `common` lane。Provider 专属变量和密钥只能在对应受保护的远端作业中配置；仓库不创建会在无密环境失败的 Provider matrix。在远端 secret scope、trusted-lane 策略和安全测试库未完成前，Provider job 不能作为已验收证据。
 
 runner 在连接前验证规范 gate、专属连接字符串、reset 授权和安全测试数据库名，并为每个 Provider/TFM 写入独立 TRX/JSON 摘要。发现零测试、全部 Skip、core Provider Skip、全局 gate 或默认连接字符串时，runner 以非零退出。MySQL 跨库测试允许在未启用独立跨库配置时单独 Skip，不得掩盖 MySQL core 测试的执行结果。
 

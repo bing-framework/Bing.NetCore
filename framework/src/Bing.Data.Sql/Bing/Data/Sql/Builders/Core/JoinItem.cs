@@ -125,7 +125,7 @@ public class JoinItem : IJoinOn
     /// 设置依赖项
     /// </summary>
     /// <param name="helper">辅助操作</param>
-    public void SetDependency(Helper helper) => _helper = helper;
+    internal void SetDependency(Helper helper) => _helper = helper;
 
     #endregion
 
@@ -204,7 +204,7 @@ public class JoinItem : IJoinOn
     /// <summary>
     /// 克隆
     /// </summary>
-    public JoinItem Clone(Helper helper)
+    internal JoinItem Clone(Helper helper)
     {
         var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
         var result = Source == null

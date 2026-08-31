@@ -78,7 +78,7 @@ public class JoinClause : IJoinClause
     /// <summary>
     /// 辅助操作
     /// </summary>
-    protected readonly Helper _helper;
+    private readonly Helper _helper;
 
     /// <summary>
     /// 实体映射解析器。

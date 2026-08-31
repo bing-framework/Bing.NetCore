@@ -1,5 +1,6 @@
 ﻿using Bing.Data.Queries;
 using Bing.Data.Sql.Builders;
+using Bing.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace Bing.Data.Sql;
@@ -144,6 +145,8 @@ public static class WhereClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        if (string.IsNullOrWhiteSpace(value.SafeString()))
+            return source;
         SqlQueryOperationAccessor.Mutate(source, accessor => accessor.WhereClause.WhereIfNotEmpty(column, value, @operator));
         return source;
     }

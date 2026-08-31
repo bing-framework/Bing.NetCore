@@ -12,6 +12,8 @@
 ### SQL 查询 API 收敛
 
 * RC 加固：Raw Fluent 扩展统一经过查询 mutation gateway，`ToSql()` 后的结构变更会正确失效缓存；空白追加和条件为 false 的操作保持 no-op 语义。
+* `WhereIfNotEmpty` 的 null、空字符串和空白字符串保持公开 Fluent 查询的 SQL、参数与缓存版本不变；非空值仍只触发一次缓存失效。
+* `Builders.Internal.Helper`、`JoinItem.SetDependency(Helper)` 和 `JoinItem.Clone(Helper)` 已内部化。第三方扩展应使用公开 Fluent API 或已声明 Provider SPI，不提供兼容 facade。
 * 删除高层 `FromTable` 和 `ClearSelect()`；字符串表来源迁移到 `Query().From(string, alias)`，类型化投影直接使用 `Select(...)` 替换。
 * 类型化 `Join`、`LeftJoin`、`RightJoin`、`FullJoin` 普通入口仅接收右侧 alias；左侧 alias 和 schema 通过 `SqlJoinOptions` 提供。
 * `CompleteAsync()` 在执行开始即清空同步和异步 completion callback，避免交叉完成和 retained delegate。
@@ -25,7 +27,7 @@
 
 上述收敛属于主版本 Breaking Change，不新增 `[Obsolete]` 包装层。迁移时，将起始阶段结果泛型调用改为非泛型描述加显式终结方法，将空 alias/schema 参数调用改为无参数来源入口，将原生 SQL 结果类型移动到 `ToList<TResult>` 等终结方法；原高层 `ToDictionary` 改为先物化列表后执行 LINQ 转换。
 
-本轮验证：`Bing.Data.Sql.Tests` 2354 项、`Bing.Dapper.Core.Tests` 262 项、SQLite 集成测试 246 项全部通过；`Bing.All.sln` Release 构建成功。外部数据库集成仍需按项目 Gate 和受控测试库配置启用。
+历史验证记录曾报告 `Bing.Data.Sql.Tests` 2354 项、`Bing.Dapper.Core.Tests` 262 项和 SQLite 集成测试 246 项；这些数字不构成当前 commit 的验收证据。当前结果必须以任务报告、TRX/JSON 和对应源 HEAD 为准。外部数据库集成仍需按项目 Gate 和受控测试库配置启用。
 
 迁移步骤见 [SQL 事务 API 迁移说明](migrations/sql-transaction-api-vNext.md)。
 

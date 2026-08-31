@@ -16,7 +16,7 @@ namespace Bing.Data.Sql.Builders.Internal;
 /// <summary>
 /// Sql生成器辅助操作
 /// </summary>
-public class Helper
+internal sealed class Helper
 {
     /// <summary>
     /// 子句运行上下文。
@@ -82,14 +82,14 @@ public class Helper
     /// 使用已绑定的子句运行上下文初始化辅助操作。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
-    public Helper(SqlClauseContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+    internal Helper(SqlClauseContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
 
     /// <summary>
     /// 获取处理后的列名
     /// </summary>
     /// <param name="expression">表达式</param>
     /// <param name="type">实体类型</param>
-    public string GetColumn(Expression expression, Type type)
+    internal string GetColumn(Expression expression, Type type)
     {
         if (expression == null)
             return null;
@@ -101,7 +101,7 @@ public class Helper
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
-    public string GetColumn<TEntity>(Expression<Func<TEntity, object>> expression)
+    internal string GetColumn<TEntity>(Expression<Func<TEntity, object>> expression)
     {
         if (expression == null)
             return null;
@@ -113,7 +113,7 @@ public class Helper
     /// </summary>
     /// <param name="column">列名</param>
     /// <param name="type">实体类型</param>
-    public string GetColumn(string column, Type type)
+    internal string GetColumn(string column, Type type)
     {
         if (string.IsNullOrWhiteSpace(column))
             return column;
@@ -124,7 +124,7 @@ public class Helper
     /// 获取处理后的列名
     /// </summary>
     /// <param name="column">列名</param>
-    public string GetColumn(string column)
+    internal string GetColumn(string column)
     {
         if (string.IsNullOrWhiteSpace(column))
             return column;
@@ -135,7 +135,7 @@ public class Helper
     /// 获取值
     /// </summary>
     /// <param name="expression">表达式</param>
-    public object GetValue(Expression expression)
+    internal object GetValue(Expression expression)
     {
         if (expression == null)
             return null;
@@ -153,7 +153,7 @@ public class Helper
     /// </summary>
     /// <param name="expression">列名</param>
     /// <param name="type">实体类型</param>
-    public ICondition CreateCondition(Expression expression, Type type)
+    internal ICondition CreateCondition(Expression expression, Type type)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
         return CreateConditionInternal(rawColumn, GetColumn(rawColumn, type), GetValue(expression),
@@ -167,7 +167,7 @@ public class Helper
     /// <param name="type">实体类型</param>
     /// <param name="value">参数值</param>
     /// <param name="operator">运算符</param>
-    public ICondition CreateCondition(Expression expression, Type type, object value, Operator @operator)
+    internal ICondition CreateCondition(Expression expression, Type type, object value, Operator @operator)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
         return CreateConditionInternal(rawColumn, GetColumn(rawColumn, type), value, @operator, type,
@@ -186,7 +186,7 @@ public class Helper
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public ICondition CreateCondition(string column, object value, Operator @operator)
+    internal ICondition CreateCondition(string column, object value, Operator @operator)
     {
         if (string.IsNullOrWhiteSpace(column))
             throw new ArgumentNullException(nameof(column));
@@ -430,7 +430,7 @@ public class Helper
     /// </summary>
     /// <param name="value">值</param>
     /// <param name="operator">运算符</param>
-    public string GenerateParamName(object value, Operator @operator)
+    internal string GenerateParamName(object value, Operator @operator)
     {
         if (_parameterManager == null)
             return string.Empty;
@@ -449,7 +449,7 @@ public class Helper
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public ICondition Between(string column, object min, object max, Boundary boundary)
+    internal ICondition Between(string column, object min, object max, Boundary boundary)
     {
         return BetweenInternal(column, GetColumn(column), null, min, max, boundary, SqlParameterSource.SqlBuilder);
     }
@@ -462,7 +462,7 @@ public class Helper
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
     /// <param name="boundary">包含边界</param>
-    public ICondition Between(Expression expression, Type type, object min, object max, Boundary boundary)
+    internal ICondition Between(Expression expression, Type type, object min, object max, Boundary boundary)
     {
         var rawColumn = _resolver.GetColumn(expression, type);
         return BetweenInternal(rawColumn, GetColumn(rawColumn, type), type, min, max, boundary,
@@ -507,5 +507,5 @@ public class Helper
     /// </summary>
     /// <param name="sql">Sql语句</param>
     /// <param name="dialect">Sql方言</param>
-    public static string ResolveSql(string sql, IDialect dialect) => sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
+    internal static string ResolveSql(string sql, IDialect dialect) => sql?.Replace('[', dialect.OpeningIdentifier).Replace(']', dialect.ClosingIdentifier);
 }

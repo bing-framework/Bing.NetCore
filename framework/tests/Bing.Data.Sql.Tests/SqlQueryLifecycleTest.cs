@@ -114,6 +114,64 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
+    /// 测试目的：公开 WhereIfNotEmpty 在空值或空白值时不得使已缓存的 Fluent SQL 失效。
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void RawFluent_WhenWhereIfNotEmptyValueIsBlank_ShouldKeepQueryStateUnchanged(string value)
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+        var beforeCachedVersion = GetFluentQueryField<long>(query, "_cachedVersion");
+
+        // Act
+        query.WhereIfNotEmpty("Status", value);
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders]", beforeSql);
+        Assert.Equal(beforeSql, afterSql);
+        Assert.Equal(beforeShapeVersion, GetFluentShapeVersion(query));
+        Assert.Equal(beforeCachedVersion, GetFluentQueryField<long>(query, "_cachedVersion"));
+        Assert.Empty(query.GetParams());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：公开 WhereIfNotEmpty 在非空值时必须只使 Fluent SQL 缓存失效一次。
+    /// </summary>
+    [Fact]
+    public void RawFluent_WhenWhereIfNotEmptyValueExists_ShouldInvalidateCacheOnce()
+    {
+        // Arrange
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .Select("Id")
+            .From("Orders");
+        var beforeSql = query.ToSql();
+        var beforeShapeVersion = GetFluentShapeVersion(query);
+
+        // Act
+        query.WhereIfNotEmpty("Status", "active");
+        var afterSql = query.ToSql();
+
+        // Assert
+        Assert.Equal("Select [Id] \r\nFrom [Orders]", beforeSql);
+        Assert.Equal("Select [Id] \r\nFrom [Orders] \r\nWhere [Status]=@_p_0", afterSql);
+        Assert.Equal(beforeShapeVersion + 1, GetFluentShapeVersion(query));
+        Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys.ToArray());
+        Assert.Equal(new object[] { "active" }, query.GetParams().Values.ToArray());
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
     /// 测试目的：Raw Fluent 查询在首次渲染后追加 Union 时必须失效缓存并渲染新的完整 SQL。
     /// </summary>
     [Fact]
