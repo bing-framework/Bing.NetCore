@@ -10,9 +10,7 @@ public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper
     /// </summary>
     private readonly Action _disposeAction;
 
-    /// <summary>
     /// <inheritdoc />
-    /// </summary>
     public IEventHandler EventHandler { get; }
 
     /// <summary>

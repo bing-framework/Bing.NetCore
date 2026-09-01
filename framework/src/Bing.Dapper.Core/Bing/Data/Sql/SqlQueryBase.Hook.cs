@@ -1,6 +1,8 @@
 ﻿namespace Bing.Data.Sql;
 
-// SqlQueryBase - 钩子方法
+/// <summary>
+/// 提供 SQL 查询执行生命周期钩子。
+/// </summary>
 public partial class SqlQueryBase
 {
     /// <summary>

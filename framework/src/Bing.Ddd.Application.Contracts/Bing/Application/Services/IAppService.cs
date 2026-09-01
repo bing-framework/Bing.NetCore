@@ -3,7 +3,7 @@
 namespace Bing.Application.Services;
 
 /// <summary>
-/// 应用服务
+/// 定义应用服务契约。
 /// </summary>
 [IgnoreDependency]
 public interface IAppService : IScopedDependency

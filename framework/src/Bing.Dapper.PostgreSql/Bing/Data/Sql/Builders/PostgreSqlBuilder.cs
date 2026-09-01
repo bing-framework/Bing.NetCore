@@ -8,12 +8,12 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// PostgreSql Sql生成器
+/// 创建 PostgreSQL SQL。
 /// </summary>
 public class PostgreSqlBuilder : SqlBuilderBase
 {
     /// <summary>
-    /// 初始化一个<see cref="PostgreSqlBuilder"/>类型的实例
+    /// 初始化一个 <see cref="PostgreSqlBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">SQL Builder 共享服务。</param>
     /// <param name="parameterManager">当前 Builder 的参数管理器。</param>
@@ -21,7 +21,6 @@ public class PostgreSqlBuilder : SqlBuilderBase
         : base(PostgreSqlSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
-    /// <returns>使用指定参数管理器创建的 PostgreSQL Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new PostgreSqlBuilder(Services, parameterManager);
 
@@ -29,6 +28,5 @@ public class PostgreSqlBuilder : SqlBuilderBase
     /// <remarks>
     /// PostgreSQL 递归公用表表达式必须以 <c>With Recursive</c> 开始；该关键字同样兼容非递归 CTE。
     /// </remarks>
-    /// <returns>PostgreSQL CTE 使用的关键字文本。</returns>
     protected override string GetCteKeyWord() => "With Recursive";
 }

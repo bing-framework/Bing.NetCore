@@ -10,12 +10,12 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// Sqlite Sql生成器
+/// 创建 SQLite SQL。
 /// </summary>
 public class SqliteBuilder : SqlBuilderBase
 {
     /// <summary>
-    /// 初始化一个<see cref="SqliteBuilder"/>类型的实例
+    /// 初始化一个 <see cref="SqliteBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">SQL Builder 共享服务。</param>
     /// <param name="parameterManager">当前 Builder 的参数管理器。</param>
@@ -25,7 +25,6 @@ public class SqliteBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
-    /// <returns>使用指定参数管理器创建的 SQLite Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqliteBuilder(Services, parameterManager);
 
@@ -33,7 +32,6 @@ public class SqliteBuilder : SqlBuilderBase
     /// <remarks>
     /// SQLite 的递归公用表表达式使用 <c>With Recursive</c> 语法；该关键字同样可用于普通 CTE。
     /// </remarks>
-    /// <returns>SQLite CTE 使用的关键字文本。</returns>
     protected override string GetCteKeyWord() => "With Recursive";
 
     /// <summary>

@@ -6,12 +6,11 @@ using Microsoft.Data.Sqlite;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sqlite 数据库参数定制器
+/// 定制 SQLite 数据库参数。
 /// </summary>
 public sealed class SqliteDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
-    /// <returns>数据库类型为 SQLite 时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.Sqlite;
 
     /// <inheritdoc />
@@ -24,10 +23,10 @@ public sealed class SqliteDbParameterCustomizer : ISqlDbParameterCustomizer
     }
 
     /// <summary>
-    /// 获取不含长度声明的 Provider 类型名
+    /// 获取不含长度声明的 Provider 类型名。
     /// </summary>
-    /// <param name="typeName">Provider 类型名</param>
-    /// <returns>基础类型名</returns>
+    /// <param name="typeName">Provider 类型名。</param>
+    /// <returns>不含长度声明的基础类型名。</returns>
     private static string GetTypeName(string typeName)
     {
         var index = typeName?.IndexOf('(') ?? -1;

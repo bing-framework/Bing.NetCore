@@ -56,7 +56,6 @@ public class MySqlFromClause : FromClause
     }
 
     /// <inheritdoc />
-    /// <returns>当前 From 子句的 MySQL 副本。</returns>
     protected override FromClause CreateClone(SqlClauseContext context, SqlItem table) =>
         new MySqlFromClause(context, table, ProviderDatabaseType);
 }

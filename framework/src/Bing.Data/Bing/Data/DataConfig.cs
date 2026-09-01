@@ -39,7 +39,8 @@ public class DataConfig
     public bool EnabledDeleteFilter { get; set; } = true;
 
     /// <summary>
-    /// 初始化 <see cref="DataConfig"/> 的实例，并创建默认 SQL 配置。
+    /// 初始化一个 <see cref="DataConfig"/> 类型的实例。
     /// </summary>
+    /// <remarks>同时创建默认的 SQL 操作配置。</remarks>
     public DataConfig() => SqlOptions = new SqlOptions();
 }

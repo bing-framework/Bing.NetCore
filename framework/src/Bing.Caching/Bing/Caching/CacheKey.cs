@@ -11,15 +11,16 @@ public class CacheKey
     private string _key;
 
     /// <summary>
-    /// 初始化 <see cref="CacheKey"/> 的空实例。
+    /// 初始化一个 <see cref="CacheKey"/> 类型的实例。
     /// </summary>
     public CacheKey() { }
 
     /// <summary>
-    /// 使用复合格式字符串和参数初始化 <see cref="CacheKey"/> 的实例；参数会在构造时格式化并保存为键文本。
+    /// 初始化一个 <see cref="CacheKey"/> 类型的实例。
     /// </summary>
     /// <param name="key">包含 <see cref="string.Format(string,object[])"/> 占位符的缓存键格式字符串。</param>
     /// <param name="parameters">用于填充缓存键格式字符串的参数；参数格式化遵循当前区域性和 <see cref="string.Format(string,object[])"/> 的规则。</param>
+    /// <remarks>参数在构造时格式化并保存为键文本。</remarks>
     public CacheKey(string key, params object[] parameters) => _key = string.Format(key, parameters);
 
     /// <summary>

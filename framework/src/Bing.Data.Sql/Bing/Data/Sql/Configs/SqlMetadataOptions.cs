@@ -1,22 +1,22 @@
 namespace Bing.Data.Sql.Configs;
 
 /// <summary>
-/// Sql 元数据配置
+/// 配置 SQL 元数据解析和映射缓存。
 /// </summary>
 public class SqlMetadataOptions
 {
     /// <summary>
-    /// SQL 数据源配置
+    /// 获取 SQL 数据源配置。
     /// </summary>
     public SqlDataSourceOptions DataSources { get; } = new();
 
     /// <summary>
-    /// 实体映射配置集合
+    /// 获取实体映射配置集合。
     /// </summary>
     public IList<EntityMappingOptions> EntityMappings { get; } = new List<EntityMappingOptions>();
 
     /// <summary>
-    /// 实体最终映射缓存容量。
+    /// 获取或设置实体最终映射缓存容量。
     /// </summary>
     /// <remarks>
     /// 未设置时保持无上限缓存行为；设置为 <c>0</c> 时不缓存最终映射；正数表示允许保留的最大映射项数。
@@ -36,7 +36,7 @@ public class SqlMetadataOptions
         EntityMappingCacheEvictionPolicy.AdmissionOnly;
 
     /// <summary>
-    /// 实体 Mutation Plan 缓存容量。
+    /// 获取或设置实体 Mutation Plan 缓存容量。
     /// </summary>
     /// <remarks>
     /// 未设置时保持无上限缓存行为；设置为 <c>0</c> 时不缓存计划；正数表示每个实体映射解析器分区中
@@ -45,7 +45,7 @@ public class SqlMetadataOptions
     public int? MutationPlanCacheCapacity { get; set; }
 
     /// <summary>
-    /// 实体 Mutation 属性 Getter 缓存容量。
+    /// 获取或设置实体 Mutation 属性 Getter 缓存容量。
     /// </summary>
     /// <remarks>
     /// 未设置时保持无上限缓存行为；设置为 <c>0</c> 时不缓存编译 Getter；正数表示每个实体映射解析器分区中
@@ -54,22 +54,22 @@ public class SqlMetadataOptions
     public int? MutationGetterCacheCapacity { get; set; }
 
     /// <summary>
-    /// 默认数据库上下文
+    /// 获取或设置默认数据库上下文。
     /// </summary>
     public DatabaseContext DefaultDatabaseContext { get; set; } = new();
 
     /// <summary>
-    /// 是否启用严格元数据模式
+    /// 获取或设置是否启用严格元数据模式。
     /// </summary>
     public bool StrictMetadata { get; set; }
 
     /// <summary>
-    /// 布尔 true 的默认字符串值
+    /// 获取或设置布尔值 <see langword="true"/> 的默认字符串表示。
     /// </summary>
     public string BoolTrueValue { get; set; } = "true";
 
     /// <summary>
-    /// 布尔 false 的默认字符串值
+    /// 获取或设置布尔值 <see langword="false"/> 的默认字符串表示。
     /// </summary>
     public string BoolFalseValue { get; set; } = "false";
 

@@ -3,7 +3,7 @@
 namespace Bing.Data;
 
 /// <summary>
-/// 数据库
+/// 提供数据库连接访问能力。
 /// </summary>
 [IgnoreAspect]
 public interface IDatabase : IDatabaseConnectionAccessor

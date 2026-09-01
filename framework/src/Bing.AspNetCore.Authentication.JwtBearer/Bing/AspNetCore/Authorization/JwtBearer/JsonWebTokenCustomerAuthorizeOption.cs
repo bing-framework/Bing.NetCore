@@ -18,8 +18,9 @@ public class JsonWebTokenCustomerAuthorizeOption : IJsonWebTokenCustomerAuthoriz
     protected internal Func<IDictionary<string, string>, JwtOptions, bool> ValidatePayload = (a, b) => true;
 
     /// <summary>
-    /// 初始化 <see cref="JsonWebTokenCustomerAuthorizeOption"/> 的实例及默认授权策略。
+    /// 初始化一个 <see cref="JsonWebTokenCustomerAuthorizeOption"/> 类型的实例。
     /// </summary>
+    /// <remarks>同时创建匿名路径列表并启用默认负载校验策略。</remarks>
     public JsonWebTokenCustomerAuthorizeOption() { }
 
     /// <summary>

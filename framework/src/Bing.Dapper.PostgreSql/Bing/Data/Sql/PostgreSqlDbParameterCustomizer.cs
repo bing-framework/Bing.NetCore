@@ -7,12 +7,11 @@ using NpgsqlTypes;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// PostgreSql 数据库参数定制器
+/// 定制 PostgreSQL 数据库参数。
 /// </summary>
 public sealed class PostgreSqlDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
-    /// <returns>数据库类型为 PostgreSQL 时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.PgSql;
 
     /// <inheritdoc />
@@ -25,10 +24,10 @@ public sealed class PostgreSqlDbParameterCustomizer : ISqlDbParameterCustomizer
     }
 
     /// <summary>
-    /// 获取不含长度声明的 Provider 类型名
+    /// 获取不含长度声明的 Provider 类型名。
     /// </summary>
-    /// <param name="typeName">Provider 类型名</param>
-    /// <returns>基础类型名</returns>
+    /// <param name="typeName">Provider 类型名。</param>
+    /// <returns>不含长度声明且已转换分隔符的基础类型名。</returns>
     private static string GetTypeName(string typeName)
     {
         var index = typeName?.IndexOf('(') ?? -1;

@@ -30,7 +30,6 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     }
 
     /// <inheritdoc />
-    /// <returns>当前领域对象的验证结果。</returns>
     public abstract IValidationResult Validate();
 
     #region ChangeTracking(变更跟踪)

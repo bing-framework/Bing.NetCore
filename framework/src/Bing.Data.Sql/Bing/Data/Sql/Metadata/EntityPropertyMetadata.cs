@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Metadata;
 public sealed class EntityPropertyMetadata
 {
     /// <summary>
-    /// 初始化一个<see cref="EntityPropertyMetadata"/>类型的实例。
+    /// 初始化一个 <see cref="EntityPropertyMetadata"/> 类型的实例。
     /// </summary>
     /// <param name="property">CLR 属性。</param>
     /// <param name="columnName">原始列名。</param>
@@ -38,78 +38,78 @@ public sealed class EntityPropertyMetadata
     }
 
     /// <summary>
-    /// CLR 属性。
+    /// 获取 CLR 属性。
     /// </summary>
     public PropertyInfo Property { get; }
 
     /// <summary>
-    /// CLR 属性名。
+    /// 获取 CLR 属性名。
     /// </summary>
     public string PropertyName { get; }
 
     /// <summary>
-    /// 原始列名。
+    /// 获取原始列名。
     /// </summary>
     public string ColumnName { get; }
 
     /// <summary>
-    /// CLR 属性类型。
+    /// 获取 CLR 属性类型。
     /// </summary>
     public Type ClrType => Property.PropertyType;
 
     /// <summary>
-    /// 是否忽略。
+    /// 获取属性是否忽略。
     /// </summary>
     public bool IsIgnored { get; }
 
     /// <summary>
-    /// 是否为主键。
+    /// 获取属性是否为主键。
     /// </summary>
     public bool IsKey { get; }
 
     /// <summary>
-    /// 数据库生成选项。
+    /// 获取数据库生成选项。
     /// </summary>
     public DatabaseGeneratedOption DatabaseGeneratedOption { get; }
 
     /// <summary>
-    /// 是否由数据库生成。
+    /// 获取属性是否由数据库生成。
     /// </summary>
     public bool IsDatabaseGenerated => DatabaseGeneratedOption != DatabaseGeneratedOption.None;
 
     /// <summary>
-    /// 是否为并发令牌。
+    /// 获取属性是否为并发令牌。
     /// </summary>
     public bool IsConcurrencyToken { get; }
 
     /// <summary>
-    /// 是否必填。
+    /// 获取属性是否必填。
     /// </summary>
     public bool IsRequired { get; }
 
     /// <summary>
-    /// 最大长度。
+    /// 获取属性允许的最大长度。
     /// </summary>
     public int? MaxLength { get; }
 
     /// <summary>
-    /// Provider 数据类型名称。
+    /// 获取 Provider 数据类型名称。
     /// </summary>
     public string ProviderTypeName { get; }
 
     /// <summary>
-    /// 是否可空。
+    /// 获取属性是否可空。
     /// </summary>
     public bool IsNullable => IsRequired == false && (ClrType.IsValueType == false || Nullable.GetUnderlyingType(ClrType) != null);
 
     /// <summary>
-    /// 是否可插入。
+    /// 获取属性是否可插入。
     /// </summary>
     public bool CanInsert => IsIgnored == false && DatabaseGeneratedOption != DatabaseGeneratedOption.Identity &&
         DatabaseGeneratedOption != DatabaseGeneratedOption.Computed;
 
     /// <summary>
-    /// 是否可更新。
+    /// 获取属性是否可更新。
     /// </summary>
     public bool CanUpdate => IsIgnored == false && IsKey == false &&
         DatabaseGeneratedOption != DatabaseGeneratedOption.Identity &&

@@ -11,31 +11,31 @@ using Microsoft.IdentityModel.Tokens;
 namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
-/// Jwt授权处理器
+/// 处理 JWT 授权要求。
 /// </summary>
 public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebTokenAuthorizationRequirement>
 {
     /// <summary>
-    /// Jwt选项配置
+    /// JWT 选项配置。
     /// </summary>
     private readonly JwtOptions _options;
 
     /// <summary>
-    /// Jwt令牌校验器
+    /// JWT 令牌校验器。
     /// </summary>
     private readonly IJsonWebTokenValidator _tokenValidator;
 
     /// <summary>
-    /// Jwt令牌存储器
+    /// JWT 令牌存储器。
     /// </summary>
     private readonly IJsonWebTokenStore _tokenStore;
 
     /// <summary>
-    /// 初始化一个<see cref="JsonWebTokenAuthorizationHandler"/>类型的实例
+    /// 初始化一个 <see cref="JsonWebTokenAuthorizationHandler"/> 类型的实例。
     /// </summary>
-    /// <param name="options">Jwt选项配置</param>
-    /// <param name="tokenValidator">Jwt令牌校验器</param>
-    /// <param name="tokenStore">Jwt令牌存储器</param>
+    /// <param name="options">JWT 选项配置。</param>
+    /// <param name="tokenValidator">JWT 令牌校验器。</param>
+    /// <param name="tokenStore">JWT 令牌存储器。</param>
     public JsonWebTokenAuthorizationHandler(
         IOptions<JwtOptions> options
         , IJsonWebTokenValidator tokenValidator
@@ -46,11 +46,7 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
         _tokenStore = tokenStore;
     }
 
-    /// <summary>
-    /// 重载异步处理
-    /// </summary>
-    /// <param name="context">授权处理上下文。</param>
-    /// <param name="requirement">JWT 授权要求。</param>
+    /// <inheritdoc />
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, JsonWebTokenAuthorizationRequirement requirement)
     {
         if (_options.ThrowEnabled)
@@ -62,7 +58,7 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     }
 
     /// <summary>
-    /// 抛异常处理方式
+    /// 以抛出异常的方式处理授权失败。
     /// </summary>
     /// <param name="context">授权处理上下文。</param>
     /// <param name="requirement">JWT 授权要求。</param>
@@ -95,7 +91,7 @@ public class JsonWebTokenAuthorizationHandler : AuthorizationHandler<JsonWebToke
     }
 
     /// <summary>
-    /// 结果处理方式
+    /// 以授权结果的方式处理授权失败。
     /// </summary>
     /// <param name="context">授权处理上下文。</param>
     /// <param name="requirement">JWT 授权要求。</param>

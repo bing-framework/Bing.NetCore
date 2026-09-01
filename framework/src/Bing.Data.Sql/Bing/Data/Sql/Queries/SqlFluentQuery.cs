@@ -321,7 +321,6 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     internal ISqlBuilder GetBuilder() => _query.GetBuilder();
 
     /// <inheritdoc />
-    /// <returns>当前查询使用的 SQL 生成器。</returns>
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _query.GetBuilder();
 
     /// <inheritdoc />

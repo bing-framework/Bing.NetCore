@@ -77,27 +77,21 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     private sealed class MySqlClauseFactory : ISqlClauseFactory
     {
         /// <inheritdoc />
-        /// <returns>MySQL Select 子句实例。</returns>
         public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
 
         /// <inheritdoc />
-        /// <returns>MySQL From 子句实例。</returns>
         public IFromClause CreateFrom(SqlClauseContext context) => new MySqlFromClause(context);
 
         /// <inheritdoc />
-        /// <returns>MySQL Join 子句实例。</returns>
         public IJoinClause CreateJoin(SqlClauseContext context) => new MySqlJoinClause(context);
 
         /// <inheritdoc />
-        /// <returns>MySQL Where 子句实例。</returns>
         public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
 
         /// <inheritdoc />
-        /// <returns>MySQL Group By 子句实例。</returns>
         public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
 
         /// <inheritdoc />
-        /// <returns>MySQL Order By 子句实例。</returns>
         public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
     }
 }
@@ -108,7 +102,6 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 internal sealed class LimitOffsetPaginationRenderer : ISqlPaginationRenderer
 {
     /// <inheritdoc />
-    /// <returns>MySQL Limit/Offset 分页 SQL 片段。</returns>
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Limit {limitParameterName} OFFSET {offsetParameterName}";
 }

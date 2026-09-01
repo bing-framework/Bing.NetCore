@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Bing.Data.Sql;
 
-// Sql查询对象 - 独立查询计划准备与跟踪
+/// <summary>
+/// 提供 SQL 查询计划的准备和跟踪支持。
+/// </summary>
 public abstract partial class SqlQueryBase
 {
     /// <summary>

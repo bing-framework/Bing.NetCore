@@ -3,13 +3,13 @@
 namespace Bing.Logging;
 
 /// <summary>
-/// 初始化日志记录器
+/// 记录应用初始化阶段的日志。
 /// </summary>
-/// <typeparam name="T">类型</typeparam>
+/// <typeparam name="T">日志所属的类别类型。</typeparam>
 public class DefaultInitLogger<T> : IInitLogger<T>
 {
     /// <summary>
-    /// 初始化一个<see cref="DefaultInitLogger{T}"/>类型的实例
+    /// 初始化一个 <see cref="DefaultInitLogger{T}"/> 类型的实例。
     /// </summary>
     public DefaultInitLogger()
     {
@@ -17,7 +17,7 @@ public class DefaultInitLogger<T> : IInitLogger<T>
     }
 
     /// <summary>
-    /// 条目列表
+    /// 获取已记录的初始化日志条目。
     /// </summary>
     public List<BingInitLogEntry> Entries { get; }
 
@@ -35,10 +35,8 @@ public class DefaultInitLogger<T> : IInitLogger<T>
     }
 
     /// <inheritdoc />
-    /// <returns>日志级别不为 <see cref="LogLevel.None"/> 时返回 <see langword="true"/>。</returns>
     public virtual bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
     /// <inheritdoc />
-    /// <returns>用于释放日志作用域的对象。</returns>
     public virtual IDisposable BeginScope<TState>(TState state) => NullDisposable.Instance;
 }

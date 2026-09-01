@@ -1,12 +1,12 @@
 ﻿namespace Bing.Localization;
 
 /// <summary>
-/// 空本地化资源查找器
+/// 提供不读取外部资源的空本地化查找器。
 /// </summary>
 public class NullStringLocalizer : IStringLocalizer
 {
     /// <summary>
-    /// 本地化资源查找器空实例
+    /// 获取空本地化查找器单例。
     /// </summary>
     public static readonly IStringLocalizer Instance = new NullStringLocalizer();
 
@@ -24,6 +24,5 @@ public class NullStringLocalizer : IStringLocalizer
     }
 
     /// <inheritdoc />
-    /// <returns>空的本地化字符串集合。</returns>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => new List<LocalizedString>();
 }

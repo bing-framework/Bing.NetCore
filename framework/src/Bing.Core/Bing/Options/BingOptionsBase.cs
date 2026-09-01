@@ -1,12 +1,12 @@
 ﻿namespace Bing.Options;
 
 /// <summary>
-/// Bing配置项基类
+/// Bing 配置项的抽象基类。
 /// </summary>
 public abstract class BingOptionsBase : IBingOptions
 {
     /// <summary>
-    /// 初始化一个<see cref="BingOptionsBase"/>类型的实例
+    /// 初始化一个 <see cref="BingOptionsBase"/> 类型的实例。
     /// </summary>
     protected BingOptionsBase()
     {
@@ -14,14 +14,14 @@ public abstract class BingOptionsBase : IBingOptions
     }
 
     /// <summary>
-    /// 配置项扩展列表
+    /// 获取配置项扩展列表。
     /// </summary>
     internal IList<IBingOptionsExtension> Extensions { get; }
 
     /// <summary>
-    /// 添加配置项扩展
+    /// 添加配置项扩展。
     /// </summary>
-    /// <param name="extension">配置项扩展</param>
+    /// <param name="extension">要添加的配置项扩展。</param>
     public void AddExtension(IBingOptionsExtension extension)
     {
         if (extension == null)

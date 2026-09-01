@@ -1,6 +1,8 @@
 ﻿namespace Bing.Caching;
 
-// 缓存 - 异步
+/// <summary>
+/// 定义缓存异步访问契约。
+/// </summary>
 public partial interface ICache
 {
     /// <summary>

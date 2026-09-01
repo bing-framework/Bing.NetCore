@@ -179,7 +179,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         CancellationToken cancellationToken = default) => _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
 
     /// <inheritdoc />
-    /// <returns>当前查询使用的 SQL 生成器。</returns>
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => GetBuilder();
 
     /// <inheritdoc />

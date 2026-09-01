@@ -143,10 +143,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="SqlQueryBase"/>类型的实例
+    /// 初始化一个 <see cref="SqlQueryBase"/> 类型的实例。
     /// </summary>
-    /// <param name="serviceProvider">服务提供程序</param>
-    /// <param name="options">Sql配置</param>
+    /// <param name="serviceProvider">用于解析查询依赖的服务提供程序。</param>
+    /// <param name="options">SQL 查询配置。</param>
     protected SqlQueryBase(IServiceProvider serviceProvider, SqlOptions options)
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));

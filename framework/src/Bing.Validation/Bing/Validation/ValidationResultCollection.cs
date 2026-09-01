@@ -5,7 +5,7 @@ using System.Text;
 namespace Bing.Validation;
 
 /// <summary>
-/// 验证结果集合
+/// 表示多个数据验证结果的集合。
 /// </summary>
 public class ValidationResultCollection : IValidationResult
 {
@@ -25,7 +25,7 @@ public class ValidationResultCollection : IValidationResult
     private readonly IDictionary<string, List<ValidationResult>> _resultsFlaggedByStrategy;
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
     public ValidationResultCollection()
     {
@@ -35,9 +35,9 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="result">结果</param>
+    /// <param name="result">要添加的验证错误消息。</param>
     public ValidationResultCollection(string result)
     {
         _results = new List<ValidationResult>();
@@ -47,9 +47,9 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="result">验证结果</param>
+    /// <param name="result">要添加的验证结果。</param>
     public ValidationResultCollection(ValidationResult result) : this()
     {
         if (result == null)
@@ -59,10 +59,10 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="result">验证结果</param>
-    /// <param name="strategyName">策略名称</param>
+    /// <param name="result">要添加的验证结果。</param>
+    /// <param name="strategyName">用于归类验证结果的策略名称。</param>
     public ValidationResultCollection(ValidationResult result, string strategyName) : this()
     {
         if (result == null)
@@ -72,9 +72,9 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="results">验证结果集合</param>
+    /// <param name="results">要添加的验证结果集合。</param>
     public ValidationResultCollection(IEnumerable<ValidationResult> results) : this()
     {
         if (results == null)
@@ -84,10 +84,10 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="results">验证结果集合</param>
-    /// <param name="strategyName">策略名称</param>
+    /// <param name="results">要添加的验证结果集合。</param>
+    /// <param name="strategyName">用于归类验证结果的策略名称。</param>
     public ValidationResultCollection(IEnumerable<ValidationResult> results, string strategyName) : this()
     {
         if (results == null)
@@ -97,9 +97,9 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollection"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
     /// </summary>
-    /// <param name="collection">验证结果集合</param>
+    /// <param name="collection">要复制的验证结果集合。</param>
     public ValidationResultCollection(ValidationResultCollection collection) : this()
     {
         if (collection == null)

@@ -6,12 +6,11 @@ using Microsoft.Data.SqlClient;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Sql Server 数据库参数定制器
+/// 定制 SQL Server 数据库参数。
 /// </summary>
 public sealed class SqlServerDbParameterCustomizer : ISqlDbParameterCustomizer
 {
     /// <inheritdoc />
-    /// <returns>数据库类型为 SQL Server 时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanHandle(DatabaseType databaseType) => databaseType == DatabaseType.SqlServer;
 
     /// <inheritdoc />
@@ -24,10 +23,10 @@ public sealed class SqlServerDbParameterCustomizer : ISqlDbParameterCustomizer
     }
 
     /// <summary>
-    /// 获取不含长度声明的 Provider 类型名
+    /// 获取不含长度声明的 Provider 类型名。
     /// </summary>
-    /// <param name="typeName">Provider 类型名</param>
-    /// <returns>基础类型名</returns>
+    /// <param name="typeName">Provider 类型名。</param>
+    /// <returns>不含长度声明的基础类型名。</returns>
     private static string GetTypeName(string typeName)
     {
         var index = typeName?.IndexOf('(') ?? -1;

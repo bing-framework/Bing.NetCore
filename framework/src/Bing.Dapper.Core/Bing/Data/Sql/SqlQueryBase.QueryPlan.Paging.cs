@@ -4,11 +4,12 @@ using Bing.Data.Sql.Builders.Clauses;
 
 namespace Bing.Data.Sql;
 
-// Sql查询对象 - 独立查询计划分页执行
+/// <summary>
+/// 提供 SQL 查询计划的分页执行支持。
+/// </summary>
 public abstract partial class SqlQueryBase
 {
     /// <inheritdoc />
-    /// <returns>按指定分页参数物化的结果列表。</returns>
     PagerList<TResult> ISqlQueryPlanExecutor.ToPage<TResult>(SqlQueryPlan plan, IPager pager, int? timeout)
     {
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
@@ -63,7 +64,6 @@ public abstract partial class SqlQueryBase
     }
 
     /// <inheritdoc />
-    /// <returns>表示按指定分页参数异步物化结果列表的任务。</returns>
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {

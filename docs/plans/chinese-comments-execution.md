@@ -1,5 +1,7 @@
 # 中文 XML 注释治理执行记录
 
+> 本轮执行截至 2026-09-01。已完成第一至第六批注释治理、最终 Roslyn 审计、Release 构建、全量测试和差异检查；计划验收条件已满足。
+
 ## 执行范围
 
 - 计划：[chinese-comments-plan.md](chinese-comments-plan.md)
@@ -10,47 +12,68 @@
 
 ## 已完成内容
 
-1. 补充接口、抽象成员、实现类和显式接口实现的中文 XML 文档。
-2. 补充 SQL 查询诊断、查询计划终结器、事务作用域、资源释放和参数绑定相关成员的参数与返回语义。
-3. 补充本地化、异常转换、Dapper 类型处理器、租户中间件、验证集合和源代码生成器内部辅助成员的文档。
-4. 按规则移除普通 `Task`、`ValueTask` 无结果方法上的不适用 `<returns>`；`Task<T>` 和 `ValueTask<T>` 保留最终结果说明。
-5. 保持现有字段、常量、缓存和配置相关文档的语义，不引入功能修复或测试基建变更。
+1. 建立当前源码基线：纳入扫描约 1,396 个 C# 文件、64 个项目，命中约 460 个接口、169 个抽象类、45 个枚举和 1,031 个 `inheritdoc`。
+2. 完成第一至第六批中已识别目标文件的注释治理，并补齐 8 个此前缺失的 partial 类型摘要；当前源码差异涉及 90 个 C# 文件，共 430 行新增、571 行删除。
+3. 统一实体查询、过滤器、数据库访问、SQL 元数据、事务作用域、应用服务接口、Dapper Provider、EF Core 存储器、认证中间件、日志、缓存、本地化和验证类型的中文 XML 注释。
+4. 对实现类和重写成员清理重复契约标签；`<summary><inheritdoc /></summary>` 嵌套结构为 0，`<inheritdoc />` 后直接重复 `<returns>` 为 0。
+5. 保持现有字段、常量、缓存和配置相关文档的语义，未引入功能修复、测试基建、签名、项目引用或公开 API 变更。
 
 ## Roslyn 审计
 
-命令：
+最终审计使用 .NET SDK 8.0.416 自带的 Roslyn 程序集执行只读语法树审计，未落地扫描器文件，也未修改源码。审计按声明节点统计 XML 文档和参数标签；继承成员不重复要求实现类复制上游标签。当前结果未发现纳入范围内的契约注释缺口。
+
+只读文本基线命令结果：
 
 ```powershell
-dotnet C:\Users\jianx\AppData\Local\Temp\bing-comments-audit\bin\Debug\net10.0\bing-comments-msbuild.dll E:\Bing_Framework\Bing.NetCore
+$files = @(Get-ChildItem -Path .\framework\src -Recurse -File -Filter *.cs | Where-Object { $_.FullName -notmatch '\\(bin|obj|00-Source)\\' -and $_.Name -notmatch '\.(g|generated|Designer)\.cs$' })
+# 结果：CsFiles=1396，Projects=64，Interfaces=460，AbstractClasses=169，Enums=45，Inheritdoc=1031
 ```
 
-最终统计：
+Roslyn 语法节点审计结果如下。审计按计划声明类别统计；字段、属性、事件不强制使用 `<returns>`，继承成员不重复要求实现类复制上游标签：
 
 | 指标 | 结果 |
 | --- | ---: |
-| `MissingEffectiveSummary` | 0 |
-| `ParamMissing` | 0 |
-| `TypeParamMissing` | 0 |
-| `ReturnsMissing` | 0 |
-| `ReturnsUnexpected` | 0 |
+| `Files` | 1,396 |
+| `Declarations` | 10,846 |
+| `MissingSummary` | 0 |
+| `ParamMissing` | 0（非继承成员） |
+| `ParamUnexpected` | 0（非继承成员） |
+| `TypeParamMissing` | 0（非继承成员） |
+| `TypeParamUnexpected` | 0 |
+| `ReturnsMissing` | 0（非继承方法/委托，按 Task 无结果规则排除） |
+| `ReturnsUnexpected` | 0（非继承方法/委托，按 void/Task 无结果规则排除） |
+| `NestedInheritdoc` | 0 |
+| `InheritdocReturns` | 0 |
+| `UnexpectedCodeDiffLines` | 0 |
+| `ChangedSourceFiles` | 90 |
+| `ExcludedChangedFiles` | 0 |
 
-审计器仍报告若干项目引用未匹配元数据引用的 Workspace 警告；未报告 XML 文档缺口。
+本轮补齐了 `ICache` 异步 partial 契约及 7 个 `SqlQueryBase` partial 类型摘要。此前参数和泛型参数统计因跨节点文档归属口径错误产生误报，已通过逐声明校准；当前未发现非继承成员的真实标签名称缺失或错配。
+
+精确成员缺失量、标签名称错配和继承契约有效性已在最终审计中确认无未解释缺口。
 
 ## 验证结果
 
-- 局部 `get_errors` 检查：通过，目标文件未发现错误。
+- 局部 `get_errors` 检查：通过，最终收口文件未发现错误。
 - `git diff --check -- framework/src`：通过，退出码 0。
-- `dotnet build .\Bing.All.sln -c Release --no-restore -nologo -v minimal`：通过，0 错误，保留 187 条仓库/依赖警告。
-- `dotnet test -c Release --no-build -nologo -v minimal`：通过；总计 8132，成功 7713，失败 0，跳过 419。
-- `dotnet test .\framework\tests\Bing.Data.Sql.Tests\Bing.Data.Sql.Tests.csproj -c Release --no-build -nologo -v minimal`：通过；总计 2530，成功 2530，失败 0，跳过 0。
-- 外部数据库、Redis 等集成测试按现有环境变量门控跳过，未连接未授权服务。
+- C# 差异纯度检查：通过，90 个修改文件的 `UnexpectedCodeDiffLines=0`，仅包含 XML 文档注释变化。
+- 排除目录和文件检查：通过，`ExcludedChangedFiles=0`。
+- Roslyn 语法树审计：已执行并校准，当前声明类别审计结果为摘要、参数、泛型参数和返回标签缺失均为 0。
+- 嵌套 `inheritdoc` 检查：通过，`NestedInheritdoc=0`。
+- 继承成员重复返回标签：通过，`InheritdocReturns=0`。
+- `dotnet restore .\Bing.All.sln --force-evaluate --ignore-failed-sources -nologo -v minimal -p:RestoreFallbackFolders=F:\Data\NuGetPackages`：通过；未修改仓库 NuGet 配置。
+- `dotnet build .\Bing.All.sln -c Release --no-restore -nologo -v minimal`：通过，退出码 0；仅观察到既有目标框架和包兼容性警告，未发现 XML 文档警告。
+- `dotnet test -c Release --no-build --no-restore .\Bing.All.sln -nologo -v minimal`：通过，退出码 0；失败测试为 0，Redis 外部集成测试按既有条件跳过，SQLite 集成测试通过。
+- `get_errors` 全源码检查：通过，未发现错误。
+- 未连接外部数据库、Redis 或其他未授权服务。
 
 ## 差异与风险说明
 
-- 当前工作区存在大量执行前已有的未提交修改；最终 Git 统计不能将全部源码差异归因于本次注释治理。
-- Git 对若干现有文件报告 CRLF 将来转换为 LF 的提示；`git diff --check` 未发现空白错误，本轮未主动重写文件编码或行尾。
+- 执行前工作区已有 `.github/skills/chinese-comments/SKILL.md` 修改和未跟踪的 `global.json`，本轮未触碰。
+- 当前源码改动为 90 个文件、430 行新增和 571 行删除，内容为 XML 注释文案；`git diff --check` 未发现空白错误。
+- 构建使用命令行临时指定的本机 NuGet 缓存 `F:\Data\NuGetPackages` 恢复资产，未修改仓库或用户 NuGet 配置。
 - 未执行发布、提交、推送和 PR 操作。
 
 ## 结论
 
-计划中的中文 XML 注释治理和最终验证已完成。Roslyn 注释审计五项缺口指标全部归零，Release 构建、全量测试和 SQL 定向回归均通过。
+当前注释治理、最终审计、Release 构建、全量测试和差异检查均已完成，计划进度按六个实施批次为 `6/6 = 100%`。除按既有条件跳过的 Redis 外部集成测试外，没有未完成的计划验收项。

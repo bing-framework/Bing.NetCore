@@ -17,12 +17,10 @@ public sealed class PostgreSqlBatchUpdateRenderer : ISqlBatchUpdateRenderer
     public string ProviderKey => PostgreSqlSqlProvider.Instance.Key;
 
     /// <inheritdoc />
-    /// <returns>当前上下文适合由该渲染器处理时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool CanRender(SqlBatchUpdateRenderContext context) => context != null &&
         context.Entities.Count > 0 && context.UpdateColumns.Count > 0 && context.Keys.Count > 0;
 
     /// <inheritdoc />
-    /// <returns>渲染得到的 PostgreSQL 批量 Update 写命令。</returns>
     public SqlWriteCommand Render(SqlBatchUpdateRenderContext context)
     {
         if (context == null)

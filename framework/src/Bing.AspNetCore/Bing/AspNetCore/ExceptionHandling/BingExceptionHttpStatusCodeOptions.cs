@@ -19,8 +19,9 @@ public class BingExceptionHttpStatusCodeOptions
     public bool GlobalHttpStatusCode200 { get; set; } = true;
 
     /// <summary>
-    /// 初始化 <see cref="BingExceptionHttpStatusCodeOptions"/> 的实例及空映射字典。
+    /// 初始化一个 <see cref="BingExceptionHttpStatusCodeOptions"/> 类型的实例。
     /// </summary>
+    /// <remarks>同时创建空的错误码到 HTTP 状态码映射字典。</remarks>
     public BingExceptionHttpStatusCodeOptions() => ErrorCodeToHttpStatusCodeMappings = new Dictionary<string, HttpStatusCode>();
 
     /// <summary>

@@ -8,12 +8,12 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// Sql Server Sql生成器
+/// 创建 SQL Server SQL。
 /// </summary>
 public class SqlServerBuilder : SqlBuilderBase
 {
     /// <summary>
-    /// 初始化一个<see cref="SqlServerBuilder"/>类型的实例
+    /// 初始化一个 <see cref="SqlServerBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">SQL Builder 共享服务。</param>
     /// <param name="parameterManager">当前 Builder 的参数管理器。</param>
@@ -21,7 +21,6 @@ public class SqlServerBuilder : SqlBuilderBase
         : base(SqlServerSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
-    /// <returns>使用指定参数管理器创建的 SQL Server Builder。</returns>
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqlServerBuilder(Services, parameterManager);
 }

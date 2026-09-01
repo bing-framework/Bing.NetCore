@@ -28,12 +28,12 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     private readonly IOptions<LocalizationOptions> _options;
 
     /// <summary>
-    /// 初始化一个<see cref="StoreStringLocalizerFactory"/>类型的实例
+    /// 初始化一个 <see cref="StoreStringLocalizerFactory"/> 类型的实例。
     /// </summary>
-    /// <param name="options">本地化配置</param>
-    /// <param name="loggerFactory">日志工厂</param>
-    /// <param name="store">本地化资源存储器</param>
-    /// <param name="cache">缓存</param>
+    /// <param name="options">本地化配置。</param>
+    /// <param name="loggerFactory">日志工厂。</param>
+    /// <param name="store">本地化资源存储器。</param>
+    /// <param name="cache">内存缓存。</param>
     public StoreStringLocalizerFactory(IOptions<LocalizationOptions> options, ILoggerFactory loggerFactory, ILocalizedStore store, IMemoryCache cache)
     {
         _options = options;
@@ -43,7 +43,6 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
-    /// <returns>指定资源类型对应的存储型本地化查找器。</returns>
     public IStringLocalizer Create(Type resourceSource)
     {
         resourceSource.CheckNull(nameof(resourceSource));
@@ -52,7 +51,6 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     }
 
     /// <inheritdoc />
-    /// <returns>指定资源基名称对应的存储型本地化查找器。</returns>
     public IStringLocalizer Create(string baseName, string location)
     {
         return new StoreStringLocalizer(_loggerFactory.CreateLogger<StoreStringLocalizer>(), _cache, _store, baseName, _options);

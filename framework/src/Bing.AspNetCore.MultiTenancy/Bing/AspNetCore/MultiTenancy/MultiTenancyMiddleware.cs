@@ -8,37 +8,37 @@ using Microsoft.Extensions.Options;
 namespace Bing.AspNetCore.MultiTenancy;
 
 /// <summary>
-/// 多租户中间件
+/// 在请求管道中建立当前租户上下文。
 /// </summary>
 public class MultiTenancyMiddleware : Microsoft.AspNetCore.Http.IMiddleware, ITransientDependency
 {
     /// <summary>
-    /// 日志
+    /// 获取或设置多租户中间件使用的日志记录器。
     /// </summary>
     public ILogger<MultiTenancyMiddleware> Logger { get; set; }
 
     /// <summary>
-    /// 租户配置提供程序
+    /// 提供当前请求租户配置的服务。
     /// </summary>
     private readonly ITenantConfigurationProvider _tenantConfigurationProvider;
 
     /// <summary>
-    /// 当前租户
+    /// 当前租户访问器。
     /// </summary>
     private readonly ICurrentTenant _currentTenant;
 
     /// <summary>
-    /// 多租户配置
+    /// 多租户配置。
     /// </summary>
     private readonly MultiTenancyOptions _options;
 
     /// <summary>
-    /// 租户解析结果访问器
+    /// 租户解析结果访问器。
     /// </summary>
     private readonly ITenantResolveResultAccessor _tenantResolveResultAccessor;
 
     /// <summary>
-    /// 初始化一个<see cref="MultiTenancyMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="MultiTenancyMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="tenantConfigurationProvider">租户配置提供程序</param>
     /// <param name="currentTenant">当前租户</param>
@@ -58,10 +58,7 @@ public class MultiTenancyMiddleware : Microsoft.AspNetCore.Http.IMiddleware, ITr
     }
 
     /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">当前 HTTP 请求上下文。</param>
-    /// <param name="next">下一个请求委托。</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         TenantConfiguration tenant = null;

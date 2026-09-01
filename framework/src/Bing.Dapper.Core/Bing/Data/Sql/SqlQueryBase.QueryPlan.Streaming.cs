@@ -4,7 +4,9 @@ using Bing.Data.Sql.Diagnostics;
 
 namespace Bing.Data.Sql;
 
-// Sql查询对象 - 独立查询计划流式执行
+/// <summary>
+/// 提供 SQL 查询计划的流式执行支持。
+/// </summary>
 public abstract partial class SqlQueryBase
 {
     /// <summary>

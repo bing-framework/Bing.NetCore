@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Bing.AspNetCore.Authorization.JwtBearer;
 
 /// <summary>
-/// JWT客户授权中间件
+/// 执行 JWT 客户端授权检查的中间件。
 /// </summary>
 public class JsonWebTokenCustomerAuthorizeMiddleware
 {
@@ -16,33 +16,33 @@ public class JsonWebTokenCustomerAuthorizeMiddleware
     private readonly RequestDelegate _next;
 
     /// <summary>
-    /// Jwt选项配置
+    /// JWT 选项配置。
     /// </summary>
     private readonly JwtOptions _options;
 
     /// <summary>
-    /// 校验负载
+    /// JWT 负载校验委托。
     /// </summary>
     private readonly Func<IDictionary<string, string>, JwtOptions, bool> _validatePayload;
 
     /// <summary>
-    /// 匿名访问路径列表
+    /// 匿名访问路径列表。
     /// </summary>
     private readonly IList<string> _anonymousPathList;
 
     /// <summary>
-    /// Jwt令牌校验器
+    /// JWT 令牌校验器。
     /// </summary>
     private readonly IJsonWebTokenValidator _tokenValidator;
 
     /// <summary>
-    /// 初始化一个<see cref="JsonWebTokenCustomerAuthorizeMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="JsonWebTokenCustomerAuthorizeMiddleware"/> 类型的实例。
     /// </summary>
-    /// <param name="next">方法</param>
-    /// <param name="options">Jwt选项配置</param>
-    /// <param name="tokenValidator">Jwt令牌校验器</param>
-    /// <param name="validatePayload">校验负载</param>
-    /// <param name="anonymousPathList">匿名访问路径列表</param>
+    /// <param name="next">请求处理管道中的下一个中间件。</param>
+    /// <param name="options">JWT 选项配置。</param>
+    /// <param name="tokenValidator">JWT 令牌校验器。</param>
+    /// <param name="validatePayload">JWT 负载校验委托。</param>
+    /// <param name="anonymousPathList">允许匿名访问的路径列表。</param>
     public JsonWebTokenCustomerAuthorizeMiddleware(
         RequestDelegate next
         , IOptions<JwtOptions> options
@@ -58,9 +58,10 @@ public class JsonWebTokenCustomerAuthorizeMiddleware
     }
 
     /// <summary>
-    /// 执行 JWT 客户端授权检查；匿名路径直接放行，其余请求必须提供并通过 Bearer 令牌校验。
+    /// 执行 JWT 客户端授权检查。
     /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <param name="context">当前 HTTP 请求上下文。</param>
+    /// <remarks>匿名路径直接放行，其余请求必须提供并通过 Bearer 令牌校验。</remarks>
     public async Task Invoke(HttpContext context)
     {
         // 如果是匿名访问路径，则直接跳过

@@ -118,7 +118,6 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     private readonly string _parentQueryContextId;
 
     /// <inheritdoc />
-    /// <returns>当前查询使用的 SQL Builder。</returns>
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => _builder;
 
     /// <inheritdoc />

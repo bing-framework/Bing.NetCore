@@ -1,19 +1,19 @@
 ﻿namespace Bing.Localization;
 
 /// <summary>
-/// 本地化资源查找器
+/// 提供基于程序集名称的本地化资源查找。
 /// </summary>
 internal class StringLocalizer:IStringLocalizer
 {
     /// <summary>
-    /// 本地化资源查找器
+    /// 底层本地化资源查找器。
     /// </summary>
     private readonly IStringLocalizer _localizer;
 
     /// <summary>
-    /// 初始化一个<see cref="StringLocalizer"/>类型的实例
+    /// 初始化一个 <see cref="StringLocalizer"/> 类型的实例。
     /// </summary>
-    /// <param name="factory">本地化资源查找器工厂</param>
+    /// <param name="factory">本地化资源查找器工厂。</param>
     public StringLocalizer(IStringLocalizerFactory factory)
     {
         var assemblyName = new AssemblyName(GetType().Assembly.FullName);
@@ -27,6 +27,5 @@ internal class StringLocalizer:IStringLocalizer
     public LocalizedString this[string name, params object[] arguments] => _localizer[name, arguments];
 
     /// <inheritdoc />
-    /// <returns>当前资源查找器能够提供的全部本地化字符串。</returns>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) => _localizer.GetAllStrings(includeParentCultures);
 }

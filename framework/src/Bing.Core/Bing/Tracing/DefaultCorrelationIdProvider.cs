@@ -4,23 +4,22 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Tracing;
 
 /// <summary>
-/// 默认跟踪标识提供程序
+/// 提供当前异步执行流的关联标识。
 /// </summary>
 [Dependency(ServiceLifetime.Singleton, TryAdd = true)]
 public class DefaultCorrelationIdProvider : ICorrelationIdProvider
 {
     /// <summary>
-    /// 使用AsyncLocal存储当前上下文的关联ID，确保在异步调用中保持一致性。
+    /// 保存当前异步执行流的关联标识。
     /// </summary>
     private readonly AsyncLocal<string> _currentCorrelationId = new();
 
     /// <summary>
-    /// 当前关联ID
+    /// 获取当前关联标识。
     /// </summary>
     private string CorrelationId => _currentCorrelationId.Value;
 
     /// <inheritdoc />
-    /// <returns>当前异步上下文中的关联 ID。</returns>
     public virtual string Get() => CorrelationId;
 
     /// <inheritdoc />

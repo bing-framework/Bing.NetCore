@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Metadata;
 public sealed class EntityModelMetadata
 {
     /// <summary>
-    /// 初始化一个<see cref="EntityModelMetadata"/>类型的实例。
+    /// 初始化一个 <see cref="EntityModelMetadata"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型。</param>
     /// <param name="tableName">原始表名。</param>
@@ -27,22 +27,22 @@ public sealed class EntityModelMetadata
     }
 
     /// <summary>
-    /// 实体类型。
+    /// 获取实体类型。
     /// </summary>
     public Type EntityType { get; }
 
     /// <summary>
-    /// 原始表名。
+    /// 获取原始表名。
     /// </summary>
     public string TableName { get; }
 
     /// <summary>
-    /// 原始架构名。
+    /// 获取原始架构名。
     /// </summary>
     public string Schema { get; }
 
     /// <summary>
-    /// 按 CLR 属性名索引的属性元数据集合。
+    /// 获取按 CLR 属性名索引的属性元数据集合。
     /// </summary>
     public IReadOnlyDictionary<string, EntityPropertyMetadata> Properties { get; }
 }

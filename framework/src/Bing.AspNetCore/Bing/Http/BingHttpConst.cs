@@ -1,12 +1,12 @@
 ﻿namespace Bing.Http;
 
 /// <summary>
-/// Http常量
+/// 定义 HTTP 相关的稳定常量。
 /// </summary>
 public static class BingHttpConst
 {
     /// <summary>
-    /// 错误格式
+    /// HTTP 响应中业务错误格式的上下文键。
     /// </summary>
     public const string BingErrorFormat = "_BingErrorFormat";
 }

@@ -5,22 +5,21 @@ using Bing.Helpers;
 namespace Bing.Data.Sql.Builders;
 
 /// <summary>
-/// PostgreSql参数字面值解析器
+/// 解析 PostgreSQL 参数字面值。
 /// </summary>
 public sealed class PostgreSqlParamLiteralsResolver : IParamLiteralsResolver
 {
     /// <summary>
-    /// 封闭构造函数
+    /// 初始化一个 <see cref="PostgreSqlParamLiteralsResolver"/> 类型的实例。
     /// </summary>
     private PostgreSqlParamLiteralsResolver() { }
 
     /// <summary>
-    /// PostgreSql参数字面值解析器实例
+    /// 获取 PostgreSQL 参数字面值解析器单例。
     /// </summary>
     public static PostgreSqlParamLiteralsResolver Instance { get; } = new();
 
     /// <inheritdoc />
-    /// <returns>适用于 PostgreSQL SQL 文本的参数字面值。</returns>
     public string GetParamLiterals(object value)
     {
         if (value == null)

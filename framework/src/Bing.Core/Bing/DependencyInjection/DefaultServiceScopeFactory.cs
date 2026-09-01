@@ -21,6 +21,5 @@ public class DefaultServiceScopeFactory : IHybridServiceScopeFactory
 
     /// <inheritdoc />
     /// <remarks>直接委托给底层 <see cref="IServiceScopeFactory"/>。</remarks>
-    /// <returns>新创建的服务作用域。</returns>
     public IServiceScope CreateScope() => ServiceScopeFactory.CreateScope();
 }

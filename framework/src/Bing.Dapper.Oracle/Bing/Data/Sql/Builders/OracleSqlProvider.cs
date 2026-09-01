@@ -78,27 +78,21 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlProviderProfileProvide
     private sealed class OracleClauseFactory : ISqlClauseFactory
     {
         /// <inheritdoc />
-        /// <returns>Oracle Select 子句实例。</returns>
         public ISelectClause CreateSelect(SqlClauseContext context) => new SelectClause(context);
 
         /// <inheritdoc />
-        /// <returns>Oracle From 子句实例。</returns>
         public IFromClause CreateFrom(SqlClauseContext context) => new OracleFromClause(context);
 
         /// <inheritdoc />
-        /// <returns>Oracle Join 子句实例。</returns>
         public IJoinClause CreateJoin(SqlClauseContext context) => new OracleJoinClause(context);
 
         /// <inheritdoc />
-        /// <returns>Oracle Where 子句实例。</returns>
         public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
 
         /// <inheritdoc />
-        /// <returns>Oracle Group By 子句实例。</returns>
         public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
 
         /// <inheritdoc />
-        /// <returns>Oracle Order By 子句实例。</returns>
         public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
     }
 }
@@ -109,7 +103,6 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlProviderProfileProvide
 internal sealed class OraclePaginationRenderer : ISqlPaginationRenderer
 {
     /// <inheritdoc />
-    /// <returns>Oracle Offset/Fetch 分页 SQL 片段。</returns>
     public string Render(string offsetParameterName, string limitParameterName) =>
         $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
 }

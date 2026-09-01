@@ -7,7 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Bing.Data.Sql;
 
-// Sql查询对象 - 诊断相关
+/// <summary>
+/// 提供 SQL 查询对象的诊断能力。
+/// </summary>
 public abstract partial class SqlQueryBase
 {
     /// <summary>
