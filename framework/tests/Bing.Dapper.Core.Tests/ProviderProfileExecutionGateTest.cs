@@ -22,52 +22,70 @@ namespace Bing.Dapper.Core.Tests;
 public sealed class ProviderProfileExecutionGateTest
 {
     /// <summary>
-    /// 测试目的：冻结描述未声明 Returning 能力时，同步入口必须在连接打开前拒绝，即使当前 Provider 支持其他 Mutation。
+    /// 测试目的：冻结描述未声明 Returning 能力时，同步入口必须在连接打开前以 ProviderImplementationGap 拒绝。
     /// </summary>
-    [Fact]
-    public void ExecuteReturning_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public void ExecuteReturning_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
         var profile = new SqlProviderProfile
         {
-            Mutation = new SqlProviderMutationCapabilities { SupportsReturning = false }
+            Mutation = new SqlProviderMutationCapabilities
+            {
+                SupportsReturning = false,
+                ReturningFailureReason = failureReason
+            }
         };
         using var serviceProvider = CreateServiceProvider(profile);
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
         var description = CreateReturningDescription(profile);
 
         // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteReturning<int>(description));
+        var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteReturning<int>(description));
 
         // Assert
         Assert.Equal("写入命令 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
 
     /// <summary>
-    /// 测试目的：冻结描述未声明 Returning 能力时，异步入口必须与同步入口在连接访问前使用相同 Gate。
+    /// 测试目的：冻结描述未声明 Returning 能力时，异步入口必须与同步入口在连接访问前使用相同结构化 Gate。
     /// </summary>
-    [Fact]
-    public async Task ExecuteReturningAsync_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public async Task ExecuteReturningAsync_WhenDescriptionProfileDisablesReturning_ShouldRejectBeforeConnectionOpen(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
         var profile = new SqlProviderProfile
         {
-            Mutation = new SqlProviderMutationCapabilities { SupportsReturning = false }
+            Mutation = new SqlProviderMutationCapabilities
+            {
+                SupportsReturning = false,
+                ReturningFailureReason = failureReason
+            }
         };
         using var serviceProvider = CreateServiceProvider(profile);
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
         var description = CreateReturningDescription(profile);
 
         // Act
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() =>
             executor.ExecuteReturningAsync<int>(description));
 
         // Assert
         Assert.Equal("写入命令 Provider test.profile-gate 未声明 Returning 能力，不能执行。", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
@@ -138,14 +156,21 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用存储过程时，执行型过程入口应在创建命令前拒绝。
     /// </summary>
-    [Fact]
-    public void ExecuteProcedure_WhenProviderDisablesStoredProcedures_ShouldRejectBeforeCommandCreation()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public void ExecuteProcedure_WhenProviderDisablesStoredProcedures_ShouldRejectBeforeCommandCreation(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile
         {
-            Procedure = new SqlProviderProcedureCapabilities { SupportsStoredProcedures = false }
+            Procedure = new SqlProviderProcedureCapabilities
+            {
+                SupportsStoredProcedures = false,
+                StoredProceduresFailureReason = failureReason
+            }
         });
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
 
@@ -153,7 +178,8 @@ public sealed class ProviderProfileExecutionGateTest
         var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("UpdateReport"));
 
         // Assert
-        Assert.Contains("test.profile-gate", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
@@ -161,8 +187,11 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 仅禁用输出参数时，过程输出参数应在创建命令前拒绝。
     /// </summary>
-    [Fact]
-    public void ExecuteProcedure_WhenProviderDisablesOutputParameters_ShouldRejectBeforeCommandCreation()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public void ExecuteProcedure_WhenProviderDisablesOutputParameters_ShouldRejectBeforeCommandCreation(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
@@ -171,7 +200,8 @@ public sealed class ProviderProfileExecutionGateTest
             Procedure = new SqlProviderProcedureCapabilities
             {
                 SupportsStoredProcedures = true,
-                SupportsOutputParameters = false
+                SupportsOutputParameters = false,
+                OutputParametersFailureReason = failureReason
             }
         });
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
@@ -181,6 +211,8 @@ public sealed class ProviderProfileExecutionGateTest
         var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("GetReport", parameters));
 
         // Assert
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         Assert.Contains("不支持存储过程输出参数", exception.Message);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
@@ -190,11 +222,14 @@ public sealed class ProviderProfileExecutionGateTest
     /// 测试目的：原生 Dapper 输出参数仅能在命令物化后识别时，Provider 仍应在执行命令前拒绝。
     /// </summary>
     [Theory]
-    [InlineData(ParameterDirection.Output)]
-    [InlineData(ParameterDirection.InputOutput)]
-    [InlineData(ParameterDirection.ReturnValue)]
+    [InlineData(ParameterDirection.Output, SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(ParameterDirection.Output, SqlCapabilityFailureReason.ProviderImplementationGap)]
+    [InlineData(ParameterDirection.InputOutput, SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(ParameterDirection.InputOutput, SqlCapabilityFailureReason.ProviderImplementationGap)]
+    [InlineData(ParameterDirection.ReturnValue, SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(ParameterDirection.ReturnValue, SqlCapabilityFailureReason.ProviderImplementationGap)]
     public void ExecuteProcedure_WhenDynamicParametersContainUnsupportedOutput_ShouldRejectBeforeCommandExecution(
-        ParameterDirection direction)
+        ParameterDirection direction, SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var command = CreateCommand();
@@ -204,7 +239,8 @@ public sealed class ProviderProfileExecutionGateTest
             Procedure = new SqlProviderProcedureCapabilities
             {
                 SupportsStoredProcedures = true,
-                SupportsOutputParameters = false
+                SupportsOutputParameters = false,
+                OutputParametersFailureReason = failureReason
             }
         });
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
@@ -215,6 +251,8 @@ public sealed class ProviderProfileExecutionGateTest
         var exception = Assert.Throws<NotSupportedException>(() => executor.ExecuteProcedure("GetReport", parameters));
 
         // Assert
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         Assert.Contains("不支持存储过程输出参数", exception.Message);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
@@ -286,14 +324,21 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用流式读取时，异步流枚举应在打开连接前拒绝。
     /// </summary>
-    [Fact]
-    public async Task AsAsyncEnumerable_WhenProviderDisablesStreaming_ShouldRejectBeforeConnectionOpen()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public async Task AsAsyncEnumerable_WhenProviderDisablesStreaming_ShouldRejectBeforeConnectionOpen(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile
         {
-            Execution = new SqlProviderExecutionCapabilities { SupportsStreaming = false }
+            Execution = new SqlProviderExecutionCapabilities
+            {
+                SupportsStreaming = false,
+                StreamingFailureReason = failureReason
+            }
         });
         using var query = new ProfileGateQuery(serviceProvider, CreateOptions(connection.Object));
 
@@ -306,7 +351,8 @@ public sealed class ProviderProfileExecutionGateTest
         });
 
         // Assert
-        Assert.Contains("test.profile-gate", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
@@ -342,14 +388,21 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用取消时，携带可取消令牌的异步原生命令应在打开连接前拒绝。
     /// </summary>
-    [Fact]
-    public async Task ExecuteSqlAsync_WhenProviderDisablesCancellation_ShouldRejectBeforeConnectionOpen()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public async Task ExecuteSqlAsync_WhenProviderDisablesCancellation_ShouldRejectBeforeConnectionOpen(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
         var connection = CreateConnection();
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile
         {
-            Execution = new SqlProviderExecutionCapabilities { SupportsCancellation = false }
+            Execution = new SqlProviderExecutionCapabilities
+            {
+                SupportsCancellation = false,
+                CancellationFailureReason = failureReason
+            }
         });
         using var executor = new ProfileGateExecutor(serviceProvider, CreateOptions(connection.Object));
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -359,7 +412,8 @@ public sealed class ProviderProfileExecutionGateTest
             cancellationToken: cancellationTokenSource.Token));
 
         // Assert
-        Assert.Contains("test.profile-gate", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(failureReason, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }

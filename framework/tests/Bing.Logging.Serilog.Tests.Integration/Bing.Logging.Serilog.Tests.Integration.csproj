@@ -6,6 +6,12 @@
     <XunitStartupFullName>Bing.Logging.Tests.Startup</XunitStartupFullName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Bing.Utils.IdUtils" Version="1.5.0" />
     <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />

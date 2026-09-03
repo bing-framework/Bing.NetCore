@@ -68,7 +68,13 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
             SupportsStreaming = true,
             SupportsCancellation = true
         },
-        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Transaction = new SqlProviderTransactionCapabilities
+        {
+            SupportsTransactions = true,
+            SupportsNativeAsyncBegin = false,
+            SupportsNativeAsyncCommit = false,
+            SupportsNativeAsyncRollback = false
+        },
         Procedure = new SqlProviderProcedureCapabilities
         {
             SupportsStoredProcedures = true,

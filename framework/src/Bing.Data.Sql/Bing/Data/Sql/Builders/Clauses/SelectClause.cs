@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Select子句
 /// </summary>
-public class SelectClause : ISelectClause
+public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -347,6 +347,18 @@ public class SelectClause : ISelectClause
             _projectionCountKnown = false;
         _columns.AddColumns(columns, tableAlias);
     }
+
+    /// <summary>
+    /// 追加已绑定到具体表源实例的投影列。
+    /// </summary>
+    /// <param name="columns">已按当前方言解析完成的列 SQL。</param>
+    internal void AppendBoundColumns(string columns) => Select(columns);
+
+    void ISqlMultiSourceSelectClause.AppendBoundColumns(string columns) => AppendBoundColumns(columns);
+
+    void ISqlMultiSourceSelectClause.Aggregate<TEntity>(SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> expression, string tableAlias, string columnAlias, bool distinct) =>
+        Aggregate(function, expression, tableAlias, columnAlias, distinct);
 
     /// <summary>
     /// 设置列名

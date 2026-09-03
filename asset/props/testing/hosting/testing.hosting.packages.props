@@ -1,0 +1,95 @@
+<Project>
+
+  <!-- Microsoft.Extensions.Hosting -->
+  <ItemGroup Condition="
+      '$(BingTestingUseHosting)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingMicrosoftExtensionsHostingVersion)' != ''">
+
+    <PackageReference
+        Include="Microsoft.Extensions.Hosting"
+        Version="$(BingMicrosoftExtensionsHostingVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- Microsoft.Extensions.DependencyInjection -->
+  <ItemGroup Condition="
+      '$(BingTestingUseDependencyInjection)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingMicrosoftDependencyInjectionVersion)' != ''">
+
+    <PackageReference
+        Include="Microsoft.Extensions.DependencyInjection"
+        Version="$(BingMicrosoftDependencyInjectionVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- Microsoft.Extensions.Logging -->
+  <ItemGroup Condition="
+      '$(BingTestingUseLogging)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingMicrosoftLoggingVersion)' != ''">
+
+    <PackageReference
+        Include="Microsoft.Extensions.Logging"
+        Version="$(BingMicrosoftLoggingVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- Microsoft.AspNetCore.TestHost -->
+  <ItemGroup Condition="
+      '$(BingTestingUseHosting)' == 'true'
+      And '$(BingTestingUseTestHost)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingAspNetCoreTestHostVersion)' != ''">
+
+    <PackageReference
+        Include="Microsoft.AspNetCore.TestHost"
+        Version="$(BingAspNetCoreTestHostVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- Xunit.DependencyInjection -->
+  <ItemGroup Condition="
+      '$(BingTestingUseXunitDependencyInjection)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingXunitDependencyInjectionVersion)' != ''">
+
+    <PackageReference
+        Include="Xunit.DependencyInjection"
+        Version="$(BingXunitDependencyInjectionVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- Xunit.DependencyInjection.Logging -->
+  <ItemGroup Condition="
+      '$(BingTestingUseXunitDependencyInjection)' == 'true'
+      And '$(BingTestingUseDependencyInjectionLogging)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingXunitDependencyInjectionLoggingVersion)' != ''">
+
+    <PackageReference
+        Include="Xunit.DependencyInjection.Logging"
+        Version="$(BingXunitDependencyInjectionLoggingVersion)" />
+
+  </ItemGroup>
+
+
+  <!-- AspectCore.Extensions.Hosting -->
+  <ItemGroup Condition="
+      '$(BingTestingUseAspectCore)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingAspectCoreHostingVersion)' != ''">
+
+    <PackageReference
+        Include="AspectCore.Extensions.Hosting"
+        Version="$(BingAspectCoreHostingVersion)" />
+
+  </ItemGroup>
+
+</Project>

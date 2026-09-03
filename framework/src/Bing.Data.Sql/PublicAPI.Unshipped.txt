@@ -496,10 +496,16 @@ Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SqlProviderExecutionCapabilities() -> void
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsMultipleResultSets.get -> bool
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsMultipleResultSets.init -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.MultipleResultSetsFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.MultipleResultSetsFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsStreaming.get -> bool
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsStreaming.init -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.StreamingFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.StreamingFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsCancellation.get -> bool
 Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.SupportsCancellation.init -> void
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.CancellationFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities.CancellationFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderLimits
 Bing.Data.Sql.Builders.SqlProviderLimits.SqlProviderLimits() -> void
 Bing.Data.Sql.Builders.SqlProviderLimits.MaxParameterCount.get -> int?
@@ -508,18 +514,30 @@ Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities
 Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SqlProviderProcedureCapabilities() -> void
 Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsStoredProcedures.get -> bool
 Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsStoredProcedures.init -> void
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.StoredProceduresFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.StoredProceduresFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsOutputParameters.get -> bool
 Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.SupportsOutputParameters.init -> void
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.OutputParametersFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderProcedureCapabilities.OutputParametersFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SqlProviderMutationCapabilities() -> void
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsDeleteUsing.get -> bool
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsDeleteUsing.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.DeleteUsingFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.DeleteUsingFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsMultiRowValues.get -> bool
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsMultiRowValues.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.MultiRowValuesFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.MultiRowValuesFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsReturning.get -> bool
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsReturning.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.ReturningFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.ReturningFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsUpdateFrom.get -> bool
 Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.SupportsUpdateFrom.init -> void
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.UpdateFromFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderMutationCapabilities.UpdateFromFailureReason.init -> void
 Bing.Data.Sql.Builders.SqlProviderProfile
 Bing.Data.Sql.Builders.SqlProviderProfile.SqlProviderProfile() -> void
 Bing.Data.Sql.Builders.SqlProviderProfile.Execution.get -> Bing.Data.Sql.Builders.SqlProviderExecutionCapabilities
@@ -536,8 +554,55 @@ Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.get -> Bing.Data.Sql.Build
 Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.init -> void
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SqlProviderTransactionCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncBegin.get -> bool
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncBegin.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncCommit.get -> bool
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncCommit.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncRollback.get -> bool
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncRollback.init -> void
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsTransactions.get -> bool
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsTransactions.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.TransactionsFailureReason.get -> Bing.Data.Sql.SqlCapabilityFailureReason?
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.TransactionsFailureReason.init -> void
+Bing.Data.Sql.SqlCapabilityFailureReason
+Bing.Data.Sql.SqlCapabilityFailureReason.DatabaseUnsupported = 0 -> Bing.Data.Sql.SqlCapabilityFailureReason
+Bing.Data.Sql.SqlCapabilityFailureReason.ProviderImplementationGap = 1 -> Bing.Data.Sql.SqlCapabilityFailureReason
+Bing.Data.Sql.SqlCapabilityFailureReason.ProviderProfileMissing = 2 -> Bing.Data.Sql.SqlCapabilityFailureReason
+Bing.Data.Sql.SqlCapabilityFailureReason.ProviderProfileMismatch = 3 -> Bing.Data.Sql.SqlCapabilityFailureReason
+Bing.Data.Sql.SqlCapabilityFailure
+static Bing.Data.Sql.SqlCapabilityFailure.Create(Bing.Data.Sql.SqlCapabilityFailureReason reason, string capability, string providerKey, string message) -> System.NotSupportedException
+static Bing.Data.Sql.SqlCapabilityFailure.TryGetReason(System.Exception exception, out Bing.Data.Sql.SqlCapabilityFailureReason reason) -> bool
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.Sources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.AppendRoot(System.Type entityType, string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.From<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression, System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource> sources) -> Bing.Data.Sql.Builders.ICondition
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(System.Linq.Expressions.LambdaExpression expression, System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource> sources, Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> Bing.Data.Sql.Builders.ICondition
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.ResolveMultiSourceColumns(System.Linq.Expressions.LambdaExpression expression, System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource> sources) -> System.Collections.Generic.IReadOnlyList<string>
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.ResolveMultiSourceDtoColumns(System.Linq.Expressions.LambdaExpression expression, System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource> sources, out System.Collections.Generic.IReadOnlyCollection<string> projectedMembers) -> System.Collections.Generic.IReadOnlyList<string>
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.ResolveMultiSourceValueCondition(System.Linq.Expressions.LambdaExpression expression, Bing.Data.Sql.Builders.Core.TableSource source, object value, Bing.Operator operator) -> Bing.Data.Sql.Builders.ICondition
+Bing.Data.Sql.Builders.ISqlMultiSourceFromClause.MergeNewParameters(Bing.Data.Sql.Builders.Params.IParameterManager parameterManager) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceSelectClause
+Bing.Data.Sql.Builders.ISqlMultiSourceSelectClause.AppendBoundColumns(string columns) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceSelectClause.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, string tableAlias, string columnAlias, bool distinct) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceGroupByClause
+Bing.Data.Sql.Builders.ISqlMultiSourceGroupByClause.AppendBoundColumns(System.Collections.Generic.IEnumerable<string> columns) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceGroupByClause.SetBoundHaving(Bing.Data.Sql.Builders.ICondition condition) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceOrderByClause
+Bing.Data.Sql.Builders.ISqlMultiSourceOrderByClause.AppendBoundColumns(System.Collections.Generic.IEnumerable<string> columns, bool desc) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.TypedSources.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Core.TableSource>
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.Join<TEntity>(Bing.Data.Sql.Builders.IFromClause fromClause, System.Linq.Expressions.LambdaExpression predicate, string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.LeftJoin<TEntity>(Bing.Data.Sql.Builders.IFromClause fromClause, System.Linq.Expressions.LambdaExpression predicate, string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.RightJoin<TEntity>(Bing.Data.Sql.Builders.IFromClause fromClause, System.Linq.Expressions.LambdaExpression predicate, string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.FullJoin<TEntity>(Bing.Data.Sql.Builders.IFromClause fromClause, System.Linq.Expressions.LambdaExpression predicate, string alias = null, string schema = null) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.Join<TProjection>(Bing.Data.Sql.Builders.IFromClause fromClause, Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.LambdaExpression predicate) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.LeftJoin<TProjection>(Bing.Data.Sql.Builders.IFromClause fromClause, Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.LambdaExpression predicate) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.RightJoin<TProjection>(Bing.Data.Sql.Builders.IFromClause fromClause, Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.LambdaExpression predicate) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.FullJoin<TProjection>(Bing.Data.Sql.Builders.IFromClause fromClause, Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.LambdaExpression predicate) -> void
+Bing.Data.Sql.Builders.ISqlMultiSourceJoinClause.CrossJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> void
+Bing.Data.Sql.Diagnostics.SqlTransactionDiagnosticInfo.ExecutionMode.get -> string
+Bing.Data.Sql.Diagnostics.SqlTransactionDiagnosticInfo.ExecutionMode.set -> void
 Bing.Data.Sql.Builders.SqlProviderQueryCapabilities
 Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.SqlProviderQueryCapabilities() -> void
 Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.Cte.get -> Bing.Data.SqlQueryCapabilityState

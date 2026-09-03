@@ -16,7 +16,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// 表连接子句
 /// </summary>
-public class JoinClause : IJoinClause
+public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 {
     #region 字段
 
@@ -325,7 +325,7 @@ public class JoinClause : IJoinClause
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构。</param>
-    internal void Join<TEntity>(string joinType, FromClause fromClause, LambdaExpression predicate,
+    private void Join<TEntity>(string joinType, ISqlMultiSourceFromClause fromClause, LambdaExpression predicate,
         string alias = null, string schema = null) where TEntity : class
     {
         if (fromClause == null)
@@ -394,7 +394,7 @@ public class JoinClause : IJoinClause
     /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
-    internal void Join<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+    internal void Join<TEntity>(ISqlMultiSourceFromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(JoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
@@ -405,7 +405,7 @@ public class JoinClause : IJoinClause
     /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
-    internal void LeftJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+    internal void LeftJoin<TEntity>(ISqlMultiSourceFromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(LeftJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
@@ -416,7 +416,7 @@ public class JoinClause : IJoinClause
     /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
-    internal void RightJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+    internal void RightJoin<TEntity>(ISqlMultiSourceFromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(RightJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
@@ -427,7 +427,7 @@ public class JoinClause : IJoinClause
     /// <param name="predicate">覆盖当前来源和连接来源的连接条件。</param>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
-    internal void FullJoin<TEntity>(FromClause fromClause, LambdaExpression predicate, string alias = null,
+    internal void FullJoin<TEntity>(ISqlMultiSourceFromClause fromClause, LambdaExpression predicate, string alias = null,
         string schema = null) where TEntity : class => Join<TEntity>(FullJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
@@ -438,7 +438,7 @@ public class JoinClause : IJoinClause
     /// <param name="fromClause">当前查询的根来源子句。</param>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
-    private void Join<TProjection>(string joinType, FromClause fromClause, SqlSubquery<TProjection> subquery,
+    private void Join<TProjection>(string joinType, ISqlMultiSourceFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class
     {
         if (fromClause == null)
@@ -510,7 +510,7 @@ public class JoinClause : IJoinClause
     /// <param name="fromClause">当前查询的根来源子句。</param>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
-    internal void Join<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+    internal void Join<TProjection>(ISqlMultiSourceFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(JoinKey, fromClause, subquery, predicate);
 
     /// <summary>
@@ -520,7 +520,7 @@ public class JoinClause : IJoinClause
     /// <param name="fromClause">当前查询的根来源子句。</param>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
-    internal void LeftJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+    internal void LeftJoin<TProjection>(ISqlMultiSourceFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(LeftJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
@@ -530,7 +530,7 @@ public class JoinClause : IJoinClause
     /// <param name="fromClause">当前查询的根来源子句。</param>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
-    internal void RightJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+    internal void RightJoin<TProjection>(ISqlMultiSourceFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(RightJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
@@ -540,7 +540,7 @@ public class JoinClause : IJoinClause
     /// <param name="fromClause">当前查询的根来源子句。</param>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     /// <param name="predicate">覆盖全部 Lambda 来源的连接条件。</param>
-    internal void FullJoin<TProjection>(FromClause fromClause, SqlSubquery<TProjection> subquery,
+    internal void FullJoin<TProjection>(ISqlMultiSourceFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) where TProjection : class => Join(FullJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
@@ -790,7 +790,8 @@ public class JoinClause : IJoinClause
     /// </summary>
     /// <param name="parameterManager">候选参数管理器。</param>
     /// <param name="fromClause">当前 From 子句。</param>
-    internal virtual void CommitParameterManager(IParameterManager parameterManager, FromClause fromClause)
+    internal virtual void CommitParameterManager(IParameterManager parameterManager,
+        ISqlMultiSourceFromClause fromClause)
     {
         if (_sqlBuilder is SqlBuilderBase builder)
             builder.ReplaceParameterManager(parameterManager);
@@ -1108,6 +1109,41 @@ public class JoinClause : IJoinClause
     /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(CrossJoinKey, subquery);
+
+    IReadOnlyList<TableSource> ISqlMultiSourceJoinClause.TypedSources => GetTypedSources();
+
+    void ISqlMultiSourceJoinClause.Join<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+        string alias, string schema) => Join<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
+
+    void ISqlMultiSourceJoinClause.LeftJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+        string alias, string schema) => LeftJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
+
+    void ISqlMultiSourceJoinClause.RightJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+        string alias, string schema) => RightJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
+
+    void ISqlMultiSourceJoinClause.FullJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+        string alias, string schema) => FullJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
+
+    void ISqlMultiSourceJoinClause.Join<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) => Join(GetMultiSourceFromClause(fromClause), subquery, predicate);
+
+    void ISqlMultiSourceJoinClause.LeftJoin<TProjection>(IFromClause fromClause,
+        SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
+        LeftJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
+
+    void ISqlMultiSourceJoinClause.RightJoin<TProjection>(IFromClause fromClause,
+        SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
+        RightJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
+
+    void ISqlMultiSourceJoinClause.FullJoin<TProjection>(IFromClause fromClause,
+        SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
+        FullJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
+
+    void ISqlMultiSourceJoinClause.CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) => CrossJoin(subquery);
+
+    private static ISqlMultiSourceFromClause GetMultiSourceFromClause(IFromClause fromClause) =>
+        fromClause as ISqlMultiSourceFromClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 From 能力。");
 
     /// <inheritdoc />
     public void AppendCrossJoin(string sql) => AppendJoin(CrossJoinKey, sql);

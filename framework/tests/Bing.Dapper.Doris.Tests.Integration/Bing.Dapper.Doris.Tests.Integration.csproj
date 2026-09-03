@@ -6,6 +6,12 @@
     <EnableDITestPackages>false</EnableDITestPackages>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />

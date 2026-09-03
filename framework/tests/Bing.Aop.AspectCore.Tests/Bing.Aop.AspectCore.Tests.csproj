@@ -5,6 +5,12 @@
     <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
   </ItemGroup>

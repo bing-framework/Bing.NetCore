@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Metadata;
 
@@ -63,7 +62,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// </summary>
     /// <param name="accessor">SQL 子句访问器。</param>
     /// <returns>当前查询的 From 子句。</returns>
-    private static FromClause GetFromClause(ISqlQueryClauseAccessor accessor) =>
+    private static ISqlMultiSourceFromClause GetFromClause(ISqlQueryClauseAccessor accessor) =>
         SqlLambdaQueryCore.GetFromClause(accessor);
 
     /// <summary>
@@ -309,7 +308,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class
     {
-        GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).AppendRoot<TEntity>(alias, schema);
+        GetFromClause((ISqlQueryClauseAccessor)GetBuilder()).AppendRoot(typeof(TEntity), alias, schema);
         Touch();
         return this;
     }
@@ -618,8 +617,8 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         var builder = GetBuilder() as SqlBuilderBase ??
             throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
         var source = ResolveSource<TEntity>(alias);
-        builder.ReplaceSelect(select => ((SelectClause)select).Aggregate(function, column, source.Alias, columnAlias,
-            distinct));
+        builder.ReplaceSelect(select => ((ISqlMultiSourceSelectClause)select).Aggregate(function, column,
+            source.Alias, columnAlias, distinct));
         Touch();
         return this;
     }

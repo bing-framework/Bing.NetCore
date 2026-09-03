@@ -1,0 +1,114 @@
+<Project>
+
+  <!-- 默认值 -->
+  <PropertyGroup>
+
+    <BingAspectCoreHostingVersion
+        Condition="'$(BingAspectCoreHostingVersion)' == ''">2.4.0</BingAspectCoreHostingVersion>
+
+  </PropertyGroup>
+
+
+  <!-- net6.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+
+    <BingMicrosoftDependencyInjectionVersion>6.0.0</BingMicrosoftDependencyInjectionVersion>
+    <BingMicrosoftLoggingVersion>6.0.0</BingMicrosoftLoggingVersion>
+    <BingMicrosoftExtensionsHostingVersion>6.0.1</BingMicrosoftExtensionsHostingVersion>
+    <BingAspNetCoreTestHostVersion>6.0.36</BingAspNetCoreTestHostVersion>
+    <BingXunitDependencyInjectionVersion>8.9.0</BingXunitDependencyInjectionVersion>
+    <BingXunitDependencyInjectionLoggingVersion>8.1.0</BingXunitDependencyInjectionLoggingVersion>
+  </PropertyGroup>
+
+
+  <!-- net8.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+
+    <BingMicrosoftDependencyInjectionVersion>8.0.1</BingMicrosoftDependencyInjectionVersion>
+    <BingMicrosoftLoggingVersion>8.0.1</BingMicrosoftLoggingVersion>
+    <BingMicrosoftExtensionsHostingVersion>8.0.1</BingMicrosoftExtensionsHostingVersion>
+    <BingAspNetCoreTestHostVersion>8.0.30</BingAspNetCoreTestHostVersion>
+    <BingXunitDependencyInjectionVersion>9.9.2</BingXunitDependencyInjectionVersion>
+    <BingXunitDependencyInjectionLoggingVersion>9.0.0</BingXunitDependencyInjectionLoggingVersion>
+  </PropertyGroup>
+
+
+  <!-- net9.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
+
+    <BingMicrosoftDependencyInjectionVersion>9.0.19</BingMicrosoftDependencyInjectionVersion>
+    <BingMicrosoftLoggingVersion>9.0.19</BingMicrosoftLoggingVersion>
+    <BingMicrosoftExtensionsHostingVersion>9.0.19</BingMicrosoftExtensionsHostingVersion>
+    <BingAspNetCoreTestHostVersion>9.0.19</BingAspNetCoreTestHostVersion>
+
+  </PropertyGroup>
+
+
+  <!-- net10.0 -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+
+    <BingMicrosoftDependencyInjectionVersion>10.0.11</BingMicrosoftDependencyInjectionVersion>
+    <BingMicrosoftLoggingVersion>10.0.11</BingMicrosoftLoggingVersion>
+    <BingMicrosoftExtensionsHostingVersion>10.0.11</BingMicrosoftExtensionsHostingVersion>
+    <BingAspNetCoreTestHostVersion>10.0.11</BingAspNetCoreTestHostVersion>
+
+  </PropertyGroup>
+
+
+  <!-- Xunit.DependencyInjection：按 xUnit 主模式选择 -->
+  <!--<PropertyGroup Condition="'$(BingTestingResolvedXunitMode)' == 'V2'">
+
+    <BingXunitDependencyInjectionVersion>9.9.2</BingXunitDependencyInjectionVersion>
+    <BingXunitDependencyInjectionLoggingVersion>9.9.2</BingXunitDependencyInjectionLoggingVersion>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BingTestingResolvedXunitMode)' == 'V3'">
+
+    <BingXunitDependencyInjectionVersion>12.0.1</BingXunitDependencyInjectionVersion>
+    <BingXunitDependencyInjectionLoggingVersion>12.0.1</BingXunitDependencyInjectionLoggingVersion>
+
+  </PropertyGroup>-->
+
+
+  <!-- Override -->
+  <PropertyGroup>
+
+    <BingMicrosoftDependencyInjectionVersion
+        Condition="'$(BingMicrosoftDependencyInjectionVersionOverride)' != ''">
+      $(BingMicrosoftDependencyInjectionVersionOverride)
+    </BingMicrosoftDependencyInjectionVersion>
+
+    <BingMicrosoftLoggingVersion
+        Condition="'$(BingMicrosoftLoggingVersionOverride)' != ''">
+      $(BingMicrosoftLoggingVersionOverride)
+    </BingMicrosoftLoggingVersion>
+
+    <BingMicrosoftExtensionsHostingVersion
+        Condition="'$(BingMicrosoftExtensionsHostingVersionOverride)' != ''">
+      $(BingMicrosoftExtensionsHostingVersionOverride)
+    </BingMicrosoftExtensionsHostingVersion>
+
+    <BingAspNetCoreTestHostVersion
+        Condition="'$(BingAspNetCoreTestHostVersionOverride)' != ''">
+      $(BingAspNetCoreTestHostVersionOverride)
+    </BingAspNetCoreTestHostVersion>
+
+    <BingXunitDependencyInjectionVersion
+        Condition="'$(BingXunitDependencyInjectionVersionOverride)' != ''">
+      $(BingXunitDependencyInjectionVersionOverride)
+    </BingXunitDependencyInjectionVersion>
+
+    <BingXunitDependencyInjectionLoggingVersion
+        Condition="'$(BingXunitDependencyInjectionLoggingVersionOverride)' != ''">
+      $(BingXunitDependencyInjectionLoggingVersionOverride)
+    </BingXunitDependencyInjectionLoggingVersion>
+
+    <BingAspectCoreHostingVersion
+        Condition="'$(BingAspectCoreHostingVersionOverride)' != ''">
+      $(BingAspectCoreHostingVersionOverride)
+    </BingAspectCoreHostingVersion>
+
+  </PropertyGroup>
+
+</Project>

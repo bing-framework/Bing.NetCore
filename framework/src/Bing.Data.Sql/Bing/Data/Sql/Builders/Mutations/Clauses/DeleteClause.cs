@@ -34,7 +34,8 @@ public sealed class DeleteClause : MutationTableClauseBase, IDeleteClause
     /// <inheritdoc />
     public void AppendTo(StringBuilder builder)
     {
-        var withAlias = SqlProviderCapabilityResolver.GetProfile(Context.Provider).Mutation.SupportsDeleteUsing;
+        var profile = SqlProviderCapabilityResolver.GetProfile(Context.Provider);
+        var withAlias = profile.Mutation?.SupportsDeleteUsing == true;
         AppendPrefixedTable(builder, "Delete From ", Table, withAlias);
     }
 

@@ -35,6 +35,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         builder.Verify(item => item.ToSql(), Times.Once);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
@@ -59,6 +61,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         builder.Verify(item => item.ToSql(), Times.Once);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
@@ -79,6 +83,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
     }
@@ -98,6 +104,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
     }
@@ -145,6 +153,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         Assert.Equal(0, entities.EnumerationCount);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
@@ -172,6 +182,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         Assert.Equal(0, entities.EnumerationCount);
         connection.Verify(item => item.CreateCommand(), Times.Never);
         connection.Verify(item => item.Open(), Times.Never);
@@ -196,6 +208,8 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Assert
         Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.BeginTransaction(It.IsAny<IsolationLevel>()), Times.Never);
     }

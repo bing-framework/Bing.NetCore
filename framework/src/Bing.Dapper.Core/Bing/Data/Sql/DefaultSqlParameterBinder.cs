@@ -535,6 +535,17 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
     private bool _supportsOutputParameters = true;
 
     /// <summary>
+    /// 输出参数关闭时的失败原因。
+    /// </summary>
+    private SqlCapabilityFailureReason _outputParametersFailureReason =
+        SqlCapabilityFailureReason.ProviderImplementationGap;
+
+    /// <summary>
+    /// 输出参数校验使用的 Provider Key。
+    /// </summary>
+    private string _providerKey;
+
+    /// <summary>
     /// 初始化原生 Dapper 输出参数访问器。
     /// </summary>
     /// <param name="parameters">当前执行使用的参数集合。</param>
@@ -570,8 +581,15 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
     /// 配置当前过程的输出参数能力。
     /// </summary>
     /// <param name="supportsOutputParameters">是否允许输出参数。</param>
-    internal void SetOutputParametersSupported(bool supportsOutputParameters) =>
+    /// <param name="failureReason">输出参数关闭时的失败原因。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    internal void SetOutputParametersSupported(bool supportsOutputParameters,
+        SqlCapabilityFailureReason failureReason, string providerKey)
+    {
         _supportsOutputParameters = supportsOutputParameters;
+        _outputParametersFailureReason = failureReason;
+        _providerKey = providerKey;
+    }
 
     /// <inheritdoc />
     public void AddParameters(IDbCommand command, SqlMapper.Identity identity)
@@ -587,7 +605,8 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
                 _outputParameters[NormalizeName(dbParameter.ParameterName)] = dbParameter;
         }
         if (_supportsOutputParameters == false && _outputParameters.Count > 0)
-            throw new NotSupportedException("当前 Provider 不支持存储过程输出参数。");
+            throw SqlCapabilityFailure.Create(_outputParametersFailureReason, "OutputParameters", _providerKey,
+                "当前 Provider 不支持存储过程输出参数。");
     }
 
     /// <inheritdoc />

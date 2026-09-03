@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Bing.Data.Sql.Builders;
-using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql;
@@ -317,8 +316,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
         var columns = GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        (accessor.SelectClause as SelectClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表投影查询。"))
-            .Select(string.Join(", ", columns));
+        GetSelectClause(accessor).AppendBoundColumns(string.Join(", ", columns));
         Touch();
     }
 
@@ -333,10 +331,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
         var columns = expression.Body is MemberInitExpression
-            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources)
+            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources, out _)
             : GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        (accessor.SelectClause as SelectClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表投影查询。"))
-            .Select(string.Join(", ", columns));
+        GetSelectClause(accessor).AppendBoundColumns(string.Join(", ", columns));
         Touch();
     }
 
@@ -356,7 +353,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
         var columns = expression.Body is MemberInitExpression
-            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources)
+            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources, out _)
             : GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
         ReplaceSelect(string.Join(", ", columns));
         Touch();
@@ -410,8 +407,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        (accessor.GroupByClause as GroupByClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表分组查询。"))
-            .AddBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources));
+        GetGroupByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources));
         Touch();
         return this;
     }
@@ -433,8 +429,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        (accessor.GroupByClause as GroupByClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表分组查询。"))
-            .SetBoundHaving(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, sources));
+        GetGroupByClause(accessor).SetBoundHaving(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, sources));
         Touch();
         return this;
     }
@@ -459,8 +454,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        (accessor.OrderByClause as OrderByClause ?? throw new NotSupportedException("当前 SQL Provider 不支持多表排序查询。"))
-            .AddBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources), desc);
+        GetOrderByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources), desc);
         Touch();
         return this;
     }
@@ -644,13 +638,13 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
     internal void CrossJoinCore<TJoin>(string alias, string schema) where TJoin : class =>
-        JoinAndTouch(() => GetBuilder().CrossJoin<TJoin>(alias, schema));
+        JoinAndTouch(() => GetJoinClause().CrossJoin<TJoin>(alias, schema));
 
     /// <summary>添加类型化交叉连接派生表。</summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待交叉连接的派生表。</param>
     internal void CrossJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
-        JoinAndTouch(() => ((JoinClause)((ISqlQueryClauseAccessor)GetBuilder()).JoinClause).CrossJoin(subquery));
+        JoinAndTouch(() => GetJoinClause().CrossJoin(subquery));
 
     /// <summary>
     /// 替换当前查询的投影列。
@@ -689,23 +683,52 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// 获取当前查询的根来源子句。
     /// </summary>
     /// <returns>当前查询的根来源子句。</returns>
-    internal FromClause GetFromClause() => GetFromClause((ISqlQueryClauseAccessor)GetBuilder());
+    internal ISqlMultiSourceFromClause GetFromClause() => GetFromClause((ISqlQueryClauseAccessor)GetBuilder());
 
     /// <summary>
     /// 获取当前查询的连接子句。
     /// </summary>
     /// <returns>当前查询的连接子句。</returns>
-    internal JoinClause GetJoinClause() =>
-        ((ISqlQueryClauseAccessor)GetBuilder()).JoinClause as JoinClause ??
-        throw new NotSupportedException("当前 SQL Provider 不支持多表连接查询。");
+    internal ISqlMultiSourceJoinClause GetJoinClause() => GetJoinClause((ISqlQueryClauseAccessor)GetBuilder());
 
     /// <summary>
     /// 从查询子句访问器获取根来源子句。
     /// </summary>
     /// <param name="accessor">SQL 查询子句访问器。</param>
     /// <returns>查询的根来源子句。</returns>
-    internal static FromClause GetFromClause(ISqlQueryClauseAccessor accessor) => accessor.FromClause as FromClause ??
-        throw new NotSupportedException("当前 SQL Provider 不支持多表根来源查询。");
+    internal static ISqlMultiSourceFromClause GetFromClause(ISqlQueryClauseAccessor accessor) =>
+        accessor?.FromClause as ISqlMultiSourceFromClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 From 能力。");
+
+    /// <summary>
+    /// 从查询子句访问器获取 Lambda 多源 Join 能力。
+    /// </summary>
+    /// <param name="accessor">SQL 查询子句访问器。</param>
+    /// <returns>Lambda 多源 Join 能力。</returns>
+    internal static ISqlMultiSourceJoinClause GetJoinClause(ISqlQueryClauseAccessor accessor) =>
+        accessor?.JoinClause as ISqlMultiSourceJoinClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Join 能力。");
+
+    /// <summary>
+    /// 从查询子句访问器获取 Lambda 多源 Select 能力。
+    /// </summary>
+    internal static ISqlMultiSourceSelectClause GetSelectClause(ISqlQueryClauseAccessor accessor) =>
+        accessor?.SelectClause as ISqlMultiSourceSelectClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Select 能力。");
+
+    /// <summary>
+    /// 从查询子句访问器获取 Lambda 多源 Group By 能力。
+    /// </summary>
+    internal static ISqlMultiSourceGroupByClause GetGroupByClause(ISqlQueryClauseAccessor accessor) =>
+        accessor?.GroupByClause as ISqlMultiSourceGroupByClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Group By 能力。");
+
+    /// <summary>
+    /// 从查询子句访问器获取 Lambda 多源 Order By 能力。
+    /// </summary>
+    internal static ISqlMultiSourceOrderByClause GetOrderByClause(ISqlQueryClauseAccessor accessor) =>
+        accessor?.OrderByClause as ISqlMultiSourceOrderByClause ??
+        throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Order By 能力。");
 
     /// <summary>
     /// 获取当前查询已绑定的全部表源。
@@ -717,8 +740,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (accessor == null)
             throw new ArgumentNullException(nameof(accessor));
         var sources = new List<TableSource>(GetFromClause(accessor).Sources);
-        if (accessor.JoinClause is JoinClause joinClause)
-            sources.AddRange(joinClause.GetTypedSources());
+        sources.AddRange(GetJoinClause(accessor).TypedSources);
         return sources;
     }
 }

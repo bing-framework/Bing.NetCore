@@ -54,41 +54,51 @@ public class SqlMultipleQueryExecutorTest
     /// <summary>
     /// 测试目的：Provider 不支持多结果集时，同步入口必须在打开连接或创建命令前拒绝有效命令。
     /// </summary>
-    [Fact]
-    public void Execute_WhenMultipleResultsAreUnsupported_ShouldRejectBeforeConnectionAccess()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public void Execute_WhenMultipleResultsAreUnsupported_ShouldRejectBeforeConnectionAccess(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
-        using var provider = CreateServiceProvider();
+        using var provider = CreateServiceProvider(failureReason: failureReason);
         var connection = new Mock<IDbConnection>();
         using var executor = new UnsupportedMultipleQueryExecutor(provider, connection.Object);
         var command = new SqlMultipleQueryCommand("Select 1; Select 2", Array.Empty<SqlParam>());
 
         // Act
-        Assert.Throws<NotSupportedException>(() => executor.Execute(command));
+        var exception = Assert.Throws<NotSupportedException>(() => executor.Execute(command));
 
         // Assert
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason), exception.ToString());
+        Assert.Equal(failureReason, reason);
     }
 
     /// <summary>
     /// 测试目的：Provider 不支持多结果集时，异步入口必须在打开连接或创建命令前拒绝有效命令。
     /// </summary>
-    [Fact]
-    public async Task ExecuteAsync_WhenMultipleResultsAreUnsupported_ShouldRejectBeforeConnectionAccess()
+    [Theory]
+    [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
+    [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
+    public async Task ExecuteAsync_WhenMultipleResultsAreUnsupported_ShouldRejectBeforeConnectionAccess(
+        SqlCapabilityFailureReason failureReason)
     {
         // Arrange
-        using var provider = CreateServiceProvider();
+        using var provider = CreateServiceProvider(failureReason: failureReason);
         var connection = new Mock<IDbConnection>();
         using var executor = new UnsupportedMultipleQueryExecutor(provider, connection.Object);
         var command = new SqlMultipleQueryCommand("Select 1; Select 2", Array.Empty<SqlParam>());
 
         // Act
-        await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteAsync(command));
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteAsync(command));
 
         // Assert
         connection.Verify(item => item.Open(), Times.Never);
         connection.Verify(item => item.CreateCommand(), Times.Never);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason), exception.ToString());
+        Assert.Equal(failureReason, reason);
     }
 
     /// <summary>
@@ -148,7 +158,7 @@ public class SqlMultipleQueryExecutorTest
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         public UnsupportedMultipleQueryExecutor(IServiceProvider serviceProvider, IDbConnection connection = null)
-            : base(serviceProvider, new SqlOptions { Connection = connection })
+            : base(serviceProvider, CreateOptions(connection))
         {
         }
 
@@ -208,11 +218,13 @@ public class SqlMultipleQueryExecutorTest
     /// <summary>
     /// 创建注册仅支持单结果集 Provider 的测试服务容器。
     /// </summary>
-    private static ServiceProvider CreateServiceProvider(bool supportsMultipleResultSets = false)
+    private static ServiceProvider CreateServiceProvider(bool supportsMultipleResultSets = false,
+        SqlCapabilityFailureReason? failureReason = null)
     {
         var services = new ServiceCollection();
         services.AddSqlCore();
-        services.AddSingleton<ISqlProvider>(new UnsupportedMultipleResultProvider(supportsMultipleResultSets));
+        services.AddSingleton<ISqlProvider>(new UnsupportedMultipleResultProvider(supportsMultipleResultSets,
+            failureReason));
         return services.BuildServiceProvider();
     }
 
@@ -228,11 +240,13 @@ public class SqlMultipleQueryExecutorTest
         /// 初始化测试 Provider。
         /// </summary>
         /// <param name="supportsMultipleResultSets">是否支持多结果集。</param>
-        public UnsupportedMultipleResultProvider(bool supportsMultipleResultSets) => Profile = new SqlProviderProfile
+        public UnsupportedMultipleResultProvider(bool supportsMultipleResultSets,
+            SqlCapabilityFailureReason? failureReason = null) => Profile = new SqlProviderProfile
         {
             Execution = new SqlProviderExecutionCapabilities
             {
-                SupportsMultipleResultSets = supportsMultipleResultSets
+                SupportsMultipleResultSets = supportsMultipleResultSets,
+                MultipleResultSetsFailureReason = failureReason
             }
         };
 

@@ -43,6 +43,7 @@ public abstract partial class SqlQueryBase
         _transactionScopeLease = lease;
         _transaction = transaction;
         _transactionId = lease.TransactionId;
+        _transactionExecutionMode = lease.ExecutionMode;
         _transactionOwnership = SqlResourceOwnership.External;
     }
 
@@ -68,6 +69,7 @@ public abstract partial class SqlQueryBase
         ValidateExternalConnectionDatabaseIdentity(transactionConnection);
         _transaction = transaction;
         _transactionId = transactionId ?? Guid.NewGuid().ToString("N");
+        _transactionExecutionMode = null;
         _transactionOwnership = SqlResourceOwnership.External;
     }
 
@@ -289,8 +291,13 @@ public abstract partial class SqlQueryBase
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            _transaction = await SqlTransactionAsyncAdapter.BeginAsync(connection,
-                isolationLevel ?? IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
+            var providerKey = GetCurrentProviderKey();
+            var transactionCapabilities = GetCurrentProviderTransactionCapabilities();
+            var transactionResult = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection,
+                isolationLevel ?? IsolationLevel.ReadCommitted, cancellationToken, transactionCapabilities,
+                providerKey).ConfigureAwait(false);
+            _transaction = transactionResult.Result;
+            _transactionExecutionMode = ToDiagnosticValue(transactionResult.Mode);
             _transactionId = Guid.NewGuid().ToString("N");
             _transactionOwnership = SqlResourceOwnership.Owned;
             return _transaction;
@@ -311,12 +318,16 @@ public abstract partial class SqlQueryBase
     {
         var dataSource = Options.GetDatabaseContext()?.DataSource;
         EnsureWritableDataSource(dataSource);
-        if (GetCurrentProviderProfile().Transaction.SupportsTransactions == false)
-            throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持本地事务。请使用不依赖事务的查询操作。");
+        var transactionCapabilities = GetCurrentProviderTransactionCapabilities();
+        if (transactionCapabilities.SupportsTransactions == false)
+            throw SqlCapabilityFailure.Create(transactionCapabilities.TransactionsFailureReason ??
+                SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction", GetCurrentProviderKey(),
+                $"Provider {GetCurrentProvider().Key} 不支持本地事务。请使用不依赖事务的查询操作。");
         if (dataSource?.SupportsTransactions != false)
             return;
         var dbKey = dataSource.Key ?? Options.GetDatabaseContext()?.DbKey ?? "<default>";
-        throw new NotSupportedException($"数据源 {dbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
+        throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction", dbKey,
+            $"数据源 {dbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
     }
 
     /// <summary>
@@ -325,9 +336,13 @@ public abstract partial class SqlQueryBase
     private protected void EnsureStoredProceduresSupported()
     {
         EnsureWritableDataSource();
-        if (GetCurrentProviderProfile().Procedure.SupportsStoredProcedures)
+        var profile = GetRequiredProviderProfile();
+        if (profile.Procedure.SupportsStoredProcedures)
             return;
-        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持存储过程命令。");
+        throw SqlCapabilityFailure.Create(profile.Procedure.StoredProceduresFailureReason ??
+            SqlCapabilityFailureReason.DatabaseUnsupported, "StoredProcedures",
+            GetCurrentProviderKey(),
+            $"Provider {GetCurrentProvider().Key} 不支持存储过程命令。");
     }
 
     /// <summary>
@@ -336,9 +351,13 @@ public abstract partial class SqlQueryBase
     /// <param name="parameters">存储过程参数。</param>
     private protected void EnsureOutputParametersSupported(object parameters)
     {
-        if (HasOutputParameters(parameters) == false || GetCurrentProviderProfile().Procedure.SupportsOutputParameters)
+        var profile = GetRequiredProviderProfile();
+        if (HasOutputParameters(parameters) == false || profile.Procedure.SupportsOutputParameters)
             return;
-        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持存储过程输出参数。");
+        throw SqlCapabilityFailure.Create(profile.Procedure.OutputParametersFailureReason ??
+            SqlCapabilityFailureReason.ProviderImplementationGap, "OutputParameters",
+            GetCurrentProviderKey(),
+            $"Provider {GetCurrentProvider().Key} 不支持存储过程输出参数。");
     }
 
     /// <summary>
@@ -376,9 +395,13 @@ public abstract partial class SqlQueryBase
         if (cancellationToken.CanBeCanceled == false)
             return;
         cancellationToken.ThrowIfCancellationRequested();
-        if (GetCurrentProviderProfile().Execution.SupportsCancellation)
+        var profile = GetRequiredProviderProfile();
+        if (profile.Execution.SupportsCancellation)
             return;
-        throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持异步命令取消。");
+        throw SqlCapabilityFailure.Create(profile.Execution.CancellationFailureReason ??
+            SqlCapabilityFailureReason.ProviderImplementationGap, "Cancellation",
+            GetCurrentProviderKey(),
+            $"Provider {GetCurrentProvider().Key} 不支持异步命令取消。");
     }
 
     /// <summary>
@@ -391,7 +414,8 @@ public abstract partial class SqlQueryBase
         if (dataSource?.IsReadOnly != true)
             return;
         var dbKey = dataSource.Key ?? Options.GetDatabaseContext()?.DbKey ?? "<default>";
-        throw new NotSupportedException($"数据源 {dbKey} 是只读数据源，不支持写入或事务操作。");
+        throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "WritableDataSource", dbKey,
+            $"数据源 {dbKey} 是只读数据源，不支持写入或事务操作。");
     }
 
     /// <summary>
@@ -431,13 +455,22 @@ public abstract partial class SqlQueryBase
         var cleanupExceptions = new List<Exception>();
         try
         {
-            await SqlTransactionAsyncAdapter.CommitAsync(transaction, cancellationToken).ConfigureAwait(false);
+                var result = await SqlTransactionAsyncAdapter.CommitWithModeAsync(transaction, cancellationToken,
+                    GetCurrentProviderTransactionCapabilities(), GetCurrentProviderKey())
+                .ConfigureAwait(false);
+            _transactionExecutionMode = ToDiagnosticValue(result.Mode);
         }
         catch (Exception commitException)
         {
             primaryException = commitException;
             await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
-                () => SqlTransactionAsyncAdapter.RollbackAsync(transaction, CancellationToken.None)).ConfigureAwait(false);
+                async () =>
+                {
+                    var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(transaction,
+                        CancellationToken.None, GetCurrentProviderTransactionCapabilities(),
+                        GetCurrentProviderKey()).ConfigureAwait(false);
+                    _transactionExecutionMode = ToDiagnosticValue(result.Mode);
+                }).ConfigureAwait(false);
         }
         await ReleaseOwnedTransactionResourcesAsync(cleanupExceptions).ConfigureAwait(false);
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
@@ -481,7 +514,12 @@ public abstract partial class SqlQueryBase
         try
         {
             if (_connection?.State != ConnectionState.Closed)
-                await SqlTransactionAsyncAdapter.RollbackAsync(transaction, CancellationToken.None).ConfigureAwait(false);
+            {
+                var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(transaction, CancellationToken.None,
+                        GetCurrentProviderTransactionCapabilities(), GetCurrentProviderKey())
+                    .ConfigureAwait(false);
+                _transactionExecutionMode = ToDiagnosticValue(result.Mode);
+            }
         }
         catch (Exception exception)
         {
@@ -550,6 +588,18 @@ public abstract partial class SqlQueryBase
         ThrowIfTransactionScopeChildDisposed();
         return _transactionId;
     }
+
+    /// <summary>
+    /// 将内部事务执行模式转换为稳定诊断值。
+    /// </summary>
+    /// <param name="mode">内部执行模式。</param>
+    /// <returns>诊断使用的执行模式文本。</returns>
+    private static string ToDiagnosticValue(SqlTransactionExecutionMode mode) => mode switch
+    {
+        SqlTransactionExecutionMode.NativeAsync => "NativeAsync",
+        SqlTransactionExecutionMode.SynchronousFallback => "SynchronousFallback",
+        _ => null
+    };
 
     /// <summary>
     /// 确保当前事务由 Query 或事务作用域拥有。

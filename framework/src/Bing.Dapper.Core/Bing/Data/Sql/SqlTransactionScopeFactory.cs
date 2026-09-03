@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Bing.Data.Enums;
+using Bing.Data.Sql.Builders;
 
 namespace Bing.Data.Sql;
 
@@ -41,12 +42,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             var context = CreateTransactionQuery(dbKey, out query);
-            EnsureTransactionsSupported(context, query);
+            var transactionCapabilities = EnsureTransactionsSupported(context, query);
             var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             var transaction = connection.BeginTransaction(isolationLevel);
-            return CreateScope(context, query, connection, transaction);
+            return CreateScope(context, query, connection, transaction, SqlTransactionExecutionMode.Unknown,
+                transactionCapabilities, GetRuntimeQuery(query).GetCurrentProviderKey());
         }
         catch (Exception exception)
         {
@@ -68,14 +70,16 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         try
         {
             var context = CreateTransactionQuery(dbKey, out query);
-            EnsureTransactionsSupported(context, query);
+            var transactionCapabilities = EnsureTransactionsSupported(context, query);
             var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            var transaction = await SqlTransactionAsyncAdapter.BeginAsync(connection, isolationLevel, cancellationToken)
-                .ConfigureAwait(false);
-            return CreateScope(context, query, connection, transaction);
+            var providerKey = GetRuntimeQuery(query).GetCurrentProviderKey();
+            var transactionResult = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection, isolationLevel,
+                cancellationToken, transactionCapabilities, providerKey).ConfigureAwait(false);
+            return CreateScope(context, query, connection, transactionResult.Result, transactionResult.Mode,
+                transactionCapabilities, providerKey);
         }
         catch (Exception exception)
         {
@@ -129,25 +133,38 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// <param name="query">拥有连接资源的根查询对象。</param>
     /// <param name="connection">已打开的数据库连接。</param>
     /// <param name="transaction">已开始的数据库事务。</param>
+    /// <param name="executionMode">开始事务时的实际异步执行模式。</param>
+    /// <param name="transactionCapabilities">当前 Provider 的事务能力声明。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
     /// <returns>绑定固定上下文和资源的事务作用域。</returns>
     private SqlTransactionScope CreateScope(DatabaseContext context, ISqlQuery query, IDbConnection connection,
-        IDbTransaction transaction) => new(context, query, connection, _queryFactory, _executorFactory, transaction);
+        IDbTransaction transaction, SqlTransactionExecutionMode executionMode,
+        SqlProviderTransactionCapabilities transactionCapabilities, string providerKey) =>
+        new(context, query, connection, _queryFactory, _executorFactory, transaction, executionMode,
+            transactionCapabilities, providerKey);
 
     /// <summary>
     /// 在访问连接前验证数据源与 Provider 的本地事务能力。
     /// </summary>
     /// <param name="context">目标数据库上下文。</param>
     /// <param name="query">用于解析 Provider Profile 的查询对象。</param>
-    private static void EnsureTransactionsSupported(DatabaseContext context, ISqlQuery query)
+    private static SqlProviderTransactionCapabilities EnsureTransactionsSupported(DatabaseContext context,
+        ISqlQuery query)
     {
         if (context?.DataSource?.IsReadOnly == true)
-            throw new NotSupportedException(
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction",
+                context.DataSource.Key ?? context.DbKey,
                 $"数据源 {context.DataSource.Key ?? context.DbKey ?? "<default>"} 是只读数据源，不支持写入或事务操作。");
-        var profile = GetRuntimeQuery(query).GetCurrentProviderProfile();
-        if (profile.Transaction.SupportsTransactions == false)
-            throw new NotSupportedException("当前 SQL Provider 不支持本地事务。请使用不依赖事务的查询操作。");
+        var profile = GetRuntimeQuery(query).GetCurrentProviderTransactionCapabilities();
+        if (profile.SupportsTransactions == false)
+            throw SqlCapabilityFailure.Create(profile.TransactionsFailureReason ??
+                SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction",
+                GetRuntimeQuery(query).GetCurrentProviderKey(),
+                "当前 SQL Provider 不支持本地事务。请使用不依赖事务的查询操作。");
         if (context?.DataSource?.SupportsTransactions == false)
-            throw new NotSupportedException($"数据源 {context.DbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction", context.DbKey,
+                $"数据源 {context.DbKey} 不支持本地事务。请使用不依赖事务的查询操作。");
+        return profile;
     }
 
     /// <summary>
@@ -224,6 +241,16 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         private readonly DatabaseContext _context;
 
         /// <summary>
+        /// 当前事务 Provider 的事务能力声明。
+        /// </summary>
+        private readonly SqlProviderTransactionCapabilities _transactionCapabilities;
+
+        /// <summary>
+        /// 当前事务 Provider Key。
+        /// </summary>
+        private readonly string _providerKey;
+
+        /// <summary>
         /// 保护作用域状态、子对象集合和资源释放状态的同步锁。
         /// </summary>
         private readonly object _syncRoot = new();
@@ -257,8 +284,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <param name="queryFactory">用于创建事务子查询的工厂。</param>
         /// <param name="executorFactory">用于创建事务子执行器的工厂。</param>
         /// <param name="transaction">当前数据库事务。</param>
+        /// <param name="executionMode">开始事务时的实际异步执行模式。</param>
+        /// <param name="transactionCapabilities">当前 Provider 的事务能力声明。</param>
+        /// <param name="providerKey">当前 Provider Key。</param>
         public SqlTransactionScope(DatabaseContext context, ISqlQuery ownerQuery, IDbConnection connection,
-            ISqlQueryFactory queryFactory, ISqlExecutorFactory executorFactory, IDbTransaction transaction)
+            ISqlQueryFactory queryFactory, ISqlExecutorFactory executorFactory, IDbTransaction transaction,
+            SqlTransactionExecutionMode executionMode, SqlProviderTransactionCapabilities transactionCapabilities,
+            string providerKey)
         {
             _context = DatabaseContextSnapshot.Create(context) ?? throw new ArgumentNullException(nameof(context));
             _ownerQuery = ownerQuery ?? throw new ArgumentNullException(nameof(ownerQuery));
@@ -266,8 +298,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _transaction = transaction ?? throw new InvalidOperationException("SQL 事务不能为空");
             _queryFactory = queryFactory;
             _executorFactory = executorFactory;
+            _transactionCapabilities = transactionCapabilities ?? throw new ArgumentNullException(nameof(transactionCapabilities));
+            _providerKey = providerKey ?? throw new ArgumentNullException(nameof(providerKey));
             TransactionId = Guid.NewGuid().ToString("N");
-            _lease = new SqlTransactionScopeLease(TransactionId);
+            _lease = new SqlTransactionScopeLease(TransactionId, executionMode);
             _state = SqlTransactionScopeState.Active;
         }
 
@@ -294,6 +328,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 
         /// <inheritdoc />
         IDbTransaction ISqlTransactionScopeRuntime.Transaction => _transaction;
+
+        /// <inheritdoc />
+        string ISqlTransactionScopeRuntime.ExecutionMode => _lease.ExecutionMode;
 
         /// <inheritdoc />
         public bool IsCompleted
@@ -360,7 +397,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             var finalState = SqlTransactionScopeState.Committed;
             try
             {
-                await SqlTransactionAsyncAdapter.CommitAsync(_transaction, cancellationToken).ConfigureAwait(false);
+                var result = await SqlTransactionAsyncAdapter.CommitWithModeAsync(_transaction, cancellationToken,
+                    _transactionCapabilities, _providerKey)
+                    .ConfigureAwait(false);
+                _lease.SetExecutionMode(result.Mode);
             }
             catch (Exception exception)
             {
@@ -413,7 +453,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             var finalState = SqlTransactionScopeState.RolledBack;
             try
             {
-                await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, cancellationToken).ConfigureAwait(false);
+                var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(_transaction, cancellationToken,
+                    _transactionCapabilities, _providerKey)
+                    .ConfigureAwait(false);
+                _lease.SetExecutionMode(result.Mode);
             }
             catch (Exception exception)
             {
@@ -480,7 +523,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             {
                 try
                 {
-                    await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, CancellationToken.None).ConfigureAwait(false);
+                    var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(_transaction,
+                        CancellationToken.None, _transactionCapabilities, _providerKey).ConfigureAwait(false);
+                    _lease.SetExecutionMode(result.Mode);
                 }
                 catch (Exception exception)
                 {
@@ -663,7 +708,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         {
             try
             {
-                await SqlTransactionAsyncAdapter.RollbackAsync(_transaction, CancellationToken.None).ConfigureAwait(false);
+                var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(_transaction,
+                    CancellationToken.None, _transactionCapabilities, _providerKey).ConfigureAwait(false);
+                _lease.SetExecutionMode(result.Mode);
                 return commitException;
             }
             catch (Exception rollbackException)
@@ -830,6 +877,46 @@ internal interface ISqlTransactionScopeRuntime
     /// 获取数据库事务。
     /// </summary>
     IDbTransaction Transaction { get; }
+
+    /// <summary>
+    /// 当前事务最近一次异步事务操作的执行模式。
+    /// </summary>
+    string ExecutionMode { get; }
+}
+
+internal enum SqlTransactionExecutionMode
+{
+    Unknown = 0,
+    NativeAsync = 1,
+    SynchronousFallback = 2
+}
+
+/// <summary>
+/// ADO.NET 异步事务调用结果。
+/// </summary>
+/// <typeparam name="T">调用结果类型。</typeparam>
+internal sealed class SqlTransactionAsyncOperationResult<T>
+{
+    /// <summary>
+    /// 初始化异步事务调用结果。
+    /// </summary>
+    /// <param name="result">调用结果。</param>
+    /// <param name="mode">实际执行模式。</param>
+    public SqlTransactionAsyncOperationResult(T result, SqlTransactionExecutionMode mode)
+    {
+        Result = result;
+        Mode = mode;
+    }
+
+    /// <summary>
+    /// 调用结果。
+    /// </summary>
+    public T Result { get; }
+
+    /// <summary>
+    /// 实际执行模式。
+    /// </summary>
+    public SqlTransactionExecutionMode Mode { get; }
 }
 
 /// <summary>
@@ -860,15 +947,58 @@ internal static class SqlTransactionAsyncAdapter
     public static async Task<IDbTransaction> BeginAsync(IDbConnection connection, IsolationLevel isolationLevel,
         CancellationToken cancellationToken)
     {
-        if (connection is DbConnection dbConnection)
+        var result = await BeginWithModeAsync(connection, isolationLevel, cancellationToken).ConfigureAwait(false);
+        return result.Result;
+    }
+
+    /// <summary>
+    /// 异步开始事务并返回实际执行模式。
+    /// </summary>
+    /// <param name="connection">已打开的数据库连接。</param>
+    /// <param name="isolationLevel">请求的事务隔离级别。</param>
+    /// <param name="cancellationToken">开始事务使用的取消令牌。</param>
+    /// <returns>事务和实际执行模式。</returns>
+    internal static async Task<SqlTransactionAsyncOperationResult<IDbTransaction>> BeginWithModeAsync(
+        IDbConnection connection, IsolationLevel isolationLevel, CancellationToken cancellationToken)
+        => await BeginWithModeAsync(connection, isolationLevel, cancellationToken, null, null)
+            .ConfigureAwait(false);
+
+    /// <summary>
+    /// 异步开始事务，并按 Provider Profile 校验实际异步成员。
+    /// </summary>
+    /// <param name="connection">已打开的数据库连接。</param>
+    /// <param name="isolationLevel">请求的事务隔离级别。</param>
+    /// <param name="cancellationToken">开始事务使用的取消令牌。</param>
+    /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    /// <returns>事务和实际执行模式。</returns>
+    internal static async Task<SqlTransactionAsyncOperationResult<IDbTransaction>> BeginWithModeAsync(
+        IDbConnection connection, IsolationLevel isolationLevel, CancellationToken cancellationToken,
+        SqlProviderTransactionCapabilities capabilities, string providerKey)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var hasNativeMember = HasProviderAsyncMember(connection, "BeginTransactionAsync", isolationLevel,
+            cancellationToken);
+        EnsureProfileMatches(capabilities?.SupportsNativeAsyncBegin == true, hasNativeMember, "Begin", providerKey);
+        if (capabilities == null && hasNativeMember)
         {
-            var invocation = await TryInvokeAsync(dbConnection, "BeginTransactionAsync", isolationLevel, cancellationToken)
+            var invocation = await TryInvokeAsync(connection, "BeginTransactionAsync", isolationLevel,
+                cancellationToken).ConfigureAwait(false);
+            if (invocation.Result is IDbTransaction transaction)
+                return new SqlTransactionAsyncOperationResult<IDbTransaction>(transaction,
+                    SqlTransactionExecutionMode.NativeAsync);
+        }
+        if (capabilities?.SupportsNativeAsyncBegin == true && hasNativeMember)
+        {
+            var invocation = await TryInvokeAsync(connection, "BeginTransactionAsync", isolationLevel, cancellationToken)
                 .ConfigureAwait(false);
             if (invocation.Result is IDbTransaction transaction)
-                return transaction;
+                return new SqlTransactionAsyncOperationResult<IDbTransaction>(transaction,
+                    SqlTransactionExecutionMode.NativeAsync);
         }
         cancellationToken.ThrowIfCancellationRequested();
-        return connection.BeginTransaction(isolationLevel);
+        return new SqlTransactionAsyncOperationResult<IDbTransaction>(connection.BeginTransaction(isolationLevel),
+            SqlTransactionExecutionMode.SynchronousFallback);
     }
 
     /// <summary>
@@ -887,10 +1017,36 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="transaction">待提交的数据库事务。</param>
     /// <param name="cancellationToken">提交操作使用的取消令牌。</param>
-    public static Task CommitAsync(IDbTransaction transaction, CancellationToken cancellationToken)
+    public static async Task CommitAsync(IDbTransaction transaction, CancellationToken cancellationToken)
+    {
+        await CommitWithModeAsync(transaction, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 异步提交事务并返回实际执行模式。
+    /// </summary>
+    /// <param name="transaction">待提交的数据库事务。</param>
+    /// <param name="cancellationToken">提交操作使用的取消令牌。</param>
+    /// <returns>实际执行模式。</returns>
+    internal static Task<SqlTransactionAsyncOperationResult<object>> CommitWithModeAsync(
+        IDbTransaction transaction, CancellationToken cancellationToken)
+        => CommitWithModeAsync(transaction, cancellationToken, null, null);
+
+    /// <summary>
+    /// 异步提交事务，并按 Provider Profile 校验实际异步成员。
+    /// </summary>
+    /// <param name="transaction">待提交的数据库事务。</param>
+    /// <param name="cancellationToken">提交操作使用的取消令牌。</param>
+    /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    /// <returns>实际执行模式。</returns>
+    internal static Task<SqlTransactionAsyncOperationResult<object>> CommitWithModeAsync(
+        IDbTransaction transaction, CancellationToken cancellationToken,
+        SqlProviderTransactionCapabilities capabilities, string providerKey)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return InvokeOrRunAsync(transaction, "CommitAsync", transaction.Commit, cancellationToken);
+        return InvokeOrRunWithModeAsync(transaction, "CommitAsync", transaction.Commit, cancellationToken,
+            capabilities?.SupportsNativeAsyncCommit, providerKey);
     }
 
     /// <summary>
@@ -898,8 +1054,37 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="transaction">待回滚的数据库事务。</param>
     /// <param name="cancellationToken">回滚操作使用的取消令牌。</param>
-    public static Task RollbackAsync(IDbTransaction transaction, CancellationToken cancellationToken) =>
-        InvokeOrRunAsync(transaction, "RollbackAsync", transaction.Rollback, cancellationToken);
+    public static async Task RollbackAsync(IDbTransaction transaction, CancellationToken cancellationToken)
+    {
+        await RollbackWithModeAsync(transaction, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 异步回滚事务并返回实际执行模式。
+    /// </summary>
+    /// <param name="transaction">待回滚的数据库事务。</param>
+    /// <param name="cancellationToken">回滚操作使用的取消令牌。</param>
+    /// <returns>实际执行模式。</returns>
+    internal static Task<SqlTransactionAsyncOperationResult<object>> RollbackWithModeAsync(
+        IDbTransaction transaction, CancellationToken cancellationToken)
+        => RollbackWithModeAsync(transaction, cancellationToken, null, null);
+
+    /// <summary>
+    /// 异步回滚事务，并按 Provider Profile 校验实际异步成员。
+    /// </summary>
+    /// <param name="transaction">待回滚的数据库事务。</param>
+    /// <param name="cancellationToken">回滚操作使用的取消令牌。</param>
+    /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    /// <returns>实际执行模式。</returns>
+    internal static Task<SqlTransactionAsyncOperationResult<object>> RollbackWithModeAsync(
+        IDbTransaction transaction, CancellationToken cancellationToken,
+        SqlProviderTransactionCapabilities capabilities, string providerKey)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return InvokeOrRunWithModeAsync(transaction, "RollbackAsync", transaction.Rollback, cancellationToken,
+            capabilities?.SupportsNativeAsyncRollback, providerKey);
+    }
 
     /// <summary>
     /// 优先异步释放资源；不支持异步释放时回退为同步释放。
@@ -923,16 +1108,67 @@ internal static class SqlTransactionAsyncAdapter
     /// <param name="methodName">异步成员名称。</param>
     /// <param name="fallback">异步成员不存在时执行的同步操作。</param>
     /// <param name="cancellationToken">调用操作使用的取消令牌。</param>
-    private static async Task InvokeOrRunAsync(object target, string methodName, Action fallback,
-        CancellationToken cancellationToken)
+    /// <param name="declaredNative">Provider 是否声明该操作支持原生异步。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    /// <returns>调用结果及实际执行模式。</returns>
+    private static async Task<SqlTransactionAsyncOperationResult<object>> InvokeOrRunWithModeAsync(object target,
+        string methodName, Action fallback, CancellationToken cancellationToken, bool? declaredNative,
+        string providerKey)
     {
-        var invocation = await TryInvokeAsync(target, methodName, cancellationToken).ConfigureAwait(false);
-        if (invocation.IsInvoked == false)
+        var hasNativeMember = HasProviderAsyncMember(target, methodName, cancellationToken);
+        if (declaredNative == true && hasNativeMember == false)
+            throw CreateImplementationGap(methodName, providerKey);
+        if (declaredNative == null && hasNativeMember)
+        {
+            await TryInvokeAsync(target, methodName, cancellationToken).ConfigureAwait(false);
+            return new SqlTransactionAsyncOperationResult<object>(null, SqlTransactionExecutionMode.NativeAsync);
+        }
+        if (declaredNative == true && hasNativeMember)
+        {
+            await TryInvokeAsync(target, methodName, cancellationToken).ConfigureAwait(false);
+            return new SqlTransactionAsyncOperationResult<object>(null, SqlTransactionExecutionMode.NativeAsync);
+        }
+        if (declaredNative == false || declaredNative == null)
         {
             cancellationToken.ThrowIfCancellationRequested();
             fallback();
+            return new SqlTransactionAsyncOperationResult<object>(null,
+                SqlTransactionExecutionMode.SynchronousFallback);
         }
+        throw CreateImplementationGap(methodName, providerKey);
     }
+
+    /// <summary>
+    /// 判断目标对象是否存在由 Provider 提供的异步事务成员。
+    /// </summary>
+    private static bool HasProviderAsyncMember(object target, string methodName, params object[] arguments)
+    {
+        if (target == null)
+            return false;
+        return target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .Where(method => method.Name == methodName && method.GetParameters().Length == arguments.Length)
+            .Where(method => IsProviderAsyncMember(target, methodName, method))
+            .Any(method => ParametersMatch(method.GetParameters(), arguments));
+    }
+
+    /// <summary>
+    /// 校验 Profile 声明与运行时异步成员是否一致。
+    /// </summary>
+    private static void EnsureProfileMatches(bool declaredNative, bool hasNativeMember, string operation,
+        string providerKey)
+    {
+        if (declaredNative && hasNativeMember == false)
+            throw CreateImplementationGap(operation, providerKey);
+    }
+
+    /// <summary>
+    /// 创建 Provider 声明与实现不一致的明确异常。
+    /// </summary>
+    private static NotSupportedException CreateImplementationGap(string operation, string providerKey) =>
+        SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap,
+            $"Transaction:{operation}", providerKey,
+            $"Provider {providerKey ?? "<unknown>"} 声明支持原生异步事务 {operation}，但运行时对象未提供对应成员。" +
+            "[ProviderImplementationGap][ProfileMismatch]");
 
     /// <summary>
     /// 尝试调用对象公开的异步成员。
@@ -945,7 +1181,8 @@ internal static class SqlTransactionAsyncAdapter
         params object[] arguments)
     {
         var methods = target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
-            .Where(method => method.Name == methodName && method.GetParameters().Length == arguments.Length);
+            .Where(method => method.Name == methodName && method.GetParameters().Length == arguments.Length)
+            .Where(method => IsProviderAsyncMember(target, methodName, method));
         var methodInfo = methods.FirstOrDefault(method => ParametersMatch(method.GetParameters(), arguments));
         if (methodInfo == null)
             return AsyncInvocationResult.NotInvoked;
@@ -959,6 +1196,28 @@ internal static class SqlTransactionAsyncAdapter
             ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
             throw;
         }
+    }
+
+    /// <summary>
+    /// 判断异步成员是否由 Provider 覆盖实现，排除 ADO.NET 基类的同步默认包装。
+    /// </summary>
+    /// <param name="target">异步成员目标对象。</param>
+    /// <param name="methodName">异步成员名称。</param>
+    /// <param name="method">候选异步成员。</param>
+    /// <returns>由具体 Provider 覆盖实现时返回 true。</returns>
+    private static bool IsProviderAsyncMember(object target, string methodName, MethodInfo method)
+    {
+        if (methodName == "BeginTransactionAsync" && target is DbConnection &&
+            method.DeclaringType == typeof(DbConnection))
+        {
+            var beginMethod = target.GetType().GetMethod("BeginDbTransactionAsync",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            return beginMethod?.DeclaringType != typeof(DbConnection);
+        }
+        if ((methodName == "CommitAsync" || methodName == "RollbackAsync") && target is DbTransaction &&
+            method.DeclaringType == typeof(DbTransaction))
+            return false;
+        return true;
     }
 
     /// <summary>

@@ -68,7 +68,13 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
             SupportsStreaming = true,
             SupportsCancellation = true
         },
-        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Transaction = new SqlProviderTransactionCapabilities
+        {
+            SupportsTransactions = true,
+            SupportsNativeAsyncBegin = true,
+            SupportsNativeAsyncCommit = true,
+            SupportsNativeAsyncRollback = true
+        },
         Procedure = new SqlProviderProcedureCapabilities
         {
             SupportsStoredProcedures = true,

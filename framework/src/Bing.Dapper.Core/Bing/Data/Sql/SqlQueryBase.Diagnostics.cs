@@ -365,7 +365,8 @@ public abstract partial class SqlQueryBase
             TransactionId = _transactionId ?? transaction.GetHashCode().ToString("X"),
             IsolationLevel = GetIsolationLevel(transaction),
             Ownership = _transaction == null ? SqlResourceOwnership.External : _transactionOwnership,
-            IsPrimaryReadTransaction = _primaryReadTransactionStarted
+            IsPrimaryReadTransaction = _primaryReadTransactionStarted,
+            ExecutionMode = _transactionScopeLease?.ExecutionMode ?? _transactionExecutionMode
         };
     }
 
@@ -487,6 +488,7 @@ public abstract partial class SqlQueryBase
     /// <param name="message">诊断消息</param>
     protected virtual void ExecuteAfter(DiagnosticsMessage message)
     {
+        RefreshTransactionExecutionMode(message);
         if (!_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.AfterExecute))
             return;
         if (message?.Timestamp != null)
@@ -505,6 +507,7 @@ public abstract partial class SqlQueryBase
     /// <param name="exception">异常</param>
     protected virtual void ExecuteError(DiagnosticsMessage message, Exception exception)
     {
+        RefreshTransactionExecutionMode(message);
         if (exception != null && message?.Timestamp != null && _diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.ErrorExecute))
         {
             var snapshot = CloneDiagnosticsMessage(message);
@@ -514,6 +517,17 @@ public abstract partial class SqlQueryBase
 
             _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.ErrorExecute, snapshot);
         }
+    }
+
+    /// <summary>
+    /// 将事务完成或回滚后的实际执行模式写回当前诊断消息。
+    /// </summary>
+    /// <param name="message">当前执行诊断消息。</param>
+    private void RefreshTransactionExecutionMode(DiagnosticsMessage message)
+    {
+        if (message?.Transaction == null)
+            return;
+        message.Transaction.ExecutionMode = _transactionScopeLease?.ExecutionMode ?? _transactionExecutionMode;
     }
 
     /// <summary>
@@ -567,7 +581,8 @@ public abstract partial class SqlQueryBase
                     HasTransaction = message.Transaction.HasTransaction,
                     IsolationLevel = message.Transaction.IsolationLevel,
                     Ownership = message.Transaction.Ownership,
-                    IsPrimaryReadTransaction = message.Transaction.IsPrimaryReadTransaction
+                    IsPrimaryReadTransaction = message.Transaction.IsPrimaryReadTransaction,
+                    ExecutionMode = message.Transaction.ExecutionMode
                 },
             ElapsedMilliseconds = message.ElapsedMilliseconds,
             Exception = message.Exception

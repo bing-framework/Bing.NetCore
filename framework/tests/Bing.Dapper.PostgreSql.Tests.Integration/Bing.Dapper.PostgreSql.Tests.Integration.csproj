@@ -6,6 +6,12 @@
     <TestTfmsInParallel>false</TestTfmsInParallel>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Dapper.PostgreSql\Bing.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
@@ -24,5 +30,10 @@
       <DependentUpon>appsettings.json</DependentUpon>
     </Content>
   </ItemGroup>
+
+  <!-- 运行时环境变量 -->
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 
 </Project>

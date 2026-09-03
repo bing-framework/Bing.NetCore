@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Bing.Data;
@@ -153,6 +154,352 @@ public class SqlFactoryTest
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => SqlTransactionAsyncAdapter.BeginAsync(
             connection.Object, IsolationLevel.ReadCommitted, cancellationTokenSource.Token));
         connection.Verify(item => item.BeginTransaction(It.IsAny<IsolationLevel>()), Times.Never);
+    }
+
+    /// <summary>
+    /// 测试目的：连接覆盖 BeginDbTransactionAsync 时，适配器应保留 ValueTask 结果并标记原生异步模式。
+    /// </summary>
+    [Fact]
+    public async Task BeginWithModeAsync_WhenBeginDbTransactionAsyncIsOverridden_ShouldUseNativeValueTask()
+    {
+        // Arrange
+        var connection = new NativeDbConnection();
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection,
+            IsolationLevel.ReadCommitted, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, result.Mode);
+        Assert.Same(connection.LastTransaction, result.Result);
+        Assert.Equal(1, connection.AsyncBeginCount);
+        Assert.Equal(0, connection.SyncBeginCount);
+    }
+
+    /// <summary>
+    /// 测试目的：仅继承 DbConnection 默认异步包装的连接必须执行同步 Begin，并报告同步回退模式。
+    /// </summary>
+    [Fact]
+    public async Task BeginWithModeAsync_WhenOnlyBaseAsyncMemberExists_ShouldUseSynchronousFallback()
+    {
+        // Arrange
+        var connection = new FallbackDbConnection();
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection,
+            IsolationLevel.ReadCommitted, CancellationToken.None);
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, result.Mode);
+        Assert.Same(connection.LastTransaction, result.Result);
+        Assert.Equal(1, connection.SyncBeginCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Commit 和 Rollback 应分别支持 Task 与 ValueTask 原生成员，并且不重复调用同步回退。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenNativeTaskOrValueTaskMembersExist_ShouldUseNativeOperations()
+    {
+        // Arrange
+        var taskTransaction = new TaskNativeDbTransaction();
+        var valueTaskTransaction = new ValueTaskNativeDbTransaction();
+
+        // Act
+        var commit = await SqlTransactionAsyncAdapter.CommitWithModeAsync(taskTransaction, CancellationToken.None);
+        var rollback = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(valueTaskTransaction,
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, commit.Mode);
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, rollback.Mode);
+        Assert.Equal(1, taskTransaction.AsyncCommitCount);
+        Assert.Equal(0, taskTransaction.CommitCount);
+        Assert.Equal(1, valueTaskTransaction.AsyncRollbackCount);
+        Assert.Equal(0, valueTaskTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：缺失异步事务成员时，Commit 和 Rollback 应在取消检查通过后各执行一次同步回退。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenAsyncMembersAreMissing_ShouldUseSynchronousFallback()
+    {
+        // Arrange
+        var commitTransaction = new FallbackDbTransaction(null);
+        var rollbackTransaction = new FallbackDbTransaction(null);
+
+        // Act
+        var commit = await SqlTransactionAsyncAdapter.CommitWithModeAsync(commitTransaction, CancellationToken.None);
+        var rollback = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(rollbackTransaction,
+            CancellationToken.None);
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, commit.Mode);
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, rollback.Mode);
+        Assert.Equal(1, commitTransaction.CommitCount);
+        Assert.Equal(1, rollbackTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Commit、Rollback 和同步回退前的取消都必须阻止底层事务操作。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenCancellationWasRequested_ShouldNotTouchTransaction()
+    {
+        // Arrange
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+        var commitTransaction = new FallbackDbTransaction(null);
+        var rollbackTransaction = new FallbackDbTransaction(null);
+
+        // Act / Assert
+        await Assert.ThrowsAsync<OperationCanceledException>(async () => await
+            SqlTransactionAsyncAdapter.CommitWithModeAsync(commitTransaction, cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(async () => await
+            SqlTransactionAsyncAdapter.RollbackWithModeAsync(rollbackTransaction, cancellationTokenSource.Token));
+        Assert.Equal(0, commitTransaction.CommitCount);
+        Assert.Equal(0, rollbackTransaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：反射调用的异步事务成员抛出异常时，适配器应解包 TargetInvocationException 并保留原异常类型。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenNativeMemberThrows_ShouldUnwrapOriginalException()
+    {
+        // Arrange
+        var transaction = new ThrowingNativeDbTransaction();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            SqlTransactionAsyncAdapter.CommitAsync(transaction, CancellationToken.None));
+
+        // Assert
+        Assert.Equal("native commit failed", exception.Message);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步提交且运行时成员存在时，适配器应保持原生异步执行模式。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileMatchesNativeCommit_ShouldUseNativeMode()
+    {
+        // Arrange
+        var transaction = new TaskNativeDbTransaction();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncCommit = true };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.CommitWithModeAsync(transaction, CancellationToken.None,
+            capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, result.Mode);
+        Assert.Equal(1, transaction.AsyncCommitCount);
+        Assert.Equal(0, transaction.CommitCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明同步提交时，即使事务对象暴露异步成员也必须执行同步回退，避免误用未声明能力。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileDisablesNativeCommit_ShouldUseSynchronousFallback()
+    {
+        // Arrange
+        var transaction = new TaskNativeDbTransaction();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncCommit = false };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.CommitWithModeAsync(transaction, CancellationToken.None,
+            capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, result.Mode);
+        Assert.Equal(0, transaction.AsyncCommitCount);
+        Assert.Equal(1, transaction.CommitCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步提交但运行时成员缺失时，必须报告 Implementation Gap 而不能静默回退。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileDeclaresMissingNativeCommit_ShouldThrowImplementationGap()
+    {
+        // Arrange
+        var transaction = new FallbackDbTransaction(null);
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncCommit = true };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() =>
+            SqlTransactionAsyncAdapter.CommitWithModeAsync(transaction, CancellationToken.None, capabilities,
+                "test.provider"));
+
+        // Assert
+        Assert.Contains("ProviderImplementationGap", exception.Message);
+        Assert.Contains("ProfileMismatch", exception.Message);
+        Assert.Equal(0, transaction.CommitCount);
+    }
+
+    /// <summary>
+    /// 测试目的：原生能力声明为 false 时，异步 Begin 即使发现 Provider 成员也必须同步创建事务。
+    /// </summary>
+    [Fact]
+    public async Task BeginWithModeAsync_WhenProfileDisablesNativeBegin_ShouldUseSynchronousFallback()
+    {
+        // Arrange
+        var connection = new NativeDbConnection();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncBegin = false };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection,
+            IsolationLevel.ReadCommitted, CancellationToken.None, capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, result.Mode);
+        Assert.Equal(0, connection.AsyncBeginCount);
+        Assert.Equal(1, connection.SyncBeginCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步 Begin 且运行时成员存在时，适配器应执行原生路径并报告 NativeAsync。
+    /// </summary>
+    [Fact]
+    public async Task BeginWithModeAsync_WhenProfileMatchesNativeBegin_ShouldUseNativeMode()
+    {
+        // Arrange
+        var connection = new NativeDbConnection();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncBegin = true };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection,
+            IsolationLevel.ReadCommitted, CancellationToken.None, capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, result.Mode);
+        Assert.Same(connection.LastTransaction, result.Result);
+        Assert.Equal(1, connection.AsyncBeginCount);
+        Assert.Equal(0, connection.SyncBeginCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步 Begin 但运行时成员缺失时，必须报告 Implementation Gap 且不创建事务。
+    /// </summary>
+    [Fact]
+    public async Task BeginWithModeAsync_WhenProfileDeclaresMissingNativeBegin_ShouldThrowImplementationGap()
+    {
+        // Arrange
+        var connection = new FallbackDbConnection();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncBegin = true };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => SqlTransactionAsyncAdapter.BeginWithModeAsync(
+            connection, IsolationLevel.ReadCommitted, CancellationToken.None, capabilities, "test.provider"));
+
+        // Assert
+        Assert.Contains("ProviderImplementationGap", exception.Message);
+        Assert.Contains("ProfileMismatch", exception.Message);
+        Assert.Equal(0, connection.SyncBeginCount);
+        Assert.Null(connection.LastTransaction);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步回滚且运行时成员存在时，适配器应执行原生路径并报告 NativeAsync。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileMatchesNativeRollback_ShouldUseNativeMode()
+    {
+        // Arrange
+        var transaction = new ValueTaskNativeDbTransaction();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncRollback = true };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(transaction, CancellationToken.None,
+            capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, result.Mode);
+        Assert.Equal(1, transaction.AsyncRollbackCount);
+        Assert.Equal(0, transaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明原生异步回滚但运行时成员缺失时，必须报告 Implementation Gap 且不执行同步回退。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileDeclaresMissingNativeRollback_ShouldThrowImplementationGap()
+    {
+        // Arrange
+        var transaction = new FallbackDbTransaction(null);
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncRollback = true };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() =>
+            SqlTransactionAsyncAdapter.RollbackWithModeAsync(transaction, CancellationToken.None, capabilities,
+                "test.provider"));
+
+        // Assert
+        Assert.Contains("ProviderImplementationGap", exception.Message);
+        Assert.Contains("ProfileMismatch", exception.Message);
+        Assert.Equal(0, transaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 声明同步回滚时，即使事务对象暴露异步成员也必须执行同步回退。
+    /// </summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenProfileDisablesNativeRollback_ShouldUseSynchronousFallback()
+    {
+        // Arrange
+        var transaction = new ValueTaskNativeDbTransaction();
+        var capabilities = new SqlProviderTransactionCapabilities { SupportsNativeAsyncRollback = false };
+
+        // Act
+        var result = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(transaction, CancellationToken.None,
+            capabilities, "test.provider");
+
+        // Assert
+        Assert.Equal(SqlTransactionExecutionMode.SynchronousFallback, result.Mode);
+        Assert.Equal(0, transaction.AsyncRollbackCount);
+        Assert.Equal(1, transaction.RollbackCount);
+    }
+
+    /// <summary>
+    /// 测试目的：Provider 未声明 Profile 时，本地事务 Query 必须 fail-closed 并给出明确原因。
+    /// </summary>
+    [Fact]
+    public void TransactionProfile_WhenProviderProfileIsMissing_ShouldFailClosed()
+    {
+        // Arrange
+        var provider = new ProfileMissingProvider();
+        var services = CreateServices();
+        services.AddSqlBuilderProvider(provider, _ => null);
+        using var serviceProvider = services.BuildServiceProvider();
+        var connection = new FallbackDbConnection();
+        var options = new SqlOptions<MySqlTestQuery>
+        {
+            Connection = connection,
+            DatabaseType = DatabaseType.MySql
+        };
+        options.SetDatabaseContext(new DatabaseContext
+        {
+            DbKey = "missing-profile",
+            DataSource = new SqlDataSourceDescriptor
+            {
+                Key = "missing-profile",
+                ProviderKey = provider.Key,
+                DatabaseType = DatabaseType.MySql
+            }
+        });
+        var query = new MySqlTestQuery(serviceProvider, options);
+        var scopeFactory = new SqlTransactionScopeFactory(new FixedQueryFactory(query),
+            new ThrowingExecutorFactory());
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => scopeFactory.Begin());
+
+        // Assert
+        Assert.Contains("ProviderProfileMissing", exception.Message);
+        Assert.Equal(0, connection.SyncBeginCount);
     }
 
     /// <summary>
@@ -448,6 +795,28 @@ public class SqlFactoryTest
     }
 
     /// <summary>
+    /// 未声明事务 Profile 的测试 Provider。
+    /// </summary>
+    private sealed class ProfileMissingProvider : ISqlProvider
+    {
+        public string Key => "test.profile-missing";
+
+        public DatabaseType DatabaseType => DatabaseType.MySql;
+
+        public IDialect Dialect => null;
+
+        public ISqlClauseFactory ClauseFactory => null;
+
+        public ISqlTableReferenceParser TableReferenceParser => null;
+
+        public ISqlPaginationRenderer PaginationRenderer => null;
+
+        public IParameterManagerFactory ParameterManagerFactory => null;
+
+        public IParamLiteralsResolver ParamLiteralsResolver => null;
+    }
+
+    /// <summary>
     /// MySQL 查询测试实现。
     /// </summary>
     private sealed class MySqlTestQuery : SqlQueryBase
@@ -541,6 +910,128 @@ public class SqlFactoryTest
     /// <summary>
     /// 固定返回测试查询对象的工厂。
     /// </summary>
+    private class FallbackDbConnection : DbConnection
+    {
+        private ConnectionState _state = ConnectionState.Open;
+
+        public int SyncBeginCount { get; private set; }
+
+        public FallbackDbTransaction LastTransaction { get; protected set; }
+
+        public override string ConnectionString { get; set; }
+
+        public override string Database => "test";
+
+        public override string DataSource => "test";
+
+        public override string ServerVersion => "1.0";
+
+        public override ConnectionState State => _state;
+
+        public override void ChangeDatabase(string databaseName) { }
+
+        public override void Close() => _state = ConnectionState.Closed;
+
+        public override void Open() => _state = ConnectionState.Open;
+
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+        {
+            SyncBeginCount++;
+            LastTransaction = new FallbackDbTransaction(this, isolationLevel);
+            return LastTransaction;
+        }
+
+        protected override DbCommand CreateDbCommand() => null;
+    }
+
+    private sealed class NativeDbConnection : FallbackDbConnection
+    {
+        public int AsyncBeginCount { get; private set; }
+
+        protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            AsyncBeginCount++;
+            LastTransaction = new FallbackDbTransaction(this, isolationLevel);
+            return ValueTask.FromResult((DbTransaction)LastTransaction);
+        }
+    }
+
+    private class FallbackDbTransaction : DbTransaction
+    {
+        private readonly DbConnection _connection;
+        private readonly IsolationLevel _isolationLevel;
+
+        public FallbackDbTransaction(DbConnection connection = null,
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            _connection = connection;
+            _isolationLevel = isolationLevel;
+        }
+
+        public int CommitCount { get; protected set; }
+
+        public int RollbackCount { get; protected set; }
+
+        public override IsolationLevel IsolationLevel => _isolationLevel;
+
+        protected override DbConnection DbConnection => _connection;
+
+        public override void Commit() => CommitCount++;
+
+        public override void Rollback() => RollbackCount++;
+    }
+
+    private sealed class ValueTaskNativeDbTransaction : IDbTransaction
+    {
+        public ValueTaskNativeDbTransaction(DbConnection connection = null,
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        {
+            Connection = connection;
+            IsolationLevel = isolationLevel;
+        }
+
+        public int AsyncRollbackCount { get; private set; }
+
+        public int RollbackCount { get; private set; }
+
+        public IDbConnection Connection { get; }
+
+        public IsolationLevel IsolationLevel { get; }
+
+        public void Commit() { }
+
+        public void Rollback() => RollbackCount++;
+
+        public ValueTask RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            AsyncRollbackCount++;
+            return ValueTask.CompletedTask;
+        }
+
+        public void Dispose() { }
+    }
+
+    private sealed class TaskNativeDbTransaction : FallbackDbTransaction
+    {
+        public int AsyncCommitCount { get; private set; }
+
+        public override Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            AsyncCommitCount++;
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class ThrowingNativeDbTransaction : FallbackDbTransaction
+    {
+        public override Task CommitAsync(CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("native commit failed");
+    }
+
     private sealed class FixedQueryFactory : ISqlQueryFactory
     {
         private readonly ISqlQuery _query;

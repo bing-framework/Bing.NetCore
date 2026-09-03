@@ -193,9 +193,16 @@ public static class SqlBuilderRuntimeBridge
             throw new ArgumentNullException(nameof(pageBuilder));
         if (plan.IsBuilderPlan)
             return CreatePagePlan(plan, pager);
-        if (SqlProviderCapabilityResolver.GetProfile(pageBuilder.Provider).Query.Pagination !=
-            SqlQueryCapabilityState.Supported)
-            throw new NotSupportedException("当前 SQL Provider 不支持原生 SQL 自动分页。");
+        var provider = pageBuilder.Provider;
+        var profile = SqlProviderCapabilityResolver.GetProfile(provider);
+        var reason = SqlProviderCapabilityResolver.HasProfile(provider) == false
+            ? SqlCapabilityFailureReason.ProviderProfileMissing
+            : SqlProviderCapabilityResolver.HasCompleteProfile(provider) == false
+                ? SqlCapabilityFailureReason.ProviderProfileMismatch
+                : SqlCapabilityFailureReason.ProviderImplementationGap;
+        if (profile.Query?.Pagination != SqlQueryCapabilityState.Supported)
+            throw SqlCapabilityFailure.Create(reason, "Query:RawPagination", provider.Key,
+                "当前 SQL Provider 不支持原生 SQL 自动分页。");
 
         var order = ValidateRawPageOrder(pager.Order);
         var parameterManager = (pageBuilder as ISqlCommonPartAccessor)?.ParameterManager ??

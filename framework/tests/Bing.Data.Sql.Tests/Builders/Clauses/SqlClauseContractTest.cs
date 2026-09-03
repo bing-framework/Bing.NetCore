@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
@@ -7,6 +8,7 @@ using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
+using Moq;
 
 namespace Bing.Data.Sql.Tests.Builders.Clauses;
 
@@ -52,6 +54,63 @@ public class SqlClauseContractTest
 
         // Assert
         Assert.All(result, Assert.True);
+    }
+
+    /// <summary>
+    /// 测试目的：Lambda 多源 optional SPI 必须隐藏于编辑器建议之外，并由默认查询 Clause 实现。
+    /// </summary>
+    [Fact]
+    public void MultiSourceClauseSpi_WhenInspected_ShouldBeHiddenAndImplementedByDefaultClauses()
+    {
+        // Arrange
+        var spiTypes = new[]
+        {
+            typeof(ISqlMultiSourceFromClause), typeof(ISqlMultiSourceSelectClause),
+            typeof(ISqlMultiSourceGroupByClause), typeof(ISqlMultiSourceOrderByClause),
+            typeof(ISqlMultiSourceJoinClause)
+        };
+        var builder = new TestSqlBuilder();
+
+        // Act
+        var browsability = spiTypes.Select(type => type.GetCustomAttributes(typeof(EditorBrowsableAttribute), false)
+            .Cast<EditorBrowsableAttribute>().SingleOrDefault()?.State).ToArray();
+
+        // Assert
+        Assert.All(browsability, state => Assert.Equal(EditorBrowsableState.Never, state));
+        Assert.IsAssignableFrom<ISqlMultiSourceFromClause>(builder.FromClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(builder.SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceGroupByClause>(builder.GroupByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceOrderByClause>(builder.OrderByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(builder.JoinClause);
+    }
+
+    /// <summary>
+    /// 测试目的：仅实现稳定 Clause 接口的外部 Provider 在进入 Lambda 多源路径时必须明确失败。
+    /// </summary>
+    [Fact]
+    public void LambdaMultiSource_WhenOptionalSpiIsMissing_ShouldFailFast()
+    {
+        // Arrange
+        var accessor = new Mock<ISqlQueryClauseAccessor>();
+        accessor.SetupGet(item => item.FromClause).Returns(new Mock<IFromClause>().Object);
+        accessor.SetupGet(item => item.SelectClause).Returns(new Mock<ISelectClause>().Object);
+        accessor.SetupGet(item => item.GroupByClause).Returns(new Mock<IGroupByClause>().Object);
+        accessor.SetupGet(item => item.OrderByClause).Returns(new Mock<IOrderByClause>().Object);
+        accessor.SetupGet(item => item.JoinClause).Returns(new Mock<IJoinClause>().Object);
+
+        // Act
+        var fromException = Assert.Throws<NotSupportedException>(() => SqlLambdaQueryCore.GetFromClause(accessor.Object));
+        var selectException = Assert.Throws<NotSupportedException>(() => SqlLambdaQueryCore.GetSelectClause(accessor.Object));
+        var groupByException = Assert.Throws<NotSupportedException>(() => SqlLambdaQueryCore.GetGroupByClause(accessor.Object));
+        var orderByException = Assert.Throws<NotSupportedException>(() => SqlLambdaQueryCore.GetOrderByClause(accessor.Object));
+        var joinException = Assert.Throws<NotSupportedException>(() => SqlLambdaQueryCore.GetJoinClause(accessor.Object));
+
+        // Assert
+        Assert.Contains("Lambda 多源 From", fromException.Message);
+        Assert.Contains("Lambda 多源 Select", selectException.Message);
+        Assert.Contains("Lambda 多源 Group By", groupByException.Message);
+        Assert.Contains("Lambda 多源 Order By", orderByException.Message);
+        Assert.Contains("Lambda 多源 Join", joinException.Message);
     }
 
     /// <summary>

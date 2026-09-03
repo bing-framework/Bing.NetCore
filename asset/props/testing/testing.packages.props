@@ -1,0 +1,106 @@
+<Project>
+
+  <!--
+    ============================================================================
+    Bing Testing - Packages
+    ============================================================================
+    负责：
+    - 根据 compatibility.props 已解析出的属性添加 PackageReference；
+    - xunit / xunit.v3 互斥；
+    - VSTest Test SDK / Runner；
+    - Shouldly / Moq / Coverlet。
+    ============================================================================
+  -->
+
+  <!-- =========================================================================
+       xUnit v2
+       ========================================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingUseXunit)' == 'true'
+      And '$(BingTestingIsTestCodeProject)' == 'true'
+      And '$(TargetFramework)' != ''
+      And '$(BingTestingResolvedXunitMode)' == 'V2'">
+    <PackageReference Include="xunit" Version="$(BingXunitV2Version)" />
+  </ItemGroup>
+
+  <!-- =========================================================================
+       xUnit v3
+       ========================================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingUseXunit)' == 'true'
+      And '$(BingTestingIsTestCodeProject)' == 'true'
+      And '$(TargetFramework)' != ''
+      And '$(BingTestingResolvedXunitMode)' == 'V3'">
+    <PackageReference Include="xunit.v3" Version="$(BingXunitV3Version)" />
+  </ItemGroup>
+
+  <!-- =========================================================================
+       VSTest Test SDK / Runner：仅 Test
+       ========================================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingTestingRunnable)' == 'true'
+      And '$(BingTestingRunnerMode)' == 'VSTest'
+      And '$(TargetFramework)' != ''">
+
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(BingMicrosoftNetTestSdkVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(BingXunitRunnerVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>
+        runtime;
+        build;
+        native;
+        contentfiles;
+        analyzers;
+        buildtransitive
+      </IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- =========================================================
+       Shouldly：Test / TestShare
+       ========================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingIsTestCodeProject)' == 'true'
+      And '$(BingTestingUseShouldly)' == 'true'
+      And '$(TargetFramework)' != ''">
+    <PackageReference Include="Shouldly" Version="$(BingShouldlyVersion)" />
+  </ItemGroup>
+
+  <!-- =========================================================
+       Moq：Test / TestShare
+       ========================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingIsTestCodeProject)' == 'true'
+      And '$(BingTestingUseMoq)' == 'true'
+      And '$(TargetFramework)' != ''">
+    <PackageReference Include="Moq" Version="$(BingMoqVersion)" />
+  </ItemGroup>
+
+  <!-- =========================================================
+       Coverlet：仅 Test
+
+       同时满足：
+       1. 项目启用 Testing
+       2. 用户没有关闭 Coverlet
+       3. 当前 TFM 支持 Coverage
+       ========================================================= -->
+  <ItemGroup Condition="
+      '$(BingTestingEnabled)' == 'true'
+      And '$(BingTestingIsRunnableProject)' == 'true'
+      And '$(BingTestingUseCoverlet)' == 'true'
+      And '$(BingTestingCoverageSupported)' == 'true'
+      And '$(BingTestingRunnable)' == 'true'
+      And '$(TargetFramework)' != ''">
+    <PackageReference Include="coverlet.collector" Version="$(BingCoverletVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

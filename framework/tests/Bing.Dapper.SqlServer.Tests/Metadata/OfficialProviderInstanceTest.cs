@@ -1,4 +1,7 @@
 using System.Collections.Concurrent;
+using System.Data;
+using System.Data.Common;
+using System.Reflection;
 using Bing.Data;
 using Bing.Data.Sql.Builders;
 
@@ -100,6 +103,63 @@ public class OfficialProviderInstanceTest
         Assert.Equal(SqlQueryCapabilityState.Unsupported, MySqlSqlProvider.Instance.Profile.Query.FullJoin);
         Assert.Equal(SqlQueryCapabilityState.Unsupported, SqliteSqlProvider.Instance.Profile.Query.FullJoin);
     }
+
+    /// <summary>
+    /// 测试目的：官方 Provider 的事务能力声明必须匹配驱动实际覆盖链路，SQLite 必须保留同步回退。
+    /// </summary>
+    [Fact]
+    public void Provider_WhenNativeAsyncTransactionCapabilitiesAreRequested_ShouldMatchDriverEvidence()
+    {
+        // Arrange
+        var contracts = new[]
+        {
+            (Provider: (ISqlProvider)MySqlSqlProvider.Instance,
+                ConnectionType: typeof(MySqlConnector.MySqlConnection),
+                TransactionType: typeof(MySqlConnector.MySqlTransaction),
+                Begin: true, Commit: true, Rollback: true),
+            (Provider: (ISqlProvider)PostgreSqlSqlProvider.Instance,
+                ConnectionType: typeof(Npgsql.NpgsqlConnection),
+                TransactionType: typeof(Npgsql.NpgsqlTransaction),
+                Begin: true, Commit: true, Rollback: true),
+            (Provider: (ISqlProvider)SqlServerSqlProvider.Instance,
+                ConnectionType: typeof(Microsoft.Data.SqlClient.SqlConnection),
+                TransactionType: typeof(Microsoft.Data.SqlClient.SqlTransaction),
+                Begin: false, Commit: false, Rollback: false),
+            (Provider: (ISqlProvider)OracleSqlProvider.Instance,
+                ConnectionType: typeof(global::Oracle.ManagedDataAccess.Client.OracleConnection),
+                TransactionType: typeof(global::Oracle.ManagedDataAccess.Client.OracleTransaction),
+                Begin: false, Commit: false, Rollback: false),
+            (Provider: (ISqlProvider)SqliteSqlProvider.Instance,
+                ConnectionType: typeof(Microsoft.Data.Sqlite.SqliteConnection),
+                TransactionType: typeof(Microsoft.Data.Sqlite.SqliteTransaction),
+                Begin: false, Commit: false, Rollback: false)
+        };
+
+        // Act / Assert
+        foreach (var contract in contracts)
+        {
+            var profile = ((ISqlProviderProfileProvider)contract.Provider).Profile.Transaction;
+            Assert.Equal(contract.Begin, profile.SupportsNativeAsyncBegin);
+            Assert.Equal(contract.Commit, profile.SupportsNativeAsyncCommit);
+            Assert.Equal(contract.Rollback, profile.SupportsNativeAsyncRollback);
+            Assert.True(typeof(DbConnection).IsAssignableFrom(contract.ConnectionType));
+            Assert.True(typeof(DbTransaction).IsAssignableFrom(contract.TransactionType));
+            Assert.Equal(contract.Begin, HasDeclaredPublicMethod(contract.ConnectionType,
+                "BeginTransactionAsync", typeof(IsolationLevel), typeof(CancellationToken)));
+            Assert.Equal(contract.Commit, HasDeclaredPublicMethod(contract.TransactionType,
+                "CommitAsync", typeof(CancellationToken)));
+            Assert.Equal(contract.Rollback, HasDeclaredPublicMethod(contract.TransactionType,
+                "RollbackAsync", typeof(CancellationToken)));
+        }
+    }
+
+    /// <summary>
+    /// 判断驱动类型是否直接声明了指定公开实例方法，排除 ADO.NET 基类默认实现。
+    /// </summary>
+    private static bool HasDeclaredPublicMethod(Type type, string name, params Type[] parameterTypes) =>
+        type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            .Any(method => method.Name == name && method.GetParameters().Select(parameter => parameter.ParameterType)
+                .SequenceEqual(parameterTypes));
 
     /// <summary>
     /// 创建官方 Provider 集合。

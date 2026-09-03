@@ -54,7 +54,10 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
             SupportsMultiRowValues = true,
             SupportsUpdateFrom = false,
             SupportsDeleteUsing = false,
-            SupportsReturning = false
+            SupportsReturning = false,
+            UpdateFromFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported,
+            DeleteUsingFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported,
+            ReturningFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
         },
         Execution = new SqlProviderExecutionCapabilities
         {
@@ -62,7 +65,13 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
             SupportsStreaming = true,
             SupportsCancellation = true
         },
-        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Transaction = new SqlProviderTransactionCapabilities
+        {
+            SupportsTransactions = true,
+            SupportsNativeAsyncBegin = true,
+            SupportsNativeAsyncCommit = true,
+            SupportsNativeAsyncRollback = true
+        },
         Procedure = new SqlProviderProcedureCapabilities
         {
             SupportsStoredProcedures = true,

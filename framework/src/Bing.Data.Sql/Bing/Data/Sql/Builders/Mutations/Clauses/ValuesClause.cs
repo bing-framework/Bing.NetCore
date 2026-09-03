@@ -157,8 +157,20 @@ public sealed class ValuesClause : IValuesClause
             throw new InvalidOperationException("Insert Values 不能为空。");
         if (_rows.Any(row => row.Count != ColumnCount))
             throw new InvalidOperationException("Insert Values 行列数量不一致。");
-        if (_rows.Count > 1 && context?.Profile.Mutation.SupportsMultiRowValues == false)
-            throw new NotSupportedException($"Provider {context.Provider.Key} 不支持多行 Values。");
+        if (_rows.Count <= 1)
+            return;
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
+        if (context.IsProfileDeclared == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "MultiRowValues",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持多行 Values。");
+        if (SqlProviderCapabilityResolver.HasCompleteProfile(context.Provider) == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "MultiRowValues",
+                context.Provider.Key, $"Provider {context.Provider.Key} 的 Mutation 能力 Profile 不完整。[ProfileMismatch]");
+        if (context.Profile.Mutation.SupportsMultiRowValues == false)
+            throw SqlCapabilityFailure.Create(context.Profile.Mutation.MultiRowValuesFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "MultiRowValues",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持多行 Values。");
     }
 
     /// <summary>

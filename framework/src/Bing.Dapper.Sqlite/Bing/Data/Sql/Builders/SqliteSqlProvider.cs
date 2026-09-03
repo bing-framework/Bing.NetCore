@@ -60,7 +60,11 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
         Mutation = new SqlProviderMutationCapabilities
         {
             SupportsMultiRowValues = true,
-            SupportsReturning = true
+            SupportsUpdateFrom = false,
+            SupportsDeleteUsing = false,
+            SupportsReturning = true,
+            UpdateFromFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported,
+            DeleteUsingFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
         },
         Execution = new SqlProviderExecutionCapabilities
         {
@@ -72,7 +76,9 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
         Procedure = new SqlProviderProcedureCapabilities
         {
             SupportsStoredProcedures = false,
-            SupportsOutputParameters = false
+            SupportsOutputParameters = false,
+            StoredProceduresFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported,
+            OutputParametersFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
         },
         Limits = new SqlProviderLimits { MaxParameterCount = null }
     };

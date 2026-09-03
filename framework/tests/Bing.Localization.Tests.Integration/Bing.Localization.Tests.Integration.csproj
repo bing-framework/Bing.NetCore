@@ -6,6 +6,12 @@
     <XunitStartupFullName>Bing.Localization.Startup</XunitStartupFullName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Localization\Bing.Localization.csproj" />
     <ProjectReference Include="..\Bing.Localization.Resources\Bing.Localization.Resources.csproj" />

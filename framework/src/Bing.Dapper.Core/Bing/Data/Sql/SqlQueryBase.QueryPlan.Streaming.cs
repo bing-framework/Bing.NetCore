@@ -14,8 +14,12 @@ public abstract partial class SqlQueryBase
     /// </summary>
     private void EnsureStreamingSupported()
     {
-        if (GetCurrentProviderProfile().Execution.SupportsStreaming == false)
-            throw new NotSupportedException($"Provider {GetCurrentProvider().Key} 不支持流式查询。");
+        var profile = GetRequiredProviderProfile();
+        if (profile.Execution.SupportsStreaming == false)
+            throw SqlCapabilityFailure.Create(profile.Execution.StreamingFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "Streaming",
+                GetCurrentProviderKey(),
+                $"Provider {GetCurrentProvider().Key} 不支持流式查询。");
         var context = GetDatabaseContext();
         if (context?.ReadPreference == SqlReadPreference.Primary &&
             context.DataSource?.PrimaryReadStrategy == PrimaryReadStrategy.Transaction)

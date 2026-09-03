@@ -73,12 +73,12 @@ public class CustomProviderBuilderTest
         // Assert
         Assert.Same(CustomSqlProvider.Instance, provider);
         Assert.IsType<CustomClauseFactory>(provider.ClauseFactory);
-        Assert.IsType<CustomSelectClause>(accessor.SelectClause);
-        Assert.IsType<FromClause>(accessor.FromClause);
-        Assert.IsType<JoinClause>(accessor.JoinClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(accessor.SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceFromClause>(accessor.FromClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(accessor.JoinClause);
         Assert.IsType<WhereClause>(accessor.WhereClause);
-        Assert.IsType<GroupByClause>(accessor.GroupByClause);
-        Assert.IsType<OrderByClause>(accessor.OrderByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceGroupByClause>(accessor.GroupByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceOrderByClause>(accessor.OrderByClause);
     }
 
     /// <summary>
@@ -529,10 +529,98 @@ public class CustomProviderBuilderTest
         source.Clear();
 
         // Assert
-        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)source).SelectClause);
-        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)clone).SelectClause);
-        Assert.IsType<CustomSelectClause>(((ISqlQueryClauseAccessor)fresh).SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(((ISqlQueryClauseAccessor)source).SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(((ISqlQueryClauseAccessor)clone).SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(((ISqlQueryClauseAccessor)fresh).SelectClause);
         Assert.Equal("Select [u].[Id] \r\nFrom [Users] As [u]", clone.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：外部 Provider 的五个自定义 Lambda Clause 在 Clone 后必须继续实现各自 optional SPI。
+    /// </summary>
+    [Fact]
+    public void CustomLambdaClauses_WhenBuilderIsCloned_ShouldPreserveAllOptionalSpi()
+    {
+        // Arrange
+        var source = new CustomSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(
+                new Moq.Mock<ISqlQueryPlanExecutor>().Object, source)
+            .From<CustomCustomer>("c")
+            .Join<CustomCustomer, CustomOrder>((customer, order) => customer.Id == order.CustomerId, "o")
+            .Select<CustomCustomer, CustomOrder>((customer, order) => new object[] { customer.Id, order.Amount }, "c", "o")
+            .GroupBy<CustomCustomer, CustomOrder>((customer, order) => new object[] { customer.Id }, "c", "o")
+            .OrderBy<CustomCustomer, CustomOrder>((customer, order) => new object[] { order.Amount }, "c", "o");
+
+        // Act
+        var clone = Assert.IsType<CustomSqlBuilder>(source.Clone());
+        var accessor = (ISqlQueryClauseAccessor)clone;
+
+        // Assert
+        Assert.IsType<CustomFromClause>(accessor.FromClause);
+        Assert.IsType<CustomSelectClause>(accessor.SelectClause);
+        Assert.IsType<CustomGroupByClause>(accessor.GroupByClause);
+        Assert.IsType<CustomOrderByClause>(accessor.OrderByClause);
+        Assert.IsType<CustomJoinClause>(accessor.JoinClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceFromClause>(accessor.FromClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(accessor.SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceGroupByClause>(accessor.GroupByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceOrderByClause>(accessor.OrderByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(accessor.JoinClause);
+        Assert.Equal(
+            "Select [c].[Id],[o].[Amount] \r\nFrom [CustomCustomer] As [c] \r\nJoin [CustomOrder] As [o] On [c].[Id]=[o].[CustomerId] \r\nGroup By [c].[Id] \r\nOrder By [o].[Amount]",
+            clone.ToSql());
+    }
+
+    /// <summary>
+    /// 测试目的：外部 Provider 的多源 Lambda 路径应通过五个公开 SPI 生成完整且稳定的 SQL，不能依赖默认具体 Clause 类型。
+    /// </summary>
+    [Fact]
+    public void Lambda_WhenCustomProviderClausesAreUsed_ShouldRenderCompleteMultiSourceSql()
+    {
+        // Arrange
+        var builder = new CustomSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(
+                new Moq.Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .From<CustomCustomer>("c")
+            .Join<CustomCustomer, CustomOrder>((customer, order) => customer.Id == order.CustomerId, "o")
+            .Select<CustomCustomer, CustomOrder>((customer, order) =>
+                new object[] { customer.Id, order.Amount }, "c", "o")
+            .GroupBy<CustomCustomer, CustomOrder>((customer, order) =>
+                new object[] { customer.Id }, "c", "o")
+            .OrderBy<CustomCustomer, CustomOrder>((customer, order) =>
+                new object[] { order.Amount }, "c", "o");
+
+        // Act
+        var sql = query.ToSql();
+
+        // Assert
+        Assert.Equal(
+            "Select [c].[Id],[o].[Amount] \r\nFrom [CustomCustomer] As [c] \r\nJoin [CustomOrder] As [o] On [c].[Id]=[o].[CustomerId] \r\nGroup By [c].[Id] \r\nOrder By [o].[Amount]",
+            sql);
+        Assert.IsNotType<DefaultSqlClauseFactory>(builder.Provider.ClauseFactory);
+        Assert.IsAssignableFrom<ISqlMultiSourceSelectClause>(((ISqlQueryClauseAccessor)builder).SelectClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceFromClause>(((ISqlQueryClauseAccessor)builder).FromClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceGroupByClause>(((ISqlQueryClauseAccessor)builder).GroupByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceOrderByClause>(((ISqlQueryClauseAccessor)builder).OrderByClause);
+        Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(((ISqlQueryClauseAccessor)builder).JoinClause);
+    }
+
+    /// <summary>
+    /// 外部 Provider Lambda 测试使用的客户实体。
+    /// </summary>
+    private sealed class CustomCustomer
+    {
+        public int Id { get; set; }
+    }
+
+    /// <summary>
+    /// 外部 Provider Lambda 测试使用的订单实体。
+    /// </summary>
+    private sealed class CustomOrder
+    {
+        public int CustomerId { get; set; }
+
+        public decimal Amount { get; set; }
     }
 
     /// <summary>

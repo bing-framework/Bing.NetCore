@@ -2,8 +2,12 @@
   <Import Project="..\..\..\framework.tests.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <EnableDITestPackages>false</EnableDITestPackages>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BingTestingUseDependencyInjection>false</BingTestingUseDependencyInjection>
+    <BingTestingUseLogging>false</BingTestingUseLogging>
   </PropertyGroup>
 
   <ItemGroup>

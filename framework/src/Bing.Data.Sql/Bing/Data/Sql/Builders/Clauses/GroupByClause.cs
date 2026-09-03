@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Group By子句
 /// </summary>
-public class GroupByClause : IGroupByClause
+public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -172,6 +172,10 @@ public class GroupByClause : IGroupByClause
         _context.UseOperation(SqlOperationAction.QueryClause);
         _having = condition.GetCondition();
     }
+
+    void ISqlMultiSourceGroupByClause.AppendBoundColumns(IEnumerable<string> columns) => AddBoundColumns(columns);
+
+    void ISqlMultiSourceGroupByClause.SetBoundHaving(ICondition condition) => SetBoundHaving(condition);
 
     /// <inheritdoc />
     public void HavingRaw(string sql)

@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Order By子句
 /// </summary>
-public class OrderByClause : IOrderByClause
+public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -151,6 +151,9 @@ public class OrderByClause : IOrderByClause
         foreach (var item in items)
             _items.Add(new OrderByItem(desc ? $"{item} Desc" : item, raw: true));
     }
+
+    void ISqlMultiSourceOrderByClause.AppendBoundColumns(IEnumerable<string> columns, bool desc) =>
+        AddBoundColumns(columns, desc);
 
     /// <summary>
     /// 添加到OrderBy子句

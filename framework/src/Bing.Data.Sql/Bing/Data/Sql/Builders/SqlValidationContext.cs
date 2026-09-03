@@ -33,6 +33,11 @@ public sealed class SqlValidationContext
     public SqlProviderProfile Profile { get; }
 
     /// <summary>
+    /// 当前 Provider 是否声明了统一能力档案。
+    /// </summary>
+    internal bool IsProfileDeclared => SqlProviderCapabilityResolver.HasProfile(Provider);
+
+    /// <summary>
     /// 当前命令已经分配的参数数量。
     /// </summary>
     public int ParameterCount { get; }

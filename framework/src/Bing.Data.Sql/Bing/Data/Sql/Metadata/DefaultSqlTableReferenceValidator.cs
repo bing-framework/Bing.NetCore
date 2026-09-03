@@ -42,9 +42,11 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
         if (string.IsNullOrWhiteSpace(table.TableName))
             throw new ArgumentException("表名不能为空。", nameof(table));
         if (HasValue(table.Database) && capabilities.SupportsDatabase == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持 Database 限定。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "DatabaseQualifiedReference",
+                null, "当前数据库 Provider 不支持 Database 限定。");
         if (HasValue(table.Schema) && capabilities.SupportsSchema == false)
-            throw new NotSupportedException("当前数据库 Provider 不支持 Schema 限定。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "SchemaQualifiedReference",
+                null, "当前数据库 Provider 不支持 Schema 限定。");
     }
 
     /// <summary>

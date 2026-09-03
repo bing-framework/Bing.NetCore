@@ -5,6 +5,12 @@
     <XunitStartupFullName>Bing.EventBus.Tests.Startup</XunitStartupFullName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="EventBusFactoryAndNullBusTest.cs" />
   </ItemGroup>

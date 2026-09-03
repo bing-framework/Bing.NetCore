@@ -57,13 +57,23 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlProviderProfileProvide
             RightJoin = SqlQueryCapabilityState.Supported,
             FullJoin = SqlQueryCapabilityState.Supported
         },
-        Mutation = new SqlProviderMutationCapabilities { SupportsMultiRowValues = false },
+        Mutation = new SqlProviderMutationCapabilities
+        {
+            SupportsMultiRowValues = false,
+            MultiRowValuesFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
+        },
         Execution = new SqlProviderExecutionCapabilities
         {
             SupportsStreaming = true,
             SupportsCancellation = true
         },
-        Transaction = new SqlProviderTransactionCapabilities { SupportsTransactions = true },
+        Transaction = new SqlProviderTransactionCapabilities
+        {
+            SupportsTransactions = true,
+            SupportsNativeAsyncBegin = false,
+            SupportsNativeAsyncCommit = false,
+            SupportsNativeAsyncRollback = false
+        },
         Procedure = new SqlProviderProcedureCapabilities
         {
             SupportsStoredProcedures = true,

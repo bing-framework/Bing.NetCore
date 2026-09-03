@@ -68,7 +68,7 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
     /// </summary>
     protected void ValidateParameterLimit()
     {
-        var maximum = SqlProviderCapabilityResolver.GetProfile(Provider).Limits.MaxParameterCount;
+        var maximum = SqlProviderCapabilityResolver.GetProfile(Provider).Limits?.MaxParameterCount;
         if (maximum == null)
             return;
         if (ParameterManager.Count > maximum.Value)

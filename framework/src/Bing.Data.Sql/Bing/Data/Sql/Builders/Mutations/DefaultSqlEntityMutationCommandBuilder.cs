@@ -93,8 +93,20 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             throw new ArgumentException("组合 Insert 实体集合不能为空。", nameof(entities));
         if (entities.Any(entity => entity == null))
             throw new ArgumentException("组合 Insert 实体集合不能包含 null。", nameof(entities));
-        if (entities.Count > 1 && SqlProviderCapabilityResolver.GetProfile(_provider).Mutation.SupportsMultiRowValues == false)
-            throw new NotSupportedException($"Provider {_provider.Key} 不支持多行 Values。");
+        if (entities.Count > 1)
+        {
+            if (SqlProviderCapabilityResolver.HasProfile(_provider) == false)
+                throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "MultiRowValues",
+                    _provider.Key, $"Provider {_provider.Key} 不支持多行 Values。");
+            var profile = SqlProviderCapabilityResolver.GetProfile(_provider);
+            if (SqlProviderCapabilityResolver.HasCompleteProfile(_provider) == false)
+                throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "MultiRowValues",
+                    _provider.Key, $"Provider {_provider.Key} 的 Mutation 能力 Profile 不完整。[ProfileMismatch]");
+            if (profile.Mutation.SupportsMultiRowValues == false)
+                throw SqlCapabilityFailure.Create(profile.Mutation.MultiRowValuesFailureReason ??
+                    SqlCapabilityFailureReason.ProviderImplementationGap, "MultiRowValues",
+                    _provider.Key, $"Provider {_provider.Key} 不支持多行 Values。");
+        }
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Insert, options?.IncludeProperties,
             options?.ExcludeProperties);
         var mapping = plan.Mapping;

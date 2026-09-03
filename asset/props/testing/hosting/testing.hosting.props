@@ -1,0 +1,50 @@
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)testing.hosting.settings.props" />
+
+  <Import Project="$(MSBuildThisFileDirectory)testing.hosting.compatibility.props" />
+
+  <Import Project="$(MSBuildThisFileDirectory)testing.hosting.packages.props" />
+
+  <Target
+      Name="ValidateBingTestingHostingConfiguration"
+      BeforeTargets="PrepareForBuild"
+      Condition="
+        '$(BingTestingEnabled)' == 'true'
+        And '$(BingTestingUseHosting)' == 'true'">
+
+    <Error
+        Condition="'$(BingTestingProjectType)' != 'Test'"
+        Text="Bing Testing Hosting：Hosting/DI 测试扩展仅支持 BingTestingProjectType=Test。当前值：'$(BingTestingProjectType)'。" />
+
+    <Error
+        Condition="'$(BingMicrosoftExtensionsHostingVersion)' == ''"
+        Text="Bing Testing Hosting：当前目标框架 '$(TargetFramework)' 尚未配置 Microsoft.Extensions.Hosting 兼容版本。请补充 testing.hosting.compatibility.props，或使用版本 Override。" />
+
+    <Error
+        Condition="
+          '$(BingTestingUseDependencyInjection)' == 'true'
+          And '$(BingMicrosoftDependencyInjectionVersion)' == ''"
+        Text="Bing Testing Hosting：当前目标框架 '$(TargetFramework)' 尚未配置 Microsoft.Extensions.DependencyInjection 兼容版本。" />
+
+    <Error
+        Condition="
+          '$(BingTestingUseLogging)' == 'true'
+          And '$(BingMicrosoftLoggingVersion)' == ''"
+        Text="Bing Testing Hosting：当前目标框架 '$(TargetFramework)' 尚未配置 Microsoft.Extensions.Logging 兼容版本。" />
+
+    <Error
+        Condition="
+          '$(BingTestingUseTestHost)' == 'true'
+          And '$(BingAspNetCoreTestHostVersion)' == ''"
+        Text="Bing Testing Hosting：当前目标框架 '$(TargetFramework)' 尚未配置 Microsoft.AspNetCore.TestHost 兼容版本。" />
+
+    <Error
+        Condition="
+          '$(BingTestingUseXunitDependencyInjection)' == 'true'
+          And '$(BingXunitDependencyInjectionVersion)' == ''"
+        Text="Bing Testing Hosting：无法为当前 xUnit 模式 '$(BingTestingResolvedXunitMode)' 解析 Xunit.DependencyInjection 版本。" />
+
+  </Target>
+
+</Project>

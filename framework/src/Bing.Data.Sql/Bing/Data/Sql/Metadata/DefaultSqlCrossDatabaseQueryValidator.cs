@@ -47,9 +47,11 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 		if (databaseType == null)
 			return;
 		if (databaseType == DatabaseType.PgSql && HasValue(target.Database))
-			throw new NotSupportedException("PostgreSQL 不支持普通跨 Database 查询。");
+			throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "CrossDatabase",
+				"pgsql", "PostgreSQL 不支持普通跨 Database 查询。");
 		if (databaseType == DatabaseType.Oracle && HasValue(target.Database))
-			throw new NotSupportedException("Oracle 不支持普通跨 Database 查询。");
+			throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "CrossDatabase",
+				"oracle", "Oracle 不支持普通跨 Database 查询。");
 	}
 
 	/// <summary>
@@ -66,13 +68,16 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 			return;
 		if (databaseType == DatabaseType.PgSql &&
 			(HasValue(source.Database) || HasValue(target.Database)))
-			throw new NotSupportedException("PostgreSQL 不支持普通跨 Database 查询。");
+			throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "CrossDatabase",
+				"pgsql", "PostgreSQL 不支持普通跨 Database 查询。");
 		if (databaseType == DatabaseType.Oracle &&
 			(HasValue(source.Database) || HasValue(target.Database)))
-			throw new NotSupportedException("Oracle 不支持普通跨 Database 查询。");
+			throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "CrossDatabase",
+				"oracle", "Oracle 不支持普通跨 Database 查询。");
 		if (databaseType == DatabaseType.Sqlite &&
 			(HasValue(source.Database) || HasValue(target.Database) || HasValue(source.Schema) || HasValue(target.Schema)))
-			throw new NotSupportedException("SQLite 核心映射不支持跨数据库结构化 Join。");
+			throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.DatabaseUnsupported, "CrossDatabase",
+				"sqlite", "SQLite 核心映射不支持跨数据库结构化 Join。");
 	}
 
 	/// <summary>

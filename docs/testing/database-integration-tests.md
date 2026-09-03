@@ -52,3 +52,19 @@ runner 在连接前验证规范 gate、专属连接字符串、reset 授权和�
 - 提交失败必须尝试回滚，两个失败原因均应保留；
 - 每个 Provider 的 Provider、Query 和 Executor 注册均必须能够通过 `ISqlDbConnectionFactoryResolver` 创建对应独立连接；
 - EF Shared 只复用 DbContext 的连接与当前事务，EF Independent 使用框架自有连接。
+
+## Provider 合同证据
+
+共享测试基建中的 `ProviderContractRunner` 只在执行委托成功且调用方提供完整 Provider/数据库/驱动版本、连接类别、测试方法、TRX、制品、UTC 时间和源码身份元数据时标记 `RealIntegrationProven`；没有该元数据的执行场景标记为 `UnitProven`。`Declared`、`Unsupported`、`ImplementationGap` 和 `NotExecuted` 必须由调用方明确提供，不能由静态 Profile、默认 Skip 或 runner self-test 推导为通过。执行场景与固定状态互斥，`ProviderCapabilityMatrix` 输出无密 Markdown/JSON，拒绝同一 Provider、能力和场景的重复记录，并把 `TestGenerated` 与可发布的 `ReleaseEvidence` 区分开。
+
+SQLite 集成测试使用该合同验证真实 Scalar 和预取消场景。执行时必须为每次运行指定新的 `artifacts/test-results` 子目录；同一 `RunName` 同时派生 VSTest 的 TRX 文件名和 Matrix 文件名，测试进程通过受控环境变量接收实际结果目录，执行完成后脚本再校验两份制品属于同一次运行：
+
+```powershell
+.\eng\ci\Invoke-SqliteContractTests.ps1 `
+	-ResultsDirectory artifacts/test-results/provider-capability-runs/sqlite/net8 `
+	-Framework net8.0 `
+	-Configuration Release `
+	-RunName sqlite-contract-net8
+```
+
+脚本会拒绝越界路径、已存在的制品、缺失的 Matrix/TRX、错误的 `total=1/passed=1/failed=0/notExecuted=0` 计数、方法名或源码身份不一致，以及 Matrix 时间不在当前 TRX 执行窗口内。当前制品为 `TestGenerated`，不能单独放行发布门禁。MySQL、PostgreSQL、SQL Server、Oracle、Doris 仍需各自的 Provider gate、专用连接变量和安全 reset 条件。报告必须分别保存每个 TFM、每次运行的 TRX，不能用复用文件名的单个历史 TRX 冒充当前证据。

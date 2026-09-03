@@ -98,8 +98,16 @@ public sealed class ReturningClause : IReturningClause
             throw new ArgumentNullException(nameof(context));
         if (IsEmpty)
             throw new InvalidOperationException("Returning 未指定返回列。");
+        if (context.IsProfileDeclared == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "Returning",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Returning。");
+        if (SqlProviderCapabilityResolver.HasCompleteProfile(context.Provider) == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "Returning",
+                context.Provider.Key, $"Provider {context.Provider.Key} 的 Mutation 能力 Profile 不完整。[ProfileMismatch]");
         if (context.Profile.Mutation.SupportsReturning == false)
-            throw new NotSupportedException($"Provider {context.Provider.Key} 不支持 Returning。");
+            throw SqlCapabilityFailure.Create(context.Profile.Mutation.ReturningFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "Returning",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Returning。");
         _executionKind = context.ExecutionKind;
     }
 }

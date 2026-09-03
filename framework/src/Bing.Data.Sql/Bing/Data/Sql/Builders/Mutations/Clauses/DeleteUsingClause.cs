@@ -57,7 +57,15 @@ public sealed class DeleteUsingClause : MutationTableClauseBase, IDeleteUsingCla
         ValidateTable(Table, "Delete Using");
         if (string.IsNullOrWhiteSpace(Table.Alias))
             throw new InvalidOperationException("Delete Using 来源表必须指定别名。");
+        if (context.IsProfileDeclared == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "DeleteUsing",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Delete Using。");
+        if (SqlProviderCapabilityResolver.HasCompleteProfile(context.Provider) == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "DeleteUsing",
+                context.Provider.Key, $"Provider {context.Provider.Key} 的 Mutation 能力 Profile 不完整。[ProfileMismatch]");
         if (context.Profile.Mutation.SupportsDeleteUsing == false)
-            throw new NotSupportedException($"Provider {context.Provider.Key} 不支持 Delete Using。");
+            throw SqlCapabilityFailure.Create(context.Profile.Mutation.DeleteUsingFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "DeleteUsing",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Delete Using。");
     }
 }

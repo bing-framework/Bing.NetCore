@@ -1,0 +1,115 @@
+<Project>
+
+  <!--
+    ============================================================================
+    Bing Testing - Settings
+    ============================================================================
+    ProjectType:
+      Test      : 可执行测试项目
+      TestShare : 测试共享库，不直接执行测试
+      None      : 不启用测试基础设施
+
+    XunitMode:
+      V2   : 使用 xunit
+      V3   : 使用 xunit.v3
+      Auto : 当前 TFM 支持 v3 时使用 v3，否则使用 v2
+    ============================================================================
+  -->
+  <PropertyGroup>
+    <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+    <NoWarn>$(NoWarn);CS1591;NETSDK1138;xUnit1041</NoWarn>
+    <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
+
+    <!-- 是否启用整套公共测试配置 -->
+    <BingTestingEnabled Condition="'$(BingTestingEnabled)' == ''">true</BingTestingEnabled>
+
+    <!--
+      测试项目类型：
+
+      Test
+        可直接执行的测试项目。
+
+      TestShare
+        测试共享基础库。
+        可以引用 xUnit / Shouldly / Moq，
+        但不引用 Test SDK、Runner、Coverlet。
+
+      None
+        不启用测试相关依赖。
+    -->
+    <BingTestingProjectType Condition="'$(BingTestingProjectType)' == ''">Test</BingTestingProjectType>
+
+    <!--
+      xUnit 模式：
+
+      V2
+        始终使用 xunit。
+        默认值，兼容历史项目。
+
+      V3
+        使用 xunit.v3。
+        如果当前 TargetFramework 不支持，则构建阶段直接报错。
+
+      Auto
+        当前 TFM 支持 xUnit v3 时使用 v3；
+        否则使用 v2。
+
+      对多目标测试项目：
+        如果不同 TFM 会分别解析成 v2/v3，请确认测试代码本身同时兼容。
+        对复杂项目更建议显式指定 V2 或 V3。
+    -->
+    <BingTestingXunitMode Condition="'$(BingTestingXunitMode)' == ''">V2</BingTestingXunitMode>
+
+    <!--
+      当前版本统一采用 VSTest。
+
+      预留此属性用于未来增加：
+        MTP / Microsoft Testing Platform
+    -->
+    <BingTestingRunnerMode Condition="'$(BingTestingRunnerMode)' == ''">VSTest</BingTestingRunnerMode>
+
+    <BingTestingUseXunit Condition="'$(BingTestingUseXunit)' == ''">true</BingTestingUseXunit>
+
+    <!-- 可选测试扩展 -->
+    <!-- 是否引用 Shouldly -->
+    <BingTestingUseShouldly Condition="'$(BingTestingUseShouldly)' == ''">true</BingTestingUseShouldly>
+    
+    <!-- 是否引用 Moq -->
+    <BingTestingUseMoq Condition="'$(BingTestingUseMoq)' == ''">true</BingTestingUseMoq>
+
+    <!-- 是否引用 Coverlet -->
+    <BingTestingUseCoverlet Condition="'$(BingTestingUseCoverlet)' == ''">true</BingTestingUseCoverlet>
+
+    <!-- 是否在构建时输出当前解析后的 Testing 配置 -->
+    <BingTestingShowConfiguration Condition="'$(BingTestingShowConfiguration)' == ''">false</BingTestingShowConfiguration>
+
+  </PropertyGroup>
+
+  <!-- 派生项目能力 -->
+  <PropertyGroup>
+    <BingTestingIsRunnableProject Condition="'$(BingTestingProjectType)' == 'Test'">true</BingTestingIsRunnableProject>
+    <BingTestingIsRunnableProject Condition="'$(BingTestingIsRunnableProject)' == ''">false</BingTestingIsRunnableProject>
+    <BingTestingIsTestCodeProject
+      Condition="
+          '$(BingTestingProjectType)' == 'Test'
+          Or '$(BingTestingProjectType)' == 'TestShare'">true</BingTestingIsTestCodeProject>
+    <BingTestingIsTestCodeProject Condition="'$(BingTestingIsTestCodeProject)' == ''">false</BingTestingIsTestCodeProject>
+
+  </PropertyGroup>
+
+  <!-- IsTestProject -->
+  <PropertyGroup>
+
+    <IsTestProject
+      Condition="
+          '$(IsTestProject)' == ''
+          And '$(BingTestingProjectType)' == 'Test'">true</IsTestProject>
+
+    <IsTestProject
+      Condition="
+          '$(IsTestProject)' == ''
+          And '$(BingTestingProjectType)' != 'Test'">false</IsTestProject>
+
+  </PropertyGroup>
+
+</Project>

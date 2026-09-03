@@ -1,0 +1,29 @@
+<Project>
+
+  <!-- 是否启用 Hosting 测试扩展 -->
+  <PropertyGroup>
+
+    <BingTestingUseHosting
+        Condition="'$(BingTestingUseHosting)' == ''">false</BingTestingUseHosting>
+
+    <BingTestingUseDependencyInjection
+        Condition="'$(BingTestingUseDependencyInjection)' == ''">true</BingTestingUseDependencyInjection>
+
+    <BingTestingUseLogging
+        Condition="'$(BingTestingUseLogging)' == ''">true</BingTestingUseLogging>
+
+    <BingTestingUseTestHost
+        Condition="'$(BingTestingUseTestHost)' == ''">true</BingTestingUseTestHost>
+
+    <BingTestingUseXunitDependencyInjection
+        Condition="'$(BingTestingUseXunitDependencyInjection)' == ''">true</BingTestingUseXunitDependencyInjection>
+
+    <BingTestingUseDependencyInjectionLogging
+        Condition="'$(BingTestingUseDependencyInjectionLogging)' == ''">true</BingTestingUseDependencyInjectionLogging>
+
+    <BingTestingUseAspectCore
+        Condition="'$(BingTestingUseAspectCore)' == ''">true</BingTestingUseAspectCore>
+
+  </PropertyGroup>
+
+</Project>

@@ -3,14 +3,42 @@
     <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
   </PropertyGroup>
 
+  <!--
+    Hosting / DI 测试项目预设。
+    TargetFramework / TargetFrameworks 由具体项目自行定义。
+  -->
+
+  <PropertyGroup>
+    <BingTestingProjectType>Test</BingTestingProjectType>
+
+    <!-- Microsoft.Extensions.Hosting -->
+    <BingTestingUseHosting>false</BingTestingUseHosting>
+    <!-- Microsoft.Extensions.DependencyInjection -->
+    <BingTestingUseDependencyInjection>false</BingTestingUseDependencyInjection>
+    <!-- Microsoft.Extensions.Logging -->
+    <BingTestingUseLogging>false</BingTestingUseLogging>
+    <!-- Microsoft.AspNetCore.TestHost -->
+    <BingTestingUseTestHost>false</BingTestingUseTestHost>
+    
+    <!-- Xunit.DependencyInjection -->
+    <BingTestingUseXunitDependencyInjection>false</BingTestingUseXunitDependencyInjection>
+    <!-- Xunit.DependencyInjection.Logging -->
+    <BingTestingUseDependencyInjectionLogging>false</BingTestingUseDependencyInjectionLogging>
+
+    <!-- AspectCore.Extensions.Hosting -->
+    <BingTestingUseAspectCore>false</BingTestingUseAspectCore>
+  </PropertyGroup>
+
   <Import Project="./common.tests.props"/>
+
+  <Import Project="./asset/props/testing/hosting/testing.hosting.props" />
 
   <PropertyGroup>
     <!-- 如果没有DI的需求，则将EnableDITestPackages设置为false -->
     <EnableDITestPackages>true</EnableDITestPackages>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' ">
+  <!--<ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' ">
     <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
     <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
   </ItemGroup>
@@ -31,6 +59,6 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
     <PackageReference Include="Xunit.DependencyInjection" Version="9.9.0" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

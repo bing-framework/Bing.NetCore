@@ -544,6 +544,393 @@ public class SqlOperationCompileContractTest
     }
 
     /// <summary>
+    /// 测试目的：第三方 Provider 消费者应能在不引用具体 Clause 实现的情况下编译使用五个 Lambda 多源 optional SPI。
+    /// </summary>
+    [Fact]
+    public void LambdaMultiSourceSpi_WhenImplementedByThirdPartyProvider_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq.Expressions;
+            using System.Text;
+            using Bing;
+            using Bing.Data.Enums;
+            using Bing.Data.Queries;
+            using Bing.Data.Sql;
+            using Bing.Data.Sql.Builders;
+            using Bing.Data.Sql.Builders.Core;
+            using Bing.Data.Sql.Builders.Clauses;
+            using Bing.Data.Sql.Builders.Params;
+            using Bing.Data.Sql.Metadata;
+
+            sealed class Item
+            {
+                public int Id { get; set; }
+            }
+
+            abstract class FromContract : IFromClause
+            {
+                public abstract void From(string table, string alias = null);
+                public abstract void From(SqlTableReference reference);
+                public abstract void From<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void From(ISqlBuilder builder, string alias);
+                public abstract void From(Action<ISqlBuilder> action, string alias);
+                public abstract void AppendSql(string sql);
+                public abstract void Validate();
+                public abstract string ToSql();
+                public abstract void AppendTo(StringBuilder builder);
+                public abstract void Clear();
+                public abstract IFromClause Clone(SqlClauseContext context);
+            }
+
+            sealed class ThirdPartyFrom : FromContract, ISqlMultiSourceFromClause
+            {
+                public IReadOnlyList<TableSource> Sources => Array.Empty<TableSource>();
+                public void AppendRoot(Type entityType, string alias = null, string schema = null) { }
+                public void From<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class { }
+                public ICondition ResolveMultiSourcePredicate(LambdaExpression expression,
+                    IReadOnlyList<TableSource> sources) => null;
+                public ICondition ResolveMultiSourcePredicate(LambdaExpression expression,
+                    IReadOnlyList<TableSource> sources, IParameterManager parameters) => null;
+                public IReadOnlyList<string> ResolveMultiSourceColumns(LambdaExpression expression,
+                    IReadOnlyList<TableSource> sources) => Array.Empty<string>();
+                public IReadOnlyList<string> ResolveMultiSourceDtoColumns(LambdaExpression expression,
+                    IReadOnlyList<TableSource> sources, out IReadOnlyCollection<string> projectedMembers)
+                {
+                    projectedMembers = Array.Empty<string>();
+                    return Array.Empty<string>();
+                }
+                public ICondition ResolveMultiSourceValueCondition(LambdaExpression expression,
+                    TableSource source, object value, Operator @operator) => null;
+                public void MergeNewParameters(IParameterManager parameters) { }
+                public override void From(string table, string alias = null) { }
+                public override void From(SqlTableReference reference) { }
+                public override void From<TEntity>(string alias = null, string schema = null) { }
+                public override void From(ISqlBuilder builder, string alias) { }
+                public override void From(Action<ISqlBuilder> action, string alias) { }
+                public override void AppendSql(string sql) { }
+                public override void Validate() { }
+                public override string ToSql() => string.Empty;
+                public override void AppendTo(StringBuilder builder) { }
+                public override void Clear() { }
+                public override IFromClause Clone(SqlClauseContext context) => this;
+            }
+
+            abstract class SelectContract : ISelectClause
+            {
+                public abstract bool IsDistinct { get; }
+                public abstract int? ProjectionCount { get; }
+                public abstract void Distinct();
+                public abstract void CountAll(string alias = null);
+                public abstract void CountColumn(string column, string alias = null, bool distinct = false);
+                public abstract void Count<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string alias = null, bool distinct = false) where TEntity : class;
+                public abstract void Aggregate(SqlAggregateFunction function, string column,
+                    string columnAlias = null, bool distinct = false);
+                public abstract void Aggregate<TEntity>(SqlAggregateFunction function,
+                    Expression<Func<TEntity, object>> expression, string columnAlias = null, bool distinct = false)
+                    where TEntity : class;
+                public abstract void AggregateRaw(SqlAggregateFunction function, string argumentSql,
+                    string columnAlias = null, bool distinct = false);
+                public abstract void AggregateExpression(SqlAggregateFunction function, string expressionSql,
+                    string columnAlias = null, bool distinct = false);
+                public abstract void Sum(string column, string columnAlias = null, bool distinct = false);
+                public abstract void Sum<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) where TEntity : class;
+                public abstract void Avg(string column, string columnAlias = null, bool distinct = false);
+                public abstract void Avg<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) where TEntity : class;
+                public abstract void Max(string column, string columnAlias = null, bool distinct = false);
+                public abstract void Max<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) where TEntity : class;
+                public abstract void Min(string column, string columnAlias = null, bool distinct = false);
+                public abstract void Min<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) where TEntity : class;
+                public abstract void Select(string columns, string tableAlias = null);
+                public abstract void Select<TEntity>(bool propertyAsAlias = false);
+                public abstract void Select<TEntity>(Expression<Func<TEntity, object[]>> expression,
+                    bool propertyAsAlias = false) where TEntity : class;
+                public abstract void Select<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null) where TEntity : class;
+                public abstract void Select(ISqlBuilder builder, string columnAlias);
+                public abstract void Select(Action<ISqlBuilder> action, string columnAlias);
+                public abstract void AppendSql(string sql, string columnAlias = null);
+                public abstract void RemoveSelect(string columns, string tableAlias = null);
+                public abstract void RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> expression)
+                    where TEntity : class;
+                public abstract void RemoveSelect<TEntity>(Expression<Func<TEntity, object>> expression)
+                    where TEntity : class;
+                public abstract string ToSql();
+                public abstract void AppendTo(StringBuilder builder);
+                public abstract void Clear();
+                public abstract ISelectClause Clone(SqlClauseContext context);
+            }
+
+            sealed class ThirdPartySelect : SelectContract, ISqlMultiSourceSelectClause
+            {
+                public void AppendBoundColumns(string columns) { }
+                public void Aggregate<TEntity>(SqlAggregateFunction function,
+                    Expression<Func<TEntity, object>> expression, string tableAlias, string columnAlias,
+                    bool distinct = false) where TEntity : class { }
+                public override bool IsDistinct => false;
+                public override int? ProjectionCount => 0;
+                public override void Distinct() { }
+                public override void CountAll(string alias = null) { }
+                public override void CountColumn(string column, string alias = null, bool distinct = false) { }
+                public override void Count<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string alias = null, bool distinct = false) { }
+                public override void Aggregate(SqlAggregateFunction function, string column,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Aggregate<TEntity>(SqlAggregateFunction function,
+                    Expression<Func<TEntity, object>> expression, string columnAlias = null,
+                    bool distinct = false) { }
+                public override void AggregateRaw(SqlAggregateFunction function, string argumentSql,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void AggregateExpression(SqlAggregateFunction function, string expressionSql,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Sum(string column, string columnAlias = null, bool distinct = false) { }
+                public override void Sum<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Avg(string column, string columnAlias = null, bool distinct = false) { }
+                public override void Avg<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Max(string column, string columnAlias = null, bool distinct = false) { }
+                public override void Max<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Min(string column, string columnAlias = null, bool distinct = false) { }
+                public override void Min<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null, bool distinct = false) { }
+                public override void Select(string columns, string tableAlias = null) { }
+                public override void Select<TEntity>(bool propertyAsAlias = false) { }
+                public override void Select<TEntity>(Expression<Func<TEntity, object[]>> expression,
+                    bool propertyAsAlias = false) { }
+                public override void Select<TEntity>(Expression<Func<TEntity, object>> expression,
+                    string columnAlias = null) { }
+                public override void Select(ISqlBuilder builder, string columnAlias) { }
+                public override void Select(Action<ISqlBuilder> action, string columnAlias) { }
+                public override void AppendSql(string sql, string columnAlias = null) { }
+                public override void RemoveSelect(string columns, string tableAlias = null) { }
+                public override void RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> expression)
+                    { }
+                public override void RemoveSelect<TEntity>(Expression<Func<TEntity, object>> expression)
+                    { }
+                public override string ToSql() => string.Empty;
+                public override void AppendTo(StringBuilder builder) { }
+                public override void Clear() { }
+                public override ISelectClause Clone(SqlClauseContext context) => this;
+            }
+
+            abstract class GroupByContract : IGroupByClause
+            {
+                public abstract bool IsGroup { get; }
+                public abstract string GroupColumns { get; }
+                public abstract void GroupBy(string groupBy);
+                public abstract void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns);
+                public abstract void GroupBy<TEntity>(Expression<Func<TEntity, object>> column)
+                    ;
+                public abstract void Having(string sql);
+                public abstract void HavingRaw(string sql);
+                public abstract void AppendSql(string sql);
+                public abstract string ToSql();
+                public abstract void AppendTo(StringBuilder builder);
+                public abstract void Clear();
+                public abstract IGroupByClause Clone(SqlClauseContext context);
+            }
+
+            sealed class ThirdPartyGroupBy : GroupByContract, ISqlMultiSourceGroupByClause
+            {
+                public void AppendBoundColumns(IEnumerable<string> columns) { }
+                public void SetBoundHaving(ICondition condition) { }
+                public override bool IsGroup => false;
+                public override string GroupColumns => string.Empty;
+                public override void GroupBy(string groupBy) { }
+                public override void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns) { }
+                public override void GroupBy<TEntity>(Expression<Func<TEntity, object>> column) { }
+                public override void Having(string sql) { }
+                public override void HavingRaw(string sql) { }
+                public override void AppendSql(string sql) { }
+                public override string ToSql() => string.Empty;
+                public override void AppendTo(StringBuilder builder) { }
+                public override void Clear() { }
+                public override IGroupByClause Clone(SqlClauseContext context) => this;
+            }
+
+            abstract class OrderByContract : IOrderByClause
+            {
+                public abstract void OrderBy(string order, string tableAlias = null);
+                public abstract void OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false);
+                public abstract void AppendSql(string order);
+                public abstract void Validate(bool isPage);
+                public abstract string ToSql();
+                public abstract void AppendTo(StringBuilder builder);
+                public abstract void Clear();
+                public abstract IOrderByClause Clone(SqlClauseContext context);
+            }
+
+            sealed class ThirdPartyOrderBy : OrderByContract, ISqlMultiSourceOrderByClause
+            {
+                public void AppendBoundColumns(IEnumerable<string> columns, bool desc) { }
+                public override void OrderBy(string order, string tableAlias = null) { }
+                public override void OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false) { }
+                public override void AppendSql(string order) { }
+                public override void Validate(bool isPage) { }
+                public override string ToSql() => string.Empty;
+                public override void AppendTo(StringBuilder builder) { }
+                public override void Clear() { }
+                public override IOrderByClause Clone(SqlClauseContext context) => this;
+            }
+
+            abstract class JoinContract : IJoinClause
+            {
+                public abstract IJoinOn Find(Type type);
+                public abstract void Join(string table, string alias = null);
+                public abstract void Join(SqlTableReference reference);
+                public abstract void Join<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void Join(ISqlBuilder builder, string alias);
+                public abstract void Join(Action<ISqlBuilder> action, string alias);
+                public abstract void AppendJoin(string sql);
+                public abstract void LeftJoin(string table, string alias = null);
+                public abstract void LeftJoin(SqlTableReference reference);
+                public abstract void LeftJoin<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void LeftJoin(ISqlBuilder builder, string alias);
+                public abstract void LeftJoin(Action<ISqlBuilder> action, string alias);
+                public abstract void AppendLeftJoin(string sql);
+                public abstract void RightJoin(string table, string alias = null);
+                public abstract void RightJoin(SqlTableReference reference);
+                public abstract void RightJoin<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void RightJoin(ISqlBuilder builder, string alias);
+                public abstract void RightJoin(Action<ISqlBuilder> action, string alias);
+                public abstract void AppendRightJoin(string sql);
+                public abstract void FullJoin(string table, string alias = null);
+                public abstract void FullJoin(SqlTableReference reference);
+                public abstract void FullJoin<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void AppendFullJoin(string sql);
+                public abstract void CrossJoin(string table, string alias = null);
+                public abstract void CrossJoin(SqlTableReference reference);
+                public abstract void CrossJoin<TEntity>(string alias = null, string schema = null)
+                    where TEntity : class;
+                public abstract void AppendCrossJoin(string sql);
+                public abstract void On(ICondition condition);
+                public abstract void On(string column, object value, Operator @operator = Operator.Equal);
+                public abstract void On<TLeft, TRight>(Expression<Func<TLeft, object>> left,
+                    Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal)
+                    where TLeft : class where TRight : class;
+                public abstract void On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression)
+                    where TLeft : class where TRight : class;
+                public abstract void AppendOn(string sql);
+                public abstract string ToSql();
+                public abstract void AppendTo(StringBuilder builder);
+                public abstract void Clear();
+                public abstract IJoinClause Clone(SqlClauseContext context);
+            }
+
+            sealed class ThirdPartyJoin : JoinContract, ISqlMultiSourceJoinClause
+            {
+                public IReadOnlyList<TableSource> TypedSources => Array.Empty<TableSource>();
+                public void Join<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+                    string alias = null, string schema = null) where TEntity : class { }
+                public void LeftJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+                    string alias = null, string schema = null) where TEntity : class { }
+                public void RightJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+                    string alias = null, string schema = null) where TEntity : class { }
+                public void FullJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
+                    string alias = null, string schema = null) where TEntity : class { }
+                public void Join<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+                    LambdaExpression predicate) where TProjection : class { }
+                public void LeftJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+                    LambdaExpression predicate) where TProjection : class { }
+                public void RightJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+                    LambdaExpression predicate) where TProjection : class { }
+                public void FullJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+                    LambdaExpression predicate) where TProjection : class { }
+                public void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery)
+                    where TProjection : class { }
+                public override IJoinOn Find(Type type) => null;
+                public override void Join(string table, string alias = null) { }
+                public override void Join(SqlTableReference reference) { }
+                public override void Join<TEntity>(string alias = null, string schema = null)
+                    { }
+                public override void Join(ISqlBuilder builder, string alias) { }
+                public override void Join(Action<ISqlBuilder> action, string alias) { }
+                public override void AppendJoin(string sql) { }
+                public override void LeftJoin(string table, string alias = null) { }
+                public override void LeftJoin(SqlTableReference reference) { }
+                public override void LeftJoin<TEntity>(string alias = null, string schema = null)
+                    { }
+                public override void LeftJoin(ISqlBuilder builder, string alias) { }
+                public override void LeftJoin(Action<ISqlBuilder> action, string alias) { }
+                public override void AppendLeftJoin(string sql) { }
+                public override void RightJoin(string table, string alias = null) { }
+                public override void RightJoin(SqlTableReference reference) { }
+                public override void RightJoin<TEntity>(string alias = null, string schema = null)
+                    { }
+                public override void RightJoin(ISqlBuilder builder, string alias) { }
+                public override void RightJoin(Action<ISqlBuilder> action, string alias) { }
+                public override void AppendRightJoin(string sql) { }
+                public override void FullJoin(string table, string alias = null) { }
+                public override void FullJoin(SqlTableReference reference) { }
+                public override void FullJoin<TEntity>(string alias = null, string schema = null)
+                    { }
+                public override void AppendFullJoin(string sql) { }
+                public override void CrossJoin(string table, string alias = null) { }
+                public override void CrossJoin(SqlTableReference reference) { }
+                public override void CrossJoin<TEntity>(string alias = null, string schema = null)
+                    { }
+                public override void AppendCrossJoin(string sql) { }
+                public override void On(ICondition condition) { }
+                public override void On(string column, object value, Operator @operator = Operator.Equal) { }
+                public override void On<TLeft, TRight>(Expression<Func<TLeft, object>> left,
+                    Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal)
+                    { }
+                public override void On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression)
+                    { }
+                public override void AppendOn(string sql) { }
+                public override string ToSql() => string.Empty;
+                public override void AppendTo(StringBuilder builder) { }
+                public override void Clear() { }
+                public override IJoinClause Clone(SqlClauseContext context) => this;
+            }
+
+            static class ThirdPartyProvider
+            {
+                static void Use(ThirdPartyFrom from, ThirdPartySelect select,
+                    ThirdPartyGroupBy groupBy, ThirdPartyOrderBy orderBy, ThirdPartyJoin join,
+                    IReadOnlyList<TableSource> sources, IParameterManager parameters, ICondition condition)
+                {
+                    from.AppendRoot(typeof(Item), "i");
+                    Expression<Func<Item, object>> column = item => item.Id;
+                    from.ResolveMultiSourceColumns(column, sources);
+                    from.MergeNewParameters(parameters);
+                    select.AppendBoundColumns("[i].[Id]");
+                    select.Aggregate(SqlAggregateFunction.Count, Expression.Lambda<Func<Item, object>>(
+                        Expression.Convert(Expression.Property(Expression.Parameter(typeof(Item), "item"), "Id"),
+                            typeof(object)), Expression.Parameter(typeof(Item), "item")), "i", "count", false);
+                    groupBy.AppendBoundColumns(new[] { "[i].[Id]" });
+                    groupBy.SetBoundHaving(condition);
+                    orderBy.AppendBoundColumns(new[] { "[i].[Id]" }, false);
+                    _ = join.TypedSources;
+                    LambdaExpression joinPredicate = (Expression<Func<Item, Item, bool>>)(
+                        (left, right) => left.Id == right.Id);
+                    join.Join<Item>(from, joinPredicate, "i");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+
+    /// <summary>
     /// 测试目的：实体 Join 使用普通右别名时，显式传入 null 应无歧义地编译为普通入口。
     /// </summary>
     [Fact]

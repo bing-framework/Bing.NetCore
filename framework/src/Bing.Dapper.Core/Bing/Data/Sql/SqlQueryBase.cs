@@ -63,6 +63,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     private string _transactionId;
 
     /// <summary>
+    /// 当前事务最近一次异步事务操作的执行模式。
+    /// </summary>
+    private string _transactionExecutionMode;
+
+    /// <summary>
     /// 事务作用域执行租约。
     /// </summary>
     private ISqlTransactionScopeLease _transactionScopeLease;
@@ -243,24 +248,54 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 获取当前执行上下文固定 Provider 的统一能力档案。
+    /// 获取执行门禁必须具备的 Provider 能力档案。
     /// </summary>
-    /// <returns>当前 Provider 的不可变能力档案。</returns>
-    internal SqlProviderProfile GetCurrentProviderProfile()
+    /// <returns>当前 Provider 声明的能力档案。</returns>
+    internal SqlProviderProfile GetRequiredProviderProfile()
     {
-        if (_provider is ISqlProviderProfileProvider { Profile: not null } profileProvider)
-            return profileProvider.Profile;
-        if (ServiceProvider.GetService<ISqlProviderResolver>() == null)
-            return new SqlProviderProfile();
-        try
-        {
-            return (GetCurrentProvider() as ISqlProviderProfileProvider)?.Profile ?? new SqlProviderProfile();
-        }
-        catch (NotSupportedException)
-        {
-            return new SqlProviderProfile();
-        }
+        var provider = GetCurrentProvider();
+        if (provider is not ISqlProviderProfileProvider { Profile: not null } profileProvider)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "ProviderProfile",
+                provider.Key, $"Provider {provider.Key} 未声明统一能力 Profile。[ProviderProfileMissing]");
+        if (profileProvider.Profile.Query == null || profileProvider.Profile.Mutation == null ||
+            profileProvider.Profile.Execution == null || profileProvider.Profile.Transaction == null ||
+            profileProvider.Profile.Procedure == null || profileProvider.Profile.Limits == null)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "ProviderProfile",
+                provider.Key, $"Provider {provider.Key} 的统一能力 Profile 不完整。[ProfileMismatch]");
+        return profileProvider.Profile;
     }
+
+    /// <summary>
+    /// 创建当前 Provider 的结构化能力拒绝异常。
+    /// </summary>
+    /// <param name="reason">能力拒绝原因。</param>
+    /// <param name="capability">被拒绝的能力名称。</param>
+    /// <param name="message">保持现有调用方兼容的异常消息。</param>
+    /// <returns>附带结构化原因的异常。</returns>
+    internal NotSupportedException CreateCapabilityFailure(SqlCapabilityFailureReason reason, string capability,
+        string message) => SqlCapabilityFailure.Create(reason, capability, GetCurrentProviderKey(), message);
+
+    /// <summary>
+    /// 获取当前 Provider 的事务能力声明；未声明 Profile 时拒绝进入本地事务路径。
+    /// </summary>
+    /// <returns>当前 Provider 的事务能力。</returns>
+    internal SqlProviderTransactionCapabilities GetCurrentProviderTransactionCapabilities()
+    {
+        var provider = GetCurrentProvider();
+        if (provider is not ISqlProviderProfileProvider { Profile: not null } profileProvider)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "Transaction",
+                provider.Key, $"Provider {provider.Key} 未声明事务能力 Profile。[ProviderProfileMissing]");
+        if (profileProvider.Profile.Transaction == null)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "Transaction",
+                provider.Key, $"Provider {provider.Key} 的事务能力 Profile 不完整。[ProfileMismatch]");
+        return profileProvider.Profile.Transaction;
+    }
+
+    /// <summary>
+    /// 获取当前 Provider Key。
+    /// </summary>
+    /// <returns>当前 Provider Key。</returns>
+    internal string GetCurrentProviderKey() => GetCurrentProvider().Key;
 
     /// <summary>
     /// Sql生成器
@@ -1106,7 +1141,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     private void ConfigureOutputParameterSupport(SqlPreparedCommand command)
     {
         if (command?.DapperParameters is DynamicParametersOutputAccessor accessor)
-            accessor.SetOutputParametersSupported(GetCurrentProviderProfile().Procedure.SupportsOutputParameters);
+        {
+            var procedure = GetRequiredProviderProfile().Procedure;
+            accessor.SetOutputParametersSupported(procedure.SupportsOutputParameters,
+                procedure.OutputParametersFailureReason ?? SqlCapabilityFailureReason.ProviderImplementationGap,
+                GetCurrentProviderKey());
+        }
     }
 
     /// <summary>

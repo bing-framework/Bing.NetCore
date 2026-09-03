@@ -11,6 +11,17 @@ internal interface ISqlTransactionScopeLease
     string TransactionId { get; }
 
     /// <summary>
+    /// 当前事务最近一次异步事务操作的执行模式。
+    /// </summary>
+    string ExecutionMode { get; }
+
+    /// <summary>
+    /// 更新当前事务最近一次异步事务操作的执行模式。
+    /// </summary>
+    /// <param name="mode">实际执行模式。</param>
+    void SetExecutionMode(SqlTransactionExecutionMode mode);
+
+    /// <summary>
     /// 确保作用域仍处于活动状态。
     /// </summary>
     void EnsureActive();
@@ -43,13 +54,42 @@ internal sealed class SqlTransactionScopeLease : ISqlTransactionScopeLease
     private int _activeExecutionCount;
 
     /// <summary>
+    /// 当前事务最近一次异步事务操作的执行模式。
+    /// </summary>
+    private string _executionMode;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlTransactionScopeLease"/> 类型的实例。
     /// </summary>
     /// <param name="transactionId">事务作用域标识。</param>
-    public SqlTransactionScopeLease(string transactionId) => TransactionId = transactionId;
+    /// <param name="mode">实际异步执行模式。</param>
+    public SqlTransactionScopeLease(string transactionId, SqlTransactionExecutionMode mode)
+    {
+        TransactionId = transactionId;
+        _executionMode = ToDiagnosticValue(mode);
+    }
 
     /// <inheritdoc />
     public string TransactionId { get; }
+
+    /// <inheritdoc />
+    public string ExecutionMode => Volatile.Read(ref _executionMode);
+
+    /// <inheritdoc />
+    public void SetExecutionMode(SqlTransactionExecutionMode mode) =>
+        Volatile.Write(ref _executionMode, ToDiagnosticValue(mode));
+
+    /// <summary>
+    /// 将内部事务执行模式转换为稳定诊断值。
+    /// </summary>
+    /// <param name="mode">内部执行模式。</param>
+    /// <returns>诊断使用的执行模式文本。</returns>
+    private static string ToDiagnosticValue(SqlTransactionExecutionMode mode) => mode switch
+    {
+        SqlTransactionExecutionMode.NativeAsync => "NativeAsync",
+        SqlTransactionExecutionMode.SynchronousFallback => "SynchronousFallback",
+        _ => null
+    };
 
     /// <summary>
     /// 使租约失效。

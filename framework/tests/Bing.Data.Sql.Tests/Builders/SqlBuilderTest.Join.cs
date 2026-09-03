@@ -838,7 +838,8 @@ public partial class SqlBuilderTest
 
         public bool FailParameterCommit { get; set; }
 
-        internal override void CommitParameterManager(IParameterManager parameterManager, FromClause fromClause)
+        internal override void CommitParameterManager(IParameterManager parameterManager,
+            ISqlMultiSourceFromClause fromClause)
         {
             base.CommitParameterManager(parameterManager, fromClause);
             if (FailParameterCommit)

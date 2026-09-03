@@ -131,8 +131,14 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     {
         if (command == null)
             throw new ArgumentNullException(nameof(command));
-        if (GetCurrentProviderProfile().Execution.SupportsMultipleResultSets == false)
-            throw new NotSupportedException($"数据库类型 {GetDatabaseType()} 不支持单次命令读取多个结果集。");
+        if (GetRequiredProviderProfile().Execution.SupportsMultipleResultSets == false)
+        {
+            var profile = GetRequiredProviderProfile();
+            throw SqlCapabilityFailure.Create(profile.Execution.MultipleResultSetsFailureReason ??
+                SqlCapabilityFailureReason.DatabaseUnsupported,
+                "MultipleResultSets",
+                GetCurrentProviderKey(), $"数据库类型 {GetDatabaseType()} 不支持单次命令读取多个结果集。");
+        }
     }
 
     /// <summary>

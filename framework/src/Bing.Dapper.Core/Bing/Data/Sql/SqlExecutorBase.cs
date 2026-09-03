@@ -22,14 +22,6 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// </remarks>
     private const int DefaultMutationBatchWindowSize = 256;
 
-    /// <summary>
-    /// 获取 Provider 声明的能力档案。
-    /// </summary>
-    /// <param name="provider">当前 SQL Provider。</param>
-    /// <returns>Provider 未声明档案时返回默认能力配置。</returns>
-    private static SqlProviderProfile GetProviderProfile(ISqlProvider provider) =>
-        (provider as ISqlProviderProfileProvider)?.Profile ?? new SqlProviderProfile();
-
     /// <inheritdoc />
     public ISqlBuilder CreateWriteBuilder() => CreateIndependentSqlBuilder();
 
@@ -170,8 +162,16 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             throw new InvalidOperationException($"ISqlExecutor 不支持执行 {command.OperationKind} 状态的写入命令。");
         if (command.HasReturning == false)
             throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
+        if (command.ProviderProfile == null)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "Returning",
+                command.ProviderKey, $"写入命令 Provider {command.ProviderKey} 未冻结统一能力 Profile，不能执行。");
+        if (command.ProviderProfile.Mutation == null)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "Returning",
+                command.ProviderKey, $"写入命令 Provider {command.ProviderKey} 的 Mutation 能力 Profile 不完整，不能执行。");
         if (command.ProviderProfile.Mutation.SupportsReturning == false)
-            throw new InvalidOperationException($"写入命令 Provider {command.ProviderKey} 未声明 Returning 能力，不能执行。");
+            throw SqlCapabilityFailure.Create(command.ProviderProfile.Mutation.ReturningFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "Returning",
+                command.ProviderKey, $"写入命令 Provider {command.ProviderKey} 未声明 Returning 能力，不能执行。");
         ValidateMutationCommandProvider(command);
     }
 
@@ -185,8 +185,10 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         var providerKey = provider.Key?.Trim();
         if (string.Equals(command.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase))
         {
-            if (command.HasReturning && GetProviderProfile(provider).Mutation.SupportsReturning == false)
-                throw new NotSupportedException($"Provider {providerKey ?? "<未指定>"} 不支持 Mutation Returning。");
+            if (command.HasReturning && GetRequiredProviderProfile().Mutation.SupportsReturning == false)
+                throw SqlCapabilityFailure.Create(GetRequiredProviderProfile().Mutation.ReturningFailureReason ??
+                    SqlCapabilityFailureReason.ProviderImplementationGap, "Returning",
+                    providerKey, $"Provider {providerKey ?? "<未指定>"} 不支持 Mutation Returning。");
             return;
         }
         throw new InvalidOperationException($"写入命令 Provider {command.ProviderKey} 与当前 Executor Provider {providerKey ?? "<未指定>"} 不一致，不能执行。");
@@ -477,7 +479,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (options?.Strategy == SqlBatchInsertStrategy.MultiRowValues)
             return true;
         var provider = ResolveMutationProvider();
-        return GetProviderProfile(provider).Mutation.SupportsMultiRowValues;
+        return GetRequiredProviderProfile().Mutation.SupportsMultiRowValues;
     }
 
     /// <summary>
@@ -534,7 +536,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                     return CreateProviderOptimizedUpdateBatchCommands(items, options);
                 }
                 if (options.Strategy == SqlBatchUpdateStrategy.ProviderOptimized)
-                    throw new NotSupportedException($"Provider {provider.Key} 无法为当前批量 Update 上下文生成优化命令。");
+                    throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap,
+                        "BatchUpdate", provider.Key, $"Provider {provider.Key} 无法为当前批量 Update 上下文生成优化命令。");
             }
             if (options.Strategy == SqlBatchUpdateStrategy.ProviderOptimized)
                 return CreateProviderOptimizedUpdateBatchCommands(items, options);
@@ -556,7 +559,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         var provider = ResolveMutationProvider();
         var renderer = ResolveBatchUpdateRenderer(provider);
         if (CreateMutationBuilder(provider) is not ISqlBatchUpdateRenderContextBuilder contextBuilder)
-            throw new NotSupportedException($"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchUpdate",
+                provider.Key, $"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
         var firstContext = contextBuilder.CreateUpdateRenderContext(items.Take(1).ToArray(), options.UpdateOptions);
         var firstCommand = renderer.Render(firstContext);
         var validateAffectedRows = firstContext.ConcurrencyColumns.Count > 0 &&
@@ -624,7 +628,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         SqlBatchUpdateOptions options, ISqlProvider provider, ISqlBatchUpdateRenderer renderer) where TEntity : class
     {
         if (CreateMutationBuilder(provider) is not ISqlBatchUpdateRenderContextBuilder contextBuilder)
-            throw new NotSupportedException($"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchUpdate",
+                provider.Key, $"Provider {provider.Key} 的实体 Mutation Builder 未实现批量 Update 渲染上下文。");
         return renderer.Render(contextBuilder.CreateUpdateRenderContext(entities, options.UpdateOptions));
     }
 
@@ -641,7 +646,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             .Take(2)
             .ToArray();
         if (renderers.Length == 0)
-            throw new NotSupportedException($"Provider {provider.Key} 未注册优化批量 Update 渲染器。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchUpdate",
+                provider.Key, $"Provider {provider.Key} 未注册优化批量 Update 渲染器。");
         if (renderers.Length > 1)
             throw new InvalidOperationException($"Provider {provider.Key} 注册了多个优化批量 Update 渲染器。");
         return renderers[0];
@@ -694,7 +700,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (options.Strategy == SqlBatchDeleteStrategy.Auto)
                 return CreateMutationBatchCommands(items,
                     entity => CreateMutationBuilder(provider).Delete(entity, options.DeleteOptions), options);
-            throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Delete 批量命令。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchDelete",
+                provider.Key, $"Provider {provider.Key} 未实现组合式 Delete 批量命令。");
         }
         return CreateCombinedDeleteBatchCommands(items, options, provider);
     }
@@ -834,16 +841,17 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (items.Any(entity => entity == null))
             throw new ArgumentException("批量 Insert 实体集合不能包含 null。", nameof(entities));
         var provider = ResolveMutationProvider();
-        var supportsMultiRowValues =
-            GetProviderProfile(provider).Mutation.SupportsMultiRowValues;
+        var supportsMultiRowValues = GetRequiredProviderProfile().Mutation.SupportsMultiRowValues;
         if (supportsMultiRowValues == false)
-            throw new NotSupportedException($"Provider {provider.Key} 未声明支持组合式 Insert 批量命令。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "MultiRowValues",
+                provider.Key, $"Provider {provider.Key} 未声明支持组合式 Insert 批量命令。");
         if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder)
         {
             if (options?.Strategy == SqlBatchInsertStrategy.Auto)
                 return CreateMutationBatchCommands(items,
                     entity => CreateMutationBuilder(provider).Insert(entity, options.InsertOptions), options);
-            throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchInsert",
+                provider.Key, $"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
         }
         var firstCommand = CreateMutationBuilder(provider).Insert(items[0], options.InsertOptions);
         var parametersPerEntity = firstCommand.Parameters.Count;
@@ -858,7 +866,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             if (options.MaxSqlLength == null)
             {
                 if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder builder)
-                    throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
+                    throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchInsert",
+                        provider.Key, $"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
                 var command = builder.InsertCombined(items.GetRange(offset, size), options.InsertOptions);
                 batches.Add(new SqlMutationBatchCommand(new[] { command }, size, options.UseTransaction));
                 offset += size;
@@ -874,7 +883,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
                 while (minimumSize <= maximumSize)
                 {
                     if (CreateMutationBuilder(provider) is not ISqlCombinedInsertMutationBuilder builder)
-                        throw new NotSupportedException($"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
+                        throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap, "BatchInsert",
+                            provider.Key, $"Provider {provider.Key} 未实现组合式 Insert 批量命令。");
                     var candidateSize = minimumSize + (maximumSize - minimumSize) / 2;
                     var candidate = builder.InsertCombined(items.GetRange(offset, candidateSize), options.InsertOptions);
                     if (options.MaxSqlLength != null && candidate.Sql.Length > options.MaxSqlLength.Value)

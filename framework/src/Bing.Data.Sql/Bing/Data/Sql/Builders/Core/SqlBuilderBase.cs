@@ -531,7 +531,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <returns>应用当前 Provider 参数数量限制后的参数管理器；输入为 null 时返回 null。</returns>
     private IParameterManager ApplyParameterLimit(IParameterManager parameterManager)
     {
-        var maxParameterCount = SqlProviderCapabilityResolver.GetProfile(Provider).Limits.MaxParameterCount;
+        var maxParameterCount = SqlProviderCapabilityResolver.GetProfile(Provider).Limits?.MaxParameterCount;
         if (parameterManager == null || parameterManager is ParameterLimitManagerBase || maxParameterCount == null)
             return parameterManager;
         return parameterManager is IAdvancedParameterManager advancedParameterManager
@@ -1973,7 +1973,13 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     {
         if (capability == SqlQueryCapabilityState.Supported)
             return;
-        throw new NotSupportedException($"Provider {Provider.Key} 的当前查询能力配置不支持 {name}。");
+        var reason = SqlProviderCapabilityResolver.HasProfile(Provider) == false
+            ? SqlCapabilityFailureReason.ProviderProfileMissing
+            : SqlProviderCapabilityResolver.HasCompleteProfile(Provider)
+                ? SqlCapabilityFailureReason.ProviderImplementationGap
+                : SqlCapabilityFailureReason.ProviderProfileMismatch;
+        throw SqlCapabilityFailure.Create(reason, $"Query:{name}", Provider.Key,
+            $"Provider {Provider.Key} 的当前查询能力配置不支持 {name}。");
     }
 
     /// <summary>

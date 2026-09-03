@@ -1,0 +1,15 @@
+<Project>
+
+  <!--
+    测试共享库预设。
+    不引用 Test SDK / Runner / Coverlet。
+    默认仍可引用 xUnit / Shouldly / Moq。
+  -->
+
+  <PropertyGroup>
+    <BingTestingProjectType>TestShare</BingTestingProjectType>
+  </PropertyGroup>
+
+  <Import Project="./asset/props/testing/testing.props" />
+
+</Project>

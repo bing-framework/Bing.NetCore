@@ -57,7 +57,15 @@ public sealed class UpdateFromClause : MutationTableClauseBase, IUpdateFromClaus
         ValidateTable(Table, "Update From");
         if (string.IsNullOrWhiteSpace(Table.Alias))
             throw new InvalidOperationException("Update From 来源表必须指定别名。");
+        if (context.IsProfileDeclared == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "UpdateFrom",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Update From。");
+        if (SqlProviderCapabilityResolver.HasCompleteProfile(context.Provider) == false)
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMismatch, "UpdateFrom",
+                context.Provider.Key, $"Provider {context.Provider.Key} 的 Mutation 能力 Profile 不完整。[ProfileMismatch]");
         if (context.Profile.Mutation.SupportsUpdateFrom == false)
-            throw new NotSupportedException($"Provider {context.Provider.Key} 不支持 Update From。");
+            throw SqlCapabilityFailure.Create(context.Profile.Mutation.UpdateFromFailureReason ??
+                SqlCapabilityFailureReason.ProviderImplementationGap, "UpdateFrom",
+                context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Update From。");
     }
 }

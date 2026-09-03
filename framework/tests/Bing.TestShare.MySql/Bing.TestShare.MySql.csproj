@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\common.tests.props" />
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <Nullable>disable</Nullable>
@@ -11,11 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj" />
     <ProjectReference Include="..\Bing.TestShare\Bing.TestShare.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UnitOfWorks\" />
-    <Folder Include="Mappings\" />
   </ItemGroup>
 
 </Project>

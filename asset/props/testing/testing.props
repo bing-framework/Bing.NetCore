@@ -1,0 +1,90 @@
+<Project>
+  <!--
+    ============================================================================
+    Bing Testing - Entry
+    ============================================================================
+    所有测试项目只需要 Import 本文件。
+
+    Import 顺序：
+      1. testing.settings.props
+      2. testing.compatibility.props
+      3. testing.packages.props
+
+    IMPORTANT:
+      本文件必须在 TargetFramework / TargetFrameworks 已确定之后导入。
+    ============================================================================
+  -->
+
+  <!-- 测试公共设置 -->
+  <Import Project="$(MSBuildThisFileDirectory)testing.settings.props" />
+
+  <!-- TFM / NuGet 版本兼容矩阵 -->
+  <Import Project="$(MSBuildThisFileDirectory)testing.compatibility.props" />
+
+  <!-- 测试 NuGet 包 -->
+  <Import Project="$(MSBuildThisFileDirectory)testing.packages.props" />
+
+  <!-- =========================================================================
+       配置校验
+       ========================================================================= -->
+  <Target
+      Name="ValidateBingTestingConfiguration"
+      BeforeTargets="PrepareForBuild"
+      Condition="'$(BingTestingEnabled)' == 'true'">
+
+    <Error
+      Condition="
+          '$(BingTestingProjectType)' != 'Test'
+          And '$(BingTestingProjectType)' != 'TestShare'
+          And '$(BingTestingProjectType)' != 'None'"
+      Text="Bing Testing：无效的 BingTestingProjectType='$(BingTestingProjectType)'。支持的值：Test、TestShare、None。" />
+
+    <Error
+      Condition="
+          '$(BingTestingXunitMode)' != 'V2'
+          And '$(BingTestingXunitMode)' != 'V3'
+          And '$(BingTestingXunitMode)' != 'Auto'"
+      Text="Bing Testing：无效的 BingTestingXunitMode='$(BingTestingXunitMode)'。支持的值：V2、V3、Auto。" />
+
+    <Error
+      Condition="'$(BingTestingRunnerMode)' != 'VSTest'"
+      Text="Bing Testing：当前 props 版本不支持 BingTestingRunnerMode='$(BingTestingRunnerMode)'。当前支持的值：VSTest。" />
+
+    <Error
+      Condition="
+          '$(BingTestingUseXunit)' == 'true'
+          And '$(BingTestingResolvedXunitMode)' == 'V3'
+          And '$(BingTestingXunitV3Supported)' != 'true'"
+      Text="Bing Testing：当前目标框架 '$(TargetFramework)' 不支持 xUnit v3。请将 BingTestingXunitMode 设置为 V2，或将目标框架升级到 .NET Framework 4.7.2+ / .NET 8+。" />
+
+  </Target>
+
+
+  <!-- =========================================================================
+       可选诊断输出
+
+       开启方式：
+         <BingTestingShowConfiguration>true</BingTestingShowConfiguration>
+       ========================================================================= -->
+  <Target
+      Name="ShowBingTestingConfiguration"
+      BeforeTargets="PrepareForBuild"
+      Condition="
+        '$(BingTestingEnabled)' == 'true'
+        And '$(BingTestingShowConfiguration)' == 'true'">
+
+    <Message Importance="High"
+             Text="Bing Testing：目标框架=$(TargetFramework)，项目类型=$(BingTestingProjectType)，Profile=$(BingTestingProfile)" />
+
+    <Message Importance="High"
+             Text="Bing Testing：xUnit模式=$(BingTestingXunitMode)，实际模式=$(BingTestingResolvedXunitMode)，支持V3=$(BingTestingXunitV3Supported)" />
+
+    <Message Importance="High"
+             Text="Bing Testing：TestSdk=$(BingMicrosoftNetTestSdkVersion)，XunitRunner=$(BingXunitRunnerVersion)" />
+
+    <Message Importance="High"
+             Text="Bing Testing：Shouldly=$(BingShouldlyVersion)，Moq=$(BingMoqVersion)，Coverlet=$(BingCoverletVersion)，支持覆盖率=$(BingTestingCoverageSupported)" />
+
+  </Target>
+
+</Project>

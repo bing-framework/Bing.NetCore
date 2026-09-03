@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\..\framework.tests.props" />
+  
   <PropertyGroup>
     <RootNamespace>Bing.Dapper.Tests</RootNamespace>
     <XunitStartupFullName>Bing.Dapper.Tests.Startup</XunitStartupFullName>
     <TestTfmsInParallel>false</TestTfmsInParallel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BingTestingUseXunitDependencyInjection>true</BingTestingUseXunitDependencyInjection>
+    <BingTestingUseDependencyInjectionLogging>true</BingTestingUseDependencyInjectionLogging>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+using System.Text;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
@@ -95,22 +97,286 @@ internal sealed class CustomSqlProvider : ISqlProvider, ISqlProviderProfileProvi
 internal sealed class CustomClauseFactory : ISqlClauseFactory
 {
     /// <inheritdoc />
-    public ISelectClause CreateSelect(SqlClauseContext context) => new CustomSelectClause(context);
+    public ISelectClause CreateSelect(SqlClauseContext context) =>
+        new CustomSelectClause(new DefaultSqlClauseFactory().CreateSelect(context));
 
     /// <inheritdoc />
-    public IFromClause CreateFrom(SqlClauseContext context) => new FromClause(context);
+    public IFromClause CreateFrom(SqlClauseContext context) =>
+        new CustomFromClause(new DefaultSqlClauseFactory().CreateFrom(context));
 
     /// <inheritdoc />
-    public IJoinClause CreateJoin(SqlClauseContext context) => new JoinClause(context);
+    public IJoinClause CreateJoin(SqlClauseContext context) =>
+        new CustomJoinClause(new DefaultSqlClauseFactory().CreateJoin(context));
 
     /// <inheritdoc />
-    public IWhereClause CreateWhere(SqlClauseContext context) => new WhereClause(context);
+    public IWhereClause CreateWhere(SqlClauseContext context) => new DefaultSqlClauseFactory().CreateWhere(context);
 
     /// <inheritdoc />
-    public IGroupByClause CreateGroupBy(SqlClauseContext context) => new GroupByClause(context);
+    public IGroupByClause CreateGroupBy(SqlClauseContext context) =>
+        new CustomGroupByClause(new DefaultSqlClauseFactory().CreateGroupBy(context));
 
     /// <inheritdoc />
-    public IOrderByClause CreateOrderBy(SqlClauseContext context) => new OrderByClause(context);
+    public IOrderByClause CreateOrderBy(SqlClauseContext context) =>
+        new CustomOrderByClause(new DefaultSqlClauseFactory().CreateOrderBy(context));
+}
+
+/// <summary>
+/// 外部 Provider 的 Select Clause 实现，仅通过公开 Clause 接口委托默认状态处理。
+/// </summary>
+internal sealed class CustomSelectClause : ISqlMultiSourceSelectClause
+{
+    private readonly ISelectClause _inner;
+    private readonly ISqlMultiSourceSelectClause _multiSource;
+
+    public CustomSelectClause(ISelectClause inner)
+    {
+        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _multiSource = inner as ISqlMultiSourceSelectClause ??
+            throw new InvalidOperationException("默认 Select Clause 未实现 Lambda 多源 SPI。");
+    }
+
+    public bool IsDistinct => _inner.IsDistinct;
+    public int? ProjectionCount => _inner.ProjectionCount;
+    public void Distinct() => _inner.Distinct();
+    public void CountAll(string alias = null) => _inner.CountAll(alias);
+    public void CountColumn(string column, string alias = null, bool distinct = false) =>
+        _inner.CountColumn(column, alias, distinct);
+    public void Count<TEntity>(Expression<Func<TEntity, object>> expression, string alias = null,
+        bool distinct = false) where TEntity : class => _inner.Count(expression, alias, distinct);
+    public void Aggregate(SqlAggregateFunction function, string column, string columnAlias = null,
+        bool distinct = false) => _inner.Aggregate(function, column, columnAlias, distinct);
+    public void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
+        string columnAlias = null, bool distinct = false) where TEntity : class =>
+        _inner.Aggregate(function, expression, columnAlias, distinct);
+    public void AggregateRaw(SqlAggregateFunction function, string argumentSql, string columnAlias = null,
+        bool distinct = false) => _inner.AggregateRaw(function, argumentSql, columnAlias, distinct);
+    public void AggregateExpression(SqlAggregateFunction function, string expressionSql, string columnAlias = null,
+        bool distinct = false) => _inner.AggregateExpression(function, expressionSql, columnAlias, distinct);
+    public void Sum(string column, string columnAlias = null, bool distinct = false) =>
+        _inner.Sum(column, columnAlias, distinct);
+    public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class => _inner.Sum(expression, columnAlias, distinct);
+    public void Avg(string column, string columnAlias = null, bool distinct = false) =>
+        _inner.Avg(column, columnAlias, distinct);
+    public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class => _inner.Avg(expression, columnAlias, distinct);
+    public void Max(string column, string columnAlias = null, bool distinct = false) =>
+        _inner.Max(column, columnAlias, distinct);
+    public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class => _inner.Max(expression, columnAlias, distinct);
+    public void Min(string column, string columnAlias = null, bool distinct = false) =>
+        _inner.Min(column, columnAlias, distinct);
+    public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
+        bool distinct = false) where TEntity : class => _inner.Min(expression, columnAlias, distinct);
+    public void Select(string columns, string tableAlias = null) => _inner.Select(columns, tableAlias);
+    public void Select<TEntity>(bool propertyAsAlias = false) =>
+        _inner.Select<TEntity>(propertyAsAlias);
+    public void Select<TEntity>(Expression<Func<TEntity, object[]>> expression, bool propertyAsAlias = false)
+        where TEntity : class => _inner.Select(expression, propertyAsAlias);
+    public void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null)
+        where TEntity : class => _inner.Select(expression, columnAlias);
+    public void Select(ISqlBuilder builder, string columnAlias) => _inner.Select(builder, columnAlias);
+    public void Select(Action<ISqlBuilder> action, string columnAlias) => _inner.Select(action, columnAlias);
+    public void AppendSql(string sql, string columnAlias = null) => _inner.AppendSql(sql, columnAlias);
+    public void RemoveSelect(string columns, string tableAlias = null) => _inner.RemoveSelect(columns, tableAlias);
+    public void RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> expression) where TEntity : class =>
+        _inner.RemoveSelect(expression);
+    public void RemoveSelect<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class =>
+        _inner.RemoveSelect(expression);
+    public void AppendBoundColumns(string columns) => _multiSource.AppendBoundColumns(columns);
+    public void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
+        string tableAlias, string columnAlias, bool distinct) where TEntity : class =>
+        _multiSource.Aggregate(function, expression, tableAlias, columnAlias, distinct);
+    public void AppendTo(StringBuilder builder) => _inner.AppendTo(builder);
+    public void Clear() => _inner.Clear();
+    public string ToSql() => _inner.ToSql();
+    public ISelectClause Clone(SqlClauseContext context) => new CustomSelectClause(_inner.Clone(context));
+}
+
+/// <summary>
+/// 外部 Provider 的 From Clause 实现，仅通过公开 Clause 接口委托默认状态处理。
+/// </summary>
+internal sealed class CustomFromClause : ISqlMultiSourceFromClause
+{
+    private readonly IFromClause _inner;
+    private readonly ISqlMultiSourceFromClause _multiSource;
+
+    public CustomFromClause(IFromClause inner)
+    {
+        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _multiSource = inner as ISqlMultiSourceFromClause ??
+            throw new InvalidOperationException("默认 From Clause 未实现 Lambda 多源 SPI。");
+    }
+
+    public IReadOnlyList<TableSource> Sources => _multiSource.Sources;
+    public void From(string table, string alias = null) => _inner.From(table, alias);
+    public void From(SqlTableReference reference) => _inner.From(reference);
+    public void From<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.From<TEntity>(alias, schema);
+    public void From(ISqlBuilder builder, string alias) => _inner.From(builder, alias);
+    public void From(Action<ISqlBuilder> action, string alias) => _inner.From(action, alias);
+    public void AppendSql(string sql) => _inner.AppendSql(sql);
+    public void Validate() => _inner.Validate();
+    public string ToSql() => _inner.ToSql();
+    public void AppendTo(StringBuilder builder) => _inner.AppendTo(builder);
+    public void Clear() => _inner.Clear();
+    public IFromClause Clone(SqlClauseContext context) => new CustomFromClause(_inner.Clone(context));
+    public void AppendRoot(Type entityType, string alias = null, string schema = null) =>
+        _multiSource.AppendRoot(entityType, alias, schema);
+    public void From<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        _multiSource.From(subquery);
+    public ICondition ResolveMultiSourcePredicate(LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
+        _multiSource.ResolveMultiSourcePredicate(expression, sources);
+    public ICondition ResolveMultiSourcePredicate(LambdaExpression expression, IReadOnlyList<TableSource> sources,
+        IParameterManager parameterManager) => _multiSource.ResolveMultiSourcePredicate(expression, sources, parameterManager);
+    public IReadOnlyList<string> ResolveMultiSourceColumns(LambdaExpression expression,
+        IReadOnlyList<TableSource> sources) => _multiSource.ResolveMultiSourceColumns(expression, sources);
+    public IReadOnlyList<string> ResolveMultiSourceDtoColumns(LambdaExpression expression,
+        IReadOnlyList<TableSource> sources, out IReadOnlyCollection<string> projectedMembers) =>
+        _multiSource.ResolveMultiSourceDtoColumns(expression, sources, out projectedMembers);
+    public ICondition ResolveMultiSourceValueCondition(LambdaExpression expression, TableSource source, object value,
+        Operator @operator) => _multiSource.ResolveMultiSourceValueCondition(expression, source, value, @operator);
+    public void MergeNewParameters(IParameterManager parameterManager) => _multiSource.MergeNewParameters(parameterManager);
+}
+
+/// <summary>
+/// 外部 Provider 的 Group By Clause 实现，仅通过公开 Clause 接口委托默认状态处理。
+/// </summary>
+internal sealed class CustomGroupByClause : ISqlMultiSourceGroupByClause
+{
+    private readonly IGroupByClause _inner;
+    private readonly ISqlMultiSourceGroupByClause _multiSource;
+
+    public CustomGroupByClause(IGroupByClause inner)
+    {
+        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _multiSource = inner as ISqlMultiSourceGroupByClause ??
+            throw new InvalidOperationException("默认 Group By Clause 未实现 Lambda 多源 SPI。");
+    }
+
+    public bool IsGroup => _inner.IsGroup;
+    public string GroupColumns => _inner.GroupColumns;
+    public void GroupBy(string groupBy) => _inner.GroupBy(groupBy);
+    public void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns) =>
+        _inner.GroupBy(columns);
+    public void GroupBy<TEntity>(Expression<Func<TEntity, object>> column) =>
+        _inner.GroupBy(column);
+    public void Having(string sql) => _inner.Having(sql);
+    public void HavingRaw(string sql) => _inner.HavingRaw(sql);
+    public void AppendSql(string sql) => _inner.AppendSql(sql);
+    public string ToSql() => _inner.ToSql();
+    public void AppendBoundColumns(IEnumerable<string> columns) => _multiSource.AppendBoundColumns(columns);
+    public void SetBoundHaving(ICondition condition) => _multiSource.SetBoundHaving(condition);
+    public void AppendTo(StringBuilder builder) => _inner.AppendTo(builder);
+    public void Clear() => _inner.Clear();
+    public IGroupByClause Clone(SqlClauseContext context) => new CustomGroupByClause(_inner.Clone(context));
+}
+
+/// <summary>
+/// 外部 Provider 的 Order By Clause 实现，仅通过公开 Clause 接口委托默认状态处理。
+/// </summary>
+internal sealed class CustomOrderByClause : ISqlMultiSourceOrderByClause
+{
+    private readonly IOrderByClause _inner;
+    private readonly ISqlMultiSourceOrderByClause _multiSource;
+
+    public CustomOrderByClause(IOrderByClause inner)
+    {
+        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _multiSource = inner as ISqlMultiSourceOrderByClause ??
+            throw new InvalidOperationException("默认 Order By Clause 未实现 Lambda 多源 SPI。");
+    }
+
+    public void OrderBy(string order, string tableAlias = null) => _inner.OrderBy(order, tableAlias);
+    public void OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false) =>
+        _inner.OrderBy(column, desc);
+    public void AppendSql(string order) => _inner.AppendSql(order);
+    public void Validate(bool isPage) => _inner.Validate(isPage);
+    public string ToSql() => _inner.ToSql();
+    public void AppendBoundColumns(IEnumerable<string> columns, bool desc) => _multiSource.AppendBoundColumns(columns, desc);
+    public void AppendTo(StringBuilder builder) => _inner.AppendTo(builder);
+    public void Clear() => _inner.Clear();
+    public IOrderByClause Clone(SqlClauseContext context) => new CustomOrderByClause(_inner.Clone(context));
+}
+
+/// <summary>
+/// 外部 Provider 的 Join Clause 实现，仅通过公开 Clause 接口委托默认状态处理。
+/// </summary>
+internal sealed class CustomJoinClause : ISqlMultiSourceJoinClause
+{
+    private readonly IJoinClause _inner;
+    private readonly ISqlMultiSourceJoinClause _multiSource;
+
+    public CustomJoinClause(IJoinClause inner)
+    {
+        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+        _multiSource = inner as ISqlMultiSourceJoinClause ??
+            throw new InvalidOperationException("默认 Join Clause 未实现 Lambda 多源 SPI。");
+    }
+
+    public IReadOnlyList<TableSource> TypedSources => _multiSource.TypedSources;
+    public IJoinOn Find(Type type) => _inner.Find(type);
+    public void Join(string table, string alias = null) => _inner.Join(table, alias);
+    public void Join(SqlTableReference reference) => _inner.Join(reference);
+    public void Join<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.Join<TEntity>(alias, schema);
+    public void Join(ISqlBuilder builder, string alias) => _inner.Join(builder, alias);
+    public void Join(Action<ISqlBuilder> action, string alias) => _inner.Join(action, alias);
+    public void AppendJoin(string sql) => _inner.AppendJoin(sql);
+    public void LeftJoin(string table, string alias = null) => _inner.LeftJoin(table, alias);
+    public void LeftJoin(SqlTableReference reference) => _inner.LeftJoin(reference);
+    public void LeftJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.LeftJoin<TEntity>(alias, schema);
+    public void LeftJoin(ISqlBuilder builder, string alias) => _inner.LeftJoin(builder, alias);
+    public void LeftJoin(Action<ISqlBuilder> action, string alias) => _inner.LeftJoin(action, alias);
+    public void AppendLeftJoin(string sql) => _inner.AppendLeftJoin(sql);
+    public void RightJoin(string table, string alias = null) => _inner.RightJoin(table, alias);
+    public void RightJoin(SqlTableReference reference) => _inner.RightJoin(reference);
+    public void RightJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.RightJoin<TEntity>(alias, schema);
+    public void RightJoin(ISqlBuilder builder, string alias) => _inner.RightJoin(builder, alias);
+    public void RightJoin(Action<ISqlBuilder> action, string alias) => _inner.RightJoin(action, alias);
+    public void AppendRightJoin(string sql) => _inner.AppendRightJoin(sql);
+    public void FullJoin(string table, string alias = null) => _inner.FullJoin(table, alias);
+    public void FullJoin(SqlTableReference reference) => _inner.FullJoin(reference);
+    public void FullJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.FullJoin<TEntity>(alias, schema);
+    public void AppendFullJoin(string sql) => _inner.AppendFullJoin(sql);
+    public void CrossJoin(string table, string alias = null) => _inner.CrossJoin(table, alias);
+    public void CrossJoin(SqlTableReference reference) => _inner.CrossJoin(reference);
+    public void CrossJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
+        _inner.CrossJoin<TEntity>(alias, schema);
+    public void AppendCrossJoin(string sql) => _inner.AppendCrossJoin(sql);
+    public void On(ICondition condition) => _inner.On(condition);
+    public void On(string column, object value, Operator @operator = Operator.Equal) => _inner.On(column, value, @operator);
+    public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right,
+        Operator @operator = Operator.Equal) where TLeft : class where TRight : class =>
+        _inner.On(left, right, @operator);
+    public void On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression)
+        where TLeft : class where TRight : class => _inner.On(expression);
+    public void AppendOn(string sql) => _inner.AppendOn(sql);
+    public string ToSql() => _inner.ToSql();
+    public void AppendTo(StringBuilder builder) => _inner.AppendTo(builder);
+    public void Clear() => _inner.Clear();
+    public IJoinClause Clone(SqlClauseContext context) => new CustomJoinClause(_inner.Clone(context));
+    public void Join<TEntity>(IFromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => _multiSource.Join<TEntity>(fromClause, predicate, alias, schema);
+    public void LeftJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => _multiSource.LeftJoin<TEntity>(fromClause, predicate, alias, schema);
+    public void RightJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => _multiSource.RightJoin<TEntity>(fromClause, predicate, alias, schema);
+    public void FullJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate, string alias = null,
+        string schema = null) where TEntity : class => _multiSource.FullJoin<TEntity>(fromClause, predicate, alias, schema);
+    public void Join<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => _multiSource.Join(fromClause, subquery, predicate);
+    public void LeftJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => _multiSource.LeftJoin(fromClause, subquery, predicate);
+    public void RightJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => _multiSource.RightJoin(fromClause, subquery, predicate);
+    public void FullJoin<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
+        LambdaExpression predicate) where TProjection : class => _multiSource.FullJoin(fromClause, subquery, predicate);
+    public void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
+        _multiSource.CrossJoin(subquery);
 }
 
 /// <summary>
@@ -276,35 +542,6 @@ internal sealed class CustomReturningClause : IReturningClause
 
     /// <inheritdoc />
     public void Validate(SqlValidationContext context) => _inner.Validate(context);
-}
-
-/// <summary>
-/// 验证 Provider 自定义 Clause 在 Builder 生命周期中保持运行类型的 Select 实现。
-/// </summary>
-internal sealed class CustomSelectClause : SelectClause
-{
-    /// <summary>
-    /// 初始化自定义 Select 子句。
-    /// </summary>
-    /// <param name="context">子句运行上下文。</param>
-    public CustomSelectClause(SqlClauseContext context) : base(context)
-    {
-    }
-
-    /// <summary>
-    /// 使用已复制状态初始化自定义 Select 子句。
-    /// </summary>
-    /// <param name="context">子句运行上下文。</param>
-    /// <param name="columns">已复制的列集合。</param>
-    /// <param name="distinct">是否保留去重状态。</param>
-    private CustomSelectClause(SqlClauseContext context, ColumnCollection columns, bool distinct)
-        : base(context, columns, distinct)
-    {
-    }
-
-    /// <inheritdoc />
-    protected override SelectClause CreateClone(SqlClauseContext context, ColumnCollection columns, bool distinct) =>
-        new CustomSelectClause(context, columns, distinct);
 }
 
 /// <summary>

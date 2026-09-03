@@ -952,10 +952,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：普通异步命令的主库短事务必须使用原生异步开始和提交成员，不能回退到同步事务 API。
+    /// 测试目的：SQL Server Profile 未声明原生异步事务时，异步命令的主库短事务必须使用同步回退。
     /// </summary>
     [Fact]
-    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionSucceeds_ShouldUseNativeAsyncTransactionMembers()
+    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionSucceeds_ShouldUseSynchronousFallbackTransactionMembers()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -967,9 +967,9 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         result.ShouldBe(1);
-        connection.AsyncBeginCount.ShouldBe(1);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
-        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
@@ -993,8 +993,8 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
         connection.LastTransaction.CommitCount.ShouldBe(0);
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
-        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -1019,10 +1019,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：普通异步命令失败时，主库短事务必须使用原生异步回滚成员且保留原始执行异常。
+    /// 测试目的：SQL Server Profile 未声明原生异步事务时，异步命令失败必须使用同步回滚并保留原始执行异常。
     /// </summary>
     [Fact]
-    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionFails_ShouldUseNativeAsyncRollback()
+    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionFails_ShouldUseSynchronousFallbackRollback()
     {
         // Arrange
         var connection = new CaptureDbConnection { ThrowOnExecute = true };
@@ -1035,10 +1035,10 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         exception.Message.ShouldBe("execute failed");
-        connection.AsyncBeginCount.ShouldBe(1);
+        connection.AsyncBeginCount.ShouldBe(0);
         connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
-        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -1063,6 +1063,151 @@ public class SqlServerRoutingAndExecutionTest
         message.Transaction.HasTransaction.ShouldBeTrue();
         message.Transaction.IsPrimaryReadTransaction.ShouldBeTrue();
         message.Transaction.Ownership.ShouldBe(SqlResourceOwnership.Owned);
+    }
+
+    /// <summary>
+    /// 测试目的：未绑定事务时，诊断仍应发布空事务信息，并明确执行模式为 null。
+    /// </summary>
+    [Fact]
+    public void ExecuteSql_WhenNoTransactionIsBound_ShouldPublishEmptyTransactionDiagnostics()
+    {
+        // Arrange
+        DiagnosticsMessage message = null;
+        using var observer = new SqlDiagnosticObserver(item => message = item);
+        var executor = CreateExecutor(new CaptureDbConnection());
+
+        // Act
+        executor.ExecuteSql("Update [Users] Set [Name]=@name", new { name = "without-transaction" });
+
+        // Assert
+        message.ShouldNotBeNull();
+        message.Transaction.ShouldNotBeNull();
+        message.Transaction.HasTransaction.ShouldBeFalse();
+        message.Transaction.ExecutionMode.ShouldBeNull();
+    }
+
+    /// <summary>
+    /// 测试目的：异步主库短事务成功完成后，Before 与 After 诊断都应保留实际异步事务执行模式。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionCompletes_ShouldPublishSynchronousFallbackExecutionMode()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                name == SqlQueryDiagnosticListenerNames.AfterExecute);
+        var connection = new CaptureDbConnection();
+        using var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        await executor.ExecuteSqlAsync("Update [Users] Set [Name]=@name", new { name = "async" });
+
+        // Assert
+        messages.Count.ShouldBe(2);
+        messages.Select(item => item.Operation).ShouldBe(new[]
+        {
+            SqlQueryDiagnosticListenerNames.BeforeExecute,
+            SqlQueryDiagnosticListenerNames.AfterExecute
+        });
+        messages.All(item => item.Transaction.ExecutionMode == "SynchronousFallback").ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// 测试目的：异步主库短事务执行失败并回滚后，Error 诊断应保留回滚阶段的实际执行模式。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenPrimaryReadTransactionFails_ShouldPublishSynchronousFallbackExecutionMode()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection { ThrowOnExecute = true };
+        using var executor = CreateOwnedExecutor(connection);
+        ConfigurePrimaryReadTransaction(executor);
+
+        // Act
+        await Assert.ThrowsAsync<InvalidOperationException>(() => executor.ExecuteSqlAsync(
+            "Update [Users] Set [Name]=@name", new { name = "async-failure" }));
+
+        // Assert
+        messages.Count.ShouldBe(2);
+        messages.Select(item => item.Operation).ShouldBe(new[]
+        {
+            SqlQueryDiagnosticListenerNames.BeforeExecute,
+            SqlQueryDiagnosticListenerNames.ErrorExecute
+        });
+        messages.All(item => item.Transaction.ExecutionMode == "SynchronousFallback").ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// 测试目的：声明原生异步事务能力且连接和事务实际覆盖异步成员时，Before 与 After 公共诊断必须发布 NativeAsync。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenProviderDeclaresNativeAsync_ShouldPublishNativeAsyncExecutionMode()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                name == SqlQueryDiagnosticListenerNames.AfterExecute);
+        var connection = new CaptureDbConnection();
+        using var provider = CreateNativeAsyncTestProvider();
+        using var executor = CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.Connection(connection));
+        ConfigurePrimaryReadTransaction(executor, NativeAsyncTestProvider.Instance.Key);
+
+        // Act
+        await executor.ExecuteSqlAsync("Update [Users] Set [Name]=@name", new { name = "native" });
+
+        // Assert
+        messages.Count.ShouldBe(2);
+        messages.Select(item => item.Operation).ShouldBe(new[]
+        {
+            SqlQueryDiagnosticListenerNames.BeforeExecute,
+            SqlQueryDiagnosticListenerNames.AfterExecute
+        });
+        messages.All(item => item.Transaction.ExecutionMode == "NativeAsync").ShouldBeTrue();
+        connection.AsyncBeginCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：原生异步事务执行失败并回滚时，Error 公共诊断必须发布回滚阶段的 NativeAsync 执行模式。
+    /// </summary>
+    [Fact]
+    public async Task ExecuteSqlAsync_WhenNativeAsyncTransactionFails_ShouldPublishNativeAsyncRollbackExecutionMode()
+    {
+        // Arrange
+        var messages = new List<DiagnosticsMessage>();
+        using var observer = new SqlDiagnosticObserver(messages.Add,
+            name => name == SqlQueryDiagnosticListenerNames.BeforeExecute ||
+                name == SqlQueryDiagnosticListenerNames.ErrorExecute);
+        var connection = new CaptureDbConnection { ThrowOnExecute = true };
+        using var provider = CreateNativeAsyncTestProvider();
+        using var executor = CreateSqlServerTestRoot<InspectableSqlServerExecutor>(provider,
+            options => options.Connection(connection));
+        ConfigurePrimaryReadTransaction(executor, NativeAsyncTestProvider.Instance.Key);
+
+        // Act
+        await Assert.ThrowsAsync<InvalidOperationException>(() => executor.ExecuteSqlAsync(
+            "Update [Users] Set [Name]=@name", new { name = "native-failure" }));
+
+        // Assert
+        messages.Count.ShouldBe(2);
+        messages.Select(item => item.Operation).ShouldBe(new[]
+        {
+            SqlQueryDiagnosticListenerNames.BeforeExecute,
+            SqlQueryDiagnosticListenerNames.ErrorExecute
+        });
+        messages.All(item => item.Transaction.ExecutionMode == "NativeAsync").ShouldBeTrue();
+        connection.AsyncBeginCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+        connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -1231,8 +1376,8 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
             exception.Flatten().InnerExceptions.Select(item => item.Message));
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
         Assert.Equal(1, executor.ErrorHookCount);
         Assert.Equal(1, executor.CompletionHookCount);
     }
@@ -1291,8 +1436,8 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed", "error hook failed", "completion hook failed" },
             exception.Flatten().InnerExceptions.Select(item => item.Message));
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
         Assert.Equal(1, executor.ErrorHookCount);
         Assert.Equal(1, executor.CompletionHookCount);
     }
@@ -1584,8 +1729,8 @@ public class SqlServerRoutingAndExecutionTest
         connection.ReaderDisposeCount.ShouldBe(1);
         connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
         connection.LastTransaction.CommitCount.ShouldBe(0);
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
-        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -1612,8 +1757,8 @@ public class SqlServerRoutingAndExecutionTest
         Assert.IsAssignableFrom<OperationCanceledException>(exception.Flatten().InnerExceptions.First());
         Assert.Equal("reader dispose failed", exception.Flatten().InnerExceptions.Last().Message);
         Assert.Equal(1, connection.ReaderDisposeCount);
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
     }
 
     /// <summary>
@@ -1646,18 +1791,18 @@ public class SqlServerRoutingAndExecutionTest
             "completion hook failed", "execution lease dispose failed" },
             exception.Flatten().InnerExceptions.Select(item => item.Message));
         Assert.Equal(1, connection.AsyncReaderDisposeCount);
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
         Assert.Equal(1, executor.ErrorHookCount);
         Assert.Equal(1, executor.CompletionHookCount);
         Assert.Equal(1, executor.ExecutionLeaseDisposeCount);
     }
 
     /// <summary>
-    /// 测试目的：异步多结果集完整消费并异步释放后，主库短事务必须使用原生异步开始和提交成员。
+    /// 测试目的：SQL Server Profile 未声明原生异步事务时，异步多结果集完整消费并异步释放必须使用同步回退事务成员。
     /// </summary>
     [Fact]
-    public async Task ExecuteMultipleAsync_WhenConsumedAndDisposedAsync_ShouldUseNativeAsyncTransactionMembers()
+    public async Task ExecuteMultipleAsync_WhenConsumedAndDisposedAsync_ShouldUseSynchronousFallbackTransactionMembers()
     {
         // Arrange
         var connection = new CaptureDbConnection
@@ -1675,9 +1820,9 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
-        connection.AsyncBeginCount.ShouldBe(1);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
-        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
@@ -1737,8 +1882,8 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
-        connection.LastTransaction.CommitCount.ShouldBe(0);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
         connection.ReaderDisposeCount.ShouldBe(1);
@@ -1796,7 +1941,8 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         rows.ShouldHaveSingleItem().Name.ShouldBe("Alice");
         connection.ReaderDisposeCount.ShouldBe(1);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
     }
 
@@ -1917,8 +2063,8 @@ public class SqlServerRoutingAndExecutionTest
         }));
 
         // Assert
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
-        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
         connection.LastTransaction.CommitCount.ShouldBe(0);
     }
 
@@ -2346,7 +2492,9 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         scope.TransactionId.ShouldNotBeNullOrWhiteSpace();
         connection.LastTransaction.ShouldNotBeNull();
-        (connection.LastTransaction.CommitCount + connection.LastTransaction.AsyncCommitCount).ShouldBe(1);
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
@@ -2412,7 +2560,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步提交尚未完成时，同步和异步释放都必须拒绝并发执行，避免调用方误判资源已释放。
+    /// 测试目的：异步提交调用在同步回退阶段尚未完成时，同步和异步释放都必须拒绝并发执行，避免调用方误判资源已释放。
     /// </summary>
     [Fact]
     public async Task SqlTransactionScope_WhenCommitAsyncIsInProgress_ShouldRejectConcurrentDispose()
@@ -2421,26 +2569,27 @@ public class SqlServerRoutingAndExecutionTest
         var connection = new CaptureDbConnection();
         using var provider = CreateSqlServerScopeProvider(connection);
         await using var scope = await provider.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
-        var commitStarted = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var allowCommit = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-        connection.LastTransaction.OnCommitAsync = async () =>
+        using var commitStarted = new ManualResetEventSlim();
+        using var allowCommit = new ManualResetEventSlim();
+        connection.LastTransaction.OnCommit = () =>
         {
-            commitStarted.TrySetResult(null);
-            await allowCommit.Task;
+            commitStarted.Set();
+            allowCommit.Wait();
         };
 
         // Act
-        var commitTask = scope.CommitAsync();
-        await commitStarted.Task;
-        var disposeException = Should.Throw<InvalidOperationException>(scope.Dispose);
+        var commitTask = Task.Run(() => scope.CommitAsync());
+        commitStarted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+        var disposeException = Should.Throw<InvalidOperationException>(() => scope.Dispose());
         var disposeAsyncException = await Assert.ThrowsAsync<InvalidOperationException>(() => scope.DisposeAsync().AsTask());
-        allowCommit.TrySetResult(null);
+        allowCommit.Set();
         await commitTask;
 
         // Assert
         disposeException.Message.ShouldContain("正在完成");
         disposeAsyncException.Message.ShouldContain("正在完成");
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
         connection.LastTransaction.DisposeCount.ShouldBe(1);
     }
@@ -2484,7 +2633,8 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => scope.RollbackAsync());
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.DisposeCount.ShouldBe(1);
         await scope.DisposeAsync();
         await Assert.ThrowsAsync<ObjectDisposedException>(() => scope.CommitAsync());
@@ -2515,10 +2665,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步事务开始和提交应优先调用 ADO.NET 原生异步成员。
+    /// 测试目的：SQL Server Profile 未声明原生异步事务时，异步事务开始和提交必须使用同步回退成员。
     /// </summary>
     [Fact]
-    public async Task SqlTransactionScope_WhenNativeAsyncMembersExist_ShouldUseThem()
+    public async Task SqlTransactionScope_WhenNativeAsyncMembersAreNotDeclared_ShouldUseSynchronousFallback()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -2529,16 +2679,16 @@ public class SqlServerRoutingAndExecutionTest
         await scope.CommitAsync();
 
         // Assert
-        connection.AsyncBeginCount.ShouldBe(1);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
-        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
     }
 
     /// <summary>
-    /// 测试目的：原生异步回滚完成后不能再同步回退执行一次回滚。
+    /// 测试目的：SQL Server Profile 未声明原生异步回滚时，异步回滚必须使用同步回退且只执行一次。
     /// </summary>
     [Fact]
-    public async Task SqlTransactionScope_WhenNativeAsyncRollbackExists_ShouldNotFallbackToSynchronousRollback()
+    public async Task SqlTransactionScope_WhenNativeAsyncRollbackIsNotDeclared_ShouldUseSynchronousFallbackOnce()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -2549,8 +2699,8 @@ public class SqlServerRoutingAndExecutionTest
         await scope.RollbackAsync();
 
         // Assert
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
-        connection.LastTransaction.RollbackCount.ShouldBe(0);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -2598,7 +2748,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试 - Scope异步提交失败时应通过原生异步回滚并保留提交异常。
+    /// 测试 - SQL Server Profile 未声明原生异步事务时，Scope异步提交失败应通过同步回滚并保留提交异常。
     /// </summary>
     [Fact]
     public async Task SqlTransactionScope_WhenCommitAsyncFails_ShouldRollbackAsyncAndPreserveCommitException()
@@ -2614,8 +2764,10 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         exception.Message.ShouldBe("commit failed");
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
-        connection.LastTransaction.AsyncRollbackCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncRollbackCount.ShouldBe(0);
+        connection.LastTransaction.RollbackCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -2625,7 +2777,7 @@ public class SqlServerRoutingAndExecutionTest
     public async Task SqlTransactionScope_WhenBeginAsyncAndOwnerQueryCleanupFail_ShouldAggregateFailures()
     {
         // Arrange
-        var connection = new CaptureDbConnection { ThrowOnAsyncBegin = true, ThrowOnDispose = true };
+        var connection = new CaptureDbConnection { ThrowOnBegin = true, ThrowOnDispose = true };
         using var provider = CreateSqlServerOwnedScopeProvider(connection);
 
         // Act
@@ -2634,7 +2786,7 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         exception.Flatten().InnerExceptions.Select(item => item.Message)
-            .ShouldBe(new[] { "async begin failed", "connection dispose failed" }, ignoreOrder: true);
+            .ShouldBe(new[] { "begin failed", "connection dispose failed" }, ignoreOrder: true);
         connection.DisposeCount.ShouldBe(1);
         connection.AsyncDisposeCount.ShouldBe(1);
     }
@@ -2874,7 +3026,8 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         await scope.CommitAsync();
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
     }
 
     /// <summary>
@@ -2970,10 +3123,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：独立查询描述的异步终结必须使用原生异步短事务开始和提交成员。
+    /// 测试目的：SQL Server Profile 未声明原生异步事务时，独立查询描述的异步终结必须使用同步回退事务成员。
     /// </summary>
     [Fact]
-    public async Task ExecuteScalarAsync_WhenPrimaryReadTransactionSucceeds_ShouldUseNativeAsyncTransactionMembers()
+    public async Task ExecuteScalarAsync_WhenPrimaryReadTransactionSucceeds_ShouldUseSynchronousFallbackTransactionMembers()
     {
         // Arrange
         var connection = new CaptureDbConnection();
@@ -2986,9 +3139,9 @@ public class SqlServerRoutingAndExecutionTest
 
         // Assert
         result.ShouldBe(1);
-        connection.AsyncBeginCount.ShouldBe(1);
-        connection.LastTransaction.AsyncCommitCount.ShouldBe(1);
-        connection.LastTransaction.CommitCount.ShouldBe(0);
+        connection.AsyncBeginCount.ShouldBe(0);
+        connection.LastTransaction.AsyncCommitCount.ShouldBe(0);
+        connection.LastTransaction.CommitCount.ShouldBe(1);
         connection.LastTransaction.RollbackCount.ShouldBe(0);
     }
 
@@ -3349,8 +3502,8 @@ public class SqlServerRoutingAndExecutionTest
             description.ToPageAsync<MappedSample>(pager, cancellationToken: cancellationTokenSource.Token));
 
         // Assert
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
         Assert.Equal(0, connection.ReaderCreateCount);
         Assert.Equal(0, pager.TotalCount);
         Assert.False(pager.IsTotalCountKnown);
@@ -3740,8 +3893,8 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         Assert.Equal(new[] { "execute failed", "rollback failed" }, exception.Flatten().InnerExceptions
             .Select(item => item.Message));
-        Assert.Equal(1, connection.LastTransaction.AsyncRollbackCount);
-        Assert.Equal(0, connection.LastTransaction.RollbackCount);
+        Assert.Equal(0, connection.LastTransaction.AsyncRollbackCount);
+        Assert.Equal(1, connection.LastTransaction.RollbackCount);
     }
 
     /// <summary>
@@ -5040,7 +5193,7 @@ public class SqlServerRoutingAndExecutionTest
     /// 配置主库短事务策略
     /// </summary>
     /// <param name="query">SQL 查询对象</param>
-    private static void ConfigurePrimaryReadTransaction(ISqlQuery query)
+    private static void ConfigurePrimaryReadTransaction(ISqlQuery query, string providerKey = null)
     {
         SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext
         {
@@ -5049,9 +5202,22 @@ public class SqlServerRoutingAndExecutionTest
             {
                 Key = "primary",
                 DatabaseType = DatabaseType.SqlServer,
+                ProviderKey = providerKey,
                 PrimaryReadStrategy = PrimaryReadStrategy.Transaction
             }
         });
+    }
+
+    /// <summary>
+    /// 创建声明原生异步事务能力的离线测试 Provider 服务图。
+    /// </summary>
+    private static ServiceProvider CreateNativeAsyncTestProvider()
+    {
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSqlBuilderProvider(NativeAsyncTestProvider.Instance,
+            builderServices => new SqlServerBuilder(builderServices));
+        return services.BuildServiceProvider();
     }
 
     /// <summary>
@@ -5176,6 +5342,56 @@ public class SqlServerRoutingAndExecutionTest
             LastProviderKey = providerKey;
             return _connection;
         }
+    }
+
+    /// <summary>
+    /// 仅用于诊断执行模式测试的原生异步 Provider Profile。
+    /// </summary>
+    private sealed class NativeAsyncTestProvider : ISqlProvider, ISqlProviderProfileProvider
+    {
+        public static NativeAsyncTestProvider Instance { get; } = new();
+
+        private NativeAsyncTestProvider()
+        {
+        }
+
+        public string Key => "test.native-async";
+
+        public DatabaseType DatabaseType => DatabaseType.SqlServer;
+
+        public IDialect Dialect => SqlServerSqlProvider.Instance.Dialect;
+
+        public ISqlClauseFactory ClauseFactory => SqlServerSqlProvider.Instance.ClauseFactory;
+
+        public ISqlTableReferenceParser TableReferenceParser => SqlServerSqlProvider.Instance.TableReferenceParser;
+
+        public ISqlPaginationRenderer PaginationRenderer => SqlServerSqlProvider.Instance.PaginationRenderer;
+
+        public IParameterManagerFactory ParameterManagerFactory =>
+            SqlServerSqlProvider.Instance.ParameterManagerFactory;
+
+        public IParamLiteralsResolver ParamLiteralsResolver => SqlServerSqlProvider.Instance.ParamLiteralsResolver;
+
+        public SqlProviderProfile Profile { get; } = new()
+        {
+            Query = new SqlProviderQueryCapabilities
+            {
+                RightJoin = SqlQueryCapabilityState.Supported,
+                FullJoin = SqlQueryCapabilityState.Supported,
+                Pagination = SqlQueryCapabilityState.Supported
+            },
+            Execution = new SqlProviderExecutionCapabilities
+            {
+                SupportsCancellation = true
+            },
+            Transaction = new SqlProviderTransactionCapabilities
+            {
+                SupportsTransactions = true,
+                SupportsNativeAsyncBegin = true,
+                SupportsNativeAsyncCommit = true,
+                SupportsNativeAsyncRollback = true
+            }
+        };
     }
 
     /// <summary>

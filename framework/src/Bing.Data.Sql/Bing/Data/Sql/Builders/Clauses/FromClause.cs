@@ -13,7 +13,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// 默认 SQL Provider 的 From 子句实现。
 /// </summary>
-public class FromClause : IFromClause
+public class FromClause : IFromClause, ISqlMultiSourceFromClause
 {
     /// <summary>
     /// 当前查询源的 SQL 项，兼容旧 Update From 路径。
@@ -571,6 +571,37 @@ public class FromClause : IFromClause
             subquery.ProjectedMembers);
         (Builder as SqlBuilderBase)?.RegisterSubqueryParent(subquery.ParentQueryContextId);
     }
+
+    IReadOnlyList<TableSource> ISqlMultiSourceFromClause.Sources => Sources;
+
+    void ISqlMultiSourceFromClause.AppendRoot(Type entityType, string alias, string schema) =>
+        AppendRoot(entityType, alias, schema);
+
+    void ISqlMultiSourceFromClause.From<TProjection>(SqlSubquery<TProjection> subquery) => From(subquery);
+
+    ICondition ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(
+        System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
+        ResolveMultiSourcePredicate(expression, sources);
+
+    ICondition ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(
+        System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources,
+        IParameterManager parameterManager) => ResolveMultiSourcePredicate(expression, sources, parameterManager);
+
+    IReadOnlyList<string> ISqlMultiSourceFromClause.ResolveMultiSourceColumns(
+        System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
+        ResolveMultiSourceColumns(expression, sources);
+
+    IReadOnlyList<string> ISqlMultiSourceFromClause.ResolveMultiSourceDtoColumns(
+        System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources,
+        out IReadOnlyCollection<string> projectedMembers) =>
+        ResolveMultiSourceDtoColumns(expression, sources, out projectedMembers);
+
+    ICondition ISqlMultiSourceFromClause.ResolveMultiSourceValueCondition(
+        System.Linq.Expressions.LambdaExpression expression, TableSource source, object value, Operator @operator) =>
+        ResolveMultiSourceValueCondition(expression, source, value, @operator);
+
+    void ISqlMultiSourceFromClause.MergeNewParameters(IParameterManager parameterManager) =>
+        MergeNewParameters(parameterManager);
 
     /// <summary>
     /// 获取派生表别名的方言渲染文本。

@@ -30,4 +30,9 @@ public sealed class SqlTransactionDiagnosticInfo
     /// 指示该事务是否为保证主库读取而创建的短事务。
     /// </summary>
     public bool IsPrimaryReadTransaction { get; set; }
+
+    /// <summary>
+    /// 当前异步事务操作的实际执行模式；原生异步为 <c>NativeAsync</c>，同步回退为 <c>SynchronousFallback</c>。
+    /// </summary>
+    public string ExecutionMode { get; set; }
 }

@@ -1,13 +1,32 @@
 using System.Diagnostics;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
+using System.Text;
+using System.Text.Json;
 using Bing.Data.Filters;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Diagnostics;
+using Bing.Test.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
+
+internal sealed class SqliteContractFactAttribute : FactAttribute
+{
+    public SqliteContractFactAttribute()
+    {
+        var missingVariables = new[]
+        {
+            "BING_SQLITE_CONTRACT_RESULTS_DIRECTORY",
+            "BING_SQLITE_CONTRACT_TRX_FILE_NAME",
+            "BING_SQLITE_CONTRACT_ARTIFACT_FILE_NAME"
+        }.Where(name => string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name))).ToArray();
+        if (missingVariables.Length > 0)
+            Skip = $"未配置受控 SQLite 合同环境变量，跳过 AI 证据记录：{string.Join(", ", missingVariables)}。";
+    }
+}
 
 /// <summary>
 /// SQLite 真实执行集成测试。
@@ -53,6 +72,161 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         Assert.Equal(new[] { "async" }, names);
     }
+
+    /// <summary>
+    /// 测试目的：SQLite 真实查询和预取消场景应通过共享 Provider 合同记录为真实集成证据。
+    /// </summary>
+    [SqliteContractFact]
+    public async Task ProviderContract_WhenSqliteScenariosRun_ShouldRecordRealIntegrationEvidence()
+    {
+        // Arrange
+        var runContext = GetRunContext();
+        var artifactRelativePath = runContext.ArtifactRelativePath;
+        var artifactPath = runContext.ArtifactPath;
+        var databaseVersion = await GetSqliteVersionAsync();
+        var providerVersion = typeof(SqliteSqlProvider).Assembly.GetName().Version?.ToString() ?? "unknown";
+        var driverVersion = typeof(SqliteConnection).Assembly.GetName().Version?.ToString() ?? "unknown";
+        var sourceIdentity = typeof(SqliteExecutionIntegrationTest).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+        var startedAtUtc = DateTimeOffset.UtcNow;
+        var scenarios = new[]
+        {
+            new ProviderContractScenario("SQLite", "Query", "scalar",
+                _ =>
+                {
+                    using var query = _fixture.CreateQuery();
+                    var count = query.Query().AppendSelect("Count(*)").AppendFrom("samples").Scalar<int>();
+                    Assert.Equal(0, count);
+                    return Task.CompletedTask;
+                }, realIntegrationEvidenceFactory: () => CreateIntegrationEvidence("scalar",
+                    runContext.TrxRelativePath, artifactRelativePath, databaseVersion, providerVersion, driverVersion, sourceIdentity,
+                    startedAtUtc)),
+            new ProviderContractScenario("SQLite", "Cancellation", "pre-execute",
+                async cancellationToken =>
+                {
+                    using var query = _fixture.CreateQuery();
+                    var description = query.Query().AppendSelect("Count(*)").AppendFrom("samples");
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => description
+                        .ScalarAsync<int>(cancellationToken: cancellationToken));
+                }, realIntegrationEvidenceFactory: () => CreateIntegrationEvidence("pre-execute",
+                    runContext.TrxRelativePath, artifactRelativePath, databaseVersion, providerVersion, driverVersion,
+                    sourceIdentity, startedAtUtc))
+        };
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        // Act
+        var evidence = await ProviderContractRunner.RunAsync(scenarios, cancellationTokenSource.Token);
+        var matrix = new ProviderCapabilityMatrix();
+        foreach (var item in evidence)
+            matrix.Add(item);
+        matrix.WriteJson(artifactPath);
+
+        // Assert
+        Assert.Equal(2, evidence.Count);
+        Assert.All(evidence, item => Assert.Equal(ProviderCapabilityEvidenceState.RealIntegrationProven,
+            item.State));
+        Assert.All(evidence, item => Assert.NotNull(item.IntegrationEvidence));
+        Assert.True(File.Exists(artifactPath));
+        var artifact = File.ReadAllText(artifactPath, Encoding.UTF8);
+        Assert.Contains("RealIntegrationProven", artifact, StringComparison.Ordinal);
+        using var artifactDocument = JsonDocument.Parse(artifact);
+        var entries = artifactDocument.RootElement.GetProperty("Entries");
+        Assert.Equal(2, entries.GetArrayLength());
+        Assert.False(artifactDocument.RootElement.GetProperty("ReleaseReady").GetBoolean());
+        foreach (var entry in entries.EnumerateArray())
+        {
+            var integrationEvidence = entry.GetProperty("IntegrationEvidence");
+            Assert.Equal(artifactRelativePath, integrationEvidence.GetProperty("ArtifactPath").GetString());
+            Assert.Equal(runContext.TrxRelativePath, integrationEvidence.GetProperty("TrxPath").GetString());
+            Assert.Equal(sourceIdentity, integrationEvidence.GetProperty("SourceIdentity").GetString());
+            Assert.Equal(ProviderCapabilityArtifactKind.TestGenerated.ToString(),
+                integrationEvidence.GetProperty("ArtifactKind").GetString());
+            Assert.False(integrationEvidence.GetProperty("TrxPath").GetString().Contains("{", StringComparison.Ordinal));
+        }
+    }
+
+    private static string GetWorkspaceRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory != null && !File.Exists(Path.Combine(directory.FullName, "global.json")))
+            directory = directory.Parent;
+        return directory?.FullName ?? Directory.GetCurrentDirectory();
+    }
+
+    private static (string ArtifactRelativePath, string ArtifactPath, string TrxRelativePath, string TrxPath)
+        GetRunContext()
+    {
+        var resultsDirectoryRelativePath = GetRequiredEnvironmentValue("BING_SQLITE_CONTRACT_RESULTS_DIRECTORY");
+        var trxFileName = GetRequiredFileName("BING_SQLITE_CONTRACT_TRX_FILE_NAME", ".trx");
+        var artifactFileName = GetRequiredFileName("BING_SQLITE_CONTRACT_ARTIFACT_FILE_NAME", ".json");
+        var normalizedResultsDirectory = NormalizeResultsDirectory(resultsDirectoryRelativePath);
+        var workspaceRoot = GetWorkspaceRoot();
+        var resultsDirectoryPath = ResolveWorkspacePath(workspaceRoot, normalizedResultsDirectory);
+        if (!Directory.Exists(resultsDirectoryPath))
+            throw new InvalidOperationException("SQLite 合同结果目录不存在，必须与 --results-directory 指向同一运行目录。");
+
+        var trxRelativePath = $"{normalizedResultsDirectory}/{trxFileName}";
+        var artifactRelativePath = $"{normalizedResultsDirectory}/{artifactFileName}";
+        var trxPath = ResolveWorkspacePath(workspaceRoot, trxRelativePath);
+        var artifactPath = ResolveWorkspacePath(workspaceRoot, artifactRelativePath);
+        if (File.Exists(trxPath) || File.Exists(artifactPath))
+            throw new InvalidOperationException("SQLite 合同制品路径已存在，必须使用新的隔离结果目录或文件名。");
+
+        return (artifactRelativePath, artifactPath, trxRelativePath, trxPath);
+    }
+
+    private static string GetRequiredEnvironmentValue(string name) =>
+        string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name))
+            ? throw new InvalidOperationException($"缺少受控 SQLite 合同环境变量：{name}。")
+            : Environment.GetEnvironmentVariable(name).Trim();
+
+    private static string GetRequiredFileName(string name, string extension)
+    {
+        var value = GetRequiredEnvironmentValue(name);
+        if (Path.IsPathRooted(value) || value.Contains("/", StringComparison.Ordinal) ||
+            value.Contains("\\", StringComparison.Ordinal) || !value.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(Path.GetFileName(value), value, StringComparison.Ordinal))
+            throw new InvalidOperationException($"SQLite 合同环境变量 {name} 必须是单层 {extension} 文件名。");
+        return value;
+    }
+
+    private static string NormalizeResultsDirectory(string value)
+    {
+        var normalized = value.Replace('\\', '/').Trim('/');
+        if (Path.IsPathRooted(normalized) || normalized.Split('/').Any(segment => segment is "" or "." or "..") ||
+            !normalized.StartsWith("artifacts/test-results/", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("SQLite 合同结果目录必须是工作区内 artifacts/test-results 下的相对目录。");
+        return normalized;
+    }
+
+    private static string ResolveWorkspacePath(string workspaceRoot, string relativePath)
+    {
+        var fullPath = Path.GetFullPath(Path.Combine(workspaceRoot,
+            relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        var rootPath = Path.GetFullPath(workspaceRoot).TrimEnd(Path.DirectorySeparatorChar) +
+            Path.DirectorySeparatorChar;
+        if (!fullPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("SQLite 合同制品路径必须位于工作区内。");
+        return fullPath;
+    }
+
+    private async Task<string> GetSqliteVersionAsync()
+    {
+        await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "Select sqlite_version()";
+        return Convert.ToString(await command.ExecuteScalarAsync());
+    }
+
+    private static ProviderIntegrationEvidenceMetadata CreateIntegrationEvidence(string scenario,
+        string trxPath, string artifactPath, string databaseVersion, string providerVersion,
+        string driverVersion, string sourceIdentity, DateTimeOffset startedAtUtc) => new(providerVersion,
+        databaseVersion, driverVersion, ProviderIntegrationConnectionKind.LocalFile,
+        $"{nameof(ProviderContract_WhenSqliteScenariosRun_ShouldRecordRealIntegrationEvidence)}[{scenario}]",
+        trxPath,
+        artifactPath, startedAtUtc, DateTimeOffset.UtcNow, sourceIdentity);
 
     /// <summary>
     /// 测试目的：异步列表、标量和单实体查询在执行前取消时，应停止执行并释放当前 Query 的执行资源。
