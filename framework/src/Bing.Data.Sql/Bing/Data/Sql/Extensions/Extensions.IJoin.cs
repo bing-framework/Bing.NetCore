@@ -15,9 +15,18 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
+    /// <returns>追加内连接后的源对象。</returns>
+    public static T Join<T>(this T source, string table) where T : IJoin => Join(source, table, null);
+
+    /// <summary>
+    /// 内连接
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     /// <returns>追加内连接后的源对象。</returns>
-    public static T Join<T>(this T source, string table, string alias = null) where T : IJoin
+    public static T Join<T>(this T source, string table, string alias) where T : IJoin
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
@@ -138,9 +147,18 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
+    /// <returns>追加左外连接后的源对象。</returns>
+    public static T LeftJoin<T>(this T source, string table) where T : IJoin => LeftJoin(source, table, null);
+
+    /// <summary>
+    /// 左外连接
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     /// <returns>追加左外连接后的源对象。</returns>
-    public static T LeftJoin<T>(this T source, string table, string alias = null) where T : IJoin
+    public static T LeftJoin<T>(this T source, string table, string alias) where T : IJoin
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
@@ -227,9 +245,18 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
+    /// <returns>追加右外连接后的源对象。</returns>
+    public static T RightJoin<T>(this T source, string table) where T : IJoin => RightJoin(source, table, null);
+
+    /// <summary>
+    /// 右外连接
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     /// <returns>追加右外连接后的源对象。</returns>
-    public static T RightJoin<T>(this T source, string table, string alias = null) where T : IJoin
+    public static T RightJoin<T>(this T source, string table, string alias) where T : IJoin
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));

@@ -15,9 +15,18 @@ public static partial class Extensions
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="table">表名</param>
+    /// <returns>设置 From 子句后的源对象。</returns>
+    public static T From<T>(this T source, string table) where T : IFrom => From(source, table, null);
+
+    /// <summary>
+    /// 设置表名
+    /// </summary>
+    /// <typeparam name="T">源类型</typeparam>
+    /// <param name="source">源</param>
+    /// <param name="table">表名</param>
     /// <param name="alias">别名</param>
     /// <returns>设置 From 子句后的源对象。</returns>
-    public static T From<T>(this T source, string table, string alias = null) where T : IFrom
+    public static T From<T>(this T source, string table, string alias) where T : IFrom
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));

@@ -186,6 +186,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.TextTemplating.Scriban
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Test.Shared", "framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj", "{D6C96AE5-8756-4278-A331-43073E08C3ED}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.ProviderEvidence.Cli", "eng\Bing.ProviderEvidence.Cli\Bing.ProviderEvidence.Cli.csproj", "{E2F83A13-9D28-4B35-B3C9-7C3C0B5D8A46}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.Ddd.Domain.Tests", "framework\tests\Bing.Ddd.Domain.Tests\Bing.Ddd.Domain.Tests.csproj", "{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bing.EventBus", "framework\src\Bing.EventBus\Bing.EventBus.csproj", "{5E8AD211-7AEF-4D9D-AFA8-C85B6F3D7C6A}"
@@ -651,6 +653,10 @@ Global
 		{D6C96AE5-8756-4278-A331-43073E08C3ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6C96AE5-8756-4278-A331-43073E08C3ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6C96AE5-8756-4278-A331-43073E08C3ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2F83A13-9D28-4B35-B3C9-7C3C0B5D8A46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2F83A13-9D28-4B35-B3C9-7C3C0B5D8A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2F83A13-9D28-4B35-B3C9-7C3C0B5D8A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2F83A13-9D28-4B35-B3C9-7C3C0B5D8A46}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B581529-D7D2-4DCF-824A-2AAFB58F8C94}.Release|Any CPU.ActiveCfg = Release|Any CPU

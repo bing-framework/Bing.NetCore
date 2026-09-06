@@ -14,6 +14,26 @@ static Bing.Data.Sql.Extensions.From<T>(this T source, Bing.Data.Sql.SqlFluentQu
 static Bing.Data.Sql.Extensions.Join<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
 static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
 static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
+static Bing.Data.Sql.Extensions.From<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.From<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.From<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.From<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.From<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.Join<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.Join<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.Join<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.Join<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.Join<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.LeftJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.LeftJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.LeftJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, string table) -> T
+static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, string table, string alias) -> T
+static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Union<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
 static Bing.Data.Sql.Extensions.UnionAll<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
 static Bing.Data.Sql.Extensions.Intersect<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
@@ -36,20 +56,48 @@ Bing.Data.Sql.SqlTextQuery.SingleAsync<TResult>(int? timeout = null, System.Thre
 Bing.Data.Sql.SqlTextQuery.SplitOn(string splitOn) -> Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.SqlTextQuery.ToEntity<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlTextQuery.ToEntityAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToList<TResult>() -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TResult>(int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>() -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>(int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TResult>(int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlTextQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlFluentQuery
 Bing.Data.Sql.SqlFluentQuery.AsAsyncEnumerable<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
 Bing.Data.Sql.SqlFluentQuery.AsEnumerable<TResult>(int? timeout = null) -> System.Collections.Generic.IEnumerable<TResult>
@@ -64,20 +112,48 @@ Bing.Data.Sql.SqlFluentQuery.SingleAsync<TResult>(int? timeout = null, System.Th
 Bing.Data.Sql.SqlFluentQuery.SplitOn(string splitOn) -> Bing.Data.Sql.SqlFluentQuery
 Bing.Data.Sql.SqlFluentQuery.ToEntity<TResult>(int? timeout = null) -> TResult
 Bing.Data.Sql.SqlFluentQuery.ToEntityAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TResult>(int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null) -> System.Collections.Generic.List<TResult>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
-Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToList<TResult>() -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TResult>(int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>() -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>(int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TResult>(int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlFluentQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
 Bing.Data.Sql.SqlFluentQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
 Bing.Data.Sql.SqlFluentQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
 Bing.Data.Sql.SqlFluentQuery.ToSql() -> string
@@ -335,45 +411,66 @@ Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TEntity, TProjection>(System.Linq.Ex
 Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias, string sourceAlias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlSubquery<TProjection>
 Bing.Data.Sql.SqlLambdaQuery.SelectSubquery<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string alias, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlSubquery<TProjection>
-Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(bool propertyAsAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.AppendSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Distinct() -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string alias, string columnAlias, bool distinct = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias, bool distinct) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string alias, string columnAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Aggregate<TEntity>(Bing.Data.Sql.Builders.SqlAggregateFunction function, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string alias, string columnAlias, bool distinct) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, string alias, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, Bing.Operator operator) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, string alias, Bing.Operator operator) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, string alias, Bing.Operator operator = Bing.Operator.Equal) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, Bing.Operator operator) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity>(bool condition, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, object value, string alias, Bing.Operator operator) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, string rightAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TRight>(System.Linq.Expressions.Expression<System.Func<TLeft, TRight, bool>> predicate, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias = null) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Join<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.LeftJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.RightJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.FullJoin<TLeft, TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery, System.Linq.Expressions.Expression<System.Func<TLeft, TProjection, bool>> predicate, string leftAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.CrossJoin<TEntity>(string alias = null, string schema = null) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.CrossJoin<TProjection>(Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
-Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, bool desc) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias, bool desc) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool desc) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias, bool desc) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Having<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Having<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery

@@ -36,9 +36,23 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
 
     /// <summary>同步执行并返回全部结果。</summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
+    /// <returns>查询结果列表。</returns>
+    public List<TResult> ToList<TResult>() => ToList<TResult>(null);
+
+    /// <summary>同步执行并返回全部结果。</summary>
+    /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果列表。</returns>
-    public List<TResult> ToList<TResult>(int? timeout = null) => _query.ToList<TResult>(timeout);
+    public List<TResult> ToList<TResult>(int? timeout) => _query.ToList<TResult>(timeout);
+
+    /// <summary>同步执行两段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将两个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map) =>
+        ToList(map, null);
 
     /// <summary>同步执行两段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -48,7 +62,17 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
-        int? timeout = null) => _query.ToList(map, timeout);
+        int? timeout) => _query.ToList(map, timeout);
+
+    /// <summary>同步执行三段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将三个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TThird, TResult>(Func<TFirst, TSecond, TThird, TResult> map) =>
+        ToList(map, null);
 
     /// <summary>同步执行三段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -59,7 +83,18 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TThird, TResult>(Func<TFirst, TSecond, TThird, TResult> map,
-        int? timeout = null) => _query.ToList(map, timeout);
+        int? timeout) => _query.ToList(map, timeout);
+
+    /// <summary>同步执行四段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将四个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map) => ToList(map, null);
 
     /// <summary>同步执行四段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -71,7 +106,19 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null) => _query.ToList(map, timeout);
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => _query.ToList(map, timeout);
+
+    /// <summary>同步执行五段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将五个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) => ToList(map, null);
 
     /// <summary>同步执行五段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -84,8 +131,21 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null) =>
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
+
+    /// <summary>同步执行六段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将六个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) => ToList(map, null);
 
     /// <summary>同步执行六段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -99,8 +159,22 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null) =>
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
+
+    /// <summary>同步执行七段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TSeventh">第七段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将七个对象映射为结果的委托。</param>
+    /// <returns>多映射查询结果列表。</returns>
+    public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) => ToList(map, null);
 
     /// <summary>同步执行七段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -115,7 +189,7 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>多映射查询结果列表。</returns>
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null) =>
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
 
     /// <summary>同步执行并返回至多一行结果。</summary>
@@ -164,11 +238,58 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
 
     /// <summary>异步执行并返回全部结果。</summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
+    /// <returns>包含查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TResult>() => ToListAsync<TResult>(null, default);
+
+    /// <summary>异步执行并返回全部结果。</summary>
+    /// <typeparam name="TResult">结果元素类型。</typeparam>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TResult>(int? timeout) => ToListAsync<TResult>(timeout, default);
+
+    /// <summary>异步执行并返回全部结果。</summary>
+    /// <typeparam name="TResult">结果元素类型。</typeparam>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TResult>(CancellationToken cancellationToken) =>
+        ToListAsync<TResult>(null, cancellationToken);
+
+    /// <summary>异步执行并返回全部结果。</summary>
+    /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果列表的异步任务。</returns>
-    public Task<List<TResult>> ToListAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync<TResult>(timeout, cancellationToken);
+    public Task<List<TResult>> ToListAsync<TResult>(int? timeout, CancellationToken cancellationToken) =>
+        _query.ToListAsync<TResult>(timeout, cancellationToken);
+
+    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将两个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map) =>
+        ToListAsync(map, null, default);
+
+    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将两个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
+        int? timeout) => ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将两个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
+        CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行两段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -179,8 +300,40 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
-        int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.ToListAsync(map, timeout, cancellationToken);
+        int? timeout, CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
+
+    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将三个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
+        Func<TFirst, TSecond, TThird, TResult> map) => ToListAsync(map, null, default);
+
+    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将三个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
+        Func<TFirst, TSecond, TThird, TResult> map, int? timeout) => ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将三个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
+        Func<TFirst, TSecond, TThird, TResult> map, CancellationToken cancellationToken) =>
+        ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行三段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -192,8 +345,44 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
-        Func<TFirst, TSecond, TThird, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync(map, timeout, cancellationToken);
+        Func<TFirst, TSecond, TThird, TResult> map, int? timeout, CancellationToken cancellationToken) =>
+        _query.ToListAsync(map, timeout, cancellationToken);
+
+    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将四个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map) => ToListAsync(map, null, default);
+
+    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将四个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将四个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map, CancellationToken cancellationToken) =>
+        ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行四段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -206,8 +395,48 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync(map, timeout, cancellationToken);
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout,
+        CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
+
+    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将五个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) => ToListAsync(map, null, default);
+
+    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将五个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) =>
+        ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将五个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map,
+        CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行五段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -221,8 +450,51 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync(map, timeout, cancellationToken);
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout,
+        CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
+
+    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将六个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) => ToListAsync(map, null, default);
+
+    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将六个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
+        ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将六个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map,
+        CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行六段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -237,8 +509,55 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync(map, timeout, cancellationToken);
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout,
+        CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
+
+    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TSeventh">第七段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将七个对象映射为结果的委托。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) =>
+        ToListAsync(map, null, default);
+
+    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TSeventh">第七段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将七个对象映射为结果的委托。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) =>
+        ToListAsync(map, timeout, default);
+
+    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
+    /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
+    /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
+    /// <typeparam name="TFourth">第四段查询结果类型。</typeparam>
+    /// <typeparam name="TFifth">第五段查询结果类型。</typeparam>
+    /// <typeparam name="TSixth">第六段查询结果类型。</typeparam>
+    /// <typeparam name="TSeventh">第七段查询结果类型。</typeparam>
+    /// <typeparam name="TResult">映射后的结果类型。</typeparam>
+    /// <param name="map">将七个对象映射为结果的委托。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包含多映射查询结果列表的异步任务。</returns>
+    public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
+        CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
     /// <summary>异步执行七段 Dapper 多映射查询。</summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
@@ -254,8 +573,8 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含多映射查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToListAsync(map, timeout, cancellationToken);
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout,
+        CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
     /// <summary>异步执行并返回至多一行结果。</summary>
     /// <typeparam name="TResult">结果类型。</typeparam>

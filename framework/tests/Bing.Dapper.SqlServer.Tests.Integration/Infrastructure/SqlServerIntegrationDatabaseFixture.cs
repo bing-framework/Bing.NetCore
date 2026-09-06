@@ -1,6 +1,7 @@
 using Bing.Dapper.SqlServer;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.DependencyInjection;
 using Bing.Test.Shared;
 using Microsoft.Data.SqlClient;
@@ -46,6 +47,15 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
         IntegrationDatabaseSafetyValidator.EnsureResetAllowed(ConnectionString, Provider);
         await using var connection = new SqlConnection(ConnectionString);
         await connection.OpenAsync();
+        await using (var versionCommand = new SqlCommand(
+                         "Select Convert(nvarchar(128), ServerProperty('ProductVersion'));", connection))
+        {
+            var databaseVersion = Convert.ToString(await versionCommand.ExecuteScalarAsync());
+            ProviderRunMetadataWriter.WriteFromEnvironment(
+                typeof(SqlServerSqlProvider).Assembly.GetName().Version?.ToString(), databaseVersion,
+                typeof(SqlConnection).Assembly.GetName().Version?.ToString(),
+                typeof(SqlServerIntegrationDatabaseFixture).Assembly);
+        }
         await DatabaseScript.InitializeAsync(connection);
 
         var services = new ServiceCollection();
@@ -93,6 +103,13 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     /// </summary>
     /// <returns>新的 SQL 执行器。</returns>
     public ISqlExecutor CreateExecutor() => ServiceProvider.GetRequiredService<ISqlExecutor>();
+
+    /// <summary>
+    /// 创建 SQL Server 多结果集执行器。
+    /// </summary>
+    /// <returns>多结果集执行器。</returns>
+    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor() =>
+        ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
     /// <summary>
     /// 释放服务提供程序和 SQL Server 连接池。

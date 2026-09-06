@@ -57,6 +57,27 @@ public class ParameterLimitManagerTest
     }
 
     /// <summary>
+    /// 测试目的：参数管理器应允许添加第 2100 个参数，并在尝试第 2101 个参数时保持已有状态不变。
+    /// </summary>
+    [Fact]
+    public void Add_WhenSqlServerBoundaryIsReached_ShouldAllow2100AndReject2101WithoutMutation()
+    {
+        // Arrange
+        var manager = new ParameterLimitManager(new ParameterManager(TestDialect.Instance), 2100, "SqlServer");
+        for (var index = 0; index < 2099; index++)
+            manager.Add($"parameter_{index}", index);
+
+        // Act
+        manager.Add("parameter_2099", 2099);
+        var exception = Assert.Throws<InvalidOperationException>(() => manager.Add("parameter_2100", 2100));
+
+        // Assert
+        Assert.Equal(2100, manager.Count);
+        Assert.False(manager.Contains("parameter_2100"));
+        Assert.Contains("最大参数数量: 2100", exception.Message);
+    }
+
+    /// <summary>
     /// 测试目的：Clone 和 CreateEmpty 应保留限制并与来源参数状态隔离。
     /// </summary>
     [Fact]

@@ -65,6 +65,13 @@ Create Table If Not Exists integration_reporting.integration_samples(
     id integer Generated Always As Identity Primary Key,
     name text Not Null
 );");
+        await ExecuteAsync(connection, @"
+Create Or Replace Function public.bing_sql_contract_function(input_value integer)
+Returns Table(output_value integer, doubled_value integer)
+Language sql
+As $$
+    Select input_value + 1, input_value * 2;
+$$;");
     }
 
     /// <summary>

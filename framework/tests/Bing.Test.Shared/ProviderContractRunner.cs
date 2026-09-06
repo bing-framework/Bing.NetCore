@@ -69,6 +69,10 @@ public static class ProviderContractRunner
             {
                 await scenario.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 var integrationEvidence = scenario.RealIntegrationEvidenceFactory?.Invoke();
+                if (integrationEvidence?.ArtifactKind == ProviderCapabilityArtifactKind.ReleaseEvidence &&
+                    !integrationEvidence.IsTrustedReleaseEvidence)
+                    throw new ArgumentException("发布级证据必须由已验证的可信运行产生。",
+                        nameof(scenario.RealIntegrationEvidenceFactory));
                 state = integrationEvidence == null
                     ? ProviderCapabilityEvidenceState.UnitProven
                     : ProviderCapabilityEvidenceState.RealIntegrationProven;

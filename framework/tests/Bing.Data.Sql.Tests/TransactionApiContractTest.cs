@@ -130,7 +130,7 @@ public class TransactionApiContractTest
     }
 
     /// <summary>
-    /// 测试目的：独立查询描述的异步终端均应在末尾提供可选取消令牌。
+    /// 测试目的：独立查询描述的异步集合终结重载应显式提供取消令牌入口，且不使用可选参数。
     /// </summary>
     [Fact]
     public void QueryDescriptionAsyncTerminals_ShouldExposeOptionalCancellationToken()
@@ -139,14 +139,23 @@ public class TransactionApiContractTest
         var methods = typeof(SqlFluentQuery).GetMethods().Where(method => method.Name is
             "ToListAsync" or "FirstAsync" or "FirstOrDefaultAsync" or "SingleAsync" or "SingleOrDefaultAsync" or
             "ScalarAsync" or "ToPageAsync" or "AsAsyncEnumerable").ToList();
+        var listMethods = methods.Where(method => method.Name == "ToListAsync").ToList();
+        var otherTerminalMethods = methods.Where(method => method.Name != "ToListAsync").ToList();
 
         // Act
         Assert.NotEmpty(methods);
-        Assert.All(methods, method =>
+        Assert.All(listMethods, method =>
         {
-            var cancellationToken = method.GetParameters().Last();
-            Assert.Equal(typeof(CancellationToken), cancellationToken.ParameterType);
-            Assert.True(cancellationToken.HasDefaultValue);
+            Assert.DoesNotContain(method.GetParameters(), parameter => parameter.HasDefaultValue);
+        });
+        Assert.Contains(listMethods, method => method.GetParameters()
+            .Any(parameter => parameter.ParameterType == typeof(CancellationToken)));
+        Assert.All(otherTerminalMethods, method =>
+        {
+            var cancellationToken = method.GetParameters()
+                .SingleOrDefault(parameter => parameter.ParameterType == typeof(CancellationToken));
+            Assert.NotNull(cancellationToken);
+            Assert.Equal("cancellationToken", cancellationToken.Name);
         });
     }
 

@@ -21,7 +21,8 @@ internal sealed class SqliteContractFactAttribute : FactAttribute
         {
             "BING_SQLITE_CONTRACT_RESULTS_DIRECTORY",
             "BING_SQLITE_CONTRACT_TRX_FILE_NAME",
-            "BING_SQLITE_CONTRACT_ARTIFACT_FILE_NAME"
+            "BING_SQLITE_CONTRACT_ARTIFACT_FILE_NAME",
+            "BING_PROVIDER_EVIDENCE_SESSION_ID"
         }.Where(name => string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name))).ToArray();
         if (missingVariables.Length > 0)
             Skip = $"未配置受控 SQLite 合同环境变量，跳过 AI 证据记录：{string.Join(", ", missingVariables)}。";
@@ -83,11 +84,16 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var runContext = GetRunContext();
         var artifactRelativePath = runContext.ArtifactRelativePath;
         var artifactPath = runContext.ArtifactPath;
+        var evidenceSessionId = GetRequiredEnvironmentValue("BING_PROVIDER_EVIDENCE_SESSION_ID");
         var databaseVersion = await GetSqliteVersionAsync();
         var providerVersion = typeof(SqliteSqlProvider).Assembly.GetName().Version?.ToString() ?? "unknown";
         var driverVersion = typeof(SqliteConnection).Assembly.GetName().Version?.ToString() ?? "unknown";
-        var sourceIdentity = typeof(SqliteExecutionIntegrationTest).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+        var sourceIdentity = Environment.GetEnvironmentVariable("BING_PROVIDER_SOURCE_IDENTITY");
+        if (string.IsNullOrWhiteSpace(sourceIdentity))
+            sourceIdentity = typeof(SqliteExecutionIntegrationTest).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
+        ProviderRunMetadataWriter.WriteFromEnvironment(providerVersion, databaseVersion, driverVersion,
+            typeof(SqliteExecutionIntegrationTest).Assembly);
         var startedAtUtc = DateTimeOffset.UtcNow;
         var scenarios = new[]
         {
@@ -100,7 +106,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                     return Task.CompletedTask;
                 }, realIntegrationEvidenceFactory: () => CreateIntegrationEvidence("scalar",
                     runContext.TrxRelativePath, artifactRelativePath, databaseVersion, providerVersion, driverVersion, sourceIdentity,
-                    startedAtUtc)),
+                    startedAtUtc, evidenceSessionId)),
             new ProviderContractScenario("SQLite", "Cancellation", "pre-execute",
                 async cancellationToken =>
                 {
@@ -110,7 +116,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
                         .ScalarAsync<int>(cancellationToken: cancellationToken));
                 }, realIntegrationEvidenceFactory: () => CreateIntegrationEvidence("pre-execute",
                     runContext.TrxRelativePath, artifactRelativePath, databaseVersion, providerVersion, driverVersion,
-                    sourceIdentity, startedAtUtc))
+                    sourceIdentity, startedAtUtc, evidenceSessionId))
         };
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
@@ -194,9 +200,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private static string NormalizeResultsDirectory(string value)
     {
         var normalized = value.Replace('\\', '/').Trim('/');
-        if (Path.IsPathRooted(normalized) || normalized.Split('/').Any(segment => segment is "" or "." or "..") ||
-            !normalized.StartsWith("artifacts/test-results/", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("SQLite 合同结果目录必须是工作区内 artifacts/test-results 下的相对目录。");
+                if (Path.IsPathRooted(normalized) || normalized.Split('/').Any(segment => segment is "" or "." or "..") ||
+                        !(normalized.StartsWith("artifacts/test-results/", StringComparison.OrdinalIgnoreCase) ||
+                            normalized.StartsWith("artifacts/provider-test-results/", StringComparison.OrdinalIgnoreCase)))
+                        throw new InvalidOperationException("SQLite 合同结果目录必须是工作区内受控 artifacts 目录下的相对目录。");
         return normalized;
     }
 
@@ -222,11 +229,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
     private static ProviderIntegrationEvidenceMetadata CreateIntegrationEvidence(string scenario,
         string trxPath, string artifactPath, string databaseVersion, string providerVersion,
-        string driverVersion, string sourceIdentity, DateTimeOffset startedAtUtc) => new(providerVersion,
+        string driverVersion, string sourceIdentity, DateTimeOffset startedAtUtc, string evidenceSessionId) => new(providerVersion,
         databaseVersion, driverVersion, ProviderIntegrationConnectionKind.LocalFile,
         $"{nameof(ProviderContract_WhenSqliteScenariosRun_ShouldRecordRealIntegrationEvidence)}[{scenario}]",
-        trxPath,
-        artifactPath, startedAtUtc, DateTimeOffset.UtcNow, sourceIdentity);
+        trxPath, artifactPath, startedAtUtc, DateTimeOffset.UtcNow, sourceIdentity,
+        evidenceSessionId: evidenceSessionId);
 
     /// <summary>
     /// 测试目的：异步列表、标量和单实体查询在执行前取消时，应停止执行并释放当前 Query 的执行资源。
@@ -3625,7 +3632,8 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await SeedAsync();
         using var query = _fixture.CreateQuery();
-        var first = await query.Query().Select("Id,Name,Amount").From("samples").OrderBy("Id").FirstAsync<Sample>();
+        var samples = await query.Query().Select("Id,Name,Amount").From("samples").OrderBy("Id").ToListAsync<Sample>();
+        var first = samples[0];
         using (var executor = _fixture.CreateExecutor())
             await executor.ExecuteSqlAsync("Insert Into Orders(Id,TenantId,Name) Values (@id,@tenantId,@name)",
                 new { id = first.Id, tenantId = "tenant-1", name = "order-one" });
@@ -3651,8 +3659,11 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var result = await description.ToListAsync<LambdaSubqueryResult>();
 
         // Assert
-        Assert.Equal(new[] { $"{first.Id}:tenant-1", "2:", "3:" },
-            result.OrderBy(item => item.SampleId).Select(item => $"{item.SampleId}:{item.TenantId}"));
+        var expected = samples.Select(item => item.Id == first.Id
+            ? $"{item.Id}:tenant-1"
+            : $"{item.Id}:");
+        Assert.Equal(expected, result.OrderBy(item => item.SampleId)
+            .Select(item => $"{item.SampleId}:{item.TenantId}"));
         Assert.Equal("Select `refined`.`SampleId` As `SampleId`,`refined`.`TenantId` As `TenantId` \r\nFrom (Select `owner`.`SampleId` As `SampleId`,`order`.`TenantId` As `TenantId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Id`>@_p_0) As `owner` \r\nLeft Join `Orders` As `order` On `owner`.`SampleId`=`order`.`Id`) As `refined` \r\nWhere `refined`.`SampleId`>@_p_1", description.ToSql());
     }
 

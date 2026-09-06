@@ -19,6 +19,7 @@
 * `CompleteAsync()` 在执行开始即清空同步和异步 completion callback，避免交叉完成和 retained delegate。
 * `ISqlQuery` 只保留非泛型 `From<TEntity>(alias = null, schema = null)`；删除 `SqlLambdaQuery<TEntity>`、公开 `SqlMultiLambdaQuery` 和 Legacy 转发路径。连续 `From<TEntity>` 追加实体来源，重复实体来源通过显式 alias 定位。
 * `Query()`、`Sql()`、`SqlInterpolated()` 和 `Procedure()` 返回非泛型描述；结果类型后置到 `ToEntity<TResult>`、`ToList<TResult>`、分页、标量、流式和 Procedure Execute 终结方法。Dapper 2～7 多映射通过非泛型 Fluent/Raw 描述的 `ToList` 和 `ToListAsync` 终结重载提供。旧的起始阶段泛型入口不再作为普通公共路径。
+* 为完成 RS0026 治理，`SqlTextQuery`、`SqlFluentQuery`、`SqlLambdaQuery` 及相关 Fluent 扩展中受影响的可选参数签名已拆分为显式短重载和保留的完整参数重载。普通源码调用应选择与实参数量匹配的重载；依赖反射、动态调用或源生成器的消费者不得再假定 `ParameterInfo.HasDefaultValue` 或默认参数元数据存在，必须按实际重载选择调用路径。
 * 删除 SQL 查询链中的 `As<TResult>()` 结果类型转换，DTO 投影统一使用强类型 `Select<TProjection>`。
 * `WhereIf` 统一为条件优先；条件组提供明确的 `AndGroup`/`OrGroup`；高层删除与 `ToEntity` 重复的 `SingleOrDefault` 和先完整列表再转换的 `ToDictionary`，字典结果请使用 `ToList<TResult>().ToDictionary(...)`。
 * 聚合、Where、Select、GroupBy、OrderBy、Having 和 Join 支持显式来源 alias；公开 Lambda 表达式最多一元或二元来源参数。

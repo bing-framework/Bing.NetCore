@@ -113,13 +113,65 @@ public class SqlQueryApiContractTest
                 method.GetParameters().First().ParameterType.GetGenericTypeDefinition() == typeof(Expression<>))
             .ToArray();
 
-        Assert.Equal(8, joinMethods.Length);
-        Assert.All(joinMethods.GroupBy(method => method.Name), group => Assert.Equal(2, group.Count()));
+        Assert.Equal(12, joinMethods.Length);
+        Assert.All(joinMethods.GroupBy(method => method.Name), group => Assert.Equal(3, group.Count()));
         Assert.Contains(joinMethods, method => method.GetParameters().Length == 2 &&
             method.GetParameters()[1].Name == "rightAlias");
         Assert.Contains(joinMethods, method => method.GetParameters().Length == 2 &&
             method.GetParameters()[1].ParameterType == typeof(SqlJoinOptions));
         Assert.True(typeof(SqlJoinOptions).IsValueType);
+    }
+
+    /// <summary>
+    /// 测试目的：扩展方法的短重载和完整重载必须显式表达参数，避免可选参数重载引发 API 兼容性诊断。
+    /// </summary>
+    [Fact]
+    public void ExtensionJoinMethods_WhenPublicApiInspected_ShouldUseExplicitOverloads()
+    {
+        var extensionMethods = typeof(Extensions).GetMethods();
+        foreach (var methodName in new[] { "From", "Join", "LeftJoin", "RightJoin" })
+        {
+            var tableMethods = extensionMethods
+                .Where(method => method.Name == methodName && method.IsGenericMethodDefinition)
+                .Where(method => method.GetParameters().Length >= 2 &&
+                    method.GetParameters()[0].ParameterType.IsGenericParameter &&
+                    method.GetParameters()[1].ParameterType == typeof(string))
+                .ToArray();
+            Assert.Equal(new[] { 2, 3 }, tableMethods.Select(method => method.GetParameters().Length).OrderBy(count => count));
+            Assert.All(tableMethods, method => Assert.DoesNotContain(method.GetParameters(), parameter => parameter.HasDefaultValue));
+
+            var builderMethods = extensionMethods
+                .Where(method => method.Name == methodName && method.IsGenericMethodDefinition)
+                .Where(method => method.GetParameters().Length >= 1 &&
+                    method.GetParameters()[0].ParameterType == typeof(ISqlBuilder))
+                .ToArray();
+            Assert.Equal(new[] { 1, 2, 3 }, builderMethods.Select(method => method.GetParameters().Length).OrderBy(count => count));
+            Assert.All(builderMethods, method => Assert.DoesNotContain(method.GetParameters(), parameter => parameter.HasDefaultValue));
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：异步集合终结方法的取消参数必须命名为 cancellationToken，且重载元数据不得重新引入可选参数。
+    /// </summary>
+    [Fact]
+    public void AsyncListMethods_WhenPublicApiInspected_ShouldExposeNamedCancellationToken()
+    {
+        foreach (var type in new[] { typeof(SqlTextQuery), typeof(SqlFluentQuery) })
+        {
+            var methods = type.GetMethods().Where(method => method.Name == "ToListAsync" &&
+                method.IsGenericMethodDefinition).ToArray();
+            Assert.NotEmpty(methods);
+            Assert.All(methods, method =>
+            {
+                Assert.DoesNotContain(method.GetParameters(), parameter => parameter.HasDefaultValue);
+                var cancellationToken = method.GetParameters()
+                    .SingleOrDefault(parameter => parameter.ParameterType == typeof(CancellationToken));
+                if (cancellationToken != null)
+                    Assert.Equal("cancellationToken", cancellationToken.Name);
+            });
+            Assert.Contains(methods, method => method.GetParameters()
+                .Any(parameter => parameter.ParameterType == typeof(CancellationToken)));
+        }
     }
 
     /// <summary>
@@ -153,7 +205,12 @@ public class SqlQueryApiContractTest
             method.IsGenericMethod == false).ReturnType);
         Assert.Equal(typeof(SqlProcedureQuery), rootType.GetMethod("Procedure")?.ReturnType);
         Assert.DoesNotContain(rootType.GetMethods(), method => method.Name == "Procedure" && method.IsGenericMethod);
-        Assert.Contains(textType.GetMethods(), method => method.Name == "ToEntity" && method.IsGenericMethodDefinition);
+        foreach (var type in new[] { typeof(SqlTextQuery), typeof(SqlFluentQuery), typeof(SqlLambdaQuery) })
+        {
+            Assert.Contains(type.GetMethods(), method => method.Name == "ToEntity" && method.IsGenericMethodDefinition);
+            Assert.Contains(type.GetMethods(), method => method.Name == "ToEntityAsync" && method.IsGenericMethodDefinition);
+            Assert.DoesNotContain(type.GetMethods(), method => method.Name == "SingleOrDefault");
+        }
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToList" && method.IsGenericMethodDefinition);
         Assert.Contains(textType.GetMethods(), method => method.Name == "ToList" && method.IsGenericMethodDefinition &&
             method.GetGenericArguments().Length == 3);

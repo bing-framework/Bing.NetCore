@@ -22,20 +22,89 @@ test_script:
         'common' {
           # 普通 lane 不继承受保护 Provider 的连接、gate 或 reset 授权。
           'RUN_INTEGRATION_TESTS', 'RUN_MYSQL_INTEGRATION_TESTS', 'RUN_POSTGRESQL_INTEGRATION_TESTS',
-          'RUN_SQLSERVER_INTEGRATION_TESTS', 'RUN_ORACLE_INTEGRATION_TESTS', 'ALLOW_DATABASE_RESET_FOR_TESTS',
+          'RUN_SQLSERVER_INTEGRATION_TESTS', 'RUN_ORACLE_INTEGRATION_TESTS', 'RUN_DORIS_INTEGRATION_TESTS',
+          'ALLOW_DATABASE_RESET_FOR_TESTS',
           'ConnectionStrings__DefaultConnection', 'ConnectionStrings__MySqlConnection',
-          'ConnectionStrings__PostgreSqlConnection', 'ConnectionStrings__SqlServerConnection' |
+          'ConnectionStrings__PostgreSqlConnection', 'ConnectionStrings__SqlServerConnection',
+          'ConnectionStrings__OracleConnection', 'ConnectionStrings__DorisConnection' |
             ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
-          dotnet test -c Release --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+          dotnet test -c Release -p:CI=true --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
           if ($LASTEXITCODE -ne 0) { throw 'Common test lane failed.' }
           dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release --no-build -- --ci-smoke --filter "*SqlCiSmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci"
           if ($LASTEXITCODE -ne 0) { throw 'CI benchmark smoke failed.' }
           dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release --no-build -- --e2e-smoke --filter "*SqliteDapperE2ESmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci-e2e"
           if ($LASTEXITCODE -ne 0) { throw 'E2E benchmark smoke failed.' }
         }
-        'mysql' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net8.0 -Configuration Release }
-        'postgresql' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider PostgreSql -Framework net8.0 -Configuration Release }
-        'sqlserver' { .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release }
+        'mysql' {
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net6.0 -Configuration Release
+          if ($LASTEXITCODE -ne 0) { throw 'MySQL net6.0 provider lane failed.' }
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net8.0 -Configuration Release
+        }
+        'postgresql' {
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider PostgreSql -Framework net6.0 -Configuration Release
+          if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL net6.0 provider lane failed.' }
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider PostgreSql -Framework net8.0 -Configuration Release
+        }
+        'sqlserver' {
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net6.0 -Configuration Release
+          if ($LASTEXITCODE -ne 0) { throw 'SQL Server net6.0 provider lane failed.' }
+          .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release
+        }
+        'release' {
+          .\eng\ci\Invoke-ReleaseCandidateValidation.ps1 -Configuration Release -ResultsRoot artifacts/release-candidate
+          if ($LASTEXITCODE -ne 0) { throw 'Protected release candidate validation failed.' }
+        }
+        'aggregate' {
+          $workspaceRoot = (Resolve-Path '.').Path
+          $sessionId = if ([string]::IsNullOrWhiteSpace($env:BING_PROVIDER_EVIDENCE_SESSION_ID)) {
+            if ([string]::IsNullOrWhiteSpace($env:APPVEYOR_BUILD_ID)) {
+              throw 'Aggregate lane requires APPVEYOR_BUILD_ID or BING_PROVIDER_EVIDENCE_SESSION_ID.'
+            }
+            "ci-$($env:APPVEYOR_BUILD_ID)"
+          }
+          else { $env:BING_PROVIDER_EVIDENCE_SESSION_ID }
+          $aggregateOutputDirectory = 'artifacts/test-results/provider-aggregate'
+          $providerResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:PROVIDER_RESULTS_DIRECTORY)) { 'artifacts/provider-test-results' } else { $env:PROVIDER_RESULTS_DIRECTORY }
+          $sqliteResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:SQLITE_RESULTS_DIRECTORY)) { 'artifacts/test-results' } else { $env:SQLITE_RESULTS_DIRECTORY }
+          $unitResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:UNIT_RESULTS_DIRECTORY)) { 'artifacts/test-results' } else { $env:UNIT_RESULTS_DIRECTORY }
+          $sourceIdentity = $env:BING_PROVIDER_SOURCE_IDENTITY
+          if ([string]::IsNullOrWhiteSpace($sourceIdentity)) {
+            throw 'Aggregate lane requires BING_PROVIDER_SOURCE_IDENTITY from the protected producer job.'
+          }
+          $arguments = @(
+            'run', '--project', '.\eng\Bing.ProviderEvidence.Cli\Bing.ProviderEvidence.Cli.csproj',
+            '-c', 'Release', '--no-restore', '--', '--workspace-root', $workspaceRoot,
+            '--aggregate-output-directory', $aggregateOutputDirectory,
+            '--provider-results-directory', $providerResultsDirectory,
+            '--sqlite-results-directory', $sqliteResultsDirectory,
+            '--unit-results-directory', $unitResultsDirectory,
+            '--evidence-session-id', $sessionId,
+            '--source-identity', $sourceIdentity
+          )
+          foreach ($name in @('FORMAL_HOST_RESULTS_DIRECTORY', 'RS0026_INVENTORY', 'API_GATE_FILE')) {
+            $value = [Environment]::GetEnvironmentVariable($name)
+            if (-not [string]::IsNullOrWhiteSpace($value)) {
+              $switchName = switch ($name) {
+                'SQLITE_RESULTS_DIRECTORY' { '--sqlite-results-directory' }
+                'FORMAL_HOST_RESULTS_DIRECTORY' { '--formal-host-results-directory' }
+                'RS0026_INVENTORY' { '--rs0026-inventory' }
+                'API_GATE_FILE' { '--api-gate-file' }
+              }
+              $arguments += $switchName
+              $arguments += $value
+            }
+          }
+          & dotnet @arguments
+          if ($LASTEXITCODE -ne 0) { throw 'Provider aggregate lane failed.' }
+          $aggregateMatrixPath = Join-Path $workspaceRoot ($aggregateOutputDirectory.Replace('/', '\') + '\provider-capability-matrix.json')
+          if (-not (Test-Path -LiteralPath $aggregateMatrixPath -PathType Leaf)) {
+            throw 'Provider aggregate lane did not produce provider-capability-matrix.json.'
+          }
+          $aggregateMatrix = Get-Content -LiteralPath $aggregateMatrixPath -Raw -Encoding utf8 | ConvertFrom-Json
+          if (-not [bool]$aggregateMatrix.ReleaseReady) {
+            throw 'Provider aggregate lane rejected RC readiness; inspect the fail-closed aggregate report.'
+          }
+        }
         default { throw "Unsupported PROVIDER_TEST_LANE '$lane'." }
       }
       if ($LASTEXITCODE -ne 0) { throw "Provider test lane '$lane' failed." }
@@ -47,6 +116,9 @@ artifacts:
   - path: 'BenchmarkDotNet.Artifacts\ci\**'
   - path: 'BenchmarkDotNet.Artifacts\ci-e2e\**'
   - path: 'artifacts\provider-test-results\**'
+  - path: 'artifacts\release-candidate\**'
+  - path: 'artifacts\benchmarks\release-candidate\**'
+  - path: 'artifacts\test-results\release-candidate\**'
 nuget:
   disable_publish_on_pr: true
 #deploy:

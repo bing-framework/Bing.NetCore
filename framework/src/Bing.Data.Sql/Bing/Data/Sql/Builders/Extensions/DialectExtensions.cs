@@ -20,7 +20,6 @@ public static partial class DialectExtensions
     /// 获取As关键字
     /// </summary>
     /// <param name="dialect">Sql方言</param>
-    /// <param name="dialect">Sql方言。</param>
     /// <returns>当前方言支持别名关键字时返回 <c>As </c>，否则返回 <see langword="null"/>。</returns>
     private static string GetAs(IDialect dialect) => dialect == null ? null : dialect.SupportSelectAs() ? "As " : null;
 

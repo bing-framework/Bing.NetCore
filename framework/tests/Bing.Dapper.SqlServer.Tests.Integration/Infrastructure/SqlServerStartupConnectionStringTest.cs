@@ -52,7 +52,9 @@ public sealed class SqlServerStartupConnectionStringTest
     {
         // Arrange
         var originalGlobalGate = Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS");
+        var originalSqlServerGate = Environment.GetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS");
         Environment.SetEnvironmentVariable("RUN_INTEGRATION_TESTS", "true");
+        Environment.SetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS", null);
         try
         {
             var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
@@ -77,6 +79,46 @@ public sealed class SqlServerStartupConnectionStringTest
         finally
         {
             Environment.SetEnvironmentVariable("RUN_INTEGRATION_TESTS", originalGlobalGate);
+            Environment.SetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS", originalSqlServerGate);
+        }
+    }
+
+    /// <summary>
+    /// 测试 - SQL Server 专属保护 lane 不应因残留全局 gate 注册其他 Provider。
+    /// </summary>
+    [Fact]
+    public void ConfigureServices_WhenSqlServerProviderLaneIsEnabled_ShouldNotRegisterOtherProviders()
+    {
+        // Arrange
+        var originalGlobalGate = Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS");
+        var originalSqlServerGate = Environment.GetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS");
+        Environment.SetEnvironmentVariable("RUN_INTEGRATION_TESTS", "true");
+        Environment.SetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS", "true");
+        try
+        {
+            var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["ConnectionStrings:SqlServerConnection"] = "sqlserver-connection",
+                ["ConnectionStrings:MySqlConnection"] = "mysql-connection",
+                ["ConnectionStrings:PostgreSqlConnection"] = "postgresql-connection"
+            }).Build();
+            var services = new ServiceCollection();
+            var context = new HostBuilderContext(new Dictionary<object, object>()) { Configuration = configuration };
+
+            // Act
+            new Startup().ConfigureServices(services, context);
+            using var serviceProvider = services.BuildServiceProvider();
+            var resolver = serviceProvider.GetRequiredService<ISqlDataSourceResolver>();
+
+            // Assert
+            Assert.Equal(DatabaseType.SqlServer, resolver.Resolve("default").DatabaseType);
+            Assert.ThrowsAny<Exception>(() => resolver.Resolve("mysql"));
+            Assert.ThrowsAny<Exception>(() => resolver.Resolve("pgsql"));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("RUN_INTEGRATION_TESTS", originalGlobalGate);
+            Environment.SetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS", originalSqlServerGate);
         }
     }
 

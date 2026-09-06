@@ -227,10 +227,29 @@ public static partial class Extensions
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
+    /// <returns>设置 From 子句后的 SQL 生成器。</returns>
+    public static ISqlBuilder From<TEntity>(this ISqlBuilder source)
+        where TEntity : class => From<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 设置表名
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
+    /// <param name="alias">别名</param>
+    /// <returns>设置 From 子句后的 SQL 生成器。</returns>
+    public static ISqlBuilder From<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => From<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 设置表名
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
     /// <returns>设置 From 子句后的 SQL 生成器。</returns>
-    public static ISqlBuilder From<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
+    public static ISqlBuilder From<TEntity>(this ISqlBuilder source, string alias, string schema)
         where TEntity : class
     {
         if (source == null)
@@ -264,10 +283,29 @@ public static partial class Extensions
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
+    /// <returns>追加内连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder Join<TEntity>(this ISqlBuilder source)
+        where TEntity : class => Join<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 内连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
+    /// <param name="alias">别名</param>
+    /// <returns>追加内连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder Join<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => Join<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 内连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
     /// <returns>追加内连接后的 SQL 生成器。</returns>
-    public static ISqlBuilder Join<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
+    public static ISqlBuilder Join<TEntity>(this ISqlBuilder source, string alias, string schema)
         where TEntity : class
     {
         if (source == null)
@@ -297,10 +335,29 @@ public static partial class Extensions
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
+    /// <returns>追加左外连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder LeftJoin<TEntity>(this ISqlBuilder source)
+        where TEntity : class => LeftJoin<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 左外连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
+    /// <param name="alias">别名</param>
+    /// <returns>追加左外连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder LeftJoin<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => LeftJoin<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 左外连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
     /// <returns>追加左外连接后的 SQL 生成器。</returns>
-    public static ISqlBuilder LeftJoin<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
+    public static ISqlBuilder LeftJoin<TEntity>(this ISqlBuilder source, string alias, string schema)
         where TEntity : class
     {
         if (source == null)
@@ -332,10 +389,29 @@ public static partial class Extensions
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
+    /// <returns>追加右外连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder RightJoin<TEntity>(this ISqlBuilder source)
+        where TEntity : class => RightJoin<TEntity>(source, null, null);
+
+    /// <summary>
+    /// 右外连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
+    /// <param name="alias">别名</param>
+    /// <returns>追加右外连接后的 SQL 生成器。</returns>
+    public static ISqlBuilder RightJoin<TEntity>(this ISqlBuilder source, string alias)
+        where TEntity : class => RightJoin<TEntity>(source, alias, null);
+
+    /// <summary>
+    /// 右外连接
+    /// </summary>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <param name="source">Sql生成器</param>
     /// <param name="alias">别名</param>
     /// <param name="schema">架构名</param>
     /// <returns>追加右外连接后的 SQL 生成器。</returns>
-    public static ISqlBuilder RightJoin<TEntity>(this ISqlBuilder source, string alias = null, string schema = null)
+    public static ISqlBuilder RightJoin<TEntity>(this ISqlBuilder source, string alias, string schema)
         where TEntity : class
     {
         if (source == null)

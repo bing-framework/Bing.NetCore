@@ -6,6 +6,16 @@
     <NoWarn Condition=" '$(Configuration)' == 'Release' ">$(NoWarn);CS1591;NETSDK1138</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Bing.Data.Sql' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.Core' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.MySql' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.PostgreSql' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.SqlServer' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.Sqlite' Or
+                            '$(MSBuildProjectName)' == 'Bing.Dapper.Oracle'">
+    <WarningsAsErrors>$(WarningsAsErrors);RS0026</WarningsAsErrors>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>$(MSBuildThisFileDirectory)/output/debug/</OutputPath>
   </PropertyGroup>

@@ -1,0 +1,11 @@
+# BING-SQL-RS0026-PROVIDER-TEST-HARDENING-20260903
+
+本任务唯一批准计划位于：
+
+`artifacts/plans/BING-SQL-RS0026-PROVIDER-TEST-HARDENING-20260903-plan.md`
+
+本文件仅作为 `execute-plan` 标准任务入口，不复制计划内容，不形成第二套计划。执行时以批准计划为唯一任务依据。
+
+<!-- AI_PLAN_SOURCE: artifacts/plans/BING-SQL-RS0026-PROVIDER-TEST-HARDENING-20260903-plan.md -->
+<!-- AI_PLAN_STATUS: READY_FOR_EXECUTION -->
+<!-- AI_TASK_ID: BING-SQL-RS0026-PROVIDER-TEST-HARDENING-20260903 -->

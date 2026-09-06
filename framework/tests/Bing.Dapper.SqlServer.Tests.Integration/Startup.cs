@@ -56,7 +56,7 @@ public class Startup
     // 但 Startup 本身不应抛异常，测试通过 [IntegrationFact] 跳过机制保护。
         services.AddSqlServerProvider();
         services.AddSqlDataSource("default", DatabaseType.SqlServer, connectionString);
-        if (IsGlobalMultiProviderRunEnabled())
+        if (IsGlobalMultiProviderRunEnabled() && !IsSqlServerProviderLaneEnabled())
         {
             services.AddMySqlProvider();
             services.AddPostgreSqlProvider();
@@ -93,4 +93,12 @@ public class Startup
     /// <returns>是全局兼容运行时返回 true。</returns>
     private static bool IsGlobalMultiProviderRunEnabled() => string.Equals(
         Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS"), "true", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 判断 SQL Server 是否运行在受保护的 Provider lane。
+    /// </summary>
+    /// <returns>专属 gate 启用时返回 true。</returns>
+    private static bool IsSqlServerProviderLaneEnabled() => string.Equals(
+        Environment.GetEnvironmentVariable("RUN_SQLSERVER_INTEGRATION_TESTS"), "true",
+        StringComparison.OrdinalIgnoreCase);
 }

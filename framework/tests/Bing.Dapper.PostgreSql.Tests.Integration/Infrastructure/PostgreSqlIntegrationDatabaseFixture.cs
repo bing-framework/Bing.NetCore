@@ -1,5 +1,6 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Dapper;
 using Bing.Dapper.PostgreSql;
 using Bing.Test.Shared;
@@ -67,6 +68,14 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
         ReportingConnectionString = CreateSchemaConnectionString(ConnectionString, "integration_reporting");
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
+        await using (var versionCommand = new NpgsqlCommand("Show server_version;", connection))
+        {
+            var databaseVersion = Convert.ToString(await versionCommand.ExecuteScalarAsync());
+            ProviderRunMetadataWriter.WriteFromEnvironment(
+                typeof(PostgreSqlSqlProvider).Assembly.GetName().Version?.ToString(), databaseVersion,
+                typeof(NpgsqlConnection).Assembly.GetName().Version?.ToString(),
+                typeof(PostgreSqlIntegrationDatabaseFixture).Assembly);
+        }
         await DatabaseScript.InitializeAsync(connection);
         var services = new ServiceCollection();
         AddPostgreSqlIntegrationTestServices(services, PrimaryConnectionString, ReportingConnectionString);

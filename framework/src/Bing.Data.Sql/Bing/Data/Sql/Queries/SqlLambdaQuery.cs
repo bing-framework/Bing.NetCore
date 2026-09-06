@@ -498,9 +498,16 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// 设置实体默认投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Select<TEntity>() where TEntity : class => Select<TEntity>(false);
+
+    /// <summary>
+    /// 设置实体默认投影。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="propertyAsAlias">是否将属性名作为列别名。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery Select<TEntity>(bool propertyAsAlias = false) where TEntity : class
+    public SqlLambdaQuery Select<TEntity>(bool propertyAsAlias) where TEntity : class
     {
         ResolveSource<TEntity>(null);
         var builder = GetBuilder() as SqlBuilderBase ??
@@ -515,10 +522,19 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回追加列的表达式；传入 null 时使用默认投影行为。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery AppendSelect<TEntity>(Expression<Func<TEntity, object[]>> columns)
+        where TEntity : class => AppendSelect(columns, false);
+
+    /// <summary>
+    /// 追加单来源投影。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="columns">返回追加列的表达式；传入 null 时使用默认投影行为。</param>
     /// <param name="propertyAsAlias">是否将属性名作为列别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery AppendSelect<TEntity>(Expression<Func<TEntity, object[]>> columns,
-        bool propertyAsAlias = false)
+        bool propertyAsAlias)
         where TEntity : class
     {
         if (columns != null)
@@ -583,12 +599,32 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
     /// <param name="column">返回聚合列的实体成员表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    /// <exception cref="NotSupportedException">当前 SQL Builder 不支持聚合投影替换时抛出。</exception>
+    public SqlLambdaQuery Aggregate<TEntity>(SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> column)
+        where TEntity : class => Aggregate(function, column, null, false);
+
+    /// <summary>使用单来源属性创建聚合投影。</summary>
+    /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
+    /// <param name="function">要执行的聚合函数。</param>
+    /// <param name="column">返回聚合列的实体成员表达式。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Aggregate<TEntity>(SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> column, string columnAlias)
+        where TEntity : class => Aggregate(function, column, columnAlias, false);
+
+    /// <summary>使用单来源属性创建聚合投影。</summary>
+    /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
+    /// <param name="function">要执行的聚合函数。</param>
+    /// <param name="column">返回聚合列的实体成员表达式。</param>
     /// <param name="columnAlias">聚合结果列别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     /// <returns>当前查询描述。</returns>
     /// <exception cref="NotSupportedException">当前 SQL Builder 不支持聚合投影替换时抛出。</exception>
     public SqlLambdaQuery Aggregate<TEntity>(SqlAggregateFunction function,
-        Expression<Func<TEntity, object>> column, string columnAlias = null, bool distinct = false)
+        Expression<Func<TEntity, object>> column, string columnAlias, bool distinct)
         where TEntity : class
     {
         var builder = GetBuilder() as SqlBuilderBase ??
@@ -607,11 +643,25 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="column">返回聚合列的实体成员表达式。</param>
     /// <param name="alias">要绑定的查询来源别名。</param>
     /// <param name="columnAlias">聚合结果列别名。</param>
+    /// <returns>当前查询描述。</returns>
+    /// <exception cref="InvalidOperationException">未找到唯一匹配的实体来源时抛出。</exception>
+    public SqlLambdaQuery Aggregate<TEntity>(SqlAggregateFunction function,
+        Expression<Func<TEntity, object>> column, string alias, string columnAlias)
+        where TEntity : class => Aggregate(function, column, alias, columnAlias, false);
+
+    /// <summary>
+    /// 按来源别名追加单来源聚合投影。
+    /// </summary>
+    /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
+    /// <param name="function">要执行的聚合函数。</param>
+    /// <param name="column">返回聚合列的实体成员表达式。</param>
+    /// <param name="alias">要绑定的查询来源别名。</param>
+    /// <param name="columnAlias">聚合结果列别名。</param>
     /// <param name="distinct">是否对聚合参数去重。</param>
     /// <returns>当前查询描述。</returns>
     /// <exception cref="InvalidOperationException">未找到唯一匹配的实体来源时抛出。</exception>
     public SqlLambdaQuery Aggregate<TEntity>(SqlAggregateFunction function,
-        Expression<Func<TEntity, object>> column, string alias, string columnAlias, bool distinct = false)
+        Expression<Func<TEntity, object>> column, string alias, string columnAlias, bool distinct)
         where TEntity : class
     {
         var builder = GetBuilder() as SqlBuilderBase ??
@@ -680,10 +730,21 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TValue">条件值类型。</typeparam>
     /// <param name="column">返回条件列的表达式。</param>
     /// <param name="value">条件值。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Where<TEntity, TValue>(Expression<Func<TEntity, TValue>> column, TValue value)
+        where TEntity : class => Where(column, value, Operator.Equal);
+
+    /// <summary>
+    /// 追加单来源参数条件。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <typeparam name="TValue">条件值类型。</typeparam>
+    /// <param name="column">返回条件列的表达式。</param>
+    /// <param name="value">条件值。</param>
     /// <param name="operator">条件运算符。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Where<TEntity, TValue>(Expression<Func<TEntity, TValue>> column, TValue value,
-        Operator @operator = Operator.Equal)
+        Operator @operator)
         where TEntity : class
     {
         var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
@@ -698,10 +759,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="column">返回条件列的表达式。</param>
     /// <param name="value">条件值。</param>
     /// <param name="alias">要绑定的来源别名。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Where<TEntity, TValue>(Expression<Func<TEntity, TValue>> column, TValue value,
+        string alias)
+        where TEntity : class => Where(column, value, alias, Operator.Equal);
+
+    /// <summary>
+    /// 按来源别名追加单来源参数条件。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <typeparam name="TValue">条件值类型。</typeparam>
+    /// <param name="column">返回条件列的表达式。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="alias">要绑定的来源别名。</param>
     /// <param name="operator">条件运算符。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Where<TEntity, TValue>(Expression<Func<TEntity, TValue>> column, TValue value,
-        string alias, Operator @operator = Operator.Equal)
+        string alias, Operator @operator)
         where TEntity : class
     {
         var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
@@ -744,10 +818,21 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="condition">是否追加条件。</param>
     /// <param name="column">返回条件列的表达式。</param>
     /// <param name="value">条件值。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery WhereIf<TEntity>(bool condition, Expression<Func<TEntity, object>> column, object value)
+        where TEntity : class => WhereIf(condition, column, value, Operator.Equal);
+
+    /// <summary>
+    /// 按条件追加单来源参数条件。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="condition">是否追加条件。</param>
+    /// <param name="column">返回条件列的表达式。</param>
+    /// <param name="value">条件值。</param>
     /// <param name="operator">条件运算符。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery WhereIf<TEntity>(bool condition, Expression<Func<TEntity, object>> column, object value,
-        Operator @operator = Operator.Equal)
+        Operator @operator)
         where TEntity : class
     {
         if (condition)
@@ -761,10 +846,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="column">返回条件列的表达式。</param>
     /// <param name="value">条件值。</param>
     /// <param name="alias">要绑定的来源别名。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery WhereIf<TEntity>(bool condition, Expression<Func<TEntity, object>> column, object value,
+        string alias)
+        where TEntity : class => WhereIf(condition, column, value, alias, Operator.Equal);
+
+    /// <summary>
+    /// 按条件和来源别名追加单来源参数条件。
+    /// </summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="condition">是否追加条件。</param>
+    /// <param name="column">返回条件列的表达式。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="alias">要绑定的来源别名。</param>
     /// <param name="operator">条件运算符。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery WhereIf<TEntity>(bool condition, Expression<Func<TEntity, object>> column, object value,
-        string alias, Operator @operator = Operator.Equal)
+        string alias, Operator @operator)
         where TEntity : class
     {
         if (condition)
@@ -789,10 +887,18 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Join<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
+        where TLeft : class where TRight : class => Join(predicate, (string)null);
+
+    /// <summary>添加内连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
+    /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Join<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null)
+        string rightAlias)
         where TLeft : class where TRight : class
     {
         JoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
@@ -821,10 +927,18 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
+        where TLeft : class where TRight : class => LeftJoin(predicate, (string)null);
+
+    /// <summary>添加左外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
+    /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null)
+        string rightAlias)
         where TLeft : class where TRight : class
     {
         LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
@@ -853,10 +967,18 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
+        where TLeft : class where TRight : class => RightJoin(predicate, (string)null);
+
+    /// <summary>添加右外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
+    /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null)
+        string rightAlias)
         where TLeft : class where TRight : class
     {
         RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
@@ -885,10 +1007,18 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
+        where TLeft : class where TRight : class => FullJoin(predicate, (string)null);
+
+    /// <summary>添加全外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
+    /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
     /// <param name="rightAlias">右侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate,
-        string rightAlias = null)
+        string rightAlias)
         where TLeft : class where TRight : class
     {
         FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
@@ -916,10 +1046,20 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
     /// <param name="predicate">连接条件表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery Join<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TLeft, TProjection, bool>> predicate)
+        where TLeft : class where TProjection : class => Join(subquery, predicate, null);
+
+    /// <summary>按指定左侧来源添加类型化派生表内连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TProjection">派生表投影类型。</typeparam>
+    /// <param name="subquery">类型化派生表查询。</param>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftAlias">左侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Join<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
-        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias = null)
+        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
         JoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
@@ -931,10 +1071,20 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
     /// <param name="predicate">连接条件表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery LeftJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TLeft, TProjection, bool>> predicate)
+        where TLeft : class where TProjection : class => LeftJoin(subquery, predicate, null);
+
+    /// <summary>按指定左侧来源添加类型化派生表左外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TProjection">派生表投影类型。</typeparam>
+    /// <param name="subquery">类型化派生表查询。</param>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftAlias">左侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery LeftJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
-        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias = null)
+        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
         LeftJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
@@ -946,10 +1096,20 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
     /// <param name="predicate">连接条件表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery RightJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TLeft, TProjection, bool>> predicate)
+        where TLeft : class where TProjection : class => RightJoin(subquery, predicate, null);
+
+    /// <summary>按指定左侧来源添加类型化派生表右外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TProjection">派生表投影类型。</typeparam>
+    /// <param name="subquery">类型化派生表查询。</param>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftAlias">左侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery RightJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
-        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias = null)
+        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
         RightJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
@@ -961,10 +1121,20 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
     /// <param name="predicate">连接条件表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery FullJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
+        Expression<Func<TLeft, TProjection, bool>> predicate)
+        where TLeft : class where TProjection : class => FullJoin(subquery, predicate, null);
+
+    /// <summary>按指定左侧来源添加类型化派生表全外连接。</summary>
+    /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
+    /// <typeparam name="TProjection">派生表投影类型。</typeparam>
+    /// <param name="subquery">类型化派生表查询。</param>
+    /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftAlias">左侧来源别名。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery FullJoin<TLeft, TProjection>(SqlSubquery<TProjection> subquery,
-        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias = null)
+        Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
         FullJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
@@ -1048,10 +1218,22 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的双来源表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns)
+    {
+        return OrderBy(columns, false);
+    }
+
+    /// <summary>
+    /// 设置双来源排序列。
+    /// </summary>
+    /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
+    /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
+    /// <param name="columns">返回排序列的双来源表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
-        bool desc = false)
+        bool desc)
     {
         OrderByCore(columns, desc, ResolveSources(columns));
         return this;
@@ -1063,10 +1245,23 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="columns">返回排序列的双来源表达式。</param>
     /// <param name="firstAlias">第一个来源别名。</param>
     /// <param name="secondAlias">第二个来源别名。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
+        string firstAlias, string secondAlias)
+    {
+        return OrderBy(columns, firstAlias, secondAlias, false);
+    }
+
+    /// <summary>按两个来源别名设置双来源排序列。</summary>
+    /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
+    /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
+    /// <param name="columns">返回排序列的双来源表达式。</param>
+    /// <param name="firstAlias">第一个来源别名。</param>
+    /// <param name="secondAlias">第二个来源别名。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
-        string firstAlias, string secondAlias, bool desc = false)
+        string firstAlias, string secondAlias, bool desc)
     {
         OrderByCore(columns, desc, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
         return this;
@@ -1075,9 +1270,18 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <summary>设置单来源排序列。</summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns)
+    {
+        return OrderBy(columns, false);
+    }
+
+    /// <summary>设置单来源排序列。</summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="columns">返回排序列的表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>当前查询描述。</returns>
-    public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, bool desc = false)
+    public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, bool desc)
     {
         OrderByCore(columns, desc, ResolveSources(columns));
         return this;
@@ -1087,10 +1291,20 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
+    /// <returns>当前查询描述。</returns>
+    public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias)
+    {
+        return OrderBy(columns, alias, false);
+    }
+
+    /// <summary>按来源别名设置单来源排序列。</summary>
+    /// <typeparam name="TEntity">来源实体类型。</typeparam>
+    /// <param name="columns">返回排序列的表达式。</param>
+    /// <param name="alias">要绑定的来源别名。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias,
-        bool desc = false)
+        bool desc)
     {
         OrderByCore(columns, desc, new[] { ResolveSource<TEntity>(alias) });
         return this;

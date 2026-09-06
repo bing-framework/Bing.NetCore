@@ -1973,8 +1973,6 @@ static Bing.Data.Sql.Extensions.From(this Bing.Data.Sql.ISqlBuilder source, Bing
 static Bing.Data.Sql.Extensions.From<T>(this T source, Bing.Data.Sql.ISqlBuilder builder, string alias) -> T
 static Bing.Data.Sql.Extensions.From<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
 static Bing.Data.Sql.Extensions.From<T>(this T source, System.Action<Bing.Data.Sql.ISqlBuilder> action, string alias) -> T
-static Bing.Data.Sql.Extensions.From<T>(this T source, string table, string alias = null) -> T
-static Bing.Data.Sql.Extensions.From<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias = null, string schema = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Greater<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.GreaterEqual<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.GroupBy<T>(this T source, string columns) -> T
@@ -1994,13 +1992,9 @@ static Bing.Data.Sql.Extensions.IsNull<TEntity>(this Bing.Data.Sql.ISqlBuilder s
 static Bing.Data.Sql.Extensions.Join(this Bing.Data.Sql.ISqlBuilder source, Bing.Data.Sql.Metadata.SqlTableReference reference) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Join<T>(this T source, Bing.Data.Sql.ISqlBuilder builder, string alias) -> T
 static Bing.Data.Sql.Extensions.Join<T>(this T source, System.Action<Bing.Data.Sql.ISqlBuilder> action, string alias) -> T
-static Bing.Data.Sql.Extensions.Join<T>(this T source, string table, string alias = null) -> T
-static Bing.Data.Sql.Extensions.Join<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias = null, string schema = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, Bing.Data.Sql.ISqlBuilder builder, string alias) -> T
 static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, Bing.Data.Sql.Metadata.SqlTableReference table) -> T
 static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, System.Action<Bing.Data.Sql.ISqlBuilder> action, string alias) -> T
-static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, string table, string alias = null) -> T
-static Bing.Data.Sql.Extensions.LeftJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias = null, string schema = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Less<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.LessEqual<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> expression, object value) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Max<T>(this T source, string column, string columnAlias = null, bool distinct = false) -> T
@@ -2027,8 +2021,6 @@ static Bing.Data.Sql.Extensions.RemoveSelect<TEntity>(this Bing.Data.Sql.ISqlBui
 static Bing.Data.Sql.Extensions.RemoveSelect<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, Bing.Data.Sql.ISqlBuilder builder, string alias) -> T
 static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, System.Action<Bing.Data.Sql.ISqlBuilder> action, string alias) -> T
-static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, string table, string alias = null) -> T
-static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias = null, string schema = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Select<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, string columnAlias = null) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Select<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, bool propertyAsAlias = false) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Select<TEntity>(this Bing.Data.Sql.ISqlBuilder source, bool propertyAsAlias = false) -> Bing.Data.Sql.ISqlBuilder

@@ -4,6 +4,7 @@ using Bing.Data.Enums;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Datas.EntityFramework.Core;
@@ -59,6 +60,14 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         IntegrationDatabaseSafetyValidator.EnsureResetAllowed(ConnectionString, Provider);
         await using var connection = new MySqlConnection(ConnectionString);
         await connection.OpenAsync();
+        await using (var versionCommand = new MySqlCommand("Select Version();", connection))
+        {
+            var databaseVersion = Convert.ToString(await versionCommand.ExecuteScalarAsync());
+            ProviderRunMetadataWriter.WriteFromEnvironment(
+                typeof(MySqlSqlProvider).Assembly.GetName().Version?.ToString(), databaseVersion,
+                typeof(MySqlConnection).Assembly.GetName().Version?.ToString(),
+                typeof(MySqlIntegrationDatabaseFixture).Assembly);
+        }
         await DatabaseScript.InitializeAsync(connection);
         var services = new ServiceCollection();
         AddMySqlIntegrationTestServices(services, ConnectionString);
@@ -128,7 +137,9 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Product>().Property(entity => entity.Id).HasColumnName("ProductId");
+            modelBuilder.Entity<Product>().Property(entity => entity.Id)
+                .HasColumnName("ProductId")
+                .ValueGeneratedNever();
             modelBuilder.Entity<MySqlDottedCompany>(entity =>
             {
                 entity.ToTable("Merchants.Company");
@@ -166,6 +177,13 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     /// </summary>
     /// <returns>SQL 执行对象。</returns>
     public ISqlExecutor CreateExecutor() => GetExecutorFactory().Create();
+
+    /// <summary>
+    /// 创建 MySQL 多结果集查询执行器。
+    /// </summary>
+    /// <returns>多结果集查询执行器。</returns>
+    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor() =>
+        ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
     /// <summary>
     /// 获取 SQL 查询工厂。

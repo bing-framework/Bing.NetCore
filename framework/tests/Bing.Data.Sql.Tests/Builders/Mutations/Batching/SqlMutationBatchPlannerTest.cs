@@ -82,6 +82,64 @@ public sealed class SqlMutationBatchPlannerTest
     }
 
     /// <summary>
+    /// 测试目的：SQL Server 2099 个参数应在 2100 上限内生成单批计划，不能提前拆分。
+    /// </summary>
+    [Fact]
+    public void Plan_WhenParameterCountIs2099_ShouldKeepSingleBatchWithinSqlServerLimit()
+    {
+        // Arrange
+        var planner = new SqlMutationBatchPlanner();
+        var context = new SqlMutationBatchPlanContext(entityCount: 2099, parametersPerEntity: 1,
+            maxParameterCount: 2100);
+
+        // Act
+        var plan = planner.Plan(context);
+
+        // Assert
+        Assert.Equal(2099, plan.EffectiveBatchSize);
+        Assert.Equal(new[] { 2099 }, plan.BatchSizes);
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Server 恰好 2100 个参数应仍允许单批执行，验证上限是包含边界。
+    /// </summary>
+    [Fact]
+    public void Plan_WhenParameterCountIs2100_ShouldKeepSingleBatchAtSqlServerLimit()
+    {
+        // Arrange
+        var planner = new SqlMutationBatchPlanner();
+        var context = new SqlMutationBatchPlanContext(entityCount: 2100, parametersPerEntity: 1,
+            maxParameterCount: 2100);
+
+        // Act
+        var plan = planner.Plan(context);
+
+        // Assert
+        Assert.Equal(2100, plan.EffectiveBatchSize);
+        Assert.Equal(new[] { 2100 }, plan.BatchSizes);
+    }
+
+    /// <summary>
+    /// 测试目的：SQL Server 2101 个参数不能生成超过 Provider 上限的单批，必须拆分为 2100 和 1。
+    /// </summary>
+    [Fact]
+    public void Plan_WhenParameterCountIs2101_ShouldSplitWithoutExceedingSqlServerLimit()
+    {
+        // Arrange
+        var planner = new SqlMutationBatchPlanner();
+        var context = new SqlMutationBatchPlanContext(entityCount: 2101, parametersPerEntity: 1,
+            maxParameterCount: 2100);
+
+        // Act
+        var plan = planner.Plan(context);
+
+        // Assert
+        Assert.Equal(2100, plan.EffectiveBatchSize);
+        Assert.Equal(new[] { 2100, 1 }, plan.BatchSizes);
+        Assert.All(plan.BatchSizes, batchSize => Assert.InRange(batchSize, 1, 2100));
+    }
+
+    /// <summary>
     /// 测试目的：既有参数必须占用 Provider 总参数上限，规划器只能使用剩余容量确定批次大小。
     /// </summary>
     [Fact]

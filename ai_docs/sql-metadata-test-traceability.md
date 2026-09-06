@@ -328,6 +328,7 @@
 | `ProviderCapabilityMatrix.Add` / `ProviderCapabilityMatrix.ToMarkdown` / `ProviderCapabilityMatrix.ToJson` | 能力矩阵拒绝同一 Provider、Capability、Scenario 的重复记录，并以无密 Markdown/JSON 输出状态、证据、版本、连接类别、测试方法、TRX、制品、时间和源码身份；`TestGenerated` 不满足发布放行。 | `Bing.Test.Shared`: `ProviderContractRunnerTest.Matrix_WhenEvidenceIsAdded_ShouldRejectDuplicatesAndRenderSafeMarkdown`; `RunAsync_WhenTrustedMetadataIsProvided_ShouldRecordTraceableIntegrationEvidence`。Round 5 runner 双 TFM 各 `6/6`。 |
 | `ProviderContractRunner.RunAsync` / `ProviderContractScenario` | 执行场景与固定状态互斥；没有完整真实集成元数据的成功委托只能生成 `UnitProven`，带完整元数据才生成 `RealIntegrationProven`，固定状态不能伪造真实状态。 | `Bing.Test.Shared`: `ProviderContractRunnerTest.RunAsync_WhenScenariosComplete_ShouldKeepSixStateEvidence`; `Scenario_WhenExecuteAndFixedStateAreBothProvided_ShouldRejectAmbiguousEvidence`; `Scenario_WhenFixedStateIsRealIntegrationProven_ShouldRejectStaticEvidence`; `RunAsync_WhenTrustedMetadataIsProvided_ShouldRecordTraceableIntegrationEvidence`。 |
 | SQLite Provider Contract runner 接入 | SQLite 真实 Scalar 和预取消场景通过共享 runner 生成含版本、连接类别、方法、TRX、制品、时间和源码身份的 JSON Matrix；运行上下文由受控结果目录、TRX 文件名和 Matrix 文件名绑定，禁止复用历史制品；外部 Provider 未配置专用数据库和安全 reset 时保持 `NotExecuted`，Oracle 安全 fixture 缺失时保持 `ImplementationGap`。 | `Bing.Dapper.Sqlite.Tests.Integration`: `SqliteExecutionIntegrationTest.ProviderContract_WhenSqliteScenariosRun_ShouldRecordRealIntegrationEvidence`；`eng/ci/Invoke-SqliteContractTests.ps1`；Round 8 `net6.0`、`net8.0` 在两组隔离目录各 `1/1`，每次 Matrix 的 `TrxPath` 与 `ArtifactPath` 均指向同目录当前运行制品，状态为 `TestGenerated`，不单独构成 Release Evidence。 |
+| `SqlServerExecutionContractTest` / SQL Server 合同 fixture | SQL Server 受保护集成路径覆盖 decimal、datetime2、显式 null 参数物化；同步流式、预取消；事务提交/回滚可见性。测试使用专属 `BingSqlContractIntegration` 表和 fixture reset，当前未因缺少授权 SQL Server 测试库执行，不能生成 `RealIntegrationProven`。 | `Bing.Dapper.SqlServer.Tests.Integration`: `SqlServerExecutionContractTest.Query_WhenTypedAndNullParametersAreBound_ShouldMaterializeValues`; `Query_WhenStreamingAndPreCancelled_ShouldReturnRowsAndCancel`; `Transaction_WhenCompletedOrRolledBack_ShouldKeepExpectedVisibility`；本轮状态：`NotExecuted`，仅保留代码与默认 gate 安全跳过证据。 |
 
 ### Provider 上下文与本机 Gate 追溯
 
@@ -580,7 +581,7 @@
 - SQL Core：2378/2378 通过，双 TFM。
 - SQLite Integration：266/266 通过，双 TFM；外部数据库 Gate 未配置时不计为通过。
 - MySQL、PostgreSQL、SQL Server、Oracle 外部 Integration：`NOT_RUN_EXTERNAL_GATE_MISSING`，未使用猜测或硬编码连接信息。
-- Public API：dev_v6 删除的旧符号已从失效 Shipped 基线清理；新增成员同步到 `PublicAPI.Unshipped.txt`；现有可选参数兼容性 RS0026/RS0027 作为已知 Analyzer 警告记录。
+- Public API：此历史阶段的 dev_v6 删除旧符号已从失效 Shipped 基线清理；新增成员同步到 `PublicAPI.Unshipped.txt`。该阶段曾将可选参数兼容性 RS0026/RS0027 记录为已知 Analyzer 警告；这不是当前门禁状态，当前状态见本文末尾的 RS0026 Provider 加固追溯。
 | `MySqlBuilder.Clone` / `MySqlFromClause.Clone` / `MySqlJoinClause.Clone` | `Bing.Dapper.MySql.Tests` | `MySqlBuilderTest` | `Clone_WhenJoinUsesDottedPhysicalTable_ShouldPreserveMySqlStringTableStrategy`; `CloneAndClear_WhenNormalTableStateExists_ShouldKeepInstancesIsolated`; `Clone_WhenCountUsesQualifiedColumn_ShouldPreserveAggregation` | Unit; preserves MySQL quote-aware string-table parsing strategy, dotted physical-table behavior, aggregate state and independent mutable state after cloning. |
 | `SqlServerBuilder.Clone` / `PostgreSqlBuilder.Clone` / `OracleBuilder.Clone` / `SqliteBuilder.Clone` | `Bing.Dapper.SqlServer.Tests`; `Bing.Dapper.PostgreSql.Tests`; `Bing.Dapper.Oracle.Tests`; `Bing.Dapper.Sqlite.Tests` | Provider `*BuilderTest` | Provider Clone, qualified-name rendering, aggregate and repeated-render regression cases | Unit; provider builders retain their dialect formatter, clause model and parameter behavior after Clone without sharing source-builder mutations. |
 | `FromClause.GetSubqueryAlias` / `JoinClause.GetSubqueryAlias` / `OracleFromClause.GetSubqueryAlias` / `OracleJoinClause.GetSubqueryAlias` | `Bing.Dapper.Oracle.Tests` | `OracleBuilderTest` | `From_WhenSourceIsSubquery_ShouldRenderOracleAliasWithoutAs`; `Join_WhenSubqueryContainsDoubleColonCast_ShouldRenameOnlyParameterToken` | Unit; Oracle derived table aliases omit unsupported `As`, while the base clause retains the existing `As` rendering for other dialects. |
@@ -635,6 +636,44 @@
 | `RebindClauseContext` | Context 对新 Builder、AliasRegister、ParameterManager 的重绑定。 | Mean 260.3 ns，Allocated 3.75 KB，Gen0 0.2036，Gen1 0.0024，无 Gen2。 |
 
 ## 参数管理器合同与快照追溯
+
+## RS0026 Provider 加固最终追溯（2026-09-03）
+
+本节覆盖 `BING-SQL-RS0026-PROVIDER-TEST-HARDENING-20260903` 的当前结论，优先于本文中所有将 RS0026/RS0027 称为“历史已知 warning”的旧阶段描述。
+
+- `common.props` 对 `Bing.Data.Sql`、`Bing.Dapper.Core`、`Bing.Dapper.MySql`、`Bing.Dapper.PostgreSql`、`Bing.Dapper.SqlServer`、`Bing.Dapper.Sqlite` 和 `Bing.Dapper.Oracle` 统一提升 `RS0026` 为错误；没有使用 `NoWarn` 逃避。
+- 显式短重载取代受影响的可选参数元数据，完整参数重载仍保留。反射合同由 `Bing.Data.Sql.Tests.SqlQueryApiContractTest.ExtensionJoinMethods_WhenPublicApiInspected_ShouldUseExplicitOverloads`、`AsyncListMethods_WhenPublicApiInspected_ShouldExposeNamedCancellationToken` 和 `Bing.Data.Sql.Tests.TransactionApiContractTest.QueryDescriptionAsyncTerminals_ShouldExposeOptionalCancellationToken` 覆盖。
+- 最终逐场景基线矩阵为 `artifacts/provider-test-results/final-rs0026-provider-hardening/provider-capability-matrix.json` 与同名 Markdown。每个键为 `Provider + Capability + Scenario`，当前共 57 个唯一条目；它是全 Provider 的静态状态目录，未授权 Provider 的默认 gate 跳过只保持 `NotExecuted`，不生成 `RealIntegrationProven` 或 `ReleaseReady`。
+- SQLite 受控合同已在 `net8.0` 和 `net6.0` 分别生成当前运行制品：`artifacts/test-results/rs0026-review-fix-round2-net8/rs0026-review-fix-round2-net8.0.trx` / `.json` 与 `artifacts/test-results/rs0026-review-fix-round2-net6/rs0026-review-fix-round2-net6.0.trx` / `.json`。每个 TRX 均为 `1/1`，对应 Matrix 均有 Query/scalar 和 Cancellation/pre-execute 两项 `RealIntegrationProven`、`TestGenerated` 证据，且 `ReleaseReady=false`；这些运行制品不改变全 Provider 基线的静态 `NotExecuted` 状态，也不构成 `ReleaseEvidence`。
+
+| 生产符号 / 受控入口 | 当前行为 | 测试或制品追溯 |
+| --- | --- | --- |
+| `ProviderReleaseEvidenceWriter.Write` / `ProviderReleaseEvidenceValidator` / `ProviderIntegrationEvidenceMetadata.CreateValidatedReleaseEvidence` | 唯一发布写入入口先复核当前 run directory、TRX、摘要、Provider、TFM、run id、source identity、UTC 时间与零失败/零核心跳过计数，之后才创建 `ReleaseEvidence` 并写同目录 JSON/Markdown。普通构造函数只能产生 `TestGenerated`。 | `Bing.Test.Shared.ProviderReleaseEvidenceValidatorTest.Write_WhenCurrentSuccessfulArtifactsMatch_ShouldCreateTrustedReleaseEvidence`; `Validate_WhenTrxPathIsOutsideCurrentRun_ShouldRejectForgery`; `Validate_WhenTrxIsHistoric_ShouldRejectArtifact`; `Validate_WhenSourceIdentityDoesNotMatch_ShouldRejectArtifact`; `Validate_WhenProviderOrFrameworkDoesNotMatch_ShouldRejectArtifact`; `Validate_WhenTrxContainsFailure_ShouldRejectArtifact`; `Validate_WhenTrxContainsCoreSkip_ShouldRejectArtifact`；`eng/ci/Invoke-ProviderIntegrationTests.ps1 -SelfTest`。 |
+| `ProviderCapabilityCatalog` / `ProviderCapabilityMatrix` | 为 MySQL、PostgreSQL、SQL Server、SQLite、Oracle、Doris 的 query、type、stream、cancellation、DML/batch、transaction、procedure/output、multiple/returning/output 能力形成唯一六态条目；测试代码但未授权执行为 `NotExecuted`，缺少 fixture/实现为 `ImplementationGap`，SQLite 过程为 `Unsupported`。 | `Bing.Test.Shared.ProviderReleaseEvidenceValidatorTest.Catalog_WhenBaselineIsCreated_ShouldCoverEveryProviderCapabilityWithUniqueKeys`；最终 matrix JSON/Markdown。 |
+| `Invoke-ProviderIntegrationTests.ps1` / `Bing.ProviderEvidence.Cli` | 保护 lane 成功后调用受限 CLI 的唯一发布写入模式；CLI 仅接受工作区 `artifacts/provider-test-results/<run-id>/` 下的相对制品路径。失败、旧制品、身份不匹配或核心跳过不能写发布矩阵。 | `Invoke-ProviderIntegrationTests.ps1 -SelfTest`；`eng/Bing.ProviderEvidence.Cli/Program.cs`。 |
+
+### Provider 能力→测试方法映射
+
+下表是最终矩阵中有实现测试方法的条目映射。当前没有经授权的 MySQL、PostgreSQL 或 SQL Server 真实运行，因此这些方法在最终矩阵均为 `NotExecuted`；它们将在 protected lane 的当前 TRX 中通过后由可信入口升级为 `RealIntegrationProven`。`ImplementationGap` 和 `Unsupported` 项没有伪造测试方法。
+
+| Provider | Capability / Scenario | 测试项目与方法 | 当前状态 |
+| --- | --- | --- | --- |
+| MySql | Core query — scalar/list/single | `Bing.Dapper.MySql.Tests.Integration`: `MySqlQueryTest.ExecuteScalar_ShouldReturnActualCount` | `NotExecuted` |
+| MySql | Parameters and null — explicit null and partial mapping | `Bing.Dapper.MySql.Tests.Integration`: `MySqlQueryTest.ExecuteSql_ShouldPersistExplicitNullParameter` | `NotExecuted` |
+| MySql | Type mapping — json/decimal/datetime | `Bing.Dapper.MySql.Tests.Integration`: `MySqlQueryTest.ExecuteSql_ShouldPersistJsonParameter` | `NotExecuted` |
+| MySql | Streaming / cancellation — early termination / pre-cancel | `Bing.Dapper.MySql.Tests.Integration`: `MySqlQueryTest.StreamQuery_ShouldReleaseReaderWhenEnumerationStopsEarly`; `StreamAsync_ShouldReleaseResourcesWhenCancelled` | `NotExecuted` |
+| MySql | DML / transactions / procedures | `Bing.Dapper.MySql.Tests.Integration`: `MySqlExecutorTest.ExecuteSqlAsync_ShouldReturnAffectedRowsForInsertUpdateAndDelete`; `MySqlQueryTest.TransactionScope_ShouldRollbackWhenDisposedWithoutCompletion`; `ExecuteProcedure_ShouldExposeInputOutputParameter` | `NotExecuted` |
+| PostgreSql | Core / parameter / type | `Bing.Dapper.PostgreSql.Tests.Integration`: `PostgreSqlQueryTest.ExecuteScalar_ShouldReturnActualCount`; `ExecuteSql_ShouldPersistExplicitNullParameter`; `ExecuteSingle_ShouldReturnMappedPostgreSqlTypes` | `NotExecuted` |
+| PostgreSql | Stream / cancellation / transactions | `Bing.Dapper.PostgreSql.Tests.Integration`: `PostgreSqlQueryTest.StreamQuery_ShouldReleaseReaderWhenEnumerationStopsEarly`; `StreamAsync_ShouldReleaseResourcesWhenCancelled`; `TransactionScope_ShouldRollbackWhenDisposedWithoutCompletion` | `NotExecuted` |
+| PostgreSql | DML / batch / Returning | `Bing.Dapper.PostgreSql.Tests.Integration`: `PostgreSqlExecutorTest.ExecuteSqlAsync_ShouldReturnAffectedRowsForInsertUpdateAndDelete`; `UpdateBatchAsync_WhenProviderOptimized_ShouldUpdateRowsAndRejectConcurrencyConflict`; `ExecuteQueryAsync_WhenInsertReturningIsConfigured_ShouldMaterializeReturnedRows` | `NotExecuted` |
+| SqlServer | Core / parameter / type | `Bing.Dapper.SqlServer.Tests.Integration`: `SqlServerQueryTest.GetValue_SelectOne_ShouldReturnOne`; `SqlServerExecutionContractTest.Query_WhenTypedAndNullParametersAreBound_ShouldMaterializeValues` | `NotExecuted` |
+| SqlServer | Stream / cancellation / transactions | `Bing.Dapper.SqlServer.Tests.Integration`: `SqlServerExecutionContractTest.Query_WhenStreamingAndPreCancelled_ShouldReturnRowsAndCancel`; `Transaction_WhenCompletedOrRolledBack_ShouldKeepExpectedVisibility` | `NotExecuted` |
+| SqlServer | Output | `Bing.Dapper.SqlServer.Tests.Integration`: `SqlServerQueryAggregateTest.ExecuteQueryAsync_WhenInsertOutputIsConfigured_ShouldMaterializeReturnedRows` | `NotExecuted` |
+| SQLite | Query/scalar / cancellation/pre-execute controlled contract | `Bing.Dapper.Sqlite.Tests.Integration`: `SqliteExecutionIntegrationTest.ProviderContract_WhenSqliteScenariosRun_ShouldRecordRealIntegrationEvidence` | `RealIntegrationProven`，当前 `TestGenerated` 运行制品：`artifacts/test-results/rs0026-review-fix-round2-net8/rs0026-review-fix-round2-net8.0.trx` / `.json` 与 `artifacts/test-results/rs0026-review-fix-round2-net6/rs0026-review-fix-round2-net6.0.trx` / `.json`；两个 TFM 的 Matrix 均为两项、`ReleaseReady=false`。 |
+| SQLite | parameter / stream / cancellation / transaction | `Bing.Dapper.Sqlite.Tests.Integration`: `SqliteExecutionIntegrationTest.SqlTextQuery_WhenStreamedOrCancelled_ShouldBindParametersAndReleaseExecutionResources`; `StreamQuery_ShouldReleaseReaderWhenEnumerationStopsEarly`; `StreamAsync_ShouldReleaseResourcesWhenCancelledDuringEnumeration`; `TransactionScope_ShouldRollbackWhenDisposedWithoutCompletion` | `NotExecuted` |
+| SQLite | DML / multiple result | `Bing.Dapper.Sqlite.Tests.Integration`: `SqliteMutationExecutionIntegrationTest.ExecuteMutation_WhenUnifiedMutationBuildersAreConfigured_ShouldExecuteCrud`; `SqliteMultipleQueryIntegrationTest.ReadAsync_WhenCancellationRequested_ShouldReleaseExecutionResources` | `NotExecuted` |
+| SQLite | Procedures / output | SQLite Provider profile 不支持 stored procedure / output parameter。 | `Unsupported` |
+| Oracle / Doris | 全部 T14 能力 | 无授权安全 fixture 的能力保持 `NotExecuted`；Oracle/Doris procedure/output fixture 保持 `ImplementationGap`。 | `NotExecuted` / `ImplementationGap` |
 
 | 生产代码 | 测试项目 | 测试类 | 测试方法 | 测试类型 |
 | --- | --- | --- | --- | --- |

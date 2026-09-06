@@ -29,7 +29,7 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 | SQL Server | `RUN_SQLSERVER_INTEGRATION_TESTS=true` | `ConnectionStrings__SqlServerConnection` |
 | Oracle | `RUN_ORACLE_INTEGRATION_TESTS=true` | `ConnectionStrings__OracleConnection` |
 
-`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥或用户显式选择的本地 runsettings 注入，日志、异常和测试输出不得回显密码。项目不会自动加载目录中的 `integration.runsettings`，避免普通构建继承本地连接或 gate。Provider CI 禁止 `ConnectionStrings__DefaultConnection` 回退。
+`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥、环境变量或未跟踪的 `integration.runsettings.local` 注入，日志、异常和测试输出不得回显密码。外部 Provider 项目仅在非 CI 且该 `.local` 文件存在时自动加载它；仓库内的 `integration.runsettings` 只是默认关闭的无密模板，不会被项目自动加载。Provider CI 禁止 `ConnectionStrings__DefaultConnection` 回退。
 
 ## 受保护 Provider CI
 

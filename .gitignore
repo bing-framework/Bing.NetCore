@@ -218,6 +218,10 @@ UpgradeLog*.htm
 *.mdf
 *.ldf
 
+# Local integration-test configuration
+**/integration.runsettings.local
+**/appsettings.Development.json
+
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout
