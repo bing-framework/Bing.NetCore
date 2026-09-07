@@ -3,7 +3,9 @@ param(
     [ValidateSet("Release")]
     [string]$Configuration = "Release",
 
-    [string]$ResultsRoot = "artifacts/release-candidate"
+    [string]$ResultsRoot = "artifacts/release-candidate",
+
+    [switch]$SelfTest
 )
 
 [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -28,10 +30,17 @@ if ([System.IO.Path]::IsPathRooted($normalizedResultsRoot) -or
     throw "ResultsRoot 必须是 artifacts/release-candidate 下的工作区相对目录。"
 }
 $unitProjects = @(
-    "framework/tests/Bing.Core.Tests/Bing.Core.Tests.csproj",
-    "framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj",
-    "framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj",
-    "framework/tests/Bing.Test.Shared/Bing.Test.Shared.csproj"
+    [ordered]@{ Path = "framework/tests/Bing.Core.Tests/Bing.Core.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.MySql.Tests/Bing.Dapper.MySql.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.PostgreSql.Tests/Bing.Dapper.PostgreSql.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.SqlServer.Tests/Bing.Dapper.SqlServer.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.Sqlite.Tests/Bing.Dapper.Sqlite.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Dapper.Oracle.Tests/Bing.Dapper.Oracle.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Data.Sql.CustomProvider.Tests/Bing.Data.Sql.CustomProvider.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Data.Sql.Analyzers.Tests/Bing.Data.Sql.Analyzers.Tests.csproj"; Frameworks = @("net8.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Test.Shared/Bing.Test.Shared.csproj"; Frameworks = @("net6.0", "net8.0") }
 )
 $providerProjects = @{
     MySql = "framework/tests/Bing.Dapper.MySql.Tests.Integration/Bing.Dapper.MySql.Tests.Integration.csproj"
@@ -62,11 +71,15 @@ function Get-RelativePath {
 }
 
 function Get-SourceIdentity {
-    $head = (& git -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1).ToString().Trim()
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($head)) {
+    $headOutput = & git -C $repositoryRoot rev-parse HEAD 2>$null
+    $headExitCode = $LASTEXITCODE
+    $head = ($headOutput | Select-Object -First 1).ToString().Trim()
+    if ($headExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($head)) {
         throw "Release Evidence 源码身份校验失败：无法解析 HEAD。"
     }
-    $status = (& git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null | Out-String).Trim()
+    $statusOutput = & git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null
+    $statusExitCode = $LASTEXITCODE
+    $status = ($statusOutput | Out-String).Trim()
     if (-not [string]::IsNullOrWhiteSpace($status)) {
         throw "Release Evidence 必须来自 clean source。"
     }
@@ -101,8 +114,9 @@ function Invoke-Captured {
         [string]$LogPath
     )
 
-    $output = & $FilePath @Arguments 2>&1 | Out-String
+    $outputLines = & $FilePath @Arguments 2>&1
     $exitCode = $LASTEXITCODE
+    $output = $outputLines | Out-String
     $output | Set-Content -LiteralPath $LogPath -Encoding utf8
     return [pscustomobject]@{ ExitCode = $exitCode; Output = $output }
 }
@@ -176,9 +190,10 @@ function Invoke-SqliteRuns {
 function Invoke-UnitRuns {
     param([string]$UnitRoot)
 
-    foreach ($relativeProject in $unitProjects) {
+    foreach ($unitProject in $unitProjects) {
+        $relativeProject = [string]$unitProject.Path
         $project = Join-Path $repositoryRoot ($relativeProject.Replace('/', [System.IO.Path]::DirectorySeparatorChar))
-        foreach ($framework in @("net6.0", "net8.0")) {
+        foreach ($framework in $unitProject.Frameworks) {
             $projectName = [System.IO.Path]::GetFileNameWithoutExtension($project)
             $resultDirectory = Join-Path $UnitRoot ("{0}-{1}" -f $projectName, $framework)
             New-Item -ItemType Directory -Path $resultDirectory -Force | Out-Null
@@ -213,22 +228,42 @@ function New-Rs0026Evidence {
         $entries += [ordered]@{
             Project = $projectName
             ExitCode = $result.ExitCode
+            RS0016 = ([regex]::Matches($result.Output, "RS0016")).Count
+            RS0017 = ([regex]::Matches($result.Output, "RS0017")).Count
+            RS0018 = ([regex]::Matches($result.Output, "RS0018")).Count
             RS0026 = $rs0026Count
             ErrorLines = $errorCount
             Log = Get-RelativePath $logPath
         }
     }
-    $artifactRecords = Get-ChildItem -LiteralPath $GateRoot -File | ForEach-Object { Get-ArtifactRecord $_.FullName }
+    $inventoryPath = Join-Path $GateRoot "rs0026-inventory.json"
+    $markdownPath = Join-Path $GateRoot "rs0026-inventory.md"
     $inventory = [ordered]@{
         EvidenceSessionId = $SessionId
         SourceIdentity = $SourceIdentity
         SourceState = "clean"
         Entries = $entries
-        Artifacts = @($artifactRecords)
+        Artifacts = @()
     }
-    $path = Join-Path $GateRoot "rs0026-inventory.json"
-    $inventory | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $path -Encoding utf8
-    return Get-RelativePath $path
+    $inventory | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $inventoryPath -Encoding utf8
+    $markdownLines = @(
+        "# Public API Analyzer Inventory",
+        "",
+        "- EvidenceSessionId: ``$SessionId``",
+        "- SourceIdentity: ``$SourceIdentity``",
+        "- SourceState: ``clean``",
+        "",
+        "| Project | ExitCode | RS0016 | RS0017 | RS0018 | RS0026 | ErrorLines | Log |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |"
+    )
+    foreach ($entry in $entries) {
+        $markdownLines += "| $($entry.Project) | $($entry.ExitCode) | $($entry.RS0016) | $($entry.RS0017) | $($entry.RS0018) | $($entry.RS0026) | $($entry.ErrorLines) | ``$($entry.Log)`` |"
+    }
+    $markdownLines | Set-Content -LiteralPath $markdownPath -Encoding utf8
+    $inventory.Artifacts = @($entries | ForEach-Object { Get-ArtifactRecord (Join-Path $repositoryRoot $_.Log) }) +
+        @(Get-ArtifactRecord $inventoryPath; Get-ArtifactRecord $markdownPath)
+    $inventory | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $inventoryPath -Encoding utf8
+    return Get-RelativePath $inventoryPath
 }
 
 function New-ApiGateEvidence {
@@ -304,47 +339,180 @@ function New-ApiGateEvidence {
     return Get-RelativePath $path
 }
 
-function Invoke-FormalHost {
-    param([string]$FormalRoot, [string]$SessionId, [string]$SourceIdentity)
+function Get-FormalHostReportPrefixes {
+    return @(
+        "Bing.Data.Sql.Benchmarks.SqlAggregateRenderingBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlBuilderAppendToBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlBuilderCteAndParameterTokenBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlDebugSqlBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqliteDapperE2EBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlLambdaJoinBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlLambdaRootBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlMetadataBenchmarks",
+        "Bing.Data.Sql.Benchmarks.SqlMutationBenchmarks"
+    )
+}
 
-    $artifactDirectory = "$formalResultsRelativeRoot/BenchmarkDotNet"
-    $logPath = Join-Path $FormalRoot "formal-host.log"
-    $result = Invoke-Captured -FilePath "dotnet" -Arguments @(
-        "run", "--project", $benchmarkProject, "-c", $Configuration, "--no-build", "--",
-        "--artifacts", $artifactDirectory
-    ) -LogPath $logPath
-    if ($result.ExitCode -ne 0) {
-        throw "FormalHost benchmark failed."
-    }
-    $reportFiles = @(Get-ChildItem -LiteralPath (Join-Path $repositoryRoot $artifactDirectory) -Recurse -File |
+function New-FormalHostManifest {
+    param(
+        [string]$FormalRoot,
+        [string]$ArtifactDirectory,
+        [string]$LogPath,
+        [string]$SessionId,
+        [string]$SourceIdentity,
+        [string[]]$FormalFilters
+    )
+
+    $reportFiles = @(Get-ChildItem -LiteralPath (Join-Path $repositoryRoot $ArtifactDirectory) -Recurse -File |
         Where-Object { $_.Name -match "-report\.(csv|html)$" -or $_.Name -like "*-report-github.md" -or $_.Extension -eq ".log" })
     $csv = @($reportFiles | Where-Object { $_.Name.EndsWith("-report.csv", [StringComparison]::OrdinalIgnoreCase) })
     $markdown = @($reportFiles | Where-Object { $_.Name.EndsWith("-report-github.md", [StringComparison]::OrdinalIgnoreCase) })
     $html = @($reportFiles | Where-Object { $_.Name.EndsWith("-report.html", [StringComparison]::OrdinalIgnoreCase) })
-    $raw = @(Get-Item -LiteralPath $logPath)
-    if ($csv.Count -eq 0 -or $markdown.Count -eq 0 -or $html.Count -eq 0 -or $raw.Count -eq 0) {
+    $expectedReportPrefixes = @(Get-FormalHostReportPrefixes)
+    foreach ($prefix in $expectedReportPrefixes) {
+        foreach ($extension in @("-report.csv", "-report-github.md", "-report.html")) {
+            if (@($reportFiles | Where-Object { $_.Name -eq "$prefix$extension" }).Count -ne 1) {
+                throw "FormalHost report is missing or duplicated: $prefix$extension"
+            }
+        }
+    }
+    if ($csv.Count -ne $expectedReportPrefixes.Count -or
+        $markdown.Count -ne $expectedReportPrefixes.Count -or
+        $html.Count -ne $expectedReportPrefixes.Count -or
+        -not (Test-Path -LiteralPath $LogPath -PathType Leaf)) {
         throw "FormalHost reports are incomplete."
     }
-    $reports = @($csv + $markdown + $html + $raw + (Get-Item -LiteralPath $logPath) |
-        ForEach-Object { Get-RelativePath $_.FullName })
-    $artifactRecords = @($reportFiles + $logPath | ForEach-Object {
-        $path = if ($_ -is [string]) { $_ } else { $_.FullName }
-        Get-ArtifactRecord $path
+    $rows = @($csv | ForEach-Object { Import-Csv -LiteralPath $_.FullName -Encoding utf8 })
+    if ($rows.Count -eq 0) {
+        throw "FormalHost produced no benchmark rows."
+    }
+    $invalidRows = @($rows | Where-Object {
+        try {
+            $_.Job -ne "FormalHost" -or [int]$_.LaunchCount -ne 3 -or
+                [int]$_.WarmupCount -ne 6 -or [int]$_.IterationCount -ne 15
+        }
+        catch {
+            $true
+        }
     })
+    if ($invalidRows.Count -gt 0) {
+        throw "FormalHost CSV contains $($invalidRows.Count) rows with an unexpected Job or iteration configuration."
+    }
+    $groupCounts = [ordered]@{
+        Aggregate = @($csv | Where-Object { $_.Name -match "SqlAggregateRendering|SqlBuilderAppendTo|SqlBuilderCteAndParameterToken" } |
+            ForEach-Object { @(Import-Csv -LiteralPath $_.FullName -Encoding utf8) }).Count
+        Debug = @($csv | Where-Object { $_.Name -match "SqlDebugSqlBenchmarks" } |
+            ForEach-Object { @(Import-Csv -LiteralPath $_.FullName -Encoding utf8) }).Count
+        SQLite = @($csv | Where-Object { $_.Name -match "SqliteDapperE2EBenchmarks" } |
+            ForEach-Object { @(Import-Csv -LiteralPath $_.FullName -Encoding utf8) }).Count
+        Lambda = @($csv | Where-Object { $_.Name -match "SqlLambdaJoin|SqlLambdaRoot" } |
+            ForEach-Object { @(Import-Csv -LiteralPath $_.FullName -Encoding utf8) }).Count
+        MetadataMutation = @($csv | Where-Object { $_.Name -match "SqlMetadata|SqlMutation" } |
+            ForEach-Object { @(Import-Csv -LiteralPath $_.FullName -Encoding utf8) }).Count
+    }
+    $artifactPaths = @($reportFiles | ForEach-Object { $_.FullName }) + @($LogPath)
+    $artifactPaths = @($artifactPaths | Sort-Object -Unique)
+    $reports = @($artifactPaths | ForEach-Object { Get-RelativePath $_ })
+    $artifactRecords = @($artifactPaths | ForEach-Object { Get-ArtifactRecord $_ })
     $manifestPath = Join-Path $FormalRoot "formal-host-complete.json"
     ([ordered]@{
         Status = "Complete"
         Job = "FormalHost"
+        Scope = "ApprovedBenchmarkSet"
+        ExecutionMode = "SingleFormalHost"
         LaunchCount = 3
         WarmupCount = 6
         IterationCount = 15
+        BenchmarkCount = $rows.Count
+        GroupCounts = $groupCounts
+        Filters = $FormalFilters
         EvidenceSessionId = $SessionId
         SourceIdentity = $SourceIdentity
         SourceState = "clean"
         Reports = $reports
         Artifacts = $artifactRecords
-    } | ConvertTo-Json -Depth 6) | Set-Content -LiteralPath $manifestPath -Encoding utf8
-    return Get-RelativePath $FormalRoot
+    } | ConvertTo-Json -Depth 8) | Set-Content -LiteralPath $manifestPath -Encoding utf8
+    return Get-RelativePath $manifestPath
+}
+
+function Invoke-FormalHostSelfTest {
+    $selfTestId = [Guid]::NewGuid().ToString("N")
+    $formalRoot = Join-Path $repositoryRoot "artifacts/release-candidate/formal-host-selftest-$selfTestId"
+    $artifactDirectory = "artifacts/benchmarks/release-candidate/formal-host-selftest-$selfTestId/BenchmarkDotNet"
+    $artifactRoot = Join-Path $repositoryRoot $artifactDirectory
+    $artifactDirectoryRoot = Split-Path -Parent $artifactRoot
+    $logPath = Join-Path $formalRoot "formal-host.log"
+    $filters = @("*SqlAggregateRenderingBenchmarks*", "*SqlBuilderAppendToBenchmarks*",
+        "*SqlBuilderCteAndParameterTokenBenchmarks*", "*SqlDebugSqlBenchmarks*",
+        "*SqliteDapperE2EBenchmarks*", "*SqlLambdaJoinBenchmarks*", "*SqlLambdaRootBenchmarks*",
+        "*SqlMetadataBenchmarks*", "*SqlMutationBenchmarks*")
+    try {
+        New-Item -ItemType Directory -Path $artifactRoot,$formalRoot -Force | Out-Null
+        foreach ($prefix in (Get-FormalHostReportPrefixes)) {
+            "Method,Job,LaunchCount,WarmupCount,IterationCount`nSynthetic,FormalHost,3,6,15" |
+                Set-Content -LiteralPath (Join-Path $artifactRoot "$prefix-report.csv") -Encoding utf8
+            "# $prefix" | Set-Content -LiteralPath (Join-Path $artifactRoot "$prefix-report-github.md") -Encoding utf8
+            "<html>$prefix</html>" | Set-Content -LiteralPath (Join-Path $artifactRoot "$prefix-report.html") -Encoding utf8
+        }
+        "formal host self-test" | Set-Content -LiteralPath $logPath -Encoding utf8
+        $manifest = New-FormalHostManifest -FormalRoot $formalRoot -ArtifactDirectory $artifactDirectory `
+            -LogPath $logPath -SessionId "selftest-formal-host" -SourceIdentity "git=selftest" -FormalFilters $filters
+        if (-not (Test-Path -LiteralPath (Join-Path $repositoryRoot $manifest) -PathType Leaf)) {
+            throw "FormalHost self-test did not create a manifest."
+        }
+        $badCsv = Join-Path $artifactRoot "Bing.Data.Sql.Benchmarks.SqlDebugSqlBenchmarks-report.csv"
+        "Method,Job,LaunchCount,WarmupCount,IterationCount`nSynthetic,Dry,3,6,15" |
+            Set-Content -LiteralPath $badCsv -Encoding utf8
+        $rejected = $false
+        try {
+            New-FormalHostManifest -FormalRoot $formalRoot -ArtifactDirectory $artifactDirectory `
+                -LogPath $logPath -SessionId "selftest-formal-host" -SourceIdentity "git=selftest" -FormalFilters $filters | Out-Null
+        }
+        catch {
+            $rejected = $true
+        }
+        if (-not $rejected) {
+            throw "FormalHost self-test accepted a non-FormalHost CSV."
+        }
+        Write-Host "FormalHost manifest self-test passed."
+    }
+    finally {
+        Remove-Item -LiteralPath $formalRoot -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $artifactDirectoryRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-FormalHost {
+    param([string]$FormalRoot, [string]$SessionId, [string]$SourceIdentity)
+
+    $artifactDirectory = "$formalResultsRelativeRoot/BenchmarkDotNet"
+    $logPath = Join-Path $FormalRoot "formal-host.log"
+    $formalFilters = @(
+        "*SqlAggregateRenderingBenchmarks*",
+        "*SqlBuilderAppendToBenchmarks*",
+        "*SqlBuilderCteAndParameterTokenBenchmarks*",
+        "*SqlDebugSqlBenchmarks*",
+        "*SqliteDapperE2EBenchmarks*",
+        "*SqlLambdaJoinBenchmarks*",
+        "*SqlLambdaRootBenchmarks*",
+        "*SqlMetadataBenchmarks*",
+        "*SqlMutationBenchmarks*"
+    )
+    $formalArguments = @(
+        "run", "--project", $benchmarkProject, "-c", $Configuration, "--no-build", "--",
+        "--artifacts", $artifactDirectory, "--filter"
+    ) + $formalFilters
+    $result = Invoke-Captured -FilePath "dotnet" -Arguments $formalArguments -LogPath $logPath
+    if ($result.ExitCode -ne 0) {
+        throw "FormalHost benchmark failed."
+    }
+    return New-FormalHostManifest -FormalRoot $FormalRoot -ArtifactDirectory $artifactDirectory `
+        -LogPath $logPath -SessionId $SessionId -SourceIdentity $SourceIdentity -FormalFilters $formalFilters
+}
+
+if ($SelfTest) {
+    Invoke-FormalHostSelfTest
+    exit 0
 }
 
 if (-not [string]::Equals([Environment]::GetEnvironmentVariable("CI"), "true",

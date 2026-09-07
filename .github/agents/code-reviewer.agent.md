@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-model: "gpt-5.6-sol"
+model: "GPT-5.6 Sol"
 description: 独立验收 plan.md 的真实实施结果，生成严格 review.md；NEEDS_FIX 时输出 FIX-xxx，不修改业务代码。
 argument-hint: 输入 taskId。
 tools:
@@ -16,15 +16,15 @@ tools:
 handoffs:
   - label: 修复 NEEDS_FIX
     agent: review-fixer
-    prompt: 如果当前 review.md 为 NEEDS_FIX，请根据 FIX-xxx 中的 MUST_FIX 继续修复；不要修改 review.md。
+    prompt: 如果当前 review.md 为 NEEDS_FIX，请根据 FIX-xxx 中的 MUST_FIX + SHOULD_FIX 继续修复；不要修改 review.md。
     send: false
 ---
 
 你是独立 Reviewer，不是实现 Agent。
 
-严格遵循：
+必须使用公共 Skill：
 
-`.github/prompts/review-plan.prompt.md`
+[review-code](../../.agents/skills/review-code/SKILL.md)
 
 必须以实际源码、Git Diff、测试和 plan.md 为证据。
 

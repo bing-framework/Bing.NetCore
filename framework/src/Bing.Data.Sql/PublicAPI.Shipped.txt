@@ -1505,10 +1505,12 @@ Bing.Data.Sql.ISqlTransactionScope.IsCompleted.get -> bool
 Bing.Data.Sql.ISqlTransactionScope.Rollback() -> void
 Bing.Data.Sql.ISqlTransactionScope.RollbackAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task
 Bing.Data.Sql.ISqlTransactionScopeFactory
-Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dbKey = null) -> Bing.Data.Sql.ISqlTransactionScope
-Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dbKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
-Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dbKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
-Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dbKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.ISqlTransactionScopeFactory.Begin() -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dataSourceKey) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.ISqlTransactionScopeFactory.Begin(string dataSourceKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dataSourceKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.ISqlTransactionScopeFactory.BeginAsync(string dataSourceKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
 Bing.Data.Sql.Metadata.ColumnIdentifier
 Bing.Data.Sql.Metadata.ColumnIdentifier.ColumnIdentifier() -> void
 Bing.Data.Sql.Metadata.ColumnIdentifier.ColumnIdentifier(string name) -> void

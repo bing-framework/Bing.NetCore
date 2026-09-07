@@ -9,6 +9,33 @@ namespace Bing.Data.Sql.Tests;
 public class TransactionApiContractTest
 {
     /// <summary>
+    /// 测试目的：事务工厂应使用显式无键、数据源键和隔离级别重载，避免 dbKey 可选参数造成 API 歧义。
+    /// </summary>
+    [Fact]
+    public void TransactionFactory_WhenPublicApiInspected_ShouldExposeExplicitDataSourceOverloads()
+    {
+        var factoryType = typeof(ISqlTransactionScopeFactory);
+        var beginMethods = factoryType.GetMethods().Where(method => method.Name == "Begin").ToArray();
+        var beginAsyncMethods = factoryType.GetMethods().Where(method => method.Name == "BeginAsync").ToArray();
+
+        Assert.Equal(new[] { 0, 1, 2 }, beginMethods.Select(method => method.GetParameters().Length).OrderBy(value => value));
+        Assert.All(beginMethods.SelectMany(method => method.GetParameters()), parameter =>
+            Assert.False(parameter.HasDefaultValue));
+        Assert.Equal(new[] { 1, 2, 3 }, beginAsyncMethods.Select(method => method.GetParameters().Length).OrderBy(value => value));
+        Assert.All(beginAsyncMethods.SelectMany(method => method.GetParameters()), parameter =>
+        {
+            if (parameter.ParameterType == typeof(string))
+                Assert.Equal("dataSourceKey", parameter.Name);
+        });
+        Assert.All(beginAsyncMethods.SelectMany(method => method.GetParameters())
+            .Where(parameter => parameter.ParameterType == typeof(CancellationToken)), parameter =>
+        {
+            Assert.Equal("cancellationToken", parameter.Name);
+            Assert.True(parameter.HasDefaultValue);
+        });
+    }
+
+    /// <summary>
     /// 测试 - 公开事务作用域应继承只读事务上下文。
     /// </summary>
     [Fact]

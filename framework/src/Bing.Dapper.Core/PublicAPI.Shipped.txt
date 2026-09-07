@@ -58,10 +58,12 @@ Bing.Data.Sql.SqlQueryBase.ValidateQueryBuilder() -> void
 Bing.Data.Sql.SqlQueryBase.ValidateQueryBuilder(Bing.Data.Sql.ISqlBuilder builder) -> void
 Bing.Data.Sql.SqlQueryBase.WhereClause.get -> Bing.Data.Sql.Builders.IWhereClause
 Bing.Data.Sql.SqlTransactionScopeFactory
-Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dbKey = null) -> Bing.Data.Sql.ISqlTransactionScope
-Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dbKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
-Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dbKey = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
-Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dbKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.SqlTransactionScopeFactory.Begin() -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dataSourceKey) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.SqlTransactionScopeFactory.Begin(string dataSourceKey, System.Data.IsolationLevel isolationLevel) -> Bing.Data.Sql.ISqlTransactionScope
+Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dataSourceKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
+Bing.Data.Sql.SqlTransactionScopeFactory.BeginAsync(string dataSourceKey, System.Data.IsolationLevel isolationLevel, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.ISqlTransactionScope>
 Bing.Data.Sql.SqlTransactionScopeFactory.SqlTransactionScopeFactory(Bing.Data.Sql.ISqlQueryFactory queryFactory, Bing.Data.Sql.ISqlExecutorFactory executorFactory) -> void
 Dapper.Handlers.GuidTypeHandler
 Dapper.Handlers.GuidTypeHandler.GuidTypeHandler() -> void

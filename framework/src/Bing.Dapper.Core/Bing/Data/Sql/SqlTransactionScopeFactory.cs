@@ -33,15 +33,18 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     }
 
     /// <inheritdoc />
-    public ISqlTransactionScope Begin(string dbKey = null) => Begin(dbKey, IsolationLevel.ReadCommitted);
+    public ISqlTransactionScope Begin() => Begin(null, IsolationLevel.ReadCommitted);
 
     /// <inheritdoc />
-    public ISqlTransactionScope Begin(string dbKey, IsolationLevel isolationLevel)
+    public ISqlTransactionScope Begin(string dataSourceKey) => Begin(dataSourceKey, IsolationLevel.ReadCommitted);
+
+    /// <inheritdoc />
+    public ISqlTransactionScope Begin(string dataSourceKey, IsolationLevel isolationLevel)
     {
         ISqlQuery query = null;
         try
         {
-            var context = CreateTransactionQuery(dbKey, out query);
+            var context = CreateTransactionQuery(dataSourceKey, out query);
             var transactionCapabilities = EnsureTransactionsSupported(context, query);
             var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)
@@ -58,18 +61,22 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     }
 
     /// <inheritdoc />
-    public Task<ISqlTransactionScope> BeginAsync(string dbKey = null, CancellationToken cancellationToken = default) =>
-        BeginAsync(dbKey, IsolationLevel.ReadCommitted, cancellationToken);
+    public Task<ISqlTransactionScope> BeginAsync(CancellationToken cancellationToken = default) =>
+        BeginAsync(null, IsolationLevel.ReadCommitted, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<ISqlTransactionScope> BeginAsync(string dbKey, IsolationLevel isolationLevel,
+    public Task<ISqlTransactionScope> BeginAsync(string dataSourceKey, CancellationToken cancellationToken = default) =>
+        BeginAsync(dataSourceKey, IsolationLevel.ReadCommitted, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<ISqlTransactionScope> BeginAsync(string dataSourceKey, IsolationLevel isolationLevel,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ISqlQuery query = null;
         try
         {
-            var context = CreateTransactionQuery(dbKey, out query);
+            var context = CreateTransactionQuery(dataSourceKey, out query);
             var transactionCapabilities = EnsureTransactionsSupported(context, query);
             var connection = GetRuntimeQuery(query).GetExecutionConnection();
             if (connection.State == ConnectionState.Closed)

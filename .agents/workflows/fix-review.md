@@ -32,3 +32,14 @@ description: 使用公共 fix-review Skill 修复 Reviewer 的 NEEDS_FIX
 13. 结束后重新进行独立 Review。
 
 Stop Hook 仍作为提前停止保护和 task-finish 遗漏兜底。
+
+
+## Goal 模式
+
+推荐复杂任务使用原生 Goal，并以公共 Skill 作为约束：
+
+```bash
+node .agents/scripts/goal-task.mjs fix-review <taskId> --harness antigravity
+```
+
+把生成的目标交给 Antigravity Goal 执行。Goal 不得绕过 plan/review 边界、Git 安全规则和终态协议。

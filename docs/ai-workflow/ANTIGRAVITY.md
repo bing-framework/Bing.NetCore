@@ -1,22 +1,20 @@
 # Antigravity IDE 使用说明
 
-本包继续基于当前项目已经验证可运行的 Hook 行为。
+V4.4 保留项目中已验证的 Hook 行为，并增加 Goal 目标生成器和完整四阶段 Skill。
 
 ## Hook cwd
 
-当前项目实测：
+当前项目已验证：
 
 ```text
 processCwd=<project>/.agents
 ```
 
-因此：
+因此 `.agents/hooks.json` 保持：
 
 ```json
 "command": "node ./scripts/stop-guard.mjs"
 ```
-
-保持不变。
 
 不要改成：
 
@@ -24,56 +22,56 @@ processCwd=<project>/.agents
 node ./.agents/scripts/stop-guard.mjs
 ```
 
-## 执行
+## 四阶段 Skill
 
 ```text
+/create-plan <taskId>
 /execute-plan <taskId>
-```
-
-Workflow 会：
-
-```text
-task-state --source antigravity
-→ execute-plan Skill
-→ implementation
-→ execution.md
-→ task-finish
-→ Feishu
-```
-
-## Stop Guard
-
-Stop Hook 现在有三层作用：
-
-1. `IN_PROGRESS + model_stop` → 有限 continue；
-2. Agent 已写终态但忘记 `task-finish` → 兜底收口/通知；
-3. `task-finish` 已经收口 → active=false，直接 Stop，不重复通知。
-
-## Review Fix
-
-```text
+/review-code <taskId>
 /fix-review <taskId>
 ```
 
-同样：
+路线二默认仍建议：
 
 ```text
-task-state review-fix --source antigravity
-→ fix-review Skill
-→ MUST_FIX
-→ execution.md
-→ task-finish
+Copilot / Codex：Plan + Review
+Antigravity：Execute + Fix
 ```
 
+## Goal
 
-## V4.2 Agent Profile
-
-同步：
+复杂 Execute：
 
 ```bash
-node .agents/scripts/sync-agent-profiles.mjs <profile> --target antigravity
+node .agents/scripts/goal-task.mjs execute-plan <taskId> --harness antigravity
 ```
 
-模型写入 Workspace Custom Agent 的 `model:` frontmatter。
+复杂 Review Fix：
 
-思考等级保留为 `session` 策略，不写入未经当前版本确认的 Agent effort 字段。
+```bash
+node .agents/scripts/goal-task.mjs fix-review <taskId> --harness antigravity
+```
+
+把输出目标交给 Antigravity 原生 Goal。
+
+Goal 的职责是持续推理、执行、测试和修复到当前阶段完成；它不得改变 plan.md / review.md 的任务边界。
+
+## Stop Guard
+
+Stop Hook 继续负责：
+
+1. `IN_PROGRESS + model_stop` → 有限继续；
+2. 已写合法终态但遗漏 `task-finish` → 兜底收口/通知；
+3. 已 `active=false` → 正常停止，不重复通知。
+
+## Agent Profile
+
+```bash
+node .agents/scripts/sync-agent-profiles.mjs balanced --target antigravity
+```
+
+模型写入 Workspace Custom Agent。
+
+思考等级仍按当前 Antigravity 会话/版本能力应用。
+
+`executionMode` 会写入生成 Agent 的说明区，用于提示是否采用 Goal。

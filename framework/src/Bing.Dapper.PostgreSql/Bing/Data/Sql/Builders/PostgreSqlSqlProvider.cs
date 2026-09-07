@@ -77,8 +77,10 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
         },
         Procedure = new SqlProviderProcedureCapabilities
         {
-            SupportsStoredProcedures = true,
-            SupportsOutputParameters = true
+            SupportsStoredProcedures = false,
+            StoredProceduresFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported,
+            SupportsOutputParameters = false,
+            OutputParametersFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
         },
         Limits = new SqlProviderLimits { MaxParameterCount = null }
     };

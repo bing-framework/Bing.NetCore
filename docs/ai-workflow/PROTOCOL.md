@@ -118,3 +118,24 @@ STOP_GUARD_NOTIFY
 ```
 
 仅作为兼容 fallback。
+
+
+## V4.4 公共 Skill 协议
+
+```text
+create-plan  → plan.md
+execute-plan → execution.md
+review-code  → review.md
+fix-review   → execution.md Review 修复记录
+```
+
+Goal 是 executionMode，不新增 Artifact 协议。
+
+Goal 仍必须遵守：
+
+```text
+execution.md / review.md 机器元数据
+fixScope
+Git 安全边界
+workflow-policy.json
+```

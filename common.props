@@ -13,7 +13,7 @@
                             '$(MSBuildProjectName)' == 'Bing.Dapper.SqlServer' Or
                             '$(MSBuildProjectName)' == 'Bing.Dapper.Sqlite' Or
                             '$(MSBuildProjectName)' == 'Bing.Dapper.Oracle'">
-    <WarningsAsErrors>$(WarningsAsErrors);RS0026</WarningsAsErrors>
+    <WarningsAsErrors>$(WarningsAsErrors);RS0016;RS0017;RS0018;RS0026</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

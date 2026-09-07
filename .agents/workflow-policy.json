@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "displayName": "Universal Agent Workflow 执行策略",
+  "description": "约束 Goal 自主执行、Review/Fix 循环、无进展检测和 Git 安全边界。",
+  "goal": {
+    "enabled": true,
+    "shared": {
+      "allowGitCommit": false,
+      "allowGitPush": false,
+      "allowPullRequest": false,
+      "stopOnNoProgress": true,
+      "maxConsecutiveNoProgress": 2
+    },
+    "create-plan": {
+      "maxRuntimeMinutes": 90,
+      "allowBusinessCodeMutation": false,
+      "requireArtifact": "plan.md"
+    },
+    "execute-plan": {
+      "maxRuntimeMinutes": 180,
+      "requireTests": true,
+      "allowPlanMutation": false,
+      "requireArtifact": "execution.md"
+    },
+    "review-code": {
+      "maxRuntimeMinutes": 120,
+      "allowBusinessCodeMutation": false,
+      "allowPlanMutation": false,
+      "allowExecutionMutation": false,
+      "requireArtifact": "review.md"
+    },
+    "fix-review": {
+      "maxRuntimeMinutes": 150,
+      "maxFixAttemptsPerItem": 3,
+      "fixScope": "recommended",
+      "allowReviewMutation": false,
+      "requireTests": true,
+      "requireArtifact": "execution.md"
+    }
+  },
+  "reviewLoop": {
+    "maxRounds": 5,
+    "needsFixOnUnresolvedMustFix": true,
+    "needsFixOnUnresolvedShouldFix": true,
+    "passWithIssuesOnlyOptional": true
+  }
+}

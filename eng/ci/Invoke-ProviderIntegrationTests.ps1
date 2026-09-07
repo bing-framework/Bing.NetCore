@@ -11,6 +11,9 @@ param(
 
     [string]$ResultsDirectory = "artifacts/provider-test-results",
 
+    [Alias("Settings")]
+    [string]$RunSettingsPath,
+
     [switch]$ValidateOnly,
 
     [switch]$SelfTest
@@ -22,6 +25,7 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $ErrorActionPreference = "Stop"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $releaseEvidenceProjectPath = Join-Path $repositoryRoot "eng\Bing.ProviderEvidence.Cli\Bing.ProviderEvidence.Cli.csproj"
+$script:ConfigurationSource = "ProcessEnvironment"
 
 function Get-ProviderSettings {
     param([string]$Name)
@@ -63,10 +67,72 @@ function Get-EnvironmentValue {
     return [Environment]::GetEnvironmentVariable($Name)
 }
 
+function Import-RunSettings {
+    param(
+        [string]$Path,
+        [string]$ProviderName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return
+    }
+    if (Test-EnabledValue (Get-EnvironmentValue "CI")) {
+        throw "Provider runsettings cannot be loaded in protected CI; use Provider-scoped environment secrets."
+    }
+
+    $candidate = if ([System.IO.Path]::IsPathRooted($Path)) {
+        [System.IO.Path]::GetFullPath($Path)
+    }
+    else {
+        [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $Path))
+    }
+    $root = [System.IO.Path]::GetFullPath($repositoryRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar) +
+        [System.IO.Path]::DirectorySeparatorChar
+    $fileName = [System.IO.Path]::GetFileName($candidate)
+    $isAllowedName = [regex]::IsMatch($fileName, '(?i)^integration\.runsettings\.local$')
+    if ((-not $candidate.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) -or
+        (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) -or
+        (-not $isAllowedName)) {
+        throw "Settings must be an existing integration.runsettings.local under the repository: $candidate"
+    }
+
+    try {
+        [xml]$document = Get-Content -LiteralPath $candidate -Raw -Encoding utf8
+    }
+    catch {
+        throw "Provider runsettings could not be parsed as UTF-8 XML: $candidate"
+    }
+    $variables = $document.SelectNodes('/RunSettings/RunConfiguration/EnvironmentVariables/*')
+    if ($null -eq $variables) {
+        throw "Provider runsettings does not contain RunConfiguration/EnvironmentVariables: $candidate"
+    }
+    $allowedNames = @(
+        "RUN_$($ProviderName.ToUpperInvariant())_INTEGRATION_TESTS",
+        "ALLOW_DATABASE_RESET_FOR_TESTS",
+        "ConnectionStrings__$($ProviderName)Connection"
+    )
+    if ([string]::Equals($ProviderName, "MySql", [StringComparison]::OrdinalIgnoreCase)) {
+        $allowedNames += @("BING_INTEGRATION_MYSQL_CROSS_DATABASE", "BING_INTEGRATION_MYSQL_CROSS_DATABASE_NAME")
+    }
+    foreach ($variable in $variables) {
+        $name = [string]$variable.Name
+        if ($name -notmatch '^[A-Za-z][A-Za-z0-9_]*$') {
+            throw "Provider runsettings contains an invalid environment variable name: $name"
+        }
+        if ($allowedNames -notcontains $name) {
+            continue
+        }
+        [Environment]::SetEnvironmentVariable($name, [string]$variable.InnerText)
+    }
+    $script:ConfigurationSource = "RunSettings:" + $candidate.Substring($root.Length).Replace('\', '/')
+}
+
 function Get-SourceIdentity {
     $sourceState = Get-SourceState
-    $gitIdentity = (& git -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitIdentity)) {
+    $gitOutput = & git -C $repositoryRoot rev-parse HEAD 2>$null
+    $gitExitCode = $LASTEXITCODE
+    $gitIdentity = ($gitOutput | Select-Object -First 1)
+    if ($gitExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($gitIdentity)) {
         throw "Source identity validation failed: git HEAD could not be resolved."
     }
     $gitIdentity = $gitIdentity.ToString().Trim()
@@ -82,8 +148,10 @@ function Get-SourceIdentity {
 }
 
 function Get-SourceState {
-    $status = (& git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null | Out-String).Trim()
-    if ($LASTEXITCODE -eq 0 -and [string]::IsNullOrWhiteSpace($status)) {
+    $statusOutput = & git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null
+    $statusExitCode = $LASTEXITCODE
+    $status = ($statusOutput | Out-String).Trim()
+    if ($statusExitCode -eq 0 -and [string]::IsNullOrWhiteSpace($status)) {
         return "clean"
     }
     return "dirty"
@@ -258,7 +326,7 @@ function Invoke-Preflight {
             "CIEnvironment"
         }
         else {
-            "ProcessEnvironment"
+            $script:ConfigurationSource
         }
         GlobalGate = Test-EnabledValue (Get-EnvironmentValue "RUN_INTEGRATION_TESTS")
         ProviderGate = Test-EnabledValue (Get-EnvironmentValue $Settings.GateVariable)
@@ -267,6 +335,97 @@ function Invoke-Preflight {
         DatabaseReachable = $false
         ExecutionStatus = "PreflightPassed"
         BlockedReason = $null
+    }
+}
+
+function Get-BlockedReason {
+    param([string]$Message)
+
+    $text = [string]$Message
+    if ($text -match '(?i)RUN_INTEGRATION_TESTS') {
+        return "GlobalGateConflict"
+    }
+    if ($text -match '(?i)ALLOW_DATABASE_RESET_FOR_TESTS') {
+        return "ResetDenied"
+    }
+    if ($text -match '(?i)must be true|protected provider lane') {
+        return "ProviderGateDisabled"
+    }
+    if ($text -match '(?i)runsettings|defaultconnection|test project was not found|settings') {
+        return "SettingsMissing"
+    }
+    if ($text -match '(?i)must be configured|connection.*missing|connection.*configured') {
+        return "ConnectionMissing"
+    }
+    if ($text -match '(?i)dedicated test database|unsafe database') {
+        return "UnsafeDatabase"
+    }
+    if ($text -match '(?i)ssl|rsa|authentication|connection|timeout|network|unreachable') {
+        return "Unreachable"
+    }
+    return "PreflightFailed"
+}
+
+function Write-ProviderStartupDiagnostic {
+    param(
+        [object]$Settings,
+        [string]$Phase,
+        [string]$FailureMessage,
+        [DateTimeOffset]$StartedAtUtc
+    )
+
+    $connectionString = Get-EnvironmentValue $Settings.ConnectionVariable
+    $databaseName = Get-DatabaseName $connectionString
+    $blockedReason = Get-BlockedReason $FailureMessage
+    $sourceState = try { Get-SourceState } catch { "unknown" }
+    $sourceIdentity = try { Get-SourceIdentity } catch { "unavailable" }
+    $evidenceSessionId = try { Get-EvidenceSessionId } catch { $null }
+    $diagnostic = [ordered]@{
+        Provider = $Settings.Name
+        TestAssembly = [System.IO.Path]::GetFileNameWithoutExtension($Settings.ProjectPath)
+        Framework = $Framework
+        ConfigurationSource = if (Test-EnabledValue (Get-EnvironmentValue "CI")) {
+            "CIEnvironment"
+        }
+        else {
+            $script:ConfigurationSource
+        }
+        GlobalGate = Test-EnabledValue (Get-EnvironmentValue "RUN_INTEGRATION_TESTS")
+        ProviderGate = Test-EnabledValue (Get-EnvironmentValue $Settings.GateVariable)
+        ConnectionConfigured = -not [string]::IsNullOrWhiteSpace($connectionString)
+        DatabaseName = $databaseName
+        ResetAllowed = Test-EnabledValue (Get-EnvironmentValue "ALLOW_DATABASE_RESET_FOR_TESTS")
+        DatabaseReachable = $false
+        ExecutionStatus = "Blocked"
+        BlockedReason = $blockedReason
+        FailurePhase = $Phase
+        ErrorSummary = $blockedReason
+        SourceState = $sourceState
+        SourceIdentity = $sourceIdentity
+        EvidenceSessionId = $evidenceSessionId
+        StartedAtUtc = $StartedAtUtc.ToString("O")
+        CompletedAtUtc = [DateTimeOffset]::UtcNow.ToString("O")
+    }
+    $json = $diagnostic | ConvertTo-Json -Depth 4
+    if ($json -match '(?i)Password=|Pwd=|User Id=|Data Source=|Server=|Token=|Secret=') {
+        throw "Provider startup diagnostic must not contain connection information."
+    }
+
+    try {
+        $resultsRoot = Resolve-ResultsRoot $ResultsDirectory
+        $runId = "{0}-{1}-startup-{2}" -f $Provider.ToLowerInvariant(), $Framework,
+            ([DateTimeOffset]::UtcNow.ToString("yyyyMMddTHHmmssfffZ") + "-" + [Guid]::NewGuid().ToString("N"))
+        $resultsPath = Join-Path $resultsRoot.Path $runId
+        New-Item -ItemType Directory -Path $resultsPath -Force | Out-Null
+        $diagnosticPath = Join-Path $resultsPath "provider-startup-diagnostic.json"
+        $json | Set-Content -LiteralPath $diagnosticPath -Encoding utf8
+        Write-Host ("Provider startup diagnostic blocked: Provider={0}; Phase={1}; Reason={2}; Path={3}" -f
+            $Settings.Name, $Phase, $blockedReason, (Get-WorkspaceRelativePath $diagnosticPath))
+        return $diagnosticPath
+    }
+    catch {
+        Write-Warning ("Provider startup diagnostic could not be persisted: Reason={0}" -f $blockedReason)
+        return $null
     }
 }
 
@@ -758,6 +917,27 @@ function Invoke-SelfTest {
         }
         Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force -ErrorAction SilentlyContinue
     }
+    $diagnosticCases = @(
+        @("RUN_INTEGRATION_TESTS must not enable a protected provider lane", "GlobalGateConflict"),
+        @("RUN_POSTGRESQL_INTEGRATION_TESTS must be true", "ProviderGateDisabled"),
+        @("ALLOW_DATABASE_RESET_FOR_TESTS must be true", "ResetDenied"),
+        @("ConnectionStrings__DefaultConnection is forbidden", "SettingsMissing"),
+        @("ConnectionStrings__PostgreSqlConnection must be configured", "ConnectionMissing"),
+        @("configured database is not a dedicated test database", "UnsafeDatabase"),
+        @("caching_sha2_password RSA public key is required", "Unreachable")
+    )
+    foreach ($case in $diagnosticCases) {
+        if ((Get-BlockedReason $case[0]) -ne $case[1]) {
+            throw "Self-test failed: diagnostic reason mapping for '$($case[0])'."
+        }
+    }
+    $syntheticDiagnostic = ([ordered]@{
+        ErrorSummary = Get-BlockedReason "Server=localhost;Password=secret"
+        BlockedReason = Get-BlockedReason "Server=localhost;Password=secret"
+    } | ConvertTo-Json -Depth 3)
+    if ($syntheticDiagnostic -match '(?i)Password=|Server=|secret') {
+        throw "Self-test failed: startup diagnostic leaked connection information."
+    }
     Write-Host "Provider runner self-test passed."
 }
 
@@ -767,7 +947,19 @@ if ($SelfTest) {
 }
 
 $settings = Get-ProviderSettings $Provider
-$preflight = Invoke-Preflight $settings
+$startupStartedAtUtc = [DateTimeOffset]::UtcNow
+try {
+    Import-RunSettings $RunSettingsPath $settings.Name
+    $preflight = Invoke-Preflight $settings
+}
+catch {
+    Write-ProviderStartupDiagnostic -Settings $settings -Phase "Preflight" `
+        -FailureMessage $_.Exception.Message -StartedAtUtc $startupStartedAtUtc | Out-Null
+    throw
+}
+Write-Host ("Provider startup diagnostic: Provider={0}; ConfigurationSource={1}; GlobalGate={2}; ProviderGate={3}; Connection=Configured; Database={4}; ResetAllowed={5}; DatabaseReachable=Pending; Execution=Pending" -f
+    $preflight.Provider, $preflight.ConfigurationSource, $preflight.GlobalGate, $preflight.ProviderGate,
+    $preflight.DatabaseName, $preflight.ResetAllowed)
 Write-Host "Provider preflight passed: Provider=$($preflight.Provider); Database=$($preflight.DatabaseName)."
 if ($ValidateOnly) {
     exit 0

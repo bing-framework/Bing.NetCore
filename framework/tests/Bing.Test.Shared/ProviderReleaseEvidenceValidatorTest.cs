@@ -423,6 +423,9 @@ public sealed class ProviderReleaseEvidenceValidatorTest
             Assert.All(expectedCapabilities, capability => Assert.Contains(definitions,
                 item => item.Provider == provider && item.Capability == capability));
         Assert.Contains(definitions, item => item.State == ProviderCapabilityEvidenceState.Unsupported);
+        Assert.Contains(definitions, item => item.Provider == "PostgreSql" &&
+            item.Scenario == "output parameter semantics" &&
+            item.State == ProviderCapabilityEvidenceState.Unsupported);
         Assert.Contains(definitions, item => item.State == ProviderCapabilityEvidenceState.ImplementationGap);
         Assert.All(matrix.Entries, item => Assert.True(Enum.IsDefined(item.State)));
         Assert.False(matrix.IsReleaseReady);

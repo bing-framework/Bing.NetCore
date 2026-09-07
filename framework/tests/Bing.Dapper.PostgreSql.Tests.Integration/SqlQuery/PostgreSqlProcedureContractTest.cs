@@ -1,3 +1,4 @@
+using Bing.Data.Sql;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Test.Shared;
 
@@ -55,6 +56,24 @@ public sealed class PostgreSqlProcedureContractTest : IAsyncLifetime
             .Sql("Select output_value From public.bing_sql_contract_function(@input_value)",
                 new { input_value = 3 })
             .ToListAsync<FunctionResult>(cancellationToken: cancellationTokenSource.Token));
+    }
+
+    /// <summary>
+    /// 测试目的：当前 Npgsql/框架 Procedure 命令语义不匹配时，应在执行数据库命令前 fail-fast。
+    /// </summary>
+    [IntegrationFact("PostgreSql")]
+    public async Task ExecuteProcedureAsync_WhenStoredProcedureCommandIsUnsupported_ShouldFailFast()
+    {
+        // Arrange
+        using var executor = _fixture.CreateExecutor();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(() => executor.ExecuteProcedureAsync(
+            "public.bing_sql_contract_procedure", new { input_value = 7 }));
+
+        // Assert
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
     }
 
     /// <inheritdoc />

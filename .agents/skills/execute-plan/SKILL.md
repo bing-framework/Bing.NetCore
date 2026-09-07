@@ -561,3 +561,26 @@ git show
 - 未 commit / push。
 
 不要重复输出整个 plan。
+
+
+## Goal / 目标推理模式
+
+如果当前 Harness 的角色配置为：
+
+```text
+executionMode = goal
+```
+
+或用户明确要求使用 Goal：
+
+- 仍必须完整遵守本 Skill；
+- Goal 只负责持续推理、执行、验证直到本阶段完成；
+- 不允许因为 Goal 模式扩大 `plan.md` / `review.md` 的任务边界；
+- 不自动 commit / push / PR；
+- 出现连续无进展时必须按 `.agents/workflow-policy.json` 停止并记录 BLOCKED，而不是无限尝试。
+
+可生成标准 Goal 目标：
+
+```bash
+node .agents/scripts/goal-task.mjs execute-plan <taskId> --harness <codex|antigravity|copilot>
+```

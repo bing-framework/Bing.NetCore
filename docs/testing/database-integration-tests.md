@@ -29,7 +29,9 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 | SQL Server | `RUN_SQLSERVER_INTEGRATION_TESTS=true` | `ConnectionStrings__SqlServerConnection` |
 | Oracle | `RUN_ORACLE_INTEGRATION_TESTS=true` | `ConnectionStrings__OracleConnection` |
 
-`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥、环境变量或未跟踪的 `integration.runsettings.local` 注入，日志、异常和测试输出不得回显密码。外部 Provider 项目仅在非 CI 且该 `.local` 文件存在时自动加载它；仓库内的 `integration.runsettings` 只是默认关闭的无密模板，不会被项目自动加载。Provider CI 禁止 `ConnectionStrings__DefaultConnection` 回退。
+`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥、环境变量或未跟踪的 `integration.runsettings.local` 注入，日志、异常和测试输出不得回显密码。受保护 Provider runner 可在本机显式读取目标项目的 `.local` 文件，并且只导入目标 Provider gate、目标连接、reset 授权和 MySQL 跨库选项；全局 gate 与其他 Provider 变量会被忽略。Provider CI 禁止读取 `.local`，也禁止 `ConnectionStrings__DefaultConnection` 回退。仓库当前不跟踪外部 Provider 的公共 `integration.runsettings` 模板。
+
+Provider 在导入配置或 preflight 失败时仍以非零退出，并在 `artifacts/provider-test-results/<run>/provider-startup-diagnostic.json` 写入脱敏诊断。诊断只包含 Provider、测试程序集、TFM、配置来源、gate、连接是否配置、安全数据库名、reset、可达性、`ExecutionStatus` 和 `BlockedReason`；常见原因包括 `ProviderGateDisabled`、`SettingsMissing`、`ConnectionMissing`、`UnsafeDatabase`、`ResetDenied` 和 `Unreachable`。原始异常和连接字符串不会写入该制品，因此该 JSON 不能被解释为测试通过。
 
 ## 受保护 Provider CI
 
@@ -41,7 +43,17 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release
 ```
 
-AppVeyor 使用 `PROVIDER_TEST_LANE=mysql`、`postgresql` 或 `sqlserver` 选择对应调用路径；未设置时仅运行 `common` lane。Provider 专属变量和密钥只能在对应受保护的远端作业中配置；仓库不创建会在无密环境失败的 Provider matrix。在远端 secret scope、trusted-lane 策略和安全测试库未完成前，Provider job 不能作为已验收证据。
+本机使用未跟踪配置时，显式传入对应 Provider 的 Settings 文件：
+
+```powershell
+.\eng\ci\Invoke-ProviderIntegrationTests.ps1 `
+    -Provider PostgreSql -Framework net8.0 `
+    -Settings .\framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\integration.runsettings.local
+```
+
+如果 MySQL 服务器使用 `caching_sha2_password`，本机 Settings 必须提供受信 TLS，或由管理员为专用测试账号配置受控 RSA public key retrieval；runner 不会自动放宽 TLS/RSA 安全策略，也不会把认证失败标记为 Skip。
+
+AppVeyor 的 environment matrix materialize `common`、`mysql`、`postgresql`、`sqlserver`、`release` 和 `aggregate` lane；Provider 专属变量和密钥只能在对应受保护的远端作业中配置，缺少 secret 时 runner 必须失败而不是跳过。在远端 secret scope、trusted-lane 策略和安全测试库未完成前，Provider job 不能作为已验收证据。
 
 runner 在连接前验证规范 gate、专属连接字符串、reset 授权和安全测试数据库名，并为每个 Provider/TFM 写入独立 TRX/JSON 摘要。发现零测试、全部 Skip、core Provider Skip、全局 gate 或默认连接字符串时，runner 以非零退出。MySQL 跨库测试允许在未启用独立跨库配置时单独 Skip，不得掩盖 MySQL core 测试的执行结果。
 

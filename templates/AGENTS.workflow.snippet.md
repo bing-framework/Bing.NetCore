@@ -1,9 +1,11 @@
 # Universal Agent Workflow
 
-当用户要求执行既定计划或修复 Review 时：
+公共四阶段 Skill：
 
-- 执行计划：使用 `.agents/skills/execute-plan/SKILL.md`
-- 修复 Review：使用 `.agents/skills/fix-review/SKILL.md`
+- 创建计划：`.agents/skills/create-plan/SKILL.md`
+- 执行计划：`.agents/skills/execute-plan/SKILL.md`
+- 独立 Review：`.agents/skills/review-code/SKILL.md`
+- 修复 Review：`.agents/skills/fix-review/SKILL.md`
 
 默认任务文件：
 
@@ -13,13 +15,21 @@ ai_docs/tasks/<taskId>/execution.md
 ai_docs/tasks/<taskId>/review.md
 ```
 
-任务开始：
+在支持 Goal / 目标推理的 Harness 中：
+
+```bash
+node .agents/scripts/goal-task.mjs <create-plan|execute-plan|review-code|fix-review> <taskId> --harness <codex|antigravity|copilot>
+```
+
+Goal 只负责持续推理/执行到阶段完成，不得绕过 Skill 的职责、边界或 Git 安全规则。
+
+任务执行/修复开始：
 
 ```text
 node .agents/scripts/task-state.mjs ...
 ```
 
-任务终态写入后：
+execution.md 写入合法终态后：
 
 ```text
 node .agents/scripts/task-finish.mjs <taskId>

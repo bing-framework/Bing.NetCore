@@ -280,6 +280,19 @@
 | Oracle 集成测试 | 仅 Gate/Skip 合同已单测；本轮不建立 DDL/DML reset，未计入真实聚合执行通过。 |
 | Git 操作 | 未执行 commit 或 push。 |
 
+## BING-SQL-RC-HARDENING-20260906-001 当前追溯
+
+| 最终生产符号 / 入口 | 直接测试 | 当前证据 |
+| --- | --- | --- |
+| `ISqlTransactionScopeFactory.Begin/BeginAsync` 显式数据源重载 | `Bing.Data.Sql.Tests.TransactionApiContractTest.TransactionFactory_WhenPublicApiInspected_ShouldExposeExplicitDataSourceOverloads`；`Bing.Data.Sql.Tests` net6/net8 | Public API 已改为无键、`dataSourceKey`、隔离级别和取消令牌显式重载；七项目 Analyzer build 均为 0。 |
+| `PostgreSqlSqlProvider.Profile.Procedure` | `Bing.Dapper.PostgreSql.Tests.PostgreSqlProviderRegistrationTest.Profile_WhenOutputParametersAreRequested_ShouldDeclareDatabaseUnsupported` | `SupportsStoredProcedures=false`、`SupportsOutputParameters=false`，两者失败原因均为 `DatabaseUnsupported`。 |
+| PostgreSQL Function / Procedure runtime gate | `PostgreSqlProcedureContractTest.ExecuteFunctionAsync_WhenFunctionReturnsTable_ShouldMaterializeNativeRows`；`ExecuteFunctionAsync_WhenCancellationIsRequested_ShouldCancelBeforeFunctionExecution`；`ExecuteProcedureAsync_WhenStoredProcedureCommandIsUnsupported_ShouldFailFast` | PostgreSQL net6/net8 集成各 `44/44` 通过；Function 是真实 Result Set，Procedure/OUT 不伪造支持。当前运行 source dirty，只能是 TestGenerated。 |
+| `ProviderCapabilityCatalog` PostgreSQL output scenario | `ProviderReleaseEvidenceValidatorTest.Catalog_WhenBaselineIsCreated_ShouldCoverEveryProviderCapabilityWithUniqueKeys` | 当前 Task baseline 为 64 项；PostgreSQL output parameter semantics 为 `Unsupported`，不是 Framework 自身 `ImplementationGap`。 |
+| `Invoke-ProviderIntegrationTests.ps1 -Settings` | runner self-test；MySQL/PostgreSQL/SQL Server `-ValidateOnly -Settings` | 只导入目标 Provider 变量，拒绝 CI `.local`，修复 PowerShell git exit-code 检查。 |
+| `common.props` API analyzer gate | 七个生产项目 Release build | `RS0016/RS0017/RS0018/RS0026` 均为 0。 |
+
+本节仅描述 2026-09-07 当前 Task 证据；此前章节中的历史 `NotExecuted`/旧 run 路径不得用于当前 RC 结论。
+
 ## Runtime 边界与渲染收敛追溯
 
 | 生产符号 | 关键行为 | 测试项目与方法 |

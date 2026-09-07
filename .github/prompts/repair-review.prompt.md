@@ -29,4 +29,4 @@ node .agents/scripts/task-state.mjs review-fix ${input:taskId} --source copilot 
 node .agents/scripts/task-finish.mjs ${input:taskId}
 ```
 
-随后重新 `/review-plan`。
+随后重新 `/review-code`，或使用严格角色入口 `/inspect-code`。

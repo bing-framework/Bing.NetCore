@@ -648,7 +648,9 @@ static bool ValidateRs0026Evidence(string root, string relativePath, string expe
             return false;
         foreach (var entry in entries)
         {
-            if (GetInt(entry, "ExitCode") != 0 || GetInt(entry, "RS0026") != 0 ||
+            if (GetInt(entry, "ExitCode") != 0 || GetInt(entry, "RS0016") != 0 ||
+                GetInt(entry, "RS0017") != 0 || GetInt(entry, "RS0018") != 0 ||
+                GetInt(entry, "RS0026") != 0 ||
                 GetInt(entry, "ErrorLines") != 0 || !HasString(entry, "Log"))
                 return false;
             var logPath = ResolveWorkspaceFile(root, GetString(entry, "Log"));

@@ -266,3 +266,40 @@ Profile
 ```
 
 详见 `ROUTES.md`。
+
+
+## V4.4 executionMode
+
+角色配置新增：
+
+```json
+{
+  "model": "...",
+  "effort": "high",
+  "executionMode": "goal"
+}
+```
+
+推荐语义：
+
+```text
+copilot
+  agent
+
+codex
+  goal
+
+antigravity
+  plan-writer/code-reviewer = interactive
+  plan-executor/review-fixer = goal
+```
+
+`sync-agent-profiles.mjs` 会把 executionMode 写入运行时报告；Codex TOML 使用注释记录，不写入未经当前环境确认的额外配置字段。
+
+真正的 Goal 目标由：
+
+```bash
+node .agents/scripts/goal-task.mjs ...
+```
+
+生成。

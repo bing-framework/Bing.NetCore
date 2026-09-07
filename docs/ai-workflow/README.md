@@ -1,4 +1,4 @@
-# Universal Agent Workflow V4.2
+# Universal Agent Workflow V4.4
 
 一套任务协议，同时服务：
 
@@ -23,10 +23,10 @@ plan.md / execution.md / review.md
 ```text
 .agents/
 ├─ skills/
-│  ├─ execute-plan/
-│  │  └─ SKILL.md
-│  └─ fix-review/
-│     └─ SKILL.md
+│  ├─ create-plan/SKILL.md
+│  ├─ execute-plan/SKILL.md
+│  ├─ review-code/SKILL.md
+│  └─ fix-review/SKILL.md
 ├─ scripts/
 │  ├─ task-state.mjs
 │  ├─ task-finish.mjs
@@ -104,3 +104,6 @@ Agent 模型与思考等级统一配置见 `AGENT-PROFILES.md`。
 ```text
 docs/ai-workflow/ROUTES.md
 ```
+
+
+Goal / 目标推理详见 `GOAL.md`。

@@ -74,4 +74,20 @@ public class PostgreSqlProviderRegistrationTest
         Assert.True(PostgreSqlSqlProvider.Instance.Profile.Mutation.SupportsUpdateFrom);
         Assert.Equal(SqlQueryCapabilityState.Supported, PostgreSqlSqlProvider.Instance.Profile.Query.Cte);
     }
+
+    /// <summary>
+    /// 测试目的：PostgreSQL 原生 Function/Procedure 结果集不应被声明为统一 OUT 参数能力。
+    /// </summary>
+    [Fact]
+    public void Profile_WhenOutputParametersAreRequested_ShouldDeclareDatabaseUnsupported()
+    {
+        var procedure = PostgreSqlSqlProvider.Instance.Profile.Procedure;
+
+        Assert.False(procedure.SupportsStoredProcedures);
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported,
+            procedure.StoredProceduresFailureReason);
+        Assert.False(procedure.SupportsOutputParameters);
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported,
+            procedure.OutputParametersFailureReason);
+    }
 }

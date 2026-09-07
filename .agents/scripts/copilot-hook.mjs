@@ -92,7 +92,10 @@ function inferStage(prompt) {
   const text = String(prompt || '').trim();
 
   const patterns = [
+    { command: 'draft-plan', stage: 'plan' },
     { command: 'create-plan', stage: 'plan' },
+    { command: 'inspect-code', stage: 'review' },
+    { command: 'review-code', stage: 'review' },
     { command: 'review-plan', stage: 'review' },
     { command: 'run-plan', stage: 'execute' },
     { command: 'execute-plan', stage: 'execute' },

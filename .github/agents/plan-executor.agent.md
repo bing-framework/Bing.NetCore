@@ -1,6 +1,6 @@
 ---
 name: plan-executor
-model: "gpt-5.6-luna"
+model: "GPT-5.6 Terra"
 description: 使用公共 execute-plan Skill 执行既定 plan.md，完成真实实现、测试、execution.md 与任务收口；不重新规划，不自动 commit/push。
 argument-hint: 输入 taskId，例如 fund-analysis-v2-convergence。
 tools:

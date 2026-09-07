@@ -49,11 +49,15 @@ if ($isCi -and -not [string]::Equals($evidenceSessionId, "ci-$($buildIdentity.Tr
 if ($evidenceSessionId -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$') {
     throw "SQLite 证据会话标识格式无效。"
 }
-$gitIdentity = (& git -C $repositoryRoot rev-parse HEAD 2>$null | Select-Object -First 1).ToString().Trim()
-if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitIdentity)) {
+$gitOutput = & git -C $repositoryRoot rev-parse HEAD 2>$null
+$gitExitCode = $LASTEXITCODE
+$gitIdentity = ($gitOutput | Select-Object -First 1).ToString().Trim()
+if ($gitExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($gitIdentity)) {
     throw "SQLite 证据源码身份校验失败：无法解析当前 HEAD。"
 }
-$sourceState = (& git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null | Out-String).Trim()
+$statusOutput = & git -C $repositoryRoot status --porcelain --untracked-files=all 2>$null
+$statusExitCode = $LASTEXITCODE
+$sourceState = ($statusOutput | Out-String).Trim()
 $sourceState = if ([string]::IsNullOrWhiteSpace($sourceState)) { "clean" } else { "dirty" }
 $sourceIdentity = "git=$gitIdentity;source=$sourceState"
 if ($ReleaseEvidence -and $sourceState -ne "clean") {

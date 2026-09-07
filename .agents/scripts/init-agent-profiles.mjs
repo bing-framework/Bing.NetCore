@@ -155,6 +155,8 @@ async function customizeProfile(rl, config, profileName) {
       if (model) cfg.model = model;
       const effort = (await rl.question(`  思考等级 [${cfg.effort || 'inherit'}]：`)).trim();
       if (effort) cfg.effort = effort;
+      const executionMode = (await rl.question(`  执行模式 [${cfg.executionMode || 'default'}]：`)).trim();
+      if (executionMode) cfg.executionMode = executionMode;
     }
   }
 }
@@ -192,7 +194,7 @@ async function main() {
     if (!yes) {
       rl = readline.createInterface({ input: process.stdin, output: process.stdout });
       console.log('Universal Agent Profile 初始化');
-      console.log('说明：程序 ID / model / effort 保持英文；displayName / description / notes 使用中文展示。');
+      console.log('说明：程序 ID / model / effort / executionMode 保持英文；displayName / description / notes 使用中文展示。');
       profileName = await chooseProfile(rl, config, profileName);
     }
 
@@ -208,7 +210,7 @@ async function main() {
     }
 
     if (!yes) {
-      const customize = await askYesNo(rl, '是否逐角色自定义模型和思考等级', false);
+      const customize = await askYesNo(rl, '是否逐角色自定义模型、思考等级和执行模式', false);
       if (customize) await customizeProfile(rl, config, profileName);
     }
 

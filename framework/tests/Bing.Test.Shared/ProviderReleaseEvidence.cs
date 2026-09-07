@@ -656,8 +656,8 @@ public static class ProviderCapabilityCatalog
         Definition("PostgreSql", "DML / mutation / batch", "optimized batch/update-from/delete-using", "PostgreSqlExecutorTest.UpdateBatchAsync_WhenProviderOptimized_ShouldUpdateRowsAndRejectConcurrencyConflict"),
         Definition("PostgreSql", "Transactions", "commit/rollback/uncompleted", "PostgreSqlQueryTest.TransactionScope_ShouldRollbackWhenDisposedWithoutCompletion"),
         Definition("PostgreSql", "Procedures / output / input-output", "native function result", "PostgreSqlProcedureContractTest.ExecuteFunctionAsync_WhenFunctionReturnsTable_ShouldMaterializeNativeRows"),
-        Definition("PostgreSql", "Procedures / output / input-output", "output parameter semantics", ProviderCapabilityEvidenceState.ImplementationGap, null,
-            "PostgreSQL 原生 Function 结果集已验证；当前 API 不将其伪造成 SQL Server/MySQL OUT 参数。"),
+        Definition("PostgreSql", "Procedures / output / input-output", "output parameter semantics", ProviderCapabilityEvidenceState.Unsupported, null,
+            "PostgreSQL Function 结果集与 SQL Server/MySQL OUT 参数不是同一统一语义；当前 Procedure/OUT 参数入口按数据库语义拒绝。"),
         Definition("PostgreSql", "Multiple result / Returning / Output", "multi-row Returning", "PostgreSqlExecutorTest.ExecuteQueryAsync_WhenInsertReturningIsConfigured_ShouldMaterializeReturnedRows"),
 
         Definition("SqlServer", "Core query", "scalar/list/single", "SqlServerQueryTest.GetValue_SelectOne_ShouldReturnOne"),

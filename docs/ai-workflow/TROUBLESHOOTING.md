@@ -167,3 +167,43 @@ must
 ```bash
 node .agents/scripts/task-state.mjs review-fix <taskId> --source copilot --fix-scope recommended
 ```
+
+
+## Codex 看不到 create-plan / review-code Skill
+
+确认文件存在：
+
+```text
+.agents/skills/create-plan/SKILL.md
+.agents/skills/review-code/SKILL.md
+```
+
+重新打开/刷新 Codex 的项目上下文后再尝试：
+
+```text
+$create-plan
+$review-code
+```
+
+## Goal 配置存在但执行不符合预期
+
+先生成标准目标：
+
+```bash
+node .agents/scripts/goal-task.mjs execute-plan <taskId> --harness codex
+```
+
+检查输出是否包含：
+
+```text
+Skill 路径
+taskId
+Profile
+Model
+Effort
+executionMode
+安全上限
+停止条件
+```
+
+Goal 不应绕过 Skill；如果 Goal 自己扩大范围，应以 Skill 和 `workflow-policy.json` 为准。

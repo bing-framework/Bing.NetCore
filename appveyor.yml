@@ -8,6 +8,15 @@ branches:
     - master
 skip_branch_with_pr: true
 configuration: Release
+environment:
+  matrix:
+    # common 不接触任何外部 Provider secret；其余 lane 必须在 AppVeyor 受保护环境中注入专属变量。
+    - PROVIDER_TEST_LANE: common
+    - PROVIDER_TEST_LANE: mysql
+    - PROVIDER_TEST_LANE: postgresql
+    - PROVIDER_TEST_LANE: sqlserver
+    - PROVIDER_TEST_LANE: release
+    - PROVIDER_TEST_LANE: aggregate
 #before_build:
 #  - cmd: dotnet restore
 build:

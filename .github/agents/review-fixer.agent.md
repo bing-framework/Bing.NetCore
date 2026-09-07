@@ -1,6 +1,6 @@
 ---
 name: review-fixer
-model: "gpt-5.6-luna"
+model: "GPT-5.6 Terra"
 description: 使用公共 fix-review Skill 修复 review.md 的 NEEDS_FIX / FIX-xxx；默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX，OPTIONAL 默认跳过；不修改 review.md，不自动 commit/push。
 argument-hint: 输入 taskId。
 tools:

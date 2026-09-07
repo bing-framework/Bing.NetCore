@@ -35,3 +35,14 @@ description: 使用公共 execute-plan Skill 执行指定计划任务
 - 如果 execution.md 仍是 IN_PROGRESS 且发生 model_stop → 有限次数 continue；
 - 如果 Agent 忘记执行 task-finish，但已经写好合法终态 → Stop Guard 兜底收口和通知；
 - 如果 task-finish 已收口 active=false → Stop Guard 直接允许停止，不重复通知。
+
+
+## Goal 模式
+
+推荐复杂任务使用原生 Goal，并以公共 Skill 作为约束：
+
+```bash
+node .agents/scripts/goal-task.mjs execute-plan <taskId> --harness antigravity
+```
+
+把生成的目标交给 Antigravity Goal 执行。Goal 不得绕过 plan/review 边界、Git 安全规则和终态协议。

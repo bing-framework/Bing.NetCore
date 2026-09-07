@@ -26,8 +26,8 @@ VS Code Workspace Hook 使用：
 当提交：
 
 ```text
-/create-plan
-/review-plan
+/draft-plan 或 /create-plan
+/inspect-code 或 /review-code
 /run-plan
 /execute-plan
 /repair-review
@@ -165,3 +165,26 @@ Copilot effort 当前按 `remembered` 模式记录期望值，见：
 ```text
 .agents/runtime-profiles/copilot.json
 ```
+
+
+## V4.4 公共四阶段 Skill
+
+Copilot 也可以直接使用：
+
+```text
+/create-plan
+/execute-plan
+/review-code
+/fix-review
+```
+
+严格 Custom Agent Prompt Adapter：
+
+```text
+/draft-plan
+/run-plan
+/inspect-code
+/repair-review
+```
+
+之所以把 Prompt Adapter 改名，是为了避免与公共 Skill 的 Slash Command 同名冲突。

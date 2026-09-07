@@ -1,32 +1,38 @@
 {
-  "version": 2,
-  "displayName": "Universal Agent 运行时配置",
-  "description": "统一管理 Copilot、Codex、Antigravity 在不同工作角色下使用的模型和思考等级策略。",
+  "version": 3,
+  "displayName": "Universal Agent 角色运行时配置",
+  "description": "统一管理 Copilot、Codex、Antigravity 在 Planner / Executor / Reviewer / Fixer 角色下使用的模型、思考等级和执行模式。",
   "defaultProfile": "balanced",
   "notes": {
     "copilotModel": "请填写 VS Code Copilot 模型选择器中实际显示的模型名称，或当前项目已注册的自定义模型名称。",
     "codexModel": "请填写当前 Codex 安装环境中实际可用的 OpenAI/Codex 模型标识。",
     "antigravityModel": "请填写当前 Antigravity 安装环境中可用的 Custom Agent 模型名称或别名。",
     "effort": "不同 Harness 对思考等级的应用方式不同：Codex 可按角色原生配置；Copilot IDE 主要按模型/会话记忆；Antigravity 当前按会话或安装版本支持能力应用。",
-    "sourceOfTruth": "本文件是 Agent 模型与思考等级策略的唯一人工维护源。下游 Copilot/Codex/Antigravity 配置应通过 sync-agent-profiles.mjs 生成或同步。"
+    "sourceOfTruth": "本文件是角色模型、思考等级与执行模式策略的唯一人工维护源。下游配置通过 sync-agent-profiles.mjs 同步。",
+    "executionMode": "executionMode 描述角色的执行方式。Codex 与 Antigravity 可使用 goal；Copilot IDE 使用 agent。Goal 负责长目标推理与持续执行，Skill 仍负责阶段职责和边界。",
+    "goal": "Goal 不替代 Skill：create-plan / execute-plan / review-code / fix-review 定义做什么，Goal 定义持续推理和执行到阶段完成的自主性。"
   },
   "capabilities": {
     "copilot": {
       "agentModel": "native",
-      "agentEffort": "remembered"
+      "agentEffort": "remembered",
+      "goalMode": "agent"
     },
     "codex": {
       "agentModel": "native",
-      "agentEffort": "native"
+      "agentEffort": "native",
+      "goalMode": "native"
     },
     "antigravity": {
       "agentModel": "native",
-      "agentEffort": "session"
+      "agentEffort": "session",
+      "goalMode": "native"
     }
   },
   "workflowRoles": {
     "create-plan": "plan-writer",
     "execute-plan": "plan-executor",
+    "review-code": "code-reviewer",
     "review-plan": "code-reviewer",
     "fix-review": "review-fixer"
   },
@@ -42,15 +48,18 @@
           "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
           "copilot": {
             "model": "GPT-5.6 Luna",
-            "effort": "low"
+            "effort": "low",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-luna",
-            "effort": "low"
+            "effort": "low",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "low"
+            "effort": "low",
+            "executionMode": "interactive"
           }
         },
         "plan-executor": {
@@ -59,15 +68,18 @@
           "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
           "copilot": {
             "model": "GPT-5.6 Terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           }
         },
         "code-reviewer": {
@@ -76,15 +88,18 @@
           "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
           "copilot": {
             "model": "GPT-5.6 Terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "interactive"
           }
         },
         "review-fixer": {
@@ -93,15 +108,18 @@
           "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
           "copilot": {
             "model": "GPT-5.6 Luna",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-luna",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           }
         }
       }
@@ -117,15 +135,18 @@
           "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "plan-executor": {
@@ -134,15 +155,18 @@
           "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
           "copilot": {
             "model": "GPT-5.6 Terra",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-terra",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           }
         },
         "code-reviewer": {
@@ -151,15 +175,18 @@
           "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "review-fixer": {
@@ -168,15 +195,18 @@
           "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
           "copilot": {
             "model": "GPT-5.6 Terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-terra",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "flash",
-            "effort": "medium"
+            "effort": "medium",
+            "executionMode": "goal"
           }
         }
       }
@@ -192,15 +222,18 @@
           "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "plan-executor": {
@@ -209,15 +242,18 @@
           "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           }
         },
         "code-reviewer": {
@@ -226,15 +262,18 @@
           "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "review-fixer": {
@@ -243,15 +282,18 @@
           "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           }
         }
       }
@@ -267,15 +309,18 @@
           "notes": "只负责规划，不直接修改业务代码、测试、配置或数据库。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "plan-executor": {
@@ -284,15 +329,18 @@
           "notes": "不重新规划整体方案，不自动 git commit、git push 或创建 PR。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           }
         },
         "code-reviewer": {
@@ -301,15 +349,18 @@
           "notes": "只审查，不直接修改业务代码；未解决 MUST_FIX/SHOULD_FIX 时保持 NEEDS_FIX。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "interactive"
           }
         },
         "review-fixer": {
@@ -318,15 +369,18 @@
           "notes": "默认 fixScope=recommended，处理 MUST_FIX + SHOULD_FIX；OPTIONAL 默认不自动处理。",
           "copilot": {
             "model": "GPT-5.6 Sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "agent"
           },
           "codex": {
             "model": "gpt-5.6-sol",
-            "effort": "xhigh"
+            "effort": "xhigh",
+            "executionMode": "goal"
           },
           "antigravity": {
             "model": "pro",
-            "effort": "high"
+            "effort": "high",
+            "executionMode": "goal"
           }
         }
       }
