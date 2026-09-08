@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -29,6 +30,9 @@ try
                 : null,
             arguments.TryGetValue("unit-results-directory", out var unitResultsDirectory)
                 ? unitResultsDirectory
+                : null,
+            arguments.TryGetValue("unit-inventory", out var unitInventory)
+                ? unitInventory
                 : null,
             arguments.TryGetValue("formal-host-results-directory", out var formalHostDirectory)
                 ? formalHostDirectory
@@ -128,7 +132,8 @@ static void WriteBaselineMatrix(string workspaceRoot, string outputDirectory)
 }
 
 static void AggregateReports(string workspaceRoot, string outputDirectory, string providerResultsDirectory,
-    string sqliteResultsDirectory, string unitResultsDirectory, string formalHostResultsDirectory,
+    string sqliteResultsDirectory, string unitResultsDirectory, string unitInventory,
+    string formalHostResultsDirectory,
     string rs0026Inventory, string apiGateFile, string evidenceSessionId, string sourceIdentity)
 {
     var root = RequireWorkspaceRoot(workspaceRoot);
@@ -140,8 +145,6 @@ static void AggregateReports(string workspaceRoot, string outputDirectory, strin
         : LoadSqliteRuns(root, ResolveWorkspaceDirectory(root, sqliteResultsDirectory, "artifacts/test-results"),
             evidenceSessionId, sourceIdentity);
     var integrationRuns = providerRuns.Concat(sqliteRuns)
-        .GroupBy(run => $"{run.Provider}|{run.Framework}", StringComparer.OrdinalIgnoreCase)
-        .Select(group => group.OrderByDescending(run => run.CompletedAtUtc).First())
         .OrderBy(run => run.Provider, StringComparer.OrdinalIgnoreCase)
         .ThenBy(run => run.Framework, StringComparer.OrdinalIgnoreCase)
         .ToArray();
@@ -149,11 +152,13 @@ static void AggregateReports(string workspaceRoot, string outputDirectory, strin
     var unitRuns = string.IsNullOrWhiteSpace(unitResultsDirectory)
         ? Array.Empty<UnitRun>()
         : LoadUnitRuns(root, ResolveWorkspaceDirectory(root, unitResultsDirectory, "artifacts/test-results"));
+    var unitEvidenceComplete = ValidateUnitEvidence(root, unitResultsDirectory, unitInventory, evidenceSessionId,
+        sourceIdentity, unitRuns);
     var formalHostComplete = ValidateFormalHostEvidence(root, formalHostResultsDirectory, evidenceSessionId,
         sourceIdentity);
     var rs0026GatePassed = ValidateRs0026Evidence(root, rs0026Inventory, evidenceSessionId, sourceIdentity);
     var apiGatePassed = ValidateApiEvidence(root, apiGateFile, evidenceSessionId, sourceIdentity);
-    var matrix = CreateAggregateCapabilityMatrix(integrationRuns, unitRuns, formalHostComplete,
+    var matrix = CreateAggregateCapabilityMatrix(integrationRuns, unitRuns, unitEvidenceComplete, formalHostComplete,
         rs0026GatePassed, apiGatePassed, evidenceSessionId);
     WriteUtf8(Path.Combine(outputRoot, "provider-capability-matrix.json"),
         JsonSerializer.Serialize(matrix, new JsonSerializerOptions { WriteIndented = true }));
@@ -412,12 +417,17 @@ static UnitRun[] LoadUnitRuns(string workspaceRoot, string unitRoot)
     {
         var document = XDocument.Load(trxPath, LoadOptions.None);
         var counters = document.Descendants().FirstOrDefault(element => element.Name.LocalName == "Counters");
-        if (counters == null)
+        var fileName = Path.GetFileNameWithoutExtension(trxPath);
+        var fileMatch = Regex.Match(fileName, "^(?<project>.+)-(?<framework>net[0-9]+\\.[0-9]+)$",
+            RegexOptions.IgnoreCase);
+        if (counters == null || !fileMatch.Success)
             continue;
+        var project = fileMatch.Groups["project"].Value;
+        var framework = fileMatch.Groups["framework"].Value;
         runs.Add(new UnitRun
         {
-            Project = Path.GetFileNameWithoutExtension(trxPath),
-            Framework = Regex.Match(trxPath, "net[0-9]+\\.[0-9]+", RegexOptions.IgnoreCase).Value,
+            Project = project,
+            Framework = framework,
             TrxPath = ToWorkspaceRelativePath(workspaceRoot, trxPath),
             Discovered = ReadCounter(counters, "total"),
             Executed = ReadCounter(counters, "passed") + ReadCounter(counters, "failed"),
@@ -425,15 +435,143 @@ static UnitRun[] LoadUnitRuns(string workspaceRoot, string unitRoot)
             Failed = ReadCounter(counters, "failed"),
             Skipped = ReadCounter(counters, "notExecuted"),
             Duration = document.Root?.Descendants().FirstOrDefault(element => element.Name.LocalName == "ResultSummary")?
-                .Attribute("duration")?.Value ?? string.Empty
+                .Attribute("duration")?.Value ?? string.Empty,
+            AssemblyIdentityValid = ValidateUnitTrxIdentity(document, counters, project, framework)
         });
     }
     return runs.OrderBy(run => run.Project, StringComparer.OrdinalIgnoreCase)
         .ThenBy(run => run.Framework, StringComparer.OrdinalIgnoreCase).ToArray();
 }
 
+static bool ValidateUnitEvidence(string workspaceRoot, string unitResultsDirectory, string unitInventory,
+    string evidenceSessionId, string sourceIdentity, IReadOnlyCollection<UnitRun> unitRuns)
+{
+    if (string.IsNullOrWhiteSpace(unitResultsDirectory) || string.IsNullOrWhiteSpace(unitInventory) ||
+        string.IsNullOrWhiteSpace(evidenceSessionId) || string.IsNullOrWhiteSpace(sourceIdentity))
+        return false;
+    try
+    {
+        var normalizedUnitDirectory = RequireRelativeArtifactPath(unitResultsDirectory, "artifacts/test-results");
+        var normalizedInventoryPath = RequireRelativeArtifactPath(unitInventory, "artifacts/test-results");
+        if (!string.Equals(normalizedInventoryPath, normalizedUnitDirectory + "/unit-inventory.json",
+                StringComparison.OrdinalIgnoreCase))
+            return false;
+        var inventoryPath = ResolveWorkspaceFile(workspaceRoot, normalizedInventoryPath);
+        using var document = JsonDocument.Parse(File.ReadAllText(inventoryPath, Encoding.UTF8));
+        var inventory = document.RootElement;
+        if (!HasValue(inventory, "EvidenceSessionId", evidenceSessionId) ||
+            !HasValue(inventory, "SourceIdentity", sourceIdentity) ||
+            !HasValue(inventory, "SourceState", "clean") ||
+            !inventory.TryGetProperty("Entries", out var entries) || entries.ValueKind != JsonValueKind.Array)
+            return false;
+
+        var startedAtUtc = GetUtc(inventory, "StartedAtUtc");
+        var completedAtUtc = GetUtc(inventory, "CompletedAtUtc");
+        var now = DateTimeOffset.UtcNow;
+        var timestampTolerance = TimeSpan.FromMinutes(2);
+        if (startedAtUtc == DateTimeOffset.MinValue || completedAtUtc == DateTimeOffset.MinValue ||
+            completedAtUtc < startedAtUtc || completedAtUtc > now + timestampTolerance)
+            return false;
+        var inventoryTime = new DateTimeOffset(File.GetLastWriteTimeUtc(inventoryPath), TimeSpan.Zero);
+        if (inventoryTime < startedAtUtc - timestampTolerance || inventoryTime > completedAtUtc + timestampTolerance)
+            return false;
+
+        var expectedEntries = GetExpectedUnitEntries();
+        if (entries.GetArrayLength() != expectedEntries.Count || unitRuns.Count != expectedEntries.Count)
+            return false;
+        var seenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var unitRunsByPath = unitRuns.ToDictionary(run => run.TrxPath, StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in entries.EnumerateArray())
+        {
+            var project = GetString(entry, "Project");
+            var framework = GetString(entry, "Framework");
+            var key = $"{project}|{framework}";
+            if (!expectedEntries.Contains(key) || !seenEntries.Add(key))
+                return false;
+            var trxPath = RequireRelativeArtifactPath(GetString(entry, "TrxPath"), "artifacts/test-results");
+            if (!trxPath.StartsWith(normalizedUnitDirectory + "/", StringComparison.OrdinalIgnoreCase))
+                return false;
+            var trxFilePath = ResolveWorkspaceFile(workspaceRoot, trxPath);
+            var expectedTrxFileName = $"{project}-{framework}.trx";
+            if (!string.Equals(Path.GetFileName(trxFilePath), expectedTrxFileName,
+                    StringComparison.OrdinalIgnoreCase))
+                return false;
+            var trxTime = new DateTimeOffset(File.GetLastWriteTimeUtc(trxFilePath), TimeSpan.Zero);
+            if (trxTime < startedAtUtc - timestampTolerance || trxTime > completedAtUtc + timestampTolerance)
+                return false;
+            var hash = GetString(entry, "Sha256");
+            if (!Regex.IsMatch(hash, "^[A-Fa-f0-9]{64}$"))
+                return false;
+            using var stream = File.OpenRead(trxFilePath);
+            var actualHash = Convert.ToHexString(SHA256.HashData(stream));
+            if (!string.Equals(actualHash, hash, StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (!unitRunsByPath.TryGetValue(trxPath, out var run) ||
+                !string.Equals(run.Project, project, StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(run.Framework, framework, StringComparison.OrdinalIgnoreCase) ||
+                !run.AssemblyIdentityValid || run.Passed <= 0 || run.Failed != 0 || run.Skipped != 0)
+                return false;
+        }
+        return seenEntries.Count == expectedEntries.Count;
+    }
+    catch (Exception exception) when (exception is ArgumentException or FileNotFoundException or
+        DirectoryNotFoundException or JsonException or IOException)
+    {
+        return false;
+    }
+}
+
+static bool ValidateUnitTrxIdentity(XDocument document, XElement counters, string project, string framework)
+{
+    var expectedAssembly = project + ".dll";
+    var testMethods = document.Descendants()
+        .Where(element => element.Name.LocalName == "TestMethod")
+        .ToArray();
+    if (testMethods.Length == 0)
+        return false;
+
+    foreach (var testMethod in testMethods)
+    {
+        var codeBase = (string)testMethod.Attribute("codeBase") ?? string.Empty;
+        var normalizedCodeBase = codeBase.Trim().Replace('\\', '/');
+        if (string.IsNullOrWhiteSpace(normalizedCodeBase))
+            return false;
+        var assemblyName = normalizedCodeBase[(normalizedCodeBase.LastIndexOf('/') + 1)..];
+        if (!string.Equals(assemblyName, expectedAssembly, StringComparison.OrdinalIgnoreCase))
+            return false;
+        var pathSegments = normalizedCodeBase.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (!pathSegments.Any(segment => string.Equals(segment, framework, StringComparison.OrdinalIgnoreCase)))
+            return false;
+    }
+
+    return TryReadCounter(counters, "total", out var total) && total >= 0 &&
+        TryReadCounter(counters, "executed", out var executed) && executed >= 0 &&
+        TryReadCounter(counters, "passed", out var passed) && passed >= 0 &&
+        TryReadCounter(counters, "failed", out var failed) && failed >= 0 &&
+        TryReadCounter(counters, "notExecuted", out var notExecuted) && notExecuted >= 0 &&
+        total == executed + notExecuted && executed == passed + failed;
+}
+
+static bool TryReadCounter(XElement counters, string name, out int value) =>
+    int.TryParse((string)counters.Attribute(name), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+
+static IReadOnlySet<string> GetExpectedUnitEntries() => new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "Bing.Core.Tests|net6.0", "Bing.Core.Tests|net8.0",
+    "Bing.Dapper.Core.Tests|net6.0", "Bing.Dapper.Core.Tests|net8.0",
+    "Bing.Dapper.MySql.Tests|net6.0", "Bing.Dapper.MySql.Tests|net8.0",
+    "Bing.Dapper.PostgreSql.Tests|net6.0", "Bing.Dapper.PostgreSql.Tests|net8.0",
+    "Bing.Dapper.SqlServer.Tests|net6.0", "Bing.Dapper.SqlServer.Tests|net8.0",
+    "Bing.Dapper.Sqlite.Tests|net6.0", "Bing.Dapper.Sqlite.Tests|net8.0",
+    "Bing.Dapper.Oracle.Tests|net6.0", "Bing.Dapper.Oracle.Tests|net8.0",
+    "Bing.Data.Sql.Tests|net6.0", "Bing.Data.Sql.Tests|net8.0",
+    "Bing.Data.Sql.CustomProvider.Tests|net6.0", "Bing.Data.Sql.CustomProvider.Tests|net8.0",
+    "Bing.Data.Sql.Analyzers.Tests|net8.0",
+    "Bing.Test.Shared|net6.0", "Bing.Test.Shared|net8.0"
+};
+
 static object CreateAggregateCapabilityMatrix(IReadOnlyList<IntegrationRun> runs,
-    IReadOnlyCollection<UnitRun> unitRuns, bool formalHostComplete, bool rs0026GatePassed,
+    IReadOnlyCollection<UnitRun> unitRuns, bool unitEvidenceComplete, bool formalHostComplete, bool rs0026GatePassed,
     bool apiGatePassed, string evidenceSessionId)
 {
     var entries = ProviderCapabilityCatalog.GetDefinitions().Select(definition =>
@@ -491,7 +629,7 @@ static object CreateAggregateCapabilityMatrix(IReadOnlyList<IntegrationRun> runs
         CoreSkipped = run.CoreSkipped,
         PassedTestMethods = run.PassedTestMethods
     }).ToArray();
-    var unitTestsPassed = unitRuns.Count > 0 && unitRuns.All(run => run.Failed == 0 &&
+    var unitTestsPassed = unitEvidenceComplete && unitRuns.Count > 0 && unitRuns.All(run => run.Failed == 0 &&
         run.Passed > 0 && run.Skipped == 0);
     var releaseReady = ProviderReleaseReadiness.IsReady(readinessRuns, unitTestsPassed,
         formalHostComplete, rs0026GatePassed, apiGatePassed);
@@ -502,6 +640,7 @@ static object CreateAggregateCapabilityMatrix(IReadOnlyList<IntegrationRun> runs
         {
             CoreProviders = new[] { "MySql", "PostgreSql", "SqlServer", "SQLite" },
             RequiredFrameworks = new[] { "net6.0", "net8.0" },
+            UnitEvidenceComplete = unitEvidenceComplete,
             UnitTestsPassed = unitTestsPassed,
             FormalHostComplete = formalHostComplete,
             Rs0026GatePassed = rs0026GatePassed,
@@ -588,14 +727,28 @@ static bool ValidateFormalHostEvidence(string root, string relativeDirectory, st
             return false;
         using var document = JsonDocument.Parse(File.ReadAllText(manifestPath, Encoding.UTF8));
         var manifest = document.RootElement;
+        var expectedReportCounts = GetExpectedFormalHostReportCounts();
+        var expectedBenchmarkCount = expectedReportCounts.Values.Sum();
         if (!HasValue(manifest, "Status", "Complete") || !HasValue(manifest, "Job", "FormalHost") ||
             !HasValue(manifest, "EvidenceSessionId", expectedEvidenceSessionId) ||
             !HasValue(manifest, "SourceIdentity", expectedSourceIdentity) ||
+            !HasValue(manifest, "SourceState", "clean") ||
             GetInt(manifest, "LaunchCount") != 3 || GetInt(manifest, "WarmupCount") != 6 ||
             GetInt(manifest, "IterationCount") != 15 ||
+            GetInt(manifest, "BenchmarkCount") != expectedBenchmarkCount ||
+            GetInt(manifest, "ExpectedBenchmarkCount") != expectedBenchmarkCount ||
+            !manifest.TryGetProperty("ReportCounts", out var reportCounts) ||
+            reportCounts.ValueKind != JsonValueKind.Object ||
             !manifest.TryGetProperty("Reports", out var reports) || reports.ValueKind != JsonValueKind.Array ||
             !reports.EnumerateArray().Any() ||
             !manifest.TryGetProperty("Artifacts", out var artifacts) || artifacts.ValueKind != JsonValueKind.Array)
+            return false;
+
+        if (reportCounts.EnumerateObject().Count() != expectedReportCounts.Count ||
+            expectedReportCounts.Any(expected =>
+                !reportCounts.TryGetProperty(expected.Key, out var count) ||
+                count.ValueKind != JsonValueKind.Number || !count.TryGetInt32(out var actual) ||
+                actual != expected.Value))
             return false;
 
         var reportPaths = reports.EnumerateArray().Select(item => item.ValueKind == JsonValueKind.String
@@ -608,9 +761,17 @@ static bool ValidateFormalHostEvidence(string root, string relativeDirectory, st
         var markdown = files.Any(path => path.EndsWith("-report-github.md", StringComparison.OrdinalIgnoreCase));
         var html = files.Any(path => path.EndsWith("-report.html", StringComparison.OrdinalIgnoreCase));
         var raw = files.Any(path => path.EndsWith(".log", StringComparison.OrdinalIgnoreCase));
-        return csv.Length > 0 && markdown && html && raw &&
-               csv.All(path => File.ReadAllText(path, Encoding.UTF8).Contains(",FormalHost,",
-                   StringComparison.OrdinalIgnoreCase));
+        if (csv.Length != expectedReportCounts.Count || !markdown || !html || !raw)
+            return false;
+        foreach (var expected in expectedReportCounts)
+        {
+            var path = csv.SingleOrDefault(candidate =>
+                string.Equals(Path.GetFileName(candidate), expected.Key + "-report.csv",
+                    StringComparison.OrdinalIgnoreCase));
+            if (path == null || !ValidateFormalHostCsv(path, expected.Value))
+                return false;
+        }
+        return true;
     }
     catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or
         FileNotFoundException or JsonException)
@@ -758,14 +919,21 @@ static string CreateIntegrationMarkdown(IReadOnlyList<IntegrationRun> runs)
     var builder = new StringBuilder();
     builder.AppendLine("# Integration Test Report");
     builder.AppendLine();
-    builder.AppendLine("> 仅记录最新 Provider/TFM 运行；Release Evidence 仍要求 clean source 和受保护验证。");
+    builder.AppendLine("> 保留全部 Provider/TFM 输入（不按“最新”折叠重复项）；Provider/TFM 唯一性由 Release Readiness 门禁校验，Release Evidence 仍要求 clean source 和受保护验证。");
     builder.AppendLine();
     builder.AppendLine("| Provider | TFM | Database | Provider Version | Database Version | Driver Version | Discovered | Executed | Passed | Failed | Core Skip | Optional Skip | Source | Status | RunId | TRX |");
     builder.AppendLine("| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |");
     foreach (var run in runs)
     {
         var status = run.Failed > 0 || run.CoreSkipped > 0 ? "FAILED" :
-            string.Equals(run.SourceState, "clean", StringComparison.OrdinalIgnoreCase) ? "PASS" : "NOT VERIFIED";
+            run.ReleaseEvidenceValid &&
+            string.Equals(run.ExecutionStatus, "Executed", StringComparison.OrdinalIgnoreCase) &&
+            run.Executed > 0 &&
+            run.Failed == 0 &&
+            run.CoreSkipped == 0 &&
+            string.Equals(run.SourceState, "clean", StringComparison.OrdinalIgnoreCase)
+                ? "PASS"
+                : "NOT VERIFIED";
         builder.AppendLine($"| {EscapeMarkdown(run.Provider)} | {EscapeMarkdown(run.Framework)} | " +
                            $"{EscapeMarkdown(run.DatabaseName)} | {EscapeMarkdown(run.ProviderVersion)} | " +
                            $"{EscapeMarkdown(run.DatabaseVersion)} | {EscapeMarkdown(run.DriverVersion)} | " +
@@ -877,6 +1045,90 @@ static bool ValidateArtifactHashes(string root, JsonElement artifacts, IEnumerab
     return expectedPaths.Count > 0 && expectedPaths.All(actualPaths.Contains);
 }
 
+static IReadOnlyDictionary<string, int> GetExpectedFormalHostReportCounts() =>
+    new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Bing.Data.Sql.Benchmarks.SqlAggregateRenderingBenchmarks"] = 19,
+        ["Bing.Data.Sql.Benchmarks.SqlBuilderAppendToBenchmarks"] = 6,
+        ["Bing.Data.Sql.Benchmarks.SqlBuilderCteAndParameterTokenBenchmarks"] = 2,
+        ["Bing.Data.Sql.Benchmarks.SqlDebugSqlBenchmarks"] = 3,
+        ["Bing.Data.Sql.Benchmarks.SqliteDapperE2EBenchmarks"] = 24,
+        ["Bing.Data.Sql.Benchmarks.SqlLambdaJoinBenchmarks"] = 28,
+        ["Bing.Data.Sql.Benchmarks.SqlLambdaRootBenchmarks"] = 12,
+        ["Bing.Data.Sql.Benchmarks.SqlMetadataBenchmarks"] = 27,
+        ["Bing.Data.Sql.Benchmarks.SqlMutationBenchmarks"] = 15
+    };
+
+static bool ValidateFormalHostCsv(string path, int expectedRows)
+{
+    var lines = File.ReadAllLines(path, Encoding.UTF8).Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+    if (lines.Length != expectedRows + 1)
+        return false;
+    var header = ParseCsvRecord(lines[0]);
+    var jobIndex = Array.FindIndex(header, value => string.Equals(value, "Job", StringComparison.Ordinal));
+    var launchIndex = Array.FindIndex(header, value => string.Equals(value, "LaunchCount", StringComparison.Ordinal));
+    var warmupIndex = Array.FindIndex(header, value => string.Equals(value, "WarmupCount", StringComparison.Ordinal));
+    var iterationIndex = Array.FindIndex(header, value => string.Equals(value, "IterationCount", StringComparison.Ordinal));
+    if (jobIndex < 0 || launchIndex < 0 || warmupIndex < 0 || iterationIndex < 0)
+        return false;
+    foreach (var line in lines.Skip(1))
+    {
+        var fields = ParseCsvRecord(line);
+        var maxIndex = Math.Max(Math.Max(jobIndex, launchIndex), Math.Max(warmupIndex, iterationIndex));
+        if (fields.Length <= maxIndex || !string.Equals(fields[jobIndex], "FormalHost", StringComparison.Ordinal) ||
+            !int.TryParse(fields[launchIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var launch) ||
+            !int.TryParse(fields[warmupIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var warmup) ||
+            !int.TryParse(fields[iterationIndex], NumberStyles.Integer, CultureInfo.InvariantCulture, out var iteration) ||
+            launch != 3 || warmup != 6 || iteration != 15)
+            return false;
+    }
+    return true;
+}
+
+static string[] ParseCsvRecord(string line)
+{
+    var values = new List<string>();
+    var value = new StringBuilder();
+    var quoted = false;
+    for (var index = 0; index < line.Length; index++)
+    {
+        var character = line[index];
+        if (quoted)
+        {
+            if (character == '"' && index + 1 < line.Length && line[index + 1] == '"')
+            {
+                value.Append('"');
+                index++;
+            }
+            else if (character == '"')
+            {
+                quoted = false;
+            }
+            else
+            {
+                value.Append(character);
+            }
+        }
+        else if (character == '"')
+        {
+            quoted = true;
+        }
+        else if (character == ',')
+        {
+            values.Add(value.ToString());
+            value.Clear();
+        }
+        else
+        {
+            value.Append(character);
+        }
+    }
+    if (quoted)
+        return Array.Empty<string>();
+    values.Add(value.ToString());
+    return values.ToArray();
+}
+
 sealed class IntegrationRun
 {
     public string Provider { get; set; }
@@ -919,4 +1171,5 @@ sealed class UnitRun
     public int Failed { get; set; }
     public int Skipped { get; set; }
     public string Duration { get; set; }
+    public bool AssemblyIdentityValid { get; set; }
 }

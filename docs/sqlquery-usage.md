@@ -670,12 +670,17 @@ public Task<Order> GetOrderAsync(ISqlQuery sqlQuery, Guid orderId)
 
 SQLite 真实执行测试位于 `framework/tests/Bing.Dapper.Sqlite.Tests.Integration`，默认随测试运行，不依赖外部服务。
 
-MySQL、PostgreSQL 和 SQL Server 集成测试默认跳过。启用其中一个 Provider 时，设置对应开关和 `ConnectionStrings__<Provider>Connection`；`ConnectionStrings__DefaultConnection` 仅用于兼容旧配置，例如：
+MySQL、PostgreSQL、SQL Server 和 Oracle 集成测试默认跳过。受保护 Provider runner 只接受对应 Provider 的 gate、专属连接字符串和 `ALLOW_DATABASE_RESET_FOR_TESTS=true`；例如本机运行 MySQL：
 
 ```powershell
 $env:RUN_MYSQL_INTEGRATION_TESTS = "true"
-$env:ConnectionStrings__MySqlConnection = "Server=127.0.0.1;Database=bing_dapper_test;User Id=test;Password=..."
-dotnet test .\framework\tests\Bing.Dapper.MySql.Tests.Integration\Bing.Dapper.MySql.Tests.Integration.csproj
+$env:ALLOW_DATABASE_RESET_FOR_TESTS = "true"
+$env:ConnectionStrings__MySqlConnection = "<专用测试库连接字符串>"
+.\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider MySql -Framework net8.0 -Configuration Release
 ```
 
-也可设置 `RUN_INTEGRATION_TESTS=true` 一次启用全部外部 Provider。测试数据库名称必须以 `_test`、`_tests` 或 `_integration` 结尾，且不能包含 `prod`、`production`、`master`、`mysql` 或 `information_schema`。本地连接配置应使用环境变量或未跟踪的 `appsettings.Development.json`，不要提交凭据。
+本机也可以把上述变量写入未跟踪的 `integration.runsettings.local`，再通过 runner 的 `-Settings <path>` 显式加载；runner 不会自动搜索 runsettings 文件，受保护 CI 不读取 `.local` 文件。`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider，不能用于受保护 runner/CI；多 Provider 路由兼容测试要求同时提供各 Provider 专属连接配置。
+
+连接字符串不得使用 `ConnectionStrings__DefaultConnection` 作为 runner 或 CI 的回退；受保护 runner 发现该变量即在 preflight 失败。部分直接本地测试启动器仍保留历史兼容回退，但该路径不能作为受保护 Provider 或发布证据。测试数据库名称必须以 `_test`、`_tests`、`_integration` 或 `_integration_test` 结尾，且不能使用系统库或包含独立的 `prod`、`production`、`development` 环境标识。本地配置不要提交凭据。
+
+如果 MySQL 服务器使用 `caching_sha2_password`，本机 Settings 必须提供受信 TLS，或由管理员为专用测试账号配置受控 RSA public key retrieval；runner 不会自动放宽 TLS/RSA 安全策略，也不会把认证失败标记为 Skip。详细门控、脱敏诊断和 AppVeyor release lane 说明见[数据库集成测试说明](testing/database-integration-tests.md)。

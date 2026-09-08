@@ -4,23 +4,23 @@ SQLite 集成测试始终执行，使用临时文件数据库，不需要额外�
 
 ## 本地运行
 
-1. 在对应 Provider 项目目录创建忽略的 `integration.local.runsettings`，或仅在终端设置 Provider 专属环境变量。
+1. 在对应 Provider 项目目录创建未跟踪的 `integration.runsettings.local`，或仅在终端设置 Provider 专属环境变量。
 2. 本地配置只提供对应 `ConnectionStrings__<Provider>Connection`、对应 `RUN_<PROVIDER>_INTEGRATION_TESTS=true` 和 `ALLOW_DATABASE_RESET_FOR_TESTS=true`；确认数据库名是专用测试库。
-3. 在 Visual Studio 中选择该 `.runsettings` 文件，或使用 `dotnet test --settings <path>` 显式运行对应项目。项目不会自动加载目录中的 `integration.runsettings`；现有文件是本地用户配置，只能由用户显式选择，CI 不使用该文件。
+3. 通过 `eng/ci/Invoke-ProviderIntegrationTests.ps1 -Settings <path>` 显式加载该文件；runner 只接受仓库内、文件名恰为 `integration.runsettings.local` 的 UTF-8 XML，不会自动搜索或加载其他 runsettings 文件。直接使用 Visual Studio 或 `dotnet test` 时也必须显式选择该文件，受保护 CI 不读取 `.local` 文件。
 
 本地配置文件被 `.gitignore` 忽略，不能提交密码或连接字符串。
 
 ## 门控变量
 
-- `RUN_INTEGRATION_TESTS=true`：启用全部外部 Provider 集成测试。
+- `RUN_INTEGRATION_TESTS=true`：仅用于本地同时验证多个外部 Provider；不得用于受保护 Provider runner 或 CI。
 - `RUN_MYSQL_INTEGRATION_TESTS=true`
 - `RUN_POSTGRESQL_INTEGRATION_TESTS=true`
 - `RUN_SQLSERVER_INTEGRATION_TESTS=true`
 - `RUN_ORACLE_INTEGRATION_TESTS=true`
 
-Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受全局变量，并要求同时提供 MySQL、PostgreSQL 和 SQL Server 的连接配置。
+Provider 级变量只启用对应 Provider。多 Provider 路由兼容测试仅限本地显式多 Provider 运行，使用全局 gate 并要求同时提供 MySQL、PostgreSQL 和 SQL Server 的专属连接配置；它不是受保护 Provider runner 的入口。runner 从 `.local` settings 只导入目标 Provider 允许的变量并忽略其他变量；若受保护 lane 的进程环境已设置全局 gate 或其他 Provider 的 gate/连接变量，preflight 会拒绝。
 
-连接字符串优先使用 `ConnectionStrings__<Provider>Connection`，例如 `ConnectionStrings__MySqlConnection`；本地旧配置可临时回退到 `ConnectionStrings__DefaultConnection`。受保护 Provider CI 禁止该回退，必须只注入对应 Provider 专属变量。缺失配置只给出变量名称和本地显式 settings 指引，不会显示密码。
+连接字符串只应使用 `ConnectionStrings__<Provider>Connection`，例如 `ConnectionStrings__MySqlConnection`。部分直接本地测试启动器仍保留 `ConnectionStrings__DefaultConnection` 的历史兼容回退，但它不是 runner 的配置入口；受保护 Provider runner/CI 发现该变量即拒绝，Provider 专属变量缺失也会失败。缺失配置只给出变量名称和本地显式 settings 指引，不会显示密码。
 
 ## 数据库安全
 
@@ -30,9 +30,11 @@ Provider 级变量只启用对应 Provider。多 Provider 路由测试只接受�
 
 表级初始化和清理不执行删库。数据库级重置额外要求 `ALLOW_DATABASE_RESET_FOR_TESTS=true`，并且仍受安全数据库名校验保护。
 
+如果 MySQL 服务器使用 `caching_sha2_password`，本机 Settings 必须提供受信 TLS，或由管理员为专用测试账号配置受控 RSA public key retrieval；runner 不会自动放宽 TLS/RSA 安全策略，也不会把认证失败标记为 Skip。
+
 ## CI
 
-常规 CI 清除所有外部 Provider gate、连接和 reset 变量，只运行无凭据测试和 SQLite 集成测试。AppVeyor 由 `PROVIDER_TEST_LANE=common|mysql|postgresql|sqlserver` 选择入口；默认是 `common`。后三者只能在远端受保护作业中设置，并仅通过作业作用域 CI 密钥注入自身 Provider 的 gate、连接和 reset 授权。仓库不能安全地创建无密 Provider matrix；实际 job materialization、secret scope 与 trusted-lane 策略需由维护者在远端配置并留存无密执行证据。不得设置 `RUN_INTEGRATION_TESTS=true` 或 `ConnectionStrings__DefaultConnection`。使用 `eng/ci/Invoke-ProviderIntegrationTests.ps1` 运行后必须生成每 Provider/TFM 独立 TRX；零测试、全部 Skip 或 core Provider Skip 均视为失败。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
+常规 CI 清除所有外部 Provider gate、连接和 reset 变量，只运行无凭据测试和 SQLite 集成测试。AppVeyor 由 `PROVIDER_TEST_LANE=common|mysql|postgresql|sqlserver|release` 选择入口；默认是 `common`。`mysql`、`postgresql`、`sqlserver` 和 `release` 只能在远端受保护作业中运行，并仅通过作业作用域 CI 密钥注入所需的 Provider gate、专属连接、reset 授权和发布验证输入。`release` lane 在同一个受保护 job 内完成 Provider、SQLite、Unit、Analyzer、FormalHost 和 aggregate；不依赖独立 matrix job 的本地工作区。仓库不能安全地创建无密 Provider matrix；实际 job materialization、secret scope 与 trusted-lane 策略需由维护者在远端配置并留存无密执行证据。不得设置 `RUN_INTEGRATION_TESTS=true` 或 `ConnectionStrings__DefaultConnection`。使用 `eng/ci/Invoke-ProviderIntegrationTests.ps1` 运行后必须生成每 Provider/TFM 独立 TRX；零测试、全部 Skip 或 core Provider Skip 均视为失败。SQLite 测试必须在每个测试内创建和释放数据库 Scope，不能跨 `IAsyncLifetime.InitializeAsync` 与 `DisposeAsync` 保存 `AsyncLocal` Scope。
 
 ## SQLite 边界覆盖
 

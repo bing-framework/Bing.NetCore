@@ -129,6 +129,43 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
+    /// 测试目的：同一 Provider/TFM 出现重复运行时必须拒绝发布，并将重复键报告为缺失项。
+    /// </summary>
+    [Fact]
+    public void ReleaseReadiness_WhenProviderFrameworkRunIsDuplicated_ShouldRemainFalse()
+    {
+        // Arrange
+        var runs = (from provider in new[] { "MySql", "PostgreSql", "SqlServer", "SQLite" }
+                    from framework in new[] { "net6.0", "net8.0" }
+                    select new ProviderReleaseReadinessRun
+                    {
+                        Provider = provider,
+                        Framework = framework,
+                        EvidenceSessionId = "ci-build-duplicate",
+                        SourceIdentity = "git-duplicate;source=clean",
+                        ReleaseEvidenceValid = true,
+                        Executed = 1
+                    }).ToList();
+        runs.Add(new ProviderReleaseReadinessRun
+        {
+            Provider = "MySql",
+            Framework = "net6.0",
+            EvidenceSessionId = "ci-build-duplicate",
+            SourceIdentity = "git-duplicate;source=clean",
+            ReleaseEvidenceValid = true,
+            Executed = 1
+        });
+
+        // Act
+        var result = ProviderReleaseReadiness.IsReady(runs, true, true, true, true,
+            Array.Empty<ProviderCapabilityScenarioDefinition>());
+
+        // Assert
+        Assert.False(result);
+        Assert.Contains("MySql/net6.0", ProviderReleaseReadiness.GetMissingRuns(runs));
+    }
+
+    /// <summary>
     /// 测试目的：当完整能力目录已无未解决实现缺口且八个 Provider/TFM 运行及外部门禁均通过时，全局 readiness 应返回 true。
     /// </summary>
     [Fact]

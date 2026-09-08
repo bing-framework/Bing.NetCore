@@ -11,12 +11,13 @@ configuration: Release
 environment:
   matrix:
     # common 不接触任何外部 Provider secret；其余 lane 必须在 AppVeyor 受保护环境中注入专属变量。
+    # release 在同一个受保护 job 内完成 Provider、SQLite、Unit、Analyzer、FormalHost 和 aggregate。
+    # aggregate 不是独立 lane，避免依赖 AppVeyor matrix job 之间不存在的共享工作区。
     - PROVIDER_TEST_LANE: common
     - PROVIDER_TEST_LANE: mysql
     - PROVIDER_TEST_LANE: postgresql
     - PROVIDER_TEST_LANE: sqlserver
     - PROVIDER_TEST_LANE: release
-    - PROVIDER_TEST_LANE: aggregate
 #before_build:
 #  - cmd: dotnet restore
 build:
@@ -60,59 +61,10 @@ test_script:
           .\eng\ci\Invoke-ProviderIntegrationTests.ps1 -Provider SqlServer -Framework net8.0 -Configuration Release
         }
         'release' {
+          git diff --check
+          if ($LASTEXITCODE -ne 0) { throw 'Release lane source diff check failed.' }
           .\eng\ci\Invoke-ReleaseCandidateValidation.ps1 -Configuration Release -ResultsRoot artifacts/release-candidate
           if ($LASTEXITCODE -ne 0) { throw 'Protected release candidate validation failed.' }
-        }
-        'aggregate' {
-          $workspaceRoot = (Resolve-Path '.').Path
-          $sessionId = if ([string]::IsNullOrWhiteSpace($env:BING_PROVIDER_EVIDENCE_SESSION_ID)) {
-            if ([string]::IsNullOrWhiteSpace($env:APPVEYOR_BUILD_ID)) {
-              throw 'Aggregate lane requires APPVEYOR_BUILD_ID or BING_PROVIDER_EVIDENCE_SESSION_ID.'
-            }
-            "ci-$($env:APPVEYOR_BUILD_ID)"
-          }
-          else { $env:BING_PROVIDER_EVIDENCE_SESSION_ID }
-          $aggregateOutputDirectory = 'artifacts/test-results/provider-aggregate'
-          $providerResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:PROVIDER_RESULTS_DIRECTORY)) { 'artifacts/provider-test-results' } else { $env:PROVIDER_RESULTS_DIRECTORY }
-          $sqliteResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:SQLITE_RESULTS_DIRECTORY)) { 'artifacts/test-results' } else { $env:SQLITE_RESULTS_DIRECTORY }
-          $unitResultsDirectory = if ([string]::IsNullOrWhiteSpace($env:UNIT_RESULTS_DIRECTORY)) { 'artifacts/test-results' } else { $env:UNIT_RESULTS_DIRECTORY }
-          $sourceIdentity = $env:BING_PROVIDER_SOURCE_IDENTITY
-          if ([string]::IsNullOrWhiteSpace($sourceIdentity)) {
-            throw 'Aggregate lane requires BING_PROVIDER_SOURCE_IDENTITY from the protected producer job.'
-          }
-          $arguments = @(
-            'run', '--project', '.\eng\Bing.ProviderEvidence.Cli\Bing.ProviderEvidence.Cli.csproj',
-            '-c', 'Release', '--no-restore', '--', '--workspace-root', $workspaceRoot,
-            '--aggregate-output-directory', $aggregateOutputDirectory,
-            '--provider-results-directory', $providerResultsDirectory,
-            '--sqlite-results-directory', $sqliteResultsDirectory,
-            '--unit-results-directory', $unitResultsDirectory,
-            '--evidence-session-id', $sessionId,
-            '--source-identity', $sourceIdentity
-          )
-          foreach ($name in @('FORMAL_HOST_RESULTS_DIRECTORY', 'RS0026_INVENTORY', 'API_GATE_FILE')) {
-            $value = [Environment]::GetEnvironmentVariable($name)
-            if (-not [string]::IsNullOrWhiteSpace($value)) {
-              $switchName = switch ($name) {
-                'SQLITE_RESULTS_DIRECTORY' { '--sqlite-results-directory' }
-                'FORMAL_HOST_RESULTS_DIRECTORY' { '--formal-host-results-directory' }
-                'RS0026_INVENTORY' { '--rs0026-inventory' }
-                'API_GATE_FILE' { '--api-gate-file' }
-              }
-              $arguments += $switchName
-              $arguments += $value
-            }
-          }
-          & dotnet @arguments
-          if ($LASTEXITCODE -ne 0) { throw 'Provider aggregate lane failed.' }
-          $aggregateMatrixPath = Join-Path $workspaceRoot ($aggregateOutputDirectory.Replace('/', '\') + '\provider-capability-matrix.json')
-          if (-not (Test-Path -LiteralPath $aggregateMatrixPath -PathType Leaf)) {
-            throw 'Provider aggregate lane did not produce provider-capability-matrix.json.'
-          }
-          $aggregateMatrix = Get-Content -LiteralPath $aggregateMatrixPath -Raw -Encoding utf8 | ConvertFrom-Json
-          if (-not [bool]$aggregateMatrix.ReleaseReady) {
-            throw 'Provider aggregate lane rejected RC readiness; inspect the fail-closed aggregate report.'
-          }
         }
         default { throw "Unsupported PROVIDER_TEST_LANE '$lane'." }
       }
