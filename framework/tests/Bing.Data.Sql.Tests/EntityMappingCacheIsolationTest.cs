@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Collections.Concurrent;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
@@ -136,6 +137,155 @@ public class EntityMappingCacheIsolationTest
     }
 
     /// <summary>
+    /// 测试目的：实体映射缓存应对上下文字符串的大小写和首尾空白规范化，并报告一次命中。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenEquivalentContextValuesDifferByCaseAndWhitespace_ShouldReuseCacheEntryAndReportHit()
+    {
+        // Arrange
+        var resolver = new DefaultEntityMappingResolver();
+        var firstContext = new DatabaseContext
+        {
+            DbKey = " reporting ",
+            MappingProfile = " read ",
+            DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+        };
+        var secondContext = new DatabaseContext
+        {
+            DbKey = "REPORTING",
+            MappingProfile = "READ",
+            DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+        };
+
+        // Act
+        var first = resolver.Resolve(typeof(CacheSample), firstContext);
+        var second = resolver.Resolve(typeof(CacheSample), secondContext);
+        var statistics = resolver.MappingCacheStatistics;
+
+        // Assert
+        Assert.Same(first, second);
+        Assert.Equal(1, statistics.CacheMissCount);
+        Assert.Equal(1, statistics.CacheHitCount);
+        Assert.Equal(1, statistics.EntryCount);
+    }
+
+    /// <summary>
+    /// 测试目的：不同实体类型必须使用独立的最终映射缓存项。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenEntityTypeChanges_ShouldUseIndependentCacheEntries()
+    {
+        // Arrange
+        var resolver = new DefaultEntityMappingResolver();
+
+        // Act
+        var first = resolver.Resolve(typeof(CacheSample), null);
+        var second = resolver.Resolve(typeof(OtherCacheSample), null);
+        var cachedSecond = resolver.Resolve(typeof(OtherCacheSample), null);
+        var statistics = resolver.MappingCacheStatistics;
+
+        // Assert
+        Assert.NotSame(first, second);
+        Assert.Same(second, cachedSecond);
+        Assert.Equal(typeof(CacheSample), first.EntityType);
+        Assert.Equal(typeof(OtherCacheSample), second.EntityType);
+        Assert.Equal(2, statistics.CacheMissCount);
+        Assert.Equal(1, statistics.CacheHitCount);
+        Assert.Equal(2, statistics.EntryCount);
+    }
+
+    /// <summary>
+    /// 测试目的：最终 Database、Schema、TableName 各自变化时都必须产生独立缓存项。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenFinalObjectNameDimensionChangesIndependently_ShouldMissEachTime()
+    {
+        // Arrange
+        var options = new SqlMetadataOptions();
+        var mappingOptions = new EntityMappingOptions
+        {
+            EntityType = typeof(CacheSample),
+            DbKey = "reporting",
+            Database = "database_a",
+            Schema = "schema_a",
+            TableName = "table_a"
+        };
+        options.EntityMappings.Add(mappingOptions);
+        var resolver = new DefaultEntityMappingResolver(options: options);
+        var context = new DatabaseContext
+        {
+            DbKey = "reporting",
+            DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+        };
+
+        // Act
+        var databaseA = resolver.Resolve(typeof(CacheSample), context);
+        mappingOptions.Database = "database_b";
+        var databaseB = resolver.Resolve(typeof(CacheSample), context);
+        mappingOptions.Schema = "schema_b";
+        var schemaB = resolver.Resolve(typeof(CacheSample), context);
+        mappingOptions.TableName = "table_b";
+        var tableB = resolver.Resolve(typeof(CacheSample), context);
+        var statistics = resolver.MappingCacheStatistics;
+
+        // Assert
+        Assert.NotSame(databaseA, databaseB);
+        Assert.NotSame(databaseB, schemaB);
+        Assert.NotSame(schemaB, tableB);
+        Assert.Equal("database_a", databaseA.Table.Database);
+        Assert.Equal("database_b", databaseB.Table.Database);
+        Assert.Equal("schema_a", databaseB.Table.Schema);
+        Assert.Equal("schema_b", schemaB.Table.Schema);
+        Assert.Equal("table_a", schemaB.Table.TableName);
+        Assert.Equal("table_b", tableB.Table.TableName);
+        Assert.Equal(4, statistics.CacheMissCount);
+        Assert.Equal(4, statistics.EntryCount);
+    }
+
+    /// <summary>
+    /// 测试目的：陈旧失败 Lazy 不得删除已发布的当前 Lazy。
+    /// </summary>
+    [Fact]
+    public void RemoveModelMetadataCacheEntryIfCurrent_WhenValueIsStale_ShouldKeepCurrentValue()
+    {
+        var cache = new ConcurrentDictionary<RuntimeTypeHandle, Lazy<EntityModelMetadata>>();
+        var typeHandle = typeof(CacheSample).TypeHandle;
+        var stale = new Lazy<EntityModelMetadata>(() => null);
+        var current = new Lazy<EntityModelMetadata>(() => null);
+        cache[typeHandle] = current;
+
+        Assert.False(DefaultEntityMappingResolver.RemoveModelMetadataCacheEntryIfCurrent(cache, typeHandle, stale));
+        Assert.Same(current, cache[typeHandle]);
+        Assert.True(DefaultEntityMappingResolver.RemoveModelMetadataCacheEntryIfCurrent(cache, typeHandle, current));
+        Assert.False(cache.ContainsKey(typeHandle));
+    }
+
+    /// <summary>
+    /// 测试目的：同一实体同一最终键并发解析时应观察最终映射构造次数合同。
+    /// </summary>
+    [Fact]
+    public async Task Resolve_WhenSameMappingIsResolvedConcurrently_ShouldCreateFinalMappingOnce()
+    {
+        var resolver = new CountingMappingResolver();
+        const int callerCount = 32;
+        using var ready = new CountdownEvent(callerCount);
+        using var start = new ManualResetEventSlim();
+        var tasks = Enumerable.Range(0, callerCount).Select(_ => Task.Factory.StartNew(() =>
+        {
+            ready.Signal();
+            start.Wait();
+            return resolver.Resolve(typeof(CacheSample), null);
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
+
+        Assert.True(SpinWait.SpinUntil(() => ready.CurrentCount == 0, TimeSpan.FromSeconds(5)));
+        start.Set();
+        var mappings = await Task.WhenAll(tasks);
+
+        Assert.All(mappings, mapping => Assert.Same(mappings[0], mapping));
+        Assert.Equal(1, resolver.MappingCreationCount);
+    }
+
+    /// <summary>
     /// 测试目的：派生解析器根据运行时路由解析出不同架构和表名时，缓存键必须使用最终对象名，避免返回前一次路由的映射。
     /// </summary>
     [Fact]
@@ -196,6 +346,68 @@ public class EntityMappingCacheIsolationTest
         // Assert
         Assert.All(mappings, mapping => Assert.Same(mappings[0], mapping));
         Assert.Equal(1, provider.MetadataCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：模型元数据首次加载失败时不得永久保留 faulted Lazy，后续解析应允许重试。
+    /// </summary>
+    [Fact]
+    public void Resolve_WhenModelMetadataProviderFailsOnce_ShouldRemoveFailureAndAllowRetry()
+    {
+        // Arrange
+        var provider = new FailOnceEntityModelMetadataProvider();
+        var resolver = new DefaultEntityMappingResolver(provider);
+
+        // Act
+        var firstException = Assert.Throws<InvalidOperationException>(() =>
+            resolver.Resolve(typeof(CacheSample), null));
+        var mapping = resolver.Resolve(typeof(CacheSample), null);
+
+        // Assert
+        Assert.Equal("metadata failed", firstException.Message);
+        Assert.Equal("cache_samples", mapping.Table.TableName);
+        Assert.Equal(2, provider.MetadataCallCount);
+    }
+
+    /// <summary>
+    /// 测试目的：多个调用者共享首次失败的模型 Lazy 后，失败项移除应允许后续解析重试。
+    /// </summary>
+    [Fact]
+    public async Task Resolve_WhenConcurrentMetadataFailureIsRetried_ShouldAllowAllWaitersToRetry()
+    {
+        // Arrange
+        var provider = new BlockingFailOnceEntityModelMetadataProvider();
+        var resolver = new DefaultEntityMappingResolver(provider);
+        const int callerCount = 8;
+        using var ready = new CountdownEvent(callerCount);
+        using var start = new ManualResetEventSlim();
+        var failures = 0;
+        var tasks = Enumerable.Range(0, callerCount).Select(_ => Task.Factory.StartNew(() =>
+        {
+            ready.Signal();
+            start.Wait();
+            try
+            {
+                resolver.Resolve(typeof(CacheSample), null);
+            }
+            catch (InvalidOperationException)
+            {
+                Interlocked.Increment(ref failures);
+            }
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
+
+        // Act
+        Assert.True(SpinWait.SpinUntil(() => ready.CurrentCount == 0, TimeSpan.FromSeconds(5)));
+        start.Set();
+        Assert.True(provider.FirstCallEntered.Wait(TimeSpan.FromSeconds(5)));
+        provider.ReleaseFirstCall();
+        await Task.WhenAll(tasks);
+        var mapping = resolver.Resolve(typeof(CacheSample), null);
+
+        // Assert
+        Assert.Equal(callerCount, failures);
+        Assert.Equal(2, provider.MetadataCallCount);
+        Assert.Equal("cache_samples", mapping.Table.TableName);
     }
 
     /// <summary>
@@ -449,6 +661,17 @@ public class EntityMappingCacheIsolationTest
     }
 
     /// <summary>
+    /// 第二个缓存测试实体。
+    /// </summary>
+    private sealed class OtherCacheSample
+    {
+        /// <summary>
+        /// 名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
     /// 可统计原始模型元数据访问次数的测试提供器。
     /// </summary>
     private sealed class CountingEntityModelMetadataProvider : IEntityModelMetadataProvider
@@ -462,6 +685,71 @@ public class EntityMappingCacheIsolationTest
         public EntityModelMetadata GetMetadata(Type entityType)
         {
             MetadataCallCount++;
+            var properties = entityType.GetProperties().Select(property => new EntityPropertyMetadata(property));
+            return new EntityModelMetadata(entityType, "cache_samples", "cache", properties);
+        }
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
+    }
+
+    /// <summary>
+    /// 首次调用失败、后续调用成功的模型元数据提供器。
+    /// </summary>
+    private sealed class FailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider
+    {
+        /// <summary>
+        /// 获取元数据的调用次数。
+        /// </summary>
+        public int MetadataCallCount { get; private set; }
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata(Type entityType)
+        {
+            MetadataCallCount++;
+            if (MetadataCallCount == 1)
+                throw new InvalidOperationException("metadata failed");
+            var properties = entityType.GetProperties().Select(property => new EntityPropertyMetadata(property));
+            return new EntityModelMetadata(entityType, "cache_samples", "cache", properties);
+        }
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
+    }
+
+    /// <summary>
+    /// 首次调用阻塞后失败、后续调用成功的模型元数据提供器。
+    /// </summary>
+    private sealed class BlockingFailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider
+    {
+        private readonly ManualResetEventSlim _releaseFirstCall = new();
+        private int _metadataCallCount;
+
+        /// <summary>
+        /// 获取元数据的调用次数。
+        /// </summary>
+        public int MetadataCallCount => Volatile.Read(ref _metadataCallCount);
+
+        /// <summary>
+        /// 首次 provider 调用已进入阻塞点。
+        /// </summary>
+        public ManualResetEventSlim FirstCallEntered { get; } = new();
+
+        /// <summary>
+        /// 释放首次 provider 调用。
+        /// </summary>
+        public void ReleaseFirstCall() => _releaseFirstCall.Set();
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata(Type entityType)
+        {
+            var call = Interlocked.Increment(ref _metadataCallCount);
+            if (call == 1)
+            {
+                FirstCallEntered.Set();
+                _releaseFirstCall.Wait();
+                throw new InvalidOperationException("metadata failed");
+            }
             var properties = entityType.GetProperties().Select(property => new EntityPropertyMetadata(property));
             return new EntityModelMetadata(entityType, "cache_samples", "cache", properties);
         }
@@ -496,5 +784,26 @@ public class EntityMappingCacheIsolationTest
         /// <inheritdoc />
         protected override string GetTableName(EntityModelMetadata model, EntityMappingOptions mappingOptions) =>
             $"cache_samples_{RouteSuffix}";
+    }
+
+    /// <summary>
+    /// 统计最终映射构造次数的测试解析器。
+    /// </summary>
+    private sealed class CountingMappingResolver : DefaultEntityMappingResolver
+    {
+        private int _mappingCreationCount;
+
+        /// <summary>
+        /// 最终映射构造次数。
+        /// </summary>
+        public int MappingCreationCount => Volatile.Read(ref _mappingCreationCount);
+
+        /// <inheritdoc />
+        protected override EntityMappingMetadata CreateMapping(EntityModelMetadata model,
+            DatabaseContext databaseContext, string schema, string tableName, EntityMappingOptions mappingOptions)
+        {
+            Interlocked.Increment(ref _mappingCreationCount);
+            return base.CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+        }
     }
 }

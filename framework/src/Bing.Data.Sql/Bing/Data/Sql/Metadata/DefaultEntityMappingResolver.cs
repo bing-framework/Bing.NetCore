@@ -224,8 +224,17 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         DatabaseContext databaseContext, string schema, string tableName, EntityMappingOptions mappingOptions)
     {
         if (_mappingCacheCapacity == null)
-            return _mappingCache.GetOrAdd(cacheKey,
-                _ => CreateMapping(model, databaseContext, schema, tableName, mappingOptions));
+        {
+            // 命中路径在 Resolve 中保持无锁；仅对并发 miss 串行化最终映射构造，避免重复执行昂贵的列元数据转换。
+            lock (_mappingCacheAdmissionLock)
+            {
+                if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
+                    return cachedMapping;
+                var mapping = CreateMapping(model, databaseContext, schema, tableName, mappingOptions);
+                _mappingCache.TryAdd(cacheKey, mapping);
+                return mapping;
+            }
+        }
         if (_mappingCacheCapacity.Value == 0)
         {
             System.Threading.Interlocked.Increment(ref _mappingCacheBypassCount);
@@ -715,9 +724,42 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// </summary>
     /// <param name="entityType">实体类型。</param>
     /// <returns>用于计算最终映射对象名的稳定模型元数据。</returns>
-    private EntityModelMetadata GetCachedModelMetadata(Type entityType) => _modelCache.GetOrAdd(entityType.TypeHandle,
-        _ => new Lazy<EntityModelMetadata>(() => GetModelMetadata(entityType),
-            LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+    private EntityModelMetadata GetCachedModelMetadata(Type entityType)
+    {
+        var typeHandle = entityType.TypeHandle;
+        var lazy = _modelCache.GetOrAdd(typeHandle,
+            _ => new Lazy<EntityModelMetadata>(() => GetModelMetadata(entityType),
+                LazyThreadSafetyMode.ExecutionAndPublication));
+        try
+        {
+            return lazy.Value;
+        }
+        catch
+        {
+            // 仅移除仍由本次调用持有的失败 Lazy，避免覆盖并发成功发布的新值。
+            RemoveModelMetadataCacheEntryIfCurrent(_modelCache, typeHandle, lazy);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// 仅在缓存仍持有指定 Lazy 时移除模型元数据项。
+    /// </summary>
+    /// <param name="cache">模型元数据缓存。</param>
+    /// <param name="typeHandle">实体运行时类型句柄。</param>
+    /// <param name="value">本次调用观察到的 Lazy。</param>
+    /// <returns>成功移除当前值时返回 <see langword="true"/>。</returns>
+    internal static bool RemoveModelMetadataCacheEntryIfCurrent(
+        ConcurrentDictionary<RuntimeTypeHandle, Lazy<EntityModelMetadata>> cache,
+        RuntimeTypeHandle typeHandle, Lazy<EntityModelMetadata> value)
+    {
+        if (cache == null)
+            throw new ArgumentNullException(nameof(cache));
+        if (value == null)
+            throw new ArgumentNullException(nameof(value));
+        return ((ICollection<KeyValuePair<RuntimeTypeHandle, Lazy<EntityModelMetadata>>>)cache)
+            .Remove(new KeyValuePair<RuntimeTypeHandle, Lazy<EntityModelMetadata>>(typeHandle, value));
+    }
 
     /// <summary>
     /// 获取字段存储方式
