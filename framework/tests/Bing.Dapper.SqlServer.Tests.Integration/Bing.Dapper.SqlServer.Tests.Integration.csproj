@@ -34,8 +34,8 @@
     </Content>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(CI)' != 'true' And '$(ContinuousIntegrationBuild)' != 'true' And Exists('$(MSBuildProjectDirectory)\integration.runsettings.local')">
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.runsettings.local</RunSettingsFilePath>
+  <PropertyGroup Condition="'$(CI)' != 'true' And '$(ContinuousIntegrationBuild)' != 'true' And Exists('$(MSBuildProjectDirectory)\integration.local.runsettings')">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.local.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
 </Project>
