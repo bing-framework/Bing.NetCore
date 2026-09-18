@@ -1,5 +1,7 @@
 # SQL 事务与数据库集成测试
 
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](../ReleaseNotes.md)
+
 ## 目标
 
 本说明覆盖 SQL/Dapper 连接与事务 API 收敛后的本地验证方式。`ISqlTransactionScope` 是唯一推荐的事务生命周期入口；外部 Provider 测试只可连接受控测试库，禁止使用生产连接字符串。

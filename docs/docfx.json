@@ -24,12 +24,7 @@
             "**/Bing.MultiTenancy.csproj",
             "**/Bing.MultiTenancy.Abstractions.csproj",
             "**/Bing.AspNetCore.MultiTenancy.csproj",
-            "**/Bing.Authorization.Abstractions.csproj",
-            "**/Bing.Logs.csproj",
-            "**/Bing.Logs.Exceptionless.csproj",
-            "**/Bing.Logs.Log4Net.csproj",
-            "**/Bing.Logs.NLog.csproj",
-            "**/Bing.Logs.Serilog.csproj"
+            "**/Bing.Authorization.Abstractions.csproj"
           ]
         }
       ],

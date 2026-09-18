@@ -1,14 +1,109 @@
 - name: 主页
   href: index.md
+- name: English map
+  href: README.en.md
+- name: 入门
+  items:
+    - name: 使用文档
+      href: getting-started/使用文档.md
+    - name: 能力矩阵
+      href: getting-started/能力矩阵.md
+    - name: 包索引
+      href: getting-started/包索引.md
+    - name: 术语表
+      href: getting-started/术语表.md
+    - name: API 速查索引
+      href: getting-started/API速查索引.md
+    - name: 从 ABP 迁移
+      href: getting-started/abp-migration.md
+    - name: FAQ 与排错
+      href: getting-started/FAQ与排错.md
+- name: 架构
+  items:
+    - name: 架构文档
+      href: architecture/架构文档.md
+    - name: 设计思路文档
+      href: architecture/设计思路文档.md
+    - name: 子系统深挖
+      href: architecture/子系统深挖.md
+    - name: 事件与消息
+      href: architecture/事件与消息文档.md
+    - name: 功能完成度与已知缺口
+      href: architecture/功能完成度.md
+    - name: 架构决策记录
+      href: architecture/adr/README.md
+- name: 指南
+  items:
+    - name: 领域建模指南
+      href: guides/领域建模指南.md
+    - name: 扩展指南
+      href: guides/扩展指南.md
+    - name: 配置参考
+      href: guides/配置参考.md
+    - name: 最佳实践
+      href: guides/最佳实践.md
+    - name: 横切能力文档
+      href: guides/横切能力文档.md
+    - name: 组件库文档
+      href: guides/组件库文档.md
+    - name: 配方集
+      href: guides/recipes/README.md
+- name: 运维与质量
+  items:
+    - name: 日志与可观测性
+      href: operations/日志与可观测性.md
+    - name: 安全指南
+      href: operations/安全指南.md
+    - name: 性能指南
+      href: operations/性能指南.md
+    - name: 测试指南
+      href: operations/测试指南.md
+    - name: 工程化文档
+      href: operations/工程化文档.md
+    - name: 资产索引
+      href: operations/资产索引.md
+- name: 数据访问专项
+  items:
+    - name: SQL 文档索引
+      href: sql/README.md
+    - name: Provider 能力
+      href: sql/provider-capabilities.md
+    - name: Migration 指南
+      href: sql/migration-guide.md
+    - name: PostgreSQL 函数
+      href: sql/postgresql-functions.md
+    - name: SqlQuery 用法
+      href: sql/sqlquery-usage.md
+    - name: SqlQuery Lambda 用法
+      href: sql/sqlquery-lambda-usage.md
+    - name: 变更 API 生命周期
+      href: sql/sql-mutation-api-lifecycle.md
+    - name: 变更 API 批量执行
+      href: sql/sql-mutation-batch-execution.md
+    - name: 变更 API 子句设计
+      href: sql/sql-mutation-clause-design.md
+    - name: 结构化表引用与跨库查询
+      href: sql/sql-table-reference-and-cross-database-query.md
+- name: 测试
+  items:
+    - name: 数据库集成测试
+      href: testing/database-integration-tests.md
+    - name: 集成测试总览
+      href: testing/integration-testing.md
+- name: 跨版本升级
+  href: migrations/README.md
 - name: API 文档
   href: api/
 - name: 发行说明
   href: ReleaseNotes.md
-- name: 数据库集成测试
-  href: integration-testing.md
-- name: SQL事务集成测试
-  href: testing/database-integration-tests.md
-- name: 结构化表引用与跨数据库查询
-  href: sql-table-reference-and-cross-database-query.md
+- name: 文档变更记录
+  href: CHANGELOG.md
+# 注意：选型向导.html 与 cheatsheet.html 是独立 HTML 页面，
+# docfx 的 build.content.files 只收录 *.{md,yml}，放进 toc 会产生「找不到内容」告警，
+# 因此不在此处登记 —— 请在 包索引.md / 使用文档.md / README 中以链接方式引用。
+#
+# 另：本文件不要用 HTML 注释语法写注释。YAML 里它不是注释，会让整个文件解析失败
+# （ScannerError: could not find expected ':'），docfx 构建随之报错。
+# 已由 eng/ci/check-docs.py 的「toc结构」「yaml注释」两项检查兜住。
 - name: Github
   href: https://github.com/bing-framework/Bing.NetCore

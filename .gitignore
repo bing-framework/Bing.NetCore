@@ -285,3 +285,11 @@ modules/admin/src/**/appsettings.Development.json
 
 # Output Libraries
 output/
+
+# docfx generated site (only docs/docfx.json, docs/toc.yml and sources are tracked)
+docs/_site/
+# docfx metadata output into docs/api/（docfx.json 的 metadata.dest）。
+# docs/api/index.md 是 docfx 的落地页存根（由 docfx / 维护者负责），
+# 其余 *.yml 均为生成物，不入库。手工维护的 API 速查索引见
+# docs/getting-started/API速查索引.md。
+docs/api/*.yml

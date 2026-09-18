@@ -2,6 +2,8 @@
 
 ## [7.0.0]
 
+> **升级指引**：跨版本破坏性变更总览、处置顺序与验收清单见 **[迁移指南](migrations/README.md)**；本次 SQL 事务 API 的详细迁移步骤见 [SQL 事务 API 迁移说明](migrations/sql-transaction-api-vNext.md)。
+
 ### 破坏性变更
 
 * Dapper Query 和 Executor 不再公开连接或事务管理入口；请使用 `ISqlTransactionScopeFactory` 创建并完成 `ISqlTransactionScope`。

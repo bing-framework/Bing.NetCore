@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" width="680" height="560">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="30" fill="#26215C" font-size="15" font-weight="500" font-family="Microsoft YaHei, sans-serif">写路径与事件 Outbox 数据流</text>
+
+  <rect x="240" y="50" width="200" height="48" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="340" y="72" fill="#0C447C" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">请求入口</text>
+  <text x="340" y="89" fill="#185FA5" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Controller / Application Service</text>
+
+  <rect x="240" y="128" width="200" height="48" rx="10" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+  <text x="340" y="150" fill="#27500A" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">领域仓储</text>
+  <text x="340" y="167" fill="#3B6D11" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">IRepository / IStore</text>
+
+  <rect x="210" y="206" width="260" height="48" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+  <text x="340" y="228" fill="#633806" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">UoW.SaveChangesAsync</text>
+  <text x="340" y="245" fill="#854F0B" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">开启 CAP 事务 BeginTransaction</text>
+
+  <rect x="40" y="300" width="230" height="48" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="155" y="322" fill="#3C3489" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">本地事件派发</text>
+  <text x="155" y="339" fill="#534AB7" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">ISimpleEventBus → IEventHandler&lt;T&gt;</text>
+
+  <rect x="410" y="300" width="230" height="48" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="525" y="322" fill="#085041" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">分布式消息注册</text>
+  <text x="525" y="339" fill="#0F6E56" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">IMessageEvent → 事务内 Register</text>
+
+  <rect x="200" y="392" width="280" height="48" rx="10" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+  <text x="340" y="414" fill="#712B13" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">业务落库 + capTransaction.Commit</text>
+  <text x="340" y="431" fill="#993C1D" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">同事务：先发消息后落库（Outbox）</text>
+
+  <rect x="200" y="470" width="280" height="48" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+  <text x="340" y="492" fill="#2C2C2A" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">MQ → CAP 消费者</text>
+  <text x="340" y="509" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">ICapSubscribe + [EventHandler]</text>
+
+  <path d="M340 98 L340 128" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M340 176 L340 206" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M320 254 C 270 278 210 280 155 300" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M360 254 C 410 278 470 280 525 300" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M155 348 C 250 365 310 372 340 392" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M525 348 C 450 365 370 372 340 392" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M340 440 L340 470" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+</svg>

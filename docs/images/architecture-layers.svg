@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" width="680" height="560">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="30" fill="#26215C" font-size="15" font-weight="500" font-family="Microsoft YaHei, sans-serif">Bing.NetCore 分层架构（依赖自上而下）</text>
+
+  <rect x="60" y="70" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="76" width="5" height="44" rx="2" fill="#185FA5"/>
+  <text x="84" y="96" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">Web / 应用层</text>
+  <text x="84" y="114" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">AspNetCore · Mvc · 统一响应 · JWT · 多租户</text>
+
+  <rect x="60" y="140" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="146" width="5" height="44" rx="2" fill="#0F6E56"/>
+  <text x="84" y="166" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">数据访问层</text>
+  <text x="84" y="184" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">EF Core · FreeSQL · Dapper · Bing.Data.Sql</text>
+
+  <rect x="60" y="210" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="216" width="5" height="44" rx="2" fill="#3B6D11"/>
+  <text x="84" y="236" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">DDD 领域层</text>
+  <text x="84" y="254" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">Entity · 聚合根 · 值对象 · IRepository · IStore</text>
+
+  <rect x="60" y="280" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="286" width="5" height="44" rx="2" fill="#534AB7"/>
+  <text x="84" y="306" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">核心层</text>
+  <text x="84" y="324" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">事件 · 异常 · 本地化 · 映射 · 验证 · 当前用户</text>
+
+  <rect x="60" y="350" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="356" width="5" height="44" rx="2" fill="#854F0B"/>
+  <text x="84" y="376" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">模块启动层</text>
+  <text x="84" y="394" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">IBingModule · [DependsOnModule] · 约定式 DI</text>
+
+  <rect x="60" y="420" width="560" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+  <rect x="66" y="426" width="5" height="44" rx="2" fill="#5F5E5A"/>
+  <text x="84" y="446" fill="#444441" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif">基础设施层</text>
+  <text x="84" y="464" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">Bing.Uow · Bing.Security · Bing.Caching · Bing.Aop</text>
+
+  <path d="M624 126 L624 140" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M624 196 L624 210" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M624 266 L624 280" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M624 336 L624 350" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M624 406 L624 420" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="60" y="500" width="560" height="34" rx="10" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="84" y="522" fill="#444441" font-size="12" font-family="Microsoft YaHei, sans-serif">横切关注点（贯穿各层）：AOP 拦截 · 缓存 · 多租户解析 · 审计日志 · 统一异常</text>
+</svg>

@@ -1,5 +1,7 @@
 # RC 迁移指南
 
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](../ReleaseNotes.md)
+
 ## Transaction Factory
 
 事务工厂使用显式重载：

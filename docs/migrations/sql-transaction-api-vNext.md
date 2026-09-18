@@ -1,5 +1,7 @@
 # SQL 事务 API 迁移到 7.0.0
 
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](../ReleaseNotes.md)
+
 ## 概要
 
 7.0.0 收敛 Dapper 的连接和事务公开 API。`ISqlTransactionScope` 是唯一的公开事务生命周期对象，Dapper 自有连接统一通过 `ISqlDbConnectionFactoryResolver` 创建。

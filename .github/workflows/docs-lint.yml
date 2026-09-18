@@ -1,0 +1,54 @@
+name: docs-lint
+
+# 文档一致性校验。与 docfx.yml 的分工：
+#   - docfx.yml      : 构建并部署文档站点（重，需要 .NET SDK）
+#   - docs-lint.yml  : 只做一致性校验（轻，纯 Python 标准库，无需 .NET）
+#
+# 为什么单独拆一个 workflow：docfx 只有在 push 到 main/master/dev 时才跑，
+# 而文档错误（漏包、断链、README 与 index.md 漂移）应该在 **PR 阶段**就拦住。
+on:
+  push:
+    branches:
+      - "main"
+      - "master"
+      - "dev"
+    paths:
+      - "**.md"
+      - "**.yml"
+      - "**.html"
+      - "eng/ci/check-docs.py"
+      - "eng/ci/sync-docs-index.py"
+      - ".github/workflows/docs-lint.yml"
+  pull_request:
+    paths:
+      - "**.md"
+      - "**.yml"
+      - "**.html"
+      - "eng/ci/check-docs.py"
+      - "eng/ci/sync-docs-index.py"
+      - ".github/workflows/docs-lint.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: "check docs consistency"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 1) 先确认 docs/index.md 是由根 README.md 正确派生的
+      - name: Verify docs/index.md is in sync with README.md
+        run: python eng/ci/sync-docs-index.py --check
+
+      # 2) 再做全量一致性校验（链接 / 包表 / 包级 README / 历史坏模式）
+      - name: Run docs consistency checks
+        run: python eng/ci/check-docs.py

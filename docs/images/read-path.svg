@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 500" width="680" height="500">
+  <defs>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="30" fill="#26215C" font-size="15" font-weight="500" font-family="Microsoft YaHei, sans-serif">读路径（查询执行流程）</text>
+
+  <rect x="220" y="44" width="240" height="44" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="340" y="64" fill="#0C447C" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Controller</text>
+  <text x="340" y="80" fill="#185FA5" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">QueryAppServiceBase.PagerQueryAsync</text>
+
+  <rect x="220" y="116" width="240" height="44" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+  <text x="340" y="136" fill="#3C3489" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">CreateQuery(parameter)</text>
+  <text x="340" y="152" fill="#534AB7" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">new Query&lt;TEntity&gt;(parameter)</text>
+
+  <rect x="190" y="188" width="300" height="44" rx="10" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+  <text x="340" y="208" fill="#27500A" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">_store.FindAsNoTracking().Where(Query&lt;T&gt;)</text>
+  <text x="340" y="224" fill="#3B6D11" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">IQueryStore 返回 IQueryable（延迟执行）</text>
+
+  <rect x="250" y="260" width="180" height="44" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+  <text x="340" y="280" fill="#633806" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Pager 排序 / 分页</text>
+
+  <rect x="210" y="332" width="260" height="44" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="340" y="352" fill="#085041" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">IAsyncQueryableExecuter</text>
+  <text x="340" y="368" fill="#0F6E56" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">→ IAsyncQueryableProvider</text>
+
+  <rect x="180" y="404" width="320" height="44" rx="10" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+  <text x="340" y="424" fill="#712B13" font-size="13" font-weight="500" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF Core ToListAsync / CountAsync 落库</text>
+  <text x="340" y="440" fill="#993C1D" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">PagerList&lt;TEntity&gt;.Convert(ToDto) → PagerList&lt;TDto&gt;</text>
+
+  <path d="M340 88 L340 116" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrowR)"/>
+  <path d="M340 160 L340 188" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrowR)"/>
+  <path d="M340 232 L340 260" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrowR)"/>
+  <path d="M340 304 L340 332" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrowR)"/>
+  <path d="M340 376 L340 404" stroke="#888780" stroke-width="1.5" fill="none" marker-end="url(#arrowR)"/>
+
+  <text x="40" y="478" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">注：FreeSQL 的 FreeSqlAsyncQueryableProvider.CanExecute=false 为占位，FreeSQL 查询不走此执行器。</text>
+</svg>

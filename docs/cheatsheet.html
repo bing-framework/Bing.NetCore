@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bing.NetCore Cheat Sheet（一页速查）</title>
+<style>
+  :root{
+    --text:#1f2328; --muted:#5b6570; --border:#d8dde3; --panel:#f6f8fa;
+    --accent:#2563eb; --accent-soft:#eff5ff; --warn:#8a6d1a; --warn-bg:#fff8e6;
+    --ok:#1a7f37;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--text);
+       font-family:"Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+       font-size:12.2px;line-height:1.5}
+  .page{max-width:1200px;margin:0 auto;padding:20px 22px 40px}
+  header{display:flex;justify-content:space-between;align-items:baseline;
+         border-bottom:2px solid var(--text);padding-bottom:6px;margin-bottom:12px}
+  h1{font-size:19px;margin:0}
+  .tip{color:var(--muted);font-size:11.5px}
+  .cols{column-count:3;column-gap:16px}
+  @media(max-width:1100px){.cols{column-count:2}}
+  @media(max-width:760px){.cols{column-count:1}}
+  section{break-inside:avoid;margin-bottom:12px;border:1px solid var(--border);
+          border-radius:7px;padding:8px 10px;background:#fff}
+  h2{font-size:12.6px;margin:0 0 5px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+  pre{background:var(--panel);border:1px solid var(--border);border-radius:5px;
+      padding:6px 8px;margin:4px 0;overflow:auto;font-size:11px;line-height:1.45}
+  code{font-family:"Cascadia Code",Consolas,Menlo,monospace}
+  table{width:100%;border-collapse:collapse;font-size:11px;margin-top:3px}
+  th,td{border:1px solid var(--border);padding:3px 5px;text-align:left;vertical-align:top}
+  th{background:var(--panel)}
+  .k{color:var(--accent)}
+  .warn{border-left:3px solid var(--warn);background:var(--warn-bg);
+        padding:4px 7px;margin:4px 0;font-size:11px;border-radius:0 4px 4px 0}
+  ol,ul{margin:3px 0;padding-left:16px}
+  li{margin:1px 0}
+  footer{margin-top:14px;border-top:1px solid var(--border);padding-top:7px;
+         color:var(--muted);font-size:11px}
+  @media print{
+    body{font-size:10px}
+    .page{max-width:none;padding:0}
+    section{break-inside:avoid;page-break-inside:avoid}
+    .noprint{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Bing.NetCore Cheat Sheet</h1>
+    <div class="tip">从零到一个 CRUD API · 类型名取自源码 · 打印请横向或缩放至 60%</div>
+  </header>
+
+  <div class="cols">
+
+  <section>
+    <h2>1. 最小宿主 Program.cs</h2>
+<pre><code>var b = WebApplication.CreateBuilder(args);
+b.Services.AddControllers().AddControllersAsServices();
+b.Services.AddBing().AddModule&lt;AppModule&gt;();
+var app = b.Build();
+app.UseBing();          // <span class="k">非 Web 用 serviceProvider.UseBing()</span>
+app.MapControllers();
+app.Run();</code></pre>
+    <div class="warn"><code>AddBing()</code> 在 <b>IBingBuilder</b> 上，不在 <code>IServiceCollection</code> 上。</div>
+  </section>
+
+  <section>
+    <h2>2. 模块 AppModule</h2>
+<pre><code>[ModuleLevel(ModuleLevel.Application)]
+public class AppModule : BingModule
+{
+    public override void ConfigureServices(IServiceCollection s)
+    {
+        s.AddMySqlUnitOfWork&lt;IAppUow, AppUow&gt;(cfg =&gt; { }, b =&gt; { });
+        s.EnableAop(o =&gt; o.ThrowAspectException = true);
+    }
+}</code></pre>
+    <div class="warn"><code>[DependsOnModule]</code> 只保证<b>加载</b>，不管<b>顺序</b>；顺序看 <code>ModuleLevel</code>（Core1/Framework10/Application20/Business30）。</div>
+  </section>
+
+  <section>
+    <h2>3. 实体</h2>
+<pre><code>// AggregateRoot&lt;T,K&gt; 已自带 IVersion（乐观锁 Version 属性）
+public class Order : AggregateRoot&lt;Order, Guid&gt;,
+    ISoftDelete, IAuditedObject&lt;Guid&gt;
+{
+    public string No { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? CreationTime { get; set; }
+    public Guid? CreatorId { get; set; }
+    // IModificationAuditedObject / IDeletionAuditedObject 按需追加
+}</code></pre>
+    <table>
+      <tr><th>接口 / 基类</th><th>作用</th></tr>
+      <tr><td><code>AggregateRoot&lt;T,K&gt;</code></td><td>聚合根，<b>已含 <code>IVersion</code></b>（byte[] Version）</td></tr>
+      <tr><td><code>ISoftDelete</code></td><td>软删除 + 查询自动过滤</td></tr>
+      <tr><td><code>IAuditedObject&lt;K&gt;</code></td><td>创建/修改审计字段自动填充</td></tr>
+      <tr><td><code>EntityBase&lt;T,K&gt;</code></td><td>不带软删除/审计的普通实体</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>4. 仓储（叫 IStore，不叫 IRepository）</h2>
+<pre><code>public interface IOrderStore : IStore&lt;Order, Guid&gt; { }
+
+public class OrderStore : StoreBase&lt;Order, Guid&gt;, IOrderStore
+{
+    public OrderStore(IUnitOfWorkManager uowm) : base(uowm) { }
+    // 约定式 DI 自动注册，不用手写 AddScoped
+}</code></pre>
+    <div class="warn">只读路径注入 <code>IQueryStore&lt;T,K&gt;</code>（<code>IStore</code> 的父接口），语义更清晰。</div>
+  </section>
+
+  <section>
+    <h2>5. 应用服务</h2>
+<pre><code>public class OrderAppService : AppServiceBase, IOrderAppService
+{
+    private readonly IOrderStore _store;
+    public OrderAppService(IOrderStore store) =&gt; _store = store;
+
+    [UnitOfWork]
+    public async Task&lt;Guid&gt; CreateAsync(OrderCreateDto dto)
+    {
+        var e = dto.MapTo&lt;Order&gt;();
+        await _store.AddAsync(e);
+        return e.Id;   // <span class="k">切面在方法成功后自动 Commit</span>
+    }
+}</code></pre>
+    <div class="warn">🔴 <code>[UnitOfWork]</code> 是 AOP 拦截器 —— <b>没调 <code>EnableAop(...)</code> 就完全不生效</b>，不报错但数据不落库。</div>
+  </section>
+
+  <section>
+    <h2>6. Controller（返回值自动包装）</h2>
+<pre><code>[ApiController, Route("api/orders")]
+public class OrderController : ApiControllerBase
+{
+    private readonly IOrderAppService _app;
+    public OrderController(IOrderAppService app) =&gt; _app = app;
+
+    [HttpPost]
+    public async Task&lt;Guid&gt; Create([FromBody] OrderCreateDto dto)
+        =&gt; await _app.CreateAsync(dto);
+    // 返回 {"code":..,"message":..,"data":..,"operationTime":..}
+}</code></pre>
+    <div class="warn">要返回原始结构（文件流等）加 <code>[IgnoreResultHandler]</code>。</div>
+  </section>
+
+  <section>
+    <h2>7. 注册入口速查</h2>
+    <table>
+      <tr><th>能力</th><th>入口</th></tr>
+      <tr><td>模块</td><td><code>AddBing().AddModule&lt;T&gt;()</code> / <code>UseBing()</code></td></tr>
+      <tr><td>EF MySQL</td><td><code>AddMySqlUnitOfWork</code></td></tr>
+      <tr><td>EF PostgreSQL</td><td><code class="k">AddPgSqlUnitOfWork</code>（不是 PostgreSql）</td></tr>
+      <tr><td>EF SqlServer / Oracle / Sqlite</td><td><code>AddSqlServer/Oracle/SqliteUnitOfWork</code></td></tr>
+      <tr><td>FreeSQL MySQL</td><td><code>AddMySqlUnitOfWork</code>（命名空间 <code>Bing.FreeSQL</code>）</td></tr>
+      <tr><td>Dapper</td><td><code>AddSqlServerProvider()</code> / <code>AddMySqlProvider()</code> …</td></tr>
+      <tr><td>AOP</td><td><code class="k">EnableAop</code>（没有 <code>AddAop</code>）</td></tr>
+      <tr><td>JWT</td><td><code>AddJwt(configuration)</code></td></tr>
+      <tr><td>事件总线</td><td><code>AddDefaultEventBus</code> / <code>AddCapEventBus</code></td></tr>
+      <tr><td>分布式锁</td><td><code>AddRedisDistributedLock</code></td></tr>
+      <tr><td>对象映射</td><td><code>AddAutoMapper</code></td></tr>
+      <tr><td>邮件</td><td><code>AddMailKit</code> / <code>AddSmtpEmail</code></td></tr>
+      <tr><td>缓存</td><td class="k">无入口 → <code>RedisHelper.Initialization</code> + <code>AddScoped&lt;ICache, CSRedisCacheManager&gt;()</code></td></tr>
+      <tr><td>文本模板</td><td class="k">无入口 → 手动装配 <code>BingTextTemplatingOptions</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>8. 五个最常见的坑</h2>
+    <ol>
+      <li><b>没有 <code>AddCache</code> / <code>AddCaching</code></b>：缓存必须手工注册。</li>
+      <li><b><code>[DependsOnModule]</code> 不排顺序</b>：顺序由 <code>ModuleLevel</code> 决定。</li>
+      <li><b>非 Web 宿主漏 <code>UseBing()</code></b>：静默不初始化。</li>
+      <li><b>把 Bing.Data.Sql 当 ORM</b>：它没有 <code>IUnitOfWork</code> / <code>IStore</code> / 审计。</li>
+      <li><b>事件总线混用</b>：<code>Bing.EventBus</code> 是遗留包，别用它的 <code>ILocalEventBus</code>。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>9. 命令</h2>
+<pre><code>dotnet build Bing.All.sln
+dotnet test framework/tests/&lt;工程&gt;/&lt;工程&gt;.csproj
+dotnet test 工程.csproj --filter "FullyQualifiedName~Xxx"
+RUN_INTEGRATION_TESTS=1 dotnet test ...      # 外部库集成测试
+dotnet pack framework/src/&lt;包&gt;/&lt;包&gt;.csproj -c Release</code></pre>
+    <div class="warn">测试工程在 <code>framework/tests/</code>，<b>不是</b> <code>tests/</code>。</div>
+  </section>
+
+  </div>
+
+  <footer>
+    完整文档：<code>docs/README.md</code>（导航）·
+    <code>docs/能力矩阵.md</code>（选 ORM）·
+    <code>docs/包索引.md</code>（找包）·
+    <code>docs/最佳实践.md</code>（写对）·
+    <code>docs/术语表.md</code>（名词）·
+    <code>docs/安全指南.md</code>（上线自查）·
+    <code>docs/选型向导.html</code>（交互向导）·
+    <code>docs/recipes/README.md</code>（配方）<br>
+    若本页与源码冲突，请以源码为准。
+  </footer>
+</div>
+</body>
+</html>

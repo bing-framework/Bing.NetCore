@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 700" width="680" height="700">
+  <text x="40" y="26" fill="#26215C" font-size="15" font-weight="500" font-family="Microsoft YaHei, sans-serif">模块分层全景（framework/src · 51 个框架工程）</text>
+
+  <rect x="40" y="44" width="600" height="176" rx="12" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+  <text x="54" y="66" fill="#3C3489" font-size="12" font-weight="500" font-family="Microsoft YaHei, sans-serif">L1 · 地基与核心（19）</text>
+  <rect x="54" y="74" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="121" y="90" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Core</text>
+  <rect x="200" y="74" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="267" y="90" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Uow</text>
+  <rect x="346" y="74" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="413" y="90" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Data</text>
+  <rect x="492" y="74" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="559" y="90" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">ObjectMapping</text>
+  <rect x="54" y="102" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="121" y="118" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Validation</text>
+  <rect x="200" y="102" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="267" y="118" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Validation.Abstr</text>
+  <rect x="346" y="102" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="413" y="118" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Auditing</text>
+  <rect x="492" y="102" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="559" y="118" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Auditing.Contracts</text>
+  <rect x="54" y="130" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="121" y="146" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Localization</text>
+  <rect x="200" y="130" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="267" y="146" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Localization.Abstr</text>
+  <rect x="346" y="130" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="413" y="146" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Security</text>
+  <rect x="492" y="130" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="559" y="146" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">ExceptionHandling</text>
+  <rect x="54" y="158" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="121" y="174" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">MultiTenancy</text>
+  <rect x="200" y="158" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="267" y="174" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">MultiTenancy.Abstr</text>
+  <rect x="346" y="158" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="413" y="174" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Caching</text>
+  <rect x="492" y="158" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="559" y="174" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Caching.CSRedis</text>
+  <rect x="54" y="186" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="121" y="202" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Logging</text>
+  <rect x="200" y="186" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="267" y="202" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Logging.Serilog</text>
+  <rect x="346" y="186" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#AFA9EC" stroke-width="0.5"/><text x="413" y="202" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Aop.AspectCore</text>
+
+  <rect x="40" y="232" width="600" height="64" rx="12" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+  <text x="54" y="254" fill="#27500A" font-size="12" font-weight="500" font-family="Microsoft YaHei, sans-serif">L4 · 领域层（3）</text>
+  <rect x="54" y="262" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#97C459" stroke-width="0.5"/><text x="121" y="278" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Ddd.Domain</text>
+  <rect x="200" y="262" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#97C459" stroke-width="0.5"/><text x="267" y="278" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Ddd.App.Contracts</text>
+  <rect x="346" y="262" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#97C459" stroke-width="0.5"/><text x="413" y="278" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Ddd.Application</text>
+
+  <rect x="40" y="308" width="600" height="148" rx="12" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+  <text x="54" y="330" fill="#085041" font-size="12" font-weight="500" font-family="Microsoft YaHei, sans-serif">L3 · 数据访问实现层（16）</text>
+  <rect x="54" y="338" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="121" y="354" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.Core</text>
+  <rect x="200" y="338" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="267" y="354" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.SqlServer</text>
+  <rect x="346" y="338" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="413" y="354" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.MySql</text>
+  <rect x="492" y="338" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="559" y="354" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.PostgreSql</text>
+  <rect x="54" y="366" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="121" y="382" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.Oracle</text>
+  <rect x="200" y="366" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="267" y="382" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EF.Sqlite</text>
+  <rect x="346" y="366" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="413" y="382" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">FreeSQL</text>
+  <rect x="492" y="366" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="559" y="382" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">FreeSQL.MySql</text>
+  <rect x="54" y="394" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="121" y="410" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.Core</text>
+  <rect x="200" y="394" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="267" y="410" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.SqlServer</text>
+  <rect x="346" y="394" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="413" y="410" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.MySql</text>
+  <rect x="492" y="394" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="559" y="410" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.PostgreSql</text>
+  <rect x="54" y="422" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="121" y="438" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.Oracle</text>
+  <rect x="200" y="422" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="267" y="438" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Dapper.Sqlite</text>
+  <rect x="346" y="422" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="413" y="438" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Data.Sql</text>
+  <rect x="492" y="422" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#5DCAA5" stroke-width="0.5"/><text x="559" y="438" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Data.Sql.Analyzers</text>
+
+  <rect x="40" y="468" width="600" height="120" rx="12" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+  <text x="54" y="490" fill="#0C447C" font-size="12" font-weight="500" font-family="Microsoft YaHei, sans-serif">L6 · 表现层（9）</text>
+  <rect x="54" y="498" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="121" y="514" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AspNetCore</text>
+  <rect x="200" y="498" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="267" y="514" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AspNetCore.Abstr</text>
+  <rect x="346" y="498" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="413" y="514" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AspNetCore.Mvc</text>
+  <rect x="492" y="498" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="559" y="514" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Mvc.Contracts</text>
+  <rect x="54" y="526" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="121" y="542" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">JwtBearer</text>
+  <rect x="200" y="526" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="267" y="542" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AspNetCore.MultiTenancy</text>
+  <rect x="346" y="526" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="413" y="542" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AspNetCore.Serilog</text>
+  <rect x="492" y="526" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="559" y="542" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">MiniProfiler</text>
+  <rect x="54" y="554" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#85B7EB" stroke-width="0.5"/><text x="121" y="570" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Permissions</text>
+
+  <rect x="40" y="600" width="600" height="64" rx="12" fill="#FAEEDA" stroke="#EF9F27" stroke-width="0.5"/>
+  <text x="54" y="622" fill="#633806" font-size="12" font-weight="500" font-family="Microsoft YaHei, sans-serif">横切 · 事件与扩展（4）</text>
+  <rect x="54" y="630" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#EF9F27" stroke-width="0.5"/><text x="121" y="646" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">Events</text>
+  <rect x="200" y="630" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#EF9F27" stroke-width="0.5"/><text x="267" y="646" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EventBus</text>
+  <rect x="346" y="630" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#EF9F27" stroke-width="0.5"/><text x="413" y="646" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">EventBus.Abstr</text>
+  <rect x="492" y="630" width="134" height="24" rx="6" fill="#FFFFFF" stroke="#EF9F27" stroke-width="0.5"/><text x="559" y="646" fill="#2C2C2A" font-size="11" font-family="Microsoft YaHei, sans-serif" text-anchor="middle">AutoMapper</text>
+
+  <text x="40" y="680" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">图中省略 Bing. 前缀：Core = Bing.Core，EF.SqlServer = Bing.EntityFrameworkCore.SqlServer。依赖方向自上而下（表现层 → 领域/应用 → 数据访问 → 核心）。</text>
+  <text x="40" y="694" fill="#5F5E5A" font-size="11" font-family="Microsoft YaHei, sans-serif">业务模块 modules/admin（Bing.Admin.*）与示例 samples/* 不在图中；EventBus / EventBus.Abstr 为遗留实现，CAP 集成使用 Bing.Events。</text>
+</svg>

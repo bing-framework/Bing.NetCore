@@ -17,4 +17,17 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <!--包内嵌 README：工程目录下存在 README.md 时才声明，避免 NU5039。
+      新增工程请一并创建 README.md（模板参考 framework/src/Bing.Core/README.md）-->
+  <PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)/README.md')">
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)/README.md')">
+    <None Include="$(MSBuildProjectDirectory)/README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!--注意：包图标 icon.png 的打包声明在 asset/props/misc.props 中（PackageIcon 在本文上方声明）。
+      两处必须配套存在，否则 pack 会报 NU5046（找不到图标文件）。-->
 </Project>

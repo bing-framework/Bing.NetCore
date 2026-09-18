@@ -1,5 +1,7 @@
 # Provider 能力
 
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](../ReleaseNotes.md)
+
 能力状态必须同时反映 Provider Profile、运行时 Fail Fast、单元测试、真实集成测试、Capability Catalog、Evidence 和本文档。`TestGenerated` 或静态声明不等于发布级 `ReleaseEvidence`。
 
 | Provider | 事务 | Streaming | Batch/Returning | Procedure / Function | OUT 参数 | RC 定位 |

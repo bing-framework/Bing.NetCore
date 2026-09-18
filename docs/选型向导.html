@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bing.NetCore 选型向导</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f7f8fa; --border:#e3e6ea; --text:#1f2328; --muted:#5b6570;
+    --accent:#2563eb; --accent-soft:#eff5ff; --warn-bg:#fff8e6; --warn-border:#e3b341;
+    --code-bg:#fbfcfd; --ok:#1a7f37;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"Microsoft YaHei","Segoe UI",system-ui,sans-serif;line-height:1.6;font-size:14px}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 24px 60px}
+  h1{font-size:24px;margin:0 0 6px}
+  .sub{color:var(--muted);margin-bottom:24px}
+  .sub a{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{border:1px solid var(--border);border-radius:10px;padding:16px 18px;background:#fff}
+  .card h2{font-size:15px;margin:0 0 4px}
+  .hint{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+  .q{margin-bottom:18px}
+  .q > label.qt{display:block;font-weight:600;font-size:13.5px;margin-bottom:8px}
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opt{border:1px solid var(--border);background:var(--panel);border-radius:8px;
+       padding:7px 12px;cursor:pointer;user-select:none;font-size:13px;transition:.12s}
+  .opt:hover{border-color:var(--accent)}
+  .opt.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+  .opt.dis{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
+      padding:12px;overflow:auto;font-size:12.5px;line-height:1.55;margin:0}
+  code{font-family:"Cascadia Code",Consolas,Menlo,monospace}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{border:1px solid var(--border);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel);font-weight:600}
+  .warn{border-left:3px solid var(--warn-border);background:var(--warn-bg);
+        padding:8px 12px;margin:8px 0;border-radius:0 6px 6px 0;font-size:13px}
+  .warn b{color:#8a6d1a}
+  .copy{float:right;border:1px solid var(--border);background:#fff;border-radius:6px;
+        padding:2px 9px;font-size:12px;cursor:pointer;color:var(--muted)}
+  .copy:hover{border-color:var(--accent);color:var(--accent)}
+  .tag{display:inline-block;background:var(--panel);border:1px solid var(--border);
+       border-radius:5px;padding:1px 7px;font-size:12px;color:var(--muted);margin-left:6px}
+  .sec{margin-top:22px}
+  .sec > h2{font-size:16px;margin:0 0 10px}
+  ul{margin:6px 0 0 18px;padding:0}
+  li{margin:3px 0}
+  .ok{color:var(--ok)}
+  footer{margin-top:34px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--border);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bing.NetCore 选型向导</h1>
+  <p class="sub">回答几个问题，直接得到「该装哪些 NuGet 包 + 可复制的启动代码」。数据基于仓库源码，详情见 <a href="包索引.md">包索引</a> · <a href="能力矩阵.md">能力矩阵</a>。</p>
+
+  <div class="grid">
+    <!-- 左：问题 -->
+    <div class="card">
+      <h2>第 1 步 · 选择</h2>
+      <p class="hint">前三项必选，其余按需勾选。</p>
+
+      <div class="q">
+        <label class="qt">① 你的主要场景？</label>
+        <div class="opts" id="q-scene">
+          <div class="opt" data-v="crud">业务 CRUD（要仓储 / 工作单元）</div>
+          <div class="opt" data-v="query">报表 / 批量 / 复杂 SQL</div>
+          <div class="opt" data-v="both">两者都要（推荐组合）</div>
+        </div>
+      </div>
+
+      <div class="q">
+        <label class="qt">② 目标数据库？</label>
+        <div class="opts" id="q-db">
+          <div class="opt" data-v="MySql">MySQL</div>
+          <div class="opt" data-v="SqlServer">SQL Server</div>
+          <div class="opt" data-v="PostgreSql">PostgreSQL</div>
+          <div class="opt" data-v="Oracle">Oracle</div>
+          <div class="opt" data-v="Sqlite">SQLite</div>
+        </div>
+      </div>
+
+      <div class="q">
+        <label class="qt">③ 项目的目标框架？</label>
+        <div class="opts" id="q-tfm">
+          <div class="opt" data-v="net6">net6.0 / net8.0</div>
+          <div class="opt" data-v="ns20">netstandard2.0（老工程）</div>
+        </div>
+      </div>
+
+      <div class="q">
+        <label class="qt">④ 还需要哪些能力？（可多选）</label>
+        <div class="opts multi" id="q-extra">
+          <div class="opt" data-v="jwt">JWT 认证</div>
+          <div class="opt" data-v="perm">权限/角色</div>
+          <div class="opt" data-v="event">跨服务事件（CAP）</div>
+          <div class="opt" data-v="cache">Redis 缓存</div>
+          <div class="opt" data-v="aop">AOP / [UnitOfWork]</div>
+          <div class="opt" data-v="tenant">多租户</div>
+          <div class="opt" data-v="log">Serilog 日志</div>
+          <div class="opt" data-v="pay">支付（支付宝/微信）</div>
+          <div class="opt" data-v="oauth">第三方登录</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：结果 -->
+    <div class="card">
+      <h2>第 2 步 · 结果</h2>
+      <p class="hint" id="placeholder">先在左边选完 ①②③。</p>
+      <div id="result" hidden>
+        <div id="orm-line" style="margin-bottom:10px"></div>
+
+        <div class="sec">
+          <h2>推荐包<span class="tag" id="pkg-count"></span>
+            <button class="copy" onclick="copyEl('pkglist')">复制</button></h2>
+          <table id="pkglist"></table>
+        </div>
+
+        <div class="sec">
+          <h2>安装命令
+            <button class="copy" onclick="copyEl('cmds')">复制</button></h2>
+          <pre id="cmds"></pre>
+        </div>
+
+        <div class="sec">
+          <h2>⚠ 注意事项</h2>
+          <div id="warns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代码 -->
+  <div class="card sec" id="codeCard" hidden>
+    <h2>第 3 步 · 启动代码
+      <button class="copy" onclick="copyEl('code')">复制</button></h2>
+    <p class="hint">按你的选择生成，命名空间与入口名均取自源码。</p>
+    <pre id="code"></pre>
+  </div>
+
+  <footer>
+    离线可用（纯静态，无外部依赖）。若结果与源码不一致，请信任源码并回来修正本文件 ·
+    <a href="README.md">文档导航</a> ·
+    <a href="最佳实践.md">最佳实践</a>
+  </footer>
+</div>
+
+<script>
+// 单一取值
+function bindSingle(id, cb){
+  const box = document.getElementById(id);
+  box.addEventListener('click', e=>{
+    const el = e.target.closest('.opt'); if(!el || el.classList.contains('dis')) return;
+    [...box.children].forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
+    cb(el.dataset.v);
+  });
+}
+function bindMulti(id, cb){
+  const box = document.getElementById(id);
+  box.addEventListener('click', e=>{
+    const el = e.target.closest('.opt'); if(!el) return;
+    el.classList.toggle('on');
+    cb([...box.children].filter(c=>c.classList.contains('on')).map(c=>c.dataset.v));
+  });
+}
+
+// 数据库 → EF provider 包名后缀 / 入口方法 / 命名空间
+const EF = {
+  MySql:      {pkg:'MySql',      fn:'AddMySqlUnitOfWork',      ns:'Bing.Datas.EntityFramework.MySql'},
+  SqlServer:  {pkg:'SqlServer',  fn:'AddSqlServerUnitOfWork',  ns:'Bing.Datas.EntityFramework.SqlServer'},
+  PostgreSql: {pkg:'PostgreSql', fn:'AddPgSqlUnitOfWork',      ns:'Bing.Datas.EntityFramework.PgSql'},
+  Oracle:     {pkg:'Oracle',     fn:'AddOracleUnitOfWork',     ns:'Bing.Datas.EntityFramework.Oracle'},
+  Sqlite:     {pkg:'Sqlite',     fn:'AddSqliteUnitOfWork',     ns:'Bing.Datas.EntityFramework.Sqlite'}
+};
+const DAP = {
+  MySql:'AddMySqlProvider', SqlServer:'AddSqlServerProvider',
+  PostgreSql:'AddPostgreSqlProvider', Oracle:'AddOracleProvider', Sqlite:'AddSqliteProvider'
+};
+const DB_LABEL = {MySql:'MySQL', SqlServer:'SQL Server', PostgreSql:'PostgreSQL', Oracle:'Oracle', Sqlite:'SQLite'};
+
+const state = {scene:null, db:null, tfm:null, extra:[]};
+
+bindSingle('q-scene', v=>{state.scene=v; render();});
+bindSingle('q-db',    v=>{state.db=v; render();});
+bindSingle('q-tfm',   v=>{state.tfm=v; render();});
+bindMulti ('q-extra', v=>{state.extra=v; render();});
+
+function copyEl(id){
+  const t = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    const b = event.target; const old = b.innerText;
+    b.innerText='已复制 ✓'; setTimeout(()=>b.innerText=old,1200);
+  });
+}
+
+function render(){
+  const {scene, db, tfm, extra} = state;
+  if(!scene || !db || !tfm){
+    document.getElementById('result').hidden = true;
+    document.getElementById('codeCard').hidden = true;
+    document.getElementById('placeholder').hidden = false;
+    return;
+  }
+  document.getElementById('placeholder').hidden = true;
+  document.getElementById('result').hidden = false;
+  document.getElementById('codeCard').hidden = false;
+
+  // ---- 选 ORM ----
+  let orm, ormNote='';
+  if(scene==='crud'){
+    if(tfm==='ns20'){
+      if(db!=='MySql'){ orm='freemysql';
+        ormNote = '你的目标是 ' + DB_LABEL[db] + '，但 FreeSQL 支<strong>只有 MySQL Provider</strong> —— 已改推荐 EF Core（需 net6.0+）。';
+        orm='ef';
+      } else { orm='freemysql'; }
+    } else { orm='ef'; }
+  } else if(scene==='query'){ orm='dapper'; }
+  else { // both
+    orm = (tfm==='ns20' && db==='MySql') ? 'freemysql+dapper' : 'ef+dapper';
+  }
+
+  const pkgs = [];   // {name, why}
+  const add = (n,w)=>{ if(!pkgs.find(p=>p.name===n)) pkgs.push({name:n, why:w}); };
+
+  add('Bing.Core','地基：模块系统、约定式 DI、<code>ISimpleEventBus</code>（通常被传递依赖带上）');
+  add('Bing.AspNetCore','Web 宿主：统一响应、请求日志、真实 IP 中间件');
+  add('Bing.AspNetCore.Mvc','MVC 封装：<code>ApiResult</code> 结果过滤器');
+
+  if(orm.includes('ef') || orm.includes('freemysql')){
+    add('Bing.Ddd.Domain','领域层：<code>IStore</code> / <code>IQueryStore</code> / <code>IUnitOfWork</code>');
+    add('Bing.Ddd.Application.Contracts','应用服务契约：<code>ICrudAppService</code>');
+    add('Bing.Ddd.Application','应用服务实现基类');
+  }
+  if(orm.includes('ef')){
+    add('Bing.EntityFrameworkCore','EF Core 支核心（<code>net6.0</code>）');
+    add('Bing.EntityFrameworkCore.'+EF[db].pkg,'EF Provider：'+DB_LABEL[db]+'（<code>'+EF[db].fn+'</code>）');
+    if(tfm==='ns20') add('（注意）','EF Core 支要求 <code>net6.0</code>，见右侧注意事项');
+  }
+  if(orm.includes('freemysql')){
+    add('Bing.FreeSQL','FreeSQL 支核心（<code>netstandard2.0</code>）');
+    add('Bing.FreeSQL.MySql','FreeSQL Provider：MySQL（<code>AddMySqlUnitOfWork</code>）');
+  }
+  if(orm.includes('dapper')){
+    add('Bing.Data.Sql','通用 SQL 引擎：Lambda→SQL、跨库、批量');
+    add('Bing.Dapper.'+db,'Dapper Provider：'+DB_LABEL[db]+'（<code>'+DAP[db]+'</code>）');
+  }
+
+  if(extra.includes('jwt'))   add('Bing.AspNetCore.Authentication.JwtBearer','JWT 认证（<code>AddJwt</code>）');
+  if(extra.includes('perm')){
+    add('Bing.Permissions','权限与用户模型');
+    add('Bing.Security','<code>ICurrentUser</code> 等安全基础');
+    if(!extra.includes('jwt')) add('Bing.AspNetCore.Authentication.JwtBearer','权限体系需要认证方案配合');
+  }
+  if(extra.includes('event')) add('Bing.Events','CAP 分布式事件 + Outbox（<code>AddCapEventBus</code>）');
+  if(extra.includes('cache')){
+    add('Bing.Caching','缓存抽象 <code>ICache</code>');
+    add('Bing.Caching.CSRedis','CSRedis 实现（也可用 <code>Bing.Caching.FreeRedis</code>）');
+  }
+  if(extra.includes('aop')){
+    add('Bing.Aop.AspectCore','AOP 拦截器（<code>EnableAop</code>）');
+    add('Bing.Uow','工作单元（<code>[UnitOfWork]</code> 依赖它）');
+  }
+  if(extra.includes('tenant')){
+    add('Bing.MultiTenancy','租户解析链');
+    add('Bing.AspNetCore.MultiTenancy','Web 侧多租户中间件');
+  }
+  if(extra.includes('log')){
+    add('Bing.Logging','日志核心');
+    add('Bing.Logging.Serilog','Serilog 集成');
+    add('Bing.AspNetCore.Serilog','Web 宿主 Serilog 接入');
+  }
+  if(extra.includes('pay'))   add('Bing.Biz.Payments','支付：<code>AddPay</code> / <code>AddAlipay</code> / <code>AddWechatpay</code>');
+  if(extra.includes('oauth')) add('Bing.Biz.OAuthLogin','第三方登录：十几个提供方');
+
+  const clean = pkgs.filter(p=>!p.name.startsWith('（'));
+
+  // ---- 渲染包表 ----
+  document.getElementById('pkg-count').textContent = clean.length + ' 个';
+  document.getElementById('pkglist').innerHTML =
+    '<tr><th>包</th><th>为什么需要它</th></tr>' +
+    clean.map(p=>'<tr><td><code>'+p.name+'</code></td><td>'+p.why+'</td></tr>').join('');
+
+  // ---- 安装命令 ----
+  document.getElementById('cmds').textContent =
+    clean.map(p=>'dotnet add package '+p.name).join('\n');
+
+  // ---- ORM 结论行 ----
+  let line='<div class="warn">数据访问方案：<b>';
+  if(orm==='ef') line += 'EF Core 支（'+DB_LABEL[db]+'）';
+  else if(orm==='freemysql') line += 'FreeSQL 支（MySQL）';
+  else if(orm==='dapper') line += 'Bing.Data.Sql + Dapper 支（'+DB_LABEL[db]+'）';
+  else if(orm==='ef+dapper') line += 'EF Core 管写入 + Bing.Data.Sql 管查询';
+  else line += 'FreeSQL 管写入 + Bing.Data.Sql 管查询';
+  line += '</b></div>';
+  if(ormNote) line += '<div class="warn">'+ormNote+'</div>';
+  document.getElementById('orm-line').innerHTML = line;
+
+  // ---- 注意事项 ----
+  const W = [];
+  if(orm.includes('dapper')) W.push('<b>Dapper 支不是 ORM</b>：没有 <code>IUnitOfWork</code>、<code>IStore</code>、审计和乐观锁。它只有 SQL 构建器 + 执行器。');
+  if(tfm==='ns20' && orm.includes('ef')) W.push('<b>TFM 冲突</b>：EF Core 支要求 <code>net6.0</code>（<code>netstandard2.0</code> 项目引用不到）。请改用 FreeSQL 支（仅 MySQL）或升级目标框架。');
+  if(orm.includes('freemysql')) W.push('<b>FreeSQL 无迁移、异步退化</b>：没有 <code>Migrate()</code>；对 <code>IQueryable</code> 调 <code>ToListAsync()</code> 会同步阻塞线程——高频路径改用仓储自带异步方法。');
+  if(orm==='ef+dapper' || orm==='freemysql+dapper') W.push('<b>混用不共享事务</b>：ORM 支与 Bing.Data.Sql 支是两条事务链路，跨支一致性要用 CAP 事件做最终一致。');
+  if(extra.includes('aop')) W.push('<b>AOP 必须开启</b>：<code>[UnitOfWork]</code> 是拦截器，没调用 <code>EnableAop(...)</code> 时静默失效、数据不落库。入口是 <code>EnableAop</code>，<b>没有 <code>AddAop</code></b>。');
+  if(extra.includes('cache')) W.push('<b>缓存没有注册入口</b>：不存在 <code>AddCache</code>。需 <code>RedisHelper.Initialization(...)</code> 后手工 <code>AddScoped&lt;ICache, CSRedisCacheManager&gt;()</code>。');
+  if(extra.includes('tenant')) W.push('<b>多租户只解析、不过滤</b>：三支 ORM 都没有内置租户查询过滤，必须自己加，否则跨租户数据泄露。');
+  if(extra.includes('event')) W.push('<b>订阅用 <code>[EventHandler]</code></b>，不是 <code>[CapSubscribe]</code>；消费者要幂等（至少一次投递）。');
+  if(extra.includes('perm')) W.push('<b>框架没有全局权限过滤器</b>：建议照抄参考实现的 <code>AuthorizeControllerModelConvention</code>，对所有控制器加 <code>AuthorizeFilter("jwt")</code>。');
+  if(extra.includes('pay')) W.push('<b><code>AddPay</code> 返回 <code>void</code></b>，不能链式调用，要单独一行。');
+  if(db==='Oracle' && orm.includes('dapper')) W.push('<b>Oracle TFM 例外</b>：<code>Bing.Dapper.Oracle</code> 是 <code>netstandard2.1</code>（其余 Provider 是 <code>netstandard2.0</code>）。');
+  if(!W.length) W.push('当前组合没有特别需要注意的坑。');
+  document.getElementById('warns').innerHTML = W.map(w=>'<div class="warn">'+w+'</div>').join('');
+
+  // ---- 生成代码 ----
+  const usings = new Set();
+  const body = [];
+
+  usings.add('Bing.Core.Modularity');
+  usings.add('Bing.DependencyInjection');
+
+  body.push('public class AppModule : BingModule');
+  body.push('{');
+  body.push('    public override void ConfigureServices(IServiceCollection services)');
+  body.push('    {');
+
+  if(orm.includes('ef')){
+    const e = EF[db];
+    usings.add(e.ns);
+    body.push('        // EF Core 工作单元 + '+DB_LABEL[db]);
+    body.push('        services.'+e.fn+'<IAppUnitOfWork, AppUnitOfWork>(');
+    body.push('            config => { config.ConnectionString = "..."; },');
+    body.push('            builder => { });');
+    body.push('');
+  }
+  if(orm.includes('freemysql')){
+    usings.add('Bing.FreeSQL');
+    body.push('        // FreeSQL 工作单元（命名空间是 Bing.FreeSQL，不是 Bing.Datas.EntityFramework.MySql）');
+    body.push('        services.AddMySqlUnitOfWork<IAppUnitOfWork, AppUnitOfWork>("server=...;database=...;uid=...;pwd=...");');
+    body.push('');
+  }
+  if(orm.includes('dapper')){
+    const ns = 'Bing.Dapper.' + db;
+    usings.add(ns);
+    body.push('        // Bing.Data.Sql + Dapper Provider');
+    body.push('        services.'+DAP[db]+'();');
+    body.push('        services.AddSqlDataSource(');
+    body.push('            "main", DatabaseType.'+db+', "connection string");');
+    body.push('');
+  }
+  if(extra.includes('jwt')){
+    usings.add('Microsoft.Extensions.DependencyInjection');
+    body.push('        services.AddJwt(Configuration);   // 配置节 JwtOptions');
+    body.push('');
+  }
+  if(extra.includes('event')){
+    usings.add('Bing.Events');
+    body.push('        services.AddCapEventBus(x => { /* CAP 配置 */ });');
+    body.push('');
+  }
+  if(extra.includes('cache')){
+    body.push('        RedisHelper.Initialization(csredis);            // 缓存没有 AddCache 入口');
+    body.push('        services.AddScoped<ICache, CSRedisCacheManager>();');
+    body.push('');
+  }
+  if(extra.includes('aop')){
+    body.push('        services.EnableAop(o => o.ThrowAspectException = true);  // 注意是 EnableAop');
+    body.push('');
+  }
+  if(extra.includes('tenant')){
+    body.push('        services.Configure<BingTenantResolveOptions>(o =>');
+    body.push('            o.TenantResolvers.Add<HeaderTenantResolveContributor>());');
+    body.push('');
+  }
+  if(extra.includes('log')){
+    body.push('        services.AddBingLogging();');
+    body.push('');
+  }
+  if(extra.includes('pay')){
+    body.push('        services.AddPay(x => { /* 支付配置 */ });   // 返回 void，不能链式');
+    body.push('');
+  }
+
+  // 去掉末尾空行
+  while(body[body.length-1]==='') body.pop();
+  body.push('    }');
+  body.push('}');
+
+  const code = [...usings].map(u=>'using '+u+';').sort().join('\n') + '\n\n' + body.join('\n')
+    + '\n\n// ---------- Program.cs ----------\n'
+    + 'var builder = WebApplication.CreateBuilder(args);\n'
+    + 'builder.Services.AddControllers().AddControllersAsServices();\n'
+    + 'builder.Services.AddBing().AddModule<AppModule>();     // 注意：AddBing() 后才是 AddModule\n'
+    + 'var app = builder.Build();\n'
+    + 'app.UseBing();                                        // 非 Web 宿主：serviceProvider.UseBing()\n'
+    + 'app.MapControllers();\n'
+    + 'app.Run();';
+
+  document.getElementById('code').textContent = code;
+}
+</script>
+</body>
+</html>
