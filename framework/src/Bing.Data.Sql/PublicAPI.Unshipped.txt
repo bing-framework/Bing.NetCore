@@ -719,3 +719,12 @@ Bing.Data.Sql.Builders.SqlProviderQueryCapabilities.UnionAll.init -> void
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreatePagePlan(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager, Bing.Data.Sql.ISqlBuilder pageBuilder) -> Bing.Data.Sql.SqlQueryPlan
 Bing.Data.Sql.SqlTextQuery.ToPage<TResult>(Bing.Data.IPager pager = null, int? timeout = null) -> Bing.Data.PagerList<TResult>
 Bing.Data.Sql.SqlTextQuery.ToPageAsync<TResult>(Bing.Data.IPager pager = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
+Bing.Data.Sql.Metadata.IEntityMappingSnapshotProvider
+Bing.Data.Sql.Metadata.IEntityMappingSnapshotProvider.CaptureSnapshot() -> Bing.Data.Sql.Metadata.IEntityMappingResolver
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.VersionedEntityMappingResolver(Bing.Data.Sql.IDatabaseContextAccessor databaseContextAccessor = null, Bing.Data.Sql.Configs.SqlMetadataOptions options = null, Bing.Data.Sql.Metadata.ITypeConverterResolver typeConverterResolver = null, Bing.Data.Sql.Metadata.IEntityModelMetadataProvider entityModelMetadataProvider = null) -> void
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.CurrentVersion.get -> long
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.PublishMappings(System.Collections.Generic.IEnumerable<Bing.Data.Sql.Configs.EntityMappingOptions> mappings) -> long
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.CaptureSnapshot() -> Bing.Data.Sql.Metadata.IEntityMappingResolver
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.GetDescriptor(System.Type entityType) -> Bing.Data.Sql.Metadata.EntityDescriptor
+Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.Resolve(System.Type entityType, Bing.Data.Sql.DatabaseContext databaseContext) -> Bing.Data.Sql.Metadata.EntityMappingMetadata

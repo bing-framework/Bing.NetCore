@@ -34,8 +34,8 @@ internal readonly record struct SqlMutationPlanCacheKey(RuntimeTypeHandle Entity
         if (mapping == null)
             throw new ArgumentNullException(nameof(mapping));
         var table = mapping.Table;
-        return new SqlMutationPlanCacheKey(mapping.EntityType.TypeHandle, Normalize(providerKey), Normalize(table?.Database),
-            Normalize(table?.Schema), Normalize(table?.TableName), Normalize(mapping.MappingProfile),
+        return new SqlMutationPlanCacheKey(mapping.EntityType.TypeHandle, Normalize(providerKey), NormalizePhysicalName(table?.Database),
+            NormalizePhysicalName(table?.Schema), NormalizePhysicalName(table?.TableName), Normalize(mapping.MappingProfile),
             Normalize(mapping.TableRouteKey), operation, CreateSignature(includes), CreateSignature(excludes));
     }
 
@@ -45,6 +45,8 @@ internal readonly record struct SqlMutationPlanCacheKey(RuntimeTypeHandle Entity
     /// <param name="value">待规范化的缓存键片段。</param>
     /// <returns>去除首尾空白并转换为大写的值；空值返回空字符串。</returns>
     private static string Normalize(string value) => value?.Trim().ToUpperInvariant() ?? string.Empty;
+
+    private static string NormalizePhysicalName(string value) => string.IsNullOrWhiteSpace(value) ? string.Empty : value;
 
     /// <summary>
     /// 创建属性集合的顺序无关稳定签名。

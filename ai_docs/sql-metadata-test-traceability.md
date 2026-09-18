@@ -771,3 +771,14 @@
 | PostgreSQL Getter 正式基准 | 6 个场景完成，包含 3 个 `FormalHost` 和 3 个额外 `ShortRun` 结果；正式数据见上表。 |
 | 外部数据库集成 | 未配置安全 Gate 与数据库重置授权，未执行且不计为通过。 |
 | Git 操作 | 未执行 commit 或 push。 |
+
+## 映射缓存版本化追踪（2026-09-18）
+
+| 生产符号 | 测试项目 | 测试方法 | 关键行为 |
+| --- | --- | --- | --- |
+| `DefaultEntityMappingResolver.Resolve` / `CloneMappings` | `Bing.Data.Sql.Tests` | `Resolve_WhenLogicalIdentifiersContainWhitespace_ShouldSelectSameColumnMapping`; `Resolve_WhenSourceOptionsChangeAfterConstruction_ShouldKeepFrozenSnapshot`; `Resolve_WhenPhysicalNamesDifferOnlyByCase_ShouldUseIndependentCacheEntries` | 逻辑标识统一规范化；配置深快照；物理名称精确隔离。 |
+| `VersionedEntityMappingResolver.PublishMappings` / `CaptureSnapshot` | `Bing.Data.Sql.Tests` | `PublishMappings_WhenColumnAndTableChange_ShouldKeepOldSnapshotAndPublishNewSnapshot`; `PublishMappings_WhenInputChangesAfterPublication_ShouldUseDeepSnapshot`; `PublishMappings_WhenEnumerationFails_ShouldKeepCurrentVersionAndMapping`; `PublishMappings_WhenCalledConcurrently_ShouldPublishCompleteMonotonicVersions` | 完整配置原子发布、失败保留旧版本、并发版本单调递增。 |
+| `SqlBuilderServices` 映射快照捕获 | `Bing.Data.Sql.Tests` | `SqlBuilderServices_WhenVersionIsPublished_ShouldKeepExistingBuilderSnapshot` | 已创建 Builder 与 Clone 固定旧版本，新 Builder 使用新版本。 |
+| `SqlMutationPlanCacheKey.Create` | `Bing.Data.Sql.Tests` | `Create_WhenPhysicalObjectNamesDifferOnlyByCase_ShouldReturnDifferentKey` | Mutation Plan 按物理对象名精确隔离。 |
+| `SqlQueryBase` 映射快照捕获 | `Bing.Dapper.Core.Tests` | `VersionedEntityMappingQueryTest.Query_WhenMappingsArePublished_ShouldKeepCreationTimeSnapshot` | Query 在构造时固定当前映射版本，新 Query 使用后续发布版本。 |
+| `DefaultSqlEntityMutationCommandBuilder` / `SqlMutationPlanCache` | `Bing.Data.Sql.Tests` | `Builder_WhenPhysicalTableNameDiffersOnlyByCase_ShouldRenderIndependentCompleteSql` | Insert、Update、Delete 均按精确物理表名输出完整 SQL 与参数。 |

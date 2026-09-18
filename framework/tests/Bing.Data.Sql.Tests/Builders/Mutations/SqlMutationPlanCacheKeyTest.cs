@@ -56,6 +56,16 @@ public sealed class SqlMutationPlanCacheKeyTest
             new[] { "Name" }, new[] { "Version" }));
     }
 
+    [Fact]
+    public void Create_WhenPhysicalObjectNamesDifferOnlyByCase_ShouldReturnDifferentKey()
+    {
+        var upper = SqlMutationPlanCacheKey.Create(CreateMapping(database: "Sales", schema: "Audit", table: "Orders"),
+            "mysql", SqlMutationOperation.Insert, null, null);
+        var lower = SqlMutationPlanCacheKey.Create(CreateMapping(database: "sales", schema: "audit", table: "orders"),
+            "mysql", SqlMutationOperation.Insert, null, null);
+
+        Assert.NotEqual(upper, lower);
+    }
     /// <summary>
     /// 创建稳定的测试映射。
     /// </summary>
