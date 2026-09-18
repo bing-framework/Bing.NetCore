@@ -198,9 +198,8 @@ public class EntityMappingCacheIsolationTest
     /// 测试目的：最终 Database、Schema、TableName 各自变化时都必须产生独立缓存项。
     /// </summary>
     [Fact]
-    public void Resolve_WhenFinalObjectNameDimensionChangesIndependently_ShouldMissEachTime()
+    public void Resolve_WhenSourceOptionsChangeAfterConstruction_ShouldKeepFrozenSnapshot()
     {
-        // Arrange
         var options = new SqlMetadataOptions();
         var mappingOptions = new EntityMappingOptions
         {
@@ -218,30 +217,18 @@ public class EntityMappingCacheIsolationTest
             DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
         };
 
-        // Act
-        var databaseA = resolver.Resolve(typeof(CacheSample), context);
+        var first = resolver.Resolve(typeof(CacheSample), context);
         mappingOptions.Database = "database_b";
-        var databaseB = resolver.Resolve(typeof(CacheSample), context);
         mappingOptions.Schema = "schema_b";
-        var schemaB = resolver.Resolve(typeof(CacheSample), context);
         mappingOptions.TableName = "table_b";
-        var tableB = resolver.Resolve(typeof(CacheSample), context);
-        var statistics = resolver.MappingCacheStatistics;
+        var second = resolver.Resolve(typeof(CacheSample), context);
 
-        // Assert
-        Assert.NotSame(databaseA, databaseB);
-        Assert.NotSame(databaseB, schemaB);
-        Assert.NotSame(schemaB, tableB);
-        Assert.Equal("database_a", databaseA.Table.Database);
-        Assert.Equal("database_b", databaseB.Table.Database);
-        Assert.Equal("schema_a", databaseB.Table.Schema);
-        Assert.Equal("schema_b", schemaB.Table.Schema);
-        Assert.Equal("table_a", schemaB.Table.TableName);
-        Assert.Equal("table_b", tableB.Table.TableName);
-        Assert.Equal(4, statistics.CacheMissCount);
-        Assert.Equal(4, statistics.EntryCount);
+        Assert.Same(first, second);
+        Assert.Equal("database_a", second.Table.Database);
+        Assert.Equal("schema_a", second.Table.Schema);
+        Assert.Equal("table_a", second.Table.TableName);
+        Assert.Equal(1, resolver.MappingCacheStatistics.EntryCount);
     }
-
     /// <summary>
     /// 测试目的：陈旧失败 Lazy 不得删除已发布的当前 Lazy。
     /// </summary>
@@ -308,6 +295,18 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal("cache_samples_beta", beta.Table.TableName);
     }
 
+    [Fact]
+    public void Resolve_WhenPhysicalNamesDifferOnlyByCase_ShouldUseIndependentCacheEntries()
+    {
+        var resolver = new RuntimeRouteMappingResolver { RouteSuffix = "Orders" };
+        var upper = resolver.Resolve(typeof(CacheSample), new DatabaseContext { DbKey = "reporting" });
+        resolver.RouteSuffix = "orders";
+        var lower = resolver.Resolve(typeof(CacheSample), new DatabaseContext { DbKey = "reporting" });
+
+        Assert.NotSame(upper, lower);
+        Assert.Equal("cache_samples_Orders", upper.Table.TableName);
+        Assert.Equal("cache_samples_orders", lower.Table.TableName);
+    }
     /// <summary>
     /// 测试 - 映射缓存命中不应重复访问 ORM 原始元数据提供器。
     /// </summary>

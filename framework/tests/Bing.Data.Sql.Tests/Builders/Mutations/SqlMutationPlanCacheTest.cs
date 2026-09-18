@@ -199,7 +199,7 @@ public sealed class SqlMutationPlanCacheTest
             cache.GetOrAdd(variation.Item1, variation.Item2, variation.Item3, variation.Item4, variation.Item5);
             Assert.Equal(++expectedMissCount, cache.PlanCacheMissCount);
         }
-        var equivalent = cache.GetOrAdd(CreateMapping(database: " DATABASE ", schema: " SCHEMA ", table: " TABLE ",
+        var equivalent = cache.GetOrAdd(CreateMapping(database: " database ", schema: " schema ", table: " table ",
             profile: " READ ", route: " TENANT-A "), " TEST ", SqlMutationOperation.Insert, null, null);
 
         Assert.Same(baseline, equivalent);
@@ -256,6 +256,38 @@ public sealed class SqlMutationPlanCacheTest
         Assert.Equal("test.beta", beta.ProviderKey);
     }
 
+    [Fact]
+    public void Builder_WhenPhysicalTableNameDiffersOnlyByCase_ShouldRenderIndependentCompleteSql()
+    {
+        var resolver = new CaseSensitiveMutationMappingResolver { TableName = "Orders" };
+        var services = new SqlBuilderServices(entityMappingResolver: resolver);
+        var builder = new DefaultSqlEntityMutationCommandBuilder(new KeyedMutationSqlProvider("test"), services);
+        var upper = builder.Insert(new MutationCacheEntity { Id = 1, Name = "upper" });
+
+        resolver.TableName = "orders";
+        var lower = builder.Insert(new MutationCacheEntity { Id = 2, Name = "lower" });
+
+        Assert.Equal("Insert Into [Orders] ([Id], [Name]) Values (@_p_0, @_p_1)", upper.Sql);
+        Assert.Equal("Insert Into [orders] ([Id], [Name]) Values (@_p_0, @_p_1)", lower.Sql);
+        Assert.Equal(new object[] { 1, "upper" }, upper.Parameters.Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { 2, "lower" }, lower.Parameters.Select(parameter => parameter.Value));
+
+        resolver.TableName = "Orders";
+        var upperUpdate = builder.Update(new MutationCacheEntity { Id = 3, Name = "upper-update" });
+        var upperDelete = builder.Delete(new MutationCacheEntity { Id = 4 });
+        resolver.TableName = "orders";
+        var lowerUpdate = builder.Update(new MutationCacheEntity { Id = 5, Name = "lower-update" });
+        var lowerDelete = builder.Delete(new MutationCacheEntity { Id = 6 });
+
+        Assert.Equal("Update [Orders] Set [Name] = @_p_0 Where [Id] = @_p_1", upperUpdate.Sql);
+        Assert.Equal("Delete From [Orders] Where [Id] = @_p_0", upperDelete.Sql);
+        Assert.Equal("Update [orders] Set [Name] = @_p_0 Where [Id] = @_p_1", lowerUpdate.Sql);
+        Assert.Equal("Delete From [orders] Where [Id] = @_p_0", lowerDelete.Sql);
+        Assert.Equal(new object[] { "upper-update", 3 }, upperUpdate.Parameters.Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { 4 }, upperDelete.Parameters.Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { "lower-update", 5 }, lowerUpdate.Parameters.Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { 6 }, lowerDelete.Parameters.Select(parameter => parameter.Value));
+    }
     /// <summary>
     /// 创建直接缓存测试使用的映射。
     /// </summary>
@@ -347,5 +379,13 @@ public sealed class SqlMutationPlanCacheTest
         public IParamLiteralsResolver ParamLiteralsResolver => TestMutationSqlProvider.Instance.ParamLiteralsResolver;
 
         public SqlProviderProfile Profile => TestMutationSqlProvider.Instance.Profile;
+    }
+
+    private sealed class CaseSensitiveMutationMappingResolver : DefaultEntityMappingResolver
+    {
+        public string TableName { get; set; }
+
+        protected override string GetTableName(EntityModelMetadata model, EntityMappingOptions mappingOptions) =>
+            TableName;
     }
 }

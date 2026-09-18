@@ -135,7 +135,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             throw new ArgumentOutOfRangeException(nameof(SqlMetadataOptions.EntityMappingCacheEvictionPolicy),
                 _mappingCacheEvictionPolicy, "实体最终映射缓存淘汰策略无效。");
         _typeConverterResolver = typeConverterResolver ?? new DefaultTypeConverterResolver();
-        _mappingOptionsIndex = CreateMappingOptionsIndex(_options.EntityMappings);
+        _mappingOptionsIndex = CreateMappingOptionsIndex(CloneMappings(_options.EntityMappings));
     }
 
     /// <summary>
@@ -197,9 +197,9 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             GetDatabaseType(context),
             NormalizeCacheValue(GetMappingProfile(context, mappingOptions)),
             GetCacheTableRouteKey(mappingOptions),
-            NormalizeCacheValue(database),
-            NormalizeCacheValue(schema),
-            NormalizeCacheValue(tableName));
+            NormalizePhysicalName(database),
+            NormalizePhysicalName(schema),
+            NormalizePhysicalName(tableName));
         if (_mappingCache.TryGetValue(cacheKey, out var cachedMapping))
         {
             System.Threading.Interlocked.Increment(ref _mappingCacheHitCount);
@@ -398,15 +398,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         foreach (var candidate in candidates)
         {
             if (string.IsNullOrWhiteSpace(candidate.DbKey) == false &&
-                string.Equals(candidate.DbKey, databaseContext?.DbKey, StringComparison.OrdinalIgnoreCase) == false)
+                NormalizeCacheValue(candidate.DbKey) != NormalizeCacheValue(databaseContext?.DbKey))
                 continue;
             if (candidate.DatabaseType != null && candidate.DatabaseType != databaseType)
                 continue;
             if (string.IsNullOrWhiteSpace(candidate.MappingProfile) == false &&
-                string.Equals(candidate.MappingProfile, mappingProfile, StringComparison.OrdinalIgnoreCase) == false)
+                NormalizeCacheValue(candidate.MappingProfile) != NormalizeCacheValue(mappingProfile))
                 continue;
             if (string.IsNullOrWhiteSpace(candidate.TableRouteKey) == false &&
-                string.Equals(candidate.TableRouteKey, routeKey, StringComparison.OrdinalIgnoreCase) == false)
+                NormalizeCacheValue(candidate.TableRouteKey) != NormalizeCacheValue(routeKey))
                 continue;
             return candidate;
         }
@@ -510,10 +510,56 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         : value.Trim().ToUpperInvariant();
 
     /// <summary>
-    /// 获取不包含租户标识的映射缓存路由键。
+    /// 规范化物理对象名，同时保留有效名称的大小写和内容。
     /// </summary>
-    /// <param name="mappingOptions">已匹配的实体映射配置。</param>
-    /// <returns>可安全写入缓存的路由键。</returns>
+    /// <param name="value">物理对象名。</param>
+    /// <returns>缓存键使用的物理对象名。</returns>
+    private static string NormalizePhysicalName(string value) => string.IsNullOrWhiteSpace(value)
+        ? string.Empty
+        : value;
+
+    internal static IReadOnlyList<EntityMappingOptions> CloneMappings(IEnumerable<EntityMappingOptions> mappings)
+    {
+        var result = new List<EntityMappingOptions>();
+        if (mappings == null)
+            return result;
+        foreach (var source in mappings.Where(mapping => mapping != null))
+        {
+            var target = new EntityMappingOptions
+            {
+                EntityType = source.EntityType,
+                DbKey = source.DbKey,
+                DatabaseType = source.DatabaseType,
+                MappingProfile = source.MappingProfile,
+                Database = source.Database,
+                Schema = source.Schema,
+                TableName = source.TableName,
+                TableRouteKey = source.TableRouteKey
+            };
+            foreach (var item in source.Columns)
+            {
+                var column = item.Value;
+                if (column == null)
+                    continue;
+                target.Columns[item.Key] = new ColumnMappingOptions
+                {
+                    PropertyName = column.PropertyName,
+                    ColumnName = column.ColumnName,
+                    DbType = column.DbType,
+                    Size = column.Size,
+                    Precision = column.Precision,
+                    Scale = column.Scale,
+                    ProviderTypeName = column.ProviderTypeName,
+                    StorageKind = column.StorageKind,
+                    ConverterKind = column.ConverterKind,
+                    CustomConverterName = column.CustomConverterName
+                };
+            }
+            result.Add(target);
+        }
+        return result;
+    }
+
     private static string GetCacheTableRouteKey(EntityMappingOptions mappingOptions) =>
         NormalizeCacheValue(mappingOptions?.TableRouteKey);
 

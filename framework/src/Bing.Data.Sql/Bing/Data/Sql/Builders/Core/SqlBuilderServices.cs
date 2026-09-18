@@ -115,9 +115,12 @@ public sealed class SqlBuilderServices
         DataFilter = dataFilter;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(
             databaseContextAccessor, MetadataOptions);
-        EntityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
+        var configuredMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
             databaseContextAccessor: databaseContextAccessor, options: MetadataOptions,
             entityModelMetadataProvider: EntityModelMetadataProvider);
+        EntityMappingResolver = configuredMappingResolver is IEntityMappingSnapshotProvider snapshotProvider
+            ? snapshotProvider.CaptureSnapshot()
+            : configuredMappingResolver;
         ObjectNameFormatter = objectNameFormatter ?? new DefaultSqlObjectNameFormatter();
         CrossDatabaseQueryValidator = crossDatabaseQueryValidator ?? new DefaultSqlCrossDatabaseQueryValidator();
         TableReferenceValidator = tableReferenceValidator ?? new DefaultSqlTableReferenceValidator();

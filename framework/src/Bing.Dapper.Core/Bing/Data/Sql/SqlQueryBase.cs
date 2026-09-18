@@ -156,6 +156,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     {
         ServiceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         Options = options ?? throw new ArgumentNullException(nameof(options));
+        _entityMappingResolver = CaptureEntityMappingResolver(ServiceProvider.GetService<IEntityMappingResolver>());
         Logger = CreateLogger();
         _connection = options.Connection;
         if (_connection != null)
@@ -209,7 +210,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// 实体映射解析器
     /// </summary>
     protected IEntityMappingResolver EntityMappingResolver =>
-        _entityMappingResolver ?? ServiceProvider.GetService<IEntityMappingResolver>();
+        _entityMappingResolver ??= CaptureEntityMappingResolver(ServiceProvider.GetService<IEntityMappingResolver>());
 
     /// <summary>
     /// 连接来源
@@ -928,8 +929,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         EnsureExecutionAvailable();
         if (_sqlBuilder != null)
             throw new InvalidOperationException("SQL Query 已创建 Builder，不能修改实体映射解析器。");
-        _entityMappingResolver = resolver;
+        _entityMappingResolver = CaptureEntityMappingResolver(resolver);
     }
+
+    private static IEntityMappingResolver CaptureEntityMappingResolver(IEntityMappingResolver resolver) =>
+        resolver is IEntityMappingSnapshotProvider snapshotProvider ? snapshotProvider.CaptureSnapshot() : resolver;
 
     /// <summary>
     /// 校验外部连接与当前固定数据库上下文的物理身份。

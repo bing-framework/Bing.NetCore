@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Bing.Data.Enums;
@@ -31,6 +32,8 @@ public class SqlMetadataBenchmarks
     private DefaultEntityMappingResolver _lruMappingResolver;
 
     private DefaultEntityMappingResolver _mappingResolver;
+    private VersionedEntityMappingResolver _versionedMappingResolver;
+    private EntityMappingOptions[] _mappingConfigurations;
     private readonly DefaultSqlObjectNameFormatter _formatter = new();
     private readonly BenchmarkDialect _dialect = new();
     private readonly DatabaseContext _databaseContext = new()
@@ -93,15 +96,18 @@ public class SqlMetadataBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var metadataOptions = new SqlMetadataOptions();
-        for (var index = 0; index < MappingConfigurationCount; index++)
-            metadataOptions.EntityMappings.Add(new EntityMappingOptions
+        _mappingConfigurations = Enumerable.Range(0, MappingConfigurationCount)
+            .Select(index => new EntityMappingOptions
             {
                 EntityType = typeof(BenchmarkEntity),
                 MappingProfile = $"profile-{index}",
                 TableName = $"orders_{index}"
-            });
+            }).ToArray();
+        var metadataOptions = new SqlMetadataOptions();
+        foreach (var mapping in _mappingConfigurations)
+            metadataOptions.EntityMappings.Add(mapping);
         _mappingResolver = new DefaultEntityMappingResolver(options: metadataOptions);
+        _versionedMappingResolver = new VersionedEntityMappingResolver(options: metadataOptions);
         _databaseContext.MappingProfile = $"profile-{MappingConfigurationCount - 1}";
         var boundedOptions = new SqlMetadataOptions { EntityMappingCacheCapacity = 1 };
         boundedOptions.EntityMappings.Add(new EntityMappingOptions
@@ -162,14 +168,16 @@ public class SqlMetadataBenchmarks
     [Benchmark]
     public EntityMappingMetadata ResolveMappingCold()
     {
-        var metadataOptions = new SqlMetadataOptions();
-        for (var index = 0; index < MappingConfigurationCount; index++)
-            metadataOptions.EntityMappings.Add(new EntityMappingOptions
+        _mappingConfigurations = Enumerable.Range(0, MappingConfigurationCount)
+            .Select(index => new EntityMappingOptions
             {
                 EntityType = typeof(BenchmarkEntity),
                 MappingProfile = $"profile-{index}",
                 TableName = $"orders_{index}"
-            });
+            }).ToArray();
+        var metadataOptions = new SqlMetadataOptions();
+        foreach (var mapping in _mappingConfigurations)
+            metadataOptions.EntityMappings.Add(mapping);
         return new DefaultEntityMappingResolver(options: metadataOptions).Resolve(typeof(BenchmarkEntity),
             _databaseContext);
     }
@@ -194,6 +202,27 @@ public class SqlMetadataBenchmarks
         return _lruMappingResolver.Resolve(typeof(BenchmarkEntity), context);
     }
 
+    /// <summary>测量完整映射配置快照的发布成本。</summary>
+    [Benchmark]
+    public long PublishMappingSnapshot() =>
+        _versionedMappingResolver.PublishMappings(_mappingConfigurations);
+
+    /// <summary>测量多个独立路由并发首次解析的总成本。</summary>
+    [Benchmark]
+    public void ResolveDistinctMappingsConcurrently()
+    {
+        var options = new SqlMetadataOptions();
+        foreach (var mapping in _mappingConfigurations)
+            options.EntityMappings.Add(mapping);
+        var resolver = new DefaultEntityMappingResolver(options: options);
+        Parallel.For(0, MappingConfigurationCount, index =>
+            resolver.Resolve(typeof(BenchmarkEntity), new DatabaseContext
+            {
+                DbKey = "benchmark",
+                MappingProfile = $"profile-{index}",
+                DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
+            }));
+    }
     /// <summary>
     /// 测量结构化表对象名称格式化性能。
     /// </summary>
