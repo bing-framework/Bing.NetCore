@@ -124,8 +124,10 @@ Bing.Dapper.PostgreSql、Bing.Dapper.SqlServer、Bing.Dapper.Sqlite
 | CAP / FreeSQL / `Bing.Data.Sql` 实现变更 | [子系统深挖](docs/architecture/子系统深挖.md) |
 | 数据访问能力变化（新增 Provider / 某支新增或失去某项能力） | [能力矩阵](docs/getting-started/能力矩阵.md)（三支 × 18 项能力对照） |
 | **新增/删除了实体基类、横切接口、仓储契约，或改了聚合根与领域事件的机制** | [领域建模指南](docs/guides/领域建模指南.md)（含继承体系与"谁填充字段"的归属） |
+| **改了工作单元 / 仓储 / 应用服务的契约、注册入口、基类或提交时机** | [工作单元、仓储与应用服务](docs/guides/工作单元仓储与应用服务.md)（写路径手册；提交行为变化必须同步该文 §0 与 §7） |
 | **新增扩展点、改了模块基类/`[DependsOnModule]`/排序规则、新增 Provider 模板** | [扩展指南](docs/guides/扩展指南.md)（三支新增 Provider 的文件清单与注册入口） |
 | **新增/重命名 Options、新增配置节、改了默认值** | [配置参考](docs/guides/配置参考.md)（并核对"是否真的绑定配置节"） |
+| **改了 `ILog` / `LogContext` / 级别映射 / Serilog 装配方式** | [日志使用说明](docs/operations/日志使用说明.md)（链式 API、级别映射、LogContext 字段与 TraceId） |
 | **新增日志 Sink / Enricher、改动请求日志或 TraceId 贯通** | [日志与可观测性](docs/operations/日志与可观测性.md)（⚠ 请求日志无脱敏，改动前先读该文 §4） |
 | **补齐了某个已知缺口 / 新引入一处占位实现或未接线工程** | [功能完成度与已知缺口](docs/architecture/功能完成度.md)（该文如实登记"哪些没做完"；补上缺口或新增缺口都要更新它） |
 | 新增自造术语或重命名概念 | [术语表](docs/getting-started/术语表.md) |
@@ -136,7 +138,7 @@ Bing.Dapper.PostgreSql、Bing.Dapper.SqlServer、Bing.Dapper.Sqlite
 | 新增/调整关键架构决策 | [ADR](docs/architecture/adr/README.md)（**新建 ADR 文件并更新索引**；已废弃的决策改状态为 🔴 而非删除） |
 | 测试工程、门控、CI 脚本、门禁规则变更 | [测试指南](docs/operations/测试指南.md) |
 | 邮件 / 文本模板 / 锁 / 本地化 / 事件总线实现变更 | [横切能力文档](docs/guides/横切能力文档.md)（使用文档 §8 的详解版） |
-| **事件相关改动**（`Bing.Events` / `Bing.EventBus*` / 领域事件派发 / CAP 发布路径 / Outbox 事务语义 / `[EventHandler]` 与订阅） | [事件与消息文档](docs/architecture/事件与消息文档.md)（四套机制的完整对照；**改动 `Send` 语义、派发时机或 UoW 提交路径时务必同步**——这两处失效都是静默的） |
+| **事件相关改动**（`Bing.Events` / `Bing.EventBus*` / 领域事件派发 / CAP 发布路径 / Outbox 事务语义 / `[EventHandler]` 与订阅） | 对照 [事件与消息文档](docs/architecture/事件与消息文档.md)（四套机制的完整对照）；**动手写与排错**看 [分布式事件使用说明](docs/guides/分布式事件使用说明.md)（收发手册 + Outbox 三个前提）。**改动 `Send` 语义、派发时机或 UoW 提交路径时务必同步**——这两处失效都是静默的 |
 | 边缘包（支付 / OAuth / 缓存适配 / 日志 Sink / 链路追踪 / Analyzers） | [组件库文档](docs/guides/组件库文档.md)（注意状态徽章：✅ / 🔌 / 🧩 / ⚠） |
 | 构建配置、CI、发版、基准、eng 脚本变更 | [工程化文档](docs/operations/工程化文档.md) |
 | 跨版本破坏性变更 | [迁移指南](docs/migrations/README.md) + [ReleaseNotes](docs/ReleaseNotes.md) |

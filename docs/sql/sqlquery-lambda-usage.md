@@ -2,6 +2,8 @@
 
 > **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](../ReleaseNotes.md)
 
+**本文只讲 Lambda 形态**（`From<TEntity>()` / `FromSubquery<T>()` 及其子句）。装包注册、四种查询形态对照、终结方法全表、参数化、分页、事务、流式读取与生命周期约束，一律见 **[ISqlQuery 使用说明](sqlquery-usage.md)**——本文不重复。
+
 `ISqlQuery` 只提供一个 `From<TEntity>(alias = null, schema = null)` Lambda 来源入口，返回非泛型 `SqlLambdaQuery`。连续调用 `From<TEntity>()` 会追加多个根来源；结果类型统一由终结方法选择。
 
 ## 单表查询
@@ -50,9 +52,11 @@ var rows = await query.From<Order>("order")
 
 `CrossJoin<TJoin>()` 不接收谓词。需要 `RightJoin` 或 `FullJoin` 时，调用阶段会按当前 Provider 能力配置拒绝不支持的操作。
 
-## Raw Fluent 与原生文本
+## 多映射（Fluent / 原生文本专有）
 
-Raw 文本查询的主入口不固定结果类型，结果类型在终结方法处选择：
+> Raw Fluent（`Query()`）与原生文本（`Sql()` / `SqlInterpolated()`）的**完整用法**见 [ISqlQuery 使用说明 §2–§6](sqlquery-usage.md)。本节只补充 Lambda 形态**没有**的那一项：Dapper 多映射。
+
+结果类型在终结方法处选择：
 
 ```csharp
 var rows = await query.Query()
@@ -66,7 +70,9 @@ var row = await query.Sql(
     .FirstOrDefaultAsync<Order>();
 ```
 
-Raw 查询支持 `ToEntity<TResult>`、`ToList<TResult>`、`First<TResult>`、`FirstOrDefault<TResult>`、`Single<TResult>`、标量和同步/异步流式终结方法。`SingleOrDefault` 与 `ToEntity` 的语义重复，已删除；字典结果请先调用 `ToList<TResult>()` 再使用 LINQ `ToDictionary`。2～7 对象多映射直接由非泛型 `SqlFluentQuery` 和 `SqlTextQuery` 的 `ToList`/`ToListAsync` 终结方法提供，映射输入类型在方法泛型参数中声明，最终结果类型位于末尾。
+2～7 对象多映射直接由非泛型 `SqlFluentQuery` 和 `SqlTextQuery` 的 `ToList`/`ToListAsync` 终结方法提供，**`SqlLambdaQuery` 没有多映射重载**。映射输入类型在方法泛型参数中声明，最终结果类型位于末尾。分段列默认 `"Id"`，可用 `SplitOn("...")` 修改。
+
+字典结果请先调用 `ToList<TResult>()` 再使用 LINQ `ToDictionary`（框架不提供 `ToDictionary` 终结方法）。
 
 ```csharp
 var rows = await query.Query()
@@ -109,6 +115,8 @@ var rows = await query.From<User>("parent")
 | `WhereIf(predicate, condition)` | `WhereIf(condition, predicate)` |
 
 上述删除和重命名属于主版本 Breaking Change，不提供 `[Obsolete]` 转发层。查询描述实例包含可变 Builder 状态，不应在并发任务之间共享；异步枚举和事务范围应使用 `CancellationToken` 与 `await using` 确保 Reader、连接和事务按拥有权释放。
+
+> 另有若干「看起来该有、实际不存在」的方法（`buffered` 参数、`StreamAsync`、`GetCountAsync`、`ToDynamicList` 等），清单见 [ISqlQuery 使用说明 §11](sqlquery-usage.md)；连接与事务类 API 的移除见 [事务 API 迁移](../migrations/sql-transaction-api-vNext.md)。
 
 ## 测试和环境
 

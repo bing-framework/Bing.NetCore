@@ -33,6 +33,171 @@ python eng/ci/sync-docs-index.py --check   # 只查 index.md 是否与 README �
 
 ## 2. 记录
 
+### 2026-09-19 — 第十八轮：新建「本地事件与消息事件」对称手册，修正两处既有事件文档的错误
+
+**背景**：事件相关已有两篇——[事件与消息文档](architecture/事件与消息文档.md)（四套机制全景，605 行）与[分布式事件使用说明](guides/分布式事件使用说明.md)（只讲 CAP，713 行）。但**本地事件（`ISimpleEventBus`）没有对称的写法说明**，且现有文档里没有一张「本地 vs 消息」的逐维度对照表（三张既有表口径各不相同）。用户要求「明确说明两者的定义、区别与各自适用场景，涵盖典型使用方式、关键参数、完整示例、常见问题」。
+
+**一、新建 `docs/guides/本地事件与消息事件使用说明.md`（10 节）**
+
+| 节 | 内容 |
+| --- | --- |
+| §1 先记 6 条 | `ISimpleEventBus` 自身无成员（只是 `IEventBus` 的别名式契约）；`PublishAsync` **无 `CancellationToken`**；`HandleAsync` **无 `CancellationToken`**；`MessageEvent.Send` **默认 `false`**；本地事件处理器**必须手工注册**；两套不继承、靠 CAP 版 `IEventBus` 组合 |
+| §2 定义与区别 | 一张**逐维度对照表**（契约 / 传递范围 / 持久化 / 可靠投递 / 事务参与 / 延迟发布 / 处理器发现 / 异常隔离 / 跨进程 / 适用与不适用场景）+ 契约继承关系图 |
+| §3 本地事件 | 五步上手（装包 → `AddDefaultEventBus()` → 定义事件 → 写处理器 → 注册处理器并发布）；完整可编译示例（**本手册构造**）；处理器解析机制与 `ServiceLocator.Instance` 前置条件 |
+| §4 消息事件 | 五步上手摘要；`Send` 两种语义；发布两个重载；订阅三件套；**深挖部分反链**到分布式手册，不重复 |
+| §5 两级发布 | `Bing.Events.Cap.EventBus` 的组合语义——一次 `PublishAsync` 先走本地、再按需走 CAP |
+| §6 选型 | 场景决策表（该用哪套 / 为什么） |
+| §7 陷阱 | 按「静默失败」「事务」「性能」分组 |
+| §8 防误用清单 | 不存在的方法与类型（负面清单） |
+| §9 相关文档 | 三方互链矩阵 |
+
+**二、核准出的关键结论（含两处对我此前口径的修正）**
+
+- ⚠ **`MessageEvent.Send` 默认值是 `false`**（`MessageEvent.cs:28`，无初始化器）。我此前在别处写过"默认 `true`"——那是**错的**，`UserLoginMessageEvent.cs:18` 的 `Send = true` 只是该子类构造参数的默认值。
+- ⚠ **`ISimpleEventBus` 全仓零生产调用**：`modules/admin/src` 与 `samples` 搜 `ISimpleEventBus` = 0 命中；唯一触及本地总线的发布在 `framework/tests/Bing.Tests/Events/EventBusTest.cs:37`，**且被注释**。
+- ⚠ **全仓找不到任何真实 `IEventHandler<T>` 实现类**（生产与测试均无，测试里唯一引用是 NSubstitute 替身）。故 §3 的示例由本手册构造，并在醒目位置声明「仓库内无先例」。
+- **本地事件是异步但串行、无 try/catch、不参与事务、不支持延迟发布**：`Default/EventBus.cs:29-40` 是 `foreach` + `await`，某处理器抛异常会**中断后续处理器并把异常抛给调用方**。
+- **`EventHandlerManager` 用全局 `ServiceLocator.Instance`**（不是注入 `IServiceProvider`），且 `GetServices<T>()` **没有** `IsProviderEnabled` 保护——未装 `AddBing()` 直接发布会抛。
+- **`AddCapEventBus` 顺带注册 `ISimpleEventBus`**（`Cap/Extensions.Service.cs`），所以装了 CAP 的用户其实同时拿到了本地总线。
+- **生命周期不同**：`ISimpleEventBus` 是 **Singleton**，`IMessageEventBus` / `IEventBus` 是 **Scoped**。
+- **`[EventHandler]` 只接一个 `name` 参数**，`Group` 来自它继承的 CAP `TopicAttribute`。
+
+**三、修正既有文档 2 处错误**
+
+| 位置 | 原来 | 修正后 |
+| --- | --- | --- |
+| [使用文档 §8.3](getting-started/使用文档.md) | 声称事件定义 `IEvent` / `IDistributedEvent`、处理器实现 `ILocalEventHandler<TEvent>`、**按约定式 DI 自动注册**、领域事件**由分发器在提交时派发** | 四项全错或属遗留包口径：`IDistributedEvent` / `ILocalEventHandler` 属遗留 `Bing.EventBus*`；本地事件处理器**必须手工注册**；领域事件**全仓无人派发** |
+| [recipes/cap-event-outbox.md](guides/recipes/cap-event-outbox.md) §4 | 把**普通 DTO** 传给 `IMessageEventBus.PublishAsync` | 泛型约束 `where TEvent : IMessageEvent` **不成立**，照抄编译不过；已改为继承 `MessageEvent` 的事件类 |
+
+**四、同步更新**：`docs/README.md` 角色表 +1、专项表 +1；`toc.yml` guides 组 +1（48 项）；`CONTRIBUTING.md` 文档维护表补指向新文档。
+
+---
+
+### 2026-09-18 — 第十七轮：新建分布式事件使用手册，把 Outbox 的三个前提讲透
+
+**背景**：[事件与消息文档](architecture/事件与消息文档.md) 是**全景图**（四套机制各占一节），分布式这一套只占其中约 170 行且偏"对照与选型"，读者看完仍不知道"第一条消息怎么发出去、怎么收"。故补一篇只在分布式这一套上做深的操作手册。
+
+**一、新建 `docs/guides/分布式事件使用说明.md`（11 节）**
+
+| 节 | 内容 |
+| --- | --- |
+| §0 先记 8 条 | 只有一个分布式入口；`send` 的两种语义；⛔ `send=false` 事务外静默丢；`[EventHandler]` 而非 `[CapSubscribe]`；`bing-trace-id`；`IEventBus` 是两级发布合并入口 |
+| §1 五分钟上手 | 装包 → 只有本地事件 / 要分布式两套注册 → 定义 `IMessageEvent` → 发布 → 订阅 |
+| §2 核心抽象 | 类型总表、继承链、三个总线接口的分工 |
+| §3 发布 | 两个重载、`send` 参数语义、两级发布、本地 vs 分布式怎么选 |
+| §4 Outbox | 链路图 + 源码依据表、**三个前提**、事务内顺序、`send=true` 无保护 |
+| §5 订阅 | 处理器三件套、`[EventHandler]` 与 `[CapSubscribe]` 的关系、允许的签名形态、发现与注册、分组与并发 |
+| §6–§7 | `bing-trace-id` 贯通（发布端自动 / 消费端两种）、CAP 配置实例 |
+| §8–§11 | 注册入口全表、admin 登录消息完整示例、陷阱与防误用清单、自行复核命令 |
+
+**二、核准出的关键结论**
+
+- **登记动作忽略传入的事务**：`MessageEventBus.cs:73-76` 的 `Register(async transaction => ...)` 里，`transaction` 参数**从未被使用**；是否写发件箱取决于 **CAP 自己的环境事务**（`ICapPublisher.Transaction`）是否已开启。所以"基类工作单元把事务对象递进去"**不等于**接上了 Outbox——这解释了为什么 admin 必须用 `Database.BeginTransaction(publisher, autoCommit: false)`。
+- **基类工作单元对 CAP 零引用**：全仓 grep `ICapPublisher` / `DotNetCore.CAP` 在 `Bing.EntityFrameworkCore` 工程**零命中**（已复核）。故裸用 `UnitOfWorkBase` 子类时，`send=false` 退化为"立即发送、且在业务事务外"。
+- **`AdminUnitOfWork` 的实现与文档引用一致**（`AdminUnitOfWork.cs:44-65`）。
+
+**三、同步更新**：`功能完成度.md` §7.2 补"登记动作忽略事务"的附注与手册链接；`docs/README.md` 角色表与专项表各 +1；`toc.yml` guides 组 +1（47 项）；`CONTRIBUTING.md` 文档维护表 +1。
+
+---
+
+### 2026-09-18 — 第十六轮：新建写路径手册（工作单元 / 仓储 / 应用服务），修正 `IRepository` 的错误结论
+
+**背景**：这三块此前只有 [使用文档 §5](getting-started/使用文档.md) 约 50 行的速览，没有能照抄的手册；且它们是**同一个写路径上的三个环节**，拆开讲容易写出"改了但不落库"的代码，故合成一篇。
+
+**一、新建 `docs/guides/工作单元仓储与应用服务.md`（8 节）**
+
+| 节 | 内容 |
+| --- | --- |
+| §0 先记 6 条 | `IUnitOfWork` 只有 2 个成员；`IUnitOfWorkManager` **没有 `Begin()`**；仓储自己不落库；⛔ 手写服务不提交**静默丢变更**；`AppServiceBase` 不提供 UoW；`Manager.CommitAsync()` 提交**所有**已登记 UoW |
+| §1 五分钟上手 | 装包 → 三步注册 → 一次完整写操作 → 各 Provider 入口名对照表 |
+| §2 工作单元 | 契约全表、`RegisterToManager` 自动登记机制、`[UnitOfWork]` 拦截器源码、事务/回滚分支、只读 UoW 现状、19 个可重写成员 |
+| §3 仓储 | `IStore` vs `IRepository` 对照、写入 12 方法、查询成员表、基类家族选型表、约定式注册、分页、映射、⚠ 仓储内不要自己提交 |
+| §4 应用服务 | 两个工程分工、基类清单、`IQueryAppService` 方法名、`CrudAppServiceBase` 强制 `IRepository`、`[Valid]` AOP 验证、Controller 基类 |
+| §5–§8 | 联合链路图、两段 admin 真实源码、13 条防误用清单 |
+
+**二、修正「Bing 没有 `IRepository`」这个错误结论（2 处）**
+
+此前 `abp-migration.md:41` 与迁移步骤第 1 条均写「Bing 没有 `IRepository`」。实际它一直存在（`IRepository.cs:37`），且是 `IStore` 的**超集**（多 `GetUnitOfWork()`，实体约束加 `IAggregateRoot`）。术语表 §8.1 上一轮已修正，本轮补齐 ABP 对照表与迁移清单，并写明选择依据与「`CrudAppServiceBase` 强制要求 `IRepository`」。
+
+**三、本轮核准出的关键事实**
+
+- **`IUnitOfWorkManager` 没有 `Begin()`**：从 ABP 迁移过来的人会找它。「开启一个工作单元」= 解析一次 Scoped UoW，构造函数 `RegisterToManager()` 自动登记（`UnitOfWorkBase.cs:79`）。
+- **`DeleteAsync` 基类已内部提交**（`DeleteAppServiceBase.cs:134`），`IDeleteAppService` 上没有 `[UnitOfWork]` —— 再手动加会双提交。
+- `[UnitOfWork]` 只在框架 3 处标注（`ICrudAppService.cs:50/57/80`），**自建服务默认没有**。
+- EF 支可重写成员 19 个，FreeSQL 支**只有 3 个**（无审计拦截、无 `PublishEventsAsync`）。
+
+### 2026-09-18 — 第十五轮：新建 `ILog` 使用说明，修掉既有日志文档的错误签名
+
+**背景**：此前的日志内容只有 `operations/日志与可观测性.md` 一篇，是**链路视角**（五个层次怎么串起来），日志 API 本身只占约 100 行。用户要"能照抄的手册"时没有对应文档。落笔前核准源码，还发现既有文档有一处签名错误与一处遗漏。
+
+**一、新建 `docs/operations/日志使用说明.md`（12 节）**
+
+| 节 | 内容 |
+| --- | --- |
+| §1 五分钟上手 | 装包清单 → 两步注册 → 三种拿日志器的方式 → 第一条日志 → 取自集成测试 `Startup.cs` 的最小装配模板 |
+| §2 链式 API 全表 | `ILog` 11 个成员 + `ILogExtensions` 11 个扩展方法；`Property`(string) vs `ExtraProperty`(object) 的四维差异；写完自动 `Clear()` |
+| §3 消息模板 | 具名占位符、`{@X}` 解构、`{$X}` 字符串化、多次 `Message` 拼接 |
+| §4 级别与配置 | `Logging:LogLevel` 处理规则 + `LogLevelSwitcher` 完整映射表 |
+| §6 `LogContext` 与 TraceId | 13 个字段、谁填充、TraceId 四级优先级 |
+| §10 / §11 | 7 条已知缺陷 + 9 行防误用清单 |
+
+**二、修正既有文档 `日志与可观测性.md`**
+
+| 位置 | 原来 | 修正为 |
+| --- | --- | --- |
+| §2.2 签名 | `public static **IServiceCollection** AddBingLogging(...)` | **`BingLoggingBuilder`**（`ServiceCollectionExtensions.cs:17`）——照原文写无法链式注册，已补 `.Services` 用法 |
+| §2.4 级别映射 | 只写"未知值 → `Warning`" | 补上 **`"None"` → `Fatal`**（`LogLevelSwitcher.cs:42`）：想关日志反而只剩最严重级别 |
+| §5.2 | 未提及 | 新增 ⛔ **`Log.AddLogContext()` 中 TraceId 注入整段被注释**（`Log.cs:260-264`），附源码摘录 |
+| 头部 | — | 加"与《日志使用说明》的分工" |
+
+**三、登记 3 处源码缺陷**（`功能完成度.md` 新增 §9.1）
+
+共同点是**编译通过、运行不报错、日志照常输出，只是字段值是错的**：
+
+1. `AspNetCoreLogContextAccessor.cs:57` —— `Browser` 被赋成**客户端 IP**
+2. `LogContextEnricher.cs:106-108` —— `AddTenantId` 判空用 `TenantId`、**写入的却是 `UserId`**
+3. `Log.cs:260-264` —— TraceId 注入被注释，`ILog` 写的日志不带 TraceId
+
+另附两处静默降级（`"None"`→`Fatal`、未知级别→`Warning`）。**只做记录，未改代码。**
+
+**结果**：`check-docs.py` 12 项全绿；新增交叉链接全部可达。
+
+---
+
+### 2026-09-18 — 第十四轮：重写 `ISqlQuery` 使用说明（补上手路径，删掉编造的 API）
+
+**背景**：`docs/sql/sqlquery-usage.md` 原有 689 行，但读起来像"变更记录汇编"——**通篇没有"怎么装包、怎么注册、怎么拿到实例、第一条查询怎么写"**，读者无法在 5 分钟内跑通。同时它和 `sqlquery-lambda-usage.md` 在 Raw Fluent / 原生文本上大段重复。更麻烦的是：文中有若干**编译不过的示例**。
+
+**一、重写主文档**（`docs/sql/sqlquery-usage.md`，13 节）
+
+新增此前完全没有的上手路径：
+
+| 节 | 内容 |
+| --- | --- |
+| §1 五分钟上手 | 装包清单 → `AddMySqlProvider()` + `AddSqlDataSource(...)` 两步注册 → `ISqlQueryFactory.Create()` → 三种等价的第一条查询 |
+| §2 四种查询形态 | `ISqlQuery` 仅 5 个入口 / 4 种描述；澄清"**结果类型由终结方法决定**" |
+| §3 终结方法全表 | 通用 9 组（含 `ToEntity` 的真实语义）+ Dapper 多映射 + 存储过程专有 `Execute*` 系列 |
+| §5 分页 | `Pager` / `PagerList` / `IsTotalCountKnown` 的**跳过计数查询**机制 |
+| §10 生命周期 | 状态机 `Draft→Frozen→Executing→Completed`、并发租约、不能共享实例、`Clone()` |
+
+**二、删掉 6 处不存在的方法**（这些签名在源码里根本不存在，照抄会编译失败）
+
+| 原文写的 | 实际情况 |
+| --- | --- |
+| `ToListAsync(buffered: false)` | ❌ 无此参数。`buffered` 是**内部写死**的：`ToList*` 族固定 `true`，`AsEnumerable*` 族固定 `false`。已沉淀为 §11 防误用清单 |
+| `StreamAsync<T>()` | ❌ 不存在。流式入口是 `AsEnumerable<T>()` / `AsAsyncEnumerable<T>()` |
+| `GetCountAsync()` | ❌ 不存在。取总数走 `ToPage` 的 `Pager.TotalCount` |
+| `ToDynamicList()` | ❌ 不存在 |
+| `ExecuteSql<TEntity>()` 挂在 `ISqlQuery` 上 | ❌ `ExecuteSql` 属于 **`ISqlExecutor`**，不属于 `ISqlQuery` |
+| `SingleOrDefault` | 已删除，语义并入 `ToEntity`（保留说明，未作为可用 API） |
+
+**三、两篇文档去重与分工**（`sqlquery-lambda-usage.md`）
+
+- Lambda 篇开头加定位声明：**只讲 `From<T>()` 的 Lambda 子句**，其余一律指向主文档
+- 原「Raw Fluent 与原生文本」节改写为「**多映射（Fluent / 原生文本专有）**」——该节真正独有的是 Dapper 多映射（且 `SqlLambdaQuery` **没有**多映射重载），其余终结方法列表删除
+- 迁移对照节末尾补一条指向主文档 §11 的链接
+- `docs/sql/README.md` 的目录项加注分工说明
+
 ### 2026-09-18 — 第十三轮：docs 目录按主题重排（终结平铺）+ 归位 docfx 生成目录
 
 **背景**：`docs/` 顶层此前平铺 **35 个 `.md`**，加上 8 个子目录，找一份文档要在 40 多个条目里扫。同时 `docs/api/index.md` 被我改成了 98 行手工 API 索引——但那一层是 **docfx 的生成目录**（`docfx.json` 的 `metadata.dest: "api"`），手工内容放进去会被生成流程覆盖，位置本身是错的。

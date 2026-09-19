@@ -18,6 +18,9 @@ on:
       - "**.html"
       - "eng/ci/check-docs.py"
       - "eng/ci/sync-docs-index.py"
+      - "eng/ci/verify-symbols.py"
+      - "framework/src/**"
+      - "components/src/**"
       - ".github/workflows/docs-lint.yml"
   pull_request:
     paths:
@@ -26,6 +29,9 @@ on:
       - "**.html"
       - "eng/ci/check-docs.py"
       - "eng/ci/sync-docs-index.py"
+      - "eng/ci/verify-symbols.py"
+      - "framework/src/**"
+      - "components/src/**"
       - ".github/workflows/docs-lint.yml"
   workflow_dispatch:
 

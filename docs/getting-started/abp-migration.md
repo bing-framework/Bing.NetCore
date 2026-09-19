@@ -38,7 +38,7 @@
 
 | ABP | Bing | 状态 | 说明 |
 | --- | --- | --- | --- |
-| `IRepository<TEntity, TKey>` | **`IStore<TEntity, TKey>`** | 🔵 | **最大差异**。Bing 没有 `IRepository` |
+| `IRepository<TEntity, TKey>` | **`IStore<TEntity, TKey>`**（推荐）／`IRepository<TEntity, TKey>`（也在） | 🔵 | **命名差异最大**。Bing 主推 `IStore`；但 `IRepository` **确实存在且是 `IStore` 的超集**（多一个 `GetUnitOfWork()`，实体约束加 `IAggregateRoot`）。聚合根且要在仓储内拿 UoW 时用 `IRepository`，否则用 `IStore`；`CrudAppServiceBase` 强制要求 `IRepository` |
 | `EfCoreRepository<...>` | `StoreBase<TEntity, TKey>` | 🔵 | 另有 `CompactRepositoryBase`、`TreeRepositoryBase` |
 | 只读仓储 | `IQueryStore<TEntity, TKey>` | 🔵 | `IStore : IQueryStore`，只读路径建议注入父接口 |
 | `IUnitOfWorkManager` | `IUnitOfWorkManager` | 🟢 | 同名，同为 `IScopedDependency` |
@@ -89,7 +89,7 @@
 
 按此顺序推进，每步都可独立验证：
 
-- [ ] **1. 换仓储**：`IRepository<T,K>` → `IStore<T,K>`；`IRepository<T>` → `IStore<T>`（默认 `Guid` 主键）
+- [ ] **1. 换仓储**：`IRepository<T,K>` → `IStore<T,K>`；`IRepository<T>` → `IStore<T>`（默认 `Guid` 主键）。⚠ 若聚合根仓储内需要 `GetUnitOfWork()`，**保留 `IRepository` 即可**（Bing 也有，是 `IStore` 的超集）；用 `CrudAppServiceBase` 时**必须**是 `IRepository`
 - [ ] **2. 换模块**：`AbpModule` → `BingModule`；`[DependsOn]` → `[DependsOnModule]`；然后**逐个检查初始化顺序**——ABP 靠依赖图，Bing 必须显式设 `ModuleLevel`
 - [ ] **3. 换注册入口**：`services.AddApplicationAsync<T>()` → `services.AddBing().AddModule<T>()`；补 `UseBing()`
 - [ ] **4. 换事件总线**：`ILocalEventBus` → `ISimpleEventBus`；`IDistributedEventBus` → `IMessageEventBus`；订阅特性改为 `[EventHandler]`

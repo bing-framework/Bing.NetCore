@@ -58,9 +58,11 @@ docs/
 | **性能问题 / 做优化** | [性能指南](operations/性能指南.md)（基于实测基准的缓存命中、Builder 复用、批量写入建议 + 已知陷阱） |
 | **上线前安全自查** | [安全指南](operations/安全指南.md)（凭据管理、JWT 双校验路径、SQL 注入、日志脱敏、多租户隔离 + 检查清单） |
 | **要建实体 / 聚合根 / 领域事件** | [领域建模指南](guides/领域建模指南.md)（继承体系选型、横切接口谁填充、⛔ 领域事件不会自动派发、`IStore` vs `IRepository`、真实建模示例） |
+| **要写增删改（落库 / 提交 / 事务）** | [工作单元、仓储与应用服务](guides/工作单元仓储与应用服务.md)（三块合一的写路径手册：五分钟上手、API 全表、注册入口、真实示例、⛔ 不提交会静默丢变更） |
 | **要给框架加东西（新模块 / 新 Provider / 换内置实现）** | [扩展指南](guides/扩展指南.md)（扩展点地图、三支 Provider 模板、⚠ `IConventionalRegistrar` 是空壳、自定义过滤器为何不生效） |
 | **某个行为想调，不知道改哪** | [配置参考](guides/配置参考.md)（Options 全清单 + 默认值；⚠ 真正绑定配置节的只有 `JwtOptions`） |
-| **要接日志 / 追踪 / 诊断面板** | [日志与可观测性](operations/日志与可观测性.md)（Serilog 装配、TraceId 贯通、SkyAPM、⚠ 请求日志无脱敏、框架无 HealthChecks） |
+| **只想学会写一条日志** | [日志使用说明](operations/日志使用说明.md)（装包 / 注册 / 拿日志器、链式 API 全表、参数化、级别映射、Serilog 装配、LogContext 与 TraceId、防误用清单） |
+| **要接日志 / 追踪 / 诊断面板** | [日志与可观测性](operations/日志与可观测性.md)（链路视角五层次：Enricher、请求留痕、TraceId 贯通、SkyAPM、⚠ 请求日志无脱敏、框架无 HealthChecks） |
 | **想知道某个决策为什么这样定** | [架构决策记录 ADR](architecture/adr/README.md)（10 份决策，含被否决的备选方案与负面后果） |
 | **跑测试 / 写新测试** | [测试指南](operations/测试指南.md)（工程布局、门控变量、`Bing.Test.Shared`、RS00xx 门禁、eng 脚本） |
 | **只知道包名，不知道装哪个** | [包索引](getting-started/包索引.md)（按「我要做 X」反查 67 个包） |
@@ -69,7 +71,8 @@ docs/
 | **要端到端的完整场景代码** | [recipes 配方集](guides/recipes/README.md)（CRUD、CAP 事件、多租户、RBAC、支付、批量报表） |
 | **要用边缘组件（支付 / OAuth / 缓存 / 日志 Sink / 链路追踪）** | [组件库文档](guides/组件库文档.md)（9 个包，含状态徽章与"入口不在 `IServiceCollection`"的提醒） |
 | **深入某个横切能力（邮件 / 模板 / 锁 / 本地化 / 事件总线）** | [横切能力文档](guides/横切能力文档.md)（《使用文档》§8 的详解版） |
-| **要发事件 / 用 CAP / 领域事件** | [事件与消息文档](architecture/事件与消息文档.md)（四套机制对照；⛔ 领域事件不会派发、⚠ `send:false` 事务外静默丢事件） |
+| **要写事件（本地 / 消息）** | [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md)（定义 / 区别 / 选型对照表 + 两套各五步上手） |
+| **要发事件 / 用 CAP / 领域事件** | 先看 [事件与消息文档](architecture/事件与消息文档.md)（四套机制对照；⛔ 领域事件不会派发、⚠ `send:false` 事务外静默丢事件）→ 动手写用 [分布式事件使用说明](guides/分布式事件使用说明.md)（CAP 全链路手册） |
 | **跨版本升级** | [迁移指南](migrations/README.md)（已知破坏性变更 + 升级验收清单） |
 | **维护仓库（构建 / CI / 发版 / 基准 / eng 脚本）** | [工程化文档](operations/工程化文档.md) + [贡献指南](../CONTRIBUTING.md) |
 | **看懂 `ai_docs/` / `artifacts/` / `templates/`** | [资产索引](operations/资产索引.md)（性质、是否入库、时效性声明） |
@@ -102,14 +105,18 @@ docs/
 | [最佳实践](guides/最佳实践.md) | **怎么写才对**：12 组 ✅/❌ 对照（模块顺序、非 Web 宿主 `UseBing()`、DI 生命周期倒挂、实体注入仓储、循环提交、跨 ORM 事务、消息幂等、`[EventHandler]`、凭据硬编码、FreeSQL 异步退化、公开 API 基线…），规则分 🔴 必须 / 🟡 建议，末尾反模式速查表。 |
 | [性能指南](operations/性能指南.md) | 基于 `artifacts/benchmarks/` **实测数据**（net8.0 / RyuJIT AVX2 / BDN 0.14.0）的性能建议：映射缓存命中 vs 冷启动（**17×**）、Builder 重复渲染（**约 60×**）、`Clone()` 开销、调试 SQL 渲染、批量写入的非线性（1000 实体 **127 ms / 463 MB**）；含缓存热路径地图、6 个已知陷阱、基准运行命令与优化清单。 |
 | [安全指南](operations/安全指南.md) | 五个方面的安全边界：凭据管理（含仓库内现状清单与处置顺序）、**JWT 两条校验路径的差异**（标准中间件校验有效期 / 自定义校验器不校验 `exp`·`nbf`，`ThrowEnabled=true` 时完全无过期检查）、SQL 注入与 `BINGSQL002`、日志脱敏与外发、多租户隔离；附上线前检查清单。诚实列出框架**未提供**的防护（XSS / CSRF / 速率限制 / IP 白名单）。 |
+| [工作单元、仓储与应用服务](guides/工作单元仓储与应用服务.md) | **写路径实操手册**（三块合一）：先记 6 条（⛔ `IUnitOfWork` 只有 `Commit`/`CommitAsync`，⛔ `IUnitOfWorkManager` **没有 `Begin()`**，⛔ 手写服务**不提交则变更静默丢失**）；五分钟上手（装包 / 三步注册 / 完整写操作）；工作单元（`[UnitOfWork]` AOP 拦截器的真实实现与"只对接口代理生效"、事务与回滚的分支条件、只读 UoW）；仓储（`IStore` vs `IRepository` 对照、**`AddAsync` 返回 `Task` 拿不到新实体**、基类家族选型表、分页、映射、⚠ 仓储内不要自己提交）；应用服务（两个工程分工、基类清单、`IQueryAppService` 方法名、`CrudAppServiceBase` 强制 `IRepository`、⛔ `DeleteAsync` 基类已内部提交勿再加 `[UnitOfWork]`、DTO 映射与 `[Valid]` AOP 验证、Controller 基类）；三者联合链路图；两段 admin 真实源码；13 条防误用清单。 |
 | [领域建模指南](guides/领域建模指南.md) | **DDD 建模规范**：完整继承体系图（`DomainObjectBase` → `EntityBase` → `BasicAggregateRoot` → `AggregateRoot`）；`EntityBase` 与 `AggregateRoot` 的**确切差异**（谁自带 `IVersion`、谁不带软删除/审计）；横切接口"谁声明、谁填充"；⛔ **领域事件不会被自动派发**（`DispatchAsync` 无生产调用）；`IStore` 与 `IRepository` **两者都存在**且后者是超集；`IQueryStore` 读侧；应用服务与 DTO 映射；变更追踪源生成器；真实聚合根源码示例；10 条建模陷阱。 |
 | [扩展指南](guides/扩展指南.md) | **二次开发**：扩展点地图；新增模块（两个基类差异、`[DependsOnModule]` 与 `ModuleLevel`、**排序规则是 `Level→Order→FullName` 而非拓扑**）；**新增数据访问 Provider 的三套模板文件清单**（EF 5 个 / FreeSQL 5 个 / Dapper 16 个 `.cs`）与 `SqlProviderProfile` 全字段；约定式 DI（`[Dependency]` 全参数、扫描范围与排除）；自定义分析器与源生成器；异常转换器、全局过滤器、租户解析器。含 3 条"别照这个扩展"的警告。 |
 | [配置参考](guides/配置参考.md) | **Options 与配置节总表**：先分清三类配置来源（**真正绑定配置节的只有 `JwtOptions` 一个**，其余是代码配置或不绑定）；`AddBing()` 的 `BingOptions` **是空类**（没有 `EnableAop`）；约 30 个 Options 的类型 / 命名空间 / 配置节 / 关键默认值；`appsettings.json` 与 `skyapm.json` 真实结构；连接串键名与**未命中静默回退**；环境变量现状；6 条常见误区。 |
+| [日志使用说明](operations/日志使用说明.md) | **`ILog` 使用手册**（《日志与可观测性》的"怎么用"篇）：五分钟上手（装包 / 两步注册 / 三种拿日志器的方式）；⚠ **`AddBingLogging` 返回 `BingLoggingBuilder` 不是 `IServiceCollection`**、⚠ 非泛型 `ILog` 的类别名固定为 `"default"`；链式 API 全表（`ILog` 11 个成员 + 11 个扩展方法）；`Property`(string) 与 `ExtraProperty`(object) 的差异；消息模板与 `{@X}` / `{$X}`；级别映射（含 **`"None"`→`Fatal`** 与未知值→`Warning`）；Serilog 手工装配；`LogContext` 字段与 TraceId 优先级、**⛔ `AddLogContext()` 中 TraceId 注入被注释**；Exceptionless Sink 三个重载；生命周期表；**7 条已知缺陷**与 9 行防误用清单；取自集成测试的真实示例。 |
 | [日志与可观测性](operations/日志与可观测性.md) | 五个层次（日志管道 / 结构化字段 / 请求留痕 / 链路标识 / 追踪面板）：`AddBingLogging` 与链式 `ILog`；Serilog 管道**手工装配**与级别映射（**未知级别静默变 `Warning`**）；`UseBingSerilogEnrichers` **在 `Bing.AspNetCore.Serilog` 而非 `Logging.Serilog`** 且**必须在 `UseAuthentication` 之后**；请求/响应日志**无任何脱敏**；`CorrelationId` / `TraceIdContext` 与 CAP 消费端 `bing-trace-id`；SkyAPM `AddSqlQuery`；MiniProfiler / CAP / Hangfire Dashboard；⚠ **框架无 HealthChecks**。 |
 | [测试指南](operations/测试指南.md) | 测试工程布局（47 个工程 + xunit/Shouldly/Moq 技术栈）、三种 props 的作用、跑测试命令与 filter、集成测试门控变量表、`Bing.Test.Shared` 提供的能力清单、新增 Provider 测试的五件套模板、**RS0016/17/18/26 公开 API 门禁**（仅 7 个工程有基线）、三个 `eng/ci` 脚本与 ProviderEvidence CLI、产物目录解读。 |
 | [abp-migration.md](getting-started/abp-migration.md) | **从 ABP 迁移对照**：模块、仓储、工作单元、审计并发、事件总线、横切服务的 ABP↔Bing 类型对照（🟢 同名 / 🔵 换名 / 🟡 同名异义 / 🔴 无对应），三个"最容易卡住"的差异，8 步迁移清单，不建议迁移的场景。 |
 | [横切能力文档](guides/横切能力文档.md) | 《使用文档》§8 的**详解版**：邮件（Emailing / MailKit / 两套 `AddMailKit` 的命名空间陷阱）、文本模板（无注册入口，手动装配）、锁、本地化、**事件总线两套并存选型**（`Bing.EventBus` 遗留 vs `Bing.Events` 现行）、`Bing.Events.Cap.MySql` 现状、缓存三实现对比。 |
 | [事件与消息文档](architecture/事件与消息文档.md) | **四套事件机制的完整对照**（本项目最易踩的区域之一）：① 进程内事件 `ISimpleEventBus`（已实现但**全仓无调用者**）② CAP 集成事件 `IMessageEventBus`（✅ 现行）③ DDD 领域事件（⛔ **派发器已注册但生产代码零调用**，`PublishEventsAsync` 是空钩子）④ 遗留总线 `Bing.EventBus*`（零生产引用）。含各自的抽象与注册入口、**完整发布链路**、Outbox 事务一致性落点、⛔ **`send:false` 在事务外静默丢事件**、CAP 重试/分组/序列化/TraceId、**类型名撞车对照表**（CS0104 / CS0433）、选型决策树、admin 一次登录的两条路径解剖、12 条陷阱、自行复核方法。 |
+| [分布式事件使用说明](guides/分布式事件使用说明.md) | 《事件与消息文档》的**操作手册版**——只讲分布式这一套（`IMessageEventBus` + CAP 8.0.1）讲到能照抄：装包与注册、定义 `IMessageEvent`、发布两个重载、订阅三件套（`ICapSubscribe` + `[EventHandler]` + `EventHandlerBase`）、处理器发现机制与分组并发、`bing-trace-id` 贯通、**Outbox 链路的三个前提**（⚠ 基类工作单元不认识 CAP，登记动作还会**忽略传入的事务**）、CAP 配置实例、注册入口全表、admin 登录消息完整示例、陷阱与防误用清单、自行复核命令。 |
+| [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md) | **两套机制的对称手册**：`ISimpleEventBus`（进程内）与 `IMessageEventBus`（跨服务 / CAP）的定义、**逐维度对照表**（契约 / 范围 / 持久化 / 可靠投递 / 事务参与 / 延迟发布 / 处理器发现 / 异常隔离 / 适用与不适用场景）、各自五步上手（装包 → 注册 → 定义 → 发布 → 订阅）、⚠ **本地事件处理器必须手工注册**（不注册则 `PublishAsync` **静默无操作**）、⚠ **本地事件全仓零生产调用、无任何真实处理器实现**（示例为本手册构造）、`Send` 默认值为 **`false`**（此前他处写成 `true` 是错的）、两级发布链路、陷阱与防误用清单。 |
 | [组件库文档](guides/组件库文档.md) | **9 个包的使用说明**（支付、**第三方 OAuth 登录 16 提供方**、业务基础类型、EasyCaching、FreeRedis、Exceptionless Sink、Mvc.UI、SkyAPM SQL 追踪、两个 Analyzers）。每个包标注状态徽章（✅ 可用 / 🔌 非标准入口 / 🧩 需手动装配 / ⚠ 入口缺失）。 |
 | [迁移指南](migrations/README.md) | **升级导航**：7.0.0 已知破坏性变更（Dapper 事务/连接收敛、SQL Fluent 收敛）、目标框架与 SDK 事实、注册入口陷阱速查、覆盖边界声明、升级验收清单。 |
 | [包索引](getting-started/包索引.md) | **按用途反查包**：从「我要做 X」找该装哪些包（15 类场景），以及全部 67 个可发包的一句话速览表（含 TFM、分层、上游依赖、反向下游包）。配合 [选型向导](选型向导.html) 使用效果最佳。 |

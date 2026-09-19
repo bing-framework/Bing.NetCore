@@ -8,9 +8,11 @@
 - [PostgreSQL Function](postgresql-functions.md)
 - [迁移指南](migration-guide.md)
 - [集成测试与 RunSettings](../testing/database-integration-tests.md)
-- [查询用法](sqlquery-usage.md)
-- [Lambda 查询](sqlquery-lambda-usage.md)
+- [查询用法](sqlquery-usage.md) —— `ISqlQuery` 主手册：装包注册、四种形态、终结方法全表、参数化、分页、事务、流式、生命周期
+- [Lambda 查询](sqlquery-lambda-usage.md) —— 仅 `From<T>()` 及其 Lambda 子句与多映射。其余内容不重复，见查询用法
 - [批量 Mutation](sql-mutation-batch-execution.md)
 - [事务 API](../migrations/sql-transaction-api-vNext.md)
 
 根 Query 入口固定为 `Query()`、`Sql()`、`SqlInterpolated()`、`Procedure()`、`From<T>()` 和 `FromSubquery<T>()`。本 RC 不再增加同义 Raw SQL 或 Query 入口。
+
+两篇查询文档的分工：**查询用法**覆盖通用面（注册 / 四种形态 / 终结方法 / 参数化 / 分页 / 事务 / 流式 / 生命周期），**Lambda 查询**只覆盖 `From<T>()` 的 Lambda 子句与多映射。交叉内容一律以查询用法为准，Lambda 篇不再重复。

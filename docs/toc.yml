@@ -36,6 +36,12 @@
   items:
     - name: 领域建模指南
       href: guides/领域建模指南.md
+    - name: 工作单元、仓储与应用服务
+      href: guides/工作单元仓储与应用服务.md
+    - name: 本地事件与消息事件使用说明
+      href: guides/本地事件与消息事件使用说明.md
+    - name: 分布式事件使用说明
+      href: guides/分布式事件使用说明.md
     - name: 扩展指南
       href: guides/扩展指南.md
     - name: 配置参考
@@ -50,6 +56,8 @@
       href: guides/recipes/README.md
 - name: 运维与质量
   items:
+    - name: 日志使用说明
+      href: operations/日志使用说明.md
     - name: 日志与可观测性
       href: operations/日志与可观测性.md
     - name: 安全指南

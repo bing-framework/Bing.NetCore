@@ -35,6 +35,8 @@
 10. index.md 同步     —— docs/index.md 与根 README 派生结果一致
 11. 包级 README       —— 每个包目录都有 README.md，且含 NuGet 徽章
 12. 已知坏模式        —— 扫描历史上的事实性错误是否回归
+13. 源码出处          —— 文档代码块里的符号必须在源码里能找到（抓「编造的 API」，
+                        由 verify-symbols.py 提供）
 
 注：本脚本只依赖 Python 标准库，不要求安装 PyYAML——第 2/3 项用纯文本结构校验替代 YAML 解析。
 """
@@ -165,6 +167,47 @@ def check_index_sync() -> None:
         fail("index", "docs/index.md 与根 README.md 不一致，请运行 python eng/ci/sync-docs-index.py")
     else:
         ok("index", "docs/index.md 与根 README 一致")
+
+
+def load_verify_module():
+    """加载同目录下的 verify-symbols.py（文件名含连字符，需按路径加载）。"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "verify-symbols.py")
+    spec = importlib.util.spec_from_file_location("verify_symbols", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_symbols() -> None:
+    """源码出处校验：文档代码块里的符号必须能在源码里找到（抓「编造的 API」）。
+
+    通过 importlib 加载 verify-symbols.py，复用它的索引与比对逻辑，
+    避免在 check-docs.py 里重复实现。若 verify-symbols.py 缺失或抛异常，
+    降级为「跳过」而非失败——它是增强项，不是既有 12 项的阻断条件。
+    """
+    try:
+        mod = load_verify_module()
+        source_index = mod.build_source_index()
+    except Exception as exc:  # pragma: no cover - 防御性
+        fail("出处校验", "无法加载 verify-symbols.py：%s" % exc)
+        return
+    dangling_total = 0
+    broken_total = 0
+    bad_docs = []
+    for path, _base in mod._docs_md_files():
+        rel = os.path.relpath(path, DOCS)
+        dangling, broken = mod.verify_document(path, source_index, strict=False)
+        if dangling:
+            dangling_total += len(dangling)
+            bad_docs.append("%s：%s" % (rel, ", ".join(dangling)))
+        if broken:
+            broken_total += len(broken)
+            bad_docs.append("%s：%s" % (rel, "；".join(broken)))
+    if bad_docs:
+        fail("出处校验", "%d 处悬空符号 / %d 处断锚：%s"
+             % (dangling_total, broken_total, "；".join(bad_docs[:5])))
+    else:
+        ok("出处校验", "无悬空符号、无断锚（源码事实面对照通过）")
 
 
 def check_pkg_readmes() -> None:
@@ -340,6 +383,7 @@ def main(argv=None) -> int:
     check_index_sync()
     check_pkg_readmes()
     check_bad_patterns()
+    check_symbols()
 
     if not args.quiet:
         for n in notes:
