@@ -282,6 +282,7 @@ modules/admin/src/**/appsettings.Development.json
 # AI Generated files
 .agents/.env.local
 .agents/runtime/
+.workbuddy/
 
 # Output Libraries
 output/
