@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.DynamicApi.Contracts</AssemblyName>
+    <PackageId>Bing.DynamicApi.Contracts</PackageId>
+    <Description>Bing 动态 API 元数据契约。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+</Project>

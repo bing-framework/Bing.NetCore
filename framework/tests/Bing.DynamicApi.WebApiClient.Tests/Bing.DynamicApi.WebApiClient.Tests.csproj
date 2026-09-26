@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <RootNamespace>Bing.DynamicApi.WebApiClient.Tests</RootNamespace>
+    <BingTestingUseHosting>true</BingTestingUseHosting>
+    <BingTestingUseTestHost>true</BingTestingUseTestHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Bing.DynamicApi.WebApiClient\Bing.DynamicApi.WebApiClient.csproj" />
+  </ItemGroup>
+</Project>

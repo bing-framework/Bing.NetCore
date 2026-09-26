@@ -10,12 +10,11 @@ namespace Bing.AspNetCore.Mvc.Filters;
 /// </summary>
 public class ResultHandlerAttribute : ResultFilterAttribute
 {
-    /// <summary>
-    /// 结果处理
-    /// </summary>
-    /// <param name="context">结果执行上下文</param>
+    /// <inheritdoc />
     public override void OnResultExecuting(ResultExecutingContext context)
     {
+        if (context.ActionDescriptor.EndpointMetadata.OfType<IgnoreResultHandlerAttribute>().Any())
+            return;
         if (HasIgnoreResultHandler(context))
             return;
         if (HasIgnoreHandle(context.Result))
@@ -59,7 +58,7 @@ public class ResultHandlerAttribute : ResultFilterAttribute
     }
 
     /// <summary>
-    /// 是否忽略结果处理
+    /// 判断控制器或方法是否跳过结果包装。
     /// </summary>
     /// <param name="context">结果执行上下文</param>
     /// <returns>应忽略结果处理时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
@@ -79,7 +78,7 @@ public class ResultHandlerAttribute : ResultFilterAttribute
     }
 
     /// <summary>
-    /// 是否忽略处理
+    /// 判断结果是否已经包装。
     /// </summary>
     /// <param name="result">操作结果</param>
     /// <returns>应忽略结果处理时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+    <AssemblyName>Bing.DynamicApi.Client</AssemblyName>
+    <PackageId>Bing.DynamicApi.Client</PackageId>
+    <Description>Bing 动态 API 类型化客户端。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.DynamicApi.Contracts\Bing.DynamicApi.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.ExceptionHandling\Bing.ExceptionHandling.csproj" />
+  </ItemGroup>
+</Project>
