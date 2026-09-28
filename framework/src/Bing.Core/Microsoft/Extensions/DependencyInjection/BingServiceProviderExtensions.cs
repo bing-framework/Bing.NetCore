@@ -61,21 +61,42 @@ public static partial class BingServiceProviderExtensions
     /// <returns>完成 Bing 模块初始化后的服务提供程序。</returns>
     public static IServiceProvider UseBing(this IServiceProvider serviceProvider)
     {
-        var logger = serviceProvider.GetLogger(FrameworkLog);
-        logger.LogInformation("Bing框架初始化开始");
-        var watch = Stopwatch.StartNew();
-        var modules = serviceProvider.GetServices<BingModule>().ToArray();
-        foreach (var module in modules)
-        {
-            var moduleName = Reflections.GetDescription(module.GetType());
-            logger.LogInformation($"正在初始化模块 “{moduleName}”");
-            module.UseModule(serviceProvider);
-            logger.LogInformation($"模块 “{moduleName}” 初始化完成");
-        }
-        watch.Stop();
-        logger.LogInformation($"Bing框架初始化完毕，耗时：{watch.Elapsed}");
+        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
+        serviceProvider.GetRequiredService<IBingModuleManager>().Initialize();
         return serviceProvider;
     }
+
+    /// <summary>
+    /// 异步初始化当前应用的模块。
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <param name="cancellationToken">初始化取消令牌。</param>
+    /// <returns>完成 Bing 模块初始化后的服务提供程序。</returns>
+    public static async Task<IServiceProvider> UseBingAsync(this IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
+    {
+        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
+        await serviceProvider.GetRequiredService<IBingModuleManager>()
+            .InitializeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        return serviceProvider;
+    }
+
+    /// <summary>
+    /// 同步停止模块并释放模块自持有资源。
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <remarks>该方法不释放根容器。</remarks>
+    public static void ShutdownBing(this IServiceProvider serviceProvider) =>
+        (serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider))).GetRequiredService<IBingModuleManager>().Shutdown();
+
+    /// <summary>
+    /// 异步停止模块并释放模块自持有资源。
+    /// </summary>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <param name="cancellationToken">关闭取消令牌。</param>
+    /// <returns>表示关闭操作的任务。</returns>
+    /// <remarks>调用方应在释放根容器之前等待此任务完成。</remarks>
+    public static Task ShutdownBingAsync(this IServiceProvider serviceProvider, CancellationToken cancellationToken = default) =>
+        (serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider))).GetRequiredService<IBingModuleManager>().ShutdownAsync(cancellationToken);
 
     /// <summary>
     /// 获取指定类型的日志对象

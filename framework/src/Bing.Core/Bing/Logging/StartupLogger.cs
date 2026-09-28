@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 namespace Bing.Logging;
 
 /// <summary>
-/// 系统启动日志
+/// 缓存系统启动阶段的日志信息。
 /// </summary>
 public class StartupLogger
 {
     /// <summary>
-    /// 日志信息列表
+    /// 获取待输出的日志信息列表。
     /// </summary>
     public IList<LogInfo> LogInfos { get; } = new List<LogInfo>();
 
@@ -41,13 +41,15 @@ public class StartupLogger
     }
 
     /// <summary>
-    /// 输出
+    /// 输出并清空已缓存的日志信息。
     /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    /// <param name="provider">服务提供程序。</param>
     public void Output(IServiceProvider provider)
     {
         IDictionary<string, ILogger> dict = new Dictionary<string, ILogger>();
-        foreach (var info in LogInfos.OrderBy(m => m.CreatedTime))
+        var entries = LogInfos.OrderBy(m => m.CreatedTime).ToArray();
+        LogInfos.Clear();
+        foreach (var info in entries)
         {
             if (!dict.TryGetValue(info.LogName, out var logger))
             {

@@ -19,7 +19,7 @@
 | 🔴 **已废弃**（Superseded） | 被后续 ADR 取代（会注明取代者） |
 | ⚪ **已拒绝**（Rejected） | 讨论过但决定不采用 |
 
-> 目前 10 份全部为 🟢 已接受——它们都是**事后补录**的（决策早已在代码中落地），本文的价值在于把「背景与备选」那部分补写出来，供日后回看与新人理解。
+> ADR-0001～0010 为历史决策补录；ADR-0011～0014 记录当前工作树的模块运行时增强。版本是否发布以发行说明为准。
 
 ---
 
@@ -27,6 +27,10 @@
 
 | 编号 | 决策 | 状态 | 一句话 |
 | --- | --- | --- | --- |
+| [ADR-0014](ADR-0014-module-context-and-scanning.md) | 模块上下文与应用级扫描范围 | 🟢 | 当前作用域便捷访问与附加程序集扫描 |
+| [ADR-0013](ADR-0013-module-lifecycle-phases.md) | 模块全局生命周期阶段 | 🟢 | 全模块 Pre / 主阶段 / Post 与可选提前扫描 |
+| [ADR-0012](ADR-0012-hot-plugin-generations.md) | 可回收的插件代 | 🟢 | 独立容器与加载上下文支持整组插件切换 |
+| [ADR-0011](ADR-0011-module-runtime-ownership.md) | 可选依赖图入口与模块资源所有权 | 🟢 | 保留旧排序，新增拓扑入口及统一生命周期 |
 | [ADR-0001](ADR-0001-module-two-phase-bootstrap.md) | 模块化两阶段启动 | 🟢 | 用 `BingModule` 替代手写 Startup 注册，按 `Level` 排序 |
 | [ADR-0002](ADR-0002-conventional-di-registration.md) | 约定式依赖注入 | 🟢 | 实现标记接口即自动注册，`[Dependency]` 可覆盖 |
 | [ADR-0003](ADR-0003-multi-orm-coexistence.md) | 多 ORM 并存 + 共享领域抽象 | 🟢 | 领域接口与 ORM 解耦，EF / FreeSQL / Dapper 各自实现 |

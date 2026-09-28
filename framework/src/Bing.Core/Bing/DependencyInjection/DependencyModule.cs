@@ -12,48 +12,48 @@ namespace Bing.DependencyInjection;
 [Description("依赖注入模块")]
 public class DependencyModule : BingModule
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>依赖注入模块属于核心级别。</remarks>
     public override ModuleLevel Level => ModuleLevel.Core;
 
-    /// <summary>
-    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
-    /// 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为>0的顺序值
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>在核心级别中使用顺序值 1。</remarks>
     public override int Order => 1;
 
-    /// <summary>
-    /// 添加服务。将模块服务添加到依赖注入服务容器中
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>已完成依赖注入服务注册的原服务集合。</returns>
+    /// <inheritdoc />
+    /// <remarks>注册依赖注入基础设施，并按配置扫描和注册依赖服务。</remarks>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         // 服务定位器设置
-        ServiceLocator.Instance.SetServiceCollection(services);
+        var registration = BingModuleRegistration.Get(services);
 
         services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));// 解决循环依赖问题
         services.TryAddTransient<IHybridServiceScopeFactory, DefaultServiceScopeFactory>();
         services.AddScoped<ScopedDictionary>();
 
-        // 查找所有自动注册的服务实现类型
-        var dependencyTypeFinder = services.GetOrAddTypeFinder<IDependencyTypeFinder>(assemblyFinder => new DependencyTypeFinder(assemblyFinder));
-
-        var dependencyTypes = dependencyTypeFinder.FindAll(true);
-        foreach (var dependencyType in dependencyTypes)
-            AddToServices(services, dependencyType);
+        if (registration?.ConventionServicesRegistered != true)
+            RegisterConventionServices(services);
 
         return services;
     }
 
     /// <summary>
-    /// 应用模块服务
+    /// 注册选中模块程序集中的约定服务。
     /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    internal void RegisterConventionServices(IServiceCollection services)
+    {
+        var registration = BingModuleRegistration.Get(services);
+        if (registration?.AutoRegisterServices == false) return;
+        var dependencyTypeFinder = services.GetOrAddTypeFinder<IDependencyTypeFinder>(assemblyFinder => new DependencyTypeFinder(assemblyFinder));
+        foreach (var dependencyType in dependencyTypeFinder.FindAll(true))
+            AddToServices(services, dependencyType);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>标记模块已启用；静态兼容入口的定位器绑定由运行时负责。</remarks>
     public override void UseModule(IServiceProvider provider)
     {
-        ServiceLocator.Instance.SetApplicationServiceProvider(provider);
+        // 静态兼容入口由运行时绑定和解绑，新入口不依赖全局定位器。
         Enabled = true;
     }
 

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
+    <RootNamespace>Bing.Core.PluginScanDependency</RootNamespace>
+    <AssemblyName>Bing.Core.PluginScanDependency</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="../../../../../common.props" />
+</Project>

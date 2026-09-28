@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
+    <RootNamespace>Bing.Core.PluginFixtures.V2</RootNamespace>
+    <AssemblyName>Bing.Core.PluginFixtures</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <Import Project="../../../../../common.props" />
+
+  <PropertyGroup>
+    <OutputPath>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\</OutputPath>
+    <IntermediateOutputPath>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\</IntermediateOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToIntermediateOutputPath>false</AppendTargetFrameworkToIntermediateOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Bing.Core/Bing.Core.csproj" />
+    <ProjectReference Include="../Bing.Core.PluginScanFixtures.V2/Bing.Core.PluginScanFixtures.V2.csproj" />
+  </ItemGroup>
+</Project>

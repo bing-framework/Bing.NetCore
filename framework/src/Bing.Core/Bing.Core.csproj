@@ -14,6 +14,13 @@
 
   <ItemGroup>
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="NuGet.Versioning" Version="5.4.0" />
+    <!-- 直接使用异步释放契约，避免现代 TFM 的传递依赖裁剪掉此程序集。 -->
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bing.PluginRuntime" />
   </ItemGroup>
 
   <ItemGroup>

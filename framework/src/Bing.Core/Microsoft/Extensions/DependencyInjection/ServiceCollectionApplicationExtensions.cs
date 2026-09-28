@@ -1,5 +1,6 @@
 ﻿using Bing;
 using Bing.Core.Builders;
+using Bing.Core.Modularity;
 using Bing.Helpers;
 using Bing.Internal;
 using Bing.Options;
@@ -21,24 +22,22 @@ public static class ServiceCollectionApplicationExtensions
     public static IBingBuilder AddBing(this IServiceCollection services, Action<BingOptions> setupAction = null)
     {
         Check.NotNull(services, nameof(services));
-        var configuration = services.GetConfigurationOrNull();
+        var registration = BingModuleRegistration.Register(services, true);
         var options = new BingOptions();
         
-        Singleton<IConfiguration>.Instance = configuration;
-        // 注册核心服务（Options、Logging、Localization）
-        services.AddCoreServices();
-        // 注册核心 Bing 服务
-        services.AddCoreBingServices();
-        // 注册自定义扩展
-        setupAction?.Invoke(options);
-
-        var builder = services.GetOrAddSingletonInstance<IBingBuilder>(() => new BingBuilder(services));
-
-        builder.AddCoreModule();
-        BingLoader.RegisterTypes(services);
-
-        foreach (var extension in options.Extensions)
-            extension.AddServices(services);
-        return builder;
+        try
+        {
+            // 配置委托和类型发现同样属于注册阶段，失败后不能重用部分配置的集合。
+            services.AddCoreServices();
+            services.AddCoreBingServices();
+            setupAction?.Invoke(options);
+            var builder = services.GetOrAddSingletonInstance<IBingBuilder>(() => new BingBuilder(services));
+            builder.AddCoreModule();
+            BingLoader.RegisterTypes(services);
+            foreach (var extension in options.Extensions)
+                extension.AddServices(services);
+            return builder;
+        }
+        catch (Exception ex) { registration.FailConfiguration(ex); throw; }
     }
 }

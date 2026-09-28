@@ -28,11 +28,8 @@ internal static class InternalServiceCollectionExtensions
     /// <param name="services">服务集合</param>
     internal static void AddCoreBingServices(this IServiceCollection services)
     {
-        var assemblyFinder = new AppDomainAllAssemblyFinder();
-        var dependencyTypeFinder = new DependencyTypeFinder(assemblyFinder);
-
-        services.TryAddSingleton<IAllAssemblyFinder>(assemblyFinder);
-        services.TryAddSingleton<IDependencyTypeFinder>(dependencyTypeFinder);
+        var assemblyFinder = services.GetOrAddAllAssemblyFinder();
+        services.TryAddSingleton<IDependencyTypeFinder>(new DependencyTypeFinder(assemblyFinder));
         services.TryAddSingleton<IInitLoggerFactory>(new DefaultInitLoggerFactory());
     }
 }

@@ -4,6 +4,7 @@ using Bing.AspNetCore.ExceptionHandling;
 using Bing.AspNetCore.Security.Claims;
 using Bing.AspNetCore.Tracing;
 using Bing.Core.Builders;
+using Bing.Core.Modularity;
 using Bing.Logging;
 using Bing.Reflection;
 using Microsoft.AspNetCore.Routing;
@@ -13,17 +14,17 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.AspNetCore.Builder;
 
 /// <summary>
-/// 应用程序构建器(<see cref="IApplicationBuilder"/>) 扩展
+/// 应用程序构建器扩展方法。
 /// </summary>
 public static partial class BingApplicationBuilderExtensions
 {
     /// <summary>
-    /// 异常处理中间件标识
+    /// 异常处理中间件标识。
     /// </summary>
     private const string ExceptionHandlingMiddlewareMarker = "_BingExceptionHandlingMiddleware_Added";
 
     /// <summary>
-    /// 框架初始化
+    /// 框架初始化日志名称。
     /// </summary>
     private const string FrameworkLog = "BingFrameworkLog";
 
@@ -97,38 +98,35 @@ public static partial class BingApplicationBuilderExtensions
     /// <returns>完成 Bing 模块初始化后的应用程序构建器。</returns>
     public static IApplicationBuilder UseBing(this IApplicationBuilder app)
     {
-        var provider = app.ApplicationServices;
-        var logger = provider.GetLogger(FrameworkLog);
-        logger.LogInformation("Bing 框架初始化开始...");
-        var watch = new Stopwatch();
-        watch.Start();
-        try
-        {
-            // 输出初始化日志
-            //var startupLogger = provider.GetService<StartupLogger>();
-            //startupLogger.Output(provider);
-
-            var modules = provider.GetAllModules();
-            logger.LogInformation("共发现 {ModuleCount} 个模块需要初始化。", modules.Length);
-            foreach (var module in modules)
-            {
-                var moduleType = module.GetType();
-                var moduleName = Reflections.GetDescription(moduleType) ?? moduleType.Name;
-                logger.LogInformation("正在初始化模块: {ModuleName} ({ModuleType})", moduleName, moduleType.Name);
-                if (module is AspNetCoreBingModule netCoreModule)
-                    netCoreModule.UseModule(app);
-                else
-                    module.UseModule(provider);
-                logger.LogInformation("模块 {ModuleName} ({ModuleType}) 初始化完成", moduleName, moduleType.Name);
-            }
-            watch.Stop();
-            logger.LogInformation("Bing 框架初始化完成，耗时: {ElapsedTime}", watch.Elapsed);
-            return app;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Bing 框架初始化失败: {ErrorMessage}", ex.Message);
-            throw;
-        }
+        if (app == null) throw new ArgumentNullException(nameof(app));
+        app.ApplicationServices.GetRequiredService<IBingModuleManager>().Initialize(CreateModuleContext(app));
+        return app;
     }
+
+    /// <summary>
+    /// 异步初始化 Web 模块。
+    /// </summary>
+    /// <param name="app">应用程序构建器。</param>
+    /// <param name="cancellationToken">初始化取消令牌。</param>
+    /// <returns>完成 Bing 模块初始化后的应用程序构建器。</returns>
+    /// <remarks>调用完成后再启动请求处理。</remarks>
+    public static async Task<IApplicationBuilder> UseBingAsync(this IApplicationBuilder app, CancellationToken cancellationToken = default)
+    {
+        if (app == null) throw new ArgumentNullException(nameof(app));
+        await app.ApplicationServices.GetRequiredService<IBingModuleManager>()
+            .InitializeAsync(CreateModuleContext(app), cancellationToken).ConfigureAwait(false);
+        return app;
+    }
+
+    /// <summary>
+    /// 创建 Web 模块初始化上下文。
+    /// </summary>
+    /// <param name="app">应用程序构建器。</param>
+    /// <returns>绑定当前应用程序构建器的模块初始化上下文。</returns>
+    private static BingModuleInitializationContext CreateModuleContext(IApplicationBuilder app) =>
+        new(app.ApplicationServices, app, (module, provider) =>
+        {
+            if (module is AspNetCoreBingModule webModule) webModule.UseModule(app);
+            else module.UseModule(provider);
+        });
 }

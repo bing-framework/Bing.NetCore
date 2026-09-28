@@ -37,11 +37,23 @@ public class OrderController : ApiControllerBase
 }
 ```
 
+新应用可使用依赖图入口：
+
+```csharp
+services.AddBingApplication<AppModule>();
+
+// Startup.Configure
+app.UseBing();
+```
+
+异步模块使用 `app.UseBingAsync()`。框架会把 `IApplicationBuilder` 放入 `BingModuleInitializationContext.HostContext`；实现 `IBingAsyncModuleInitializer` 的模块可以从上下文读取 `ServiceProvider` 和 Web 宿主对象，在 `InitializeAsync` 中完成异步初始化。
+
 ## 注册入口
 
 | 入口方法 | 命名空间 | 说明 |
 | --- | --- | --- |
 | `UseBing(this IApplicationBuilder)` | `Microsoft.AspNetCore.Builder` | Web 初始化：遍历模块执行 `UseModule(app)` |
+| `UseBingAsync(this IApplicationBuilder, CancellationToken)` | `Microsoft.AspNetCore.Builder` | 异步初始化模块，并将 `IApplicationBuilder` 作为 `HostContext` |
 | `UseBingExceptionHandling()` | `Microsoft.AspNetCore.Builder` | 异常处理中间件 |
 | `UseCorrelationId` / `UseRealIp(...)` / `UseRequestResponseLog(app)` | `Bing.AspNetCore.Extensions` | 链路标识 / 真实 IP / 请求响应日志 |
 
@@ -58,6 +70,8 @@ public class OrderController : ApiControllerBase
 **本包依赖**：`Bing.AspNetCore.Abstractions`、`Bing.Logging`、`Bing.ExceptionHandling`、`Bing.Security`、`Bing.Aop.AspectCore`
 
 **依赖本包**：`Bing.AspNetCore.MultiTenancy`
+
+Web 应用停止前应等待 `ShutdownBingAsync()` 完成，再释放根服务提供程序。使用 Generic Host 时，Bing 注册的 hosted service 会在 Host 停止阶段自动调用模块关闭流程；若应用自行管理容器，必须显式调用 `provider.ShutdownBingAsync()`。模块只释放自己拥有的资源，控制器、日志和其他 DI 服务由容器释放。
 
 ## 更多文档
 

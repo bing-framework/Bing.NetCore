@@ -6,7 +6,7 @@
 | --- | --- |
 | **状态** | 🟢 已接受（代码已落地） |
 | **日期** | 2026-09-18（事后补录） |
-| **涉及** | `Bing.Core`（`IBingModule` / `BingModule` / `ModuleLevel` / `[DependsOnModule]`） |
+| **涉及** | 旧 `AddBing` 兼容入口与新 `AddBingApplication` 依赖图入口（`Bing.Core` 模块生命周期） |
 
 ## 背景
 
@@ -16,7 +16,7 @@
 2. 无法表达包之间的依赖（用了 A 就必须先用 B），文档里写「请先注册 XXX」很容易被忽略；
 3. 框架自己也无法按能力裁剪——总不能装了一堆用不上的东西。
 
-需要一个**自描述、自装配、可裁剪**的启动模型。
+需要一个**自描述、自装配、可裁剪**的启动模型。旧 `AddBing` 继续服务已有应用；新 `AddBingApplication` 为显式根模块提供完整依赖图和独立的配置/初始化边界。
 
 ## 备选方案
 
@@ -29,16 +29,16 @@
 
 ## 决策
 
-采用 **方案 D**：以 `BingModule`（`ConfigureServices` 阶段 + `Initialize` 阶段）为装配单元，配 `[DependsOnModule]` 表达依赖、`ModuleLevel`（`Core=1` / `Framework=10` / `Application=20` / `Business=30`）表达顺序。
+旧入口继续采用 **方案 D**：以 `BingModule` 的 `AddServices` + `UseModule` 为装配单元，依赖只负责纳入模块，历史排序使用 `Level → Order → FullName`。新入口 `AddBingApplication` 在同一模块生命周期之上构建完整依赖图：依赖拓扑优先；同一轮已就绪模块再按 `Level → Order → FullName`（类型全名 Ordinal）排序，并支持可选前配置、后配置及异步初始化/关闭。
 
 ```csharp
-services.AddBing().AddModule<AppModule>();   // 注册阶段（挂在 IBingBuilder，不是 IServiceCollection）
-app.UseBing();                                // Web：初始化阶段
-// 非 Web：serviceProvider.UseBing();
+services.AddBingApplication<AppModule>();     // 新入口：完整依赖图
+app.UseBing();                                // Web：同步初始化
+// 异步模块使用 app.UseBingAsync() / serviceProvider.UseBingAsync()
 ```
 
-- `[DependsOnModule]` 递归展开，**只保证被依赖模块被加载**；
-- 加载顺序由 `Level → Order → FullName` 三级排序决定，**不做拓扑排序**。
+- 旧 `AddBing` 的 `[DependsOnModule]` 递归展开只保证被依赖模块被加载，保留历史排序；
+- 新 `AddBingApplication` 的 `[DependsOnModule]` 参与完整拓扑排序，依赖模块先于依赖它的模块。
 
 ## 后果
 
@@ -52,7 +52,7 @@ app.UseBing();                                // Web：初始化阶段
 **负面**
 
 - **启动逻辑分散**：想知道 Redis 什么时候初始化，得去翻 `CacheModule`，而不是在 `Startup` 里一眼看完。
-- **`[DependsOnModule]` 不管顺序**这一点与业界多数框架（ABP）相反，是本框架最容易误解的设计之一。已在 [最佳实践 §1.1](../../guides/最佳实践.md) 与 [术语表 §8.4](../../getting-started/术语表.md) 反复强调。
+- 两套入口的排序语义不同：旧入口保留历史 `Level/Order/FullName` 排序，新入口优先满足依赖拓扑。迁移时应阅读[模块运行时迁移指南](../../migrations/modularity-runtime.md)。
 - 非 Web 场景（控制台 / WinForm）必须**额外**调 `serviceProvider.UseBing()`，漏了不报错、只是「什么都没发生」——静默失败。
 
 **中性**

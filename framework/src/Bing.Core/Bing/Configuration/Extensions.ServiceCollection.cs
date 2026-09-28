@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 namespace Bing.Configuration;
 
 /// <summary>
-/// 服务集合(<see cref="IServiceCollection"/>) 扩展
+/// 服务集合扩展方法。
 /// </summary>
 public static partial class Extensions
 {
@@ -16,32 +16,24 @@ public static partial class Extensions
     /// <param name="services">服务集合</param>
     /// <param name="configuration">配置</param>
     /// <returns>已注册选项配置服务的原服务集合。</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="services"/> 或 <paramref name="configuration"/> 为空时抛出。</exception>
     public static IServiceCollection AddOptionsType(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions();
-        BingLoader.RegisterType += type =>
-        {
-            if (type.IsAbstract || type.IsInterface)
-                return;
-            var attribute = type.GetCustomAttribute<OptionsTypeAttribute>();
-            if (attribute != null)
-            {
-                var section = string.IsNullOrWhiteSpace(attribute.SectionName)
-                    ? configuration
-                    : configuration.GetSection(attribute.SectionName);
-                services.AddOptionsType(type, section, _ => { });
-            }
-        };
+        OptionsTypeRegistration.GetOrCreate(services, configuration);
+        // 提前登记时由 RegisterTypes 使用当前集合的程序集边界；晚登记才补扫已完成的集合。
+        if (BingLoader.HasRegisteredTypes(services))
+            BingLoader.RegisterOptionsTypes(services);
         return services;
     }
 
     /// <summary>
     /// 将指定的 <paramref name="optionsType"/> 配置绑定到 <paramref name="configuration"/>，并注册到依赖注入容器中。
     /// </summary>
-    /// <param name="services">服务集合</param>
+    /// <param name="services">服务集合。</param>
     /// <param name="optionsType">要绑定的选项类型，必须是非抽象类。</param>
-    /// <param name="configuration">配置</param>
-    /// <param name="configurationBinder">配置绑定操作</param>
+    /// <param name="configuration">配置。</param>
+    /// <param name="configurationBinder">配置绑定操作。</param>
     /// <exception cref="ArgumentNullException">
     /// 当 <paramref name="services"/> 或 <paramref name="configuration"/> 为空时抛出。
     /// </exception>
@@ -49,9 +41,9 @@ public static partial class Extensions
     /// 当 <paramref name="optionsType"/> 不是可实例化的类（即抽象类或接口）时抛出。
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// 当动态创建 <paramref name="optionsType"/> 相关的 `IOptionsChangeTokenSource` 或 `IConfigureOptions` 失败时抛出。
+    /// 当动态创建 <paramref name="optionsType"/> 相关的选项服务失败时抛出。
     /// </exception>
-    private static void AddOptionsType(this IServiceCollection services, Type optionsType, IConfiguration configuration, Action<BinderOptions> configurationBinder)
+    internal static void RegisterOptionsType(IServiceCollection services, Type optionsType, IConfiguration configuration, Action<BinderOptions> configurationBinder)
     {
         if (services == null)
             throw new ArgumentNullException(nameof(services));

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Bing.PluginRuntime</AssemblyName>
+    <PackageId>Bing.PluginRuntime</PackageId>
+    <Description>Bing 可回收插件运行时。</Description>
+  </PropertyGroup>
+
+  <Import Project="../../../common.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Core/Bing.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftPackageVersion)" />
+  </ItemGroup>
+</Project>

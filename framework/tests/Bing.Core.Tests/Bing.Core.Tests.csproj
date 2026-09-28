@@ -11,10 +11,72 @@
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Core" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="PluginFixtures\**" />
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
+    <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
+    <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
+                      ReferenceOutputAssembly="false"
+                      BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginFixtures.V2\Bing.Core.PluginFixtures.V2.csproj"
+                      ReferenceOutputAssembly="false"
+                      BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginScanFixtures\Bing.Core.PluginScanFixtures.csproj"
+                      ReferenceOutputAssembly="false"
+                      BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginScanFixtures.V2\Bing.Core.PluginScanFixtures.V2.csproj"
+                      ReferenceOutputAssembly="false"
+                      BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginScanDependency\Bing.Core.PluginScanDependency.csproj"
+                      ReferenceOutputAssembly="false"
+                      BuildReference="true" />
   </ItemGroup>
+
+  <Target Name="CopyBingCorePluginFixtures" AfterTargets="Build">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
+             Targets="GetTargetPath"
+             Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="BingCorePluginFixtureTargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(BingCorePluginFixtureTargetPath)"
+          DestinationFolder="$(TargetDir)PluginFixtures"
+          SkipUnchangedFiles="true" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginScanFixtures\Bing.Core.PluginScanFixtures.csproj"
+             Targets="GetTargetPath"
+             Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="BingCorePluginScanFixtureTargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(BingCorePluginScanFixtureTargetPath)"
+          DestinationFolder="$(TargetDir)PluginFixtures"
+          SkipUnchangedFiles="true" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginScanFixtures.V2\Bing.Core.PluginScanFixtures.V2.csproj"
+             Targets="GetTargetPath"
+             Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="BingCorePluginScanV2FixtureTargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(BingCorePluginScanV2FixtureTargetPath)"
+          DestinationFolder="$(TargetDir)PluginFixtures\V2"
+          SkipUnchangedFiles="true" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginScanDependency\Bing.Core.PluginScanDependency.csproj"
+             Targets="GetTargetPath"
+             Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="BingCorePluginScanDependencyFixtureTargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(BingCorePluginScanDependencyFixtureTargetPath)"
+          DestinationFolder="$(TargetDir)PluginFixtures"
+          SkipUnchangedFiles="true" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginFixtures.V2\Bing.Core.PluginFixtures.V2.csproj"
+             Targets="GetTargetPath"
+             Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="BingCorePluginFixtureV2TargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(BingCorePluginFixtureV2TargetPath)"
+          DestinationFolder="$(TargetDir)PluginFixtures\V2"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
