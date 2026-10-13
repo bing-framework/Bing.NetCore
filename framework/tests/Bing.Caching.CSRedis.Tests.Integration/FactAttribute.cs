@@ -8,7 +8,7 @@ namespace Bing.Caching.CSRedis.Tests;
 public sealed class FactAttribute : Xunit.FactAttribute
 {
     /// <summary>
-    /// 初始化 Redis 集成测试特性。
+    /// 初始化一个 <see cref="FactAttribute"/> 类型的实例。
     /// </summary>
     public FactAttribute()
     {

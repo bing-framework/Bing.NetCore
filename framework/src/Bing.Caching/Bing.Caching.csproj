@@ -13,6 +13,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.3" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bing.Caching.FreeRedis" />
+    <InternalsVisibleTo Include="Bing.Caching.CSRedis" />
+    <InternalsVisibleTo Include="Bing.EasyCaching" />
+    <InternalsVisibleTo Include="Bing.Caching.Tests" />
+    <InternalsVisibleTo Include="CacheBench" />
   </ItemGroup>
 
 </Project>

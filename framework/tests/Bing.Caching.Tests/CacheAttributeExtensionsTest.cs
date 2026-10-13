@@ -10,14 +10,20 @@ namespace Bing.Caching.Tests;
 // 测试辅助类型
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// <summary>带 CacheNameAttribute 的缓存项</summary>
+/// <summary>
+/// 带 CacheNameAttribute 的缓存项
+/// </summary>
 [CacheName("my-custom-cache")]
 public class AnnotatedCacheItem { }
 
-/// <summary>无 CacheNameAttribute，FullName 为 "Bing.Caching.Tests.UserCacheItem"</summary>
+/// <summary>
+/// 无 CacheNameAttribute，FullName 为 "Bing.Caching.Tests.UserCacheItem"
+/// </summary>
 public class UserCacheItem { }
 
-/// <summary>无 CacheNameAttribute，FullName 不含 "CacheItem" 后缀</summary>
+/// <summary>
+/// 无 CacheNameAttribute，FullName 不含 "CacheItem" 后缀
+/// </summary>
 public class OrderData { }
 
 // ─────────────────────────────────────────────────────────────────────────────

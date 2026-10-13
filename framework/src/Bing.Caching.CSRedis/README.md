@@ -13,7 +13,7 @@
 
 ## 这是什么
 
-`CSRedisCacheManager` 实现 `ICache` / `IRedisCache`。因为依赖 CSRedis 的**静态初始化**，需要两步注册。`modules/admin` 使用的就是它。
+`CSRedisCacheManager` 实现 `ICache` / `IRedisCache`，通过依赖注入获取独立的 `CSRedisClient` 和必填的缓存命名空间。
 
 ## 安装
 
@@ -24,15 +24,14 @@ dotnet add package Bing.Caching.CSRedis
 ## 快速上手
 
 ```csharp
-// ① CSRedis 静态初始化（必须）
-RedisHelper.Initialization(new CSRedisClient("127.0.0.1:6379,password=,defaultDatabase=0"));
-
-// ② 注册 ICache
+services.AddSingleton(new CSRedisClient("127.0.0.1:6379,password=,defaultDatabase=0"));
+services.AddSingleton(new CacheConfiguration("my-app", "csredis"));
 services.AddScoped<ICache, CSRedisCacheManager>();
 
 // 使用
 var user = await cache.GetAsync("user:1", async () => await repo.FindByIdAsync(1));
-await cache.SetAsync(new CacheKey("user:{0}", 1), user, TimeSpan.FromMinutes(10));
+await cache.SetAsync(new CacheKey("user:{0}", 1), user,
+    new CacheOptions { Expiration = TimeSpan.FromMinutes(10) });
 ```
 
 ## 关键类型
@@ -49,7 +48,11 @@ await cache.SetAsync(new CacheKey("user:{0}", 1), user, TimeSpan.FromMinutes(10)
 
 ## 注意事项
 
-⚠ **必须先 `RedisHelper.Initialization(...)`**，否则运行时取不到 Redis 客户端。本包也没有 `AddXxx` 入口。
+`Clear` 只扫描并删除当前命名空间的键，不执行 `FLUSHDB`。升级后旧物理键不会回读，需为冷缓存回源预留容量。不要在 CSRedis 连接串中配置 `prefix`，否则构造时会报错。客户端生命周期由 DI 管理。
+
+删除批次同时受 `CacheConfiguration.BatchSize` 与 `CacheResourceOptions.MaxBatchCommandBytes` 限制，后者按数据键和 `:lease` 键参数的 UTF-8 字节数计算，不包括 Redis 协议帧。原生 `SCAN` 路径还支持 `CacheResourceOptions.MaxScanPages`；页预算耗尽后不会继续发送下一条 `SCAN` 命令，默认值 `0` 不限制。
+
+多节点部署必须设置 `CacheTopology.RedisCluster` 或 `CacheTopology.ClientSharded`，并提供主节点扫描客户端。客户端分片须另设 `expectedShardCount`，数量不符或 Redis 实例重复时构造失败；Cluster 扫描前会按当前主节点身份核对客户端实际发现的节点，遗漏、重复或节点失效时操作抛出异常。主节点列表须随拓扑变化更新，不能将副本或生产外的节点混入。普通按键读写仍由主客户端路由。客户端分片的批量读取直连对应扫描节点；若 CSRedisClient 使用自定义 `NodeRule`，构造 `CSRedisCacheManager` 时必须传入作用于物理键的 `shardNodeIndex`，返回与 `scanClients` 顺序一致的节点索引。默认 `NodeRule` 可省略该参数。
 
 ## 更多文档
 

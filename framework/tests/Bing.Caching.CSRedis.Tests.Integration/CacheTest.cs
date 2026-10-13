@@ -8,17 +8,17 @@ namespace Bing.Caching.CSRedis.Tests;
 public class CacheTest
 {
     /// <summary>
-    /// 缓存服务
+    /// 用于验证 CSRedis 缓存行为的缓存实例。
     /// </summary>
     private readonly ICache _cache;
 
     /// <summary>
-    /// 日志
+    /// 记录 CSRedis 缓存测试信息的日志记录器。
     /// </summary>
     private readonly ILogger<CacheTest> _logger;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="CacheTest"/> 类型的实例。
     /// </summary>
     public CacheTest(ICache cache, ILogger<CacheTest> logger)
     {
@@ -163,10 +163,19 @@ public class CacheTest
         Assert.Equal(3, result);
     }
 
+    /// <summary>
+    /// 表示缓存测试使用的数据模型。
+    /// </summary>
     private class TestCacheModel
     {
+        /// <summary>
+        /// 获取或设置模型标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置模型名称。
+        /// </summary>
         public string Name { get; set; }
     }
 }

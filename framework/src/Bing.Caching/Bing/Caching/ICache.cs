@@ -36,8 +36,9 @@ public partial interface ICache
     T Get<T>(string key);
 
     /// <summary>
-    /// 从缓存中获取指定键的值，如果键不存在，则使用提供的函数获取值，然后将其添加到缓存中。
+    /// 从缓存中获取指定键的值。
     /// </summary>
+    /// <remarks>缓存未命中时调用回源函数生成值并写入缓存。</remarks>
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="key">缓存键</param>
     /// <param name="dataRetriever">用于获取值的函数。</param>
@@ -46,8 +47,9 @@ public partial interface ICache
     T Get<T>(CacheKey key, Func<T> dataRetriever, CacheOptions options = null);
 
     /// <summary>
-    /// 从缓存中获取指定键的值，如果键不存在，则使用提供的函数获取值，然后将其添加到缓存中。
+    /// 从缓存中获取指定键的值。
     /// </summary>
+    /// <remarks>缓存未命中时调用回源函数生成值并写入缓存。</remarks>
     /// <typeparam name="T">缓存数据类型</typeparam>
     /// <param name="key">缓存键</param>
     /// <param name="dataRetriever">用于获取值的函数。</param>

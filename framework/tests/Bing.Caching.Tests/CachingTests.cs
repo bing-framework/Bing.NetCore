@@ -67,11 +67,13 @@ public class CacheKeyTest
 }
 
 /// <summary>
-/// <see cref="NullCache"/> 单元测试。
-/// NullCache 是一个纯内存空实现，用于测试和不需要实际缓存的场景。
+/// <see cref="NullCache"/> 单元测试。 NullCache 是一个纯内存空实现，用于测试和不需要实际缓存的场景。
 /// </summary>
 public class NullCacheTest
 {
+    /// <summary>
+    /// 用于验证空缓存行为的本地缓存实例。
+    /// </summary>
     private readonly ILocalCache _cache = NullCache.Instance;
 
     // ── Exists ─────────────────────────────────────────────────────

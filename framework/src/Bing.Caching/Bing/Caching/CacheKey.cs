@@ -6,7 +6,7 @@
 public class CacheKey
 {
     /// <summary>
-    /// 存储不包含 <see cref="Prefix"/> 的缓存键文本。
+    /// 保存未拼接缓存键前缀的键文本。
     /// </summary>
     private string _key;
 
@@ -24,8 +24,11 @@ public class CacheKey
     public CacheKey(string key, params object[] parameters) => _key = string.Format(key, parameters);
 
     /// <summary>
-    /// 获取或设置包含前缀的最终缓存键；读取时返回 <see cref="Prefix"/> 与内部键文本的拼接结果，写入时仅替换内部键文本。
+    /// 获取或设置包含前缀的最终缓存键。
     /// </summary>
+    /// <remarks>
+    /// 读取时返回 <see cref="Prefix"/> 与内部键文本的拼接结果，写入时仅替换内部键文本。
+    /// </remarks>
     public string Key
     {
         get => ToString();
@@ -33,13 +36,16 @@ public class CacheKey
     }
 
     /// <summary>
-    /// 获取或设置直接拼接到最终缓存键前的命名空间前缀；调用方负责提供所需的分隔符。
+    /// 获取或设置直接拼接到最终缓存键前的命名空间前缀。
     /// </summary>
+    /// <remarks>
+    /// 调用方负责提供所需的分隔符。
+    /// </remarks>
     public string Prefix { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回由前缀和缓存键文本直接拼接形成的最终缓存键，不会自动添加分隔符或再次格式化参数。
-    /// </summary>
-    /// <returns>可用于缓存实现的最终缓存键。</returns>
+    /// </remarks>
     public override string ToString() => $"{Prefix}{_key}";
 }

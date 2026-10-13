@@ -10,7 +10,7 @@ namespace Bing.Caching;
 public class CacheNameAttribute : Attribute
 {
     /// <summary>
-    /// 使用指定缓存名称初始化 <see cref="CacheNameAttribute"/> 的实例。
+    /// 初始化一个 <see cref="CacheNameAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="name">覆盖默认类型名推导规则的缓存名称。</param>
     public CacheNameAttribute(string name)

@@ -5,15 +5,21 @@ using Xunit;
 namespace Bing.Caching.Tests;
 
 /// <summary>
-/// <see cref="NullCache"/> 单元测试 — 验证空缓存所有方法的默认行为（不抛异常、返回默认值/false/空集合）
+/// 验证空缓存的读取、写入和删除行为。
 /// </summary>
-public class NullCacheTest
+public class NullCacheComprehensiveTest
 {
+    /// <summary>
+    /// 提供空操作缓存实现。
+    /// </summary>
     private readonly ILocalCache _cache = NullCache.Instance;
+    /// <summary>
+    /// 供空缓存行为测试使用的键。
+    /// </summary>
     private readonly CacheKey _key = new("test:key");
 
     /// <summary>
-    /// 测试目的：NullCache.Instance 为静态单例，不应为 null。
+    /// 验证空缓存单例可用。
     /// </summary>
     [Fact]
     public void Instance_ShouldNotBeNull()
@@ -23,7 +29,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：多次获取 Instance 应返回同一引用。
+    /// 验证空缓存始终返回同一实例。
     /// </summary>
     [Fact]
     public void Instance_ShouldBeSameReference()
@@ -33,7 +39,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Exists(CacheKey) 始终返回 false，表明缓存为空。
+    /// 验证键对象查询始终未命中。
     /// </summary>
     [Fact]
     public void Exists_WithCacheKey_ShouldReturnFalse()
@@ -43,7 +49,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Exists(string) 始终返回 false。
+    /// 验证字符串键查询始终未命中。
     /// </summary>
     [Fact]
     public void Exists_WithStringKey_ShouldReturnFalse()
@@ -53,7 +59,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：ExistsAsync(CacheKey) 始终返回 false。
+    /// 验证键对象异步查询始终未命中。
     /// </summary>
     [Fact]
     public async Task ExistsAsync_WithCacheKey_ShouldReturnFalse()
@@ -63,7 +69,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：ExistsAsync(string) 始终返回 false。
+    /// 验证字符串键异步查询始终未命中。
     /// </summary>
     [Fact]
     public async Task ExistsAsync_WithStringKey_ShouldReturnFalse()
@@ -73,7 +79,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(CacheKey) 始终返回类型默认值（引用类型为 null，值类型为 0/false 等）。
+    /// 验证键对象读取返回类型默认值。
     /// </summary>
     [Fact]
     public void Get_WithCacheKey_ShouldReturnDefault()
@@ -86,7 +92,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(string) 始终返回类型默认值。
+    /// 验证字符串键读取返回类型默认值。
     /// </summary>
     [Fact]
     public void Get_WithStringKey_ShouldReturnDefault()
@@ -99,7 +105,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(CacheKey, Func) 当 dataRetriever 不为 null 时，应调用并返回其结果。
+    /// 验证键对象读取调用并返回回源结果。
     /// </summary>
     [Fact]
     public void Get_WithCacheKeyAndRetriever_ShouldCallRetriever()
@@ -112,7 +118,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(CacheKey, null) 当 dataRetriever 为 null 时，应返回默认值，不抛异常。
+    /// 验证未提供回源委托时键对象读取返回默认值。
     /// </summary>
     [Fact]
     public void Get_WithCacheKeyAndNullRetriever_ShouldReturnDefault()
@@ -125,7 +131,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(string, Func) 当 dataRetriever 不为 null 时，应调用并返回其结果。
+    /// 验证字符串键读取调用并返回回源结果。
     /// </summary>
     [Fact]
     public void Get_WithStringKeyAndRetriever_ShouldCallRetriever()
@@ -138,7 +144,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Get&lt;T&gt;(string, null) 当 dataRetriever 为 null 时，应返回默认值。
+    /// 验证未提供回源委托时字符串键读取返回默认值。
     /// </summary>
     [Fact]
     public void Get_WithStringKeyAndNullRetriever_ShouldReturnDefault()
@@ -151,7 +157,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync(string, Type) 始终返回 null（Task 结果为 null）。
+    /// 验证运行时类型异步读取返回空值。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithStringKeyAndType_ShouldReturnNull()
@@ -164,7 +170,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync&lt;T&gt;(CacheKey) 始终返回默认值。
+    /// 验证键对象异步读取返回类型默认值。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithCacheKey_ShouldReturnDefault()
@@ -177,7 +183,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync&lt;T&gt;(string) 始终返回默认值。
+    /// 验证字符串键异步读取返回类型默认值。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithStringKey_ShouldReturnDefault()
@@ -190,7 +196,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync&lt;T&gt;(CacheKey, Func&lt;Task&lt;T&gt;&gt;) 当 dataRetriever 不为 null 时，应调用并返回其结果。
+    /// 验证键对象异步读取调用并返回回源结果。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithCacheKeyAndRetriever_ShouldCallRetriever()
@@ -203,7 +209,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync&lt;T&gt;(CacheKey, null) 当 dataRetriever 为 null 时，应返回默认值。
+    /// 验证未提供回源委托时键对象异步读取返回默认值。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithCacheKeyAndNullRetriever_ShouldReturnDefault()
@@ -216,7 +222,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAsync&lt;T&gt;(string, Func&lt;Task&lt;T&gt;&gt;) 当 dataRetriever 不为 null 时，应调用并返回其结果。
+    /// 验证字符串键异步读取调用并返回回源结果。
     /// </summary>
     [Fact]
     public async Task GetAsync_WithStringKeyAndRetriever_ShouldCallRetriever()
@@ -229,7 +235,112 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAll&lt;T&gt;(IEnumerable&lt;CacheKey&gt;) 始终返回空列表，不抛异常。
+    /// 验证预先取消时异步操作保持取消状态且不调用回源委托。
+    /// </summary>
+    [Fact]
+    public async Task AsyncOperations_WithPreCanceledToken_ShouldReturnCanceledTasksAndSkipRetrievers()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+        var cancellationToken = cancellationTokenSource.Token;
+        var retrieverCalls = 0;
+        var tasks = new Task[]
+        {
+            _cache.ExistsAsync(_key, cancellationToken),
+            _cache.ExistsAsync("test:key", cancellationToken),
+            _cache.GetAsync("test:key", typeof(string), cancellationToken),
+            _cache.GetAsync<string>(_key, cancellationToken),
+            _cache.GetAsync<string>("test:key", cancellationToken),
+            _cache.GetAsync(_key, () =>
+            {
+                retrieverCalls++;
+                return Task.FromResult("value");
+            }, cancellationToken: cancellationToken),
+            _cache.GetAsync("test:key", () =>
+            {
+                retrieverCalls++;
+                return Task.FromResult("value");
+            }, cancellationToken: cancellationToken),
+            _cache.GetAsync(_key, _ =>
+            {
+                retrieverCalls++;
+                return Task.FromResult("value");
+            }, cancellationToken: cancellationToken),
+            _cache.GetAsync("test:key", _ =>
+            {
+                retrieverCalls++;
+                return Task.FromResult("value");
+            }, cancellationToken: cancellationToken),
+            _cache.GetAllAsync<string>(new[] { _key }, cancellationToken),
+            _cache.GetAllAsync<string>(new[] { "test:key" }, cancellationToken),
+            _cache.GetByPrefixAsync<string>("prefix:", cancellationToken),
+            _cache.TrySetAsync(_key, "value", cancellationToken: cancellationToken),
+            _cache.TrySetAsync("test:key", "value", cancellationToken: cancellationToken),
+            _cache.SetAsync(_key, "value", cancellationToken: cancellationToken),
+            _cache.SetAsync("test:key", "value", cancellationToken: cancellationToken),
+            _cache.SetAllAsync(new Dictionary<CacheKey, string> { [_key] = "value" }, cancellationToken: cancellationToken),
+            _cache.SetAllAsync(new Dictionary<string, string> { ["test:key"] = "value" }, cancellationToken: cancellationToken),
+            _cache.RemoveAsync(_key, cancellationToken),
+            _cache.RemoveAsync("test:key", cancellationToken),
+            _cache.RemoveAllAsync(new[] { _key }, cancellationToken),
+            _cache.RemoveAllAsync(new[] { "test:key" }, cancellationToken),
+            _cache.RemoveByPrefixAsync("prefix:", cancellationToken),
+            _cache.RemoveByPatternAsync("*", cancellationToken),
+            _cache.ClearAsync(cancellationToken)
+        };
+
+        foreach (var task in tasks)
+        {
+            task.IsCanceled.ShouldBeTrue();
+            await Should.ThrowAsync<OperationCanceledException>(async () => await task);
+        }
+
+        retrieverCalls.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 验证流式读取在首次消费前响应取消。
+    /// </summary>
+    [Fact]
+    public async Task StreamOperations_WithPreCanceledToken_ShouldThrowBeforeFirstMoveNext()
+    {
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+        var cancellationToken = cancellationTokenSource.Token;
+
+        var cacheKeyEnumerator = _cache.GetAllStreamAsync<string>(new[] { _key }, cancellationToken).GetAsyncEnumerator();
+        try
+        {
+            await Should.ThrowAsync<OperationCanceledException>(async () => await cacheKeyEnumerator.MoveNextAsync());
+        }
+        finally
+        {
+            await cacheKeyEnumerator.DisposeAsync();
+        }
+
+        var stringKeyEnumerator = _cache.GetAllStreamAsync<string>(new[] { "test:key" }, cancellationToken).GetAsyncEnumerator();
+        try
+        {
+            await Should.ThrowAsync<OperationCanceledException>(async () => await stringKeyEnumerator.MoveNextAsync());
+        }
+        finally
+        {
+            await stringKeyEnumerator.DisposeAsync();
+        }
+
+        var prefixEnumerator = _cache.GetByPrefixStreamAsync<string>("prefix:", cancellationToken).GetAsyncEnumerator();
+        try
+        {
+            await Should.ThrowAsync<OperationCanceledException>(async () => await prefixEnumerator.MoveNextAsync());
+        }
+        finally
+        {
+            await prefixEnumerator.DisposeAsync();
+        }
+    }
+
+    /// <summary>
+    /// 验证键对象批量读取返回空列表。
     /// </summary>
     [Fact]
     public void GetAll_WithCacheKeys_ShouldReturnEmptyList()
@@ -243,7 +354,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAll&lt;T&gt;(IEnumerable&lt;string&gt;) 始终返回空列表。
+    /// 验证字符串键批量读取返回空列表。
     /// </summary>
     [Fact]
     public void GetAll_WithStringKeys_ShouldReturnEmptyList()
@@ -257,7 +368,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetAllAsync&lt;T&gt;(IEnumerable&lt;CacheKey&gt;) 始终返回空列表。
+    /// 验证键对象异步批量读取返回空列表。
     /// </summary>
     [Fact]
     public async Task GetAllAsync_WithCacheKeys_ShouldReturnEmptyList()
@@ -271,7 +382,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetByPrefix&lt;T&gt; 始终返回空列表。
+    /// 验证前缀读取返回空列表。
     /// </summary>
     [Fact]
     public void GetByPrefix_ShouldReturnEmptyList()
@@ -285,7 +396,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：GetByPrefixAsync&lt;T&gt; 始终返回空列表。
+    /// 验证异步前缀读取返回空列表。
     /// </summary>
     [Fact]
     public async Task GetByPrefixAsync_ShouldReturnEmptyList()
@@ -299,7 +410,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：TrySet&lt;T&gt;(CacheKey, value) 始终返回 false（不存储任何数据）。
+    /// 验证键对象条件写入始终失败。
     /// </summary>
     [Fact]
     public void TrySet_WithCacheKey_ShouldReturnFalse()
@@ -309,7 +420,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：TrySet&lt;T&gt;(string, value) 始终返回 false。
+    /// 验证字符串键条件写入始终失败。
     /// </summary>
     [Fact]
     public void TrySet_WithStringKey_ShouldReturnFalse()
@@ -319,7 +430,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：TrySetAsync&lt;T&gt;(CacheKey, value) 始终返回 false。
+    /// 验证键对象异步条件写入始终失败。
     /// </summary>
     [Fact]
     public async Task TrySetAsync_WithCacheKey_ShouldReturnFalse()
@@ -329,7 +440,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：TrySetAsync&lt;T&gt;(string, value) 始终返回 false。
+    /// 验证字符串键异步条件写入始终失败。
     /// </summary>
     [Fact]
     public async Task TrySetAsync_WithStringKey_ShouldReturnFalse()
@@ -339,7 +450,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Set&lt;T&gt;(CacheKey) 不应抛任何异常（空操作）。
+    /// 验证键对象写入为空操作。
     /// </summary>
     [Fact]
     public void Set_WithCacheKey_ShouldNotThrow()
@@ -349,7 +460,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Set&lt;T&gt;(string) 不应抛任何异常。
+    /// 验证字符串键写入为空操作。
     /// </summary>
     [Fact]
     public void Set_WithStringKey_ShouldNotThrow()
@@ -359,7 +470,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：SetAsync&lt;T&gt;(CacheKey) 不应抛任何异常，并返回 CompletedTask。
+    /// 验证键对象异步写入为空操作。
     /// </summary>
     [Fact]
     public async Task SetAsync_WithCacheKey_ShouldNotThrow()
@@ -369,7 +480,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：SetAll&lt;T&gt;(IDictionary&lt;CacheKey, T&gt;) 不应抛任何异常。
+    /// 验证键对象批量写入为空操作。
     /// </summary>
     [Fact]
     public void SetAll_WithCacheKeys_ShouldNotThrow()
@@ -382,7 +493,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：SetAll&lt;T&gt;(IDictionary&lt;string, T&gt;) 不应抛任何异常。
+    /// 验证字符串键批量写入为空操作。
     /// </summary>
     [Fact]
     public void SetAll_WithStringKeys_ShouldNotThrow()
@@ -395,7 +506,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Remove(CacheKey) 不应抛任何异常。
+    /// 验证键对象删除为空操作。
     /// </summary>
     [Fact]
     public void Remove_WithCacheKey_ShouldNotThrow()
@@ -405,7 +516,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Remove(string) 不应抛任何异常。
+    /// 验证字符串键删除为空操作。
     /// </summary>
     [Fact]
     public void Remove_WithStringKey_ShouldNotThrow()
@@ -415,7 +526,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveAll(IEnumerable&lt;CacheKey&gt;) 不应抛任何异常。
+    /// 验证键对象批量删除为空操作。
     /// </summary>
     [Fact]
     public void RemoveAll_WithCacheKeys_ShouldNotThrow()
@@ -425,7 +536,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveAll(IEnumerable&lt;string&gt;) 不应抛任何异常。
+    /// 验证字符串键批量删除为空操作。
     /// </summary>
     [Fact]
     public void RemoveAll_WithStringKeys_ShouldNotThrow()
@@ -435,7 +546,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveByPrefix 不应抛任何异常（空操作）。
+    /// 验证前缀删除为空操作。
     /// </summary>
     [Fact]
     public void RemoveByPrefix_ShouldNotThrow()
@@ -445,7 +556,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveByPrefixAsync 不应抛任何异常。
+    /// 验证异步前缀删除为空操作。
     /// </summary>
     [Fact]
     public async Task RemoveByPrefixAsync_ShouldNotThrow()
@@ -455,7 +566,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveByPattern 不应抛任何异常（空操作）。
+    /// 验证模式删除为空操作。
     /// </summary>
     [Fact]
     public void RemoveByPattern_ShouldNotThrow()
@@ -465,7 +576,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：RemoveByPatternAsync 不应抛任何异常。
+    /// 验证异步模式删除为空操作。
     /// </summary>
     [Fact]
     public async Task RemoveByPatternAsync_ShouldNotThrow()
@@ -475,7 +586,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：Clear() 不应抛任何异常（空操作）。
+    /// 验证缓存清理为空操作。
     /// </summary>
     [Fact]
     public void Clear_ShouldNotThrow()
@@ -485,7 +596,7 @@ public class NullCacheTest
     }
 
     /// <summary>
-    /// 测试目的：ClearAsync() 不应抛任何异常，返回 CompletedTask。
+    /// 验证异步缓存清理为空操作。
     /// </summary>
     [Fact]
     public async Task ClearAsync_ShouldNotThrow()
@@ -496,12 +607,12 @@ public class NullCacheTest
 }
 
 /// <summary>
-/// <see cref="CacheOptions"/> 单元测试 — 验证默认值与属性赋值行为
+/// 验证缓存过期选项的默认值和赋值行为。
 /// </summary>
-public class CacheOptionsTest
+public class CacheOptionsComprehensiveTest
 {
     /// <summary>
-    /// 测试目的：CacheOptions 默认构造后，Expiration 应为 null（不设过期时间）。
+    /// 验证过期选项默认不设置过期时间。
     /// </summary>
     [Fact]
     public void Default_Expiration_ShouldBeNull()
@@ -514,7 +625,7 @@ public class CacheOptionsTest
     }
 
     /// <summary>
-    /// 测试目的：设置 Expiration 后，应能正确读回。
+    /// 验证过期时间可被正确读取。
     /// </summary>
     [Fact]
     public void SetExpiration_ShouldBeReadBack()
@@ -530,7 +641,7 @@ public class CacheOptionsTest
     }
 
     /// <summary>
-    /// 测试目的：Expiration 可被设置为零（立即过期语义）。
+    /// 验证过期时间支持零值。
     /// </summary>
     [Fact]
     public void SetExpiration_ToZero_ShouldBeReadBack()
@@ -544,12 +655,15 @@ public class CacheOptionsTest
 }
 
 /// <summary>
-/// <see cref="CacheNameAttribute"/> 单元测试 — 验证构造、Name 属性及 GetCacheName 静态方法逻辑
+/// 验证缓存名称特性的解析行为。
 /// </summary>
-public class CacheNameAttributeTest
+/// <remarks>
+/// 覆盖构造、Name 属性和 GetCacheName 静态方法。
+/// </remarks>
+public class CacheNameAttributeComprehensiveTest
 {
     /// <summary>
-    /// 测试目的：构造 CacheNameAttribute 并传入有效名称，Name 属性应等于传入值。
+    /// 验证缓存名称特性保留传入名称。
     /// </summary>
     [Fact]
     public void Constructor_WithValidName_ShouldStoreName()
@@ -562,7 +676,7 @@ public class CacheNameAttributeTest
     }
 
     /// <summary>
-    /// 测试目的：构造 CacheNameAttribute 时传入 null，应抛出异常，Guard 会阻止无效状态。
+    /// 验证缓存名称为空时构造失败。
     /// </summary>
     [Fact]
     public void Constructor_WithNullName_ShouldThrow()
@@ -572,34 +686,34 @@ public class CacheNameAttributeTest
     }
 
     /// <summary>
-    /// 测试目的：GetCacheName&lt;TCacheItem&gt; 泛型版本应与 GetCacheName(Type) 非泛型版本返回相同结果。
+    /// 验证泛型和运行时类型解析返回相同缓存名称。
     /// </summary>
     [Fact]
     public void GetCacheName_GenericAndNonGeneric_ShouldBeEqual()
     {
         // Act
-        var fromGeneric = CacheNameAttribute.GetCacheName<AnnotatedCacheItem>();
-        var fromType = CacheNameAttribute.GetCacheName(typeof(AnnotatedCacheItem));
+        var fromGeneric = CacheNameAttribute.GetCacheName<AnnotatedComprehensiveCacheItem>();
+        var fromType = CacheNameAttribute.GetCacheName(typeof(AnnotatedComprehensiveCacheItem));
 
         // Assert
         fromGeneric.ShouldBe(fromType);
     }
 
     /// <summary>
-    /// 测试目的：有 [CacheNameAttribute] 标注的类型，GetCacheName 应返回特性中指定的名称。
+    /// 验证缓存名称优先使用类型特性中的名称。
     /// </summary>
     [Fact]
     public void GetCacheName_WhenAttributePresent_ShouldReturnAttributeName()
     {
         // Act
-        var name = CacheNameAttribute.GetCacheName<AnnotatedCacheItem>();
+        var name = CacheNameAttribute.GetCacheName<AnnotatedComprehensiveCacheItem>();
 
         // Assert
         name.ShouldBe("custom-name");
     }
 
     /// <summary>
-    /// 测试目的：无 [CacheNameAttribute] 标注的类型，GetCacheName 应返回 FullName 去除 "CacheItem" 后缀的结果。
+    /// 验证缓存名称默认移除 CacheItem 后缀。
     /// </summary>
     [Fact]
     public void GetCacheName_WhenNoAttribute_ShouldReturnFullNameWithoutCacheItemSuffix()
@@ -613,7 +727,7 @@ public class CacheNameAttributeTest
     }
 
     /// <summary>
-    /// 测试目的：无后缀的普通类（不以 "CacheItem" 结尾），GetCacheName 应返回完整 FullName。
+    /// 验证无约定后缀时缓存名称保留完整类型名。
     /// </summary>
     [Fact]
     public void GetCacheName_WhenNoAttributeAndNoSuffix_ShouldReturnFullName()
@@ -628,9 +742,18 @@ public class CacheNameAttributeTest
 
 // ─── 测试用辅助类型 ───────────────────────────────────────────────────
 
+/// <summary>
+/// 带自定义缓存名称的测试实体。
+/// </summary>
 [CacheName("custom-name")]
-internal class AnnotatedCacheItem { }
+internal class AnnotatedComprehensiveCacheItem { }
 
+/// <summary>
+/// 未声明缓存名称的测试实体。
+/// </summary>
 internal class UnannotatedCacheItem { }
 
+/// <summary>
+/// 用于验证默认缓存名称的实体。
+/// </summary>
 internal class PlainEntity { }
