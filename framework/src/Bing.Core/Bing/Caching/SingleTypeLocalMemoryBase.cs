@@ -8,11 +8,22 @@
 public abstract class SingleTypeLocalMemoryBase<TKey, TValue> : ISingleTypeCache<TKey, TValue>
 {
     /// <inheritdoc />
-    public int Count => GetCache().Count;
+    public int Count
+    {
+        get
+        {
+            lock (GetSyncCache())
+                return GetCache().Count;
+        }
+    }
 
     /// <inheritdoc />
     /// <remarks>键不存在时返回 <typeparamref name="TValue"/> 的默认值。</remarks>
-    public virtual TValue Get(TKey key) => Exists(key) ? GetCache()[key] : default;
+    public virtual TValue Get(TKey key)
+    {
+        lock (GetSyncCache())
+            return GetCache().TryGetValue(key, out var value) ? value : default;
+    }
 
     /// <summary>
     /// 清空缓存中的所有键值对。
@@ -24,25 +35,22 @@ public abstract class SingleTypeLocalMemoryBase<TKey, TValue> : ISingleTypeCache
     }
 
     /// <inheritdoc />
-    /// <remarks>直接返回内部可变字典；调用方修改该字典会绕过当前类的同步控制。</remarks>
-    public virtual IDictionary<TKey, TValue> Reader() => GetCache();
+    /// <remarks>返回读取时的字典快照；快照中的值对象不会被深度复制。</remarks>
+    public virtual IDictionary<TKey, TValue> Reader()
+    {
+        lock (GetSyncCache())
+            return new Dictionary<TKey, TValue>(GetCache());
+    }
 
     /// <inheritdoc />
-    /// <remarks>并发竞争导致重复键异常时会被忽略，方法仍返回 <c>true</c>。</remarks>
     public virtual bool Add(TKey key, TValue value)
     {
-        if (Exists(key))
-            return false;
         lock (GetSyncCache())
         {
-            try
-            {
-                GetCache().Add(key, value);
-            }
-            catch (ArgumentException)
-            {
-                // 忽略添加相同键的异常，为了预防密集的线程
-            }
+            var cache = GetCache();
+            if (cache.TryGetValue(key, out _))
+                return false;
+            cache.Add(key, value);
             return true;
         }
     }
@@ -50,8 +58,19 @@ public abstract class SingleTypeLocalMemoryBase<TKey, TValue> : ISingleTypeCache
     /// <inheritdoc />
     public virtual bool Update(TKey key, TValue value)
     {
-        if (!Exists(key))
-            return false;
+        lock (GetSyncCache())
+        {
+            var cache = GetCache();
+            if (!cache.TryGetValue(key, out _))
+                return false;
+            cache[key] = value;
+            return true;
+        }
+    }
+
+    /// <inheritdoc />
+    public virtual bool Set(TKey key, TValue value)
+    {
         lock (GetSyncCache())
         {
             GetCache()[key] = value;
@@ -60,33 +79,32 @@ public abstract class SingleTypeLocalMemoryBase<TKey, TValue> : ISingleTypeCache
     }
 
     /// <inheritdoc />
-    public virtual bool Set(TKey key, TValue value)
-    {
-        if (Exists(key))
-            return Update(key, value);
-        return Add(key, value);
-    }
-
-    /// <inheritdoc />
     public virtual bool Remove(TKey key)
     {
-        if (!Exists(key))
-            return false;
         lock (GetSyncCache())
             return GetCache().Remove(key);
     }
 
     /// <inheritdoc />
-    /// <remarks>逐个尝试移除键，当前实现始终返回 <c>true</c>。</remarks>
+    /// <remarks>返回是否至少移除了一个键。</remarks>
     public virtual bool Remove(TKey[] keys)
     {
-        foreach (var key in keys)
-            Remove(key);
-        return true;
+        lock (GetSyncCache())
+        {
+            var removed = false;
+            var cache = GetCache();
+            foreach (var key in keys)
+                removed |= cache.Remove(key);
+            return removed;
+        }
     }
 
     /// <inheritdoc />
-    public virtual bool Exists(TKey key) => GetCache().ContainsKey(key);
+    public virtual bool Exists(TKey key)
+    {
+        lock (GetSyncCache())
+            return GetCache().TryGetValue(key, out _);
+    }
 
     /// <summary>
     /// 获取当前缓存使用的内部可变字典。
