@@ -123,7 +123,7 @@ public class ValidationResultCollection : IValidationResult
     public string Flag { get; set; } = "__EMPTY_FLG";
 
     /// <summary>
-    /// 成功验证结果集合
+    /// 获取成功验证结果集合
     /// </summary>
     public static ValidationResultCollection Success { get; } = new();
 
@@ -185,16 +185,10 @@ public class ValidationResultCollection : IValidationResult
         return sb;
     }
 
-    /// <summary>
-    /// 获取验证结果枚举器。
-    /// </summary>
-    /// <returns>验证结果枚举器。</returns>
+    /// <inheritdoc />
     public IEnumerator<ValidationResult> GetEnumerator() => _results.GetEnumerator();
 
-    /// <summary>
-    /// 获取非泛型验证结果枚举器。
-    /// </summary>
-    /// <returns>验证结果枚举器。</returns>
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <inheritdoc />

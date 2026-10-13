@@ -9,7 +9,7 @@ namespace Bing.Security.Principals;
 public class UnauthenticatedPrincipal : ClaimsPrincipal
 {
     /// <summary>
-    /// 初始化一个<see cref="UnauthenticatedPrincipal"/>类型的实例
+    /// 初始化一个 <see cref="UnauthenticatedPrincipal"/> 类型的实例。
     /// </summary>
     private UnauthenticatedPrincipal() { }
 
@@ -19,8 +19,6 @@ public class UnauthenticatedPrincipal : ClaimsPrincipal
     // ReSharper disable once InconsistentNaming
     public static readonly UnauthenticatedPrincipal Instance = new();
 
-    /// <summary>
-    /// 身份标识
-    /// </summary>
+    /// <inheritdoc />
     public override IIdentity Identity => UnauthenticatedIdentity.Instance;
 }

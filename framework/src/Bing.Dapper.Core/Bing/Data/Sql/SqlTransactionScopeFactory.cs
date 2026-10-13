@@ -155,6 +155,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     /// <param name="context">目标数据库上下文。</param>
     /// <param name="query">用于解析 Provider Profile 的查询对象。</param>
+    /// <returns>当前查询的 Provider 事务能力声明。</returns>
     private static SqlProviderTransactionCapabilities EnsureTransactionsSupported(DatabaseContext context,
         ISqlQuery query)
     {
@@ -283,7 +284,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         private bool _completionInProgress;
 
         /// <summary>
-        /// 初始化事务作用域并冻结资源和数据库上下文。
+        /// 初始化一个 <see cref="SqlTransactionScope"/> 类型的实例。
         /// </summary>
         /// <param name="context">事务固定数据库上下文。</param>
         /// <param name="ownerQuery">拥有连接生命周期的根查询对象。</param>
@@ -480,10 +481,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
-        /// <summary>
-        /// 异步释放事务作用域及其拥有的事务资源。
-        /// </summary>
+        /// <inheritdoc />
         /// <remarks>
+        /// 异步释放事务作用域及其拥有的事务资源。
+        ///
         /// 若当前作用域创建的子 Query 或 Executor 持有活动执行租约，释放会抛出异常且不改变作用域状态、租约或事务资源。
         /// 调用方释放子对象后可重试。
         /// </remarks>
@@ -514,10 +515,10 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             }
         }
 
-        /// <summary>
-        /// 异步释放事务作用域及其拥有的事务资源。
-        /// </summary>
+        /// <inheritdoc />
         /// <remarks>
+        /// 异步释放事务作用域及其拥有的事务资源。
+        ///
         /// 若当前作用域创建的子 Query 或 Executor 持有活动执行租约，释放会抛出异常且不改变作用域状态、租约或事务资源。
         /// 调用方释放子对象后可重试。
         /// </remarks>
@@ -866,7 +867,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
 }
 
 /// <summary>
-/// SQL 事务作用域内部资源访问契约。
+/// 提供事务作用域运行时所需的连接和上下文信息。
 /// </summary>
 internal interface ISqlTransactionScopeRuntime
 {
@@ -886,15 +887,29 @@ internal interface ISqlTransactionScopeRuntime
     IDbTransaction Transaction { get; }
 
     /// <summary>
-    /// 当前事务最近一次异步事务操作的执行模式。
+    /// 获取当前事务最近一次异步事务操作的执行模式。
     /// </summary>
     string ExecutionMode { get; }
 }
 
+/// <summary>
+/// 标识事务操作实际采用的执行模式。
+/// </summary>
 internal enum SqlTransactionExecutionMode
 {
+    /// <summary>
+    /// 执行模式尚未确定。
+    /// </summary>
     Unknown = 0,
+
+    /// <summary>
+    /// 使用原生异步事务操作。
+    /// </summary>
     NativeAsync = 1,
+
+    /// <summary>
+    /// 使用同步事务操作回退执行。
+    /// </summary>
     SynchronousFallback = 2
 }
 
@@ -905,7 +920,7 @@ internal enum SqlTransactionExecutionMode
 internal sealed class SqlTransactionAsyncOperationResult<T>
 {
     /// <summary>
-    /// 初始化异步事务调用结果。
+    /// 初始化一个 <see cref="SqlTransactionAsyncOperationResult{T}"/> 类型的实例。
     /// </summary>
     /// <param name="result">调用结果。</param>
     /// <param name="mode">实际执行模式。</param>
@@ -916,12 +931,12 @@ internal sealed class SqlTransactionAsyncOperationResult<T>
     }
 
     /// <summary>
-    /// 调用结果。
+    /// 获取调用结果。
     /// </summary>
     public T Result { get; }
 
     /// <summary>
-    /// 实际执行模式。
+    /// 获取实际执行模式。
     /// </summary>
     public SqlTransactionExecutionMode Mode { get; }
 }
@@ -971,8 +986,9 @@ internal static class SqlTransactionAsyncAdapter
             .ConfigureAwait(false);
 
     /// <summary>
-    /// 异步开始事务，并按 Provider Profile 校验实际异步成员。
+    /// 异步开始事务并返回实际执行模式。
     /// </summary>
+    /// <remarks>根据 Provider Profile 校验声明的原生异步事务能力。</remarks>
     /// <param name="connection">已打开的数据库连接。</param>
     /// <param name="isolationLevel">请求的事务隔离级别。</param>
     /// <param name="cancellationToken">开始事务使用的取消令牌。</param>
@@ -1040,8 +1056,9 @@ internal static class SqlTransactionAsyncAdapter
         => CommitWithModeAsync(transaction, cancellationToken, null, null);
 
     /// <summary>
-    /// 异步提交事务，并按 Provider Profile 校验实际异步成员。
+    /// 异步提交事务并返回实际执行模式。
     /// </summary>
+    /// <remarks>根据 Provider Profile 校验声明的原生异步事务能力。</remarks>
     /// <param name="transaction">待提交的数据库事务。</param>
     /// <param name="cancellationToken">提交操作使用的取消令牌。</param>
     /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
@@ -1077,8 +1094,9 @@ internal static class SqlTransactionAsyncAdapter
         => RollbackWithModeAsync(transaction, cancellationToken, null, null);
 
     /// <summary>
-    /// 异步回滚事务，并按 Provider Profile 校验实际异步成员。
+    /// 异步回滚事务并返回实际执行模式。
     /// </summary>
+    /// <remarks>根据 Provider Profile 校验声明的原生异步事务能力。</remarks>
     /// <param name="transaction">待回滚的数据库事务。</param>
     /// <param name="cancellationToken">回滚操作使用的取消令牌。</param>
     /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
@@ -1148,6 +1166,10 @@ internal static class SqlTransactionAsyncAdapter
     /// <summary>
     /// 判断目标对象是否存在由 Provider 提供的异步事务成员。
     /// </summary>
+    /// <param name="target">要检查的运行时 Provider 对象。</param>
+    /// <param name="methodName">要查找的异步成员名称。</param>
+    /// <param name="arguments">用于匹配成员参数的实参。</param>
+    /// <returns>存在匹配的异步成员时为 <see langword="true"/>。</returns>
     private static bool HasProviderAsyncMember(object target, string methodName, params object[] arguments)
     {
         if (target == null)
@@ -1161,6 +1183,10 @@ internal static class SqlTransactionAsyncAdapter
     /// <summary>
     /// 校验 Profile 声明与运行时异步成员是否一致。
     /// </summary>
+    /// <param name="declaredNative">Profile 是否声明支持原生异步成员。</param>
+    /// <param name="hasNativeMember">运行时对象是否包含匹配的异步成员。</param>
+    /// <param name="operation">正在校验的事务操作名称。</param>
+    /// <param name="providerKey">Provider 标识。</param>
     private static void EnsureProfileMatches(bool declaredNative, bool hasNativeMember, string operation,
         string providerKey)
     {
@@ -1171,6 +1197,9 @@ internal static class SqlTransactionAsyncAdapter
     /// <summary>
     /// 创建 Provider 声明与实现不一致的明确异常。
     /// </summary>
+    /// <param name="operation">不匹配的事务操作名称。</param>
+    /// <param name="providerKey">Provider 标识。</param>
+    /// <returns>描述 Provider 实现缺口的异常实例。</returns>
     private static NotSupportedException CreateImplementationGap(string operation, string providerKey) =>
         SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderImplementationGap,
             $"Transaction:{operation}", providerKey,
@@ -1277,7 +1306,7 @@ internal static class SqlTransactionAsyncAdapter
         public static readonly AsyncInvocationResult NotInvoked = new(false, null);
 
         /// <summary>
-        /// 初始化异步成员调用结果。
+        /// 初始化一个 <see cref="AsyncInvocationResult"/> 类型的实例。
         /// </summary>
         /// <param name="isInvoked">是否命中并调用异步成员。</param>
         /// <param name="result">异步成员完成后的结果。</param>
@@ -1288,12 +1317,12 @@ internal static class SqlTransactionAsyncAdapter
         }
 
         /// <summary>
-        /// 是否命中并调用异步成员。
+        /// 获取是否命中并调用异步成员。
         /// </summary>
         public bool IsInvoked { get; }
 
         /// <summary>
-        /// 异步成员完成后的结果。
+        /// 获取异步成员完成后的结果。
         /// </summary>
         public object Result { get; }
     }

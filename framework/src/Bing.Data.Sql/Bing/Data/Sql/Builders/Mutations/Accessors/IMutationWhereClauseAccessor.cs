@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface IMutationWhereClauseAccessor
 {
     /// <summary>
-    /// Mutation Where 子句。
+    /// 获取Mutation Where 子句。
     /// </summary>
     IMutationWhereClause WhereClause { get; }
 }

@@ -17,15 +17,12 @@ public class WhereIfNotEmptyCondition<TEntity> : ICondition<TEntity>
     private readonly Expression<Func<TEntity, bool>> _condition;
 
     /// <summary>
-    /// 初始化一个<see cref="WhereIfNotEmptyCondition{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="WhereIfNotEmptyCondition{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="condition">查询条件</param>
     public WhereIfNotEmptyCondition(Expression<Func<TEntity, bool>> condition) => _condition = condition;
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>当前非空查询条件表达式；条件为空或表达式值为空文本时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public Expression<Func<TEntity, bool>> GetCondition()
     {
         if (_condition == null)

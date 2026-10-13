@@ -114,6 +114,7 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 测试 - 可转换聚合表达式存在未闭合上下文时应拒绝请求且不污染生成器状态。
     /// </summary>
+    /// <param name="expressionSql">包含未闭合 SQL 上下文的聚合表达式。</param>
     [Theory]
     [InlineData("[o].[Amount] /* comment")]
     [InlineData("[o].[Amount] + '[text]")]
@@ -152,6 +153,7 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 测试 - 非 Count 聚合使用通配符时应拒绝请求且不污染 Builder 状态。
     /// </summary>
+    /// <param name="function">使用通配符的非 Count 聚合函数。</param>
     [Theory]
     [InlineData(SqlAggregateFunction.Sum)]
     [InlineData(SqlAggregateFunction.Avg)]
@@ -190,6 +192,7 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 测试 - 结构化聚合只允许简单列、限定列和引用标识符。
     /// </summary>
+    /// <param name="column">待作为结构化标识符解析的 SQL 列名。</param>
     [Theory]
     [InlineData("Id")]
     [InlineData("u.Id")]
@@ -231,6 +234,7 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 测试 - 结构化聚合传入表达式、注释或多列时应拒绝且保留后续可用性。
     /// </summary>
+    /// <param name="column">不符合单一结构化标识符格式的列文本。</param>
     [Theory]
     [InlineData("Amount * Quantity")]
     [InlineData("TenantId,UserId")]
@@ -254,6 +258,7 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 测试 - 结构化聚合的空列参数应拒绝且不污染 Builder 状态。
     /// </summary>
+    /// <param name="column">待验证的空列名。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]

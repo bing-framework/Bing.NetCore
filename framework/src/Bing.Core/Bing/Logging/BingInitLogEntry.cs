@@ -23,8 +23,11 @@ public class BingInitLogEntry
     public object State { get; set; } = default!;
 
     /// <summary>
-    /// 获取或设置关联异常；没有异常时为空。
+    /// 获取或设置关联异常。
     /// </summary>
+    /// <remarks>
+    /// 没有异常时为空。
+    /// </remarks>
     public Exception Exception { get; set; }
 
     /// <summary>
@@ -33,8 +36,9 @@ public class BingInitLogEntry
     public Func<object, Exception, string> Formatter { get; set; } = default!;
 
     /// <summary>
-    /// 根据 <see cref="State"/>、<see cref="Exception"/> 和 <see cref="Formatter"/> 生成日志消息。
+    /// 获取格式化后的日志消息。
     /// </summary>
+    /// <remarks>通过 <see cref="Formatter"/> 根据 <see cref="State"/> 和 <see cref="Exception"/> 生成。</remarks>
     public string Message => Formatter(State, Exception);
 
 }

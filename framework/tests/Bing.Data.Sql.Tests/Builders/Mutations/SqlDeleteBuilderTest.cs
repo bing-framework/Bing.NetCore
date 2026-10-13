@@ -198,6 +198,7 @@ public sealed class SqlDeleteBuilderTest
     /// <summary>
     /// 测试目的：WhereUsing 应拒绝表达式和限定列名，避免调用方绕过结构化标识符边界。
     /// </summary>
+    /// <param name="column">不符合单一标识符格式的列表达式。</param>
     [Theory]
     [InlineData("t.Id")]
     [InlineData("Id = 1")]
@@ -414,7 +415,7 @@ public sealed class SqlDeleteBuilderTest
     private sealed class TypedDeleteSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
@@ -426,31 +427,59 @@ public sealed class SqlDeleteBuilderTest
     [Table("tenant_delete_samples")]
     private sealed class TenantDeleteSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>租户标识。</summary>
+        /// <summary>
+        /// 获取或设置租户标识。
+        /// </summary>
         public string TenantId { get; set; }
     }
 
+    /// <summary>
+    /// 为租户 Delete 测试提供租户实体识别和租户值的 Contributor。
+    /// </summary>
     private sealed class TenantDeleteContributor : ISqlTenantFilterContributor
     {
+        /// <inheritdoc />
         public bool IsTenantEntity(Type entityType) => entityType == typeof(TenantDeleteSample);
+
+        /// <inheritdoc />
         public object GetTenantId(SqlTenantFilterContext context) => "tenant-a";
     }
 
+    /// <summary>
+    /// 包含租户字段和软删除标记的 Delete 测试实体。
+    /// </summary>
     private sealed class SoftDeleteTenantDeleteSample : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置实体主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置租户标识。
+        /// </summary>
         public string TenantId { get; set; }
+
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
+    /// <summary>
+    /// 对软删除租户实体不提供租户值的测试 Contributor。
+    /// </summary>
     private sealed class MissingTenantSoftDeleteContributor : ISqlTenantFilterContributor
     {
+        /// <inheritdoc />
         public bool IsTenantEntity(Type entityType) => entityType == typeof(SoftDeleteTenantDeleteSample);
+
+        /// <inheritdoc />
         public object GetTenantId(SqlTenantFilterContext context) => null;
     }
 }

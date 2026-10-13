@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IInsertColumnsClause : ISqlClause, ISqlMutationClauseCloneable<IInsertColumnsClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前插入列名集合。
+    /// 获取当前插入列名集合。
     /// </summary>
     IReadOnlyList<string> Columns { get; }
 

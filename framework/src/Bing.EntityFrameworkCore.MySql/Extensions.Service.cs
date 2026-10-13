@@ -16,7 +16,7 @@ namespace Bing.Datas.EntityFramework.MySql;
 public static partial class Extensions
 {
     /// <summary>
-    /// 注册MySql工作单元服务
+    /// 注册 MySQL 工作单元服务。
     /// </summary>
     /// <typeparam name="TService">工作单元接口类型</typeparam>
     /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
@@ -39,7 +39,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 注册MySql工作单元服务
+    /// 注册 MySQL 工作单元服务。
     /// </summary>
     /// <typeparam name="TService">工作单元接口类型</typeparam>
     /// <typeparam name="TImplementation">工作单元实现类型</typeparam>
@@ -62,7 +62,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 注册MySql工作单元
+    /// 注册 MySQL 工作单元服务。
     /// </summary>
     /// <typeparam name="TService">工作单元接口类型</typeparam>
     /// <typeparam name="TImplementation">工作单元实现类型</typeparam>

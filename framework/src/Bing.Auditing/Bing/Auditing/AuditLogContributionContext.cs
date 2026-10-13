@@ -18,9 +18,7 @@ public class AuditLogContributionContext : IServiceProviderAccessor
         AuditInfo = auditInfo;
     }
 
-    /// <summary>
-    /// 获取服务提供程序。
-    /// </summary>
+    /// <inheritdoc />
     public IServiceProvider ServiceProvider { get; }
 
     /// <summary>

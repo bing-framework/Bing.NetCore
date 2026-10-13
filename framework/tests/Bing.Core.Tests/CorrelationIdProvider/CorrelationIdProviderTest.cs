@@ -2,8 +2,14 @@
 
 namespace Bing.Tests.CorrelationIdProvider;
 
+/// <summary>
+/// 默认关联标识提供程序测试。
+/// </summary>
 public class CorrelationIdProviderTest
 {
+    /// <summary>
+    /// 验证关联标识在变更作用域结束后恢复为空。
+    /// </summary>
     [Fact]
     public void Test()
     {

@@ -15,7 +15,7 @@ public class ParamLiteralsResolverTest
     private readonly IParamLiteralsResolver _resolver;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ParamLiteralsResolverTest"/> 类型的实例。
     /// </summary>
     public ParamLiteralsResolverTest()
     {
@@ -43,6 +43,8 @@ public class ParamLiteralsResolverTest
     /// <summary>
     /// 测试 boolean 类型的参数值，返回正确的字符串
     /// </summary>
+    /// <param name="value">待转换的布尔参数值。</param>
+    /// <param name="expected">预期生成的参数字面量。</param>
     [Theory]
     [InlineData(true, "1")]
     [InlineData(false, "0")]
@@ -58,6 +60,8 @@ public class ParamLiteralsResolverTest
     /// <summary>
     /// 测试各种数值类型的参数值，返回正确的字符串
     /// </summary>
+    /// <param name="value">待转换的数值参数。</param>
+    /// <param name="expected">预期生成的参数字面量。</param>
     [Theory]
     [InlineData((short)123, "123")]
     [InlineData(123, "123")]

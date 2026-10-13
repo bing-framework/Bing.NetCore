@@ -12,7 +12,7 @@ public class TreeCondition<TEntity> : TreeCondition<TEntity, Guid?>
     where TEntity : IPath, IEnabled, IParentId<Guid?>
 {
     /// <summary>
-    /// 初始化一个<see cref="TreeCondition{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="TreeCondition{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="parameter">查询参数</param>
     public TreeCondition(ITreeQueryParameter<Guid?> parameter) : base(parameter)
@@ -29,7 +29,7 @@ public class TreeCondition<TEntity, TParentId> : ICondition<TEntity>
     where TEntity : IPath, IEnabled
 {
     /// <summary>
-    /// 初始化一个<see cref="TreeCondition{TEntity,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreeCondition{TEntity, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="parameter">查询参数</param>
     public TreeCondition(ITreeQueryParameter<TParentId> parameter)
@@ -45,13 +45,10 @@ public class TreeCondition<TEntity, TParentId> : ICondition<TEntity>
     }
 
     /// <summary>
-    /// 查询条件
+    /// 获取或设置查询条件
     /// </summary>
     protected Expression<Func<TEntity, bool>> Condition { get; set; }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>当前树型查询条件表达式。</returns>
+    /// <inheritdoc />
     public Expression<Func<TEntity, bool>> GetCondition() => Condition;
 }

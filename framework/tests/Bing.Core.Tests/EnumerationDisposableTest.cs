@@ -9,12 +9,31 @@ namespace Bing.Tests;
 // 测试用 Enumeration 子类
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// <summary>
+/// 枚举类型测试使用的订单状态。
+/// </summary>
 public class OrderStatus : Enumeration
 {
+    /// <summary>
+    /// 表示待处理状态。
+    /// </summary>
     public static readonly OrderStatus Pending   = new OrderStatus("1", "待处理");
+
+    /// <summary>
+    /// 表示已确认状态。
+    /// </summary>
     public static readonly OrderStatus Confirmed = new OrderStatus("2", "已确认");
+
+    /// <summary>
+    /// 表示已发货状态。
+    /// </summary>
     public static readonly OrderStatus Shipped   = new OrderStatus("3", "已发货");
 
+    /// <summary>
+    /// 初始化一个 <see cref="OrderStatus"/> 类型的实例。
+    /// </summary>
+    /// <param name="id">状态标识。</param>
+    /// <param name="name">状态名称。</param>
     private OrderStatus(string id, string name) : base(id, name) { }
 }
 
@@ -185,11 +204,22 @@ public class EnumerationTest
 /// </summary>
 public class DisposableTest
 {
+    /// <summary>
+    /// 记录托管资源释放调用并暴露释放状态的测试实现。
+    /// </summary>
     private class ConcreteDisposable : System.Disposable
     {
+        /// <summary>
+        /// 获取或设置托管资源释放路径是否已调用。
+        /// </summary>
         public bool ManagedDisposeCalled { get; private set; }
+
+        /// <summary>
+        /// 获取对象是否已释放。
+        /// </summary>
         public bool IsDisposed => Disposed;
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -244,9 +274,18 @@ public class DisposableTest
 /// </summary>
 public class BingExceptionExtensionsTest
 {
+    /// <summary>
+    /// 携带日志级别属性的异常测试实现。
+    /// </summary>
     private class HasLogLevelException : Exception, IHasLogLevel
     {
+        /// <inheritdoc />
         public LogLevel LogLevel { get; set; }
+
+        /// <summary>
+        /// 初始化一个 <see cref="HasLogLevelException"/> 类型的实例。
+        /// </summary>
+        /// <param name="level">该异常关联的日志级别。</param>
         public HasLogLevelException(LogLevel level) : base("test") => LogLevel = level;
     }
 

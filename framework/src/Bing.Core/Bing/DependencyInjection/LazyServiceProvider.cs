@@ -14,12 +14,12 @@ public class LazyServiceProvider : ILazyServiceProvider, ITransientDependency
     protected ConcurrentDictionary<Type, Lazy<object>> CachedServices { get; }
 
     /// <summary>
-    /// 获取用于解析服务的底层服务提供程序。
+    /// 获取或设置用于解析服务的底层服务提供程序。
     /// </summary>
     protected IServiceProvider ServiceProvider { get; set; }
 
     /// <summary>
-    /// 使用服务提供程序初始化 <see cref="LazyServiceProvider"/> 的实例。
+    /// 初始化一个 <see cref="LazyServiceProvider"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">用于解析服务的服务提供程序。</param>
     public LazyServiceProvider(IServiceProvider serviceProvider)

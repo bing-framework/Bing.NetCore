@@ -14,6 +14,9 @@ namespace Bing.Data.Sql.Benchmarks;
 [DryJob]
 public class SqlCiSmokeBenchmarks
 {
+    /// <summary>
+    /// 执行轻量 SQL 构建基准的计划执行器。
+    /// </summary>
     private ISqlQueryPlanExecutor _executor;
 
     /// <summary>
@@ -25,6 +28,7 @@ public class SqlCiSmokeBenchmarks
     /// <summary>
     /// 验证 CI 可完成最小 Raw Fluent SQL 构建。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildRawQuery() => SqlQueryRuntimeFactory.CreateQuery(_executor, new SqlServerBuilder())
         .Select("Id")
@@ -33,13 +37,25 @@ public class SqlCiSmokeBenchmarks
         .ToSql();
 }
 
+/// <summary>
+/// 提供 CI smoke 基准所需的查询执行器扩展。
+/// </summary>
 internal static class SqlCiSmokeBenchmarkExtensions
 {
+    /// <summary>
+    /// 创建无操作的 SQL 查询计划执行器。
+    /// </summary>
+    /// <param name="builder">调用扩展方法时使用的 SQL Builder。</param>
+    /// <returns>不执行数据库操作的查询计划执行器。</returns>
     public static ISqlQueryPlanExecutor CreateQueryExecutorForBenchmark(this ISqlBuilder builder) =>
         DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
 
+    /// <summary>
+    /// 为基准查询提供默认返回值的代理执行器。
+    /// </summary>
     private class NoOpExecutor : DispatchProxy
     {
+        /// <inheritdoc />
         protected override object Invoke(System.Reflection.MethodInfo targetMethod, object[] args) =>
             targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
     }

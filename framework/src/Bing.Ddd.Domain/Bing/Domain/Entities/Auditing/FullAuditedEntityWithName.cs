@@ -11,19 +11,22 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class FullAuditedEntityWithName<TEntity> : FullAuditedEntity<TEntity>, IFullAuditedObjectWithName
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Creator { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string LastModifier { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该实体为删除的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Deleter { get; set; }
 }
 
@@ -36,30 +39,33 @@ public abstract class FullAuditedEntityWithName<TEntity> : FullAuditedEntity<TEn
 public abstract class FullAuditedEntityWithName<TEntity, TKey> : FullAuditedEntity<TEntity, TKey>, IFullAuditedObjectWithName<TKey>
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Creator { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string LastModifier { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该实体为删除的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Deleter { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="FullAuditedEntityWithName{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedEntityWithName{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected FullAuditedEntityWithName()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="FullAuditedEntityWithName{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedEntityWithName{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected FullAuditedEntityWithName(TKey id) : base(id)

@@ -15,7 +15,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：默认构造后集合为空，IsValid 应为 true，Count = 0。
+    /// 默认构造后集合为空，IsValid 应为 true，Count = 0。
     /// </summary>
     [Fact]
     public void Default_ShouldBeEmptyAndValid()
@@ -29,7 +29,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：静态 Success 实例应为空集合，IsValid = true。
+    /// 静态 Success 实例应为空集合，IsValid = true。
     /// </summary>
     [Fact]
     public void Success_ShouldBeValidAndEmpty()
@@ -44,7 +44,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：使用非空错误字符串构造时，Count = 1，IsValid = false。
+    /// 使用非空错误字符串构造时，Count = 1，IsValid = false。
     /// </summary>
     [Fact]
     public void Ctor_WithErrorString_ShouldContainOneResult()
@@ -58,8 +58,9 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：使用 null 或空白字符串构造时，集合应为空，IsValid = true。
+    /// 使用 null 或空白字符串构造时，集合应为空，IsValid = true。
     /// </summary>
+    /// <param name="message">待测试的错误消息；为 null 或空白时不添加错误。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -79,7 +80,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：使用 ValidationResult 构造时，Count = 1，IsValid = false。
+    /// 使用 ValidationResult 构造时，Count = 1，IsValid = false。
     /// </summary>
     [Fact]
     public void Ctor_WithValidationResult_ShouldContainOneResult()
@@ -96,7 +97,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：使用 null ValidationResult 构造时应抛出 ArgumentNullException。
+    /// 使用 null ValidationResult 构造时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Ctor_WithNullValidationResult_ShouldThrow()
@@ -110,7 +111,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：使用多条 ValidationResult 集合构造时，Count 应等于集合长度。
+    /// 使用多条 ValidationResult 集合构造时，Count 应等于集合长度。
     /// </summary>
     [Fact]
     public void Ctor_WithMultipleResults_ShouldSetCountCorrectly()
@@ -132,7 +133,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：使用 null 集合构造时应抛出 ArgumentNullException。
+    /// 使用 null 集合构造时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Ctor_WithNullEnumerable_ShouldThrow()
@@ -147,7 +148,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Add(ValidationResult) 应使 Count 增加 1，IsValid 变为 false。
+    /// Add(ValidationResult) 应使 Count 增加 1，IsValid 变为 false。
     /// </summary>
     [Fact]
     public void Add_ValidResult_ShouldIncreaseCount()
@@ -164,7 +165,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：Add(null) 应被忽略，不改变 Count。
+    /// Add(null) 应被忽略，不改变 Count。
     /// </summary>
     [Fact]
     public void Add_Null_ShouldBeIgnored()
@@ -180,7 +181,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：AddRange(null) 应被忽略，不抛异常，Count 保持不变。
+    /// AddRange(null) 应被忽略，不抛异常，Count 保持不变。
     /// </summary>
     [Fact]
     public void AddRange_Null_ShouldBeIgnoredWithoutThrowing()
@@ -194,7 +195,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：AddRange 多条结果后，Count 应等于累计添加数量。
+    /// AddRange 多条结果后，Count 应等于累计添加数量。
     /// </summary>
     [Fact]
     public void AddRange_MultipleResults_ShouldAccumulateCount()
@@ -215,7 +216,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：初始为空时 IsValid = true；添加一条错误后变为 false（边界转换）。
+    /// 初始为空时 IsValid = true；添加一条错误后变为 false（边界转换）。
     /// </summary>
     [Fact]
     public void IsValid_TransitionFromTrueToFalse_WhenFirstErrorAdded()
@@ -236,7 +237,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：空集合 ToMessage 应包含"未发现验证错误"提示。
+    /// 空集合 ToMessage 应包含"未发现验证错误"提示。
     /// </summary>
     [Fact]
     public void ToMessage_WhenValid_ShouldContainNoErrorText()
@@ -252,7 +253,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：有 1 条错误时 ToMessage 应包含"发现1个验证错误"。
+    /// 有 1 条错误时 ToMessage 应包含"发现1个验证错误"。
     /// </summary>
     [Fact]
     public void ToMessage_WithOneError_ShouldContainSingleErrorText()
@@ -268,7 +269,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：有多条错误时 ToMessage 应包含错误总数。
+    /// 有多条错误时 ToMessage 应包含错误总数。
     /// </summary>
     [Fact]
     public void ToMessage_WithMultipleErrors_ShouldContainErrorCount()
@@ -293,7 +294,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：有效集合（空）调用 ToValidationMessages 应返回空枚举。
+    /// 有效集合（空）调用 ToValidationMessages 应返回空枚举。
     /// </summary>
     [Fact]
     public void ToValidationMessages_WhenValid_ShouldReturnEmpty()
@@ -309,7 +310,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：有错误时 ToValidationMessages 应返回对应数量的消息字符串。
+    /// 有错误时 ToValidationMessages 应返回对应数量的消息字符串。
     /// </summary>
     [Fact]
     public void ToValidationMessages_WithErrors_ShouldReturnAllMessages()
@@ -335,7 +336,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ValidationResultCollection 应支持 foreach 迭代，遍历出所有错误结果。
+    /// ValidationResultCollection 应支持 foreach 迭代，遍历出所有错误结果。
     /// </summary>
     [Fact]
     public void Enumeration_ShouldYieldAllResults()
@@ -361,7 +362,7 @@ public class ValidationResultCollectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：使用 ValidationResultCollection 复制构造时，Count 和 ErrorCode 应与原始一致。
+    /// 使用 ValidationResultCollection 复制构造时，Count 和 ErrorCode 应与原始一致。
     /// </summary>
     [Fact]
     public void CopyCtor_ShouldPreserveCountAndErrorCode()
@@ -383,7 +384,7 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：复制构造传 null 时应抛出 ArgumentNullException。
+    /// 复制构造传 null 时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void CopyCtor_WithNull_ShouldThrow()

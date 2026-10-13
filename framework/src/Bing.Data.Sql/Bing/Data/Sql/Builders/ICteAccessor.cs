@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders;
 public interface ICteAccessor
 {
     /// <summary>
-    /// 公用表表达式CTE集合
+    /// 获取公用表表达式CTE集合
     /// </summary>
     List<BuilderItem> CteItems { get; }
 }

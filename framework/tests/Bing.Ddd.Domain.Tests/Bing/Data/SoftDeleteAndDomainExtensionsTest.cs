@@ -8,17 +8,27 @@ namespace Bing.Data;
 // ISoftDelete 测试辅助类型
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// <summary>简单的逻辑删除实体（仅实现 ISoftDelete）</summary>
+/// <summary>
+/// 简单的逻辑删除实体（仅实现 ISoftDelete）
+/// </summary>
 internal class SoftDeleteEntity : ISoftDelete
 {
+    /// <inheritdoc />
     public bool IsDeleted { get; set; }
 }
 
-/// <summary>带删除审计的逻辑删除实体（同时实现 ISoftDelete + IDeletionAuditedObject）</summary>
+/// <summary>
+/// 带删除审计的逻辑删除实体（同时实现 ISoftDelete + IDeletionAuditedObject）
+/// </summary>
 internal class AuditedSoftDeleteEntity : ISoftDelete, IDeletionAuditedObject
 {
+    /// <inheritdoc />
     public bool IsDeleted { get; set; }
+
+    /// <inheritdoc />
     public Guid? DeleterId { get; set; }
+
+    /// <inheritdoc />
     public DateTime? DeletionTime { get; set; }
 }
 

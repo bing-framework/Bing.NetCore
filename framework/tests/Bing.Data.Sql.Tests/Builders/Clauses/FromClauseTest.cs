@@ -16,7 +16,7 @@ public class FromClauseTest
     private FromClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="FromClauseTest"/> 类型的实例。
     /// </summary>
     public FromClauseTest()
     {

@@ -18,7 +18,7 @@ public class LocalizationContext : IServiceProviderAccessor
     public IStringLocalizerFactory LocalizerFactory { get; }
 
     /// <summary>
-    /// 使用服务提供程序初始化 <see cref="LocalizationContext"/> 的实例。
+    /// 初始化一个 <see cref="LocalizationContext"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">用于解析 <see cref="IStringLocalizerFactory"/> 的服务提供程序。</param>
     /// <exception cref="InvalidOperationException">未注册 <see cref="IStringLocalizerFactory"/> 时抛出。</exception>

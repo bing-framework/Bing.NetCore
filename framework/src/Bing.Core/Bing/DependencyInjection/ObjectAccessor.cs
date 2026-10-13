@@ -6,18 +6,16 @@
 /// <typeparam name="T">保存对象的类型。</typeparam>
 public class ObjectAccessor<T> : IObjectAccessor<T>
 {
-    /// <summary>
-    /// 获取或设置当前对象值。
-    /// </summary>
+    /// <inheritdoc />
     public T Value { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="ObjectAccessor{T}"/> 的空实例。
+    /// 初始化一个 <see cref="ObjectAccessor{T}"/> 类型的实例。
     /// </summary>
     public ObjectAccessor() { }
 
     /// <summary>
-    /// 使用初始对象值初始化 <see cref="ObjectAccessor{T}"/> 的实例。
+    /// 初始化一个 <see cref="ObjectAccessor{T}"/> 类型的实例。
     /// </summary>
     /// <param name="value">要保存的初始对象值。</param>
     public ObjectAccessor(T value) => Value = value;

@@ -23,7 +23,7 @@ public class ListCompareResult<TEntity, TKey> where TEntity : IKey<TKey>
     public List<TEntity> DeleteList { get; }
 
     /// <summary>
-    /// 使用实体比较分类结果初始化 <see cref="ListCompareResult{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="ListCompareResult{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="createList">仅存在于新实体集合中的实体列表。</param>
     /// <param name="updateList">同时存在于新旧实体集合中的新实体列表。</param>

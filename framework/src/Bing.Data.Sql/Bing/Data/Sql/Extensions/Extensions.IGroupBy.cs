@@ -9,7 +9,7 @@ namespace Bing.Data.Sql;
 public static partial class Extensions
 {
     /// <summary>
-    /// 分组
+    /// 添加 GroupBy 分组条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -54,7 +54,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到 GroupBy 子句。
+    /// 追加 GroupBy 表达式。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -71,7 +71,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件添加到 GroupBy 子句。
+    /// 追加 GroupBy 表达式。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>

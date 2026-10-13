@@ -7,10 +7,7 @@ namespace Bing.Validation;
 /// </summary>
 public class ThrowHandler : IValidationCallbackHandler
 {
-    /// <summary>
-    /// 处理验证错误
-    /// </summary>
-    /// <param name="result">验证错误</param>
+    /// <inheritdoc />
     public void Handle(IValidationResult result)
     {
         if (result.IsValid)

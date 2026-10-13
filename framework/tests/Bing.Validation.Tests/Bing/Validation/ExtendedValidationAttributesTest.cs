@@ -7,39 +7,69 @@ namespace Bing.Validation.Tests;
 
 // ── 测试用模型定义 ─────────────────────────────────────────────────────────
 
+/// <summary>
+/// 仅包含 HTTP URL 验证字段的测试模型。
+/// </summary>
 internal class HttpUrlModel
 {
+    /// <summary>
+    /// 获取或设置待验证的 URL。
+    /// </summary>
     [HttpUrlAddress]
     public string Url { get; set; }
 }
 
+/// <summary>
+/// 仅包含中国固话验证字段的测试模型。
+/// </summary>
 internal class TelNoModel
 {
+    /// <summary>
+    /// 获取或设置待验证的电话号码。
+    /// </summary>
     [TelNoOfChina]
     public string TelNo { get; set; }
 }
 
+/// <summary>
+/// 仅包含中国车牌号验证字段的测试模型。
+/// </summary>
 internal class PlateModel
 {
+    /// <summary>
+    /// 获取或设置待验证的车牌号。
+    /// </summary>
     [PlateNumberOfChina]
     public string PlateNo { get; set; }
 }
 
+/// <summary>
+/// 仅包含微信号验证字段的测试模型。
+/// </summary>
 internal class WechatModel
 {
+    /// <summary>
+    /// 获取或设置待验证的微信号。
+    /// </summary>
     [WechatNo]
     public string WechatId { get; set; }
 }
 
 /// <summary>
-/// 扩展验证 Attribute 单元测试：
-/// <see cref="HttpUrlAddressAttribute"/>、<see cref="TelNoOfChinaAttribute"/>、
-/// <see cref="PlateNumberOfChinaAttribute"/>、<see cref="WechatNoAttribute"/>
+/// 扩展验证特性测试。
 /// </summary>
+/// <remarks>
+/// 覆盖 HTTP URL、中国固话、中国车牌号和微信号验证特性。
+/// </remarks>
 public class ExtendedValidationAttributesTest
 {
     // ── 辅助方法 ─────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// 验证测试模型的所有属性。
+    /// </summary>
+    /// <param name="model">待验证的测试模型。</param>
+    /// <returns>验证通过返回 true，否则返回 false。</returns>
     private static bool IsValid(object model)
     {
         var ctx = new System.ComponentModel.DataAnnotations.ValidationContext(model);
@@ -52,8 +82,9 @@ public class ExtendedValidationAttributesTest
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：合法的 http/https URL 应通过 [HttpUrlAddress] 验证。
+    /// 合法的 http/https URL 应通过 [HttpUrlAddress] 验证。
     /// </summary>
+    /// <param name="url">待验证的 URL。</param>
     [Theory]
     [InlineData("http://www.example.com")]
     [InlineData("https://example.com/path/to/page")]
@@ -68,8 +99,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：非 URL 格式字符串应使 [HttpUrlAddress] 验证失败。
+    /// 非 URL 格式字符串应使 [HttpUrlAddress] 验证失败。
     /// </summary>
+    /// <param name="url">待验证的 URL。</param>
     [Theory]
     [InlineData("not-a-url")]
     [InlineData("ftp://example.com")]
@@ -85,8 +117,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [HttpUrlAddress] 验证（允许空值）。
+    /// null 或空字符串应通过 [HttpUrlAddress] 验证（允许空值）。
     /// </summary>
+    /// <param name="url">待验证的 URL。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -104,8 +137,9 @@ public class ExtendedValidationAttributesTest
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：符合中国固定电话号码格式（区号-号码）的字符串应通过验证。
+    /// 符合中国固定电话号码格式（区号-号码）的字符串应通过验证。
     /// </summary>
+    /// <param name="telNo">待验证的电话号码。</param>
     [Theory]
     [InlineData("010-12345678")]
     [InlineData("021-1234567")]
@@ -121,8 +155,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：不符合固话格式的字符串应使 [TelNoOfChina] 验证失败。
+    /// 不符合固话格式的字符串应使 [TelNoOfChina] 验证失败。
     /// </summary>
+    /// <param name="telNo">待验证的电话号码。</param>
     [Theory]
     [InlineData("13800138000")]  // 手机号，非固话
     [InlineData("abcd-1234567")]
@@ -137,8 +172,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [TelNoOfChina] 验证（允许空值）。
+    /// null 或空字符串应通过 [TelNoOfChina] 验证（允许空值）。
     /// </summary>
+    /// <param name="telNo">待验证的电话号码。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -156,8 +192,9 @@ public class ExtendedValidationAttributesTest
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：符合中国车牌号格式的字符串应通过 [PlateNumberOfChina] 验证。
+    /// 符合中国车牌号格式的字符串应通过 [PlateNumberOfChina] 验证。
     /// </summary>
+    /// <param name="plateNo">待验证的车牌号。</param>
     [Theory]
     [InlineData("京A12345")]
     [InlineData("粤B88888")]
@@ -172,8 +209,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：不符合车牌格式（太短、纯数字等）应使验证失败。
+    /// 不符合车牌格式（太短、纯数字等）应使验证失败。
     /// </summary>
+    /// <param name="plateNo">待验证的车牌号。</param>
     [Theory]
     [InlineData("123456")]
     [InlineData("AB12345")]
@@ -188,8 +226,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [PlateNumberOfChina] 验证（允许空值）。
+    /// null 或空字符串应通过 [PlateNumberOfChina] 验证（允许空值）。
     /// </summary>
+    /// <param name="plateNo">待验证的车牌号。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -207,8 +246,9 @@ public class ExtendedValidationAttributesTest
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：满足微信号规则（字母开头，6~20位字母/数字/下划线/横线）的字符串应通过验证。
+    /// 满足微信号规则（字母开头，6~20位字母/数字/下划线/横线）的字符串应通过验证。
     /// </summary>
+    /// <param name="wechat">待验证的微信号。</param>
     [Theory]
     [InlineData("aBcDe12345")]
     [InlineData("wx_user-001")]
@@ -223,8 +263,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：不符合微信号格式（数字开头、太短）的字符串应验证失败。
+    /// 不符合微信号格式（数字开头、太短）的字符串应验证失败。
     /// </summary>
+    /// <param name="wechat">待验证的微信号。</param>
     [Theory]
     [InlineData("1abc")]          // 数字开头
     [InlineData("ab")]            // 太短（不足6位）
@@ -239,8 +280,9 @@ public class ExtendedValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [WechatNo] 验证（允许空值）。
+    /// null 或空字符串应通过 [WechatNo] 验证（允许空值）。
     /// </summary>
+    /// <param name="wechat">待验证的微信号。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -258,7 +300,7 @@ public class ExtendedValidationAttributesTest
     // ════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ValidatePattern 中各正则常量不为 null/空，确保静态初始化正常。
+    /// ValidatePattern 中各正则常量不为 null/空，确保静态初始化正常。
     /// </summary>
     [Fact]
     public void ValidatePattern_AllPatterns_ShouldNotBeNullOrEmpty()

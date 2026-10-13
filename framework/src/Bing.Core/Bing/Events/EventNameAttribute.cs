@@ -14,7 +14,7 @@ public class EventNameAttribute : Attribute, IEventNameProvider
     public virtual string Name { get; }
 
     /// <summary>
-    /// 使用固定事件名称初始化 <see cref="EventNameAttribute"/> 的实例。
+    /// 初始化一个 <see cref="EventNameAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="name">不能为空的固定事件名称。</param>
     public EventNameAttribute(string name)
@@ -27,7 +27,7 @@ public class EventNameAttribute : Attribute, IEventNameProvider
     public string GetName(Type eventType) => Name;
 
     /// <summary>
-    /// 获取指定泛型事件类型的逻辑名称。
+    /// 获取指定事件类型的逻辑名称。
     /// </summary>
     /// <typeparam name="TEvent">要解析名称的事件类型。</typeparam>
     /// <returns>特性声明的名称或事件类型的 CLR 全名。</returns>

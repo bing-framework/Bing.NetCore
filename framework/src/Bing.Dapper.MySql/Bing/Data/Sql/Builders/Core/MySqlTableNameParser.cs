@@ -278,7 +278,7 @@ internal static class MySqlTableNameParser
     private sealed class MySqlIdentifierComponent
     {
         /// <summary>
-        /// 初始化标识符段。
+        /// 初始化一个 <see cref="MySqlIdentifierComponent"/> 类型的实例。
         /// </summary>
         /// <param name="value">标识符值。</param>
         /// <param name="quoted">是否由反引号包围。</param>
@@ -289,12 +289,12 @@ internal static class MySqlTableNameParser
         }
 
         /// <summary>
-        /// 标识符值。
+        /// 获取标识符值。
         /// </summary>
         public string Value { get; }
 
         /// <summary>
-        /// 是否由反引号包围。
+        /// 获取是否由反引号包围。
         /// </summary>
         public bool Quoted { get; }
     }

@@ -9,29 +9,21 @@ namespace Bing.Identity.JwtBearer.Internal;
 internal sealed class TokenPayloadStore : ITokenPayloadStore
 {
     /// <summary>
-    /// 缓存
+    /// 存储令牌负载并按过期时间设置有效期的缓存提供程序。
     /// </summary>
     private readonly ICache _cache;
 
     /// <summary>
-    /// 初始化一个<see cref="TokenPayloadStore"/>类型的实例
+    /// 初始化一个 <see cref="TokenPayloadStore"/> 类型的实例。
     /// </summary>
     /// <param name="cache">用于存储令牌负载的缓存。</param>
     public TokenPayloadStore(ICache cache) => _cache = cache;
 
-    /// <summary>
-    /// 保存
-    /// </summary>
-    /// <param name="token">令牌</param>
-    /// <param name="payload">负载字典</param>
-    /// <param name="expires">过期时间</param>
+    /// <inheritdoc />
     public async Task SaveAsync(string token, IDictionary<string, string> payload, DateTime expires) =>
         await _cache.SetAsync(GetPayloadKey(token), payload, new CacheOptions() { Expiration = expires.Subtract(DateTime.UtcNow) });
 
-    /// <summary>
-    /// 移除
-    /// </summary>
-    /// <param name="token">令牌</param>
+    /// <inheritdoc />
     public async Task RemoveAsync(string token)
     {
         if (!await _cache.ExistsAsync(GetPayloadKey(token)))
@@ -39,11 +31,7 @@ internal sealed class TokenPayloadStore : ITokenPayloadStore
         await _cache.RemoveAsync(GetPayloadKey(token));
     }
 
-    /// <summary>
-    /// 获取Payload
-    /// </summary>
-    /// <param name="token">令牌</param>
-    /// <returns>令牌对应的负载字典；缓存未命中或令牌已过期时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public async Task<IDictionary<string, string>> GetAsync(string token) =>
         await _cache.GetAsync<IDictionary<string, string>>(GetPayloadKey(token));
 

@@ -12,21 +12,17 @@ namespace Bing.AspNetCore.MultiTenancy;
 public class HeaderTenantResolveContributor : HttpTenantResolveContributorBase
 {
     /// <summary>
-    /// 获取该租户解析贡献者使用的稳定名称。
+    /// 标识请求头租户解析贡献者的稳定名称，值为 <c>Header</c>。
     /// </summary>
     public const string ContributorName = "Header";
 
-    /// <summary>
-    /// 获取该租户解析贡献者的名称。
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => ContributorName;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 异步从请求头中提取租户标识或名称。
-    /// </summary>
-    /// <param name="context">租户解析上下文。</param>
-    /// <param name="httpContext">当前 HTTP 请求上下文。</param>
-    /// <returns>表示解析操作的任务，结果为第一个租户请求头值；请求头缺失或没有值时返回 <see langword="null"/>。</returns>
+    /// </remarks>
     protected override Task<string> GetTenantIdOrNameFromHttpContextOrNullAsync(ITenantResolveContext context, HttpContext httpContext)
     {
         if (httpContext.Request.Headers.IsNullOrEmpty())

@@ -19,6 +19,9 @@ namespace Bing.AutoMapper.Tests;
 /// </summary>
 public class MapTest
 {
+    /// <summary>
+    /// 初始化一个 <see cref="MapTest"/> 类型的实例。
+    /// </summary>
     public MapTest()
     {
         var allAssemblyFinder = new AppDomainAllAssemblyFinder();
@@ -253,6 +256,9 @@ public class MapTest
         Assert.Equal("666-001", target.TargetSampleValue);
     }
 
+    /// <summary>
+    /// 验证集合及其嵌套元素可以映射到对应 DTO。
+    /// </summary>
     [Fact]
     public void Test_MapTo_ListToList()
     {
@@ -274,27 +280,57 @@ public class MapTest
         var ff1 = t1.MapTo<T1Dto>();
     }
 
+    /// <summary>
+    /// 集合映射测试使用的外层源对象。
+    /// </summary>
     public class T1
     {
+        /// <summary>
+        /// 获取或设置源对象文本值。
+        /// </summary>
         public string A { get; set; }
 
+        /// <summary>
+        /// 获取或设置嵌套源对象集合。
+        /// </summary>
         public List<T2> T2 { get; set; }
     }
 
+    /// <summary>
+    /// 集合映射测试使用的嵌套源对象。
+    /// </summary>
     public class T2
     {
+        /// <summary>
+        /// 获取或设置源对象文本值。
+        /// </summary>
         public string A { get; set; }
     }
 
+    /// <summary>
+    /// 集合映射测试使用的外层目标 DTO。
+    /// </summary>
     public class T1Dto
     {
+        /// <summary>
+        /// 获取或设置目标 DTO 文本值。
+        /// </summary>
         public string A { get; set; }
 
+        /// <summary>
+        /// 获取或设置嵌套目标 DTO 集合。
+        /// </summary>
         public List<T2Dto> T2 { get; set; }
     }
 
+    /// <summary>
+    /// 集合映射测试使用的嵌套目标 DTO。
+    /// </summary>
     public class T2Dto
     {
+        /// <summary>
+        /// 获取或设置目标 DTO 文本值。
+        /// </summary>
         public string A { get; set; }
     }
 }

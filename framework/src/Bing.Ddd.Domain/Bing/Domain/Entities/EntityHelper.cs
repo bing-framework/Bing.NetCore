@@ -181,7 +181,7 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 判断指定类型是否实现 <see cref="IEntity{TKey}"/> 并输出标识类型。
+    /// 判断类型是否为带标识实体。
     /// </summary>
     /// <param name="type">要检查的类型。</param>
     /// <param name="keyType">实现单一标识实体接口时输出标识类型；否则为 <c>null</c>。</param>
@@ -206,7 +206,7 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 判断指定的类型是否实现了 <see cref="IEntity{TKey}"/> 泛型接口。
+    /// 判断类型是否为带标识实体。
     /// </summary>
     /// <param name="type">要检查的类型。</param>
     /// <returns>如果该类型实现了 <see cref="IEntity{TKey}"/> 泛型接口，则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
@@ -221,7 +221,7 @@ public static class EntityHelper
     public static Func<Type, bool> IsValueObjectPredicate { get; set; } = type => typeof(ValueObjectBase<>).IsAssignableFrom(type);
 
     /// <summary>
-    /// 判断类型是否为值对象。
+    /// 判断是否为值对象。
     /// </summary>
     /// <param name="type">要检查的类型。</param>
     /// <returns>当前值对象谓词返回 <c>true</c> 时为 <c>true</c>；否则为 <c>false</c>。</returns>
@@ -233,7 +233,7 @@ public static class EntityHelper
     }
 
     /// <summary>
-    /// 判断对象实例的类型是否为值对象。
+    /// 判断是否为值对象。
     /// </summary>
     /// <param name="obj">要检查的对象实例。</param>
     /// <returns>对象非空且其类型满足当前值对象谓词时返回 <c>true</c>；否则返回 <c>false</c>。</returns>

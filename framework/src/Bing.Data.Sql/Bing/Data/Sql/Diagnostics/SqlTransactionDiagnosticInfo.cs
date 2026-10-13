@@ -3,36 +3,45 @@ using Bing.Data.Sql;
 
 namespace Bing.Data.Sql.Diagnostics;
 
-/// <summary>SQL 事务诊断信息。</summary>
+/// <summary>
+/// SQL 事务诊断信息。
+/// </summary>
 public sealed class SqlTransactionDiagnosticInfo
 {
     /// <summary>
-    /// 当前事务的诊断标识；不存在事务时为 null。
+    /// 获取或设置当前事务的诊断标识。
     /// </summary>
+    /// <remarks>
+    /// 不存在事务时为 null。
+    /// </remarks>
     public string TransactionId { get; set; }
 
     /// <summary>
-    /// 指示当前操作是否绑定到事务。
+    /// 获取或设置指示当前操作是否绑定到事务。
     /// </summary>
     public bool HasTransaction { get; set; }
 
     /// <summary>
-    /// 当前事务的隔离级别；不存在事务或驱动未提供时为 null。
+    /// 获取或设置当前事务的隔离级别。
     /// </summary>
+    /// <remarks>
+    /// 不存在事务或驱动未提供时为 null。
+    /// </remarks>
     public IsolationLevel? IsolationLevel { get; set; }
 
     /// <summary>
-    /// 当前操作对事务资源承担的所有权。
+    /// 获取或设置当前操作对事务资源承担的所有权。
     /// </summary>
     public SqlResourceOwnership Ownership { get; set; }
 
     /// <summary>
-    /// 指示该事务是否为保证主库读取而创建的短事务。
+    /// 获取或设置指示该事务是否为保证主库读取而创建的短事务。
     /// </summary>
     public bool IsPrimaryReadTransaction { get; set; }
 
     /// <summary>
-    /// 当前异步事务操作的实际执行模式；原生异步为 <c>NativeAsync</c>，同步回退为 <c>SynchronousFallback</c>。
+    /// 获取或设置当前异步事务操作的执行模式。
     /// </summary>
+    /// <remarks>原生异步执行时为 <c>NativeAsync</c>，同步回退时为 <c>SynchronousFallback</c>。</remarks>
     public string ExecutionMode { get; set; }
 }

@@ -6,7 +6,7 @@
 public interface IDomainEventDispatcher : IDisposable
 {
     /// <summary>
-    /// 注册指定领域事件类型对应的处理器类型。
+    /// 注册领域事件处理器。
     /// </summary>
     /// <typeparam name="TDomainEvent">要处理的领域事件类型。</typeparam>
     /// <typeparam name="TDomainEventHandler">实现该事件处理契约的处理器类型。</typeparam>
@@ -16,7 +16,7 @@ public interface IDomainEventDispatcher : IDisposable
         where TDomainEventHandler : IDomainEventHandler<TDomainEvent>;
 
     /// <summary>
-    /// 注册指定领域事件类型对应的处理器类型。
+    /// 注册领域事件处理器。
     /// </summary>
     /// <typeparam name="TDomainEvent">要处理的领域事件类型。</typeparam>
     /// <param name="handlerType">领域事件处理器类型。</param>
@@ -24,7 +24,7 @@ public interface IDomainEventDispatcher : IDisposable
     bool Register<TDomainEvent>(Type handlerType) where TDomainEvent : DomainEvent;
 
     /// <summary>
-    /// 注册指定领域事件类型和处理器类型的映射。
+    /// 注册领域事件处理器。
     /// </summary>
     /// <param name="eventType">领域事件类型。</param>
     /// <param name="handlerType">能够处理该事件的处理器类型。</param>

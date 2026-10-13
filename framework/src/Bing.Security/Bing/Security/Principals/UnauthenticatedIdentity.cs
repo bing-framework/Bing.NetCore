@@ -7,9 +7,7 @@ namespace Bing.Security.Principals;
 /// </summary>
 public class UnauthenticatedIdentity : ClaimsIdentity
 {
-    /// <summary>
-    /// 是否认证
-    /// </summary>
+    /// <inheritdoc />
     public override bool IsAuthenticated => false;
 
     /// <summary>

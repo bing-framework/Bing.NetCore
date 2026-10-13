@@ -215,6 +215,10 @@ public class WhereGroupAtomicityTest
             .From<Sample>("s")
             .Select<Sample>(item => new object[] { item.IntValue });
 
+    /// <summary>
+    /// 创建包含两个同类型来源且显式绑定投影的查询。
+    /// </summary>
+    /// <returns>包含重复来源的 Lambda 查询。</returns>
     private static SqlLambdaQuery CreateDuplicateQuery() =>
         SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, new TestSqlBuilder())
             .From<Sample>("left")
@@ -261,6 +265,15 @@ public class WhereGroupAtomicityTest
     /// </summary>
     private sealed class QueryState : IEquatable<QueryState>
     {
+        /// <summary>
+        /// 初始化一个 <see cref="QueryState"/> 类型的实例。
+        /// </summary>
+        /// <param name="sql">查询生成的 SQL 文本。</param>
+        /// <param name="parameterNames">参数名称快照。</param>
+        /// <param name="parameterValues">参数值快照。</param>
+        /// <param name="shapeVersion">查询结构版本。</param>
+        /// <param name="cachedVersion">已缓存 SQL 对应的结构版本。</param>
+        /// <param name="cachedSql">缓存的 SQL 文本。</param>
         public QueryState(string sql, string[] parameterNames, object[] parameterValues, long shapeVersion,
             long cachedVersion, string cachedSql)
         {
@@ -272,12 +285,37 @@ public class WhereGroupAtomicityTest
             CachedSql = cachedSql;
         }
 
+        /// <summary>
+        /// 获取查询生成的 SQL 文本。
+        /// </summary>
         private string Sql { get; }
+
+        /// <summary>
+        /// 获取参数名称快照。
+        /// </summary>
         private string[] ParameterNames { get; }
+
+        /// <summary>
+        /// 获取参数值快照。
+        /// </summary>
         private object[] ParameterValues { get; }
+
+        /// <summary>
+        /// 获取查询结构版本。
+        /// </summary>
         private long ShapeVersion { get; }
+
+        /// <summary>
+        /// 获取已缓存 SQL 对应的结构版本。
+        /// </summary>
         private long CachedVersion { get; }
+
+        /// <summary>
+        /// 获取缓存的 SQL 文本。
+        /// </summary>
         private string CachedSql { get; }
+
+        /// <inheritdoc />
         public bool Equals(QueryState other)
         {
             if (other == null)
@@ -287,8 +325,10 @@ public class WhereGroupAtomicityTest
                 ParameterValues.SequenceEqual(other.ParameterValues);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj) => Equals(obj as QueryState);
 
+        /// <inheritdoc />
         public override int GetHashCode() => HashCode.Combine(Sql, ShapeVersion, CachedVersion, CachedSql);
     }
 

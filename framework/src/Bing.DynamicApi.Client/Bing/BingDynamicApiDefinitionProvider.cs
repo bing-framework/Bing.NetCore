@@ -36,7 +36,7 @@ internal sealed class BingDynamicApiDefinitionProvider
     private readonly BingDynamicApiDefinitionCache _cache;
 
     /// <summary>
-    /// 初始化 BingDynamicApiDefinitionProvider 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiDefinitionProvider"/> 类型的实例。
     /// </summary>
     /// <param name="httpClientFactory">HTTP 客户端工厂。</param>
     /// <param name="options">客户端选项。</param>

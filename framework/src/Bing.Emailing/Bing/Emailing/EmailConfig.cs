@@ -11,13 +11,19 @@ public class EmailConfig
     public string Host { get; set; }
 
     /// <summary>
-    /// 获取或设置 SMTP 服务端口，默认值为 <c>25</c>。
+    /// 获取或设置 SMTP 服务端口。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>25</c>。
+    /// </remarks>
     public int Port { get; set; } = 25;
 
     /// <summary>
-    /// 获取或设置 SMTP 认证用户名；认证不启用时可以不设置。
+    /// 获取或设置 SMTP 认证用户名。
     /// </summary>
+    /// <remarks>
+    /// 认证不启用时可以不设置。
+    /// </remarks>
     public string UserName { get; set; }
 
     /// <summary>
@@ -52,7 +58,10 @@ public class EmailConfig
     public string FromAddress { get; set; }
 
     /// <summary>
-    /// 获取或设置邮件队列空闲轮询间隔，单位为毫秒，默认值为 <c>3000</c>。
+    /// 获取或设置邮件队列空闲轮询间隔，单位为毫秒。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>3000</c>。
+    /// </remarks>
     public int SleepInterval { get; set; } = 3000;
 }

@@ -10,7 +10,7 @@ namespace Bing.Data.Queries.Conditions;
 public class DoubleSegmentCondition<TEntity, TProperty> : SegmentConditionBase<TEntity, TProperty, double> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个<see cref="DoubleSegmentCondition{TEntity,TProperty}"/>类型的实例
+    /// 初始化一个 <see cref="DoubleSegmentCondition{TEntity, TProperty}"/> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>
@@ -24,11 +24,6 @@ public class DoubleSegmentCondition<TEntity, TProperty> : SegmentConditionBase<T
     {
     }
 
-    /// <summary>
-    /// 最小值是否大于最大值
-    /// </summary>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <returns>最小值大于最大值时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     protected override bool IsMinGreaterMax(double? min, double? max) => min > max;
 }

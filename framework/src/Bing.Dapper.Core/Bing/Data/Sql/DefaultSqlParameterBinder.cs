@@ -48,7 +48,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     private readonly IReadOnlyCollection<ISqlDbParameterCustomizer> _dbParameterCustomizers;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlParameterBinder"/>类型的实例
+    /// 初始化一个 <see cref="DefaultSqlParameterBinder"/> 类型的实例。
     /// </summary>
     /// <param name="entityMappingResolver">实体映射解析器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -76,19 +76,10 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
                       new List<ISqlDbParameterCustomizer>();
     }
 
-    /// <summary>
-    /// 绑定 Sql 生成器参数
-    /// </summary>
-    /// <param name="builder">Sql 生成器</param>
-    /// <returns>Dapper 可识别的参数对象</returns>
+    /// <inheritdoc />
     public object Bind(ISqlBuilder builder) => Bind(builder, null);
 
-    /// <summary>
-    /// 绑定 Sql 生成器参数
-    /// </summary>
-    /// <param name="builder">Sql 生成器</param>
-    /// <param name="options">Sql 配置</param>
-    /// <returns>Dapper 可识别的参数对象</returns>
+    /// <inheritdoc />
     public object Bind(ISqlBuilder builder, SqlOptions options)
         => Bind(builder, options, null);
 
@@ -103,19 +94,10 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         return builder.GetParams();
     }
 
-    /// <summary>
-    /// 绑定参数对象
-    /// </summary>
-    /// <param name="parameter">参数对象</param>
-    /// <returns>Dapper 可识别的参数对象</returns>
+    /// <inheritdoc />
     public object Bind(object parameter) => Bind(parameter, null);
 
-    /// <summary>
-    /// 绑定参数对象
-    /// </summary>
-    /// <param name="parameter">参数对象</param>
-    /// <param name="options">Sql 配置</param>
-    /// <returns>Dapper 可识别的参数对象</returns>
+    /// <inheritdoc />
     public object Bind(object parameter, SqlOptions options)
         => Bind(parameter, options, null);
 
@@ -133,12 +115,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         return parameter;
     }
 
-    /// <summary>
-    /// 获取 Sql 增强参数集合
-    /// </summary>
-    /// <param name="builder">Sql 生成器</param>
-    /// <param name="options">Sql 配置</param>
-    /// <returns>Sql 增强参数集合</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options)
         => GetSqlParams(builder, options, null);
 
@@ -151,12 +128,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         return new List<SqlParam>();
     }
 
-    /// <summary>
-    /// 获取 Sql 增强参数集合
-    /// </summary>
-    /// <param name="parameter">参数对象</param>
-    /// <param name="options">Sql 配置</param>
-    /// <returns>Sql 增强参数集合</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<SqlParam> GetSqlParams(object parameter, SqlOptions options)
         => GetSqlParams(parameter, options, null);
 
@@ -215,14 +187,14 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     }
 
     /// <summary>
-    /// 创建增强 Sql 参数
+    /// 创建增强 SQL 参数。
     /// </summary>
     /// <param name="item">参数映射项</param>
     /// <returns>Sql 参数</returns>
     private SqlParam CreateSqlParam(SqlParameterMapItem item) => CreateSqlParam(item, null);
 
     /// <summary>
-    /// 创建增强 Sql 参数
+    /// 创建增强 SQL 参数。
     /// </summary>
     /// <param name="item">参数映射项</param>
     /// <param name="options">Sql 配置</param>
@@ -247,7 +219,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     }
 
     /// <summary>
-    /// 根据统一绑定项创建增强 Sql 参数
+    /// 创建增强 SQL 参数。
     /// </summary>
     /// <param name="item">参数绑定项</param>
     /// <param name="options">Sql 配置</param>
@@ -358,7 +330,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
         public IReadOnlyCollection<SqlParam> Parameters => _parameters;
 
         /// <summary>
-        /// 初始化一个<see cref="MetadataDynamicParameters"/>类型的实例
+        /// 初始化一个 <see cref="MetadataDynamicParameters"/> 类型的实例。
         /// </summary>
         /// <param name="parameters">参数集合</param>
         /// <param name="customizers">数据库参数定制器集合</param>
@@ -369,11 +341,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
             _customizers = customizers ?? Array.Empty<ISqlDbParameterCustomizer>();
         }
 
-        /// <summary>
-        /// 将参数添加到命令对象
-        /// </summary>
-        /// <param name="command">命令对象</param>
-        /// <param name="identity">Dapper 标识</param>
+        /// <inheritdoc />
         public void AddParameters(IDbCommand command, SqlMapper.Identity identity)
         {
             if (command == null)
@@ -546,7 +514,7 @@ internal sealed class DynamicParametersOutputAccessor : SqlMapper.IDynamicParame
     private string _providerKey;
 
     /// <summary>
-    /// 初始化原生 Dapper 输出参数访问器。
+    /// 初始化一个 <see cref="DynamicParametersOutputAccessor"/> 类型的实例。
     /// </summary>
     /// <param name="parameters">当前执行使用的参数集合。</param>
     public DynamicParametersOutputAccessor(global::Dapper.DynamicParameters parameters) =>

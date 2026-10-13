@@ -15,7 +15,7 @@ public sealed class DefaultSqlDataSourceResolver : ISqlDataSourceResolver
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlDataSourceResolver"/>类型的实例
+    /// 初始化一个 <see cref="DefaultSqlDataSourceResolver"/> 类型的实例。
     /// </summary>
     /// <param name="options">Sql 元数据配置</param>
     public DefaultSqlDataSourceResolver(SqlMetadataOptions options = null) =>

@@ -5,9 +5,10 @@
 /// </summary>
 public class TraceIdContext : IHasTraceId
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置贯穿整个调用链的跟踪标识。
-    /// </summary>
+    /// </remarks>
     public string TraceId { get; set; }
 
     /// <summary>
@@ -26,7 +27,7 @@ public class TraceIdContext : IHasTraceId
     public string ChildId { get; set; }
 
     /// <summary>
-    /// 使用指定跟踪标识初始化一个 <see cref="TraceIdContext"/> 实例；未提供时自动生成 GUID。
+    /// 初始化一个 <see cref="TraceIdContext"/> 类型的实例。
     /// </summary>
     /// <param name="traceId">跟踪标识；为空时自动生成一个 <see cref="Guid"/>。</param>
     public TraceIdContext(string traceId)
@@ -37,7 +38,7 @@ public class TraceIdContext : IHasTraceId
     }
 
     /// <summary>
-    /// 使用完整的调用链层级标识初始化一个 <see cref="TraceIdContext"/> 实例。
+    /// 初始化一个 <see cref="TraceIdContext"/> 类型的实例。
     /// </summary>
     /// <param name="traceId">贯穿整个调用链的跟踪标识。</param>
     /// <param name="rootId">调用链根节点标识。</param>

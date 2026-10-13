@@ -8,7 +8,10 @@ namespace Bing.Auditing;
 public interface IHasDeletionTime : ISoftDelete
 {
     /// <summary>
-    /// 获取或设置实体的删除时间；未删除时为 <c>null</c>。
+    /// 获取或设置实体的删除时间。
     /// </summary>
+    /// <remarks>
+    /// 未删除时为 <c>null</c>。
+    /// </remarks>
     DateTime? DeletionTime { get; set; }
 }

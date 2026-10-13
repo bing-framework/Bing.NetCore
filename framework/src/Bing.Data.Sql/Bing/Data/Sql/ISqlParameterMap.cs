@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 public interface ISqlParameterMap
 {
     /// <summary>
-    /// 参数源对象。
+    /// 获取参数源对象。
     /// </summary>
     object Source { get; }
 

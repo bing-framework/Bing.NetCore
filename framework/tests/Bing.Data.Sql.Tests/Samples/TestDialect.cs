@@ -9,12 +9,12 @@ namespace Bing.Data.Sql.Tests.Samples;
 public class TestDialect : DialectBase
 {
     /// <summary>
-    /// 封闭构造方法
+    /// 初始化一个 <see cref="TestDialect"/> 类型的实例。
     /// </summary>
     private TestDialect() { }
 
     /// <summary>
-    /// 测试方言实例
+    /// 获取测试方言实例
     /// </summary>
     public static IDialect Instance => new TestDialect();
 

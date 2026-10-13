@@ -3,16 +3,22 @@ using System.Net.Http;
 
 namespace Bing.AspNetCore.CorrelationIdProvider;
 
+/// <summary>
+/// 验证 HTTP 请求中的关联标识传播。
+/// </summary>
 public class CorrelationIdProviderTest : BingAspNetCoreTestBase
 {
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="CorrelationIdProviderTest"/> 类型的实例。
     /// </summary>
     public CorrelationIdProviderTest(HttpClient client)
     {
         InitClient(client);
     }
 
+    /// <summary>
+    /// 验证缺少或指定关联标识时响应头均包含对应标识。
+    /// </summary>
     [Fact]
     public async Task Test()
     {

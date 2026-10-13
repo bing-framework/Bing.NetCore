@@ -13,52 +13,52 @@ public class ColumnItem
     private readonly SqlAggregateDescriptor _aggregate;
 
     /// <summary>
-    /// 列名
+    /// 获取或设置列名
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// 表别名
+    /// 获取或设置表别名
     /// </summary>
     public string TableAlias { get; set; }
 
     /// <summary>
-    /// 列别名
+    /// 获取或设置列别名
     /// </summary>
     public string ColumnAlias { get; set; }
 
     /// <summary>
-    /// 是否使用原始值
+    /// 获取是否使用原始值
     /// </summary>
     public bool Raw { get; }
 
     /// <summary>
-    /// 表实体类型
+    /// 获取表实体类型
     /// </summary>
     public Type TableType { get; }
 
     /// <summary>
-    /// 结构化聚合函数。
+    /// 获取结构化聚合函数。
     /// </summary>
     public SqlAggregateFunction? AggregateFunction => _aggregate?.Function;
 
     /// <summary>
-    /// 是否对聚合参数去重。
+    /// 获取是否对聚合参数去重。
     /// </summary>
     public bool AggregateDistinct => _aggregate?.Distinct == true;
 
     /// <summary>
-    /// 是否使用聚合通配符参数。
+    /// 获取是否使用聚合通配符参数。
     /// </summary>
     public bool AggregateWildcard => _aggregate?.ArgumentKind == SqlAggregateArgumentKind.Wildcard;
 
     /// <summary>
-    /// 是否将聚合参数作为已解析的 SQL 片段。
+    /// 获取是否将聚合参数作为已解析的 SQL 片段。
     /// </summary>
     public bool AggregateArgumentRaw => _aggregate?.ArgumentKind is SqlAggregateArgumentKind.Expression or SqlAggregateArgumentKind.Raw;
 
     /// <summary>
-    /// 使用结构化聚合描述初始化列。
+    /// 初始化一个 <see cref="ColumnItem"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名或聚合参数。</param>
     /// <param name="tableAlias">表别名。</param>

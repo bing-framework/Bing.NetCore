@@ -45,7 +45,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityConfigurationTypeFinder"/>类型的实例
+    /// 初始化一个 <see cref="EntityConfigurationTypeFinder"/> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器</param>
     public EntityConfigurationTypeFinder(IAllAssemblyFinder allAssemblyFinder)
@@ -53,21 +53,13 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         _allAssemblyFinder = allAssemblyFinder;
     }
 
-    /// <summary>
-    /// 获取指定上下文类型的实体配置注册信息
-    /// </summary>
-    /// <param name="dbContextType">数据上下文类型</param>
-    /// <returns>指定数据上下文类型对应的实体配置注册信息；未找到时返回空字典。</returns>
+    /// <inheritdoc />
     public Dictionary<Type, EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType)
     {
         return _entityMapDbContextDict.ContainsKey(dbContextType) ? _entityRegistersDict[dbContextType] : _empty;
     }
 
-    /// <summary>
-    /// 获取实体类型所属的数据上下文类型
-    /// </summary>
-    /// <param name="entityType">实体类型</param>
-    /// <returns>数据上下文类型</returns>
+    /// <inheritdoc />
     public Type GetDbContextTypeForEntity(Type entityType)
     {
         if (!_entityMapDbContextDict.ContainsKey(entityType))
@@ -75,23 +67,12 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         return _entityMapDbContextDict[entityType];
     }
 
-    /// <summary>
-    /// 获取全部数据上下文的实体类型
-    /// </summary>
-    /// <returns>已发现的数据上下文类型集合。</returns>
+    /// <inheritdoc />
     public IEnumerable<Type> GetAllDbContextTypes() => _dbContextTypes;
 
-    /// <summary>
-    /// 判断实体是否配置到 <see cref="DbContext"/> 当中
-    /// </summary>
-    /// <typeparam name="T">实体类型</typeparam>
-    /// <returns>实体类型已配置到数据上下文时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool HasDbContextForEntity<T>() => HasDbContextForEntity(typeof(T));
 
-    /// <summary>
-    /// 判断实体是否配置到 <see cref="DbContext"/> 当中
-    /// </summary>
-    /// <param name="type">实体类型</param>
-    /// <returns>实体类型已配置到数据上下文时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool HasDbContextForEntity(Type type) => _entityMapDbContextDict.ContainsKey(type);
 }

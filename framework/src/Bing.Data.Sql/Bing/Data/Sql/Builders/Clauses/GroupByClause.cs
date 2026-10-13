@@ -43,14 +43,10 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     /// </summary>
     private string _having;
 
-    /// <summary>
-    /// 是否存在分组
-    /// </summary>
+    /// <inheritdoc />
     public bool IsGroup => _group.Count > 0;
 
-    /// <summary>
-    /// 分组列表
-    /// </summary>
+    /// <inheritdoc />
     public string GroupColumns => _group.Select(t => t.ToSql(_dialect)).Join();
 
     /// <summary>
@@ -71,11 +67,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _having = having;
     }
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    /// <returns>使用指定运行上下文创建的独立 Group By 子句。</returns>
+    /// <inheritdoc />
     public virtual IGroupByClause Clone(SqlClauseContext context) => CreateClone(context,
         _group.Select(item => item.Clone()).ToList(), _having);
 
@@ -89,10 +81,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     protected virtual GroupByClause CreateClone(SqlClauseContext context, List<SqlItem> group, string having) =>
         new GroupByClause(context, group, having);
 
-    /// <summary>
-    /// 分组
-    /// </summary>
-    /// <param name="columns">分组字段</param>
+    /// <inheritdoc />
     public void GroupBy(string columns)
     {
         if (string.IsNullOrWhiteSpace(columns))
@@ -104,11 +93,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _group.AddRange(items.Select(item => new SqlItem(item)));
     }
 
-    /// <summary>
-    /// 分组
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="columns">分组字段</param>
+    /// <inheritdoc />
     public void GroupBy<TEntity>(params Expression<Func<TEntity, object>>[] columns)
     {
         if (columns == null)
@@ -129,11 +114,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _group.AddRange(items);
     }
 
-    /// <summary>
-    /// 分组
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="column">分组字段</param>
+    /// <inheritdoc />
     public void GroupBy<TEntity>(Expression<Func<TEntity, object>> column)
     {
         if (column == null)
@@ -173,8 +154,10 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _having = condition.GetCondition();
     }
 
+    /// <inheritdoc />
     void ISqlMultiSourceGroupByClause.AppendBoundColumns(IEnumerable<string> columns) => AddBoundColumns(columns);
 
+    /// <inheritdoc />
     void ISqlMultiSourceGroupByClause.SetBoundHaving(ICondition condition) => SetBoundHaving(condition);
 
     /// <inheritdoc />
@@ -197,10 +180,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _having = sql;
     }
 
-    /// <summary>
-    /// 添加到GroupBy子句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <inheritdoc />
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -242,10 +222,7 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         _having = null;
     }
 
-    /// <summary>
-    /// 获取Sql。
-    /// </summary>
-    /// <returns>当前 Group By 子句的 SQL 文本；未设置分组时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();

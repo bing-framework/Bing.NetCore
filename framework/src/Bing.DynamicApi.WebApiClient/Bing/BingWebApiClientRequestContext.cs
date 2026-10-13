@@ -6,7 +6,7 @@ namespace Bing.DynamicApi.WebApiClient;
 public sealed class BingWebApiClientRequestContext
 {
     /// <summary>
-    /// 初始化 BingWebApiClientRequestContext 类的新实例。
+    /// 初始化一个 <see cref="BingWebApiClientRequestContext"/> 类型的实例。
     /// </summary>
     /// <param name="tenantId">租户标识；null 表示未提供。</param>
     /// <param name="correlationId">关联标识；null 表示未提供。</param>

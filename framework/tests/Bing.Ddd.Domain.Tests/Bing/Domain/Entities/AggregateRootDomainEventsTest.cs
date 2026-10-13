@@ -12,11 +12,13 @@ public class AggregateRootDomainEventsTest
     /// </summary>
     private class SampleDomainEvent : DomainEvent
     {
-        /// <summary>消息内容</summary>
+        /// <summary>
+        /// 获取消息内容
+        /// </summary>
         public string Message { get; }
 
         /// <summary>
-        /// 初始化
+        /// 初始化一个 <see cref="SampleDomainEvent"/> 类型的实例。
         /// </summary>
         public SampleDomainEvent(string message) => Message = message;
     }

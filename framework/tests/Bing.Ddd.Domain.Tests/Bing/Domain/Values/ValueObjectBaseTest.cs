@@ -46,7 +46,7 @@ public class ValueObjectBaseTest
     private AggregateRootSample _aggregateRootSample;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ValueObjectBaseTest"/> 类型的实例。
     /// </summary>
     public ValueObjectBaseTest()
     {

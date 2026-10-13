@@ -40,12 +40,12 @@ public sealed class SqlTenantFilterContext
     }
 
     /// <summary>
-    /// 当前结构化表对应的实体类型。
+    /// 获取当前结构化表对应的实体类型。
     /// </summary>
     public Type EntityType { get; }
 
     /// <summary>
-    /// 当前 Builder 生命周期内固定的数据库上下文。
+    /// 获取当前 Builder 生命周期内固定的数据库上下文。
     /// </summary>
     public DatabaseContext DatabaseContext { get; }
 }

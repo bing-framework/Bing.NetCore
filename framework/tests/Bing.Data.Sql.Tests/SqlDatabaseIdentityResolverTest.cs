@@ -203,6 +203,8 @@ public class SqlDatabaseIdentityResolverTest
     /// <summary>
     /// 测试目的：服务器型 Provider 缺少服务器地址时不能安全比较物理身份。
     /// </summary>
+    /// <param name="databaseType">要解析的数据库类型。</param>
+    /// <param name="connectionString">缺少服务器地址的连接字符串。</param>
     [Theory]
     [InlineData(DatabaseType.SqlServer, "Database=orders;")]
     [InlineData(DatabaseType.MySql, "Database=orders;")]
@@ -223,6 +225,8 @@ public class SqlDatabaseIdentityResolverTest
     /// <summary>
     /// 测试目的：服务器型 Provider 缺少数据库名称时不能安全比较物理身份。
     /// </summary>
+    /// <param name="databaseType">要解析的数据库类型。</param>
+    /// <param name="connectionString">缺少数据库名称的连接字符串。</param>
     [Theory]
     [InlineData(DatabaseType.SqlServer, "Server=sql01;")]
     [InlineData(DatabaseType.MySql, "Server=mysql01;")]
@@ -302,6 +306,9 @@ public class SqlDatabaseIdentityResolverTest
     /// <summary>
     /// 测试目的：省略默认端口和显式默认端口应解析为同一服务器型数据库身份。
     /// </summary>
+    /// <param name="databaseType">要解析的数据库类型。</param>
+    /// <param name="withoutPort">省略默认端口的连接字符串。</param>
+    /// <param name="withPort">显式包含默认端口的连接字符串。</param>
     [Theory]
     [InlineData(DatabaseType.MySql, "Server=mysql01;Database=orders;", "Server=mysql01;Port=3306;Database=orders;")]
     [InlineData(DatabaseType.PgSql, "Host=pgsql01;Database=orders;", "Host=pgsql01;Port=5432;Database=orders;")]
@@ -404,6 +411,7 @@ public class SqlDatabaseIdentityResolverTest
     /// <summary>
     /// 测试目的：普通主机和 EZConnect 同时给出服务名与 SID 时目标存在歧义，不能用于 Shared 身份比较。
     /// </summary>
+    /// <param name="connectionString">同时指定服务名与 SID 的 Oracle 连接字符串。</param>
     [Theory]
     [InlineData("Data Source=oracle01;Service Name=orders;SID=ORCL;")]
     [InlineData("Data Source=//oracle01:1521/orders;SID=ORCL;")]
@@ -465,6 +473,7 @@ public class SqlDatabaseIdentityResolverTest
     /// <summary>
     /// 测试目的：存在多个地址、复杂结构、重复字段或歧义目标的 TNS Descriptor 必须拒绝物理身份比较。
     /// </summary>
+    /// <param name="descriptor">存在歧义的 Oracle TNS 描述符。</param>
     [Theory]
     [InlineData("(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle01)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=oracle02)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orders)))")]
     [InlineData("(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle01)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orders))(CONNECT_DATA=(SID=ORCL)))")]

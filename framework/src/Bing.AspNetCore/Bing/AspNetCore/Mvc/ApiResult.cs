@@ -8,7 +8,7 @@ namespace Bing.AspNetCore.Mvc;
 public class ApiResult : JsonResult
 {
     /// <summary>
-    /// 使用整数业务状态码初始化 <see cref="ApiResult"/> 的实例。
+    /// 初始化一个 <see cref="ApiResult"/> 类型的实例。
     /// </summary>
     /// <param name="code">业务状态码。</param>
     /// <param name="message">面向调用方的响应消息。</param>
@@ -25,7 +25,7 @@ public class ApiResult : JsonResult
     }
 
     /// <summary>
-    /// 使用框架业务状态枚举初始化 <see cref="ApiResult"/> 的实例。
+    /// 初始化一个 <see cref="ApiResult"/> 类型的实例。
     /// </summary>
     /// <param name="code">框架业务状态码。</param>
     /// <param name="message">面向调用方的响应消息。</param>
@@ -47,8 +47,11 @@ public class ApiResult : JsonResult
     public string Message { get; }
 
     /// <summary>
-    /// 获取响应数据；无数据时为 <c>null</c>。
+    /// 获取响应数据。
     /// </summary>
+    /// <remarks>
+    /// 无数据时为 <c>null</c>。
+    /// </remarks>
     public object Data { get; }
 
     /// <summary>
@@ -56,10 +59,10 @@ public class ApiResult : JsonResult
     /// </summary>
     public DateTime OperationTime { get; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 将统一响应对象写入 ASP.NET Core 执行上下文并委托基类完成 JSON 响应。
-    /// </summary>
-    /// <param name="context">当前 MVC 操作上下文。</param>
+    /// </remarks>
     /// <exception cref="ArgumentNullException"><paramref name="context"/> 为 <c>null</c> 时抛出。</exception>
     public override Task ExecuteResultAsync(ActionContext context)
     {

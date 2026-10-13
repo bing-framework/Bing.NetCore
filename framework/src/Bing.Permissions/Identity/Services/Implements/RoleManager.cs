@@ -20,17 +20,17 @@ public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, I
     where TRole : RoleBase<TRole, TKey, TParentId>
 {
     /// <summary>
-    /// Identity角色管理
+    /// 获取Identity角色管理
     /// </summary>
     private RoleManager<TRole> Manager { get; }
 
     /// <summary>
-    /// 角色仓储
+    /// 获取角色仓储
     /// </summary>
     private IRoleRepository<TRole, TKey, TParentId> Repository { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="RoleManager{TRole,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="RoleManager{TRole, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="roleManager">Identity角色管理</param>
     /// <param name="repository">角色仓储</param>
@@ -42,10 +42,7 @@ public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, I
 
     #region CreateAsync(创建角色)
 
-    /// <summary>
-    /// 创建角色
-    /// </summary>
-    /// <param name="role">角色</param>
+    /// <inheritdoc />
     public virtual async Task CreateAsync(TRole role)
     {
         await ValidateCreate(role);
@@ -88,10 +85,7 @@ public abstract class RoleManager<TRole, TKey, TParentId> : DomainServiceBase, I
 
     #region UpdateAsync(修改角色)
 
-    /// <summary>
-    /// 修改角色
-    /// </summary>
-    /// <param name="role">角色</param>
+    /// <inheritdoc />
     public virtual async Task UpdateAsync(TRole role)
     {
         role.CheckNotNull(nameof(role));

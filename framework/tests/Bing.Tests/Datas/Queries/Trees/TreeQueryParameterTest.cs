@@ -14,7 +14,7 @@ public class TreeQueryParameterTest
     private readonly TreeQueryParameter _parameter;
 
     /// <summary>
-    /// 初始化一个<see cref="TreeQueryParameterTest"/>类型的实例
+    /// 初始化一个 <see cref="TreeQueryParameterTest"/> 类型的实例。
     /// </summary>
     public TreeQueryParameterTest() => _parameter = new TreeQueryParameter();
 

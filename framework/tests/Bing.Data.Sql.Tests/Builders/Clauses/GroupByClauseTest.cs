@@ -19,7 +19,7 @@ public class GroupByClauseTest
     private GroupByClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="GroupByClauseTest"/> 类型的实例。
     /// </summary>
     public GroupByClauseTest()
     {
@@ -29,6 +29,7 @@ public class GroupByClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>返回当前分组子句生成的 SQL 片段。</returns>
     private string GetSql()
     {
         return _clause.ToSql();

@@ -96,6 +96,7 @@ public class PostgreSqlTypeConverterResolverTest
     /// </summary>
     private sealed class TestDatabase : IDatabase
     {
+        /// <inheritdoc />
         public IDbConnection GetConnection() => null;
     }
 }

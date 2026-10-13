@@ -31,42 +31,42 @@ public enum SqlQueryCapabilityState
 public sealed class SqlQueryCapabilities
 {
     /// <summary>
-    /// 公用表表达式（CTE）能力状态。
+    /// 获取或设置公用表表达式（CTE）能力状态。
     /// </summary>
     public SqlQueryCapabilityState Cte { get; set; }
 
     /// <summary>
-    /// Union 集合运算能力状态。
+    /// 获取或设置 <c>UNION</c> 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Union { get; set; }
 
     /// <summary>
-    /// Union All 集合运算能力状态。
+    /// 获取或设置 <c>UNION ALL</c> 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState UnionAll { get; set; }
 
     /// <summary>
-    /// Intersect 集合运算能力状态。
+    /// 获取或设置 <c>INTERSECT</c> 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Intersect { get; set; }
 
     /// <summary>
-    /// Except 集合运算能力状态。
+    /// 获取或设置 <c>EXCEPT</c> 集合运算能力状态。
     /// </summary>
     public SqlQueryCapabilityState Except { get; set; }
 
     /// <summary>
-    /// Right Join 连接能力状态。
+    /// 获取或设置 <c>RIGHT JOIN</c> 连接能力状态。
     /// </summary>
     public SqlQueryCapabilityState RightJoin { get; set; }
 
     /// <summary>
-    /// Full Join 连接能力状态。
+    /// 获取或设置 <c>FULL JOIN</c> 连接能力状态。
     /// </summary>
     public SqlQueryCapabilityState FullJoin { get; set; }
 
     /// <summary>
-    /// Skip、Take 和 Page 分页能力状态。
+    /// 获取或设置 <c>Skip</c>、<c>Take</c> 和 <c>Page</c> 分页能力状态。
     /// </summary>
     public SqlQueryCapabilityState Pagination { get; set; }
 }

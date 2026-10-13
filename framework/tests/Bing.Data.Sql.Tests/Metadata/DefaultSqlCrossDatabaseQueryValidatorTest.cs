@@ -12,6 +12,7 @@ public class DefaultSqlCrossDatabaseQueryValidatorTest
     /// <summary>
     /// 测试目的：支持 Database 限定的 Provider 应允许结构化跨数据库查询。
     /// </summary>
+    /// <param name="databaseType">要验证的数据库类型。</param>
     [Theory]
     [InlineData(DatabaseType.SqlServer)]
     [InlineData(DatabaseType.MySql)]

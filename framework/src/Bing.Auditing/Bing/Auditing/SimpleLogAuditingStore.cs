@@ -12,7 +12,7 @@ namespace Bing.Auditing;
 public class SimpleLogAuditingStore : IAuditingStore
 {
     /// <summary>
-    /// 初始化 <see cref="SimpleLogAuditingStore"/> 的实例，并使用空日志记录器。
+    /// 初始化一个 <see cref="SimpleLogAuditingStore"/> 类型的实例。
     /// </summary>
     public SimpleLogAuditingStore()
     {

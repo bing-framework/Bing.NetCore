@@ -10,17 +10,17 @@ namespace Bing.AspNetCore.WebClientInfo;
 public class HttpContextWebClientInfoProvider : IWebClientInfoProvider, ITransientDependency
 {
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILogger<HttpContextWebClientInfoProvider> Logger { get; }
 
     /// <summary>
-    /// Http上下文访问器
+    /// 获取Http上下文访问器
     /// </summary>
     protected IHttpContextAccessor HttpContextAccessor { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="HttpContextWebClientInfoProvider"/>类型的实例
+    /// 初始化一个 <see cref="HttpContextWebClientInfoProvider"/> 类型的实例。
     /// </summary>
     /// <param name="logger">日志</param>
     /// <param name="httpContextAccessor">Http上下文访问器</param>

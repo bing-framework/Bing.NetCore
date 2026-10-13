@@ -17,73 +17,73 @@ namespace Bing.Data.Sql.Builders.Core;
 public sealed class SqlBuilderServices
 {
     /// <summary>
-    /// 将实体成员解析为表、列和数据库映射元数据的解析器。
+    /// 获取将实体成员解析为表、列和数据库映射元数据的解析器。
     /// </summary>
     public IEntityMappingResolver EntityMappingResolver { get; }
 
     /// <summary>
-    /// 访问当前执行流数据库上下文的访问器。
+    /// 获取访问当前执行流数据库上下文的访问器。
     /// </summary>
     public IDatabaseContextAccessor DatabaseContextAccessor { get; }
 
     /// <summary>
-    /// 根据字段元数据和数据库上下文创建 SQL 参数的工厂。
+    /// 获取根据字段元数据和数据库上下文创建 SQL 参数的工厂。
     /// </summary>
     public ISqlParameterFactory ParameterFactory { get; }
 
     /// <summary>
-    /// 控制实体映射、字段转换和默认数据库上下文的元数据配置。
+    /// 获取控制实体映射、字段转换和默认数据库上下文的元数据配置。
     /// </summary>
     public SqlMetadataOptions MetadataOptions { get; }
 
     /// <summary>
-    /// 保存当前 Builder 使用的查询和数据库选项。
+    /// 获取保存当前 Builder 使用的查询和数据库选项。
     /// </summary>
     public SqlOptions Options { get; }
 
     /// <summary>
-    /// 按 SQL 选项、访问器和元数据配置解析数据库上下文的解析器。
+    /// 获取按 SQL 选项、访问器和元数据配置解析数据库上下文的解析器。
     /// </summary>
     public ISqlDatabaseContextResolver DatabaseContextResolver { get; }
 
     /// <summary>
-    /// 格式化数据库、架构、表和列等 SQL 对象名称的格式化器。
+    /// 获取格式化数据库、架构、表和列等 SQL 对象名称的格式化器。
     /// </summary>
     public ISqlObjectNameFormatter ObjectNameFormatter { get; }
 
     /// <summary>
-    /// 校验跨数据库查询是否满足当前 Provider 能力的校验器。
+    /// 获取校验跨数据库查询是否满足当前 Provider 能力的校验器。
     /// </summary>
     public ISqlCrossDatabaseQueryValidator CrossDatabaseQueryValidator { get; }
 
     /// <summary>
-    /// 校验结构化表引用完整性和命名约束的校验器。
+    /// 获取校验结构化表引用完整性和命名约束的校验器。
     /// </summary>
     public ISqlTableReferenceValidator TableReferenceValidator { get; }
 
     /// <summary>
-    /// 提供实体原始模型元数据以支持映射、过滤和对象名称解析的提供器。
+    /// 获取提供实体原始模型元数据以支持映射、过滤和对象名称解析的提供器。
     /// </summary>
     public IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 
     /// <summary>
-    /// 当前 Builder 固定使用的 SQL 过滤器快照。
+    /// 获取当前 Builder 固定使用的 SQL 过滤器快照。
     /// </summary>
     public IReadOnlyList<ISqlFilter> Filters { get; }
 
     /// <summary>
-    /// 当前异步执行流共享的数据过滤状态。
+    /// 获取当前异步执行流共享的数据过滤状态。
     /// </summary>
     public IDataFilter DataFilter { get; }
 
     /// <summary>
-    /// 解析不含凭据的物理数据库身份。
+    /// 获取或设置解析不含凭据的物理数据库身份。
     /// </summary>
     public ISqlDatabaseIdentityResolver DatabaseIdentityResolver { get; set; } =
         new DefaultSqlDatabaseIdentityResolver();
 
     /// <summary>
-    /// 初始化一个 <see cref="SqlBuilderServices"/> 类型的实例，并填充默认服务。
+    /// 初始化一个 <see cref="SqlBuilderServices"/> 类型的实例。
     /// </summary>
     /// <param name="entityMappingResolver">实体映射解析器。</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>

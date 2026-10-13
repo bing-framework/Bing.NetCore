@@ -6,12 +6,12 @@
 public interface IMailQueueManager
 {
     /// <summary>
-    /// 是否正在运行
+    /// 获取是否正在运行
     /// </summary>
     bool IsRunning { get; }
 
     /// <summary>
-    /// 队列数
+    /// 获取队列数
     /// </summary>
     int Count { get; }
 

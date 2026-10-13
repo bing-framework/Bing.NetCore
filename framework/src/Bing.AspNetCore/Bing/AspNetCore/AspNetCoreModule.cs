@@ -11,21 +11,13 @@ namespace Bing.AspNetCore;
 [Description("AspNetCore模块")]
 public class AspNetCoreModule : Bing.Core.Modularity.BingModule
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
     public override Bing.Core.Modularity.ModuleLevel Level => Bing.Core.Modularity.ModuleLevel.Core;
 
-    /// <summary>
-    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
-    /// </summary>
+    /// <inheritdoc />
     public override int Order => 2;
 
-    /// <summary>
-    /// 添加服务。将模块服务添加到依赖注入服务容器中
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>完成模块服务注册后的服务集合。</returns>
+    /// <inheritdoc />
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         // 注册 HttpContextAccessor，提供 HttpContext 访问
@@ -47,9 +39,6 @@ public class AspNetCoreModule : Bing.Core.Modularity.BingModule
         return services;
     }
 
-    /// <summary>
-    /// 应用模块服务
-    /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    /// <inheritdoc />
     public override void UseModule(IServiceProvider provider) => Enabled = true;
 }

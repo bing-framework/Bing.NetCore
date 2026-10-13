@@ -10,6 +10,8 @@ public class IsNullConditionTest
     /// <summary>
     /// 获取结果
     /// </summary>
+    /// <param name="condition">要追加到缓冲区的 SQL 条件。</param>
+    /// <returns>返回 SQL 条件生成的文本。</returns>
     private string GetResult(ISqlCondition condition)
     {
         var result = new StringBuilder();

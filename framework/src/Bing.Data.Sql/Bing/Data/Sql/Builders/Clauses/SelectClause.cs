@@ -16,22 +16,22 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// SQL 生成器。
+    /// 获取SQL 生成器。
     /// </summary>
     private ISqlBuilder _sqlBuilder => _context.Builder;
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     private IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体解析器。
+    /// 获取实体解析器。
     /// </summary>
     private IEntityResolver _resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 实体别名注册器。
+    /// 获取实体别名注册器。
     /// </summary>
     private IEntityAliasRegister _register => _context.AliasRegister;
 
@@ -57,7 +57,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     public int? ProjectionCount => _columns.Count == 0 || _projectionCountKnown == false ? null : _columns.Count;
 
     /// <summary>
-    /// 是否包含结构化聚合投影。
+    /// 获取是否包含结构化聚合投影。
     /// </summary>
     public bool HasAggregate
     {
@@ -73,7 +73,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     }
 
     /// <summary>
-    /// 初始化一个<see cref="SelectClause"/>类型的实例
+    /// 初始化一个 <see cref="SelectClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public SelectClause(SqlClauseContext context)
@@ -82,7 +82,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     }
 
     /// <summary>
-    /// 使用运行上下文和克隆状态初始化 Select 子句。
+    /// 初始化一个 <see cref="SelectClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="columns">已复制的列集合。</param>
@@ -94,11 +94,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _distinct = distinct;
     }
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <returns>独立的 Select 子句。</returns>
+    /// <inheritdoc />
     public virtual ISelectClause Clone(SqlClauseContext context)
     {
         var result = CreateClone(context, _columns.Clone(), _distinct);
@@ -131,9 +127,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _projectionCountKnown = source._projectionCountKnown;
     }
 
-    /// <summary>
-    /// 过滤重复记录
-    /// </summary>
+    /// <inheritdoc />
     public void Distinct()
     {
         _context.UseOperation(SqlOperationAction.Select);
@@ -156,13 +150,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         bool distinct = false) where TEntity : class =>
         Aggregate(SqlAggregateFunction.Count, expression, alias, distinct);
 
-    /// <summary>
-    /// 添加结构化聚合列。
-    /// </summary>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="column">列名。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Aggregate(SqlAggregateFunction function, string column, string columnAlias = null,
         bool distinct = false)
     {
@@ -179,14 +167,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _context.UseOperation(SqlOperationAction.Select);
     }
 
-    /// <summary>
-    /// 添加实体表达式聚合列。
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型。</typeparam>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="expression">列名表达式。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Aggregate<TEntity>(SqlAggregateFunction function, Expression<Func<TEntity, object>> expression,
         string columnAlias = null, bool distinct = false) where TEntity : class
     {
@@ -222,13 +203,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _context.UseOperation(SqlOperationAction.Select);
     }
 
-    /// <summary>
-    /// 添加原始聚合参数。
-    /// </summary>
-    /// <param name="function">聚合函数。</param>
-    /// <param name="argumentSql">聚合参数 SQL。</param>
-    /// <param name="columnAlias">聚合结果列别名。</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void AggregateRaw(SqlAggregateFunction function, string argumentSql, string columnAlias = null,
         bool distinct = false)
     {
@@ -253,91 +228,43 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _context.UseOperation(SqlOperationAction.Select);
     }
 
-    /// <summary>
-    /// 求和
-    /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Sum(string column, string columnAlias = null, bool distinct = false) =>
         Aggregate(SqlAggregateFunction.Sum, column, columnAlias, distinct);
 
-    /// <summary>
-    /// 求和
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Sum<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
         Aggregate(SqlAggregateFunction.Sum, expression, columnAlias, distinct);
 
-    /// <summary>
-    /// 求平均值
-    /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Avg(string column, string columnAlias = null, bool distinct = false) =>
         Aggregate(SqlAggregateFunction.Avg, column, columnAlias, distinct);
 
-    /// <summary>
-    /// 求平均值
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Avg<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
         Aggregate(SqlAggregateFunction.Avg, expression, columnAlias, distinct);
 
-    /// <summary>
-    /// 求最大值
-    /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Max(string column, string columnAlias = null, bool distinct = false) =>
         Aggregate(SqlAggregateFunction.Max, column, columnAlias, distinct);
 
-    /// <summary>
-    /// 求最大值
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Max<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
         Aggregate(SqlAggregateFunction.Max, expression, columnAlias, distinct);
 
-    /// <summary>
-    /// 求最小值
-    /// </summary>
-    /// <param name="column">列</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Min(string column, string columnAlias = null, bool distinct = false) =>
         Aggregate(SqlAggregateFunction.Min, column, columnAlias, distinct);
 
-    /// <summary>
-    /// 求最小值
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
-    /// <param name="distinct">是否对聚合参数去重。</param>
+    /// <inheritdoc />
     public void Min<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null,
         bool distinct = false) where TEntity : class =>
         Aggregate(SqlAggregateFunction.Min, expression, columnAlias, distinct);
 
-    /// <summary>
-    /// 设置列名
-    /// </summary>
-    /// <param name="columns">列名</param>
-    /// <param name="tableAlias">表别名</param>
+    /// <inheritdoc />
     public void Select(string columns, string tableAlias = null)
     {
         if (string.IsNullOrWhiteSpace(columns))
@@ -354,17 +281,15 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     /// <param name="columns">已按当前方言解析完成的列 SQL。</param>
     internal void AppendBoundColumns(string columns) => Select(columns);
 
+    /// <inheritdoc />
     void ISqlMultiSourceSelectClause.AppendBoundColumns(string columns) => AppendBoundColumns(columns);
 
+    /// <inheritdoc />
     void ISqlMultiSourceSelectClause.Aggregate<TEntity>(SqlAggregateFunction function,
         Expression<Func<TEntity, object>> expression, string tableAlias, string columnAlias, bool distinct) =>
         Aggregate(function, expression, tableAlias, columnAlias, distinct);
 
-    /// <summary>
-    /// 设置列名
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <inheritdoc />
     public void Select<TEntity>(bool propertyAsAlias = false)
     {
         var columns = _resolver.GetColumns<TEntity>(propertyAsAlias);
@@ -389,12 +314,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _columns.FreezeTableAlias(typeof(TEntity), source.Alias);
     }
 
-    /// <summary>
-    /// 设置列名
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
+    /// <inheritdoc />
     public void Select<TEntity>(Expression<Func<TEntity, object[]>> expression, bool propertyAsAlias = false) where TEntity : class
     {
         _context.ValidateOperation(SqlOperationAction.Select);
@@ -407,12 +327,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _context.UseOperation(SqlOperationAction.Select);
     }
 
-    /// <summary>
-    /// 设置列名
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <inheritdoc />
     public void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class
     {
         _context.ValidateOperation(SqlOperationAction.Select);
@@ -522,11 +437,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     private static NotSupportedException CreateUnsupportedDtoProjectionException(string nodeType) =>
         new($"不支持的 DTO 投影表达式节点类型：{nodeType}。仅支持当前实体的直接成员赋值。");
 
-    /// <summary>
-    /// 设置子查询列
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <inheritdoc />
     public void Select(ISqlBuilder builder, string columnAlias)
     {
         _context.ValidateOperation(SqlOperationAction.Select);
@@ -538,11 +449,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         AppendSql(result, columnAlias);
     }
 
-    /// <summary>
-    /// 设置子查询列
-    /// </summary>
-    /// <param name="action">子查询操作</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <inheritdoc />
     public void Select(Action<ISqlBuilder> action, string columnAlias)
     {
         _context.ValidateOperation(SqlOperationAction.Select);
@@ -553,11 +460,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         Select(builder, columnAlias);
     }
 
-    /// <summary>
-    /// 添加到Select子句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
-    /// <param name="columnAlias">列别名</param>
+    /// <inheritdoc />
     public void AppendSql(string sql, string columnAlias = null)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -569,18 +472,10 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _columns.AddRawColumn(sql, columnAlias);
     }
 
-    /// <summary>
-    /// 移除列名
-    /// </summary>
-    /// <param name="columns">列名</param>
-    /// <param name="tableAlias">表别名</param>
+    /// <inheritdoc />
     public void RemoveSelect(string columns, string tableAlias = null) => _columns.RemoveColumns(columns, tableAlias);
 
-    /// <summary>
-    /// 移除列名
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void RemoveSelect<TEntity>(Expression<Func<TEntity, object[]>> expression) where TEntity : class
     {
         if (expression == null)
@@ -588,11 +483,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _columns.RemoveColumns(_resolver.GetColumns(expression, false), typeof(TEntity));
     }
 
-    /// <summary>
-    /// 移除列名
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void RemoveSelect<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
     {
         if (expression == null)
@@ -618,10 +509,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
         _projectionCountKnown = true;
     }
 
-    /// <summary>
-    /// 输出Sql。
-    /// </summary>
-    /// <returns>当前 Select 子句的 SQL 文本。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();

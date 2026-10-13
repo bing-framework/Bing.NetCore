@@ -9,6 +9,9 @@ namespace Bing.Dapper.Tests.Builders;
 /// </summary>
 public class OracleDialectTest
 {
+    /// <summary>
+    /// Oracle 方言实例。
+    /// </summary>
     private readonly IDialect _dialect = OracleDialect.Instance;
 
     // ═══════════════════════════════════════════════════════════

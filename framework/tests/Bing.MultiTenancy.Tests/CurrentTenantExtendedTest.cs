@@ -10,6 +10,7 @@ public class CurrentTenantExtendedTest
     /// <summary>
     /// 创建独立的 ICurrentTenant 实例（不依赖 DI 容器）
     /// </summary>
+    /// <returns>独立的当前租户上下文实例。</returns>
     private static ICurrentTenant CreateCurrentTenant() =>
         new CurrentTenant(new AsyncLocalCurrentTenantAccessor());
 

@@ -13,26 +13,13 @@ public class NullLog<TCategoryName> : ILog<TCategoryName>
     /// </summary>
     public static readonly ILog<TCategoryName> Instance = new NullLog<TCategoryName>();
 
-    /// <summary>
-    /// 设置日志事件标识
-    /// </summary>
-    /// <param name="eventId">日志事件标识</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog EventId(EventId eventId) => this;
 
-    /// <summary>
-    /// 设置异常
-    /// </summary>
-    /// <param name="exception">异常</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Exception(Exception exception) => this;
 
-    /// <summary>
-    /// 设置自定义扩展属性
-    /// </summary>
-    /// <param name="propertyName">属性名</param>
-    /// <param name="propertyValue">属性值</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Property(string propertyName, string propertyValue) => this;
 
     /// <summary>
@@ -43,11 +30,7 @@ public class NullLog<TCategoryName> : ILog<TCategoryName>
     /// <returns>当前空日志操作实例。</returns>
     public ILog ExtraProperty(string propertyName, object propertyValue) => this;
 
-    /// <summary>
-    /// 设置日志事件描述符
-    /// </summary>
-    /// <param name="action">操作</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Set(Action<LogEventDescriptor> action) => this;
 
     /// <summary>
@@ -57,70 +40,34 @@ public class NullLog<TCategoryName> : ILog<TCategoryName>
     /// <returns>当前空日志操作实例。</returns>
     public ILog Tags(params string[] tags) => this;
 
-    /// <summary>
-    /// 设置日志状态对象
-    /// </summary>
-    /// <param name="state">状态对象</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog State(object state) => this;
 
-    /// <summary>
-    /// 设置日志消息
-    /// </summary>
-    /// <param name="message">日志消息</param>
-    /// <param name="args">日志消息参数</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Message(string message, params object[] args) => this;
 
-    /// <summary>
-    /// 是否启用
-    /// </summary>
-    /// <param name="logLevel">日志级别</param>
-    /// <returns>true=启用；false=禁用</returns>
+    /// <inheritdoc />
     public bool IsEnabled(LogLevel logLevel) => false;
 
-    /// <summary>
-    /// 开启日志范围
-    /// </summary>
-    /// <typeparam name="TState">日志状态类型</typeparam>
-    /// <param name="state">日志状态</param>
-    /// <returns>不执行任何操作的日志范围释放句柄。</returns>
+    /// <inheritdoc />
     public IDisposable BeginScope<TState>(TState state) => new DisposeAction(() => { });
 
-    /// <summary>
-    /// 写跟踪日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogTrace() => this;
 
-    /// <summary>
-    /// 写调试日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogDebug() => this;
 
-    /// <summary>
-    /// 写信息日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogInformation() => this;
 
-    /// <summary>
-    /// 写警告日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogWarning() => this;
 
-    /// <summary>
-    /// 写错误日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogError() => this;
 
-    /// <summary>
-    /// 写致命日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogCritical() => this;
 }
 
@@ -134,26 +81,13 @@ public class NullLog : ILog
     /// </summary>
     public static readonly ILog Instance = new NullLog();
 
-    /// <summary>
-    /// 设置日志事件标识
-    /// </summary>
-    /// <param name="eventId">日志事件标识</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog EventId(EventId eventId) => this;
 
-    /// <summary>
-    /// 设置异常
-    /// </summary>
-    /// <param name="exception">异常</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Exception(Exception exception) => this;
 
-    /// <summary>
-    /// 设置自定义扩展属性
-    /// </summary>
-    /// <param name="propertyName">属性名</param>
-    /// <param name="propertyValue">属性值</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Property(string propertyName, string propertyValue) => this;
 
     /// <summary>
@@ -164,11 +98,7 @@ public class NullLog : ILog
     /// <returns>当前空日志操作实例。</returns>
     public ILog ExtraProperty(string propertyName, object propertyValue) => this;
 
-    /// <summary>
-    /// 设置日志事件描述符
-    /// </summary>
-    /// <param name="action">操作</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Set(Action<LogEventDescriptor> action) => this;
 
     /// <summary>
@@ -178,69 +108,33 @@ public class NullLog : ILog
     /// <returns>当前空日志操作实例。</returns>
     public ILog Tags(params string[] tags) => this;
 
-    /// <summary>
-    /// 设置日志状态对象
-    /// </summary>
-    /// <param name="state">状态对象</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog State(object state) => this;
 
-    /// <summary>
-    /// 设置日志消息
-    /// </summary>
-    /// <param name="message">日志消息</param>
-    /// <param name="args">日志消息参数</param>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Message(string message, params object[] args) => this;
 
-    /// <summary>
-    /// 是否启用
-    /// </summary>
-    /// <param name="logLevel">日志级别</param>
-    /// <returns>true=启用；false=禁用</returns>
+    /// <inheritdoc />
     public bool IsEnabled(LogLevel logLevel) => false;
 
-    /// <summary>
-    /// 开启日志范围
-    /// </summary>
-    /// <typeparam name="TState">日志状态类型</typeparam>
-    /// <param name="state">日志状态</param>
-    /// <returns>不执行任何操作的日志范围释放句柄。</returns>
+    /// <inheritdoc />
     public IDisposable BeginScope<TState>(TState state) => new DisposeAction(() => { });
 
-    /// <summary>
-    /// 写跟踪日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogTrace() => this;
 
-    /// <summary>
-    /// 写调试日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogDebug() => this;
 
-    /// <summary>
-    /// 写信息日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogInformation() => this;
 
-    /// <summary>
-    /// 写警告日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogWarning() => this;
 
-    /// <summary>
-    /// 写错误日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogError() => this;
 
-    /// <summary>
-    /// 写致命日志
-    /// </summary>
-    /// <returns>当前空日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog LogCritical() => this;
 }

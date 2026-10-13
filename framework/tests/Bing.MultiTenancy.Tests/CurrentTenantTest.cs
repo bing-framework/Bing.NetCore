@@ -27,7 +27,7 @@ public class CurrentTenantTest
     private readonly Guid _tenantBId = Guid.NewGuid();
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="CurrentTenantTest"/> 类型的实例。
     /// </summary>
     public CurrentTenantTest()
     {

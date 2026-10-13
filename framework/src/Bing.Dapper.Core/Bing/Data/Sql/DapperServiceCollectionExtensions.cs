@@ -266,7 +266,7 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 从配置注册 SQL 数据源。
+    /// 注册 SQL 数据源。
     /// </summary>
     /// <param name="services">服务集合。</param>
     /// <param name="configuration">配置。</param>
@@ -330,7 +330,7 @@ public static class DapperCoreServiceCollectionExtensions
         string.IsNullOrWhiteSpace(value) ? null : value;
 
     /// <summary>
-    /// 注册默认实体模型元数据提供器。
+    /// 注册实体模型元数据提供器。
     /// </summary>
     /// <typeparam name="TEntityMetadata">实体元数据提供器实现类型。</typeparam>
     /// <param name="services">要注册服务的服务集合。</param>
@@ -342,7 +342,7 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 将实体模型元数据提供器注册到指定服务契约。
+    /// 注册实体模型元数据提供器。
     /// </summary>
     /// <typeparam name="TInterface">元数据提供器服务契约类型。</typeparam>
     /// <typeparam name="TImplementation">元数据提供器实现类型。</typeparam>
@@ -437,7 +437,7 @@ public static class DapperCoreServiceCollectionExtensions
         private readonly Action<SqlMetadataOptions> _setupAction;
 
         /// <summary>
-        /// 初始化一个<see cref="DelegateSqlMetadataOptionsConfigure"/>类型的实例。
+        /// 初始化一个 <see cref="DelegateSqlMetadataOptionsConfigure"/> 类型的实例。
         /// </summary>
         /// <param name="setupAction">配置操作。</param>
         public DelegateSqlMetadataOptionsConfigure(Action<SqlMetadataOptions> setupAction) =>

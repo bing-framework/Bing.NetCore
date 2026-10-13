@@ -9,7 +9,7 @@ namespace Bing.Tests.Samples;
 public class Sample3
 {
     /// <summary>
-    /// string值
+    /// 获取或设置string值
     /// </summary>
     public string StringValue { get; set; }
 }
@@ -20,7 +20,7 @@ public class Sample3
 public class Sample3Copy
 {
     /// <summary>
-    /// string值
+    /// 获取或设置string值
     /// </summary>
     public string StringValue { get; set; }
 }

@@ -7,20 +7,20 @@ using Bing.Domain.Entities;
 namespace Bing.Tests.Models;
 
 /// <summary>
-/// 产品
+/// 表示用于数据访问测试的产品实体。
 /// </summary>
 [Description("产品")]
 public class Product : AggregateRoot<Product>, ISoftDelete, IAuditedObject//, IExtraProperties
 {
     /// <summary>
-    /// 初始化产品
+    /// 初始化一个 <see cref="Product"/> 类型的实例。
     /// </summary>
     public Product() : this(Guid.Empty)
     {
     }
 
     /// <summary>
-    /// 初始化产品
+    /// 初始化一个 <see cref="Product"/> 类型的实例。
     /// </summary>
     /// <param name="id">产品标识</param>
     public Product(Guid id) : base(id)
@@ -31,70 +31,63 @@ public class Product : AggregateRoot<Product>, ISoftDelete, IAuditedObject//, IE
     }
 
     /// <summary>
-    /// 产品编码
-    ///</summary>
+    /// 获取或设置产品编码。
+    /// </summary>
     [Description("产品编码")]
     [MaxLength(50)]
     public string Code { get; set; }
     /// <summary>
-    /// 产品名称
-    ///</summary>
+    /// 获取或设置产品名称。
+    /// </summary>
     [Description("产品名称")]
     [MaxLength(500)]
     public string Name { get; set; }
     /// <summary>
-    /// 价格
-    ///</summary>
+    /// 获取或设置产品价格。
+    /// </summary>
     [Description("价格")]
     public decimal Price { get; set; }
     /// <summary>
-    /// 价格
-    ///</summary>
+    /// 获取或设置以 <see langword="int"/> 表示的产品价格。
+    /// </summary>
     [Description("价格")]
     public int IntPrice { get; set; }
     /// <summary>
-    /// 价格
-    ///</summary>
+    /// 获取或设置以 <see langword="long"/> 表示的产品价格。
+    /// </summary>
     [Description("价格")]
     public long LongPrice { get; set; }
     /// <summary>
-    /// 价格
-    ///</summary>
+    /// 获取或设置以 <see langword="float"/> 表示的产品价格。
+    /// </summary>
     [Description("价格")]
     public float FloatPrice { get; set; }
     /// <summary>
-    /// 描述
-    ///</summary>
+    /// 获取或设置产品描述。
+    /// </summary>
     [Description("描述")]
     public string Description { get; set; }
     /// <summary>
-    /// 启用
-    ///</summary>
+    /// 获取或设置产品是否启用。
+    /// </summary>
     [Description("启用")]
     public bool Enabled { get; set; }
-    /// <summary>
-    /// 创建时间
-    ///</summary>
+    /// <inheritdoc />
     [Description("创建时间")]
     public DateTime? CreationTime { get; set; }
-    /// <summary>
-    /// 创建人
-    ///</summary>
+    /// <inheritdoc />
     [Description("创建人")]
     public Guid? CreatorId { get; set; }
-    /// <summary>
-    /// 最后修改时间
-    ///</summary>
+    /// <inheritdoc />
     [Description("最后修改时间")]
     public DateTime? LastModificationTime { get; set; }
-    /// <summary>
-    /// 最后修改人
-    ///</summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取或设置产品最后修改者标识。
+    /// </remarks>
     [Description("最后修改人")]
     public Guid? LastModifierId { get; set; }
-    /// <summary>
-    /// 是否删除
-    ///</summary>
+    /// <inheritdoc />
     [Description("是否删除")]
     public bool IsDeleted { get; set; }
 
@@ -157,9 +150,7 @@ public class Product : AggregateRoot<Product>, ISoftDelete, IAuditedObject//, IE
     //    set => _property5.SetProperty( ExtraProperties, value );
     //}
 
-    /// <summary>
-    /// 添加变更列表
-    /// </summary>
+    /// <inheritdoc />
     protected override void AddChanges(Product other)
     {
         AddChange(t => t.Code, other.Code);

@@ -25,12 +25,12 @@ public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation, ISqlQuery
     ISqlProvider Provider { get; }
 
     /// <summary>
-    /// 当前 SQL 操作类型。
+    /// 获取当前 SQL 操作类型。
     /// </summary>
     SqlOperationKind OperationKind { get; }
 
     /// <summary>
-    /// 分页参数
+    /// 获取分页参数
     /// </summary>
     IPager Pager { get; }
 
@@ -41,13 +41,13 @@ public interface ISqlBuilder : ICondition, ISqlContent, ISqlOperation, ISqlQuery
     ISqlBuilder Clone();
 
     /// <summary>
-    /// 生成调试Sql语句，Sql语句中的参数被替换为参数值
+    /// 生成替换了参数值的调试 SQL。
     /// </summary>
     /// <returns>将参数替换为参数值后的调试 SQL。</returns>
     string ToDebugSql();
 
     /// <summary>
-    /// 根据已生成的Sql语句生成调试Sql语句，Sql语句中的参数被替换为参数值
+    /// 生成替换了参数值的调试 SQL。
     /// </summary>
     /// <param name="sql">已生成的Sql语句</param>
     /// <returns>将参数替换为参数值后的调试 SQL。</returns>

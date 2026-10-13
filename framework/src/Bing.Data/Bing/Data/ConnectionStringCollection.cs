@@ -1,18 +1,18 @@
 ﻿namespace Bing.Data;
 
 /// <summary>
-/// 连接字符串集合
+/// 按名称存储连接字符串并提供默认连接字符串入口。
 /// </summary>
 [Serializable]
 public class ConnectionStringCollection : Dictionary<string, string>
 {
     /// <summary>
-    /// 默认连接字符串名称，值：Default
+    /// 连接字符串集合中默认项的名称，值为 <c>Default</c>。
     /// </summary>
     public const string DefaultConnectionStringName = "Default";
 
     /// <summary>
-    /// 默认连接字符串
+    /// 获取或设置默认连接字符串。
     /// </summary>
     public string Default
     {

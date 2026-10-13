@@ -8,7 +8,9 @@
 /// </remarks>
 public partial interface ISqlQuery : IDisposable, IAsyncDisposable
 {
-    /// <summary>创建结果类型由终结方法决定的独立 Fluent SQL 查询描述。</summary>
+    /// <summary>
+    /// 创建结果类型由终结方法决定的独立 Fluent SQL 查询描述。
+    /// </summary>
     /// <returns>持有独立 SQL Builder 的非泛型查询描述。</returns>
     SqlFluentQuery Query();
 
@@ -27,13 +29,17 @@ public partial interface ISqlQuery : IDisposable, IAsyncDisposable
     /// <returns>保留 SQL 文本和插值参数的查询描述。</returns>
     SqlTextQuery SqlInterpolated(FormattableString sql);
 
-    /// <summary>创建结果类型由终结方法决定的存储过程查询描述。</summary>
+    /// <summary>
+    /// 创建结果类型由终结方法决定的存储过程查询描述。
+    /// </summary>
     /// <param name="procedure">存储过程名称。</param>
     /// <param name="parameters">过程输入和输出参数。</param>
     /// <returns>结果类型由 Execute* 终结方法选择的过程描述。</returns>
     SqlProcedureQuery Procedure(string procedure, object parameters = null);
 
-    /// <summary>创建使用实体映射初始化的独立结构化 SQL 查询描述。</summary>
+    /// <summary>
+    /// 创建使用实体映射初始化的独立结构化 SQL 查询描述。
+    /// </summary>
     /// <typeparam name="TEntity">查询来源实体类型。</typeparam>
     /// <param name="alias">来源别名。</param>
     /// <param name="schema">来源架构。</param>

@@ -11,7 +11,7 @@ public sealed class EntityMappingMetadata
     public Type EntityType { get; init; }
 
     /// <summary>
-    /// 解析映射时使用的完整实体模型元数据。
+    /// 获取或初始化解析映射时使用的完整实体模型元数据。
     /// </summary>
     public EntityModelMetadata Model { get; init; }
 

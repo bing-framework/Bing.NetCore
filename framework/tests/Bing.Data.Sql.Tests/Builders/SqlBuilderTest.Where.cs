@@ -623,6 +623,10 @@ public partial class SqlBuilderTest
         Assert.Equal(guid, _builder.GetParam("@_p_0"));
     }
 
+    /// <summary>
+    /// 构建包含指定标识值过滤条件的查询。
+    /// </summary>
+    /// <param name="id">查询使用的标识值。</param>
     private void GetSql(Guid id)
     {
         _builder.Select<Sample>(x => new object[] { x.GuidValue }, true).From<Sample>("s")

@@ -21,17 +21,17 @@ namespace Bing.AspNetCore.Mvc.DynamicApi;
 public class BingDynamicApiIntegrationTest : BingAspNetCoreTestBase
 {
     /// <summary>
-    /// 获取 MVC 控制器发现器使用的应用部件管理器。
+    /// 管理动态 API 集成测试使用的 MVC 应用部件。
     /// </summary>
     private readonly ApplicationPartManager _partManager;
 
     /// <summary>
-    /// 获取 MVC 生成的操作描述集合。
+    /// 提供动态 API 集成测试的 MVC 操作描述集合。
     /// </summary>
     private readonly IActionDescriptorCollectionProvider _actionDescriptorProvider;
 
     /// <summary>
-    /// 初始化 BingDynamicApiIntegrationTest 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiIntegrationTest"/> 类型的实例。
     /// </summary>
     /// <param name="client">用于发送集成测试请求的客户端。</param>
     /// <param name="partManager">MVC 应用部件管理器。</param>
@@ -425,12 +425,12 @@ public class BingDynamicApiIntegrationTest : BingAspNetCoreTestBase
     private sealed class ExplicitCollisionControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
     {
         /// <summary>
-        /// 获取需要加入控制器发现结果的类型。
+        /// 加入 MVC 控制器发现结果的测试控制器类型。
         /// </summary>
         private readonly Type _controllerType;
 
         /// <summary>
-        /// 初始化 ExplicitCollisionControllerFeatureProvider 类的新实例。
+        /// 初始化一个 <see cref="ExplicitCollisionControllerFeatureProvider"/> 类型的实例。
         /// </summary>
         /// <param name="controllerType">需要加入发现结果的控制器类型。</param>
         public ExplicitCollisionControllerFeatureProvider(Type controllerType) => _controllerType = controllerType;

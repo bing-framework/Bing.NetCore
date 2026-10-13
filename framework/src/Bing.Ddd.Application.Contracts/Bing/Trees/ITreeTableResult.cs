@@ -4,6 +4,7 @@ namespace Bing.Trees;
 /// <summary>
 /// 树型表格结果
 /// </summary>
+/// <typeparam name="TNode">树形表格的节点类型。</typeparam>
 public interface ITreeTableResult<TNode> where TNode : TreeDto<TNode>
 {
     /// <summary>

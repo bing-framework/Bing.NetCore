@@ -22,7 +22,7 @@ public class ExceptionNotifier : IExceptionNotifier, ITransientDependency
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 使用服务作用域工厂初始化 <see cref="ExceptionNotifier"/> 的实例。
+    /// 初始化一个 <see cref="ExceptionNotifier"/> 类型的实例。
     /// </summary>
     /// <param name="serviceScopeFactory">用于解析异常订阅器的服务作用域工厂。</param>
     public ExceptionNotifier(IServiceScopeFactory serviceScopeFactory)

@@ -9,13 +9,16 @@ namespace Bing.Data.Sql.Builders;
 public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
 {
     /// <summary>
-    /// 指示当前投影是否启用了去重。
+    /// 获取指示当前投影是否启用了去重。
     /// </summary>
     bool IsDistinct { get; }
 
     /// <summary>
-    /// 可确定的查询输出列数量；通配符或无法可靠分析的原始投影返回 null。
+    /// 获取可确定的查询输出列数量。
     /// </summary>
+    /// <remarks>
+    /// 通配符或无法可靠分析的原始投影返回 null。
+    /// </remarks>
     int? ProjectionCount { get; }
 
     /// <summary>
@@ -49,7 +52,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
         where TEntity : class;
 
     /// <summary>
-    /// 添加结构化聚合列。
+    /// 添加聚合列。
     /// </summary>
     /// <param name="function">聚合函数。</param>
     /// <param name="column">单个结构化列名，不支持表达式、函数或多个列。</param>
@@ -58,7 +61,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Aggregate(SqlAggregateFunction function, string column, string columnAlias = null, bool distinct = false);
 
     /// <summary>
-    /// 添加实体表达式聚合列。
+    /// 添加聚合列。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="function">聚合函数。</param>
@@ -97,7 +100,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Sum(string column, string columnAlias = null, bool distinct = false);
 
     /// <summary>
-    /// 求和
+    /// 求和。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -115,7 +118,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Avg(string column, string columnAlias = null, bool distinct = false);
 
     /// <summary>
-    /// 求平均值
+    /// 求平均值。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -133,7 +136,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Max(string column, string columnAlias = null, bool distinct = false);
 
     /// <summary>
-    /// 求最大值
+    /// 求最大值。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -151,7 +154,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Min(string column, string columnAlias = null, bool distinct = false);
 
     /// <summary>
-    /// 求最小值
+    /// 求最小值。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -161,21 +164,21 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
         where TEntity : class;
 
     /// <summary>
-    /// 设置列名
+    /// 设置查询投影。
     /// </summary>
     /// <param name="columns">列名</param>
     /// <param name="tableAlias">表别名</param>
     void Select(string columns, string tableAlias = null);
 
     /// <summary>
-    /// 设置列名
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="propertyAsAlias">是否将属性名映射为列别名</param>
     void Select<TEntity>(bool propertyAsAlias = false);
 
     /// <summary>
-    /// 设置列名
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -184,7 +187,7 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
         where TEntity : class;
 
     /// <summary>
-    /// 设置列名
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="expression">列名表达式</param>
@@ -192,14 +195,14 @@ public interface ISelectClause : ISqlClause, ISqlClauseCloneable<ISelectClause>
     void Select<TEntity>(Expression<Func<TEntity, object>> expression, string columnAlias = null) where TEntity : class;
 
     /// <summary>
-    /// 设置子查询列
+    /// 设置查询投影。
     /// </summary>
     /// <param name="builder">Sql生成器</param>
     /// <param name="columnAlias">列别名</param>
     void Select(ISqlBuilder builder, string columnAlias);
 
     /// <summary>
-    /// 设置子查询列
+    /// 设置查询投影。
     /// </summary>
     /// <param name="action">子查询操作</param>
     /// <param name="columnAlias">列别名</param>

@@ -7,8 +7,6 @@ namespace Bing.MultiTenancy;
 /// </summary>
 public class NullTenantResolveResultAccessor : ITenantResolveResultAccessor, ISingletonDependency
 {
-    /// <summary>
-    /// 租户解析结果
-    /// </summary>
+    /// <inheritdoc />
     public TenantResolveResult? Result { get => null; set { } }
 }

@@ -5,10 +5,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
-/// <see cref="SqlServerDialect"/> 单元测试
+/// <see cref="SqlServerDialect"/> 单元测试。
 /// </summary>
 public class SqlServerDialectTest
 {
+    /// <summary>
+    /// SQL Server 方言。
+    /// </summary>
     private readonly IDialect _dialect = SqlServerDialect.Instance;
 
     // ═══════════════════════════════════════════════════════════

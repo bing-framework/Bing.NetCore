@@ -6,12 +6,12 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface IUpdateClauseAccessor : IMutationWhereClauseAccessor, IUpdateFromClauseAccessor
 {
     /// <summary>
-    /// Update 目标表子句。
+    /// 获取Update 目标表子句。
     /// </summary>
     IUpdateClause UpdateClause { get; }
 
     /// <summary>
-    /// Update Set 子句。
+    /// 获取Update Set 子句。
     /// </summary>
     ISetClause SetClause { get; }
 }

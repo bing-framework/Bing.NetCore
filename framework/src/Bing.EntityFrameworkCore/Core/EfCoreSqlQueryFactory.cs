@@ -53,7 +53,7 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     private readonly ISqlDatabaseIdentityResolver _databaseIdentityResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="EfCoreSqlQueryFactory"/>类型的实例
+    /// 初始化一个 <see cref="EfCoreSqlQueryFactory"/> 类型的实例。
     /// </summary>
     /// <param name="queryFactory">SQL 查询对象工厂</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>

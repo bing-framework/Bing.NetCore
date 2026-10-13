@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public sealed class SqlServerDialect : DialectBase
 {
     /// <summary>
-    /// 封闭构造函数
+    /// 初始化一个 <see cref="SqlServerDialect"/> 类型的实例。
     /// </summary>
     private SqlServerDialect() { }
 
     /// <summary>
-    /// Sql Server方言实例
+    /// 获取Sql Server方言实例
     /// </summary>
     public static SqlServerDialect Instance { get; } = new();
 }

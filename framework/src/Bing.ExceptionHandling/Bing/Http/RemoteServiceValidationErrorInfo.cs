@@ -17,25 +17,25 @@ public class RemoteServiceValidationErrorInfo
     public string[] Members{ get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="RemoteServiceValidationErrorInfo"/> 的空实例。
+    /// 初始化一个 <see cref="RemoteServiceValidationErrorInfo"/> 类型的实例。
     /// </summary>
     public RemoteServiceValidationErrorInfo(){}
 
     /// <summary>
-    /// 使用验证消息初始化 <see cref="RemoteServiceValidationErrorInfo"/> 的实例。
+    /// 初始化一个 <see cref="RemoteServiceValidationErrorInfo"/> 类型的实例。
     /// </summary>
     /// <param name="message">验证失败的说明消息。</param>
     public RemoteServiceValidationErrorInfo(string message) => Message = message;
 
     /// <summary>
-    /// 使用验证消息和无效成员列表初始化 <see cref="RemoteServiceValidationErrorInfo"/> 的实例。
+    /// 初始化一个 <see cref="RemoteServiceValidationErrorInfo"/> 类型的实例。
     /// </summary>
     /// <param name="message">验证失败的说明消息。</param>
     /// <param name="members">触发验证错误的字段或属性名称列表。</param>
     public RemoteServiceValidationErrorInfo(string message, string[] members) : this(message) => Members = members;
 
     /// <summary>
-    /// 使用验证消息和单个无效成员名称初始化 <see cref="RemoteServiceValidationErrorInfo"/> 的实例。
+    /// 初始化一个 <see cref="RemoteServiceValidationErrorInfo"/> 类型的实例。
     /// </summary>
     /// <param name="message">验证失败的说明消息。</param>
     /// <param name="member">触发验证错误的字段或属性名称。</param>

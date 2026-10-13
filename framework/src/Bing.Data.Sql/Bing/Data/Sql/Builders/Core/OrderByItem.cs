@@ -9,32 +9,32 @@ namespace Bing.Data.Sql.Builders.Core;
 public class OrderByItem
 {
     /// <summary>
-    /// 排序列
+    /// 获取排序列
     /// </summary>
     public string Order { get; }
 
     /// <summary>
-    /// 排序列，不带前缀
+    /// 获取排序列，不带前缀
     /// </summary>
     public string Column { get; }
 
     /// <summary>
-    /// 是否降序
+    /// 获取是否降序
     /// </summary>
     public bool Desc { get; }
 
     /// <summary>
-    /// 实体类型
+    /// 获取实体类型
     /// </summary>
     public Type Type { get; }
 
     /// <summary>
-    /// 是否使用原始值
+    /// 获取是否使用原始值
     /// </summary>
     public bool Raw { get; }
 
     /// <summary>
-    /// 前缀
+    /// 获取前缀
     /// </summary>
     public string Prefix { get; }
 

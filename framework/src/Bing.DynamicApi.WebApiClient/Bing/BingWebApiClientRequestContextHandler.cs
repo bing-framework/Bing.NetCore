@@ -28,7 +28,7 @@ internal sealed class BingWebApiClientRequestContextHandler : DelegatingHandler
     private readonly string? _languageHeaderName;
 
     /// <summary>
-    /// 初始化 BingWebApiClientRequestContextHandler 类的新实例。
+    /// 初始化一个 <see cref="BingWebApiClientRequestContextHandler"/> 类型的实例。
     /// </summary>
     /// <param name="contextAccessor">当前请求上下文访问器。</param>
     /// <param name="tenantHeaderName">租户头名称；null 表示禁用。</param>

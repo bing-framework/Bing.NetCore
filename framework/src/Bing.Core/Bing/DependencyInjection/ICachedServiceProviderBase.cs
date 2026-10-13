@@ -6,7 +6,7 @@
 public interface ICachedServiceProviderBase// : IServiceProvider
 {
     /// <summary>
-    /// 获取指定服务；未解析到时返回默认值。
+    /// 获取服务。
     /// </summary>
     /// <typeparam name="T">要解析的服务类型。</typeparam>
     /// <param name="defaultValue">服务未注册或解析结果为 <c>null</c> 时返回的默认值。</param>
@@ -14,7 +14,7 @@ public interface ICachedServiceProviderBase// : IServiceProvider
     T GetService<T>(T defaultValue);
 
     /// <summary>
-    /// 获取指定类型的服务；未解析到时返回默认值。
+    /// 获取服务。
     /// </summary>
     /// <param name="serviceType">要解析的服务类型。</param>
     /// <param name="defaultValue">服务未注册或解析结果为 <c>null</c> 时返回的默认值。</param>
@@ -22,7 +22,7 @@ public interface ICachedServiceProviderBase// : IServiceProvider
     object GetService(Type serviceType, object defaultValue);
 
     /// <summary>
-    /// 获取指定服务；首次按该服务类型解析时由工厂创建并缓存。
+    /// 获取服务。
     /// </summary>
     /// <typeparam name="T">要解析的服务类型。</typeparam>
     /// <param name="factory">首次解析时用于创建服务实例的工厂。</param>
@@ -30,7 +30,7 @@ public interface ICachedServiceProviderBase// : IServiceProvider
     T GetService<T>(Func<IServiceProvider, object> factory);
 
     /// <summary>
-    /// 获取指定类型的服务；首次按该服务类型解析时由工厂创建并缓存。
+    /// 获取服务。
     /// </summary>
     /// <param name="serviceType">要解析的服务类型。</param>
     /// <param name="factory">首次解析时用于创建服务实例的工厂。</param>

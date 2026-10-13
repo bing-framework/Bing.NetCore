@@ -6,7 +6,7 @@
 public class BingAuthorizationExceptionHandlerOptions
 {
     /// <summary>
-    /// 认证方案
+    /// 获取或设置认证方案
     /// </summary>
     public string AuthenticationScheme { get; set; }
 }

@@ -716,12 +716,12 @@ public class BingDynamicApiClientTest
     private sealed class StubHandler : HttpMessageHandler
     {
         /// <summary>
-        /// 获取用于生成 HTTP 响应的委托。
+        /// 根据请求和取消令牌创建测试响应的委托。
         /// </summary>
         private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _responseFactory;
 
         /// <summary>
-        /// 初始化 StubHandler 类的新实例。
+        /// 初始化一个 <see cref="StubHandler"/> 类型的实例。
         /// </summary>
         /// <param name="responseFactory">接收请求和取消令牌并生成响应的委托。</param>
         public StubHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> responseFactory)
@@ -730,12 +730,12 @@ public class BingDynamicApiClientTest
         }
 
         /// <summary>
-        /// 获取动态 API 描述请求的累计次数。
+        /// 获取或设置动态 API 描述请求的累计次数。
         /// </summary>
         public int DefinitionRequestCount { get; private set; }
 
         /// <summary>
-        /// 获取动态 API 业务请求的累计次数。
+        /// 获取或设置动态 API 业务请求的累计次数。
         /// </summary>
         public int ApiRequestCount { get; private set; }
 
@@ -772,7 +772,7 @@ public class BingDynamicApiClientTest
     private sealed class TestRequestHandler : IBingDynamicApiRequestHandler
     {
         /// <summary>
-        /// 获取请求处理器被调用的次数。
+        /// 获取或设置请求处理器被调用的次数。
         /// </summary>
         public int CallCount { get; private set; }
 
@@ -791,7 +791,7 @@ public class BingDynamicApiClientTest
     private sealed class TestJsonSerializer : IBingDynamicApiJsonSerializer
     {
         /// <summary>
-        /// 获取反序列化操作的累计次数。
+        /// 获取或设置反序列化操作的累计次数。
         /// </summary>
         public int DeserializeCount { get; private set; }
 
@@ -816,7 +816,7 @@ public class BingDynamicApiClientTest
     private sealed class TestParameterConverter : IBingDynamicApiParameterConverter
     {
         /// <summary>
-        /// 获取参数转换操作的累计次数。
+        /// 获取或设置参数转换操作的累计次数。
         /// </summary>
         public int CallCount { get; private set; }
 
@@ -836,12 +836,12 @@ public class BingDynamicApiClientTest
     private sealed class TestRetryPolicy : IBingDynamicApiRetryPolicy
     {
         /// <summary>
-        /// 获取重试判定操作的累计次数。
+        /// 获取或设置重试判定操作的累计次数。
         /// </summary>
         public int ShouldRetryCount { get; private set; }
 
         /// <summary>
-        /// 获取重试延迟计算操作的累计次数。
+        /// 获取或设置重试延迟计算操作的累计次数。
         /// </summary>
         public int GetDelayCount { get; private set; }
 

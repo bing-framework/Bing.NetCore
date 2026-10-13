@@ -21,7 +21,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     internal SqlFluentQuery(ISqlQueryPlanExecutor executor, ISqlBuilder builder) =>
         _query = new SqlQuery(executor, builder);
 
-    /// <summary>设置 Dapper 多映射使用的分段列名称。</summary>
+    /// <summary>
+    /// 设置 Dapper 多映射使用的分段列名称。
+    /// </summary>
     /// <param name="splitOn">分段列名称，多个分段列使用逗号分隔。</param>
     /// <returns>当前查询描述。</returns>
     public SqlFluentQuery SplitOn(string splitOn)
@@ -30,22 +32,30 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         return this;
     }
 
-    /// <summary>生成当前查询的 SQL 文本。</summary>
+    /// <summary>
+    /// 获取当前查询的 SQL 文本。
+    /// </summary>
     /// <returns>当前查询的 SQL 文本。</returns>
     public string ToSql() => _query.ToSql();
 
-    /// <summary>同步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <returns>查询结果列表。</returns>
     public List<TResult> ToList<TResult>() => ToList<TResult>(null);
 
-    /// <summary>同步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果列表。</returns>
     public List<TResult> ToList<TResult>(int? timeout) => _query.ToList<TResult>(timeout);
 
-    /// <summary>同步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -54,7 +64,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map) =>
         ToList(map, null);
 
-    /// <summary>同步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -64,7 +76,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
         int? timeout) => _query.ToList(map, timeout);
 
-    /// <summary>同步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -74,7 +88,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TResult>(Func<TFirst, TSecond, TThird, TResult> map) =>
         ToList(map, null);
 
-    /// <summary>同步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -85,7 +101,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TResult>(Func<TFirst, TSecond, TThird, TResult> map,
         int? timeout) => _query.ToList(map, timeout);
 
-    /// <summary>同步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -96,7 +114,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TResult> map) => ToList(map, null);
 
-    /// <summary>同步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -108,7 +128,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => _query.ToList(map, timeout);
 
-    /// <summary>同步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -120,7 +142,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) => ToList(map, null);
 
-    /// <summary>同步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -134,7 +158,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
 
-    /// <summary>同步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -147,7 +173,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) => ToList(map, null);
 
-    /// <summary>同步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -162,7 +190,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
 
-    /// <summary>同步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -176,7 +206,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public List<TResult> ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) => ToList(map, null);
 
-    /// <summary>同步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 同步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -192,37 +224,49 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) =>
         _query.ToList(map, timeout);
 
-    /// <summary>同步执行并返回至多一行结果。</summary>
+    /// <summary>
+    /// 同步执行并返回至多一行结果。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询到的实体；没有结果时返回类型默认值。</returns>
     public TResult ToEntity<TResult>(int? timeout = null) => _query.ToEntity<TResult>(timeout);
 
-    /// <summary>同步执行并返回第一行。</summary>
+    /// <summary>
+    /// 同步执行并返回第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行。</returns>
     public TResult First<TResult>(int? timeout = null) => _query.First<TResult>(timeout);
 
-    /// <summary>同步执行并返回第一行或默认值。</summary>
+    /// <summary>
+    /// 同步执行并返回第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行；没有结果时返回类型默认值。</returns>
     public TResult FirstOrDefault<TResult>(int? timeout = null) => _query.FirstOrDefault<TResult>(timeout);
 
-    /// <summary>同步执行并返回唯一一行。</summary>
+    /// <summary>
+    /// 同步执行并返回唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询到的唯一结果。</returns>
     public TResult Single<TResult>(int? timeout = null) => _query.Single<TResult>(timeout);
 
-    /// <summary>同步执行并返回标量值。</summary>
+    /// <summary>
+    /// 同步执行并返回标量值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询得到的标量值。</returns>
     public TResult Scalar<TResult>(int? timeout = null) => _query.Scalar<TResult>(timeout);
 
-    /// <summary>同步执行并返回分页结果。</summary>
+    /// <summary>
+    /// 同步执行并返回分页结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="pager">分页参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -230,31 +274,41 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public PagerList<TResult> ToPage<TResult>(IPager pager = null, int? timeout = null) =>
         _query.ToPage<TResult>(pager, timeout);
 
-    /// <summary>同步流式读取结果。</summary>
+    /// <summary>
+    /// 按需枚举查询结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>按需读取查询结果的可枚举序列。</returns>
     public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null) => _query.AsEnumerable<TResult>(timeout);
 
-    /// <summary>异步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <returns>包含查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TResult>() => ToListAsync<TResult>(null, default);
 
-    /// <summary>异步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TResult>(int? timeout) => ToListAsync<TResult>(timeout, default);
 
-    /// <summary>异步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果列表的异步任务。</returns>
     public Task<List<TResult>> ToListAsync<TResult>(CancellationToken cancellationToken) =>
         ToListAsync<TResult>(null, cancellationToken);
 
-    /// <summary>异步执行并返回全部结果。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -262,7 +316,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TResult>(int? timeout, CancellationToken cancellationToken) =>
         _query.ToListAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -271,7 +327,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map) =>
         ToListAsync(map, null, default);
 
-    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -281,7 +339,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
         int? timeout) => ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -291,7 +351,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
         CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行两段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TResult">映射后的结果类型。</typeparam>
@@ -302,7 +364,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
         int? timeout, CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -312,7 +376,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
         Func<TFirst, TSecond, TThird, TResult> map) => ToListAsync(map, null, default);
 
-    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -323,7 +389,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout) => ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -335,7 +403,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TResult> map, CancellationToken cancellationToken) =>
         ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行三段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -348,7 +418,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout, CancellationToken cancellationToken) =>
         _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -359,7 +431,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TResult> map) => ToListAsync(map, null, default);
 
-    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -371,7 +445,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -384,7 +460,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, CancellationToken cancellationToken) =>
         ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行四段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -398,7 +476,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout,
         CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -410,7 +490,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) => ToListAsync(map, null, default);
 
-    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -424,7 +506,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) =>
         ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -438,7 +522,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map,
         CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行五段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -453,7 +539,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout,
         CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -466,7 +554,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) => ToListAsync(map, null, default);
 
-    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -481,7 +571,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
         ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -496,7 +588,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map,
         CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行六段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -512,7 +606,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout,
         CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -527,7 +623,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) =>
         ToListAsync(map, null, default);
 
-    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -543,7 +641,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) =>
         ToListAsync(map, timeout, default);
 
-    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -559,7 +659,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
         CancellationToken cancellationToken) => ToListAsync(map, null, cancellationToken);
 
-    /// <summary>异步执行七段 Dapper 多映射查询。</summary>
+    /// <summary>
+    /// 异步执行查询并返回结果集。
+    /// </summary>
     /// <typeparam name="TFirst">第一段查询结果类型。</typeparam>
     /// <typeparam name="TSecond">第二段查询结果类型。</typeparam>
     /// <typeparam name="TThird">第三段查询结果类型。</typeparam>
@@ -576,7 +678,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout,
         CancellationToken cancellationToken) => _query.ToListAsync(map, timeout, cancellationToken);
 
-    /// <summary>异步执行并返回至多一行结果。</summary>
+    /// <summary>
+    /// 异步执行并返回至多一行结果。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -584,7 +688,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.ToEntityAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行并返回第一行。</summary>
+    /// <summary>
+    /// 异步执行并返回第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -592,7 +698,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<TResult> FirstAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.FirstAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行并返回第一行或默认值。</summary>
+    /// <summary>
+    /// 异步执行并返回第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -601,7 +709,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         CancellationToken cancellationToken = default) =>
         _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行并返回唯一一行。</summary>
+    /// <summary>
+    /// 异步执行并返回唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -609,7 +719,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<TResult> SingleAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.SingleAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行并返回标量值。</summary>
+    /// <summary>
+    /// 异步执行并返回标量值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -617,7 +729,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public Task<TResult> ScalarAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.ScalarAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行并返回分页结果。</summary>
+    /// <summary>
+    /// 异步执行并返回分页结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="pager">分页参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -627,7 +741,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
         CancellationToken cancellationToken = default) =>
         _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
 
-    /// <summary>异步流式读取结果。</summary>
+    /// <summary>
+    /// 异步流式读取结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -635,7 +751,9 @@ public sealed class SqlFluentQuery : ISqlQueryOperation, ISqlQueryBuilderAccesso
     public IAsyncEnumerable<TResult> AsAsyncEnumerable<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
 
-    /// <summary>获取当前查询专属的 Builder。</summary>
+    /// <summary>
+    /// 获取当前查询专属的 Builder。
+    /// </summary>
     /// <returns>当前查询使用的 SQL 生成器。</returns>
     internal ISqlBuilder GetBuilder() => _query.GetBuilder();
 

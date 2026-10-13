@@ -8,7 +8,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlBuilderExecutionSnapshot
 {
     /// <summary>
-    /// 初始化 Builder 执行快照。
+    /// 初始化一个 <see cref="SqlBuilderExecutionSnapshot"/> 类型的实例。
     /// </summary>
     /// <param name="sql">冻结后的 SQL 文本。</param>
     /// <param name="parameters">与 SQL 使用同一参数状态的参数快照。</param>
@@ -25,17 +25,17 @@ public sealed class SqlBuilderExecutionSnapshot
     }
 
     /// <summary>
-    /// 冻结后的 SQL 文本。
+    /// 获取冻结后的 SQL 文本。
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 与 SQL 使用同一参数状态生成的调试 SQL。
+    /// 获取与 SQL 使用同一参数状态生成的调试 SQL。
     /// </summary>
     public string DebugSql { get; }
 
     /// <summary>
-    /// 与 SQL 使用同一参数状态的不可变参数快照。
+    /// 获取与 SQL 使用同一参数状态的不可变参数快照。
     /// </summary>
     public IReadOnlyCollection<SqlParam> Parameters { get; }
 }

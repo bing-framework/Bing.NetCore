@@ -14,7 +14,7 @@ namespace Bing.TextTemplating;
 public class TemplateDefinitionManager : ITemplateDefinitionManager, ISingletonDependency
 {
     /// <summary>
-    /// 延迟创建并缓存的模板定义字典。
+    /// 获取延迟创建并缓存的模板定义字典。
     /// </summary>
     protected Lazy<IDictionary<string, TemplateDefinition>> TemplateDefinitions { get; }
 
@@ -29,7 +29,7 @@ public class TemplateDefinitionManager : ITemplateDefinitionManager, ISingletonD
     protected IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="TemplateDefinitionManager"/>类型的实例
+    /// 初始化一个 <see cref="TemplateDefinitionManager"/> 类型的实例。
     /// </summary>
     /// <param name="options">文本模板选项配置</param>
     /// <param name="serviceProvider">服务提供程序</param>

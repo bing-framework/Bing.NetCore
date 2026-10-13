@@ -9,7 +9,9 @@ namespace Bing.EntityFrameworkCore.ValueConverters;
 /// </summary>
 public class ExtraPropertiesValueConverter : ValueConverter<ExtraPropertyDictionary, string>
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 初始化一个 <see cref="ExtraPropertiesValueConverter"/> 类型的实例。
+    /// </summary>
     public ExtraPropertiesValueConverter() 
         : base(d => PropertiesToJson(d), json => JsonToProperties(json))
     {

@@ -20,22 +20,22 @@ public sealed class SqlFilterContext
     private readonly List<SqlFilterPredicate> _predicates = new();
 
     /// <summary>
-    /// 当前查询图中可参与全局过滤的结构化表来源。
+    /// 获取当前查询图中可参与全局过滤的结构化表来源。
     /// </summary>
     public IReadOnlyList<SqlFilterSource> Sources { get; }
 
     /// <summary>
-    /// 当前查询图按 SQL 连接顺序排列的 Join 拓扑。
+    /// 获取当前查询图按 SQL 连接顺序排列的 Join 拓扑。
     /// </summary>
     public IReadOnlyList<SqlFilterJoin> Joins { get; }
 
     /// <summary>
-    /// 当前 Builder 固定使用的数据库上下文。
+    /// 获取当前 Builder 固定使用的数据库上下文。
     /// </summary>
     public DatabaseContext DatabaseContext { get; }
 
     /// <summary>
-    /// 初始化过滤器贡献上下文。
+    /// 初始化一个 <see cref="SqlFilterContext"/> 类型的实例。
     /// </summary>
     /// <param name="dialect">当前 SQL 方言。</param>
     /// <param name="clause">当前查询子句访问器，仅由框架内部用于提取拓扑。</param>
@@ -66,22 +66,28 @@ public sealed class SqlFilterContext
     }
 
     /// <summary>
-    /// 当前 Builder 的 SQL 方言，仅用于从实体属性构造安全列引用。
+    /// 获取当前 Builder 的 SQL 方言。
     /// </summary>
+    /// <remarks>
+    /// 仅用于从实体属性构造安全列引用。
+    /// </remarks>
     private IDialect Dialect { get; }
 
     /// <summary>
-    /// 实体映射解析器，仅用于从实体属性构造安全列引用。
+    /// 获取实体映射解析器。
     /// </summary>
+    /// <remarks>
+    /// 仅用于从实体属性构造安全列引用。
+    /// </remarks>
     private IEntityMappingResolver EntityMappingResolver { get; }
 
     /// <summary>
-    /// 实体原始元数据提供器，映射未提供字段时作为回退。
+    /// 获取实体原始元数据提供器，映射未提供字段时作为回退。
     /// </summary>
     private IEntityModelMetadataProvider EntityModelMetadataProvider { get; }
 
     /// <summary>
-    /// 当前异步执行流的数据过滤状态。
+    /// 获取当前异步执行流的数据过滤状态。
     /// </summary>
     private IDataFilter DataFilter { get; }
 

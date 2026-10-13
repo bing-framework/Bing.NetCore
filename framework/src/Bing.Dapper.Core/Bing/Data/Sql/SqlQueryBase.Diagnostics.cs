@@ -87,7 +87,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 为 Builder 执行按需创建执行前诊断消息。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="builder">当前 SQL Builder。</param>
     /// <param name="sql">当前执行的 SQL 文本。</param>
@@ -105,7 +105,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 为原生参数执行按需创建执行前诊断消息。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="sql">当前执行的 SQL 文本。</param>
     /// <param name="parameters">调用方提供的原始参数。</param>
@@ -122,7 +122,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 为已准备命令按需创建执行前诊断消息。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="command">当前执行的准备命令。</param>
     /// <param name="connection">当前数据库连接。</param>
@@ -132,7 +132,7 @@ public abstract partial class SqlQueryBase
         => CreateExecutionDiagnostics(command, connection, null);
 
     /// <summary>
-    /// 为查询计划创建执行前诊断消息，并保留计划上下文关系。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="command">当前执行的准备命令。</param>
     /// <param name="connection">当前数据库连接。</param>
@@ -150,7 +150,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 为 Builder 查询计划创建包含计划上下文的执行前诊断消息。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="builder">当前 SQL Builder。</param>
     /// <param name="sql">当前执行的 SQL 文本。</param>
@@ -164,7 +164,7 @@ public abstract partial class SqlQueryBase
             () => GetSqlParameterDiagnostics(builder, sql)), plan);
 
     /// <summary>
-    /// 为原生参数查询计划创建包含计划上下文的执行前诊断消息。
+    /// 创建执行前诊断消息。
     /// </summary>
     /// <param name="sql">当前执行的 SQL 文本。</param>
     /// <param name="parameters">调用方提供的原始参数。</param>
@@ -239,13 +239,14 @@ public abstract partial class SqlQueryBase
     private sealed class EmptyDisposable : IDisposable
     {
         /// <summary>
-        /// 空释放对象的共享实例。
+        /// 获取空释放对象的共享实例。
         /// </summary>
         internal static EmptyDisposable Instance { get; } = new();
 
-        /// <summary>
+        /// <inheritdoc />
+        /// <remarks>
         /// 释放空对象；此方法不执行任何操作。
-        /// </summary>
+        /// </remarks>
         public void Dispose()
         {
         }
@@ -284,7 +285,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 创建参数诊断项
+    /// 创建参数诊断项。
     /// </summary>
     /// <param name="parameter">参数对象</param>
     /// <returns>参数诊断项集合</returns>
@@ -314,7 +315,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 根据字典参数创建诊断项。
+    /// 创建参数诊断项。
     /// </summary>
     /// <param name="parameters">参数字典。</param>
     /// <returns>按参数名生成的诊断项集合。</returns>

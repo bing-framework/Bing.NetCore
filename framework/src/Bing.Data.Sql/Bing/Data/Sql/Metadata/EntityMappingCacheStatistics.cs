@@ -12,7 +12,7 @@ namespace Bing.Data.Sql.Metadata;
 internal readonly struct EntityMappingCacheStatistics
 {
     /// <summary>
-    /// 初始化一个<see cref="EntityMappingCacheStatistics"/>类型的实例。
+    /// 初始化一个 <see cref="EntityMappingCacheStatistics"/> 类型的实例。
     /// </summary>
     /// <param name="cacheHitCount">首次缓存查找命中次数。</param>
     /// <param name="cacheMissCount">首次缓存查找未命中次数。</param>
@@ -59,8 +59,11 @@ internal readonly struct EntityMappingCacheStatistics
     public int EntryCount { get; }
 
     /// <summary>
-    /// 获取解析器创建时固定的缓存容量；<see langword="null"/> 表示无上限。
+    /// 获取解析器创建时固定的缓存容量。
     /// </summary>
+    /// <remarks>
+    /// <see langword="null"/> 表示无上限。
+    /// </remarks>
     public int? Capacity { get; }
 
     /// <summary>

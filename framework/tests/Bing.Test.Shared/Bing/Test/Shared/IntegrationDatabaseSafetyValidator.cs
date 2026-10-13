@@ -7,8 +7,14 @@ namespace Bing.Test.Shared;
 /// </summary>
 public static class IntegrationDatabaseSafetyValidator
 {
+    /// <summary>
+    /// 允许重置测试数据库的环境变量名称。
+    /// </summary>
     private const string AllowDatabaseResetEnvironmentVariable = "ALLOW_DATABASE_RESET_FOR_TESTS";
 
+    /// <summary>
+    /// 禁止直接操作的系统数据库名称集合。
+    /// </summary>
     private static readonly HashSet<string> SystemDatabaseNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "information_schema", "master", "model", "msdb", "mysql", "performance_schema", "postgres", "sys",

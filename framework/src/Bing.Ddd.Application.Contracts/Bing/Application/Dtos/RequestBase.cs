@@ -8,10 +8,10 @@ namespace Bing.Application.Dtos;
 /// </summary>
 public abstract class RequestBase : IRequest
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 验证当前请求对象；验证失败时抛出包含首个错误信息的警告异常。
-    /// </summary>
-    /// <returns>验证成功时返回共享的成功验证结果。</returns>
+    /// </remarks>
     public virtual IValidationResult Validate()
     {
         var result = DataAnnotationValidation.Validate(this);

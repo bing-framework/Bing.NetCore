@@ -349,12 +349,12 @@ public sealed class SqlInsertBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 年龄。
+        /// 获取或设置年龄。
         /// </summary>
         public int Age { get; set; }
     }
@@ -376,7 +376,7 @@ public sealed class SqlInsertBuilderTest
         public CountingParameterManager(IDialect dialect) => _inner = new ParameterManager(dialect);
 
         /// <summary>
-        /// 获取增强参数快照的调用次数。
+        /// 获取或设置增强参数快照的调用次数。
         /// </summary>
         public int GetSqlParamsCallCount { get; private set; }
 

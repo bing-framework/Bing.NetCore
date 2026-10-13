@@ -6,7 +6,7 @@
 public interface ISoftDelete
 {
     /// <summary>
-    /// 是否已删除
+    /// 获取或设置是否已删除
     /// </summary>
     bool IsDeleted { get; set; }
 }

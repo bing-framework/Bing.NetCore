@@ -46,7 +46,10 @@ public class RouteInformation
     public string ViewName { get; set; }
 
     /// <summary>
-    /// 获取或设置该路由是否对应部分视图，默认值为 <c>false</c>。
+    /// 获取或设置该路由是否对应部分视图。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>false</c>。
+    /// </remarks>
     public bool IsPartialView { get; set; } = false;
 }

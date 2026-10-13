@@ -14,15 +14,10 @@ namespace Bing.Dapper.Tests;
 
 /// <summary>
 /// 集成测试启动配置。
-/// 连接字符串通过以下任一方式提供（优先级从高到低）：
-/// 1. 环境变量：ConnectionStrings__PostgreSqlConnection
-/// 2. appsettings.Development.json（本地开发，不提交到 Git）
-/// 3. appsettings.json 的 PostgreSqlConnection 或 DefaultConnection（本地兼容）
-/// 前置条件：
-/// - PostgreSQL 实例可访问
-/// - 数据库账号有 CREATE / DROP / DML 权限
-/// CI 启用方式：设置环境变量 RUN_POSTGRESQL_INTEGRATION_TESTS=true 并提供专属连接字符串
 /// </summary>
+/// <remarks>
+/// 连接字符串通过以下任一方式提供（优先级从高到低）： 1. 环境变量：ConnectionStrings__PostgreSqlConnection 2. appsettings.Development.json（本地开发，不提交到 Git） 3. appsettings.json 的 PostgreSqlConnection 或 DefaultConnection（本地兼容） 前置条件： - PostgreSQL 实例可访问 - 数据库账号有 CREATE / DROP / DML 权限 CI 启用方式：设置环境变量 RUN_POSTGRESQL_INTEGRATION_TESTS=true 并提供专属连接字符串
+/// </remarks>
 public class Startup
 {
     /// <summary>

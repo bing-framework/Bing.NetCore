@@ -38,7 +38,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     private readonly ILogger _logger;
 
     /// <summary>
-    /// 资源缓存
+    /// 按区域文化和资源基名称缓存 JSON 本地化资源的映射。
     /// </summary>
     private readonly ConcurrentDictionary<string, IEnumerable<KeyValuePair<string, string>>> _resourcesCache;
 
@@ -48,7 +48,7 @@ public class JsonStringLocalizer : StringLocalizerBase
     private readonly string _searchedLocation;
 
     /// <summary>
-    /// 初始化一个<see cref="JsonStringLocalizer"/>类型的实例
+    /// 初始化一个 <see cref="JsonStringLocalizer"/> 类型的实例。
     /// </summary>
     /// <param name="pathResolver">路径解析器</param>
     /// <param name="resourcesRootPath">资源根目录路径</param>
@@ -67,12 +67,7 @@ public class JsonStringLocalizer : StringLocalizerBase
         _searchedLocation = $"{resourcesRootPath}.{resourcesBaseName}";
     }
 
-    /// <summary>
-    /// 获取本地化字符串
-    /// </summary>
-    /// <param name="culture">区域文化</param>
-    /// <param name="name">资源名称</param>
-    /// <returns>当前文化下的本地化字符串；未找到资源时标记为未找到。</returns>
+    /// <inheritdoc />
     protected override LocalizedString GetLocalizedString(CultureInfo culture, string name)
     {
         var value = GetValue(culture, name, _resourcesBaseName) ?? GetValue(culture, name, null);
@@ -81,13 +76,7 @@ public class JsonStringLocalizer : StringLocalizerBase
         return new LocalizedString(name, value, false, _searchedLocation);
     }
 
-    /// <summary>
-    /// 获取资源值
-    /// </summary>
-    /// <param name="culture">区域文化</param>
-    /// <param name="name">资源名称</param>
-    /// <param name="type">资源类型</param>
-    /// <returns>资源值；未找到资源时返回 null。</returns>
+    /// <inheritdoc />
     protected override string GetValue(CultureInfo culture, string name, string type)
     {
         var resources = GetResourcesByCache(culture, type);
@@ -141,11 +130,7 @@ public class JsonStringLocalizer : StringLocalizerBase
         return document.RootElement.EnumerateObject().ToDictionary(e => e.Name, e => e.Value.ToString());
     }
 
-    /// <summary>
-    /// 获取全部本地化字符串
-    /// </summary>
-    /// <param name="includeParentCultures">是否包含父区域</param>
-    /// <returns>当前文化及可选父文化的本地化字符串集合。</returns>
+    /// <inheritdoc />
     public override IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var result = new List<LocalizedString>();

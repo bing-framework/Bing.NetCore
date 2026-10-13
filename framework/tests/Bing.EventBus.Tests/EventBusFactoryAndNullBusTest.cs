@@ -7,11 +7,14 @@ using Xunit;
 namespace Bing.EventBus.Tests;
 
 /// <summary>
-/// <see cref="NullLocalEventBus"/> 单元测试
-/// 验证空本地事件总线的所有方法均为空操作：不抛异常，Subscribe 返回 NullDisposable
+/// 验证空本地事件总线的空操作行为。
 /// </summary>
+/// <remarks>测试覆盖 Subscribe、Publish 和取消订阅等方法的空实现语义。</remarks>
 public class NullLocalEventBusTest
 {
+    /// <summary>
+    /// 用于验证空事件总线行为的实例。
+    /// </summary>
     private readonly ILocalEventBus _bus = NullLocalEventBus.Instance;
 
     /// <summary>
@@ -133,11 +136,14 @@ public class NullLocalEventBusTest
 }
 
 /// <summary>
-/// <see cref="SingleInstanceHandlerFactory"/> 单元测试
-/// 验证单例工厂每次 GetHandler 都包装同一个 handler 实例；IsInFactories 判断逻辑
+/// 验证单例事件处理器工厂的行为。
 /// </summary>
+/// <remarks>测试检查工厂包装的处理器实例以及工厂成员查询结果。</remarks>
 public class SingleInstanceHandlerFactoryTest
 {
+    /// <summary>
+    /// 用于验证事件处理器工厂行为的模拟处理器。
+    /// </summary>
     private readonly Mock<IEventHandler> _mockHandler = new();
 
     /// <summary>
@@ -197,8 +203,7 @@ public class SingleInstanceHandlerFactoryTest
 }
 
 /// <summary>
-/// <see cref="TransientEventHandlerFactory"/> 单元测试
-/// 验证瞬时工厂每次 GetHandler 创建新实例；IsInFactories 按类型匹配
+/// <see cref="TransientEventHandlerFactory"/> 单元测试 验证瞬时工厂每次 GetHandler 创建新实例；IsInFactories 按类型匹配
 /// </summary>
 public class TransientEventHandlerFactoryTest
 {
@@ -213,8 +218,7 @@ public class TransientEventHandlerFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：GetHandler 应返回非 null 的 IEventHandlerDisposeWrapper，
-    /// 内部 EventHandler 应为 SampleEventHandler 实例。
+    /// 测试目的：GetHandler 应返回非 null 的 IEventHandlerDisposeWrapper， 内部 EventHandler 应为 SampleEventHandler 实例。
     /// </summary>
     [Fact]
     public void GetHandler_ShouldReturnWrapperWithNewHandlerInstance()
@@ -273,8 +277,7 @@ public class TransientEventHandlerFactoryTest
 }
 
 /// <summary>
-/// <see cref="MessageEvent"/> 单元测试
-/// 验证默认值、属性赋值、ToString 输出格式
+/// <see cref="MessageEvent"/> 单元测试 验证默认值、属性赋值、ToString 输出格式
 /// </summary>
 public class MessageEventTest
 {
@@ -363,14 +366,25 @@ public class MessageEventTest
 
 // ─── 测试辅助类型 ──────────────────────────────────────────────────────────────
 
+/// <summary>
+/// 表示事件总线工厂测试使用的事件。
+/// </summary>
 internal class SampleEvent { }
 
+/// <summary>
+/// 处理事件总线工厂测试事件。
+/// </summary>
 internal class SampleEventHandler : IEventHandler<SampleEvent>, ILocalEventHandler<SampleEvent>
 {
+    /// <inheritdoc />
     public Task HandleAsync(SampleEvent eventData) => Task.CompletedTask;
 }
 
+/// <summary>
+/// 提供事件总线工厂测试中的另一事件处理器。
+/// </summary>
 internal class OtherEventHandler : IEventHandler<SampleEvent>, ILocalEventHandler<SampleEvent>
 {
+    /// <inheritdoc />
     public Task HandleAsync(SampleEvent eventData) => Task.CompletedTask;
 }

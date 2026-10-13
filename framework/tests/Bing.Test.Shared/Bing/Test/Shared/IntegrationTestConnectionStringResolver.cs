@@ -5,6 +5,9 @@ namespace Bing.Test.Shared;
 /// </summary>
 public static class IntegrationTestConnectionStringResolver
 {
+    /// <summary>
+    /// 默认集成测试连接字符串环境变量名称。
+    /// </summary>
     private const string DefaultConnectionEnvironmentVariable = "ConnectionStrings__DefaultConnection";
 
     /// <summary>
@@ -59,7 +62,7 @@ public static class IntegrationTestConnectionStringResolver
     private sealed class ProviderSettings
     {
         /// <summary>
-        /// 初始化 Provider 集成测试配置。
+        /// 初始化一个 <see cref="ProviderSettings"/> 类型的实例。
         /// </summary>
         /// <param name="provider">Provider 名称。</param>
         /// <param name="connectionEnvironmentVariable">连接字符串环境变量名称。</param>

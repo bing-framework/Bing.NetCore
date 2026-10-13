@@ -14,23 +14,23 @@ namespace Bing.AspNetCore.Mvc;
 public abstract class BingControllerBase : ControllerBase
 {
     /// <summary>
-    /// Lazy延迟加载服务提供程序
+    /// 获取或设置Lazy延迟加载服务提供程序
     /// </summary>
     [Autowired]
     public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
     /// <summary>
-    /// 当前用户
+    /// 获取当前用户
     /// </summary>
     protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
 
     /// <summary>
-    /// 日志工厂
+    /// 获取日志工厂
     /// </summary>
     protected ILogFactory LogFactory => LazyServiceProvider.LazyGetRequiredService<ILogFactory>();
 
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILog Log => LazyServiceProvider.LazyGetService<ILog>(provider => LogFactory?.CreateLog(GetType().FullName) ?? NullLog.Instance);
 

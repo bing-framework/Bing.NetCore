@@ -22,7 +22,7 @@ public class ExtraProperty<TProperty> where TProperty : class
     private readonly string _propertyName;
 
     /// <summary>
-    /// 初始化一个<see cref="ExtraProperty{TProperty}"/>类型的实例
+    /// 初始化一个 <see cref="ExtraProperty{TProperty}"/> 类型的实例。
     /// </summary>
     /// <param name="propertyName">属性名</param>
     public ExtraProperty(string propertyName) => _propertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));

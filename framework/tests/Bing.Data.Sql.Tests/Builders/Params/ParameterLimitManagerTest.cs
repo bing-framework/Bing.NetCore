@@ -105,6 +105,7 @@ public class ParameterLimitManagerTest
     /// <summary>
     /// 测试 - 内部管理器 Clone 返回 null 或自身时应拒绝生成共享状态副本。
     /// </summary>
+    /// <param name="returnNull">控制内部 Clone 测试替身返回 null 还是自身。</param>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -123,10 +124,18 @@ public class ParameterLimitManagerTest
     /// </summary>
     private sealed class InvalidCloneParameterManager : ParameterManager
     {
+        /// <summary>
+        /// 指示 Clone 是否返回空值。
+        /// </summary>
         private readonly bool _returnNull;
 
+        /// <summary>
+        /// 初始化一个 <see cref="InvalidCloneParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="returnNull">是否让 Clone 返回空值。</param>
         public InvalidCloneParameterManager(bool returnNull) : base(TestDialect.Instance) => _returnNull = returnNull;
 
+        /// <inheritdoc />
         public override IParameterManager Clone() => _returnNull ? null : this;
     }
 }

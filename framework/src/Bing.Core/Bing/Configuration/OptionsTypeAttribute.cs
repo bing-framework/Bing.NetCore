@@ -7,12 +7,15 @@
 public class OptionsTypeAttribute : Attribute
 {
     /// <summary>
-    /// 获取配置节点名称；未指定时由使用方回退到目标类名称。
+    /// 获取配置节点名称。
     /// </summary>
+    /// <remarks>
+    /// 未指定时由使用方回退到目标类名称。
+    /// </remarks>
     public string SectionName { get; }
 
     /// <summary>
-    /// 使用可选的配置节点名称初始化 <see cref="OptionsTypeAttribute"/> 的实例。
+    /// 初始化一个 <see cref="OptionsTypeAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="sectionName">配置节点名称；为空时不覆盖默认节点名称推导规则。</param>
     public OptionsTypeAttribute(string sectionName = null)

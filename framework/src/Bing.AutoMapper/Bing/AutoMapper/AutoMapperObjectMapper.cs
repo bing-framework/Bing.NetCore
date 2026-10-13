@@ -42,7 +42,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     private readonly IReadOnlyCollection<IObjectMapperProfile> _profiles;
 
     /// <summary>
-    /// 初始化一个<see cref="AutoMapperObjectMapper"/>类型的实例
+    /// 初始化一个 <see cref="AutoMapperObjectMapper"/> 类型的实例。
     /// </summary>
     /// <param name="configuration">AutoMapper配置提供程序</param>
     /// <param name="profiles">映射器</param>
@@ -56,23 +56,10 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
 
     #region Map(将源对象映射到目标对象)
 
-    /// <summary>
-    /// 将源对象映射到目标对象
-    /// </summary>
-    /// <typeparam name="TSource">源类型</typeparam>
-    /// <typeparam name="TDestination">目标类型</typeparam>
-    /// <param name="source">源对象</param>
-    /// <returns>映射后的目标对象。</returns>
+    /// <inheritdoc />
     public TDestination Map<TSource, TDestination>(TSource source) => Map<TSource, TDestination>(source, default);
 
-    /// <summary>
-    /// 将源对象映射到目标对象
-    /// </summary>
-    /// <typeparam name="TSource">源类型</typeparam>
-    /// <typeparam name="TDestination">目标类型</typeparam>
-    /// <param name="source">源对象</param>
-    /// <param name="destination">目标对象</param>
-    /// <returns>映射后的目标对象。</returns>
+    /// <inheritdoc />
     public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
     {
         if (source == null)

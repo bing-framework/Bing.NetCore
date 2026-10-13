@@ -26,7 +26,7 @@ public class SqlMetadataOptions
     public int? EntityMappingCacheCapacity { get; set; }
 
     /// <summary>
-    /// 实体最终映射缓存达到容量后的淘汰策略。
+    /// 获取或设置实体最终映射缓存达到容量后的淘汰策略。
     /// </summary>
     /// <remarks>
     /// 默认值保留既有已缓存路由，并旁路新路由。设置为 <see cref="EntityMappingCacheEvictionPolicy.LeastRecentlyUsed"/>

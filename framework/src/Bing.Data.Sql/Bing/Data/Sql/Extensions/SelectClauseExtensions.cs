@@ -4,12 +4,11 @@
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Select子句(<see cref="ISelect"/>) 扩展
-/// </summary>
+/// 添加 Select 列。
 public static class SelectClauseExtensions
 {
     /// <summary>
-    /// 为统一 Builder 添加多个查询输出列。
+    /// 添加 Select 列。
     /// </summary>
     /// <param name="source">SQL 生成器。</param>
     /// <param name="columns">待添加的查询输出列。</param>
@@ -28,7 +27,7 @@ public static class SelectClauseExtensions
     #region Select(设置列)
 
     /// <summary>
-    /// 设置列名
+    /// 添加 Select 列。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -44,7 +43,7 @@ public static class SelectClauseExtensions
     }
 
     /// <summary>
-    /// 设置子查询列
+    /// 添加 Select 列。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -60,7 +59,7 @@ public static class SelectClauseExtensions
     }
 
     /// <summary>
-    /// 设置子查询列
+    /// 添加 Select 列。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -80,7 +79,7 @@ public static class SelectClauseExtensions
     #region AppendSelect(添加到Select子句)
 
     /// <summary>
-    /// 添加到 Select 子句。
+    /// 追加 Select 列。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -97,7 +96,7 @@ public static class SelectClauseExtensions
     }
 
     /// <summary>
-    /// 按条件添加到 Select 子句。
+    /// 追加 Select 列。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>

@@ -30,7 +30,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
     private readonly ILogger<DefaultRazorHtmlGenerator> _logger;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultRazorHtmlGenerator"/>类型的实例
+    /// 初始化一个 <see cref="DefaultRazorHtmlGenerator"/> 类型的实例。
     /// </summary>
     /// <param name="routeAnalyzer">路由分析器</param>
     /// <param name="logger">日志</param>
@@ -40,9 +40,7 @@ public class DefaultRazorHtmlGenerator : IRazorHtmlGenerator
         _logger = logger;
     }
 
-    /// <summary>
-    /// 生成Html文件
-    /// </summary>
+    /// <inheritdoc />
     public async Task Generate()
     {
         foreach (var routeInformation in _routeAnalyzer.GetAllRouteInformations())

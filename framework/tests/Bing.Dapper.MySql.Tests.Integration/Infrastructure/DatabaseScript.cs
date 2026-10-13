@@ -11,7 +11,6 @@ public class DatabaseScript
     /// 初始化 MySQL 集成测试所需的表和存储过程。
     /// </summary>
     /// <param name="connection">已打开的 MySQL 连接。</param>
-    /// <returns>异步任务。</returns>
     public static async Task InitializeAsync(MySqlConnection connection)
     {
         if (connection == null)
@@ -93,7 +92,6 @@ End;");
     /// 清理 MySQL 集成测试数据，保留表结构和存储过程。
     /// </summary>
     /// <param name="connection">已打开的 MySQL 连接。</param>
-    /// <returns>异步任务。</returns>
     public static async Task ResetAsync(MySqlConnection connection)
     {
         if (connection == null)
@@ -111,7 +109,6 @@ End;");
     /// </summary>
     /// <param name="connection">已打开的 MySQL 连接。</param>
     /// <param name="sql">SQL 脚本。</param>
-    /// <returns>异步任务。</returns>
     private static async Task ExecuteAsync(MySqlConnection connection, string sql)
     {
         await using var command = new MySqlCommand(sql, connection);

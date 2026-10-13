@@ -157,7 +157,7 @@ public sealed class OracleMutationBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 名称 Getter 调用次数。
+        /// 获取或设置名称 Getter 调用次数。
         /// </summary>
         public static int NameGetterCallCount { get; private set; }
 
@@ -167,7 +167,7 @@ public sealed class OracleMutationBuilderTest
         private string _name;
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name
         {

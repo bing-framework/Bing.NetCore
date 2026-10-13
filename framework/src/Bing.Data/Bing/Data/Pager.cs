@@ -11,14 +11,14 @@ public class Pager : IPager
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="Pager"/>类型的实例
+    /// 初始化一个 <see cref="Pager"/> 类型的实例。
     /// </summary>
     public Pager() : this(1)
     {
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Pager"/>类型的实例
+    /// 初始化一个 <see cref="Pager"/> 类型的实例。
     /// </summary>
     /// <param name="page">页索引</param>
     /// <param name="pageSize">每页显示行数，默认20</param>
@@ -28,7 +28,7 @@ public class Pager : IPager
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Pager"/>类型的实例
+    /// 初始化一个 <see cref="Pager"/> 类型的实例。
     /// </summary>
     /// <param name="page">页索引</param>
     /// <param name="pageSize">每页显示行数，默认20</param>
@@ -61,9 +61,10 @@ public class Pager : IPager
     /// </summary>
     private int _totalCount;
 
-    /// <summary>
-    /// 页索引，即第几页，从1开始
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取或设置页索引，即第几页，从1开始
+    /// </remarks>
     public int Page
     {
         get
@@ -75,14 +76,10 @@ public class Pager : IPager
         set => _pageIndex = value;
     }
 
-    /// <summary>
-    /// 每页显示行数
-    /// </summary>
+    /// <inheritdoc />
     public int PageSize { get; set; }
 
-    /// <summary>
-    /// 总行数
-    /// </summary>
+    /// <inheritdoc />
     public int TotalCount
     {
         get => _totalCount;
@@ -94,22 +91,17 @@ public class Pager : IPager
     }
 
     /// <summary>
-    /// 总行数是否已由调用方或执行路径确定。
+    /// 获取或设置总行数是否已由调用方或执行路径确定。
     /// </summary>
     /// <remarks>
     /// 默认值为 <see langword="false"/>，允许分页执行路径自动计数；当已知结果恰好为零时，调用方应显式设置为 <see langword="true"/>。
     /// </remarks>
     public bool IsTotalCountKnown { get; set; }
 
-    /// <summary>
-    /// 排序条件
-    /// </summary>
+    /// <inheritdoc />
     public string Order { get; set; }
 
-    /// <summary>
-    /// 获取总页数
-    /// </summary>
-    /// <returns>根据总记录数和每页记录数计算得到的总页数；总记录数不能整除页大小时向上取整。</returns>
+    /// <inheritdoc />
     public int GetPageCount()
     {
         if (TotalCount % PageSize == 0)
@@ -117,28 +109,16 @@ public class Pager : IPager
         return (TotalCount / PageSize) + 1;
     }
 
-    /// <summary>
-    /// 获取跳过的行数
-    /// </summary>
-    /// <returns>根据当前页码和页大小计算得到的跳过记录数。</returns>
+    /// <inheritdoc />
     public int GetSkipCount() => PageSize * (Page - 1);
 
-    /// <summary>
-    /// 获取起始行数
-    /// </summary>
-    /// <returns>当前页第一条记录的序号，从 1 开始。</returns>
+    /// <inheritdoc />
     public int GetStartNumber() => (Page - 1) * PageSize + 1;
 
-    /// <summary>
-    /// 获取结束行数
-    /// </summary>
-    /// <returns>当前页最后一条记录的序号。</returns>
+    /// <inheritdoc />
     public int GetEndNumber() => Page * PageSize;
 
-    /// <summary>
-    /// 重写 生成字符串
-    /// </summary>
-    /// <returns>包含页码、页大小和排序条件的分页描述字符串。</returns>
+    /// <inheritdoc />
     public override string ToString()
     {
         _description = new StringBuilder();

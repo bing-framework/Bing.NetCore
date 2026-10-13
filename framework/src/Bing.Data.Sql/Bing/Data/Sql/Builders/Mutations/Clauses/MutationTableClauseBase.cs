@@ -16,7 +16,7 @@ public abstract class MutationTableClauseBase
     protected MutationTableClauseBase(SqlMutationContext context) => Context = context ?? throw new ArgumentNullException(nameof(context));
 
     /// <summary>
-    /// Mutation 子句上下文。
+    /// 获取Mutation 子句上下文。
     /// </summary>
     protected SqlMutationContext Context { get; }
 

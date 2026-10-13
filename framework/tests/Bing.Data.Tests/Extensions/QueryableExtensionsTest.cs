@@ -166,6 +166,7 @@ public class QueryableExtensionsTest
     /// <summary>
     /// 创建用于内存查询的固定数据集。
     /// </summary>
+    /// <returns>供查询扩展测试使用的固定数据项。</returns>
     private static IReadOnlyList<QueryItem> CreateItems() => new[]
     {
         new QueryItem { Id = 1, Name = "Alpha" },

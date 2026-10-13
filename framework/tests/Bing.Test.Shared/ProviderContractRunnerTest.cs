@@ -8,7 +8,7 @@ namespace Bing.Test.Shared;
 public sealed class ProviderContractRunnerTest
 {
     /// <summary>
-    /// 测试目的：全局 RC readiness 必须同时具备四类核心 Provider、双 TFM、完整能力方法和所有外部门禁。
+    /// 全局 RC readiness 必须同时具备四类核心 Provider、双 TFM、完整能力方法和所有外部门禁。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenAnyGlobalInputIsMissing_ShouldRemainFalse()
@@ -33,7 +33,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：全局 RC readiness 不得因单 Provider 局部证据或支持缺口而返回 true。
+    /// 全局 RC readiness 不得因单 Provider 局部证据或支持缺口而返回 true。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenImplementationGapOrFormalHostIsIncomplete_ShouldRemainFalse()
@@ -59,7 +59,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：全局发布门禁必须拒绝来自不同聚合会话的 Provider 运行，避免跨构建拼接证据。
+    /// 全局发布门禁必须拒绝来自不同聚合会话的 Provider 运行，避免跨构建拼接证据。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenEvidenceSessionsDiffer_ShouldRemainFalse()
@@ -93,7 +93,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：全局发布门禁必须拒绝来自不同源码提交的 Provider 运行，避免跨提交拼接证据。
+    /// 全局发布门禁必须拒绝来自不同源码提交的 Provider 运行，避免跨提交拼接证据。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenSourceIdentitiesDiffer_ShouldRemainFalse()
@@ -129,7 +129,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：同一 Provider/TFM 出现重复运行时必须拒绝发布，并将重复键报告为缺失项。
+    /// 同一 Provider/TFM 出现重复运行时必须拒绝发布，并将重复键报告为缺失项。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenProviderFrameworkRunIsDuplicated_ShouldRemainFalse()
@@ -166,7 +166,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：当完整能力目录已无未解决实现缺口且八个 Provider/TFM 运行及外部门禁均通过时，全局 readiness 应返回 true。
+    /// 当完整能力目录已无未解决实现缺口且八个 Provider/TFM 运行及外部门禁均通过时，全局 readiness 应返回 true。
     /// </summary>
     [Fact]
     public void ReleaseReadiness_WhenCompleteCatalogAndAllCoreRunsMatch_ShouldReturnTrue()
@@ -210,7 +210,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：没有真实集成元数据的执行场景只能保留为单元证据，预分类场景应保留对应六态。
+    /// 没有真实集成元数据的执行场景只能保留为单元证据，预分类场景应保留对应六态。
     /// </summary>
     [Fact]
     public async Task RunAsync_WhenScenariosComplete_ShouldKeepSixStateEvidence()
@@ -239,7 +239,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：矩阵不得接受重复 Provider 能力场景，输出必须保留状态并转义表格字符。
+    /// 矩阵不得接受重复 Provider 能力场景，输出必须保留状态并转义表格字符。
     /// </summary>
     [Fact]
     public void Matrix_WhenEvidenceIsAdded_ShouldRejectDuplicatesAndRenderSafeMarkdown()
@@ -263,7 +263,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：真实执行状态不能由固定声明伪造，避免静态矩阵冒充运行证据。
+    /// 真实执行状态不能由固定声明伪造，避免静态矩阵冒充运行证据。
     /// </summary>
     [Fact]
     public void Scenario_WhenFixedStateIsRealIntegrationProven_ShouldRejectStaticEvidence()
@@ -277,7 +277,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：执行场景与固定状态不能同时出现，避免忽略执行委托而伪造固定结论。
+    /// 执行场景与固定状态不能同时出现，避免忽略执行委托而伪造固定结论。
     /// </summary>
     [Fact]
     public void Scenario_WhenExecuteAndFixedStateAreBothProvided_ShouldRejectAmbiguousEvidence()
@@ -291,7 +291,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：公开证据模型不得直接构造真实集成状态，真实状态只能由 runner 产生。
+    /// 公开证据模型不得直接构造真实集成状态，真实状态只能由 runner 产生。
     /// </summary>
     [Fact]
     public void Evidence_WhenRealIntegrationStateIsConstructedDirectly_ShouldRejectStaticEvidence()
@@ -305,7 +305,7 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：完整真实集成元数据才允许执行场景进入真实集成状态，测试制品不能直接放行发布门禁。
+    /// 完整真实集成元数据才允许执行场景进入真实集成状态，测试制品不能直接放行发布门禁。
     /// </summary>
     [Fact]
     public async Task RunAsync_WhenTrustedMetadataIsProvided_ShouldRecordTraceableIntegrationEvidence()
@@ -330,8 +330,9 @@ public sealed class ProviderContractRunnerTest
     }
 
     /// <summary>
-    /// 测试目的：证据路径必须拒绝绝对路径、路径穿越和连接信息，避免制品写出工作区或泄露凭据。
+    /// 证据路径必须拒绝绝对路径、路径穿越和连接信息，避免制品写出工作区或泄露凭据。
     /// </summary>
+    /// <param name="path">待验证的证据路径。</param>
     [Theory]
     [InlineData("C:\\temp\\result.trx")]
     [InlineData("artifacts/test-results/../secret.trx")]

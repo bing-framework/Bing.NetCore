@@ -11,7 +11,7 @@ public sealed class DefaultSqlConnectionStringResolver : ISqlConnectionStringRes
     private readonly ConnectionStringCollection _connectionStrings;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlConnectionStringResolver"/>类型的实例。
+    /// 初始化一个 <see cref="DefaultSqlConnectionStringResolver"/> 类型的实例。
     /// </summary>
     /// <param name="connectionStrings">连接字符串集合。</param>
     public DefaultSqlConnectionStringResolver(ConnectionStringCollection connectionStrings = null) =>

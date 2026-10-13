@@ -114,6 +114,11 @@ public class UserFriendlyExceptionTest
 /// </summary>
 public class LocalLockTest
 {
+    /// <summary>
+    /// 创建当前锁测试独有的键名。
+    /// </summary>
+    /// <param name="suffix">键名后缀。</param>
+    /// <returns>包含随机标识的锁键名。</returns>
     private static string Key(string suffix) => $"LocalLock_{suffix}_{Guid.NewGuid():N}";
 
     // -----------------------------------------------------------------

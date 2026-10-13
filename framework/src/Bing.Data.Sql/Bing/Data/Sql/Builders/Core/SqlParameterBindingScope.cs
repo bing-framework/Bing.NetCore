@@ -16,7 +16,7 @@ internal sealed class SqlParameterBindingScope
     private readonly IReadOnlyDictionary<ParameterExpression, TableSource> _bindings;
 
     /// <summary>
-    /// 使用 Lambda 表达式参数与表源实例创建绑定范围。
+    /// 初始化一个 <see cref="SqlParameterBindingScope"/> 类型的实例。
     /// </summary>
     /// <param name="expression">定义参数位置的 Lambda 表达式。</param>
     /// <param name="sources">按参数顺序排列的表源实例。</param>

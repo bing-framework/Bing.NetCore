@@ -240,7 +240,7 @@ public class StoreVersionValidationTest
         }
 
         /// <summary>
-        /// 最近一次接收的取消令牌。
+        /// 获取或设置最近一次接收的取消令牌。
         /// </summary>
         public CancellationToken CapturedCancellationToken { get; private set; }
 
@@ -258,10 +258,13 @@ public class StoreVersionValidationTest
     /// </summary>
     private sealed class SideEffectKeySample : IKey<Guid>
     {
+        /// <summary>
+        /// 测试实体标识。
+        /// </summary>
         private readonly Guid _id = Guid.NewGuid();
 
         /// <summary>
-        /// 标识读取次数。
+        /// 获取或设置标识读取次数。
         /// </summary>
         public int IdReadCount { get; private set; }
 
@@ -296,7 +299,7 @@ public class StoreVersionValidationTest
     private sealed class SideEffectIdentifier
     {
         /// <summary>
-        /// 字符串转换次数。
+        /// 获取或设置字符串转换次数。
         /// </summary>
         public int ToStringCallCount { get; private set; }
 
@@ -313,14 +316,10 @@ public class StoreVersionValidationTest
     /// </summary>
     private sealed class VersionedSample : IKey<Guid>, IVersion
     {
-        /// <summary>
-        /// 标识。
-        /// </summary>
+        /// <inheritdoc />
         public Guid Id { get; set; }
 
-        /// <summary>
-        /// 版本号。
-        /// </summary>
+        /// <inheritdoc />
         public byte[] Version { get; set; }
     }
 }

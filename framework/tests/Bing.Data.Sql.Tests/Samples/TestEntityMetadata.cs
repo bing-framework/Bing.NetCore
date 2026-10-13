@@ -7,11 +7,7 @@ namespace Bing.Data.Sql.Tests.Samples;
 /// </summary>
 public class TestEntityMetadata : IEntityModelMetadataProvider
 {
-    /// <summary>
-    /// 获取实体模型元数据。
-    /// </summary>
-    /// <param name="entityType">实体类型。</param>
-    /// <returns>实体模型元数据。</returns>
+    /// <inheritdoc />
     public EntityModelMetadata GetMetadata(Type entityType)
     {
         if (entityType == null)

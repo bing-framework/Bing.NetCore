@@ -38,7 +38,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private bool _operationInProgress;
 
     /// <summary>
-    /// 初始化支持同步和异步完成的<see cref="SqlMultipleQueryResult"/>类型的实例。
+    /// 初始化一个 <see cref="SqlMultipleQueryResult"/> 类型的实例。
     /// </summary>
     /// <param name="reader">Dapper 结果集读取器。</param>
     /// <param name="executionLease">当前执行租约。</param>
@@ -52,7 +52,7 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     }
 
     /// <summary>
-    /// 使用指定生命周期回调初始化多结果集读取结果。
+    /// 初始化一个 <see cref="SqlMultipleQueryResult"/> 类型的实例。
     /// </summary>
     /// <param name="reader">Dapper 结果集读取器。</param>
     /// <param name="executionLease">当前执行租约。</param>
@@ -77,17 +77,17 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     }
 
     /// <summary>
-    /// 判断读取器是否已完整消费。
+    /// 获取判断读取器是否已完整消费。
     /// </summary>
     private Func<SqlMapper.GridReader, bool> IsConsumed { get; }
 
     /// <summary>
-    /// 释放读取器的同步操作。
+    /// 获取释放读取器的同步操作。
     /// </summary>
     private Action<SqlMapper.GridReader> DisposeReader { get; }
 
     /// <summary>
-    /// 释放读取器的异步操作。
+    /// 获取释放读取器的异步操作。
     /// </summary>
     private Func<SqlMapper.GridReader, Task> DisposeReaderAsync { get; }
 
@@ -133,9 +133,10 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 异步释放多结果集读取器及其执行资源。
-    /// </summary>
+    /// </remarks>
     public async ValueTask DisposeAsync()
     {
         if (TryBeginDispose(out var reader) == false)

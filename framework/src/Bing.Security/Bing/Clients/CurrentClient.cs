@@ -15,19 +15,19 @@ public class CurrentClient : ICurrentClient, ITransientDependency
     private readonly ICurrentPrincipalAccessor _principalAccessor;
 
     /// <summary>
-    /// 初始化一个 <see cref="CurrentClient"/> 实例。
+    /// 初始化一个 <see cref="CurrentClient"/> 类型的实例。
     /// </summary>
     /// <param name="principalAccessor">当前安全主体访问器。</param>
     public CurrentClient(ICurrentPrincipalAccessor principalAccessor) => _principalAccessor = principalAccessor;
 
-    /// <summary>
-    /// 获取当前安全主体声明中的客户端标识；未找到时返回 <see langword="null"/>。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取当前安全主体声明中的客户端标识。
+    ///
+    /// 未找到时返回 <see langword="null"/>。
+    /// </remarks>
     public virtual string Id => _principalAccessor.Principal?.FindClientId();
 
-    /// <summary>
-    /// 获取当前客户端是否存在有效标识。
-    /// </summary>
-    /// <returns>客户端标识不为空时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public virtual bool IsAuthenticated => Id != null;
 }

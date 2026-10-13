@@ -6,11 +6,15 @@ using Xunit;
 namespace Bing.Uow.Tests;
 
 /// <summary>
-/// <see cref="UnitOfWorkManager"/> 单元测试。
-/// Mock IUnitOfWork，验证管理器协调行为，不依赖真实 DB。
+/// <see cref="UnitOfWorkManager"/> 单元测试。 Mock IUnitOfWork，验证管理器协调行为，不依赖真实 DB。
 /// </summary>
 public class UnitOfWorkManagerTest
 {
+    /// <summary>
+    /// 创建带有指定提交结果的工作单元模拟对象。
+    /// </summary>
+    /// <param name="commitResult">模拟提交返回值。</param>
+    /// <returns>已配置的工作单元模拟对象。</returns>
     private static Mock<IUnitOfWork> CreateMockUow(int commitResult = 1)
     {
         var mock = new Mock<IUnitOfWork>();

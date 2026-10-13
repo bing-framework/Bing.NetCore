@@ -17,7 +17,7 @@ public class MySqlJoinClause : JoinClause
     private readonly bool _splitStringTableName;
 
     /// <summary>
-    /// 初始化一个<see cref="MySqlJoinClause"/>类型的实例
+    /// 初始化一个 <see cref="MySqlJoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public MySqlJoinClause(SqlClauseContext context)
@@ -27,7 +27,7 @@ public class MySqlJoinClause : JoinClause
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 MySQL 表连接子句。
+    /// 初始化一个 <see cref="MySqlJoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="splitStringTableName">是否拆分字符串表名中的句点。</param>
@@ -45,12 +45,10 @@ public class MySqlJoinClause : JoinClause
             ? JoinItem.CreateTable(joinType, table, schema, alias, type)
             : JoinItem.CreateAtomicTable(joinType, table, schema, alias, type);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 解析实际 MySQL 的反引号字符串表名。
-    /// </summary>
-    /// <param name="table">表名。</param>
-    /// <param name="alias">别名。</param>
-    /// <returns>表名、别名和架构名。</returns>
+    /// </remarks>
     protected override (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
     {
         if (_splitStringTableName)

@@ -238,7 +238,7 @@ public sealed class SqlServerMutationBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -250,13 +250,13 @@ public sealed class SqlServerMutationBuilderTest
     private sealed class ReturningMutationSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         [Column("sample_id")]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         [Column("sample_name")]
         public string Name { get; set; }

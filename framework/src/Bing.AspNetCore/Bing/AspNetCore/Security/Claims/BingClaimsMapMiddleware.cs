@@ -17,15 +17,12 @@ public class BingClaimsMapMiddleware : IMiddleware
     private readonly RequestDelegate _next;
 
     /// <summary>
-    /// 初始化一个<see cref="BingClaimsMapMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="BingClaimsMapMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     public BingClaimsMapMiddleware(RequestDelegate next) => _next = next;
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         var currentPrincipalAccessor = context

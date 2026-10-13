@@ -155,17 +155,17 @@ public partial class PostgreSqlBuilderTest
     private sealed class PgUser
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 角色标识。
+        /// 获取或设置角色标识。
         /// </summary>
         public int RoleId { get; set; }
 
         /// <summary>
-        /// 是否启用。
+        /// 获取或设置是否启用。
         /// </summary>
         public bool Enabled { get; set; }
     }
@@ -176,12 +176,12 @@ public partial class PostgreSqlBuilderTest
     private sealed class PgRole
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }

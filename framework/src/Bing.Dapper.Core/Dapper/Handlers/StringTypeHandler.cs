@@ -5,11 +5,7 @@
 /// </summary>
 public class StringTypeHandler : SqlMapper.TypeHandler<string>
 {
-    /// <summary>
-    /// 设置值
-    /// </summary>
-    /// <param name="parameter">参数</param>
-    /// <param name="value">值</param>
+    /// <inheritdoc />
     public override void SetValue(System.Data.IDbDataParameter parameter, string value)
     {
         if (parameter == null)
@@ -17,10 +13,6 @@ public class StringTypeHandler : SqlMapper.TypeHandler<string>
         parameter.Value = value;
     }
 
-    /// <summary>
-    /// 转换值
-    /// </summary>
-    /// <param name="value">值</param>
-    /// <returns>转换后的字符串；输入为空时返回 null。</returns>
+    /// <inheritdoc />
     public override string Parse(object value) => value?.ToString();
 }

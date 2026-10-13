@@ -8,6 +8,7 @@ public interface IHasCreator : IHasCreator<string> { }
 /// <summary>
 /// 定义使用指定标识类型表示创建人的审计契约。
 /// </summary>
+/// <typeparam name="TCreator">创建人标识类型。</typeparam>
 public interface IHasCreator<TCreator>
 {
     /// <summary>

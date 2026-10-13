@@ -6,7 +6,7 @@
 public class NullStringLocalizer : IStringLocalizer
 {
     /// <summary>
-    /// 获取空本地化查找器单例。
+    /// 供进程内复用的空本地化查找器单例。
     /// </summary>
     public static readonly IStringLocalizer Instance = new NullStringLocalizer();
 

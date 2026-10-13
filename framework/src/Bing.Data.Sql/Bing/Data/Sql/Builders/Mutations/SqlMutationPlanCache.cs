@@ -33,52 +33,52 @@ internal sealed class SqlMutationPlanCache
     }
 
     /// <summary>
-    /// 缓存计划数量。
+    /// 获取缓存计划数量。
     /// </summary>
     internal int PlanCount => _plans.Count;
 
     /// <summary>
-    /// 缓存 Getter 数量。
+    /// 获取缓存 Getter 数量。
     /// </summary>
     internal int GetterCount => _getters.Count;
 
     /// <summary>
-    /// Plan 缓存命中次数。
+    /// 获取Plan 缓存命中次数。
     /// </summary>
     internal long PlanCacheHitCount => _plans.HitCount;
 
     /// <summary>
-    /// Plan 缓存未命中次数。
+    /// 获取Plan 缓存未命中次数。
     /// </summary>
     internal long PlanCacheMissCount => _plans.MissCount;
 
     /// <summary>
-    /// Plan 缓存旁路次数。
+    /// 获取Plan 缓存旁路次数。
     /// </summary>
     internal long PlanCacheBypassCount => _plans.BypassCount;
 
     /// <summary>
-    /// Plan 缓存淘汰次数。
+    /// 获取Plan 缓存淘汰次数。
     /// </summary>
     internal long PlanCacheEvictionCount => _plans.EvictionCount;
 
     /// <summary>
-    /// Getter 缓存命中次数。
+    /// 获取Getter 缓存命中次数。
     /// </summary>
     internal long GetterCacheHitCount => _getters.HitCount;
 
     /// <summary>
-    /// Getter 缓存未命中次数。
+    /// 获取Getter 缓存未命中次数。
     /// </summary>
     internal long GetterCacheMissCount => _getters.MissCount;
 
     /// <summary>
-    /// Getter 缓存旁路次数。
+    /// 获取Getter 缓存旁路次数。
     /// </summary>
     internal long GetterCacheBypassCount => _getters.BypassCount;
 
     /// <summary>
-    /// Getter 缓存淘汰次数。
+    /// 获取 Getter 缓存驱逐次数。
     /// </summary>
     internal long GetterCacheEvictionCount => _getters.EvictionCount;
 
@@ -99,7 +99,7 @@ internal sealed class SqlMutationPlanCache
     }
 
     /// <summary>
-    /// 使用调用方提供的工厂获取或创建 Mutation Plan。
+    /// 获取或创建 Mutation Plan。
     /// </summary>
     /// <remarks>
     /// 此重载供内部测试验证并发初始化与异常恢复，不应由生产调用方绕过标准映射计划创建。
@@ -125,7 +125,7 @@ internal sealed class SqlMutationPlanCache
     }
 
     /// <summary>
-    /// 获取实体或原始值对象的映射属性值。
+    /// 获取或创建 Mutation Plan。
     /// </summary>
     /// <param name="source">实体或并发原始值对象。</param>
     /// <param name="column">待读取的映射列。</param>

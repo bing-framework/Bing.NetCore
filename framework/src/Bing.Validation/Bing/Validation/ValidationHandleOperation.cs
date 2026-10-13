@@ -13,7 +13,7 @@ public sealed class ValidationHandleOperation
     private readonly ValidationResultCollection _collection;
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationHandleOperation"/>
+    /// 初始化一个 <see cref="ValidationHandleOperation"/> 类型的实例。
     /// </summary>
     /// <param name="collection">验证结果集合</param>
     public ValidationHandleOperation(ValidationResultCollection collection) => _collection = collection ?? throw new ArgumentNullException(nameof(collection));

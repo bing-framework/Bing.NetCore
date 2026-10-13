@@ -205,10 +205,20 @@ public class DependencyInjectionTest
     /// </summary>
     private class MyTransientServiceUsesSingleton
     {
+        /// <summary>
+        /// 被当前瞬时服务委托调用的单例服务。
+        /// </summary>
         private readonly MySingletonServiceUsesTransients _singletonService;
 
+        /// <summary>
+        /// 初始化一个 <see cref="MyTransientServiceUsesSingleton"/> 类型的实例。
+        /// </summary>
+        /// <param name="singletonService">接收调用的单例服务。</param>
         public MyTransientServiceUsesSingleton(MySingletonServiceUsesTransients singletonService) => _singletonService = singletonService;
 
+        /// <summary>
+        /// 让单例服务解析并保存一个瞬时服务。
+        /// </summary>
         public void DoIt() => _singletonService.DoIt();
     }
 
@@ -217,24 +227,43 @@ public class DependencyInjectionTest
     /// </summary>
     private class MySingletonServiceUsesTransients
     {
+        /// <summary>
+        /// 用于解析瞬时服务的服务提供程序。
+        /// </summary>
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// 由单例服务解析并持有的瞬时服务实例。
+        /// </summary>
         private readonly List<MyTransientService> _instances;
 
+        /// <summary>
+        /// 初始化一个 <see cref="MySingletonServiceUsesTransients"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">用于解析瞬时服务的服务提供程序。</param>
         public MySingletonServiceUsesTransients(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _instances = new List<MyTransientService>();
         }
 
+        /// <summary>
+        /// 解析一个瞬时服务并保留其引用。
+        /// </summary>
         public void DoIt() => _instances.Add(_serviceProvider.GetRequiredService<MyTransientService>());
 
+        /// <summary>
+        /// 验证已解析的瞬时服务尚未释放。
+        /// </summary>
         public void ShouldNotBeDisposed()
         {
             foreach (var instance in _instances)
                 instance.IsDisposed.ShouldBeFalse();
         }
 
+        /// <summary>
+        /// 验证已解析的瞬时服务已经释放。
+        /// </summary>
         public void ShouldBeDisposed()
         {
             foreach (var instance in _instances)
@@ -247,8 +276,12 @@ public class DependencyInjectionTest
     /// </summary>
     private class MyTransientService : IDisposable
     {
+        /// <summary>
+        /// 获取或设置服务是否已经释放。
+        /// </summary>
         public bool IsDisposed { get; private set; }
 
+        /// <inheritdoc />
         public void Dispose() => IsDisposed = true;
     }
 
@@ -257,24 +290,43 @@ public class DependencyInjectionTest
     /// </summary>
     private class MyTransientServiceUsesTransients
     {
+        /// <summary>
+        /// 用于解析瞬时服务的服务提供程序。
+        /// </summary>
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// 由当前瞬时服务解析并持有的其他瞬时服务实例。
+        /// </summary>
         private readonly List<MyTransientService> _instances;
 
+        /// <summary>
+        /// 初始化一个 <see cref="MyTransientServiceUsesTransients"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">用于解析瞬时服务的服务提供程序。</param>
         public MyTransientServiceUsesTransients(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _instances = new List<MyTransientService>();
         }
 
+        /// <summary>
+        /// 解析一个瞬时服务并保留其引用。
+        /// </summary>
         public void DoIt() => _instances.Add(_serviceProvider.GetRequiredService<MyTransientService>());
 
+        /// <summary>
+        /// 验证已解析的瞬时服务尚未释放。
+        /// </summary>
         public void ShouldNotBeDisposed()
         {
             foreach (var instance in _instances)
                 instance.IsDisposed.ShouldBeFalse();
         }
 
+        /// <summary>
+        /// 验证已解析的瞬时服务已经释放。
+        /// </summary>
         public void ShouldBeDisposed()
         {
             foreach (var instance in _instances)
@@ -287,47 +339,97 @@ public class DependencyInjectionTest
     /// </summary>
     private class ScopedServiceWithState
     {
+        /// <summary>
+        /// 保存当前作用域内的状态值。
+        /// </summary>
         private readonly Dictionary<string, object> _items;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ScopedServiceWithState"/> 类型的实例。
+        /// </summary>
         public ScopedServiceWithState() => _items = new Dictionary<string, object>();
 
+        /// <summary>
+        /// 在当前作用域中保存状态值。
+        /// </summary>
+        /// <param name="name">状态项名称。</param>
+        /// <param name="value">要保存的状态值。</param>
         public void Set(string name, object value) => _items[name] = value;
 
+        /// <summary>
+        /// 获取当前作用域中指定名称的状态值。
+        /// </summary>
+        /// <param name="name">状态项名称。</param>
+        /// <returns>对应的状态值。</returns>
         public object Get(string name) => _items[name];
     }
 
+    /// <summary>
+    /// 标记为作用域生命周期的测试服务契约。
+    /// </summary>
     private interface IA : IScopedDependency
     {
+        /// <summary>
+        /// 获取服务实例标识。
+        /// </summary>
         string Id { get; }
     }
 
+    /// <summary>
+    /// 标记为单例生命周期的测试服务契约。
+    /// </summary>
     private interface IB : ISingletonDependency
     {
+        /// <summary>
+        /// 获取服务实例标识。
+        /// </summary>
         string Id { get; }
     }
 
+    /// <summary>
+    /// 标记为瞬时生命周期的测试服务契约。
+    /// </summary>
     private interface IC : ITransientDependency
     {
+        /// <summary>
+        /// 获取服务实例标识。
+        /// </summary>
         string Id { get; }
     }
 
+    /// <summary>
+    /// 作用域生命周期的测试服务实现。
+    /// </summary>
     private class A : IA
     {
+        /// <inheritdoc />
         public string Id { get; } = Guid.NewGuid().ToString();
     }
 
+    /// <summary>
+    /// 单例生命周期的测试服务实现。
+    /// </summary>
     private class B : IB
     {
+        /// <inheritdoc />
         public string Id { get; } = Guid.NewGuid().ToString();
     }
 
+    /// <summary>
+    /// 瞬时生命周期的测试服务实现。
+    /// </summary>
     private class C : IC
     {
+        /// <inheritdoc />
         public string Id { get; } = Guid.NewGuid().ToString();
     }
 
+    /// <summary>
+    /// 注册为作用域服务的第二个实现，用于验证同一契约的实例隔离。
+    /// </summary>
     private class D : IA
     {
+        /// <inheritdoc />
         public string Id { get; } = Guid.NewGuid().ToString();
     }
 

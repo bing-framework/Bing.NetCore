@@ -10,17 +10,17 @@ namespace Bing.Dapper.Tests.Samples;
 public class Sample3
 {
     /// <summary>
-    /// string值
+    /// 获取或设置字符串值。
     /// </summary>
     public string StringValue { get; set; }
 
     /// <summary>
-    /// 是否删除
+    /// 获取或设置删除标记。
     /// </summary>
     public bool IsDeleted { get; set; }
 
     /// <summary>
-    /// 跳过的属性
+    /// 获取或设置是否跳过。
     /// </summary>
     [NotMapped]
     public bool Ignore { get; set; }

@@ -11,7 +11,7 @@ public static partial class QueryableExtensions
     #region Page(分页，包含排序)
 
     /// <summary>
-    /// 分页，包含排序
+    /// 应用分页和排序。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
@@ -23,13 +23,14 @@ public static partial class QueryableExtensions
         where TEntity : class => PageAsync(query, pager, CancellationToken.None);
 
     /// <summary>
-    /// 分页，包含排序，并将取消令牌传递给总数查询。
+    /// 应用分页和排序。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>已应用排序和分页条件的数据源。</returns>
+    /// <remarks>执行总数查询时使用指定的取消令牌。</remarks>
     /// <exception cref="ArgumentNullException">当数据源或分页对象为空时抛出。</exception>
     /// <exception cref="ArgumentException">当未设置排序字段时抛出。</exception>
     public static async Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager,
@@ -55,7 +56,7 @@ public static partial class QueryableExtensions
     #region ToPagerListAsync(转换为分页列表)
 
     /// <summary>
-    /// 转换为分页列表，包含排序分页操作
+    /// 生成分页结果列表。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
@@ -66,13 +67,14 @@ public static partial class QueryableExtensions
         where TEntity : class => ToPagerListAsync(query, pager, CancellationToken.None);
 
     /// <summary>
-    /// 转换为分页列表，包含排序分页操作，并将取消令牌传递给总数和数据查询。
+    /// 生成分页结果列表。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>分页结果。</returns>
+    /// <remarks>执行总数和数据查询时使用指定的取消令牌。</remarks>
     /// <exception cref="ArgumentNullException">当数据源或分页对象为空时抛出。</exception>
     public static async Task<PagerList<TEntity>> ToPagerListAsync<TEntity>(this IQueryable<TEntity> query, IPager pager,
         CancellationToken cancellationToken) where TEntity : class

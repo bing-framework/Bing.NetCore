@@ -22,8 +22,11 @@ public class NameItem
     private string _prefix;
 
     /// <summary>
-    /// 获取或设置对象名称的前缀；读取时空值按空字符串处理。
+    /// 获取或设置对象名称的前缀。
     /// </summary>
+    /// <remarks>
+    /// 读取时空值按空字符串处理。
+    /// </remarks>
     public string Prefix
     {
         get => _prefix.SafeString();
@@ -36,8 +39,11 @@ public class NameItem
     private string _name;
 
     /// <summary>
-    /// 获取或设置对象名称；读取时空值按空字符串处理。
+    /// 获取或设置对象名称。
     /// </summary>
+    /// <remarks>
+    /// 读取时空值按空字符串处理。
+    /// </remarks>
     public string Name
     {
         get => _name.SafeString();
@@ -49,7 +55,7 @@ public class NameItem
     #region 构造函数
 
     /// <summary>
-    /// 解析指定的数据库对象名称并初始化结构化名称项。
+    /// 初始化一个 <see cref="NameItem"/> 类型的实例。
     /// </summary>
     /// <param name="name">包含数据库名、前缀和对象名的名称文本。</param>
     public NameItem(string name)

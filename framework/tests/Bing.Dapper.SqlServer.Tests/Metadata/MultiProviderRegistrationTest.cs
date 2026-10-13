@@ -38,8 +38,7 @@ public class MultiProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：直接注入的执行器和多结果集执行器必须与查询使用同一数据源路由，
-    /// 不能由首个 Provider 的直接服务注册决定实现类型。
+    /// 测试目的：直接注入的执行器和多结果集执行器必须与查询使用同一数据源路由， 不能由首个 Provider 的直接服务注册决定实现类型。
     /// </summary>
     [Fact]
     public void ResolveDirectly_WhenDatabaseScopeChanges_ShouldRouteAllRootServicesByCurrentDataSource()

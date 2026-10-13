@@ -156,6 +156,10 @@ public class OfficialProviderInstanceTest
     /// <summary>
     /// 判断驱动类型是否直接声明了指定公开实例方法，排除 ADO.NET 基类默认实现。
     /// </summary>
+    /// <param name="type">要检查的驱动类型。</param>
+    /// <param name="name">要查找的方法名称。</param>
+    /// <param name="parameterTypes">目标方法的参数类型序列。</param>
+    /// <returns>如果类型直接声明了匹配的方法，则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     private static bool HasDeclaredPublicMethod(Type type, string name, params Type[] parameterTypes) =>
         type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
             .Any(method => method.Name == name && method.GetParameters().Select(parameter => parameter.ParameterType)
@@ -164,6 +168,7 @@ public class OfficialProviderInstanceTest
     /// <summary>
     /// 创建官方 Provider 集合。
     /// </summary>
+    /// <returns>返回官方 SQL Provider 集合。</returns>
     private static ISqlProvider[] CreateProviders() =>
     [
         MySqlSqlProvider.Instance,

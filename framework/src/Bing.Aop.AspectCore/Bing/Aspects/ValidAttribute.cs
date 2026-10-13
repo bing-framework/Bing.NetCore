@@ -4,8 +4,7 @@ using Bing.Aspects;
 namespace Bing.Validation;
 
 /// <summary>
-/// 验证拦截器。
-/// 标记在方法参数上，AOP 管道会在方法执行前自动调用 <see cref="IVerifyModel.Validate"/> 进行校验。
+/// 验证拦截器。 标记在方法参数上，AOP 管道会在方法执行前自动调用 <see cref="IVerifyModel.Validate"/> 进行校验。
 /// </summary>
 /// <remarks>
 /// 此特性依赖 AspectCore 参数拦截机制，因此定义在 Bing.Aop.AspectCore 项目中，
@@ -15,11 +14,10 @@ namespace Bing.Validation;
 /// </remarks>
 public class ValidAttribute : ParameterInterceptorBase
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行参数拦截逻辑，在目标方法执行前触发参数验证。
-    /// </summary>
-    /// <param name="context">参数拦截上下文。</param>
-    /// <param name="next">后续拦截器或目标方法委托。</param>
+    /// </remarks>
     public override async Task Invoke(ParameterAspectContext context, ParameterAspectDelegate next)
     {
         Validate(context.Parameter);

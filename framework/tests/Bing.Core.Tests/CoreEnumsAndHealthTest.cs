@@ -8,10 +8,7 @@ using Bing.Trees;
 namespace Bing.Tests;
 
 /// <summary>
-/// <see cref="LoadMode"/>、<see cref="LoadOperation"/>、<see cref="ModuleLevel"/>、
-/// <see cref="EnvironmentType"/> 枚举，以及
-/// <see cref="BusHealthResult"/>、<see cref="BusHealthStatus"/> 结构体，
-/// <see cref="ExceptionPrompt"/> 静态工具类 的单元测试。
+/// <see cref="LoadMode"/>、<see cref="LoadOperation"/>、<see cref="ModuleLevel"/>、 <see cref="EnvironmentType"/> 枚举，以及 <see cref="BusHealthResult"/>、<see cref="BusHealthStatus"/> 结构体， <see cref="ExceptionPrompt"/> 静态工具类 的单元测试。
 /// </summary>
 public class CoreEnumsAndHealthTest
 {
@@ -20,8 +17,7 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：枚举包含 Sync、Async、OnlyRootAsync 三个成员，
-    /// 防止意外增删导致树形组件加载策略错乱。
+    /// 测试目的：枚举包含 Sync、Async、OnlyRootAsync 三个成员， 防止意外增删导致树形组件加载策略错乱。
     /// </summary>
     [Fact]
     public void LoadMode_Count_ShouldBeThree()
@@ -46,8 +42,7 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：枚举值 FirstLoad=1、LoadChild=2、Search=3，
-    /// 确保与前端或配置中的整数约定一致。
+    /// 测试目的：枚举值 FirstLoad=1、LoadChild=2、Search=3， 确保与前端或配置中的整数约定一致。
     /// </summary>
     [Fact]
     public void LoadOperation_Values_ShouldMatchExpected()
@@ -71,9 +66,9 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ModuleLevel 各级别的整数值应符合规范（Core=1, Framework=10, Application=20, Business=30），
-    /// 数值越小优先级越高，确保模块启动顺序正确。
+    /// 验证 ModuleLevel 的整数值和启动优先级。
     /// </summary>
+    /// <remarks>Core、Framework、Application、Business 的值依次为 1、10、20、30，数值越小优先级越高。</remarks>
     [Fact]
     public void ModuleLevel_Values_ShouldMatchExpected()
     {
@@ -97,8 +92,7 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：枚举值 Development=1、Test=2、Preview=3、Prod=4，
-    /// 确保环境配置切换时数值映射正确。
+    /// 测试目的：枚举值 Development=1、Test=2、Preview=3、Prod=4， 确保环境配置切换时数值映射正确。
     /// </summary>
     [Fact]
     public void EnvironmentType_Values_ShouldMatchExpected()
@@ -123,9 +117,9 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：BusHealthStatus 各状态值应符合规范（Unhealthy=0, Degraded=1, Healthy=2），
-    /// 确保健康检查端点返回的整数与状态语义一致。
+    /// 验证 BusHealthStatus 的整数映射。
     /// </summary>
+    /// <remarks>Unhealthy、Degraded、Healthy 的值依次为 0、1、2。</remarks>
     [Fact]
     public void BusHealthStatus_Values_ShouldMatchExpected()
     {
@@ -135,8 +129,7 @@ public class CoreEnumsAndHealthTest
     }
 
     /// <summary>
-    /// 测试目的：BusHealthStatus 默认值应为 Unhealthy（0），
-    /// 防止未初始化时误判为健康状态。
+    /// 测试目的：BusHealthStatus 默认值应为 Unhealthy（0）， 防止未初始化时误判为健康状态。
     /// </summary>
     [Fact]
     public void BusHealthStatus_Default_ShouldBeUnhealthy()
@@ -149,8 +142,7 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：BusHealthResult.Healthy() 应创建状态为 Healthy 的结果，
-    /// 描述与 Data 按传入值正确赋值。
+    /// 测试目的：BusHealthResult.Healthy() 应创建状态为 Healthy 的结果， 描述与 Data 按传入值正确赋值。
     /// </summary>
     [Fact]
     public void BusHealthResult_Healthy_ShouldSetStatusAndDescription()
@@ -167,8 +159,7 @@ public class CoreEnumsAndHealthTest
     }
 
     /// <summary>
-    /// 测试目的：BusHealthResult.Degraded() 应创建状态为 Degraded 的结果，
-    /// 异常信息被正确保留。
+    /// 测试目的：BusHealthResult.Degraded() 应创建状态为 Degraded 的结果， 异常信息被正确保留。
     /// </summary>
     [Fact]
     public void BusHealthResult_Degraded_ShouldSetStatusAndException()
@@ -186,9 +177,9 @@ public class CoreEnumsAndHealthTest
     }
 
     /// <summary>
-    /// 测试目的：BusHealthResult.Unhealthy() 应创建状态为 Unhealthy 的结果，
-    /// 无参调用时 Description 和 Exception 均为 null。
+    /// 验证无参 Unhealthy 结果的默认状态和字段值。
     /// </summary>
+    /// <remarks>无参调用时，状态为 Unhealthy，Description 和 Exception 均为 null。</remarks>
     [Fact]
     public void BusHealthResult_Unhealthy_DefaultArgs_ShouldHaveNullDescriptionAndException()
     {
@@ -202,8 +193,7 @@ public class CoreEnumsAndHealthTest
     }
 
     /// <summary>
-    /// 测试目的：BusHealthResult.Healthy() 可传入自定义 Data 字典，
-    /// 结果中 Data 应与传入引用相同。
+    /// 测试目的：BusHealthResult.Healthy() 可传入自定义 Data 字典， 结果中 Data 应与传入引用相同。
     /// </summary>
     [Fact]
     public void BusHealthResult_Healthy_WithData_ShouldReturnData()
@@ -224,8 +214,7 @@ public class CoreEnumsAndHealthTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：当 exception 为 null 时，GetPrompt 应返回 null，
-    /// 防止调用方收到误导性的错误信息。
+    /// 测试目的：当 exception 为 null 时，GetPrompt 应返回 null， 防止调用方收到误导性的错误信息。
     /// </summary>
     [Fact]
     public void ExceptionPrompt_GetPrompt_NullException_ShouldReturnNull()

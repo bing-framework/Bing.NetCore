@@ -98,7 +98,6 @@ public class BingDynamicApiRouteBuilderTest
         /// <summary>
         /// 提供未匹配其他动词前缀的操作示例。
         /// </summary>
-        /// <returns>表示操作完成的异步操作。</returns>
         public Task RunAsync() => Task.CompletedTask;
     }
 }

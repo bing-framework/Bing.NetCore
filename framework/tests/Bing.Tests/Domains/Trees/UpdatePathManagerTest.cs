@@ -54,7 +54,7 @@ public class UpdatePathManagerTest
     private readonly Guid _id5 = "10000005-AAF2-4D03-9310-FEF2F47B9FE2".ToGuid();
 
     /// <summary>
-    /// 初始化一个<see cref="UpdatePathManagerTest"/>类型的实例
+    /// 初始化一个 <see cref="UpdatePathManagerTest"/> 类型的实例。
     /// </summary>
     public UpdatePathManagerTest()
     {

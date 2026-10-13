@@ -135,17 +135,17 @@ public sealed class SetClause : ISetClause, IColumnSetClause
         }
 
         /// <summary>
-        /// 待赋值的目标列名。
+        /// 获取待赋值的目标列名。
         /// </summary>
         public string Column { get; }
 
         /// <summary>
-        /// 参数名称或源列表达式。
+        /// 获取参数名称或源列表达式。
         /// </summary>
         public string Value { get; }
 
         /// <summary>
-        /// 是否将值解释为参数名称。
+        /// 获取是否将值解释为参数名称。
         /// </summary>
         public bool IsParameter { get; }
     }

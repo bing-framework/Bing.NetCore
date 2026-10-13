@@ -16,7 +16,7 @@ public class IdentitySignInManager<TUser, TKey> : SignInManager<TUser> where TUs
 {
 #if NETCOREAPP3_1_OR_GREATER
         /// <summary>
-        /// 初始化一个<see cref="IdentitySignInManager{TUser,TKey}"/>类型的实例
+        /// 初始化一个 <see cref="IdentitySignInManager{TUser, TKey}"/> 类型的实例。
         /// </summary>
         /// <param name="userManager">Identity用户管理器</param>
         /// <param name="contextAccessor">HttpContext访问器</param>
@@ -37,7 +37,7 @@ public class IdentitySignInManager<TUser, TKey> : SignInManager<TUser> where TUs
         }
 #else
     /// <summary>
-    /// 初始化一个<see cref="IdentitySignInManager{TUser,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="IdentitySignInManager{TUser, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="userManager">Identity用户管理器</param>
     /// <param name="contextAccessor">HttpContext访问器</param>
@@ -56,11 +56,8 @@ public class IdentitySignInManager<TUser, TKey> : SignInManager<TUser> where TUs
     }
 #endif
 
-    /// <summary>
-    /// 是否允许登录
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <returns>表示是否允许登录结果的异步操作。</returns>
+    /// <inheritdoc />
+    /// <remarks>禁用的用户不允许登录。</remarks>
     public override async Task<bool> CanSignInAsync(TUser user)
     {
         if (user.Enabled == false)

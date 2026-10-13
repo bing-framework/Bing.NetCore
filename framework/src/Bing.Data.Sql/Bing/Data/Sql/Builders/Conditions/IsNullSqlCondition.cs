@@ -13,7 +13,7 @@ public class IsNullSqlCondition : ISqlCondition
     private readonly string _name;
 
     /// <summary>
-    /// 初始化一个<see cref="IsNullSqlCondition"/>类型的实例
+    /// 初始化一个 <see cref="IsNullSqlCondition"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名</param>
     public IsNullSqlCondition(string name) => _name = name;

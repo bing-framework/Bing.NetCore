@@ -10,7 +10,7 @@ namespace Bing.Test.Shared;
 public sealed class ProviderRunMetadataTest
 {
     /// <summary>
-    /// 测试目的：写入完整运行元数据时应使用 UTF-8 无 BOM，并将目标框架标准化为 net 形式。
+    /// 写入完整运行元数据时应使用 UTF-8 无 BOM，并将目标框架标准化为 net 形式。
     /// </summary>
     [Fact]
     public void WriteFromEnvironment_WhenMetadataIsComplete_ShouldWriteUtf8AndNormalizedTargetFramework()
@@ -45,7 +45,7 @@ public sealed class ProviderRunMetadataTest
     }
 
     /// <summary>
-    /// 测试目的：数据库版本缺失时应拒绝写入，避免生成不可发布的占位元数据。
+    /// 数据库版本缺失时应拒绝写入，避免生成不可发布的占位元数据。
     /// </summary>
     [Fact]
     public void WriteFromEnvironment_WhenDatabaseVersionIsMissing_ShouldRejectIncompleteMetadata()
@@ -71,8 +71,9 @@ public sealed class ProviderRunMetadataTest
     }
 
     /// <summary>
-    /// 测试目的：元数据中的连接字符串关键字段必须被拒绝，避免秘密进入证据制品。
+    /// 元数据中的连接字符串关键字段必须被拒绝，避免秘密进入证据制品。
     /// </summary>
+    /// <param name="sensitiveValue">包含连接信息的伪造 Provider 版本。</param>
     [Theory]
     [InlineData("Server=localhost;Database=test;")]
     [InlineData("User Id=integration;")]

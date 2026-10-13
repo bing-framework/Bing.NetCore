@@ -8,14 +8,18 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// </summary>
 public class OracleFromClause : FromClause
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 初始化一个 <see cref="OracleFromClause"/> 类型的实例。
+    /// </summary>
+    /// <remarks>将数据库类型固定为 <see cref="Bing.Data.Enums.DatabaseType.Oracle"/>。</remarks>
+    /// <param name="context">SQL 子句运行上下文。</param>
     public OracleFromClause(SqlClauseContext context)
         : this(context, null, Bing.Data.Enums.DatabaseType.Oracle)
     {
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 Oracle From 子句。
+    /// 初始化一个 <see cref="OracleFromClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="table">表。</param>

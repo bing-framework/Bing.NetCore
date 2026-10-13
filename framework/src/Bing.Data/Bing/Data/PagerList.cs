@@ -1,46 +1,40 @@
 ﻿namespace Bing.Data;
 
 /// <summary>
-/// 分页集合
+/// 表示包含分页信息和结果数据的列表。
 /// </summary>
-/// <typeparam name="T">元素类型</typeparam>
+/// <typeparam name="T">结果元素类型。</typeparam>
 [Serializable]
 public class PagerList<T> : IPagerBase
 {
     #region 属性
 
-    /// <summary>
-    /// 页索引，即第几页，从1开始
-    /// </summary>
+    /// <inheritdoc />
     public int Page { get; set; }
 
-    /// <summary>
-    /// 每页显示行数
-    /// </summary>
+    /// <inheritdoc />
     public int PageSize { get; set; }
 
-    /// <summary>
-    /// 总行数
-    /// </summary>
+    /// <inheritdoc />
     public int TotalCount { get; set; }
 
     /// <summary>
-    /// 总页数
+    /// 获取或设置结果总页数。
     /// </summary>
     public int PageCount { get; set; }
 
     /// <summary>
-    /// 排序条件
+    /// 获取或设置排序条件。
     /// </summary>
     public string Order { get; set; }
 
     /// <summary>
-    /// 内容
+    /// 获取或设置当前分页的结果数据。
     /// </summary>
     public List<T> Data { get; set; }
 
     /// <summary>
-    /// 索引器
+    /// 获取或设置指定索引处的元素。
     /// </summary>
     /// <param name="index">索引</param>
     public T this[int index]
@@ -54,14 +48,14 @@ public class PagerList<T> : IPagerBase
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     public PagerList() : this(0)
     {
     }
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     /// <param name="data">数据</param>
     public PagerList(IEnumerable<T> data = null) : this(0, data)
@@ -69,7 +63,7 @@ public class PagerList<T> : IPagerBase
     }
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     /// <param name="totalCount">总行数</param>
     /// <param name="data">数据</param>
@@ -78,7 +72,7 @@ public class PagerList<T> : IPagerBase
     }
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     /// <param name="page">页索引</param>
     /// <param name="pageSize">每页显示行数</param>
@@ -89,7 +83,7 @@ public class PagerList<T> : IPagerBase
     }
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     /// <param name="pager">查询对象</param>
     /// <param name="data">数据</param>
@@ -98,7 +92,7 @@ public class PagerList<T> : IPagerBase
     }
 
     /// <summary>
-    /// 初始化一个<see cref="PagerList{T}"/>类型的实例
+    /// 初始化一个 <see cref="PagerList{T}"/> 类型的实例。
     /// </summary>
     /// <param name="page">页索引</param>
     /// <param name="pageSize">每页显示行数</param>

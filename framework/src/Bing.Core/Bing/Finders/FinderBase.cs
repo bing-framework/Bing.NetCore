@@ -14,7 +14,7 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
     private readonly object _lockObj = new();
 
     /// <summary>
-    /// 已缓存的项目
+    /// 保存查找器最近一次返回的项目集合。
     /// </summary>
     // ReSharper disable once InconsistentNaming
     protected readonly List<TItem> ItemsCache = new();
@@ -25,19 +25,10 @@ public abstract class FinderBase<TItem> : IFinder<TItem>
     // ReSharper disable once InconsistentNaming
     protected bool Found = false;
 
-    /// <summary>
-    /// 查找指定条件的项
-    /// </summary>
-    /// <param name="predicate">筛选条件</param>
-    /// <param name="fromCache">是否来自缓存</param>
-    /// <returns>符合筛选条件的项目数组。</returns>
+    /// <inheritdoc />
     public virtual TItem[] Find(Func<TItem, bool> predicate, bool fromCache = false) => FindAll(fromCache).Where(predicate).ToArray();
 
-    /// <summary>
-    /// 查找所有项
-    /// </summary>
-    /// <param name="fromCache">是否来自缓存</param>
-    /// <returns>查找到的全部项目数组，并在需要时更新缓存。</returns>
+    /// <inheritdoc />
     public virtual TItem[] FindAll(bool fromCache = false)
     {
         lock (_lockObj)

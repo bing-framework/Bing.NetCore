@@ -11,16 +11,12 @@ internal class EnvironmentEnricher : ILogEventEnricher
     private readonly string _environmentVariable;
 
     /// <summary>
-    /// 初始化一个<see cref="EnvironmentEnricher"/>类型的实例
+    /// 初始化一个 <see cref="EnvironmentEnricher"/> 类型的实例。
     /// </summary>
     /// <param name="variableName">环境变量名称</param>
     public EnvironmentEnricher(string variableName) => _environmentVariable = variableName;
 
-    /// <summary>
-    /// 扩展属性
-    /// </summary>
-    /// <param name="logEvent">日志事件</param>
-    /// <param name="propertyFactory">日志事件属性工厂</param>
+    /// <inheritdoc />
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         var envValue = Environment.GetEnvironmentVariable(_environmentVariable);

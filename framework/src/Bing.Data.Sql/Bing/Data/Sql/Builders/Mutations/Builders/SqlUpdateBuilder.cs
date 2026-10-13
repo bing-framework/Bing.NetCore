@@ -18,7 +18,7 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
     private bool _isDataBoundaryApplied;
 
     /// <summary>
-    /// 当前 Update 对应的数据边界语义。
+    /// 获取或设置当前 Update 对应的数据边界语义。
     /// </summary>
     internal SqlDataBoundaryOperation DataBoundaryOperation { get; set; } = SqlDataBoundaryOperation.Update;
 

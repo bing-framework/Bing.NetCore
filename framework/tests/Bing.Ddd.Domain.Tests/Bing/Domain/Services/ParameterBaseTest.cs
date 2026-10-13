@@ -17,23 +17,38 @@ public class ParameterBaseTest
 {
     // ----- 具体实现 -----
 
-    /// <summary>合法参数样例：Name 必填，已满足</summary>
+    /// <summary>
+    /// 合法参数样例：Name 必填，已满足
+    /// </summary>
     private class ValidParam : ParameterBase
     {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Required(ErrorMessage = "Name 不能为空")]
         public string Name { get; set; } = "Alice";
     }
 
-    /// <summary>非法参数样例：Name 必填，但为空</summary>
+    /// <summary>
+    /// 非法参数样例：Name 必填，但为空
+    /// </summary>
     private class InvalidParam : ParameterBase
     {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Required(ErrorMessage = "Name 不能为空")]
         public string Name { get; set; }
     }
 
-    /// <summary>无约束参数样例：无 DataAnnotation，始终合法</summary>
+    /// <summary>
+    /// 无约束参数样例：无 DataAnnotation，始终合法
+    /// </summary>
     private class UnconstrainedParam : ParameterBase
     {
+        /// <summary>
+        /// 获取或设置备注。
+        /// </summary>
         public string Remark { get; set; }
     }
 
@@ -95,12 +110,18 @@ public class ParameterBaseTest
         result.IsValid.ShouldBeTrue();
     }
 
-    /// <summary>自定义验证参数：直接绕过 DataAnnotation</summary>
+    /// <summary>
+    /// 自定义验证参数：直接绕过 DataAnnotation
+    /// </summary>
     private class CustomValidatedParam : ParameterBase
     {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Required]
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public override Bing.Validation.IValidationResult Validate()
             => Bing.Validation.ValidationResultCollection.Success;
     }

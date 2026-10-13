@@ -5,12 +5,18 @@ using Bing.Security.Claims;
 
 namespace Bing.AspNetCore.Mvc.ExceptionHandling;
 
+/// <summary>
+/// 验证控制器异常处理的 HTTP 响应。
+/// </summary>
 public class ExceptionTestControllerTest : BingAspNetCoreTestBase
 {
+    /// <summary>
+    /// 为异常控制器测试提供模拟用户声明。
+    /// </summary>
     private FakeUserClaims _fakeUserClaims;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ExceptionTestControllerTest"/> 类型的实例。
     /// </summary>
     public ExceptionTestControllerTest(HttpClient client, FakeUserClaims fakeUserClaims)
     {

@@ -18,7 +18,7 @@ public class ListComparatorTest
     private readonly ListComparator<AggregateRootSample, Guid> _comparator;
 
     /// <summary>
-    /// 初始化一个<see cref="ListComparatorTest"/>类型的实例
+    /// 初始化一个 <see cref="ListComparatorTest"/> 类型的实例。
     /// </summary>
     public ListComparatorTest() => _comparator = new ListComparator<AggregateRootSample, Guid>();
 

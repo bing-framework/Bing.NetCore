@@ -17,13 +17,11 @@ public class HttpContextCancellationTokenProvider : ICancellationTokenProvider
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
-    /// 初始化一个<see cref="HttpContextCancellationTokenProvider"/>类型的实例
+    /// 初始化一个 <see cref="HttpContextCancellationTokenProvider"/> 类型的实例。
     /// </summary>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
     public HttpContextCancellationTokenProvider(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
-    /// <summary>
-    /// 异步任务取消令牌
-    /// </summary>
+    /// <inheritdoc />
     public CancellationToken Token => _httpContextAccessor.HttpContext?.RequestAborted ?? CancellationToken.None;
 }

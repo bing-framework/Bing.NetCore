@@ -14,8 +14,9 @@ public sealed class SqlDataSourceDescriptor
     public string Key { get; set; }
 
     /// <summary>
-    /// SQL Provider 唯一标识。未设置时仅允许使用官方数据库类型兼容映射。
+    /// 获取或设置 SQL Provider 的唯一标识。
     /// </summary>
+    /// <remarks>未设置时，仅允许使用官方数据库类型兼容映射。</remarks>
     public string ProviderKey { get; set; }
 
     /// <summary>
@@ -37,13 +38,19 @@ public sealed class SqlDataSourceDescriptor
     public string ConnectionString { get; set; }
 
     /// <summary>
-    /// 是否为只读数据源。框架会拒绝结构化 Mutation、执行型存储过程和本地事务；原生 SQL 仍由调用方负责权限控制。
+    /// 获取或设置是否为只读数据源。
     /// </summary>
+    /// <remarks>
+    /// 框架会拒绝结构化 Mutation、执行型存储过程和本地事务；原生 SQL 仍由调用方负责权限控制。
+    /// </remarks>
     public bool IsReadOnly { get; set; }
 
     /// <summary>
-    /// 获取或设置选择实体映射配置的名称；未设置时使用默认映射配置。
+    /// 获取或设置选择实体映射配置的名称。
     /// </summary>
+    /// <remarks>
+    /// 未设置时使用默认映射配置。
+    /// </remarks>
     public string MappingProfile { get; set; }
 
     /// <summary>
@@ -57,12 +64,15 @@ public sealed class SqlDataSourceDescriptor
     public string PrimaryDataSourceKey { get; set; }
 
     /// <summary>
-    /// 是否支持本地事务。Doris 等仅通过 MySQL 协议提供分析查询的数据源应设为 false。
+    /// 获取或设置是否支持本地事务。
     /// </summary>
+    /// <remarks>
+    /// Doris 等仅通过 MySQL 协议提供分析查询的数据源应设为 false。
+    /// </remarks>
     public bool SupportsTransactions { get; set; } = true;
 
     /// <summary>
-    /// 已验证的数据源查询语法能力配置。
+    /// 获取或设置已验证的数据源查询语法能力配置。
     /// </summary>
     /// <remarks>
     /// 用于覆盖受服务器版本影响的 Provider 默认能力；未设置的属性继承 Provider 声明。

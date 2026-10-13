@@ -30,7 +30,7 @@ internal sealed class BingDynamicApiDescriptionController : ControllerBase
     private readonly BingDynamicApiRegistry _registry;
 
     /// <summary>
-    /// 初始化 BingDynamicApiDescriptionController 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiDescriptionController"/> 类型的实例。
     /// </summary>
     /// <param name="apiDescriptionProvider">MVC API 描述提供器。</param>
     /// <param name="registry">动态服务注册表。</param>

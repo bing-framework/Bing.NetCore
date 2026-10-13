@@ -9,7 +9,7 @@ namespace Bing.AspNetCore.Mvc;
 public static class ActionResultHelper
 {
     /// <summary>
-    /// 对象结果类型列表
+    /// 获取对象结果类型列表
     /// </summary>
     public static List<Type> ObjectResultTypes { get; }
 

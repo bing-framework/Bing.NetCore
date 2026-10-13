@@ -8,7 +8,7 @@ namespace Bing.DependencyInjection;
 public abstract class CachedServiceProviderBase : ICachedServiceProviderBase
 {
     /// <summary>
-    /// 使用服务提供程序初始化 <see cref="CachedServiceProviderBase"/> 的实例。
+    /// 初始化一个 <see cref="CachedServiceProviderBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">用于解析服务的服务提供程序。</param>
     protected CachedServiceProviderBase(IServiceProvider serviceProvider)

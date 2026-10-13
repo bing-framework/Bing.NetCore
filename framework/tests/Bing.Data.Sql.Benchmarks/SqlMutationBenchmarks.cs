@@ -40,7 +40,7 @@ public class SqlMutationBenchmarks
 
 
     /// <summary>
-    /// Mutation 实体数量。
+    /// 获取或设置Mutation 实体数量。
     /// </summary>
     [Params(10, 100, 1000)]
     public int EntityCount { get; set; }
@@ -128,23 +128,23 @@ public class SqlMutationBenchmarks
     private sealed class MutationBenchmarkEntity
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 可更新名称。
+        /// 获取或设置可更新名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 可更新金额。
+        /// 获取或设置可更新金额。
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// 乐观并发令牌。
+        /// 获取或设置乐观并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public int Version { get; set; }
@@ -158,6 +158,9 @@ public class SqlMutationBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlUpdateFromBenchmarks
 {
+    /// <summary>
+    /// 可重复渲染的 UpdateFrom 查询 Builder。
+    /// </summary>
     private ISqlBuilder _builder;
 
     /// <summary>
@@ -189,6 +192,9 @@ public class SqlUpdateFromBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlDeleteUsingBenchmarks
 {
+    /// <summary>
+    /// 可重复渲染的 DeleteUsing 查询 Builder。
+    /// </summary>
     private ISqlBuilder _builder;
 
     /// <summary>
@@ -218,6 +224,9 @@ public class SqlDeleteUsingBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlReturningBenchmarks
 {
+    /// <summary>
+    /// 可重复渲染的 Returning 查询 Builder。
+    /// </summary>
     private ISqlBuilder _builder;
 
     /// <summary>
@@ -249,6 +258,9 @@ public class SqlReturningBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlServerOutputBenchmarks
 {
+    /// <summary>
+    /// 可重复渲染的 Output 查询 Builder。
+    /// </summary>
     private ISqlBuilder _builder;
 
     /// <summary>
@@ -279,6 +291,9 @@ public class SqlServerOutputBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqliteReturningBenchmarks
 {
+    /// <summary>
+    /// 可重复渲染的 Returning 查询 Builder。
+    /// </summary>
     private ISqlBuilder _builder;
 
     /// <summary>

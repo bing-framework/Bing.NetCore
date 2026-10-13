@@ -6,7 +6,10 @@
 public interface IHasCreationTime
 {
     /// <summary>
-    /// 获取或设置实体的创建时间；尚未创建或未填充时为 <c>null</c>。
+    /// 获取或设置实体的创建时间。
     /// </summary>
+    /// <remarks>
+    /// 尚未创建或未填充时为 <c>null</c>。
+    /// </remarks>
     DateTime? CreationTime { get; set; }
 }

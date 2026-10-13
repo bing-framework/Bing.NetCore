@@ -8,7 +8,7 @@ namespace Bing.Logging;
 public sealed class BingLoggingBuilder
 {
     /// <summary>
-    /// 初始化一个<see cref="BingLoggingBuilder"/>类型的实例
+    /// 初始化一个 <see cref="BingLoggingBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">服务集合</param>
     public BingLoggingBuilder(IServiceCollection services)
@@ -17,7 +17,7 @@ public sealed class BingLoggingBuilder
     }
 
     /// <summary>
-    /// 服务集合
+    /// 获取服务集合
     /// </summary>
     public IServiceCollection Services { get; }
 }

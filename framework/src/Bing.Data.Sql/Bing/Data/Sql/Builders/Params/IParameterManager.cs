@@ -9,7 +9,7 @@
 public interface IParameterManager
 {
     /// <summary>
-    /// 当前已保存的参数数量。
+    /// 获取当前已保存的参数数量。
     /// </summary>
     int Count { get; }
 

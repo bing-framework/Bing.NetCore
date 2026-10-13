@@ -14,8 +14,11 @@ public interface ITreeQueryParameter<TParentId> : IQueryParameter
     TParentId ParentId { get; set; }
 
     /// <summary>
-    /// 获取或设置节点层级；为空时不按层级过滤。
+    /// 获取或设置节点层级。
     /// </summary>
+    /// <remarks>
+    /// 为空时不按层级过滤。
+    /// </remarks>
     int? Level { get; set; }
 
     /// <summary>
@@ -24,8 +27,11 @@ public interface ITreeQueryParameter<TParentId> : IQueryParameter
     string Path { get; set; }
 
     /// <summary>
-    /// 获取或设置启用状态过滤条件；为空时不按状态过滤。
+    /// 获取或设置启用状态过滤条件。
     /// </summary>
+    /// <remarks>
+    /// 为空时不按状态过滤。
+    /// </remarks>
     bool? Enabled { get; set; }
 
     /// <summary>

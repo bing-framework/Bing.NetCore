@@ -3,8 +3,7 @@ using Bing.DependencyInjection;
 namespace Bing.Timing;
 
 /// <summary>
-/// 基于系统时钟的 <see cref="IClock"/> 实现（生产环境默认实现）。
-/// 直接委托给 <see cref="DateTime"/> 和 <see cref="DateTimeOffset"/>。
+/// 基于系统时钟的 <see cref="IClock"/> 实现（生产环境默认实现）。 直接委托给 <see cref="DateTime"/> 和 <see cref="DateTimeOffset"/>。
 /// </summary>
 public class SystemClock : IClock, ISingletonDependency
 {

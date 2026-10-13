@@ -19,7 +19,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     private readonly PostgreSqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="PostgreSqlExecutorTest"/>类型的实例。
+    /// 初始化一个 <see cref="PostgreSqlExecutorTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">PostgreSQL 集成测试数据库固定装置。</param>
     public PostgreSqlExecutorTest(PostgreSqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -214,28 +214,40 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     [System.ComponentModel.DataAnnotations.Schema.Table("integration_products", Schema = "public")]
     private sealed class PostgreSqlMutationProduct
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         [System.ComponentModel.DataAnnotations.Schema.Column("id")]
         public Guid Id { get; set; }
 
-        /// <summary>业务编码。</summary>
+        /// <summary>
+        /// 获取或设置业务编码。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Schema.Column("code")]
         public string Code { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Schema.Column("name")]
         public string Name { get; set; }
 
-        /// <summary>金额。</summary>
+        /// <summary>
+        /// 获取或设置金额。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Schema.Column("amount")]
         public decimal? Amount { get; set; }
 
-        /// <summary>发生时间。</summary>
+        /// <summary>
+        /// 获取或设置发生时间。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Schema.Column("occurred_at")]
         public DateTime OccurredAt { get; set; }
 
-        /// <summary>并发令牌。</summary>
+        /// <summary>
+        /// 获取或设置并发令牌。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
         [System.ComponentModel.DataAnnotations.Schema.Column("version")]
         public int Version { get; set; }
@@ -246,10 +258,14 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
     /// </summary>
     private sealed class PostgreSqlReturningProduct
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         public Guid Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         public string Name { get; set; }
     }
 }

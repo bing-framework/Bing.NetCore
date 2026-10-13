@@ -24,7 +24,7 @@ public sealed class SqlParameterCollection : IReadOnlyCollection<SqlParam>
     private readonly IDictionary<string, SqlParam> _parameters;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlParameterCollection"/>类型的实例。
+    /// 初始化一个 <see cref="SqlParameterCollection"/> 类型的实例。
     /// </summary>
     /// <param name="nameNormalizer">参数名称规范化器。</param>
     public SqlParameterCollection(ISqlParameterNameNormalizer nameNormalizer = null)
@@ -33,9 +33,7 @@ public sealed class SqlParameterCollection : IReadOnlyCollection<SqlParam>
         _parameters = new Dictionary<string, SqlParam>(StringComparer.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// 参数数量。
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _parameters.Count;
 
     /// <summary>
@@ -56,7 +54,7 @@ public sealed class SqlParameterCollection : IReadOnlyCollection<SqlParam>
     }
 
     /// <summary>
-    /// 添加或替换输入参数。
+    /// 添加或替换参数。
     /// </summary>
     /// <param name="name">参数名称，支持 Provider 前缀。</param>
     /// <param name="value">参数值。</param>
@@ -73,7 +71,7 @@ public sealed class SqlParameterCollection : IReadOnlyCollection<SqlParam>
         });
 
     /// <summary>
-    /// 添加或替换输出参数。
+    /// 添加或替换参数。
     /// </summary>
     /// <param name="name">参数名称，支持 Provider 前缀。</param>
     /// <param name="dbType">数据库通用类型。</param>
@@ -82,15 +80,9 @@ public sealed class SqlParameterCollection : IReadOnlyCollection<SqlParam>
     public SqlParameterCollection AddOutput(string name, DbType? dbType = null, int? size = null) =>
         Add(new SqlParam(name, null, dbType, ParameterDirection.Output, size));
 
-    /// <summary>
-    /// 获取参数枚举器。
-    /// </summary>
-    /// <returns>参数枚举器。</returns>
+    /// <inheritdoc />
     public IEnumerator<SqlParam> GetEnumerator() => _parameters.Values.GetEnumerator();
 
-    /// <summary>
-    /// 获取非泛型参数枚举器。
-    /// </summary>
-    /// <returns>非泛型参数枚举器。</returns>
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

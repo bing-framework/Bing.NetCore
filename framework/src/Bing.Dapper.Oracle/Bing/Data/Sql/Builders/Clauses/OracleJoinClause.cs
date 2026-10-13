@@ -13,14 +13,17 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// </summary>
 public class OracleJoinClause : JoinClause
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 初始化一个 <see cref="OracleJoinClause"/> 类型的实例。
+    /// </summary>
+    /// <param name="context">SQL 子句运行上下文。</param>
     public OracleJoinClause(SqlClauseContext context)
         : this(context, null)
     {
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 Oracle 表连接子句。
+    /// 初始化一个 <see cref="OracleJoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="joinItems">已克隆的连接项。</param>

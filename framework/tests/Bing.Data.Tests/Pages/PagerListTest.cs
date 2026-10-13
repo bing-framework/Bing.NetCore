@@ -15,7 +15,7 @@ public class PagerListTest
     private readonly PagerList<Sample> _list;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="PagerListTest"/> 类型的实例。
     /// </summary>
     public PagerListTest()
     {

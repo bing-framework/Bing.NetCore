@@ -9,19 +9,19 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface ISetClause : ISqlClause, ISqlMutationClauseCloneable<ISetClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前赋值项数量。
+    /// 获取当前赋值项数量。
     /// </summary>
     int Count { get; }
 
     /// <summary>
-    /// 设置指定列的参数化值。
+    /// 设置指定列的值。
     /// </summary>
     /// <param name="column">逻辑列名。</param>
     /// <param name="value">列值。</param>
     void Set(string column, object value);
 
     /// <summary>
-    /// 使用已分配名称且包含数据库元数据的参数设置列值。
+    /// 设置指定列的值。
     /// </summary>
     /// <param name="column">逻辑列名。</param>
     /// <param name="parameter">SQL 参数。</param>

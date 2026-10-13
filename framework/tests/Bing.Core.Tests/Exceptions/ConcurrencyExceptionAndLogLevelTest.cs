@@ -119,8 +119,15 @@ public class ConcurrencyExceptionAndLogLevelTest
     // ════════════════════════════════════════════════════════════════
 
     // Warning 实现了 IHasLogLevel（通过 Warning 基类）
+    /// <summary>
+    /// 用于验证异常可携带日志级别的测试类型。
+    /// </summary>
     private class LogLevelException : Exception, IHasLogLevel
     {
+        /// <inheritdoc />
+        /// <remarks>
+        /// 获取或设置异常关联的日志级别。
+        /// </remarks>
         public LogLevel LogLevel { get; set; } = LogLevel.Error;
     }
 

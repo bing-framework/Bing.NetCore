@@ -180,6 +180,7 @@ public sealed class SqlMutationBatchPlannerTest
     /// <summary>
     /// 测试目的：用户指定零或负数批量大小时，规划器应在生成计划前拒绝无效配置。
     /// </summary>
+    /// <param name="batchSize">无效的用户指定批量大小。</param>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]

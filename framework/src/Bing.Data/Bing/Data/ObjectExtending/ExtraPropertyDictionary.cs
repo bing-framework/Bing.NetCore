@@ -7,14 +7,14 @@
 public class ExtraPropertyDictionary : Dictionary<string, object>
 {
     /// <summary>
-    /// 初始化一个<see cref="ExtraPropertyDictionary"/>类型的实例
+    /// 初始化一个 <see cref="ExtraPropertyDictionary"/> 类型的实例。
     /// </summary>
     public ExtraPropertyDictionary()
     {
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ExtraPropertyDictionary"/>类型的实例
+    /// 初始化一个 <see cref="ExtraPropertyDictionary"/> 类型的实例。
     /// </summary>
     /// <param name="dictionary">字典</param>
     public ExtraPropertyDictionary(IDictionary<string, object> dictionary) : base(dictionary)

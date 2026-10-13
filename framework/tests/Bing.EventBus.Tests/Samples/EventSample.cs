@@ -6,12 +6,12 @@
 public class EventSample : IEvent
 {
     /// <summary>
-    /// 值
+    /// 获取或设置值
     /// </summary>
     public string Value { get; set; }
 
     /// <summary>
-    /// 结果
+    /// 获取或设置结果
     /// </summary>
     public string Result { get; set; }
 }
@@ -22,7 +22,7 @@ public class EventSample : IEvent
 public class EventSample2 : IEvent
 {
     /// <summary>
-    /// 结果
+    /// 获取或设置结果
     /// </summary>
     public string Result { get; set; }
 }
@@ -33,7 +33,7 @@ public class EventSample2 : IEvent
 public class EventSample3 : IEvent
 {
     /// <summary>
-    /// 结果
+    /// 获取或设置结果
     /// </summary>
     public string Result { get; set; }
 }

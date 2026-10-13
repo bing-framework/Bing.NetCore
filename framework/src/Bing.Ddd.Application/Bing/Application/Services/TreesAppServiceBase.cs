@@ -26,25 +26,16 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter>
     private readonly IStore<TEntity, Guid> _store;
 
     /// <summary>
-    /// 初始化一个<see cref="TreesAppServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
+    /// 初始化一个 <see cref="TreesAppServiceBase{TEntity, TDto, TQueryParameter}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="store">存储器</param>
     protected TreesAppServiceBase(IUnitOfWork unitOfWork, IStore<TEntity, Guid> store) : base(unitOfWork, store) => _store = store;
 
-    /// <summary>
-    /// 过滤
-    /// </summary>
-    /// <param name="queryable">查询条件</param>
-    /// <param name="parameter">查询参数</param>
-    /// <returns>应用树形条件后的查询数据源。</returns>
+    /// <inheritdoc />
     protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity>(parameter));
 
-    /// <summary>
-    /// 获取直接下级子节点列表
-    /// </summary>
-    /// <param name="parameter">查询参数</param>
-    /// <returns>表示直接下级子节点查询结果的异步操作。</returns>
+    /// <inheritdoc />
     protected override async Task<List<TEntity>> GetChildren(TQueryParameter parameter) => await _store.FindAllAsync(t => t.ParentId == parameter.ParentId);
 }
 
@@ -74,7 +65,7 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
     private readonly IStore<TEntity, TKey> _store;
 
     /// <summary>
-    /// 初始化一个<see cref="TreesAppServiceBase{TEntity, TDto, TQueryParameter, TKey, TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreesAppServiceBase{TEntity, TDto, TQueryParameter, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="store">存储器</param>
@@ -84,29 +75,17 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
         _store = store;
     }
 
-    /// <summary>
-    /// 过滤
-    /// </summary>
-    /// <param name="queryable">查询条件</param>
-    /// <param name="parameter">查询参数</param>
-    /// <returns>应用树形条件后的查询数据源。</returns>
+    /// <inheritdoc />
     protected override IQueryable<TEntity> Filter(IQueryable<TEntity> queryable, TQueryParameter parameter) => queryable.Where(new TreeCondition<TEntity, TParentId>(parameter));
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>表示实体查询结果的异步操作，结果为对应的数据传输对象列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TDto>> FindByIdsAsync(string ids)
     {
         var entities = await _store.FindByIdsNoTrackingAsync(ids);
         return entities.Select(ToDto).ToList();
     }
 
-    /// <summary>
-    /// 异步启用指定标识对应的树节点。
-    /// </summary>
-    /// <param name="ids">以逗号分隔的节点标识列表。</param>
+    /// <inheritdoc />
     public virtual async Task EnableAsync(string ids) => await Enable(Conv.ToList<TKey>(ids), true);
 
     /// <summary>
@@ -159,17 +138,10 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
         WriteLog($"{(enabled ? "启用" : "冻结")}成功");
     }
 
-    /// <summary>
-    /// 异步禁用指定标识对应的树节点。
-    /// </summary>
-    /// <param name="ids">以逗号分隔的节点标识列表。</param>
+    /// <inheritdoc />
     public virtual Task DisableAsync(string ids) => Enable(Conv.ToList<TKey>(ids), false);
 
-    /// <summary>
-    /// 异步交换两个树节点的排序号。
-    /// </summary>
-    /// <param name="id">第一个节点标识。</param>
-    /// <param name="swapId">要交换排序号的目标节点标识。</param>
+    /// <inheritdoc />
     public virtual async Task SwapSortAsync(Guid id, Guid swapId)
     {
         var entity = await _store.FindByIdAsync(id);
@@ -182,10 +154,7 @@ public abstract class TreesAppServiceBase<TEntity, TDto, TQueryParameter, TKey, 
         await _unitOfWork.CommitAsync();
     }
 
-    /// <summary>
-    /// 异步按查询结果重新修正树节点的排序号。
-    /// </summary>
-    /// <param name="parameter">用于筛选待修正节点的查询参数。</param>
+    /// <inheritdoc />
     public virtual async Task FixSortIdAsync(TQueryParameter parameter)
     {
         var children = await GetChildren(parameter);

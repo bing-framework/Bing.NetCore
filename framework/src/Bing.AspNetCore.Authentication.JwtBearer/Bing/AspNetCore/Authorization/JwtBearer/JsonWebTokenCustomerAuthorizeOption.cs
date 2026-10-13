@@ -23,11 +23,10 @@ public class JsonWebTokenCustomerAuthorizeOption : IJsonWebTokenCustomerAuthoriz
     /// <remarks>同时创建匿名路径列表并启用默认负载校验策略。</remarks>
     public JsonWebTokenCustomerAuthorizeOption() { }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 将指定路径追加到匿名访问路径列表。
-    /// </summary>
-    /// <param name="urls">要追加的匿名访问路径列表。</param>
-    /// <returns>更新后的匿名访问路径列表。</returns>
+    /// </remarks>
     public List<string> SetAnonymousPaths(IList<string> urls)
     {
         urls.ToList().ForEach(url =>
@@ -37,9 +36,6 @@ public class JsonWebTokenCustomerAuthorizeOption : IJsonWebTokenCustomerAuthoriz
         return AnonymousPaths;
     }
 
-    /// <summary>
-    /// 设置 JWT 负载校验委托。
-    /// </summary>
-    /// <param name="func">接收负载和 JWT 配置并返回校验结果的委托。</param>
+    /// <inheritdoc />
     public void SetValidateFunc(Func<IDictionary<string, string>, JwtOptions, bool> func) => ValidatePayload = func;
 }

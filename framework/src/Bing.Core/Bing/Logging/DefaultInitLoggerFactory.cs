@@ -8,15 +8,11 @@ namespace Bing.Logging;
 public class DefaultInitLoggerFactory : IInitLoggerFactory
 {
     /// <summary>
-    /// 缓存
+    /// 按日志目标类型索引初始化日志记录器实例的容器。
     /// </summary>
     private readonly Dictionary<Type, object> _cache = new();
 
-    /// <summary>
-    /// 创建初始化日志记录器
-    /// </summary>
-    /// <typeparam name="T">类型</typeparam>
-    /// <returns>指定类型对应的初始化日志记录器。</returns>
+    /// <inheritdoc />
     public virtual IInitLogger<T> Create<T>()
     {
         return (IInitLogger<T>)_cache.GetValueOrDefault(typeof(T), _ => new DefaultInitLogger<T>());

@@ -8,13 +8,13 @@ namespace Bing.Localization;
 public class LocalizedTypeAttribute : Attribute
 {
     /// <summary>
-    /// 初始化一个<see cref="LocalizedTypeAttribute"/>类型的实例
+    /// 初始化一个 <see cref="LocalizedTypeAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="type">本地化资源类型</param>
     public LocalizedTypeAttribute(string type) => Type = type;
 
     /// <summary>
-    /// 本地化资源类型
+    /// 获取本地化资源类型
     /// </summary>
     public string Type { get; }
 

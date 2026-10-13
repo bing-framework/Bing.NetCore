@@ -28,7 +28,7 @@ public class DomainTenantResolveContributorTest
     private readonly Mock<HttpContext> _mockHttpContext;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="DomainTenantResolveContributorTest"/> 类型的实例。
     /// </summary>
     public DomainTenantResolveContributorTest()
     {

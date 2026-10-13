@@ -5,17 +5,19 @@ using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders;
 
-/// <summary>SQL Server SQL 提供程序。</summary>
+/// <summary>
+/// SQL Server SQL 提供程序。
+/// </summary>
 public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
     ISqlProviderProfileProvider
 {
     /// <summary>
-    /// 可在线程间安全共享的 SQL Server Provider 单例。
+    /// 获取可在线程间安全共享的 SQL Server Provider 单例。
     /// </summary>
     public static SqlServerSqlProvider Instance { get; } = new();
 
     /// <summary>
-    /// 初始化 SQL Server Provider 单例。
+    /// 初始化一个 <see cref="SqlServerSqlProvider"/> 类型的实例。
     /// </summary>
     private SqlServerSqlProvider() { }
 

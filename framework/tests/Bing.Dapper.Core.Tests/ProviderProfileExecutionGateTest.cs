@@ -24,6 +24,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：冻结描述未声明 Returning 能力时，同步入口必须在连接打开前以 ProviderImplementationGap 拒绝。
     /// </summary>
+    /// <param name="failureReason">能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -58,6 +59,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：冻结描述未声明 Returning 能力时，异步入口必须与同步入口在连接访问前使用相同结构化 Gate。
     /// </summary>
+    /// <param name="failureReason">能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -156,6 +158,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用存储过程时，执行型过程入口应在创建命令前拒绝。
     /// </summary>
+    /// <param name="failureReason">存储过程能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -187,6 +190,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 仅禁用输出参数时，过程输出参数应在创建命令前拒绝。
     /// </summary>
+    /// <param name="failureReason">输出参数能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -221,6 +225,8 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：原生 Dapper 输出参数仅能在命令物化后识别时，Provider 仍应在执行命令前拒绝。
     /// </summary>
+    /// <param name="direction">原生 Dapper 参数的方向。</param>
+    /// <param name="failureReason">输出参数能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(ParameterDirection.Output, SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(ParameterDirection.Output, SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -324,6 +330,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用流式读取时，异步流枚举应在打开连接前拒绝。
     /// </summary>
+    /// <param name="failureReason">流式读取能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -388,6 +395,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 测试目的：Provider 禁用取消时，携带可取消令牌的异步原生命令应在打开连接前拒绝。
     /// </summary>
+    /// <param name="failureReason">取消能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -445,8 +453,9 @@ public sealed class ProviderProfileExecutionGateTest
     }
 
     /// <summary>
-    /// 创建验证连接前拒绝的 ADO 连接。
+    /// 创建 ADO 连接测试替身。
     /// </summary>
+    /// <returns>返回状态为关闭的 ADO 连接测试替身。</returns>
     private static Mock<IDbConnection> CreateConnection()
     {
         var connection = new Mock<IDbConnection>();
@@ -455,9 +464,10 @@ public sealed class ProviderProfileExecutionGateTest
     }
 
     /// <summary>
-    /// 创建携带测试命令的 ADO 连接。
+    /// 创建 ADO 连接测试替身。
     /// </summary>
     /// <param name="command">Dapper 创建的命令。</param>
+    /// <returns>返回配置为创建指定命令的 ADO 连接测试替身。</returns>
     private static Mock<IDbConnection> CreateConnection(IDbCommand command)
     {
         var connection = CreateConnection();
@@ -468,6 +478,7 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 创建可由 Dapper 物化参数的测试命令。
     /// </summary>
+    /// <returns>返回包含可用参数集合和参数工厂的命令测试替身。</returns>
     private static Mock<IDbCommand> CreateCommand()
     {
         var command = new Mock<IDbCommand>();
@@ -479,6 +490,8 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 创建固定到测试 Provider 的 SQL 选项。
     /// </summary>
+    /// <param name="connection">绑定到 SQL 选项的 ADO 连接。</param>
+    /// <returns>返回绑定指定连接和测试 Provider 的 SQL 选项。</returns>
     private static SqlOptions CreateOptions(IDbConnection connection)
     {
         var options = new SqlOptions { Connection = connection, DatabaseType = DatabaseType.SqlServer };
@@ -498,6 +511,8 @@ public sealed class ProviderProfileExecutionGateTest
     /// <summary>
     /// 创建注册指定 Profile Provider 的测试服务容器。
     /// </summary>
+    /// <param name="profile">要注册到测试容器的 Provider 能力配置。</param>
+    /// <returns>返回注册指定 Profile Provider 的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(SqlProviderProfile profile)
     {
         var services = new ServiceCollection();
@@ -530,7 +545,7 @@ public sealed class ProviderProfileExecutionGateTest
     private sealed class ProfileGateQuery : SqlQueryBase
     {
         /// <summary>
-        /// 初始化测试 Query。
+        /// 初始化一个 <see cref="ProfileGateQuery"/> 类型的实例。
         /// </summary>
         public ProfileGateQuery(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options)
         {
@@ -546,19 +561,19 @@ public sealed class ProviderProfileExecutionGateTest
     private sealed class ProfileGateExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化测试执行器。
+        /// 初始化一个 <see cref="ProfileGateExecutor"/> 类型的实例。
         /// </summary>
         public ProfileGateExecutor(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options)
         {
         }
 
         /// <summary>
-        /// 是否让执行前 Hook 返回跳过。
+        /// 获取或设置是否让执行前 Hook 返回跳过。
         /// </summary>
         public bool SkipBeforeExecution { get; set; }
 
         /// <summary>
-        /// 执行前 Hook 调用次数。
+        /// 获取或设置执行前 Hook 调用次数。
         /// </summary>
         public int ExecuteBeforeCount { get; private set; }
 
@@ -578,11 +593,13 @@ public sealed class ProviderProfileExecutionGateTest
     /// </summary>
     private sealed class ProfileGateProvider : ISqlProvider, ISqlProviderProfileProvider
     {
-        /// <summary>测试 Provider Key。</summary>
+        /// <summary>
+        /// Provider 能力门控测试使用的稳定标识，值为 <c>test.profile-gate</c>。
+        /// </summary>
         public const string ProviderKey = "test.profile-gate";
 
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="ProfileGateProvider"/> 类型的实例。
         /// </summary>
         public ProfileGateProvider(SqlProviderProfile profile) => Profile = profile;
 
@@ -619,54 +636,75 @@ public sealed class ProviderProfileExecutionGateTest
     /// </summary>
     private sealed class TestDbParameterCollection : IDataParameterCollection
     {
+        /// <summary>
+        /// 存储集合中的数据库参数。
+        /// </summary>
         private readonly List<IDbDataParameter> _items = new();
 
+        /// <inheritdoc />
         public object this[string parameterName]
         {
             get => _items.FirstOrDefault(item => item.ParameterName == parameterName);
             set => throw new NotSupportedException();
         }
 
+        /// <inheritdoc />
         public object this[int index]
         {
             get => _items[index];
             set => throw new NotSupportedException();
         }
 
+        /// <inheritdoc />
         public bool IsFixedSize => false;
 
+        /// <inheritdoc />
         public bool IsReadOnly => false;
 
+        /// <inheritdoc />
         public int Count => _items.Count;
 
+        /// <inheritdoc />
         public bool IsSynchronized => false;
 
+        /// <inheritdoc />
         public object SyncRoot { get; } = new();
 
+        /// <inheritdoc />
         public int Add(object value)
         {
             _items.Add((IDbDataParameter)value);
             return _items.Count - 1;
         }
 
+        /// <inheritdoc />
         public void Clear() => _items.Clear();
 
+        /// <inheritdoc />
         public bool Contains(string parameterName) => _items.Any(item => item.ParameterName == parameterName);
 
+        /// <inheritdoc />
         public bool Contains(object value) => _items.Contains((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void CopyTo(Array array, int index) => _items.ToArray().CopyTo(array, index);
 
+        /// <inheritdoc />
         public IEnumerator GetEnumerator() => _items.GetEnumerator();
 
+        /// <inheritdoc />
         public int IndexOf(string parameterName) => _items.FindIndex(item => item.ParameterName == parameterName);
 
+        /// <inheritdoc />
         public int IndexOf(object value) => _items.IndexOf((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void Insert(int index, object value) => _items.Insert(index, (IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void Remove(object value) => _items.Remove((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void RemoveAt(string parameterName)
         {
             var index = IndexOf(parameterName);
@@ -674,6 +712,7 @@ public sealed class ProviderProfileExecutionGateTest
                 _items.RemoveAt(index);
         }
 
+        /// <inheritdoc />
         public void RemoveAt(int index) => _items.RemoveAt(index);
     }
 
@@ -682,24 +721,34 @@ public sealed class ProviderProfileExecutionGateTest
     /// </summary>
     private sealed class TestDbParameter : IDbDataParameter
     {
+        /// <inheritdoc />
         public byte Precision { get; set; }
 
+        /// <inheritdoc />
         public byte Scale { get; set; }
 
+        /// <inheritdoc />
         public int Size { get; set; }
 
+        /// <inheritdoc />
         public DbType DbType { get; set; }
 
+        /// <inheritdoc />
         public ParameterDirection Direction { get; set; } = ParameterDirection.Input;
 
+        /// <inheritdoc />
         public bool IsNullable => true;
 
+        /// <inheritdoc />
         public string ParameterName { get; set; }
 
+        /// <inheritdoc />
         public string SourceColumn { get; set; }
 
+        /// <inheritdoc />
         public DataRowVersion SourceVersion { get; set; }
 
+        /// <inheritdoc />
         public object Value { get; set; }
     }
 }

@@ -21,17 +21,17 @@ public sealed class SqlReturningColumn
     }
 
     /// <summary>
-    /// 物理列名。
+    /// 获取物理列名。
     /// </summary>
     public string Column { get; }
 
     /// <summary>
-    /// 可选目标表别名。
+    /// 获取可选目标表别名。
     /// </summary>
     public string Qualifier { get; }
 
     /// <summary>
-    /// 可选结果列别名。
+    /// 获取可选结果列别名。
     /// </summary>
     public string Alias { get; }
 }

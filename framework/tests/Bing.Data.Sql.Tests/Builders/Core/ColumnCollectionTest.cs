@@ -13,7 +13,7 @@ public class ColumnCollectionTest
     private readonly ColumnCollection _columns;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ColumnCollectionTest"/> 类型的实例。
     /// </summary>
     public ColumnCollectionTest()
     {

@@ -9,28 +9,20 @@ namespace Bing.TextTemplating;
 public class TemplateDefinitionContext : ITemplateDefinitionContext
 {
     /// <summary>
-    /// 模板字典
+    /// 获取模板字典
     /// </summary>
     protected Dictionary<string, TemplateDefinition> Templates { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="TemplateDefinitionContext"/>类型的实例
+    /// 初始化一个 <see cref="TemplateDefinitionContext"/> 类型的实例。
     /// </summary>
     /// <param name="templates">模板字典</param>
     public TemplateDefinitionContext(Dictionary<string, TemplateDefinition> templates) => Templates = templates;
 
-    /// <summary>
-    /// 获取指定名称的模板定义列表
-    /// </summary>
-    /// <param name="name">模板名称</param>
-    /// <returns>当前上下文中的模板定义列表。</returns>
+    /// <inheritdoc />
     public virtual IReadOnlyList<TemplateDefinition> GetAll(string name) => Templates.Values.ToImmutableList();
 
-    /// <summary>
-    /// 获取指定名称的模板定义
-    /// </summary>
-    /// <param name="name">模板名称</param>
-    /// <returns>指定名称对应的模板定义；未找到时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public virtual TemplateDefinition GetOrNull(string name) => Templates.GetOrDefault(name);
 
     /// <summary>
@@ -39,10 +31,7 @@ public class TemplateDefinitionContext : ITemplateDefinitionContext
     /// <returns>当前上下文中的全部模板定义列表。</returns>
     public virtual IReadOnlyList<TemplateDefinition> GetAll() => Templates.Values.ToImmutableList();
 
-    /// <summary>
-    /// 添加
-    /// </summary>
-    /// <param name="definitions">模板定义数组</param>
+    /// <inheritdoc />
     public void Add(params TemplateDefinition[] definitions)
     {
         if (definitions.IsNullOrEmpty())

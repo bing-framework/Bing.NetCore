@@ -69,7 +69,7 @@ public sealed class DataFilter : IDataFilter
     private sealed class FilterOverride
     {
         /// <summary>
-        /// 初始化状态覆盖。
+        /// 初始化一个 <see cref="FilterOverride"/> 类型的实例。
         /// </summary>
         /// <param name="token">作用域唯一标识。</param>
         /// <param name="filterType">过滤器标识类型。</param>
@@ -81,13 +81,19 @@ public sealed class DataFilter : IDataFilter
             Enabled = enabled;
         }
 
-        /// <summary>作用域唯一标识。</summary>
+        /// <summary>
+        /// 获取作用域唯一标识。
+        /// </summary>
         public Guid Token { get; }
 
-        /// <summary>过滤器标识类型。</summary>
+        /// <summary>
+        /// 获取过滤器标识类型。
+        /// </summary>
         public Type FilterType { get; }
 
-        /// <summary>启用状态。</summary>
+        /// <summary>
+        /// 获取启用状态。
+        /// </summary>
         public bool Enabled { get; }
     }
 
@@ -107,7 +113,7 @@ public sealed class DataFilter : IDataFilter
         private readonly Guid _token;
 
         /// <summary>
-        /// 初始化作用域。
+        /// 初始化一个 <see cref="FilterScope"/> 类型的实例。
         /// </summary>
         /// <param name="owner">所属状态管理器。</param>
         /// <param name="token">当前作用域唯一标识。</param>

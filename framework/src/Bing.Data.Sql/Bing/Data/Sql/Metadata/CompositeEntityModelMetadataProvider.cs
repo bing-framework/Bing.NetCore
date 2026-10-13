@@ -11,7 +11,7 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
     private readonly IReadOnlyList<IEntityModelMetadataProvider> _providers;
 
     /// <summary>
-    /// 初始化默认组合提供器。
+    /// 初始化一个 <see cref="CompositeEntityModelMetadataProvider"/> 类型的实例。
     /// </summary>
     public CompositeEntityModelMetadataProvider()
         : this(null)
@@ -19,7 +19,7 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
     }
 
     /// <summary>
-    /// 初始化一个<see cref="CompositeEntityModelMetadataProvider"/>类型的实例。
+    /// 初始化一个 <see cref="CompositeEntityModelMetadataProvider"/> 类型的实例。
     /// </summary>
     /// <param name="providers">前置自定义提供器集合。</param>
     public CompositeEntityModelMetadataProvider(IEnumerable<IEntityModelMetadataProvider> providers)

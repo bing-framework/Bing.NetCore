@@ -16,7 +16,7 @@ public class ValidationException : BingException
     private const string FLAG = "__VALID_FLG";
 
     /// <summary>
-    /// 验证消息键
+    /// 在验证异常附加数据和序列化信息中标识验证消息集合的键，值为 <c>__VALIDATION_MESSAGES</c>。
     /// </summary>
     private const string ValidationMessageInfoKey = "__VALIDATION_MESSAGES";
 
@@ -26,32 +26,32 @@ public class ValidationException : BingException
     private readonly IEnumerable<string> _validationMessage = Enumerable.Empty<string>();
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     public ValidationException() => Flag = FLAG;
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     public ValidationException(string message) : base(message, FLAG) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="flag">错误标识</param>
     public ValidationException(string message, string flag) : base(message, flag) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>
     public ValidationException(string message, Exception innerException) : base(message, FLAG, innerException) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="flag">错误标识</param>
@@ -59,14 +59,14 @@ public class ValidationException : BingException
     public ValidationException(string message, string flag, Exception innerException) : base(message, flag, innerException) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="validationMessage">验证消息集合</param>
     public ValidationException(IEnumerable<string> validationMessage) : base(string.Empty, FLAG) =>
         _validationMessage = validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="validationMessage">验证消息集合</param>
     /// <param name="flag">错误标识</param>
@@ -74,7 +74,7 @@ public class ValidationException : BingException
         _validationMessage = validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="validationMessage">验证消息集合</param>
@@ -82,7 +82,7 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="validationMessage">验证消息集合</param>
@@ -91,14 +91,14 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
     public ValidationException(long errorCode, string message) : base(errorCode, message, FLAG) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
@@ -106,7 +106,7 @@ public class ValidationException : BingException
     public ValidationException(long errorCode, string message, string flag) : base(errorCode, message, flag) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
@@ -114,7 +114,7 @@ public class ValidationException : BingException
     public ValidationException(long errorCode, string message, Exception innerException) : base(errorCode, message, FLAG, innerException) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
@@ -123,7 +123,7 @@ public class ValidationException : BingException
     public ValidationException(long errorCode, string message, string flag, Exception innerException) : base(errorCode, message, flag, innerException) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="validationMessage">验证消息集合</param>
@@ -131,7 +131,7 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="validationMessage">验证消息集合</param>
@@ -140,7 +140,7 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
@@ -149,7 +149,7 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="message">错误消息</param>
@@ -159,7 +159,7 @@ public class ValidationException : BingException
         validationMessage ?? throw new ArgumentNullException(nameof(validationMessage));
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="info">序列化信息</param>
     /// <param name="streamingContext">流上下文</param>
@@ -172,7 +172,7 @@ public class ValidationException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationException"/>类型的实例
+    /// 初始化一个 <see cref="ValidationException"/> 类型的实例。
     /// </summary>
     /// <param name="options">Bing框架异常选项配置</param>
     public ValidationException(BingExceptionOptions options) : base(options)
@@ -183,31 +183,21 @@ public class ValidationException : BingException
     }
 
     /// <summary>
-    /// 验证消息集合
+    /// 获取验证消息集合
     /// </summary>
     public IEnumerable<string> ValidationMessage => _validationMessage;
 
-    /// <summary>
-    /// 获取对象数据
-    /// </summary>
-    /// <param name="info">序列化信息</param>
-    /// <param name="streamingContext">流上下文</param>
+    /// <inheritdoc />
     public override void GetObjectData(SerializationInfo info, StreamingContext streamingContext)
     {
         base.GetObjectData(info, streamingContext);
         info.AddValue(ValidationMessageInfoKey, _validationMessage);
     }
 
-    /// <summary>
-    /// 获取完整的消息
-    /// </summary>
-    /// <returns>包含验证消息明细的完整异常消息。</returns>
+    /// <inheritdoc />
     public override string GetFullMessage() => ToString();
 
-    /// <summary>
-    /// 输出字符串
-    /// </summary>
-    /// <returns>包含基础消息和验证消息明细的字符串。</returns>
+    /// <inheritdoc />
     public override string ToString()
     {
         var sb = new StringBuilder();

@@ -119,26 +119,26 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     #region Add(添加)
 
     /// <summary>
-    /// 添加实体
+    /// 添加实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     void Add([Valid] TEntity entity);
 
     /// <summary>
-    /// 添加实体集合
+    /// 添加实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     void Add([Valid] IEnumerable<TEntity> entities);
 
     /// <summary>
-    /// 添加实体
+    /// 异步添加实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="cancellationToken">取消令牌</param>
     Task AddAsync([Valid] TEntity entity, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 添加实体集合
+    /// 异步添加实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>
@@ -149,25 +149,25 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     #region Update(修改)
 
     /// <summary>
-    /// 修改实体
+    /// 修改实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     void Update([Valid] TEntity entity);
 
     /// <summary>
-    /// 修改实体集合
+    /// 修改实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     void Update([Valid] IEnumerable<TEntity> entities);
 
     /// <summary>
-    /// 修改实体
+    /// 异步修改实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     Task UpdateAsync([Valid] TEntity entity);
 
     /// <summary>
-    /// 修改实体集合
+    /// 异步修改实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     Task UpdateAsync([Valid] IEnumerable<TEntity> entities);
@@ -177,52 +177,52 @@ public interface ICompactRepository<TEntity, in TKey> : IScopedDependency
     #region Remove(移除)
 
     /// <summary>
-    /// 移除实体
+    /// 移除实体或实体集合。
     /// </summary>
     /// <param name="id">标识</param>
     void Remove(object id);
 
     /// <summary>
-    /// 移除实体
+    /// 移除实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     void Remove(TEntity entity);
 
     /// <summary>
-    /// 移除实体集合
+    /// 移除实体或实体集合。
     /// </summary>
     /// <param name="ids">标识集合</param>
     void Remove(IEnumerable<TKey> ids);
 
     /// <summary>
-    /// 移除实体集合
+    /// 移除实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     void Remove(IEnumerable<TEntity> entities);
 
     /// <summary>
-    /// 移除实体
+    /// 异步移除实体或实体集合。
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="cancellationToken">取消令牌</param>
     Task RemoveAsync(object id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 移除实体
+    /// 异步移除实体或实体集合。
     /// </summary>
     /// <param name="entity">实体</param>
     /// <param name="cancellationToken">取消令牌</param>
     Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 移除实体集合
+    /// 异步移除实体或实体集合。
     /// </summary>
     /// <param name="ids">标识集合</param>
     /// <param name="cancellationToken">取消令牌</param>
     Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 移除实体集合
+    /// 异步移除实体或实体集合。
     /// </summary>
     /// <param name="entities">实体集合</param>
     /// <param name="cancellationToken">取消令牌</param>

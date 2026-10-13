@@ -8,84 +8,147 @@ namespace Bing.Auditing.Tests;
 
 // ─── 测试用实体模型 ───────────────────────────────────────────────
 
-/// <summary>简单实体：仅含创建时间</summary>
+/// <summary>
+/// 仅包含创建时间的审计测试实体。
+/// </summary>
 internal class CreationOnlyEntity : IHasCreationTime
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
 }
 
-/// <summary>实体：Guid 创建人 + 创建时间</summary>
+/// <summary>
+/// 包含 Guid 创建人标识和创建时间的审计测试实体。
+/// </summary>
 internal class GuidCreationEntity : ICreationAuditedObject<Guid>
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public Guid CreatorId { get; set; }
 }
 
-/// <summary>实体：可空 Guid 创建人</summary>
+/// <summary>
+/// 包含可空 Guid 创建人标识的审计测试实体。
+/// </summary>
 internal class NullableGuidCreationEntity : ICreationAuditedObject<Guid?>
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? CreatorId { get; set; }
 }
 
-/// <summary>实体：int 创建人</summary>
+/// <summary>
+/// 包含 int 创建人标识的审计测试实体。
+/// </summary>
 internal class IntCreationEntity : ICreationAuditedObject<int>
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public int CreatorId { get; set; }
 }
 
-/// <summary>实体：string 创建人</summary>
+/// <summary>
+/// 包含 string 创建人标识的审计测试实体。
+/// </summary>
 internal class StringCreationEntity : ICreationAuditedObject<string>
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public string CreatorId { get; set; }
 }
 
-/// <summary>实体：long 创建人</summary>
+/// <summary>
+/// 包含 long 创建人标识的审计测试实体。
+/// </summary>
 internal class LongCreationEntity : ICreationAuditedObject<long>
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public long CreatorId { get; set; }
 }
 
-/// <summary>实体：含创建人名</summary>
+/// <summary>
+/// 包含创建人名称的审计测试实体。
+/// </summary>
 internal class NamedCreationEntity : ICreationAuditedObject<Guid?>, IHasCreator
 {
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? CreatorId { get; set; }
+
+    /// <inheritdoc />
     public string Creator { get; set; }
 }
 
-/// <summary>实体：含修改时间</summary>
+/// <summary>
+/// 包含最后修改时间和修改人标识的审计测试实体。
+/// </summary>
 internal class ModificationEntity : IModificationAuditedObject<Guid?>
 {
+    /// <inheritdoc />
     public DateTime? LastModificationTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? LastModifierId { get; set; }
 }
 
-/// <summary>实体：含修改人名</summary>
+/// <summary>
+/// 包含修改人名称的审计测试实体。
+/// </summary>
 internal class NamedModificationEntity : IModificationAuditedObject<Guid?>, IHasModifier
 {
+    /// <inheritdoc />
     public DateTime? LastModificationTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? LastModifierId { get; set; }
+
+    /// <inheritdoc />
     public string LastModifier { get; set; }
 }
 
-/// <summary>实体：软删除</summary>
+/// <summary>
+/// 包含软删除状态的审计测试实体。
+/// </summary>
 internal class DeletionEntity : IDeletionAuditedObject<Guid?>
 {
+    /// <inheritdoc />
     public bool IsDeleted { get; set; }
+
+    /// <inheritdoc />
     public DateTime? DeletionTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? DeleterId { get; set; }
 }
 
-/// <summary>实体：含删除人名</summary>
+/// <summary>
+/// 包含删除人名称的审计测试实体。
+/// </summary>
 internal class NamedDeletionEntity : IDeletionAuditedObject<Guid?>, IHasDeleter
 {
+    /// <inheritdoc />
     public bool IsDeleted { get; set; }
+
+    /// <inheritdoc />
     public DateTime? DeletionTime { get; set; }
+
+    /// <inheritdoc />
     public Guid? DeleterId { get; set; }
+
+    /// <inheritdoc />
     public string Deleter { get; set; }
 }
 
@@ -96,9 +159,18 @@ internal class NamedDeletionEntity : IDeletionAuditedObject<Guid?>, IHasDeleter
 /// </summary>
 public class AuditPropertySetterTest
 {
-    /// <summary>固定时间：2025-06-01 12:00:00</summary>
+    /// <summary>
+    /// 用于审计属性断言的固定时间。
+    /// </summary>
     private static readonly DateTime FixedTime = new DateTime(2025, 6, 1, 12, 0, 0, DateTimeKind.Local);
 
+    /// <summary>
+    /// 创建使用固定时钟和指定用户状态的审计属性设置器。
+    /// </summary>
+    /// <param name="userId">当前用户标识。</param>
+    /// <param name="userName">当前用户名。</param>
+    /// <param name="isAuthenticated">当前用户是否已认证。</param>
+    /// <returns>使用固定时间和指定用户信息创建的属性设置器。</returns>
     private static AuditPropertySetter CreateSetter(
         string userId = "user-001",
         string userName = "张三",
@@ -490,8 +562,10 @@ public class AuditPropertySetterTest
 
     /// <summary>
     /// 测试目的：使用 FakeClock.Advance 推进时间后，后续调用应获得新的时间戳。
-    /// 验证 FakeClock 可以模拟时序相关的审计场景（如创建后修改）。
     /// </summary>
+    /// <remarks>
+    /// 验证 FakeClock 可以模拟时序相关的审计场景（如创建后修改）。
+    /// </remarks>
     [Fact]
     public void SetModificationProperties_AfterClockAdvance_ShouldUseNewTime()
     {

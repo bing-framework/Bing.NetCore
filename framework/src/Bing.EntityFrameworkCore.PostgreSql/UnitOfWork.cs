@@ -10,7 +10,7 @@ namespace Bing.Datas.EntityFramework.PgSql;
 public abstract class UnitOfWork : UnitOfWorkBase
 {
     /// <summary>
-    /// 初始化一个<see cref="UnitOfWork"/>类型的实例
+    /// 初始化一个 <see cref="UnitOfWork"/> 类型的实例。
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
@@ -18,10 +18,6 @@ public abstract class UnitOfWork : UnitOfWorkBase
     {
     }
 
-    /// <summary>
-    /// 获取映射实例列表
-    /// </summary>
-    /// <param name="assembly">程序集</param>
-    /// <returns>指定程序集中的映射实例集合。</returns>
+    /// <inheritdoc />
     protected override IEnumerable<Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 }

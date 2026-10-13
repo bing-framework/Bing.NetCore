@@ -14,6 +14,11 @@ namespace Bing.Threading;
 public class CallContextTest
 {
     // 每个测试用唯一键名，避免并发/顺序干扰
+    /// <summary>
+    /// 创建当前测试独有的 CallContext 键名。
+    /// </summary>
+    /// <param name="suffix">键名后缀。</param>
+    /// <returns>包含随机标识的键名。</returns>
     private static string Key(string suffix) => $"CallContext_Test_{suffix}_{Guid.NewGuid():N}";
 
     /// <summary>
@@ -151,6 +156,13 @@ public class CallContextTest
 /// </summary>
 public class AsyncLocalExtensionsTest
 {
+    /// <summary>
+    /// 通过反射调用内部 SetScoped 扩展方法。
+    /// </summary>
+    /// <typeparam name="T">AsyncLocal 中存储的值类型。</typeparam>
+    /// <param name="local">要设置作用域值的 AsyncLocal 实例。</param>
+    /// <param name="value">作用域内使用的值。</param>
+    /// <returns>用于恢复原值的释放句柄。</returns>
     private static IDisposable InvokeSetScoped<T>(AsyncLocal<T> local, T value)
     {
         var method = typeof(CallContext).Assembly

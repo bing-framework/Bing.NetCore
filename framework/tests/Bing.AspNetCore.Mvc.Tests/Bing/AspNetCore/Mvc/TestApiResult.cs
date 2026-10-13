@@ -8,22 +8,22 @@ namespace Bing.AspNetCore.Mvc;
 public class TestApiResult
 {
     /// <summary>
-    /// 状态码
+    /// 获取或设置状态码
     /// </summary>
     public int Code { get; set; }
 
     /// <summary>
-    /// 消息
+    /// 获取或设置消息
     /// </summary>
     public string Message { get; set; }
 
     /// <summary>
-    /// 数据
+    /// 获取或设置数据
     /// </summary>
     public dynamic Data { get; set; }
 
     /// <summary>
-    /// 操作时间
+    /// 获取或设置操作时间
     /// </summary>
     public DateTime OperationTime { get; set; }
 }

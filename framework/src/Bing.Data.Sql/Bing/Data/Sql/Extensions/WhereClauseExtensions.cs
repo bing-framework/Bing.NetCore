@@ -26,7 +26,7 @@ public static class WhereClauseExtensions
     #region Where
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -42,7 +42,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -60,7 +60,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置子查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -78,7 +78,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置子查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -100,7 +100,7 @@ public static class WhereClauseExtensions
     #region WhereIf
 
     /// <summary>
-    /// 设置查询条件
+    /// 按条件设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -112,7 +112,7 @@ public static class WhereClauseExtensions
     public static T WhereIf<T>(this T source, string column, object value, bool condition, Operator @operator = Operator.Equal) where T : IWhere => condition ? Where(source, column, value, @operator) : source;
 
     /// <summary>
-    /// 设置子查询条件
+    /// 按条件设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -124,7 +124,7 @@ public static class WhereClauseExtensions
     public static T WhereIf<T>(this T source, string column, ISqlBuilder builder, bool condition, Operator @operator = Operator.Equal) where T : IWhere => condition ? Where(source, column, builder, @operator) : source;
 
     /// <summary>
-    /// 设置子查询条件
+    /// 按条件设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -164,7 +164,7 @@ public static class WhereClauseExtensions
     #region Equal
 
     /// <summary>
-    /// 设置相等查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -184,7 +184,7 @@ public static class WhereClauseExtensions
     #region NotEqual
 
     /// <summary>
-    /// 设置不相等查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -204,7 +204,7 @@ public static class WhereClauseExtensions
     #region Greater
 
     /// <summary>
-    /// 设置大于查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -224,7 +224,7 @@ public static class WhereClauseExtensions
     #region GreaterEqual
 
     /// <summary>
-    /// 设置大于等于查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -244,7 +244,7 @@ public static class WhereClauseExtensions
     #region Less
 
     /// <summary>
-    /// 设置小于查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -264,7 +264,7 @@ public static class WhereClauseExtensions
     #region LessEqual
 
     /// <summary>
-    /// 设置小于等于查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -284,7 +284,7 @@ public static class WhereClauseExtensions
     #region Contains
 
     /// <summary>
-    /// 设置模糊匹配查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -304,7 +304,7 @@ public static class WhereClauseExtensions
     #region Starts
 
     /// <summary>
-    /// 设置头匹配查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -324,7 +324,7 @@ public static class WhereClauseExtensions
     #region Ends
 
     /// <summary>
-    /// 设置尾匹配查询条件
+    /// 设置 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -424,7 +424,7 @@ public static class WhereClauseExtensions
     #region In
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -441,7 +441,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -458,7 +458,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -475,7 +475,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置 In 子查询条件。
+    /// 添加 In 条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -490,7 +490,7 @@ public static class WhereClauseExtensions
     #region NotIn
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 Not In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -507,7 +507,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 Not In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -524,7 +524,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置In条件
+    /// 添加 Not In 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -541,7 +541,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置 Not In 子查询条件。
+    /// 添加 Not In 条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -556,7 +556,7 @@ public static class WhereClauseExtensions
     #region Exists
 
     /// <summary>
-    /// 设置Exists条件
+    /// 添加 Exists 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -572,7 +572,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置Exists条件
+    /// 添加 Exists 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -588,7 +588,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置 Exists 子查询条件。
+    /// 添加 Exists 条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -602,7 +602,7 @@ public static class WhereClauseExtensions
     #region NotExists
 
     /// <summary>
-    /// 设置Not Exists条件
+    /// 添加 Not Exists 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -618,7 +618,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 设置Not Exists条件
+    /// 添加 Not Exists 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -634,7 +634,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置 Not Exists 子查询条件。
+    /// 添加 Not Exists 条件。
     /// </summary>
     /// <typeparam name="T">支持 Where 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -767,7 +767,7 @@ public static class WhereClauseExtensions
     #region AppendWhere
 
     /// <summary>
-    /// 添加到 Where 子句。
+    /// 追加 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -785,7 +785,7 @@ public static class WhereClauseExtensions
     }
 
     /// <summary>
-    /// 按条件添加到 Where 子句。
+    /// 追加 Where 条件。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>

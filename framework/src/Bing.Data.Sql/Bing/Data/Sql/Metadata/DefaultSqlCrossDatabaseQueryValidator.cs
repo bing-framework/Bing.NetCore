@@ -13,7 +13,7 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 	private readonly ISqlObjectNameCapabilityProvider _capabilityProvider;
 
 	/// <summary>
-	/// 初始化一个<see cref="DefaultSqlCrossDatabaseQueryValidator"/>类型的实例。
+	/// 初始化一个 <see cref="DefaultSqlCrossDatabaseQueryValidator"/> 类型的实例。
 	/// </summary>
 	/// <param name="capabilityProvider">SQL 对象名称能力提供器。</param>
 	public DefaultSqlCrossDatabaseQueryValidator(ISqlObjectNameCapabilityProvider capabilityProvider = null)
@@ -34,11 +34,7 @@ public sealed class DefaultSqlCrossDatabaseQueryValidator : ISqlCrossDatabaseQue
 		ValidateCrossDatabase(executionContext, source, target);
 	}
 
-	/// <summary>
-	/// 验证原始字符串 From 的结构化 Join 目标。
-	/// </summary>
-	/// <param name="executionContext">执行数据库上下文。</param>
-	/// <param name="target">目标表引用。</param>
+	/// <inheritdoc />
 	public void ValidateTarget(DatabaseContext executionContext, SqlTableReference target)
 	{
 		if (target == null)

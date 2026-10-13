@@ -8,12 +8,15 @@ namespace Bing.EventBus.Local;
 public class LocalEventBusOptions
 {
     /// <summary>
-    /// 获取本地事件处理器类型列表，默认初始化为空列表。
+    /// 获取本地事件处理器类型列表。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空列表。
+    /// </remarks>
     public ITypeList<IEventHandler> Handlers { get; }
 
     /// <summary>
-    /// 初始化 <see cref="LocalEventBusOptions"/> 的实例及空处理器类型列表。
+    /// 初始化一个 <see cref="LocalEventBusOptions"/> 类型的实例。
     /// </summary>
     public LocalEventBusOptions()
     {

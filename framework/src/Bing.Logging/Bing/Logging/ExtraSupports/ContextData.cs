@@ -6,12 +6,12 @@
 public class ContextData : Dictionary<string, ContextDataItem>
 {
     /// <summary>
-    /// 初始化一个<see cref="ContextData"/>类型的实例
+    /// 初始化一个 <see cref="ContextData"/> 类型的实例。
     /// </summary>
     public ContextData() : base(StringComparer.OrdinalIgnoreCase) { }
 
     /// <summary>
-    /// 初始化一个<see cref="ContextData"/>类型的实例
+    /// 初始化一个 <see cref="ContextData"/> 类型的实例。
     /// </summary>
     /// <param name="ctx">字典</param>
     public ContextData(IDictionary<string, ContextDataItem> ctx) : base(ctx, StringComparer.OrdinalIgnoreCase) { }
@@ -71,7 +71,7 @@ public class ContextData : Dictionary<string, ContextDataItem>
     }
 
     /// <summary>
-    /// 当前上游上下文数据的指针
+    /// 获取或设置当前上游上下文数据的指针
     /// </summary>
     private ContextData CurrentUpstreamContextPointer { get; set; }
 
@@ -98,10 +98,7 @@ public class ContextData : Dictionary<string, ContextDataItem>
     /// <returns>当前上下文记录的上游上下文数据；未导入上游数据时返回 <see langword="null"/>。</returns>
     internal ContextData ExportUpstreamContextData() => CurrentUpstreamContextPointer;
 
-    /// <summary>
-    /// 输出字符串
-    /// </summary>
-    /// <returns>包含可输出上下文项的 JSON 风格文本。</returns>
+    /// <inheritdoc />
     public override string ToString()
     {
         if (Count == 0)

@@ -18,25 +18,17 @@ public class DomainEventHandlerTypeStore : IDomainEventHandlerTypeStore
     private static readonly IReadOnlyCollection<DomainEventHandlerInfo> Empty = new List<DomainEventHandlerInfo>();
 
     /// <summary>
-    /// 初始化空的领域事件处理器类型存储器。
+    /// 初始化一个 <see cref="DomainEventHandlerTypeStore"/> 类型的实例。
     /// </summary>
     public DomainEventHandlerTypeStore() => _eventHandlerTypesDict = new ConcurrentDictionary<Type, HashSet<DomainEventHandlerInfo>>();
 
-    /// <summary>
-    /// 添加指定领域事件和处理器类型的映射。
-    /// </summary>
-    /// <typeparam name="TDomainEvent">领域事件类型。</typeparam>
-    /// <typeparam name="TDomainEventHandler">领域事件处理器类型。</typeparam>
+    /// <inheritdoc />
     public void Add<TDomainEvent, TDomainEventHandler>()
         where TDomainEvent : DomainEvent
         where TDomainEventHandler : IDomainEventHandler<TDomainEvent> =>
         Add(typeof(TDomainEvent), typeof(TDomainEventHandler));
 
-    /// <summary>
-    /// 添加指定领域事件和处理器类型的映射。
-    /// </summary>
-    /// <param name="eventType">领域事件类型。</param>
-    /// <param name="handlerType">领域事件处理器类型。</param>
+    /// <inheritdoc />
     /// <exception cref="BingFrameworkException">处理器类型没有 <c>HandleAsync</c> 方法时抛出。</exception>
     public void Add(Type eventType, Type handlerType)
     {
@@ -48,11 +40,7 @@ public class DomainEventHandlerTypeStore : IDomainEventHandlerTypeStore
         _eventHandlerTypesDict[eventType].Add(new DomainEventHandlerInfo(handlerType, methodInfo));
     }
 
-    /// <summary>
-    /// 获取指定领域事件对应的处理器信息集合。
-    /// </summary>
-    /// <param name="eventType">要查询的领域事件类型。</param>
-    /// <returns>已注册的处理器信息集合；没有注册处理器时返回共享空集合。</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<DomainEventHandlerInfo> GetHandlers(Type eventType)
     {
         if (_eventHandlerTypesDict.TryGetValue(eventType, out var handlerTypes))

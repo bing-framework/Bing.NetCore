@@ -16,15 +16,12 @@ public class AttributeTypeFinderBase<TAttributeType> : FinderBase<Type>, ITypeFi
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 初始化一个<see cref="AttributeTypeFinderBase{TAttributeType}"/>类型的实例
+    /// 初始化一个 <see cref="AttributeTypeFinderBase{TAttributeType}"/> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器</param>
     public AttributeTypeFinderBase(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
-    /// <summary>
-    /// 执行所有项目的查找工作
-    /// </summary>
-    /// <returns>符合特性筛选条件的类型数组。</returns>
+    /// <inheritdoc />
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);

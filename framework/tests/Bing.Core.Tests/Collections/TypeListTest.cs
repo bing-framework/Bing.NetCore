@@ -10,9 +10,24 @@ public class TypeListTest
 {
     // ==================== 辅助接口/类 ====================
 
+    /// <summary>
+    /// TypeList 类型参数验证使用的动物契约。
+    /// </summary>
     private interface IAnimal { }
+
+    /// <summary>
+    /// 实现动物契约的狗测试类型。
+    /// </summary>
     private class Dog : IAnimal { }
+
+    /// <summary>
+    /// 实现动物契约的猫测试类型。
+    /// </summary>
     private class Cat : IAnimal { }
+
+    /// <summary>
+    /// 实现动物契约的鱼测试类型。
+    /// </summary>
     private class Fish : IAnimal { }
 
     // ==================== Count / IsReadOnly ====================

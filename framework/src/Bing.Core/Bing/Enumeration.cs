@@ -16,7 +16,7 @@ public abstract class Enumeration : IComparable
     public string Name { get; }
 
     /// <summary>
-    /// 使用标识和名称初始化 <see cref="Enumeration"/> 的实例。
+    /// 初始化一个 <see cref="Enumeration"/> 类型的实例。
     /// </summary>
     /// <param name="id">枚举项的唯一字符串标识。</param>
     /// <param name="name">枚举项的显示名称。</param>
@@ -26,17 +26,16 @@ public abstract class Enumeration : IComparable
         Name = name;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回包含类型、标识和名称的枚举项文本表示。
-    /// </summary>
-    /// <returns>包含类型、标识和名称的文本表示。</returns>
+    /// </remarks>
     public override string ToString() => $"[{GetType().Name}] Id = {Id}, Name = {Name}";
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 判断当前枚举项是否与指定对象具有相同的具体类型和标识。
-    /// </summary>
-    /// <param name="other">要比较的对象。</param>
-    /// <returns>对象为相同具体类型且标识相等时返回 <see langword="true"/>。</returns>
+    /// </remarks>
     public override bool Equals(object other)
     {
         var otherValue = other as Enumeration;
@@ -47,17 +46,16 @@ public abstract class Enumeration : IComparable
         return typeMatches && valueMatches;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回基于枚举项标识的哈希代码。
-    /// </summary>
-    /// <returns>基于枚举项标识计算的哈希代码。</returns>
+    /// </remarks>
     public override int GetHashCode() => Id.GetHashCode();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 按字符串标识顺序比较当前枚举项与指定对象。
-    /// </summary>
-    /// <param name="other">要比较的枚举项。</param>
-    /// <returns>当前标识与指定标识的序关系。</returns>
+    /// </remarks>
     public int CompareTo(object other) => string.Compare(Id, ((Enumeration)other).Id, StringComparison.Ordinal);
 
     /// <summary>

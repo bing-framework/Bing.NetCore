@@ -11,7 +11,7 @@ namespace Bing.Data.Sql;
 internal sealed class SqlPreparedCommand
 {
     /// <summary>
-    /// 初始化一个<see cref="SqlPreparedCommand"/>类型的实例。
+    /// 初始化一个 <see cref="SqlPreparedCommand"/> 类型的实例。
     /// </summary>
     /// <param name="sql">待执行的 SQL 文本。</param>
     /// <param name="parameterSource">调用方提供的原始参数源。</param>
@@ -29,32 +29,35 @@ internal sealed class SqlPreparedCommand
     }
 
     /// <summary>
-    /// 待执行的 SQL 文本。
+    /// 获取待执行的 SQL 文本。
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 调用方提供的原始参数源。
+    /// 获取调用方提供的原始参数源。
     /// </summary>
     public object ParameterSource { get; }
 
     /// <summary>
-    /// 本次执行绑定后的 Dapper 参数。
+    /// 获取本次执行绑定后的 Dapper 参数。
     /// </summary>
     public object DapperParameters { get; }
 
     /// <summary>
-    /// 生成 SQL 的 Builder；原生 SQL 时为 null。
+    /// 获取生成 SQL 的 Builder。
     /// </summary>
+    /// <remarks>
+    /// 原生 SQL 时为 null。
+    /// </remarks>
     public ISqlBuilder Builder { get; }
 
     /// <summary>
-    /// 与 SQL 使用同一快照生成的调试 SQL。
+    /// 获取与 SQL 使用同一快照生成的调试 SQL。
     /// </summary>
     public string DebugSql { get; }
 
     /// <summary>
-    /// 是否由 SQL Builder 生成。
+    /// 获取是否由 SQL Builder 生成。
     /// </summary>
     public bool IsBuilderCommand => Builder != null;
 }

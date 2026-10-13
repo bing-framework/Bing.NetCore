@@ -11,14 +11,14 @@ public abstract class BasicAggregateRoot<TEntity> : BasicAggregateRoot<TEntity, 
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例，并使用空标识。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity}"/> 类型的实例。
     /// </summary>
     protected BasicAggregateRoot() : this(Guid.Empty)
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected BasicAggregateRoot(Guid id) : base(id)
@@ -40,14 +40,14 @@ public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TK
     private List<DomainEvent> _domainEvents;
 
     /// <summary>
-    /// 初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例，并使用默认标识。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected BasicAggregateRoot() : this(default)
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected BasicAggregateRoot(TKey id) : base(id)

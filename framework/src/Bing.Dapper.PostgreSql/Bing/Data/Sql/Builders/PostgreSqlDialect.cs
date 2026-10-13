@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public sealed class PostgreSqlDialect : DialectBase
 {
     /// <summary>
-    /// 封闭构造函数
+    /// 初始化一个 <see cref="PostgreSqlDialect"/> 类型的实例。
     /// </summary>
     private PostgreSqlDialect() { }
 
     /// <summary>
-    /// PostgreSql方言实例
+    /// 获取PostgreSql方言实例
     /// </summary>
     public static PostgreSqlDialect Instance { get; } = new();
 

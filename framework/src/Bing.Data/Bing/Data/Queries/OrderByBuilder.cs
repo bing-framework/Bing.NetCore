@@ -13,7 +13,7 @@ public class OrderByBuilder
     private readonly List<OrderByItem> _items;
 
     /// <summary>
-    /// 初始化一个<see cref="OrderByBuilder"/>类型的实例
+    /// 初始化一个 <see cref="OrderByBuilder"/> 类型的实例。
     /// </summary>
     public OrderByBuilder() => _items = new List<OrderByItem>();
 

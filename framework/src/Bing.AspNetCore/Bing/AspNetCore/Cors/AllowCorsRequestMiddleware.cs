@@ -13,15 +13,12 @@ public class AllowCorsRequestMiddleware : IMiddleware
     private readonly RequestDelegate _next;
 
     /// <summary>
-    /// 初始化一个<see cref="AllowCorsRequestMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="AllowCorsRequestMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     public AllowCorsRequestMiddleware(RequestDelegate next) => _next = next;
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         // 若为OPTIONS跨域请求则直接返回，不进入后续管道

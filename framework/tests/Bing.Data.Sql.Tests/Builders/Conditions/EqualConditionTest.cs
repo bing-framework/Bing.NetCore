@@ -16,7 +16,7 @@ public class EqualConditionTest
     private readonly IParameterManager _parameterManager;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="EqualConditionTest"/> 类型的实例。
     /// </summary>
     public EqualConditionTest()
     {
@@ -36,6 +36,8 @@ public class EqualConditionTest
     /// <summary>
     /// 获取结果
     /// </summary>
+    /// <param name="condition">要追加到缓冲区的 SQL 条件。</param>
+    /// <returns>返回 SQL 条件生成的文本。</returns>
     private string GetResult(ISqlCondition condition)
     {
         var result = new StringBuilder();
@@ -180,7 +182,7 @@ public class EqualConditionTest
         private bool _shouldThrow = true;
 
         /// <summary>
-        /// 初始化一个<see cref="ThrowOnceSqlCondition"/>类型的实例。
+        /// 初始化一个 <see cref="ThrowOnceSqlCondition"/> 类型的实例。
         /// </summary>
         /// <param name="parameterManager">参数管理器。</param>
         /// <param name="column">列名。</param>
@@ -207,7 +209,7 @@ public class EqualConditionTest
     private sealed class UnsupportedSqlBuilderCondition : SqlConditionBase
     {
         /// <summary>
-        /// 初始化测试条件。
+        /// 初始化一个 <see cref="UnsupportedSqlBuilderCondition"/> 类型的实例。
         /// </summary>
         public UnsupportedSqlBuilderCondition(IParameterManager parameterManager, string column, object value)
             : base(parameterManager, column, value, true)

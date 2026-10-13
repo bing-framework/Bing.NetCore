@@ -5,6 +5,17 @@ namespace Bing.Test.Shared;
 /// </summary>
 public sealed class ProviderContractScenario
 {
+    /// <summary>
+    /// 初始化一个 <see cref="ProviderContractScenario"/> 类型的实例。
+    /// </summary>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="capability">能力名称。</param>
+    /// <param name="name">场景名称。</param>
+    /// <param name="executeAsync">执行场景的异步委托。</param>
+    /// <param name="fixedState">未执行场景的固定状态。</param>
+    /// <param name="evidence">场景证据说明。</param>
+    /// <param name="artifact">场景制品路径或标识。</param>
+    /// <param name="realIntegrationEvidenceFactory">创建真实集成证据的工厂。</param>
     public ProviderContractScenario(string provider, string capability, string name,
         Func<CancellationToken, Task> executeAsync = null,
         ProviderCapabilityEvidenceState? fixedState = null, string evidence = null, string artifact = null,
@@ -28,22 +39,52 @@ public sealed class ProviderContractScenario
             throw new ArgumentException("固定状态场景不能提供真实集成证据工厂。", nameof(realIntegrationEvidenceFactory));
     }
 
+    /// <summary>
+    /// 获取 Provider 名称。
+    /// </summary>
     public string Provider { get; }
 
+    /// <summary>
+    /// 获取能力名称。
+    /// </summary>
     public string Capability { get; }
 
+    /// <summary>
+    /// 获取场景名称。
+    /// </summary>
     public string Name { get; }
 
+    /// <summary>
+    /// 获取场景执行委托。
+    /// </summary>
     public Func<CancellationToken, Task> ExecuteAsync { get; }
 
+    /// <summary>
+    /// 获取未执行场景的固定状态。
+    /// </summary>
     public ProviderCapabilityEvidenceState? FixedState { get; }
 
+    /// <summary>
+    /// 获取场景证据说明。
+    /// </summary>
     public string Evidence { get; }
 
+    /// <summary>
+    /// 获取场景制品路径或标识。
+    /// </summary>
     public string Artifact { get; }
 
+    /// <summary>
+    /// 获取真实集成证据工厂。
+    /// </summary>
     public Func<ProviderIntegrationEvidenceMetadata> RealIntegrationEvidenceFactory { get; }
 
+    /// <summary>
+    /// 验证文本值不为空并去除首尾空白。
+    /// </summary>
+    /// <param name="value">待验证的文本值。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的文本值。</returns>
     private static string Require(string value, string parameterName) =>
         string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("值不能为空。", parameterName) : value.Trim();
 }
@@ -53,6 +94,12 @@ public sealed class ProviderContractScenario
 /// </summary>
 public static class ProviderContractRunner
 {
+    /// <summary>
+    /// 执行 Provider 合同场景并生成能力证据。
+    /// </summary>
+    /// <param name="scenarios">待执行的合同场景集合。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>按输入顺序生成的能力证据。</returns>
     public static async Task<IReadOnlyList<ProviderCapabilityEvidence>> RunAsync(
         IEnumerable<ProviderContractScenario> scenarios, CancellationToken cancellationToken = default)
     {

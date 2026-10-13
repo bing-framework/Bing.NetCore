@@ -37,7 +37,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     private readonly SqlMutationPlanCache _planCache;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlEntityMutationCommandBuilder"/>类型的实例。
+    /// 初始化一个 <see cref="DefaultSqlEntityMutationCommandBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
     /// <param name="services">当前命令可共享的服务。</param>
@@ -50,12 +50,12 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <summary>
-    /// 当前映射解析器分区内已缓存的 Mutation Plan 数量。
+    /// 获取当前映射解析器分区内已缓存的 Mutation Plan 数量。
     /// </summary>
     internal int PlanCacheCount => _planCache.PlanCount;
 
     /// <summary>
-    /// 当前映射解析器分区内已缓存的属性 Getter 数量。
+    /// 获取当前映射解析器分区内已缓存的属性 Getter 数量。
     /// </summary>
     internal int GetterCacheCount => _planCache.GetterCount;
 
@@ -325,7 +325,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <summary>
-    /// 将实体主键和并发令牌配置为 Update 或 Delete 的条件子句。
+    /// 配置 Mutation 条件子句。
     /// </summary>
     /// <param name="plan">已解析的 Mutation 映射计划。</param>
     /// <param name="entity">实体当前值。</param>
@@ -343,7 +343,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <summary>
-    /// 将实体主键和并发令牌配置为 Delete 条件子句。
+    /// 配置 Mutation 条件子句。
     /// </summary>
     /// <param name="whereClause">待配置的 Mutation Where 子句。</param>
     /// <param name="plan">已解析的 Mutation 映射计划。</param>
@@ -448,7 +448,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         SqlConcurrencyConflictBehavior.Throw);
 
     /// <summary>
-    /// 尝试读取更新选项中的并发原始值。
+    /// 尝试读取并发原始值。
     /// </summary>
     /// <param name="options">可选的 Update 选项。</param>
     /// <param name="propertyName">并发属性名称。</param>
@@ -463,7 +463,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <summary>
-    /// 尝试读取删除选项中的并发原始值。
+    /// 尝试读取并发原始值。
     /// </summary>
     /// <param name="options">可选的 Delete 选项。</param>
     /// <param name="propertyName">并发属性名称。</param>

@@ -9,7 +9,7 @@ namespace Bing.Tests.UnitOfWorks;
 public class MySqlUnitOfWork : MySqlUnitOfWorkBase, ITestUnitOfWork
 {
     /// <summary>
-    /// 初始化一个<see cref="MySqlUnitOfWork"/>类型的实例
+    /// 初始化一个 <see cref="MySqlUnitOfWork"/> 类型的实例。
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>

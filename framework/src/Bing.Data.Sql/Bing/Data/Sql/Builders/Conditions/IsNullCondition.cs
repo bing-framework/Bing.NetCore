@@ -11,14 +11,11 @@ public class IsNullCondition : ICondition
     private readonly string _name;
 
     /// <summary>
-    /// 初始化一个<see cref="IsNullCondition"/>类型的实例
+    /// 初始化一个 <see cref="IsNullCondition"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名</param>
     public IsNullCondition(string name) => _name = name;
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>返回列名对应的 <c>Is Null</c> SQL 条件；列名为空时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetCondition() => string.IsNullOrWhiteSpace(_name) ? null : $"{_name} Is Null";
 }

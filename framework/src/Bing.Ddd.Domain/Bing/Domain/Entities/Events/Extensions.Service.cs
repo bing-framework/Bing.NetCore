@@ -15,7 +15,7 @@ public static class Extensions
     private static readonly Type _eventHandlerBaseType = typeof(IDomainEventHandler<>);
 
     /// <summary>
-    /// 从指定类型所属程序集注册领域事件调度器及处理器。
+    /// 注册领域事件调度器及处理器。
     /// </summary>
     /// <param name="services">服务集合。</param>
     /// <param name="types">用于定位待扫描程序集的类型集合。</param>
@@ -28,7 +28,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// 从当前服务集合关联的全部程序集注册领域事件调度器及处理器。
+    /// 注册领域事件调度器及处理器。
     /// </summary>
     /// <param name="services">服务集合。</param>
     /// <returns>传入的服务集合。</returns>
@@ -39,7 +39,7 @@ public static class Extensions
     }
 
     /// <summary>
-    /// 从指定程序集注册领域事件调度器及处理器。
+    /// 注册领域事件调度器及处理器。
     /// </summary>
     /// <param name="services">服务集合。</param>
     /// <param name="assemblies">要扫描的程序集集合。</param>

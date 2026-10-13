@@ -12,6 +12,7 @@ public class RemoteStreamContentTestController : ApiControllerBase
     /// <summary>
     /// 测试 - 下载
     /// </summary>
+    /// <returns>包含 RTF 下载内容的远程流内容。</returns>
     [HttpGet("Download")]
     public async Task<IRemoteStreamContent> DownloadAsync()
     {
@@ -24,6 +25,7 @@ public class RemoteStreamContentTestController : ApiControllerBase
     /// <summary>
     /// 测试 - 下载 - 自定义内容
     /// </summary>
+    /// <returns>包含 RTF 下载内容的远程流内容。</returns>
     [HttpGet("Download-With-Custom-Content-Disposition")]
     public async Task<IRemoteStreamContent> Download_With_Custom_Content_Disposition_Async()
     {
@@ -37,6 +39,7 @@ public class RemoteStreamContentTestController : ApiControllerBase
     /// <summary>
     /// 测试 - 下载 - 中文文件名
     /// </summary>
+    /// <returns>包含中文文件名的 RTF 下载内容。</returns>
     [HttpGet("Download_With_Chinese_File_Name")]
     public async Task<IRemoteStreamContent> Download_With_Chinese_File_Name_Async()
     {
@@ -50,6 +53,7 @@ public class RemoteStreamContentTestController : ApiControllerBase
     /// 测试 - 上传
     /// </summary>
     /// <param name="file">文件</param>
+    /// <returns>包含文件内容、内容类型和文件名的字符串。</returns>
     [HttpPost("Upload")]
     public async Task<string> UploadAsync(IRemoteStreamContent file)
     {
@@ -61,6 +65,7 @@ public class RemoteStreamContentTestController : ApiControllerBase
     /// 测试 - 上传 - 流
     /// </summary>
     /// <param name="file">文件</param>
+    /// <returns>包含文件内容和内容类型的字符串。</returns>
     [HttpPost("Upload-Raw")]
     public async Task<string> UploadRawAsync(IRemoteStreamContent file)
     {

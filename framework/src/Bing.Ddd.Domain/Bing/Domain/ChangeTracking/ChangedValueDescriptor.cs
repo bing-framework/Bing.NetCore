@@ -6,7 +6,7 @@
 public record ChangedValueDescriptor
 {
     /// <summary>
-    /// 初始化一个<see cref="ChangedValueDescriptor"/>类型的实例
+    /// 初始化一个 <see cref="ChangedValueDescriptor"/> 类型的实例。
     /// </summary>
     /// <param name="propertyName">属性名</param>
     /// <param name="description">描述</param>
@@ -21,28 +21,28 @@ public record ChangedValueDescriptor
     }
 
     /// <summary>
-    /// 属性名
+    /// 获取属性名
     /// </summary>
     public string PropertyName { get; }
 
     /// <summary>
-    /// 描述
+    /// 获取描述
     /// </summary>
     public string Description { get; }
 
     /// <summary>
-    /// 旧值
+    /// 获取旧值
     /// </summary>
     public string OldValue { get; }
 
     /// <summary>
-    /// 新值
+    /// 获取新值
     /// </summary>
     public string NewValue { get; }
 
-    /// <summary>
-    /// 输出变更信息
-    /// </summary>
-    /// <returns>当前变更值描述的文本表示。</returns>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 文本包含属性、描述、旧值和新值。
+    /// </remarks>
     public override string ToString() => $"{PropertyName}({Description}),旧值:{OldValue},新值:{NewValue}";
 }

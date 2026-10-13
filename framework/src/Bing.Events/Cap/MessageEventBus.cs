@@ -14,22 +14,22 @@ namespace Bing.Events.Cap;
 public class MessageEventBus : IMessageEventBus
 {
     /// <summary>
-    /// 事件发布器
+    /// 获取或设置事件发布器
     /// </summary>
     public ICapPublisher Publisher { get; set; }
 
     /// <summary>
-    /// 事务操作管理器
+    /// 获取或设置事务操作管理器
     /// </summary>
     public ITransactionActionManager TransactionActionManager { get; set; }
 
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILogger<MessageEventBus> Logger { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="MessageEventBus"/>类型的实例
+    /// 初始化一个 <see cref="MessageEventBus"/> 类型的实例。
     /// </summary>
     /// <param name="publisher">事件发布器</param>
     /// <param name="transactionActionManager">事务操作管理器</param>
@@ -43,24 +43,12 @@ public class MessageEventBus : IMessageEventBus
         Logger = logger ?? NullLogger<MessageEventBus>.Instance;
     }
 
-    /// <summary>
-    /// 发布事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="event">事件</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : IMessageEvent =>
         PublishAsync(@event.Name, @event.Data, @event.Callback, @event.Send, cancellationToken);
 
-    /// <summary>
-    /// 发布事件
-    /// </summary>
-    /// <param name="name">消息名称</param>
-    /// <param name="data">事件数据</param>
-    /// <param name="callback">回调名称</param>
-    /// <param name="send">是否立即发送消息</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public async Task PublishAsync(string name, object data, string callback = null, bool send = false, CancellationToken cancellationToken = default)
     {
         var headers = new Dictionary<string, string> { { DotNetCore.CAP.Messages.Headers.CallbackName, callback } };

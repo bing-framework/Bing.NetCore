@@ -461,7 +461,6 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 写入缓冲测试产品。
     /// </summary>
-    /// <returns>异步任务。</returns>
     private async Task SeedProductsAsync()
     {
         await InitProductDataAsync(Guid.NewGuid(), "buffer-one");

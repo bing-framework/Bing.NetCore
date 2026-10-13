@@ -21,7 +21,7 @@ public class SqlDebugSqlBenchmarks
     private string _sql;
 
     /// <summary>
-    /// 参数数量。
+    /// 获取或设置参数数量。
     /// </summary>
     [Params(10, 100, 1000)]
     public int ParameterCount { get; set; }

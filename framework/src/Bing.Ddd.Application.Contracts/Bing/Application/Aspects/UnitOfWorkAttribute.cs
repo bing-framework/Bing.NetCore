@@ -11,16 +11,16 @@ namespace Bing.Application.Aspects;
 /// </summary>
 public class UnitOfWorkAttribute : InterceptorBase, IScopeInterceptor
 {
-    /// <summary>
-    /// 获取或设置拦截器作用域；使用 <see cref="Scope.Aspect"/> 时，嵌套拦截器仅由最外层生效。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 使用 <see cref="Scope.Aspect"/> 时，嵌套拦截器仅由最外层生效。
+    /// </remarks>
     public Scope Scope { get; set; } = Scope.Aspect;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行目标方法，并在成功返回后提交工作单元及执行提交后回调。
-    /// </summary>
-    /// <param name="context">当前拦截上下文。</param>
-    /// <param name="next">目标方法的后续执行委托。</param>
+    /// </remarks>
     public override async Task Invoke(AspectContext context, AspectDelegate next)
     {
         await next(context);

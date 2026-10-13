@@ -14,7 +14,7 @@ public abstract class SqlConditionBase : ISqlCondition
     private string _parameterName;
 
     /// <summary>
-    /// 使用参数管理器、列和值初始化一个 <see cref="SqlConditionBase"/> 实例。
+    /// 初始化一个 <see cref="SqlConditionBase"/> 类型的实例。
     /// </summary>
     /// <param name="parameterManager">用于保存参数的参数管理器。</param>
     /// <param name="column">条件左侧列名。</param>
@@ -46,7 +46,7 @@ public abstract class SqlConditionBase : ISqlCondition
     protected object Value { get; }
 
     /// <summary>
-    /// 是否参数化
+    /// 获取是否参数化
     /// </summary>
     protected bool IsParameterization { get; }
 

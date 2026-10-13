@@ -3,67 +3,67 @@ using Bing.Data.Enums;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// SQL 数据库物理身份。
+/// 标识 SQL 数据库的物理位置和连接身份。
 /// </summary>
 public sealed class SqlDatabaseIdentity : IEquatable<SqlDatabaseIdentity>
 {
     /// <summary>
-    /// 数据库类型。
+    /// 获取或设置数据库类型。
     /// </summary>
     public DatabaseType DatabaseType { get; set; }
 
     /// <summary>
-    /// 数据库服务器或数据源端点。
+    /// 获取或设置数据库服务器或数据源端点。
     /// </summary>
     public string Server { get; set; }
 
     /// <summary>
-    /// 数据库服务端口。
+    /// 获取或设置数据库服务端口。
     /// </summary>
     public int? Port { get; set; }
 
     /// <summary>
-    /// 数据库名称或目录。
+    /// 获取或设置数据库名称或目录。
     /// </summary>
     public string Database { get; set; }
 
     /// <summary>
-    /// 数据库实例名称。
+    /// 获取或设置数据库实例名称。
     /// </summary>
     public string Instance { get; set; }
 
     /// <summary>
-    /// SQLite 数据库文件路径或内存数据库标识。
+    /// 获取或设置 SQLite 数据库文件路径或内存数据库标识。
     /// </summary>
     public string FilePath { get; set; }
 
     /// <summary>
-    /// Oracle 服务名称或 SID。
+    /// 获取或设置 Oracle 服务名称或 SID。
     /// </summary>
     public string ServiceName { get; set; }
 
     /// <summary>
-    /// Oracle SID。
+    /// 获取或设置 Oracle SID。
     /// </summary>
     public string Sid { get; set; }
 
     /// <summary>
-    /// Oracle 未展开的数据源别名。
+    /// 获取或设置 Oracle 未展开的数据源别名。
     /// </summary>
     public string OracleAlias { get; set; }
 
     /// <summary>
-    /// SQLite 命名共享内存数据库名称。
+    /// 获取或设置 SQLite 命名共享内存数据库名称。
     /// </summary>
     public string SharedMemoryName { get; set; }
 
     /// <summary>
-    /// 是否可以安全比较物理身份。
+    /// 获取或设置是否可以安全比较物理身份。
     /// </summary>
     public bool IsComparable { get; set; } = true;
 
     /// <summary>
-    /// 是否为仅当前连接可见的 SQLite 独占内存数据库。
+    /// 获取或设置是否为仅当前连接可见的 SQLite 独占内存数据库。
     /// </summary>
     /// <remarks>
     /// 独占内存数据库不能作为 EF Core Shared 模式的可复用物理身份。

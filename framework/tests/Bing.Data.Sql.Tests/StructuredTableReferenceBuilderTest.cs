@@ -162,6 +162,8 @@ public class StructuredTableReferenceBuilderTest
     /// <summary>
     /// 创建带指定 Provider 执行上下文的测试 Builder。
     /// </summary>
+    /// <param name="databaseType">测试执行上下文使用的数据库类型。</param>
+    /// <returns>返回绑定指定数据库上下文和跨库校验器的测试 Builder。</returns>
     private static TestSqlBuilder CreateBuilder(DatabaseType databaseType)
     {
         var context = new DatabaseContext

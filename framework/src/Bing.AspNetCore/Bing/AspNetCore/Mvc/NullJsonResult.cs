@@ -8,7 +8,7 @@ namespace Bing.AspNetCore.Mvc;
 public class NullJsonResult : JsonResult
 {
     /// <summary>
-    /// 初始化一个<see cref="NullJsonResult"/>类型的实例
+    /// 初始化一个 <see cref="NullJsonResult"/> 类型的实例。
     /// </summary>
     public NullJsonResult() : base(null)
     {

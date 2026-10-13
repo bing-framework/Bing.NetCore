@@ -11,7 +11,7 @@ namespace Bing.Test.Shared;
 public sealed class ProviderReleaseEvidenceValidatorTest
 {
     /// <summary>
-    /// 测试目的：当前运行的成功 TRX 和摘要通过验证后，才能创建带当前运行绑定的 ReleaseEvidence。
+    /// 当前运行的成功 TRX 和摘要通过验证后，才能创建带当前运行绑定的 ReleaseEvidence。
     /// </summary>
     [Fact]
     public void Write_WhenCurrentSuccessfulArtifactsMatch_ShouldCreateTrustedReleaseEvidence()
@@ -36,7 +36,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：发布证据不得引用当前运行目录以外的伪造 TRX 路径。
+    /// 发布证据不得引用当前运行目录以外的伪造 TRX 路径。
     /// </summary>
     [Fact]
     public void Validate_WhenTrxPathIsOutsideCurrentRun_ShouldRejectForgery()
@@ -53,7 +53,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：历史 TRX 即使内容成功也不得被重新绑定为当前发布运行。
+    /// 历史 TRX 即使内容成功也不得被重新绑定为当前发布运行。
     /// </summary>
     [Fact]
     public void Validate_WhenTrxIsHistoric_ShouldRejectArtifact()
@@ -70,7 +70,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：已绑定同一证据会话的归档制品超过当前运行 freshness 后，仍应通过完整性验证。
+    /// 已绑定同一证据会话的归档制品超过当前运行 freshness 后，仍应通过完整性验证。
     /// </summary>
     [Fact]
     public void ValidateArchived_WhenCompletedMoreThanFreshnessWindowAgo_ShouldAcceptMatchingEvidence()
@@ -88,7 +88,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：归档制品的 EvidenceSessionId 与聚合会话不一致时必须拒绝，避免重放历史制品。
+    /// 归档制品的 EvidenceSessionId 与聚合会话不一致时必须拒绝，避免重放历史制品。
     /// </summary>
     [Fact]
     public void ValidateArchived_WhenEvidenceSessionDoesNotMatch_ShouldRejectArtifact()
@@ -105,7 +105,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：TestGenerated 能力矩阵不能被重新解释为归档 ReleaseEvidence。
+    /// TestGenerated 能力矩阵不能被重新解释为归档 ReleaseEvidence。
     /// </summary>
     [Fact]
     public void ValidateArchived_WhenMatrixUsesTestGenerated_ShouldRejectArtifact()
@@ -167,7 +167,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：摘要 source identity 与当前 runner 不一致时必须拒绝发布证据。
+    /// 摘要 source identity 与当前 runner 不一致时必须拒绝发布证据。
     /// </summary>
     [Fact]
     public void Validate_WhenSourceIdentityDoesNotMatch_ShouldRejectArtifact()
@@ -184,8 +184,10 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：摘要 Provider 或目标框架与当前 runner 不一致时必须拒绝发布证据。
+    /// 摘要 Provider 或目标框架与当前 runner 不一致时必须拒绝发布证据。
     /// </summary>
+    /// <param name="summaryProvider">摘要中的 Provider 名称。</param>
+    /// <param name="summaryFramework">摘要中的目标框架。</param>
     [Theory]
     [InlineData("SqlServer", "net8.0")]
     [InlineData("PostgreSql", "net6.0")]
@@ -205,7 +207,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：包含失败结果的 TRX 不能进入 ReleaseEvidence 创建路径。
+    /// 包含失败结果的 TRX 不能进入 ReleaseEvidence 创建路径。
     /// </summary>
     [Fact]
     public void Validate_WhenTrxContainsFailure_ShouldRejectArtifact()
@@ -221,7 +223,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：包含核心跳过结果的 TRX 不能进入 ReleaseEvidence 创建路径。
+    /// 包含核心跳过结果的 TRX 不能进入 ReleaseEvidence 创建路径。
     /// </summary>
     [Fact]
     public void Validate_WhenTrxContainsCoreSkip_ShouldRejectArtifact()
@@ -237,7 +239,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：脏工作树不能通过 Release Evidence 验证，避免将未提交源码误绑定到可发布制品。
+    /// 脏工作树不能通过 Release Evidence 验证，避免将未提交源码误绑定到可发布制品。
     /// </summary>
     [Fact]
     public void Validate_WhenSourceStateIsDirty_ShouldRejectReleaseEvidence()
@@ -253,7 +255,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：发布证据不得接受 not-recorded 等占位版本，避免把不完整元数据伪装成 RC 证据。
+    /// 发布证据不得接受 not-recorded 等占位版本，避免把不完整元数据伪装成 RC 证据。
     /// </summary>
     [Fact]
     public void Validate_WhenReleaseMetadataIsPlaceholder_ShouldRejectReleaseEvidence()
@@ -269,7 +271,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：缺少二进制 manifest 时不得把成功 TRX 绑定为发布级证据。
+    /// 缺少二进制 manifest 时不得把成功 TRX 绑定为发布级证据。
     /// </summary>
     [Fact]
     public void Validate_WhenBinaryManifestIsMissing_ShouldRejectReleaseEvidence()
@@ -286,7 +288,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：二进制 manifest 中的哈希与实际 DLL 不一致时必须拒绝发布级证据。
+    /// 二进制 manifest 中的哈希与实际 DLL 不一致时必须拒绝发布级证据。
     /// </summary>
     [Fact]
     public void Validate_WhenBinaryManifestHashDoesNotMatch_ShouldRejectReleaseEvidence()
@@ -320,7 +322,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：manifest 生成后程序集发生替换时必须拒绝发布级证据，避免陈旧或替换的测试输出被复用。
+    /// manifest 生成后程序集发生替换时必须拒绝发布级证据，避免陈旧或替换的测试输出被复用。
     /// </summary>
     [Fact]
     public void Validate_WhenBinaryChangesAfterManifest_ShouldRejectReleaseEvidence()
@@ -338,7 +340,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：二进制 manifest 不得引用运行目录之外的构建输出，确保跨 job 归档后仍可重新验证。
+    /// 二进制 manifest 不得引用运行目录之外的构建输出，确保跨 job 归档后仍可重新验证。
     /// </summary>
     [Fact]
     public void Validate_WhenBinaryManifestReferencesOutsideRun_ShouldRejectReleaseEvidence()
@@ -374,7 +376,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：共享程序集内手工构造的运行令牌未经过验证器登记时，不能伪造 ReleaseEvidence。
+    /// 共享程序集内手工构造的运行令牌未经过验证器登记时，不能伪造 ReleaseEvidence。
     /// </summary>
     [Fact]
     public void CreateReleaseEvidence_WhenRunTokenWasNotValidated_ShouldRejectForgery()
@@ -399,7 +401,7 @@ public sealed class ProviderReleaseEvidenceValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：能力目录应为五类 Provider 的每个 T14 能力提供唯一、可解释的六态条目。
+    /// 能力目录应为五类 Provider 的每个 T14 能力提供唯一、可解释的六态条目。
     /// </summary>
     [Fact]
     public void Catalog_WhenBaselineIsCreated_ShouldCoverEveryProviderCapabilityWithUniqueKeys()
@@ -431,8 +433,17 @@ public sealed class ProviderReleaseEvidenceValidatorTest
         Assert.False(matrix.IsReleaseReady);
     }
 
+    /// <summary>
+    /// 创建发布证据验证测试所需的临时制品。
+    /// </summary>
     private sealed class ProviderReleaseEvidenceFixture : IDisposable
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ProviderReleaseEvidenceFixture"/> 类型的实例。
+        /// </summary>
+        /// <param name="directory">临时制品目录。</param>
+        /// <param name="trxPath">TRX 文件路径。</param>
+        /// <param name="request">发布证据验证请求。</param>
         private ProviderReleaseEvidenceFixture(string directory, string trxPath, ProviderReleaseEvidenceRequest request)
         {
             Directory = directory;
@@ -440,14 +451,38 @@ public sealed class ProviderReleaseEvidenceValidatorTest
             Request = request;
         }
 
+        /// <summary>
+        /// 获取临时制品目录。
+        /// </summary>
         public string Directory { get; }
 
+        /// <summary>
+        /// 获取 TRX 文件路径。
+        /// </summary>
         public string TrxPath { get; }
 
+        /// <summary>
+        /// 获取二进制 manifest 文件路径。
+        /// </summary>
         public string BinaryManifestPath => Path.Combine(Directory, "provider-binary-manifest.json");
 
+        /// <summary>
+        /// 获取发布证据验证请求。
+        /// </summary>
         public ProviderReleaseEvidenceRequest Request { get; }
 
+        /// <summary>
+        /// 创建测试用临时发布证据制品。
+        /// </summary>
+        /// <param name="outcome">TRX 测试结果。</param>
+        /// <param name="sourceIdentity">manifest 中的源码身份。</param>
+        /// <param name="summarySourceIdentity">摘要中的源码身份。</param>
+        /// <param name="summaryProvider">摘要中的 Provider。</param>
+        /// <param name="summaryFramework">摘要中的目标框架。</param>
+        /// <param name="providerVersion">Provider 版本。</param>
+        /// <param name="sourceState">源码工作区状态。</param>
+        /// <param name="age">制品相对当前时间的年龄。</param>
+        /// <returns>测试用发布证据 fixture。</returns>
         public static ProviderReleaseEvidenceFixture Create(string outcome = "Passed", string sourceIdentity = "git=expected",
             string summarySourceIdentity = null, string summaryProvider = "PostgreSql", string summaryFramework = "net8.0",
             string providerVersion = "7.0.0", string sourceState = "clean", TimeSpan? age = null)
@@ -593,12 +628,17 @@ public sealed class ProviderReleaseEvidenceValidatorTest
             });
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (System.IO.Directory.Exists(Directory))
                 System.IO.Directory.Delete(Directory, true);
         }
 
+        /// <summary>
+        /// 从测试程序集目录向上查找工作区根目录。
+        /// </summary>
+        /// <returns>工作区根目录。</returns>
         private static string FindWorkspaceRoot()
         {
             var directory = new DirectoryInfo(AppContext.BaseDirectory);

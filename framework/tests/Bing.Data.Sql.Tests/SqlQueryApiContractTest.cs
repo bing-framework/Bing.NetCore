@@ -25,7 +25,9 @@ public class SqlQueryApiContractTest
         Assert.Null(typeof(ISqlQuery).GetMethod("Config"));
     }
 
-    /// <summary>测试目的：Root 查询只公开类型化和子查询 Lambda From 入口。</summary>
+    /// <summary>
+    /// 测试目的：Root 查询只公开类型化和子查询 Lambda From 入口。
+    /// </summary>
     [Fact]
     public void From_WhenPublicApiInspected_ShouldExposeTypedAndSubqueryEntryPointsOnly()
     {
@@ -43,7 +45,10 @@ public class SqlQueryApiContractTest
         Assert.Null(type.GetMethod("FromTable"));
     }
 
-    /// <summary>测试目的：From<TEntity>()、From<TEntity>(alias) 和双参数调用必须解析为同一非泛型返回类型。</summary>
+    /// <summary>
+    /// 验证泛型 From 重载具有一致的非泛型返回类型。
+    /// </summary>
+    /// <remarks>覆盖无别名、单别名和别名及架构参数三种调用形式。</remarks>
     [Fact]
     public void From_WhenOverloadsAreResolved_ShouldUseTheSameNonGenericPath()
     {
@@ -333,27 +338,38 @@ public class SqlQueryApiContractTest
         Assert.Equal("当前 SQL 查询对象不支持框架运行时资源绑定。", exception.Message);
     }
 
+    /// <summary>
+    /// 不实现运行时绑定控制器并拒绝所有查询操作的测试替身。
+    /// </summary>
     private sealed class UnsupportedRuntimeBindingQuery : ISqlQuery
     {
+        /// <inheritdoc />
         public SqlFluentQuery Query() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public SqlTextQuery Sql(string sql, object parameters = null) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public SqlTextQuery SqlInterpolated(FormattableString sql) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public SqlProcedureQuery Procedure(string procedure, object parameters = null) =>
             throw new NotSupportedException();
 
+        /// <inheritdoc />
         public SqlLambdaQuery From<TEntity>(string alias = null, string schema = null) where TEntity : class =>
             throw new NotSupportedException();
 
+        /// <inheritdoc />
         public SqlLambdaQuery FromSubquery<TProjection>(SqlSubquery<TProjection> subquery)
             where TProjection : class => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void Dispose()
         {
         }
 
+        /// <inheritdoc />
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

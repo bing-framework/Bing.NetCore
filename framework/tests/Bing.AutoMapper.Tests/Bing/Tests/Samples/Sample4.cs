@@ -6,7 +6,7 @@
 public class Sample4
 {
     /// <summary>
-    /// string值
+    /// 获取或设置string值
     /// </summary>
     public string StringValue { get; set; }
 }

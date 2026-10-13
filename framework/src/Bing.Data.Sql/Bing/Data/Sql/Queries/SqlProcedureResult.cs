@@ -12,7 +12,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlProcedureResult<TResult>
 {
     /// <summary>
-    /// 初始化一次存储过程执行结果。
+    /// 初始化一个 <see cref="SqlProcedureResult{TResult}"/> 类型的实例。
     /// </summary>
     /// <param name="result">本次执行返回的结果。</param>
     /// <param name="outputParameters">本次执行绑定的输出参数访问器。</param>
@@ -28,7 +28,10 @@ public sealed class SqlProcedureResult<TResult>
     public TResult Result { get; }
 
     /// <summary>
-    /// 获取本次过程执行完成后可读取的输出参数值快照；不支持框架输出参数模型时为 <see langword="null"/>。
+    /// 获取本次过程执行完成后可读取的输出参数值快照。
     /// </summary>
+    /// <remarks>
+    /// 不支持框架输出参数模型时为 <see langword="null"/>。
+    /// </remarks>
     public ISqlOutputParameterAccessor OutputParameters { get; }
 }

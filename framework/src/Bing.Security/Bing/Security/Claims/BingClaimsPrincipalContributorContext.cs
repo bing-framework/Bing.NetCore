@@ -10,7 +10,7 @@ namespace Bing.Security.Claims;
 public class BingClaimsPrincipalContributorContext
 {
     /// <summary>
-    /// 初始化一个<see cref="BingClaimsPrincipalContributorContext"/> 类型的实例。
+    /// 初始化一个 <see cref="BingClaimsPrincipalContributorContext"/> 类型的实例。
     /// </summary>
     /// <param name="claimsPrincipal">身份主体</param>
     /// <param name="serviceProvider">服务提供程序</param>
@@ -21,12 +21,12 @@ public class BingClaimsPrincipalContributorContext
     }
 
     /// <summary>
-    /// 身份主体
+    /// 获取或设置身份主体
     /// </summary>
     public ClaimsPrincipal ClaimsPrincipal { get; set; }
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取服务提供程序
     /// </summary>
     public IServiceProvider ServiceProvider { get; }
 

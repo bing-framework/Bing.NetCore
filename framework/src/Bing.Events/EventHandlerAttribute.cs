@@ -8,7 +8,7 @@ namespace Bing.Events;
 public class EventHandlerAttribute : TopicAttribute
 {
     /// <summary>
-    /// 初始化一个<see cref="EventHandlerAttribute"/>类型的实例
+    /// 初始化一个 <see cref="EventHandlerAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="name">消息名称</param>
     public EventHandlerAttribute(string name) : base(name)

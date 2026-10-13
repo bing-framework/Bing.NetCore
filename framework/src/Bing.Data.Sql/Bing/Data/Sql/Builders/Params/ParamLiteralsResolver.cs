@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Params;
 public sealed class ParamLiteralsResolver : IParamLiteralsResolver
 {
     /// <summary>
-    /// 默认参数字面值解析器实例。
+    /// 获取默认参数字面值解析器实例。
     /// </summary>
     public static ParamLiteralsResolver Instance { get; } = new();
 
@@ -18,11 +18,7 @@ public sealed class ParamLiteralsResolver : IParamLiteralsResolver
     /// </summary>
     public ParamLiteralsResolver() { }
 
-    /// <summary>
-    /// 获取参数字面值
-    /// </summary>
-    /// <param name="value">参数值</param>
-    /// <returns>可嵌入 SQL 的参数字面值文本。</returns>
+    /// <inheritdoc />
     public string GetParamLiterals(object value)
     {
         if (value == null)

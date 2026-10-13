@@ -28,7 +28,7 @@ public class SegmentCondition : ICondition
     private readonly Boundary _boundary;
 
     /// <summary>
-    /// 初始化一个<see cref="SegmentCondition"/>类型的实例
+    /// 初始化一个 <see cref="SegmentCondition"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名</param>
     /// <param name="min">最小值</param>
@@ -42,10 +42,7 @@ public class SegmentCondition : ICondition
         _boundary = boundary;
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>返回根据边界设置生成的范围 SQL 条件；列名为空时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_name))

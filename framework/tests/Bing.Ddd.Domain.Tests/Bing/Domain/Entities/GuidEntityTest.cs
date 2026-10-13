@@ -20,7 +20,7 @@ public class GuidEntityTest
     private AggregateRootSample _sample2;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="GuidEntityTest"/> 类型的实例。
     /// </summary>
     public GuidEntityTest()
     {

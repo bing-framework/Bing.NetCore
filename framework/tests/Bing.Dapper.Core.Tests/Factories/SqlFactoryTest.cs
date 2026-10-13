@@ -753,7 +753,7 @@ public class SqlFactoryTest
     private sealed class TestSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="TestSqlProvider"/> 类型的实例。
         /// </summary>
         /// <param name="key">Provider 路由标识。</param>
         /// <param name="databaseType">Provider 对应的数据库类型。</param>
@@ -799,20 +799,28 @@ public class SqlFactoryTest
     /// </summary>
     private sealed class ProfileMissingProvider : ISqlProvider
     {
+        /// <inheritdoc />
         public string Key => "test.profile-missing";
 
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.MySql;
 
+        /// <inheritdoc />
         public IDialect Dialect => null;
 
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory => null;
 
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => null;
 
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer => null;
 
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => null;
 
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => null;
     }
 
@@ -832,7 +840,7 @@ public class SqlFactoryTest
         }
 
         /// <summary>
-        /// 当前 SQL 配置。
+        /// 获取当前查询配置。
         /// </summary>
         public SqlOptions CurrentOptions => Options;
 
@@ -875,7 +883,7 @@ public class SqlFactoryTest
         }
 
         /// <summary>
-        /// 当前 SQL 配置。
+        /// 获取当前执行器配置。
         /// </summary>
         public SqlOptions CurrentOptions => Options;
 
@@ -899,7 +907,7 @@ public class SqlFactoryTest
         }
 
         /// <summary>
-        /// 当前 SQL 配置。
+        /// 获取当前执行器配置。
         /// </summary>
         public SqlOptions CurrentOptions => Options;
 
@@ -908,32 +916,50 @@ public class SqlFactoryTest
     }
 
     /// <summary>
-    /// 固定返回测试查询对象的工厂。
+    /// 为事务测试提供可观测状态的数据库连接。
     /// </summary>
     private class FallbackDbConnection : DbConnection
     {
+        /// <summary>
+        /// 当前连接状态。
+        /// </summary>
         private ConnectionState _state = ConnectionState.Open;
 
+        /// <summary>
+        /// 获取或设置同步事务创建次数。
+        /// </summary>
         public int SyncBeginCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置最近创建的测试事务。
+        /// </summary>
         public FallbackDbTransaction LastTransaction { get; protected set; }
 
+        /// <inheritdoc />
         public override string ConnectionString { get; set; }
 
+        /// <inheritdoc />
         public override string Database => "test";
 
+        /// <inheritdoc />
         public override string DataSource => "test";
 
+        /// <inheritdoc />
         public override string ServerVersion => "1.0";
 
+        /// <inheritdoc />
         public override ConnectionState State => _state;
 
+        /// <inheritdoc />
         public override void ChangeDatabase(string databaseName) { }
 
+        /// <inheritdoc />
         public override void Close() => _state = ConnectionState.Closed;
 
+        /// <inheritdoc />
         public override void Open() => _state = ConnectionState.Open;
 
+        /// <inheritdoc />
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
             SyncBeginCount++;
@@ -941,13 +967,21 @@ public class SqlFactoryTest
             return LastTransaction;
         }
 
+        /// <inheritdoc />
         protected override DbCommand CreateDbCommand() => null;
     }
 
+    /// <summary>
+    /// 使用原生异步事务创建入口的测试连接。
+    /// </summary>
     private sealed class NativeDbConnection : FallbackDbConnection
     {
+        /// <summary>
+        /// 获取或设置异步事务创建次数。
+        /// </summary>
         public int AsyncBeginCount { get; private set; }
 
+        /// <inheritdoc />
         protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -958,11 +992,26 @@ public class SqlFactoryTest
         }
     }
 
+    /// <summary>
+    /// 为事务测试提供可观测提交和回滚行为的测试事务。
+    /// </summary>
     private class FallbackDbTransaction : DbTransaction
     {
+        /// <summary>
+        /// 关联的数据库连接。
+        /// </summary>
         private readonly DbConnection _connection;
+
+        /// <summary>
+        /// 当前事务的隔离级别。
+        /// </summary>
         private readonly IsolationLevel _isolationLevel;
 
+        /// <summary>
+        /// 初始化一个 <see cref="FallbackDbTransaction"/> 类型的实例。
+        /// </summary>
+        /// <param name="connection">关联的数据库连接。</param>
+        /// <param name="isolationLevel">事务隔离级别。</param>
         public FallbackDbTransaction(DbConnection connection = null,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -970,21 +1019,39 @@ public class SqlFactoryTest
             _isolationLevel = isolationLevel;
         }
 
+        /// <summary>
+        /// 获取或设置提交操作次数。
+        /// </summary>
         public int CommitCount { get; protected set; }
 
+        /// <summary>
+        /// 获取或设置回滚操作次数。
+        /// </summary>
         public int RollbackCount { get; protected set; }
 
+        /// <inheritdoc />
         public override IsolationLevel IsolationLevel => _isolationLevel;
 
+        /// <inheritdoc />
         protected override DbConnection DbConnection => _connection;
 
+        /// <inheritdoc />
         public override void Commit() => CommitCount++;
 
+        /// <inheritdoc />
         public override void Rollback() => RollbackCount++;
     }
 
+    /// <summary>
+    /// 实现异步回滚入口的测试事务。
+    /// </summary>
     private sealed class ValueTaskNativeDbTransaction : IDbTransaction
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ValueTaskNativeDbTransaction"/> 类型的实例。
+        /// </summary>
+        /// <param name="connection">关联的数据库连接。</param>
+        /// <param name="isolationLevel">事务隔离级别。</param>
         public ValueTaskNativeDbTransaction(DbConnection connection = null,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
@@ -992,18 +1059,29 @@ public class SqlFactoryTest
             IsolationLevel = isolationLevel;
         }
 
+        /// <summary>
+        /// 获取或设置异步回滚操作次数。
+        /// </summary>
         public int AsyncRollbackCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置同步回滚操作次数。
+        /// </summary>
         public int RollbackCount { get; private set; }
 
+        /// <inheritdoc />
         public IDbConnection Connection { get; }
 
+        /// <inheritdoc />
         public IsolationLevel IsolationLevel { get; }
 
+        /// <inheritdoc />
         public void Commit() { }
 
+        /// <inheritdoc />
         public void Rollback() => RollbackCount++;
 
+        /// <inheritdoc />
         public ValueTask RollbackAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -1011,13 +1089,21 @@ public class SqlFactoryTest
             return ValueTask.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Dispose() { }
     }
 
+    /// <summary>
+    /// 实现原生异步提交入口的测试事务。
+    /// </summary>
     private sealed class TaskNativeDbTransaction : FallbackDbTransaction
     {
+        /// <summary>
+        /// 获取或设置异步提交操作次数。
+        /// </summary>
         public int AsyncCommitCount { get; private set; }
 
+        /// <inheritdoc />
         public override Task CommitAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -1026,14 +1112,24 @@ public class SqlFactoryTest
         }
     }
 
+    /// <summary>
+    /// 异步提交时抛出异常的测试事务。
+    /// </summary>
     private sealed class ThrowingNativeDbTransaction : FallbackDbTransaction
     {
+        /// <inheritdoc />
         public override Task CommitAsync(CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("native commit failed");
     }
 
+    /// <summary>
+    /// 始终返回固定查询对象的测试工厂。
+    /// </summary>
     private sealed class FixedQueryFactory : ISqlQueryFactory
     {
+        /// <summary>
+        /// 固定返回的查询对象。
+        /// </summary>
         private readonly ISqlQuery _query;
 
         /// <summary>

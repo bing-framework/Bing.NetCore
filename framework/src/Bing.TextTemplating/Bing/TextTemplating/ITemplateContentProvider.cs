@@ -6,7 +6,7 @@
 public interface ITemplateContentProvider
 {
     /// <summary>
-    /// 按模板名称获取模板内容。
+    /// 异步获取模板内容。
     /// </summary>
     /// <param name="templateName">已注册模板名称。</param>
     /// <param name="cultureName">可选的区域性名称。</param>
@@ -16,7 +16,7 @@ public interface ITemplateContentProvider
     Task<string> GetContentOrNullAsync(string templateName, string cultureName = null, bool tryDefaults = true, bool useCurrentCultureIfCultureNameIsNull = true);
 
     /// <summary>
-    /// 按模板定义获取模板内容。
+    /// 异步获取模板内容。
     /// </summary>
     /// <param name="templateDefinition">已注册的模板定义。</param>
     /// <param name="cultureName">可选的区域性名称。</param>

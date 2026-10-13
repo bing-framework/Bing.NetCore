@@ -7,11 +7,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="SqlServerTypeConverter"/> 单元测试。
-/// 验证每个 SQL Server 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
+/// <see cref="SqlServerTypeConverter"/> 单元测试。 验证每个 SQL Server 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
 /// </summary>
 public class SqlServerTypeConverterTest
 {
+    /// <summary>
+    /// SQL Server 类型转换器。
+    /// </summary>
     private readonly SqlServerTypeConverter _converter = new();
 
     // ═══════════════════════════════════════════════════════════
@@ -106,6 +108,7 @@ public class SqlServerTypeConverterTest
     /// <summary>
     /// 测试目的：uniqueidentifier → DbType.Guid（SQL Server GUID 存储类型）。
     /// </summary>
+    /// <param name="dataType">SQL Server 数据类型名称。</param>
     [Theory]
     [InlineData("uniqueidentifier")]
     public void ToDbType_UniqueIdentifier_ShouldBeGuid(string dataType)
@@ -120,6 +123,7 @@ public class SqlServerTypeConverterTest
     /// <summary>
     /// 测试目的：nvarchar/text/ntext → DbType.String（Unicode 变长字符串）。
     /// </summary>
+    /// <param name="dataType">SQL Server 数据类型名称。</param>
     [Theory]
     [InlineData("nvarchar")]
     [InlineData("text")]
@@ -234,6 +238,7 @@ public class SqlServerTypeConverterTest
     /// <summary>
     /// 测试目的：decimal/numeric/money/smallmoney → DbType.Decimal。
     /// </summary>
+    /// <param name="dataType">SQL Server 数据类型名称。</param>
     [Theory]
     [InlineData("decimal")]
     [InlineData("numeric")]
@@ -269,6 +274,7 @@ public class SqlServerTypeConverterTest
     /// <summary>
     /// 测试目的：datetime/smalldatetime → DbType.DateTime。
     /// </summary>
+    /// <param name="dataType">SQL Server 数据类型名称。</param>
     [Theory]
     [InlineData("datetime")]
     [InlineData("smalldatetime")]
@@ -302,6 +308,7 @@ public class SqlServerTypeConverterTest
     /// <summary>
     /// 测试目的：binary/varbinary/varbinary(max)/image/rowversion/timestamp → DbType.Binary。
     /// </summary>
+    /// <param name="dataType">SQL Server 数据类型名称。</param>
     [Theory]
     [InlineData("binary")]
     [InlineData("varbinary")]

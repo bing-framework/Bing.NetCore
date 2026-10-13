@@ -5,16 +5,18 @@ using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders;
 
-/// <summary>SQLite SQL 提供程序。</summary>
+/// <summary>
+/// SQLite SQL 提供程序。
+/// </summary>
 public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
-    /// 可在线程间安全共享的 SQLite Provider 单例。
+    /// 获取可在线程间安全共享的 SQLite Provider 单例。
     /// </summary>
     public static SqliteSqlProvider Instance { get; } = new();
 
     /// <summary>
-    /// 初始化 SQLite Provider 单例。
+    /// 初始化一个 <see cref="SqliteSqlProvider"/> 类型的实例。
     /// </summary>
     private SqliteSqlProvider() { }
 

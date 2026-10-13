@@ -40,7 +40,7 @@ public sealed class EntityMappingCacheKeyTest
     private sealed class KeyEntity
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -51,7 +51,7 @@ public sealed class EntityMappingCacheKeyTest
     private sealed class OtherKeyEntity
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }

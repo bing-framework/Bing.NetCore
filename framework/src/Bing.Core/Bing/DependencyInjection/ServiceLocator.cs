@@ -4,10 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.DependencyInjection;
 
 /// <summary>
-/// 应用程序服务定位器。可随时正常解析<see cref="ServiceLifetime.Singleton"/>与<see cref="ServiceLifetime.Transient"/>生命周期类型的服务
-/// 如果当前处于HttpContext有效的范围内，可正常解析<see cref="ServiceLifetime.Scoped"/>的服务
-/// 注：服务定位器尚不能正常解析 RootServiceProvider.CreateScope() 生命周期内的 Scoped 的服务
+/// 应用程序服务定位器。
 /// </summary>
+/// <remarks>
+/// 可随时正常解析<see cref="ServiceLifetime.Singleton"/>与<see cref="ServiceLifetime.Transient"/>生命周期类型的服务 如果当前处于HttpContext有效的范围内，可正常解析<see cref="ServiceLifetime.Scoped"/>的服务 注：服务定位器尚不能正常解析 RootServiceProvider.CreateScope() 生命周期内的 Scoped 的服务
+/// </remarks>
 public sealed class ServiceLocator : Disposable
 {
     #region 字段
@@ -33,17 +34,17 @@ public sealed class ServiceLocator : Disposable
     #region 属性
 
     /// <summary>
-    /// 服务定位器实例
+    /// 获取服务定位器实例
     /// </summary>
     public static ServiceLocator Instance => InstanceLazy.Value;
 
     /// <summary>
-    /// ServiceProvider是否可用
+    /// 获取ServiceProvider是否可用
     /// </summary>
     public bool IsProviderEnabled => _provider != null;
 
     /// <summary>
-    /// <see cref="ServiceLifetime.Scoped"/>生命周期的服务提供者
+    /// 获取生命周期的服务提供者
     /// </summary>
     public IServiceProvider ScopedProvider
     {
@@ -59,7 +60,7 @@ public sealed class ServiceLocator : Disposable
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="ServiceLocator"/>类型的实例
+    /// 初始化一个 <see cref="ServiceLocator"/> 类型的实例。
     /// </summary>
     private ServiceLocator() { }
 
@@ -198,10 +199,7 @@ public sealed class ServiceLocator : Disposable
 
     #region Dispose(释放资源)
 
-    /// <summary>
-    /// 释放资源
-    /// </summary>
-    /// <param name="disposing">是否释放中</param>
+    /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
         _services = null;

@@ -50,7 +50,7 @@ public static class SqlCapabilityFailure
     private const string CapabilityDataKey = "Bing.Data.Sql.Capability";
 
     /// <summary>
-    /// 异常数据中的 Provider Key 键。
+    /// 异常数据中保存 Provider 标识的键，作用域为 Bing.Data.Sql 能力拒绝信息。
     /// </summary>
     private const string ProviderKeyDataKey = "Bing.Data.Sql.ProviderKey";
 

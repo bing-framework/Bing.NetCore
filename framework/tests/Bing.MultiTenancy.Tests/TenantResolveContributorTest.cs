@@ -7,8 +7,7 @@ using Xunit;
 namespace Bing.MultiTenancy;
 
 /// <summary>
-/// <see cref="ActionTenantResolveContributor"/> 和
-/// <see cref="CurrentUserTenantResolveContributor"/> 单元测试
+/// <see cref="ActionTenantResolveContributor"/> 和 <see cref="CurrentUserTenantResolveContributor"/> 单元测试
 /// </summary>
 public class TenantResolveContributorTest
 {
@@ -17,8 +16,7 @@ public class TenantResolveContributorTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：传入 null Action 时，构造器应抛出 ArgumentNullException，
-    /// 防止 ResolveAsync 时出现 NRE。
+    /// 测试目的：传入 null Action 时，构造器应抛出 ArgumentNullException， 防止 ResolveAsync 时出现 NRE。
     /// </summary>
     [Fact]
     public void ActionTenantResolveContributor_NullAction_ShouldThrow()
@@ -29,8 +27,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：Name 属性应返回 "Action"（ContributorName 常量），
-    /// 确保 TenantResolver 中的 AppliedResolvers 能正确识别此构造器。
+    /// 测试目的：Name 属性应返回 "Action"（ContributorName 常量）， 确保 TenantResolver 中的 AppliedResolvers 能正确识别此构造器。
     /// </summary>
     [Fact]
     public void ActionTenantResolveContributor_Name_ShouldBeAction()
@@ -44,8 +41,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：ResolveAsync 应调用注入的 Action 并传入上下文，
-    /// 确保自定义解析逻辑可以正确设置 TenantIdOrName。
+    /// 测试目的：ResolveAsync 应调用注入的 Action 并传入上下文， 确保自定义解析逻辑可以正确设置 TenantIdOrName。
     /// </summary>
     [Fact]
     public async Task ActionTenantResolveContributor_ResolveAsync_ShouldInvokeAction()
@@ -71,8 +67,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：ResolveAsync 应返回已完成的 Task（非 null），
-    /// 确保调用方可以安全 await。
+    /// 测试目的：ResolveAsync 应返回已完成的 Task（非 null）， 确保调用方可以安全 await。
     /// </summary>
     [Fact]
     public async Task ActionTenantResolveContributor_ResolveAsync_ShouldCompleteSuccessfully()
@@ -93,6 +88,7 @@ public class TenantResolveContributorTest
     /// <summary>
     /// 构建包含 Mock ICurrentUser 的 IServiceProvider
     /// </summary>
+    /// <returns>包含测试租户解析依赖的服务提供器。</returns>
     private static IServiceProvider BuildServiceProvider(bool isAuthenticated, string? tenantId)
     {
         var mockUser = new Mock<ICurrentUser>();
@@ -118,8 +114,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：用户已认证且有 TenantId 时，应将 Handled=true 并设置 TenantIdOrName，
-    /// 确保租户解析链可以短路后续构造器。
+    /// 测试目的：用户已认证且有 TenantId 时，应将 Handled=true 并设置 TenantIdOrName， 确保租户解析链可以短路后续构造器。
     /// </summary>
     [Fact]
     public async Task CurrentUserTenantResolveContributor_AuthenticatedWithTenantId_ShouldSetHandled()
@@ -138,8 +133,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：用户未认证时，Handled 应保持 false，不设置 TenantIdOrName，
-    /// 确保匿名用户不会影响租户解析结果。
+    /// 测试目的：用户未认证时，Handled 应保持 false，不设置 TenantIdOrName， 确保匿名用户不会影响租户解析结果。
     /// </summary>
     [Fact]
     public async Task CurrentUserTenantResolveContributor_NotAuthenticated_ShouldNotSetHandled()
@@ -158,9 +152,7 @@ public class TenantResolveContributorTest
     }
 
     /// <summary>
-    /// 测试目的：用户已认证但 TenantId 为 null（宿主管理员场景），
-    /// Handled 应为 true，TenantIdOrName 应为 null，
-    /// 确保宿主身份可以正确终止租户解析链。
+    /// 测试目的：用户已认证但 TenantId 为 null（宿主管理员场景）， Handled 应为 true，TenantIdOrName 应为 null， 确保宿主身份可以正确终止租户解析链。
     /// </summary>
     [Fact]
     public async Task CurrentUserTenantResolveContributor_AuthenticatedWithNullTenantId_ShouldHandleAsHost()

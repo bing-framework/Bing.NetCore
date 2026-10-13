@@ -9,11 +9,14 @@ using Xunit;
 namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
-/// <see cref="SqlServerBuilder"/> 单元测试
-/// 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@_p_N 参数、分页语法
+/// <see cref="SqlServerBuilder"/> 单元测试 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@_p_N 参数、分页语法。
 /// </summary>
 public class SqlServerBuilderTest
 {
+    /// <summary>
+    /// 创建 SQL Server Builder。
+    /// </summary>
+    /// <returns>SQL Server Builder。</returns>
     private SqlServerBuilder NewBuilder() => new(new SqlBuilderServices(options: new SqlOptions
     {
         QueryCapabilities = new SqlQueryCapabilities { Pagination = SqlQueryCapabilityState.Supported }

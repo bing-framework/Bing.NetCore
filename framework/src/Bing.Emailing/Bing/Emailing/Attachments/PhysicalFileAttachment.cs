@@ -16,7 +16,7 @@ public class PhysicalFileAttachment : IAttachment
     public string AbsolutePath { get; }
 
     /// <summary>
-    /// 使用已存在的物理文件路径初始化 <see cref="PhysicalFileAttachment"/> 的实例。
+    /// 初始化一个 <see cref="PhysicalFileAttachment"/> 类型的实例。
     /// </summary>
     /// <param name="absolutePath">附件文件的绝对路径。</param>
     /// <exception cref="FileNotFoundException">指定路径不存在文件时抛出。</exception>
@@ -27,9 +27,7 @@ public class PhysicalFileAttachment : IAttachment
         AbsolutePath = absolutePath;
     }
 
-    /// <summary>
-    /// 释放缓存的物理文件读取流。
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose() => _stream?.Dispose();
 
     /// <inheritdoc />

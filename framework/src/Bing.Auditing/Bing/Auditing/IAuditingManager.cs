@@ -6,7 +6,7 @@
 public interface IAuditingManager
 {
     /// <summary>
-    /// 当前审计日志作用域
+    /// 获取当前审计日志作用域
     /// </summary>
     IAuditLogScope Current { get; }
 

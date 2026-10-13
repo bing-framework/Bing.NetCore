@@ -94,6 +94,7 @@ public class RawApiContractTest
     /// <summary>
     /// 断言 Fluent 字符串表名扩展签名。
     /// </summary>
+    /// <param name="methodName">待检查的扩展方法名称。</param>
     private static void AssertFluentStringTableSignature(string methodName)
     {
         var method = typeof(Extensions).GetMethods(BindingFlags.Public | BindingFlags.Static).Single(item =>
@@ -107,6 +108,7 @@ public class RawApiContractTest
     /// <summary>
     /// 断言 Append 扩展签名没有别名参数。
     /// </summary>
+    /// <param name="methodName">待检查的扩展方法名称。</param>
     private static void AssertAppendSignature(string methodName)
     {
         var methods = typeof(Extensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
@@ -123,6 +125,7 @@ public class RawApiContractTest
     /// <summary>
     /// 断言结构化 Join Clause 签名。
     /// </summary>
+    /// <param name="methodName">待检查的 Join 子句方法名称。</param>
     private static void AssertStructuredJoinClauseSignature(string methodName) =>
         Assert.Contains(typeof(IJoinClause).GetMethods(), method => method.Name == methodName &&
             method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType == typeof(SqlTableReference));
@@ -130,6 +133,7 @@ public class RawApiContractTest
     /// <summary>
     /// 断言 ISqlBuilder 的结构化 Join 扩展签名。
     /// </summary>
+    /// <param name="methodName">待检查的结构化 Builder 扩展方法名称。</param>
     private static void AssertStructuredBuilderExtension(string methodName) =>
         Assert.Contains(typeof(Extensions).GetMethods(BindingFlags.Public | BindingFlags.Static), method =>
             method.Name == methodName && method.IsGenericMethod == false && method.ReturnType == typeof(ISqlBuilder) &&
@@ -139,6 +143,7 @@ public class RawApiContractTest
     /// <summary>
     /// 断言 IJoin 的结构化 Fluent 扩展签名。
     /// </summary>
+    /// <param name="methodName">待检查的结构化 Fluent 扩展方法名称。</param>
     private static void AssertStructuredFluentExtension(string methodName) =>
         Assert.Contains(typeof(Extensions).GetMethods(BindingFlags.Public | BindingFlags.Static), method =>
             method.Name == methodName && method.IsGenericMethodDefinition && method.GetParameters().Length == 2 &&

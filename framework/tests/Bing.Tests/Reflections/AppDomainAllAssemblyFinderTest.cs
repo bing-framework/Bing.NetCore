@@ -16,7 +16,7 @@ public class AppDomainAllAssemblyFinderTest : TestBase
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 初始化一个<see cref="AppDomainAllAssemblyFinderTest"/>类型的实例
+    /// 初始化一个 <see cref="AppDomainAllAssemblyFinderTest"/> 类型的实例。
     /// </summary>
     public AppDomainAllAssemblyFinderTest(ITestOutputHelper output) : base(output)
     {

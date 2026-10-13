@@ -46,6 +46,11 @@ internal readonly record struct SqlMutationPlanCacheKey(RuntimeTypeHandle Entity
     /// <returns>去除首尾空白并转换为大写的值；空值返回空字符串。</returns>
     private static string Normalize(string value) => value?.Trim().ToUpperInvariant() ?? string.Empty;
 
+    /// <summary>
+    /// 规范化物理对象名称，同时保留有效名称的原始大小写。
+    /// </summary>
+    /// <param name="value">数据库、架构或表名称。</param>
+    /// <returns>原始物理名称；空白值返回空字符串。</returns>
     private static string NormalizePhysicalName(string value) => string.IsNullOrWhiteSpace(value) ? string.Empty : value;
 
     /// <summary>

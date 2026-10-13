@@ -236,13 +236,14 @@ public sealed class UnitOfWorkCancellationTest
         /// <param name="action">事务动作。</param>
         public RecordingTransactionActionManager(Func<IDbTransaction, Task> action = null) => _action = action;
 
-        /// <summary>
-        /// 表示存在一个待提交的事务动作。
-        /// </summary>
+        /// <inheritdoc />
+        /// <remarks>
+        /// 获取表示存在一个待提交的事务动作。
+        /// </remarks>
         public int Count => 1;
 
         /// <summary>
-        /// 是否请求提交事务动作。
+        /// 获取或设置是否请求提交事务动作。
         /// </summary>
         public bool CommitRequested { get; private set; }
 
@@ -266,13 +267,13 @@ public sealed class UnitOfWorkCancellationTest
     private sealed class TransactionalSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         [FreeSql.DataAnnotations.Column(IsPrimary = true)]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }

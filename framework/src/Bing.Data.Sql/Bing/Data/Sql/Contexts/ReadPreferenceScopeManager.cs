@@ -11,7 +11,7 @@ public sealed class ReadPreferenceScopeManager : IReadPreferenceScopeManager
     private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
     /// <summary>
-    /// 初始化一个<see cref="ReadPreferenceScopeManager"/>类型的实例。
+    /// 初始化一个 <see cref="ReadPreferenceScopeManager"/> 类型的实例。
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
     public ReadPreferenceScopeManager(IDatabaseContextAccessor databaseContextAccessor)

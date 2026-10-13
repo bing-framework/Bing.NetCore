@@ -8,13 +8,13 @@
 public class IgnoreDependencyAttribute : Attribute
 {
     /// <summary>
-    /// 是否忽略当前类以及子类
+    /// 获取或设置是否忽略当前类以及子类
     /// </summary>
     /// <remarks>设置为true时，当前类以及子类都不再被自动注册，设置为false，仅当前类不背自动注册（默认False）</remarks>
     public bool Cascade { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="IgnoreDependencyAttribute"/>类型的实例
+    /// 初始化一个 <see cref="IgnoreDependencyAttribute"/> 类型的实例。
     /// </summary>
     /// <param name="cascade">是否忽略当前类以及子类</param>
     public IgnoreDependencyAttribute(bool cascade = false)

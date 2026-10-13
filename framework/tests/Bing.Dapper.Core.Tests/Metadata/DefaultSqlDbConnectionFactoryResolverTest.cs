@@ -112,6 +112,8 @@ public class DefaultSqlDbConnectionFactoryResolverTest
     /// <summary>
     /// 通过公开服务注册创建连接工厂解析器。
     /// </summary>
+    /// <param name="registrations">要注册到测试容器的连接工厂配置。</param>
+    /// <returns>返回包含 SQL Core 服务和指定连接工厂配置的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(params SqlDbConnectionFactoryRegistration[] registrations)
     {
         var services = new ServiceCollection();

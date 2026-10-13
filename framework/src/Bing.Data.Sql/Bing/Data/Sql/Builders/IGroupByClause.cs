@@ -9,12 +9,12 @@ namespace Bing.Data.Sql.Builders;
 public interface IGroupByClause : ISqlClause, ISqlClauseCloneable<IGroupByClause>
 {
     /// <summary>
-    /// 是否存在分组
+    /// 获取是否存在分组
     /// </summary>
     bool IsGroup { get; }
 
     /// <summary>
-    /// 分组列表
+    /// 获取分组列表
     /// </summary>
     string GroupColumns { get; }
 

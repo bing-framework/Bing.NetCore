@@ -14,11 +14,7 @@ namespace Bing.AspNetCore.ExceptionHandling;
 /// </summary>
 public class DefaultBingAuthorizationExceptionHandler : IBingAuthorizationExceptionHandler, ITransientDependency
 {
-    /// <summary>
-    /// 处理
-    /// </summary>
-    /// <param name="exception">授权异常</param>
-    /// <param name="httpContext">Http上下文</param>
+    /// <inheritdoc />
     public virtual async Task HandleAsync(BingAuthorizationException exception, HttpContext httpContext)
     {
         var handlerOptions = httpContext.RequestServices

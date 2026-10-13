@@ -9,19 +9,22 @@ namespace Bing.AspNetCore.Mvc.Filters;
 public class ValidationModelAttribute : IActionFilter
 {
     /// <summary>
-    /// 是否允许参数为空，默认为 false。
+    /// 获取或设置是否允许参数为空。
     /// </summary>
+    /// <remarks>
+    /// 默认为 false。
+    /// </remarks>
     public bool AllowNulls { get; set; } = false;
 
     /// <summary>
-    /// 是否允许多个错误结果，默认为 true
+    /// 获取或设置是否允许多个错误结果。
     /// </summary>
+    /// <remarks>
+    /// 默认为 true。
+    /// </remarks>
     public bool AllowMultipleResult { get; set; } = true;
 
-    /// <summary>
-    /// 操作执行前进行参数验证
-    /// </summary>
-    /// <param name="context">操作执行上下文</param>
+    /// <inheritdoc />
     public void OnActionExecuting(ActionExecutingContext context)
     {
         // 检查是否允许参数为空
@@ -58,10 +61,10 @@ public class ValidationModelAttribute : IActionFilter
         }
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 操作执行后，当前实现不执行任何操作
-    /// </summary>
-    /// <param name="context">操作执行完成的上下文</param>
+    /// </remarks>
     public void OnActionExecuted(ActionExecutedContext context)
     {
     }

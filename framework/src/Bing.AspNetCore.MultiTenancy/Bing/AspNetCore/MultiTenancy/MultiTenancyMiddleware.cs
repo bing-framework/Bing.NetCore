@@ -57,7 +57,6 @@ public class MultiTenancyMiddleware : Microsoft.AspNetCore.Http.IMiddleware, ITr
         _options = options.Value;
     }
 
-    /// <summary>
     /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {

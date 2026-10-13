@@ -18,8 +18,10 @@ public static class SqlServerServiceCollectionExtensions
 {
     /// <summary>
     /// 注册 SQL Server Provider 能力，不配置默认数据源。
-    /// 多 Provider 容器应通过具名数据源完成运行时路由。
     /// </summary>
+    /// <remarks>
+    /// 多 Provider 容器应通过具名数据源完成运行时路由。
+    /// </remarks>
     /// <param name="services">服务集合。</param>
     /// <returns>服务集合。</returns>
     public static IServiceCollection AddSqlServerProvider(this IServiceCollection services)

@@ -6,7 +6,7 @@
 public interface IRequestResponseLogCreator
 {
     /// <summary>
-    /// 请求响应日志
+    /// 获取请求响应日志
     /// </summary>
     RequestResponseLog Log { get; }
 

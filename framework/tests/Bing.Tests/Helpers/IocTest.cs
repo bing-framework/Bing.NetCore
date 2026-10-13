@@ -15,7 +15,7 @@ namespace Bing.Tests.Helpers;
 public class IocTest
 {
     /// <summary>
-    /// 初始化Ioc测试
+    /// 初始化一个 <see cref="IocTest"/> 类型的实例。
     /// </summary>
     public IocTest()
     {

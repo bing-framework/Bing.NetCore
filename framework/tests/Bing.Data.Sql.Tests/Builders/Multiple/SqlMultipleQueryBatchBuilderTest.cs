@@ -235,6 +235,7 @@ public class SqlMultipleQueryBatchBuilderTest
     /// <summary>
     /// 在返回首个嵌套参数值后抛出异常的枚举器。
     /// </summary>
+    /// <returns>返回产生首个嵌套参数值后抛出异常的测试序列。</returns>
     private static IEnumerable<object> ThrowAfterFirstValue()
     {
         yield return 1;

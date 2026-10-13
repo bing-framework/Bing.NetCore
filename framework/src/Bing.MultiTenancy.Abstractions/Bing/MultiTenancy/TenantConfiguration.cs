@@ -10,7 +10,7 @@ namespace Bing.MultiTenancy;
 public class TenantConfiguration
 {
     /// <summary>
-    /// 初始化 <see cref="TenantConfiguration"/> 的空配置实例，并将租户设置为启用状态。
+    /// 初始化一个 <see cref="TenantConfiguration"/> 类型的实例。
     /// </summary>
     public TenantConfiguration()
     {
@@ -18,7 +18,7 @@ public class TenantConfiguration
     }
 
     /// <summary>
-    /// 使用租户标识和名称初始化 <see cref="TenantConfiguration"/> 的实例。
+    /// 初始化一个 <see cref="TenantConfiguration"/> 类型的实例。
     /// </summary>
     /// <param name="id">租户标识。</param>
     /// <param name="name">租户名称，不能为空。</param>
@@ -32,7 +32,7 @@ public class TenantConfiguration
     }
 
     /// <summary>
-    /// 使用租户标识、名称和规范化名称初始化 <see cref="TenantConfiguration"/> 的实例。
+    /// 初始化一个 <see cref="TenantConfiguration"/> 类型的实例。
     /// </summary>
     /// <param name="id">租户标识。</param>
     /// <param name="name">租户名称，不能为空。</param>
@@ -60,12 +60,18 @@ public class TenantConfiguration
     public string NormalizedName { get; set; } = default!;
 
     /// <summary>
-    /// 获取或设置该租户按连接名称索引的连接字符串覆盖；未配置覆盖时为 <c>null</c>。
+    /// 获取或设置该租户按连接名称索引的连接字符串覆盖。
     /// </summary>
+    /// <remarks>
+    /// 未配置覆盖时为 <c>null</c>。
+    /// </remarks>
     public ConnectionStringCollection? ConnectionStrings { get; set; }
 
     /// <summary>
-    /// 获取或设置租户是否可作为已解析配置使用；默认值为 <c>true</c>。
+    /// 获取或设置租户是否可作为已解析配置使用。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>true</c>。
+    /// </remarks>
     public bool IsActive { get; set; }
 }

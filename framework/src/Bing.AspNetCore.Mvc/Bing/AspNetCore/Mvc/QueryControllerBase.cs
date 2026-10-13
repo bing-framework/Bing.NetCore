@@ -22,7 +22,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     private readonly IQueryAppService<TDto, TQuery> _service;
 
     /// <summary>
-    /// 初始化一个<see cref="QueryControllerBase{TDto,TQuery}"/>类型的实例
+    /// 初始化一个 <see cref="QueryControllerBase{TDto, TQuery}"/> 类型的实例。
     /// </summary>
     /// <param name="service">查询服务</param>
     protected QueryControllerBase(IQueryAppService<TDto, TQuery> service)

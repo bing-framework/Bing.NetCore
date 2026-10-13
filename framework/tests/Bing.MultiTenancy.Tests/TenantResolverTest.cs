@@ -12,6 +12,7 @@ public class TenantResolverTest
     /// <summary>
     /// 构建包含若干 ActionTenantResolveContributor 的 TenantResolver
     /// </summary>
+    /// <returns>包含已配置解析器的租户解析器实例。</returns>
     private static ITenantResolver BuildResolver(
         params Action<ITenantResolveContext>[] actions)
     {

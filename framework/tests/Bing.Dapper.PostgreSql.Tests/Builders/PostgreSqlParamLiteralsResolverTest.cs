@@ -6,12 +6,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
-/// <see cref="PostgreSqlParamLiteralsResolver"/> 单元测试。
-/// 验证各类型参数的字面值输出：null、bool、整型/浮点型（无引号）、默认类型（有单引号）。
-/// 不依赖数据库连接，纯逻辑单元测试。
+/// <see cref="PostgreSqlParamLiteralsResolver"/> 单元测试。 验证各类型参数的字面值输出：null、bool、整型/浮点型（无引号）、默认类型（有单引号）。 不依赖数据库连接，纯逻辑单元测试。
 /// </summary>
 public class PostgreSqlParamLiteralsResolverTest
 {
+    /// <summary>
+    /// 供 PostgreSQL 参数字面量测试使用的解析器。
+    /// </summary>
     private readonly IParamLiteralsResolver _resolver = PostgreSqlParamLiteralsResolver.Instance;
 
     // ─── null ────────────────────────────────────────────────────────────────

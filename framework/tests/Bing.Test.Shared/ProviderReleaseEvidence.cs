@@ -11,42 +11,99 @@ namespace Bing.Test.Shared;
 /// </summary>
 public sealed class ProviderReleaseEvidenceRequest
 {
+    /// <summary>
+    /// 获取或设置工作区根目录。
+    /// </summary>
     public string WorkspaceRoot { get; set; }
 
+    /// <summary>
+    /// 获取或设置 Provider 名称。
+    /// </summary>
     public string Provider { get; set; }
 
+    /// <summary>
+    /// 获取或设置目标框架。
+    /// </summary>
     public string Framework { get; set; }
 
+    /// <summary>
+    /// 获取或设置当前运行标识。
+    /// </summary>
     public string RunId { get; set; }
 
+    /// <summary>
+    /// 获取或设置 TRX 制品相对路径。
+    /// </summary>
     public string TrxRelativePath { get; set; }
 
+    /// <summary>
+    /// 获取或设置摘要制品相对路径。
+    /// </summary>
     public string SummaryRelativePath { get; set; }
 
+    /// <summary>
+    /// 获取或设置 JSON 矩阵制品相对路径。
+    /// </summary>
     public string MatrixJsonRelativePath { get; set; }
 
+    /// <summary>
+    /// 获取或设置 Markdown 矩阵制品相对路径。
+    /// </summary>
     public string MatrixMarkdownRelativePath { get; set; }
 
+    /// <summary>
+    /// 获取或设置二进制 manifest 相对路径。
+    /// </summary>
     public string BinaryManifestRelativePath { get; set; }
 
+    /// <summary>
+    /// 获取或设置证据聚合会话标识。
+    /// </summary>
     public string EvidenceSessionId { get; set; }
 
+    /// <summary>
+    /// 获取或设置源码身份标识。
+    /// </summary>
     public string SourceIdentity { get; set; }
 
+    /// <summary>
+    /// 获取或设置 Provider 版本。
+    /// </summary>
     public string ProviderVersion { get; set; }
 
+    /// <summary>
+    /// 获取或设置数据库版本。
+    /// </summary>
     public string DatabaseVersion { get; set; }
 
+    /// <summary>
+    /// 获取或设置驱动版本。
+    /// </summary>
     public string DriverVersion { get; set; }
 
+    /// <summary>
+    /// 获取或设置运行时版本。
+    /// </summary>
     public string RuntimeVersion { get; set; }
 
+    /// <summary>
+    /// 获取或设置操作系统名称。
+    /// </summary>
     public string OperatingSystem { get; set; }
 
+    /// <summary>
+    /// 获取或设置源码工作区状态。
+    /// </summary>
     public string SourceState { get; set; }
 
+    /// <summary>
+    /// 获取或设置运行开始时间。
+    /// </summary>
     public DateTimeOffset StartedAtUtc { get; set; }
 
+    /// <summary>
+    /// 获取或设置运行完成时间。
+    /// </summary>
     public DateTimeOffset CompletedAtUtc { get; set; }
 }
 
@@ -55,25 +112,48 @@ public sealed class ProviderReleaseEvidenceRequest
 /// </summary>
 public static class ProviderReleaseEvidenceValidator
 {
+    /// <summary>
+    /// 允许制品时间戳偏离运行窗口的最大时长。
+    /// </summary>
     private static readonly TimeSpan FileTimestampTolerance = TimeSpan.FromMinutes(2);
+    /// <summary>
+    /// 当前运行完成后的最大有效时长。
+    /// </summary>
     private static readonly TimeSpan MaximumCompletedRunAge = TimeSpan.FromMinutes(15);
+    /// <summary>
+    /// 已验证运行令牌及其校验标记。
+    /// </summary>
     private static readonly ConditionalWeakTable<ProviderValidatedReleaseRun, object> ValidatedRuns = new();
+    /// <summary>
+    /// 当前验证器使用的运行令牌标记对象。
+    /// </summary>
     private static readonly object ValidationMarker = new();
 
     /// <summary>
     /// 验证当前运行的 TRX、摘要和制品路径，并返回可创建发布证据的受信运行对象。
     /// </summary>
     /// <param name="request">由 CI runner 传入的当前运行绑定信息。</param>
+    /// <returns>可创建发布证据的受信运行对象。</returns>
     public static ProviderValidatedReleaseRun Validate(ProviderReleaseEvidenceRequest request) =>
         ValidateCore(request, true, null);
 
     /// <summary>
     /// 验证已绑定证据会话的归档 Provider 运行，不重复执行当前运行时效门禁。
     /// </summary>
+    /// <param name="request">归档运行的制品绑定信息。</param>
+    /// <param name="expectedEvidenceSessionId">要求匹配的证据聚合会话标识。</param>
+    /// <returns>可创建发布证据的受信运行对象。</returns>
     public static ProviderValidatedReleaseRun ValidateArchived(ProviderReleaseEvidenceRequest request,
         string expectedEvidenceSessionId) => ValidateCore(request, false,
         RequireEvidenceSessionId(expectedEvidenceSessionId));
 
+    /// <summary>
+    /// 执行当前或归档运行的共同证据校验流程。
+    /// </summary>
+    /// <param name="request">运行制品绑定信息。</param>
+    /// <param name="requireFreshness">是否校验当前运行时效。</param>
+    /// <param name="expectedEvidenceSessionId">要求匹配的证据会话标识。</param>
+    /// <returns>已验证的 Provider 运行对象。</returns>
     private static ProviderValidatedReleaseRun ValidateCore(ProviderReleaseEvidenceRequest request,
         bool requireFreshness, string expectedEvidenceSessionId)
     {
@@ -191,6 +271,10 @@ public static class ProviderReleaseEvidenceValidator
         return run;
     }
 
+    /// <summary>
+    /// 确认运行令牌由当前验证器创建。
+    /// </summary>
+    /// <param name="run">待确认的运行令牌。</param>
     internal static void EnsureValidated(ProviderValidatedReleaseRun run)
     {
         if (run == null || !ValidatedRuns.TryGetValue(run, out var marker) ||
@@ -203,6 +287,30 @@ public static class ProviderReleaseEvidenceValidator
     /// </summary>
     public sealed class ProviderValidatedReleaseRun
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ProviderValidatedReleaseRun"/> 类型的实例。
+        /// </summary>
+        /// <param name="provider">Provider 名称。</param>
+        /// <param name="framework">目标框架。</param>
+        /// <param name="runId">运行标识。</param>
+        /// <param name="evidenceSessionId">证据聚合会话标识。</param>
+        /// <param name="sourceIdentity">源码身份标识。</param>
+        /// <param name="startedAtUtc">运行开始时间。</param>
+        /// <param name="completedAtUtc">运行完成时间。</param>
+        /// <param name="trxRelativePath">TRX 制品相对路径。</param>
+        /// <param name="summaryRelativePath">摘要制品相对路径。</param>
+        /// <param name="matrixJsonRelativePath">JSON 矩阵相对路径。</param>
+        /// <param name="matrixMarkdownRelativePath">Markdown 矩阵相对路径。</param>
+        /// <param name="matrixJsonPath">JSON 矩阵绝对路径。</param>
+        /// <param name="matrixMarkdownPath">Markdown 矩阵绝对路径。</param>
+        /// <param name="binaryManifestRelativePath">二进制 manifest 相对路径。</param>
+        /// <param name="passedTestMethods">已通过测试方法集合。</param>
+        /// <param name="providerVersion">Provider 版本。</param>
+        /// <param name="databaseVersion">数据库版本。</param>
+        /// <param name="driverVersion">驱动版本。</param>
+        /// <param name="runtimeVersion">运行时版本。</param>
+        /// <param name="operatingSystem">操作系统名称。</param>
+        /// <param name="sourceState">源码工作区状态。</param>
         internal ProviderValidatedReleaseRun(string provider, string framework, string runId, string evidenceSessionId,
             string sourceIdentity,
             DateTimeOffset startedAtUtc, DateTimeOffset completedAtUtc, string trxRelativePath,
@@ -236,6 +344,22 @@ public static class ProviderReleaseEvidenceValidator
             SourceState = sourceState;
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="ProviderValidatedReleaseRun"/> 类型的实例。
+        /// </summary>
+        /// <param name="provider">Provider 名称。</param>
+        /// <param name="framework">目标框架。</param>
+        /// <param name="runId">运行标识。</param>
+        /// <param name="sourceIdentity">源码身份标识。</param>
+        /// <param name="startedAtUtc">运行开始时间。</param>
+        /// <param name="completedAtUtc">运行完成时间。</param>
+        /// <param name="trxRelativePath">TRX 制品相对路径。</param>
+        /// <param name="summaryRelativePath">摘要制品相对路径。</param>
+        /// <param name="matrixJsonRelativePath">JSON 矩阵相对路径。</param>
+        /// <param name="matrixMarkdownRelativePath">Markdown 矩阵相对路径。</param>
+        /// <param name="matrixJsonPath">JSON 矩阵绝对路径。</param>
+        /// <param name="matrixMarkdownPath">Markdown 矩阵绝对路径。</param>
+        /// <param name="passedTestMethods">已通过测试方法集合。</param>
         internal ProviderValidatedReleaseRun(string provider, string framework, string runId, string sourceIdentity,
             DateTimeOffset startedAtUtc, DateTimeOffset completedAtUtc, string trxRelativePath,
             string summaryRelativePath, string matrixJsonRelativePath, string matrixMarkdownRelativePath,
@@ -246,51 +370,137 @@ public static class ProviderReleaseEvidenceValidator
         {
         }
 
+        /// <summary>
+        /// 获取 Provider 名称。
+        /// </summary>
         public string Provider { get; }
 
+        /// <summary>
+        /// 获取目标框架。
+        /// </summary>
         public string Framework { get; }
 
+        /// <summary>
+        /// 获取运行标识。
+        /// </summary>
         public string RunId { get; }
 
+        /// <summary>
+        /// 获取证据聚合会话标识。
+        /// </summary>
         public string EvidenceSessionId { get; }
 
+        /// <summary>
+        /// 获取源码身份标识。
+        /// </summary>
         public string SourceIdentity { get; }
 
+        /// <summary>
+        /// 获取运行开始时间。
+        /// </summary>
         public DateTimeOffset StartedAtUtc { get; }
 
+        /// <summary>
+        /// 获取运行完成时间。
+        /// </summary>
         public DateTimeOffset CompletedAtUtc { get; }
 
+        /// <summary>
+        /// 获取 TRX 制品相对路径。
+        /// </summary>
         public string TrxRelativePath { get; }
 
+        /// <summary>
+        /// 获取摘要制品相对路径。
+        /// </summary>
         public string SummaryRelativePath { get; }
 
+        /// <summary>
+        /// 获取 JSON 矩阵相对路径。
+        /// </summary>
         public string MatrixJsonRelativePath { get; }
 
+        /// <summary>
+        /// 获取 Markdown 矩阵相对路径。
+        /// </summary>
         public string MatrixMarkdownRelativePath { get; }
 
+        /// <summary>
+        /// 获取 JSON 矩阵绝对路径。
+        /// </summary>
         public string MatrixJsonPath { get; }
 
+        /// <summary>
+        /// 获取 Markdown 矩阵绝对路径。
+        /// </summary>
         public string MatrixMarkdownPath { get; }
 
+        /// <summary>
+        /// 获取二进制 manifest 相对路径。
+        /// </summary>
         public string BinaryManifestRelativePath { get; }
 
+        /// <summary>
+        /// 获取已通过测试方法集合。
+        /// </summary>
         public IReadOnlySet<string> PassedTestMethods { get; }
 
+        /// <summary>
+        /// 获取 Provider 版本。
+        /// </summary>
         internal string ProviderVersion { get; }
 
+        /// <summary>
+        /// 获取数据库版本。
+        /// </summary>
         internal string DatabaseVersion { get; }
 
+        /// <summary>
+        /// 获取驱动版本。
+        /// </summary>
         internal string DriverVersion { get; }
 
+        /// <summary>
+        /// 获取运行时版本。
+        /// </summary>
         internal string RuntimeVersion { get; }
 
+        /// <summary>
+        /// 获取操作系统名称。
+        /// </summary>
         internal string OperatingSystem { get; }
 
+        /// <summary>
+        /// 获取源码工作区状态。
+        /// </summary>
         internal string SourceState { get; }
 
+        /// <summary>
+        /// 获取集成测试连接类别。
+        /// </summary>
         internal ProviderIntegrationConnectionKind ConnectionKind => ProviderIntegrationConnectionKind.RemoteTestDatabase;
     }
 
+    /// <summary>
+    /// 校验摘要中的运行身份和制品元数据。
+    /// </summary>
+    /// <param name="summary">运行摘要 JSON。</param>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="framework">目标框架。</param>
+    /// <param name="runId">运行标识。</param>
+    /// <param name="evidenceSessionId">证据聚合会话标识。</param>
+    /// <param name="sourceIdentity">源码身份标识。</param>
+    /// <param name="trxRelativePath">TRX 制品相对路径。</param>
+    /// <param name="summaryRelativePath">摘要制品相对路径。</param>
+    /// <param name="startedAtUtc">运行开始时间。</param>
+    /// <param name="completedAtUtc">运行完成时间。</param>
+    /// <param name="providerVersion">Provider 版本。</param>
+    /// <param name="databaseVersion">数据库版本。</param>
+    /// <param name="driverVersion">驱动版本。</param>
+    /// <param name="runtimeVersion">运行时版本。</param>
+    /// <param name="operatingSystem">操作系统名称。</param>
+    /// <param name="sourceState">源码工作区状态。</param>
+    /// <param name="binaryManifestRelativePath">二进制 manifest 相对路径。</param>
     private static void EnsureSummaryIdentity(JsonElement summary, string provider, string framework, string runId,
         string evidenceSessionId, string sourceIdentity, string trxRelativePath, string summaryRelativePath,
         DateTimeOffset startedAtUtc,
@@ -315,6 +525,15 @@ public static class ProviderReleaseEvidenceValidator
         EnsureSummaryValue(summary, "SourceState", sourceState);
     }
 
+    /// <summary>
+    /// 校验摘要中的测试计数与 TRX 计数一致。
+    /// </summary>
+    /// <param name="summary">运行摘要 JSON。</param>
+    /// <param name="total">TRX 总测试数。</param>
+    /// <param name="passed">TRX 通过测试数。</param>
+    /// <param name="failed">TRX 失败测试数。</param>
+    /// <param name="skipped">TRX 跳过测试数。</param>
+    /// <param name="parameterName">错误参数名称。</param>
     private static void EnsureSummaryCounts(JsonElement summary, int total, int passed, int failed, int skipped,
         string parameterName)
     {
@@ -329,6 +548,12 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException("摘要计数与 TRX 或发布证据要求不一致。", parameterName);
     }
 
+    /// <summary>
+    /// 校验摘要字段的字符串值。
+    /// </summary>
+    /// <param name="summary">摘要 JSON。</param>
+    /// <param name="name">字段名称。</param>
+    /// <param name="expected">期望值。</param>
     private static void EnsureSummaryValue(JsonElement summary, string name, string expected)
     {
         if (!summary.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.String ||
@@ -336,6 +561,12 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException($"摘要字段 {name} 与当前运行不一致。", nameof(summary));
     }
 
+    /// <summary>
+    /// 校验摘要字段的 UTC 时间值。
+    /// </summary>
+    /// <param name="summary">摘要 JSON。</param>
+    /// <param name="name">字段名称。</param>
+    /// <param name="expected">期望时间。</param>
     private static void EnsureSummaryTimestamp(JsonElement summary, string name, DateTimeOffset expected)
     {
         if (!summary.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.String ||
@@ -344,6 +575,13 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException($"摘要字段 {name} 与当前运行时间不一致。", nameof(summary));
     }
 
+    /// <summary>
+    /// 读取并校验摘要中的非负整数。
+    /// </summary>
+    /// <param name="summary">摘要 JSON。</param>
+    /// <param name="name">字段名称。</param>
+    /// <param name="parameterName">错误参数名称。</param>
+    /// <returns>摘要中的整数值。</returns>
     private static int GetSummaryInt(JsonElement summary, string name, string parameterName)
     {
         if (!summary.TryGetProperty(name, out var value) || !value.TryGetInt32(out var result) || result < 0)
@@ -351,6 +589,13 @@ public static class ProviderReleaseEvidenceValidator
         return result;
     }
 
+    /// <summary>
+    /// 读取并校验 TRX 计数器。
+    /// </summary>
+    /// <param name="counters">TRX 计数器元素。</param>
+    /// <param name="name">计数器名称。</param>
+    /// <param name="parameterName">错误参数名称。</param>
+    /// <returns>计数器数值。</returns>
     private static int ParseCounter(XElement counters, string name, string parameterName)
     {
         if (!int.TryParse((string)counters.Attribute(name), out var value) || value < 0)
@@ -358,6 +603,13 @@ public static class ProviderReleaseEvidenceValidator
         return value;
     }
 
+    /// <summary>
+    /// 校验制品文件时间戳位于当前运行窗口内。
+    /// </summary>
+    /// <param name="path">制品文件路径。</param>
+    /// <param name="startedAtUtc">运行开始时间。</param>
+    /// <param name="completedAtUtc">运行完成时间。</param>
+    /// <param name="parameterName">错误参数名称。</param>
     private static void EnsureCurrentRunFile(string path, DateTimeOffset startedAtUtc, DateTimeOffset completedAtUtc,
         string parameterName)
     {
@@ -367,6 +619,12 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException("制品文件不在当前运行时间窗口内。", parameterName);
     }
 
+    /// <summary>
+    /// 校验运行时间窗口及当前运行的新鲜度。
+    /// </summary>
+    /// <param name="startedAtUtc">运行开始时间。</param>
+    /// <param name="completedAtUtc">运行完成时间。</param>
+    /// <param name="requireFreshness">是否要求运行仍在有效期内。</param>
     private static void EnsureUtcWindow(DateTimeOffset startedAtUtc, DateTimeOffset completedAtUtc,
         bool requireFreshness)
     {
@@ -376,6 +634,14 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException("当前运行时间窗口无效或已过期。", nameof(completedAtUtc));
     }
 
+    /// <summary>
+    /// 校验固定矩阵制品路径。
+    /// </summary>
+    /// <param name="value">待验证的相对路径。</param>
+    /// <param name="runRelativeDirectory">运行目录相对路径。</param>
+    /// <param name="fileName">固定文件名。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的矩阵相对路径。</returns>
     private static string RequireExpectedMatrixPath(string value, string runRelativeDirectory, string fileName,
         string parameterName)
     {
@@ -386,6 +652,14 @@ public static class ProviderReleaseEvidenceValidator
         return normalized;
     }
 
+    /// <summary>
+    /// 校验制品路径位于当前运行目录并具有指定扩展名。
+    /// </summary>
+    /// <param name="value">待验证的相对路径。</param>
+    /// <param name="runRelativeDirectory">运行目录相对路径。</param>
+    /// <param name="extension">要求的文件扩展名。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的制品相对路径。</returns>
     private static string RequirePathInRunDirectory(string value, string runRelativeDirectory, string extension,
         string parameterName)
     {
@@ -396,6 +670,12 @@ public static class ProviderReleaseEvidenceValidator
         return normalized;
     }
 
+    /// <summary>
+    /// 规范化并校验工作区相对路径。
+    /// </summary>
+    /// <param name="value">待验证的相对路径。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的相对路径。</returns>
     private static string NormalizeRelativePath(string value, string parameterName)
     {
         var path = RequireSafeText(value, parameterName).Replace('\\', '/');
@@ -404,6 +684,13 @@ public static class ProviderReleaseEvidenceValidator
         return path;
     }
 
+    /// <summary>
+    /// 将工作区根目录与安全相对路径组合为绝对路径。
+    /// </summary>
+    /// <param name="workspaceRoot">工作区根目录。</param>
+    /// <param name="relativePath">工作区相对路径。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>组合后的绝对路径。</returns>
     private static string CombineRelativePath(string workspaceRoot, string relativePath, string parameterName)
     {
         var normalized = NormalizeRelativePath(relativePath, parameterName);
@@ -414,6 +701,12 @@ public static class ProviderReleaseEvidenceValidator
         return fullPath;
     }
 
+    /// <summary>
+    /// 校验工作区根目录为存在的绝对路径。
+    /// </summary>
+    /// <param name="value">工作区根目录。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的绝对路径。</returns>
     private static string RequireFullPath(string value, string parameterName)
     {
         var root = RequireSafeText(value, parameterName);
@@ -422,6 +715,11 @@ public static class ProviderReleaseEvidenceValidator
         return Path.GetFullPath(root);
     }
 
+    /// <summary>
+    /// 校验目标框架名称。
+    /// </summary>
+    /// <param name="value">目标框架名称。</param>
+    /// <returns>规范化后的目标框架名称。</returns>
     private static string RequireFramework(string value)
     {
         var framework = RequireSafeText(value, nameof(value));
@@ -430,6 +728,11 @@ public static class ProviderReleaseEvidenceValidator
         return framework;
     }
 
+    /// <summary>
+    /// 校验运行标识。
+    /// </summary>
+    /// <param name="value">运行标识。</param>
+    /// <returns>规范化后的运行标识。</returns>
     private static string RequireRunId(string value)
     {
         var runId = RequireSafeText(value, nameof(value));
@@ -438,6 +741,11 @@ public static class ProviderReleaseEvidenceValidator
         return runId;
     }
 
+    /// <summary>
+    /// 校验证据会话标识。
+    /// </summary>
+    /// <param name="value">证据会话标识。</param>
+    /// <returns>规范化后的证据会话标识。</returns>
     private static string RequireEvidenceSessionId(string value)
     {
         var sessionId = RequireSafeText(value, nameof(value));
@@ -446,6 +754,12 @@ public static class ProviderReleaseEvidenceValidator
         return sessionId;
     }
 
+    /// <summary>
+    /// 校验 Provider 标识令牌。
+    /// </summary>
+    /// <param name="value">待验证的标识。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的标识。</returns>
     private static string RequireToken(string value, string parameterName)
     {
         var token = RequireSafeText(value, parameterName);
@@ -454,6 +768,12 @@ public static class ProviderReleaseEvidenceValidator
         return token;
     }
 
+    /// <summary>
+    /// 校验文本值不为空且不包含敏感连接信息。
+    /// </summary>
+    /// <param name="value">待验证的文本值。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的文本值。</returns>
     private static string RequireSafeText(string value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -463,6 +783,12 @@ public static class ProviderReleaseEvidenceValidator
         return result;
     }
 
+    /// <summary>
+    /// 校验发布元数据不使用占位值。
+    /// </summary>
+    /// <param name="value">发布元数据值。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的发布元数据。</returns>
     private static string RequireReleaseMetadata(string value, string parameterName)
     {
         var result = RequireSafeText(value, parameterName);
@@ -472,6 +798,11 @@ public static class ProviderReleaseEvidenceValidator
         return result;
     }
 
+    /// <summary>
+    /// 校验文本不包含连接信息。
+    /// </summary>
+    /// <param name="value">待检查的文本。</param>
+    /// <param name="parameterName">参数名称。</param>
     private static void EnsureNoSensitiveText(string value, string parameterName)
     {
         if (value.Contains("Password=", StringComparison.OrdinalIgnoreCase) ||
@@ -481,12 +812,30 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException("发布证据不能包含连接信息。", parameterName);
     }
 
+    /// <summary>
+    /// 确认运行制品文件存在。
+    /// </summary>
+    /// <param name="path">制品文件路径。</param>
+    /// <param name="parameterName">参数名称。</param>
     private static void EnsureFileExists(string path, string parameterName)
     {
         if (!File.Exists(path))
             throw new ArgumentException("当前运行制品不存在。", parameterName);
     }
 
+    /// <summary>
+    /// 校验二进制 manifest 的身份、路径和哈希。
+    /// </summary>
+    /// <param name="manifestPath">manifest 文件路径。</param>
+    /// <param name="workspaceRoot">工作区根目录。</param>
+    /// <param name="runRelativeDirectory">运行目录相对路径。</param>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="framework">目标框架。</param>
+    /// <param name="runId">运行标识。</param>
+    /// <param name="evidenceSessionId">证据聚合会话标识。</param>
+    /// <param name="sourceIdentity">源码身份标识。</param>
+    /// <param name="sourceState">源码工作区状态。</param>
+    /// <param name="parameterName">错误参数名称。</param>
     private static void ValidateBinaryManifest(string manifestPath, string workspaceRoot,
         string runRelativeDirectory, string provider, string framework, string runId, string evidenceSessionId,
         string sourceIdentity, string sourceState, string parameterName)
@@ -544,6 +893,18 @@ public static class ProviderReleaseEvidenceValidator
         }
     }
 
+    /// <summary>
+    /// 校验归档能力矩阵绑定到指定运行。
+    /// </summary>
+    /// <param name="matrixPath">能力矩阵文件路径。</param>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="framework">目标框架。</param>
+    /// <param name="runId">运行标识。</param>
+    /// <param name="evidenceSessionId">证据聚合会话标识。</param>
+    /// <param name="sourceIdentity">源码身份标识。</param>
+    /// <param name="matrixRelativePath">矩阵相对路径。</param>
+    /// <param name="trxRelativePath">TRX 相对路径。</param>
+    /// <param name="binaryManifestRelativePath">二进制 manifest 相对路径。</param>
     private static void ValidateArchivedMatrix(string matrixPath, string provider, string framework, string runId,
         string evidenceSessionId, string sourceIdentity, string matrixRelativePath, string trxRelativePath,
         string binaryManifestRelativePath)
@@ -593,6 +954,12 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException("归档能力矩阵缺少 ReleaseEvidence 条目。", nameof(matrixPath));
     }
 
+    /// <summary>
+    /// 校验矩阵字段与当前运行值一致。
+    /// </summary>
+    /// <param name="root">矩阵条目 JSON。</param>
+    /// <param name="name">字段名称。</param>
+    /// <param name="expected">期望值。</param>
     private static void EnsureMatrixValue(JsonElement root, string name, string expected)
     {
         if (!root.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.String ||
@@ -600,6 +967,12 @@ public static class ProviderReleaseEvidenceValidator
             throw new ArgumentException($"归档能力矩阵字段 {name} 与当前运行不一致。", nameof(root));
     }
 
+    /// <summary>
+    /// 规范化并校验二进制 manifest 路径。
+    /// </summary>
+    /// <param name="value">待验证的 manifest 路径。</param>
+    /// <param name="parameterName">参数名称。</param>
+    /// <returns>规范化后的 manifest 路径。</returns>
     private static string NormalizeManifestPath(string value, string parameterName)
     {
         var path = RequireSafeText(value, parameterName).Replace('\\', '/');
@@ -619,6 +992,7 @@ public static class ProviderReleaseEvidenceWriter
     /// 验证当前 CI 运行并写入同目录的 JSON 和 Markdown 发布矩阵。
     /// </summary>
     /// <param name="request">当前 runner 的制品绑定信息。</param>
+    /// <returns>写入制品后的能力矩阵。</returns>
     public static ProviderCapabilityMatrix Write(ProviderReleaseEvidenceRequest request)
     {
         var run = ProviderReleaseEvidenceValidator.Validate(request);
@@ -634,6 +1008,9 @@ public static class ProviderReleaseEvidenceWriter
 /// </summary>
 public static class ProviderCapabilityCatalog
 {
+    /// <summary>
+    /// Provider 能力场景定义集合。
+    /// </summary>
     private static readonly ProviderCapabilityScenarioDefinition[] Definitions =
     {
         Definition("MySql", "Core query", "scalar/list/single", "MySqlQueryTest.ExecuteScalar_ShouldReturnActualCount"),
@@ -730,6 +1107,7 @@ public static class ProviderCapabilityCatalog
     /// <summary>
     /// 创建未执行状态的完整跨 Provider 能力矩阵。
     /// </summary>
+    /// <returns>完整的基础能力矩阵。</returns>
     public static ProviderCapabilityMatrix CreateBaselineMatrix()
     {
         var matrix = new ProviderCapabilityMatrix();
@@ -742,6 +1120,7 @@ public static class ProviderCapabilityCatalog
     /// 基于已验证的当前 Provider 运行创建同目录发布矩阵。
     /// </summary>
     /// <param name="run">已验证的 CI 运行。</param>
+    /// <returns>当前 Provider 的发布能力矩阵。</returns>
     internal static ProviderCapabilityMatrix CreateReleaseMatrix(ProviderReleaseEvidenceValidator.ProviderValidatedReleaseRun run)
     {
         if (run == null)
@@ -758,8 +1137,15 @@ public static class ProviderCapabilityCatalog
     /// <summary>
     /// 返回用于直接单元测试的完整场景定义。
     /// </summary>
+    /// <returns>能力场景定义集合。</returns>
     public static IReadOnlyList<ProviderCapabilityScenarioDefinition> GetDefinitions() => Definitions;
 
+    /// <summary>
+    /// 根据场景定义和运行结果创建能力证据。
+    /// </summary>
+    /// <param name="definition">能力场景定义。</param>
+    /// <param name="run">已验证的 Provider 运行。</param>
+    /// <returns>能力证据。</returns>
     private static ProviderCapabilityEvidence CreateEvidence(ProviderCapabilityScenarioDefinition definition,
         ProviderReleaseEvidenceValidator.ProviderValidatedReleaseRun run)
     {
@@ -778,10 +1164,28 @@ public static class ProviderCapabilityCatalog
             definition.State, evidence, definition.TestMethod ?? string.Empty);
     }
 
+    /// <summary>
+    /// 创建 Provider 能力场景定义。
+    /// </summary>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="capability">能力名称。</param>
+    /// <param name="scenario">场景名称。</param>
+    /// <param name="testMethod">测试方法名称。</param>
+    /// <returns>场景定义。</returns>
     private static ProviderCapabilityScenarioDefinition Definition(string provider, string capability, string scenario,
         string testMethod) => Definition(provider, capability, scenario, ProviderCapabilityEvidenceState.NotExecuted,
         testMethod, "受保护 Provider lane 尚未执行；默认 gate 跳过不构成真实执行证据。");
 
+    /// <summary>
+    /// 创建 Provider 能力场景定义。
+    /// </summary>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="capability">能力名称。</param>
+    /// <param name="scenario">场景名称。</param>
+    /// <param name="state">能力证据状态。</param>
+    /// <param name="testMethod">测试方法名称。</param>
+    /// <param name="evidence">证据说明。</param>
+    /// <returns>场景定义。</returns>
     private static ProviderCapabilityScenarioDefinition Definition(string provider, string capability, string scenario,
         ProviderCapabilityEvidenceState state, string testMethod, string evidence) => new(provider, capability,
         scenario, state, testMethod, evidence);
@@ -792,6 +1196,15 @@ public static class ProviderCapabilityCatalog
 /// </summary>
 public sealed class ProviderCapabilityScenarioDefinition
 {
+    /// <summary>
+    /// 初始化一个 <see cref="ProviderCapabilityScenarioDefinition"/> 类型的实例。
+    /// </summary>
+    /// <param name="provider">Provider 名称。</param>
+    /// <param name="capability">能力名称。</param>
+    /// <param name="scenario">场景名称。</param>
+    /// <param name="state">能力证据状态。</param>
+    /// <param name="testMethod">测试方法名称。</param>
+    /// <param name="evidence">证据说明。</param>
     internal ProviderCapabilityScenarioDefinition(string provider, string capability, string scenario,
         ProviderCapabilityEvidenceState state, string testMethod, string evidence)
     {
@@ -803,15 +1216,33 @@ public sealed class ProviderCapabilityScenarioDefinition
         Evidence = evidence;
     }
 
+    /// <summary>
+    /// 获取 Provider 名称。
+    /// </summary>
     public string Provider { get; }
 
+    /// <summary>
+    /// 获取能力名称。
+    /// </summary>
     public string Capability { get; }
 
+    /// <summary>
+    /// 获取场景名称。
+    /// </summary>
     public string Scenario { get; }
 
+    /// <summary>
+    /// 获取能力证据状态。
+    /// </summary>
     public ProviderCapabilityEvidenceState State { get; }
 
+    /// <summary>
+    /// 获取测试方法名称。
+    /// </summary>
     public string TestMethod { get; }
 
+    /// <summary>
+    /// 获取证据说明。
+    /// </summary>
     public string Evidence { get; }
 }

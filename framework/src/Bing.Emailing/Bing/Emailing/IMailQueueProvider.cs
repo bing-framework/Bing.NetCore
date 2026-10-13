@@ -6,12 +6,12 @@
 public interface IMailQueueProvider
 {
     /// <summary>
-    /// 队列邮件数量
+    /// 获取队列邮件数量
     /// </summary>
     int Count { get; }
 
     /// <summary>
-    /// 队列是否为空
+    /// 获取队列是否为空
     /// </summary>
     bool IsEmpty { get; }
 

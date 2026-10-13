@@ -23,14 +23,17 @@ public class HttpContextTenantResolveResultAccessor : ITenantResolveResultAccess
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
-    /// 使用指定 HTTP 上下文访问器初始化 <see cref="HttpContextTenantResolveResultAccessor"/> 的实例。
+    /// 初始化一个 <see cref="HttpContextTenantResolveResultAccessor"/> 类型的实例。
     /// </summary>
     /// <param name="httpContextAccessor">用于读取当前 HTTP 请求上下文的访问器。</param>
     public HttpContextTenantResolveResultAccessor(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
-    /// <summary>
-    /// 获取或设置当前 HTTP 请求缓存的租户解析结果；没有 HTTP 上下文时读取返回 <c>null</c>，写入被忽略。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取或设置当前 HTTP 请求缓存的租户解析结果。
+    ///
+    /// 没有 HTTP 上下文时读取返回 <c>null</c>，写入被忽略。
+    /// </remarks>
     public TenantResolveResult Result
     {
         get => _httpContextAccessor.HttpContext?.Items[HttpContextItemName] as TenantResolveResult;

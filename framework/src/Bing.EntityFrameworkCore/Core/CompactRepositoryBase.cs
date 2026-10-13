@@ -14,7 +14,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo> : CompactRepositoryBas
     where TPo : class, IKey<Guid>
 {
     /// <summary>
-    /// 初始化一个<see cref="CompactRepositoryBase{TEntity,TPo}"/>类型的实例
+    /// 初始化一个 <see cref="CompactRepositoryBase{TEntity, TPo}"/> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected CompactRepositoryBase(IStore<TPo, Guid> store) : base(store)
@@ -38,7 +38,7 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     private readonly IStore<TPo, TKey> _store;
 
     /// <summary>
-    /// 初始化一个<see cref="CompactRepositoryBase{TEntity,TPo,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="CompactRepositoryBase{TEntity, TPo, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected CompactRepositoryBase(IStore<TPo, TKey> store) => _store = store;
@@ -57,63 +57,33 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
     /// <returns>由实体转换得到的持久化对象。</returns>
     protected abstract TPo ToPo(TEntity entity);
 
-    /// <summary>
-    /// 查找实体
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <returns>指定标识对应的实体；未找到时返回 null。</returns>
+    /// <inheritdoc />
     public virtual TEntity Find(object id) => ToEntity(_store.FindById(id));
 
-    /// <summary>
-    /// 查找实体
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为指定标识对应的实体；未找到时返回 null。</returns>
+    /// <inheritdoc />
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return ToEntity(await _store.FindByIdAsync(id, cancellationToken));
     }
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual List<TEntity> FindByIds(params TKey[] ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual List<TEntity> FindByIds(IEnumerable<TKey> ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    /// <returns>指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual List<TEntity> FindByIds(string ids) => _store.FindByIds(ids).Select(ToEntity).ToList();
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(params TKey[] ids)
     {
         var pos = await _store.FindByIdsAsync(ids);
         return pos.Select(ToEntity).ToList();
     }
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -121,165 +91,91 @@ public abstract class CompactRepositoryBase<TEntity, TPo, TKey> : ICompactReposi
         return pos.Select(ToEntity).ToList();
     }
 
-    /// <summary>
-    /// 查找实体列表
-    /// </summary>
-    /// <param name="ids">逗号分隔的标识列表，范例："1,2"</param>
-    /// <returns>表示异步操作的任务，结果为指定标识对应的实体列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids)
     {
         var pos = await _store.FindByIdsAsync(ids);
         return pos.Select(ToEntity).ToList();
     }
 
-    /// <summary>
-    /// 判断是否存在
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <returns>指定标识对应的实体存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public virtual bool Exists(TKey id) => _store.Exists(id);
 
-    /// <summary>
-    /// 判断是否存在
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>指定标识对应的实体均存在时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public virtual bool Exists(TKey[] ids) => _store.Exists(ids);
 
-    /// <summary>
-    /// 判断是否存在
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <returns>表示异步判断操作的任务，结果指示指定标识对应的实体是否存在。</returns>
+    /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(TKey id) => await _store.ExistsAsync(id);
 
-    /// <summary>
-    /// 判断是否存在
-    /// </summary>
-    /// <param name="ids">标识列表</param>
-    /// <returns>表示异步判断操作的任务，结果指示指定标识对应的实体是否存在。</returns>
+    /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(TKey[] ids) => await _store.ExistsAsync(ids);
 
-    /// <summary>
-    /// 添加实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     public virtual void Add(TEntity entity) => _store.Add(ToPo(entity));
 
-    /// <summary>
-    /// 添加实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     public virtual void Add(IEnumerable<TEntity> entities) => _store.Add(entities.Select(ToPo));
 
-    /// <summary>
-    /// 添加实体
-    /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _store.AddAsync(ToPo(entity), cancellationToken);
     }
 
-    /// <summary>
-    /// 添加实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _store.AddAsync(entities.Select(ToPo), cancellationToken);
     }
 
-    /// <summary>
-    /// 修改实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     public virtual void Update(TEntity entity) => _store.Update(ToPo(entity));
 
-    /// <summary>
-    /// 修改实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     public virtual void Update(IEnumerable<TEntity> entities) => _store.Update(entities.Select(ToPo));
 
-    /// <summary>
-    /// 修改实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     public virtual async Task UpdateAsync(TEntity entity) => await _store.UpdateAsync(ToPo(entity));
 
-    /// <summary>
-    /// 修改实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     public virtual async Task UpdateAsync(IEnumerable<TEntity> entities) => await _store.UpdateAsync(entities.Select(ToPo));
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="id">标识</param>
+    /// <inheritdoc />
     public virtual void Remove(object id) => _store.Remove(id);
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     public virtual void Remove(TEntity entity) => _store.Remove(ToPo(entity));
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="ids">标识集合</param>
+    /// <inheritdoc />
     public virtual void Remove(IEnumerable<TKey> ids) => _store.Remove(ids);
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     public virtual void Remove(IEnumerable<TEntity> entities) => _store.Remove(entities.Select(ToPo));
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _store.RemoveAsync(id, cancellationToken);
     }
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _store.RemoveAsync(ToPo(entity), cancellationToken);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="ids">标识集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _store.RemoveAsync(ids, cancellationToken);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

@@ -7,7 +7,10 @@
 public interface IObjectAccessor<out T>
 {
     /// <summary>
-    /// 获取当前对象值；引用类型尚未设置时可能为 <c>null</c>。
+    /// 获取当前对象值。
     /// </summary>
+    /// <remarks>
+    /// 引用类型尚未设置时可能为 <c>null</c>。
+    /// </remarks>
     T Value { get; }
 }

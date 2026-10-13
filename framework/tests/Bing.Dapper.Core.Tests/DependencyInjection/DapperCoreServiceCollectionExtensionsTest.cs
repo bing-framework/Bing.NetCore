@@ -505,7 +505,7 @@ public class DapperCoreServiceCollectionExtensionsTest
     private sealed class TestEntity
     {
         /// <summary>
-        /// 实体标识。
+        /// 获取或设置实体标识。
         /// </summary>
         public int Id { get; set; }
     }

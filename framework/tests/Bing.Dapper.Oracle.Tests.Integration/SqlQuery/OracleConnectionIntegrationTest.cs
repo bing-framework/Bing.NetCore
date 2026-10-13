@@ -5,10 +5,13 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// </summary>
 public sealed class OracleConnectionIntegrationTest
 {
+    /// <summary>
+    /// 用于 Oracle 连接集成测试的 SQL 查询实例。
+    /// </summary>
     private readonly ISqlQuery _query;
 
     /// <summary>
-    /// 初始化 Oracle 连接集成测试。
+    /// 初始化一个 <see cref="OracleConnectionIntegrationTest"/> 类型的实例。
     /// </summary>
     /// <param name="query">Oracle SQL 查询对象。</param>
     public OracleConnectionIntegrationTest(ISqlQuery query) => _query = query;

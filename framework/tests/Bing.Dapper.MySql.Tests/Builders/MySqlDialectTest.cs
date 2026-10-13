@@ -5,10 +5,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
-/// <see cref="MySqlDialect"/> 单元测试
+/// <see cref="MySqlDialect" /> 单元测试。
 /// </summary>
 public class MySqlDialectTest
 {
+    /// <summary>
+    /// MySQL 方言实例。
+    /// </summary>
     private readonly IDialect _dialect = MySqlDialect.Instance;
 
     // ═══════════════════════════════════════════════════════════

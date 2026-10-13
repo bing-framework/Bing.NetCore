@@ -6,17 +6,26 @@
 public class LockoutOptions
 {
     /// <summary>
-    /// 获取或设置是否允许新创建的用户参与锁定策略，默认值为 <c>true</c>。
+    /// 获取或设置是否允许新创建的用户参与锁定策略。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>true</c>。
+    /// </remarks>
     public bool AllowedForNewUsers { get; set; } = true;
 
     /// <summary>
-    /// 获取或设置触发锁定所需的连续登录失败次数，默认值为 <c>5</c> 次。
+    /// 获取或设置触发锁定所需的连续登录失败次数。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>5</c> 次。
+    /// </remarks>
     public int MaxFailedAccessAttempts { get; set; } = 5;
 
     /// <summary>
-    /// 获取或设置用户每次触发锁定后的锁定时长，默认值为 5 分钟。
+    /// 获取或设置用户每次触发锁定后的锁定时长。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 5 分钟。
+    /// </remarks>
     public TimeSpan LockoutTimeSpan { get; set; } = TimeSpan.FromMinutes(5);
 }

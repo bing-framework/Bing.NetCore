@@ -41,8 +41,7 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
     }
 
     /// <summary>
-    /// 获取当前条件组的根条件。
-    /// </summary>
+    /// 添加条件。
     internal ICondition Condition => _condition;
 
     /// <inheritdoc />
@@ -104,7 +103,7 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
     }
 
     /// <summary>
-    /// 解析并追加一个 Lambda 条件。
+    /// 添加条件。
     /// </summary>
     /// <param name="predicate">待解析的 Lambda 条件。</param>
     /// <param name="or">是否使用 Or 连接当前条件。</param>
@@ -117,7 +116,7 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
     }
 
     /// <summary>
-    /// 将结构化条件追加到当前条件树。
+    /// 添加条件。
     /// </summary>
     /// <param name="condition">待追加的条件。</param>
     /// <param name="or">是否使用 Or 连接当前条件。</param>

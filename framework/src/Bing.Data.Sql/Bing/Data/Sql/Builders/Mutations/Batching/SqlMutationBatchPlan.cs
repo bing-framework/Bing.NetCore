@@ -19,17 +19,17 @@ public sealed class SqlMutationBatchPlan
     }
 
     /// <summary>
-    /// 待处理实体数量。
+    /// 获取待处理实体数量。
     /// </summary>
     public int EntityCount { get; }
 
     /// <summary>
-    /// 实际每批最大实体数量。
+    /// 获取实际每批最大实体数量。
     /// </summary>
     public int EffectiveBatchSize { get; }
 
     /// <summary>
-    /// 按顺序保存的每批实体数量。
+    /// 获取按顺序保存的每批实体数量。
     /// </summary>
     public IReadOnlyList<int> BatchSizes { get; }
 }

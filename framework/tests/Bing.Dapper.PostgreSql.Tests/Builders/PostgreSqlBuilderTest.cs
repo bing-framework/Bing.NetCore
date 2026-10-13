@@ -15,7 +15,7 @@ public partial class PostgreSqlBuilderTest
     private readonly PostgreSqlBuilder _builder;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="PostgreSqlBuilderTest"/> 类型的实例。
     /// </summary>
     public PostgreSqlBuilderTest()
     {

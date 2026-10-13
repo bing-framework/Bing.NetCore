@@ -22,7 +22,7 @@ internal sealed class BingDynamicApiActionDescriptorProvider : IActionDescriptor
     private readonly BingDynamicApiRegistry _registry;
 
     /// <summary>
-    /// 初始化 BingDynamicApiActionDescriptorProvider 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiActionDescriptorProvider"/> 类型的实例。
     /// </summary>
     /// <param name="registry">动态服务注册表。</param>
     public BingDynamicApiActionDescriptorProvider(BingDynamicApiRegistry registry) => _registry = registry;

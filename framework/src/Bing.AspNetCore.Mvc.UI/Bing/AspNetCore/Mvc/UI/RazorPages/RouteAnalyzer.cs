@@ -17,7 +17,7 @@ public class RouteAnalyzer : IRouteAnalyzer
     private readonly IActionDescriptorCollectionProvider _actionDescriptorCollectionProvider;
 
     /// <summary>
-    /// 初始化一个<see cref="RouteAnalyzer"/>类型的实例
+    /// 初始化一个 <see cref="RouteAnalyzer"/> 类型的实例。
     /// </summary>
     /// <param name="actionDescriptorCollectionProvider">操作描述集合提供程序</param>
     public RouteAnalyzer(IActionDescriptorCollectionProvider actionDescriptorCollectionProvider)
@@ -25,10 +25,7 @@ public class RouteAnalyzer : IRouteAnalyzer
         _actionDescriptorCollectionProvider = actionDescriptorCollectionProvider;
     }
 
-    /// <summary>
-    /// 获取所有路由信息
-    /// </summary>
-    /// <returns>应用中 MVC 和 Razor Page 操作描述对应的路由、调用入口及视图信息集合。</returns>
+    /// <inheritdoc />
     public IEnumerable<RouteInformation> GetAllRouteInformations()
     {
         var list = new List<RouteInformation>();

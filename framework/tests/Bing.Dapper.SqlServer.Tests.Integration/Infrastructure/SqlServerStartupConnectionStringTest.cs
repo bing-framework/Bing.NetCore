@@ -122,6 +122,12 @@ public sealed class SqlServerStartupConnectionStringTest
         }
     }
 
+    /// <summary>
+    /// 创建包含 SQL Server 和默认连接字符串的内存配置。
+    /// </summary>
+    /// <param name="providerConnection">SQL Server 专用连接字符串。</param>
+    /// <param name="defaultConnection">默认连接字符串。</param>
+    /// <returns>已构建的内存配置。</returns>
     private static IConfiguration CreateConfiguration(string providerConnection, string defaultConnection) =>
         new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
         {

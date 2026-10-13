@@ -10,6 +10,9 @@ namespace Bing.Localization.Tests;
 /// </summary>
 public class NullStringLocalizerTest
 {
+    /// <summary>
+    /// 用于验证空字符串本地化行为的本地化器。
+    /// </summary>
     private readonly IStringLocalizer _localizer = NullStringLocalizer.Instance;
 
     // ═══════════════════════════════════════════════════════════
@@ -36,8 +39,7 @@ public class NullStringLocalizerTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：按名称索引时，返回的 LocalizedString.Name 和 Value 应等于传入的 name，
-    /// ResourceNotFound 应为 true（空本地化器不存储任何资源）。
+    /// 测试目的：按名称索引时，返回的 LocalizedString.Name 和 Value 应等于传入的 name， ResourceNotFound 应为 true（空本地化器不存储任何资源）。
     /// </summary>
     [Fact]
     public void Indexer_ByName_ShouldReturnNameAsValueWithResourceNotFound()
@@ -135,6 +137,9 @@ public class NullStringLocalizerTest
 /// </summary>
 public class PathResolverTest
 {
+    /// <summary>
+    /// 用于验证路径解析行为的路径解析器。
+    /// </summary>
     private readonly PathResolver _resolver = new();
 
     // ═══════════════════════════════════════════════════════════

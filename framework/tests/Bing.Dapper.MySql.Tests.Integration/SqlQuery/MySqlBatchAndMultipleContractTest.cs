@@ -12,10 +12,13 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Collection(MySqlIntegrationDatabaseCollection.Name)]
 public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
 {
+    /// <summary>
+    /// 为 MySQL 批量及多查询集成测试提供数据库夹具。
+    /// </summary>
     private readonly MySqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化 MySQL 批量和多结果集合同测试。
+    /// 初始化一个 <see cref="MySqlBatchAndMultipleContractTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">MySQL 集成测试数据库固定装置。</param>
     public MySqlBatchAndMultipleContractTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -148,6 +151,10 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
     /// <inheritdoc />
     public Task DisposeAsync() => Task.CompletedTask;
 
+    /// <summary>
+    /// 向测试数据库插入产品记录。
+    /// </summary>
+    /// <param name="code">产品代码。</param>
     private async Task InsertProductAsync(string code)
     {
         using var executor = _fixture.CreateExecutor();
@@ -155,14 +162,25 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
             new { id = Guid.NewGuid(), code });
     }
 
+    /// <summary>
+    /// 创建包含产品列表和总数查询的多结果集命令。
+    /// </summary>
+    /// <param name="executor">多结果集查询执行器。</param>
+    /// <returns>构建的多结果集命令。</returns>
     private static Bing.Data.Sql.Builders.Multiple.SqlMultipleQueryCommand CreateMultipleQueryCommand(
         ISqlMultipleQueryExecutor executor) => executor.CreateBatch()
         .Append("Select Code From Product Order By Code")
         .Append("Select Count(*) From Product")
         .Build();
 
+    /// <summary>
+    /// 表示产品代码查询结果。
+    /// </summary>
     private sealed class CodeRow
     {
+        /// <summary>
+        /// 获取或设置产品代码。
+        /// </summary>
         public string Code { get; set; }
     }
 }

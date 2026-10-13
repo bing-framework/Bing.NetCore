@@ -15,10 +15,13 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Trait("Database", "MySql")]
 public sealed class MySqlCrossDatabaseQueryTest
 {
+    /// <summary>
+    /// 为 MySQL 跨数据库集成测试提供数据库夹具。
+    /// </summary>
     private readonly MySqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="MySqlCrossDatabaseQueryTest"/>类型的实例。
+    /// 初始化一个 <see cref="MySqlCrossDatabaseQueryTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">MySQL 集成测试数据库固定装置。</param>
     public MySqlCrossDatabaseQueryTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -306,6 +309,7 @@ public sealed class MySqlCrossDatabaseQueryTest
     /// <summary>
     /// 获取已预创建的跨数据库测试配置。
     /// </summary>
+    /// <returns>包含数据库名称和连接字符串的配置元组。</returns>
     private (string DatabaseName, string ConnectionString) GetCrossDatabaseConfiguration()
     {
         var databaseName = Environment.GetEnvironmentVariable(MySqlCrossDatabaseFactAttribute.DatabaseNameEnvironmentVariable);
@@ -322,6 +326,7 @@ public sealed class MySqlCrossDatabaseQueryTest
     /// <summary>
     /// 创建结构化跨数据库 LeftJoin 查询。
     /// </summary>
+    /// <returns>包含跨数据库 LeftJoin 的 SQL 查询。</returns>
     private static SqlFluentQuery CreateStructuredCrossDatabaseJoinQuery(ISqlQuery query,
         string databaseName, Guid companyId)
     {
@@ -408,6 +413,7 @@ Create Table {tableName}(
     /// <summary>
     /// 获取带反引号的跨数据库专属表名。
     /// </summary>
+    /// <returns>包含数据库限定符和反引号的表名。</returns>
     private static string GetQualifiedTableName(string databaseName, string tableName) =>
         $"`{databaseName.Replace("`", "``", StringComparison.Ordinal)}`.`{tableName}`";
 
@@ -428,17 +434,17 @@ Create Table {tableName}(
     private sealed class CrossDatabaseCompanyResult
     {
         /// <summary>
-        /// 公司标识。
+        /// 获取或设置公司标识。
         /// </summary>
         public Guid CompanyId { get; set; }
 
         /// <summary>
-        /// 公司名称。
+        /// 获取或设置公司名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 商户名称。
+        /// 获取或设置商户名称。
         /// </summary>
         public string MerchantName { get; set; }
     }

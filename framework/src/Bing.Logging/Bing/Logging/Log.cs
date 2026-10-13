@@ -14,7 +14,7 @@ public class Log : ILog
     #region 字段
 
     /// <summary>
-    /// 当前的日志事件描述符
+    /// 获取或设置当前的日志事件描述符
     /// </summary>
     private LogEventDescriptor CurrentDescriptor { get; set; }
 
@@ -29,7 +29,7 @@ public class Log : ILog
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="Log"/>类型的实例
+    /// 初始化一个 <see cref="Log"/> 类型的实例。
     /// </summary>
     /// <param name="logger">日志记录包装器</param>
     /// <param name="logContextAccessor">日志上下文访问器</param>
@@ -57,47 +57,47 @@ public class Log : ILog
     #region 属性
 
     /// <summary>
-    /// 日志记录包装器
+    /// 获取日志记录包装器
     /// </summary>
     protected ILoggerWrapper Logger { get; }
 
     /// <summary>
-    /// 日志上下文
+    /// 获取日志上下文
     /// </summary>
     protected LogContext LogContext { get; }
 
     /// <summary>
-    /// 日志级别
+    /// 获取或设置日志级别
     /// </summary>
     protected LogLevel LogLevel { get; set; }
 
     /// <summary>
-    /// 日志事件标识
+    /// 获取或设置日志事件标识
     /// </summary>
     protected EventId LogEventId { get; set; }
 
     /// <summary>
-    /// 日志异常
+    /// 获取或设置日志异常
     /// </summary>
     protected Exception LogException { get; set; }
 
     /// <summary>
-    /// 日志内容
+    /// 获取或设置日志内容
     /// </summary>
     protected IDictionary<string, object> LogProperties { get; set; }
 
     /// <summary>
-    /// 日志状态
+    /// 获取或设置日志状态
     /// </summary>
     protected object LogState { get; set; }
 
     /// <summary>
-    /// 日志消息
+    /// 获取日志消息
     /// </summary>
     protected StringBuilder LogMessage { get; }
 
     /// <summary>
-    /// 日志消息参数
+    /// 获取日志消息参数
     /// </summary>
     protected List<object> LogMessageArgs { get; }
 
@@ -145,11 +145,7 @@ public class Log : ILog
 
     #region Set(设置日志事件描述符)
 
-    /// <summary>
-    /// 设置日志事件描述符
-    /// </summary>
-    /// <param name="action">操作</param>
-    /// <returns>当前日志操作实例。</returns>
+    /// <inheritdoc />
     public ILog Set(Action<LogEventDescriptor> action)
     {
         if (action == null)

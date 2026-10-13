@@ -19,7 +19,7 @@ public class StoreStringLocalizerFactoryTest
     private readonly IStringLocalizerFactory _localizerFactory;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="StoreStringLocalizerFactoryTest"/> 类型的实例。
     /// </summary>
     public StoreStringLocalizerFactoryTest()
     {

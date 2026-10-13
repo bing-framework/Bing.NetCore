@@ -6,7 +6,7 @@
 public class OrderByItem
 {
     /// <summary>
-    /// 初始化一个<see cref="OrderByItem"/>类型的实例
+    /// 初始化一个 <see cref="OrderByItem"/> 类型的实例。
     /// </summary>
     /// <param name="name">排序属性</param>
     /// <param name="desc">是否降序</param>
@@ -17,12 +17,12 @@ public class OrderByItem
     }
 
     /// <summary>
-    /// 排序属性
+    /// 获取或设置排序属性
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// 是否降序
+    /// 获取或设置是否降序
     /// </summary>
     public bool Desc { get; set; }
 

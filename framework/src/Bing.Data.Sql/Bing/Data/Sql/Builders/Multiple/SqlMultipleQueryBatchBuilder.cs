@@ -29,7 +29,7 @@ public sealed class SqlMultipleQueryBatchBuilder : ISqlMultipleQueryBatchBuilder
     private readonly HashSet<string> _parameterNames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// 初始化一个<see cref="SqlMultipleQueryBatchBuilder"/>类型的实例。
+    /// 初始化一个 <see cref="SqlMultipleQueryBatchBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="separator">批处理语句分隔符。</param>
     public SqlMultipleQueryBatchBuilder(char separator)

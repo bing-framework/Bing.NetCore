@@ -117,17 +117,17 @@ public sealed class TreeCompactRepositoryBaseTest
     private sealed class TestTreeRepository : TreeCompactRepositoryBase<TestTreeEntity, TestTreePo, int, int?>
     {
         /// <summary>
-        /// 持久化映射调用次数。
+        /// 获取或设置持久化映射调用次数。
         /// </summary>
         public int ToPoCallCount { get; private set; }
 
         /// <summary>
-        /// 实体映射调用次数。
+        /// 获取或设置实体映射调用次数。
         /// </summary>
         public int ToEntityCallCount { get; private set; }
 
         /// <summary>
-        /// 初始化测试仓储。
+        /// 初始化一个 <see cref="TestTreeRepository"/> 类型的实例。
         /// </summary>
         /// <param name="store">持久化对象存储器。</param>
         public TestTreeRepository(IStore<TestTreePo, int> store) : base(store)
@@ -163,7 +163,7 @@ public sealed class TreeCompactRepositoryBaseTest
     private sealed class TestTreeEntity : TreeEntityBase<TestTreeEntity, int, int?>
     {
         /// <summary>
-        /// 初始化测试树节点。
+        /// 初始化一个 <see cref="TestTreeEntity"/> 类型的实例。
         /// </summary>
         /// <param name="id">节点标识。</param>
         /// <param name="path">物化路径。</param>
@@ -178,24 +178,16 @@ public sealed class TreeCompactRepositoryBaseTest
     /// </summary>
     public sealed class TestTreePo : IKey<int>, IVersion, IPath
     {
-        /// <summary>
-        /// 节点标识。
-        /// </summary>
+        /// <inheritdoc />
         public int Id { get; set; }
 
-        /// <summary>
-        /// 乐观锁版本。
-        /// </summary>
+        /// <inheritdoc />
         public byte[] Version { get; set; }
 
-        /// <summary>
-        /// 物化路径。
-        /// </summary>
+        /// <inheritdoc />
         public string Path { get; set; }
 
-        /// <summary>
-        /// 节点层级。
-        /// </summary>
+        /// <inheritdoc />
         public int Level { get; set; }
     }
 }

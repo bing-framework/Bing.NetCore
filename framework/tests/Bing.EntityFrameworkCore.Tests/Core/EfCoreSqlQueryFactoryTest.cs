@@ -557,9 +557,12 @@ public class EfCoreSqlQueryFactoryTest
     private static int ExecuteCount(ISqlQuery query) => query.Query().CountAll().From("sqlite_master").Scalar<int>();
 
     /// <summary>
-    /// 创建服务提供程序
+    /// 创建服务提供程序。
     /// </summary>
-    /// <returns>服务提供程序</returns>
+    /// <param name="metadataOptions">可选的 SQL 元数据配置。</param>
+    /// <param name="connectionStrings">可选的数据库连接字符串集合。</param>
+    /// <param name="identityContributor">可选的数据库身份贡献器。</param>
+    /// <returns>服务提供程序。</returns>
     private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null,
         ConnectionStringCollection connectionStrings = null,
         ISqlDatabaseIdentityContributor identityContributor = null)
@@ -715,7 +718,7 @@ public class EfCoreSqlQueryFactoryTest
         private IDisposable _listenerSubscription;
 
         /// <summary>
-        /// 初始化一个<see cref="SqlDiagnosticObserver"/>类型的实例。
+        /// 初始化一个 <see cref="SqlDiagnosticObserver"/> 类型的实例。
         /// </summary>
         /// <param name="onMessage">接收诊断消息的回调。</param>
         public SqlDiagnosticObserver(Action<DiagnosticsMessage> onMessage)
@@ -758,7 +761,7 @@ public class EfCoreSqlQueryFactoryTest
     private sealed class TestUnitOfWork : UnitOfWorkBase
     {
         /// <summary>
-        /// 初始化一个<see cref="TestUnitOfWork"/>类型的实例
+        /// 初始化一个 <see cref="TestUnitOfWork"/> 类型的实例。
         /// </summary>
         /// <param name="options">数据库上下文配置</param>
         /// <param name="serviceProvider">服务提供程序</param>
@@ -767,10 +770,7 @@ public class EfCoreSqlQueryFactoryTest
         {
         }
 
-        /// <summary>
-        /// 配置实体映射
-        /// </summary>
-        /// <param name="modelBuilder">模型生成器</param>
+        /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TestEntity>(builder =>
@@ -803,7 +803,7 @@ public class EfCoreSqlQueryFactoryTest
     private sealed class TestSqliteIdentityContributor : ISqlDatabaseIdentityContributor
     {
         /// <summary>
-        /// 解析调用次数。
+        /// 获取或设置解析调用次数。
         /// </summary>
         public int ResolveCount { get; private set; }
 
@@ -828,12 +828,12 @@ public class EfCoreSqlQueryFactoryTest
     private sealed class TestEntity
     {
         /// <summary>
-        /// 标识
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 显示名称
+        /// 获取或设置显示名称。
         /// </summary>
         public string DisplayName { get; set; }
     }
@@ -844,12 +844,12 @@ public class EfCoreSqlQueryFactoryTest
     private sealed class DottedTableEntity
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 显示名称。
+        /// 获取或设置显示名称。
         /// </summary>
         public string DisplayName { get; set; }
     }

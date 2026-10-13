@@ -586,12 +586,15 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     /// <summary>
     /// 创建使用独立映射解析器的实体 Mutation Builder。
     /// </summary>
+    /// <param name="metadataOptions">用于创建 Builder 的 SQL 元数据选项。</param>
+    /// <returns>返回使用指定元数据选项的实体 Mutation Builder。</returns>
     private static DefaultSqlEntityMutationCommandBuilder CreateBuilder(SqlMetadataOptions metadataOptions = null) =>
         new(TestMutationSqlProvider.Instance, new SqlBuilderServices(metadataOptions: metadataOptions));
 
     /// <summary>
     /// 创建用于直接缓存测试的稳定映射。
     /// </summary>
+    /// <returns>返回测试使用的稳定实体映射。</returns>
     private static EntityMappingMetadata CreatePlanCacheMapping() => new()
     {
         EntityType = typeof(MutationSample),
@@ -615,23 +618,23 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 金额。
+        /// 获取或设置金额。
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// 乐观并发令牌。
+        /// 获取或设置乐观并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public string Version { get; set; }
@@ -644,7 +647,7 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     private sealed class SimpleDeleteSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
@@ -657,19 +660,17 @@ public sealed class DefaultSqlMutationBuilderPlanTest
     private sealed class SoftDeleteMutationSample : ISoftDelete
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// 是否已删除。
-        /// </summary>
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 

@@ -13,7 +13,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Static Success ─────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：静态 Success 属性应为有效的空集合（IsValid=true，Count=0）。
+    /// 静态 Success 属性应为有效的空集合（IsValid=true，Count=0）。
     /// </summary>
     [Fact]
     public void Success_ShouldBeValidAndEmpty()
@@ -29,7 +29,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Constructor(ValidationResult) ──────────────────────────────
 
     /// <summary>
-    /// 测试目的：通过 ValidationResult 构造时，集合应包含该条目且 IsValid=false。
+    /// 通过 ValidationResult 构造时，集合应包含该条目且 IsValid=false。
     /// </summary>
     [Fact]
     public void Constructor_WithValidationResult_ShouldContainOneError()
@@ -47,7 +47,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：传入 null 的 ValidationResult 应抛出 ArgumentNullException。
+    /// 传入 null 的 ValidationResult 应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Constructor_WithNullValidationResult_ShouldThrowArgumentNullException()
@@ -59,7 +59,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Constructor(ValidationResult, strategyName) ────────────────
 
     /// <summary>
-    /// 测试目的：带策略名构造时，结果仍应被正确存入集合，IsValid=false。
+    /// 带策略名构造时，结果仍应被正确存入集合，IsValid=false。
     /// </summary>
     [Fact]
     public void Constructor_WithValidationResultAndStrategyName_ShouldContainOneError()
@@ -78,7 +78,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Constructor(IEnumerable<ValidationResult>) ─────────────────
 
     /// <summary>
-    /// 测试目的：通过多条 ValidationResult 集合构造时，Count 应正确反映。
+    /// 通过多条 ValidationResult 集合构造时，Count 应正确反映。
     /// </summary>
     [Fact]
     public void Constructor_WithEnumerableResults_ShouldContainAllErrors()
@@ -99,7 +99,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：传入 null 的枚举集合应抛出 ArgumentNullException。
+    /// 传入 null 的枚举集合应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Constructor_WithNullEnumerable_ShouldThrowArgumentNullException()
@@ -112,7 +112,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Copy Constructor(ValidationResultCollection) ───────────────
 
     /// <summary>
-    /// 测试目的：拷贝构造时，应复制 ErrorCode、Flag 与所有错误条目。
+    /// 拷贝构造时，应复制 ErrorCode、Flag 与所有错误条目。
     /// </summary>
     [Fact]
     public void Constructor_CopyFromOther_ShouldCopyErrorCodeFlagAndResults()
@@ -132,7 +132,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：传入 null 的源集合应抛出 ArgumentNullException。
+    /// 传入 null 的源集合应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Constructor_CopyFromNull_ShouldThrowArgumentNullException()
@@ -145,7 +145,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── ErrorCode / Flag defaults ──────────────────────────────────
 
     /// <summary>
-    /// 测试目的：默认构造后，ErrorCode 应为 1001，Flag 应为 "__EMPTY_FLG"。
+    /// 默认构造后，ErrorCode 应为 1001，Flag 应为 "__EMPTY_FLG"。
     /// </summary>
     [Fact]
     public void DefaultConstructor_ShouldHaveDefaultErrorCodeAndFlag()
@@ -159,7 +159,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：ErrorCode 和 Flag 属性可被外部设置并正确存储。
+    /// ErrorCode 和 Flag 属性可被外部设置并正确存储。
     /// </summary>
     [Fact]
     public void ErrorCodeAndFlag_CanBeSetExternally()
@@ -179,7 +179,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── ToMessage ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：有效（空）集合的 ToMessage 应包含"未发现验证错误"。
+    /// 有效（空）集合的 ToMessage 应包含"未发现验证错误"。
     /// </summary>
     [Fact]
     public void ToMessage_WhenValid_ShouldContainNoErrorText()
@@ -195,7 +195,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：1 条错误时 ToMessage 应包含"发现1个验证错误"。
+    /// 1 条错误时 ToMessage 应包含"发现1个验证错误"。
     /// </summary>
     [Fact]
     public void ToMessage_WhenOneError_ShouldContainOneErrorText()
@@ -211,7 +211,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：多条错误时 ToMessage 应包含正确的错误数量。
+    /// 多条错误时 ToMessage 应包含正确的错误数量。
     /// </summary>
     [Fact]
     public void ToMessage_WhenMultipleErrors_ShouldContainCorrectCount()
@@ -231,7 +231,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── ToValidationMessages ───────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：有效集合的 ToValidationMessages 应返回空序列（非 null）。
+    /// 有效集合的 ToValidationMessages 应返回空序列（非 null）。
     /// </summary>
     [Fact]
     public void ToValidationMessages_WhenValid_ShouldReturnEmpty()
@@ -248,7 +248,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：无效集合的 ToValidationMessages 每条消息应包含成员名与错误描述。
+    /// 无效集合的 ToValidationMessages 每条消息应包含成员名与错误描述。
     /// </summary>
     [Fact]
     public void ToValidationMessages_WhenInvalid_ShouldContainMemberNameAndMessage()
@@ -269,7 +269,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── Add(null) / AddRange(null) no-op ──────────────────────────
 
     /// <summary>
-    /// 测试目的：Add(null) 应为空操作，Count 保持不变，不抛异常。
+    /// Add(null) 应为空操作，Count 保持不变，不抛异常。
     /// </summary>
     [Fact]
     public void Add_Null_ShouldBeNoOp()
@@ -286,7 +286,7 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
-    /// 测试目的：AddRange(null) 应为空操作，不抛异常，Count 保持不变。
+    /// AddRange(null) 应为空操作，不抛异常，Count 保持不变。
     /// </summary>
     [Fact]
     public void AddRange_Null_ShouldBeNoOp()
@@ -304,7 +304,7 @@ public class ValidationResultCollectionAdvancedTest
     // ── IEnumerable ────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：集合应支持 foreach 遍历并返回所有 ValidationResult。
+    /// 集合应支持 foreach 遍历并返回所有 ValidationResult。
     /// </summary>
     [Fact]
     public void GetEnumerator_ShouldIterateAllResults()

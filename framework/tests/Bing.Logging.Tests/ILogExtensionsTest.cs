@@ -14,6 +14,7 @@ public class ILogExtensionsTest
     /// <summary>
     /// 构建一个模拟 ILog，通过验证 Message 调用来断言扩展方法行为
     /// </summary>
+    /// <returns>包含模拟对象和日志接口实例的元组。</returns>
     private static (Mock<ILog> mock, ILog log) BuildMockLog()
     {
         var mock = new Mock<ILog>();

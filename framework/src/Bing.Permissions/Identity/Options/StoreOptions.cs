@@ -11,12 +11,18 @@ public class StoreOptions
     public int MaxLengthForKeys { get; set; }
 
     /// <summary>
-    /// 获取或设置是否加密存储标记为 <c>ProtectPersonalData</c> 的用户数据，默认不启用。
+    /// 获取或设置是否加密存储标记为 <c>ProtectPersonalData</c> 的用户数据。
     /// </summary>
+    /// <remarks>
+    /// 默认不启用。
+    /// </remarks>
     public bool ProtectPersonalData { get; set; }
 
     /// <summary>
-    /// 获取或设置是否保存原始密码，默认不启用；启用会造成严重的敏感凭据泄露风险。
+    /// 获取或设置是否保存原始密码。
     /// </summary>
+    /// <remarks>
+    /// 默认不启用；启用会造成严重的敏感凭据泄露风险。
+    /// </remarks>
     public bool StoreOriginalPassword { get; set; }
 }

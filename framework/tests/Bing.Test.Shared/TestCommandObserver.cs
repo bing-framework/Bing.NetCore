@@ -8,12 +8,12 @@ namespace Bing.Test.Shared;
 public sealed class TestCommandObserver
 {
     /// <summary>
-    /// 最近一次命令 SQL。
+    /// 获取或设置最近一次命令 SQL。
     /// </summary>
     public string CommandText { get; private set; }
 
     /// <summary>
-    /// 最近一次命令的独立参数快照。
+    /// 获取或设置最近一次命令的独立参数快照。
     /// </summary>
     public IReadOnlyCollection<SqlParam> Parameters { get; private set; } = Array.Empty<SqlParam>();
 
@@ -31,6 +31,8 @@ public sealed class TestCommandObserver
     /// <summary>
     /// 复制参数，避免测试观察结果随调用方容器变化。
     /// </summary>
+    /// <param name="source">待复制的 SQL 参数。</param>
+    /// <returns>返回保留参数值及元数据的副本。</returns>
     private static SqlParam Clone(SqlParam source) => new(source.Name, source.Value, source.DbType, source.Direction,
         source.Size, source.Precision, source.Scale)
     {

@@ -11,22 +11,25 @@ namespace Bing.Security.Claims;
 public class BingClaimsPrincipalFactory : IBingClaimsPrincipalFactory, ITransientDependency
 {
     /// <summary>
-    /// 认证类型常量，默认值为 "Bing.Application"。
+    /// 获取认证类型常量。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 &quot;Bing.Application&quot;。
+    /// </remarks>
     public static string AuthenticationType => "Bing.Application";
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取服务提供程序
     /// </summary>
     protected IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// 身份主体工厂选项
+    /// 获取身份主体工厂选项
     /// </summary>
     protected BingClaimsPrincipalFactoryOptions Options { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="BingClaimsPrincipalFactory"/> 类型的实例
+    /// 初始化一个 <see cref="BingClaimsPrincipalFactory"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="bingClaimOptions">身份主体工厂配置选项。</param>

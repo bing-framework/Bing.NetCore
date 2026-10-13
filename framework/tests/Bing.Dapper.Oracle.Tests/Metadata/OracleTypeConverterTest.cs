@@ -6,11 +6,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="OracleTypeConverter"/> 单元测试。
-/// 测试常见 Oracle 类型映射与未知类型的明确错误语义。
+/// <see cref="OracleTypeConverter"/> 单元测试。 测试常见 Oracle 类型映射与未知类型的明确错误语义。
 /// </summary>
 public class OracleTypeConverterTest
 {
+    /// <summary>
+    /// Oracle 类型转换器实例。
+    /// </summary>
     private readonly OracleTypeConverter _converter = new();
 
     // ═══════════════════════════════════════════════════════════
@@ -47,6 +49,8 @@ public class OracleTypeConverterTest
     /// <summary>
     /// 测试目的：常见 Oracle 数据类型应映射为对应的 DbType。
     /// </summary>
+    /// <param name="dataType">Oracle 数据类型名称。</param>
+    /// <param name="expected">预期的数据库类型。</param>
     [Theory]
     [InlineData("varchar2", DbType.String)]
     [InlineData("number", DbType.Decimal)]

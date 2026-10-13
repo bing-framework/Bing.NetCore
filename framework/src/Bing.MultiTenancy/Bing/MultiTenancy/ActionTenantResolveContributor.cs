@@ -19,7 +19,7 @@ public class ActionTenantResolveContributor : TenantResolveContributorBase
     private readonly Action<ITenantResolveContext> _resolveAction;
 
     /// <summary>
-    /// 使用指定解析委托初始化 <see cref="ActionTenantResolveContributor"/> 的实例。
+    /// 初始化一个 <see cref="ActionTenantResolveContributor"/> 类型的实例。
     /// </summary>
     /// <param name="resolveAction">用于更新租户解析上下文的同步操作。</param>
     public ActionTenantResolveContributor(Action<ITenantResolveContext> resolveAction)

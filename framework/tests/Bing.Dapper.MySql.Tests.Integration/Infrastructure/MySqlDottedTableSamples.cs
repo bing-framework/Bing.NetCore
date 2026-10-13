@@ -6,17 +6,17 @@ namespace Bing.Dapper.Tests.Infrastructure;
 internal sealed class MySqlDottedCompany
 {
     /// <summary>
-    /// 公司标识。
+    /// 获取或设置公司标识。
     /// </summary>
     public Guid CompanyId { get; set; }
 
     /// <summary>
-    /// 商户标识。
+    /// 获取或设置商户标识。
     /// </summary>
     public Guid? MerchantId { get; set; }
 
     /// <summary>
-    /// 公司名称。
+    /// 获取或设置公司名称。
     /// </summary>
     public string Name { get; set; }
 }
@@ -27,12 +27,12 @@ internal sealed class MySqlDottedCompany
 internal sealed class MySqlDottedMerchant
 {
     /// <summary>
-    /// 商户标识。
+    /// 获取或设置商户标识。
     /// </summary>
     public Guid MerchantId { get; set; }
 
     /// <summary>
-    /// 商户名称。
+    /// 获取或设置商户名称。
     /// </summary>
     public string Name { get; set; }
 }

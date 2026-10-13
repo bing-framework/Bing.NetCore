@@ -24,7 +24,7 @@ internal sealed class BingDynamicApiApplicationModelConvention : IApplicationMod
     private readonly BingDynamicApiRegistry _registry;
 
     /// <summary>
-    /// 初始化 BingDynamicApiApplicationModelConvention 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiApplicationModelConvention"/> 类型的实例。
     /// </summary>
     /// <param name="registry">动态服务注册表。</param>
     public BingDynamicApiApplicationModelConvention(BingDynamicApiRegistry registry) => _registry = registry;

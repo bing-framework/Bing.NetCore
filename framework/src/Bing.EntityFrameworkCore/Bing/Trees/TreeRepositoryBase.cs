@@ -13,18 +13,14 @@ public abstract class TreeRepositoryBase<TEntity> : TreeRepositoryBase<TEntity, 
     where TEntity : class, ITreeEntity<TEntity, Guid, Guid?>
 {
     /// <summary>
-    /// 初始化一个<see cref="TreeRepositoryBase{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="TreeRepositoryBase{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     protected TreeRepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
 
-    /// <summary>
-    /// 生成排序号
-    /// </summary>
-    /// <param name="parentId">父标识</param>
-    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
+    /// <inheritdoc />
     public override async Task<int> GenerateSortIdAsync(Guid? parentId)
     {
         var maxSortId = await Find(x => x.ParentId == parentId).MaxAsync(x => x.SortId);
@@ -42,25 +38,17 @@ public abstract class TreeRepositoryBase<TEntity, TKey, TParentId> : RepositoryB
     where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
 {
     /// <summary>
-    /// 初始化一个<see cref="TreeRepositoryBase{TEntity,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreeRepositoryBase{TEntity, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     protected TreeRepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)
     {
     }
 
-    /// <summary>
-    /// 生成排序号
-    /// </summary>
-    /// <param name="parentId">父标识</param>
-    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
+    /// <inheritdoc />
     public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
-    /// <summary>
-    /// 获取全部下级实体
-    /// </summary>
-    /// <param name="parent">父实体</param>
-    /// <returns>表示异步操作的任务，结果为指定父实体的全部下级实体。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
     {
         var list = await FindAllAsync(t => t.Path.StartsWith(parent.Path));

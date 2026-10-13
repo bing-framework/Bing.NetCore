@@ -13,7 +13,7 @@ namespace Bing.Data.Sql;
 public abstract class SqlServerSqlExecutorBase : SqlExecutorBase
 {
     /// <summary>
-    /// 初始化一个<see cref="SqlServerSqlExecutorBase"/>类型的实例
+    /// 初始化一个 <see cref="SqlServerSqlExecutorBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>

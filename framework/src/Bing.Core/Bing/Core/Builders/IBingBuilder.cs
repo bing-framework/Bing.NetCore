@@ -9,12 +9,12 @@ namespace Bing.Core.Builders;
 public interface IBingBuilder
 {
     /// <summary>
-    /// 服务集合
+    /// 获取服务集合
     /// </summary>
     IServiceCollection Services { get; }
 
     /// <summary>
-    /// 加载的模块集合
+    /// 获取加载的模块集合
     /// </summary>
     IEnumerable<BingModule> Modules { get; }
 

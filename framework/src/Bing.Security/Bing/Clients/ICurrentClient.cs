@@ -6,8 +6,11 @@
 public interface ICurrentClient
 {
     /// <summary>
-    /// 获取当前客户端标识；未找到时返回 <see langword="null"/>。
+    /// 获取当前客户端标识。
     /// </summary>
+    /// <remarks>
+    /// 未找到时返回 <see langword="null"/>。
+    /// </remarks>
     string Id { get; }
 
     /// <summary>

@@ -23,32 +23,32 @@ public sealed class SqlValidationContext
     }
 
     /// <summary>
-    /// 当前 SQL Provider。
+    /// 获取当前 SQL Provider。
     /// </summary>
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// 当前 Provider 的统一能力档案。
+    /// 获取当前 Provider 的统一能力档案。
     /// </summary>
     public SqlProviderProfile Profile { get; }
 
     /// <summary>
-    /// 当前 Provider 是否声明了统一能力档案。
+    /// 获取当前 Provider 是否声明了统一能力档案。
     /// </summary>
     internal bool IsProfileDeclared => SqlProviderCapabilityResolver.HasProfile(Provider);
 
     /// <summary>
-    /// 当前命令已经分配的参数数量。
+    /// 获取当前命令已经分配的参数数量。
     /// </summary>
     public int ParameterCount { get; }
 
     /// <summary>
-    /// 是否显式允许 Update 或 Delete 影响全部行。
+    /// 获取是否显式允许 Update 或 Delete 影响全部行。
     /// </summary>
     public bool AllowAllRows { get; }
 
     /// <summary>
-    /// 当前 SQL 的执行类型。
+    /// 获取当前 SQL 的执行类型。
     /// </summary>
     public SqlExecutionKind ExecutionKind { get; }
 }

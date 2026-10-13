@@ -13,7 +13,7 @@ public sealed class SqlMultipleQueryCommand
     private readonly IReadOnlyCollection<SqlParam> _parameters;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlMultipleQueryCommand"/>类型的实例。
+    /// 初始化一个 <see cref="SqlMultipleQueryCommand"/> 类型的实例。
     /// </summary>
     /// <param name="sql">组合后的 SQL 语句。</param>
     /// <param name="parameters">组合后的参数快照。</param>
@@ -25,12 +25,12 @@ public sealed class SqlMultipleQueryCommand
     }
 
     /// <summary>
-    /// 组合后的 SQL 语句。
+    /// 获取组合后的 SQL 语句。
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 组合后的参数快照副本。
+    /// 获取组合后的参数快照副本。
     /// </summary>
     /// <remarks>
     /// 每次访问均返回独立的参数副本，调用方修改返回项不会影响命令内部快照。

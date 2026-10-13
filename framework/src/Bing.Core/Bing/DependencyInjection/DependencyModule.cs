@@ -12,22 +12,16 @@ namespace Bing.DependencyInjection;
 [Description("依赖注入模块")]
 public class DependencyModule : BingModule
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
     public override ModuleLevel Level => ModuleLevel.Core;
 
-    /// <summary>
-    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
-    /// 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为>0的顺序值
-    /// </summary>
+    /// <inheritdoc />
     public override int Order => 1;
 
-    /// <summary>
-    /// 添加服务。将模块服务添加到依赖注入服务容器中
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>已完成依赖注入服务注册的原服务集合。</returns>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 自动扫描并注册实现依赖注入生命周期标记接口的服务类型。
+    /// </remarks>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         // 服务定位器设置
@@ -47,10 +41,10 @@ public class DependencyModule : BingModule
         return services;
     }
 
-    /// <summary>
-    /// 应用模块服务
-    /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 设置应用服务提供程序并启用模块。
+    /// </remarks>
     public override void UseModule(IServiceProvider provider)
     {
         ServiceLocator.Instance.SetApplicationServiceProvider(provider);

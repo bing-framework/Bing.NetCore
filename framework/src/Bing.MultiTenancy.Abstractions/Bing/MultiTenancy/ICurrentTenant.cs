@@ -11,13 +11,19 @@ public interface ICurrentTenant
     bool IsAvailable { get; }
 
     /// <summary>
-    /// 获取当前租户标识；未解析到租户时返回 <c>null</c>。
+    /// 获取当前租户标识。
     /// </summary>
+    /// <remarks>
+    /// 未解析到租户时返回 <c>null</c>。
+    /// </remarks>
     string? Id { get; }
 
     /// <summary>
-    /// 获取当前租户名称；未解析到租户或名称不可用时返回 <c>null</c>。
+    /// 获取当前租户名称。
     /// </summary>
+    /// <remarks>
+    /// 未解析到租户或名称不可用时返回 <c>null</c>。
+    /// </remarks>
     string? Name { get; }
 
     /// <summary>

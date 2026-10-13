@@ -8,6 +8,7 @@ public interface IHasModifier : IHasModifier<string> { }
 /// <summary>
 /// 定义使用指定标识类型表示最后修改人的审计契约。
 /// </summary>
+/// <typeparam name="TModifier">最后修改人标识类型。</typeparam>
 public interface IHasModifier<TModifier>
 {
     /// <summary>

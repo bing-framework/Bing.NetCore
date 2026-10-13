@@ -15,15 +15,15 @@ public class DependencyTypeFinder : FinderBase<Type>, IDependencyTypeFinder
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 初始化一个<see cref="DependencyTypeFinder"/>类型的实例
+    /// 初始化一个 <see cref="DependencyTypeFinder"/> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器</param>
     public DependencyTypeFinder(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
-    /// <summary>
-    /// 重写已实现所有项的查找
-    /// </summary>
-    /// <returns>符合依赖注入注册条件的实现类型数组。</returns>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 返回实现依赖注入生命周期标记接口的类型。
+    /// </remarks>
     protected override Type[] FindAllItems()
     {
         var baseTypes = new[] {typeof(ISingletonDependency), typeof(IScopedDependency), typeof(ITransientDependency)};

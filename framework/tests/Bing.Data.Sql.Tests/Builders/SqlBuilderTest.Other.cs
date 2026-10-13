@@ -234,21 +234,45 @@ public partial class SqlBuilderTest
         Assert.Empty(builder.GetSqlParams());
     }
 
+    /// <summary>
+    /// 租户过滤测试使用的实体模型。
+    /// </summary>
     private sealed class TenantFilterSample
     {
+        /// <summary>
+        /// 获取或设置实体主键。
+        /// </summary>
         public int Id { get; set; }
+        /// <summary>
+        /// 获取或设置租户标识。
+        /// </summary>
         public string TenantId { get; set; }
+        /// <summary>
+        /// 获取或设置实体名称。
+        /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 为租户过滤测试提供固定租户标识的 Contributor。
+    /// </summary>
     private sealed class TestTenantFilterContributor : ISqlTenantFilterContributor
     {
+        /// <summary>
+        /// 当前测试使用的租户标识。
+        /// </summary>
         private readonly string _tenantId;
 
+        /// <summary>
+        /// 初始化一个 <see cref="TestTenantFilterContributor"/> 类型的实例。
+        /// </summary>
+        /// <param name="tenantId">要返回的租户标识。</param>
         public TestTenantFilterContributor(string tenantId) => _tenantId = tenantId;
 
+        /// <inheritdoc />
         public bool IsTenantEntity(Type entityType) => entityType == typeof(TenantFilterSample);
 
+        /// <inheritdoc />
         public object GetTenantId(SqlTenantFilterContext context) => _tenantId;
     }
 

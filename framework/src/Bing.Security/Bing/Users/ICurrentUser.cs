@@ -8,47 +8,47 @@ namespace Bing.Users;
 public interface ICurrentUser
 {
     /// <summary>
-    /// 是否已认证
+    /// 获取是否已认证
     /// </summary>
     bool IsAuthenticated { get; }
 
     /// <summary>
-    /// 用户标识
+    /// 获取用户标识
     /// </summary>
     string UserId { get; }
 
     /// <summary>
-    /// 用户名
+    /// 获取用户名
     /// </summary>
     string UserName { get; }
 
     /// <summary>
-    /// 手机号码
+    /// 获取手机号码
     /// </summary>
     string PhoneNumber { get; }
 
     /// <summary>
-    /// 是否已验证手机号码
+    /// 获取是否已验证手机号码
     /// </summary>
     bool PhoneNumberVerified { get; }
 
     /// <summary>
-    /// 电子邮箱
+    /// 获取电子邮箱
     /// </summary>
     string Email { get; }
 
     /// <summary>
-    /// 是否已验证邮箱
+    /// 获取是否已验证邮箱
     /// </summary>
     bool EmailVerified { get; }
 
     /// <summary>
-    /// 租户标识
+    /// 获取租户标识
     /// </summary>
     string TenantId { get; }
 
     /// <summary>
-    /// 角色列表
+    /// 获取角色列表
     /// </summary>
     string[] Roles { get; }
 

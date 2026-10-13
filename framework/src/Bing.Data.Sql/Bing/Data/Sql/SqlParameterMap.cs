@@ -109,10 +109,7 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
         return this;
     }
 
-    /// <summary>
-    /// 获取参数映射项集合
-    /// </summary>
-    /// <returns>参数映射项集合</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<SqlParameterMapItem> GetItems() =>
         new ReadOnlyCollection<SqlParameterMapItem>(_items.Values.Select(ResolveItem).ToList());
 
@@ -151,7 +148,7 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
     }
 
     /// <summary>
-    /// 尝试获取参数值
+    /// 尝试获取参数值。
     /// </summary>
     /// <param name="source">参数源对象</param>
     /// <param name="name">参数名</param>
@@ -176,7 +173,7 @@ public class SqlParameterMap<TEntity> : ISqlParameterMap where TEntity : class
     }
 
     /// <summary>
-    /// 尝试从字典获取参数值
+    /// 尝试获取参数值。
     /// </summary>
     /// <param name="dictionary">字典</param>
     /// <param name="name">参数名</param>

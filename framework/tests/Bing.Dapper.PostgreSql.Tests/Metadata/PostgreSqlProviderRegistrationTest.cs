@@ -15,8 +15,7 @@ namespace Bing.Dapper.Tests.Metadata;
 public class PostgreSqlProviderRegistrationTest
 {
     /// <summary>
-    /// 测试目的：PostgreSQL dollar-quoted 文本中的参数样式不得触发插值参数改名，
-    /// 避免文本内容与实际绑定参数发生错误冲突。
+    /// 测试目的：PostgreSQL dollar-quoted 文本中的参数样式不得触发插值参数改名， 避免文本内容与实际绑定参数发生错误冲突。
     /// </summary>
     [Fact]
     public void SqlInterpolated_WhenTokenAppearsOnlyInDollarQuotedText_ShouldKeepDefaultParameterName()

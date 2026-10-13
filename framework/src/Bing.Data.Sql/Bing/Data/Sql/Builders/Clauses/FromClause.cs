@@ -31,27 +31,27 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     protected IDialect Dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体解析器。
+    /// 获取实体解析器。
     /// </summary>
     protected IEntityResolver Resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 实体别名注册器。
+    /// 获取实体别名注册器。
     /// </summary>
     protected IEntityAliasRegister Register => _context.AliasRegister;
 
     /// <summary>
-    /// SQL 生成器。
+    /// 获取SQL 生成器。
     /// </summary>
     protected ISqlBuilder Builder => _context.Builder;
 
     /// <summary>
-    /// SQL 对象名称格式化器。
+    /// 获取SQL 对象名称格式化器。
     /// </summary>
     protected ISqlObjectNameFormatter ObjectNameFormatter => _context.Services.ObjectNameFormatter;
 
@@ -61,17 +61,17 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     protected readonly DatabaseType? ProviderDatabaseType;
 
     /// <summary>
-    /// SQL 表引用验证器。
+    /// 获取SQL 表引用验证器。
     /// </summary>
     protected ISqlTableReferenceValidator TableReferenceValidator => _context.Services.TableReferenceValidator;
 
     /// <summary>
-    /// SQL 字符串表引用解析器。
+    /// 获取SQL 字符串表引用解析器。
     /// </summary>
     protected ISqlTableReferenceParser TableReferenceParser => _context.Provider.TableReferenceParser;
 
     /// <summary>
-    /// 初始化绑定到指定运行上下文的 From 子句。
+    /// 初始化一个 <see cref="FromClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public FromClause(SqlClauseContext context)
@@ -80,7 +80,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 From 子句。
+    /// 初始化一个 <see cref="FromClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="table">表。</param>
@@ -211,12 +211,12 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     internal SqlTableReference GetStructuredReference() => (Table as StructuredSqlItem)?.Reference;
 
     /// <summary>
-    /// 获取当前查询图的根表源快照。
+    /// 获取当前根表源集合。
     /// </summary>
     internal IReadOnlyList<TableSource> Sources => _sources;
 
     /// <summary>
-    /// 追加结构化实体根表源。
+    /// 追加结构化根表源。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="alias">来源别名。</param>
@@ -227,7 +227,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 追加指定实体类型的结构化根表源。
+    /// 追加结构化根表源。
     /// </summary>
     /// <param name="entityType">来源实体类型。</param>
     /// <param name="alias">来源别名。</param>
@@ -269,7 +269,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 使用参数位置绑定解析多表 Lambda 谓词。
+    /// 解析多表 Lambda 谓词。
     /// </summary>
     /// <param name="expression">多表谓词表达式。</param>
     /// <returns>可追加到 Where 子句的参数化条件。</returns>
@@ -277,7 +277,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         ResolveMultiSourcePredicate(expression, Sources);
 
     /// <summary>
-    /// 使用指定查询图表源解析多表 Lambda 谓词。
+    /// 解析多表 Lambda 谓词。
     /// </summary>
     /// <param name="expression">多表谓词表达式。</param>
     /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
@@ -289,7 +289,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 使用指定参数管理器解析多表 Lambda 谓词。
+    /// 解析多表 Lambda 谓词。
     /// </summary>
     /// <param name="expression">多表谓词表达式。</param>
     /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
@@ -358,7 +358,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 解析多表投影表达式中的参数成员。
+    /// 解析多表表达式中的列。
     /// </summary>
     /// <param name="expression">返回 object 数组的投影表达式。</param>
     /// <returns>按投影顺序排列的完整列 SQL。</returns>
@@ -366,7 +366,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         ResolveMultiSourceColumns(expression, Sources);
 
     /// <summary>
-    /// 解析指定查询图表源的多表投影、分组或排序表达式。
+    /// 解析多表表达式中的列。
     /// </summary>
     /// <param name="expression">返回列或列数组的表达式。</param>
     /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
@@ -433,7 +433,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     }
 
     /// <summary>
-    /// 解析多表 DTO 成员初始化投影，并使用目标成员名作为结果列别名。
+    /// 解析多表 DTO 成员初始化投影。
     /// </summary>
     /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
     /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
@@ -442,7 +442,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         IReadOnlyList<TableSource> sources) => ResolveMultiSourceDtoColumns(expression, sources, out _);
 
     /// <summary>
-    /// 解析多表 DTO 成员初始化投影，并返回可供派生表公开的成员名称。
+    /// 解析多表 DTO 成员初始化投影。
     /// </summary>
     /// <param name="expression">返回 DTO 成员初始化对象的多表投影表达式。</param>
     /// <param name="sources">按 Lambda 参数顺序排列的表源实例。</param>
@@ -572,34 +572,43 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         (Builder as SqlBuilderBase)?.RegisterSubqueryParent(subquery.ParentQueryContextId);
     }
 
+    /// <inheritdoc />
     IReadOnlyList<TableSource> ISqlMultiSourceFromClause.Sources => Sources;
 
+    /// <inheritdoc />
     void ISqlMultiSourceFromClause.AppendRoot(Type entityType, string alias, string schema) =>
         AppendRoot(entityType, alias, schema);
 
+    /// <inheritdoc />
     void ISqlMultiSourceFromClause.From<TProjection>(SqlSubquery<TProjection> subquery) => From(subquery);
 
+    /// <inheritdoc />
     ICondition ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(
         System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
         ResolveMultiSourcePredicate(expression, sources);
 
+    /// <inheritdoc />
     ICondition ISqlMultiSourceFromClause.ResolveMultiSourcePredicate(
         System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources,
         IParameterManager parameterManager) => ResolveMultiSourcePredicate(expression, sources, parameterManager);
 
+    /// <inheritdoc />
     IReadOnlyList<string> ISqlMultiSourceFromClause.ResolveMultiSourceColumns(
         System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources) =>
         ResolveMultiSourceColumns(expression, sources);
 
+    /// <inheritdoc />
     IReadOnlyList<string> ISqlMultiSourceFromClause.ResolveMultiSourceDtoColumns(
         System.Linq.Expressions.LambdaExpression expression, IReadOnlyList<TableSource> sources,
         out IReadOnlyCollection<string> projectedMembers) =>
         ResolveMultiSourceDtoColumns(expression, sources, out projectedMembers);
 
+    /// <inheritdoc />
     ICondition ISqlMultiSourceFromClause.ResolveMultiSourceValueCondition(
         System.Linq.Expressions.LambdaExpression expression, TableSource source, object value, Operator @operator) =>
         ResolveMultiSourceValueCondition(expression, source, value, @operator);
 
+    /// <inheritdoc />
     void ISqlMultiSourceFromClause.MergeNewParameters(IParameterManager parameterManager) =>
         MergeNewParameters(parameterManager);
 
@@ -708,10 +717,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         Table = _sources.LastOrDefault()?.Item;
     }
 
-    /// <summary>
-    /// 输出Sql。
-    /// </summary>
-    /// <returns>当前 From 子句的 SQL 文本；没有有效来源时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();

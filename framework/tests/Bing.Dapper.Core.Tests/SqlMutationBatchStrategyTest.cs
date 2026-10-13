@@ -877,7 +877,6 @@ public sealed class SqlMutationBatchStrategyTest
     /// <param name="executor">测试执行器。</param>
     /// <param name="operation">Mutation 操作类型。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示异步执行结果的任务。</returns>
     private static Task ExecuteSingleAsync(RecordingExecutor executor, SingleMutationOperation operation,
         CancellationToken cancellationToken) => operation switch
     {
@@ -897,16 +896,24 @@ public sealed class SqlMutationBatchStrategyTest
     /// </summary>
     public enum SingleMutationOperation
     {
-        /// <summary>插入。</summary>
+        /// <summary>
+        /// 插入。
+        /// </summary>
         Insert,
 
-        /// <summary>更新。</summary>
+        /// <summary>
+        /// 更新。
+        /// </summary>
         Update,
 
-        /// <summary>删除。</summary>
+        /// <summary>
+        /// 删除。
+        /// </summary>
         Delete,
 
-        /// <summary>存储过程。</summary>
+        /// <summary>
+        /// 存储过程。
+        /// </summary>
         Procedure
     }
 
@@ -915,13 +922,19 @@ public sealed class SqlMutationBatchStrategyTest
     /// </summary>
     public enum BatchMutationOperation
     {
-        /// <summary>插入。</summary>
+        /// <summary>
+        /// 插入。
+        /// </summary>
         Insert,
 
-        /// <summary>更新。</summary>
+        /// <summary>
+        /// 更新。
+        /// </summary>
         Update,
 
-        /// <summary>删除。</summary>
+        /// <summary>
+        /// 删除。
+        /// </summary>
         Delete
     }
 
@@ -932,7 +945,7 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class ThrowOnEnumerationEnumerable<T> : IEnumerable<T>
     {
         /// <summary>
-        /// 枚举次数。
+        /// 获取或设置枚举次数。
         /// </summary>
         public int EnumerationCount { get; private set; }
 
@@ -953,16 +966,19 @@ public sealed class SqlMutationBatchStrategyTest
     /// <typeparam name="T">实体类型。</typeparam>
     private sealed class YieldTrackingEnumerable<T> : IEnumerable<T>
     {
+        /// <summary>
+        /// 要跟踪枚举过程的实体序列。
+        /// </summary>
         private readonly IEnumerable<T> _items;
 
         /// <summary>
-        /// 初始化测试序列。
+        /// 初始化一个 <see cref="YieldTrackingEnumerable{T}"/> 类型的实例。
         /// </summary>
         /// <param name="items">待枚举的实体。</param>
         public YieldTrackingEnumerable(IEnumerable<T> items) => _items = items;
 
         /// <summary>
-        /// 已向调用方产出的元素数量。
+        /// 获取或设置已向调用方产出的元素数量。
         /// </summary>
         public int YieldCount { get; private set; }
 
@@ -987,7 +1003,7 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 实体名称。
+        /// 获取或设置实体名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -999,7 +1015,7 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class DeleteSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
@@ -1012,13 +1028,13 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class UpdateSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -1029,14 +1045,20 @@ public sealed class SqlMutationBatchStrategyTest
     [Table("concurrency_update_samples")]
     private sealed class ConcurrencyUpdateSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>并发令牌。</summary>
+        /// <summary>
+        /// 获取或设置并发令牌。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
         public string Version { get; set; }
     }
@@ -1047,11 +1069,15 @@ public sealed class SqlMutationBatchStrategyTest
     [Table("concurrency_delete_samples")]
     private sealed class ConcurrencyDeleteSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
 
-        /// <summary>并发令牌。</summary>
+        /// <summary>
+        /// 获取或设置并发令牌。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.ConcurrencyCheck]
         public string Version { get; set; }
     }
@@ -1062,14 +1088,18 @@ public sealed class SqlMutationBatchStrategyTest
     [Table("soft_delete_update_samples")]
     private sealed class SoftDeleteUpdateSample : ISoftDelete
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [System.ComponentModel.DataAnnotations.Key]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>逻辑删除标识。</summary>
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
@@ -1084,7 +1114,9 @@ public sealed class SqlMutationBatchStrategyTest
         /// <inheritdoc />
         public bool CanRender(SqlBatchUpdateRenderContext context) => true;
 
-        /// <summary>最近一次上下文中的实体数量。</summary>
+        /// <summary>
+        /// 获取或设置最近一次上下文中的实体数量。
+        /// </summary>
         public int LastEntityCount { get; private set; }
 
         /// <inheritdoc />
@@ -1104,7 +1136,9 @@ public sealed class SqlMutationBatchStrategyTest
         /// <inheritdoc />
         public string ProviderKey => "test.mutation-batch";
 
-        /// <summary>是否调用过 Render。</summary>
+        /// <summary>
+        /// 获取或设置是否调用过 Render。
+        /// </summary>
         public bool RenderCalled { get; private set; }
 
         /// <inheritdoc />
@@ -1124,7 +1158,7 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class RecordingExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化记录型执行器。
+        /// 初始化一个 <see cref="RecordingExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="databaseType">测试 Provider 的数据库类型。</param>
@@ -1153,32 +1187,32 @@ public sealed class SqlMutationBatchStrategyTest
         }
 
         /// <summary>
-        /// 已执行命令的不可变快照集合。
+        /// 获取已执行命令的不可变快照集合。
         /// </summary>
         public List<RecordedCommand> Commands { get; } = new();
 
         /// <summary>
-        /// 异步命令收到的取消令牌集合。
+        /// 获取异步命令收到的取消令牌集合。
         /// </summary>
         public List<CancellationToken> CancellationTokens { get; } = new();
 
         /// <summary>
-        /// 异步命令执行后触发的测试回调。
+        /// 获取或设置异步命令执行后触发的测试回调。
         /// </summary>
         public Action AfterExecuteAsync { get; set; }
 
         /// <summary>
-        /// 同步命令执行时抛出的测试异常。
+        /// 获取或设置同步命令执行时抛出的测试异常。
         /// </summary>
         public Exception ExecuteException { get; set; }
 
         /// <summary>
-        /// 异步命令执行时返回的测试异常。
+        /// 获取或设置异步命令执行时返回的测试异常。
         /// </summary>
         public Exception ExecuteAsyncException { get; set; }
 
         /// <summary>
-        /// 根据已记录命令返回模拟的实际影响行数。
+        /// 获取或设置根据已记录命令返回模拟的实际影响行数。
         /// </summary>
         public Func<int> AffectedRows { get; set; }
 
@@ -1225,7 +1259,7 @@ public sealed class SqlMutationBatchStrategyTest
     private sealed class TestProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="TestProvider"/> 类型的实例。
         /// </summary>
         /// <param name="supportsMultiRowValues">是否支持标准多行 Values。</param>
         /// <param name="maxParameterCount">Provider 允许的最大参数数量。</param>

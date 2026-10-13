@@ -23,7 +23,7 @@ public class FilterManager : IFilterManager
     private readonly IDataFilter _dataFilter;
 
     /// <summary>
-    /// 初始化一个<see cref="FilterManager"/>类型的实例
+    /// 初始化一个 <see cref="FilterManager"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="dataFilter">当前执行流的共享过滤状态。</param>
@@ -34,41 +34,25 @@ public class FilterManager : IFilterManager
         _filters = new ConcurrentDictionary<Type, IFilter>();
     }
 
-    /// <summary>
-    /// 启用过滤器
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    /// <returns>用于恢复过滤器原启用状态的释放对象。</returns>
+    /// <inheritdoc />
     public IDisposable EnableFilter<TFilterType>() where TFilterType : class
     {
         return _dataFilter.Enable<TFilterType>();
     }
 
-    /// <summary>
-    /// 禁用过滤器
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    /// <returns>用于恢复过滤器原启用状态的释放对象。</returns>
+    /// <inheritdoc />
     public IDisposable DisableFilter<TFilterType>() where TFilterType : class
     {
         return _dataFilter.Disable<TFilterType>();
     }
 
-    /// <summary>
-    /// 获取过滤器
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    /// <returns>指定类型的过滤器；未注册时返回 null。</returns>
+    /// <inheritdoc />
     public IFilter GetFilter<TFilterType>() where TFilterType : class
     {
         return GetFilter(typeof(TFilterType));
     }
 
-    /// <summary>
-    /// 获取过滤器
-    /// </summary>
-    /// <param name="filterType">过滤器类型</param>
-    /// <returns>指定类型的过滤器；未注册或类型为空时返回 null。</returns>
+    /// <inheritdoc />
     public IFilter GetFilter(Type filterType)
     {
         if (filterType == null)
@@ -82,22 +66,14 @@ public class FilterManager : IFilterManager
         return filter;
     }
 
-    /// <summary>
-    /// 实体是否启用过滤器
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <returns>指定实体类型的软删除过滤器已启用时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool IsEntityEnabled<TEntity>()
     {
         var filter = GetFilter<ISoftDelete>();
         return filter != null && _dataFilter.IsEnabled<ISoftDelete>() && filter.IsEntityEnabled<TEntity>();
     }
 
-    /// <summary>
-    /// 过滤器是否启用
-    /// </summary>
-    /// <typeparam name="TFilterType">过滤器类型</typeparam>
-    /// <returns>指定类型过滤器已注册且启用时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool IsEnabled<TFilterType>() where TFilterType : class
     {
         return GetFilter<TFilterType>() != null && _dataFilter.IsEnabled<TFilterType>();

@@ -59,6 +59,8 @@ public static class SqlAssert
     /// <summary>
     /// 获取行首空白字符数量。
     /// </summary>
+    /// <param name="value">待统计的文本行。</param>
+    /// <returns>行首空白字符数量。</returns>
     private static int GetLeadingWhitespaceCount(string value)
     {
         var index = 0;

@@ -37,7 +37,7 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     private long _evictionCount;
 
     /// <summary>
-    /// 初始化一个 <see cref="BoundedLazyCache{TKey,TValue}"/> 类型的实例。
+    /// 初始化一个 <see cref="BoundedLazyCache{TKey, TValue}"/> 类型的实例。
     /// </summary>
     /// <param name="capacity">缓存容量；<see langword="null"/> 表示无上限，<c>0</c> 表示不缓存。</param>
     public BoundedLazyCache(int? capacity = null)
@@ -48,12 +48,12 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     }
 
     /// <summary>
-    /// 缓存容量。
+    /// 获取缓存容量。
     /// </summary>
     public int? Capacity { get; }
 
     /// <summary>
-    /// 当前缓存条目数。
+    /// 获取当前缓存条目数。
     /// </summary>
     public int Count
     {
@@ -65,7 +65,7 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     }
 
     /// <summary>
-    /// 缓存命中次数。
+    /// 获取缓存命中次数。
     /// </summary>
     public long HitCount
     {
@@ -77,7 +77,7 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     }
 
     /// <summary>
-    /// 缓存未命中次数。
+    /// 获取缓存未命中次数。
     /// </summary>
     public long MissCount
     {
@@ -89,7 +89,7 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     }
 
     /// <summary>
-    /// 因容量为零而不缓存的次数。
+    /// 获取因容量为零而不缓存的次数。
     /// </summary>
     public long BypassCount
     {
@@ -101,7 +101,7 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     }
 
     /// <summary>
-    /// 最久未使用条目被移除的次数。
+    /// 获取最久未使用条目被移除的次数。
     /// </summary>
     public long EvictionCount
     {
@@ -203,12 +203,12 @@ internal sealed class BoundedLazyCache<TKey, TValue>
         }
 
         /// <summary>
-        /// 缓存惰性值。
+        /// 获取缓存惰性值。
         /// </summary>
         public Lazy<TValue> Value { get; }
 
         /// <summary>
-        /// 对应的访问顺序链表节点。
+        /// 获取对应的访问顺序链表节点。
         /// </summary>
         public LinkedListNode<TKey> Node { get; }
     }

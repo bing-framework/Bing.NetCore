@@ -20,7 +20,7 @@ public class ValidationFailedResult : ObjectResult
     public List<ValidationError> Errors { get; }
 
     /// <summary>
-    /// 使用验证错误列表初始化 <see cref="ValidationFailedResult"/> 的实例。
+    /// 初始化一个 <see cref="ValidationFailedResult"/> 类型的实例。
     /// </summary>
     /// <param name="errors">要写入响应正文的验证错误列表。</param>
     public ValidationFailedResult(List<ValidationError> errors) : base(errors)
@@ -37,8 +37,11 @@ public class ValidationFailedResult : ObjectResult
 public class ValidationError
 {
     /// <summary>
-    /// 获取或设置触发验证错误的参数、字段或属性名称；未关联具体成员时不输出默认值。
+    /// 获取或设置触发验证错误的参数、字段或属性名称。
     /// </summary>
+    /// <remarks>
+    /// 未关联具体成员时不输出默认值。
+    /// </remarks>
     [DataMember(EmitDefaultValue = false)]
     public string Name { get; set; }
 

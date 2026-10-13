@@ -39,7 +39,7 @@ public static class SqlParameterAssert
         : $"{parameter.Name}: Value={parameter.Value ?? "<null>"}, DbType={parameter.DbType?.ToString() ?? "<null>"}, Direction={parameter.Direction?.ToString() ?? "<null>"}";
 
     /// <summary>
-    /// 将参数集合格式化为失败诊断文本。
+    /// 将参数格式化为失败诊断文本。
     /// </summary>
     /// <param name="parameters">参数集合。</param>
     /// <returns>可读参数集合文本。</returns>

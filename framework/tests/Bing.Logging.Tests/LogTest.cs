@@ -18,7 +18,7 @@ public partial class LogTest
     private readonly ILog _log;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="LogTest"/> 类型的实例。
     /// </summary>
     public LogTest()
     {

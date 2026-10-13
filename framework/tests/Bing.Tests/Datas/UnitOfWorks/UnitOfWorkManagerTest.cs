@@ -25,7 +25,7 @@ public class UnitOfWorkManagerTest
     private readonly UnitOfWorkManager _manager;
 
     /// <summary>
-    /// 初始化一个<see cref="UnitOfWorkManagerTest"/>类型的实例
+    /// 初始化一个 <see cref="UnitOfWorkManagerTest"/> 类型的实例。
     /// </summary>
     public UnitOfWorkManagerTest()
     {

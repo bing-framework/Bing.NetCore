@@ -21,7 +21,7 @@ public class ActionTenantResolveContributorTest
     private readonly Mock<IServiceProvider> _mockServiceProvider;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ActionTenantResolveContributorTest"/> 类型的实例。
     /// </summary>
     public ActionTenantResolveContributorTest()
     {

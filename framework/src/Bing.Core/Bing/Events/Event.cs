@@ -14,7 +14,7 @@ public class Event : IEvent
     private readonly string _eventName;
 
     /// <summary>
-    /// 使用可选的显式事件名称初始化 <see cref="Event"/> 的实例。
+    /// 初始化一个 <see cref="Event"/> 类型的实例。
     /// </summary>
     /// <param name="eventName">优先于事件类型特性解析结果使用的可选事件名称。</param>
     /// <remarks>构造时生成新的 GUID 标识，并将发生时间设置为当前本地时间。</remarks>
@@ -50,10 +50,10 @@ public class Event : IEvent
         return eventName;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回包含事件标识、发生时间和 JSON 数据的多行文本。
-    /// </summary>
-    /// <returns>当前事件的诊断文本表示。</returns>
+    /// </remarks>
     public override string ToString()
     {
         var result = new StringBuilder();

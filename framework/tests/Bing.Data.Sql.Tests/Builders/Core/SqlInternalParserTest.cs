@@ -27,6 +27,7 @@ public class SqlInternalParserTest
     /// <summary>
     /// 测试目的：标识符路径解析器应拒绝空段、超长路径和 SQL 语句分隔符。
     /// </summary>
+    /// <param name="value">包含无效语法的标识符路径。</param>
     [Theory]
     [InlineData("Orders;Drop")]
     [InlineData("Orders..Id")]

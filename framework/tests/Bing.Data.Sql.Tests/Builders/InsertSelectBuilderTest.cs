@@ -279,13 +279,13 @@ public class InsertSelectBuilderTest
     private sealed class MappedArchive
     {
         /// <summary>
-        /// 订单标识。
+        /// 获取或设置订单标识。
         /// </summary>
         [Column("order_id")]
         public int OrderId { get; set; }
 
         /// <summary>
-        /// 展示编码。
+        /// 获取或设置展示编码。
         /// </summary>
         [Column("display_code")]
         public string DisplayCode { get; set; }
@@ -298,13 +298,13 @@ public class InsertSelectBuilderTest
     private sealed class MappedOrder
     {
         /// <summary>
-        /// 订单标识。
+        /// 获取或设置订单标识。
         /// </summary>
         [Column("order_id")]
         public int Id { get; set; }
 
         /// <summary>
-        /// 订单编码。
+        /// 获取或设置订单编码。
         /// </summary>
         [Column("order_code")]
         public string Code { get; set; }

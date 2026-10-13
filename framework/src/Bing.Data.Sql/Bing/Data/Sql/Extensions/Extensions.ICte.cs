@@ -5,12 +5,11 @@ using Bing.Data.Sql.Builders.Core;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 公用表表达式CTE操作扩展
-/// </summary>
+/// 设置公用表表达式（CTE）。
 public static partial class Extensions
 {
     /// <summary>
-    /// 设置公用表表达式CTE
+    /// 设置公用表表达式（CTE）。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -32,7 +31,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置公用表表达式。
+    /// 设置公用表表达式（CTE）。
     /// </summary>
     /// <typeparam name="T">支持 CTE 的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>

@@ -13,7 +13,7 @@ public class ValidationExceptionTest
     // ── Default constructor ────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：默认构造后，Flag 应为 "__VALID_FLG"，标识其为验证类异常。
+    /// 默认构造后，Flag 应为 "__VALID_FLG"，标识其为验证类异常。
     /// </summary>
     [Fact]
     public void DefaultConstructor_ShouldHaveValidFlag()
@@ -28,7 +28,7 @@ public class ValidationExceptionTest
     // ── Constructor(string message) ────────────────────────────────
 
     /// <summary>
-    /// 测试目的：通过消息字符串构造时，Message 应正确赋值，Flag 仍为 "__VALID_FLG"。
+    /// 通过消息字符串构造时，Message 应正确赋值，Flag 仍为 "__VALID_FLG"。
     /// </summary>
     [Fact]
     public void Constructor_WithMessage_ShouldSetMessageAndFlag()
@@ -44,7 +44,7 @@ public class ValidationExceptionTest
     // ── Constructor(string message, string flag) ───────────────────
 
     /// <summary>
-    /// 测试目的：通过消息与自定义 flag 构造时，应正确覆盖默认 Flag 值。
+    /// 通过消息与自定义 flag 构造时，应正确覆盖默认 Flag 值。
     /// </summary>
     [Fact]
     public void Constructor_WithMessageAndFlag_ShouldSetCustomFlag()
@@ -60,7 +60,7 @@ public class ValidationExceptionTest
     // ── Constructor(string message, Exception innerException) ──────
 
     /// <summary>
-    /// 测试目的：带内部异常构造时，InnerException 应被正确链接，Flag 仍为默认值。
+    /// 带内部异常构造时，InnerException 应被正确链接，Flag 仍为默认值。
     /// </summary>
     [Fact]
     public void Constructor_WithInnerException_ShouldLinkInnerExceptionAndFlag()
@@ -80,7 +80,7 @@ public class ValidationExceptionTest
     // ── Constructor(IEnumerable<string>) ──────────────────────────
 
     /// <summary>
-    /// 测试目的：传入 null 的验证消息集合应抛出 ArgumentNullException。
+    /// 传入 null 的验证消息集合应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Constructor_WithNullMessages_ShouldThrowArgumentNullException()
@@ -91,8 +91,7 @@ public class ValidationExceptionTest
     }
 
     /// <summary>
-    /// 测试目的：通过有效验证消息集合构造时不应抛出异常，
-    /// 且 ValidationMessage 属性应包含所有传入消息。
+    /// 通过有效验证消息集合构造时不应抛出异常， 且 ValidationMessage 属性应包含所有传入消息。
     /// </summary>
     [Fact]
     public void Constructor_WithValidMessages_ShouldSetValidationMessage()
@@ -112,7 +111,7 @@ public class ValidationExceptionTest
     // ── Constructor(long errorCode, string message) ────────────────
 
     /// <summary>
-    /// 测试目的：通过错误码和消息构造时，Code 和 Message 均应被正确设置。
+    /// 通过错误码和消息构造时，Code 和 Message 均应被正确设置。
     /// </summary>
     [Fact]
     public void Constructor_WithErrorCodeAndMessage_ShouldSetCodeAndMessage()
@@ -129,7 +128,7 @@ public class ValidationExceptionTest
     // ── ToString / GetFullMessage ──────────────────────────────────
 
     /// <summary>
-    /// 测试目的：带验证消息集合时，ToString 应包含各条消息内容（非空输出）。
+    /// 带验证消息集合时，ToString 应包含各条消息内容（非空输出）。
     /// </summary>
     [Fact]
     public void ToString_WithValidationMessages_ShouldContainMessages()
@@ -148,7 +147,7 @@ public class ValidationExceptionTest
     // ── Is-a hierarchy ────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：ValidationException 应继承自 BingException，满足框架异常类型约定。
+    /// ValidationException 应继承自 BingException，满足框架异常类型约定。
     /// </summary>
     [Fact]
     public void ValidationException_ShouldInheritFromBingException()

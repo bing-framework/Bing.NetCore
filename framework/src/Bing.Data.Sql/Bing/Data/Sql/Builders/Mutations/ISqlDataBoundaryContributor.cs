@@ -11,19 +11,29 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// </summary>
 public enum SqlDataBoundaryOperation
 {
-    /// <summary>更新操作。</summary>
+    /// <summary>
+    /// 更新操作。
+    /// </summary>
     Update,
 
-    /// <summary>删除操作。</summary>
+    /// <summary>
+    /// 删除操作。
+    /// </summary>
     Delete,
 
-    /// <summary>逻辑删除操作。</summary>
+    /// <summary>
+    /// 逻辑删除操作。
+    /// </summary>
     SoftDelete,
 
-    /// <summary>恢复已逻辑删除实体的操作。</summary>
+    /// <summary>
+    /// 恢复已逻辑删除实体的操作。
+    /// </summary>
     Restore,
 
-    /// <summary>显式物理清除操作。</summary>
+    /// <summary>
+    /// 显式物理清除操作。
+    /// </summary>
     Purge
 }
 
@@ -66,7 +76,7 @@ public sealed class SqlDataBoundaryContext
     private readonly IMutationWhereClause _whereClause;
 
     /// <summary>
-    /// 初始化写入数据边界上下文。
+    /// 初始化一个 <see cref="SqlDataBoundaryContext"/> 类型的实例。
     /// </summary>
     /// <param name="mutationContext">当前 Mutation 上下文。</param>
     /// <param name="target">结构化写入目标。</param>
@@ -82,22 +92,22 @@ public sealed class SqlDataBoundaryContext
     }
 
     /// <summary>
-    /// 当前结构化写入目标的实体类型。
+    /// 获取当前结构化写入目标的实体类型。
     /// </summary>
     public Type EntityType => Target.EntityType;
 
     /// <summary>
-    /// 当前结构化写入目标。
+    /// 获取当前结构化写入目标。
     /// </summary>
     public SqlTableReference Target { get; }
 
     /// <summary>
-    /// 当前写入操作类型。
+    /// 获取当前写入操作类型。
     /// </summary>
     public SqlDataBoundaryOperation Operation { get; }
 
     /// <summary>
-    /// 当前 Builder 固定使用的数据库上下文。
+    /// 获取当前 Builder 固定使用的数据库上下文。
     /// </summary>
     public DatabaseContext DatabaseContext => _mutationContext.ExecutionContext.DatabaseContext;
 

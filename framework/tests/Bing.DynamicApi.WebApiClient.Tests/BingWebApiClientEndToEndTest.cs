@@ -46,12 +46,12 @@ namespace Bing.DynamicApi.WebApiClient.Tests;
 public sealed class BingWebApiClientEndToEndTest : IClassFixture<WebApiClientTestServerFixture>
 {
     /// <summary>
-    /// 获取端到端测试服务器 fixture。
+    /// 为端到端测试承载服务端应用的夹具。
     /// </summary>
     private readonly WebApiClientTestServerFixture _fixture;
 
     /// <summary>
-    /// 初始化 BingWebApiClientEndToEndTest 类的新实例。
+    /// 初始化一个 <see cref="BingWebApiClientEndToEndTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">提供测试服务器和请求探针的 fixture。</param>
     public BingWebApiClientEndToEndTest(WebApiClientTestServerFixture fixture) => _fixture = fixture;
@@ -704,17 +704,17 @@ public interface IOrdersAppService : IAppService
 public sealed class OrdersAppService : IOrdersAppService
 {
     /// <summary>
-    /// 获取当前服务端 HTTP 上下文访问器。
+        /// 用于访问端到端测试 HTTP 上下文的访问器。
     /// </summary>
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
-    /// 获取用于同步测试请求状态的探针。
+        /// 记录端到端测试请求状态的探针。
     /// </summary>
     private readonly WebApiClientTestProbe _probe;
 
     /// <summary>
-    /// 初始化 OrdersAppService 类的新实例。
+    /// 初始化一个 <see cref="OrdersAppService"/> 类型的实例。
     /// </summary>
     /// <param name="httpContextAccessor">提供当前请求上下文的访问器。</param>
     /// <param name="probe">用于记录请求和协调并发测试的探针。</param>
@@ -971,7 +971,7 @@ public sealed class OrderHeadersDto
 public sealed class CapturedRequest
 {
     /// <summary>
-    /// 初始化 CapturedRequest 类的新实例。
+    /// 初始化一个 <see cref="CapturedRequest"/> 类型的实例。
     /// </summary>
     /// <param name="method">HTTP 请求方法。</param>
     /// <param name="path">请求路径。</param>
@@ -1077,7 +1077,6 @@ public sealed class WebApiClientTestProbe
     /// 等待并发请求全部到达屏障。
     /// </summary>
     /// <param name="cancellationToken">用于取消等待的令牌。</param>
-    /// <returns>表示屏障放行的异步操作。</returns>
     public Task WaitForConcurrentRequestsAsync(CancellationToken cancellationToken)
     {
         Task waitTask;
@@ -1108,8 +1107,11 @@ public sealed class WebApiClientTestServerFixture : IAsyncLifetime
     private IHost? _server;
 
     /// <summary>
-    /// 获取已启动的测试宿主；尚未初始化时抛出异常。
+    /// 获取已启动的测试宿主。
     /// </summary>
+    /// <remarks>
+    /// 尚未初始化时抛出异常。
+    /// </remarks>
     public IHost Server => _server ?? throw new InvalidOperationException("TestServer has not been initialized.");
 
     /// <summary>
@@ -1209,12 +1211,12 @@ public sealed class TestCredentialState
 public sealed class TestAuthorizationMessageHandler : DelegatingHandler
 {
     /// <summary>
-    /// 获取共享的测试凭据状态。
+        /// 保存端到端测试客户端凭据状态的共享对象。
     /// </summary>
     private readonly TestCredentialState _credentialState;
 
     /// <summary>
-    /// 初始化 TestAuthorizationMessageHandler 类的新实例。
+    /// 初始化一个 <see cref="TestAuthorizationMessageHandler"/> 类型的实例。
     /// </summary>
     /// <param name="credentialState">提供访问令牌和请求记录状态的对象。</param>
     public TestAuthorizationMessageHandler(TestCredentialState credentialState) => _credentialState = credentialState;
@@ -1263,7 +1265,7 @@ public sealed class TestAuthenticationHandler : AuthenticationHandler<Authentica
 {
 #if NET8_0_OR_GREATER
     /// <summary>
-    /// 初始化 TestAuthenticationHandler 类的新实例。
+    /// 初始化一个 <see cref="TestAuthenticationHandler"/> 类型的实例。
     /// </summary>
     /// <param name="options">认证方案选项监视器。</param>
     /// <param name="logger">认证处理器日志工厂。</param>
@@ -1277,7 +1279,7 @@ public sealed class TestAuthenticationHandler : AuthenticationHandler<Authentica
     }
 #else
     /// <summary>
-    /// 初始化 TestAuthenticationHandler 类的新实例。
+    /// 初始化一个 <see cref="TestAuthenticationHandler"/> 类型的实例。
     /// </summary>
     /// <param name="options">认证方案选项监视器。</param>
     /// <param name="logger">认证处理器日志工厂。</param>

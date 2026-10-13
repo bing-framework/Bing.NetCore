@@ -8,10 +8,7 @@ namespace Bing.Data.Sql.Builders.Filters;
 /// </summary>
 public class IsDeletedFilter : ISqlFilter, ISqlDataBoundaryContributor
 {
-    /// <summary>
-    /// 过滤
-    /// </summary>
-    /// <param name="context">Sql查询执行上下文</param>
+    /// <inheritdoc />
     public void Filter(SqlFilterContext context)
     {
         if (context == null || context.IsEnabled<ISoftDelete>() == false)

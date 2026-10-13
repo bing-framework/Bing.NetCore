@@ -17,12 +17,12 @@ public sealed class DescriptionContext
     private readonly StringBuilder _stringBuilder;
 
     /// <summary>
-    /// 初始化空的描述上下文。
+    /// 初始化一个 <see cref="DescriptionContext"/> 类型的实例。
     /// </summary>
     public DescriptionContext() => _stringBuilder = new StringBuilder();
 
     /// <summary>
-    /// 添加原始描述片段。
+    /// 添加描述片段。
     /// </summary>
     /// <param name="description">要追加的描述；空白文本会被忽略。</param>
     public void Add(string description)
@@ -33,7 +33,7 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 添加名称和值组成的描述片段。
+    /// 添加描述片段。
     /// </summary>
     /// <typeparam name="TValue">属性值类型。</typeparam>
     /// <param name="name">显示名称；空白名称会被忽略。</param>
@@ -47,7 +47,7 @@ public sealed class DescriptionContext
     }
 
     /// <summary>
-    /// 根据属性表达式的显示名称或描述添加对应描述片段。
+    /// 添加描述片段。
     /// </summary>
     /// <typeparam name="T">属性所属对象类型。</typeparam>
     /// <typeparam name="TProperty">属性值类型。</typeparam>
@@ -78,9 +78,9 @@ public sealed class DescriptionContext
         return _stringBuilder.ToString().Trim().TrimEnd(',');
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回当前描述文本。
-    /// </summary>
-    /// <returns><see cref="Output"/> 生成的描述文本。</returns>
+    /// </remarks>
     public override string ToString() => Output();
 }

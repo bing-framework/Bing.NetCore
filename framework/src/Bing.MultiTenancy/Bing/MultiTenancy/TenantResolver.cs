@@ -20,7 +20,7 @@ public class TenantResolver : ITenantResolver, ITransientDependency
     private readonly BingTenantResolveOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="TenantResolver"/>类型的实例
+    /// 初始化一个 <see cref="TenantResolver"/> 类型的实例。
     /// </summary>
     /// <param name="options">租户解析器选项配置</param>
     /// <param name="serviceProvider">服务提供程序</param>
@@ -30,12 +30,7 @@ public class TenantResolver : ITenantResolver, ITransientDependency
         _options = options.Value;
     }
 
-    /// <summary>
-    /// 解析当前租户
-    /// </summary>
-    /// <returns>
-    /// 租户ID，租户名称，null（如果无法解析则返回空）
-    /// </returns>
+    /// <inheritdoc />
     public virtual async Task<TenantResolveResult> ResolveTenantIdOrNameAsync()
     {
         var result = new TenantResolveResult();

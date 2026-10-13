@@ -22,16 +22,12 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo> : TreeCompactRepos
     private readonly IStore<TPo, Guid> _store;
 
     /// <summary>
-    /// 初始化一个<see cref="TreeCompactRepositoryBase{TEntity,TPo}"/>类型的实例
+    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity, TPo}"/> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected TreeCompactRepositoryBase(IStore<TPo, Guid> store) : base(store) => _store = store;
 
-    /// <summary>
-    /// 生成排序号
-    /// </summary>
-    /// <param name="parentId">父标识</param>
-    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
+    /// <inheritdoc />
     public override async Task<int> GenerateSortIdAsync(Guid? parentId)
     {
         var maxSortId = await _store.Find(t => t.ParentId == parentId).MaxAsync(t => t.SortId);
@@ -56,35 +52,22 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     private readonly IStore<TPo, TKey> _store;
 
     /// <summary>
-    /// 初始化一个<see cref="TreeCompactRepositoryBase{TEntity,TPo,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity, TPo, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected TreeCompactRepositoryBase(IStore<TPo, TKey> store) : base(store) => _store = store;
 
-    /// <summary>
-    /// 生成排序号
-    /// </summary>
-    /// <param name="parentId">父标识</param>
-    /// <returns>表示异步操作的任务，结果为父节点下新的排序号。</returns>
+    /// <inheritdoc />
     public abstract Task<int> GenerateSortIdAsync(TParentId parentId);
 
-    /// <summary>
-    /// 获取全部下级实体
-    /// </summary>
-    /// <param name="parent">父实体</param>
-    /// <returns>表示异步操作的任务，结果为指定父实体的全部下级实体。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TEntity>> GetAllChildrenAsync(TEntity parent)
     {
         var list = await _store.FindAllAsync(t => t.Path.StartsWith(parent.Path));
         return list.Where(t => !t.Id.Equals(parent.Id)).Select(ToEntity).ToList();
     }
 
-    /// <summary>
-    /// 查找未跟踪单个实体
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为指定标识对应的未跟踪实体；未找到时返回 null。</returns>
+    /// <inheritdoc />
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

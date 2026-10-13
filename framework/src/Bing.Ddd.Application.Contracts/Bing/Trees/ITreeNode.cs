@@ -18,12 +18,18 @@ public interface ITreeNode : IKey
     string Path { get; set; }
 
     /// <summary>
-    /// 获取或设置节点在树中的层级；为空时未指定层级。
+    /// 获取或设置节点在树中的层级。
     /// </summary>
+    /// <remarks>
+    /// 为空时未指定层级。
+    /// </remarks>
     int? Level { get; set; }
 
     /// <summary>
-    /// 获取或设置节点是否在树形界面中展开；为空时未指定展开状态。
+    /// 获取或设置节点是否在树形界面中展开。
     /// </summary>
+    /// <remarks>
+    /// 为空时未指定展开状态。
+    /// </remarks>
     bool? Expanded { get; set; }
 }

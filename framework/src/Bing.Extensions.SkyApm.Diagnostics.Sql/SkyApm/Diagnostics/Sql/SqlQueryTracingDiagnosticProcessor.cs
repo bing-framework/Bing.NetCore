@@ -41,7 +41,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     private readonly StringOrIntValue _component;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlQueryTracingDiagnosticProcessor"/>类型的实例
+    /// 初始化一个 <see cref="SqlQueryTracingDiagnosticProcessor"/> 类型的实例。
     /// </summary>
     /// <param name="tracingContext">跟踪上下文</param>
     /// <param name="contextAccessor">上下文访问器</param>
@@ -58,9 +58,7 @@ public class SqlQueryTracingDiagnosticProcessor : ITracingDiagnosticProcessor
         _logParameterValue = configAccessor.Get<SamplingConfig>().LogSqlParameterValue;
     }
 
-    /// <summary>
-    /// 监听名称
-    /// </summary>
+    /// <inheritdoc />
     public string ListenerName => SqlQueryDiagnosticListenerNames.DiagnosticListenerName;
 
     /// <summary>

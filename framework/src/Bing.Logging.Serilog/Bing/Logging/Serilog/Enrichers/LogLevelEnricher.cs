@@ -7,11 +7,7 @@ namespace Bing.Logging.Serilog.Enrichers;
 /// </summary>
 internal class LogLevelEnricher : ILogEventEnricher
 {
-    /// <summary>
-    /// 扩展属性
-    /// </summary>
-    /// <param name="logEvent">日志事件</param>
-    /// <param name="propertyFactory">日志事件属性工厂</param>
+    /// <inheritdoc />
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         var property = propertyFactory.CreateProperty("LogLevel", LogLevelSwitcher.Switch(logEvent.Level));

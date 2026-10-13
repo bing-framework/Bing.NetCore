@@ -192,28 +192,28 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     #region 属性
 
     /// <summary>
-    /// 服务提供程序
+    /// 获取服务提供程序
     /// </summary>
     protected IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// 日志操作
+    /// 获取日志操作
     /// </summary>
     protected ILogger Logger { get; }
 
     /// <summary>
-    /// Sql配置
+    /// 获取或设置Sql配置
     /// </summary>
     protected internal SqlOptions Options { get; set; }
 
     /// <summary>
-    /// 实体映射解析器
+    /// 获取实体映射解析器
     /// </summary>
     protected IEntityMappingResolver EntityMappingResolver =>
         _entityMappingResolver ??= CaptureEntityMappingResolver(ServiceProvider.GetService<IEntityMappingResolver>());
 
     /// <summary>
-    /// 连接来源
+    /// 获取连接来源
     /// </summary>
     protected SqlConnectionSource ConnectionSource => _connectionSource;
 
@@ -299,77 +299,77 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     internal string GetCurrentProviderKey() => GetCurrentProvider().Key;
 
     /// <summary>
-    /// Sql生成器
+    /// 获取Sql生成器
     /// </summary>
     protected ISqlBuilder SqlBuilder => _sqlBuilder ??= CreateSqlBuilder();
 
     /// <summary>
-    /// Sql方言
+    /// 获取Sql方言
     /// </summary>
     protected IDialect Dialect => ((ISqlCommonPartAccessor)SqlBuilder).Dialect;
 
     /// <summary>
-    /// 参数管理器
+    /// 获取参数管理器
     /// </summary>
     protected IParameterManager ParameterManager => ((ISqlCommonPartAccessor)SqlBuilder).ParameterManager;
 
     /// <summary>
-    /// 参数字面值解析器
+    /// 获取参数字面值解析器
     /// </summary>
     protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= CreateParamLiteralsResolver();
 
     /// <summary>
-    /// Sql 参数绑定器
+    /// 获取Sql 参数绑定器
     /// </summary>
     private protected ISqlParameterBinder SqlParameterBinder => _sqlParameterBinder ??= CreateSqlParameterBinder();
 
     /// <summary>
-    /// Select子句
+    /// 获取Select子句
     /// </summary>
     protected ISelectClause SelectClause => ((ISqlQueryClauseAccessor)SqlBuilder).SelectClause;
 
     /// <summary>
-    /// From子句
+    /// 获取From子句
     /// </summary>
     protected IFromClause FromClause => ((ISqlQueryClauseAccessor)SqlBuilder).FromClause;
 
     /// <summary>
-    /// Join子句
+    /// 获取Join子句
     /// </summary>
     protected IJoinClause JoinClause => ((ISqlQueryClauseAccessor)SqlBuilder).JoinClause;
 
     /// <summary>
-    /// Where子句
+    /// 获取Where子句
     /// </summary>
     protected IWhereClause WhereClause => ((ISqlQueryClauseAccessor)SqlBuilder).WhereClause;
 
     /// <summary>
-    /// GroupBy子句
+    /// 获取GroupBy子句
     /// </summary>
     protected IGroupByClause GroupByClause => ((ISqlQueryClauseAccessor)SqlBuilder).GroupByClause;
 
     /// <summary>
-    /// OrderBy子句
+    /// 获取OrderBy子句
     /// </summary>
     protected IOrderByClause OrderByClause => ((ISqlQueryClauseAccessor)SqlBuilder).OrderByClause;
 
     /// <summary>
-    /// 参数列表
+    /// 获取参数列表
     /// </summary>
     protected IReadOnlyDictionary<string, object> Params => SqlBuilder.GetParams();
 
     /// <summary>
-    /// 是否包含联合操作
+    /// 获取是否包含联合操作
     /// </summary>
     protected bool IsUnion => ((IUnionAccessor)SqlBuilder).IsUnion;
 
     /// <summary>
-    /// 联合操作项集合
+    /// 获取联合操作项集合
     /// </summary>
     protected List<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
 
     /// <summary>
-    /// 公用表表达式CTE集合
+    /// 获取公用表表达式CTE集合
     /// </summary>
     protected List<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
 
@@ -378,13 +378,13 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     #region 工厂方法
 
     /// <summary>
-    /// 创建绑定到当前查询状态的 SQL Builder。
+    /// 创建 SQL Builder。
     /// </summary>
     /// <returns>由当前 Provider 配置的 SQL Builder。</returns>
     protected abstract ISqlBuilder CreateSqlBuilder();
 
     /// <summary>
-    /// 根据当前查询状态创建 SQL Builder。
+    /// 创建 SQL Builder。
     /// </summary>
     /// <param name="provider">SQL 提供程序。</param>
     /// <returns>SQL Builder。</returns>
@@ -410,10 +410,10 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <returns>绑定当前 Provider 的独立 SQL Builder。</returns>
     protected virtual ISqlBuilder CreateIndependentSqlBuilder() => CreateSqlBuilder(GetCurrentProvider());
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 创建供运行时绑定使用的独立 SQL Builder。
-    /// </summary>
-    /// <returns>绑定当前 Provider 的独立 SQL Builder。</returns>
+    /// </remarks>
     ISqlBuilder ISqlQueryBuilderSource.CreateIndependentSqlBuilder() => CreateIndependentSqlBuilder();
 
     /// <inheritdoc />
@@ -706,7 +706,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         GetOrCreateConnection();
 
     /// <summary>
-    /// 获取当前实例的非阻塞执行租约。
+    /// 获取或设置当前实例的非阻塞执行租约。
     /// </summary>
     /// <remarks>
     /// Query 和 Executor 保存可变的 Builder、连接与事务状态；同一实例只允许一个执行操作。
@@ -766,7 +766,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         private IDisposable _transactionScopeExecutionLease;
 
         /// <summary>
-        /// 初始化执行租约。
+        /// 初始化一个 <see cref="ExecutionLease"/> 类型的实例。
         /// </summary>
         /// <param name="owner">所属查询对象。</param>
         /// <param name="transactionScopeExecutionLease">关联的事务作用域执行租约。</param>
@@ -932,6 +932,11 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         _entityMappingResolver = CaptureEntityMappingResolver(resolver);
     }
 
+    /// <summary>
+    /// 捕获适用于当前查询生命周期的实体映射解析器。
+    /// </summary>
+    /// <param name="resolver">待捕获的实体映射解析器。</param>
+    /// <returns>快照提供程序返回的稳定解析器，或原解析器。</returns>
     private static IEntityMappingResolver CaptureEntityMappingResolver(IEntityMappingResolver resolver) =>
         resolver is IEntityMappingSnapshotProvider snapshotProvider ? snapshotProvider.CaptureSnapshot() : resolver;
 
@@ -999,15 +1004,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     protected string GetSql() => SqlBuilder.ToSql();
 
     /// <summary>
-    /// 验证普通查询 API 不会执行缺少 Returning 的 Mutation，且不会通过只读数据源执行结构化写入。
+    /// 验证 SQL Builder 是否可通过查询结果 API 执行。
     /// </summary>
+    /// <remarks>结构化写入必须配置 Returning，且不能通过只读数据源执行。</remarks>
     protected void ValidateQueryBuilder()
     {
         ValidateQueryBuilder(_sqlBuilder);
     }
 
     /// <summary>
-    /// 验证指定 Builder 可通过查询结果 API 执行。
+    /// 验证 SQL Builder 是否可通过查询结果 API 执行。
     /// </summary>
     /// <param name="builder">待验证的 SQL Builder；原生 SQL 文本查询传入 null。</param>
     protected void ValidateQueryBuilder(ISqlBuilder builder)
@@ -1076,7 +1082,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 准备 Builder 命令执行所需的 SQL 和参数。
+    /// 准备命令执行所需的 SQL 和参数。
     /// </summary>
     /// <param name="builder">当前 SQL Builder。</param>
     /// <returns>本次执行的不可变准备快照。</returns>
@@ -1090,7 +1096,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 准备查询计划执行所需的 SQL 和参数。
+    /// 准备命令执行所需的 SQL 和参数。
     /// </summary>
     /// <param name="plan">待执行的查询计划。</param>
     /// <returns>本次执行的不可变准备快照。</returns>
@@ -1104,7 +1110,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 准备独立写入命令执行所需的 SQL 和参数。
+    /// 准备命令执行所需的 SQL 和参数。
     /// </summary>
     /// <param name="command">已冻结的写入命令。</param>
     /// <returns>本次执行的不可变准备快照。</returns>
@@ -1117,7 +1123,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 准备原生 SQL 命令执行所需的参数。
+    /// 准备命令执行所需的 SQL 和参数。
     /// </summary>
     /// <param name="sql">待执行的 SQL 文本。</param>
     /// <param name="parameters">调用方提供的原始参数源。</param>
@@ -1175,7 +1181,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 写日志
+    /// 写入 SQL 跟踪日志。
     /// </summary>
     /// <param name="sql">Sql语句</param>
     /// <param name="parameters">参数</param>
@@ -1197,7 +1203,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 按需写入原生参数 SQL 的调试跟踪日志。
+    /// 写入 SQL 跟踪日志。
     /// </summary>
     /// <param name="sql">当前执行 SQL。</param>
     /// <param name="parameters">原始参数对象。</param>
@@ -1209,7 +1215,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 写查询跟踪日志。
+    /// 写入 SQL 跟踪日志。
     /// </summary>
     /// <param name="builder">Sql生成器。</param>
     /// <param name="sql">已生成的Sql语句。</param>
@@ -1221,7 +1227,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 按需写入已准备命令的调试跟踪日志。
+    /// 写入 SQL 跟踪日志。
     /// </summary>
     /// <param name="command">当前执行的准备命令。</param>
     private protected void WriteTraceLog(SqlPreparedCommand command)
@@ -1260,9 +1266,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
 
     #region Dispose(释放资源)
 
-    /// <summary>
-    /// 释放资源
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         if (TryBeginDispose() == false)
@@ -1295,10 +1299,12 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
             ExceptionDispatchInfo.Capture(transactionException).Throw();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 异步释放自有事务、连接和运行时注册。
-    /// </summary>
-    /// <remarks>活动执行期间不得释放 Root 对象，避免中断流式读取或结果集生命周期。</remarks>
+    ///
+    /// 活动执行期间不得释放 Root 对象，避免中断流式读取或结果集生命周期。
+    /// </remarks>
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
         if (TryBeginDispose() == false)

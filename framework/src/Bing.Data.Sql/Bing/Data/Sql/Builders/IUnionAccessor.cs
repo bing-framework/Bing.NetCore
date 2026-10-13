@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public interface IUnionAccessor
 {
     /// <summary>
-    /// 是否包含联合操作
+    /// 获取是否包含联合操作
     /// </summary>
     bool IsUnion { get; }
 
     /// <summary>
-    /// 联合操作项集合
+    /// 获取联合操作项集合
     /// </summary>
     List<BuilderItem> UnionItems { get; }
 }

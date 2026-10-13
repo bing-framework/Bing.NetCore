@@ -8,7 +8,7 @@ namespace Bing.MultiTenancy;
 public static class CurrentTenantExtensions
 {
     /// <summary>
-    /// 获取当前租户的 ID，并转换为 <see cref="Guid"/> 类型。
+    /// 获取当前租户 ID。
     /// </summary>
     /// <param name="currentTenant">当前租户信息。</param>
     /// <returns>返回租户的 <see cref="Guid"/> ID。</returns>
@@ -23,7 +23,7 @@ public static class CurrentTenantExtensions
     }
 
     /// <summary>
-    /// 获取当前租户的 ID，并转换为指定的类型 <typeparamref name="T"/>。
+    /// 获取当前租户 ID。
     /// </summary>
     /// <typeparam name="T">目标 ID 类型，例如 <see cref="Guid"/> 或 <see cref="int"/>。</typeparam>
     /// <param name="currentTenant">当前租户信息。</param>

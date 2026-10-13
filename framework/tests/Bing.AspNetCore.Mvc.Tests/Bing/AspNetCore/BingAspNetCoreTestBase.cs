@@ -12,7 +12,7 @@ namespace Bing.AspNetCore;
 public abstract class BingAspNetCoreTestBase
 {
     /// <summary>
-    /// Http客户端
+    /// 获取或设置Http客户端
     /// </summary>
     protected HttpClient Client { get; private set; }
 
@@ -27,6 +27,7 @@ public abstract class BingAspNetCoreTestBase
     /// <typeparam name="T">期望反序列化的对象类型</typeparam>
     /// <param name="url">请求地址</param>
     /// <param name="expectedStatusCode">期望的HTTP状态码，默认为 <see cref="HttpStatusCode.OK"/>。</param>
+    /// <returns>指定类型的反序列化结果。</returns>
     protected virtual async Task<T> GetResponseAsObjectAsync<T>(string url, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
     {
         var strResponse = await GetResponseAsStringAsync(url, expectedStatusCode);
@@ -38,6 +39,7 @@ public abstract class BingAspNetCoreTestBase
     /// </summary>
     /// <param name="url">请求地址</param>
     /// <param name="expectedStatusCode">期望的HTTP状态码，默认为 <see cref="HttpStatusCode.OK"/>。</param>
+    /// <returns>响应内容字符串。</returns>
     protected virtual async Task<string> GetResponseAsStringAsync(string url, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
     {
         using var response = await GetResponseAsync(url, expectedStatusCode);
@@ -50,6 +52,7 @@ public abstract class BingAspNetCoreTestBase
     /// <param name="url">请求地址</param>
     /// <param name="expectedStatusCode">期望的HTTP状态码，默认为 <see cref="HttpStatusCode.OK"/>。</param>
     /// <param name="xmlHttpRequest">指定请求是否应被视为XMLHttpRequest，默认为false</param>
+    /// <returns>HTTP 响应消息。</returns>
     protected virtual async Task<HttpResponseMessage> GetResponseAsync(string url, HttpStatusCode expectedStatusCode = HttpStatusCode.OK, bool xmlHttpRequest = false)
     {
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);

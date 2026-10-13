@@ -41,7 +41,7 @@ internal abstract class SqlFactoryBase
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlFactoryBase"/>类型的实例。
+    /// 初始化一个 <see cref="SqlFactoryBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>

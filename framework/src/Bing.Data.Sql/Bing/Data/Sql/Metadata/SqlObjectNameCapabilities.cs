@@ -6,17 +6,17 @@ namespace Bing.Data.Sql.Metadata;
 public sealed record SqlObjectNameCapabilities
 {
 	/// <summary>
-	/// 是否支持数据库限定。
+	/// 获取或初始化是否支持数据库限定。
 	/// </summary>
 	public bool SupportsDatabase { get; init; }
 
 	/// <summary>
-	/// 是否支持架构限定。
+	/// 获取或初始化是否支持架构限定。
 	/// </summary>
 	public bool SupportsSchema { get; init; }
 
 	/// <summary>
-	/// 最大对象名称段数。
+	/// 获取或初始化最大对象名称段数。
 	/// </summary>
 	public int MaximumNameParts { get; init; }
 }

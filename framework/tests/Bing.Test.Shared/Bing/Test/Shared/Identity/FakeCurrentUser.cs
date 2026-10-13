@@ -4,50 +4,61 @@ using Bing.Users;
 namespace Bing.Test.Shared.Identity;
 
 /// <summary>
-/// 测试专用伪用户，可精确控制当前用户上下文，消除对真实 HttpContext / Claims 的依赖。
-/// 用法示例：
+/// 测试专用伪用户。
+/// </summary>
+/// <remarks>
+/// 可精确控制当前用户上下文，消除对真实 HttpContext 或 Claims 的依赖。
 /// <code>
 ///   var user = FakeCurrentUser.AsAuthenticated("user-001", "张三");
 ///   Assert.True(user.IsAuthenticated);
 ///   Assert.Equal("user-001", user.UserId);
 /// </code>
-/// </summary>
+/// </remarks>
 public class FakeCurrentUser : ICurrentUser
 {
+    /// <summary>
+    /// 空声明数组。
+    /// </summary>
     private static readonly Claim[] EmptyClaimsArray = Array.Empty<Claim>();
+    /// <summary>
+    /// 空角色数组。
+    /// </summary>
     private static readonly string[] EmptyRolesArray = Array.Empty<string>();
 
+    /// <summary>
+    /// 当前用户的声明集合。
+    /// </summary>
     private readonly List<Claim> _claims;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool IsAuthenticated { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string UserId { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string UserName { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string PhoneNumber { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool PhoneNumberVerified { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string Email { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool EmailVerified { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string TenantId { get; set; } = string.Empty;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public string[] Roles { get; set; } = EmptyRolesArray;
 
     /// <summary>
-    /// 初始化一个未认证的空用户实例
+    /// 初始化一个 <see cref="FakeCurrentUser"/> 类型的实例。
     /// </summary>
     public FakeCurrentUser()
     {
@@ -56,8 +67,14 @@ public class FakeCurrentUser : ICurrentUser
     }
 
     /// <summary>
-    /// 初始化一个带有指定属性的用户实例
+    /// 初始化一个 <see cref="FakeCurrentUser"/> 类型的实例。
     /// </summary>
+    /// <param name="userId">用户标识。</param>
+    /// <param name="userName">用户名。</param>
+    /// <param name="tenantId">租户标识。</param>
+    /// <param name="isAuthenticated">是否已认证。</param>
+    /// <param name="roles">角色列表。</param>
+    /// <param name="extraClaims">额外声明集合。</param>
     private FakeCurrentUser(string userId, string userName, string tenantId, bool isAuthenticated, string[] roles, IEnumerable<Claim> extraClaims)
     {
         UserId = userId ?? string.Empty;
@@ -69,12 +86,13 @@ public class FakeCurrentUser : ICurrentUser
     }
 
     /// <summary>
-    /// 创建一个已认证的用户实例（最常用的工厂方法）
+    /// 创建已认证的用户实例。
     /// </summary>
-    /// <param name="userId">用户标识</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="tenantId">租户标识（可选）</param>
-    /// <param name="roles">角色列表（可选）</param>
+    /// <param name="userId">用户标识。</param>
+    /// <param name="userName">用户名。</param>
+    /// <param name="tenantId">租户标识。</param>
+    /// <param name="roles">角色列表。</param>
+    /// <returns>已认证的伪用户。</returns>
     public static FakeCurrentUser AsAuthenticated(string userId = "test-user-id", string userName = "test-user",
         string tenantId = null, string[] roles = null)
     {
@@ -82,33 +100,35 @@ public class FakeCurrentUser : ICurrentUser
     }
 
     /// <summary>
-    /// 创建一个未认证的匿名用户实例
+    /// 创建未认证的匿名用户实例。
     /// </summary>
+    /// <returns>未认证的伪用户。</returns>
     public static FakeCurrentUser AsAnonymous() => new FakeCurrentUser();
 
     /// <summary>
-    /// 添加额外声明（支持链式调用）
+    /// 添加额外声明。
     /// </summary>
-    /// <param name="type">声明类型</param>
-    /// <param name="value">声明值</param>
+    /// <param name="type">声明类型。</param>
+    /// <param name="value">声明值。</param>
+    /// <returns>当前伪用户。</returns>
     public FakeCurrentUser WithClaim(string type, string value)
     {
         _claims.Add(new Claim(type, value));
         return this;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public Claim FindClaim(string claimType) =>
         _claims.FirstOrDefault(c => c.Type == claimType);
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public Claim[] FindClaims(string claimType) =>
         _claims.Where(c => c.Type == claimType).ToArray();
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public Claim[] GetAllClaims() => _claims.ToArray();
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool IsInRole(string roleName) =>
         Roles != null && Roles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
 }

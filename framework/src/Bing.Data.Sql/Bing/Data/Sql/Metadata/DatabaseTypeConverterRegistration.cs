@@ -9,12 +9,12 @@ namespace Bing.Data.Sql.Metadata;
 public sealed class DatabaseTypeConverterRegistration
 {
     /// <summary>
-    /// 数据库类型
+    /// 获取或设置数据库类型
     /// </summary>
     public DatabaseType DatabaseType { get; set; }
 
     /// <summary>
-    /// 数据类型转换器
+    /// 获取或设置数据类型转换器
     /// </summary>
     public ITypeConverter Converter { get; set; }
 }

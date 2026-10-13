@@ -25,7 +25,7 @@ public class AdminSafeListMiddleware : IMiddleware
     private readonly string _whitelist;
 
     /// <summary>
-    /// 初始化一个<see cref="AdminSafeListMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="AdminSafeListMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="whitelist">IP白名单</param>
@@ -37,10 +37,7 @@ public class AdminSafeListMiddleware : IMiddleware
         _logger = logger;
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         if (context.Request.Method != "GET")

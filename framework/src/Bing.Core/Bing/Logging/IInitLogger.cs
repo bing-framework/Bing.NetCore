@@ -9,7 +9,7 @@ namespace Bing.Logging;
 public interface IInitLogger<out T> : ILogger<T>
 {
     /// <summary>
-    /// 条目列表
+    /// 获取条目列表
     /// </summary>
     public List<BingInitLogEntry> Entries { get; }
 }

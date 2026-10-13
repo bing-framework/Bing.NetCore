@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface ISqlMutationContextAccessor
 {
     /// <summary>
-    /// 当前 Mutation 运行上下文。
+    /// 获取当前 Mutation 运行上下文。
     /// </summary>
     SqlMutationContext MutationContext { get; }
 }

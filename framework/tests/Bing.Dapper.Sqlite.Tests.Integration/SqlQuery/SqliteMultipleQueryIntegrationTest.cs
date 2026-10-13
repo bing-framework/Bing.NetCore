@@ -18,7 +18,7 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
     private readonly SqliteIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="SqliteMultipleQueryIntegrationTest"/>类型的实例。
+    /// 初始化一个 <see cref="SqliteMultipleQueryIntegrationTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQLite 集成测试数据库固定装置。</param>
     public SqliteMultipleQueryIntegrationTest(SqliteIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -212,6 +212,7 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
     /// <summary>
     /// 创建固定的两个结果集命令。
     /// </summary>
+    /// <returns>配置为返回两个结果集的 SQL 命令。</returns>
     private static SqlMultipleQueryCommand CreateTwoResultCommand(ISqlMultipleQueryExecutor executor) => executor.CreateBatch()
         .Append("Select Name From samples")
         .Append("Select Count(*) From samples")
@@ -223,7 +224,7 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
     private sealed class SampleName
     {
         /// <summary>
-        /// 样例名称。
+        /// 获取或设置样例名称。
         /// </summary>
         public string Name { get; set; }
     }

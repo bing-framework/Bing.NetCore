@@ -5,17 +5,16 @@ namespace Bing.Data.Sql.Builders.Core;
 /// </summary>
 public abstract partial class SqlBuilderBase
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 生成调试 SQL 语句，语句中的参数将被替换为可诊断字面量。
-    /// </summary>
-    /// <returns>替换参数后的调试 SQL。</returns>
+    /// </remarks>
     public virtual string ToDebugSql() => ToDebugSql(ToSql());
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 根据已生成的 SQL 语句生成调试 SQL，参数标记被替换为可诊断字面量。
-    /// </summary>
-    /// <param name="sql">待渲染的 SQL 语句。</param>
-    /// <returns>替换参数后的调试 SQL。</returns>
+    /// </remarks>
     public virtual string ToDebugSql(string sql)
     {
         if (sql == null)

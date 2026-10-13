@@ -23,7 +23,7 @@ public class DomainEventHandlerInfo
     public MethodInfo Method { get; private set; }
 
     /// <summary>
-    /// 使用处理器类型和方法信息初始化 <see cref="DomainEventHandlerInfo"/> 的实例。
+    /// 初始化一个 <see cref="DomainEventHandlerInfo"/> 类型的实例。
     /// </summary>
     /// <param name="type">注册处理器的目标类型。</param>
     /// <param name="method">用于处理领域事件的方法反射信息。</param>
@@ -33,9 +33,9 @@ public class DomainEventHandlerInfo
         Method = method;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回基于处理器目标类型的哈希代码，用于按处理器类型参与集合比较。
-    /// </summary>
-    /// <returns>处理器目标类型的哈希代码。</returns>
+    /// </remarks>
     public override int GetHashCode() => _type.GetHashCode();
 }

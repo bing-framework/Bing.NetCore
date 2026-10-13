@@ -109,7 +109,7 @@ public class EntityMappingConfigurationIndexTest
     private sealed class IndexedSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -121,7 +121,7 @@ public class EntityMappingConfigurationIndexTest
     private sealed class AttributedSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -133,7 +133,7 @@ public class EntityMappingConfigurationIndexTest
     private sealed class TableOnlySample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }

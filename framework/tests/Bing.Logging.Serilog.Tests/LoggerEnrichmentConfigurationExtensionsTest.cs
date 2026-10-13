@@ -13,6 +13,10 @@ public class LoggerEnrichmentConfigurationExtensionsTest
     // ─────────────────────────────────────────────────────────
     // 辅助：获取有效的 LoggerEnrichmentConfiguration
     // ─────────────────────────────────────────────────────────
+    /// <summary>
+    /// 创建日志丰富配置测试对象。
+    /// </summary>
+    /// <returns>日志丰富配置。</returns>
     private static LoggerEnrichmentConfiguration GetEnrichConfig()
         => new LoggerConfiguration().Enrich;
 

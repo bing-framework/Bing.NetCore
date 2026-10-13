@@ -529,18 +529,24 @@ public sealed class DefaultSqlDatabaseIdentityContributor : ISqlDatabaseIdentity
         }
 
         /// <summary>
-        /// 节点名称。
+        /// 获取节点名称。
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// 标量节点值；复合节点为空。
+        /// 获取标量节点值。
         /// </summary>
+        /// <remarks>
+        /// 复合节点为空。
+        /// </remarks>
         public string Value { get; }
 
         /// <summary>
-        /// 复合节点的子节点列表；标量节点为空。
+        /// 获取复合节点的子节点列表。
         /// </summary>
+        /// <remarks>
+        /// 标量节点为空。
+        /// </remarks>
         public List<OracleTnsDescriptorNode> Children { get; }
     }
 

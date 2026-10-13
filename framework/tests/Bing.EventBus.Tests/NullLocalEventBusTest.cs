@@ -176,13 +176,23 @@ public class NullLocalEventBusTest
 
     // ==================== 辅助类型 ====================
 
+    /// <summary>
+    /// 表示空事件总线测试使用的事件。
+    /// </summary>
     private class NullBusEvent : IEvent
     {
+        /// <summary>
+        /// 获取或设置事件值。
+        /// </summary>
         public string? Value { get; set; }
     }
 
+    /// <summary>
+    /// 处理空事件总线测试事件。
+    /// </summary>
     private class NullEventHandler : ILocalEventHandler<NullBusEvent>
     {
+        /// <inheritdoc />
         public Task HandleAsync(NullBusEvent eventData) => Task.CompletedTask;
     }
 }

@@ -6,7 +6,7 @@
 public abstract class Disposable : IDisposable
 {
     /// <summary>
-    /// 是否已释放
+    /// 获取或设置是否已释放
     /// </summary>
     protected bool Disposed { get; private set; }
 
@@ -20,9 +20,10 @@ public abstract class Disposable : IDisposable
             Disposed = true;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放资源。执行与释放或重置非托管资源关联的应用程序定义的任务
-    /// </summary>
+    /// </remarks>
     public void Dispose()
     {
         Dispose(true);

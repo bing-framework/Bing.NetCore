@@ -6,49 +6,69 @@ namespace Bing.Dapper.Tests.Infrastructure;
 public abstract class SqliteAritySampleBase
 {
     /// <summary>
-    /// 标识。
+    /// 获取或设置标识。
     /// </summary>
     public int Id { get; set; }
 
     /// <summary>
-    /// 名称。
+    /// 获取或设置名称。
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// 下一个来源的关联标识。
+    /// 获取或设置下一个来源的关联标识。
     /// </summary>
     public int? NextId { get; set; }
 }
 
-/// <summary>一表测试来源。</summary>
+/// <summary>
+/// 一表测试来源。
+/// </summary>
 public sealed class SqliteArity01 : SqliteAritySampleBase { }
 
-/// <summary>二表测试来源。</summary>
+/// <summary>
+/// 二表测试来源。
+/// </summary>
 public sealed class SqliteArity02 : SqliteAritySampleBase { }
 
-/// <summary>三表测试来源。</summary>
+/// <summary>
+/// 三表测试来源。
+/// </summary>
 public sealed class SqliteArity03 : SqliteAritySampleBase { }
 
-/// <summary>四表测试来源。</summary>
+/// <summary>
+/// 四表测试来源。
+/// </summary>
 public sealed class SqliteArity04 : SqliteAritySampleBase { }
 
-/// <summary>五表测试来源。</summary>
+/// <summary>
+/// 五表测试来源。
+/// </summary>
 public sealed class SqliteArity05 : SqliteAritySampleBase { }
 
-/// <summary>六表测试来源。</summary>
+/// <summary>
+/// 六表测试来源。
+/// </summary>
 public sealed class SqliteArity06 : SqliteAritySampleBase { }
 
-/// <summary>七表测试来源。</summary>
+/// <summary>
+/// 七表测试来源。
+/// </summary>
 public sealed class SqliteArity07 : SqliteAritySampleBase { }
 
-/// <summary>八表测试来源。</summary>
+/// <summary>
+/// 八表测试来源。
+/// </summary>
 public sealed class SqliteArity08 : SqliteAritySampleBase { }
 
-/// <summary>九表测试来源。</summary>
+/// <summary>
+/// 九表测试来源。
+/// </summary>
 public sealed class SqliteArity09 : SqliteAritySampleBase { }
 
-/// <summary>十表测试来源。</summary>
+/// <summary>
+/// 十表测试来源。
+/// </summary>
 public sealed class SqliteArity10 : SqliteAritySampleBase { }
 
 /// <summary>
@@ -57,7 +77,7 @@ public sealed class SqliteArity10 : SqliteAritySampleBase { }
 public sealed class SqliteArityResult
 {
     /// <summary>
-    /// 标识。
+    /// 获取或设置标识。
     /// </summary>
     public int Id { get; set; }
 }
@@ -68,17 +88,17 @@ public sealed class SqliteArityResult
 public sealed class SqliteArityJoinResult
 {
     /// <summary>
-    /// 第一来源名称。
+    /// 获取或设置第一来源名称。
     /// </summary>
     public string FirstName { get; set; }
 
     /// <summary>
-    /// 第五来源名称。
+    /// 获取或设置第五来源名称。
     /// </summary>
     public string MiddleName { get; set; }
 
     /// <summary>
-    /// 第十来源名称。
+    /// 获取或设置第十来源名称。
     /// </summary>
     public string LastName { get; set; }
 }

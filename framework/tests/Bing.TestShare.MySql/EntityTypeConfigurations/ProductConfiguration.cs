@@ -8,10 +8,7 @@ namespace Bing.Tests.EntityTypeConfigurations {
     /// 产品类型配置
     /// </summary>
     public class ProductConfiguration : IEntityTypeConfiguration<Product> {
-        /// <summary>
-        /// 配置
-        /// </summary>
-        /// <param name="builder">实体类型生成器</param>
+        /// <inheritdoc />
         public void Configure( EntityTypeBuilder<Product> builder ) {
             ConfigTable( builder );
             ConfigId( builder );

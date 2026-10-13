@@ -4,8 +4,10 @@ namespace Bing.Domain.Entities;
 
 /// <summary>
 /// 测试目的：验证 DomainObjectBase.ToString() / GetChanges() 与 AddDescriptions / AddChanges 的联动行为。
-/// 通过 AggregateRootSample（测试项目内已有的具体实现）进行黑盒验证。
 /// </summary>
+/// <remarks>
+/// 通过 AggregateRootSample（测试项目内已有的具体实现）进行黑盒验证。
+/// </remarks>
 public class DomainObjectBaseTest
 {
     // =====================================================================

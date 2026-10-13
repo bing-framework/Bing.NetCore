@@ -28,7 +28,7 @@ public class AuthorizeResult : JsonResult
     public DateTime OperationTime { get; }
 
     /// <summary>
-    /// 使用状态码、消息和可选数据初始化一个 <see cref="AuthorizeResult"/> 实例。
+    /// 初始化一个 <see cref="AuthorizeResult"/> 类型的实例。
     /// </summary>
     /// <param name="code">授权处理结果状态码。</param>
     /// <param name="message">授权处理结果消息。</param>
@@ -41,10 +41,10 @@ public class AuthorizeResult : JsonResult
         OperationTime = DateTime.Now;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 将授权结果写入 MVC 执行上下文并异步执行 JSON 结果。
-    /// </summary>
-    /// <param name="context">当前 MVC 操作执行上下文。</param>
+    /// </remarks>
     /// <exception cref="ArgumentNullException">执行上下文为空时抛出。</exception>
     public override Task ExecuteResultAsync(ActionContext context)
     {

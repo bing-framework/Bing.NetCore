@@ -28,27 +28,27 @@ public sealed class SqlMutationBatchCommand
     }
 
     /// <summary>
-    /// 按执行顺序保存的 SQL 命令。
+    /// 获取按执行顺序保存的 SQL 命令。
     /// </summary>
     public IReadOnlyList<SqlWriteCommand> Commands { get; }
 
     /// <summary>
-    /// 本批覆盖的实体数量。
+    /// 获取本批覆盖的实体数量。
     /// </summary>
     public int EntityCount { get; }
 
     /// <summary>
-    /// 是否要求在单一事务中执行。即使外层批处理选项禁用事务，执行器也必须尊重该要求。
+    /// 获取是否要求在单一事务中执行。即使外层批处理选项禁用事务，执行器也必须尊重该要求。
     /// </summary>
     public bool RequiresTransaction { get; }
 
     /// <summary>
-    /// 是否要求本批实际受影响行数与实体数量完全一致。
+    /// 获取是否要求本批实际受影响行数与实体数量完全一致。
     /// </summary>
     public bool ValidateAffectedRows { get; }
 
     /// <summary>
-    /// 受影响行数校验失败时使用的操作名称。
+    /// 获取受影响行数校验失败时使用的操作名称。
     /// </summary>
     public string OperationName { get; }
 }

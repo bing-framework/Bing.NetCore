@@ -6,7 +6,7 @@
 public readonly struct LogCallerInfo : ILogCallerInfo
 {
     /// <summary>
-    /// 初始化一个<see cref="LogCallerInfo"/>类型的实例
+    /// 初始化一个 <see cref="LogCallerInfo"/> 类型的实例。
     /// </summary>
     /// <param name="memberName">成员名称（方法名）</param>
     /// <param name="filePath">文件路径</param>
@@ -18,24 +18,15 @@ public readonly struct LogCallerInfo : ILogCallerInfo
         LineNumber = lineNumber;
     }
 
-    /// <summary>
-    /// 成员名称（方法名）
-    /// </summary>
+    /// <inheritdoc />
     public string MemberName { get; }
 
-    /// <summary>
-    /// 文件路径
-    /// </summary>
+    /// <inheritdoc />
     public string FilePath { get; }
 
-    /// <summary>
-    /// 行号
-    /// </summary>
+    /// <inheritdoc />
     public int LineNumber { get; }
 
-    /// <summary>
-    /// 转换为参数
-    /// </summary>
-    /// <returns>包含调用成员名称、文件路径和行号的动态参数对象。</returns>
+    /// <inheritdoc />
     public dynamic ToParams() => new { MemberName, FilePath, LineNumber };
 }

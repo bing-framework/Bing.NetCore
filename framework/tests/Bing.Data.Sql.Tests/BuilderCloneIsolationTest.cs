@@ -190,7 +190,7 @@ public class BuilderCloneIsolationTest
         private readonly bool _returnNull;
 
         /// <summary>
-        /// 初始化测试替身。
+        /// 初始化一个 <see cref="InvalidCloneParameterManager"/> 类型的实例。
         /// </summary>
         /// <param name="returnNull">是否返回 null。</param>
         public InvalidCloneParameterManager(bool returnNull) : base(TestDialect.Instance) => _returnNull = returnNull;

@@ -19,81 +19,48 @@ public class NullCurrentUser : ICurrentUser
     // ReSharper disable once InconsistentNaming
     private static readonly string[] EmptyRolesArray = new string[0];
 
-    /// <summary>
-    /// 是否已认证
-    /// </summary>
+    /// <inheritdoc />
     public bool IsAuthenticated => false;
 
-    /// <summary>
-    /// 用户标识
-    /// </summary>
+    /// <inheritdoc />
     public string UserId => string.Empty;
 
-    /// <summary>
-    /// 用户名
-    /// </summary>
+    /// <inheritdoc />
     public string UserName => string.Empty;
 
-    /// <summary>
-    /// 手机号码
-    /// </summary>
+    /// <inheritdoc />
     public string PhoneNumber => string.Empty;
 
-    /// <summary>
-    /// 是否已验证手机号码
-    /// </summary>
+    /// <inheritdoc />
     public bool PhoneNumberVerified => false;
 
-    /// <summary>
-    /// 电子邮箱
-    /// </summary>
+    /// <inheritdoc />
     public string Email => string.Empty;
 
-    /// <summary>
-    /// 是否已验证邮箱
-    /// </summary>
+    /// <inheritdoc />
     public bool EmailVerified => false;
 
-    /// <summary>
-    /// 租户标识
-    /// </summary>
+    /// <inheritdoc />
     public string TenantId => string.Empty;
 
-    /// <summary>
-    /// 角色列表
-    /// </summary>
+    /// <inheritdoc />
     public string[] Roles => EmptyRolesArray;
 
     /// <summary>
-    /// 初始化一个<see cref="NullCurrentUser"/>类型的实例
+    /// 初始化一个 <see cref="NullCurrentUser"/> 类型的实例。
     /// </summary>
     private NullCurrentUser() { }
 
-    /// <summary>
-    /// 查找声明
-    /// </summary>
-    /// <param name="claimType">声明类型</param>
-    /// <returns>始终返回 null。</returns>
+    /// <inheritdoc />
     public Claim FindClaim(string claimType) => null;
 
-    /// <summary>
-    /// 查找声明列表
-    /// </summary>
-    /// <param name="claimType">声明类型</param>
-    /// <returns>始终返回空声明数组。</returns>
+    /// <inheritdoc />
     public Claim[] FindClaims(string claimType) => EmptyClaimsArray;
 
-    /// <summary>
-    /// 获取所有声明列表
-    /// </summary>
-    /// <returns>始终返回空声明数组。</returns>
+    /// <inheritdoc />
     public Claim[] GetAllClaims() => EmptyClaimsArray;
 
-    /// <summary>
-    /// 是否包含指定角色
-    /// </summary>
-    /// <param name="roleName">角色名</param>
-    /// <returns>始终返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool IsInRole(string roleName) => false;
 
     /// <summary>

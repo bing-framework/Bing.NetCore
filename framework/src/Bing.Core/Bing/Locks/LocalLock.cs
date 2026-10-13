@@ -9,24 +9,18 @@ namespace Bing.Locks;
 public class LocalLock : ILock
 {
     /// <summary>
-    /// 锁缓存
+    /// 按锁键复用进程内同步对象的映射。
     /// </summary>
     // ReSharper disable once InconsistentNaming
     private static readonly ConcurrentDictionary<string, object> _lockCache = new ConcurrentDictionary<string, object>();
 
     /// <summary>
-    /// 用户锁缓存
+    /// 记录锁键对应的持有者值，用于校验释放请求的所有权。
     /// </summary>
     // ReSharper disable once InconsistentNaming
     private static readonly ConcurrentDictionary<string, string> _lockUserCache = new ConcurrentDictionary<string, string>();
 
-    /// <summary>
-    /// 获取一个锁（需要自己释放）
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <returns>true:成功锁定; false:之前已被锁定</returns>
+    /// <inheritdoc />
     public bool LockTake(string key, string value, TimeSpan expiration)
     {
         Check.NotNull(key, nameof(key));
@@ -41,21 +35,10 @@ public class LocalLock : ILock
         return false;
     }
 
-    /// <summary>
-    /// 获取一个锁（需要自己释放）
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <returns>表示尝试获取锁结果的异步操作；成功获取锁时结果为 <see langword="true"/>，否则为 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public Task<bool> LockTakeAsync(string key, string value, TimeSpan expiration) => Task.FromResult(LockTake(key, value, expiration));
 
-    /// <summary>
-    /// 释放一个锁
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <returns>true:释放成功; false:释放失败</returns>
+    /// <inheritdoc />
     public bool LockRelease(string key, string value)
     {
         Check.NotNull(key, nameof(key));
@@ -74,21 +57,10 @@ public class LocalLock : ILock
         return true;
     }
 
-    /// <summary>
-    /// 释放一个锁
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <returns>true:释放成功; false:释放失败</returns>
+    /// <inheritdoc />
     public Task<bool> LockReleaseAsync(string key, string value) => Task.FromResult(LockRelease(key, value));
 
-    /// <summary>
-    /// 使用锁执行一个方法
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <param name="executeAction">执行的方法</param>
+    /// <inheritdoc />
     public void ExecuteWithLock(string key, string value, TimeSpan expiration, Action executeAction)
     {
         if (executeAction == null)
@@ -106,13 +78,7 @@ public class LocalLock : ILock
         }
     }
 
-    /// <summary>
-    /// 使用锁执行一个方法
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <param name="executeAction">执行的方法</param>
+    /// <inheritdoc />
     public async Task ExecuteWithLockAsync(string key, string value, TimeSpan expiration, Func<Task> executeAction)
     {
         if (executeAction == null)
@@ -130,16 +96,7 @@ public class LocalLock : ILock
         }
     }
 
-    /// <summary>
-    /// 使用锁执行一个方法
-    /// </summary>
-    /// <typeparam name="T">返回对象类型</typeparam>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <param name="executeAction">执行的方法</param>
-    /// <param name="defaultValue">默认值</param>
-    /// <returns>锁执行结果；未获取到锁或执行方法为空时返回默认值。</returns>
+    /// <inheritdoc />
     public T ExecuteWithLock<T>(string key, string value, TimeSpan expiration, Func<T> executeAction, T defaultValue = default)
     {
         if (executeAction == null)
@@ -158,16 +115,7 @@ public class LocalLock : ILock
         return defaultValue;
     }
 
-    /// <summary>
-    /// 使用锁执行一个方法
-    /// </summary>
-    /// <typeparam name="T">返回对象类型</typeparam>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <param name="executeAction">执行的方法</param>
-    /// <param name="defaultValue">默认值</param>
-    /// <returns>表示锁执行结果的异步操作；未获取到锁或执行方法为空时返回默认值。</returns>
+    /// <inheritdoc />
     public async Task<T> ExecuteWithLockAsync<T>(string key, string value, TimeSpan expiration, Func<Task<T>> executeAction, T defaultValue = default)
     {
         if (executeAction == null)

@@ -15,14 +15,11 @@ public class HttpContextCurrentPrincipalAccessor : ThreadCurrentPrincipalAccesso
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
-    /// 初始化一个<see cref="HttpContextCurrentPrincipalAccessor"/>类型的实例
+    /// 初始化一个 <see cref="HttpContextCurrentPrincipalAccessor"/> 类型的实例。
     /// </summary>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
     public HttpContextCurrentPrincipalAccessor(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
-    /// <summary>
-    /// 获取安全主体
-    /// </summary>
-    /// <returns>当前 HTTP 上下文中的安全主体；不存在时返回基类提供的安全主体。</returns>
+    /// <inheritdoc />
     protected override ClaimsPrincipal GetClaimsPrincipal() => _httpContextAccessor.HttpContext?.User ?? base.GetClaimsPrincipal();
 }

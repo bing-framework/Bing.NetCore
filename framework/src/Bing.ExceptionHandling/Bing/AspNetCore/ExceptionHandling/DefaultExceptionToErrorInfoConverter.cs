@@ -12,12 +12,7 @@ namespace Bing.AspNetCore.ExceptionHandling;
 /// </summary>
 public class DefaultExceptionToErrorInfoConverter : IExceptionToErrorInfoConverter, ITransientDependency
 {
-    /// <summary>
-    /// 转换
-    /// </summary>
-    /// <param name="exception">异常</param>
-    /// <param name="options">配置操作</param>
-    /// <returns>转换后的远程服务错误信息。</returns>
+    /// <inheritdoc />
     public RemoteServiceErrorInfo Convert(Exception exception, Action<BingExceptionHandlingOptions> options = null)
     {
         var exceptionHandlingOptions = CreateDefaultOptions();

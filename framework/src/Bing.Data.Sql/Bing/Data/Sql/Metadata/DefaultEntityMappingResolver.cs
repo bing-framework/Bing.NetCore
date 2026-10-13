@@ -112,7 +112,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         _mappingCacheEvictionPolicy);
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultEntityMappingResolver"/>类型的实例
+    /// 初始化一个 <see cref="DefaultEntityMappingResolver"/> 类型的实例。
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>
@@ -139,7 +139,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     }
 
     /// <summary>
-    /// 使用实体模型元数据提供器初始化实体映射解析器。
+    /// 初始化一个 <see cref="DefaultEntityMappingResolver"/> 类型的实例。
     /// </summary>
     /// <param name="entityModelMetadataProvider">实体模型元数据提供器。</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
@@ -150,11 +150,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     {
     }
 
-    /// <summary>
-    /// 获取实体描述信息
-    /// </summary>
-    /// <param name="entityType">实体类型。</param>
-    /// <returns>实体描述信息</returns>
+    /// <inheritdoc />
     public EntityDescriptor GetDescriptor(Type entityType)
     {
         if (entityType == null)
@@ -175,12 +171,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         };
     }
 
-    /// <summary>
-    /// 解析实体映射元数据
-    /// </summary>
-    /// <param name="entityType">实体类型。</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>实体映射元数据</returns>
+    /// <inheritdoc />
     public EntityMappingMetadata Resolve(Type entityType, DatabaseContext databaseContext)
     {
         if (entityType == null)
@@ -518,6 +509,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         ? string.Empty
         : value;
 
+    /// <summary>
+    /// 深复制实体映射配置及其列映射集合。
+    /// </summary>
+    /// <param name="mappings">待复制的实体映射配置；为 <see langword="null"/> 时返回空集合。</param>
+    /// <returns>与输入配置相互独立的映射配置列表。</returns>
     internal static IReadOnlyList<EntityMappingOptions> CloneMappings(IEnumerable<EntityMappingOptions> mappings)
     {
         var result = new List<EntityMappingOptions>();
@@ -560,6 +556,11 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         return result;
     }
 
+    /// <summary>
+    /// 获取用于区分表路由的规范化缓存键片段。
+    /// </summary>
+    /// <param name="mappingOptions">实体映射配置。</param>
+    /// <returns>规范化后的路由键；未配置时返回空字符串。</returns>
     private static string GetCacheTableRouteKey(EntityMappingOptions mappingOptions) =>
         NormalizeCacheValue(mappingOptions?.TableRouteKey);
 

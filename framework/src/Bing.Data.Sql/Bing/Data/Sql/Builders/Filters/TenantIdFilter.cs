@@ -29,7 +29,7 @@ public sealed class TenantIdFilter : ISqlFilter, ISqlDataBoundaryContributor
         Contributor = contributor ?? throw new ArgumentNullException(nameof(contributor));
 
     /// <summary>
-    /// 当前租户过滤扩展点。
+    /// 获取当前租户过滤扩展点。
     /// </summary>
     public ISqlTenantFilterContributor Contributor { get; }
 

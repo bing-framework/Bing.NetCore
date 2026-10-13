@@ -6,13 +6,11 @@ using Bing.Application.Dtos;
 namespace Bing.Trees;
 
 /// <summary>
-/// 提供树形数据传输对象的父节点、路径、层级、启用和展示状态字段。
+/// 提供树形数据传输对象的父节点、层级、路径和展示状态。
 /// </summary>
 public abstract class TreeDtoBase : DtoBase, ITreeNode
 {
-    /// <summary>
-    /// 获取或设置父节点标识。
-    /// </summary>
+    /// <inheritdoc />
     public string ParentId { get; set; }
 
     /// <summary>
@@ -20,31 +18,37 @@ public abstract class TreeDtoBase : DtoBase, ITreeNode
     /// </summary>
     public string ParentName { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点的物化路径。
-    /// </summary>
+    /// <inheritdoc />
     public string Path { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点在树中的层级；为空时未指定层级。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 为空时未指定层级。
+    /// </remarks>
     public int? Level { get; set; }
 
     /// <summary>
-    /// 获取或设置节点是否启用，默认值为 <see langword="true"/>。
+    /// 获取或设置节点是否启用。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see langword="true"/>。
+    /// </remarks>
     [Display(Name = "启用")]
     public bool? Enabled { get; set; } = true;
 
     /// <summary>
-    /// 获取或设置同级节点的排序号；为空时不指定排序号。
+    /// 获取或设置同级节点的排序号。
     /// </summary>
+    /// <remarks>
+    /// 为空时不指定排序号。
+    /// </remarks>
     [Display(Name = "排序号")]
     public int? SortId { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点是否在树形界面中展开；为空时未指定展开状态。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 为空时未指定展开状态。
+    /// </remarks>
     [Display(Name = "是否展开")]
     public bool? Expanded { get; set; }
 }

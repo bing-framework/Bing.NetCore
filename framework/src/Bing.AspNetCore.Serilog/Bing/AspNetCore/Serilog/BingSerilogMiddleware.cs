@@ -27,7 +27,7 @@ public class BingSerilogMiddleware : IMiddleware, ITransientDependency
     private readonly RequestDelegate _next;
 
     /// <summary>
-    /// 初始化一个<see cref="BingSerilogMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="BingSerilogMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="options">Serilog 选项配置</param>
@@ -39,10 +39,7 @@ public class BingSerilogMiddleware : IMiddleware, ITransientDependency
         _options = options.Value;
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">当前 HTTP 请求上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         var enrichers = new List<ILogEventEnricher>();

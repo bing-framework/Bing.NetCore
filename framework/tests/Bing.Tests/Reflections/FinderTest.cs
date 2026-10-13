@@ -157,6 +157,7 @@ public interface IC
 /// <summary>
 /// 测试类型
 /// </summary>
+/// <typeparam name="T">测试类型参数。</typeparam>
 public class D<T> : IC
 {
 }
@@ -164,6 +165,7 @@ public class D<T> : IC
 /// <summary>
 /// 测试查找接口
 /// </summary>
+/// <typeparam name="T">测试类型参数。</typeparam>
 public interface IG<T>
 {
 }
@@ -178,6 +180,7 @@ public class E : IG<E>
 /// <summary>
 /// 测试类型
 /// </summary>
+/// <typeparam name="T">测试类型参数。</typeparam>
 public class F2<T> : IG<T>
 {
 }

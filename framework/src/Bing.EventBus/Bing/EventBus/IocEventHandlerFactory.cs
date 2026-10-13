@@ -18,7 +18,7 @@ public class IocEventHandlerFactory : IEventHandlerFactory, IDisposable
     protected IServiceScopeFactory ScopeFactory { get; }
 
     /// <summary>
-    /// 使用服务作用域工厂和事件处理器类型初始化 <see cref="IocEventHandlerFactory"/> 的实例。
+    /// 初始化一个 <see cref="IocEventHandlerFactory"/> 类型的实例。
     /// </summary>
     /// <param name="scopeFactory">创建处理器独立服务作用域的工厂。</param>
     /// <param name="handlerType">要从服务容器解析的事件处理器类型。</param>
@@ -46,10 +46,10 @@ public class IocEventHandlerFactory : IEventHandlerFactory, IDisposable
             .Any(t => t.HandlerType == HandlerType);
     }
 
-    /// <summary>
-    /// 释放工厂资源。
-    /// </summary>
-    /// <remarks>当前工厂不持有需释放的资源；处理器服务作用域由 <see cref="GetHandler"/> 返回的包装器释放。</remarks>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 当前工厂不持有需释放的资源；处理器服务作用域由 <see cref="GetHandler"/> 返回的包装器释放。
+    /// </remarks>
     public void Dispose()
     {
     }

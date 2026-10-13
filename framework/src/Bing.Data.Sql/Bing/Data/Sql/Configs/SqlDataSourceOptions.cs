@@ -6,13 +6,15 @@ namespace Bing.Data.Sql.Configs;
 public sealed class SqlDataSourceOptions
 {
     /// <summary>
-    /// 获取或设置无显式数据源标识时使用的默认数据源键；该值必须对应 <see cref="DataSources"/> 中的键。
+    /// 获取或设置无显式数据源标识时使用的默认数据源键。
     /// </summary>
+    /// <remarks>该值必须对应 <see cref="DataSources"/> 中的一个键。</remarks>
     public string DefaultDataSourceKey { get; set; } = "default";
 
     /// <summary>
-    /// 获取按数据源标识索引的数据源集合；键不区分大小写。
+    /// 获取按数据源标识索引的数据源集合。
     /// </summary>
+    /// <remarks>键比较不区分大小写。</remarks>
     public IDictionary<string, SqlDataSourceDescriptor> DataSources { get; } =
         new Dictionary<string, SqlDataSourceDescriptor>(StringComparer.OrdinalIgnoreCase);
 }

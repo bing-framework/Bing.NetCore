@@ -721,6 +721,7 @@ public class SqlBuilderSubqueryCompositionTest
     /// <summary>
     /// 创建已写入一个 Set 参数的 Update Builder。
     /// </summary>
+    /// <returns>返回包含目标表和一个 Set 参数的 Update Builder。</returns>
     private static TestSqlBuilder CreateUpdateBuilder() => new TestSqlBuilder()
         .Update(new SqlTableReference { TableName = "outer" })
         .Set("Name", "existing");
@@ -728,6 +729,8 @@ public class SqlBuilderSubqueryCompositionTest
     /// <summary>
     /// 捕获原子操作失败后必须保持不变的查询状态。
     /// </summary>
+    /// <param name="builder">要捕获状态的测试 Builder。</param>
+    /// <returns>返回 Builder 当前 SQL、参数、来源及操作类型的快照。</returns>
     private static QueryState CaptureQueryState(TestSqlBuilder builder)
     {
         var fromClause = (FromClause)builder.FromClause;
@@ -743,6 +746,8 @@ public class SqlBuilderSubqueryCompositionTest
     /// <summary>
     /// 断言失败后的查询状态与调用前快照完全一致。
     /// </summary>
+    /// <param name="expected">调用前捕获的查询状态。</param>
+    /// <param name="builder">要检查的测试 Builder。</param>
     private static void AssertQueryState(QueryState expected, TestSqlBuilder builder)
     {
         var actual = CaptureQueryState(builder);
@@ -757,6 +762,8 @@ public class SqlBuilderSubqueryCompositionTest
     /// <summary>
     /// 描述表源的稳定身份、别名、类型和派生表投影白名单。
     /// </summary>
+    /// <param name="source">要描述的表来源。</param>
+    /// <returns>返回表来源的稳定文本表示。</returns>
     private static string DescribeSource(TableSource source) =>
         $"{source.SourceId}|{source.Alias}|{source.EntityType?.FullName}|{string.Join(",", source.ProjectedMembers ?? Array.Empty<string>())}";
 
@@ -825,7 +832,7 @@ public class SqlBuilderSubqueryCompositionTest
     private sealed class DerivedSummary
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -836,12 +843,12 @@ public class SqlBuilderSubqueryCompositionTest
     private sealed class SubqueryTenantSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 租户标识。
+        /// 获取或设置租户标识。
         /// </summary>
         public string TenantId { get; set; }
     }
@@ -858,7 +865,7 @@ public class SqlBuilderSubqueryCompositionTest
         public SubqueryTenantFilterContributor(string tenantId) => TenantId = tenantId;
 
         /// <summary>
-        /// 当前租户标识。
+        /// 获取当前租户标识。
         /// </summary>
         private string TenantId { get; }
 
@@ -887,7 +894,7 @@ public class SqlBuilderSubqueryCompositionTest
     private sealed class FailingSubqueryAliasDialect : DialectBase
     {
         /// <summary>
-        /// 是否抛出别名格式化异常。
+        /// 获取或设置是否抛出别名格式化异常。
         /// </summary>
         public bool ShouldFail { get; set; } = true;
 

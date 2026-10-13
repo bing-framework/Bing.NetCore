@@ -8,6 +8,7 @@ public interface IHasDeleter : IHasDeleter<string> { }
 /// <summary>
 /// 定义使用指定标识类型表示删除人的审计契约。
 /// </summary>
+/// <typeparam name="TDeleter">删除人标识类型。</typeparam>
 public interface IHasDeleter<TDeleter>
 {
     /// <summary>

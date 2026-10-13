@@ -21,17 +21,17 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     #region 属性
 
     /// <summary>
-    /// Identity用户管理
+    /// 获取Identity用户管理
     /// </summary>
     private IdentityUserManager<TUser, TKey> Manager { get; }
 
     /// <summary>
-    /// 权限配置
+    /// 获取权限配置
     /// </summary>
     private IOptions<PermissionOptions> Options { get; }
 
     /// <summary>
-    /// 用户仓储
+    /// 获取用户仓储
     /// </summary>
     private IUserRepository<TUser, TKey> UserRepository { get; }
 
@@ -40,7 +40,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="UserManager{TUser,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="UserManager{TUser, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="userManager">Identity用户管理</param>
     /// <param name="options">权限配置</param>
@@ -58,11 +58,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region CreateAsync(创建用户)
 
-    /// <summary>
-    /// 创建用户
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="password">密码</param>
+    /// <inheritdoc />
     public virtual async Task CreateAsync(TUser user, string password)
     {
         if (user == null)
@@ -78,14 +74,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region GenerateTokenAsync(生成令牌)
 
-    /// <summary>
-    /// 生成令牌
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <param name="purpose">用途</param>
-    /// <param name="application">应用程序</param>
-    /// <param name="provider">令牌提供器</param>
-    /// <returns>表示生成令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GenerateTokenAsync(string phone, string purpose, string application = "", string provider = "")
     {
         var user = await GetUserOrDefault(phone);
@@ -117,14 +106,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
     /// <returns>新生成的安全戳。</returns>
     protected virtual string CreateSecurityStamp() => "56df9984-bc05-460a-a4ce-9dec3922a5e9";
 
-    /// <summary>
-    /// 生成令牌
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="purpose">用途</param>
-    /// <param name="application">应用程序</param>
-    /// <param name="provider">令牌提供器</param>
-    /// <returns>表示生成令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GenerateTokenAsync(TUser user, string purpose, string application = "", string provider = "")
     {
         user.CheckNotNull(nameof(user));
@@ -146,30 +128,14 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region VerifyTokenAsync(验证令牌)
 
-    /// <summary>
-    /// 验证令牌
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <param name="purpose">用途</param>
-    /// <param name="token">令牌</param>
-    /// <param name="application">应用程序</param>
-    /// <param name="provider">令牌提供器</param>
-    /// <returns>表示令牌验证结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<bool> VerifyTokenAsync(string phone, string purpose, string token, string application = "", string provider = "")
     {
         var user = await GetUserOrDefault(phone);
         return await VerifyTokenAsync(user, purpose, token, application, provider);
     }
 
-    /// <summary>
-    /// 验证令牌
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="purpose">用途</param>
-    /// <param name="token">令牌</param>
-    /// <param name="application">应用程序</param>
-    /// <param name="provider">令牌提供器</param>
-    /// <returns>表示令牌验证结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<bool> VerifyTokenAsync(TUser user, string purpose, string token, string application = "", string provider = "")
     {
         user.CheckNotNull(nameof(user));
@@ -183,11 +149,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region SetPhoneNumberAsync(设置手机号)
 
-    /// <summary>
-    /// 设置手机号
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="phone">手机号</param>
+    /// <inheritdoc />
     public virtual async Task SetPhoneNumberAsync(TUser user, string phone)
     {
         var result = await Manager.SetPhoneNumberAsync(user, phone);
@@ -198,12 +160,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region GenerateRegisterTokenAsync(生成手机号注册令牌)
 
-    /// <summary>
-    /// 生成手机号注册令牌
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <param name="application">应用程序</param>
-    /// <returns>表示生成注册令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GenerateRegisterTokenAsync(string phone, string application = "") =>
         await GenerateTokenAsync(phone, TokenPurpose.PhoneRegister, application);
 
@@ -211,13 +168,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region VerifyRegisterTokenAsync(验证手机号注册令牌)
 
-    /// <summary>
-    /// 验证手机号注册令牌
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <param name="token">令牌</param>
-    /// <param name="application">应用程序</param>
-    /// <returns>表示注册令牌验证结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<bool> VerifyRegisterTokenAsync(string phone, string token, string application = "") =>
         await VerifyTokenAsync(phone, TokenPurpose.PhoneRegister, token, application);
 
@@ -225,11 +176,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region SetEmailAsync(设置电子邮件)
 
-    /// <summary>
-    /// 设置电子邮件
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="email">电子邮件</param>
+    /// <inheritdoc />
     public virtual async Task SetEmailAsync(TUser user, string email)
     {
         var result = await Manager.SetEmailAsync(user, email);
@@ -240,11 +187,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region GenerateEmailConfirmationTokenAsync(生成电子邮件确认令牌)
 
-    /// <summary>
-    /// 生成电子邮件确认令牌
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <returns>表示生成电子邮件确认令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GenerateEmailConfirmationTokenAsync(TUser user) =>
         await Manager.GenerateEmailConfirmationTokenAsync(user);
 
@@ -252,11 +195,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region ConfirmEmailAsync(激活电子邮件)
 
-    /// <summary>
-    /// 激活电子邮件
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="token">令牌</param>
+    /// <inheritdoc />
     public virtual async Task ConfirmEmailAsync(TUser user, string token)
     {
         var result = await Manager.ConfirmEmailAsync(user, token);
@@ -267,11 +206,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region GenerateEmailPasswordResetTokenAsync(生成电子邮件重置密码令牌)
 
-    /// <summary>
-    /// 生成电子邮件重置密码令牌
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <returns>表示生成电子邮件重置密码令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GenerateEmailPasswordResetTokenAsync(TUser user) =>
         await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider,
             UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -280,12 +215,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region ResetPasswordByEmailAsync(通过电子邮件重置密码)
 
-    /// <summary>
-    /// 通过电子邮件重置密码
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="token">令牌</param>
-    /// <param name="newPassword">新密码</param>
+    /// <inheritdoc />
     public virtual async Task ResetPasswordByEmailAsync(TUser user, string token, string newPassword)
     {
         user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
@@ -297,11 +227,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region GeneratePhonePasswordResetTokenAsync(生成手机号重置密码令牌)
 
-    /// <summary>
-    /// 生成手机号重置密码令牌
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <returns>表示生成手机号重置密码令牌结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<string> GeneratePhonePasswordResetTokenAsync(TUser user) =>
         await Manager.GenerateUserTokenAsync(user, TokenOptions.DefaultPhoneProvider,
             UserManager<TUser>.ResetPasswordTokenPurpose);
@@ -310,12 +236,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region ResetPasswordByPhoneAsync(通过手机号重置密码)
 
-    /// <summary>
-    /// 通过手机号重置密码
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="token">令牌</param>
-    /// <param name="newPassword">新密码</param>
+    /// <inheritdoc />
     public virtual async Task ResetPasswordByPhoneAsync(TUser user, string token, string newPassword)
     {
         user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
@@ -327,12 +248,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region ChangePasswordAsync(修改密码)
 
-    /// <summary>
-    /// 修改密码
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="currentPassword">当前密码</param>
-    /// <param name="newPassword">新密码</param>
+    /// <inheritdoc />
     public virtual async Task ChangePasswordAsync(TUser user, string currentPassword, string newPassword)
     {
         user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
@@ -340,11 +256,7 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
         result.ThrowIfError();
     }
 
-    /// <summary>
-    /// 修改密码
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="newPassword">新密码</param>
+    /// <inheritdoc />
     public virtual async Task ChangePasswordAsync(TUser user, string newPassword)
     {
         user.SetPassword(newPassword, Options?.Value.Store.StoreOriginalPassword);
@@ -356,33 +268,21 @@ public class UserManager<TUser, TKey> : DomainServiceBase, IUserManager<TUser, T
 
     #region FindByNameAsync(通过用户名查找)
 
-    /// <summary>
-    /// 通过用户名查找
-    /// </summary>
-    /// <param name="userName">用户名</param>
-    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
+    /// <inheritdoc />
     public virtual async Task<TUser> FindByNameAsync(string userName) => await Manager.FindByNameAsync(userName);
 
     #endregion
 
     #region FindByEmailAsync(通过电子邮件查找)
 
-    /// <summary>
-    /// 通过电子邮件查找
-    /// </summary>
-    /// <param name="email">电子邮件</param>
-    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
+    /// <inheritdoc />
     public virtual async Task<TUser> FindByEmailAsync(string email) => await Manager.FindByEmailAsync(email);
 
     #endregion
 
     #region FindByPhoneAsync(通过手机号查找)
 
-    /// <summary>
-    /// 通过手机号查找
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <returns>表示用户查询结果的异步操作；未找到时结果为 null。</returns>
+    /// <inheritdoc />
     public virtual async Task<TUser> FindByPhoneAsync(string phone) =>
         await UserRepository.SingleAsync(t => t.PhoneNumber == phone);
 

@@ -12,15 +12,10 @@ namespace Bing.Datas.EntityFramework;
 public abstract class MigrationModuleBase<TDbContext> : BingModule
     where TDbContext : DbContext
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
     public override ModuleLevel Level => ModuleLevel.Framework;
 
-    /// <summary>
-    /// 应用模块服务
-    /// </summary>
-    /// <param name="provider">服务提供程序</param>
+    /// <inheritdoc />
     public override void UseModule(IServiceProvider provider)
     {
         var seedDataInitializers = provider.GetServices<ISeedDataInitializer>().OrderBy(m => m.Order);

@@ -396,43 +396,85 @@ public sealed class SqlUpdateBuilderTest
     private sealed class TypedMutationSample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 可更新名称。
+        /// 获取或设置可更新名称。
         /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 租户 Update 测试使用的实体模型。
+    /// </summary>
     private sealed class TenantMutationSample
     {
+        /// <summary>
+        /// 获取或设置实体主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置租户标识。
+        /// </summary>
         public string TenantId { get; set; }
+
+        /// <summary>
+        /// 获取或设置实体名称。
+        /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 为租户 Update 测试提供租户实体识别和租户值的 Contributor。
+    /// </summary>
     private sealed class TenantMutationContributor : ISqlTenantFilterContributor
     {
+        /// <inheritdoc />
         public bool IsTenantEntity(Type entityType) => entityType == typeof(TenantMutationSample);
+
+        /// <inheritdoc />
         public object GetTenantId(SqlTenantFilterContext context) => "tenant-a";
     }
 
+    /// <summary>
+    /// 同时包含租户字段和软删除标记的 Update 测试实体。
+    /// </summary>
     private sealed class SoftDeleteTenantMutationSample : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置实体主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置租户标识。
+        /// </summary>
         public string TenantId { get; set; }
+
+        /// <summary>
+        /// 获取或设置实体名称。
+        /// </summary>
         public string Name { get; set; }
+
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
+    /// <summary>
+    /// 对软删除租户实体不提供租户值的测试 Contributor。
+    /// </summary>
     private sealed class MissingTenantSoftDeleteContributor : ISqlTenantFilterContributor
     {
+        /// <inheritdoc />
         public bool IsTenantEntity(Type entityType) => entityType == typeof(SoftDeleteTenantMutationSample);
+
+        /// <inheritdoc />
         public object GetTenantId(SqlTenantFilterContext context) => null;
     }
 
@@ -442,14 +484,20 @@ public sealed class SqlUpdateBuilderTest
     [Table("contributor_mutation_samples")]
     private sealed class ContributorMutationSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>区域边界。</summary>
+        /// <summary>
+        /// 获取或设置区域边界。
+        /// </summary>
         public string Region { get; set; }
 
-        /// <summary>可更新名称。</summary>
+        /// <summary>
+        /// 获取或设置可更新名称。
+        /// </summary>
         public string Name { get; set; }
     }
 

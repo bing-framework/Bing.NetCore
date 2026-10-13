@@ -16,7 +16,7 @@ public class LogFactory : ILogFactory
     private readonly ILogContextAccessor _logContextAccessor;
 
     /// <summary>
-    /// 使用日志记录器工厂和日志上下文访问器初始化 <see cref="LogFactory"/> 的实例。
+    /// 初始化一个 <see cref="LogFactory"/> 类型的实例。
     /// </summary>
     /// <param name="factory">按类别创建底层日志记录器的工厂。</param>
     /// <param name="logContextAccessor">关联当前日志上下文的访问器。</param>

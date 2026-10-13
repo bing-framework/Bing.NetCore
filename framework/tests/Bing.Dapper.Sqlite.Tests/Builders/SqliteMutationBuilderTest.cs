@@ -226,19 +226,19 @@ public sealed class SqliteMutationBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 数据库生成的主键。
+        /// 获取或设置数据库生成的主键。
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 并发令牌。
+        /// 获取或设置并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public string Secret { get; set; }
@@ -250,11 +250,15 @@ public sealed class SqliteMutationBuilderTest
     [Table("mapped_samples")]
     private sealed class ReturningMutationSample
     {
-        /// <summary>标识。</summary>
+        /// <summary>
+        /// 获取或设置标识。
+        /// </summary>
         [Column("sample_id")]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Column("sample_name")]
         public string Name { get; set; }
     }
@@ -266,7 +270,7 @@ public sealed class SqliteMutationBuilderTest
     private sealed class KeylessMutationSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -278,12 +282,12 @@ public sealed class SqliteMutationBuilderTest
     private sealed class KeylessConcurrencyMutationSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 并发令牌。
+        /// 获取或设置并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public string Secret { get; set; }

@@ -200,7 +200,6 @@ public sealed partial class PostgreSqlQueryTest
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。
     /// </summary>
-    /// <returns>异步写入任务。</returns>
     private async Task SeedAggregateDataAsync()
     {
         await InsertProductAsync(Guid.NewGuid(), "aggregate-1", amount: 10m, userId: "A");
@@ -216,12 +215,12 @@ public sealed partial class PostgreSqlQueryTest
 public sealed class PostgreSqlAggregateResult
 {
     /// <summary>
-    /// 去重后的用户数量。
+    /// 获取或设置去重后的用户数量。
     /// </summary>
     public int UserCount { get; set; }
 
     /// <summary>
-    /// 去重后的金额合计。
+    /// 获取或设置去重后的金额合计。
     /// </summary>
     public decimal DistinctAmount { get; set; }
 }

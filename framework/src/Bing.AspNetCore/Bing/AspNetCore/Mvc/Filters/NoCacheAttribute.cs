@@ -8,10 +8,10 @@ namespace Bing.AspNetCore.Mvc.Filters;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class NoCacheAttribute : ActionFilterAttribute
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 重写OnResultExecuting()方法，取消页面缓存
-    /// </summary>
-    /// <param name="context">结果执行上下文。</param>
+    /// </remarks>
     public override void OnResultExecuting(ResultExecutingContext context)
     {
         context.HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, max-age=0";

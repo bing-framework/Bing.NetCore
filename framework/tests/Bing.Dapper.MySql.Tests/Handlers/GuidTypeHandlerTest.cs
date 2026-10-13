@@ -7,11 +7,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Handlers;
 
 /// <summary>
-/// <see cref="GuidTypeHandler"/> 单元测试
-/// 覆盖 MySQL 特有的 Guid 字节序转换逻辑（Data1/Data2/Data3 大端序存储）。
+/// <see cref="GuidTypeHandler" /> 单元测试。 覆盖 MySQL 特有的 Guid 字节序转换逻辑（Data1/Data2/Data3 大端序存储）。
 /// </summary>
 public class GuidTypeHandlerTest
 {
+    /// <summary>
+    /// Guid 类型处理器。
+    /// </summary>
     private readonly GuidTypeHandler _handler = new();
 
     // ═══════════════════════════════════════════════════════════
@@ -181,6 +183,7 @@ public class GuidTypeHandlerTest
     /// <summary>
     /// 测试目的：多个不同 Guid 的 SetValue→Parse 均应还原为原始值（幂等性批量验证）。
     /// </summary>
+    /// <param name="guidStr">待验证的 Guid 字符串。</param>
     [Theory]
     [InlineData("00000000-0000-0000-0000-000000000001")]
     [InlineData("ffffffff-ffff-ffff-ffff-ffffffffffff")]

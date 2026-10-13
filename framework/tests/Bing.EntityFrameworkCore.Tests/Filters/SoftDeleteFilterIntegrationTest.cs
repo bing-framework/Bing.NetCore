@@ -44,6 +44,7 @@ public sealed class SoftDeleteFilterIntegrationTest
     /// <summary>
     /// 创建并打开 SQLite 内存连接。
     /// </summary>
+    /// <returns>已打开的 SQLite 内存数据库连接。</returns>
     private static SqliteConnection CreateOpenConnection()
     {
         var connection = new SqliteConnection("Data Source=:memory:");
@@ -54,6 +55,8 @@ public sealed class SoftDeleteFilterIntegrationTest
     /// <summary>
     /// 创建包含共享过滤状态的测试服务提供程序。
     /// </summary>
+    /// <param name="dataFilter">共享的数据过滤器。</param>
+    /// <returns>测试服务提供程序。</returns>
     private static ServiceProvider CreateServiceProvider(IDataFilter dataFilter)
     {
         var services = new ServiceCollection();
@@ -68,6 +71,9 @@ public sealed class SoftDeleteFilterIntegrationTest
     /// <summary>
     /// 创建使用当前服务提供程序的测试工作单元。
     /// </summary>
+    /// <param name="connection">SQLite 数据库连接。</param>
+    /// <param name="serviceProvider">测试服务提供程序。</param>
+    /// <returns>软删除查询测试工作单元。</returns>
     private static SoftDeleteUnitOfWork CreateUnitOfWork(SqliteConnection connection, IServiceProvider serviceProvider)
     {
         var options = new DbContextOptionsBuilder<SoftDeleteUnitOfWork>()
@@ -86,15 +92,17 @@ public sealed class SoftDeleteFilterIntegrationTest
     private sealed class SoftDeleteUnitOfWork : UnitOfWorkBase
     {
         /// <summary>
-        /// 初始化测试工作单元。
+        /// 初始化一个 <see cref="SoftDeleteUnitOfWork"/> 类型的实例。
         /// </summary>
+        /// <param name="options">数据库上下文配置。</param>
+        /// <param name="serviceProvider">服务提供程序。</param>
         public SoftDeleteUnitOfWork(DbContextOptions options, IServiceProvider serviceProvider)
             : base(options, serviceProvider)
         {
         }
 
         /// <summary>
-        /// 测试实体集合。
+        /// 获取或设置测试实体集合。
         /// </summary>
         public DbSet<SoftDeletedSample> Samples { get; set; }
 
@@ -116,12 +124,12 @@ public sealed class SoftDeleteFilterIntegrationTest
     private sealed class SoftDeletedSample : ISoftDelete
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 

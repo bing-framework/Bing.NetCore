@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Batching;
 public interface ISqlBatchUpdateRenderer
 {
     /// <summary>
-    /// 适用的 Provider 唯一标识。
+    /// 获取适用的 Provider 唯一标识。
     /// </summary>
     string ProviderKey { get; }
 

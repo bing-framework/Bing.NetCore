@@ -236,6 +236,11 @@ public class EntityPropertyChangeInfoTest
 /// </summary>
 public class EntityChangeInfoTest
 {
+    /// <summary>
+    /// 创建包含指定属性变更项的实体变更模型。
+    /// </summary>
+    /// <param name="props">要包含的属性变更项。</param>
+    /// <returns>包含指定属性变更项的实体变更模型。</returns>
     private static EntityChangeInfo CreateWithChanges(params EntityPropertyChangeInfo[] props)
     {
         var e = new EntityChangeInfo

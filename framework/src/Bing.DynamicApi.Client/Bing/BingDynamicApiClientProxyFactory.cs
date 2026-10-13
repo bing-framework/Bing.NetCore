@@ -19,7 +19,7 @@ internal sealed class BingDynamicApiClientProxyFactory
     /// </summary>
     private readonly IOptions<BingDynamicApiClientOptions> _options;
     /// <summary>
-    /// 获取服务描述并发送配置化 HTTP 请求。
+    /// 提供远程服务描述并发送 HTTP 请求的组件。
     /// </summary>
     private readonly BingDynamicApiDefinitionProvider _definitionProvider;
     /// <summary>
@@ -32,7 +32,7 @@ internal sealed class BingDynamicApiClientProxyFactory
     private readonly IBingDynamicApiJsonSerializer _serializer;
 
     /// <summary>
-    /// 初始化 BingDynamicApiClientProxyFactory 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiClientProxyFactory"/> 类型的实例。
     /// </summary>
     /// <param name="options">客户端选项。</param>
     /// <param name="definitionProvider">远程 API 描述与请求提供器。</param>
@@ -580,7 +580,7 @@ internal sealed class ResponseOwnedStream : Stream
     private readonly HttpResponseMessage _response;
 
     /// <summary>
-    /// 初始化 ResponseOwnedStream 类的新实例。
+    /// 初始化一个 <see cref="ResponseOwnedStream"/> 类型的实例。
     /// </summary>
     /// <param name="inner">下载响应的内容流。</param>
     /// <param name="response">内容流所属的 HTTP 响应。</param>

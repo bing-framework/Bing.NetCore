@@ -11,14 +11,11 @@ public class SqlCondition : ICondition
     private readonly string _condition;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlCondition"/>类型的实例
+    /// 初始化一个 <see cref="SqlCondition"/> 类型的实例。
     /// </summary>
     /// <param name="condition">查询条件</param>
     public SqlCondition(string condition) => _condition = condition;
 
-    /// <summary>
-    ///  获取查询条件
-    /// </summary>
-    /// <returns>当前保存的原始 SQL 条件。</returns>
+    /// <inheritdoc />
     public string GetCondition() => _condition;
 }

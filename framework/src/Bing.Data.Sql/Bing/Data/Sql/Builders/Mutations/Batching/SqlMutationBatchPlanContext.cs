@@ -41,37 +41,43 @@ public sealed class SqlMutationBatchPlanContext
     }
 
     /// <summary>
-    /// 待处理实体数量。
+    /// 获取待处理实体数量。
     /// </summary>
     public int EntityCount { get; }
 
     /// <summary>
-    /// 每个实体使用的参数数量。
+    /// 获取每个实体使用的参数数量。
     /// </summary>
     public int ParametersPerEntity { get; }
 
     /// <summary>
-    /// 命令开始前已使用的参数数量。
+    /// 获取命令开始前已使用的参数数量。
     /// </summary>
     public int ExistingParameterCount { get; }
 
     /// <summary>
-    /// Provider 最大参数数量；为空时不限制。
+    /// 获取Provider 最大参数数量。
     /// </summary>
+    /// <remarks>
+    /// 为空时不限制。
+    /// </remarks>
     public int? MaxParameterCount { get; }
 
     /// <summary>
-    /// 每个实体预计增加的 SQL 字符数。
+    /// 获取每个实体预计增加的 SQL 字符数。
     /// </summary>
     public int EstimatedSqlLengthPerEntity { get; }
 
     /// <summary>
-    /// 最大 SQL 字符数；为空时不限制。
+    /// 获取最大 SQL 字符数。
     /// </summary>
+    /// <remarks>
+    /// 为空时不限制。
+    /// </remarks>
     public int? MaxSqlLength { get; }
 
     /// <summary>
-    /// 批量选项。
+    /// 获取批量选项。
     /// </summary>
     public SqlMutationBatchOptions Options { get; }
 }

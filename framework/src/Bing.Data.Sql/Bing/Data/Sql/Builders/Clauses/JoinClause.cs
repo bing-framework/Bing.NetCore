@@ -51,27 +51,27 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// SQL 生成器。
+    /// 获取SQL 生成器。
     /// </summary>
     protected ISqlBuilder _sqlBuilder => _context.Builder;
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     protected IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体解析器。
+    /// 获取实体解析器。
     /// </summary>
     protected IEntityResolver _resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 实体别名注册器。
+    /// 获取实体别名注册器。
     /// </summary>
     protected IEntityAliasRegister _register => _context.AliasRegister;
 
     /// <summary>
-    /// 参数管理器。
+    /// 获取参数管理器。
     /// </summary>
     protected IParameterManager _parameterManager => _context.ParameterManager;
 
@@ -81,58 +81,58 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     private readonly Helper _helper;
 
     /// <summary>
-    /// 实体映射解析器。
+    /// 获取实体映射解析器。
     /// </summary>
     protected IEntityMappingResolver _entityMappingResolver => _context.Services.EntityMappingResolver;
 
     /// <summary>
-    /// 数据库上下文访问器。
+    /// 获取数据库上下文访问器。
     /// </summary>
     protected IDatabaseContextAccessor _databaseContextAccessor => _context.Services.DatabaseContextAccessor;
 
     /// <summary>
-    /// SQL 参数工厂。
+    /// 获取SQL 参数工厂。
     /// </summary>
     protected ISqlParameterFactory _sqlParameterFactory => _context.Services.ParameterFactory;
 
     /// <summary>
-    /// SQL 元数据配置。
+    /// 获取SQL 元数据配置。
     /// </summary>
     protected SqlMetadataOptions _metadataOptions => _context.Services.MetadataOptions;
 
     /// <summary>
-    /// SQL 配置。
+    /// 获取SQL 配置。
     /// </summary>
     protected SqlOptions _sqlOptions => _context.Services.Options;
 
     /// <summary>
-    /// SQL 数据库上下文解析器。
+    /// 获取SQL 数据库上下文解析器。
     /// </summary>
     protected ISqlDatabaseContextResolver _databaseContextResolver => _context.Services.DatabaseContextResolver;
 
     /// <summary>
-    /// Builder 生命周期内固定的数据库上下文。
+    /// 获取Builder 生命周期内固定的数据库上下文。
     /// </summary>
     protected DatabaseContext _databaseContext => _context.ExecutionContext.DatabaseContext;
 
     /// <summary>
-    /// SQL 对象名称格式化器。
+    /// 获取SQL 对象名称格式化器。
     /// </summary>
     protected ISqlObjectNameFormatter _objectNameFormatter => _context.Services.ObjectNameFormatter;
 
     /// <summary>
-    /// 跨数据库查询校验器。
+    /// 获取跨数据库查询校验器。
     /// </summary>
     protected ISqlCrossDatabaseQueryValidator _crossDatabaseQueryValidator =>
         _context.Services.CrossDatabaseQueryValidator;
 
     /// <summary>
-    /// SQL 表引用验证器。
+    /// 获取SQL 表引用验证器。
     /// </summary>
     protected ISqlTableReferenceValidator _tableReferenceValidator => _context.Services.TableReferenceValidator;
 
     /// <summary>
-    /// SQL 字符串表引用解析器。
+    /// 获取SQL 字符串表引用解析器。
     /// </summary>
     protected ISqlTableReferenceParser _tableReferenceParser => _context.Provider.TableReferenceParser;
 
@@ -155,7 +155,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     }
 
     /// <summary>
-    /// 使用运行上下文初始化表连接子句。
+    /// 初始化一个 <see cref="JoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="joinItems">连接参数列表。</param>
@@ -170,11 +170,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 
     #region Clone(克隆)
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <returns>独立的连接子句。</returns>
+    /// <inheritdoc />
     public virtual IJoinClause Clone(SqlClauseContext context) => CreateClone(context, CloneItems(context));
 
     /// <summary>
@@ -201,11 +197,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 
     #region Find(查找连接项)
 
-    /// <summary>
-    /// 查找连接项
-    /// </summary>
-    /// <param name="type">表实体类型</param>
-    /// <returns>指定实体类型对应的连接条件；未找到时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public IJoinOn Find(Type type) => _params.Find(t => t.Type == type);
 
     /// <summary>
@@ -317,7 +309,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     internal void ValidateLastJoinSupportsOn() => GetLastJoinOrThrow();
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化连接表。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">连接表实体类型。</typeparam>
     /// <param name="joinType">连接类型关键字。</param>
@@ -387,7 +379,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     }
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化内连接表。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">连接表实体类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -398,7 +390,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         string schema = null) where TEntity : class => Join<TEntity>(JoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化左外连接表。
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">连接表实体类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -409,7 +401,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         string schema = null) where TEntity : class => Join<TEntity>(LeftJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化右外连接表。
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">连接表实体类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -420,7 +412,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         string schema = null) where TEntity : class => Join<TEntity>(RightJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">连接表实体类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -431,7 +423,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         string schema = null) where TEntity : class => Join<TEntity>(FullJoinKey, fromClause, predicate, alias, schema);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化派生表连接。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="joinType">连接类型关键字。</param>
@@ -504,7 +496,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     }
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化派生表内连接。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -514,7 +506,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         LambdaExpression predicate) where TProjection : class => Join(JoinKey, fromClause, subquery, predicate);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化派生表左外连接。
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -524,7 +516,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         LambdaExpression predicate) where TProjection : class => Join(LeftJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化派生表右外连接。
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -534,7 +526,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         LambdaExpression predicate) where TProjection : class => Join(RightJoinKey, fromClause, subquery, predicate);
 
     /// <summary>
-    /// 原子添加带 Lambda On 谓词的类型化派生表全外连接。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="fromClause">当前查询的根来源子句。</param>
@@ -568,21 +560,14 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 
     #region Join(内连接)
 
-    /// <summary>
-    /// 内连接
-    /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="alias">别名</param>
+    /// <inheritdoc />
     public void Join(string table, string alias = null) => Join(JoinKey, table, alias);
 
-    /// <summary>
-    /// 内连接结构化表引用。
-    /// </summary>
-    /// <param name="reference">结构化表引用。</param>
+    /// <inheritdoc />
     public void Join(SqlTableReference reference) => Join(JoinKey, reference);
 
     /// <summary>
-    /// 表连接
+    /// 添加内连接表源。
     /// </summary>
     /// <param name="joinType">连接类型</param>
     /// <param name="table">表名</param>
@@ -610,7 +595,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     }
 
     /// <summary>
-    /// 添加结构化表引用连接项。
+    /// 添加内连接表源。
     /// </summary>
     /// <param name="joinType">连接类型。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -675,17 +660,12 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     private static string GetSourceAlias(JoinItem item) =>
         (item.Table as StructuredSqlItem)?.Reference?.Alias ?? item.Table?.Alias;
 
-    /// <summary>
-    /// 内连接
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="alias">别名</param>
-    /// <param name="schema">架构名</param>
+    /// <inheritdoc />
     public void Join<TEntity>(string alias = null, string schema = null) where TEntity : class =>
         Join<TEntity>(JoinKey, alias, schema);
 
     /// <summary>
-    /// 表连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="joinType">连接类型</param>
@@ -845,15 +825,11 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
             builder.RestoreOperationState(operationKind);
     }
 
-    /// <summary>
-    /// 内连接子查询
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void Join(ISqlBuilder builder, string alias) => JoinSubquery(JoinKey, builder, alias);
 
     /// <summary>
-    /// 内连接严格 DTO 派生表。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
@@ -861,7 +837,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         JoinSubquery(JoinKey, subquery);
 
     /// <summary>
-    /// 添加到连接子句
+    /// 添加连接子查询。
     /// </summary>
     /// <param name="joinType">连接类型</param>
     /// <param name="builder">Sql生成器</param>
@@ -880,7 +856,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     }
 
     /// <summary>
-    /// 添加保留投影成员绑定信息的类型化派生表。
+    /// 添加连接子查询。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="joinType">连接类型关键字。</param>
@@ -914,15 +890,11 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     /// <returns>包含前导空格的别名 SQL 文本。</returns>
     protected virtual string GetSubqueryAlias(string alias) => $" As {_dialect.SafeName(alias)}";
 
-    /// <summary>
-    /// 内连接子查询
-    /// </summary>
-    /// <param name="action">子查询操作</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void Join(Action<ISqlBuilder> action, string alias) => JoinSubquery(JoinKey, action, alias);
 
     /// <summary>
-    /// 添加到连接子句
+    /// 添加连接子查询。
     /// </summary>
     /// <param name="joinType">连接类型</param>
     /// <param name="action">子查询操作</param>
@@ -951,116 +923,67 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         AddItem(JoinItem.CreateRaw(joinType, sql));
     }
 
-    /// <summary>
-    /// 添加原始内连接 SQL。
-    /// </summary>
-    /// <param name="sql">原始 SQL。</param>
+    /// <inheritdoc />
     public void AppendJoin(string sql) => AppendJoin(JoinKey, sql);
 
     #region LeftJoin(左外连接)
 
-    /// <summary>
-    /// 左外连接
-    /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="alias">别名</param>
+    /// <inheritdoc />
     public void LeftJoin(string table, string alias = null) => Join(LeftJoinKey, table, alias);
 
-    /// <summary>
-    /// 左外连接结构化表引用。
-    /// </summary>
-    /// <param name="reference">结构化表引用。</param>
+    /// <inheritdoc />
     public void LeftJoin(SqlTableReference reference) => Join(LeftJoinKey, reference);
 
-    /// <summary>
-    /// 左外连接
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="alias">别名</param>
-    /// <param name="schema">架构名</param>
+    /// <inheritdoc />
     public void LeftJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
         Join<TEntity>(LeftJoinKey, alias, schema);
 
-    /// <summary>
-    /// 左外连接子查询
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void LeftJoin(ISqlBuilder builder, string alias) => JoinSubquery(LeftJoinKey, builder, alias);
 
     /// <summary>
-    /// 左外连接严格 DTO 派生表。
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void LeftJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(LeftJoinKey, subquery);
 
-    /// <summary>
-    /// 左外连接子查询
-    /// </summary>
-    /// <param name="action">子查询操作</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void LeftJoin(Action<ISqlBuilder> action, string alias) => JoinSubquery(LeftJoinKey, action, alias);
 
-    /// <summary>
-    /// 添加原始左连接 SQL。
-    /// </summary>
-    /// <param name="sql">原始 SQL。</param>
+    /// <inheritdoc />
     public void AppendLeftJoin(string sql) => AppendJoin(LeftJoinKey, sql);
 
     #endregion
 
     #region RightJoin(右外连接)
 
-    /// <summary>
-    /// 右外连接
-    /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="alias">别名</param>
+    /// <inheritdoc />
     public void RightJoin(string table, string alias = null) => Join(RightJoinKey, table, alias);
 
-    /// <summary>
-    /// 右外连接结构化表引用。
-    /// </summary>
-    /// <param name="reference">结构化表引用。</param>
+    /// <inheritdoc />
     public void RightJoin(SqlTableReference reference) => Join(RightJoinKey, reference);
 
-    /// <summary>
-    /// 右外连接
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="alias">别名</param>
-    /// <param name="schema">架构名</param>
+    /// <inheritdoc />
     public void RightJoin<TEntity>(string alias = null, string schema = null) where TEntity : class =>
         Join<TEntity>(RightJoinKey, alias, schema);
 
-    /// <summary>
-    /// 右外连接子查询
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void RightJoin(ISqlBuilder builder, string alias) => JoinSubquery(RightJoinKey, builder, alias);
 
     /// <summary>
-    /// 右外连接严格 DTO 派生表。
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
     internal void RightJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(RightJoinKey, subquery);
 
-    /// <summary>
-    /// 右外连接子查询
-    /// </summary>
-    /// <param name="action">子查询操作</param>
-    /// <param name="alias">表别名</param>
+    /// <inheritdoc />
     public void RightJoin(Action<ISqlBuilder> action, string alias) => JoinSubquery(RightJoinKey, action, alias);
 
-    /// <summary>
-    /// 添加原始右连接 SQL。
-    /// </summary>
-    /// <param name="sql">原始 SQL。</param>
+    /// <inheritdoc />
     public void AppendRightJoin(string sql) => AppendJoin(RightJoinKey, sql);
 
     #endregion
@@ -1078,7 +1001,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         Join<TEntity>(FullJoinKey, alias, schema);
 
     /// <summary>
-    /// 全外连接严格 DTO 派生表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TProjection">派生表公开的 DTO 类型。</typeparam>
     /// <param name="subquery">已冻结的类型化派生表。</param>
@@ -1110,37 +1033,53 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     internal void CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) where TProjection : class =>
         JoinSubquery(CrossJoinKey, subquery);
 
+    /// <inheritdoc />
     IReadOnlyList<TableSource> ISqlMultiSourceJoinClause.TypedSources => GetTypedSources();
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.Join<TEntity>(IFromClause fromClause, LambdaExpression predicate,
         string alias, string schema) => Join<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.LeftJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
         string alias, string schema) => LeftJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.RightJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
         string alias, string schema) => RightJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.FullJoin<TEntity>(IFromClause fromClause, LambdaExpression predicate,
         string alias, string schema) => FullJoin<TEntity>(GetMultiSourceFromClause(fromClause), predicate, alias, schema);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.Join<TProjection>(IFromClause fromClause, SqlSubquery<TProjection> subquery,
         LambdaExpression predicate) => Join(GetMultiSourceFromClause(fromClause), subquery, predicate);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.LeftJoin<TProjection>(IFromClause fromClause,
         SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
         LeftJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.RightJoin<TProjection>(IFromClause fromClause,
         SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
         RightJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.FullJoin<TProjection>(IFromClause fromClause,
         SqlSubquery<TProjection> subquery, LambdaExpression predicate) =>
         FullJoin(GetMultiSourceFromClause(fromClause), subquery, predicate);
 
+    /// <inheritdoc />
     void ISqlMultiSourceJoinClause.CrossJoin<TProjection>(SqlSubquery<TProjection> subquery) => CrossJoin(subquery);
 
+    /// <summary>
+    /// 获取支持多源 Lambda 查询的 From 子句实现。
+    /// </summary>
+    /// <param name="fromClause">待转换的查询来源子句。</param>
+    /// <returns>多源 From 子句实现。</returns>
+    /// <exception cref="NotSupportedException"><paramref name="fromClause"/> 不支持多源 Lambda 查询。</exception>
     private static ISqlMultiSourceFromClause GetMultiSourceFromClause(IFromClause fromClause) =>
         fromClause as ISqlMultiSourceFromClause ??
         throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 From 能力。");
@@ -1152,10 +1091,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 
     #region On(设置连接条件)
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <param name="condition">连接条件</param>
+    /// <inheritdoc />
     public void On(ICondition condition) => GetLastJoinOrThrow().On(MergeBuilderCondition(condition));
 
     /// <summary>
@@ -1170,23 +1106,11 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         return new SqlCondition(sqlBuilder.MergeSubqueryParameters(builder, builder.GetCondition()));
     }
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void On(string column, object value, Operator @operator = Operator.Equal) =>
         GetLastJoinOrThrow().On(column, value, @operator);
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <typeparam name="TLeft">左表实体类型</typeparam>
-    /// <typeparam name="TRight">右表实体类型</typeparam>
-    /// <param name="left">左表列名</param>
-    /// <param name="right">右表列名</param>
-    /// <param name="operator">条件运算符</param>
+    /// <inheritdoc />
     public void On<TLeft, TRight>(Expression<Func<TLeft, object>> left, Expression<Func<TRight, object>> right, Operator @operator = Operator.Equal) where TLeft : class where TRight : class
     {
         var join = GetLastJoinOrThrow();
@@ -1219,12 +1143,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     private string GetColumn(Type entity, string column, bool selfJoin = false, bool right = false) =>
         $"{GetAlias(entity, selfJoin, right)}.{column}";
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <typeparam name="TLeft">左表实体类型</typeparam>
-    /// <typeparam name="TRight">右表实体类型</typeparam>
-    /// <param name="expression">条件表达式</param>
+    /// <inheritdoc />
     public void On<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> expression) where TLeft : class where TRight : class
     {
         if (expression == null)
@@ -1309,10 +1228,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
 
     #region AppendOn(添加到On子句)
 
-    /// <summary>
-    /// 添加到On子句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <inheritdoc />
     public void AppendOn(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -1377,10 +1293,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         _params.Clear();
     }
 
-    /// <summary>
-    /// 输出Sql。
-    /// </summary>
-    /// <returns>当前连接子句的 SQL 文本；没有连接项时返回空字符串。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();

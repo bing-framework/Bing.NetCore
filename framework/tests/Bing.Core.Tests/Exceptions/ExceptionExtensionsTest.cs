@@ -12,7 +12,7 @@ namespace Bing.Tests.Exceptions;
 public class ExceptionExtensionsTest
 {
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ExceptionExtensionsTest"/> 类型的实例。
     /// </summary>
     public ExceptionExtensionsTest()
     {

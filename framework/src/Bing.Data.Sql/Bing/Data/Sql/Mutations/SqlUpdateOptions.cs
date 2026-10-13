@@ -6,17 +6,20 @@ namespace Bing.Data.Sql.Mutations;
 public class SqlUpdateOptions
 {
     /// <summary>
-    /// 仅更新指定 CLR 属性名对应的列；为空时更新全部可更新列。
+    /// 获取或初始化仅更新指定 CLR 属性名对应的列。
     /// </summary>
+    /// <remarks>
+    /// 为空时更新全部可更新列。
+    /// </remarks>
     public IReadOnlyCollection<string> IncludeProperties { get; init; }
 
     /// <summary>
-    /// 不更新指定 CLR 属性名对应的列。
+    /// 获取或初始化不更新指定 CLR 属性名对应的列。
     /// </summary>
     public IReadOnlyCollection<string> ExcludeProperties { get; init; }
 
     /// <summary>
-    /// 并发令牌不匹配时的处理方式。默认抛出异常。
+    /// 获取或初始化并发令牌不匹配时的处理方式。默认抛出异常。
     /// </summary>
     public SqlConcurrencyConflictBehavior ConcurrencyConflictBehavior { get; init; } =
         SqlConcurrencyConflictBehavior.Throw;

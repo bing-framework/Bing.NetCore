@@ -9,13 +9,16 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IValuesClause : ISqlClause, ISqlMutationClauseCloneable<IValuesClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前 Values 行数。
+    /// 获取当前 Values 行数。
     /// </summary>
     int RowCount { get; }
 
     /// <summary>
-    /// 当前 Values 列数；没有行时返回零。
+    /// 获取当前 Values 列数。
     /// </summary>
+    /// <remarks>
+    /// 没有行时返回零。
+    /// </remarks>
     int ColumnCount { get; }
 
     /// <summary>
@@ -25,7 +28,7 @@ public interface IValuesClause : ISqlClause, ISqlMutationClauseCloneable<IValues
     void AddRow(IReadOnlyList<object> values);
 
     /// <summary>
-    /// 添加包含数据库参数元数据的一行 Values。
+    /// 添加一行 Values。
     /// </summary>
     /// <param name="parameters">本行已分配名称的 SQL 参数。</param>
     void AddRow(IReadOnlyList<SqlParam> parameters);

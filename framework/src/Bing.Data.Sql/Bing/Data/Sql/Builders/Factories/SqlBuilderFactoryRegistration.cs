@@ -17,12 +17,12 @@ public sealed class SqlBuilderFactoryRegistration
     }
 
     /// <summary>
-    /// SQL 提供程序。
+    /// 获取SQL 提供程序。
     /// </summary>
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// Builder 创建委托。
+    /// 获取Builder 创建委托。
     /// </summary>
     public Func<SqlBuilderServices, ISqlBuilder> Creator { get; }
 }

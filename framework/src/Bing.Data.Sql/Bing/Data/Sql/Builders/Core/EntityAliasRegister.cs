@@ -19,14 +19,10 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
 {
     #region 属性
 
-    /// <summary>
-    /// From子句设置的实体类型
-    /// </summary>
+    /// <inheritdoc />
     public Type FromType { get; set; }
 
-    /// <summary>
-    /// 实体别名
-    /// </summary>
+    /// <inheritdoc />
     public IReadOnlyDictionary<Type, string> Data { get; }
 
     /// <summary>
@@ -65,7 +61,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     }
 
     /// <summary>
-    /// 使用完整别名注册状态初始化实例。
+    /// 初始化一个 <see cref="EntityAliasRegister"/> 类型的实例。
     /// </summary>
     /// <param name="data">实体当前别名映射。</param>
     /// <param name="entityAliases">实体别名注册顺序。</param>
@@ -85,11 +81,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
 
     #region Register(注册实体别名)
 
-    /// <summary>
-    /// 注册实体别名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    /// <param name="alias">别名</param>
+    /// <inheritdoc />
     public void Register(Type entity, string alias)
     {
         if (entity == null)
@@ -99,11 +91,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
         GetEntityAliases(entity).Add(alias);
     }
 
-    /// <summary>
-    /// 替换 From 实体的表别名。
-    /// </summary>
-    /// <param name="entity">实体类型。</param>
-    /// <param name="alias">表别名。</param>
+    /// <inheritdoc />
     public void Replace(Type entity, string alias)
     {
         if (entity == null)
@@ -118,10 +106,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
         _entityAliases[entity] = new List<string> { alias };
     }
 
-    /// <summary>
-    /// 注册查询范围内的表别名。
-    /// </summary>
-    /// <param name="alias">表别名。</param>
+    /// <inheritdoc />
     public void RegisterAlias(string alias)
     {
         if (string.IsNullOrWhiteSpace(alias))
@@ -134,22 +119,14 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
 
     #region Contains(是否包含实体)
 
-    /// <summary>
-    /// 是否包含实体
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    /// <returns>包含指定实体类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool Contains(Type entity) => entity != null && Data.ContainsKey(entity);
 
     #endregion
 
     #region GetAlias(获取实体别名)
 
-    /// <summary>
-    /// 获取实体别名
-    /// </summary>
-    /// <param name="entity">实体类型</param>
-    /// <returns>指定实体的当前别名；实体为空或未注册时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetAlias(Type entity)
     {
         if (entity == null)
@@ -157,12 +134,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
         return _data.TryGetValue(entity, out var alias) ? alias : null;
     }
 
-    /// <summary>
-    /// 获取同实体自连接 On 条件使用的别名。
-    /// </summary>
-    /// <param name="entity">实体类型。</param>
-    /// <param name="right">是否为连接条件右侧。</param>
-    /// <returns>匹配的表别名。</returns>
+    /// <inheritdoc />
     public string GetSelfJoinAlias(Type entity, bool right)
     {
         if (entity == null || _entityAliases.TryGetValue(entity, out var aliases) == false || aliases.Count < 2)
@@ -174,10 +146,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
 
     #region Clone(克隆)
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <returns>当前别名注册状态的独立副本。</returns>
+    /// <inheritdoc />
     public IEntityAliasRegister Clone() => new EntityAliasRegister(new Dictionary<Type, string>(_data),
         _entityAliases.ToDictionary(item => item.Key, item => new List<string>(item.Value)),
         new HashSet<string>(_aliases, StringComparer.OrdinalIgnoreCase), FromType);

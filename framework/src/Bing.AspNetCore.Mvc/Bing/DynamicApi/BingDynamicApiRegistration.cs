@@ -56,7 +56,7 @@ internal sealed class BingDynamicApiServiceRegistration
     public IReadOnlyDictionary<int, MethodInfo> ContractMethods { get; }
 
     /// <summary>
-    /// 初始化 BingDynamicApiServiceRegistration 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiServiceRegistration"/> 类型的实例。
     /// </summary>
     /// <param name="controllerType">服务实现类型。</param>
     /// <param name="serviceInterface">服务契约类型。</param>
@@ -338,7 +338,7 @@ internal sealed class BingDynamicApiControllerFeatureProvider : IApplicationFeat
     private readonly BingDynamicApiRegistry _registry;
 
     /// <summary>
-    /// 初始化 BingDynamicApiControllerFeatureProvider 类的新实例。
+    /// 初始化一个 <see cref="BingDynamicApiControllerFeatureProvider"/> 类型的实例。
     /// </summary>
     /// <param name="registry">动态服务注册表。</param>
     public BingDynamicApiControllerFeatureProvider(BingDynamicApiRegistry registry) => _registry = registry;

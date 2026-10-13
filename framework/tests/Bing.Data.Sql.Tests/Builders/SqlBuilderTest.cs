@@ -19,7 +19,7 @@ public partial class SqlBuilderTest
     private TestSqlBuilder _builder;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="SqlBuilderTest"/> 类型的实例。
     /// </summary>
     public SqlBuilderTest(ITestOutputHelper output)
     {

@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Builders.Core;
 internal sealed class ParameterManagerState
 {
     /// <summary>
-    /// 当前参数管理器。
+    /// 获取或设置当前参数管理器。
     /// </summary>
     public IParameterManager Current { get; set; }
 }
@@ -25,32 +25,32 @@ internal sealed class ParameterManagerState
 public sealed record SqlClauseContext
 {
     /// <summary>
-    /// 当前 SQL Builder。
+    /// 获取当前 SQL Builder。
     /// </summary>
     public ISqlBuilder Builder { get; }
 
     /// <summary>
-    /// SQL 提供程序。
+    /// 获取SQL 提供程序。
     /// </summary>
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     public IDialect Dialect => Provider.Dialect;
 
     /// <summary>
-    /// 当前实体解析器。
+    /// 获取当前实体解析器。
     /// </summary>
     public IEntityResolver EntityResolver { get; }
 
     /// <summary>
-    /// 当前实体别名注册器。
+    /// 获取当前实体别名注册器。
     /// </summary>
     public IEntityAliasRegister AliasRegister { get; }
 
     /// <summary>
-    /// 当前参数管理器。
+    /// 获取当前参数管理器。
     /// </summary>
     public IParameterManager ParameterManager => _parameterManagerState.Current;
 
@@ -60,12 +60,12 @@ public sealed record SqlClauseContext
     private readonly ParameterManagerState _parameterManagerState;
 
     /// <summary>
-    /// Builder 生命周期内固定的执行上下文。
+    /// 获取Builder 生命周期内固定的执行上下文。
     /// </summary>
     public SqlBuilderExecutionContext ExecutionContext { get; }
 
     /// <summary>
-    /// SQL Builder 共享服务集合。
+    /// 获取SQL Builder 共享服务集合。
     /// </summary>
     public SqlBuilderServices Services { get; }
 
@@ -88,7 +88,7 @@ public sealed record SqlClauseContext
     }
 
     /// <summary>
-    /// 使用共享参数状态引用初始化子句上下文。
+    /// 初始化一个 <see cref="SqlClauseContext"/> 类型的实例。
     /// </summary>
     /// <param name="builder">当前 SQL Builder。</param>
     /// <param name="provider">SQL 提供程序。</param>

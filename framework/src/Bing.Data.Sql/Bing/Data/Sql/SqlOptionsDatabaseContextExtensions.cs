@@ -58,7 +58,7 @@ public static class SqlOptionsDatabaseContextExtensions
     private sealed class DatabaseContextHolder
     {
         /// <summary>
-        /// 使用指定上下文快照初始化 <see cref="DatabaseContextHolder"/> 的实例。
+        /// 初始化一个 <see cref="DatabaseContextHolder"/> 类型的实例。
         /// </summary>
         /// <param name="context">要保存的数据库上下文快照。</param>
         public DatabaseContextHolder(DatabaseContext context) => Context = context;

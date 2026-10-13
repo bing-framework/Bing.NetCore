@@ -19,7 +19,7 @@ public class ObjectMapperTest
     private readonly Bing.ObjectMapping.IObjectMapper _mapper;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ObjectMapperTest"/> 类型的实例。
     /// </summary>
     public ObjectMapperTest()
     {
@@ -79,11 +79,9 @@ public class ObjectMapperTest
     }
 
     /// <summary>
-    /// 测试 - 映射 - 用于重现动态配置后映射之前的配置出现问题
-    /// 1. 执行Sample -> Sample2映射,已在配置类中配置映射关系
-    /// 2. 执行Sample2 -> Sample映射,未在配置类中配置,将自动配置映射
-    /// 3. 重复执行Sample -> Sample2映射
+    /// 验证动态配置后的映射不会影响已有映射。
     /// </summary>
+    /// <remarks>先执行已配置的 <c>Sample</c> 到 <c>Sample2</c> 映射，再触发 <c>Sample2</c> 到 <c>Sample</c> 的动态配置，最后重复原映射。</remarks>
     [Fact]
     public void Test_Map_4()
     {

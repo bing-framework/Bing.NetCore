@@ -22,7 +22,7 @@ public sealed class DorisReadOnlyIntegrationTest : IDisposable
     private readonly ServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 初始化 Doris 只读集成测试的服务容器。
+    /// 初始化一个 <see cref="DorisReadOnlyIntegrationTest"/> 类型的实例。
     /// </summary>
     public DorisReadOnlyIntegrationTest()
     {
@@ -81,9 +81,10 @@ public sealed class DorisReadOnlyIntegrationTest : IDisposable
         Assert.Equal(new[] { 2 }, values);
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放当前测试创建的查询和服务容器。
-    /// </summary>
+    /// </remarks>
     public void Dispose()
     {
         _query?.Dispose();

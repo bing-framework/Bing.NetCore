@@ -349,12 +349,12 @@ public class MySqlRoutingAndMappingTest
     private sealed class RoutingSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称
+        /// 获取或设置名称
         /// </summary>
         public string Name { get; set; }
     }
@@ -365,7 +365,7 @@ public class MySqlRoutingAndMappingTest
     private sealed class RoutingJoinSample
     {
         /// <summary>
-        /// 公司标识。
+        /// 获取或设置公司标识。
         /// </summary>
         public int CompanyId { get; set; }
     }

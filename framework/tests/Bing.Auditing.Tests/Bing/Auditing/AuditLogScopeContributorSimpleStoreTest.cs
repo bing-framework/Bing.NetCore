@@ -7,9 +7,7 @@ using Xunit;
 namespace Bing.Auditing.Tests;
 
 /// <summary>
-/// <see cref="AuditLogScope"/>、<see cref="AuditLogContributionContext"/>、
-/// <see cref="AuditLogContributor"/>、<see cref="DisableAuditingAttribute"/>、
-/// <see cref="SimpleLogAuditingStore"/> 单元测试。
+/// <see cref="AuditLogScope"/>、<see cref="AuditLogContributionContext"/>、 <see cref="AuditLogContributor"/>、<see cref="DisableAuditingAttribute"/>、 <see cref="SimpleLogAuditingStore"/> 单元测试。
 /// </summary>
 public class AuditLogScopeContributorSimpleStoreTest
 {
@@ -34,8 +32,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     }
 
     /// <summary>
-    /// 测试目的：AuditLogScope.Log 持有的 AuditLogInfo 应与原始实例完全相同（引用相等），
-    /// 防止误复制导致修改不可见。
+    /// 测试目的：AuditLogScope.Log 持有的 AuditLogInfo 应与原始实例完全相同（引用相等）， 防止误复制导致修改不可见。
     /// </summary>
     [Fact]
     public void AuditLogScope_Log_ShouldBeReferenceEqual()
@@ -57,8 +54,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：构造器应将 ServiceProvider 和 AuditInfo 正确赋值，
-    /// 确保 Contributor 可访问这两个核心属性。
+    /// 测试目的：构造器应将 ServiceProvider 和 AuditInfo 正确赋值， 确保 Contributor 可访问这两个核心属性。
     /// </summary>
     [Fact]
     public void AuditLogContributionContext_Constructor_ShouldSetBothProperties()
@@ -95,8 +91,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：PreContribute 和 PostContribute 的默认实现不应抛出任何异常，
-    /// 子类可安全地选择性覆盖其中任一方法。
+    /// 测试目的：PreContribute 和 PostContribute 的默认实现不应抛出任何异常， 子类可安全地选择性覆盖其中任一方法。
     /// </summary>
     [Fact]
     public void AuditLogContributor_DefaultMethods_ShouldNotThrow()
@@ -112,8 +107,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     }
 
     /// <summary>
-    /// 测试目的：子类覆盖 PreContribute 时，应仅执行子类逻辑，
-    /// 验证虚方法可被正确重写。
+    /// 测试目的：子类覆盖 PreContribute 时，应仅执行子类逻辑， 验证虚方法可被正确重写。
     /// </summary>
     [Fact]
     public void AuditLogContributor_OverridePreContribute_ShouldBeInvoked()
@@ -133,8 +127,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     }
 
     /// <summary>
-    /// 测试目的：子类覆盖 PostContribute 时，应仅执行子类逻辑，
-    /// 验证 PreContribute 和 PostContribute 是独立的扩展点。
+    /// 测试目的：子类覆盖 PostContribute 时，应仅执行子类逻辑， 验证 PreContribute 和 PostContribute 是独立的扩展点。
     /// </summary>
     [Fact]
     public void AuditLogContributor_OverridePostContribute_ShouldBeInvoked()
@@ -208,8 +201,7 @@ public class AuditLogScopeContributorSimpleStoreTest
     }
 
     /// <summary>
-    /// 测试目的：注入真实 Logger 后，SaveAsync 应调用 Logger.LogInformation 一次，
-    /// 确保审计信息被写入日志。
+    /// 测试目的：注入真实 Logger 后，SaveAsync 应调用 Logger.LogInformation 一次， 确保审计信息被写入日志。
     /// </summary>
     [Fact]
     public async Task SimpleLogAuditingStore_SaveAsync_ShouldCallLogInformationOnce()
@@ -254,16 +246,30 @@ public class AuditLogScopeContributorSimpleStoreTest
     // 内部辅助类型
     // ═══════════════════════════════════════════════════════════
 
-    /// <summary>空实现的 AuditLogContributor，用于测试默认虚方法不抛异常。</summary>
+    /// <summary>
+    /// 提供默认空实现的审计日志贡献者。
+    /// </summary>
     private class NoOpAuditLogContributor : AuditLogContributor { }
 
-    /// <summary>记录调用次数的 AuditLogContributor，用于验证方法覆盖。</summary>
+    /// <summary>
+    /// 记录审计日志贡献方法调用次数的测试实现。
+    /// </summary>
     private class TrackingAuditLogContributor : AuditLogContributor
     {
+        /// <summary>
+        /// 获取或设置PreContribute 方法的调用次数。
+        /// </summary>
         public int PreContributeCallCount { get; private set; }
+
+        /// <summary>
+        /// 获取或设置PostContribute 方法的调用次数。
+        /// </summary>
         public int PostContributeCallCount { get; private set; }
 
+        /// <inheritdoc />
         public override void PreContribute(AuditLogContributionContext context) => PreContributeCallCount++;
+
+        /// <inheritdoc />
         public override void PostContribute(AuditLogContributionContext context) => PostContributeCallCount++;
     }
 

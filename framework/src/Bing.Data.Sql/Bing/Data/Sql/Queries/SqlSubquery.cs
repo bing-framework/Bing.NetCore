@@ -10,7 +10,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlSubquery<TProjection> where TProjection : class
 {
     /// <summary>
-    /// 初始化类型化派生表。
+    /// 初始化一个 <see cref="SqlSubquery{TProjection}"/> 类型的实例。
     /// </summary>
     /// <param name="builder">已冻结投影和参数的独立 SQL Builder。</param>
     /// <param name="alias">派生表别名。</param>
@@ -41,52 +41,52 @@ public sealed class SqlSubquery<TProjection> where TProjection : class
     }
 
     /// <summary>
-    /// 派生表在外层查询中的别名。
+    /// 获取派生表在外层查询中的别名。
     /// </summary>
     public string Alias { get; }
 
     /// <summary>
-    /// 已冻结的派生查询 Builder。
+    /// 获取已冻结的派生查询 Builder。
     /// </summary>
     internal ISqlBuilder Builder { get; }
 
     /// <summary>
-    /// 允许由外层 Lambda 引用的 DTO 成员名称。
+    /// 获取允许由外层 Lambda 引用的 DTO 成员名称。
     /// </summary>
     internal IReadOnlyCollection<string> ProjectedMembers { get; }
 
     /// <summary>
-    /// 创建派生表时冻结的 Provider 标识。
+    /// 获取创建派生表时冻结的 Provider 标识。
     /// </summary>
     internal string ProviderKey { get; }
 
     /// <summary>
-    /// 创建派生表时冻结的数据源标识。
+    /// 获取创建派生表时冻结的数据源标识。
     /// </summary>
     internal string DataSourceKey { get; }
 
     /// <summary>
-    /// 创建派生表时冻结的映射配置标识。
+    /// 获取创建派生表时冻结的映射配置标识。
     /// </summary>
     internal string MappingProfile { get; }
 
     /// <summary>
-    /// 创建派生表时冻结的租户标识。
+    /// 获取创建派生表时冻结的租户标识。
     /// </summary>
     internal string TenantId { get; }
 
     /// <summary>
-    /// 创建派生表时冻结的物理数据库身份。
+    /// 获取创建派生表时冻结的物理数据库身份。
     /// </summary>
     internal SqlDatabaseIdentity DatabaseIdentity { get; }
 
     /// <summary>
-    /// 创建派生表的根查询执行作用域令牌。
+    /// 获取创建派生表的根查询执行作用域令牌。
     /// </summary>
     internal object ExecutionScope { get; }
 
     /// <summary>
-    /// 创建派生表的父查询上下文标识。
+    /// 获取创建派生表的父查询上下文标识。
     /// </summary>
     internal string ParentQueryContextId { get; }
 

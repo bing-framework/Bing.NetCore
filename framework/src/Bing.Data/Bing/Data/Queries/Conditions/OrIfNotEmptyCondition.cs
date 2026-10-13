@@ -15,7 +15,7 @@ public class OrIfNotEmptyCondition<TEntity> : ICondition<TEntity>
     private readonly List<Expression<Func<TEntity, bool>>> _conditions;
 
     /// <summary>
-    /// 初始化一个<see cref="OrIfNotEmptyCondition{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="OrIfNotEmptyCondition{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="condition1">查询条件1</param>
     /// <param name="condition2">查询条件2</param>
@@ -29,10 +29,7 @@ public class OrIfNotEmptyCondition<TEntity> : ICondition<TEntity>
         _conditions.AddRange(conditions);
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>过滤空条件后按 OR 合并的表达式；没有有效条件时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public Expression<Func<TEntity, bool>> GetCondition()
     {
         Expression<Func<TEntity, bool>> result = null;

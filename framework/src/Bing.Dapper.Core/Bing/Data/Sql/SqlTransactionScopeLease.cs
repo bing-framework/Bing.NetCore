@@ -6,12 +6,12 @@ namespace Bing.Data.Sql;
 internal interface ISqlTransactionScopeLease
 {
     /// <summary>
-    /// 事务作用域标识。
+    /// 获取事务作用域标识。
     /// </summary>
     string TransactionId { get; }
 
     /// <summary>
-    /// 当前事务最近一次异步事务操作的执行模式。
+    /// 获取当前事务最近一次异步事务操作的执行模式。
     /// </summary>
     string ExecutionMode { get; }
 
@@ -142,7 +142,7 @@ internal sealed class SqlTransactionScopeLease : ISqlTransactionScopeLease
         private SqlTransactionScopeLease _owner;
 
         /// <summary>
-        /// 初始化一个<see cref="ExecutionLease"/>类型的实例。
+        /// 初始化一个 <see cref="ExecutionLease"/> 类型的实例。
         /// </summary>
         /// <param name="owner">所属事务作用域租约。</param>
         public ExecutionLease(SqlTransactionScopeLease owner) => _owner = owner;

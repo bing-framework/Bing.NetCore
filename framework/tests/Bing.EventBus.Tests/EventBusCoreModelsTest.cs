@@ -8,8 +8,7 @@ using Xunit;
 namespace Bing.EventBus.Tests;
 
 /// <summary>
-/// <see cref="LocalEventMessage"/> 测试。
-/// 验证构造函数传参与属性读取的正确性。
+/// <see cref="LocalEventMessage"/> 测试。 验证构造函数传参与属性读取的正确性。
 /// </summary>
 public class LocalEventMessageTest
 {
@@ -74,8 +73,7 @@ public class LocalEventMessageTest
 }
 
 /// <summary>
-/// <see cref="LocalEventBusOptions"/> 测试。
-/// 验证 Handlers 集合的初始化状态。
+/// <see cref="LocalEventBusOptions"/> 测试。 验证 Handlers 集合的初始化状态。
 /// </summary>
 public class LocalEventBusOptionsTest
 {
@@ -128,8 +126,7 @@ public class LocalEventBusOptionsTest
 }
 
 /// <summary>
-/// <see cref="ActionEventHandler{TEvent}"/> 测试。
-/// 验证 Action 属性赋值及 HandleAsync 委托行为。
+/// <see cref="ActionEventHandler{TEvent}"/> 测试。 验证 Action 属性赋值及 HandleAsync 委托行为。
 /// </summary>
 public class ActionEventHandlerTest
 {
@@ -206,8 +203,7 @@ public class ActionEventHandlerTest
 }
 
 /// <summary>
-/// <see cref="EventHandlerDisposeWrapper"/> 测试。
-/// 验证 EventHandler 属性引用及 Dispose 的委托行为。
+/// <see cref="EventHandlerDisposeWrapper"/> 测试。 验证 EventHandler 属性引用及 Dispose 的委托行为。
 /// </summary>
 public class EventHandlerDisposeWrapperTest
 {
@@ -278,8 +274,7 @@ public class EventHandlerDisposeWrapperTest
 }
 
 /// <summary>
-/// <see cref="EventHandlerFactoryUnregistrar"/> 测试。
-/// 验证 Dispose 时调用 IEventBus.Unsubscribe 并传递正确参数。
+/// <see cref="EventHandlerFactoryUnregistrar"/> 测试。 验证 Dispose 时调用 IEventBus.Unsubscribe 并传递正确参数。
 /// </summary>
 public class EventHandlerFactoryUnregistrarTest
 {

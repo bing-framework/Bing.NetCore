@@ -27,7 +27,7 @@ public class BingBuilder : IBingBuilder
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="BingBuilder"/>类型的实例
+    /// 初始化一个 <see cref="BingBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">服务集合</param>
     public BingBuilder(IServiceCollection services)
@@ -59,25 +59,20 @@ public class BingBuilder : IBingBuilder
 
     #region 属性
 
-    /// <summary>
-    /// 服务集合
-    /// </summary>
+    /// <inheritdoc />
     public IServiceCollection Services { get; }
 
-    /// <summary>
-    /// 加载的模块集合
-    /// </summary>
+    /// <inheritdoc />
     public IEnumerable<BingModule> Modules => _modules;
 
     #endregion
 
     #region AddModule(添加模块)
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 添加指定模块。执行此功能后将仅加载指定的模块
-    /// </summary>
-    /// <typeparam name="TModule">要添加的模块类型</typeparam>
-    /// <returns>当前构建器实例。</returns>
+    /// </remarks>
     public IBingBuilder AddModule<TModule>() where TModule : BingModule => AddModule(typeof(TModule));
 
     /// <summary>
@@ -160,11 +155,7 @@ public class BingBuilder : IBingBuilder
         return services;
     }
 
-    /// <summary>
-    /// 添加加载的所有模块，并可排除指定的模块类型
-    /// </summary>
-    /// <param name="exceptModuleTypes">要排除的模块类型</param>
-    /// <returns>当前构建器实例。</returns>
+    /// <inheritdoc />
     public IBingBuilder AddModules(params Type[] exceptModuleTypes)
     {
         var source = _sourceModules.ToArray();

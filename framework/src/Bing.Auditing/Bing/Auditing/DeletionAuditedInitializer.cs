@@ -23,7 +23,7 @@ public sealed class DeletionAuditedInitializer
     private readonly string _userName;
 
     /// <summary>
-    /// 使用实体和删除人审计信息初始化一个 <see cref="DeletionAuditedInitializer"/> 实例。
+    /// 初始化一个 <see cref="DeletionAuditedInitializer"/> 类型的实例。
     /// </summary>
     /// <param name="entity">待初始化的实体对象。</param>
     /// <param name="userId">删除人的字符串标识。</param>
@@ -44,7 +44,7 @@ public sealed class DeletionAuditedInitializer
     public static void Init(object entity, string userId, string userName) => new DeletionAuditedInitializer(entity, userId, userName).Init();
 
     /// <summary>
-    /// 按删除审计契约初始化实体的删除时间、人员名称和人员标识。
+    /// 初始化实体的删除审计信息。
     /// </summary>
     public void Init()
     {

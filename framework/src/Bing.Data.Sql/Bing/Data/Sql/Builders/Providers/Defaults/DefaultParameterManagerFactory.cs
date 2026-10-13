@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Core;
 public sealed class DefaultParameterManagerFactory : IParameterManagerFactory
 {
     /// <summary>
-    /// 默认实例。
+    /// 获取默认实例。
     /// </summary>
     public static DefaultParameterManagerFactory Instance { get; } = new();
 

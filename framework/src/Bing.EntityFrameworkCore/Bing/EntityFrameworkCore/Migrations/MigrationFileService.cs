@@ -39,42 +39,28 @@ public class MigrationFileService : IMigrationFileService
         _logger = logger ?? NullLogger<MigrationFileService>.Instance;
     }
 
-    /// <summary>
-    /// 设置迁移目录绝对路径。即：Migrations目录的绝对路径
-    /// </summary>
-    /// <param name="path">迁移目录绝对路径</param>
-    /// <returns>当前迁移文件服务实例。</returns>
+    /// <inheritdoc />
     public IMigrationFileService MigrationsPath(string path)
     {
         _migrationsPath = path;
         return this;
     }
 
-    /// <summary>
-    /// 设置迁移名称
-    /// </summary>
-    /// <param name="name">迁移名称。范例：init</param>
-    /// <returns>当前迁移文件服务实例。</returns>
+    /// <inheritdoc />
     public IMigrationFileService MigrationName(string name)
     {
         _migrationName = name;
         return this;
     }
 
-    /// <summary>
-    /// 是否移除所有外键，将删除迁移文件中的外键设置
-    /// </summary>
-    /// <returns>当前迁移文件服务实例。</returns>
+    /// <inheritdoc />
     public IMigrationFileService RemoveForeignKeys()
     {
         _isRemoveForeignKeys = true;
         return this;
     }
 
-    /// <summary>
-    /// 获取迁移文件路径
-    /// </summary>
-    /// <returns>迁移文件绝对路径；未找到时返回 null。</returns>
+    /// <inheritdoc />
     public string GetFilePath()
     {
         if (string.IsNullOrWhiteSpace(_migrationsPath))
@@ -101,10 +87,7 @@ public class MigrationFileService : IMigrationFileService
             .ToList();
     }
 
-    /// <summary>
-    /// 获取文件内容
-    /// </summary>
-    /// <returns>迁移文件内容；未找到文件时返回 null。</returns>
+    /// <inheritdoc />
     public string GetContent()
     {
         var filePath = GetFilePath();
@@ -113,10 +96,7 @@ public class MigrationFileService : IMigrationFileService
         return FileHelper.ReadToString(filePath);
     }
 
-    /// <summary>
-    /// 保存文件
-    /// </summary>
-    /// <param name="filePath">文件绝对路径，传入null则覆盖原文件</param>
+    /// <inheritdoc />
     public void Save(string filePath = null)
     {
         if (_isRemoveForeignKeys == false)

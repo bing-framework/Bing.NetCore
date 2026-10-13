@@ -10,7 +10,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlProviderRuntime
 {
     /// <summary>
-    /// 初始化 Provider 运行时服务实现注册。
+    /// 初始化一个 <see cref="SqlProviderRuntime"/> 类型的实例。
     /// </summary>
     /// <param name="providerKey">Provider 唯一标识。</param>
     /// <param name="queryType">实现 <see cref="ISqlQuery"/> 的查询类型。</param>
@@ -31,22 +31,22 @@ public sealed class SqlProviderRuntime
     }
 
     /// <summary>
-    /// Provider 唯一标识。
+    /// 获取Provider 唯一标识。
     /// </summary>
     public string ProviderKey { get; }
 
     /// <summary>
-    /// 查询实现类型。
+    /// 获取查询实现类型。
     /// </summary>
     public Type QueryType { get; }
 
     /// <summary>
-    /// 执行器实现类型。
+    /// 获取执行器实现类型。
     /// </summary>
     public Type ExecutorType { get; }
 
     /// <summary>
-    /// 多结果集执行器实现类型。
+    /// 获取多结果集执行器实现类型。
     /// </summary>
     public Type MultipleQueryExecutorType { get; }
 

@@ -21,7 +21,7 @@ public class RemoteStreamContent : IRemoteStreamContent
     private bool _disposed;
 
     /// <summary>
-    /// 使用内容流和可选元数据初始化 <see cref="RemoteStreamContent"/> 的实例。
+    /// 初始化一个 <see cref="RemoteStreamContent"/> 类型的实例。
     /// </summary>
     /// <param name="stream">作为内容返回的源流。</param>
     /// <param name="fileName">可选的内容文件名。</param>

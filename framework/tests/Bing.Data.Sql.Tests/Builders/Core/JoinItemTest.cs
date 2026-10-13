@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 public class JoinItemTest
 {
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="JoinItemTest"/> 类型的实例。
     /// </summary>
     public JoinItemTest()
     {

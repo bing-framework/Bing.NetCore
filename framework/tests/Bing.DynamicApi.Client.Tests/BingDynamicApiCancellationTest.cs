@@ -236,12 +236,12 @@ public class BingDynamicApiCancellationTest
     private sealed class TestHandler : HttpMessageHandler
     {
         /// <summary>
-        /// 获取用于生成 HTTP 响应的委托。
+        /// 根据请求和取消令牌创建测试响应的委托。
         /// </summary>
         private readonly Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> _responseFactory;
 
         /// <summary>
-        /// 初始化 TestHandler 类的新实例。
+        /// 初始化一个 <see cref="TestHandler"/> 类型的实例。
         /// </summary>
         /// <param name="responseFactory">接收请求和取消令牌并生成响应的委托。</param>
         public TestHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> responseFactory)
@@ -262,7 +262,7 @@ public class BingDynamicApiCancellationTest
     private sealed class BlockingReadStream : Stream
     {
         /// <summary>
-        /// 获取用于解除阻塞读取的任务源。
+        /// 控制测试流读取完成状态的任务源。
         /// </summary>
         private readonly TaskCompletionSource<int> _readResult = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -272,7 +272,7 @@ public class BingDynamicApiCancellationTest
         public TaskCompletionSource<bool> ReadStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>
-        /// 获取流是否已释放。
+        /// 获取或设置流是否已释放。
         /// </summary>
         public bool IsDisposed { get; private set; }
 

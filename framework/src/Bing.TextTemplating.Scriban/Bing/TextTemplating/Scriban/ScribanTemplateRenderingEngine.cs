@@ -16,13 +16,11 @@ public class ScribanTemplateRenderingEngine : TemplateRenderingEngineBase, ITran
     /// </summary>
     public const string EngineName = "Scriban";
 
-    /// <summary>
-    /// 获取 Scriban 渲染引擎的名称。
-    /// </summary>
+    /// <inheritdoc />
     public override string Name => EngineName;
 
     /// <summary>
-    /// 初始化一个 <see cref="ScribanTemplateRenderingEngine"/> 实例。
+    /// 初始化一个 <see cref="ScribanTemplateRenderingEngine"/> 类型的实例。
     /// </summary>
     /// <param name="templateDefinitionManager">模板定义管理器。</param>
     /// <param name="templateContentProvider">模板内容提供程序。</param>
@@ -33,14 +31,10 @@ public class ScribanTemplateRenderingEngine : TemplateRenderingEngineBase, ITran
     {
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 使用 Scriban 异步渲染指定模板。
-    /// </summary>
-    /// <param name="templateName">要渲染的模板名称。</param>
-    /// <param name="model">传递给模板的模型，可为空。</param>
-    /// <param name="cultureName">渲染使用的区域性名称；当前实现保留该参数以兼容统一渲染契约。</param>
-    /// <param name="globalContext">传递给模板的全局上下文，可为空。</param>
-    /// <returns>表示异步渲染操作的任务，结果为生成的模板文本。</returns>
+    /// </remarks>
     public override async Task<string> RenderAsync(string templateName, object model = null, string cultureName = null, Dictionary<string, object> globalContext = null)
     {
         Check.NotNullOrEmpty(templateName, nameof(templateName));

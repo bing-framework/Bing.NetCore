@@ -21,7 +21,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     private readonly SqliteIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="SqliteMutationExecutionIntegrationTest"/>类型的实例。
+    /// 初始化一个 <see cref="SqliteMutationExecutionIntegrationTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQLite 集成测试数据库固定装置。</param>
     public SqliteMutationExecutionIntegrationTest(SqliteIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -506,24 +506,24 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     private sealed class MutationSample
     {
         /// <summary>
-        /// 数据库生成的主键。
+        /// 获取或设置数据库生成的主键。
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
-        /// 样例名称。
+        /// 获取或设置样例名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 样例金额。
+        /// 获取或设置样例金额。
         /// </summary>
         public decimal? Amount { get; set; }
 
         /// <summary>
-        /// 乐观并发令牌。
+        /// 获取或设置乐观并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public string SecretText { get; set; }
@@ -535,15 +535,19 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     [Table("soft_delete_samples")]
     private sealed class SoftDeleteSample : ISoftDelete
     {
-        /// <summary>数据库生成的主键。</summary>
+        /// <summary>
+        /// 获取或设置数据库生成的主键。
+        /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        /// <summary>样例名称。</summary>
+        /// <summary>
+        /// 获取或设置样例名称。
+        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>逻辑删除状态。</summary>
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
@@ -553,11 +557,15 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     [Table("samples")]
     private sealed class SqliteReturningRow
     {
-        /// <summary>标识。</summary>
+        /// <summary>
+        /// 获取或设置标识。
+        /// </summary>
         [Column("Id")]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Column("Name")]
         public string Name { get; set; }
     }

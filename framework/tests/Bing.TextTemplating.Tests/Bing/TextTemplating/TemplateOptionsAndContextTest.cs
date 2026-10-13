@@ -12,6 +12,10 @@ namespace Bing.TextTemplating;
 /// </summary>
 public class TemplateDefinitionContextTest
 {
+    /// <summary>
+    /// 创建不包含模板定义的上下文。
+    /// </summary>
+    /// <returns>空模板定义上下文。</returns>
     private static TemplateDefinitionContext CreateEmpty() =>
         new(new Dictionary<string, TemplateDefinition>());
 
@@ -232,6 +236,10 @@ public class BingTextTemplatingOptionsTest
 /// </summary>
 public class TemplateContentContributorContextTest
 {
+    /// <summary>
+    /// 创建测试使用的模拟服务提供程序。
+    /// </summary>
+    /// <returns>模拟服务提供程序。</returns>
     private static IServiceProvider CreateFakeProvider() =>
         new FakeServiceProvider();
 
@@ -293,6 +301,7 @@ public class TemplateContentContributorContextTest
     /// </summary>
     private class FakeServiceProvider : IServiceProvider
     {
+        /// <inheritdoc />
         public object? GetService(Type serviceType) => null;
     }
 }

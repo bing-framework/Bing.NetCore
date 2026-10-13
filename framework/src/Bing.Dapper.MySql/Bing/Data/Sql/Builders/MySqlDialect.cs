@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public sealed class MySqlDialect : DialectBase
 {
     /// <summary>
-    /// 封闭构造函数
+    /// 初始化一个 <see cref="MySqlDialect"/> 类型的实例。
     /// </summary>
     private MySqlDialect() { }
 
     /// <summary>
-    /// MySql方言实例
+    /// 获取MySql方言实例
     /// </summary>
     public static MySqlDialect Instance { get; } = new();
 

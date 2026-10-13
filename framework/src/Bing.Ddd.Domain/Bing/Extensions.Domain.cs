@@ -9,7 +9,7 @@ namespace Bing;
 public static partial class DomainExtensions
 {
     /// <summary>
-    /// 比较以 <see cref="Guid"/> 为标识的实体集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <typeparam name="TEntity">实现 <see cref="IKey{TKey}"/> 的实体类型。</typeparam>
     /// <param name="newList">表示期望状态的新实体集合。</param>
@@ -21,7 +21,7 @@ public static partial class DomainExtensions
         Compare<TEntity, Guid>(newList, oldList);
 
     /// <summary>
-    /// 比较指定标识类型的实体集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <typeparam name="TEntity">实现 <see cref="IKey{TKey}"/> 的实体类型。</typeparam>
     /// <typeparam name="TKey">实体标识类型。</typeparam>
@@ -37,7 +37,7 @@ public static partial class DomainExtensions
     }
 
     /// <summary>
-    /// 比较 <see cref="Guid"/> 标识集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <param name="newList">表示期望状态的新标识集合。</param>
     /// <param name="oldList">表示当前状态的旧标识集合。</param>
@@ -46,7 +46,7 @@ public static partial class DomainExtensions
         CompareKey(newList, oldList);
 
     /// <summary>
-    /// 比较字符串标识集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <param name="newList">表示期望状态的新标识集合。</param>
     /// <param name="oldList">表示当前状态的旧标识集合。</param>
@@ -55,7 +55,7 @@ public static partial class DomainExtensions
         CompareKey(newList, oldList);
 
     /// <summary>
-    /// 比较 <see cref="int"/> 标识集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <param name="newList">表示期望状态的新标识集合。</param>
     /// <param name="oldList">表示当前状态的旧标识集合。</param>
@@ -64,7 +64,7 @@ public static partial class DomainExtensions
         CompareKey(newList, oldList);
 
     /// <summary>
-    /// 比较 <see cref="long"/> 标识集合。
+    /// 比较新旧集合的变更。
     /// </summary>
     /// <param name="newList">表示期望状态的新标识集合。</param>
     /// <param name="oldList">表示当前状态的旧标识集合。</param>

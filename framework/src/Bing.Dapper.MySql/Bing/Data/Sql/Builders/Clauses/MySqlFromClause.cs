@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 public class MySqlFromClause : FromClause
 {
     /// <summary>
-    /// 初始化一个<see cref="MySqlFromClause"/>类型的实例
+    /// 初始化一个 <see cref="MySqlFromClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public MySqlFromClause(SqlClauseContext context)
@@ -18,7 +18,7 @@ public class MySqlFromClause : FromClause
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 MySQL From 子句。
+    /// 初始化一个 <see cref="MySqlFromClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="table">表。</param>
@@ -29,24 +29,16 @@ public class MySqlFromClause : FromClause
     {
     }
 
-    /// <summary>
-    /// 创建Sql项
-    /// </summary>
-    /// <param name="table">表名</param>
-    /// <param name="schema">架构名</param>
-    /// <param name="alias">别名</param>
-    /// <returns>根据 Provider 类型创建的 SQL 项。</returns>
+    /// <inheritdoc />
     protected override SqlItem CreateSqlItem(string table, string schema, string alias) =>
         ProviderDatabaseType != Bing.Data.Enums.DatabaseType.MySql
             ? SqlItem.Parse(table, schema, alias)
             : SqlItem.Atomic(table, schema, alias);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 解析实际 MySQL 的反引号字符串表名。
-    /// </summary>
-    /// <param name="table">表名。</param>
-    /// <param name="alias">别名。</param>
-    /// <returns>表名、别名和架构名。</returns>
+    /// </remarks>
     protected override (string TableName, string Alias, string Schema) ParseTableName(string table, string alias)
     {
         if (ProviderDatabaseType != Bing.Data.Enums.DatabaseType.MySql)

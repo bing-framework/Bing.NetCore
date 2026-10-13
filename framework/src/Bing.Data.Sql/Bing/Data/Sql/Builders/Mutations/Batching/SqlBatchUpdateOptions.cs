@@ -7,9 +7,13 @@ namespace Bing.Data.Sql.Builders.Mutations.Batching;
 /// </summary>
 public sealed class SqlBatchUpdateOptions : SqlMutationBatchOptions
 {
-    /// <summary>批量 Update 的 SQL 生成策略。</summary>
+    /// <summary>
+    /// 获取或设置批量 Update 的 SQL 生成策略。
+    /// </summary>
     public SqlBatchUpdateStrategy Strategy { get; set; } = SqlBatchUpdateStrategy.Auto;
 
-    /// <summary>应用于每个实体的 Update 列筛选和并发选项。</summary>
+    /// <summary>
+    /// 获取或设置应用于每个实体的 Update 列筛选和并发选项。
+    /// </summary>
     public SqlUpdateOptions UpdateOptions { get; set; }
 }

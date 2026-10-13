@@ -13,6 +13,9 @@ namespace Bing.Data.Sql.Tests.Metadata;
 /// </summary>
 public sealed class VersionedEntityMappingResolverTest
 {
+    /// <summary>
+    /// 验证发布新的表和列映射后，旧快照仍保留原配置。
+    /// </summary>
     [Fact]
     public void PublishMappings_WhenColumnAndTableChange_ShouldKeepOldSnapshotAndPublishNewSnapshot()
     {
@@ -30,6 +33,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal("new_name", newSnapshot.Resolve(typeof(Sample), Context).Columns[nameof(Sample.Name)].ColumnName);
     }
 
+    /// <summary>
+    /// 验证发布映射时会复制输入配置，后续修改不会影响已发布快照。
+    /// </summary>
     [Fact]
     public void PublishMappings_WhenInputChangesAfterPublication_ShouldUseDeepSnapshot()
     {
@@ -49,6 +55,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal(FieldValueConverterKind.None, result.Columns[nameof(Sample.Name)].ConverterKind);
     }
 
+    /// <summary>
+    /// 验证枚举映射失败时当前版本和映射保持不变。
+    /// </summary>
     [Fact]
     public void PublishMappings_WhenEnumerationFails_ShouldKeepCurrentVersionAndMapping()
     {
@@ -60,6 +69,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal("OldTable", resolver.Resolve(typeof(Sample), Context).Table.TableName);
     }
 
+    /// <summary>
+    /// 验证候选映射新增、匹配和移除后选择索引保持正确。
+    /// </summary>
     [Fact]
     public void PublishMappings_WhenCandidateIsAddedAndRemoved_ShouldRebuildSelectionIndex()
     {
@@ -80,6 +92,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal("profile_name", matched.Columns[nameof(Sample.Name)].ColumnName);
         Assert.Equal(nameof(Sample), removed.Table.TableName);
     }
+    /// <summary>
+    /// 验证并发发布产生完整且单调递增的版本。
+    /// </summary>
     [Fact]
     public async Task PublishMappings_WhenCalledConcurrently_ShouldPublishCompleteMonotonicVersions()
     {
@@ -95,6 +110,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.StartsWith("name_", result.Columns[nameof(Sample.Name)].ColumnName);
     }
 
+    /// <summary>
+    /// 验证已有 Builder 在发布新版本后继续使用原映射快照。
+    /// </summary>
     [Fact]
     public void SqlBuilderServices_WhenVersionIsPublished_ShouldKeepExistingBuilderSnapshot()
     {
@@ -110,6 +128,9 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal("NewTable", newBuilder.SharedServices.EntityMappingResolver.Resolve(typeof(Sample), Context).Table.TableName);
     }
 
+    /// <summary>
+    /// 验证逻辑标识中的空白规范化后仍能选择相同列映射。
+    /// </summary>
     [Fact]
     public void Resolve_WhenLogicalIdentifiersContainWhitespace_ShouldSelectSameColumnMapping()
     {
@@ -125,12 +146,21 @@ public sealed class VersionedEntityMappingResolverTest
         Assert.Equal("mapped_name", mapping.Columns[nameof(Sample.Name)].ColumnName);
     }
 
+    /// <summary>
+    /// 解析测试映射时使用的数据库上下文。
+    /// </summary>
     private static readonly DatabaseContext Context = new()
     {
         DbKey = "reporting", MappingProfile = "read", TenantId = "route-a",
         DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
     };
 
+    /// <summary>
+    /// 创建仅包含一个样例实体映射的元数据配置。
+    /// </summary>
+    /// <param name="table">映射表名。</param>
+    /// <param name="column">名称属性对应的列名。</param>
+    /// <returns>包含样例实体映射的元数据配置。</returns>
     private static SqlMetadataOptions CreateOptions(string table, string column)
     {
         var options = new SqlMetadataOptions();
@@ -138,6 +168,12 @@ public sealed class VersionedEntityMappingResolverTest
         return options;
     }
 
+    /// <summary>
+    /// 创建包含数据库、配置和路由范围的样例实体映射。
+    /// </summary>
+    /// <param name="table">映射表名。</param>
+    /// <param name="column">名称属性对应的列名。</param>
+    /// <returns>样例实体映射配置。</returns>
     private static EntityMappingOptions CreateMapping(string table, string column)
     {
         var mapping = new EntityMappingOptions
@@ -152,14 +188,26 @@ public sealed class VersionedEntityMappingResolverTest
         return mapping;
     }
 
+    /// <summary>
+    /// 枚举时抛出异常的映射集合测试替身。
+    /// </summary>
     private sealed class ThrowingMappings : IEnumerable<EntityMappingOptions>
     {
+        /// <inheritdoc />
         public IEnumerator<EntityMappingOptions> GetEnumerator() => throw new InvalidOperationException("Failed to enumerate mappings.");
+
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
+    /// <summary>
+    /// 映射解析测试使用的样例实体。
+    /// </summary>
     private sealed class Sample
     {
+        /// <summary>
+        /// 获取或设置实体名称。
+        /// </summary>
         public string Name { get; set; }
     }
 }

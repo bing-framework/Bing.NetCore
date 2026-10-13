@@ -15,8 +15,7 @@ public class ActionResultHelperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：静态初始化后 ObjectResultTypes 应包含三个预定义类型，
-    /// 确保框架内置的对象结果类型映射不被意外修改。
+    /// 测试目的：静态初始化后 ObjectResultTypes 应包含三个预定义类型， 确保框架内置的对象结果类型映射不被意外修改。
     /// </summary>
     [Fact]
     public void ObjectResultTypes_ShouldContainThreeDefaultTypes()
@@ -33,8 +32,7 @@ public class ActionResultHelperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：string 类型不是 IActionResult，IsObjectResult 应返回 true，
-    /// 确保普通 POCO 返回类型被识别为对象结果（需要序列化输出）。
+    /// 测试目的：string 类型不是 IActionResult，IsObjectResult 应返回 true， 确保普通 POCO 返回类型被识别为对象结果（需要序列化输出）。
     /// </summary>
     [Fact]
     public void IsObjectResult_StringReturnType_ShouldBeTrue()
@@ -54,8 +52,7 @@ public class ActionResultHelperTest
     }
 
     /// <summary>
-    /// 测试目的：Task&lt;string&gt; 应被解包为 string，仍返回 true，
-    /// 确保异步方法返回类型可正常处理。
+    /// 测试目的：Task&lt;string&gt; 应被解包为 string，仍返回 true， 确保异步方法返回类型可正常处理。
     /// </summary>
     [Fact]
     public void IsObjectResult_TaskOfString_ShouldBeTrue()
@@ -69,8 +66,7 @@ public class ActionResultHelperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：JsonResult（ObjectResultTypes 成员）应返回 true，
-    /// 确保框架认为 JsonResult 是"对象结果"类型。
+    /// 测试目的：JsonResult（ObjectResultTypes 成员）应返回 true， 确保框架认为 JsonResult 是"对象结果"类型。
     /// </summary>
     [Fact]
     public void IsObjectResult_JsonResult_ShouldBeTrue()
@@ -100,8 +96,7 @@ public class ActionResultHelperTest
     }
 
     /// <summary>
-    /// 测试目的：ContentResult 不在 ObjectResultTypes 中，应返回 false，
-    /// 确保非对象结果类型被正确排除。
+    /// 测试目的：ContentResult 不在 ObjectResultTypes 中，应返回 false， 确保非对象结果类型被正确排除。
     /// </summary>
     [Fact]
     public void IsObjectResult_ContentResult_ShouldBeFalse()
@@ -125,8 +120,7 @@ public class ActionResultHelperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：传入 excludeTypes 包含 string 时，string 应被排除并返回 false，
-    /// 确保 excludeTypes 参数能正确覆盖默认对象结果判断。
+    /// 测试目的：传入 excludeTypes 包含 string 时，string 应被排除并返回 false， 确保 excludeTypes 参数能正确覆盖默认对象结果判断。
     /// </summary>
     [Fact]
     public void IsObjectResult_WithExcludeType_ShouldReturnFalse()
@@ -136,8 +130,7 @@ public class ActionResultHelperTest
     }
 
     /// <summary>
-    /// 测试目的：excludeTypes 为基类时，子类也应被排除，
-    /// 确保 excludeTypes 使用 IsAssignableFrom 语义。
+    /// 测试目的：excludeTypes 为基类时，子类也应被排除， 确保 excludeTypes 使用 IsAssignableFrom 语义。
     /// </summary>
     [Fact]
     public void IsObjectResult_ExcludeBaseType_SubClassAlsoExcluded()

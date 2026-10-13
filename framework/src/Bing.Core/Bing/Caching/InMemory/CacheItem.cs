@@ -21,12 +21,12 @@ internal class CacheItem
     public bool Expired => ExpiredTime <= DateTime.Now;
 
     /// <summary>
-    /// 获取最近一次设置或访问的本地时间。
+    /// 获取或设置最近一次设置或访问的本地时间。
     /// </summary>
     public DateTime VisitTime{ get; private set; }
 
     /// <summary>
-    /// 使用缓存值和可选绝对过期时长初始化 <see cref="CacheItem"/> 的实例。
+    /// 初始化一个 <see cref="CacheItem"/> 类型的实例。
     /// </summary>
     /// <param name="value">要缓存的原始对象引用。</param>
     /// <param name="expired">从设置时刻起计算的可选过期时长；为空时永不过期。</param>

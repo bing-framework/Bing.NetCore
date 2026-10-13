@@ -7,10 +7,7 @@ namespace Bing.Tests.Samples;
 /// </summary>
 internal class AspectExceptionPrompt : IExceptionPrompt
 {
-    /// <summary>
-    /// 获取异常提示
-    /// </summary>
-    /// <param name="exception">异常</param>
+    /// <inheritdoc />
     public string GetPrompt(Exception exception)
     {
         if (exception == null)
@@ -24,10 +21,7 @@ internal class AspectExceptionPrompt : IExceptionPrompt
         return string.Empty;
     }
 
-    /// <summary>
-    /// 获取原始异常
-    /// </summary>
-    /// <param name="exception">异常</param>
+    /// <inheritdoc />
     public Exception GetRawException(Exception exception)
     {
         if (exception is AspectCore.DynamicProxy.AspectInvocationException aspectInvocationException)

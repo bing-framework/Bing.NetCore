@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Bing.Tests.Core;
 
 /// <summary>
-/// TraceIdContext、NoneCancellationTokenProvider、NullExceptionNotifier、
-/// ExceptionNotificationContext 单元测试
+/// 跟踪信息与取消令牌组件的单元测试。
 /// </summary>
 public class TracingAndCancellationTest
 {

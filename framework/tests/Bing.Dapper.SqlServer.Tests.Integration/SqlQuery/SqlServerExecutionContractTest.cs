@@ -17,22 +17,21 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Collection(SqlServerIntegrationDatabaseCollection.Name)]
 public sealed class SqlServerExecutionContractTest : IAsyncLifetime
 {
+    /// <summary>
+    /// 为 SQL Server 执行契约测试提供数据库夹具。
+    /// </summary>
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化 SQL Server 合同测试。
+    /// 初始化一个 <see cref="SqlServerExecutionContractTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
     public SqlServerExecutionContractTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
 
-    /// <summary>
-    /// 每个测试前清空合同表。
-    /// </summary>
+    /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
-    /// <summary>
-    /// 测试类结束时无需额外清理。
-    /// </summary>
+    /// <inheritdoc />
     public Task DisposeAsync() => Task.CompletedTask;
 
     /// <summary>
@@ -442,36 +441,85 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
         Assert.Equal(2, count.Single());
     }
 
+    /// <summary>
+    /// 表示 SQL Server 查询合同测试的结果行。
+    /// </summary>
     private sealed class ContractRow
     {
+        /// <summary>
+        /// 获取或设置代码。
+        /// </summary>
         public string Code { get; set; }
+
+        /// <summary>
+        /// 获取或设置可空值。
+        /// </summary>
         public int? NullableValue { get; set; }
+
+        /// <summary>
+        /// 获取或设置金额。
+        /// </summary>
         public decimal Amount { get; set; }
+
+        /// <summary>
+        /// 获取或设置创建时间。
+        /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// 获取或设置启用状态。
+        /// </summary>
         public bool Enabled { get; set; }
     }
 
+    /// <summary>
+    /// 表示仅包含代码的查询结果行。
+    /// </summary>
     private sealed class CodeRow
     {
+        /// <summary>
+        /// 获取或设置代码。
+        /// </summary>
         public string Code { get; set; }
     }
 
+    /// <summary>
+    /// 表示批量写入测试的数据库行。
+    /// </summary>
     [Table("BingSqlBatchIntegration", Schema = "dbo")]
     private sealed class BatchRow
     {
+        /// <summary>
+        /// 获取或设置行标识。
+        /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置代码。
+        /// </summary>
         public string Code { get; set; }
 
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// 获取或设置启用状态。
+        /// </summary>
         public bool Enabled { get; set; } = true;
     }
 
+    /// <summary>
+    /// 表示仅包含行标识的查询结果。
+    /// </summary>
     private sealed class CodeIdRow
     {
+        /// <summary>
+        /// 获取或设置行标识。
+        /// </summary>
         public int Id { get; set; }
     }
 }

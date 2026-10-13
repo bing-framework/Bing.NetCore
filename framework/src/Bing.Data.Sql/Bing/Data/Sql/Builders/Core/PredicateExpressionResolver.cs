@@ -19,13 +19,13 @@ public class PredicateExpressionResolver
     private readonly Helper _helper;
 
     /// <summary>
-    /// 使用子句运行上下文初始化谓词表达式解析器。
+    /// 初始化一个 <see cref="PredicateExpressionResolver"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public PredicateExpressionResolver(SqlClauseContext context) : this(context, null) { }
 
     /// <summary>
-    /// 使用子句运行上下文和已创建的辅助操作初始化谓词表达式解析器。
+    /// 初始化一个 <see cref="PredicateExpressionResolver"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="helper">可复用的辅助操作。</param>

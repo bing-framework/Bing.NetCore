@@ -20,20 +20,20 @@ public class RequestResponseLoggerActionFilter : Attribute, IActionFilter
         return context.RequestServices.GetRequiredService<IRequestResponseLogCreator>().Log;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行操作之前。在模型绑定完成之后，在执行操作之前调用。
-    /// </summary>
-    /// <param name="context">操作执行上下文</param>
+    /// </remarks>
     public void OnActionExecuting(ActionExecutingContext context)
     {
         var log = GetLog(context.HttpContext);
         log.RequestDateTimeUtcActionLevel = DateTime.UtcNow;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行操作之后。在操作执行之后，操作结果执行之前调用。
-    /// </summary>
-    /// <param name="context">已执行操作上下文</param>
+    /// </remarks>
     public void OnActionExecuted(ActionExecutedContext context)
     {
         var log = GetLog(context.HttpContext);

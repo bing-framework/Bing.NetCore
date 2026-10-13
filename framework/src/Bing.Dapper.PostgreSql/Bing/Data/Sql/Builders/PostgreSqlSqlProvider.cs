@@ -4,16 +4,18 @@ using Bing.Data.Sql.Builders.Params;
 
 namespace Bing.Data.Sql.Builders;
 
-/// <summary>PostgreSQL SQL 提供程序。</summary>
+/// <summary>
+/// PostgreSQL SQL 提供程序。
+/// </summary>
 public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
-    /// 可在线程间安全共享的 PostgreSQL Provider 单例。
+    /// 获取可在线程间安全共享的 PostgreSQL Provider 单例。
     /// </summary>
     public static PostgreSqlSqlProvider Instance { get; } = new();
 
     /// <summary>
-    /// 初始化 PostgreSQL Provider 单例。
+    /// 初始化一个 <see cref="PostgreSqlSqlProvider"/> 类型的实例。
     /// </summary>
     private PostgreSqlSqlProvider() { }
 

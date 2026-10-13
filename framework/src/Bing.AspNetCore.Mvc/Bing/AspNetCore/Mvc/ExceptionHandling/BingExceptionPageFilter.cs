@@ -24,11 +24,10 @@ public class BingExceptionPageFilter : IAsyncPageFilter, ITransientDependency
     /// <inheritdoc />
     public Task OnPageHandlerSelectionAsync(PageHandlerSelectedContext context) => Task.CompletedTask;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// Razor Page处理程序执行过程中拦截操作。
-    /// </summary>
-    /// <param name="context">页面处理器执行中上下文。</param>
-    /// <param name="next">下一个页面处理器执行委托。</param>
+    /// </remarks>
     public async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
     {
         if (context.HandlerMethod == null || !ShouldHandleException(context))

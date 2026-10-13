@@ -11,14 +11,16 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class AuditedEntityWithName<TEntity> : AuditedEntity<TEntity>, IAuditedObjectWithName
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Creator { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string LastModifier { get; set; }
 }
 
@@ -31,25 +33,27 @@ public abstract class AuditedEntityWithName<TEntity> : AuditedEntity<TEntity>, I
 public abstract class AuditedEntityWithName<TEntity, TKey> : AuditedEntity<TEntity, TKey>, IAuditedObjectWithName<TKey>
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string Creator { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该实体的用户名称。
-    /// </summary>
+    /// </remarks>
     public virtual string LastModifier { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="AuditedEntityWithName{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="AuditedEntityWithName{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected AuditedEntityWithName()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="AuditedEntityWithName{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="AuditedEntityWithName{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected AuditedEntityWithName(TKey id) : base(id)

@@ -23,8 +23,11 @@ public class AntiDuplicateRequestAttribute : ActionFilterAttribute
     public bool IsDistributed { get; set; }
 
     /// <summary>
-    /// 获取或设置锁标识的生成类型，默认按用户区分。
+    /// 获取或设置锁标识的生成类型。
     /// </summary>
+    /// <remarks>
+    /// 默认按用户区分。
+    /// </remarks>
     public LockType Type { get; set; } = LockType.User;
 
     /// <summary>
@@ -38,15 +41,17 @@ public class AntiDuplicateRequestAttribute : ActionFilterAttribute
     public string Message { get; set; }
 
     /// <summary>
-    /// 获取或设置请求处理完成后是否自动释放锁；默认值为 <see langword="false"/>。
+    /// 获取或设置请求处理完成后是否自动释放锁。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see langword="false"/>。
+    /// </remarks>
     public bool AutoUnLock { get; set; } = false;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取锁后执行 MVC 操作，并根据配置在操作完成后释放锁。
-    /// </summary>
-    /// <param name="context">操作执行上下文</param>
-    /// <param name="next">操作执行下一步委托</param>
+    /// </remarks>
     /// <exception cref="ArgumentNullException">执行上下文或后续执行委托为空时抛出。</exception>
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -137,8 +142,9 @@ public class AntiDuplicateRequestAttribute : ActionFilterAttribute
 public enum LockType
 {
     /// <summary>
-    /// 用户锁，当用户发出多个执行该操作的请求，只有第一个请求被执行，其它请求被抛弃，其它用户不受影响
+    /// 按用户维度限制同一操作的并发请求。
     /// </summary>
+    /// <remarks>同一用户的多个请求仅执行首个请求，不同用户的请求互不影响。</remarks>
     User = 0,
 
     /// <summary>

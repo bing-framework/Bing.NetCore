@@ -14,7 +14,7 @@ public class OrderByBuilderTest
     private readonly OrderByBuilder _builder;
 
     /// <summary>
-    /// 初始化一个<see cref="OrderByBuilderTest"/>类型的实例
+    /// 初始化一个 <see cref="OrderByBuilderTest"/> 类型的实例。
     /// </summary>
     public OrderByBuilderTest() => _builder = new OrderByBuilder();
 

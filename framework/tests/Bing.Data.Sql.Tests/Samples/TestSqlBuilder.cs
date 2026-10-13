@@ -27,6 +27,7 @@ public class TestSqlBuilder : SqlBuilderBase
     /// <summary>
     /// 获取当前 Builder 的类型化 Join 表源快照。
     /// </summary>
+    /// <returns>返回当前 Builder 中的类型化 Join 表源。</returns>
     public IReadOnlyList<TableSource> GetTypedJoinSources() =>
         (JoinClause as Bing.Data.Sql.Builders.Clauses.JoinClause)?.GetTypedSources() ?? Array.Empty<TableSource>();
 
@@ -72,7 +73,7 @@ public class TestSqlBuilder : SqlBuilderBase
     }
 
     /// <summary>
-    /// 初始化Sql生成器
+    /// 初始化一个 <see cref="TestSqlBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="dialect">Sql 方言</param>
     /// <param name="entityModelMetadataProvider">实体模型元数据提供器</param>
@@ -99,7 +100,7 @@ public class TestSqlBuilder : SqlBuilderBase
             tableReferenceValidator, entityModelMetadataProvider), dialect, parameterManager) { }
 
     /// <summary>
-    /// 使用共享依赖初始化测试 SQL Builder。
+    /// 初始化一个 <see cref="TestSqlBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="services">可共享服务依赖。</param>
     /// <param name="dialect">SQL 方言。</param>
@@ -112,18 +113,42 @@ public class TestSqlBuilder : SqlBuilderBase
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new TestSqlBuilder(Services, Dialect, parameterManager);
 
+    /// <summary>
+    /// 为测试 Builder 提供 SQL Server 风格的 Provider。
+    /// </summary>
     private sealed class TestSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
+        /// <inheritdoc />
         public string Key => "test.sqlserver";
 
+        /// <summary>
+        /// 初始化一个 <see cref="TestSqlProvider"/> 类型的实例。
+        /// </summary>
+        /// <param name="dialect">测试使用的 SQL 方言。</param>
         public TestSqlProvider(IDialect dialect) => Dialect = dialect;
+
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
+
+        /// <inheritdoc />
         public IDialect Dialect { get; }
+
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory { get; } = new DefaultSqlClauseFactory();
+
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => DefaultSqlTableReferenceParser.Instance;
+
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer { get; } = new TestPaginationRenderer();
+
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
+
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => new ParamLiteralsResolver();
+
+        /// <inheritdoc />
         public SqlProviderProfile Profile { get; } = new()
         {
             Query = new SqlProviderQueryCapabilities
@@ -139,8 +164,12 @@ public class TestSqlBuilder : SqlBuilderBase
         };
     }
 
+    /// <summary>
+    /// 输出 SQL Server 风格分页子句的测试实现。
+    /// </summary>
     private sealed class TestPaginationRenderer : ISqlPaginationRenderer
     {
+        /// <inheritdoc />
         public string Render(string offsetParameterName, string limitParameterName) =>
             $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
     }

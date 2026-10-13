@@ -17,8 +17,11 @@ public class RemoteServiceErrorInfo
     public string Message { get; set; }
 
     /// <summary>
-    /// 获取或设置错误的补充详情；不应包含未脱敏的敏感信息。
+    /// 获取或设置错误的补充详情。
     /// </summary>
+    /// <remarks>
+    /// 不应包含未脱敏的敏感信息。
+    /// </remarks>
     public string Details { get; set; }
 
     /// <summary>
@@ -32,12 +35,12 @@ public class RemoteServiceErrorInfo
     public RemoteServiceValidationErrorInfo[] ValidationErrors { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="RemoteServiceErrorInfo"/> 的空实例。
+    /// 初始化一个 <see cref="RemoteServiceErrorInfo"/> 类型的实例。
     /// </summary>
     public RemoteServiceErrorInfo() { }
 
     /// <summary>
-    /// 使用消息、详情、错误码和附加数据初始化 <see cref="RemoteServiceErrorInfo"/> 的实例。
+    /// 初始化一个 <see cref="RemoteServiceErrorInfo"/> 类型的实例。
     /// </summary>
     /// <param name="message">面向调用方的错误消息。</param>
     /// <param name="details">错误补充详情，可为空。</param>

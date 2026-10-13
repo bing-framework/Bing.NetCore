@@ -123,6 +123,8 @@ public class ExecutionPreparationTest
     /// <summary>
     /// 创建用于 Direct Builder 执行的测试 Builder。
     /// </summary>
+    /// <param name="providerKey">Builder 使用的 Provider 标识。</param>
+    /// <returns>返回配置完成的 SQL Builder 测试替身。</returns>
     private static Mock<ISqlBuilder> CreateBuilder(string providerKey = "bing.sqlserver")
     {
         var builder = new Mock<ISqlBuilder>();
@@ -140,6 +142,8 @@ public class ExecutionPreparationTest
     /// <summary>
     /// 创建具有外部连接和空参数绑定器的测试执行器。
     /// </summary>
+    /// <param name="provider">执行器使用的 SQL Provider；省略时使用默认测试 Provider。</param>
+    /// <returns>返回配置了外部连接的测试执行器。</returns>
     private static PreparationTestExecutor CreateExecutor(ISqlProvider provider = null)
     {
         var command = new Mock<IDbCommand>();
@@ -155,6 +159,8 @@ public class ExecutionPreparationTest
     /// <summary>
     /// 创建测试服务提供程序。
     /// </summary>
+    /// <param name="sqlProvider">要注册的 SQL Provider；省略时注册默认测试 Provider。</param>
+    /// <returns>返回包含 SQL Core 服务和指定 Provider 的服务容器。</returns>
     private static IServiceProvider CreateServiceProvider(ISqlProvider sqlProvider = null)
     {
         var services = new ServiceCollection();
@@ -172,6 +178,7 @@ public class ExecutionPreparationTest
     /// <summary>
     /// 创建足以驱动专用 Mutation Builder 的 SQL Server 风格 Provider。
     /// </summary>
+    /// <returns>返回用于 Mutation Builder 测试的 SQL Provider。</returns>
     private static ISqlProvider CreateMutationProvider()
     {
         var dialect = new Mock<IDialect>();
@@ -205,7 +212,7 @@ public class ExecutionPreparationTest
     private sealed class PreparationTestExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化执行器测试替身。
+        /// 初始化一个 <see cref="PreparationTestExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -215,7 +222,7 @@ public class ExecutionPreparationTest
         }
 
         /// <summary>
-        /// Builder 参数诊断元数据请求次数。
+        /// 获取或设置Builder 参数诊断元数据请求次数。
         /// </summary>
         public int BuilderDiagnosticRequests { get; private set; }
 

@@ -300,20 +300,33 @@ public class SqlClauseContractTest
     /// </summary>
     private sealed class QueryClauseAccessorProxy : ISelect, IFrom, IWhere, ISqlQueryClauseAccessor
     {
+        /// <summary>
+        /// 被代理的 SQL Builder。
+        /// </summary>
         private readonly TestSqlBuilder _builder;
 
+        /// <summary>
+        /// 初始化一个 <see cref="QueryClauseAccessorProxy"/> 类型的实例。
+        /// </summary>
+        /// <param name="builder">要暴露子句访问器的 SQL Builder。</param>
         public QueryClauseAccessorProxy(TestSqlBuilder builder) => _builder = builder;
 
+        /// <inheritdoc />
         public ISelectClause SelectClause => _builder.SelectClause;
 
+        /// <inheritdoc />
         public IFromClause FromClause => _builder.FromClause;
 
+        /// <inheritdoc />
         public IJoinClause JoinClause => _builder.JoinClause;
 
+        /// <inheritdoc />
         public IWhereClause WhereClause => _builder.WhereClause;
 
+        /// <inheritdoc />
         public IGroupByClause GroupByClause => _builder.GroupByClause;
 
+        /// <inheritdoc />
         public IOrderByClause OrderByClause => _builder.OrderByClause;
     }
 
@@ -329,8 +342,10 @@ public class SqlClauseContractTest
     /// </summary>
     private sealed class CommonPartAccessorProxy : ISqlParameter, ISqlCommonPartAccessor
     {
+        /// <inheritdoc />
         public IDialect Dialect { get; } = TestDialect.Instance;
 
+        /// <inheritdoc />
         public IParameterManager ParameterManager { get; } = new ParameterManager(TestDialect.Instance);
     }
 }

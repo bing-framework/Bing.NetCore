@@ -23,7 +23,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
     private readonly RequestResponseLoggerOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="RequestResponseLoggerMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="RequestResponseLoggerMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="options">请求响应记录器选项</param>
@@ -33,10 +33,7 @@ public class RequestResponseLoggerMiddleware : IMiddleware
         _options = options.Value;
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         if (_options == null || !_options.IsEnabled || FilterRequest(context))

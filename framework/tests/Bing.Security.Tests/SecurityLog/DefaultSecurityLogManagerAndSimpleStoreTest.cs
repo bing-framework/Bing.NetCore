@@ -16,6 +16,13 @@ public class DefaultSecurityLogManagerAndSimpleStoreTest
     // DefaultSecurityLogManager — 辅助工厂
     // ═══════════════════════════════════════════════════════════
 
+    /// <summary>
+    /// 创建安全日志管理器。
+    /// </summary>
+    /// <param name="isEnabled">是否启用安全日志。</param>
+    /// <param name="appName">应用名称。</param>
+    /// <param name="mockStore">安全日志存储模拟对象。</param>
+    /// <returns>安全日志管理器。</returns>
     private static DefaultSecurityLogManager CreateManager(
         bool isEnabled,
         string appName,
@@ -67,8 +74,7 @@ public class DefaultSecurityLogManagerAndSimpleStoreTest
     }
 
     /// <summary>
-    /// 测试目的：当 IsEnabled = true 且传入 saveAction 时，saveAction 应被调用，
-    /// 且传入的 SecurityLogInfo.ApplicationName 应与选项一致。
+    /// 验证启用安全日志时会执行回调并设置应用名称。
     /// </summary>
     [Fact]
     public async Task SaveAsync_WhenEnabledWithAction_ShouldInvokeActionAndSetApplicationName()
@@ -111,6 +117,12 @@ public class DefaultSecurityLogManagerAndSimpleStoreTest
     // SimpleSecurityLogStore — 辅助工厂
     // ═══════════════════════════════════════════════════════════
 
+    /// <summary>
+    /// 创建安全日志存储器。
+    /// </summary>
+    /// <param name="isEnabled">是否启用安全日志。</param>
+    /// <param name="mockLogger">日志记录器模拟对象。</param>
+    /// <returns>安全日志存储器。</returns>
     private static SimpleSecurityLogStore CreateStore(
         bool isEnabled,
         Mock<ILogger<SimpleSecurityLogStore>> mockLogger)

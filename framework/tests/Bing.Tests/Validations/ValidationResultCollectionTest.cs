@@ -16,7 +16,7 @@ public class ValidationResultCollectionTest
     private readonly ValidationResultCollection _results;
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationResultCollectionTest"/>类型的实例
+    /// 初始化一个 <see cref="ValidationResultCollectionTest"/> 类型的实例。
     /// </summary>
     public ValidationResultCollectionTest() => _results = new ValidationResultCollection();
 

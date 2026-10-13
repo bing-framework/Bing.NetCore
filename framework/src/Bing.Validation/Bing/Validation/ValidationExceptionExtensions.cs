@@ -8,7 +8,7 @@ namespace Bing.Validation;
 public static class ValidationExceptionExtensions
 {
     /// <summary>
-    /// 转换异常
+    /// 将验证结果转换为异常。
     /// </summary>
     /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="resultCollection">验证结果集合</param>
@@ -27,7 +27,7 @@ public static class ValidationExceptionExtensions
     }
 
     /// <summary>
-    /// 转换为异常
+    /// 将验证结果转换为异常。
     /// </summary>
     /// <param name="resultCollection">验证结果集合</param>
     /// <param name="appendAction">追加操作</param>
@@ -42,7 +42,7 @@ public static class ValidationExceptionExtensions
     }
 
     /// <summary>
-    /// 转换为异常
+    /// 将验证结果转换为异常。
     /// </summary>
     /// <typeparam name="TException">异常类型</typeparam>
     /// <param name="result">验证结果</param>
@@ -63,7 +63,7 @@ public static class ValidationExceptionExtensions
     }
 
     /// <summary>
-    /// 转换为异常
+    /// 将验证结果转换为异常。
     /// </summary>
     /// <param name="result">验证结果</param>
     /// <param name="appendAction">追加操作</param>

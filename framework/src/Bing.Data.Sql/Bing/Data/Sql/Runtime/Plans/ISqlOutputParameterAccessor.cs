@@ -53,7 +53,7 @@ public sealed class SqlOutputParameterSnapshot : ISqlOutputParameterAccessor
     private readonly IReadOnlyDictionary<string, object> _values;
 
     /// <summary>
-    /// 初始化输出参数值快照。
+    /// 初始化一个 <see cref="SqlOutputParameterSnapshot"/> 类型的实例。
     /// </summary>
     /// <param name="values">已在本次执行完成后读取的输出值。</param>
     public SqlOutputParameterSnapshot(IEnumerable<KeyValuePair<string, object>> values)

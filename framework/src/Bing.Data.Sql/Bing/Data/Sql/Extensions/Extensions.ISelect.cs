@@ -56,7 +56,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化聚合列。
+    /// 添加聚合列。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>

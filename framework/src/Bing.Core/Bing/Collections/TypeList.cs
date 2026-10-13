@@ -18,20 +18,13 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     /// </summary>
     private readonly List<Type> _typeList;
 
-    /// <summary>
-    /// 计数
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _typeList.Count;
 
-    /// <summary>
-    /// 是否只读
-    /// </summary>
+    /// <inheritdoc />
     public bool IsReadOnly => false;
 
-    /// <summary>
-    /// 获取或设置类型
-    /// </summary>
-    /// <param name="index">索引值</param>
+    /// <inheritdoc />
     public Type this[int index]
     {
         get => _typeList[index];
@@ -43,21 +36,14 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
     }
 
     /// <summary>
-    /// 初始化一个<see cref="TypeList{TBaseType}"/>类型的实例
+    /// 初始化一个 <see cref="TypeList{TBaseType}"/> 类型的实例。
     /// </summary>
     public TypeList() => _typeList = new List<Type>();
 
-    /// <summary>
-    /// 添加
-    /// </summary>
-    /// <typeparam name="T">泛型类型</typeparam>
+    /// <inheritdoc />
     public void Add<T>() where T : TBaseType => _typeList.Add(typeof(T));
 
-    /// <summary>
-    /// 尝试添加
-    /// </summary>
-    /// <typeparam name="T">泛型类型</typeparam>
-    /// <returns>类型尚未存在并添加成功时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool TryAdd<T>() where T : TBaseType
     {
         if (Contains<T>())
@@ -66,89 +52,48 @@ public class TypeList<TBaseType> : ITypeList<TBaseType>
         return true;
     }
 
-    /// <summary>
-    /// 添加
-    /// </summary>
-    /// <param name="item">类型</param>
+    /// <inheritdoc />
     public void Add(Type item)
     {
         CheckType(item);
         _typeList.Add(item);
     }
 
-    /// <summary>
-    /// 插入
-    /// </summary>
-    /// <param name="index">索引值</param>
-    /// <param name="item">类型</param>
+    /// <inheritdoc />
     public void Insert(int index, Type item)
     {
         CheckType(item);
         _typeList.Insert(index, item);
     }
 
-    /// <summary>
-    /// 获取指定类型索引值
-    /// </summary>
-    /// <param name="item">类型</param>
-    /// <returns>指定类型在列表中的索引；不存在时返回 -1。</returns>
+    /// <inheritdoc />
     public int IndexOf(Type item) => _typeList.IndexOf(item);
 
-    /// <summary>
-    /// 包含
-    /// </summary>
-    /// <typeparam name="T">泛型类型</typeparam>
-    /// <returns>列表包含指定类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool Contains<T>() where T : TBaseType => Contains(typeof(T));
 
-    /// <summary>
-    /// 包含
-    /// </summary>
-    /// <param name="item">类型</param>
-    /// <returns>列表包含指定类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool Contains(Type item) => _typeList.Contains(item);
 
-    /// <summary>
-    /// 移除
-    /// </summary>
-    /// <typeparam name="T">泛型类型</typeparam>
+    /// <inheritdoc />
     public void Remove<T>() where T : TBaseType => _typeList.Remove(typeof(T));
 
-    /// <summary>
-    /// 移除
-    /// </summary>
-    /// <param name="item">类型</param>
-    /// <returns>类型存在并移除成功时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool Remove(Type item) => _typeList.Remove(item);
 
-    /// <summary>
-    /// 移除指定索引的项
-    /// </summary>
-    /// <param name="index">索引</param>
+    /// <inheritdoc />
     public void RemoveAt(int index) => _typeList.RemoveAt(index);
 
-    /// <summary>
-    /// 清空
-    /// </summary>
+    /// <inheritdoc />
     public void Clear() => _typeList.Clear();
 
-    /// <summary>
-    /// 复制到指定数组中
-    /// </summary>
-    /// <param name="array">数组</param>
-    /// <param name="arrayIndex">数组索引</param>
+    /// <inheritdoc />
     public void CopyTo(Type[] array, int arrayIndex) => _typeList.CopyTo(array, arrayIndex);
 
-    /// <summary>
-    /// 获取迭代器集合
-    /// </summary>
-    /// <returns>用于遍历列表中类型的泛型枚举器。</returns>
+    /// <inheritdoc />
     public IEnumerator<Type> GetEnumerator() => _typeList.GetEnumerator();
 
-    /// <summary>
-    /// 获取迭代器
-    /// </summary>
-    /// <returns>用于遍历列表中类型的非泛型枚举器。</returns>
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => _typeList.GetEnumerator();
 
     /// <summary>

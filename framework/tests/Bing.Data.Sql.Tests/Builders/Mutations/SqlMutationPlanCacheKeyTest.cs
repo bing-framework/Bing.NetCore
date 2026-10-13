@@ -56,6 +56,9 @@ public sealed class SqlMutationPlanCacheKeyTest
             new[] { "Name" }, new[] { "Version" }));
     }
 
+    /// <summary>
+    /// 验证仅大小写不同的物理对象名称生成不同缓存键。
+    /// </summary>
     [Fact]
     public void Create_WhenPhysicalObjectNamesDifferOnlyByCase_ShouldReturnDifferentKey()
     {
@@ -69,6 +72,13 @@ public sealed class SqlMutationPlanCacheKeyTest
     /// <summary>
     /// 创建稳定的测试映射。
     /// </summary>
+    /// <param name="entityType">映射对应的实体类型。</param>
+    /// <param name="database">映射所属的数据库名称。</param>
+    /// <param name="schema">映射所属的架构名称。</param>
+    /// <param name="table">映射对应的表名称。</param>
+    /// <param name="profile">映射使用的配置标识。</param>
+    /// <param name="route">映射使用的路由标识。</param>
+    /// <returns>返回包含指定实体、表和路由信息的测试映射。</returns>
     private static EntityMappingMetadata CreateMapping(Type entityType = null, string database = "database",
         string schema = "schema", string table = "table", string profile = "read", string route = "tenant-a") =>
         new()
@@ -90,7 +100,7 @@ public sealed class SqlMutationPlanCacheKeyTest
     private sealed class MutationEntity
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -101,7 +111,7 @@ public sealed class SqlMutationPlanCacheKeyTest
     private sealed class OtherMutationEntity
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }

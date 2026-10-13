@@ -5,7 +5,7 @@ using Bing.Data.Sql.Mutations;
 namespace Bing.Data.Sql.Builders.Mutations;
 
 /// <summary>
-/// Insert SQL Builder。
+/// 用于构建 Insert SQL 的接口。
 /// </summary>
 public interface ISqlInsertBuilder : ISqlContent, IInsert, IInsertClauseAccessor, ISqlMutationContextAccessor
 {

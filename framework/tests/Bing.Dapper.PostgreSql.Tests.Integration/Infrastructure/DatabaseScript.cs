@@ -11,7 +11,6 @@ public static class DatabaseScript
     /// 初始化 PostgreSQL 集成测试所需的专用 schema 和表。
     /// </summary>
     /// <param name="connection">已打开的 PostgreSQL 连接。</param>
-    /// <returns>异步初始化任务。</returns>
     public static async Task InitializeAsync(NpgsqlConnection connection)
     {
         if (connection == null)
@@ -78,7 +77,6 @@ $$;");
     /// 清理 PostgreSQL 集成测试数据，保留受控测试对象结构。
     /// </summary>
     /// <param name="connection">已打开的 PostgreSQL 连接。</param>
-    /// <returns>异步清理任务。</returns>
     public static async Task ResetAsync(NpgsqlConnection connection)
     {
         if (connection == null)
@@ -92,7 +90,6 @@ $$;");
     /// </summary>
     /// <param name="connection">已打开的 PostgreSQL 连接。</param>
     /// <param name="sql">固定的测试数据库脚本。</param>
-    /// <returns>异步执行任务。</returns>
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
     {
         await using var command = new NpgsqlCommand(sql, connection);

@@ -6,22 +6,22 @@
 public class OnItem
 {
     /// <summary>
-    /// 左表列名
+    /// 获取左表列名
     /// </summary>
     public SqlItem Left { get; }
 
     /// <summary>
-    /// 右表列名
+    /// 获取右表列名
     /// </summary>
     public SqlItem Right { get; }
 
     /// <summary>
-    /// 条件运算符
+    /// 获取条件运算符
     /// </summary>
     public Operator Operator { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="OnItem"/>类型的实例
+    /// 初始化一个 <see cref="OnItem"/> 类型的实例。
     /// </summary>
     /// <param name="left">左表列名</param>
     /// <param name="right">右表列名</param>
@@ -34,7 +34,7 @@ public class OnItem
     }
 
     /// <summary>
-    /// 初始化一个<see cref="OnItem"/>类型的实例
+    /// 初始化一个 <see cref="OnItem"/> 类型的实例。
     /// </summary>
     /// <param name="left">左表列名</param>
     /// <param name="right">右表列名</param>

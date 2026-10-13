@@ -366,16 +366,16 @@ public class SqliteMultiDataSourceExecutionTest
         private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
         /// <summary>
-        /// 初始化一个<see cref="TestDatabase"/>类型的实例。
+        /// 初始化一个 <see cref="TestDatabase"/> 类型的实例。
         /// </summary>
         /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
         public TestDatabase(IDatabaseContextAccessor databaseContextAccessor) =>
             _databaseContextAccessor = databaseContextAccessor;
 
-        /// <summary>
+        /// <inheritdoc />
+        /// <remarks>
         /// 获取当前数据源的 SQLite 连接。
-        /// </summary>
-        /// <returns>SQLite 连接。</returns>
+        /// </remarks>
         public System.Data.IDbConnection GetConnection()
         {
             var connectionString = _databaseContextAccessor.Current?.DataSource?.ConnectionString;
@@ -391,12 +391,12 @@ public class SqliteMultiDataSourceExecutionTest
     private sealed class Sample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }

@@ -19,8 +19,10 @@ public static class OracleServiceCollectionExtensions
 {
     /// <summary>
     /// 注册 Oracle Provider 能力，不配置默认数据源。
-    /// 多 Provider 容器应先调用此方法，再通过具名 <c>AddSqlDataSource</c> 配置实际数据源。
     /// </summary>
+    /// <remarks>
+    /// 多 Provider 容器应先调用此方法，再通过具名 <c>AddSqlDataSource</c> 配置实际数据源。
+    /// </remarks>
     /// <param name="services">服务集合。</param>
     /// <returns>服务集合。</returns>
     public static IServiceCollection AddOracleProvider(this IServiceCollection services)

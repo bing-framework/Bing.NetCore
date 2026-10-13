@@ -11,33 +11,25 @@ public class UnitOfWorkManager : IUnitOfWorkManager
     private readonly HashSet<IUnitOfWork> _unitOfWorks;
 
     /// <summary>
-    /// 初始化一个<see cref="UnitOfWorkManager"/>类型的实例
+    /// 初始化一个 <see cref="UnitOfWorkManager"/> 类型的实例。
     /// </summary>
     public UnitOfWorkManager() => _unitOfWorks = new HashSet<IUnitOfWork>();
 
-    /// <summary>
-    /// 提交
-    /// </summary>
+    /// <inheritdoc />
     public void Commit()
     {
         foreach (var unitOfWork in _unitOfWorks)
             unitOfWork.Commit();
     }
 
-    /// <summary>
-    /// 提交
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         foreach (var unitOfWork in _unitOfWorks)
             await unitOfWork.CommitAsync(cancellationToken);
     }
 
-    /// <summary>
-    /// 注册工作单元
-    /// </summary>
-    /// <param name="unitOfWork">工作单元</param>
+    /// <inheritdoc />
     public void Register(IUnitOfWork unitOfWork)
     {
         if (unitOfWork == null)
@@ -46,9 +38,6 @@ public class UnitOfWorkManager : IUnitOfWorkManager
             _unitOfWorks.Add(unitOfWork);
     }
 
-    /// <summary>
-    /// 获取工作单元集合
-    /// </summary>
-    /// <returns>当前已注册的工作单元集合。</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks() => _unitOfWorks;
 }

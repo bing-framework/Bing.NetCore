@@ -15,6 +15,7 @@ public class LocalEventBusDynamicTest
     /// <summary>
     /// 创建带空 Handler 的 LocalEventBus（不依赖 EventBusModule）
     /// </summary>
+    /// <returns>不依赖模块初始化的本地事件总线。</returns>
     private static LocalEventBus CreateBus()
     {
         var services = new ServiceCollection();
@@ -23,8 +24,14 @@ public class LocalEventBusDynamicTest
         return new LocalEventBus(options, sp.GetRequiredService<IServiceScopeFactory>());
     }
 
+    /// <summary>
+    /// 表示动态事件订阅测试使用的事件。
+    /// </summary>
     private class DynEvent : IEvent
     {
+        /// <summary>
+        /// 获取或设置事件值。
+        /// </summary>
         public string? Value { get; set; }
     }
 
@@ -242,12 +249,22 @@ public class LocalEventBusDynamicTest
 
     // ==================== 辅助类型 ====================
 
+    /// <summary>
+    /// 表示动态订阅测试中未订阅的事件类型。
+    /// </summary>
     private class OtherEvent : IEvent { }
 
+    /// <summary>
+    /// 记录动态事件订阅收到的事件值。
+    /// </summary>
     private class TrackingEventHandler : ILocalEventHandler<DynEvent>
     {
+        /// <summary>
+        /// 获取已接收的事件值列表。
+        /// </summary>
         public List<string?> ReceivedValues { get; } = new();
 
+        /// <inheritdoc />
         public Task HandleAsync(DynEvent eventData)
         {
             ReceivedValues.Add(eventData.Value);
