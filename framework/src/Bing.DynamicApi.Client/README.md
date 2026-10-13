@@ -1,4 +1,5 @@
 # Bing.DynamicApi.Client
+[![NuGet](https://img.shields.io/nuget/v/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/) [![NuGet Downloads](https://img.shields.io/nuget/dt/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/) ![TFM](https://img.shields.io/badge/TFM-net6.0-blue.svg)
 
 面向 `IAppService` 契约的运行时 HTTP 客户端代理。该组件依赖 Bing 的动态 API 描述契约，不依赖 ABP。
 

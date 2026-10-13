@@ -21,7 +21,8 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | 文档 | 定位 |
 | --- | --- |
 | [使用文档](getting-started/使用文档.md) | 安装配置、快速上手、核心 API 与典型示例（§3.3 注册入口速查） |
-| [架构文档](architecture/架构文档.md) | 分层结构、真实模块依赖图、模块清单（51 个工程）、注册入口完整清单（§12） |
+| [架构文档](architecture/架构文档.md) | 分层结构、真实模块依赖图、核心模块清单与注册入口完整清单（§12） |
+| [代码对照清单](operations/文档与代码对照清单.md) | 当前代码与文档覆盖状态、缺口及待确认项 |
 | [设计思路文档](architecture/设计思路文档.md) | 设计动机、关键决策与权衡、数据流与扩展方式 |
 | [子系统深挖](architecture/子系统深挖.md) | CAP / FreeSQL / Bing.Data.Sql 的代码级实现解析 |
 
@@ -32,7 +33,8 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | 你想做的事 | 直接看 |
 | --- | --- |
 | **选 ORM / 比较数据访问能力** | [能力矩阵](getting-started/能力矩阵.md)（三支 × 18 项能力对照 + 决策树） |
-| **只知包名，不知该装哪个** | [包索引](getting-started/包索引.md)（按场景反查 67 个包）／网页版 [选型向导](选型向导.html) |
+| **只知包名，不知该装哪个** | [包索引](getting-started/包索引.md)（按场景反查 70 个包）／网页版 [选型向导](选型向导.html) |
+| **使用动态 API 或缓存高级能力** | [模块文档](modules/README.md) |
 | **想要一行不多的最小上手代码** | 网页版 [Cheat Sheet](cheatsheet.html)（可打印一页纸） |
 | **要端到端场景的完整代码** | [recipes 配方集](guides/recipes/README.md)（CRUD / CAP 事件 / 多租户 / RBAC / 支付 / 批量报表） |
 | **读文档被术语卡住** | [术语表](getting-started/术语表.md) |
@@ -42,7 +44,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | **想知道某个决策为何这样定** | [架构决策记录 ADR](architecture/adr/README.md) |
 | **跑测试 / 写新测试 / 发版打包** | [测试指南](operations/测试指南.md) · [工程化文档](operations/工程化文档.md) |
 
-> 全部文档索引见 **[docs/README.md](README.md)**——`docs/` 下共 **74 篇 Markdown**（含 10 份 ADR 决策记录、6 篇 recipes 配方、10 篇 `ai-workflow/` 历史资产），按 `getting-started` / `architecture` / `guides` / `operations` / `sql` / `testing` 分目录组织，顶层只保留 5 个入口文件。每个 NuGet 包目录下也各有一份 `README.md`（共 67 份，会内嵌到 nupkg 并在 nuget.org 包页面展示）。
+> 全部文档索引见 **[docs/README.md](README.md)**。`docs/` 按主题分目录组织，顶层只保留入口文件；每个 NuGet 包目录下也各有一份 `README.md`（共 70 份，会内嵌到 nupkg 并在 nuget.org 包页面展示）。
 >
 > 英文读者请看 **[docs/README.en.md](../README.en.md)**（英文导航地图；中文是权威版本）。
 
@@ -70,6 +72,9 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 |[Bing.AspNetCore.Mvc.Contracts](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|
 |[Bing.AspNetCore.Mvc](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|
 |[Bing.AspNetCore.Mvc.UI](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|
+|[Bing.DynamicApi.Contracts](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/v/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/vpre/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/dt/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|
+|[Bing.DynamicApi.Client](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/v/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/vpre/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/dt/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|
+|[Bing.DynamicApi.WebApiClient](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/v/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/vpre/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/dt/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|
 |[Bing.AspNetCore.MultiTenancy](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/v/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/vpre/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/dt/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|
 |[Bing.MiniProfiler](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/v/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/vpre/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/dt/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|
 |[Bing.Logging](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/v/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/vpre/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/dt/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|

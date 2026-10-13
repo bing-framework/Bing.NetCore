@@ -1,7 +1,7 @@
 # Bing.NetCore 文档导航
 
 **简体中文** ｜ [English](README.en.md)（英文导航）
-> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](ReleaseNotes.md)
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 内容核对：2026-10-13｜ 版本历史见 [发行说明](ReleaseNotes.md)
 
 > 本文是全部文档的**入口索引**。按「你是谁、想解决什么」组织，点击即可跳转。
 >
@@ -26,6 +26,7 @@ docs/
 │   └── adr/                     架构决策记录（10 份）
 ├── guides/                      指南：建模 / 扩展 / 配置 / 实践 / 横切能力 / 组件库
 │   └── recipes/                 端到端配方（6 篇）
+├── modules/                     跨包模块：动态 API、缓存
 ├── operations/                  运维与质量：日志可观测 / 安全 / 性能 / 测试 / 工程化 / 资产
 ├── sql/                         数据访问专项（10 篇）
 ├── testing/                     集成测试
@@ -65,11 +66,13 @@ docs/
 | **要接日志 / 追踪 / 诊断面板** | [日志与可观测性](operations/日志与可观测性.md)（链路视角五层次：Enricher、请求留痕、TraceId 贯通、SkyAPM、⚠ 请求日志无脱敏、框架无 HealthChecks） |
 | **想知道某个决策为什么这样定** | [架构决策记录 ADR](architecture/adr/README.md)（10 份决策，含被否决的备选方案与负面后果） |
 | **跑测试 / 写新测试** | [测试指南](operations/测试指南.md)（工程布局、门控变量、`Bing.Test.Shared`、RS00xx 门禁、eng 脚本） |
-| **只知道包名，不知道装哪个** | [包索引](getting-started/包索引.md)（按「我要做 X」反查 67 个包） |
+| **只知道包名，不知道装哪个** | [包索引](getting-started/包索引.md)（按「我要做 X」反查 70 个包） |
+| **核对文档与当前代码是否一致** | [文档与代码对照清单](operations/文档与代码对照清单.md)（已实现、缺失、过时、待实现/待确认） |
+| **使用动态 API 或缓存高级能力** | [模块文档索引](modules/README.md)（跨包实现、配置、用法与限制） |
 | **不确定组合，想要交互式推荐** | [选型向导](选型向导.html)（浏览器打开，几个问题 → 包清单 + 启动代码） |
 | **想要一页纸速查 / 打印贴墙** | [Cheat Sheet](cheatsheet.html)（从零到 CRUD API 的全部代码） |
 | **要端到端的完整场景代码** | [recipes 配方集](guides/recipes/README.md)（CRUD、CAP 事件、多租户、RBAC、支付、批量报表） |
-| **要用边缘组件（支付 / OAuth / 缓存 / 日志 Sink / 链路追踪）** | [组件库文档](guides/组件库文档.md)（9 个包，含状态徽章与"入口不在 `IServiceCollection`"的提醒） |
+| **要用边缘组件（支付 / OAuth / 日志 Sink / 链路追踪）** | [组件库文档](guides/组件库文档.md)（含状态徽章与“入口不在 `IServiceCollection`”的提醒） |
 | **深入某个横切能力（邮件 / 模板 / 锁 / 本地化 / 事件总线）** | [横切能力文档](guides/横切能力文档.md)（《使用文档》§8 的详解版） |
 | **要写事件（本地 / 消息）** | [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md)（定义 / 区别 / 选型对照表 + 两套各五步上手） |
 | **要发事件 / 用 CAP / 领域事件** | 先看 [事件与消息文档](architecture/事件与消息文档.md)（四套机制对照；⛔ 领域事件不会派发、⚠ `send:false` 事务外静默丢事件）→ 动手写用 [分布式事件使用说明](guides/分布式事件使用说明.md)（CAP 全链路手册） |
@@ -119,7 +122,9 @@ docs/
 | [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md) | **两套机制的对称手册**：`ISimpleEventBus`（进程内）与 `IMessageEventBus`（跨服务 / CAP）的定义、**逐维度对照表**（契约 / 范围 / 持久化 / 可靠投递 / 事务参与 / 延迟发布 / 处理器发现 / 异常隔离 / 适用与不适用场景）、各自五步上手（装包 → 注册 → 定义 → 发布 → 订阅）、⚠ **本地事件处理器必须手工注册**（不注册则 `PublishAsync` **静默无操作**）、⚠ **本地事件全仓零生产调用、无任何真实处理器实现**（示例为本手册构造）、`Send` 默认值为 **`false`**（此前他处写成 `true` 是错的）、两级发布链路、陷阱与防误用清单。 |
 | [组件库文档](guides/组件库文档.md) | **9 个包的使用说明**（支付、**第三方 OAuth 登录 16 提供方**、业务基础类型、EasyCaching、FreeRedis、Exceptionless Sink、Mvc.UI、SkyAPM SQL 追踪、两个 Analyzers）。每个包标注状态徽章（✅ 可用 / 🔌 非标准入口 / 🧩 需手动装配 / ⚠ 入口缺失）。 |
 | [迁移指南](migrations/README.md) | **升级导航**：7.0.0 已知破坏性变更（Dapper 事务/连接收敛、SQL Fluent 收敛）、目标框架与 SDK 事实、注册入口陷阱速查、覆盖边界声明、升级验收清单。 |
-| [包索引](getting-started/包索引.md) | **按用途反查包**：从「我要做 X」找该装哪些包（15 类场景），以及全部 67 个可发包的一句话速览表（含 TFM、分层、上游依赖、反向下游包）。配合 [选型向导](选型向导.html) 使用效果最佳。 |
+| [包索引](getting-started/包索引.md) | **按用途反查包**：从「我要做 X」找该装哪些包，以及全部 70 个可发包的一句话速览表（含 TFM、分层、上游依赖、反向下游包）。配合 [选型向导](选型向导.html) 使用效果最佳。 |
+| [模块文档](modules/README.md) | **跨包能力入口**：当前集中说明动态 API 与缓存，并链接到已有专题。 |
+| [文档与代码对照清单](operations/文档与代码对照清单.md) | **盘点结果**：逐模块记录代码状态、文档状态、修订动作和待实现/待确认项。 |
 | [recipes 配方集](guides/recipes/README.md) | **端到端可运行场景代码**：① `crud-efcore`（EF Core + MySQL 完整 CRUD，含 DTO 映射、分页、软删除、`IVersion` 并发冲突处理）② `cap-event-outbox`（本地事件 + CAP 消息 + Outbox 事务一致性）③ `multi-tenancy`（租户解析链 + 三种租户 Store + ⚠ 自定义过滤器必须自己套用）④ `rbac-authorization`（JWT 签发校验 + 全局 Authorize + 权限树）⑤ `payment`（`AddPay` 配置与支付宝/微信下发-回调闭环）⑥ `bulk-and-report`（批量写入与报表查询的性能取舍）。每个配方含完整代码与验收清单。 |
 | [选型向导](选型向导.html) | **交互式 HTML 工具**（浏览器打开即可用，无需部署）：回答几个问题（宿主类型 / 要不要全功能 ORM / 目标数据库 / 是否需要分布式事件 / 是否多租户…）→ 自动输出**该装哪几个包**与**可直接复制的 `Program.cs` / `AppModule` 代码**。纯粹的静态页面，数据固化自 [包索引](getting-started/包索引.md)。 |
 | [Cheat Sheet](cheatsheet.html) | **一页纸速查**（浅色、适合 `Ctrl+P` 打印贴墙）：实体/聚合根模板、`IStore` 仓储写法、应用服务模板、注册入口总表、常用调用片段、十个最容易踩的坑。所有 API 均已按源码核准，可直接复制。 |
@@ -148,7 +153,7 @@ docs/
 
 ## 5. 配套资源
 
-- **包级 README**：`framework/src/<工程>/README.md` 与 `components/src/<工程>/README.md`（共 67 份）。它们通过 `asset/props/package.props` 的 `PackageReadmeFile` **自动内嵌进 nupkg**，在 nuget.org 包页面直接展示。模板与结构规范见 [工程化文档 §7.1](operations/工程化文档.md)。
+- **包级 README**：`framework/src/<工程>/README.md` 与 `components/src/<工程>/README.md`（共 70 份）。它们通过 `asset/props/package.props` 的 `PackageReadmeFile` **自动内嵌进 nupkg**，在 nuget.org 包页面直接展示。模板与结构规范见 [工程化文档 §7.1](operations/工程化文档.md)。
 - **架构与数据流图**：`docs/images/`（6 张 PNG，附 SVG 源文件）——分层架构、写路径+事件 Outbox、模块启动序列、读路径、异常与统一响应管道、模块分层全景。
 - **交互式工具（本地打开即可用）**：[选型向导](选型向导.html)（几个问题 → 包清单 + 可复制启动代码）、[一页纸 Cheat Sheet](cheatsheet.html)（打印版 API 速查）。两者都是零依赖静态 HTML，**不进 docfx 站点**（docfx 只收 `*.md` / `*.yml`），请在本地浏览器打开。
 - **参考实现**：[`modules/admin/README.md`](../modules/admin/README.md)（12 个工程，领域 → 仓储 → 应用服务 → Web API 完整组织；两个宿主互斥，迁移/种子未接通，见文档第 5 节）。

@@ -1,4 +1,5 @@
 # Bing.DynamicApi.WebApiClient
+[![NuGet](https://img.shields.io/nuget/v/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/) [![NuGet Downloads](https://img.shields.io/nuget/dt/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/) ![TFM](https://img.shields.io/badge/TFM-net6.0%20%7C%20net8.0-blue.svg)
 
 面向第三方 SDK 的 WebApiClientCore 声明式客户端集成。SDK 接口和 DTO 属于调用方自己的发布契约，不需要继承 `IAppService`，也不会运行时读取动态 API 描述。现有 `Bing.DynamicApi.Client` 仍用于根据运行时描述创建客户端代理；两个客户端包互不替代。
 

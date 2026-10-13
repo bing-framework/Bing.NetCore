@@ -25,7 +25,7 @@ third‑party component wrappers, and integration modules for common infrastruct
 | **Data access** | Three coexisting options — EF Core (5 providers), FreeSQL (MySql), Dapper (`Bing.Data.Sql` engine) |
 | **DDD building blocks** | `IStore` (not `IRepository`), aggregate roots, unit of work, auditing, soft delete, optimistic concurrency |
 | **Cross‑cutting** | Unified API response, exception pipeline, multi‑tenancy, local + distributed event bus (CAP), caching, locks, email, templating, localization |
-| **Packages** | **67 packable projects** under `framework/src` and `components/src` |
+| **Packages** | **70 packable projects** under `framework/src` and `components/src` |
 
 ## Quick start
 
@@ -135,7 +135,7 @@ Interactive helpers (open locally in a browser, zero dependencies):
 
 ## Packages
 
-The full table with NuGet version / download badges for all **67 packages** is maintained in the
+The full table with NuGet version / download badges for all **70 packages** is maintained in the
 Chinese [README](README.md#nuget-packages). Core groups:
 
 | Group | Packages |
@@ -143,12 +143,13 @@ Chinese [README](README.md#nuget-packages). Core groups:
 | **Core & DI** | `Bing.Core` · `Bing.Uow` · `Bing.ExceptionHandling` · `Bing.ObjectMapping` · `Bing.AutoMapper` |
 | **Domain (DDD)** | `Bing.Ddd.Domain` · `Bing.Ddd.Application` (+ `.Contracts`) · `Bing.Auditing` (+ `.Contracts`) |
 | **ASP.NET Core** | `Bing.AspNetCore` (+ `.Abstractions`, `.Mvc`, `.Mvc.Contracts`, `.Mvc.UI`, `.Serilog`) · `Bing.AspNetCore.Authentication.JwtBearer` · `Bing.AspNetCore.MultiTenancy` |
+| **Dynamic API** | `Bing.DynamicApi.Contracts` · `Bing.DynamicApi.Client` · `Bing.DynamicApi.WebApiClient` |
 | **Data access** | `Bing.Data` · `Bing.Data.Sql` (+ `.Analyzers`) · `Bing.Dapper.*` (5 providers) · `Bing.EntityFrameworkCore.*` (5 providers) · `Bing.FreeSQL` (+ `.MySql`) |
 | **Cross‑cutting** | `Bing.Caching.*` · `Bing.Events` · `Bing.Locks.CSRedis` · `Bing.Localization` · `Bing.MultiTenancy` · `Bing.Emailing` · `Bing.MailKit` · `Bing.TextTemplating` (+ `.Scriban`) · `Bing.Logging` (+ `.Serilog`, `.Sinks.Exceptionless`) |
 | **Security** | `Bing.Security` · `Bing.Permissions` · `Bing.Validation` (+ `.Abstractions`) |
 | **Business** | `Bing.Biz` · `Bing.Biz.Payments` · `Bing.Biz.OAuthLogin` |
 
-Every package directory contains its own `README.md`, which is embedded into the `.nupkg`
+Every one of the 70 package directories contains its own `README.md`, which is embedded into the `.nupkg`
 (via `PackageReadmeFile`) and rendered on its nuget.org page.
 
 ## Build and test

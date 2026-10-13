@@ -54,8 +54,18 @@
       href: guides/组件库文档.md
     - name: 配方集
       href: guides/recipes/README.md
+- name: 模块
+  items:
+    - name: 模块索引
+      href: modules/README.md
+    - name: 动态 API
+      href: modules/dynamic-api.md
+    - name: 缓存
+      href: modules/caching.md
 - name: 运维与质量
   items:
+    - name: 文档与代码对照清单
+      href: operations/文档与代码对照清单.md
     - name: 日志使用说明
       href: operations/日志使用说明.md
     - name: 日志与可观测性

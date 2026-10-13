@@ -1,6 +1,6 @@
 # 文档体系变更记录
 
-> **适用版本**：框架 `7.0.0`（`version.props`）｜ 目标框架：类库 `netstandard2.0`、Web / 应用 `net6.0`｜ 内容核对：2026-09-18｜ 版本历史见 [发行说明](ReleaseNotes.md)
+> **适用版本**：框架 `7.0.0`（`version.props`）｜ 内容核对：2026-10-13｜ 版本历史见 [发行说明](ReleaseNotes.md)
 
 本文记录的是 **`docs/` 文档体系自身**的演进——新增/重构了哪些文档、修正了哪些事实错误、建立了哪些约定。
 
@@ -13,7 +13,7 @@
 | 约定 | 说明 | 谁在自动检查 |
 | --- | --- | --- |
 | **`docs/index.md` 是派生产物** | 它由根 `README.md` 自动生成，**禁止手工编辑**。改完根 README 后运行 `python eng/ci/sync-docs-index.py` | `eng/ci/check-docs.py` + `.github/workflows/docs-lint.yml` |
-| **新增包必须同时做三件事** | ① 写包级 `README.md`（含 NuGet 徽章）；② 把包加进根 README 的包表；③ 若属于核心能力，补进《架构文档》§11/§12 | 同上（包表覆盖 67/67、徽章覆盖 67/67 是硬门槛） |
+| **新增包必须同时做三件事** | ① 写包级 `README.md`（含 NuGet 徽章）；② 把包加进根 README 的包表；③ 若属于核心能力，补进《架构文档》§11/§12 | 同上（当前包表与徽章覆盖应为 70/70） |
 | **新增文档要挂三处** | ① `docs/toc.yml`（docfx 站点导航）；② `docs/README.md`（人工导航 hub）；③ 若是核心文档，在四份核心文档头部「配套文档」里互相引用 | `check-docs.py` 校验 toc 与 hub 的链接可达 |
 | **HTML 不能进 toc** | `docfx.json` 的 `content.files` 只收 `**/*.{md,yml}`，`选型向导.html`、`cheatsheet.html` 这类工具页放进 `toc.yml` 会产生"找不到内容"告警 | 人工约定 |
 | **文档必须放进主题子目录** | `docs/` 顶层只允许 5 个入口类文件（`README.md` / `README.en.md` / `index.md` / `CHANGELOG.md` / `ReleaseNotes.md`）。新增文档一律放进 `getting-started` / `architecture` / `guides` / `operations` / `sql` / `testing` 等既有子目录 | `check-docs.py` 的「顶层归位」检查 |
@@ -32,6 +32,16 @@ python eng/ci/sync-docs-index.py --check   # 只查 index.md 是否与 README �
 ---
 
 ## 2. 记录
+
+### 2026-10-13 — 第十九轮：全仓文档盘点，补动态 API 与缓存模块入口
+
+- 新增[文档与代码对照清单](operations/文档与代码对照清单.md)，按功能模块标明完整、缺失、过时、待实现和待确认状态。
+- 新增[模块索引](modules/README.md)、[动态 API](modules/dynamic-api.md)与[缓存](modules/caching.md)，统一记录实现路径、接口、配置和限制。
+- 包口径由 67 修正为 70，补入 `Bing.DynamicApi.Contracts`、`Bing.DynamicApi.Client`、`Bing.DynamicApi.WebApiClient`，并补齐契约包 README。
+- 翻译 `docs/api/index.md` 的英文占位内容，明确实际成员页仍需 DocFX 生成。
+- 去除 `ai_docs/` 易漂移的固定数量，更新中文/英文导航、toc 与架构文档入口。
+
+---
 
 ### 2026-09-19 — 第十八轮：新建「本地事件与消息事件」对称手册，修正两处既有事件文档的错误
 
@@ -261,7 +271,7 @@ python eng/ci/sync-docs-index.py --check   # 只查 index.md 是否与 README �
 | 缺口 | 之前的口径 | 精确后 |
 | --- | --- | --- |
 | 领域事件不派发 | "派发器注册与否不明" | **派发器其实已注册**（`Bing.Admin/Modules/AppModule.cs:74`、`Bing.Admin.FreeSQL/Modules/AppModule.cs:68`）——缺的是**调用**。`DispatchAsync` 全仓仅 3 处：接口声明、实现、测试 |
-| 工作单元是否排空领域事件 | 只写"全仓零命中" | EF 支**恰好有一个为此预留的钩子**，但它是空的：`UnitOfWorkBase.cs:799-802` 的 `protected virtual Task PublishEventsAsync() => Task.CompletedTask;`。FreeSQL 与 `Bing.Uow` 则连钩子都没有 |
+| 工作单元是否排空领域事件 | 只写"全仓零命中" | EF 支**恰好有一个为此预留的钩子**，但它是空的：`UnitOfWorkBase.cs:777-784` 的 `protected virtual Task PublishEventsAsync() => Task.CompletedTask;`。FreeSQL 与 `Bing.Uow` 则连钩子都没有 |
 | `ClearDomainEvents()` | 未提及 | 在生产代码中**从未被调用**——所以准确说法是"既没清也没派发"，而非"清了却没派发" |
 | **`send:false` 在事务外会静默丢事件** 🆕 | 未登记 | `MessageEventBus` 对 `Send=false` **完全不调用 `Publisher`**，只 `TransactionActionManager.Register`；而 `SaveChanges` 仅在 `Count>0` 时才走 `CommitAsync` → **无 UoW 提交则动作永不执行、无报错无日志无兜底**。admin 恰好因 `SecurityService.cs:105` 那行 `CommitAsync()` 才躲过 |
 | `Bing.Events.Cap.MySql` 的版本 | 写"CAP 2.6 的源码镜像" | **该包内部标注自相矛盾**：`csproj:9` 的 `Description` 说 "CAP 2.6"，而 `dependency.props:3` 实际 pin 的是 `DotNetCore.CAP` **3.1.2**。按源码为准 |
