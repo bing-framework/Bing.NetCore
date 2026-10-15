@@ -1,10 +1,10 @@
 # 缓存已完成任务总览
 
-> 核对日期：2026-10-14。整合任务 009–098 的局部实现与完成证据；原始任务 ID 保留。功能核对基于当前源码、职责级测试和已有执行/评审记录，本轮没有重跑 Redis、Cluster 或性能矩阵。
+> 核对日期：2026-10-15。整合任务 006、009–098 共 91 个局部任务的实现与完成证据；原始任务 ID 保留。功能核对基于当前源码、职责级测试和已有执行/评审记录，本轮没有重跑 Redis、Cluster 或性能矩阵。
 
 ## 阅读方式与完成范围
 
-面向使用者的当前契约见[缓存模块](../../../docs/modules/caching.md)。缓存总体状态和下一动作仍以[缓存能力索引](../../cache-todo-index.md)为准；001–008 总体计划与性能任务、099 跨版本发布任务保留原文。
+面向使用者的当前契约见[缓存模块](../../../docs/modules/caching.md)。缓存总体状态和下一动作仍以[缓存能力索引](../../cache-todo-index.md)为准；001–005、007–008 总体计划与性能任务、099 跨版本发布任务保留原文。
 
 这里的“完成”指各局部计划范围内的实现或补证完成，不代表正式性能预算、全局发布准入或所有拓扑的大规模测试通过。前序重复的外部环境 TODO 已由 077–092 的后续任务逐项补证；历史方向性采样只表明当时的观测结果，不能拼接为当前候选的正式 before/after。
 
@@ -36,7 +36,31 @@
 
 原始 JSON/checkpoint 已按任务 ID 归档到 `artifacts/ai-tasks/`，不随 Git clone 分发，定位规则见[产物说明](../ARTIFACTS.md)。下列测试方法与脚本/索引入口均已在当前仓库定位；表中没有把存在测试当作本轮运行通过。
 
-## 逐任务实现与证据
+## 单节点与跨进程协调证据
+
+<a id="BING-CACHE-TODO-20261006-006"></a>
+
+### BING-CACHE-TODO-20261006-006
+
+原计划只要求在已确认的本地 Redis 单节点补齐协调证据，并明确区分 Cluster、独立总线和正式性能预算。计划内的命令计数复用、三个 Provider 跨进程探针及协调回归均已有执行记录；原报告的 `PARTIAL` / `PASS_WITH_EXTERNAL_GATES` 表示外部边界仍在，不表示该单节点计划尚缺实现。本任务未修改生产代码。
+
+历史环境为 Redis 5.0.12、`127.0.0.1:6379`；该地址是当时的实验环境，不是库的默认配置。各场景使用随机命名空间，禁止 FLUSHDB 或删除其他命名空间哨兵。ProcessProbe 历史构建成功、0 错误，存在 NU1801/NU1603/NU1900 离线依赖告警。
+
+<a id="BING-CACHE-TODO-20261006-006-test-mapping"></a>
+
+| 生产职责与关键文件 | 验证入口 | 原执行记录与范围 |
+| --- | --- | --- |
+| FreeRedis/CSRedis 流首批取消，阻止后续命令派发：两个 Provider 的 Stream 实现 | [FreeRedis CommandCancellationTest](../../../framework/tests/Bing.Caching.FreeRedis.Tests.Integration/CommandCancellationTest.cs)、[CSRedis CommandCancellationTest](../../../framework/tests/Bing.Caching.CSRedis.Tests.Integration/CommandCancellationTest.cs) | 复用相同端点、未改源码的 MONITOR 证据；net6.0/net8.0 各 1/1；不代表 Cluster |
+| 同键回源合并、租约与提交检查：[FreeRedis 协调](../../../framework/src/Bing.Caching.FreeRedis/Bing/Caching/FreeRedis/FreeRedisCacheManager.Coordination.cs)、[CSRedis 管理器](../../../framework/src/Bing.Caching.CSRedis/Bing/Caching/CSRedis/CSRedisCacheManager.cs)、[RedisLeaseCoordinator](../../../framework/src/Bing.EasyCaching/Bing/EasyCaching/RedisLeaseCoordinator.cs) | [Run-ProcessProbe.ps1](../../../framework/tests/Bing.Caching.ProcessProbe/Run-ProcessProbe.ps1) | FreeRedis、CSRedis、EasyRedis 各自的 normal、crash-holder、timeout-holder、lost-lease、waiter-timeout 五类独立进程场景均 PASS |
+| FreeRedis/CSRedis 进程内协调、资源预算与取消边界 | [FreeRedis CoordinationBoundaryTest](../../../framework/tests/Bing.Caching.FreeRedis.Tests.Integration/CoordinationBoundaryTest.cs)、[CSRedis CoordinationBoundaryTest](../../../framework/tests/Bing.Caching.CSRedis.Tests.Integration/CoordinationBoundaryTest.cs) | 两个项目在 net6.0/net8.0 均各 4/4；仅表示当时的单节点回归集合 |
+| EasyCaching Redis/Hybrid 协调、显式写删与跨实例失效 | [RedisCoordinatorIntegrationTest](../../../framework/tests/Bing.EasyCaching.Tests/RedisCoordinatorIntegrationTest.cs) | `RUN_INTEGRATION_TESTS=true`、`BING_TEST_EASYCACHING_REDIS=127.0.0.1:6379`；net6.0/net8.0 各 19/19；两个实例共用该端点，不能替代独立总线故障 |
+| Hybrid 回填代次拒绝陈旧提交 | [HybridRefillGenerationTest](../../../framework/tests/Bing.EasyCaching.Tests/HybridRefillGenerationTest.cs) | 进程内单元职责证据，不声称验证了跨实例总线 |
+
+以上数量是原执行记录，不是本次重跑，也不等于当前测试类的用例总数。复用能力是“按 Provider 与拓扑隔离证据、以进程故障验证租约提交边界”，与后续场景共享探针而不重复维护任务快照。
+
+原 TODO 中的独立总线重连/暂停/故障及 Cluster/客户端分片缺口，应结合后续 [079](#BING-CACHE-TODO-20261007-079)、[084](#BING-CACHE-TODO-20261007-084)、[085](#BING-CACHE-TODO-20261007-085)、[089–092](#BING-CACHE-TODO-20261007-089) 的限定场景证据阅读；不能据此宣称任意拓扑已验收。正式 baseline、完整矩阵与预算仍由 [002](../BING-CACHE-PERF-STREAM-20261004-002/plan.md)、[004](../BING-CACHE-TODO-20261005-004/plan.md) 和[当前能力索引](../../cache-todo-index.md)承接；本任务没有重测性能或确认发布。
+
+## 逐任务实现与证据（009–098）
 
 ### 公共契约、输入与资源边界
 

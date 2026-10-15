@@ -2,7 +2,25 @@
 
 > 日期：2026-10-14。已执行清单；本轮整合任务文档，归档完成任务遗留日志，不修改业务实现、基准源码或原始运行产物内容。
 
-> 2026-10-15 复核：没有新增任务或相关业务源码变更，沿用下列逐文件处置；380 份删除属于上次整理，本次新增删除为 0。仍有效或未完成的 24 个任务全部保留，不因重复整理请求继续删减。
+> 2026-10-15 追加整理：用户确认后，将 006 和 V4 的 7 份 Markdown 合并后删除。下方原 380 份删除和保留规则属于上一轮记录；最新状态、完整保留清单与验证见[本轮核对结果](STATUS-AUDIT.md)。
+
+## 2026-10-15 经确认追加合并（7 份）
+
+006 的单节点计划范围已有三 Provider 跨进程及双 TFM 协调记录支撑，合入[缓存总览](completed/caching.md#BING-CACHE-TODO-20261006-006)，保留生产职责映射、历史通过数和总体性能边界。V4 的历史实现及 Round 7 Review 已完成，但高元数 API 已被 V6 替代，合入[SQL 查询 API 演进](completed/sql-query-api.md#sql-lambda-query-api-v4)，保留原子状态与 FIX-011/012 结论、历史验收限制。
+
+执行顺序为先合并证据、迁移引用，再删除以下被覆盖的原始快照：
+
+- `ai_docs/tasks/BING-CACHE-TODO-20261006-006/plan.md`
+- `ai_docs/tasks/BING-CACHE-TODO-20261006-006/execution.md`
+- `ai_docs/tasks/BING-CACHE-TODO-20261006-006/test-mapping.md`
+- `ai_docs/tasks/BING-CACHE-TODO-20261006-006/TODO.md`
+- `ai_docs/tasks/sql-lambda-query-api-v4/plan.md`
+- `ai_docs/tasks/sql-lambda-query-api-v4/execution.md`
+- `ai_docs/tasks/sql-lambda-query-api-v4/review.md`
+
+未完成的查询重构计划只将一处 V4 Review 引用改到新总览锚点。其余 102 份保留任务 Markdown 逐字节不变；22 个任务、103 份原文档及复现程序仍保留，目标、背景、验收标准未改写。独立任务目录 24 → 22；合并总览由三份增为四份，覆盖 97 个任务，连同保留的 22 个任务共 119 个 ID。原文件可由 Git 历史及既有本地备份恢复；没有新增直接丢弃或运行产物清理。
+
+## 上一轮整理记录（2026-10-14）
 
 ## 删除依据与保留规则
 
