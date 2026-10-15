@@ -27,7 +27,7 @@ public class DependencyModule : BingModule
         // 服务定位器设置
         var registration = BingModuleRegistration.Get(services);
 
-        services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));// 解决循环依赖问题
+        services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));// 仅延迟解析，访问 Value 时仍可能形成循环依赖。
         services.TryAddTransient<IHybridServiceScopeFactory, DefaultServiceScopeFactory>();
         services.AddScoped<ScopedDictionary>();
 
@@ -74,6 +74,12 @@ public class DependencyModule : BingModule
         var dependencyAttribute = implementationType.GetAttribute<DependencyAttribute>();
         var serviceTypes = GetImplementedInterfaces(implementationType);
 
+        // 开放泛型的次接口不能通过工厂转发：容器要求开放泛型描述符使用实现类型。
+        if (implementationType.ContainsGenericParameters && lifetime != ServiceLifetime.Transient &&
+            RequiresOpenGenericFactory(services, serviceTypes, dependencyAttribute))
+            throw new InvalidOperationException(
+                $"开放泛型服务 {implementationType.FullName} 的多接口实例共享不受支持；请只约定注册一个业务接口，并手工注册其余接口的适配器。");
+
         // 服务数量为0时注册自身
         if (serviceTypes.Length == 0)
         {
@@ -85,6 +91,9 @@ public class DependencyModule : BingModule
         if (dependencyAttribute?.AddSelf == true)
             services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime.Value));
 
+        // 记录真正注册成功的主接口，避免 TryAdd 被跳过后次接口转发到其他实现。
+        Type sharedServiceType = null;
+
         // 注册服务
         for (var i = 0; i < serviceTypes.Length; i++)
         {
@@ -92,7 +101,12 @@ public class DependencyModule : BingModule
             var descriptor = new ServiceDescriptor(serviceType, implementationType, lifetime.Value);
             if (lifetime.Value == ServiceLifetime.Transient)
             {
-                services.TryAddEnumerable(descriptor);
+                if (serviceType.HasAttribute<MultipleDependencyAttribute>())
+                    services.TryAddEnumerable(descriptor);
+                else if (dependencyAttribute?.TryAdd == true || dependencyAttribute?.ReplaceExisting == true)
+                    AddSingleService(services, descriptor, dependencyAttribute);
+                else
+                    services.TryAddEnumerable(descriptor);
                 continue;
             }
 
@@ -103,6 +117,8 @@ public class DependencyModule : BingModule
                     services.Add(descriptor);
                 else
                     AddSingleService(services, descriptor, dependencyAttribute);
+                if (services.Contains(descriptor))
+                    sharedServiceType = serviceType;
             }
             else
             {
@@ -112,10 +128,23 @@ public class DependencyModule : BingModule
                 }
                 else
                 {
-                    // 有多个接口，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一实例
-                    var firstServiceType = serviceTypes[0];
-                    descriptor = new ServiceDescriptor(serviceType, provider => provider.GetService(firstServiceType), lifetime.Value);
+                    // 主接口未注册时，当前接口必须由自己的实现创建。
+                    if (sharedServiceType != null)
+                    {
+                        var firstServiceType = sharedServiceType;
+                        descriptor = new ServiceDescriptor(serviceType,
+                            provider =>
+                            {
+                                var instance = provider.GetService(firstServiceType);
+                                if (instance != null && implementationType.IsInstanceOfType(instance))
+                                    return instance;
+                                throw new InvalidOperationException(
+                                    $"服务 {implementationType.FullName} 的主接口 {firstServiceType.FullName} 已被其他实现覆盖，无法转发到 {serviceType.FullName}。");
+                            }, lifetime.Value);
+                    }
                     AddSingleService(services, descriptor, dependencyAttribute);
+                    if (sharedServiceType == null && services.Contains(descriptor))
+                        sharedServiceType = serviceType;
                 }
             }
         }
@@ -147,7 +176,7 @@ public class DependencyModule : BingModule
     /// <returns>实现类型可注册的服务接口数组。</returns>
     protected virtual Type[] GetImplementedInterfaces(Type type)
     {
-        var exceptInterfaces = new[] { typeof(IDisposable) };
+        var exceptInterfaces = new[] { typeof(IDisposable), typeof(IAsyncDisposable) };
         var interfaceTypes = type.GetInterfaces()
             .Where(x => !exceptInterfaces.Contains(x) && !x.HasAttribute<IgnoreDependencyAttribute>())
             .ToArray();
@@ -174,5 +203,48 @@ public class DependencyModule : BingModule
             services.TryAdd(descriptor);
         else
             services.Add(descriptor);
+    }
+
+    /// <summary>
+    /// 判断开放泛型注册是否会生成容器不支持的工厂转发描述符。
+    /// </summary>
+    private static bool RequiresOpenGenericFactory(IServiceCollection services, Type[] serviceTypes,
+        DependencyAttribute dependencyAttribute)
+    {
+        if (serviceTypes.Length < 2)
+            return false;
+
+        // 预演 AddToServices 的共享入口状态。TryAdd 可能跳过首接口，
+        // 此时后续接口仍可能成为共享入口并使再后续接口需要开放泛型工厂。
+        var sharedServiceRegistered = false;
+        for (var index = 0; index < serviceTypes.Length; index++)
+        {
+            var serviceType = serviceTypes[index];
+            var multiple = serviceType.HasAttribute<MultipleDependencyAttribute>();
+            var alreadyRegistered = services.Any(descriptor => descriptor.ServiceType == serviceType);
+
+            if (index == 0)
+            {
+                sharedServiceRegistered = multiple || dependencyAttribute?.TryAdd != true || !alreadyRegistered;
+                continue;
+            }
+
+            if (multiple)
+                continue;
+
+            if (sharedServiceRegistered)
+            {
+                if (dependencyAttribute?.TryAdd == true && alreadyRegistered)
+                    continue;
+                return true;
+            }
+
+            // 共享入口尚未建立时，当前普通接口可能直接注册并成为入口。
+            if (dependencyAttribute?.TryAdd == true && alreadyRegistered)
+                continue;
+            sharedServiceRegistered = true;
+        }
+
+        return false;
     }
 }

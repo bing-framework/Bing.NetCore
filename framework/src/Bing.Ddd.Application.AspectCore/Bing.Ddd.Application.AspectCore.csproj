@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bing.Ddd.Application.AspectCore</AssemblyName>
+    <PackageId>Bing.Ddd.Application.AspectCore</PackageId>
+    <Description>Bing DDD 应用层的 AspectCore 工作单元适配器。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\framework.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Aspect-RefVersion>3.0.0</Aspect-RefVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.AspectScope" Version="$(Aspect-RefVersion)" />
+  </ItemGroup>
+</Project>

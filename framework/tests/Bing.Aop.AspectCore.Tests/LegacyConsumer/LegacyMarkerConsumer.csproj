@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>Bing.Aop.AspectCore.LegacyConsumer</AssemblyName>
+    <RootNamespace>Bing.Aop.AspectCore.LegacyConsumer</RootNamespace>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="LegacyMarkerConsumer.cs" />
+    <ProjectReference Include="LegacyAspectCoreContract.csproj" />
+  </ItemGroup>
+</Project>

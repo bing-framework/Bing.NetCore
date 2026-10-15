@@ -1,3 +1,2 @@
-﻿// ValidAttribute 已迁移至 Bing.Aop.AspectCore 项目，保留在 Bing.Validation 命名空间。
-// 消费方请确保引用 Bing.Aop.AspectCore，using Bing.Validation 语句无需变更。
-// See: Bing.Aop.AspectCore/Bing/Aspects/ValidAttribute.cs
+// ValidAttribute 位于 Bing.Validation.Abstractions，保留此文件以避免旧源码路径变化。
+// 消费方无需修改 using Bing.Validation；需要执行验证时再引用对应的 AOP 适配器。

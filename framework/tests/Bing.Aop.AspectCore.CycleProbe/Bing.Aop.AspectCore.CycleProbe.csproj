@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Aop.AspectCore/Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="../../src/Bing.Core/Bing.Core.csproj" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
+  </ItemGroup>
+</Project>

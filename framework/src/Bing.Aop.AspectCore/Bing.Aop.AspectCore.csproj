@@ -7,13 +7,17 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Bing.Core\Bing.Core.csproj" />
-    <ProjectReference Include="..\Bing.Validation\Bing.Validation.csproj" />
+    <ProjectReference Include="..\Bing.Validation.Abstractions\Bing.Validation.Abstractions.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <Aspect-RefVersion>2.4.0</Aspect-RefVersion>
+    <Aspect-RefVersion>3.0.0</Aspect-RefVersion>
   </PropertyGroup>
 
   <ItemGroup>

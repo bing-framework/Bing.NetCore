@@ -1,0 +1,23 @@
+# 生产符号到直接测试映射
+
+| 生产符号或行为 | 直接测试项目与方法 |
+| --- | --- |
+| `DependencyModule.GetImplementedInterfaces` | Bing.Core.Tests: `Register_ShouldExcludeAsyncDisposableFromServiceInterfaces` |
+| `DependencyModule.AddToServices` 开放泛型预检和单接口解析 | Bing.Core.Tests: `Register_OpenGenericAliases_ShouldFailBeforePartialRegistration`、`Register_OpenGenericSingleInterface_ShouldResolveClosedTypes`、`Register_OpenGenericTryAdd_WithExistingPrimary_ShouldRegisterSecondaryDirectly`、`Register_ScopedOpenGenericTryAdd_WithExistingPrimary_ShouldRegisterSecondaryDirectly`、`Register_OpenGenericTryAdd_WithBothInterfacesExisting_ShouldSkipRegistration`、`Register_ScopedOpenGenericTryAdd_WithBothInterfacesExisting_ShouldSkipRegistration`、`Register_OpenGenericTryAdd_WithExistingPrimaryAndTwoPendingInterfaces_ShouldFailBeforeMutation`、`Register_OpenGenericTryAdd_WithAllInterfacesExisting_ShouldSkipRegistration`、`Register_OpenGenericTryAdd_WithOnlyOnePendingInterface_ShouldRegisterDirectly`、`Register_OpenGenericMultipleDependencyFirst_ShouldFailBeforeMutation`、`Register_OpenGenericTryAdd_WithMultipleDependencyMiddle_ShouldRegisterRemainingDirectly`、`Register_OpenGenericReplaceExisting_WhenSharedFactoryRequired_ShouldFailBeforeMutation`、`Register_ScopedOpenGenericReplaceExisting_WhenSharedFactoryRequired_ShouldFailBeforeMutation` |
+| `DependencyModule.AddToServices` 瞬时 TryAdd/ReplaceExisting 与实例生命周期 | Bing.Core.Tests: `Register_TransientFlags_ShouldHonorTryAddAndReplaceExisting` |
+| `DependencyModule.AddToServices` 的 TryAdd 与后续主接口替换路径 | Bing.Core.Tests: `Register_TryAddPrimaryExists_ShouldNotForwardSecondaryToOtherImplementation`、`Register_PrimaryReplacedLater_ShouldRejectStaleAlias` |
+| `DependencyModule.AddToServices` 的作用域、多重注入、AddSelf、ReplaceExisting | Bing.Core.Tests: `Register_ScopedInterfaces_ShouldShareWithinScope`、`Register_MultipleDependency_ShouldKeepAllImplementations`、`Register_AddSelf_ShouldExposeSelfAndInterface`、`Register_ReplaceExisting_ShouldReplacePrimary` |
+| DI 工厂转发的底层释放限制 | Bing.Core.Tests: `Register_DisposableBusinessAliases_ShouldExposeDuplicateDisposalLimitation` |
+| 异步双接口释放与非释放适配器所有权 | Bing.Core.Tests: `Register_AsyncBusinessAliases_ShouldExposeDuplicateDisposalLimitation`、`ManualAdapters_ShouldDisposeSharedOwnerOnce` |
+| `AddSelf` 自身和接口实例所有权；双路径释放选择 | Bing.Core.Tests: `Register_AddSelf_ShouldExposeSelfAndInterface`、`OwnedDualDisposable_ShouldUseSyncPathOnce`、`OwnedDualDisposable_ShouldUseAsyncPathOnce` |
+| 服务构造环、缺失依赖、作用域与 Lazy 动态解析 | Bing.Core.Tests: `ContainerValidationBehaviorTest` 的 12 个直接测试（含动态解析理论用例） |
+| `LazyServiceProvider` 缓存回收与并发 Lazy | Bing.Core.Tests: `LazyServiceProvider_ClosedScope_ShouldReleaseCachedReferences`、`LazyServiceProvider_RetainedAcrossScopes_ShouldRetainCachedInstance`、`LazyGetService_WithFactory_ShouldCacheScopedDisposableAcrossScopeRelease`、`LazyGetService_WithFactory_ShouldReleaseCacheAndScopedService`、`Lazy_ConcurrentValueAccess_ShouldShareOneResolution`、`SameLazyInstance_ReentrantValueAccess_ShouldFailFast` |
+| 容器集合环与跨作用域缓存边界 | Bing.Core.Tests: `ValidateOnBuild_ShouldRejectEnumerableElementCycle`、`LazyServiceProvider_RetainedAcrossScopes_ShouldRetainCachedInstance` |
+| `BingModuleManager` 资源释放与对象回收 | Bing.Core.Tests: `ModuleResourceProbeTest.ModuleCycles_ShouldReleaseOwnedResourcesAndReportGc`、`ModuleInitializationCancellationDuringCallback_ShouldReleaseOwnedResources`；既有 `ModuleResourceRegressionTest` |
+| `BingModuleManager.ShutdownCore` 并发同步释放 | Bing.Core.Tests: `Dispose_DuringAsyncShutdown_ShouldWaitAndCloseOnce`；Bing.Aop.AspectCore.Tests: `HostStopAndDispose_ShouldShutdownModuleAndDisposeInjectedServiceOnce` |
+| `BingModuleManager.ShutdownCore` 并发异步关闭 | Bing.Core.Tests: `ShutdownAsync_ConcurrentCalls_ShouldCloseOnce` |
+| `BingModuleRegistration.ReleaseAsync` 释放异常继续处理 | Bing.Core.Tests: `Shutdown_SyncModuleDisposeFailure_ShouldContinueInReverseOrder`、`Shutdown_AsyncModuleDisposeFailure_ShouldContinueInReverseOrder`、`InitializationFailure_ShouldPreserveOriginalAndCollectDisposeFailure` |
+| `BingHotPluginHost.ReloadAsync` 活动调用保留及退出后回收 | Bing.Core.Tests: `ReloadAsync_NonCooperativeCall_ShouldKeepRetiringGenerationUntilCallExits`（同一调用中检查等待、退出与旧 ALC 弱引用）、`PluginReloadCycles_ShouldCollectRetiredContextsAndReportGc` |
+| AspectCore `AutowiredAttribute` 与容器释放 | Bing.Aop.AspectCore.Tests: `AutowiredContainerBehaviorTest` 的 5 个直接测试 |
+| AspectCore 属性自环、构造/属性混合环、工厂递归、构造期间 Lazy.Value 环及普通 Microsoft DI 动态环 | Bing.Aop.AspectCore.Tests: `ResolveCycle_ShouldRemainInsideBoundedChildProcess` 的 property/mixed/factory/lazy/plain-factory/plain-lazy/bing-lazy 七种独立进程模式；Debug/Release 与 net8/net6 定向运行 |
+| AspectCore 宿主与 Bing 模块共同运行 | Bing.Aop.AspectCore.Tests: `HostStopAndDispose_ShouldShutdownModuleAndDisposeInjectedServiceOnce` |

@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Bing.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -21,6 +22,11 @@ public class LazyServiceProviderTest
         return (root, scope);
     }
 
+    /// <summary>
+    /// 创建延迟服务提供程序。
+    /// </summary>
+    /// <param name="sp">底层服务提供程序。</param>
+    /// <returns>封装指定服务提供程序的延迟访问器。</returns>
     private static LazyServiceProvider CreateProvider(IServiceProvider sp) =>
         new LazyServiceProvider(sp);
 
@@ -158,6 +164,54 @@ public class LazyServiceProviderTest
         first.ShouldBeSameAs(second);
     }
 
+    /// <summary>
+    /// 验证工厂重载会缓存作用域服务，并在原作用域释放后保持缓存实例。
+    /// </summary>
+    [Fact]
+    public void LazyGetService_WithFactory_ShouldCacheScopedDisposableAcrossScopeRelease()
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<ScopedFactoryDisposable>();
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        var firstScope = provider.CreateScope();
+        var cache = new LazyServiceProvider(firstScope.ServiceProvider);
+        var expected = firstScope.ServiceProvider.GetRequiredService<ScopedFactoryDisposable>();
+        var first = (ScopedFactoryDisposable)cache.LazyGetService(typeof(ScopedFactoryDisposable),
+            _ => expected);
+
+        first.ShouldBeSameAs(expected);
+        firstScope.Dispose();
+
+        first.DisposeCount.ShouldBe(1);
+        var cached = (ScopedFactoryDisposable)cache.LazyGetService(typeof(ScopedFactoryDisposable),
+            _ => throw new InvalidOperationException("缓存实例不应再次调用工厂。"));
+        cached.ShouldBeSameAs(first);
+        first.DisposeCount.ShouldBe(1);
+
+        var secondScope = provider.CreateScope();
+        var second = secondScope.ServiceProvider.GetRequiredService<ScopedFactoryDisposable>();
+        second.ShouldNotBeSameAs(first);
+        secondScope.Dispose();
+        second.DisposeCount.ShouldBe(1);
+    }
+
+    /// <summary>
+    /// 验证工厂重载缓存及其作用域服务在缓存释放后可回收。
+    /// </summary>
+    [Fact]
+    public void LazyGetService_WithFactory_ShouldReleaseCacheAndScopedService()
+    {
+        var references = CreateFactoryCachedScopeReferences();
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        references.Cache.IsAlive.ShouldBeFalse();
+        references.Service.IsAlive.ShouldBeFalse();
+    }
+
     // ==================== LazyGetRequiredService ====================
 
     /// <summary>
@@ -212,6 +266,48 @@ public class LazyServiceProviderTest
 
     // ==================== 辅助类型 ====================
 
+    /// <summary>
+    /// 在独立栈帧创建工厂缓存并释放其作用域。
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (WeakReference Cache, WeakReference Service) CreateFactoryCachedScopeReferences()
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<ScopedFactoryDisposable>();
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+        var cache = new LazyServiceProvider(scope.ServiceProvider);
+        var service = (ScopedFactoryDisposable)cache.LazyGetService(typeof(ScopedFactoryDisposable),
+            serviceProvider => serviceProvider.GetRequiredService<ScopedFactoryDisposable>());
+
+        return (new WeakReference(cache), new WeakReference(service));
+    }
+
+    /// <summary>
+    /// 记录工厂创建的作用域资源是否已释放。
+    /// </summary>
+    private sealed class ScopedFactoryDisposable : IDisposable
+    {
+        /// <summary>
+        /// 记录资源的释放次数。
+        /// </summary>
+        private int _disposeCount;
+
+        /// <summary>
+        /// 获取资源释放次数。
+        /// </summary>
+        public int DisposeCount => Volatile.Read(ref _disposeCount);
+
+        /// <inheritdoc />
+        public void Dispose() => Interlocked.Increment(ref _disposeCount);
+    }
+
+    /// <summary>
+    /// 服务延迟解析测试使用的契约。
+    /// </summary>
     private interface IMyService { }
+    /// <summary>
+    /// 用于验证服务延迟解析的测试服务。
+    /// </summary>
     private class MyService : IMyService { }
 }

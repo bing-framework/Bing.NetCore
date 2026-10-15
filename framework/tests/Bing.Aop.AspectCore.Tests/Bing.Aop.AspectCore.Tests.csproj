@@ -12,8 +12,41 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="LegacyConsumer\**" />
     <ProjectReference Include="..\..\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Bing.Core.Tests\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
+    <ProjectReference Include="..\Bing.Aop.AspectCore.CycleProbe\Bing.Aop.AspectCore.CycleProbe.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
+    <ProjectReference Include="LegacyConsumer\LegacyMarkerConsumer.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
   </ItemGroup>
+
+  <Target Name="CopyCycleProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\Bing.Aop.AspectCore.CycleProbe\Bing.Aop.AspectCore.CycleProbe.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" ItemName="_CycleProbeTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <_CycleProbeOutput Include="%(_CycleProbeTargetPath.RootDir)%(_CycleProbeTargetPath.Directory)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_CycleProbeOutput)"
+          DestinationFiles="@(_CycleProbeOutput->'$(OutDir)CycleProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="CopyLegacyMarkerConsumerToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="LegacyConsumer\LegacyMarkerConsumer.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration);TargetFramework=net6.0">
+      <Output TaskParameter="TargetOutputs" ItemName="_LegacyConsumerTargetPath" />
+    </MSBuild>
+    <Copy SourceFiles="@(_LegacyConsumerTargetPath)"
+          DestinationFolder="$(OutDir)LegacyConsumer"
+          SkipUnchangedFiles="true" />
+  </Target>
 
   <PropertyGroup>
     <RootNamespace>Bing.Aop.AspectCore</RootNamespace>

@@ -11,10 +11,13 @@ namespace Bing.Aop.AspectCore;
 /// </summary>
 public class ValidAttributeTest
 {
+    /// <summary>
+    /// 经 AOP 代理的验证测试服务。
+    /// </summary>
     private readonly IValidTestService _service;
 
     /// <summary>
-    /// 通过 Xunit.DependencyInjection 注入经 AOP 代理的服务
+    /// 初始化一个 <see cref="ValidAttributeTest" /> 类型的实例。
     /// </summary>
     public ValidAttributeTest(IValidTestService service)
     {
@@ -64,13 +67,12 @@ public class ValidAttributeTest
     }
 
     /// <summary>
-    /// 测试目的：ValidAttribute 应继承自 ParameterInterceptorBase，
-    /// 确保类型层次结构正确，AOP 框架能识别并调用。
+    /// 测试目的：ValidAttribute 是容器无关的普通特性，参数执行器负责解释其语义。
     /// </summary>
     [Fact]
-    public void ValidAttribute_ShouldInheritFromParameterInterceptorBase()
+    public void ValidAttribute_ShouldBeContainerNeutralAttribute()
     {
         // Assert
-        typeof(ValidAttribute).BaseType.ShouldBe(typeof(Bing.Aspects.ParameterInterceptorBase));
+        typeof(ValidAttribute).BaseType.ShouldBe(typeof(Attribute));
     }
 }

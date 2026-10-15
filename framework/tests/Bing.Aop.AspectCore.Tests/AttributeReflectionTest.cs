@@ -1,4 +1,3 @@
-using AspectCore.DependencyInjection;
 using AspectCore.DynamicProxy;
 using AspectCore.DynamicProxy.Parameters;
 using Bing.Aspects;
@@ -37,14 +36,42 @@ public class AttributeReflectionTest
     }
 
     /// <summary>
-    /// 测试目的：AutowiredAttribute 应继承自 AspectCore 的 FromServiceContextAttribute，
-    /// 确保属性注入行为由 AspectCore DI 容器提供。
+    /// 测试目的：AutowiredAttribute 是容器无关的普通特性，避免核心契约绑定 AspectCore。
     /// </summary>
     [Fact]
-    public void AutowiredAttribute_ShouldInheritFromFromServiceContextAttribute()
+    public void AutowiredAttribute_ShouldBeContainerNeutralAttribute()
     {
         // Assert
-        typeof(AutowiredAttribute).BaseType.ShouldBe(typeof(FromServiceContextAttribute));
+        typeof(AutowiredAttribute).BaseType.ShouldBe(typeof(Attribute));
+    }
+
+    /// <summary>
+    /// 验证旧 AspectCore 程序集限定名仍可解析到中立特性。
+    /// </summary>
+    [Fact]
+    public void AutowiredAttribute_ShouldResolveThroughLegacyAspectCoreAssemblyName()
+    {
+        var type = Type.GetType(
+            "Bing.Aspects.AutowiredAttribute, Bing.Aop.AspectCore",
+            throwOnError: true);
+
+        type.ShouldBe(typeof(AutowiredAttribute));
+    }
+
+    /// <summary>
+    /// 验证迁移后的中立特性仍可通过旧 AspectCore 程序集限定名解析。
+    /// </summary>
+    [Fact]
+    public void NeutralAttributes_ShouldResolveThroughLegacyAspectCoreAssemblyName()
+    {
+        Type.GetType("Bing.Aspects.IgnoreAttribute, Bing.Aop.AspectCore", throwOnError: true)
+            .ShouldBe(typeof(IgnoreAttribute));
+        Type.GetType("Bing.Aspects.NotNullAttribute, Bing.Aop.AspectCore", throwOnError: true)
+            .ShouldBe(typeof(Bing.Aspects.NotNullAttribute));
+        Type.GetType("Bing.Aspects.NotEmptyAttribute, Bing.Aop.AspectCore", throwOnError: true)
+            .ShouldBe(typeof(Bing.Aspects.NotEmptyAttribute));
+        Type.GetType("Bing.Validation.ValidAttribute, Bing.Aop.AspectCore", throwOnError: true)
+            .ShouldBe(typeof(Bing.Validation.ValidAttribute));
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -52,14 +79,13 @@ public class AttributeReflectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：IgnoreAttribute 应继承自 AspectCore 的 NonAspectAttribute，
-    /// 确保被标记的成员被 AOP 框架正确排除在拦截链之外。
+    /// 测试目的：IgnoreAttribute 是容器无关的普通特性，执行器负责解释其语义。
     /// </summary>
     [Fact]
-    public void IgnoreAttribute_ShouldInheritFromNonAspectAttribute()
+    public void IgnoreAttribute_ShouldBeContainerNeutralAttribute()
     {
         // Assert
-        typeof(IgnoreAttribute).BaseType.ShouldBe(typeof(NonAspectAttribute));
+        typeof(IgnoreAttribute).BaseType.ShouldBe(typeof(Attribute));
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -106,9 +132,11 @@ public class AttributeReflectionTest
     }
 
     /// <summary>
-    /// 测试目的：ParameterInterceptorBase 应继承自 ParameterInterceptorAttribute，
-    /// 确保参数拦截器基类约束与 AspectCore 参数拦截机制对齐。
+    /// 验证参数拦截器基类的继承关系。
     /// </summary>
+    /// <remarks>
+    /// 该继承关系用于符合 AspectCore 参数拦截机制的类型约束。
+    /// </remarks>
     [Fact]
     public void ParameterInterceptorBase_ShouldInheritFromParameterInterceptorAttribute()
     {

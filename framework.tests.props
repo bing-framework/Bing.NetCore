@@ -40,7 +40,7 @@
 
   <!--<ItemGroup Condition=" '$(EnableDITestPackages)' == 'true' ">
     <PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.1.0" />
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(EnableDITestPackages)' == 'true' and '$(TargetFramework)' == 'net6.0' ">

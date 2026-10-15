@@ -7,6 +7,10 @@
 
   <Import Project="..\..\..\framework.props" />
 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
   <Import Project="dependency.props" />
 
   <Import Project="references.props" />
