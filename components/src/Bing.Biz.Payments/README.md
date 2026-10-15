@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：业务组件（components/） ｜ **当前版本**：7.0.0 ｜ **源文件**：96
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：`Bing.ObjectMapping`、`Bing.Validation`、`Bing.Core`
 
 ---
 
@@ -14,7 +14,7 @@
 框架里体量最大的业务组件（约 96 个源文件），覆盖：
 
 **支付宝**：条码付 / 二维码付 / App 付 / 电脑网站付 / 手机网站付 + 回调通知与同步跳转；
-**微信支付**：付款码 / JsApi / Native / App / H5 / 小程序 + 回调通知、退款、下载账单。
+**微信支付**：付款码 / JsApi / Native / App / H5 / 小程序 + 回调通知、下载账单；退款接口存在，但 `WechatpayRefundService.RefundAsync` 当前抛 `NotImplementedException`，标记为“待实现/待确认”。
 
 内置签名管理器（MD5 / HMAC-SHA256）与账单 CSV 映射，不依赖额外三方支付 SDK。
 

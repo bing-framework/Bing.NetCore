@@ -3,9 +3,9 @@
 
 > MVC 控制器基类、全局结果过滤与 MVC 选项扩展。
 >
-> **目标框架**：`net6.0` ｜ **分层**：L6 表现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：16
+> **目标框架**：`net6.0` ｜ **分层**：L6 表现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：25
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：`Bing.DynamicApi.Contracts`、`Bing.AspNetCore.Mvc.Contracts`、`Bing.AspNetCore`
 
 ---
 

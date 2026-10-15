@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：13
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：`Bing.Data.Sql`、`Bing.Ddd.Domain`、`Bing.Security`
 
 ---
 

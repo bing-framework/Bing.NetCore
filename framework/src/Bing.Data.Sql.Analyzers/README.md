@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：2
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：无（无直接项目引用）
 >
 > **三方依赖**：`Microsoft.CodeAnalysis.Analyzers`、`Microsoft.CodeAnalysis.CSharp`
 

@@ -5,7 +5,7 @@
 >
 > **目标框架**：`net6.0` ｜ **分层**：L6 表现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：25
 >
-> **上游 Bing 包**：`Bing.AspNetCore.Abstractions`、`Bing.Caching`
+> **上游 Bing 包**：`Bing.AspNetCore.Abstractions`、`Bing.Caching`、`Bing.Security`
 
 ---
 
@@ -22,6 +22,8 @@ dotnet add package Bing.AspNetCore.Authentication.JwtBearer
 ## 快速上手
 
 ```csharp
+using Bing.AspNetCore.Authorization.JwtBearer;
+
 services.AddJwt(Configuration);
 
 // appsettings.json
@@ -35,13 +37,13 @@ services.AddJwt(Configuration);
 
 | 入口方法 | 命名空间 | 说明 |
 | --- | --- | --- |
-| `AddJwt(IConfiguration)` | `Bing.AspNetCore.Authorization.JwtBearer.Extensions` | 配置节 **`JwtOptions`**，策略名 **`jwt`** |
+| `AddJwt(IConfiguration)` | `Bing.AspNetCore.Authorization.JwtBearer` | 配置节 **`JwtOptions`**，策略名 **`jwt`** |
 | `AddBingJwtBearer(this AuthenticationBuilder, ...)` | `Microsoft.Extensions.DependencyInjection` | 细粒度方案注册（4 个重载） |
 | `UseJwtCustomerAuthorize(app, ...)` | `Bing.AspNetCore` | 自定义授权中间件（含匿名路径） |
 
 ## 与其它包的关系
 
-**本包依赖**：`Bing.AspNetCore.Abstractions`、`Bing.Caching`
+**本包依赖**：`Bing.AspNetCore.Abstractions`、`Bing.Caching`、`Bing.Security`
 
 ## 更多文档
 

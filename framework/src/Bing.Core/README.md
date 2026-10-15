@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L1 地基与核心 ｜ **当前版本**：7.0.0 ｜ **源文件**：179
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：无（无直接项目引用）
 >
 > **三方依赖**：`Bing.Utils`、`Bing.Utils.Collections`、`System.Runtime.Loader`、`Microsoft.Extensions.Options`、`Microsoft.Extensions.Options.ConfigurationExtensions`、`Microsoft.Extensions.Logging`、`Microsoft.Extensions.Localization`、`Microsoft.Extensions.DependencyModel`、`Microsoft.Extensions.Hosting.Abstractions`
 
@@ -58,7 +58,8 @@ serviceProvider.UseBing();
 | 入口方法 | 命名空间 | 说明 |
 | --- | --- | --- |
 | `AddBing(Action<BingOptions>)` | `Microsoft.Extensions.DependencyInjection` | 框架总入口，返回 `IBingBuilder` |
-| `IBingBuilder.AddModule<T>()` / `AddModules(params Type[])` | `Bing.Core.Builders` | 添加模块并递归拉入依赖，立即执行 `AddServices` |
+| `IBingBuilder.AddModule<T>()` | `Bing.Core.Builders` | 添加指定模块及依赖，立即执行 `AddServices` |
+| `IBingBuilder.AddModules(params Type[] exceptModuleTypes)` | `Bing.Core.Builders` | 加载已发现模块，参数为排除列表 |
 | `UseBing(this IServiceProvider)` | `Microsoft.Extensions.DependencyInjection` | 非 Web 场景：遍历模块执行 `UseModule` |
 | `EnableAop(Action<IAspectConfiguration>)` | `Bing.DependencyInjection` | 启用 AOP（注意入口叫 `EnableAop`，没有 `AddAop`） |
 | `AddLocalLock()` | `Bing.Locks` | 进程内锁 `ILock` → `LocalLock` |

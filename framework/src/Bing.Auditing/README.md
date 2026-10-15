@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L1 地基与核心 ｜ **当前版本**：7.0.0 ｜ **源文件**：21
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：`Bing.Data`、`Bing.Auditing.Contracts`、`Bing.Security`
 
 ---
 

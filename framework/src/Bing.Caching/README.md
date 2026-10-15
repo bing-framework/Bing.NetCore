@@ -3,7 +3,7 @@
 
 > 缓存抽象 `ICache`（含 `ILocalCache` / `IRedisCache`）与 `CacheKey`。
 >
-> **目标框架**：`netstandard2.0` ｜ **分层**：L1 地基与核心 ｜ **当前版本**：7.0.0 ｜ **源文件**：10
+> **目标框架**：`netstandard2.0` ｜ **分层**：L1 地基与核心 ｜ **当前版本**：7.0.0 ｜ **源文件**：35
 >
 > **上游 Bing 包**：`Bing.Core`
 >
