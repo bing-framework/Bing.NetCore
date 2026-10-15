@@ -10,13 +10,25 @@ namespace Bing.Tests.Exceptions;
 /// 异常扩展测试
 /// </summary>
 public class ExceptionExtensionsTest
+    : IDisposable
 {
     /// <summary>
-    /// 测试初始化
+    /// 当前测试注册的异常提示组件句柄。
+    /// </summary>
+    private readonly IDisposable _promptRegistration;
+
+    /// <summary>
+    /// 初始化一个 <see cref="ExceptionExtensionsTest" /> 类型的实例。
     /// </summary>
     public ExceptionExtensionsTest()
     {
-        ExceptionPrompt.AddPrompt(new AspectExceptionPrompt());
+        _promptRegistration = ExceptionPrompt.RegisterPrompt(new AspectExceptionPrompt());
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _promptRegistration.Dispose();
     }
 
     /// <summary>
