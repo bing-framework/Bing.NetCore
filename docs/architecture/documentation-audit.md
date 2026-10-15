@@ -116,3 +116,4 @@
 | `framework/src/Bing.Events.EventBusAdapter/README.md` | 新增 | 旧消息契约到 CAP 的显式适配说明 |
 | `framework/src/Bing.PluginRuntime/README.md` | 新增 | 可回收插件代宿主的使用边界 |
 | `framework/src/Bing.Ddd.Application.AspectCore/README.md` | 更新 | 补充 NuGet 徽章 |
+

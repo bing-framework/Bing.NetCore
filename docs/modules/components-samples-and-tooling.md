@@ -34,3 +34,4 @@ dotnet run --project samples/Bing.Samples.WebApi/Bing.Samples.WebApi.csproj
 - **待确认**：Admin 的外部 MySQL/CAP/RabbitMQ 全量链路取决于专用测试环境。
 - **待确认**：部署模板存在不等于目标集群已完成切流、排空、回滚和强杀恢复演练。
 - WinForms 样例不在主解决方案内，需单独构建验证。
+

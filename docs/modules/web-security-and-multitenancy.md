@@ -45,3 +45,4 @@ app.UseAuthorization();
 - 多租户解析只确定“当前租户”，不会自动为三套 ORM 注入所有查询过滤。
 - **待实现**：通用 `IPermissionChecker`、全局权限过滤、XSS、CSRF 和 IP 白名单。
 - 请求/响应日志没有通用字段级脱敏，敏感端点应排除或由宿主实现脱敏。
+

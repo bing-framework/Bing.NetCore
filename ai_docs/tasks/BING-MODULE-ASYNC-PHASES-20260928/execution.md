@@ -2,8 +2,8 @@
 
 ## 执行结论
 
-Implementation: PASS
-Tests: PASS（实际使用 SDK `8.0.425`）
+Implementation: PASS  
+Tests: PASS（实际使用 SDK `8.0.425`）  
 Locked SDK Gate: NOT_VERIFIED（本机缺少锁定的 `8.0.424`）
 
 ## 任务信息与计划执行情况

@@ -39,3 +39,4 @@ services.AddBingOrderedConsumer<OrderHandler>("orders");
 - `MessageEvent.Send = false` 依赖工作单元提交动作；事务外使用可能没有发送时机。
 - 领域事件派发已接入 EF Core 和 FreeSQL 工作单元，但派发器不等于可靠跨进程消息；需要可靠投递时仍应写入 CAP 出箱。
 - RabbitMQ 网络重排、重投和并发消费不能仅靠单消费者参数解决。
+

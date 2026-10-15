@@ -15,7 +15,7 @@ Admin 的 EFCore 和 FreeSQL 宿主可通过 `OrderedEvents:Enabled=true`（环�
 `AddBingOrderedConsumer<THandler>`，且只能在允许消费的宿主角色启用。Admin 的库存业务是一个明确的例外：
 同时设置 `Inventory:Enabled=true`、`OrderedEvents:Enabled=true`、`BING_HOST_ROLE=consumer` 和
 `BING_CAP_CONSUMER_ENABLED=true` 时，两个 Admin 宿主会注册固定主题、固定 CAP 组和 `admin-inventory-v1`
-有序消费者；Web/Task 只发布消息，不启动该后台消费者。
+有序消费者；Web/Task 只发布消息，不启动该后台消费者。 
 
 管理端人工恢复默认关闭。启用时必须同时配置恢复角色和逻辑消费者白名单；配置不完整会拒绝恢复，不会默认放行：
 

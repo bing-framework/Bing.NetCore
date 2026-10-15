@@ -40,3 +40,4 @@ services.AddMailKit(options => { /* SMTP 与安全连接配置 */ });
 - 邮件队列只有存取能力，后台调度由宿主或 Hangfire 等执行。
 - HTTP 请求日志缺少通用字段级脱敏。
 - 参数验证默认不启用；AspectCore 宿主需显式调用 `EnableBingParameterValidation()`。
+

@@ -37,3 +37,4 @@ hostBuilder.UseServiceContext();
 - `ValidateOnBuild` 不能完整发现工厂、动态解析、属性注入和运行时 `Lazy<T>` 环。
 - 多接口转发同一可释放实例可能被底层容器重复记录；资源服务应使用单一所有者和非释放型适配器。
 - 详细所有权与循环依赖边界见[模块 DI 与资源所有权指南](../guides/modularity-di-resources.md)。
+

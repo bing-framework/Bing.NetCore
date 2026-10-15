@@ -38,3 +38,4 @@ services.AddBingInventoryOrders(InventoryDatabase.MySql);
 - 三套 ORM 不能共享同一个物理事务；跨存储一致性需要消息和补偿。
 - 多租户解析不会自动生成所有 ORM 的数据过滤条件。
 - 外部 MySQL、CAP 和 RabbitMQ 的验证结果依赖专用测试环境，SQLite 不能替代分布式事务结论。
+
