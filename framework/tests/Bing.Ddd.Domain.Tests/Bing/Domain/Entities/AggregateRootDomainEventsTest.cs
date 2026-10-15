@@ -8,15 +8,36 @@ namespace Bing.Domain.Entities;
 public class AggregateRootDomainEventsTest
 {
     /// <summary>
+    /// 验证聚合根通过领域事件契约提供读取与移除能力。
+    /// </summary>
+    [Fact]
+    public void IHasDomainEvents_ShouldExposeAggregateEvents()
+    {
+        IHasDomainEvents aggregate = new AggregateRootSample();
+        var domainEvent = new SampleDomainEvent("created");
+        ((AggregateRootSample)aggregate).AddDomainEvent(domainEvent);
+
+        aggregate.GetDomainEvents().ShouldContain(domainEvent);
+        aggregate.RemoveDomainEvent(domainEvent);
+        aggregate.GetDomainEvents().ShouldBeEmpty();
+
+        ((AggregateRootSample)aggregate).AddDomainEvent(domainEvent);
+        aggregate.ClearDomainEvents();
+        aggregate.GetDomainEvents().ShouldBeEmpty();
+    }
+
+    /// <summary>
     /// 测试用领域事件样例
     /// </summary>
     private class SampleDomainEvent : DomainEvent
     {
-        /// <summary>消息内容</summary>
+        /// <summary>
+        /// 消息内容
+        /// </summary>
         public string Message { get; }
 
         /// <summary>
-        /// 初始化
+        /// 初始化一个 <see cref="SampleDomainEvent" /> 类型的实例。
         /// </summary>
         public SampleDomainEvent(string message) => Message = message;
     }

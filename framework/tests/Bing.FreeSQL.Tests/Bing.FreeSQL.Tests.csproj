@@ -7,10 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\deploy\migrations\inventory\002-exact-identities.mysql.sql"
+          Link="InventoryMigrations\002-exact-identities.mysql.sql" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL\Bing.FreeSQL.csproj" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL.MySql\Bing.FreeSQL.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+    <ProjectReference Include="..\Bing.Events.Ordering.MySqlProbe\Bing.Events.Ordering.MySqlProbe.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
   </ItemGroup>
+  <Target Name="CopyOrderedEventProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\Bing.Events.Ordering.MySqlProbe\Bing.Events.Ordering.MySqlProbe.csproj"
+             Targets="GetTargetPath" Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" ItemName="_OrderedEventProbeTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <_OrderedEventProbeOutput Include="%(_OrderedEventProbeTargetPath.RootDir)%(_OrderedEventProbeTargetPath.Directory)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_OrderedEventProbeOutput)"
+          DestinationFiles="@(_OrderedEventProbeOutput->'$(OutDir)OrderingProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

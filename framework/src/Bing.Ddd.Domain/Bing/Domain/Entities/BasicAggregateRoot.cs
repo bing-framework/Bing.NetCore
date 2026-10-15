@@ -11,15 +11,21 @@ public abstract class BasicAggregateRoot<TEntity> : BasicAggregateRoot<TEntity, 
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例，并使用空标识。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例，并使用空标识。
+    /// </remarks>
     protected BasicAggregateRoot() : this(Guid.Empty)
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity}"/> 的实例。
+    /// </remarks>
     /// <param name="id">聚合根标识。</param>
     protected BasicAggregateRoot(Guid id) : base(id)
     {
@@ -31,7 +37,7 @@ public abstract class BasicAggregateRoot<TEntity> : BasicAggregateRoot<TEntity, 
 /// </summary>
 /// <typeparam name="TEntity">聚合根的具体实体类型。</typeparam>
 /// <typeparam name="TKey">聚合根标识类型。</typeparam>
-public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey>
+public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TKey>, IAggregateRoot<TEntity, TKey>, IHasDomainEvents
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
@@ -40,24 +46,27 @@ public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TK
     private List<DomainEvent> _domainEvents;
 
     /// <summary>
-    /// 初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例，并使用默认标识。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例，并使用默认标识。
+    /// </remarks>
     protected BasicAggregateRoot() : this(default)
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// </remarks>
     /// <param name="id">聚合根标识。</param>
     protected BasicAggregateRoot(TKey id) : base(id)
     {
     }
 
-    /// <summary>
-    /// 获取当前聚合根记录的领域事件。
-    /// </summary>
-    /// <returns>领域事件的只读集合；尚未添加事件时返回 <c>null</c>。</returns>
+    /// <inheritdoc />
     public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents?.AsReadOnly();
 
     /// <summary>
@@ -70,16 +79,9 @@ public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TK
         _domainEvents.Add(@event);
     }
 
-    /// <summary>
-    /// 移除指定的领域事件。
-    /// </summary>
-    /// <param name="event">要移除的领域事件。</param>
-    /// <remarks>未初始化事件列表或事件不存在时不执行任何操作。</remarks>
+    /// <inheritdoc />
     public void RemoveDomainEvent(DomainEvent @event) => _domainEvents?.Remove(@event);
 
-    /// <summary>
-    /// 清空当前已记录的领域事件。
-    /// </summary>
-    /// <remarks>未初始化事件列表时不执行任何操作。</remarks>
+    /// <inheritdoc />
     public void ClearDomainEvents() => _domainEvents?.Clear();
 }

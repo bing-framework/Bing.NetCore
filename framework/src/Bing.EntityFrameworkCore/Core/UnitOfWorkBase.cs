@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Data;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -12,6 +13,7 @@ using Bing.Data.Sql.Metadata;
 using Bing.Data.Transaction;
 using Bing.DependencyInjection;
 using Bing.Domain.Entities;
+using Bing.Domain.Entities.Events;
 using Bing.EntityFrameworkCore.Modeling;
 using Bing.Exceptions;
 using Bing.Expressions;
@@ -45,6 +47,11 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
+    /// 保存后需要刷新数据库生成主键的审计记录。
+    /// </summary>
+    private readonly List<(EntityEntry Entry, EntityChangeInfo Change)> _pendingCreatedAuditChanges = new();
+
+    /// <summary>
     /// 缓存用于配置基础实体属性的反射方法信息。
     /// </summary>
     private static readonly MethodInfo _configureBasePropertiesMethodInfo = typeof(UnitOfWorkBase).GetMethod(nameof(ConfigureBaseProperties), BindingFlags.Instance | BindingFlags.NonPublic);
@@ -66,7 +73,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="UnitOfWorkBase"/>类型的实例
+    /// 初始化一个 <see cref="UnitOfWorkBase" /> 类型的实例。
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
@@ -429,12 +436,52 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <returns>保存更改影响的实体行数。</returns>
     public override int SaveChanges()
     {
-        SaveChangesBefore();
-        var transactionActionManager = Create<ITransactionActionManager>();
-        var result = transactionActionManager.Count == 0
-            ? base.SaveChanges()
-            : TransactionCommit(transactionActionManager);
-        SaveChangesAfter().GetAwaiter().GetResult();
+        _pendingCreatedAuditChanges.Clear();
+        ITransactionActionManager transactionActionManager;
+        DomainEventDispatchSession domainEvents;
+        try
+        {
+            SaveChangesBefore();
+            transactionActionManager = Create<ITransactionActionManager>();
+            domainEvents = PrepareDomainEvents(transactionActionManager);
+        }
+        catch
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        var ownsCommit = Database.CurrentTransaction == null;
+        int result;
+        try
+        {
+            result = transactionActionManager.Count == 0
+                ? base.SaveChanges()
+                : TransactionCommit(transactionActionManager);
+        }
+        catch (Exception exception) when (exception.GetTransactionOutcome() == TransactionOutcome.Committed)
+        {
+            domainEvents?.CompleteAfterCommitFailure(exception);
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        catch
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        try
+        {
+            RefreshGeneratedAuditEntityIds();
+            domainEvents?.Complete();
+            SaveChangesAfter().GetAwaiter().GetResult();
+        }
+        catch (Exception exception)
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw new PostCommitNotificationException(exception,
+                ownsCommit ? TransactionOutcome.Committed : TransactionOutcome.Unknown);
+        }
+        _pendingCreatedAuditChanges.Clear();
         return result;
     }
 
@@ -443,12 +490,13 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器。</param>
     /// <returns>事务提交并保存更改影响的实体行数。</returns>
-    private int TransactionCommit(ITransactionActionManager transactionActionManager)
+    protected virtual int TransactionCommit(ITransactionActionManager transactionActionManager)
     {
         var connection = Database.GetDbConnection();
         var openedHere = false;
         var cleanupExceptions = new List<Exception>();
         Exception primaryException = null;
+        var outcome = TransactionOutcome.Unknown;
         var result = 0;
         try
         {
@@ -462,8 +510,8 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                 var shouldRollback = false;
                 try
                 {
-                    transactionActionManager.CommitAsync(transaction).GetAwaiter().GetResult();
                     Database.UseTransaction(transaction);
+                    transactionActionManager.CommitAsync(transaction).GetAwaiter().GetResult();
                     result = base.SaveChanges();
                 }
                 catch (Exception exception)
@@ -476,6 +524,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                     try
                     {
                         transaction.Rollback();
+                        outcome = TransactionOutcome.RolledBack;
                     }
                     catch (Exception rollbackException)
                     {
@@ -487,6 +536,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                     try
                     {
                         transaction.Commit();
+                        outcome = TransactionOutcome.Committed;
                     }
                     catch (Exception commitException)
                     {
@@ -530,14 +580,24 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
             if (cleanupExceptions.Count > 0)
             {
                 cleanupExceptions.Insert(0, primaryException);
-                throw new AggregateException(cleanupExceptions);
+                var failure = new AggregateException(cleanupExceptions);
+                failure.SetTransactionOutcome(outcome);
+                throw failure;
             }
+            primaryException.SetTransactionOutcome(outcome);
             ExceptionDispatchInfo.Capture(primaryException).Throw();
         }
         if (cleanupExceptions.Count == 1)
+        {
+            cleanupExceptions[0].SetTransactionOutcome(outcome);
             ExceptionDispatchInfo.Capture(cleanupExceptions[0]).Throw();
+        }
         if (cleanupExceptions.Count > 1)
-            throw new AggregateException(cleanupExceptions);
+        {
+            var failure = new AggregateException(cleanupExceptions);
+            failure.SetTransactionOutcome(outcome);
+            throw failure;
+        }
         return result;
     }
 
@@ -553,12 +613,52 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        SaveChangesBefore();
-        var transactionActionManager = Create<ITransactionActionManager>();
-        var result = transactionActionManager.Count == 0
-            ? await base.SaveChangesAsync(cancellationToken)
-            : await TransactionCommitAsync(transactionActionManager, cancellationToken);
-        await SaveChangesAfter();
+        _pendingCreatedAuditChanges.Clear();
+        ITransactionActionManager transactionActionManager;
+        DomainEventDispatchSession domainEvents;
+        try
+        {
+            SaveChangesBefore();
+            transactionActionManager = Create<ITransactionActionManager>();
+            domainEvents = PrepareDomainEvents(transactionActionManager);
+        }
+        catch
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        var ownsCommit = Database.CurrentTransaction == null;
+        int result;
+        try
+        {
+            result = transactionActionManager.Count == 0
+                ? await base.SaveChangesAsync(cancellationToken)
+                : await TransactionCommitAsync(transactionActionManager, cancellationToken);
+        }
+        catch (Exception exception) when (exception.GetTransactionOutcome() == TransactionOutcome.Committed)
+        {
+            domainEvents?.CompleteAfterCommitFailure(exception);
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        catch
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw;
+        }
+        try
+        {
+            RefreshGeneratedAuditEntityIds();
+            domainEvents?.Complete();
+            await SaveChangesAfter();
+        }
+        catch (Exception exception)
+        {
+            _pendingCreatedAuditChanges.Clear();
+            throw new PostCommitNotificationException(exception,
+                ownsCommit ? TransactionOutcome.Committed : TransactionOutcome.Unknown);
+        }
+        _pendingCreatedAuditChanges.Clear();
         return result;
     }
 
@@ -568,12 +668,13 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>表示异步事务提交操作的任务，结果为事务提交并保存更改影响的实体行数。</returns>
-    private async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
+    protected virtual async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager, CancellationToken cancellationToken)
     {
         var connection = Database.GetDbConnection();
         var openedHere = false;
         var cleanupExceptions = new List<Exception>();
         Exception primaryException = null;
+        var outcome = TransactionOutcome.Unknown;
         var result = 0;
         try
         {
@@ -587,10 +688,10 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                 var shouldRollback = false;
                 try
                 {
+                    await Database.UseTransactionAsync(transaction, cancellationToken);
                     await transactionActionManager.CommitAsync(transaction);
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Database.UseTransactionAsync(transaction, cancellationToken);
-                    result = await base.SaveChangesAsync(cancellationToken);
+                    result = await SaveChangesCoreAsync(cancellationToken);
                 }
                 catch (Exception exception)
                 {
@@ -602,6 +703,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                     try
                     {
                         await transaction.RollbackAsync(CancellationToken.None);
+                        outcome = TransactionOutcome.RolledBack;
                     }
                     catch (Exception rollbackException)
                     {
@@ -613,6 +715,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
                     try
                     {
                         await transaction.CommitAsync(cancellationToken);
+                        outcome = TransactionOutcome.Committed;
                     }
                     catch (Exception commitException)
                     {
@@ -656,18 +759,61 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
             if (cleanupExceptions.Count > 0)
             {
                 cleanupExceptions.Insert(0, primaryException);
-                throw new AggregateException(cleanupExceptions);
+                var failure = new AggregateException(cleanupExceptions);
+                failure.SetTransactionOutcome(outcome);
+                throw failure;
             }
+            primaryException.SetTransactionOutcome(outcome);
             ExceptionDispatchInfo.Capture(primaryException).Throw();
         }
         if (cleanupExceptions.Count == 1)
+        {
+            cleanupExceptions[0].SetTransactionOutcome(outcome);
             ExceptionDispatchInfo.Capture(cleanupExceptions[0]).Throw();
+        }
         if (cleanupExceptions.Count > 1)
-            throw new AggregateException(cleanupExceptions);
+        {
+            var failure = new AggregateException(cleanupExceptions);
+            failure.SetTransactionOutcome(outcome);
+            throw failure;
+        }
         return result;
     }
 
     #endregion
+
+    /// <summary>
+    /// 保存当前上下文的实体更改。
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>受影响的实体行数。</returns>
+    protected Task<int> SaveChangesCoreAsync(CancellationToken cancellationToken) =>
+        base.SaveChangesAsync(cancellationToken);
+
+    /// <summary>
+    /// 登记当前跟踪聚合根的事务内领域事件分发。
+    /// </summary>
+    /// <param name="transactionActionManager">事务操作管理器。</param>
+    /// <returns>需要在保存成功后确认的事件分发会话。</returns>
+    private DomainEventDispatchSession PrepareDomainEvents(ITransactionActionManager transactionActionManager)
+    {
+        var dispatcher = Create<IDomainEventDispatcher>();
+        if (dispatcher == null)
+            return null;
+
+        IEnumerable<IHasDomainEvents> GetSources() => ChangeTracker.Entries()
+            .Select(entry => entry.Entity)
+            .OfType<IHasDomainEvents>();
+
+        if (!GetSources().Any(source => source.GetDomainEvents()?.Count > 0))
+            return null;
+        if (Database.CurrentTransaction != null || System.Transactions.Transaction.Current != null)
+            throw new InvalidOperationException("外部事务中的领域事件无法确认最终提交，请由工作单元管理事务。");
+
+        var session = new DomainEventDispatchSession(GetSources, dispatcher);
+        transactionActionManager.Register(_ => session.DispatchAsync());
+        return session;
+    }
 
     #region SaveChangesBefore(保存前操作)
 
@@ -705,6 +851,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="entry">输入实体</param>
     protected virtual void ApplyInterceptForAddedEntity(EntityEntry entry)
     {
+        CaptureAuditChanges(entry, EntityChangeType.Created);
         AuditPropertySetter?.SetCreationProperties(entry.Entity);
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
         SetVersion(entry);
@@ -720,6 +867,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="entry">输入实体</param>
     protected virtual void ApplyInterceptForModifiedEntity(EntityEntry entry)
     {
+        CaptureAuditChanges(entry, EntityChangeType.Updated);
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
         SetVersion(entry);
     }
@@ -734,9 +882,211 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     /// <param name="entry">输入实体</param>
     protected virtual void ApplyInterceptForDeletedEntity(EntityEntry entry)
     {
+        CaptureAuditChanges(entry, EntityChangeType.Deleted);
         AuditPropertySetter?.SetDeletionProperties(entry.Entity);
         AuditPropertySetter?.SetModificationProperties(entry.Entity);
         SetVersion(entry);
+    }
+
+    /// <summary>
+    /// 将当前 EFCore 实体变化加入活动审计作用域。
+    /// </summary>
+    /// <param name="entry">待保存的实体条目。</param>
+    /// <param name="changeType">实体变化类型。</param>
+    /// <remarks>没有活动审计作用域时不执行任何捕获；敏感属性只在内存采集阶段直接排除。</remarks>
+    private void CaptureAuditChanges(EntityEntry entry, EntityChangeType changeType)
+    {
+        var audit = Create<IAuditingManager>()?.Current?.Log;
+        if (audit == null || entry?.Metadata?.ClrType == null)
+            return;
+        audit.EntityChanges ??= new List<EntityChangeInfo>();
+
+        var entityId = GetAuditEntityId(entry);
+        var tenantId = entry.Properties.FirstOrDefault(property =>
+            string.Equals(property.Metadata.Name, "TenantId", StringComparison.OrdinalIgnoreCase));
+        var tenantName = tenantId?.Metadata.Name;
+        string formattedTenantId;
+        if (!TryReadAuditValue(() => tenantId?.CurrentValue, entry.Metadata.ClrType, tenantName, out var tenantValue) ||
+            !TryFormatAuditValue(tenantValue, entry.Metadata.ClrType, tenantName, out formattedTenantId))
+            formattedTenantId = null;
+        var change = new EntityChangeInfo
+        {
+            ChangeTime = DateTime.UtcNow,
+            ChangeType = changeType,
+            EntityId = entityId,
+            EntityTenantId = formattedTenantId,
+            EntityTypeFullName = entry.Metadata.ClrType.FullName ?? entry.Metadata.ClrType.Name,
+            PropertyChanges = new List<EntityPropertyChangeInfo>()
+        };
+
+        foreach (var property in entry.Properties)
+        {
+            var name = property.Metadata.Name;
+            if (property.Metadata.IsShadowProperty() || IsSensitiveAuditProperty(name))
+                continue;
+            if (changeType == EntityChangeType.Updated && !property.IsModified)
+                continue;
+            if (!TryReadAuditValue(() => changeType == EntityChangeType.Created ? null : property.OriginalValue,
+                    entry.Metadata.ClrType, name, out var originalValue) ||
+                !TryReadAuditValue(() => changeType == EntityChangeType.Deleted ? null : property.CurrentValue,
+                    entry.Metadata.ClrType, name, out var currentValue))
+                continue;
+            if (changeType == EntityChangeType.Updated && AreAuditValuesEqual(originalValue, currentValue))
+                continue;
+            if (!TryFormatAuditValue(originalValue, entry.Metadata.ClrType, name, out var original) ||
+                !TryFormatAuditValue(currentValue, entry.Metadata.ClrType, name, out var current))
+                continue;
+            change.PropertyChanges.Add(new EntityPropertyChangeInfo
+            {
+                PropertyName = name,
+                PropertyTypeFullName = property.Metadata.ClrType?.FullName,
+                OriginalValue = original,
+                NewValue = current
+            });
+        }
+
+        if (change.PropertyChanges.Count == 0)
+            return;
+        var existing = changeType == EntityChangeType.Created
+            ? null
+            : audit.EntityChanges.FirstOrDefault(item =>
+                string.Equals(item.EntityTypeFullName, change.EntityTypeFullName, StringComparison.Ordinal) &&
+                string.Equals(item.EntityId, change.EntityId, StringComparison.Ordinal));
+        if (existing == null)
+            audit.EntityChanges.Add(change);
+        else
+        {
+            if (changeType == EntityChangeType.Deleted)
+                existing.ChangeType = EntityChangeType.Deleted;
+            existing.PropertyChanges ??= new List<EntityPropertyChangeInfo>();
+            existing.Merge(change);
+            change = existing;
+        }
+        if (changeType == EntityChangeType.Created)
+            _pendingCreatedAuditChanges.Add((entry, change));
+    }
+
+    /// <summary>
+    /// 获取实体当前主键的审计文本。
+    /// </summary>
+    /// <param name="entry">实体条目。</param>
+    /// <returns>由主键属性组成的标识文本。</returns>
+    private string GetAuditEntityId(EntityEntry entry)
+    {
+        var primaryKey = entry?.Metadata?.FindPrimaryKey()?.Properties;
+        if (primaryKey == null)
+            return null;
+        var values = new List<string>(primaryKey.Count);
+        foreach (var property in primaryKey)
+        {
+            if (!TryReadAuditValue(() => entry.Property(property.Name).CurrentValue, entry.Metadata.ClrType,
+                    property.Name, out var rawValue) ||
+                !TryFormatAuditValue(rawValue, entry.Metadata.ClrType, property.Name, out var value))
+                return null;
+            values.Add(value);
+        }
+        return string.Join(",", values);
+    }
+
+    /// <summary>
+    /// 将数据库生成的主键刷新到已采集的创建审计记录。
+    /// </summary>
+    private void RefreshGeneratedAuditEntityIds()
+    {
+        foreach (var pending in _pendingCreatedAuditChanges)
+            pending.Change.EntityId = GetAuditEntityId(pending.Entry);
+    }
+
+    /// <summary>
+    /// 判断属性名称是否属于默认敏感审计字段。
+    /// </summary>
+    private static bool IsSensitiveAuditProperty(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return false;
+        return name.IndexOf("password", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            name.IndexOf("token", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            name.IndexOf("secret", StringComparison.OrdinalIgnoreCase) >= 0 ||
+            name.IndexOf("credential", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    /// <summary>
+    /// 将属性值转换为有界的安全文本。
+    /// </summary>
+    private static string FormatAuditValue(object value)
+    {
+        if (value == null)
+            return null;
+        var text = value is IFormattable formattable
+            ? formattable.ToString(null, CultureInfo.InvariantCulture)
+            : value.ToString();
+        if (text == null || text.Length <= 512)
+            return text;
+        return text.Substring(0, 512);
+    }
+
+    /// <summary>
+    /// 尝试格式化审计值。
+    /// </summary>
+    /// <param name="value">待格式化的值。</param>
+    /// <param name="entityType">所属实体类型。</param>
+    /// <param name="propertyName">属性名称。</param>
+    /// <param name="formattedValue">格式化后的值。</param>
+    /// <returns>格式化成功时返回 <see langword="true"/>。</returns>
+    /// <remarks>值对象格式化失败时跳过该值，不阻断业务保存；数据库和审计存储异常仍会继续传播。</remarks>
+    private bool TryFormatAuditValue(object value, Type entityType, string propertyName, out string formattedValue)
+    {
+        try
+        {
+            formattedValue = FormatAuditValue(value);
+            return true;
+        }
+        catch (Exception exception)
+        {
+            formattedValue = null;
+            Logger.LogWarning("实体 {EntityType} 的审计属性 {PropertyName} 格式化失败，已跳过该审计值。异常类型：{ExceptionType}。",
+                entityType?.FullName ?? entityType?.Name, propertyName, exception.GetType().FullName);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 尝试读取审计值。
+    /// </summary>
+    /// <param name="valueFactory">值读取委托。</param>
+    /// <param name="entityType">所属实体类型。</param>
+    /// <param name="propertyName">属性名称。</param>
+    /// <param name="value">读取到的值。</param>
+    /// <returns>读取成功时返回 <see langword="true"/>。</returns>
+    private bool TryReadAuditValue(Func<object> valueFactory, Type entityType, string propertyName, out object value)
+    {
+        try
+        {
+            value = valueFactory();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            value = null;
+            Logger.LogWarning("实体 {EntityType} 的审计属性 {PropertyName} 读取失败，已跳过该审计值。异常类型：{ExceptionType}。",
+                entityType?.FullName ?? entityType?.Name, propertyName, exception.GetType().FullName);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 比较未截断的审计属性值。
+    /// </summary>
+    /// <param name="original">原始值。</param>
+    /// <param name="current">当前值。</param>
+    /// <returns>值相同时返回 <see langword="true"/>。</returns>
+    private static bool AreAuditValuesEqual(object original, object current)
+    {
+        if (ReferenceEquals(original, current))
+            return true;
+        if (original is byte[] originalBytes && current is byte[] currentBytes)
+            return originalBytes.SequenceEqual(currentBytes);
+        return Equals(original, current);
     }
 
     #endregion

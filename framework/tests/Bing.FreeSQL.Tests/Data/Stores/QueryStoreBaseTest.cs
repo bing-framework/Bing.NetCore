@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Bing.Auditing;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Configs;
@@ -23,6 +24,33 @@ namespace Bing.FreeSQL.Tests.Data.Stores;
 /// </summary>
 public class QueryStoreBaseTest
 {
+    /// <summary>
+    /// 验证 FreeSQL 写入存储会调用可选的实体审计字段设置器。
+    /// </summary>
+    [Fact]
+    public void StoreBase_WhenAuditPropertySetterIsRegistered_ShouldSetCreateAndModifyProperties()
+    {
+        var services = new ServiceCollection();
+        services.AddMySqlProvider();
+        services.AddSqlDataSource("default", Bing.Data.Enums.DatabaseType.MySql, "Server=scope;Database=test;");
+        var setter = new RecordingAuditPropertySetter();
+        services.AddSingleton<IAuditPropertySetter>(setter);
+        using var serviceProvider = services.BuildServiceProvider();
+        using var scope = serviceProvider.CreateScope();
+        using var orm = CreateOrm();
+        using var unitOfWork = new TestUnitOfWork(new FreeSqlWrapper { Orm = orm }, scope.ServiceProvider);
+        using var store = CreateStoreBase(unitOfWork, scope.ServiceProvider);
+        var entity = new StoreSample { Id = 1, Name = "new" };
+
+        store.Add(entity);
+        store.Update(entity);
+
+        Assert.Equal(1, setter.CreationCount);
+        Assert.Equal(2, setter.ModificationCount);
+        Assert.Empty(setter.DeletionTargets);
+        Assert.All(setter.CreationTargets, target => Assert.Same(entity, target));
+    }
+
     /// <summary>
     /// 测试目的：查询存储器应使用显式注入的 SQL Query 工厂，并注入当前 FreeSQL 的实体元数据。
     /// </summary>
@@ -496,6 +524,18 @@ public class QueryStoreBaseTest
         }
     }
 
+    /// <summary>
+    /// 创建注入数据库访问依赖的测试存储。
+    /// </summary>
+    /// <param name="unitOfWork">测试工作单元。</param>
+    /// <param name="serviceProvider">作用域服务提供程序。</param>
+    /// <returns>已配置的测试存储。</returns>
+    /// <summary>
+    /// 创建注入数据库访问依赖的测试存储。
+    /// </summary>
+    /// <param name="unitOfWork">测试工作单元。</param>
+    /// <param name="serviceProvider">作用域服务提供程序。</param>
+    /// <returns>已配置的测试存储。</returns>
     private static TestQueryStore CreateStore(MySqlUnitOfWork unitOfWork, IServiceProvider serviceProvider)
     {
         return new TestQueryStore(unitOfWork, serviceProvider.GetRequiredService<ISqlQueryFactory>(),
@@ -559,7 +599,7 @@ public class QueryStoreBaseTest
     private sealed class TestUnitOfWork : MySqlUnitOfWork
     {
         /// <summary>
-        /// 初始化一个<see cref="TestUnitOfWork"/>类型的实例。
+        /// 初始化一个 <see cref="TestUnitOfWork" /> 类型的实例。
         /// </summary>
         /// <param name="wrapper">FreeSQL 包装器。</param>
         /// <param name="serviceProvider">服务提供程序。</param>
@@ -575,7 +615,7 @@ public class QueryStoreBaseTest
     private sealed class TestQueryStore : QueryStoreBase<StoreSample, int>
     {
         /// <summary>
-        /// 初始化一个<see cref="TestQueryStore"/>类型的实例。
+        /// 初始化一个 <see cref="TestQueryStore" /> 类型的实例。
         /// </summary>
         /// <param name="unitOfWork">工作单元。</param>
         public TestQueryStore(MySqlUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
@@ -598,7 +638,7 @@ public class QueryStoreBaseTest
     private sealed class TestStore : StoreBase<StoreSample, int>
     {
         /// <summary>
-        /// 初始化一个 <see cref="TestStore"/> 类型的实例。
+        /// 初始化一个 <see cref="TestStore" /> 类型的实例。
         /// </summary>
         /// <param name="unitOfWork">工作单元。</param>
         /// <param name="sqlQueryFactory">SQL 查询对象工厂。</param>
@@ -619,7 +659,7 @@ public class QueryStoreBaseTest
     private sealed class SideEffectStore : StoreBase<SideEffectStoreSample, int>
     {
         /// <summary>
-        /// 初始化一个 <see cref="SideEffectStore"/> 类型的实例。
+        /// 初始化一个 <see cref="SideEffectStore" /> 类型的实例。
         /// </summary>
         public SideEffectStore(MySqlUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
             IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
@@ -648,7 +688,7 @@ public class QueryStoreBaseTest
     private sealed class StoreContext : IDisposable
     {
         /// <summary>
-        /// 初始化一个 <see cref="StoreContext"/> 类型的实例。
+        /// 初始化一个 <see cref="StoreContext" /> 类型的实例。
         /// </summary>
         public StoreContext(ServiceProvider serviceProvider, IServiceScope scope, IFreeSql orm,
             TestUnitOfWork unitOfWork, TestStore store, TestQueryStore queryStore)
@@ -714,7 +754,7 @@ public class QueryStoreBaseTest
         private readonly Bing.Data.IPager _pager;
 
         /// <summary>
-        /// 初始化一个 <see cref="PagingQuery"/> 类型的实例。
+        /// 初始化一个 <see cref="PagingQuery" /> 类型的实例。
         /// </summary>
         /// <param name="pager">分页对象。</param>
         public PagingQuery(Bing.Data.IPager pager) => _pager = pager;
@@ -745,7 +785,7 @@ public class QueryStoreBaseTest
         public List<Type> RequestedServiceTypes { get; } = new();
 
         /// <summary>
-        /// 初始化一个<see cref="RecordingServiceProvider"/>类型的实例。
+        /// 初始化一个 <see cref="RecordingServiceProvider" /> 类型的实例。
         /// </summary>
         /// <param name="innerProvider">内部服务提供程序。</param>
         public RecordingServiceProvider(IServiceProvider innerProvider) => _innerProvider = innerProvider;
@@ -760,6 +800,42 @@ public class QueryStoreBaseTest
             RequestedServiceTypes.Add(serviceType);
             return _innerProvider.GetService(serviceType);
         }
+    }
+
+    /// <summary>
+    /// 记录 FreeSQL 存储调用的实体审计操作。
+    /// </summary>
+    private sealed class RecordingAuditPropertySetter : IAuditPropertySetter
+    {
+        /// <summary>
+        /// 创建操作次数。
+        /// </summary>
+        public int CreationCount { get; private set; }
+        /// <summary>
+        /// 修改操作次数。
+        /// </summary>
+        public int ModificationCount { get; private set; }
+        /// <summary>
+        /// 创建操作目标。
+        /// </summary>
+        public List<object> CreationTargets { get; } = new();
+        /// <summary>
+        /// 删除操作目标。
+        /// </summary>
+        public List<object> DeletionTargets { get; } = new();
+
+        /// <inheritdoc />
+        public void SetCreationProperties(object targetObject)
+        {
+            CreationCount++;
+            CreationTargets.Add(targetObject);
+        }
+
+        /// <inheritdoc />
+        public void SetModificationProperties(object targetObject) => ModificationCount++;
+
+        /// <inheritdoc />
+        public void SetDeletionProperties(object targetObject) => DeletionTargets.Add(targetObject);
     }
 
     /// <summary>

@@ -14,6 +14,11 @@ namespace Bing.EventBus.Local;
 public class LocalEventBus : EventBusBase, ILocalEventBus
 {
     /// <summary>
+    /// 保存当前异步事件发布链的深度。
+    /// </summary>
+    private readonly AsyncLocal<int> _publishDepth = new AsyncLocal<int>();
+
+    /// <summary>
     /// 日志组件
     /// </summary>
     public ILogger<LocalEventBus> Logger { get; set; }
@@ -29,7 +34,12 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     protected ConcurrentDictionary<Type, List<IEventHandlerFactory>> HandlerFactories { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="EventBusBase"/>类型的实例
+    /// 保护事件类型字典与列表的增删操作。
+    /// </summary>
+    private readonly object _handlerFactoriesGate = new object();
+
+    /// <summary>
+    /// 初始化一个 <see cref="LocalEventBus" /> 类型的实例。
     /// </summary>
     /// <param name="options">本地事件总线 选项配置</param>
     /// <param name="serviceScopeFactory">服务作用域工厂</param>
@@ -52,11 +62,15 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// <returns>用于取消本次订阅的释放句柄。</returns>
     public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
     {
-        GetOrCreateHandlerFactories(eventType).LockAndRun(factories =>
+        lock (_handlerFactoriesGate)
         {
-            if (!factory.IsInFactories(factories))
-                factories.Add(factory);
-        });
+            var factories = GetOrCreateHandlerFactories(eventType);
+            factories.LockAndRun(items =>
+            {
+                if (!factory.IsInFactories(items))
+                    items.Add(factory);
+            });
+        }
         return new EventHandlerFactoryUnregistrar(this, eventType, factory);
     }
 
@@ -69,10 +83,13 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     {
         Check.NotNull(action, nameof(action));
 
-        GetOrCreateHandlerFactories(typeof(TEvent))
-            .LockAndRun(factories =>
+        lock (_handlerFactoriesGate)
+        {
+            var eventType = typeof(TEvent);
+            var factories = GetOrCreateHandlerFactories(eventType);
+            factories.LockAndRun(items =>
             {
-                factories.RemoveAll(factory =>
+                items.RemoveAll(factory =>
                 {
                     var singleInstanceFactory = factory as SingleInstanceHandlerFactory;
                     if (singleInstanceFactory == null)
@@ -83,6 +100,8 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
                     return actionHandler.Action == action;
                 });
             });
+            RemoveEmptyHandlerFactories(eventType, factories);
+        }
     }
 
     /// <summary>
@@ -92,13 +111,17 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// <param name="handler">事件处理器</param>
     public override void Unsubscribe(Type eventType, IEventHandler handler)
     {
-        GetOrCreateHandlerFactories(eventType)
-            .LockAndRun(factories =>
+        lock (_handlerFactoriesGate)
+        {
+            var factories = GetOrCreateHandlerFactories(eventType);
+            factories.LockAndRun(items =>
             {
-                factories.RemoveAll(factory =>
+                items.RemoveAll(factory =>
                     factory is SingleInstanceHandlerFactory &&
                     (factory as SingleInstanceHandlerFactory).HandlerInstance == handler);
             });
+            RemoveEmptyHandlerFactories(eventType, factories);
+        }
     }
 
     /// <summary>
@@ -108,7 +131,12 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// <param name="factory">事件处理器工厂</param>
     public override void Unsubscribe(Type eventType, IEventHandlerFactory factory)
     {
-        GetOrCreateHandlerFactories(eventType).LockAndRun(factories => factories.Remove(factory));
+        lock (_handlerFactoriesGate)
+        {
+            var factories = GetOrCreateHandlerFactories(eventType);
+            factories.LockAndRun(items => items.Remove(factory));
+            RemoveEmptyHandlerFactories(eventType, factories);
+        }
     }
 
     /// <summary>
@@ -117,7 +145,12 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// <param name="eventType">事件类型</param>
     public override void UnsubscribeAll(Type eventType)
     {
-        GetOrCreateHandlerFactories(eventType).LockAndRun(factories => factories.Clear());
+        lock (_handlerFactoriesGate)
+        {
+            var factories = GetOrCreateHandlerFactories(eventType);
+            factories.LockAndRun(items => items.Clear());
+            RemoveEmptyHandlerFactories(eventType, factories);
+        }
     }
 
     /// <summary>
@@ -147,7 +180,28 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// <param name="localEventMessage">本地事件消息</param>
     public virtual async Task PublishAsync(LocalEventMessage localEventMessage)
     {
-        await TriggerHandlersAsync(localEventMessage.EventType, localEventMessage.EventData);
+        if (localEventMessage == null)
+            throw new ArgumentNullException(nameof(localEventMessage));
+        if (Options.MaxPublishDepth <= 0)
+            throw new InvalidOperationException("本地事件总线的最大发布深度必须大于零。");
+
+        var previousDepth = _publishDepth.Value;
+        var currentDepth = checked(previousDepth + 1);
+        if (currentDepth > Options.MaxPublishDepth)
+        {
+            throw new InvalidOperationException(
+                $"本地事件发布深度超过上限 {Options.MaxPublishDepth}：{localEventMessage.EventType.FullName}。");
+        }
+
+        _publishDepth.Value = currentDepth;
+        try
+        {
+            await TriggerHandlersAsync(localEventMessage.EventType, localEventMessage.EventData);
+        }
+        finally
+        {
+            _publishDepth.Value = previousDepth;
+        }
     }
 
     /// <summary>
@@ -155,12 +209,19 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     /// </summary>
     /// <param name="eventType">要发布的事件类型。</param>
     /// <returns>匹配目标事件类型或可赋值基类型/接口订阅的工厂列表快照。</returns>
-    /// <remarks>返回数组不会在当前方法返回后继续枚举并发字典，从而避免订阅变更影响当前分发枚举。</remarks>
+    /// <remarks>订阅列表在同一同步区域复制，当前分发不会受后续订阅变更影响。</remarks>
     protected override IEnumerable<EventTypeWithEventHandlerFactories> GetHandlerFactories(Type eventType)
     {
         var handlerFactoryList = new List<EventTypeWithEventHandlerFactories>();
-        foreach (var handlerFactory in HandlerFactories.Where(hf => ShouldTriggerEventForHandler(eventType, hf.Key)))
-            handlerFactoryList.Add(new EventTypeWithEventHandlerFactories(handlerFactory.Key, handlerFactory.Value));
+        lock (_handlerFactoriesGate)
+        {
+            foreach (var handlerFactory in HandlerFactories.Where(hf => ShouldTriggerEventForHandler(eventType, hf.Key)))
+            {
+                List<IEventHandlerFactory> snapshot = null;
+                handlerFactory.Value.LockAndRun(factories => snapshot = factories.ToList());
+                handlerFactoryList.Add(new EventTypeWithEventHandlerFactories(handlerFactory.Key, snapshot));
+            }
+        }
         return handlerFactoryList.ToArray();
     }
 
@@ -172,6 +233,19 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     private List<IEventHandlerFactory> GetOrCreateHandlerFactories(Type eventType)
     {
         return HandlerFactories.GetOrAdd(eventType, (type) => new List<IEventHandlerFactory>());
+    }
+
+    /// <summary>
+    /// 删除不再包含订阅的事件类型列表。
+    /// </summary>
+    /// <param name="eventType">事件类型。</param>
+    /// <param name="factories">待检查的工厂列表。</param>
+    private void RemoveEmptyHandlerFactories(Type eventType, List<IEventHandlerFactory> factories)
+    {
+        if (factories.Count != 0 || !HandlerFactories.TryGetValue(eventType, out var current) ||
+            !ReferenceEquals(current, factories))
+            return;
+        HandlerFactories.TryRemove(eventType, out _);
     }
 
     /// <summary>

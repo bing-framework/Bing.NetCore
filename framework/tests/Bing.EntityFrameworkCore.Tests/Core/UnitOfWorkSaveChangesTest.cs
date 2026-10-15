@@ -1,5 +1,6 @@
 using Bing.Data.Transaction;
 using Bing.Datas.EntityFramework.Core;
+using Bing.Domain.Entities.Events;
 using Bing.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -306,6 +307,237 @@ public class UnitOfWorkSaveChangesTest
     }
 
     /// <summary>
+    /// 验证同步保存后的通知失败不会被误报为数据库回滚。
+    /// </summary>
+    [Fact]
+    public void SaveChanges_WhenPostCommitNotificationFails_ShouldReportCommittedData()
+    {
+        using var connection = CreateOpenConnection();
+        using var provider = CreateServiceProvider();
+        using var unitOfWork = CreateUnitOfWork(connection, provider);
+        unitOfWork.Database.EnsureCreated();
+        provider.GetRequiredService<ITransactionActionManager>().Register(_ => Task.CompletedTask);
+        unitOfWork.NotificationFailure = new InvalidOperationException("notification failed");
+        unitOfWork.Samples.Add(new SaveSample { Name = "committed-sync" });
+
+        var exception = Assert.Throws<PostCommitNotificationException>(() => unitOfWork.SaveChanges());
+
+        Assert.Same(unitOfWork.NotificationFailure, exception.InnerException);
+        Assert.Contains("保存操作已完成", exception.Message);
+        Assert.Equal(1, unitOfWork.PublishEventsCount);
+        Assert.Equal(1, unitOfWork.Samples.Count());
+    }
+
+    /// <summary>
+    /// 验证异步保存后的通知失败保留原始异常和已提交的数据。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WhenPostCommitNotificationFails_ShouldReportCommittedData()
+    {
+        await using var connection = CreateOpenConnection();
+        using var provider = CreateServiceProvider();
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        provider.GetRequiredService<ITransactionActionManager>().Register(_ => Task.CompletedTask);
+        unitOfWork.NotificationFailure = new InvalidOperationException("notification failed");
+        unitOfWork.Samples.Add(new SaveSample { Name = "committed-async" });
+
+        var exception = await Assert.ThrowsAsync<PostCommitNotificationException>(() => unitOfWork.SaveChangesAsync());
+
+        Assert.Same(unitOfWork.NotificationFailure, exception.InnerException);
+        Assert.Contains("保存操作已完成", exception.Message);
+        Assert.Equal(1, unitOfWork.PublishEventsCount);
+        Assert.Equal(1, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证外部事务仍可在保存后通知失败时回滚。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WhenExternalTransactionExists_ShouldNotClaimFinalCommit()
+    {
+        await using var connection = CreateOpenConnection();
+        using var provider = CreateServiceProvider();
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        await using var transaction = await unitOfWork.Database.BeginTransactionAsync();
+        unitOfWork.NotificationFailure = new InvalidOperationException("notification failed");
+        unitOfWork.Samples.Add(new SaveSample { Name = "external-transaction" });
+
+        var exception = await Assert.ThrowsAsync<PostCommitNotificationException>(() => unitOfWork.SaveChangesAsync());
+
+        Assert.Same(unitOfWork.NotificationFailure, exception.InnerException);
+        Assert.Contains("外部事务", exception.Message);
+        Assert.Equal(1, await unitOfWork.Samples.CountAsync());
+        await transaction.RollbackAsync();
+        Assert.Equal(0, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证领域事件在数据库事务内分轮分发，并于保存成功后移除。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WithDomainEvents_ShouldDispatchDerivedEventsInTransaction()
+    {
+        await using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        var sample = new SaveSample { Name = "domain-events" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+        dispatcher.OnDispatch = @event =>
+        {
+            Assert.NotNull(unitOfWork.Database.CurrentTransaction);
+            if (((SaveDomainEvent)@event).Sequence == 1)
+                sample.AddDomainEvent(new SaveDomainEvent(2));
+            return Task.CompletedTask;
+        };
+
+        await unitOfWork.SaveChangesAsync();
+
+        Assert.Equal(new[] { 1, 2 }, dispatcher.Sequences);
+        Assert.Empty(sample.GetDomainEvents());
+        Assert.Equal(1, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证同步保存也在事务内分发并清理领域事件。
+    /// </summary>
+    [Fact]
+    public void SaveChanges_WithDomainEvents_ShouldDispatchInTransaction()
+    {
+        using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        using var unitOfWork = CreateUnitOfWork(connection, provider);
+        unitOfWork.Database.EnsureCreated();
+        var sample = new SaveSample { Name = "sync-domain-event" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+        dispatcher.OnDispatch = _ =>
+        {
+            Assert.NotNull(unitOfWork.Database.CurrentTransaction);
+            return Task.CompletedTask;
+        };
+
+        unitOfWork.SaveChanges();
+
+        Assert.Equal(new[] { 1 }, dispatcher.Sequences);
+        Assert.Empty(sample.GetDomainEvents());
+        Assert.Equal(1, unitOfWork.Samples.Count());
+    }
+
+    /// <summary>
+    /// 验证事务内分派失败阻止实体保存，并保留待处理事件。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WhenDomainDispatchFails_ShouldRollbackAndRetainEvents()
+    {
+        await using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        var sample = new SaveSample { Name = "not-committed" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+        var original = new InvalidOperationException("dispatch failed");
+        dispatcher.OnDispatch = _ => throw original;
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => unitOfWork.SaveChangesAsync());
+
+        Assert.Same(original, exception);
+        Assert.Single(sample.GetDomainEvents());
+        Assert.Equal(0, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证处理器持续产生事件时分派有上限且实体不会保存。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WhenDomainEventsRepeat_ShouldStopAtRoundLimit()
+    {
+        await using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        var sample = new SaveSample { Name = "recursive" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+        dispatcher.OnDispatch = @event =>
+        {
+            sample.AddDomainEvent(new SaveDomainEvent(((SaveDomainEvent)@event).Sequence + 1));
+            return Task.CompletedTask;
+        };
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => unitOfWork.SaveChangesAsync());
+
+        Assert.Contains("32", exception.Message);
+        Assert.Equal(32, dispatcher.Sequences.Count);
+        Assert.Equal(0, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证外部事务中的领域事件在回调执行前被拒绝。
+    /// </summary>
+    [Fact]
+    public async Task SaveChangesAsync_WithDomainEventsAndExternalTransaction_ShouldRejectBeforeDispatch()
+    {
+        await using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        await using var transaction = await unitOfWork.Database.BeginTransactionAsync();
+        var sample = new SaveSample { Name = "external-event" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => unitOfWork.SaveChangesAsync());
+
+        Assert.Contains("外部事务", exception.Message);
+        Assert.Empty(dispatcher.Sequences);
+        Assert.Single(sample.GetDomainEvents());
+        Assert.Equal(0, await unitOfWork.Samples.CountAsync());
+    }
+
+    /// <summary>
+    /// 验证已提交后的资源失败仍清理领域事件且不执行后续通知。
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SaveChanges_WhenCleanupFailsAfterCommit_ShouldClearEventsAndExposeOutcome(bool asynchronous)
+    {
+        await using var connection = CreateOpenConnection();
+        var dispatcher = new RecordingDomainEventDispatcher();
+        using var provider = CreateServiceProvider(dispatcher);
+        await using var unitOfWork = CreateUnitOfWork(connection, provider);
+        await unitOfWork.Database.EnsureCreatedAsync();
+        var sample = new SaveSample { Name = "committed-with-cleanup-error" };
+        sample.AddDomainEvent(new SaveDomainEvent(1));
+        unitOfWork.Samples.Add(sample);
+        var original = new InvalidOperationException("cleanup failed");
+        unitOfWork.AfterCommitFailure = original;
+
+        var exception = asynchronous
+            ? await Assert.ThrowsAsync<InvalidOperationException>(() => unitOfWork.SaveChangesAsync())
+            : Assert.Throws<InvalidOperationException>(() => unitOfWork.SaveChanges());
+
+        Assert.Same(original, exception);
+        Assert.Equal(TransactionOutcome.Committed, exception.GetTransactionOutcome());
+        Assert.Empty(sample.GetDomainEvents());
+        Assert.Equal(new[] { 1 }, dispatcher.Sequences);
+        Assert.Equal(0, unitOfWork.PublishEventsCount);
+        using var verification = connection.CreateCommand();
+        verification.CommandText = "SELECT COUNT(*) FROM save_samples";
+        Assert.Equal(1L, (long)await verification.ExecuteScalarAsync());
+    }
+
+    /// <summary>
     /// 测试目的：保存失败时不得发布领域事件。
     /// </summary>
     [Fact]
@@ -337,11 +569,13 @@ public class UnitOfWorkSaveChangesTest
     /// 创建测试服务提供程序。
     /// </summary>
     /// <returns>服务提供程序。</returns>
-    private static ServiceProvider CreateServiceProvider()
+    private static ServiceProvider CreateServiceProvider(IDomainEventDispatcher dispatcher = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddSingleton<ITransactionActionManager, TransactionActionManager>();
+        if (dispatcher != null)
+            services.AddSingleton(dispatcher);
         return services.BuildServiceProvider();
     }
 
@@ -366,7 +600,7 @@ public class UnitOfWorkSaveChangesTest
     private sealed class EventPublishingUnitOfWork : UnitOfWorkBase
     {
         /// <summary>
-        /// 初始化一个 <see cref="EventPublishingUnitOfWork"/> 类型的实例。
+        /// 初始化一个 <see cref="EventPublishingUnitOfWork" /> 类型的实例。
         /// </summary>
         /// <param name="options">数据库上下文配置。</param>
         /// <param name="serviceProvider">服务提供程序。</param>
@@ -384,6 +618,44 @@ public class UnitOfWorkSaveChangesTest
         /// 事件发布次数。
         /// </summary>
         public int PublishEventsCount { get; private set; }
+
+        /// <summary>
+        /// 用于模拟提交后通知失败的异常。
+        /// </summary>
+        public Exception NotificationFailure { get; set; }
+
+        /// <summary>
+        /// 提交成功后模拟资源释放失败。
+        /// </summary>
+        public Exception AfterCommitFailure { get; set; }
+
+        /// <inheritdoc />
+        protected override int TransactionCommit(ITransactionActionManager transactionActionManager)
+        {
+            var result = base.TransactionCommit(transactionActionManager);
+            ThrowAfterCommit();
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override async Task<int> TransactionCommitAsync(ITransactionActionManager transactionActionManager,
+            CancellationToken cancellationToken)
+        {
+            var result = await base.TransactionCommitAsync(transactionActionManager, cancellationToken);
+            ThrowAfterCommit();
+            return result;
+        }
+
+        /// <summary>
+        /// 注入具有已提交诊断的清理错误。
+        /// </summary>
+        private void ThrowAfterCommit()
+        {
+            if (AfterCommitFailure == null)
+                return;
+            AfterCommitFailure.SetTransactionOutcome(TransactionOutcome.Committed);
+            throw AfterCommitFailure;
+        }
 
         /// <summary>
         /// 保存前拦截调用次数。
@@ -410,6 +682,8 @@ public class UnitOfWorkSaveChangesTest
         protected override Task PublishEventsAsync()
         {
             PublishEventsCount++;
+            if (NotificationFailure != null)
+                throw NotificationFailure;
             return Task.CompletedTask;
         }
     }
@@ -417,8 +691,13 @@ public class UnitOfWorkSaveChangesTest
     /// <summary>
     /// 保存测试实体。
     /// </summary>
-    private sealed class SaveSample
+    private sealed class SaveSample : IHasDomainEvents
     {
+        /// <summary>
+        /// 待分发的领域事件。
+        /// </summary>
+        private readonly List<DomainEvent> _events = new();
+
         /// <summary>
         /// 标识。
         /// </summary>
@@ -428,5 +707,76 @@ public class UnitOfWorkSaveChangesTest
         /// 名称。
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 添加测试领域事件。
+        /// </summary>
+        public void AddDomainEvent(DomainEvent @event) => _events.Add(@event);
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _events.AsReadOnly();
+
+        /// <inheritdoc />
+        public void RemoveDomainEvent(DomainEvent @event) => _events.Remove(@event);
+
+        /// <inheritdoc />
+        public void ClearDomainEvents() => _events.Clear();
+    }
+
+    /// <summary>
+    /// 测试领域事件。
+    /// </summary>
+    private sealed class SaveDomainEvent : DomainEvent
+    {
+        /// <summary>
+        /// 初始化一个 <see cref="SaveDomainEvent" /> 类型的实例。
+        /// </summary>
+        public SaveDomainEvent(int sequence) => Sequence = sequence;
+
+        /// <summary>
+        /// 事件序号。
+        /// </summary>
+        public int Sequence { get; }
+    }
+
+    /// <summary>
+    /// 记录领域事件分发的测试替身。
+    /// </summary>
+    private sealed class RecordingDomainEventDispatcher : IDomainEventDispatcher
+    {
+        /// <summary>
+        /// 分发回调。
+        /// </summary>
+        public Func<DomainEvent, Task> OnDispatch { get; set; }
+
+        /// <summary>
+        /// 已分发事件序号。
+        /// </summary>
+        public List<int> Sequences { get; } = new();
+
+        /// <inheritdoc />
+        public bool Register<TDomainEvent, TDomainEventHandler>()
+            where TDomainEvent : DomainEvent
+            where TDomainEventHandler : IDomainEventHandler<TDomainEvent> => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public bool Register<TDomainEvent>(Type handlerType) where TDomainEvent : DomainEvent =>
+            throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public bool Register(Type eventType, Type handlerType) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public async Task DispatchAsync(DomainEvent @event)
+        {
+            Sequences.Add(((SaveDomainEvent)@event).Sequence);
+            if (OnDispatch != null)
+                await OnDispatch(@event);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+        }
     }
 }

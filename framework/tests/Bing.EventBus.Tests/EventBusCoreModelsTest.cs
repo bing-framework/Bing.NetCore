@@ -106,6 +106,15 @@ public class LocalEventBusOptionsTest
     }
 
     /// <summary>
+    /// 测试目的：默认发布深度上限应为有限值，避免递归事件无限执行。
+    /// </summary>
+    [Fact]
+    public void Constructor_MaxPublishDepth_ShouldHaveSafeDefault()
+    {
+        new LocalEventBusOptions().MaxPublishDepth.ShouldBe(64);
+    }
+
+    /// <summary>
     /// 测试目的：可向 Handlers 添加处理器类型，Count 增加。
     /// </summary>
     [Fact]

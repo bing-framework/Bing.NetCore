@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;</TargetFrameworks>
+    <AssemblyName>Bing.Events.EventBusAdapter</AssemblyName>
+    <PackageId>Bing.Events.EventBusAdapter</PackageId>
+    <Description>在旧 Bing.EventBus 消息契约与 CAP 事件总线之间提供显式适配。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.EventBus\Bing.EventBus.csproj" />
+    <ProjectReference Include="..\Bing.Events\Bing.Events.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,7 +1,9 @@
 ﻿using Bing.Domain.Entities;
+using Bing.Auditing;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Bing.Domain.Entities.Events;
 using IUnitOfWork = Bing.Uow.IUnitOfWork;
 
 namespace Bing.Data.Stores;
@@ -14,7 +16,7 @@ public abstract class StoreBase<TEntity> : StoreBase<TEntity, Guid>, IStore<TEnt
     where TEntity : class, IKey<Guid>, IVersion
 {
     /// <summary>
-    /// 初始化一个<see cref="StoreBase{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="StoreBase{TEntity}" /> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
@@ -37,7 +39,13 @@ public abstract class StoreBase<TEntity> : StoreBase<TEntity, Guid>, IStore<TEnt
 public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, IStore<TEntity, TKey> where TEntity : class, IKey<TKey>
 {
     /// <summary>
-    /// 初始化一个<see cref="StoreBase{TEntity,TKey}"/>类型的实例
+    /// 获取当前工作单元提供的实体审计字段设置器。
+    /// </summary>
+    protected virtual IAuditPropertySetter AuditPropertySetter =>
+        UnitOfWork.ServiceProvider?.GetService(typeof(IAuditPropertySetter)) as IAuditPropertySetter;
+
+    /// <summary>
+    /// 初始化一个 <see cref="StoreBase{TEntity, TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
@@ -60,6 +68,9 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
+        RegisterDomainEventSource(entity);
+        AuditPropertySetter?.SetCreationProperties(entity);
+        AuditPropertySetter?.SetModificationProperties(entity);
         Set.Add(entity);
     }
 
@@ -72,7 +83,16 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        Set.AddRange(entities);
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity == null)
+                throw new ArgumentException("实体集合不能包含空值。", nameof(entities));
+            RegisterDomainEventSource(entity);
+            AuditPropertySetter?.SetCreationProperties(entity);
+            AuditPropertySetter?.SetModificationProperties(entity);
+        }
+        Set.AddRange(items);
     }
 
     /// <summary>
@@ -86,6 +106,9 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         cancellationToken.ThrowIfCancellationRequested();
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
+        RegisterDomainEventSource(entity);
+        AuditPropertySetter?.SetCreationProperties(entity);
+        AuditPropertySetter?.SetModificationProperties(entity);
         await Set.AddAsync(entity, cancellationToken);
     }
 
@@ -100,7 +123,16 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        await Set.AddRangeAsync(entities, cancellationToken);
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity == null)
+                throw new ArgumentException("实体集合不能包含空值。", nameof(entities));
+            RegisterDomainEventSource(entity);
+            AuditPropertySetter?.SetCreationProperties(entity);
+            AuditPropertySetter?.SetModificationProperties(entity);
+        }
+        await Set.AddRangeAsync(items, cancellationToken);
     }
 
     /// <summary>
@@ -112,6 +144,8 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
+        RegisterDomainEventSource(entity);
+        AuditPropertySetter?.SetModificationProperties(entity);
         Set.Update(entity);
     }
 
@@ -124,7 +158,15 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        Set.UpdateRange(entities);
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity == null)
+                throw new ArgumentException("实体集合不能包含空值。", nameof(entities));
+            RegisterDomainEventSource(entity);
+            AuditPropertySetter?.SetModificationProperties(entity);
+        }
+        Set.UpdateRange(items);
     }
 
     /// <summary>
@@ -150,7 +192,15 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        await Set.UpdateRangeAsync(entities, cancellationToken);
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity == null)
+                throw new ArgumentException("实体集合不能包含空值。", nameof(entities));
+            RegisterDomainEventSource(entity);
+            AuditPropertySetter?.SetModificationProperties(entity);
+        }
+        await Set.UpdateRangeAsync(items, cancellationToken);
     }
 
     /// <summary>
@@ -171,6 +221,9 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entity == null)
             return;
+        RegisterDomainEventSource(entity);
+        AuditPropertySetter?.SetDeletionProperties(entity);
+        AuditPropertySetter?.SetModificationProperties(entity);
         if (entity is ISoftDelete model)
         {
             model.IsDeleted = true;
@@ -189,6 +242,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entity == null)
             return;
+        RegisterDomainEventSource(entity);
         Remove(entity.Id);
     }
 
@@ -214,6 +268,12 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
             return;
         if (!list.Any())
             return;
+        foreach (var entity in list)
+        {
+            RegisterDomainEventSource(entity);
+            AuditPropertySetter?.SetDeletionProperties(entity);
+            AuditPropertySetter?.SetModificationProperties(entity);
+        }
         if (list[0] is ISoftDelete)
         {
             foreach (var entity in list.Select(t => (ISoftDelete)t))
@@ -232,7 +292,13 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
         if (entities == null)
             return;
-        Remove(entities.Select(t => t.Id));
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity != null)
+                RegisterDomainEventSource(entity);
+        }
+        Remove(items.Select(t => t.Id));
     }
 
     /// <summary>
@@ -257,6 +323,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         cancellationToken.ThrowIfCancellationRequested();
         if (entity == null)
             return;
+        RegisterDomainEventSource(entity);
         await RemoveAsync(entity.Id, cancellationToken);
     }
 
@@ -284,6 +351,22 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         cancellationToken.ThrowIfCancellationRequested();
         if (entities == null)
             return;
-        await RemoveAsync(entities.Select(t => t.Id), cancellationToken);
+        var items = entities.ToList();
+        foreach (var entity in items)
+        {
+            if (entity != null)
+                RegisterDomainEventSource(entity);
+        }
+        await RemoveAsync(items.Select(t => t.Id), cancellationToken);
+    }
+
+    /// <summary>
+    /// 登记由当前存储器写入的领域事件源。
+    /// </summary>
+    /// <param name="entity">当前写入实体。</param>
+    private void RegisterDomainEventSource(TEntity entity)
+    {
+        if (entity is IHasDomainEvents source)
+            UnitOfWork.RegisterDomainEventSource(source);
     }
 }

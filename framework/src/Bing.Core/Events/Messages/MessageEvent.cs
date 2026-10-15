@@ -5,8 +5,26 @@ namespace Bing.Events.Messages;
 /// <summary>
 /// 消息事件
 /// </summary>
-public class MessageEvent : Event, IMessageEvent
+public class MessageEvent : Event, IClusterEventMetadata
 {
+    /// <inheritdoc />
+    public string TenantId { get; set; }
+
+    /// <inheritdoc />
+    public string Stream { get; set; }
+
+    /// <inheritdoc />
+    public string EntityKey { get; set; }
+
+    /// <inheritdoc />
+    public long? Sequence { get; set; }
+
+    /// <inheritdoc />
+    public string ContractVersion { get; set; }
+
+    /// <inheritdoc />
+    public string TraceId { get; set; }
+
     /// <summary>
     /// 消息名称
     /// </summary>
@@ -52,7 +70,7 @@ public class MessageEvent : Event, IMessageEvent
 public class MessageEvent<T> : MessageEvent
 {
     /// <summary>
-    /// 使用指定消息数据初始化 <see cref="MessageEvent{T}"/> 的实例。
+    /// 初始化一个 <see cref="MessageEvent{T}" /> 类型的实例。
     /// </summary>
     /// <param name="data">消息负载数据。</param>
     public MessageEvent(T data)

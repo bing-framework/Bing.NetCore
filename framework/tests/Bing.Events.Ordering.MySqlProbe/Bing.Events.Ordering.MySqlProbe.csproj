@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.FreeSQL.MySql/Bing.FreeSQL.MySql.csproj" />
+    <ProjectReference Include="../Bing.Test.Shared/Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>

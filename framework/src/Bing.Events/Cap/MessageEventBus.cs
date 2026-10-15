@@ -1,7 +1,6 @@
 ﻿using Bing.Data.Transaction;
 using Bing.Events.Messages;
 using Bing.Tracing;
-using Bing.Utils.Json;
 using DotNetCore.CAP;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -29,7 +28,7 @@ public class MessageEventBus : IMessageEventBus
     protected ILogger<MessageEventBus> Logger { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="MessageEventBus"/>类型的实例
+    /// 初始化一个 <see cref="MessageEventBus" /> 类型的实例。
     /// </summary>
     /// <param name="publisher">事件发布器</param>
     /// <param name="transactionActionManager">事务操作管理器</param>
@@ -50,8 +49,13 @@ public class MessageEventBus : IMessageEventBus
     /// <param name="event">事件</param>
     /// <param name="cancellationToken">取消令牌</param>
     public Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
-        where TEvent : IMessageEvent =>
-        PublishAsync(@event.Name, @event.Data, @event.Callback, @event.Send, cancellationToken);
+        where TEvent : IMessageEvent
+    {
+        if (@event == null)
+            throw new ArgumentNullException(nameof(@event));
+        return PublishCoreAsync(@event.Name, @event.Data, @event.Callback, @event.Send,
+            @event as IClusterEventMetadata, cancellationToken);
+    }
 
     /// <summary>
     /// 发布事件
@@ -61,10 +65,19 @@ public class MessageEventBus : IMessageEventBus
     /// <param name="callback">回调名称</param>
     /// <param name="send">是否立即发送消息</param>
     /// <param name="cancellationToken">取消令牌</param>
-    public async Task PublishAsync(string name, object data, string callback = null, bool send = false, CancellationToken cancellationToken = default)
+    public Task PublishAsync(string name, object data, string callback = null, bool send = false, CancellationToken cancellationToken = default) =>
+        PublishCoreAsync(name, data, callback, send, null, cancellationToken);
+
+    /// <summary>
+    /// 发布带有可选业务元数据的事件。
+    /// </summary>
+    private async Task PublishCoreAsync(string name, object data, string callback, bool send,
+        IClusterEventMetadata metadata, CancellationToken cancellationToken)
     {
         var headers = new Dictionary<string, string> { { DotNetCore.CAP.Messages.Headers.CallbackName, callback } };
         InitTraceIdContext(headers);
+        if (metadata != null)
+            ClusterEventHeaders.Write(headers, metadata);
         if (send)
         {
             await InternalPublishAsync(name, data, headers, callback, cancellationToken);
@@ -86,36 +99,25 @@ public class MessageEventBus : IMessageEventBus
     /// <param name="cancellationToken">取消令牌</param>
     private async Task InternalPublishAsync(string name, object data, IDictionary<string, string> headers, string callback, CancellationToken cancellationToken = default)
     {
-        WriteLog(name, data, headers, callback);
+        WriteLog(name, headers, callback);
         await Publisher.PublishAsync(name, data, headers, cancellationToken);
-        WriteLog(name, data, headers, callback, true);
+        WriteLog(name, headers, callback, true);
     }
 
     /// <summary>
     /// 写日志
     /// </summary>
     /// <param name="name">消息名称</param>
-    /// <param name="data">事件数据</param>
     /// <param name="headers">数据头</param>
     /// <param name="callback">回调名称</param>
     /// <param name="isEnd">是否结束</param>
-    private void WriteLog(string name, object data, IDictionary<string, string> headers, string callback, bool isEnd = false)
+    private void WriteLog(string name, IDictionary<string, string> headers, string callback, bool isEnd = false)
     {
         if (Logger.IsEnabled(LogLevel.Trace) == false)
             return;
-        var dict = new Dictionary<string, object>
-        {
-            { "EventHeader", headers.ToJson() },
-            { "EventData", data.ToJson() },
-        };
-        using (Logger.BeginScope(dict))
-        {
-            var end = isEnd ? "结束" : "开始";
-            var sb = new StringBuilder();
-            sb.Append("Cap发送事件[{EventName}]");
-            sb.Append(end);
-            Logger.LogTrace(sb.ToString(), name);
-        }
+        // Trace 日志只记录定位所需的低敏元数据，不序列化事件正文或完整请求头。
+        Logger.LogTrace("Cap发送事件{Phase}。EventName={EventName}, Callback={Callback}, HeaderCount={HeaderCount}",
+            isEnd ? "结束" : "开始", name, callback, headers?.Count ?? 0);
     }
 
     /// <summary>
