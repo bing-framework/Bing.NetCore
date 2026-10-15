@@ -1,4 +1,6 @@
-# Universal Agent Workflow V4.4
+# 通用 Agent 工作流 V4.4
+
+> 本文描述的是 Agent 协作协议与历史资产，不是产品功能说明，也不构成当前产品实现的保证；实际行为以当前 Skill、脚本与源码为准。
 
 一套任务协议，同时服务：
 
@@ -34,15 +36,15 @@ plan.md / execution.md / review.md
 │  ├─ notify-feishu.mjs
 │  ├─ hook-diagnostic.mjs
 │  └─ workflow-doctor.mjs
-├─ workflows/                  # Antigravity Adapter
+├─ workflows/                  # Antigravity 适配器
 │  ├─ execute-plan.md
 │  └─ fix-review.md
 ├─ rules/
 │  └─ plan-executor.md
-└─ hooks.json                  # Antigravity Stop Guard
+└─ hooks.json                  # Antigravity 停止守卫
 
 .github/
-├─ agents/                     # Copilot Adapter
+├─ agents/                     # Copilot 适配器
 │  ├─ plan-writer.agent.md
 │  ├─ plan-executor.agent.md
 │  ├─ code-reviewer.agent.md
@@ -66,17 +68,17 @@ ai_docs/tasks/<taskId>/
 ## 推荐闭环
 
 ```text
-Plan
+计划
  ↓
-Execute
+执行
  ↓
-Review
- ├─ PASS → Done
+审查
+ ├─ PASS → 完成
  └─ NEEDS_FIX
        ↓
-      Fix
+      修复
        ↓
-    Re-review
+    重新审查
 ```
 
 详细使用请查看：
@@ -97,7 +99,7 @@ Agent 模型与思考等级统一配置见 `AGENT-PROFILES.md`。
 本工作流支持两条闭环路线：
 
 1. 纯 Copilot / Codex 自闭环；
-2. Copilot / Codex 负责 Plan + Review，Antigravity 负责 Execute + Review Fix。
+2. Copilot / Codex 负责计划 + 审查，Antigravity 负责执行 + 审查修复。
 
 详见：
 

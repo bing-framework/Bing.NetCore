@@ -1,6 +1,6 @@
 - name: 主页
   href: index.md
-- name: English map
+- name: 原英文导航的中文译文
   href: README.en.md
 - name: 入门
   items:
@@ -58,14 +58,36 @@
   items:
     - name: 模块索引
       href: modules/README.md
+    - name: 核心启动与依赖注入
+      href: modules/core.md
+    - name: Web 与 MVC
+      href: modules/web.md
     - name: 动态 API
       href: modules/dynamic-api.md
+    - name: 领域与工作单元
+      href: modules/domain.md
+    - name: 数据访问
+      href: modules/data-access.md
     - name: 缓存
       href: modules/caching.md
+    - name: 事件与消息
+      href: modules/events.md
+    - name: 安全与多租户
+      href: modules/security.md
+    - name: 日志与诊断
+      href: modules/observability.md
+    - name: 外围集成
+      href: modules/integrations.md
+    - name: 工程与测试
+      href: modules/development.md
+    - name: 参考宿主
+      href: modules/reference-apps.md
 - name: 运维与质量
   items:
     - name: 文档与代码对照清单
       href: operations/文档与代码对照清单.md
+    - name: 本次文档更新清单
+      href: operations/本次文档更新清单.md
     - name: 日志使用说明
       href: operations/日志使用说明.md
     - name: 日志与可观测性
@@ -86,7 +108,7 @@
       href: sql/README.md
     - name: Provider 能力
       href: sql/provider-capabilities.md
-    - name: Migration 指南
+    - name: SQL 迁移指南
       href: sql/migration-guide.md
     - name: PostgreSQL 函数
       href: sql/postgresql-functions.md

@@ -69,10 +69,10 @@ services.AddBingWebApiClient<IOrdersSdk>(options =>
 
 ## 已知限制与注意事项
 
-- 运行时客户端接口方法必须返回 `Task` 或 `Task<T>`；同步返回、`ValueTask` 为待实现。
+- 运行时客户端接口方法必须返回 `Task` 或 `Task<T>`；同步返回、`ValueTask`：待实现/待确认。
 - 单个方法不支持多个 JSON 请求体，也不支持 JSON 请求体与表单参数混用。
 - 文件上传参数必须实现 `IRemoteStreamContent`；流结果也必须与接口返回类型匹配。
 - 自动重试默认关闭，只允许用于可重放的 GET 或描述请求；文件流和普通请求体不会被强行重放。
 - WebApiClientCore 路径不会读取动态描述，异常模型也不同：它不包装为 `BingRemoteCallException`。
 - 服务端路由冲突会在 MVC 模型构建阶段失败；显式路由与约定路由混用时应运行端到端契约测试。
-- 动态描述目前是运行时客户端协议，不是 OpenAPI 的替代品；OpenAPI 互操作能力为待确认。
+- 动态描述目前是运行时客户端协议；OpenAPI 互操作能力：待实现/待确认。

@@ -47,11 +47,15 @@ services.AddModule<AppModule>();             // ❌ 编译不过
 **正解**：框架没有通用的 `AddCache` / `AddCaching` 入口。使用 `Bing.EasyCaching` 时，应按模式调用 `AddMemoryCaching`、`AddRedisCaching` 或 `AddHybridCaching`；客户端分片使用 `AddShardedRedisCaching` / `AddShardedHybridCaching`。直接使用 CSRedis 或 FreeRedis 时，才需要手工注册客户端和对应缓存管理器：
 
 ```csharp
-RedisHelper.Initialization(...);                                  // CSRedisCore
-services.AddScoped<ICache, CSRedisCacheManager>();                // 或 FreeRedisCacheManager
+using Bing.Caching;
+using Bing.Caching.CSRedis;
+
+services.AddSingleton(new CSRedis.CSRedisClient(redisConnectionString));
+services.AddSingleton(new CacheConfiguration("admin", "admin-csredis"));
+services.AddScoped<ICache, CSRedisCacheManager>();
 ```
 
-详见 [使用文档 §8.1](使用文档.md)。
+连接串由宿主提供；仅初始化静态 `RedisHelper` 不能满足缓存管理器的构造依赖。FreeRedis 同样需要客户端、`CacheConfiguration` 和管理器。详见[缓存模块](../modules/caching.md)及各包 README。
 
 ### Q7 启用 AOP 的入口叫什么？
 

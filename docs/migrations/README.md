@@ -135,8 +135,8 @@ services.AddSqlDataSource("reporting", DatabaseType.Sqlite, connectionString);
 
 | 能力 | 现状 |
 | --- | --- |
-| `ICache` | **无注册扩展**，需 `RedisHelper.Initialization(...)` 后手工 `services.AddScoped<ICache, CSRedisCacheManager>()` |
-| `AddCache` / `AddCaching` / `AddCSRedis` / `AddFreeRedis` | **都不存在**。`Bing.EasyCaching` 的 `AddCaching` 整段被注释且 `CachingOptions` 是 `internal` |
+| `ICache` | EasyCaching 按模式调用 `AddMemoryCaching` / `AddRedisCaching` / `AddHybridCaching`；CSRedis/FreeRedis 注入客户端、`CacheConfiguration` 和管理器 |
+| 通用 `AddCache` / `AddCaching` / `AddCSRedis` / `AddFreeRedis` | 不存在；EasyCaching 客户端分片使用 `AddShardedRedisCaching` / `AddShardedHybridCaching`，详见[缓存模块](../modules/caching.md) |
 | `AddMultiTenancy` / `UseMultiTenancy` / `AddPermissions` / `AddValidation` / `AddObjectMapping` / `AddSecurity` / `AddEmailing` / `AddBingMvc` / `AddEventBus` | **都不存在**，见 [架构文档 §12.8](../architecture/架构文档.md) 防误用清单 |
 
 ### 3.4 组件库入口的形态差异
@@ -177,7 +177,7 @@ services.AddSqlDataSource("reporting", DatabaseType.Sqlite, connectionString);
 **运行期（框架装配）**
 
 - [ ] 模块注册用的是 `IBingBuilder.AddModule<T>()`，且 `UseBing()`（Web）或 `serviceProvider.UseBing()`（非 Web）已调用。
-- [ ] 缓存若使用，是手工注册的（框架没有 `AddCache`，见 §3.3）。
+- [ ] 缓存按对应 Provider 的入口装配，且提供命名空间与配置（见 §3.3）。
 - [ ] 升级后跑一遍 `Bing.Data.Sql` 相关单元测试 + SQLite 本地集成测试。
 
 > 外部数据库（SQL Server / MySQL / PostgreSQL / Oracle）集成测试受 Gate 控制，需按项目配置启用**受控测试库**，不得指向生产库。参见 [数据库集成测试](../testing/integration-testing.md)。

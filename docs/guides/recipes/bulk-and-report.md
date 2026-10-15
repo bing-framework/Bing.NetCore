@@ -90,11 +90,11 @@ await executor.ExecuteProcedure("sp_close_day", parameters);
 
 ## 7. 已知限制（别踩）
 
-1. Lambda 多源 `From` 不支持 → `NotSupportedException`
-2. 不支持 `Returning` 子句；`Mutation Set` 不支持「来源列赋值」
+1. Lambda 支持多源 From 和重复二元 Join，公开投影最多两个来源参数
+2. Returning/Output 与结构化来源列赋值受 Provider 和 Builder 能力限制，详见[变更子句设计](../../sql/sql-mutation-clause-design.md)
 3. 含 **CTE 的 `Union` / `Group` / `Distinct`** 查询**不支持自动分页计数**——需预先设置 `TotalCount`
 4. **原生 SQL 不支持自动分页**
-5. 不支持多表 DTO 投影绑定
+5. 多表 DTO 投影须使用成员初始化与直接成员绑定，派生表只暴露已投影成员
 6. **Doris 数据源强制只读**（`IsReadOnly = true; SupportsTransactions = false`）
 7. **SQLite** 不支持库名/架构名限定，只能写单段对象名
 

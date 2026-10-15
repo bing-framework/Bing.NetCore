@@ -3,31 +3,28 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/bing-framework/Bing.NetCore)
 
-**English** ｜ [简体中文](README.md)
+**中文译文** ｜ [中文主入口](README.md)
 
-Bing.NetCore is an application framework built on .NET. It targets small teams that need to ship
-business applications quickly: a set of common utilities, layered architecture base classes,
-third‑party component wrappers, and integration modules for common infrastructure.
+Bing.NetCore 是一个基于 .NET 构建的应用框架。它面向需要快速交付业务应用的小型团队，提供常用工具、分层架构基类、
+第三方组件封装，以及常见基础设施的集成模块。
 
-> **Note on documentation language**: the framework's reference documentation is currently written
-> in Simplified Chinese. This file is the English entry point; the full documentation set lives in
-> [`docs/`](docs/README.md), and an English index of that set is at
-> [docs/README.en.md](docs/README.en.md).
+> **文档语言说明**：框架参考文档目前以简体中文编写。本文件提供中文入口；完整文档集位于
+> [`docs/`](docs/README.md)，对应的文档导航见 [docs/README.en.md](docs/README.en.md)。
 
-## Key characteristics
+## 主要特性
 
 | | |
 | --- | --- |
-| **Target frameworks** | Class libraries: `netstandard2.0` · Web / application hosts: `net6.0` |
-| **Build SDK** | Pinned by [`global.json`](global.json) to **.NET SDK 8.0.424** |
-| **Modularity** | Explicit module graph via `IBingModule` + `[DependsOnModule]`, two‑phase bootstrap |
-| **Dependency injection** | Convention‑based auto‑registration (marker interfaces + `[Dependency]`), built on MSDI |
-| **Data access** | Three coexisting options — EF Core (5 providers), FreeSQL (MySql), Dapper (`Bing.Data.Sql` engine) |
-| **DDD building blocks** | `IStore` (not `IRepository`), aggregate roots, unit of work, auditing, soft delete, optimistic concurrency |
-| **Cross‑cutting** | Unified API response, exception pipeline, multi‑tenancy, local + distributed event bus (CAP), caching, locks, email, templating, localization |
-| **Packages** | **70 packable projects** under `framework/src` and `components/src` |
+| **目标框架** | 类库：`netstandard2.0` · Web / 应用宿主：`net6.0` |
+| **构建 SDK** | [`global.json`](global.json) 固定为 **.NET SDK 8.0.424** |
+| **模块化** | 通过 `IBingModule` + `[DependsOnModule]` 显式声明模块图，并采用两阶段启动 |
+| **依赖注入** | 基于约定的自动注册（标记接口 + `[Dependency]`），底层使用 MSDI |
+| **数据访问** | 三种并存选项：EF Core（5 个 Provider）、FreeSQL（MySql）、Dapper（`Bing.Data.Sql` 引擎） |
+| **DDD 构建块** | `IStore`（不是 `IRepository`）、聚合根、工作单元、审计、软删除、乐观并发 |
+| **横切能力** | 统一 API 响应、异常管道、多租户、本地 + 分布式事件总线（CAP）、缓存、锁、邮件、模板、本地化 |
+| **包数量** | `framework/src` 与 `components/src` 下共有 **70 个可打包工程** |
 
-## Quick start
+## 快速开始
 
 ```bash
 dotnet add package Bing.AspNetCore
@@ -70,8 +67,7 @@ public class Startup
 }
 ```
 
-Registering a data access unit of work (EF Core + MySQL) — this is the shape used by the reference
-implementation in `modules/admin`:
+注册数据访问工作单元（EF Core + MySQL）。`modules/admin` 中的参考实现采用以下形式：
 
 ```csharp
 public class EntityFrameworkCoreModule : BingModule
@@ -92,107 +88,119 @@ public class EntityFrameworkCoreModule : BingModule
 }
 ```
 
-Details that commonly trip people up:
+常见易错点：
 
-- **`AddMySqlUnitOfWork<TService, TImplementation>` takes two type parameters** and a connection
-  string (or a `DbConnection`) — it is *not* a `DbContext`-options builder. The interface type comes
-  first, the `UnitOfWorkBase`-derived implementation second.
-- **Non‑Web hosts** call `serviceProvider.UseBing()` instead of `app.UseBing()`. Forgetting this
-  means modules are registered but never started.
-- **Module execution order is `Level` → `Order` → `FullName`**, *not* a topological sort of
-  `[DependsOnModule]`. Dependencies are included recursively, but ordering is not derived from them —
-  set `Order` when two modules at the same level must sequence.
-- **There is no `AddAop`.** AOP is enabled on the service collection
-  (`services.EnableAop(config => ...)`) or via AspectCore's `.UseServiceContext()` on the host builder.
-- **The PostgreSQL entry point is named `AddPgSqlUnitOfWork`** (not `AddPostgreSqlUnitOfWork`), even
-  though the project directory is `Bing.EntityFrameworkCore.PostgreSql`.
+- **`AddMySqlUnitOfWork<TService, TImplementation>` 接收两个类型参数**和一个连接字符串（或 `DbConnection`），
+  它*不是* `DbContext` 选项构建器。第一个类型是接口，第二个类型是派生自 `UnitOfWorkBase` 的实现。
+- **非 Web 宿主**调用 `serviceProvider.UseBing()`，而不是 `app.UseBing()`。遗漏这一步会导致模块已注册但从未启动。
+- **模块执行顺序为 `Level` → `Order` → `FullName`**，*不是* `[DependsOnModule]` 的拓扑排序。依赖会递归纳入，
+  但顺序不会从依赖关系推导；同一级别的模块需要排序时，请设置 `Order`。
+- **不存在 `AddAop`。** AOP 可在服务集合上启用（`services.EnableAop(config => ...)`），或通过宿主构建器上的
+  AspectCore `.UseServiceContext()` 启用。
+- **PostgreSQL 入口名称是 `AddPgSqlUnitOfWork`**（不是 `AddPostgreSqlUnitOfWork`），即使工程目录名为
+  `Bing.EntityFrameworkCore.PostgreSql`。
 
-## Documentation
+## 文档
 
-Full index: **[docs/README.md](docs/README.md)** (Chinese) · **[docs/README.en.md](docs/README.en.md)** (English map)
+完整索引：**[docs/README.md](docs/README.md)** · **[docs/README.en.md](docs/README.en.md)**
 
-| Document | What it covers |
+| 文档 | 覆盖内容 |
 | --- | --- |
-| [使用文档 (Usage)](docs/getting-started/使用文档.md) | Install, quick start, core concepts, per‑feature examples |
-| [架构文档 (Architecture)](docs/architecture/架构文档.md) | Layers, real project reference graph, module inventory, full registration entry list |
-| [设计思路文档 (Design rationale)](docs/architecture/设计思路文档.md) | Design goals, key decisions and their trade‑offs |
-| [子系统深挖 (Subsystem deep dive)](docs/architecture/子系统深挖.md) | Code‑level analysis of CAP event bus, FreeSQL, `Bing.Data.Sql` |
-| [能力矩阵 (Capability matrix)](docs/getting-started/能力矩阵.md) | Which ORM to pick — EF Core / FreeSQL / Dapper compared across 18 dimensions |
-| [术语表 (Glossary)](docs/getting-started/术语表.md) | Framework‑specific vocabulary and easily confused terms |
-| [最佳实践 (Best practices)](docs/guides/最佳实践.md) | Do / Don't pairs and antipatterns |
-| [安全指南 (Security guide)](docs/operations/安全指南.md) | Credentials, JWT, SQL injection, log redaction, tenant isolation |
-| [性能指南 (Performance guide)](docs/operations/性能指南.md) | Benchmarked guidance and known hot‑path traps |
-| [测试指南 (Testing guide)](docs/operations/测试指南.md) | How to write and run tests, Public API gates, CI scripts |
-| [abp-migration](docs/getting-started/abp-migration.md) | Type‑by‑type mapping for teams coming from ABP Framework |
-| [架构决策记录 (ADRs)](docs/architecture/adr/README.md) | 10 decision records, each with rejected alternatives |
-| [recipes](docs/guides/recipes/README.md) | End‑to‑end scenario code (CRUD, CAP events, multi‑tenancy, RBAC, payments, bulk/reporting) |
-| [Issue tracker / FAQ](docs/getting-started/FAQ与排错.md) | The most common pitfalls, with source‑verified explanations |
+| [使用文档](docs/getting-started/使用文档.md) | 安装、快速开始、核心概念和按功能组织的示例 |
+| [架构文档](docs/architecture/架构文档.md) | 分层结构、真实项目参考依赖图、模块清单和完整注册入口列表 |
+| [设计思路文档](docs/architecture/设计思路文档.md) | 设计目标、关键决策及其权衡 |
+| [子系统深挖](docs/architecture/子系统深挖.md) | CAP 事件总线、FreeSQL、`Bing.Data.Sql` 的代码级分析 |
+| [能力矩阵](docs/getting-started/能力矩阵.md) | 通过 18 个维度比较 EF Core、FreeSQL 与 Dapper，帮助选择 ORM |
+| [术语表](docs/getting-started/术语表.md) | 框架专用词汇和容易混淆的术语 |
+| [最佳实践](docs/guides/最佳实践.md) | 应做 / 不应做对照和反模式 |
+| [安全指南](docs/operations/安全指南.md) | 凭据、JWT、SQL 注入、日志脱敏和租户隔离 |
+| [性能指南](docs/operations/性能指南.md) | 基准测试结论和已知热点路径陷阱 |
+| [测试指南](docs/operations/测试指南.md) | 如何编写和运行测试、公开 API 门禁及 CI 脚本 |
+| [abp-migration](docs/getting-started/abp-migration.md) | 面向 ABP Framework 团队的逐类型映射 |
+| [架构决策记录](docs/architecture/adr/README.md) | 10 份架构决策记录，每份都包含被否决的备选方案 |
+| [recipes](docs/guides/recipes/README.md) | 端到端场景代码（CRUD、CAP 事件、多租户、RBAC、支付、批量处理 / 报表） |
+| [问题追踪 / FAQ](docs/getting-started/FAQ与排错.md) | 最常见的问题及经过源码核对的解释 |
 
-Interactive helpers (open locally in a browser, zero dependencies):
+### 模块文档（12 篇）
 
-- [选型向导 (Selection wizard)](docs/选型向导.html) — answer a few questions, get a package list and startup code
-- [Cheat sheet](docs/cheatsheet.html) — one printable page from entity to CRUD API
-
-## Packages
-
-The full table with NuGet version / download badges for all **70 packages** is maintained in the
-Chinese [README](README.md#nuget-packages). Core groups:
-
-| Group | Packages |
+| 模块 | 一句话简介 |
 | --- | --- |
-| **Core & DI** | `Bing.Core` · `Bing.Uow` · `Bing.ExceptionHandling` · `Bing.ObjectMapping` · `Bing.AutoMapper` |
-| **Domain (DDD)** | `Bing.Ddd.Domain` · `Bing.Ddd.Application` (+ `.Contracts`) · `Bing.Auditing` (+ `.Contracts`) |
-| **ASP.NET Core** | `Bing.AspNetCore` (+ `.Abstractions`, `.Mvc`, `.Mvc.Contracts`, `.Mvc.UI`, `.Serilog`) · `Bing.AspNetCore.Authentication.JwtBearer` · `Bing.AspNetCore.MultiTenancy` |
-| **Dynamic API** | `Bing.DynamicApi.Contracts` · `Bing.DynamicApi.Client` · `Bing.DynamicApi.WebApiClient` |
-| **Data access** | `Bing.Data` · `Bing.Data.Sql` (+ `.Analyzers`) · `Bing.Dapper.*` (5 providers) · `Bing.EntityFrameworkCore.*` (5 providers) · `Bing.FreeSQL` (+ `.MySql`) |
-| **Cross‑cutting** | `Bing.Caching.*` · `Bing.Events` · `Bing.Locks.CSRedis` · `Bing.Localization` · `Bing.MultiTenancy` · `Bing.Emailing` · `Bing.MailKit` · `Bing.TextTemplating` (+ `.Scriban`) · `Bing.Logging` (+ `.Serilog`, `.Sinks.Exceptionless`) |
-| **Security** | `Bing.Security` · `Bing.Permissions` · `Bing.Validation` (+ `.Abstractions`) |
-| **Business** | `Bing.Biz` · `Bing.Biz.Payments` · `Bing.Biz.OAuthLogin` |
+| [核心启动与依赖注入](docs/modules/core.md) | 模块发现、依赖加载、约定注册、AOP 与异常基础设施。 |
+| [Web 与 MVC](docs/modules/web.md) | ASP.NET Core 启动、统一响应、异常处理与 Razor 扩展。 |
+| [动态 API](docs/modules/dynamic-api.md) | 将 `IAppService` 约定公开为 HTTP API，并提供运行时代理与 WebApiClientCore 两种客户端。 |
+| [领域与工作单元](docs/modules/domain.md) | DDD、应用服务、审计、验证、提交与对象映射。 |
+| [数据访问](docs/modules/data-access.md) | EF Core、FreeSQL、Dapper、SQL Builder 与各数据库 Provider。 |
+| [缓存](docs/modules/caching.md) | 统一缓存抽象、Redis 适配器、EasyCaching、命名空间、拓扑、分片和 Hybrid 协调。 |
+| [事件与消息](docs/modules/events.md) | 进程内发布、CAP 消息及领域事件分发的边界。 |
+| [安全与多租户](docs/modules/security.md) | JWT、授权、权限、安全服务及租户解析和切换。 |
+| [日志与诊断](docs/modules/observability.md) | Bing 日志、Serilog、Exceptionless、SkyAPM 与 MiniProfiler。 |
+| [外围集成](docs/modules/integrations.md) | 邮件、模板、本地化、锁、支付与 OAuth 的注册和限制。 |
+| [工程与测试](docs/modules/development.md) | 分析器、生成器、构建、测试和文档校验工具。 |
+| [参考宿主](docs/modules/reference-apps.md) | admin 分层参考实现及 WebAPI、Hangfire、WinForms 示例。 |
 
-Every one of the 70 package directories contains its own `README.md`, which is embedded into the `.nupkg`
-(via `PackageReadmeFile`) and rendered on its nuget.org page.
+### 本次文档更新清单
 
-## Build and test
+逐文件的操作类型、内容摘要和验证边界见正式清单：[docs/operations/本次文档更新清单.md](docs/operations/本次文档更新清单.md)。
+
+交互式辅助工具（本地浏览器打开，零依赖）：
+
+- [选型向导](docs/选型向导.html) — 回答几个问题，获取包清单和启动代码
+- [Cheat sheet](docs/cheatsheet.html) — 从实体到 CRUD API 的一页纸速查
+
+## 包
+
+全部 **70 个包**的 NuGet 版本 / 下载徽章完整表格维护在中文 [README](README.md#nuget-packages) 中。核心分组如下：
+
+| 分组 | 包 |
+| --- | --- |
+| **核心与 DI** | `Bing.Core` · `Bing.Uow` · `Bing.ExceptionHandling` · `Bing.ObjectMapping` · `Bing.AutoMapper` |
+| **领域（DDD）** | `Bing.Ddd.Domain` · `Bing.Ddd.Application`（+ `.Contracts`）· `Bing.Auditing`（+ `.Contracts`） |
+| **ASP.NET Core** | `Bing.AspNetCore`（+ `.Abstractions`、`.Mvc`、`.Mvc.Contracts`、`.Mvc.UI`、`.Serilog`）· `Bing.AspNetCore.Authentication.JwtBearer` · `Bing.AspNetCore.MultiTenancy` |
+| **动态 API** | `Bing.DynamicApi.Contracts` · `Bing.DynamicApi.Client` · `Bing.DynamicApi.WebApiClient` |
+| **数据访问** | `Bing.Data` · `Bing.Data.Sql`（+ `.Analyzers`）· `Bing.Dapper.*`（5 个 Provider）· `Bing.EntityFrameworkCore.*`（5 个 Provider）· `Bing.FreeSQL`（+ `.MySql`） |
+| **横切能力** | `Bing.Caching.*` · `Bing.Events` · `Bing.Locks.CSRedis` · `Bing.Localization` · `Bing.MultiTenancy` · `Bing.Emailing` · `Bing.MailKit` · `Bing.TextTemplating`（+ `.Scriban`）· `Bing.Logging`（+ `.Serilog`、`.Sinks.Exceptionless`） |
+| **安全** | `Bing.Security` · `Bing.Permissions` · `Bing.Validation`（+ `.Abstractions`） |
+| **业务** | `Bing.Biz` · `Bing.Biz.Payments` · `Bing.Biz.OAuthLogin` |
+
+70 个包目录都包含自己的 `README.md`，它们通过 `PackageReadmeFile` 嵌入 `.nupkg`，并在 nuget.org 包页面中展示。
+
+## 构建与测试
 
 ```bash
 dotnet build Bing.All.sln
 dotnet test framework/tests/<TestProject>/<TestProject>.csproj
 ```
 
-- Test stack: **xUnit + Shouldly + Moq + Coverlet**.
-- SQLite integration tests run by default; external databases (SqlServer / MySql / PostgreSQL /
-  Oracle) are gated behind `RUN_INTEGRATION_TESTS` or provider‑specific environment variables.
-  **Never point them at a production database.**
-- Docs consistency is checked by `python eng/ci/check-docs.py` (also wired into CI via
-  `.github/workflows/docs-lint.yml`).
+- 测试技术栈：**xUnit + Shouldly + Moq + Coverlet**。
+- SQLite 集成测试默认运行；外部数据库（SqlServer / MySql / PostgreSQL / Oracle）由
+  `RUN_INTEGRATION_TESTS` 或 Provider 专用环境变量门控。**切勿指向生产数据库。**
+- 文档一致性由 `python eng/ci/check-docs.py` 检查（同时通过 `.github/workflows/docs-lint.yml` 接入 CI）。
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) (Chinese) and [AGENTS.md](AGENTS.md) for contribution rules —
-note that the repository mandates **UTF‑8 for all text files** and Chinese XML doc comments.
+贡献规则见 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [AGENTS.md](AGENTS.md)；请注意，仓库要求**所有文本文件使用 UTF-8**，
+XML 文档注释使用中文。
 
-## Reference implementation and samples
+## 参考实现与示例
 
-- [`modules/admin/`](modules/admin/README.md) — full layered business reference (domain → store → application service → Web API). Requires MySQL / Redis / RabbitMQ.
-- [`samples/`](samples/README.md) — three minimal projects: minimal Web API host, console + Hangfire background jobs, and a non‑Web WinForms host.
+- [`modules/admin/`](modules/admin/README.md) — 完整的分层业务参考实现（领域 → Store → 应用服务 → Web API）。需要 MySQL / Redis / RabbitMQ。
+- [`samples/`](samples/README.md) — 三个最小项目：最小 Web API 宿主、控制台 + Hangfire 后台任务，以及非 Web WinForms 宿主。
 
-## Contributing
+## 贡献
 
-Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+欢迎提交 Issue 和 Pull Request，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-> **API compatibility**: the project states that API compatibility is *not* guaranteed across
-> releases for cost reasons. Always check the [release notes](docs/ReleaseNotes.md) and the
-> [migration guide](docs/migrations/README.md) before upgrading.
+> **API 兼容性**：由于成本原因，项目声明不保证不同版本之间的 API 兼容性。升级前请务必查看
+> [发行说明](docs/ReleaseNotes.md) 和 [迁移指南](docs/migrations/README.md)。
 
-## Disclaimer
+## 免责声明
 
-The code has been reviewed and is used in production by its authors, but unknown defects may
-remain. The Bing team accepts no liability for production losses. See the Chinese
-[README](README.md) for the full disclaimer.
+代码已经过审查，并由作者用于生产环境，但仍可能存在未知缺陷。Bing 团队不对生产损失承担责任。
+完整免责声明请参阅中文 [README](README.md)。
 
-## License
+## 许可证
 
-**MIT** — see [LICENSE](LICENSE).
+**MIT** — 详见 [LICENSE](LICENSE)。
 
-## Links
+## 链接
 
-- Source: <https://github.com/bing-framework/Bing.NetCore>
-- Documentation site: built and deployed by `.github/workflows/docfx.yml` (GitHub Pages)
+- 源码：<https://github.com/bing-framework/Bing.NetCore>
+- 文档站点：由 `.github/workflows/docfx.yml` 构建并部署到 GitHub Pages

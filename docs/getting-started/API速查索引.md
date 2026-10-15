@@ -58,7 +58,7 @@
 | --- | --- | --- | --- |
 | Bing.AspNetCore | `Bing.AspNetCore.Mvc` / `Bing.AspNetCore.ExceptionHandling` | `ApiResult : JsonResult`、`StatusCode{Ok=1,Fail=2,Unauthorized=401}`、`BingControllerBase` / `ApiControllerBase`、`BingExceptionHandlingMiddleware` | 统一响应与异常处理 |
 | Bing.AspNetCore.Mvc | `Bing.AspNetCore.Mvc.Filters` / `.ExceptionHandling` | `ResultHandlerAttribute`、`BingExceptionFilter`、`QueryControllerBase` / `CrudControllerBase`、`MvcOptions.AddBing` | 结果包装与控制器基类 |
-| Bing.AspNetCore.Authentication.JwtBearer | `Bing.AspNetCore.Authorization.JwtBearer.Extensions` | `AddJwt(IConfiguration)` | 配置节 `JwtOptions`，策略名 `jwt` |
+| Bing.AspNetCore.Authentication.JwtBearer | `Bing.AspNetCore.Authorization.JwtBearer` | `AddJwt(IConfiguration)` | 配置节 `JwtOptions`，策略名 `jwt` |
 | Bing.Events | `Bing.Events` / `.Messages` / `.Handlers` | `IEventBus` / `ISimpleEventBus` / `IMessageEventBus` / `IMessageEvent` / `IEventHandler<T>` / `IEventHandlerManager` | 事件总线（两层发布） |
 | Bing.Events | `Bing.Events.Cap` / `Bing.Events.Default` | `EventBus`、`MessageEventBus`、`AddCapEventBus` / `AddDefaultEventBus` | CAP 与进程内实现 |
 | Bing.Caching | `Bing.Caching` | `ICache` | 缓存抽象；实现：`CSRedisCacheManager` / `FreeRedisCacheManager` |
