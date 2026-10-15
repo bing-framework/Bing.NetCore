@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\AdminInventoryProcessProbe.cs" Link="Program.cs" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
+    <ProjectReference Include="..\..\src\Bing.Admin.Data.FreeSQL\Bing.Admin.Data.FreeSQL.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>

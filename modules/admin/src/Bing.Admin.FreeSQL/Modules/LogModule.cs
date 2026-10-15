@@ -38,28 +38,38 @@ namespace Bing.Admin.Modules
         /// <param name="services">服务集合</param>
         public override IServiceCollection AddServices(IServiceCollection services)
         {
-            // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
             services.AddBingLogging(x => { });
-            ExceptionlessClient.Default.Configuration.ApiKey = "vCFssLV6HPlElQ6wkQJaLvaCqvhTTsWWTOm8dzQo";
-            ExceptionlessClient.Default.Configuration.ServerUrl = "http://10.186.135.147:5100";
-            ExceptionlessClient.Default.Startup();
-            
+            var configuration = services.GetConfiguration();
+            var exceptionlessApiKey = configuration["Exceptionless:ApiKey"];
+            var exceptionlessServerUrl = configuration["Exceptionless:ServerUrl"];
+            if (!string.IsNullOrWhiteSpace(exceptionlessApiKey))
+            {
+                services.AddExceptionless(x =>
+                {
+                    x.ApiKey = exceptionlessApiKey;
+                    x.ServerUrl = exceptionlessServerUrl;
+                });
+            }
             services.AddLogging(loggingBuilder =>
             {
                 var logFilePath = $"{AppContext.BaseDirectory}logs\\log-.log";
-                var configuration = services.GetConfiguration();
-                serilog.Log.Logger = new serilog.LoggerConfiguration()
+                var loggerConfiguration = new serilog.LoggerConfiguration()
                     .Enrich.FromLogContext()
                     .Enrich.WithLogContext()
                     .Enrich.WithLogLevel()
-                    .Enrich.WithSpan()
-                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
-                    {
-                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
-                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
-                        return builder;
-                    })
+                    .Enrich.WithSpan();
+                if (!string.IsNullOrWhiteSpace(exceptionlessApiKey))
+                {
+                    loggerConfiguration = loggerConfiguration.WriteTo.Exceptionless(
+                        exceptionlessApiKey, exceptionlessServerUrl, additionalOperation: builder =>
+                        {
+                            if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                                builder.Target.AddTags(traceId.ToString() ?? string.Empty);
+                            builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
+                            return builder;
+                        });
+                }
+                serilog.Log.Logger = loggerConfiguration
                     .WriteTo.Async(o =>
                     {
                         o.File(logFilePath,
@@ -90,7 +100,7 @@ namespace Bing.Admin.Modules
         private readonly AsyncLocal<LogContext> _currentLogContext;
 
         /// <summary>
-        /// 初始化一个<see cref="LogContextAccessor"/>类型的实例
+        /// 初始化一个 <see cref="LogContextAccessor" /> 类型的实例。
         /// </summary>
         public LogContextAccessor()
         {

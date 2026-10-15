@@ -3,6 +3,7 @@ using AspectCore.DependencyInjection;
 using System.Diagnostics;
 using Bing.Admin.Jobs;
 using Bing.AspNetCore;
+using Bing.AspNetCore.Hosting;
 using Bing.Core.Modularity;
 using Bing.Tracing;
 using Hangfire;
@@ -11,6 +12,7 @@ using Hangfire.Common;
 using Hangfire.MemoryStorage;
 using Hangfire.Server;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin.Modules;
@@ -38,25 +40,70 @@ public class HangfireModule : AspNetCoreBingModule
     /// <param name="services">服务集合</param>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
+        var role = services.GetConfiguration().GetBingHostRole();
+        BingHangfireRuntime hangfireRuntime = null;
+        BingHangfireDrainFilter drainFilter = null;
+        if (role == BingHostRole.Task)
+        {
+            hangfireRuntime = new BingHangfireRuntime();
+            drainFilter = new BingHangfireDrainFilter(hangfireRuntime);
+            services.AddSingleton(hangfireRuntime);
+            services.AddSingleton<IBingHangfireRuntime>(provider =>
+                provider.GetRequiredService<BingHangfireRuntime>());
+            services.AddSingleton(drainFilter);
+        }
+
         services.AddHangfire(o =>
         {
             o.UseMemoryStorage();
             o.UseFilter(new CorrelateFilterAttribute());
+            if (drainFilter != null)
+                o.UseFilter(drainFilter);
         });
+        if (role == BingHostRole.Task)
+        {
+            services.AddHangfireServer();
+            services.AddHostedService<BingHangfireDrainHostedService>();
+        }
         return services;
+    }
+
+    /// <inheritdoc />
+    public override void OnApplicationInitialization(BingModuleInitializationContext context)
+    {
+        var configuration = context.ServiceProvider.GetRequiredService<IConfiguration>();
+        if (configuration.GetBingHostRole() == BingHostRole.Task)
+        {
+            Enabled = true;
+            GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(context.ServiceProvider));
+            RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0 0/1 * * * ? ", TimeZoneInfo.Local);
+            return;
+        }
+        base.OnApplicationInitialization(context);
     }
 
     /// <summary>
     /// 应用AspNetCore的服务业务
     /// </summary>
     /// <param name="app">应用程序构建器</param>
+    /// <remarks>Web 角色只装配 Dashboard；后台 Server 由 Task 角色的托管服务启动。</remarks>
     public override void UseModule(IApplicationBuilder app)
     {
         Enabled = true;
         GlobalConfiguration.Configuration.UseActivator(new HangfireDIActivator(app.ApplicationServices));
-        app.UseHangfireDashboard();
-        app.UseHangfireServer();
-        RecurringJob.AddOrUpdate<IDebugLogJob>(x => x.WriteLog(), "0 0/1 * * * ? ", TimeZoneInfo.Local);
+        var configuration = app.ApplicationServices.GetRequiredService<IConfiguration>();
+        var role = configuration.GetBingHostRole();
+        if (role == BingHostRole.Web)
+        {
+            var requiredRole = configuration["Hangfire:Dashboard:Role"];
+            app.UseHangfireDashboard(options: new DashboardOptions
+            {
+                Authorization = new[] { new AdminHangfireDashboardAuthorizationFilter(requiredRole) }
+            });
+            return;
+        }
+
+        // Task 角色由 Generic Host 的托管服务启动，避免管道路径重复装配 Server。
     }
 }
 
@@ -77,7 +124,7 @@ internal class HangfireDIActivator : JobActivator
     private readonly IServiceResolver _serviceResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="HangfireDIActivator"/>类型的实例
+    /// 初始化一个 <see cref="HangfireDIActivator" /> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     public HangfireDIActivator(IServiceProvider serviceProvider)
@@ -117,7 +164,7 @@ internal class HangfireDIActivator : JobActivator
         private readonly IServiceResolver _resolver;
 
         /// <summary>
-        /// 初始化一个<see cref="AspectCoreScope"/>类型的实例
+        /// 初始化一个 <see cref="AspectCoreScope" /> 类型的实例。
         /// </summary>
         /// <param name="resolver">服务解析器</param>
         public AspectCoreScope(IServiceResolver resolver) => _resolver = resolver;
@@ -145,7 +192,7 @@ internal class HangfireDIActivator : JobActivator
         private readonly IServiceScope _scope;
 
         /// <summary>
-        /// 初始化一个<see cref="MsdiScope"/>类型的实例
+        /// 初始化一个 <see cref="MsdiScope" /> 类型的实例。
         /// </summary>
         /// <param name="scope">作用域</param>
         public MsdiScope(IServiceScope scope) => _scope = scope;
@@ -168,10 +215,19 @@ internal class HangfireDIActivator : JobActivator
 /// </summary>
 internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, IServerFilter
 {
+    /// <summary>
+    /// 关联 ID 项在 Hangfire 作业参数中的键。
+    /// </summary>
     private const string CorrelationIdKey = "CorrelationId";
+
+    /// <summary>
+    /// 活动关联标记在 Hangfire 作业参数中的键。
+    /// </summary>
     private const string CorrelateActivityKey = "Correlate-Activity";
 
-    /// <summary>Called before the creation of the job.</summary>
+    /// <summary>
+    /// Called before the creation of the job.
+    /// </summary>
     /// <param name="filterContext">The filter context.</param>
     public void OnCreating(CreatingContext filterContext)
     {
@@ -181,14 +237,18 @@ internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, ISe
         filterContext.SetJobParameter(CorrelationIdKey, TraceIdContext.Current.TraceId);
     }
 
-    /// <summary>Called after the creation of the job.</summary>
+    /// <summary>
+    /// Called after the creation of the job.
+    /// </summary>
     /// <param name="filterContext">The filter context.</param>
     public void OnCreated(CreatedContext filterContext)
     {
         Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnCreated】TraceId: {TraceIdContext.Current.TraceId}");
     }
 
-    /// <summary>Called before the performance of the job.</summary>
+    /// <summary>
+    /// Called before the performance of the job.
+    /// </summary>
     /// <param name="filterContext">The filter context.</param>
     public void OnPerforming(PerformingContext filterContext)
     {
@@ -197,7 +257,9 @@ internal class CorrelateFilterAttribute : JobFilterAttribute, IClientFilter, ISe
         Debug.WriteLine($"【{nameof(CorrelateFilterAttribute)}-OnPerforming】TraceId: {TraceIdContext.Current.TraceId}");
     }
 
-    /// <summary>Called after the performance of the job.</summary>
+    /// <summary>
+    /// Called after the performance of the job.
+    /// </summary>
     /// <param name="filterContext">The filter context.</param>
     public void OnPerformed(PerformedContext filterContext)
     {

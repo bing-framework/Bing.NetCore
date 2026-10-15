@@ -1,4 +1,5 @@
 ﻿using Bing.Admin.Modules;
+using Bing.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +14,7 @@ namespace Bing.Admin
     public class Startup
     {
         /// <summary>
-        /// 初始化一个<see cref="Startup"/>类型的是
+        /// 初始化一个 <see cref="Startup" /> 类型的实例。
         /// </summary>
         /// <param name="configuration">配置</param>
         public Startup(IConfiguration configuration)
@@ -31,7 +32,7 @@ namespace Bing.Admin
         /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBing()
+            var builder = services.AddBing()
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
                 .AddModule<AppModule>()
@@ -39,10 +40,13 @@ namespace Bing.Admin
                 .AddModule<EntityFrameworkCoreModule>()
                 .AddModule<CacheModule>()
                 .AddModule<CapModule>()
-                .AddModule<SkyApmModule>()
-                //.AddModule<MySqlAdminUnitOfWorkMigrationModule>()
-                .AddModule<SwaggerModule>()
-                .AddModule<HangfireModule>();
+                .AddModule<SkyApmModule>();
+            if (!Configuration.IsBingBackgroundRole())
+                builder.AddModule<SwaggerModule>();
+            if (!Configuration.IsBingConsumerRole())
+                builder.AddModule<HangfireModule>();
+            if (Configuration.IsBingBackgroundRole())
+                services.EnableBingHostedInitialization();
             //return services.BuildServiceContextProvider();
         }
 
@@ -52,7 +56,8 @@ namespace Bing.Admin
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             //loggerFactory.AddSysLogProvider();
-            app.UseBing();
+            if (!Configuration.IsBingBackgroundRole())
+                app.UseBing();
         }
     }
 }

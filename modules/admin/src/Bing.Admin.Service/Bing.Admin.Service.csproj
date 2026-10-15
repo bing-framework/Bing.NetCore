@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Events\AdminOrderedEventRecovery.cs" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service.Shared\Bing.Admin.Service.Shared.csproj" />
   </ItemGroup>

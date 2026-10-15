@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetCore.CAP.MySql" Version="3.1.2" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bing.Admin.FreeSQL.Tests" />
   </ItemGroup>
 
   <ItemGroup>

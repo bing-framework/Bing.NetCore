@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\..\framework.tests.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <RootNamespace>Bing.Admin.EFCore.Tests</RootNamespace>
+    <BingTestingUseAspectCore>true</BingTestingUseAspectCore>
+    <DefineConstants>$(DefineConstants);BING_ADMIN_EFCORE_TESTS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\AdminInventoryIntegrationCases.cs" Link="AdminMySqlCapIntegrationTest.Inventory.cs" />
+    <Compile Include="..\Shared\AdminInventoryOrderExecutorTest.cs" Link="AdminInventoryOrderExecutorTest.cs" />
+    <Compile Include="..\Shared\AdminInventoryProbeCleanupTest.cs" Link="AdminInventoryProbeCleanupTest.cs" />
+    <Compile Include="..\Shared\AdminInventoryProcessCases.cs" Link="AdminMySqlCapIntegrationTest.Process.cs" />
+    <Compile Include="..\Shared\AdminInventoryDeadlockCases.cs" Link="AdminMySqlCapIntegrationTest.Deadlock.cs" />
+    <Compile Include="..\Shared\AdminInventoryCommitLossCases.cs" Link="AdminMySqlCapIntegrationTest.CommitLoss.cs" />
+    <Compile Include="..\Shared\AdminInventoryOutboxRecoveryCases.cs" Link="AdminMySqlCapIntegrationTest.OutboxRecovery.cs" />
+    <Compile Include="..\Shared\InventoryCommitAckLossProxy.cs" Link="InventoryCommitAckLossProxy.cs" />
+    <Compile Include="..\Shared\AdminCapCancellationCases.cs" Link="AdminMySqlCapIntegrationTest.Cancellation.cs" />
+    <Compile Include="..\Shared\AdminCapCancellationCleanupTest.cs" Link="AdminCapCancellationCleanupTest.cs" />
+    <Compile Include="..\Shared\AdminOrderedEventRecoveryTest.cs" Link="AdminOrderedEventRecoveryTest.cs" />
+    <Compile Include="..\Shared\AdminOrderedEventRecoveryControllerTest.cs" Link="AdminOrderedEventRecoveryControllerTest.cs" />
+    <Compile Include="..\Shared\AdminOrderedEventMetricsTest.cs" Link="AdminOrderedEventMetricsTest.cs" />
+    <Compile Include="..\Shared\AdminAuditLogQueryTest.cs" Link="AdminAuditLogQueryTest.cs" />
+    <Compile Include="..\Shared\AdminInventoryOrderedEventHandlerTest.cs" Link="AdminInventoryOrderedEventHandlerTest.cs" />
+    <Compile Include="..\Shared\AdminInventoryOrderedEventPublishingTest.cs" Link="AdminInventoryOrderedEventPublishingTest.cs" />
+    <Compile Include="..\Shared\AdminLogConfigurationTest.cs" Link="AdminLogConfigurationTest.cs" />
+    <Compile Include="..\Shared\AdminRateLimitingHttpPipelineTest.cs" Link="AdminRateLimitingHttpPipelineTest.cs" />
+    <ProjectReference Include="..\Bing.Admin.EFCore.InventoryProbe\Bing.Admin.EFCore.InventoryProbe.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Admin\Bing.Admin.csproj" />
+  </ItemGroup>
+  <Target Name="CopyInventoryProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\Bing.Admin.EFCore.InventoryProbe\Bing.Admin.EFCore.InventoryProbe.csproj"
+             Targets="GetTargetPath" Properties="Configuration=$(Configuration);TargetFramework=net6.0">
+      <Output TaskParameter="TargetOutputs" ItemName="_InventoryProbeTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <_InventoryProbeOutput Include="%(_InventoryProbeTargetPath.RootDir)%(_InventoryProbeTargetPath.Directory)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_InventoryProbeOutput)"
+          DestinationFiles="@(_InventoryProbeOutput->'$(OutDir)InventoryProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

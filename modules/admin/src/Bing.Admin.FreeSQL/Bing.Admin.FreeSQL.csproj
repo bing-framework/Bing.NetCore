@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.36" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.5.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.4.0" />
     <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.1.4" />
@@ -19,6 +21,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Bing.Admin\Modules\HangfireModule.cs" Link="Modules\HangfireModule.cs" />
+    <Compile Include="..\Bing.Admin\Modules\AdminHangfireDashboardAuthorizationFilter.cs"
+             Link="Modules\AdminHangfireDashboardAuthorizationFilter.cs" />
+    <Compile Include="..\Bing.Admin\Jobs\BingHangfireRuntime.cs" Link="Jobs\BingHangfireRuntime.cs" />
+    <Compile Include="..\Bing.Admin\Jobs\BingHangfireDrainFilter.cs" Link="Jobs\BingHangfireDrainFilter.cs" />
+    <Compile Include="..\Bing.Admin\Jobs\BingHangfireDrainHostedService.cs" Link="Jobs\BingHangfireDrainHostedService.cs" />
+    <Compile Include="..\Bing.Admin\Jobs\IBingHangfireRuntime.cs" Link="Jobs\IBingHangfireRuntime.cs" />
+    <Compile Include="..\Bing.Admin\Jobs\DebugLogJob.cs" Link="Jobs\DebugLogJob.cs" />
+    <Compile Include="..\Bing.Admin\Modules\AdminRoleAuthorization.cs"
+             Link="Modules\AdminRoleAuthorization.cs" />
+    <Compile Include="..\Bing.Admin\Apis\Auditing\AuditLogController.cs" Link="Apis\Auditing\AuditLogController.cs" />
+    <Compile Include="..\Bing.Admin.Service\Events\AdminOrderedEventRecovery.cs"
+             Link="Events\AdminOrderedEventRecovery.cs" />
+    <Compile Include="..\Bing.Admin\Apis\Events\OrderedEventRecoveryController.cs"
+             Link="Apis\Events\OrderedEventRecoveryController.cs" />
+    <Compile Include="..\Bing.Admin\Apis\Events\OrderedEventMetricsController.cs"
+             Link="Apis\Events\OrderedEventMetricsController.cs" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />

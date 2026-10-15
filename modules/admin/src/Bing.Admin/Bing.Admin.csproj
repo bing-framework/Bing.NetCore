@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Bing.Admin.EFCore.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="logs\**" />
     <Content Remove="logs\**" />
     <EmbeddedResource Remove="logs\**" />
@@ -15,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
     <PackageReference Include="Bing.Extensions.Swashbuckle" Version="1.5.3" />
     <PackageReference Include="Exceptionless.AspNetCore" Version="6.0.2" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.32" />
@@ -32,10 +36,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Bing.Admin.Service\Events\AdminOrderedEventRecovery.cs"
+             Link="Events\AdminOrderedEventRecovery.cs" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.AspNetCore.Serilog\Bing.AspNetCore.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Extensions.SkyApm.Diagnostics.Sql\Bing.Extensions.SkyApm.Diagnostics.Sql.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Serilog\Bing.Logging.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Logging.Sinks.Exceptionless\Bing.Logging.Sinks.Exceptionless.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />
     <ProjectReference Include="..\Bing.Admin.EventHandlers\Bing.Admin.EventHandlers.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service\Bing.Admin.Service.csproj" />
@@ -44,4 +53,3 @@
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
-  

@@ -8,6 +8,7 @@ using Bing.Admin.Domain.Shared.Enums;
 using Bing.Admin.Systems.Domain.Models;
 using Bing.Data.Sql;
 using Bing.Datas.EntityFramework.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bing.Admin.Data.Stores.Implements.Systems
 {
@@ -17,7 +18,7 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
     public class ResourcePoStore : StoreBase<ResourcePo>, IResourcePoStore
     {
         /// <summary>
-        /// 初始化一个<see cref="ResourcePoStore"/>类型的实例
+        /// 初始化一个 <see cref="ResourcePoStore" /> 类型的实例。
         /// </summary>
         /// <param name="unitOfWork">工作单元</param>
         public ResourcePoStore(IAdminUnitOfWork unitOfWork) : base(unitOfWork)
@@ -106,6 +107,10 @@ namespace Bing.Admin.Data.Stores.Implements.Systems
         /// </summary>
         /// <param name="applicationId">应用程序标识</param>
         /// <param name="moduleId">模块标识</param>
-        public Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId) => throw new NotImplementedException();
+        public async Task<int?> GetMaxSortIdAsync(Guid applicationId, Guid? moduleId) =>
+            await Set
+                .Where(x => x.ApplicationId == applicationId && x.ParentId == moduleId)
+                .Select(x => x.SortId)
+                .MaxAsync();
     }
 }

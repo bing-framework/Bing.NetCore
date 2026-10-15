@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Bing.Admin.FreeSQL.Tests" />
+    <InternalsVisibleTo Include="Bing.Admin.Data.FreeSQL" />
+    <InternalsVisibleTo Include="Bing.Admin.Data.EFCore" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\Bing.Admin.Commons.Domain\Bing.Admin.Commons.Domain.csproj" />
     <ProjectReference Include="..\Bing.Admin.Systems.Domain\Bing.Admin.Systems.Domain.csproj" />
   </ItemGroup>
