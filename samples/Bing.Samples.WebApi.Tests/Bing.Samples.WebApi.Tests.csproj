@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <BingTestingUseHosting>true</BingTestingUseHosting>
+    <BingTestingUseTestHost>true</BingTestingUseTestHost>
+  </PropertyGroup>
+
+  <Import Project="..\..\framework.tests.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Samples.WebApi\Bing.Samples.WebApi.csproj" />
+  </ItemGroup>
+</Project>
