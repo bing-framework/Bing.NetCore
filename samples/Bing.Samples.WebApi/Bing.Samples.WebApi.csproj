@@ -7,10 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Extensions.Hosting" Version="2.4.0" />
+    <PackageReference Include="AspectCore.Extensions.Hosting" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
     <ProjectReference Include="..\..\framework\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
   </ItemGroup>
 

@@ -37,28 +37,37 @@ namespace Bing.Samples.Hangfire.Modules
         public override IServiceCollection AddServices(IServiceCollection services)
         {
             //services.AddNLog();
-            // 同时输出2种方式的日志，可能存在重复 需要陆续兼容
-            services.AddExceptionless(o =>
+            var configuration = services.GetConfiguration();
+            var exceptionlessApiKey = configuration["Exceptionless:ApiKey"];
+            var exceptionlessServerUrl = configuration["Exceptionless:ServerUrl"];
+            if (!string.IsNullOrWhiteSpace(exceptionlessApiKey))
             {
-                o.ApiKey = "2R8FksPOpJikquJ2SLUfZMNES6d6dIsBsFYWTJR7";
-                o.ServerUrl = "http://10.186.135.27:5100";
-            });
+                services.AddExceptionless(o =>
+                {
+                    o.ApiKey = exceptionlessApiKey;
+                    o.ServerUrl = exceptionlessServerUrl;
+                });
+            }
             services.AddBingLogging(x => { });
             services.AddLogging(loggingBuilder =>
             {
-                var configuration = services.GetConfiguration();
-                serilog.Log.Logger = new serilog.LoggerConfiguration()
+                var loggerConfiguration = new serilog.LoggerConfiguration()
                     .Enrich.FromLogContext()
                     .Enrich.WithLogContext()
                     .Enrich.WithLogLevel()
-                    .Enrich.WithSpan()
-                    .WriteTo.Exceptionless(additionalOperation: (builder) =>
-                    {
-                        if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
-                            builder.Target.AddTags(traceId.ToString() ?? string.Empty);
-                        builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
-                        return builder;
-                    })
+                    .Enrich.WithSpan();
+                if (!string.IsNullOrWhiteSpace(exceptionlessApiKey))
+                {
+                    loggerConfiguration = loggerConfiguration.WriteTo.Exceptionless(
+                        exceptionlessApiKey, exceptionlessServerUrl, additionalOperation: builder =>
+                        {
+                            if (builder.Target.Data.TryGetValue("TraceId", out var traceId))
+                                builder.Target.AddTags(traceId.ToString() ?? string.Empty);
+                            builder.Target.AddTags((TraceIdContext.Current ??= new TraceIdContext(string.Empty)).TraceId);
+                            return builder;
+                        });
+                }
+                serilog.Log.Logger = loggerConfiguration
                     .ReadFrom.Configuration(configuration)
                     .ConfigLogLevel(configuration)
                     .CreateLogger();

@@ -1,4 +1,5 @@
-﻿using Bing.Samples.WebApi.Modules;
+﻿using Bing.DependencyInjection;
+using Bing.Samples.WebApi.Modules;
 
 namespace Bing.Samples.WebApi;
 
@@ -8,7 +9,7 @@ namespace Bing.Samples.WebApi;
 public class Startup
 {
     /// <summary>
-    /// 初始化一个<see cref="Startup"/>类型的是
+    /// 初始化一个 <see cref="Startup" /> 类型的实例。
     /// </summary>
     /// <param name="configuration">配置</param>
     public Startup(IConfiguration configuration)
@@ -26,6 +27,7 @@ public class Startup
     /// </summary>
     public void ConfigureServices(IServiceCollection services)
     {
+        services.EnableAutowired();
         services.AddBing()
             .AddModule<AppModule>();
     }

@@ -22,7 +22,9 @@ public class AppModule : AspNetCoreBingModule
     /// <param name="services">服务集合</param>
     public override IServiceCollection AddServices(IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers()
+            .AddControllersAsServices();
+        services.AddSingleton<SampleLazyDependency>();
         return services;
     }
 
@@ -33,5 +35,17 @@ public class AppModule : AspNetCoreBingModule
     public override void UseModule(IApplicationBuilder app)
     {
         app.UseRouting();
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
+}
+
+/// <summary>
+/// 示例中通过延迟服务提供程序解析的业务服务。
+/// </summary>
+public sealed class SampleLazyDependency
+{
+    /// <summary>
+    /// 获取示例业务值。
+    /// </summary>
+    public string Value => "lazy-service-ready";
 }
