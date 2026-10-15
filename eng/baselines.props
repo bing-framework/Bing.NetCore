@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <BaselineCommit Condition="'$(BaselineCommit)' == ''">24c93cb1a5355797223637e2d42ac3dce968d7ef</BaselineCommit>
+    <!-- 同一提交共用仓库外工作树；也可通过命令行覆盖存储或源码目录。 -->
+    <BaselineStore Condition="'$(BaselineStore)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../Bing.NetCore.baselines'))</BaselineStore>
+    <BaselineSourceRoot Condition="'$(BaselineSourceRoot)' == ''">$(BaselineStore)/$(BaselineCommit)</BaselineSourceRoot>
+  </PropertyGroup>
+  <Target Name="ValidateBaselineSource" BeforeTargets="CollectPackageReferences;ResolveProjectReferences">
+    <Error Condition="!Exists('$(BaselineSourceRoot)/framework/src/Bing.Caching.FreeRedis/Bing.Caching.FreeRedis.csproj') Or !Exists('$(BaselineSourceRoot)/framework/src/Bing.Caching.CSRedis/Bing.Caching.CSRedis.csproj')"
+           Text="基线源码缺失：$(BaselineSourceRoot)。请运行 eng/ci/prepare-baseline.ps1 -Commit $(BaselineCommit)，或设置 BaselineStore / BaselineSourceRoot。" />
+  </Target>
+</Project>

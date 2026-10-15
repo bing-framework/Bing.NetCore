@@ -25,6 +25,13 @@ bld/
 # Benchmarks results
 BenchmarkDotNet.Artifacts/
 
+# 完整基线源码应放在仓库外统一存储，防止任务目录重复收录。
+/ai_docs/**/baseline-checkout/
+/ai_docs/**/baseline-worktree/
+
+# AI 任务的原始报告与 checkpoint 归档到 artifacts/ai-tasks，不入库。
+/ai_docs/tasks/**/*.json
+
 # Visual Studio 2015 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
