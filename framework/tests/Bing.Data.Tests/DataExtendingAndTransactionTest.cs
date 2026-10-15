@@ -493,6 +493,131 @@ public class TransactionActionManagerTest
         // Act & Assert
         await Should.NotThrowAsync(() => mgr.CommitAsync(txn));
     }
+
+    /// <summary>
+    /// 验证回调中新登记的操作在下一轮执行。
+    /// </summary>
+    [Fact]
+    public async Task CommitAsync_ActionRegistersAnotherAction_ShouldRunNextRound()
+    {
+        var mgr = new TransactionActionManager();
+        var txn = new Mock<IDbTransaction>().Object;
+        var order = new List<int>();
+        mgr.Register(_ =>
+        {
+            order.Add(1);
+            mgr.Register(nextTransaction =>
+            {
+                nextTransaction.ShouldBeSameAs(txn);
+                order.Add(3);
+                return Task.CompletedTask;
+            });
+            return Task.CompletedTask;
+        });
+        mgr.Register(_ =>
+        {
+            order.Add(2);
+            return Task.CompletedTask;
+        });
+
+        await mgr.CommitAsync(txn);
+
+        order.ShouldBe(new[] { 1, 2, 3 });
+        mgr.Count.ShouldBe(0);
+        await mgr.CommitAsync(txn);
+        order.ShouldBe(new[] { 1, 2, 3 });
+    }
+
+    /// <summary>
+    /// 验证持续追加的回调到达轮次上限后失败且不会重放。
+    /// </summary>
+    [Fact]
+    public async Task CommitAsync_ActionKeepsRegistering_ShouldStopAtRoundLimit()
+    {
+        var mgr = new TransactionActionManager();
+        var txn = new Mock<IDbTransaction>().Object;
+        var calls = 0;
+        Func<IDbTransaction, Task> action = null;
+        action = _ =>
+        {
+            calls++;
+            mgr.Register(action);
+            return Task.CompletedTask;
+        };
+        mgr.Register(action);
+
+        var error = await Should.ThrowAsync<InvalidOperationException>(() => mgr.CommitAsync(txn));
+
+        error.Message.ShouldContain("32");
+        calls.ShouldBe(32);
+        mgr.Count.ShouldBe(0);
+        await mgr.CommitAsync(txn);
+        calls.ShouldBe(32);
+    }
+
+    /// <summary>
+    /// 验证回调失败后不执行其余回调，也不在后续提交中重放。
+    /// </summary>
+    [Fact]
+    public async Task CommitAsync_ActionThrows_ShouldDiscardPendingActions()
+    {
+        var mgr = new TransactionActionManager();
+        var txn = new Mock<IDbTransaction>().Object;
+        var failure = new InvalidOperationException("callback failure");
+        var calls = 0;
+        mgr.Register(_ =>
+        {
+            mgr.Register(__ =>
+            {
+                calls++;
+                return Task.CompletedTask;
+            });
+            throw failure;
+        });
+        mgr.Register(_ =>
+        {
+            calls++;
+            return Task.CompletedTask;
+        });
+
+        var error = await Should.ThrowAsync<InvalidOperationException>(() => mgr.CommitAsync(txn));
+
+        error.ShouldBeSameAs(failure);
+        calls.ShouldBe(0);
+        mgr.Count.ShouldBe(0);
+        await mgr.CommitAsync(txn);
+        calls.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 验证提交尚未完成时拒绝第二次提交。
+    /// </summary>
+    [Fact]
+    public async Task CommitAsync_ConcurrentCall_ShouldRejectSecondCommit()
+    {
+        var mgr = new TransactionActionManager();
+        var txn = new Mock<IDbTransaction>().Object;
+        var entered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var resume = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        mgr.Register(async _ =>
+        {
+            entered.SetResult(true);
+            await resume.Task;
+        });
+
+        var first = mgr.CommitAsync(txn);
+        await entered.Task;
+        try
+        {
+            await Should.ThrowAsync<InvalidOperationException>(() => mgr.CommitAsync(txn));
+        }
+        finally
+        {
+            resume.SetResult(true);
+        }
+        await first;
+        mgr.Count.ShouldBe(0);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -504,6 +629,9 @@ public class TransactionActionManagerTest
 /// </summary>
 file class GuidTreeQuery : TreeQueryParameter<Guid?>
 {
+    /// <summary>
+    /// 初始化一个 <see cref="GuidTreeQuery" /> 类型的实例。
+    /// </summary>
     public GuidTreeQuery() { }
 }
 
