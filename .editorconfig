@@ -1,56 +1,125 @@
-# EditorConfig is awesome:http://EditorConfig.org
+# EditorConfig is awesome: https://editorconfig.org
+# 统一约束编辑器、IDE、dotnet format、Codex/Copilot 生成代码的格式。
+# 项目统一：
+# - UTF-8
+# - LF
+# - 文件末尾保留一个换行
+# - C# 默认 4 空格缩进
 
-# top-most EditorConfig file
 root = true
 
-# Don't use tabs for indentation.
+# ============================================================
+# 全局规则
+# ============================================================
 [*]
-indent_style = space
-# (Please don't specify an indent_size here; that has too many unintended consequences.)
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
 
+# ============================================================
+# C# / Visual Basic
+# ============================================================
+[*.{cs,csx,vb,vbx}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+# ============================================================
+# .NET / MSBuild / Solution
+# ============================================================
+[*.{csproj,fsproj,vbproj,proj,projitems,props,targets,tasks,sln,slnx}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# XML / Config / Resx
+# ============================================================
+[*.{xml,config,resx,ruleset,nuspec}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# JSON
+# ============================================================
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# YAML
+# ============================================================
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# Markdown
+# ============================================================
 [*.md]
+indent_style = space
+indent_size = 2
+# Markdown 行尾双空格可能用于强制换行，因此不自动删除
 trim_trailing_whitespace = false
 
-[framework/src/Bing.Data.Sql/**.cs]
-dotnet_diagnostic.RS0016.severity = error
-dotnet_diagnostic.RS0017.severity = error
-
-[framework/src/Bing.Dapper.Core/**.cs]
-dotnet_diagnostic.RS0016.severity = error
-dotnet_diagnostic.RS0017.severity = error
-
-[*.csproj]
-end_of_line              = crlf
-
-[*.sln]
-end_of_line              = crlf
-
-[*.ps1]
-indent_size              = 4
-end_of_line              = crlf
-
-# Code files
-[*.{cs,csx,vb,vbx}]
-# 缩进和间距
-indent_size = 4
-insert_final_newline = true
-charset = utf-8-bom
-
-# Xml project files
-[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+# ============================================================
+# Shell
+# ============================================================
+[*.{sh,bash,zsh}]
+indent_style = space
 indent_size = 2
-
-# Xml config files
-[*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
-indent_size = 2
-
-# JSON files
-[*.json]
-indent_size = 2
-
-[*.{sh}]
 end_of_line = lf
+
+# ============================================================
+# PowerShell
+# ============================================================
+[*.{ps1,psm1,psd1}]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+
+# ============================================================
+# Batch / CMD
+# ============================================================
+[*.{bat,cmd}]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+
+# ============================================================
+# Docker
+# ============================================================
+[Dockerfile]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+
+[Dockerfile.*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+
+# ============================================================
+# JavaScript / TypeScript / Vue / CSS
+# 如果仓库包含前端项目，可直接共用
+# ============================================================
+[*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,css,scss,less}]
+indent_style = space
 indent_size = 2
+
+# ============================================================
+# HTML
+# ============================================================
+[*.{html,htm}]
+indent_style = space
+indent_size = 2
+
+# ============================================================
+# SQL
+# ============================================================
+[*.sql]
+indent_style = space
+indent_size = 4
 
 # C# 命名规则
 # https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-naming-conventions
@@ -199,3 +268,14 @@ csharp_space_between_parentheses = false
 csharp_prefer_braces = true:silent
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
+
+
+
+# 自定义
+[framework/src/Bing.Data.Sql/**.cs]
+dotnet_diagnostic.RS0016.severity = error
+dotnet_diagnostic.RS0017.severity = error
+
+[framework/src/Bing.Dapper.Core/**.cs]
+dotnet_diagnostic.RS0016.severity = error
+dotnet_diagnostic.RS0017.severity = error

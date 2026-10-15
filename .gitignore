@@ -284,6 +284,15 @@ modules/admin/src/**/appsettings.Development.json
 .agents/runtime/
 .workbuddy/
 
+# Repository-local generated files
+/.admin-packages/
+/.dotnet-cli/
+/.dotnet-cli-validation-contracts/
+/.sample-test-obj/
+/.sample-test-output/
+/.test-output/
+/tmp/
+
 # Output Libraries
 output/
 
