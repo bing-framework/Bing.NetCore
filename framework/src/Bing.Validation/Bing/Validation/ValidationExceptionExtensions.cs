@@ -103,8 +103,11 @@ public static class ValidationExceptionExtensions
     /// <returns>由验证结果创建的验证异常。</returns>
     private static ValidationException CreateValidationException(IValidationResult result)
     {
-        var exception = new ValidationException(result.ErrorCode, result.ToMessage(), result.ToValidationMessages(),
-            result.Flag);
+        var validationMessages = result.ToValidationMessages().ToList();
+        var message = result.ToMessage();
+        if (validationMessages.Count > 0)
+            message = $"{message}{Environment.NewLine}{string.Join(Environment.NewLine, validationMessages)}";
+        var exception = new ValidationException(result.ErrorCode, message, validationMessages, result.Flag);
         exception.ExtraData.Add("ValidationResultCollection", result);
         return exception;
     }
@@ -117,7 +120,13 @@ public static class ValidationExceptionExtensions
     /// <param name="appendAction">追加操作</param>
     public static void RaiseException<TException>(this ValidationResultCollection resultCollection, Action<TException, ValidationResultCollection> appendAction = null) 
         where TException : BingException, new() 
-        => throw resultCollection.ToException(appendAction);
+    {
+        if (resultCollection == null)
+            throw new ArgumentNullException(nameof(resultCollection));
+        if (resultCollection.IsValid)
+            return;
+        throw resultCollection.ToException(appendAction);
+    }
 
     /// <summary>
     /// 引发异常
@@ -125,5 +134,11 @@ public static class ValidationExceptionExtensions
     /// <param name="resultCollection">验证结果集合</param>
     /// <param name="appendAction">追加操作</param>
     public static void RaiseException(this ValidationResultCollection resultCollection, Action<ValidationException, ValidationResultCollection> appendAction = null) 
-        => throw resultCollection.ToException(appendAction);
+    {
+        if (resultCollection == null)
+            throw new ArgumentNullException(nameof(resultCollection));
+        if (resultCollection.IsValid)
+            return;
+        throw resultCollection.ToException(appendAction);
+    }
 }

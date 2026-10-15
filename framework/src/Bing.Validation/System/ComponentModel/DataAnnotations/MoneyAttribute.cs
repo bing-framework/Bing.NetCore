@@ -25,7 +25,7 @@ public class MoneyAttribute : ValidationAttribute
     public decimal Max { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="MoneyAttribute"/>类型的实例
+    /// 初始化一个 <see cref="MoneyAttribute" /> 类型的实例。
     /// </summary>
     /// <param name="min">最小值</param>
     /// <param name="max">最大值</param>
@@ -43,7 +43,7 @@ public class MoneyAttribute : ValidationAttribute
     public override string FormatErrorMessage(string name)
     {
         if (ErrorMessage == null && ErrorMessageResourceName == null)
-            ErrorMessage = ErrorMsg;
+            return string.Format(System.Globalization.CultureInfo.CurrentCulture, ErrorMsg, name, Min, Max);
         return base.FormatErrorMessage(name);
     }
 

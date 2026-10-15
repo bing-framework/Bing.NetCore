@@ -35,7 +35,7 @@ public static class ValidatePattern
     /// 车牌号验证正则表达式
     /// </summary>
     public const string PlateNumberOfChinaPatter =
-        @"^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$";
+        @"^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$";
 
     /// <summary>
     /// 邮政编码验证正则表达式
@@ -56,5 +56,5 @@ public static class ValidatePattern
     /// <summary>
     /// 固话验证正则表达式
     /// </summary>
-    public const string TelNoOfChinaPatter = @"^\d{3,4}-?\d{6,8}$";
+    public const string TelNoOfChinaPatter = @"^0\d{2,3}-?\d{7,8}$";
 }

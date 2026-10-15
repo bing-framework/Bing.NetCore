@@ -15,14 +15,22 @@ namespace Bing.Validation.Tests;
 internal class ValidatableValidModel : IVerifyModel<ValidatableValidModel>
 {
     [Required(ErrorMessage = "名称不能为空")]
+    /// <summary>
+    /// 模型名称。
+    /// </summary>
     public string Name { get; set; } = "valid-name";
 
+    /// <inheritdoc />
     public IValidationResult Validate() =>
         new ValidationResultCollection();
 
+    /// <inheritdoc />
     public void SetValidationCallback(IValidationCallbackHandler handler) { }
+    /// <inheritdoc />
     public void UseValidationRules() { }
+    /// <inheritdoc />
     public void UseStrategy(IValidationStrategy<ValidatableValidModel> strategy) { }
+    /// <inheritdoc />
     public void UseStrategyList(IEnumerable<IValidationStrategy<ValidatableValidModel>> strategies) { }
 }
 
@@ -32,31 +40,56 @@ internal class ValidatableValidModel : IVerifyModel<ValidatableValidModel>
 internal class ValidatableInvalidModel : IVerifyModel<ValidatableInvalidModel>
 {
     [Required(ErrorMessage = "名称不能为空")]
+    /// <summary>
+    /// 未设置的模型名称。
+    /// </summary>
     public string Name { get; set; } // null → DataAnnotation 失败
 
+    /// <inheritdoc />
     public IValidationResult Validate() =>
         new ValidationResultCollection("名称不能为空");
 
+    /// <inheritdoc />
     public void SetValidationCallback(IValidationCallbackHandler handler) { }
+    /// <inheritdoc />
     public void UseValidationRules() { }
+    /// <inheritdoc />
     public void UseStrategy(IValidationStrategy<ValidatableInvalidModel> strategy) { }
+    /// <inheritdoc />
     public void UseStrategyList(IEnumerable<IValidationStrategy<ValidatableInvalidModel>> strategies) { }
 }
 
 /// <summary>
-/// 验证策略样本：可指定策略名称和返回的验证结果
+/// 可配置验证结果的测试策略。
 /// </summary>
 internal class NamedStrategy : IValidationStrategy<ValidatableValidModel>
 {
+    /// <summary>
+    /// 此策略返回的验证结果。
+    /// </summary>
     private readonly ValidationResult _result;
+
+    /// <summary>
+    /// 策略名称。
+    /// </summary>
     public string StrategyName { get; }
 
+    /// <summary>
+    /// 初始化一个 <see cref="NamedStrategy" /> 类型的实例。
+    /// </summary>
+    /// <param name="name">策略名称。</param>
+    /// <param name="result">验证结果。</param>
     public NamedStrategy(string name, ValidationResult result = null)
     {
         StrategyName = name;
         _result = result;
     }
 
+    /// <summary>
+    /// 验证指定对象。
+    /// </summary>
+    /// <param name="obj">待验证对象。</param>
+    /// <returns>此策略配置的验证结果。</returns>
     public ValidationResult Validate(ValidatableValidModel obj) => _result;
 }
 
@@ -631,6 +664,19 @@ public class ValidationExceptionExtensionsTest
 
         // Act & Assert
         Should.NotThrow(() => col.RaiseException<ValidationException>());
+    }
+
+    /// <summary>
+    /// 测试目的：非泛型 RaiseException 对有效集合应直接返回，不执行异常构造。
+    /// </summary>
+    [Fact]
+    public void RaiseExceptionNonGeneric_WhenValid_ShouldNotThrow()
+    {
+        // Arrange
+        var col = new ValidationResultCollection();
+
+        // Act & Assert
+        Should.NotThrow(() => col.RaiseException());
     }
 
     /// <summary>

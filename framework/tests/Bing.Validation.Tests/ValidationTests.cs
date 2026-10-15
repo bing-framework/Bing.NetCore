@@ -7,38 +7,65 @@ namespace Bing.Validation.Tests;
 
 // ─── 测试用模型 ────────────────────────────────────────────────────
 
+/// <summary>
+/// 所有字段均满足验证规则的测试模型。
+/// </summary>
 internal class ValidModel
 {
     [Required(ErrorMessage = "姓名不能为空")]
     [StringLength(20, ErrorMessage = "姓名不超过20个字符")]
+    /// <summary>
+    /// 测试姓名。
+    /// </summary>
     public string Name { get; set; } = "测试";
 
     [Range(0, 150, ErrorMessage = "年龄必须在 0~150 之间")]
+    /// <summary>
+    /// 测试年龄。
+    /// </summary>
     public int Age { get; set; } = 25;
 }
 
+/// <summary>
+/// 包含无效字段值的测试模型。
+/// </summary>
 internal class InvalidModel
 {
     [Required(ErrorMessage = "姓名不能为空")]
+    /// <summary>
+    /// 未设置的姓名。
+    /// </summary>
     public string Name { get; set; } // null → 验证失败
 
     [Range(1, 10, ErrorMessage = "数值必须在 1~10 之间")]
+    /// <summary>
+    /// 超出有效范围的数值。
+    /// </summary>
     public int Value { get; set; } = 100; // 超出范围
 }
 
+/// <summary>
+/// 包含多个错误字段的测试模型。
+/// </summary>
 internal class MultiErrorModel
 {
     [Required(ErrorMessage = "字段A不能为空")]
+    /// <summary>
+    /// 第一个必填字段。
+    /// </summary>
     public string FieldA { get; set; }
 
     [Required(ErrorMessage = "字段B不能为空")]
+    /// <summary>
+    /// 第二个必填字段。
+    /// </summary>
     public string FieldB { get; set; }
 }
 
 /// <summary>
 /// <see cref="ValidationResultCollection"/> 单元测试
 /// </summary>
-public class ValidationResultCollectionTest
+public class ValidationResultCollectionCompatibilityTest
 {
     // ── IsValid ────────────────────────────────────────────────────
 
@@ -128,19 +155,19 @@ public class ValidationResultCollectionTest
         col.IsValid.ShouldBeFalse();
     }
 
-    // ── GetErrors ─────────────────────────────────────────────────
+    // ── ToValidationMessages ──────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：有效时 GetErrors 应返回空序列，不为 null。
+    /// 测试目的：有效时 ToValidationMessages 应返回空序列，不为 null。
     /// </summary>
     [Fact]
-    public void GetErrors_WhenValid_ShouldReturnEmpty()
+    public void ToValidationMessages_WhenValid_ShouldReturnEmpty()
     {
         // Arrange
         var col = new ValidationResultCollection();
 
         // Act
-        var errors = col.GetErrors();
+        var errors = col.ToValidationMessages();
 
         // Assert
         errors.ShouldNotBeNull();
@@ -148,17 +175,17 @@ public class ValidationResultCollectionTest
     }
 
     /// <summary>
-    /// 测试目的：无效时 GetErrors 应返回所有错误的字符串描述。
+    /// 测试目的：无效时 ToValidationMessages 应返回所有错误的字符串描述。
     /// </summary>
     [Fact]
-    public void GetErrors_WhenInvalid_ShouldReturnErrorDescriptions()
+    public void ToValidationMessages_WhenInvalid_ShouldReturnErrorDescriptions()
     {
         // Arrange
         var col = new ValidationResultCollection();
         col.Add(new ValidationResult("字段A错误", new[] { "FieldA" }));
 
         // Act
-        var errors = col.GetErrors().ToList();
+        var errors = col.ToValidationMessages().ToList();
 
         // Assert
         errors.ShouldNotBeEmpty();

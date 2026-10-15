@@ -132,6 +132,23 @@ public class ValidationResultCollectionAdvancedTest
     }
 
     /// <summary>
+    /// 测试目的：复制字符串构造的集合时，空策略表不应导致异常，错误结果应被保留。
+    /// </summary>
+    [Fact]
+    public void Constructor_CopyFromStringCollection_ShouldCopyResults()
+    {
+        // Arrange
+        var source = new ValidationResultCollection("字符串错误");
+
+        // Act
+        var copy = new ValidationResultCollection(source);
+
+        // Assert
+        copy.Count.ShouldBe(1);
+        copy.First().ErrorMessage.ShouldBe("字符串错误");
+    }
+
+    /// <summary>
     /// 测试目的：传入 null 的源集合应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
@@ -299,6 +316,23 @@ public class ValidationResultCollectionAdvancedTest
 
         // Assert
         col.Count.ShouldBe(0);
+    }
+
+    /// <summary>
+    /// 测试目的：AddRange 应忽略集合中的空结果，不应将有效集合误判为无效。
+    /// </summary>
+    [Fact]
+    public void AddRange_WithNullEntries_ShouldIgnoreNullResults()
+    {
+        // Arrange
+        var col = new ValidationResultCollection();
+
+        // Act
+        col.AddRange(new ValidationResult[] { null, new ValidationResult("有效错误") });
+
+        // Assert
+        col.Count.ShouldBe(1);
+        col.First().ErrorMessage.ShouldBe("有效错误");
     }
 
     // ── IEnumerable ────────────────────────────────────────────────

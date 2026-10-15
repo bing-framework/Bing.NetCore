@@ -7,42 +7,81 @@ namespace Bing.Validation.Tests;
 
 // ── 测试用模型定义（仅 string 参数属性，确保属性语法合法）──────────────────
 
+/// <summary>
+/// 字母格式验证模型。
+/// </summary>
 internal class LetterModel
 {
     [Letter]
+    /// <summary>
+    /// 待验证的字母文本。
+    /// </summary>
     public string Code { get; set; }
 }
 
+/// <summary>
+/// 中文格式验证模型。
+/// </summary>
 internal class ChineseModel
 {
     [Chinese]
+    /// <summary>
+    /// 待验证的中文文本。
+    /// </summary>
     public string Name { get; set; }
 }
 
+/// <summary>
+/// 身份证号码验证模型。
+/// </summary>
 internal class IdCardModel
 {
     [IdCard]
+    /// <summary>
+    /// 待验证的身份证号码。
+    /// </summary>
     public string CardNo { get; set; }
 }
 
+/// <summary>
+/// 邮政编码验证模型。
+/// </summary>
 internal class PostalModel
 {
     [PostalCodeOfChina]
+    /// <summary>
+    /// 待验证的邮政编码。
+    /// </summary>
     public string Postal { get; set; }
 }
 
+/// <summary>
+/// QQ 号码验证模型。
+/// </summary>
 internal class QQModel
 {
     [QQ]
+    /// <summary>
+    /// 待验证的 QQ 号码。
+    /// </summary>
     public string QQNo { get; set; }
 }
 
+/// <summary>
+/// 同时使用多种格式特性的验证模型。
+/// </summary>
 internal class MultiAttributeModel
 {
     [Letter]
+    /// <summary>
+    /// 待验证的字母文本。
+    /// </summary>
     public string Code { get; set; }
 
     [Chinese]
+    /// <summary>
+    /// 待验证的中文文本。
+    /// </summary>
     public string Name { get; set; }
 }
 
@@ -208,6 +247,7 @@ public class ValidationAttributesTest
 
         // Assert — 非 null 表示验证失败
         result.ShouldNotBeNull();
+        result.ErrorMessage.ShouldContain("Amount");
     }
 
     /// <summary>

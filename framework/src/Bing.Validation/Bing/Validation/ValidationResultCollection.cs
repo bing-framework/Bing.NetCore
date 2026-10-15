@@ -25,7 +25,7 @@ public class ValidationResultCollection : IValidationResult
     private readonly IDictionary<string, List<ValidationResult>> _resultsFlaggedByStrategy;
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     public ValidationResultCollection()
     {
@@ -35,19 +35,20 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="result">要添加的验证错误消息。</param>
-    public ValidationResultCollection(string result)
+    public ValidationResultCollection(string result) : this()
     {
-        _results = new List<ValidationResult>();
         if (string.IsNullOrWhiteSpace(result))
             return;
-        _results.Add(new ValidationResult(result));
+        var validationResult = new ValidationResult(result);
+        _results.Add(validationResult);
+        UpdateResultFlaggedByStrategy(NoName, validationResult);
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="result">要添加的验证结果。</param>
     public ValidationResultCollection(ValidationResult result) : this()
@@ -59,7 +60,7 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="result">要添加的验证结果。</param>
     /// <param name="strategyName">用于归类验证结果的策略名称。</param>
@@ -72,7 +73,7 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="results">要添加的验证结果集合。</param>
     public ValidationResultCollection(IEnumerable<ValidationResult> results) : this()
@@ -84,7 +85,7 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="results">要添加的验证结果集合。</param>
     /// <param name="strategyName">用于归类验证结果的策略名称。</param>
@@ -97,7 +98,7 @@ public class ValidationResultCollection : IValidationResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="ValidationResultCollection"/> 类型的实例。
+    /// 初始化一个 <see cref="ValidationResultCollection" /> 类型的实例。
     /// </summary>
     /// <param name="collection">要复制的验证结果集合。</param>
     public ValidationResultCollection(ValidationResultCollection collection) : this()
@@ -106,7 +107,7 @@ public class ValidationResultCollection : IValidationResult
             throw new ArgumentNullException(nameof(collection));
         ErrorCode = collection.ErrorCode;
         Flag = collection.Flag;
-        _results = collection._results;
+        _results.AddRange(collection._results);
         UpdateResultFlaggedByStrategy(collection);
     }
 
@@ -140,7 +141,7 @@ public class ValidationResultCollection : IValidationResult
     {
         if (results == null)
             return;
-        _results.AddRange(results);
+        _results.AddRange(results.Where(result => result != null));
     }
 
     /// <inheritdoc />
@@ -200,6 +201,9 @@ public class ValidationResultCollection : IValidationResult
     /// <inheritdoc />
     public override string ToString()
     {
+        if (IsValid)
+            return string.Empty;
+
         var sb = new StringBuilder();
         sb.AppendLine(ToMessage());
         sb.AppendLine("详情:");
@@ -218,8 +222,10 @@ public class ValidationResultCollection : IValidationResult
     {
         if (collection == null)
             return;
+        if (collection._resultsFlaggedByStrategy == null)
+            return;
         foreach (var set in collection._resultsFlaggedByStrategy)
-            UpdateResultFlaggedByStrategy(set.Key, set.Value);
+            UpdateResultFlaggedByStrategy(set.Key, set.Value?.ToList());
     }
 
     /// <summary>
