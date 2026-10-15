@@ -19,7 +19,7 @@ public static class BingApplicationBuilderExtensions
     /// <returns>已注册真实 IP 中间件的应用程序生成器。</returns>
     public static IApplicationBuilder UseRealIp(this IApplicationBuilder builder, Action<RealIpOptions> setupAct = null)
     {
-        var options = new RealIpOptions { HeaderKey = "x-forwarded-for" };
+        var options = new RealIpOptions();
         setupAct?.Invoke(options);
         return builder.UseMiddleware<RealIpMiddleware>(Microsoft.Extensions.Options.Options.Create(options));
     }
@@ -30,7 +30,18 @@ public static class BingApplicationBuilderExtensions
     /// <param name="hostBuilder">Web主机生成器</param>
     /// <param name="headerKey">请求头键名</param>
     /// <returns>已配置真实 IP 支持的 Web 主机生成器。</returns>
-    public static IWebHostBuilder UseRealIp(this IWebHostBuilder hostBuilder, string headerKey = "X-Forwarded-For")
+    public static IWebHostBuilder UseRealIp(this IWebHostBuilder hostBuilder, string headerKey = "X-Forwarded-For") =>
+        UseRealIp(hostBuilder, headerKey, null);
+
+    /// <summary>
+    /// 注册真实 IP，并配置请求头信任边界。
+    /// </summary>
+    /// <param name="hostBuilder">Web主机生成器</param>
+    /// <param name="headerKey">请求头键名</param>
+    /// <param name="setupAct">真实 IP 选项配置。</param>
+    /// <returns>已配置真实 IP 支持的 Web 主机生成器。</returns>
+    public static IWebHostBuilder UseRealIp(this IWebHostBuilder hostBuilder, string headerKey,
+        Action<RealIpOptions> setupAct)
     {
         if (hostBuilder == null)
             throw new ArgumentNullException(nameof(hostBuilder));
@@ -41,7 +52,11 @@ public static class BingApplicationBuilderExtensions
         hostBuilder.ConfigureServices(services =>
         {
             services.AddSingleton<IStartupFilter>(new RealIpFilter());
-            services.Configure<RealIpOptions>(options => options.HeaderKey = headerKey);
+            services.Configure<RealIpOptions>(options =>
+            {
+                options.HeaderKey = headerKey;
+                setupAct?.Invoke(options);
+            });
         });
 
         return hostBuilder;

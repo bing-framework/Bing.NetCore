@@ -14,7 +14,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+    <ProjectReference Include="..\Bing.Caching.CSRedis.RateLimitProbe\Bing.Caching.CSRedis.RateLimitProbe.csproj"
+                      ReferenceOutputAssembly="false" BuildReference="true" />
   </ItemGroup>
 
+  <Target Name="CopyRedisRateLimitProbeToTestOutput" AfterTargets="Build">
+    <MSBuild Projects="..\Bing.Caching.CSRedis.RateLimitProbe\Bing.Caching.CSRedis.RateLimitProbe.csproj"
+             Targets="GetTargetPath" Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" ItemName="_RedisRateLimitProbeTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <_RedisRateLimitProbeOutput Include="%(_RedisRateLimitProbeTargetPath.RootDir)%(_RedisRateLimitProbeTargetPath.Directory)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_RedisRateLimitProbeOutput)"
+          DestinationFiles="@(_RedisRateLimitProbeOutput->'$(OutDir)RedisRateLimitProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 </Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Bing.Caching.CSRedis.RateLimitProbe</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Caching.CSRedis/Bing.Caching.CSRedis.csproj" />
+    <ProjectReference Include="../../src/Bing.Locks.CSRedis/Bing.Locks.CSRedis.csproj" />
+  </ItemGroup>
+</Project>

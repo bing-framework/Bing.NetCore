@@ -29,16 +29,24 @@ public class RealIpMiddleware : IMiddleware
     private readonly ILogger<RealIpMiddleware> _logger;
 
     /// <summary>
-    /// 初始化一个<see cref="RealIpMiddleware"/>类型的实例
+    /// 已解析的可信代理地址。
     /// </summary>
-    /// <param name="next">方法</param>
-    /// <param name="options">真实IP选项</param>
-    /// <param name="logger">日志</param>
+    private readonly IReadOnlyList<IPAddress> _trustedProxies;
+
+    /// <summary>
+    /// 初始化一个 <see cref="RealIpMiddleware" /> 类型的实例。
+    /// </summary>
+    /// <param name="next">后续请求委托。</param>
+    /// <param name="options">真实 IP 配置。</param>
+    /// <param name="logger">日志记录器。</param>
     public RealIpMiddleware(RequestDelegate next, IOptions<RealIpOptions> options, ILogger<RealIpMiddleware> logger)
     {
-        _next = next;
-        _options = options.Value;
-        _logger = logger;
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        if (string.IsNullOrWhiteSpace(_options.HeaderKey))
+            throw new ArgumentException("真实 IP 请求头名称不能为空。", nameof(options));
+        _trustedProxies = ParseTrustedProxies(_options.TrustedProxies);
     }
 
     /// <summary>
@@ -50,8 +58,8 @@ public class RealIpMiddleware : IMiddleware
         var headers = context.Request.Headers;
         try
         {
-            var ip = TryGetIpAddress(headers, _options.HeaderKey) ?? TryGetIpAddress(headers, "x-forwarded-for") ?? TryGetIpAddress(headers, "X-Forwarded-For");
-            if (ip != null) 
+            var ip = TryGetIpAddress(context.Connection.RemoteIpAddress, headers, _options.HeaderKey);
+            if (ip != null)
                 context.Connection.RemoteIpAddress = ip;
         }
         finally
@@ -63,28 +71,40 @@ public class RealIpMiddleware : IMiddleware
     /// <summary>
     /// 尝试获取IP地址
     /// </summary>
+    /// <param name="remoteIpAddress">请求连接的对端地址。</param>
     /// <param name="headers">请求头字典</param>
     /// <param name="key">请求头</param>
     /// <returns>解析出的 IP 地址；请求头不存在或值无法解析时返回 null。</returns>
-    private IPAddress TryGetIpAddress(IHeaderDictionary headers, string key)
+    private IPAddress TryGetIpAddress(IPAddress remoteIpAddress, IHeaderDictionary headers, string key)
     {
-        if (headers.ContainsKey(key))
+        if (remoteIpAddress == null || !_trustedProxies.Any(proxy => AreSameAddress(proxy, remoteIpAddress)))
         {
-            headers.TryGetValue(key, out var ip);
+            WriteLog("请求对端不在可信代理列表中，忽略真实 IP 请求头。");
+            return null;
+        }
 
-            WriteLog($"解析真实IP地址: {ip}");
-            if (string.IsNullOrEmpty(ip) == false && ip.ToString().ToLower() != "unknown")
+        if (headers.TryGetValue(key, out var values))
+        {
+            _logger.LogTrace("解析真实 IP 请求头，共 {HeaderValueCount} 个值。", values.Count);
+            var candidates = values
+                .SelectMany(value => value.Split(','))
+                .Select(value => value.Trim())
+                .Where(value => !string.IsNullOrWhiteSpace(value) &&
+                                !string.Equals(value, "unknown", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            for (var index = candidates.Length - 1; index >= 0; index--)
             {
-                var tmpIp = key.Equals("x-forwarded-for", StringComparison.CurrentCultureIgnoreCase)
-                    ? ip.ToString().Split(',')[0]
-                    : ip.ToString();
-                if (IPAddress.TryParse(tmpIp, out var ipAddress))
+                if (!IPAddress.TryParse(candidates[index], out var ipAddress))
                 {
-                    WriteLog($"解析真实IP成功: {ipAddress}");
-                    return ipAddress;
+                    _logger.LogError("解析真实 IP 失败，转发链中存在无效地址。");
+                    continue;
                 }
 
-                _logger.LogError($"解析真实IP失败: {tmpIp}");
+                if (_trustedProxies.Any(proxy => AreSameAddress(proxy, ipAddress)))
+                    continue;
+
+                WriteLog($"解析真实IP成功: {ipAddress}");
+                return ipAddress;
             }
         }
 
@@ -101,6 +121,41 @@ public class RealIpMiddleware : IMiddleware
             return;
         _logger.LogTrace(message);
     }
+
+    /// <summary>
+    /// 解析可信代理地址配置。
+    /// </summary>
+    private static IReadOnlyList<IPAddress> ParseTrustedProxies(IEnumerable<string> values)
+    {
+        if (values == null)
+            return Array.Empty<IPAddress>();
+
+        var result = new List<IPAddress>();
+        foreach (var value in values)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !IPAddress.TryParse(value.Trim(), out var address))
+                throw new ArgumentException($"可信代理地址无效：{value}。", nameof(values));
+            if (!result.Any(item => AreSameAddress(item, address)))
+                result.Add(address);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 比较 IPv4 与 IPv4 映射 IPv6 地址。
+    /// </summary>
+    private static bool AreSameAddress(IPAddress left, IPAddress right)
+    {
+        if (left == null || right == null)
+            return false;
+        if (left.Equals(right))
+            return true;
+        if (left.IsIPv4MappedToIPv6)
+            return left.MapToIPv4().Equals(right);
+        if (right.IsIPv4MappedToIPv6)
+            return right.MapToIPv4().Equals(left);
+        return false;
+    }
 }
 
 /// <summary>
@@ -111,8 +166,14 @@ public class RealIpOptions
     /// <summary>
     /// 获取或设置承载真实客户端 IP 的请求头名称。
     /// </summary>
-    /// <remarks>仅应在请求经过可信代理并且应用已建立请求头信任边界时启用对应配置，否则请求方可伪造该值。</remarks>
-    public string HeaderKey { get; set; }
+    /// <remarks>默认使用 <c>X-Forwarded-For</c>。只有连接对端位于 <see cref="TrustedProxies"/> 时才会读取该请求头。</remarks>
+    public string HeaderKey { get; set; } = "X-Forwarded-For";
+
+    /// <summary>
+    /// 允许提交真实 IP 请求头的代理地址。
+    /// </summary>
+    /// <remarks>为空时不信任任何转发头；地址比较支持 IPv4 与 IPv4 映射 IPv6。</remarks>
+    public IList<string> TrustedProxies { get; } = new List<string>();
 }
 
 /// <summary>
