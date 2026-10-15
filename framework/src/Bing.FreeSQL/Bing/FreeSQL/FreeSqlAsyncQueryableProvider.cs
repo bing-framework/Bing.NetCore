@@ -9,6 +9,27 @@ namespace Bing.FreeSQL;
 public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
 {
     /// <summary>
+    /// 在取消检查后执行同步 LINQ 查询并包装为异步结果。
+    /// </summary>
+    /// <typeparam name="TResult">查询结果类型。</typeparam>
+    /// <param name="operation">同步查询操作。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>包装同步结果的异步任务。</returns>
+    private static Task<TResult> Execute<TResult>(Func<TResult> operation, CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<TResult>(cancellationToken);
+        try
+        {
+            return Task.FromResult(operation());
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException<TResult>(exception);
+        }
+    }
+
+    /// <summary>
     /// 是否可执行
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
@@ -29,7 +50,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源是否包含指定对象。</returns>
     public Task<bool> ContainsAsync<T>(IQueryable<T> queryable, T item, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Contains(item), cancellationToken);
     }
 
     /// <summary>
@@ -42,7 +63,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为是否存在符合条件的元素。</returns>
     public Task<bool> AnyAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Any(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -55,7 +76,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为所有元素是否均符合条件。</returns>
     public Task<bool> AllAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.All(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -67,7 +88,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的元素数量。</returns>
     public Task<int> CountAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Count(), cancellationToken);
     }
 
     /// <summary>
@@ -80,7 +101,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的元素数量。</returns>
     public Task<int> CountAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Count(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -92,7 +113,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的元素数量。</returns>
     public Task<long> LongCountAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.LongCount(), cancellationToken);
     }
 
     /// <summary>
@@ -105,7 +126,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的元素数量。</returns>
     public Task<long> LongCountAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.LongCount(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -117,7 +138,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的第一个元素。</returns>
     public Task<T> FirstAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.First(), cancellationToken);
     }
 
     /// <summary>
@@ -130,7 +151,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的第一个元素。</returns>
     public Task<T> FirstAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.First(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -142,7 +163,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的第一个元素；没有元素时返回默认值。</returns>
     public Task<T> FirstOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.FirstOrDefault(), cancellationToken);
     }
 
     /// <summary>
@@ -155,7 +176,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的第一个元素；没有元素时返回默认值。</returns>
     public Task<T> FirstOrDefaultAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.FirstOrDefault(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -167,7 +188,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的最后一个元素。</returns>
     public Task<T> LastAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Last(), cancellationToken);
     }
 
     /// <summary>
@@ -180,7 +201,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的最后一个元素。</returns>
     public Task<T> LastAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Last(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -192,7 +213,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的最后一个元素；没有元素时返回默认值。</returns>
     public Task<T> LastOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.LastOrDefault(), cancellationToken);
     }
 
     /// <summary>
@@ -205,7 +226,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的最后一个元素；没有元素时返回默认值。</returns>
     public Task<T> LastOrDefaultAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.LastOrDefault(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -217,7 +238,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的唯一元素。</returns>
     public Task<T> SingleAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Single(), cancellationToken);
     }
 
     /// <summary>
@@ -230,7 +251,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的唯一元素。</returns>
     public Task<T> SingleAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Single(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -242,7 +263,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的唯一元素；没有元素时返回默认值。</returns>
     public Task<T> SingleOrDefaultAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.SingleOrDefault(), cancellationToken);
     }
 
     /// <summary>
@@ -255,7 +276,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为符合条件的唯一元素；没有元素时返回默认值。</returns>
     public Task<T> SingleOrDefaultAsync<T>(IQueryable<T> queryable, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.SingleOrDefault(predicate), cancellationToken);
     }
 
     /// <summary>
@@ -267,7 +288,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的最小值。</returns>
     public Task<T> MinAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Min(), cancellationToken);
     }
 
     /// <summary>
@@ -281,7 +302,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的最小值。</returns>
     public Task<TResult> MinAsync<T, TResult>(IQueryable<T> queryable, Expression<Func<T, TResult>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Min(selector), cancellationToken);
     }
 
     /// <summary>
@@ -293,7 +314,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源中的最大值。</returns>
     public Task<T> MaxAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Max(), cancellationToken);
     }
 
     /// <summary>
@@ -307,7 +328,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的最大值。</returns>
     public Task<TResult> MaxAsync<T, TResult>(IQueryable<T> queryable, Expression<Func<T, TResult>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Max(selector), cancellationToken);
     }
 
     /// <summary>
@@ -318,7 +339,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的十进制总和。</returns>
     public Task<decimal> SumAsync(IQueryable<decimal> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -329,7 +350,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空十进制总和。</returns>
     public Task<decimal?> SumAsync(IQueryable<decimal?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -342,7 +363,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的十进制总和。</returns>
     public Task<decimal> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, decimal>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -355,7 +376,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空十进制总和。</returns>
     public Task<decimal?> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, decimal?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -366,7 +387,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的整数总和。</returns>
     public Task<int> SumAsync(IQueryable<int> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -377,7 +398,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空整数总和。</returns>
     public Task<int?> SumAsync(IQueryable<int?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -390,7 +411,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的整数总和。</returns>
     public Task<int> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, int>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -403,7 +424,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空整数总和。</returns>
     public Task<int?> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, int?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -414,7 +435,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的长整数总和。</returns>
     public Task<long> SumAsync(IQueryable<long> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -425,7 +446,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空长整数总和。</returns>
     public Task<long?> SumAsync(IQueryable<long?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -438,7 +459,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的长整数总和。</returns>
     public Task<long> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, long>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -451,7 +472,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空长整数总和。</returns>
     public Task<long?> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, long?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -462,7 +483,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的双精度总和。</returns>
     public Task<double> SumAsync(IQueryable<double> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -473,7 +494,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空双精度总和。</returns>
     public Task<double?> SumAsync(IQueryable<double?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -486,7 +507,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的双精度总和。</returns>
     public Task<double> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, double>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -499,7 +520,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空双精度总和。</returns>
     public Task<double?> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, double?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -510,7 +531,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的单精度总和。</returns>
     public Task<float> SumAsync(IQueryable<float> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -521,7 +542,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空单精度总和。</returns>
     public Task<float?> SumAsync(IQueryable<float?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Sum(), cancellationToken);
     }
 
     /// <summary>
@@ -534,7 +555,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的单精度总和。</returns>
     public Task<float> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, float>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -547,7 +568,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空单精度总和。</returns>
     public Task<float?> SumAsync<T>(IQueryable<T> queryable, Expression<Func<T, float?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Sum(selector), cancellationToken);
     }
 
     /// <summary>
@@ -558,7 +579,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的十进制平均值。</returns>
     public Task<decimal> AverageAsync(IQueryable<decimal> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -569,7 +590,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空十进制平均值。</returns>
     public Task<decimal?> AverageAsync(IQueryable<decimal?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -582,7 +603,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的十进制平均值。</returns>
     public Task<decimal> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, decimal>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -595,7 +616,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空十进制平均值。</returns>
     public Task<decimal?> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, decimal?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -606,7 +627,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的双精度平均值。</returns>
     public Task<double> AverageAsync(IQueryable<int> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -617,7 +638,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空双精度平均值。</returns>
     public Task<double?> AverageAsync(IQueryable<int?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -630,7 +651,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的双精度平均值。</returns>
     public Task<double> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, int>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -643,7 +664,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空双精度平均值。</returns>
     public Task<double?> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, int?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -654,7 +675,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的双精度平均值。</returns>
     public Task<double> AverageAsync(IQueryable<long> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -665,7 +686,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空双精度平均值。</returns>
     public Task<double?> AverageAsync(IQueryable<long?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -678,7 +699,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的双精度平均值。</returns>
     public Task<double> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, long>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -691,7 +712,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空双精度平均值。</returns>
     public Task<double?> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, long?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -702,7 +723,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的双精度平均值。</returns>
     public Task<double> AverageAsync(IQueryable<double> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -713,7 +734,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空双精度平均值。</returns>
     public Task<double?> AverageAsync(IQueryable<double?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -726,7 +747,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的双精度平均值。</returns>
     public Task<double> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, double>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -739,7 +760,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空双精度平均值。</returns>
     public Task<double?> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, double?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -750,7 +771,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的单精度平均值。</returns>
     public Task<float> AverageAsync(IQueryable<float> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -761,7 +782,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素的可空单精度平均值。</returns>
     public Task<float?> AverageAsync(IQueryable<float?> source, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => source.Average(), cancellationToken);
     }
 
     /// <summary>
@@ -774,7 +795,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的单精度平均值。</returns>
     public Task<float> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, float>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -787,7 +808,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为按选择器计算得到的可空单精度平均值。</returns>
     public Task<float?> AverageAsync<T>(IQueryable<T> queryable, Expression<Func<T, float?>> selector, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.Average(selector), cancellationToken);
     }
 
     /// <summary>
@@ -799,7 +820,7 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为数据源元素列表。</returns>
     public Task<List<T>> ToListAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.ToList(), cancellationToken);
     }
 
     /// <summary>
@@ -811,6 +832,6 @@ public class FreeSqlAsyncQueryableProvider : IAsyncQueryableProvider
     /// <returns>表示异步操作的任务，结果为包含数据源元素的数组。</returns>
     public Task<T[]> ToArrayAsync<T>(IQueryable<T> queryable, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return Execute(() => queryable.ToArray(), cancellationToken);
     }
 }

@@ -16,6 +16,6 @@
     <EfCore6Version>6.0.*</EfCore6Version>
     <EfCore5Version>5.0.*</EfCore5Version>
     <!-- FreeSQL packages -->
-    <FreeSQLPackageVersion>3.2.*</FreeSQLPackageVersion>
+    <FreeSQLPackageVersion>3.5.311</FreeSQLPackageVersion>
   </PropertyGroup>
 </Project>
