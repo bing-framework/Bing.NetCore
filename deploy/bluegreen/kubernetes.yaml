@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-web-blue
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: bing-web, color: blue}
+  template:
+    metadata:
+      labels: {app: bing-web, color: blue}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: web
+          image: example.invalid/bing-admin:blue-replace-me
+          env:
+            - {name: ASPNETCORE_URLS, value: "http://+:8080"}
+            - {name: BING_HOST_ROLE, value: web}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "false"}
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /health/ready, port: http}
+            periodSeconds: 5
+            failureThreshold: 2
+          startupProbe:
+            httpGet: {path: /health/ready, port: http}
+            periodSeconds: 5
+            failureThreshold: 24
+          lifecycle:
+            preStop:
+              exec: {command: ["/bin/sh", "-c", "sleep 15"]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-web-green
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: bing-web, color: green}
+  template:
+    metadata:
+      labels: {app: bing-web, color: green}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: web
+          image: example.invalid/bing-admin:green-replace-me
+          env:
+            - {name: ASPNETCORE_URLS, value: "http://+:8080"}
+            - {name: BING_HOST_ROLE, value: web}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "false"}
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /health/ready, port: http}
+            periodSeconds: 5
+            failureThreshold: 2
+          startupProbe:
+            httpGet: {path: /health/ready, port: http}
+            periodSeconds: 5
+            failureThreshold: 24
+          lifecycle:
+            preStop:
+              exec: {command: ["/bin/sh", "-c", "sleep 15"]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bing-web
+spec:
+  selector: {app: bing-web, color: blue}
+  ports:
+    - {name: http, port: 80, targetPort: http}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-consumer-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: bing-consumer, color: blue}
+  template:
+    metadata:
+      labels: {app: bing-consumer, color: blue}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: consumer
+          image: example.invalid/bing-admin:blue-replace-me
+          env:
+            - {name: BING_HOST_ROLE, value: consumer}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "true"}
+            - {name: BING_CAP_CONSUMER_GROUP, value: bing-admin}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-consumer-green
+spec:
+  replicas: 0
+  selector:
+    matchLabels: {app: bing-consumer, color: green}
+  template:
+    metadata:
+      labels: {app: bing-consumer, color: green}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: consumer
+          image: example.invalid/bing-admin:green-replace-me
+          env:
+            - {name: BING_HOST_ROLE, value: consumer}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "true"}
+            - {name: BING_CAP_CONSUMER_GROUP, value: bing-admin}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-task-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: bing-task, color: blue}
+  template:
+    metadata:
+      labels: {app: bing-task, color: blue}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: task
+          image: example.invalid/bing-admin:blue-replace-me
+          env:
+            - {name: BING_HOST_ROLE, value: task}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "false"}
+          lifecycle:
+            preStop:
+              exec: {command: ["/bin/sh", "-c", "sleep 15"]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bing-task-green
+spec:
+  replicas: 0
+  selector:
+    matchLabels: {app: bing-task, color: green}
+  template:
+    metadata:
+      labels: {app: bing-task, color: green}
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+        - name: task
+          image: example.invalid/bing-admin:green-replace-me
+          env:
+            - {name: BING_HOST_ROLE, value: task}
+            - {name: BING_CAP_CONSUMER_ENABLED, value: "false"}
+          lifecycle:
+            preStop:
+              exec: {command: ["/bin/sh", "-c", "sleep 15"]}

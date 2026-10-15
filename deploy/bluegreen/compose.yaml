@@ -1,0 +1,63 @@
+name: bing-admin-bluegreen
+
+# The image must implement BING_HOST_ROLE and GET /health/ready; see README.md.
+x-web: &web
+  environment:
+    ASPNETCORE_URLS: http://+:8080
+    BING_HOST_ROLE: web
+    BING_CAP_CONSUMER_ENABLED: "false"
+  stop_grace_period: 5m
+  restart: unless-stopped
+
+x-consumer: &consumer
+  environment:
+    BING_HOST_ROLE: consumer
+    BING_CAP_CONSUMER_ENABLED: "true"
+    BING_CAP_CONSUMER_GROUP: bing-admin
+  stop_grace_period: 5m
+  restart: unless-stopped
+
+x-task: &task
+  environment:
+    BING_HOST_ROLE: task
+    BING_CAP_CONSUMER_ENABLED: "false"
+  stop_grace_period: 5m
+  restart: unless-stopped
+
+services:
+  web-blue:
+    <<: *web
+    image: ${BING_BLUE_IMAGE:?Set BING_BLUE_IMAGE to an immutable image digest}
+    ports:
+      - "127.0.0.1:18081:8080"
+  web-green:
+    <<: *web
+    image: ${BING_GREEN_IMAGE:?Set BING_GREEN_IMAGE to an immutable image digest}
+    ports:
+      - "127.0.0.1:18082:8080"
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${BING_PUBLIC_PORT:-8080}:80"
+    volumes:
+      - ./nginx/active.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web-blue
+      - web-green
+    restart: unless-stopped
+  consumer-blue:
+    <<: *consumer
+    image: ${BING_BLUE_IMAGE:?Set BING_BLUE_IMAGE to an immutable image digest}
+    profiles: [consumer-blue]
+  consumer-green:
+    <<: *consumer
+    image: ${BING_GREEN_IMAGE:?Set BING_GREEN_IMAGE to an immutable image digest}
+    profiles: [consumer-green]
+  task-blue:
+    <<: *task
+    image: ${BING_BLUE_IMAGE:?Set BING_BLUE_IMAGE to an immutable image digest}
+    profiles: [task-blue]
+  task-green:
+    <<: *task
+    image: ${BING_GREEN_IMAGE:?Set BING_GREEN_IMAGE to an immutable image digest}
+    profiles: [task-green]
