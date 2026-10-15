@@ -17,7 +17,7 @@ public class EntityChangeInfo : IHasExtraProperties
     /// <summary>
     /// 获取或设置实体变更类型。
     /// </summary>
-    public EntityChangeInfo ChangeType { get; set; }
+    public EntityChangeType ChangeType { get; set; }
 
     /// <summary>
     /// 获取或设置发生变更的实体所属租户标识。

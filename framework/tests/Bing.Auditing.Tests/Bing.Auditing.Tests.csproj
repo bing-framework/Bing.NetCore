@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
+    <PackageReference Include="MySqlConnector" Version="2.1.2" />
     <ProjectReference Include="..\..\src\Bing.Auditing\Bing.Auditing.csproj" />
     <!-- FakeClock / FakeCurrentUser -->
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
