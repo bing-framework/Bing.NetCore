@@ -114,7 +114,85 @@ public class UserFriendlyExceptionTest
 /// </summary>
 public class LocalLockTest
 {
+    /// <summary>
+    /// 创建当前测试使用的唯一锁键。
+    /// </summary>
+    /// <param name="suffix">键后缀。</param>
+    /// <returns>唯一锁键。</returns>
     private static string Key(string suffix) => $"LocalLock_{suffix}_{Guid.NewGuid():N}";
+
+    /// <summary>
+    /// 验证异步等待完成后可以在另一线程释放锁。
+    /// </summary>
+    [Fact]
+    public async Task LockTakeAsync_ShouldReleaseAfterThreadSwitch()
+    {
+        var key = Key("thread_switch");
+        var @lock = new LocalLock();
+        (await @lock.LockTakeAsync(key, "owner", TimeSpan.FromSeconds(1))).ShouldBeTrue();
+        (await Task.Run(() => @lock.LockReleaseAsync(key, "owner"))).ShouldBeTrue();
+        @lock.LockTake(key, "next", TimeSpan.Zero).ShouldBeTrue();
+        @lock.LockRelease(key, "next").ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// 验证错误持有者和重复释放都不能开启被占用的锁。
+    /// </summary>
+    [Fact]
+    public async Task LockRelease_ShouldCheckOwnerAndWaiter()
+    {
+        var key = Key("ownership");
+        var @lock = new LocalLock();
+        @lock.LockTake(key, "first", TimeSpan.Zero).ShouldBeTrue();
+        var waiter = @lock.LockTakeAsync(key, "second", TimeSpan.FromSeconds(3));
+
+        @lock.LockRelease(key, "other").ShouldBeFalse();
+        @lock.LockRelease(key, "first").ShouldBeTrue();
+        (await waiter).ShouldBeTrue();
+        @lock.LockRelease(key, "first").ShouldBeFalse();
+        @lock.LockRelease(key, "second").ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// 验证成功释放和等待超时后均回收按键锁状态。
+    /// </summary>
+    [Fact]
+    public async Task LockState_ShouldBeRemovedWhenNoUsersRemain()
+    {
+        var key = Key("reclaim");
+        var @lock = new LocalLock();
+        @lock.LockTake(key, "owner", TimeSpan.Zero).ShouldBeTrue();
+        (await @lock.LockTakeAsync(key, "waiter", TimeSpan.Zero)).ShouldBeFalse();
+        @lock.LockRelease(key, "owner").ShouldBeTrue();
+
+        var cache = typeof(LocalLock).GetField("_lockCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+            ?.GetValue(null) as System.Collections.IDictionary;
+        cache.ShouldNotBeNull();
+        cache.Contains(key).ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// 验证本地租约支持取消及跨线程的一次性释放。
+    /// </summary>
+    [Fact]
+    public async Task TryAcquireLeaseAsync_ShouldCancelAndReleaseOnce()
+    {
+        var key = Key("lease");
+        var @lock = new LocalLock();
+        var lease = await @lock.TryAcquireLeaseAsync(key, TimeSpan.Zero);
+        lease.ShouldNotBeNull();
+
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        await Should.ThrowAsync<OperationCanceledException>(() =>
+            @lock.TryAcquireLeaseAsync(key, TimeSpan.FromSeconds(1), cancellation.Token));
+
+        (await Task.Run(() => lease.ReleaseAsync())).ShouldBeTrue();
+        lease.Release().ShouldBeFalse();
+        var next = await @lock.TryAcquireLeaseAsync(key, TimeSpan.Zero);
+        next.ShouldNotBeNull();
+        await next.DisposeAsync();
+    }
 
     // -----------------------------------------------------------------
     //  LockTake / LockRelease
