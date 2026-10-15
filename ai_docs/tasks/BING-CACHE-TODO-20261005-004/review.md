@@ -96,6 +96,7 @@ OPEN_ACTIONABLE: 0
 
 ## 验证证据
 
+- 运行产物归档入口：[task004 运行产物](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/)，包括矩阵汇总、测试结果及门控/构建日志。
 - `Bing.Caching.Tests`：net8.0 130 pass，net6.0 130 pass。
 - `Bing.Caching.FreeRedis.Tests.Integration`：net8.0/net6.0 均 94 pass / 13 skip。
 - `Bing.Caching.CSRedis.Tests.Integration`：net8.0/net6.0 均 91 pass / 12 skip。

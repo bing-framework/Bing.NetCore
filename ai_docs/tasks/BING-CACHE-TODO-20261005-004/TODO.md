@@ -2,6 +2,8 @@
 
 本轮范围见 plan.md；实现证据见 execution.md、test-mapping.md，性能证据见 performance.md。未提交、推送或发布。已关闭项不因性能门禁失败自动重开。
 
+> 运行产物归档入口：[task004 运行产物](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/)，包括矩阵、测试结果及门控/构建日志。
+
 ## 已完成
 
 - [x] Hybrid 批量/扫描按 Redis 原子 GET/PTTL 的剩余寿命回填，扣除耗时，关闭本地随机 TTL 延长。

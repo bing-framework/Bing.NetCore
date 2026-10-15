@@ -78,11 +78,13 @@ T01-T08 核心实现已完成（T07 按字节自适应拆分保留明确偏差�
 
 正式矩阵共 14 个 cell：7 COMPLETED、7 VERIFIED_TIMEOUT_BOUNDARY、0 FAILED。Free/CS 两个单节点 1k/10k 预算 cell 完成；Easy Redis/Hybrid 单节点、双分片及 Easy Redis Cluster 的三个规模完整；Free/CS 单节点 100k、双分片、Cluster 以及 Easy Hybrid Cluster 达到固定 600 秒整轮观察边界。该窗口覆盖整 cell 的预热与采样，不是某一次 API 的时限；超时不证明单次调用失败或不支持该规模。原始结果见 performance-matrix/run-status.json，统计汇总见 performance-matrix/summary.csv（159 行）；超时行无统计。
 
+运行产物归档入口：[task004 运行产物](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/)，矩阵、测试结果及门控/构建日志均按原相对结构保存。
+
 预算对照仍失败：命中请求 P95 4/4 PASS，批读 P95 1/4 PASS，扫描 P95 2/4 PASS，批读与扫描平均分配 0/8 PASS。不改变 10%/20%/30% 原预算。键编码假设已完成一次诊断和一次正式确认，不再重复同一实验；新结构假设作为后续性能 TODO，见 performance.md。
 
 矩阵杀掉超时子进程时 finally 清理可能未执行，后续隔离实例扫描可能包含前序随机 bench 命名空间残留。预算 cell 在这些超时之前结束，二方对照保留；后续矩阵仅报告该运行条件下的绝对值，不用于 Provider 横向提升声明。harness 仅在整个 cell 成功后写最终 JSON，超时没有完整或可恢复的正式统计。两个任务自有 279,497,080-byte hang dump 已删除，原失败/中止 TRX 与 Sequence 证据保留。
 
-新增 Free/CS 三类集成测试改用 IntegrationFact 后，仅运行对应门控专项：2 Provider × 2 TFM × 2 模式，8 份独立 TRX。RUN_INTEGRATION_TESTS=false 且配置不可用测试地址时 24 个 UnitTestResult 为 NotExecuted；开启门控在 :52800 时 24 个用例通过、0 失败。VSTest Counters.notExecuted 字段为 0，因此跳过数以逐用例 outcome=NotExecuted 及 CLI 为准，不把该字段误记成已执行。证据 test-results/gates、gate-validation.log。
+新增 Free/CS 三类集成测试改用 IntegrationFact 后，仅运行对应门控专项：2 Provider × 2 TFM × 2 模式，8 份独立 TRX。RUN_INTEGRATION_TESTS=false 且配置不可用测试地址时 24 个 UnitTestResult 为 NotExecuted；开启门控在 :52800 时 24 个用例通过、0 失败。VSTest Counters.notExecuted 字段为 0，因此跳过数以逐用例 outcome=NotExecuted 及 CLI 为准，不把该字段误记成已执行。证据 test-results/gates、gate-validation.log；归档入口见 [task004 运行产物](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/)。
 
 最终候选对照 candidate-source-identity.json：47 个生产/benchmark 源文件哈希均未变化；测试属性变化未影响生产路径，复用上面的完整 net6/net8 与解决方案构建证据。git diff --check 通过，只有两处现有 CRLF→LF 提示。后续仅文档更改不重跑正确性或性能矩阵。
 

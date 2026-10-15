@@ -25,3 +25,12 @@ ai_docs/tasks/<任务ID>/<相对路径>.json
 这些文件只保存在本地，新的克隆不会包含它们；需要团队共享或长期保存时，将整个任务产物目录上传到团队制品存储，并在任务记录中留下位置和生成环境。Markdown 结论仍可入库，但不能代替原始测量证据。
 
 本次任务整理同时将已完成 089–098 目录剩余的 10 份运行日志（`probe-output.txt`、`cluster-output.txt`、`redis-outbox-output.txt`）按同样的任务 ID/相对路径规则移至 `artifacts/ai-tasks/`，保留原始内容，清空原目录；上述脚本仍只自动处理 JSON。Markdown 整理前的完整本地备份为 `artifacts/task-doc-audit/tasks-before-cleanup.zip`，逐文件处置见[整理清单](CLEANUP.md)。
+
+task004 的本地历史产物统一存放在 `artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/`，保留原来的相对路径：
+
+- `performance-matrix/`：矩阵汇总 CSV 与运行日志；汇总 CSV 与已有归档副本逐字节一致，仅保留归档副本。
+- `test-results/`：TRX 与覆盖率 XML；`verify-integration-gates.ps1` 后续直接输出至归档目录的 `test-results/gates/`。
+- `gate-validation.log`、`solution-build.log`：历史门控及构建日志。
+- `edit-coordination.ps1`、`edit-mutations.ps1`：一次性源码修改脚本，仅保留作历史记录，不作为可直接重跑的工具；迁移后其相对路径不再适用。
+
+本次迁移没有改写原始证据内容；任务文档保留历史命令与生成路径，并补充归档入口。上述 JSON 归档脚本的处理范围不变。构建缓存、正式输出、IDE/任务状态、复现源码及既有证据备份继续保留。

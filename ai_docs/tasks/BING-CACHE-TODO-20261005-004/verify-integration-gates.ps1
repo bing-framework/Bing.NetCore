@@ -3,7 +3,7 @@
 $OutputEncoding = [Text.UTF8Encoding]::new($false)
 $ErrorActionPreference = 'Stop'
 $workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
-$resultRoot = Join-Path $PSScriptRoot 'test-results/gates'
+$resultRoot = Join-Path $workspaceRoot 'artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/test-results/gates'
 New-Item -ItemType Directory -Path $resultRoot -Force | Out-Null
 $filter = 'FullyQualifiedName~CoordinationBoundaryTest|FullyQualifiedName~SerializationBoundaryTest|FullyQualifiedName~PrefixScanCancellationTest'
 $projects = @('Bing.Caching.FreeRedis.Tests.Integration','Bing.Caching.CSRedis.Tests.Integration')

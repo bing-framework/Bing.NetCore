@@ -1,6 +1,8 @@
 # 缓存性能正式预算报告
 
 > 本报告引用的 JSON 产物为本地归档，位于 `artifacts/ai-tasks/`，不随普通 Git clone 分发。
+>
+> task004 运行产物归档入口：[artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/)，包含矩阵、测试结果及门控/构建日志。
 
 <!-- AI_EXECUTION_STATUS: PARTIAL -->
 <!-- AI_TASK_ID: BING-CACHE-TODO-20261005-004 -->
@@ -62,7 +64,7 @@ delta = (current / baseline - 1) * 100
 | `matrix-cluster-easyredis` | EasyRedis | cluster | 1,000/10,000/100,000 | `COMPLETED` | 0 |
 | `matrix-cluster-easyhybrid` | EasyHybrid | cluster | 1,000/10,000/100,000 | `VERIFIED_TIMEOUT_BOUNDARY` | -1 |
 
-`VERIFIED_TIMEOUT_BOUNDARY` 只表示该 cell 触发 600 秒窗口，不能推出功能不支持，也不能使用不完整日志宣称该 cell 的能力或性能结果。600 秒窗口覆盖整个 cell，包括预热和正式采样，不是单次 API 调用的超时。完整的 Easy 100,000 项结果来自 [summary.csv](performance-matrix/summary.csv) 的 159 条数据记录；以下只列出 5 个 `COMPLETED` Easy topology/mode 的绝对值。
+`VERIFIED_TIMEOUT_BOUNDARY` 只表示该 cell 触发 600 秒窗口，不能推出功能不支持，也不能使用不完整日志宣称该 cell 的能力或性能结果。600 秒窗口覆盖整个 cell，包括预热和正式采样，不是单次 API 调用的超时。完整的 Easy 100,000 项结果来自 [summary.csv](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/performance-matrix/summary.csv) 的 159 条数据记录；以下只列出 5 个 `COMPLETED` Easy topology/mode 的绝对值。
 
 ### Easy 100,000 项绝对指标
 
@@ -130,6 +132,6 @@ delta = (current / baseline - 1) * 100
 - 执行记录：[execution.md](execution.md)
 - 性能证据审计：[performance-audit.md](performance-audit.md)
 - 矩阵状态：[performance-matrix/run-status.json](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/performance-matrix/run-status.json)
-- 矩阵汇总：[performance-matrix/summary.csv](performance-matrix/summary.csv)
+- 矩阵汇总：[performance-matrix/summary.csv](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/performance-matrix/summary.csv)
 - 当前正式预算：[performance-matrix/budget-csredis.json](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/performance-matrix/budget-csredis.json)、[performance-matrix/budget-freeredis.json](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261005-004/performance-matrix/budget-freeredis.json)
 - task003 冻结基线：[CSRedis baseline](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261004-003/keyparse-formal-baseline-csredis-1k10k.json)、[FreeRedis baseline](../../../artifacts/ai-tasks/BING-CACHE-TODO-20261004-003/keyparse-formal-baseline-freeredis-1k10k.json)
