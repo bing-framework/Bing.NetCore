@@ -33,9 +33,11 @@ public class OrderQuery : Query<OrderDto> { public string OrderNo { get; set; } 
 | --- | --- | --- |
 | `IAppService` / `ICrudAppService` / `IQueryAppService` | `Bing.Application.Services` | 应用服务契约 |
 | `DtoBase` / `RequestBase` | `Bing.Application.Services` | DTO 与请求基类 |
-| `[UnitOfWork]` | `Bing.Application.Services` | 工作单元拦截特性（需 AOP） |
+| `[UnitOfWork]` | `Bing.Application.Aspects` | 中立工作单元标记（需 `Bing.Ddd.Application.AspectCore` 执行器） |
 
 ## 与其它包的关系
+
+本包不引用 AspectCore。需要让 `[UnitOfWork]` 生效时，应用宿主另外引用 `Bing.Aop.AspectCore` 和 `Bing.Ddd.Application.AspectCore`，并调用 `EnableAop()`、`EnableBingUnitOfWork()` 与 `UseServiceContext()`。
 
 ## 更多文档
 

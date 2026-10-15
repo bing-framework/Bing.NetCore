@@ -19,8 +19,10 @@ app.UseBing();                                // Web；非 Web 用 serviceProvid
 | 工程 | TFM | 演示点 | 注册的模块 | 外部依赖 | 在 `Bing.All.sln` 中 |
 | --- | --- | --- | --- | --- | --- |
 | [`Bing.Samples.WebApi`](Bing.Samples.WebApi/README.md) | `net6.0` | **最小 Web 宿主骨架**：模块系统 + AOP 宿主 + `UseBing` 管道 | `AppModule`（依赖 `AspNetCoreModule`） | 无 | ✅ |
-| [`Bing.Samples.Hangfire`](Bing.Samples.Hangfire/README.md) | `net6.0` | 后台任务：Hangfire 与框架 DI 打通、TraceId 跨任务传递、Serilog + Exceptionless 日志 | `AppModule` / `LogModule` / `HangfireModule` | ⚠ Exceptionless 服务（默认指向内网地址） | ✅ |
+| [`Bing.Samples.Hangfire`](Bing.Samples.Hangfire/README.md) | `net6.0` | 后台任务：Hangfire 与框架 DI 打通、TraceId 跨任务传递、Serilog + Exceptionless 日志 | `AppModule` / `LogModule` / `HangfireModule` | 可选 Exceptionless 服务（通过配置注入） | ✅ |
 | [`Bing.Samples.Winform`](Bing.Samples.Winform/README.md) | `net6.0-windows` | 非 Web 宿主：WinForms 里手工搭 `ServiceCollection` + `AddBing()` | **无**（只调 `AddBing()`，未注册任何模块） | 无 | ❌ **未纳入解决方案** |
+
+`Bing.Samples.WebApi.Tests` 提供 WebApi 的自动冒烟验证：请求 `/sample/lazy` 会实际调用 `ILazyServiceProvider`，并在 `StopAsync` 后确认监听端口释放。
 
 ---
 
@@ -55,7 +57,7 @@ dotnet run --project samples/<工程名>/<工程名>.csproj
 
 ## 4. 已知注意事项
 
-- **samples 不是 API 演示**：`Bing.Samples.WebApi` 虽然调了 `services.AddControllers()`，但目录里**没有任何 Controller**，启动后只有框架默认的中间件在跑。
-- **Hangfire 样例硬编码了 Exceptionless 服务地址**（`http://10.186.135.27:5100`）与 ApiKey，属内网调试遗留；本地运行前请先改成你自己的服务，否则日志写入会失败（不影响进程启动）。
+- **samples 不是完整业务示例**：`Bing.Samples.WebApi` 提供了最小的 `SampleController`，用于验证 `ILazyServiceProvider` 属性注入和业务服务延迟解析；它不承担完整业务分层演示。
+- **Hangfire 样例的 Exceptionless 为可选配置**：通过 `Exceptionless:ApiKey`、`Exceptionless:ServerUrl` 或对应环境变量注入；空 API Key 时只使用本地日志，不会连接远程服务。
 - **Winform 样例不在 `Bing.All.sln` 里**，不会被整体构建覆盖，改框架后请单独编译验证。
 - 样例引用的都是 `framework/src/` 下的**工程引用**，不是 NuGet 包——因此版本号以仓库 `version.props` 为准。

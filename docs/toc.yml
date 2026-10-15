@@ -1,6 +1,6 @@
 - name: 主页
   href: index.md
-- name: English map
+- name: 中文精简导航
   href: README.en.md
 - name: 入门
   items:
@@ -20,6 +20,10 @@
       href: getting-started/FAQ与排错.md
 - name: 架构
   items:
+    - name: 文档与源码核对报告
+      href: architecture/documentation-audit.md
+    - name: 功能与文档对照清单
+      href: architecture/feature-documentation-matrix.md
     - name: 架构文档
       href: architecture/架构文档.md
     - name: 设计思路文档
@@ -32,8 +36,46 @@
       href: architecture/功能完成度.md
     - name: 架构决策记录
       href: architecture/adr/README.md
+- name: 已实现模块
+  items:
+    - name: 模块索引
+      href: modules/README.md
+    - name: 模块化与插件
+      href: modules/modularity-and-plugins.md
+    - name: 依赖注入与 AOP
+      href: modules/dependency-injection-and-aop.md
+    - name: 事件与一致性
+      href: modules/events-and-consistency.md
+    - name: 审计
+      href: modules/auditing.md
+    - name: 锁与限流
+      href: modules/locking-and-rate-limiting.md
+    - name: 数据访问与工作单元
+      href: modules/data-access-and-unit-of-work.md
+    - name: 宿主与部署
+      href: modules/hosting-and-deployment.md
+    - name: Web、安全与多租户
+      href: modules/web-security-and-multitenancy.md
+    - name: 通用横切服务
+      href: modules/cross-cutting-services.md
+    - name: 组件、样例与部署资产
+      href: modules/components-samples-and-tooling.md
 - name: 指南
   items:
+    - name: 模块 DI 与资源所有权
+      href: guides/modularity-di-resources.md
+    - name: 可信插件
+      href: guides/modularity-plugins.md
+    - name: 集群事件与一致性
+      href: guides/cluster-consistency.md
+    - name: 集群宿主配置
+      href: guides/cluster-host-configuration.md
+    - name: 有序事件
+      href: guides/ordered-events.md
+    - name: 库存订单
+      href: guides/inventory-orders.md
+    - name: 审计持久化
+      href: guides/auditing-persistence.md
     - name: 领域建模指南
       href: guides/领域建模指南.md
     - name: 工作单元、仓储与应用服务

@@ -6,7 +6,7 @@
 | --- | --- |
 | **状态** | 🟢 已接受（代码已落地） |
 | **日期** | 2026-09-18（事后补录） |
-| **涉及** | `Bing.Uow`（`IUnitOfWork` / `IUnitOfWorkManager`）、`Bing.Aop.AspectCore`（`UnitOfWorkAttribute` / `InterceptorBase`） |
+| **涉及** | `Bing.Uow`（`IUnitOfWork` / `IUnitOfWorkManager`）、`Bing.Ddd.Application.Contracts`（中立 `UnitOfWorkAttribute`）、`Bing.Ddd.Application.AspectCore`（AspectCore 执行器） |
 
 ## 背景
 
@@ -27,7 +27,7 @@
 
 ## 决策
 
-采用 **方案 C**：`[UnitOfWork]`（基于 AspectCore 的 `InterceptorBase : AbstractInterceptorAttribute`）在应用服务方法**成功返回后**由 `IUnitOfWorkManager.CommitAsync()` 统一提交；`CrudAppServiceBase` 已内置该特性。
+采用 **方案 C**：`[UnitOfWork]` 作为应用契约中的中立标记，由 `Bing.Ddd.Application.AspectCore` 的适配器在应用服务方法**成功返回后**调用 `IUnitOfWorkManager.CommitAsync()`；`CrudAppServiceBase` 已内置该特性。
 
 显式方式保留：`IUnitOfWork.Commit()` / `CommitAsync()` 仍可直接调用。
 
@@ -41,7 +41,7 @@
 
 **负面**
 
-- **必须启用 AOP**。`UnitOfWorkAttribute` 是 AOP 拦截器，**没调 `EnableAop(...)` 时它完全不生效——不报错，数据不落库**。这是本框架最危险的静默失败之一（入口还叫 `EnableAop` 而非 `AddAop`）。
+- **必须启用执行器**。`UnitOfWorkAttribute` 是中立标记，未同时调用 `EnableAop()` 和 `EnableBingUnitOfWork()` 时它不生效；这属于宿主配置约束。
 - **仅对代理生效**：同一类内部方法互相调用不会触发拦截器。
 - AspectCore 对 `EF DbContext`、标记 `[IgnoreAspect]` 的接口默认不代理——这是刻意为之，但会让"为什么这个类的 `[UnitOfWork]` 不生效"难以排查。
 - 控制器需要属性注入时要额外 `AddControllersAsServices()`。

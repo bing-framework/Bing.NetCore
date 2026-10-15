@@ -144,6 +144,7 @@ EXTERNAL_NAMES = {
     "UseDeveloperExceptionPage", "UseExceptionHandler", "UseSession", "UseSignalR",
     "UseLazyLoading", "UseTransaction", "UseTransactionAsync", "UseConnectionString",
     "UseDefaultServiceProvider", "UseSetting", "UseEnvironment", "UseHealthChecks",
+    "UseServiceContext", "AddDays",
     "CreateLogger", "CreateDefaultBuilder", "CreateScope", "CreateRequest", "CreateResponse",
     "GetInstance", "GetService", "GetServices", "GetRequiredService", "GetConnectionString",
     "GetDbConnection", "ConfigureServices", "Configure", "ConfigureAppConfiguration",
@@ -168,6 +169,7 @@ KNOWN_SYMBOLS = {
     "AddSelf",              # Bing.Core DependencyAttribute.AddSelf（属性，非方法签名）
     "AddParameter",         # 私有 static 方法（Bing.Data.Sql / Bing.Dapper.PostgreSql 内部）
     "BingSqlBatch",         # 文档示例里作为 SQL 表名字面量出现，不是符号
+    "UseCoordinationLease", # 审计与有序事件清理调度选项属性
 }
 
 # 正则：抽取「文档代码块」里可能的类型/成员引用（PascalCase 或 AddXxx/UseXxx）

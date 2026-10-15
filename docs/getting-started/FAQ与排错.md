@@ -77,11 +77,11 @@ services.AddScoped<ICache, CSRedisCacheManager>();                // 或 FreeRed
 
 ### Q11 用 FreeSQL 时，异步查询会真的异步执行吗？
 
-**正解**：**不会——而且它不报错。** 完整链路：
+**正解**：**通用入口不会执行真正的数据库异步 I/O，但不会因为 Provider 占位而抛异常。** 完整链路：
 
 1. 你调 `IAsyncQueryableExecuter` 的异步扩展方法（如 `ToListAsync`）；
 2. 它用 `FindProvider` 找 provider：`Providers.FirstOrDefault(p => p.CanExecute(queryable))`；
-3. FreeSQL 的 `FreeSqlAsyncQueryableProvider.CanExecute` **恒返回 `false`**（占位实现；该文件另有 **65 处** `throw new NotImplementedException()`）；
+3. FreeSQL 的 `FreeSqlAsyncQueryableProvider.CanExecute` **恒返回 `false`**，避免抢占数据库 Provider；
 4. 于是 `FindProvider` 返回 `null`，走兜底分支——**同步执行**：
 
 ```csharp
@@ -91,11 +91,11 @@ return provider != null
     : Task.FromResult(queryable.Contains(item));   // ← 同步阻塞调用线程
 ```
 
-**后果**：能编译、能跑、不抛异常、日志干净，但数据库查询在**调用线程上同步执行**。在 ASP.NET Core 里等于白白占住一个线程池线程，高并发下表现为吞吐下降而**没有任何错误信号**。
+**后果**：能编译、能跑，数据库查询仍在**调用线程上同步执行**。在 ASP.NET Core 里会占用线程池线程，高并发下表现为吞吐下降。
 
 EF Core 的 `EfCoreAsyncQueryableProvider` 才是真正生效的实现（真异步）。
 
-**怎么确认自己踩到了**：对 `IQueryable` 调 `ToListAsync()`，若返回的 `Task` **立即**处于 `RanToCompletion`，就是同步降级。完整说明见 [功能完成度 §3](../architecture/功能完成度.md)。
+**怎么确认自己踩到了**：对 `IQueryable` 调 `ToListAsync()`，若返回的 `Task` **立即**处于 `RanToCompletion`，就是同步降级。需要真正异步 I/O 时改用仓储原生异步方法或 EF Core。完整说明见 [功能完成度 §3](../architecture/功能完成度.md)。
 
 ### Q12 仓储接口 `IRepository` / `IStore` 在哪个包？
 

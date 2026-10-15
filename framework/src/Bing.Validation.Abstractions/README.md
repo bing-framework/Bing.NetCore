@@ -27,7 +27,8 @@ dotnet add package Bing.Validation.Abstractions
 
 ## 注意事项
 
-只是契约工程，不含运行时实现。
+只是契约工程，不含运行时实现。`NotNullAttribute`、`NotEmptyAttribute` 和
+`ValidAttribute` 只表达参数验证意图；具体执行由 `Bing.Aop.AspectCore` 等适配器提供。
 
 ## 更多文档
 

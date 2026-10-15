@@ -1,7 +1,7 @@
 # Bing.FreeSQL
 [![NuGet](https://img.shields.io/nuget/v/Bing.FreeSQL.svg)](https://www.nuget.org/packages/Bing.FreeSQL/) [![NuGet Downloads](https://img.shields.io/nuget/dt/Bing.FreeSQL.svg)](https://www.nuget.org/packages/Bing.FreeSQL/) ![TFM](https://img.shields.io/badge/TFM-netstandard2.0-blue.svg)
 
-> FreeSQL 数据访问核心：工作单元、乐观锁与审计 AOP、软删除全局过滤。
+> FreeSQL 数据访问核心：工作单元、乐观锁和软删除支持。
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：13
 >
@@ -42,9 +42,13 @@ services.AddMySqlUnitOfWork<IAdminUnitOfWork, AdminUnitOfWork>(connection);
 
 ## 注意事项
 
+仓库当前统一使用 FreeSQL `3.5.311`：`FreeSql`、`FreeSql.DbContext`、`FreeSql.Extensions.Linq`、MySQLConnector 与 SQLite 测试 Provider 均按同一版本还原。升级后若同时引入 `FreeSql` 和 `Bing.Uow` 命名空间，`IUnitOfWorkManager` 需写明所属命名空间。Admin FreeSQL 与 EFCore 的 MySQL/CAP 工作单元均已覆盖同步、异步提交、失败回滚和执行中取消；FreeSQL 的 CAP 事务由 Admin 数据项目适配，基础 `Bing.FreeSQL` 包本身不自动启用 CAP。
+
+与 EFCore 数据项目相比，FreeSQL 基础项目现在会在 `StoreBase` 写入入口调用已注册的 `IAuditPropertySetter`，为新增、修改和删除实体填充审计字段；未注册设置器时保持兼容的无操作行为。`StoreBase` 的新增、修改和删除同步/异步入口会自动登记实现 `IHasDomainEvents` 的实体，注册 `IDomainEventDispatcher` 后工作单元才会在事务内分发并在保存成功后清理事件；未注册分发器时保留事件，不自动清空。直接使用 FreeSQL 原生 API、原始 SQL 或自定义存储器时仍需显式调用 `RegisterDomainEventSource`。两套 Admin 数据项目的 CAP 事务测试仅证明该适配路径，不代表所有仓储和查询行为完全一致。
+
 ⚠ FreeSQL 目前**只有 MySql Provider**（`Bing.FreeSQL.MySql`），扩展其他数据库按 Provider 工程模板复制。
 
-⚠ **异步查询会退化成同步**：`FreeSqlAsyncQueryableProvider.CanExecute<T>()` 恒返回 `false`，其异步方法全部 `throw new NotImplementedException()`。实际运行时由 `AsyncQueryableExecuter` 在找不到可用 Provider 时回退为 `Task.FromResult(queryable.ToList())`——**不会抛异常，但会同步阻塞调用线程**。高频异步路径请改用仓储自带的异步方法（走 FreeSql 原生异步），或改用 EF Core 支。详见 [能力矩阵 §4.3](../../../docs/getting-started/能力矩阵.md)。
+⚠ **异步查询会退化成同步**：`FreeSqlAsyncQueryableProvider.CanExecute<T>()` 恒返回 `false`，异步聚合、元素、列表和数组方法会先检查取消令牌，再执行对应的同步 LINQ 查询并包装为 `Task`；不会伪装成可由 FreeSQL 数据库 Provider 执行的异步查询。高频异步路径请改用仓储自带的异步方法（走 FreeSql 原生异步），或改用 EF Core 支。详见 [能力矩阵 §4.3](../../../docs/getting-started/能力矩阵.md)。
 
 ## 更多文档
 

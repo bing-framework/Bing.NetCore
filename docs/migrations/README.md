@@ -14,6 +14,10 @@
 | 迁移文档 | 适用升级 | 内容 |
 | --- | --- | --- |
 | [模块运行时兼容增强](modularity-runtime.md) | 当前工作树，未变更版本号 | 新旧入口排序、异步生命周期、宿主与资源所有权 |
+| [AspectCore 3.0.0 迁移说明](aspectcore-3.0.md) | AspectCore 2.x → 3.0.0 | 目标框架、属性注入、工作单元和 Sample 验证 |
+| [审计关键标记迁移](../../deploy/migrations/auditing/001-critical-flag.mysql.sql) | 当前工作树审计表升级 | `IsCritical` 字段、普通审计分批保留和旧历史行复核 |
+| [审计归档表迁移](../../deploy/migrations/auditing/005-audit-log-archive.mysql.sql) | 当前工作树审计表升级 | `bing_audit_log_archive` 表及归档查询索引；启用显式归档前执行 |
+| [有序事件收件箱迁移](../../deploy/migrations/ordered-events/001-created-at-utc.mysql.sql) | 当前工作树有序收件箱升级 | `CreatedAtUtc` 年龄字段、历史去重表及清理前归档；需按顺序执行两份受控 MySQL 迁移 |
 | [SQL 事务 API 迁移到 7.0.0](sql-transaction-api-vNext.md) | → 7.0.0 | Dapper 连接 / 事务公开 API 收敛 |
 
 ---

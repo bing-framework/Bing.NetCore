@@ -2,6 +2,8 @@
 
 本文说明从旧的立即注册入口迁移到新的依赖图入口时，注册、初始化和关闭行为的变化。
 
+2026-09-28 修复了真实 Web 宿主只读集合清理，以及已部署插件私有 DLL 的方法体延迟加载。现有调用方式无需调整；辅助 DLL 不必为了加载而加入服务扫描。具体支持范围见[加载与关闭边界](../guides/modularity-plugins.md#加载与关闭边界)。
+
 ## 入口对照
 
 旧入口保留用于兼容已有应用：
@@ -63,7 +65,7 @@ services.AddBingApplication<AppModule>();
 
 ## 服务扫描边界
 
-新入口的约定式 DI 只扫描本次选中模块所属的程序集。该边界用于控制扫描范围，不提供安全隔离；需要关闭扫描时设置 `AutoRegisterServices = false`。模块可以持有仅支持 `IAsyncDisposable` 的资源；同步注册失败时框架会同步等待异步释放，正常运行和关闭应使用异步入口。
+新入口的约定式 DI 默认扫描本次选中模块所属的程序集，也支持模块声明和应用选项指定的附加程序集。该边界用于控制扫描范围，不提供安全隔离；需要关闭扫描时设置 `AutoRegisterServices = false`。模块可以持有仅支持 `IAsyncDisposable` 的资源；同步注册失败时框架会同步等待异步释放，正常运行和关闭应使用异步入口。
 
 `ServiceRegistrationMode` 提供两种扫描时机：
 
@@ -72,11 +74,11 @@ services.AddBingApplication<AppModule>();
 | `Compatible`（默认） | `DependencyModule` 的主配置阶段 | 全部 Post 配置完成后 |
 | `BeforeConfigureServices` | 全部 Pre 配置完成后、主配置开始前 | 与约定 DI 扫描同一时机 |
 
-两种模式都只扫描最终选中模块的程序集，公开类型事件每次应用注册只触发一次。`AutoRegisterServices = false` 仅关闭约定 DI 自动注册，不改变选项绑定和公开事件；配置阶段较晚加入的选项类型仍由既有补扫机制处理。`BeforeConfigureServices` 适合主配置钩子需要读取约定注册结果的模块；已有应用保持默认值即可维持原顺序。
+两种模式使用相同的冻结扫描集合：最终选中模块的程序集、模块声明的附加程序集及应用额外程序集；公开类型事件每类型每轮注册只触发一次。`AutoRegisterServices = false` 仅关闭约定 DI 自动注册，不改变选项绑定和公开事件；配置阶段较晚加入的选项类型仍由既有补扫机制处理。`BeforeConfigureServices` 适合主配置钩子需要读取约定注册结果的模块；已有应用保持默认值即可维持原顺序。
 
 新入口的短期初始化作用域只在模块初始化或关闭回调期间有效。模块和 Web 中间件不得长期保存该作用域、`BingModuleInitializationContext.ServiceProvider` 或由它解析的短期服务；需要长期工作的对象应通过合适的 DI 生命周期或独立资源管理。
 
-`ModuleDependencyGraph` 允许只实现 `IAsyncDisposable` 的模块。此类模块必须使用 `UseBingAsync`、`ShutdownBingAsync` 和 `await using`；同步注册或构造失败路径会同步等待 `DisposeAsync`，以确保原始异常返回前不遗留模块资源。需要异步工作的模块仍应把工作放入 `IBingAsyncModuleInitializer.InitializeAsync` 和 `IBingAsyncModuleShutdown.ShutdownAsync`。
+`ModuleDependencyGraph` 允许只实现 `IAsyncDisposable` 的模块。此类模块必须使用 `UseBingAsync`、`ShutdownBingAsync` 和 `await using`；同步注册或构造失败路径会同步等待 `DisposeAsync`，以确保原始异常返回前不遗留模块资源。主初始化仍可实现 `IBingAsyncModuleInitializer.InitializeAsync`；前后阶段和关闭钩子使用下文的统一接口。
 
 模块实例由框架拥有并释放；通过 DI 注册的服务仍由 DI 容器拥有和释放，模块不要手动释放从容器解析的服务。
 
@@ -87,6 +89,62 @@ services.AddBingApplication<AppModule>();
 模块资源按实例的引用身份管理。即使两个模块覆写 `Equals` 后被判定相等，框架也会分别释放它们，并保证每个实例最多释放一次。
 
 ## 生命周期
+
+`IPreConfigureServices`、`IPostConfigureServices`、`IOnPreApplicationInitialization`、`IOnPostApplicationInitialization` 和 `IBingModuleShutdown` 各自同时声明同步方法和异步方法。异步方法接收对应的服务集合或上下文及 `CancellationToken`，返回 `Task`。`BingModule` 提供默认实现，继承它的模块只需重写实际使用的方法；直接实现这些接口的类型必须实现同步和异步两种方法。仅继承基类默认实现的模块不会被误判为必须异步执行。
+
+下面是一个完整示例。它假设项目引用 `Bing.Core` 和 `Microsoft.Extensions.DependencyInjection`：
+
+```csharp
+using System.Threading;
+using System.Threading.Tasks;
+using Bing.Core.Modularity;
+using Microsoft.Extensions.DependencyInjection;
+
+public sealed class CacheService
+{
+    public Task WarmUpAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}
+
+public sealed class CacheModule : BingModule, IPreConfigureServices,
+    IOnPostApplicationInitialization
+{
+    void IPreConfigureServices.PreConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<CacheService>();
+    }
+
+    Task IPreConfigureServices.PreConfigureServicesAsync(
+        IServiceCollection services, CancellationToken cancellationToken)
+    {
+        services.AddSingleton<CacheService>();
+        return Task.CompletedTask;
+    }
+
+    void IOnPostApplicationInitialization.OnPostApplicationInitialization(
+        BingModuleInitializationContext context)
+    {
+    }
+
+    Task IOnPostApplicationInitialization.OnPostApplicationInitializationAsync(
+        BingModuleInitializationContext context, CancellationToken cancellationToken) =>
+        context.ServiceProvider.GetRequiredService<CacheService>()
+            .WarmUpAsync(cancellationToken);
+}
+
+public static class Program
+{
+    public static async Task Main()
+    {
+        var services = new ServiceCollection();
+        await services.AddBingApplicationAsync<CacheModule>();
+        await using var provider = services.BuildServiceProvider();
+        await provider.UseBingAsync();
+        await provider.ShutdownBingAsync();
+    }
+}
+```
+
+新入口对前置配置、主配置、后置配置、前置初始化、主初始化、后置初始化分别选择唯一回调：有效异步虚方法重写优先，其次是同步虚方法重写；前后阶段没有重写时，再从统一接口选择对应方法。主配置和主初始化分别默认桥接 `AddServices` 与 `UseModule`；前后服务配置还可回退到旧 `IBingPreConfigureServices` / `IBingPostConfigureServices`。基类桥接期间不会重复调用接口实现。同步入口在实际需要异步回调时，会在任何阶段回调执行前拒绝启动并给出迁移提示。
 
 `AddBingApplication` 按已确定的依赖优先模块序列完成三轮服务配置，再由 `UseBing` / `UseBingAsync` 按同一序列完成三轮应用初始化：
 
@@ -128,9 +186,25 @@ public sealed class AppModule : BingModule
 }
 ```
 
-同一阶段只走一条分派路径：异步入口优先选用有效的异步重写，其次同步重写；没有新重写才使用原有可选接口（包括显式实现）。主服务配置默认桥接 `AddServices`，主初始化默认桥接原有 Web 分派器或 `UseModule`。新重写取代同阶段旧回调；显式调用对应的 `base` 可续接旧回调，包括前后配置、异步初始化及同步/异步关闭接口。继承自中间基类的重写同样有效，即使派生类声明了同名隐藏方法；单纯同名隐藏方法不算重写。`OnApplicationShutdown` / `OnApplicationShutdownAsync` 用于单一逆序关闭阶段。
+前后服务配置也可分别实现 `IPreConfigureServices`、`IPostConfigureServices`，前后初始化可分别实现 `IOnPreApplicationInitialization`、`IOnPostApplicationInitialization`，关闭可实现 `IBingModuleShutdown`。每个接口均同时包含同步方法和以 `Async` 结尾的异步方法；异步方法参数沿用对应上下文并接收 `CancellationToken`。直接实现接口的类型必须提供两种方法，继承 `BingModule` 的类型则可使用基类默认实现，只重写所需虚方法。以下示例展示统一接口的显式实现：
 
-旧 `AddBing().AddModule<T>()` 继续在调用处执行 `AddServices`；使用新服务配置重写的模块会收到迁移提示。初始化 Pre / Post 钩子则可在旧入口使用。同步注册发现有效异步配置重写时，在任何配置钩子执行前报错；同步 `UseBing` 发现有效异步初始化重写时，在任何初始化钩子执行前报错。需要异步关闭的模块应等待 `ShutdownBingAsync` 完成。初始化任一阶段失败或取消后，后续阶段不再执行；已经开始初始化的模块逆序关闭，所有框架拥有的模块实例释放一次。清理失败会附加到原始异常的诊断数据中。
+```csharp
+public sealed class ExplicitModule : BingModule, IOnPostApplicationInitialization
+{
+    void IOnPostApplicationInitialization.OnPostApplicationInitialization(
+        BingModuleInitializationContext context) { }
+
+    Task IOnPostApplicationInitialization.OnPostApplicationInitializationAsync(
+        BingModuleInitializationContext context, CancellationToken cancellationToken) =>
+        Task.CompletedTask;
+}
+```
+
+所有接口均位于 `Bing.Core.Modularity`。删除独立异步阶段及关闭接口属于破坏性契约调整：依赖旧接口的外部模块需要迁移到对应统一接口，并重新编译模块及已编译插件。
+
+每阶段只分派一次，顺序与上文一致。有效重写包括继承自中间基类的重写；派生类的同名隐藏方法不算重写。重写取代该阶段的接口回调，显式调用对应的 `base` 方法可续接基类桥接的接口实现。关闭阶段使用 `IBingModuleShutdown.Shutdown` / `ShutdownAsync`；`BingModule` 将其桥接到 `OnApplicationShutdown` / `OnApplicationShutdownAsync`。
+
+旧 `AddBing().AddModule<T>()` 继续在调用处执行 `AddServices`，不会执行新的前后服务配置阶段；实际重写服务配置钩子或独立实现前后配置接口方法的模块会收到迁移提示。仅继承 `BingModule` 的默认接口实现不会触发提示。初始化前后命名接口仍可在旧初始化入口使用。同步注册发现实际需要异步配置的模块时，在任何配置回调执行前报错；同步 `UseBing` 发现实际需要异步初始化的模块时，也会在任何初始化回调执行前报错。需要异步关闭的模块应等待 `ShutdownBingAsync` 完成。初始化任一阶段失败或取消后，后续阶段不再执行；已经开始初始化的模块逆序关闭，所有框架拥有的模块实例释放一次。清理失败会附加到原始异常的诊断数据中。
 
 模块异步初始化抛出 `OperationCanceledException` 时，`UseBingAsync` 返回已取消的 `Task`，并保留该异常实例、取消令牌、消息及 `Data` 中的模块阶段和清理诊断。调用方可检查 `Task.IsCanceled`，或捕获原始 `OperationCanceledException` 获取诊断。调用前令牌已取消的路径仍按原入口规则处理。
 
@@ -173,12 +247,16 @@ public sealed class AppModule : BingModule, IBingAsyncModuleInitializer
 
 ```csharp
 await provider.ShutdownBingAsync();
-provider.Dispose();
+await provider.DisposeAsync();
 ```
+
+这里的 `provider` 为 `BuildBingServiceProvider` 返回的容器。也可使用 `await using` 管理其释放；模块异步关闭完成不等于容器里的服务都支持同步释放。
 
 Generic Host 不会替应用自动调用 `UseBing` 或 `UseBingAsync`；应用仍须显式激活模块。它只会通过 Bing 注册的 `IHostedService` 在停止阶段自动调用异步关闭。无 Host 场景建议使用 `BuildBingServiceProvider`，该入口会预解析管理器，使根容器的 `using`/`await using` 能覆盖尚未初始化的模块；若直接调用原生 `BuildServiceProvider` 且从未解析模块管理器，DI 仍无法保证自动释放。已初始化应用应在释放根容器前等待 `ShutdownBing` 或 `ShutdownBingAsync`。
 
 `BingHotPluginHost` 用异步应用注册构建候选代。候选代的 Pre、主阶段、Post 都完成后才切换服务入口；任一阶段失败时旧代仍继续服务，候选代进行关闭与资源清理。插件代仍按整组切换，不支持替换已装配的 Web 管道。
+
+运行中切换可读取 `BingHotPluginHost.Status`，其中当前代和退役代共享稳定的代 ID，退役代提供活动调用数与 `Draining` / `Closing` 状态。`ReloadAsync` 保留原异常类型；失败时通过 `BingHotPluginReloadFailureInfo.FromException(error)` 读取失败阶段、代 ID 和 `Switched`。旧代关闭失败可能发生在新代已切换之后，应依据 `Switched` 判断当前入口。原有只调用 `ReloadAsync` 的代码无需改签名。
 
 旧入口仍支持单宿主的静态兼容定位器；新入口不绑定该 locator。需要多个宿主或可测试的应用边界时，应使用新入口并通过 `BingModuleInitializationContext.ServiceProvider` 获取当前服务。
 
@@ -191,7 +269,7 @@ Generic Host 不会替应用自动调用 `UseBing` 或 `UseBingAsync`；应用�
 模块可声明附加程序集，并允许应用补充扫描范围：
 
 ```csharp
-[BingModuleAssembly(typeof(SharedServicesMarker))]
+[BingModuleAssemblyAttribute(typeof(SharedServicesMarker))]
 public sealed class ReportingModule : BingModule { }
 
 services.AddBingApplication<ReportingModule>(options =>

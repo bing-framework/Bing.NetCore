@@ -4,7 +4,7 @@
 
 `admin` 是本仓库中**唯一一个完整的分层业务实现**，用于验证框架在真实场景下的可用性：领域建模、双 ORM 落地、CAP 事件总线、缓存、鉴权、SkyAPM 链路追踪、Swagger、Hangfire 一应俱全。
 
-> ⚠ **它不是"开箱即用的产品"**：数据库迁移与种子数据初始化**尚未接通**，**Identity 与权限注册整段被注释**，连接串为内网调试地址。请以"参考实现 / 架构样板"的预期来阅读它，详见 §5。
+> ⚠ **它不是"开箱即用的产品"**：数据库迁移与种子数据初始化**尚未接通**，**Identity 与权限注册整段被注释**，外部连接串、JWT Secret、CAP/RabbitMQ 和日志服务配置必须由部署环境注入。请以"参考实现 / 架构样板"的预期来阅读它，详见 §5。
 
 ---
 
@@ -83,9 +83,9 @@ dotnet run --project modules/admin/src/Bing.Admin/Bing.Admin.csproj
 | --- | --- | --- |
 | MySQL | 主库 + CAP 出箱表（Outbox） | `appsettings.json` |
 | Redis | 缓存（`CacheModule`） | `appsettings.json` |
-| RabbitMQ | CAP 消息传输 | **硬编码**在 `Modules/CapModule.cs` |
+| RabbitMQ | CAP 消息传输 | `CAP:RabbitMQ` 配置节或环境变量 |
 
-> ⚠ **安全提示**：上述依赖的连接串与账号密码写在**受版本控制**的 `appsettings.json` 与 `CapModule.cs` 中（`.gitignore` 只忽略了 `appsettings.Development.json`）。这些是内网调试遗留值，**本地运行前请改成你自己的环境配置**，切勿把生产凭据提交进仓库。
+> ⚠ **安全提示**：仓库中的 `appsettings.json` 只保留空配置键。启动前必须通过环境变量、用户机密或外部密钥服务注入数据库、Redis、JWT、RabbitMQ 和 Exceptionless 配置，切勿把生产凭据提交进仓库。
 
 ## 5. ⚠ 迁移、种子与 Identity 注册尚未接通
 
@@ -120,7 +120,7 @@ dotnet run --project modules/admin/src/Bing.Admin/Bing.Admin.csproj
 services.AddCapEventBus(o =>
 {
     o.UseEntityFramework<AdminUnitOfWork>();   // ← 出箱表落在 MySQL（与工作单元同库同事务）
-    o.UseDashboard();
+    // Admin 由 CAP:Dashboard:Enabled=true 显式启用，并要求 CAP:Dashboard:Role 角色
     o.SucceedMessageExpiredAfter = 24 * 3600;  // 成功消息保留 24 小时
     o.FailedRetryCount = 5;
     o.Version = "admin";
@@ -165,8 +165,8 @@ Postman 集合：`modules/admin/docs/postman/Bing.Admin.postman_collection.json`
 | 入口 | 地址 |
 | --- | --- |
 | Swagger | `/swagger`（端口见 `Properties/launchSettings.json`） |
-| CAP Dashboard | `/cap`（`o.UseDashboard()`） |
-| Hangfire Dashboard | `/hangfire` |
+| CAP Dashboard | `/cap`（默认关闭；显式启用后要求 `CAP:Dashboard:Role`） |
+| Hangfire Dashboard | `/hangfire`（Web 角色默认拒绝；配置 `Hangfire:Dashboard:Role`） |
 
 ## 8. 相关文档
 

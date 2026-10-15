@@ -43,7 +43,7 @@
 | 只读仓储 | `IQueryStore<TEntity, TKey>` | 🔵 | `IStore : IQueryStore`，只读路径建议注入父接口 |
 | `IUnitOfWorkManager` | `IUnitOfWorkManager` | 🟢 | 同名，同为 `IScopedDependency` |
 | `IUnitOfWork` | `IUnitOfWork` | 🟢 | 同名 |
-| `[UnitOfWork]` | `[UnitOfWork]` | 🟡 | **同名但实现不同**：Bing 的是 AOP 拦截器（`UnitOfWorkAttribute : InterceptorBase, IScopeInterceptor`），**必须启用 `EnableAop(...)` 才生效** |
+| `[UnitOfWork]` | `[UnitOfWork]` | 🟡 | **同名但实现不同**：Bing 的是 `Bing.Ddd.Application.Contracts` 中立标记，由 `Bing.Ddd.Application.AspectCore` 执行器识别；宿主需启用 `EnableAop()`、`EnableBingUnitOfWork()` 和 `UseServiceContext()` |
 | `IDataFilter<TFilter>` | `IDataFilter` | 🟡 | 概念一致（临时关闭全局过滤器）；泛型形态不同 |
 
 ### 2.3 审计与并发

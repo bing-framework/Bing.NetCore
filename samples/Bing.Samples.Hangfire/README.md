@@ -14,7 +14,7 @@
 | --- | --- |
 | TFM | `net6.0`（`Microsoft.NET.Sdk.Web`，`InProcess` 托管） |
 | 框架引用 | `Bing.AspNetCore`、`Bing.Logging.Serilog`、`Bing.Logging.Sinks.Exceptionless` |
-| 三方包 | `Hangfire.AspNetCore` 1.7.16、`Hangfire.MemoryStorage` 1.7.0、`Serilog.Enrichers.Span` 2.0.1、`AspectCore.Extensions.Hosting` 2.2.0 |
+| 三方包 | `Hangfire.AspNetCore` 1.7.16、`Hangfire.MemoryStorage` 1.7.0、`Serilog.Enrichers.Span` 2.0.1、`AspectCore.Extensions.Hosting` 3.0.0 |
 | 存储 | **MemoryStorage**（进程内，重启即丢，无需 Redis/SQL Server） |
 | 启动地址 | `https://localhost:5001` / `http://localhost:5000` |
 | 面板 | `/hangfire` |
@@ -101,7 +101,7 @@ dotnet run --project samples/Bing.Samples.Hangfire/Bing.Samples.Hangfire.csproj
 
 ## 6. ⚠ 注意事项
 
-- **硬编码的 Exceptionless 地址与 ApiKey**：`Modules/LogModule.cs` 里 `o.ServerUrl = "http://10.186.135.27:5100"`，ApiKey 也在源码中。这是内网调试遗留，**本地运行前请改成你自己的服务/密钥**，否则日志提交会失败（进程仍可启动）。
+- **Exceptionless 配置**：`Modules/LogModule.cs` 从 `Exceptionless:ApiKey`、`Exceptionless:ServerUrl` 读取配置；API Key 为空时不启用远程接收器。生产请通过密钥存储或受控环境注入，不要把密钥写入源码或提交的配置文件。
 - **MemoryStorage 只适合演示**：重启进程后任务历史与队列全部丢失，生产请换 SQL Server / Redis 存储并相应调整 `AddHangfire` 配置。
 - **日志可能重复**：源码注释明确写着"同时输出 2 种方式的日志，可能存在重复 需要陆续兼容"——`AddExceptionless` 与 Serilog 的 `WriteTo.Exceptionless` 会各写一份。
 - **Hangfire Dashboard 未加鉴权**：样例直接 `app.UseHangfireDashboard()`，任何人可访问；生产必须加 `DashboardOptions` 的 `Authorization`。

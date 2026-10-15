@@ -37,14 +37,17 @@ if (!result.IsValid) { /* 处理错误 */ }
 | --- | --- | --- |
 | `DataAnnotationValidation` | `Bing.Validation` | 校验入口 |
 | `ChineseAttribute` / `IdCardAttribute` 等 | `Bing.Validation` | 中文业务验证特性 |
+| `ValidAttribute` | `Bing.Validation.Abstractions` | 参数验证意图标记 |
 
 ## 与其它包的关系
 
-**依赖本包**：`Bing.Aop.AspectCore`、`Bing.Biz.OAuthLogin`
+**依赖本包**：`Bing.Biz.OAuthLogin`
 
 ## 注意事项
 
-在应用服务参数上标记 `[Valid]` 可配合 AOP 自动触发校验（需 `Bing.Aop.AspectCore`）。
+在应用服务参数上标记 `[Valid]` 可配合 AOP 自动触发校验。标记来自
+`Bing.Validation.Abstractions`；需要执行时，宿主另外引用 `Bing.Aop.AspectCore`，
+并显式调用 `EnableBingParameterValidation()`。
 
 ## 更多文档
 

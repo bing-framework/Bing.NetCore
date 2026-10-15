@@ -26,7 +26,7 @@ AI_TASK_ID: <taskId>
 AI_REVIEWED_AT: <ISO-8601>
 ```
 
-## Fix Scope
+## 修复范围
 
 ```text
 must
