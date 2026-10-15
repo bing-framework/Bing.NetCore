@@ -5,40 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Core.Modularity;
 
 /// <summary>
-/// 提供不持有插件程序集引用的当前插件信息。
-/// </summary>
-public sealed class BingHotPluginInfo
-{
-    /// <summary>
-    /// 初始化插件信息。
-    /// </summary>
-    /// <param name="id">插件 ID。</param>
-    /// <param name="version">插件数值版本。</param>
-    /// <param name="versionText">插件完整版本。</param>
-    internal BingHotPluginInfo(string id, Version version, string versionText)
-    {
-        Id = id;
-        Version = version;
-        VersionText = versionText;
-    }
-
-    /// <summary>
-    /// 获取插件 ID。
-    /// </summary>
-    public string Id { get; }
-
-    /// <summary>
-    /// 获取插件数值版本，不包含预发布和构建元数据。
-    /// </summary>
-    public Version Version { get; }
-
-    /// <summary>
-    /// 获取插件完整版本。
-    /// </summary>
-    public string VersionText { get; }
-}
-
-/// <summary>
 /// 管理可回收的整组插件，并在重新加载时切换服务入口。
 /// </summary>
 /// <typeparam name="TStartupModule">应用启动模块。</typeparam>
@@ -46,7 +12,7 @@ public sealed class BingHotPluginInfo
 /// 每次重新加载都会建立独立的服务容器和可回收程序集上下文。调用方应通过 RunAsync 使用插件服务，
 /// 不得在回调外长期保留插件服务、类型、程序集或服务提供程序。
 /// </remarks>
-public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where TStartupModule : BingModule
+public sealed partial class BingHotPluginHost<TStartupModule> : IAsyncDisposable where TStartupModule : BingModule
 {
     /// <summary>
     /// 每一代插件使用的注册配置。
@@ -64,7 +30,7 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
     private readonly SemaphoreSlim _reloadGate = new(1, 1);
 
     /// <summary>
-    /// 保护当前插件代及活动调用数。
+    /// 保护当前代、退役代和宿主关闭状态。
     /// </summary>
     private readonly object _gate = new();
 
@@ -79,12 +45,17 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
     private Generation _current;
 
     /// <summary>
+    /// 正在等待活动调用退出或关闭的插件代。
+    /// </summary>
+    private readonly List<Generation> _retiring = new();
+
+    /// <summary>
     /// 宿主是否已经关闭。
     /// </summary>
     private bool _disposed;
 
     /// <summary>
-    /// 初始化动态插件宿主。
+    /// 初始化一个 <see cref="BingHotPluginHost{TStartupModule}" /> 类型的实例。
     /// </summary>
     /// <param name="configurePlugins">每次重新加载时执行的插件来源配置。</param>
     /// <param name="configureServices">可选的宿主服务配置。</param>
@@ -107,39 +78,82 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
     }
 
     /// <summary>
+    /// 获取当前与退役插件代的状态快照。
+    /// </summary>
+    public BingHotPluginHostStatus Status
+    {
+        get
+        {
+            lock (_gate)
+                return new BingHotPluginHostStatus(_current?.Snapshot(), _retiring.Select(item => item.Snapshot()));
+        }
+    }
+
+    /// <summary>
     /// 构建新插件代并切换服务入口。
     /// </summary>
     /// <param name="cancellationToken">构建和初始化的取消令牌。</param>
-    /// <returns>旧插件代停止并发出卸载请求后完成的任务。</returns>
     /// <remarks>
     /// 新一代初始化失败时保留当前插件代。切换后等待旧调用退出，再关闭旧模块和容器。
     /// 程序集实际回收取决于外部是否仍持有插件对象或程序集引用。
     /// </remarks>
     public async Task ReloadAsync(CancellationToken cancellationToken = default)
     {
-        if (_insideCall.Value)
-            throw new InvalidOperationException("不能在插件服务调用期间等待同一宿主重新加载。");
-        await _reloadGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var attemptId = Guid.NewGuid();
+        var phase = BingHotPluginReloadPhase.WaitForTurn;
+        Guid? previousGenerationId = null;
+        var switched = false;
+        var enteredGate = false;
         try
         {
-            lock (_gate) ThrowIfDisposed();
-            var next = await BuildGenerationAsync(cancellationToken).ConfigureAwait(false);
+            if (_insideCall.Value)
+                throw new InvalidOperationException("不能在插件服务调用期间等待同一宿主重新加载。");
+            await _reloadGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            enteredGate = true;
+            lock (_gate)
+            {
+                ThrowIfDisposed();
+                previousGenerationId = _current?.Id;
+            }
+            phase = BingHotPluginReloadPhase.BuildCandidate;
+            var next = await BuildGenerationAsync(attemptId, cancellationToken).ConfigureAwait(false);
             Generation previous;
             lock (_gate)
             {
                 previous = _current;
                 _current = next;
                 previous?.Retire();
+                if (previous != null) _retiring.Add(previous);
+                switched = true;
             }
 
             // 一旦切换成功，旧代清理必须完成，不能由调用方取消而留下仍运行的旧模块。
             if (previous != null)
             {
-                await previous.WaitForIdleAsync().ConfigureAwait(false);
-                await previous.CloseAsync().ConfigureAwait(false);
+                try
+                {
+                    phase = BingHotPluginReloadPhase.WaitForPreviousCalls;
+                    await previous.WaitForIdleAsync().ConfigureAwait(false);
+                    phase = BingHotPluginReloadPhase.ClosePrevious;
+                    previous.MarkClosing();
+                    await previous.CloseAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    lock (_gate) _retiring.Remove(previous);
+                }
             }
         }
-        finally { _reloadGate.Release(); }
+        catch (Exception error)
+        {
+            Guid? currentGenerationId;
+            lock (_gate) currentGenerationId = _current?.Id;
+            error.Data[BingHotPluginReloadFailureInfo.ExceptionDataKey] =
+                new BingHotPluginReloadFailureInfo(attemptId, previousGenerationId,
+                    currentGenerationId, phase, switched);
+            throw;
+        }
+        finally { if (enteredGate) _reloadGate.Release(); }
     }
 
     /// <summary>
@@ -175,10 +189,8 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
         finally { generation.Release(); }
     }
 
-    /// <summary>
-    /// 关闭当前插件代并请求卸载其程序集。
-    /// </summary>
-    /// <returns>旧调用退出且插件资源释放后的任务。</returns>
+    /// <inheritdoc />
+    /// <remarks>等待当前插件代退出并请求卸载其程序集。</remarks>
     public async ValueTask DisposeAsync()
     {
         if (_insideCall.Value)
@@ -194,11 +206,20 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
                 previous = _current;
                 _current = null;
                 previous?.Retire();
+                if (previous != null) _retiring.Add(previous);
             }
             if (previous != null)
             {
-                await previous.WaitForIdleAsync().ConfigureAwait(false);
-                await previous.CloseAsync().ConfigureAwait(false);
+                try
+                {
+                    await previous.WaitForIdleAsync().ConfigureAwait(false);
+                    previous.MarkClosing();
+                    await previous.CloseAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    lock (_gate) _retiring.Remove(previous);
+                }
             }
         }
         finally { _reloadGate.Release(); }
@@ -207,11 +228,12 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
     /// <summary>
     /// 构建并初始化可回收的插件代。
     /// </summary>
+    /// <param name="generationId">候选插件代标识。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>完成初始化的插件代。</returns>
-    private async Task<Generation> BuildGenerationAsync(CancellationToken cancellationToken)
+    private async Task<Generation> BuildGenerationAsync(Guid generationId, CancellationToken cancellationToken)
     {
-        var context = new AssemblyLoadContext("Bing.HotPlugins." + Guid.NewGuid().ToString("N"), isCollectible: true);
+        var context = new AssemblyLoadContext("Bing.HotPlugins." + generationId.ToString("N"), isCollectible: true);
         ServiceProvider provider = null;
         try
         {
@@ -226,7 +248,7 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
             await provider.UseBingAsync(cancellationToken).ConfigureAwait(false);
             var plugins = provider.GetRequiredService<IBingPluginContainer>().Plugins
                 .Select(plugin => new BingHotPluginInfo(plugin.Id, plugin.Version, plugin.VersionText)).ToArray();
-            return new Generation(context, provider, new ReadOnlyCollection<BingHotPluginInfo>(plugins));
+            return new Generation(generationId, context, provider, new ReadOnlyCollection<BingHotPluginInfo>(plugins));
         }
         catch (Exception error)
         {
@@ -246,113 +268,5 @@ public sealed class BingHotPluginHost<TStartupModule> : IAsyncDisposable where T
     private void ThrowIfDisposed()
     {
         if (_disposed) throw new ObjectDisposedException(GetType().Name);
-    }
-
-    /// <summary>
-    /// 保存一代插件的容器、上下文与活动调用状态。
-    /// </summary>
-    private sealed class Generation
-    {
-        /// <summary>
-        /// 保护活动调用计数。
-        /// </summary>
-        private readonly object _gate = new();
-
-        /// <summary>
-        /// 旧代全部调用退出时完成。
-        /// </summary>
-        private readonly TaskCompletionSource<bool> _idle = new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        /// <summary>
-        /// 当前活动调用数。
-        /// </summary>
-        private int _active;
-
-        /// <summary>
-        /// 是否已禁止新调用。
-        /// </summary>
-        private bool _retired;
-
-        /// <summary>
-        /// 初始化插件代。
-        /// </summary>
-        internal Generation(AssemblyLoadContext context, ServiceProvider provider,
-            IReadOnlyList<BingHotPluginInfo> plugins)
-        {
-            Context = context;
-            Provider = provider;
-            Plugins = plugins;
-        }
-
-        /// <summary>
-        /// 获取程序集加载上下文。
-        /// </summary>
-        internal AssemblyLoadContext Context { get; }
-
-        /// <summary>
-        /// 获取本代服务容器。
-        /// </summary>
-        internal ServiceProvider Provider { get; }
-
-        /// <summary>
-        /// 获取插件信息快照。
-        /// </summary>
-        internal IReadOnlyList<BingHotPluginInfo> Plugins { get; }
-
-        /// <summary>
-        /// 登记当前调用。
-        /// </summary>
-        internal void Acquire()
-        {
-            lock (_gate)
-            {
-                if (_retired) throw new InvalidOperationException("插件代已停止接收新调用。");
-                _active++;
-            }
-        }
-
-        /// <summary>
-        /// 释放当前调用。
-        /// </summary>
-        internal void Release()
-        {
-            lock (_gate)
-            {
-                _active--;
-                if (_retired && _active == 0) _idle.TrySetResult(true);
-            }
-        }
-
-        /// <summary>
-        /// 停止接收新调用。
-        /// </summary>
-        internal void Retire()
-        {
-            lock (_gate)
-            {
-                _retired = true;
-                if (_active == 0) _idle.TrySetResult(true);
-            }
-        }
-
-        /// <summary>
-        /// 等待全部已开始的调用退出。
-        /// </summary>
-        internal Task WaitForIdleAsync() => _idle.Task;
-
-        /// <summary>
-        /// 关闭模块、释放服务并请求卸载程序集。
-        /// </summary>
-        internal async Task CloseAsync()
-        {
-            var errors = new List<Exception>();
-            try { await Provider.ShutdownBingAsync().ConfigureAwait(false); }
-            catch (Exception error) { errors.Add(error); }
-            try { await Provider.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) { errors.Add(error); }
-            Context.Unload();
-            if (errors.Count > 0)
-                throw new AggregateException("插件代关闭失败；已尝试释放容器并请求卸载程序集。", errors);
-        }
     }
 }

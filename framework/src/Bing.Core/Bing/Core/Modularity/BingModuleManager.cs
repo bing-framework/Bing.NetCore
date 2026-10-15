@@ -103,7 +103,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     private volatile bool _providerDisposing;
 
     /// <summary>
-    /// 初始化模块生命周期管理器。
+    /// 初始化一个 <see cref="BingModuleManager" /> 类型的实例。
     /// </summary>
     /// <param name="provider">应用根服务提供程序。</param>
     /// <param name="registration">当前应用的模块注册记录。</param>
@@ -254,7 +254,9 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
             if (currentModule != null) error.Data["Bing.ModuleType"] = currentModule.GetType().FullName;
             try { FlushStartupLogs(); }
             catch (Exception logError) { error.Data["Bing.ModuleLogError"] = logError; }
-            var cleanup = await CleanupAsync(asynchronous, CancellationToken.None, _providerDisposing).ConfigureAwait(false);
+            var cleanup = new List<Exception>();
+            try { cleanup.AddRange(await CleanupAsync(asynchronous, CancellationToken.None, _providerDisposing).ConfigureAwait(false)); }
+            catch (Exception cleanupError) { cleanup.Add(cleanupError); }
             try { await DisposeScopeAsync(scope, asynchronous).ConfigureAwait(false); }
             catch (Exception scopeError) { cleanup.Add(scopeError); }
             scope = null;
@@ -313,10 +315,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
             if (_state == State.Stopped || _state == State.Failed) return Task.CompletedTask;
             if (_state == State.Initializing) throw new InvalidOperationException("请先等待模块初始化完成，再关闭应用。");
             if (_state == State.Stopping)
-            {
-                if (asynchronous) return _shutdown;
-                throw new InvalidOperationException("模块正在关闭，请等待既有关闭操作。");
-            }
+                return _shutdown;
             if (!asynchronous && NeedsAsyncShutdown())
                 throw new InvalidOperationException("应用需要异步清理，请在释放容器之前调用 ShutdownBingAsync。");
             _state = State.Stopping;
@@ -429,7 +428,6 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     /// <summary>
     /// 异步释放模块管理器及其所属模块资源。
     /// </summary>
-    /// <returns>表示释放操作的值任务。</returns>
     private async Task DisposeCoreAsync()
     {
         Task initialization;

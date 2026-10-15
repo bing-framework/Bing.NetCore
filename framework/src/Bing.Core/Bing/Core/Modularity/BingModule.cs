@@ -6,17 +6,48 @@ namespace Bing.Core.Modularity;
 /// <summary>
 /// 为 Bing 模块提供默认生命周期行为的基类。
 /// </summary>
-public abstract class BingModule : IBingModule
+public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConfigureServices,
+    IOnPreApplicationInitialization, IOnPostApplicationInitialization, IBingModuleShutdown
 {
     /// <summary>
-    /// 前置配置旧接口桥接是否正在执行。
+    /// 前置配置接口桥接是否正在执行。
     /// </summary>
     private bool _bridgingPreConfiguration;
 
     /// <summary>
-    /// 后置配置旧接口桥接是否正在执行。
+    /// 后置配置接口桥接是否正在执行。
     /// </summary>
     private bool _bridgingPostConfiguration;
+
+    /// <summary>
+    /// 异步前置配置接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingAsyncPreConfiguration;
+
+    /// <summary>
+    /// 异步后置配置接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingAsyncPostConfiguration;
+
+    /// <summary>
+    /// 前置初始化接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingPreInitialization;
+
+    /// <summary>
+    /// 后置初始化接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingPostInitialization;
+
+    /// <summary>
+    /// 异步前置初始化接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingAsyncPreInitialization;
+
+    /// <summary>
+    /// 异步后置初始化接口桥接是否正在执行。
+    /// </summary>
+    private bool _bridgingAsyncPostInitialization;
 
     /// <summary>
     /// 异步初始化旧接口桥接是否正在执行。
@@ -52,11 +83,19 @@ public abstract class BingModule : IBingModule
     /// <param name="services">当前应用的服务集合。</param>
     public virtual void PreConfigureServices(IServiceCollection services)
     {
-        if (_bridgingPreConfiguration || this is not IBingPreConfigureServices pre ||
-            !BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingPreConfigureServices),
-                nameof(IBingPreConfigureServices.PreConfigureServices), typeof(IServiceCollection))) return;
+        if (_bridgingPreConfiguration) return;
         _bridgingPreConfiguration = true;
-        try { pre.PreConfigureServices(services); }
+        try
+        {
+            if (this is IPreConfigureServices pre &&
+                BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IPreConfigureServices),
+                    nameof(IPreConfigureServices.PreConfigureServices), typeof(IServiceCollection)))
+                pre.PreConfigureServices(services);
+            else if (this is IBingPreConfigureServices legacy &&
+                     BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingPreConfigureServices),
+                         nameof(IBingPreConfigureServices.PreConfigureServices), typeof(IServiceCollection)))
+                legacy.PreConfigureServices(services);
+        }
         finally { _bridgingPreConfiguration = false; }
     }
 
@@ -65,10 +104,20 @@ public abstract class BingModule : IBingModule
     /// </summary>
     /// <param name="services">当前应用的服务集合。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    public virtual Task PreConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
+    public virtual async Task PreConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
     {
-        PreConfigureServices(services);
-        return Task.CompletedTask;
+        if (_bridgingAsyncPreConfiguration) return;
+        _bridgingAsyncPreConfiguration = true;
+        try
+        {
+            if (BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IPreConfigureServices),
+                    nameof(IPreConfigureServices.PreConfigureServicesAsync), typeof(IServiceCollection),
+                    typeof(CancellationToken)))
+                await ((IPreConfigureServices)this).PreConfigureServicesAsync(services, cancellationToken)
+                    .ConfigureAwait(false);
+            else PreConfigureServices(services);
+        }
+        finally { _bridgingAsyncPreConfiguration = false; }
     }
 
     /// <summary>
@@ -94,11 +143,19 @@ public abstract class BingModule : IBingModule
     /// <param name="services">当前应用的服务集合。</param>
     public virtual void PostConfigureServices(IServiceCollection services)
     {
-        if (_bridgingPostConfiguration || this is not IBingPostConfigureServices post ||
-            !BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingPostConfigureServices),
-                nameof(IBingPostConfigureServices.PostConfigureServices), typeof(IServiceCollection))) return;
+        if (_bridgingPostConfiguration) return;
         _bridgingPostConfiguration = true;
-        try { post.PostConfigureServices(services); }
+        try
+        {
+            if (this is IPostConfigureServices post &&
+                BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IPostConfigureServices),
+                    nameof(IPostConfigureServices.PostConfigureServices), typeof(IServiceCollection)))
+                post.PostConfigureServices(services);
+            else if (this is IBingPostConfigureServices legacy &&
+                     BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingPostConfigureServices),
+                         nameof(IBingPostConfigureServices.PostConfigureServices), typeof(IServiceCollection)))
+                legacy.PostConfigureServices(services);
+        }
         finally { _bridgingPostConfiguration = false; }
     }
 
@@ -107,10 +164,20 @@ public abstract class BingModule : IBingModule
     /// </summary>
     /// <param name="services">当前应用的服务集合。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    public virtual Task PostConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
+    public virtual async Task PostConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
     {
-        PostConfigureServices(services);
-        return Task.CompletedTask;
+        if (_bridgingAsyncPostConfiguration) return;
+        _bridgingAsyncPostConfiguration = true;
+        try
+        {
+            if (BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IPostConfigureServices),
+                    nameof(IPostConfigureServices.PostConfigureServicesAsync), typeof(IServiceCollection),
+                    typeof(CancellationToken)))
+                await ((IPostConfigureServices)this).PostConfigureServicesAsync(services, cancellationToken)
+                    .ConfigureAwait(false);
+            else PostConfigureServices(services);
+        }
+        finally { _bridgingAsyncPostConfiguration = false; }
     }
 
     /// <inheritdoc />
@@ -121,18 +188,38 @@ public abstract class BingModule : IBingModule
     /// 在应用主初始化前初始化当前模块。
     /// </summary>
     /// <param name="context">本轮应用初始化上下文。</param>
-    public virtual void OnPreApplicationInitialization(BingModuleInitializationContext context) { }
+    public virtual void OnPreApplicationInitialization(BingModuleInitializationContext context)
+    {
+        if (_bridgingPreInitialization || this is not IOnPreApplicationInitialization initializer ||
+            !BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IOnPreApplicationInitialization),
+                nameof(IOnPreApplicationInitialization.OnPreApplicationInitialization),
+                typeof(BingModuleInitializationContext))) return;
+        _bridgingPreInitialization = true;
+        try { initializer.OnPreApplicationInitialization(context); }
+        finally { _bridgingPreInitialization = false; }
+    }
 
     /// <summary>
     /// 在应用主初始化前初始化当前模块。
     /// </summary>
     /// <param name="context">本轮应用初始化上下文。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    public virtual Task OnPreApplicationInitializationAsync(BingModuleInitializationContext context,
+    public virtual async Task OnPreApplicationInitializationAsync(BingModuleInitializationContext context,
         CancellationToken cancellationToken)
     {
-        OnPreApplicationInitialization(context);
-        return Task.CompletedTask;
+        if (_bridgingAsyncPreInitialization) return;
+        _bridgingAsyncPreInitialization = true;
+        try
+        {
+            if (BingModuleHooks.HasIndependentInterfaceImplementation(this,
+                    typeof(IOnPreApplicationInitialization),
+                    nameof(IOnPreApplicationInitialization.OnPreApplicationInitializationAsync),
+                    typeof(BingModuleInitializationContext), typeof(CancellationToken)))
+                await ((IOnPreApplicationInitialization)this)
+                    .OnPreApplicationInitializationAsync(context, cancellationToken).ConfigureAwait(false);
+            else OnPreApplicationInitialization(context);
+        }
+        finally { _bridgingAsyncPreInitialization = false; }
     }
 
     /// <summary>
@@ -169,18 +256,38 @@ public abstract class BingModule : IBingModule
     /// 在应用主初始化后初始化当前模块。
     /// </summary>
     /// <param name="context">本轮应用初始化上下文。</param>
-    public virtual void OnPostApplicationInitialization(BingModuleInitializationContext context) { }
+    public virtual void OnPostApplicationInitialization(BingModuleInitializationContext context)
+    {
+        if (_bridgingPostInitialization || this is not IOnPostApplicationInitialization initializer ||
+            !BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IOnPostApplicationInitialization),
+                nameof(IOnPostApplicationInitialization.OnPostApplicationInitialization),
+                typeof(BingModuleInitializationContext))) return;
+        _bridgingPostInitialization = true;
+        try { initializer.OnPostApplicationInitialization(context); }
+        finally { _bridgingPostInitialization = false; }
+    }
 
     /// <summary>
     /// 在应用主初始化后初始化当前模块。
     /// </summary>
     /// <param name="context">本轮应用初始化上下文。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    public virtual Task OnPostApplicationInitializationAsync(BingModuleInitializationContext context,
+    public virtual async Task OnPostApplicationInitializationAsync(BingModuleInitializationContext context,
         CancellationToken cancellationToken)
     {
-        OnPostApplicationInitialization(context);
-        return Task.CompletedTask;
+        if (_bridgingAsyncPostInitialization) return;
+        _bridgingAsyncPostInitialization = true;
+        try
+        {
+            if (BingModuleHooks.HasIndependentInterfaceImplementation(this,
+                    typeof(IOnPostApplicationInitialization),
+                    nameof(IOnPostApplicationInitialization.OnPostApplicationInitializationAsync),
+                    typeof(BingModuleInitializationContext), typeof(CancellationToken)))
+                await ((IOnPostApplicationInitialization)this)
+                    .OnPostApplicationInitializationAsync(context, cancellationToken).ConfigureAwait(false);
+            else OnPostApplicationInitialization(context);
+        }
+        finally { _bridgingAsyncPostInitialization = false; }
     }
 
     /// <summary>
@@ -189,9 +296,11 @@ public abstract class BingModule : IBingModule
     /// <param name="context">本轮应用关闭上下文。</param>
     public virtual void OnApplicationShutdown(BingModuleShutdownContext context)
     {
-        if (_bridgingShutdown || this is not IBingModuleShutdown shutdown) return;
+        if (_bridgingShutdown ||
+            !BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingModuleShutdown),
+                nameof(IBingModuleShutdown.Shutdown), typeof(BingModuleShutdownContext))) return;
         _bridgingShutdown = true;
-        try { shutdown.Shutdown(context); }
+        try { ((IBingModuleShutdown)this).Shutdown(context); }
         finally { _bridgingShutdown = false; }
     }
 
@@ -204,14 +313,23 @@ public abstract class BingModule : IBingModule
         CancellationToken cancellationToken)
     {
         if (_bridgingAsyncShutdown) return;
-        if (this is IBingAsyncModuleShutdown shutdown)
+        if (BingModuleHooks.HasIndependentInterfaceImplementation(this, typeof(IBingModuleShutdown),
+                nameof(IBingModuleShutdown.ShutdownAsync), typeof(BingModuleShutdownContext),
+                typeof(CancellationToken)))
         {
             _bridgingAsyncShutdown = true;
-            try { await shutdown.ShutdownAsync(context, cancellationToken).ConfigureAwait(false); }
+            try { await ((IBingModuleShutdown)this).ShutdownAsync(context, cancellationToken).ConfigureAwait(false); }
             finally { _bridgingAsyncShutdown = false; }
         }
         else OnApplicationShutdown(context);
     }
+
+    /// <inheritdoc />
+    void IBingModuleShutdown.Shutdown(BingModuleShutdownContext context) => OnApplicationShutdown(context);
+
+    /// <inheritdoc />
+    Task IBingModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
+        CancellationToken cancellationToken) => OnApplicationShutdownAsync(context, cancellationToken);
 
     /// <summary>
     /// 获取指定模块直接和间接依赖的模块类型。

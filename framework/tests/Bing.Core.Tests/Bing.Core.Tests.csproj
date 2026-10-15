@@ -10,12 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Core" Version="2.4.0" />
+    <PackageReference Include="AspectCore.Core" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="PluginFixtures\**" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginLazyFixture\Bing.Core.PluginLazyFixture.csproj" ReferenceOutputAssembly="false" BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginLazyHelper\Bing.Core.PluginLazyHelper.csproj" ReferenceOutputAssembly="false" BuildReference="true" />
+    <ProjectReference Include="PluginFixtures\Bing.Core.PluginLazyLeaf\Bing.Core.PluginLazyLeaf.csproj" ReferenceOutputAssembly="false" BuildReference="true" />
+
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
     <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
     <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
@@ -37,6 +41,17 @@
   </ItemGroup>
 
   <Target Name="CopyBingCorePluginFixtures" AfterTargets="Build">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginLazyFixture\Bing.Core.PluginLazyFixture.csproj" Targets="GetTargetPath" Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="LazyFixturePaths" />
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginLazyHelper\Bing.Core.PluginLazyHelper.csproj" Targets="GetTargetPath" Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="LazyFixturePaths" />
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginLazyLeaf\Bing.Core.PluginLazyLeaf.csproj" Targets="GetTargetPath" Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="LazyFixturePaths" />
+    </MSBuild>
+    <Copy SourceFiles="@(LazyFixturePaths)" DestinationFolder="$(TargetDir)PluginFixtures" SkipUnchangedFiles="true" />
+
     <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
              Targets="GetTargetPath"
              Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Bing.Core.Modularity;
@@ -113,6 +114,39 @@ public sealed class PluginResourceRegressionTest
             resolver, new object[] { AssemblyLoadContext.Default, requested }));
         var error = invocation.InnerException.ShouldBeOfType<FileLoadException>();
         error.Data["Bing.PluginAssembly"].ShouldBe(requested.FullName);
+    }
+
+    /// <summary>
+    /// 验证插件依赖身份比较同时校验区域性和公钥标记。
+    /// </summary>
+    [Fact]
+    public void DependencyInjectionAssemblyIdentityMismatch_ShouldRejectCultureAndPublicKey()
+    {
+        var loaderType = typeof(BingApplicationOptions).Assembly
+            .GetType("Bing.Core.Modularity.BingPluginLoader", true);
+        var resolverType = loaderType.GetNestedType("PluginAssemblyResolver", BindingFlags.NonPublic);
+        var candidateType = loaderType.GetNestedType("AssemblyCandidate", BindingFlags.NonPublic);
+        var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), candidateType);
+        var candidates = Activator.CreateInstance(dictionaryType);
+        var resolver = Activator.CreateInstance(resolverType,
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            binder: null, args: new[] { candidates, true }, culture: null);
+        var resolve = resolverType.GetMethod("Resolve", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        var loaded = typeof(IServiceCollection).Assembly.GetName();
+
+        var cultureMismatch = new AssemblyName(loaded.FullName)
+        {
+            CultureInfo = new CultureInfo("fr-FR")
+        };
+        var cultureInvocation = Should.Throw<TargetInvocationException>(() => resolve.Invoke(
+            resolver, new object[] { AssemblyLoadContext.Default, cultureMismatch }));
+        cultureInvocation.InnerException.ShouldBeOfType<FileLoadException>();
+
+        var publicKeyMismatch = new AssemblyName(loaded.FullName);
+        publicKeyMismatch.SetPublicKeyToken(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
+        var publicKeyInvocation = Should.Throw<TargetInvocationException>(() => resolve.Invoke(
+            resolver, new object[] { AssemblyLoadContext.Default, publicKeyMismatch }));
+        publicKeyInvocation.InnerException.ShouldBeOfType<FileLoadException>();
     }
 
     /// <summary>

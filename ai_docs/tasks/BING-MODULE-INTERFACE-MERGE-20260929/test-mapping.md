@@ -1,0 +1,15 @@
+# 生产符号与测试映射
+
+| 生产符号 / 行为 | 直接测试 |
+|---|---|
+| `IPreConfigureServices`、`IPostConfigureServices` 的同步/异步契约 | `Bing.Core.Tests` `ModuleAsyncNamedPhaseInterfacesTest.UnifiedInterfaces_ExposeBothMethods_AndRemovedTypesAreAbsent`、`ModuleAsyncNamedPhaseInterfacesTest.AsyncInterfaces_RunGlobalPhasesOnceInDependencyOrder` |
+| `IOnPreApplicationInitialization`、`IOnPostApplicationInitialization` 的同步/异步契约 | `Bing.Core.Tests` `ModuleAsyncNamedPhaseInterfacesTest.UnifiedInterfaces_ExposeBothMethods_AndRemovedTypesAreAbsent`、`ModuleAsyncPhaseBoundaryTest.AsyncInterface_WaitsBeforeRunningFollowingPhase` |
+| `IBingModuleShutdown` 的同步/异步契约及基类显式适配 | `Bing.Core.Tests` `ModuleAsyncNamedPhaseInterfacesTest.UnifiedInterfaces_ExposeBothMethods_AndRemovedTypesAreAbsent`、`ModuleLifecycleReviewRound18Test.LegacyInterfacesCallingBase_RunOnce`、`ModuleLifecycleReviewRound18Test.CombinedOverrides_AsyncWinsAndSyncPreflightHasNoSideEffects`、`ModuleLifecycleReviewFixTest.SyncShutdownBaseCall_BridgesOldInterfaceOnce` |
+| `BingModule` 前后阶段默认实现与防递归桥接 | `Bing.Core.Tests` `ModuleAsyncNamedPhaseInterfacesTest.DefaultModule_ImplementsAllPhaseInterfaces_AndLegacyRegistrationWorks`、`ModuleAsyncNamedPhaseInterfacesTest.AsyncInterfaceCallingBase_DoesNotRepeatOrFallThroughToSync` |
+| `BingModuleHooks.HasIndependentInterfaceImplementation` 接口映射 | `Bing.Core.Tests` `ModuleLifecycleReviewFixTest.ImplicitInterfaceMapping_BaseCallDoesNotReenterHook`、`ModuleAsyncNamedPhaseInterfacesTest.HiddenMethods_ImplementAsyncInterfaces` |
+| `BingModuleHooks` 异步预检、分派优先级 | `Bing.Core.Tests` `ModuleAsyncNamedPhaseInterfacesTest.SyncRegistration_RejectsAsyncInterfacesBeforeAnyHook`、`ModuleAsyncNamedPhaseInterfacesTest.SyncInitialization_RejectsAsyncInterfacesBeforeAnyHook`、`ModuleAsyncNamedPhaseInterfacesTest.AsyncOverrides_TakePriorityOverOtherImplementations` |
+| Web 上下文与 Host 停止 | `Bing.AspNetCore.Mvc.Tests` `WebModuleLifecycleTest.UseBingAsync_AsyncInterfaces_ShouldShareApplicationBuilderAndComposePipeline`、`WebModuleLifecycleTest.HostStop_ShouldRunAsyncModuleShutdown` |
+| 热更新候选切换与回收 | `Bing.Core.Tests` `HotPluginHostTest.ReloadAsync_AsyncPostInterface_ShouldPublishThenCollectCandidate`、`HotPluginHostTest.ReloadAsync_AsyncConfigurationFailureAtAnyPhase_ShouldKeepCurrentGenerationAndCollectCandidate` |
+| 逆序关闭与重复释放 | `Bing.Core.Tests` `ModuleLifecycleTest.InitializesOnce_AndStopsInReverseOrder`、`ModuleResourceRegressionTest.EqualButDistinctAsyncModules_AsyncShutdownAndRepeatedShutdown_DisposeEachInstanceOnce` |
+
+迁移指南中的显式统一接口消费者写法由 `ModuleUnifiedInterfaceConsumerTest.ExplicitUnifiedInterfaces_RegisterAndInitialize` 的编译和执行覆盖；关闭双方法显式实现由 `ModuleLifecycleReviewRound18Test.LegacyInterfacesCallingBase_RunOnce` 覆盖。

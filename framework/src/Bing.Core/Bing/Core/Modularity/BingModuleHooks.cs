@@ -30,10 +30,10 @@ internal static class BingModuleHooks
     }
 
     /// <summary>
-    /// 判断旧接口实现是否独立于基类虚钩子。
+    /// 判断接口实现是否独立于基类虚钩子。
     /// </summary>
     /// <param name="module">待检查模块。</param>
-    /// <param name="interfaceType">旧接口类型。</param>
+    /// <param name="interfaceType">接口类型。</param>
     /// <param name="methodName">接口方法名称。</param>
     /// <param name="parameters">接口方法参数类型。</param>
     /// <returns>存在独立接口实现时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
@@ -46,9 +46,20 @@ internal static class BingModuleHooks
             method.Name == methodName && method.GetParameters().Select(parameter => parameter.ParameterType)
                 .SequenceEqual(parameters));
         if (index < 0) return false;
-        var baseMethod = typeof(BingModule).GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance,
-            null, parameters, null);
-        return baseMethod == null || mapping.TargetMethods[index].GetBaseDefinition() != baseMethod;
+        if (!interfaceType.IsAssignableFrom(typeof(BingModule)))
+        {
+            var virtualMethod = typeof(BingModule).GetMethod(methodName,
+                BindingFlags.Public | BindingFlags.Instance, null, parameters, null);
+            return virtualMethod == null ||
+                   mapping.TargetMethods[index].GetBaseDefinition() != virtualMethod;
+        }
+        var baseMapping = typeof(BingModule).GetInterfaceMap(interfaceType);
+        var baseIndex = Array.FindIndex(baseMapping.InterfaceMethods, method =>
+            method.Name == methodName && method.GetParameters().Select(parameter => parameter.ParameterType)
+                .SequenceEqual(parameters));
+        return baseIndex < 0 ||
+               mapping.TargetMethods[index].GetBaseDefinition() !=
+               baseMapping.TargetMethods[baseIndex].GetBaseDefinition();
     }
 
     /// <summary>
@@ -58,8 +69,16 @@ internal static class BingModuleHooks
     /// <returns>需要异步配置时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     internal static bool RequiresAsyncConfiguration(BingModule module) =>
         Overrides(module, nameof(BingModule.PreConfigureServicesAsync), typeof(IServiceCollection), typeof(CancellationToken)) ||
+        (!Overrides(module, nameof(BingModule.PreConfigureServices), typeof(IServiceCollection)) &&
+         HasIndependentInterfaceImplementation(module, typeof(IPreConfigureServices),
+             nameof(IPreConfigureServices.PreConfigureServicesAsync), typeof(IServiceCollection),
+             typeof(CancellationToken))) ||
         Overrides(module, nameof(BingModule.ConfigureServicesAsync), typeof(IServiceCollection), typeof(CancellationToken)) ||
-        Overrides(module, nameof(BingModule.PostConfigureServicesAsync), typeof(IServiceCollection), typeof(CancellationToken));
+        Overrides(module, nameof(BingModule.PostConfigureServicesAsync), typeof(IServiceCollection), typeof(CancellationToken)) ||
+        (!Overrides(module, nameof(BingModule.PostConfigureServices), typeof(IServiceCollection)) &&
+         HasIndependentInterfaceImplementation(module, typeof(IPostConfigureServices),
+             nameof(IPostConfigureServices.PostConfigureServicesAsync), typeof(IServiceCollection),
+             typeof(CancellationToken)));
 
     /// <summary>
     /// 判断旧入口是否无法执行模块的新服务配置钩子。
@@ -67,6 +86,16 @@ internal static class BingModuleHooks
     /// <param name="module">待检查模块。</param>
     /// <returns>存在新服务配置钩子时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     internal static bool HasNewServiceHooks(BingModule module) => RequiresAsyncConfiguration(module) ||
+        HasIndependentInterfaceImplementation(module, typeof(IPreConfigureServices),
+            nameof(IPreConfigureServices.PreConfigureServices), typeof(IServiceCollection)) ||
+        HasIndependentInterfaceImplementation(module, typeof(IPostConfigureServices),
+            nameof(IPostConfigureServices.PostConfigureServices), typeof(IServiceCollection)) ||
+        HasIndependentInterfaceImplementation(module, typeof(IPreConfigureServices),
+            nameof(IPreConfigureServices.PreConfigureServicesAsync), typeof(IServiceCollection),
+            typeof(CancellationToken)) ||
+        HasIndependentInterfaceImplementation(module, typeof(IPostConfigureServices),
+            nameof(IPostConfigureServices.PostConfigureServicesAsync), typeof(IServiceCollection),
+            typeof(CancellationToken)) ||
         Overrides(module, nameof(BingModule.PreConfigureServices), typeof(IServiceCollection)) ||
         Overrides(module, nameof(BingModule.ConfigureServices), typeof(IServiceCollection)) ||
         Overrides(module, nameof(BingModule.PostConfigureServices), typeof(IServiceCollection));
@@ -79,10 +108,20 @@ internal static class BingModuleHooks
     internal static bool RequiresAsyncInitialization(BingModule module) =>
         Overrides(module, nameof(BingModule.OnPreApplicationInitializationAsync),
             typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+        (!Overrides(module, nameof(BingModule.OnPreApplicationInitialization),
+             typeof(BingModuleInitializationContext)) &&
+         HasIndependentInterfaceImplementation(module, typeof(IOnPreApplicationInitialization),
+             nameof(IOnPreApplicationInitialization.OnPreApplicationInitializationAsync),
+             typeof(BingModuleInitializationContext), typeof(CancellationToken))) ||
         Overrides(module, nameof(BingModule.OnApplicationInitializationAsync),
             typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
         Overrides(module, nameof(BingModule.OnPostApplicationInitializationAsync),
             typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+        (!Overrides(module, nameof(BingModule.OnPostApplicationInitialization),
+             typeof(BingModuleInitializationContext)) &&
+         HasIndependentInterfaceImplementation(module, typeof(IOnPostApplicationInitialization),
+             nameof(IOnPostApplicationInitialization.OnPostApplicationInitializationAsync),
+             typeof(BingModuleInitializationContext), typeof(CancellationToken))) ||
         (module is IBingAsyncModuleInitializer &&
          !Overrides(module, nameof(BingModule.OnApplicationInitialization), typeof(BingModuleInitializationContext)));
 
@@ -94,7 +133,11 @@ internal static class BingModuleHooks
     internal static bool RequiresAsyncShutdown(BingModule module) =>
         Overrides(module, nameof(BingModule.OnApplicationShutdownAsync),
             typeof(BingModuleShutdownContext), typeof(CancellationToken)) ||
-        (module is IBingAsyncModuleShutdown && module is not IBingModuleShutdown &&
+        (HasIndependentInterfaceImplementation(module, typeof(IBingModuleShutdown),
+             nameof(IBingModuleShutdown.ShutdownAsync), typeof(BingModuleShutdownContext),
+             typeof(CancellationToken)) &&
+         !HasIndependentInterfaceImplementation(module, typeof(IBingModuleShutdown),
+             nameof(IBingModuleShutdown.Shutdown), typeof(BingModuleShutdownContext)) &&
          !Overrides(module, nameof(BingModule.OnApplicationShutdown), typeof(BingModuleShutdownContext)));
 
     /// <summary>
@@ -108,12 +151,24 @@ internal static class BingModuleHooks
         "PreInitialize" => Overrides(module, nameof(BingModule.OnPreApplicationInitialization),
                                typeof(BingModuleInitializationContext)) ||
                            Overrides(module, nameof(BingModule.OnPreApplicationInitializationAsync),
-                               typeof(BingModuleInitializationContext), typeof(CancellationToken)),
+                               typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+                           HasIndependentInterfaceImplementation(module, typeof(IOnPreApplicationInitialization),
+                               nameof(IOnPreApplicationInitialization.OnPreApplicationInitializationAsync),
+                               typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+                           HasIndependentInterfaceImplementation(module, typeof(IOnPreApplicationInitialization),
+                               nameof(IOnPreApplicationInitialization.OnPreApplicationInitialization),
+                               typeof(BingModuleInitializationContext)),
         "Initialize" => true,
         "PostInitialize" => Overrides(module, nameof(BingModule.OnPostApplicationInitialization),
                                 typeof(BingModuleInitializationContext)) ||
                             Overrides(module, nameof(BingModule.OnPostApplicationInitializationAsync),
-                                typeof(BingModuleInitializationContext), typeof(CancellationToken)),
+                                typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+                            HasIndependentInterfaceImplementation(module, typeof(IOnPostApplicationInitialization),
+                                nameof(IOnPostApplicationInitialization.OnPostApplicationInitializationAsync),
+                                typeof(BingModuleInitializationContext), typeof(CancellationToken)) ||
+                            HasIndependentInterfaceImplementation(module, typeof(IOnPostApplicationInitialization),
+                                nameof(IOnPostApplicationInitialization.OnPostApplicationInitialization),
+                                typeof(BingModuleInitializationContext)),
         _ => throw new ArgumentOutOfRangeException(nameof(phase))
     };
 
@@ -131,7 +186,12 @@ internal static class BingModuleHooks
                     return module.PreConfigureServicesAsync(services, token);
                 if (Overrides(module, nameof(BingModule.PreConfigureServices), typeof(IServiceCollection)))
                     module.PreConfigureServices(services);
-                else if (module is IBingPreConfigureServices)
+                else if (asynchronous && HasIndependentInterfaceImplementation(module,
+                             typeof(IPreConfigureServices),
+                             nameof(IPreConfigureServices.PreConfigureServicesAsync),
+                             typeof(IServiceCollection), typeof(CancellationToken)))
+                    return module.PreConfigureServicesAsync(services, token);
+                else
                     module.PreConfigureServices(services);
                 return Task.CompletedTask;
             case "ConfigureServices":
@@ -149,7 +209,12 @@ internal static class BingModuleHooks
                     return module.PostConfigureServicesAsync(services, token);
                 if (Overrides(module, nameof(BingModule.PostConfigureServices), typeof(IServiceCollection)))
                     module.PostConfigureServices(services);
-                else if (module is IBingPostConfigureServices)
+                else if (asynchronous && HasIndependentInterfaceImplementation(module,
+                             typeof(IPostConfigureServices),
+                             nameof(IPostConfigureServices.PostConfigureServicesAsync),
+                             typeof(IServiceCollection), typeof(CancellationToken)))
+                    return module.PostConfigureServicesAsync(services, token);
+                else
                     module.PostConfigureServices(services);
                 return Task.CompletedTask;
             default:
@@ -169,6 +234,12 @@ internal static class BingModuleHooks
                 if (asynchronous && Overrides(module, nameof(BingModule.OnPreApplicationInitializationAsync),
                         typeof(BingModuleInitializationContext), typeof(CancellationToken)))
                     return module.OnPreApplicationInitializationAsync(context, token);
+                if (asynchronous && !Overrides(module, nameof(BingModule.OnPreApplicationInitialization),
+                        typeof(BingModuleInitializationContext)) &&
+                    HasIndependentInterfaceImplementation(module, typeof(IOnPreApplicationInitialization),
+                        nameof(IOnPreApplicationInitialization.OnPreApplicationInitializationAsync),
+                        typeof(BingModuleInitializationContext), typeof(CancellationToken)))
+                    return module.OnPreApplicationInitializationAsync(context, token);
                 module.OnPreApplicationInitialization(context);
                 return Task.CompletedTask;
             case "Initialize":
@@ -184,6 +255,12 @@ internal static class BingModuleHooks
                 return Task.CompletedTask;
             case "PostInitialize":
                 if (asynchronous && Overrides(module, nameof(BingModule.OnPostApplicationInitializationAsync),
+                        typeof(BingModuleInitializationContext), typeof(CancellationToken)))
+                    return module.OnPostApplicationInitializationAsync(context, token);
+                if (asynchronous && !Overrides(module, nameof(BingModule.OnPostApplicationInitialization),
+                        typeof(BingModuleInitializationContext)) &&
+                    HasIndependentInterfaceImplementation(module, typeof(IOnPostApplicationInitialization),
+                        nameof(IOnPostApplicationInitialization.OnPostApplicationInitializationAsync),
                         typeof(BingModuleInitializationContext), typeof(CancellationToken)))
                     return module.OnPostApplicationInitializationAsync(context, token);
                 module.OnPostApplicationInitialization(context);
@@ -204,7 +281,7 @@ internal static class BingModuleHooks
             return module.OnApplicationShutdownAsync(context, token);
         if (Overrides(module, nameof(BingModule.OnApplicationShutdown), typeof(BingModuleShutdownContext)))
             module.OnApplicationShutdown(context);
-        else if (asynchronous && module is IBingAsyncModuleShutdown)
+        else if (asynchronous && module is IBingModuleShutdown)
             return module.OnApplicationShutdownAsync(context, token);
         else if (module is IBingModuleShutdown)
             module.OnApplicationShutdown(context);

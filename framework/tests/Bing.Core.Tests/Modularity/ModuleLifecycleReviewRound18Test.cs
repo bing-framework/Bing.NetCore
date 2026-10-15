@@ -223,7 +223,7 @@ public class ModuleLifecycleReviewRound18Test
     /// 同时实现新旧生命周期契约的模块。
     /// </summary>
     public class CombinedOverridesModule : BingModule, IBingPreConfigureServices, IBingPostConfigureServices,
-        IBingAsyncModuleInitializer, IBingModuleShutdown, IBingAsyncModuleShutdown
+        IBingAsyncModuleInitializer, IBingModuleShutdown
     {
         /// <summary>
         /// 记录配置事件。
@@ -312,7 +312,7 @@ public class ModuleLifecycleReviewRound18Test
         }
         void IBingModuleShutdown.Shutdown(BingModuleShutdownContext context) =>
             context.ServiceProvider.GetRequiredService<List<string>>().Add("old-sync-stop");
-        Task IBingAsyncModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
+        Task IBingModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
             CancellationToken cancellationToken)
         {
             context.ServiceProvider.GetRequiredService<List<string>>().Add("old-async-stop");
@@ -324,7 +324,7 @@ public class ModuleLifecycleReviewRound18Test
     /// 旧接口执行期间记录事件。
     /// </summary>
     public class ExplicitLegacyModule : BingModule, IBingPreConfigureServices, IBingPostConfigureServices,
-        IBingAsyncModuleInitializer, IBingModuleShutdown, IBingAsyncModuleShutdown
+        IBingAsyncModuleInitializer, IBingModuleShutdown
     {
         void IBingPreConfigureServices.PreConfigureServices(IServiceCollection services)
         {
@@ -353,7 +353,7 @@ public class ModuleLifecycleReviewRound18Test
             base.OnApplicationShutdown(context);
         }
 
-        async Task IBingAsyncModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
+        async Task IBingModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
             CancellationToken cancellationToken)
         {
             context.ServiceProvider.GetRequiredService<List<string>>().Add("old-async-stop");

@@ -526,7 +526,7 @@ public class ModuleLifecycleTest
     private sealed class ThrowingLoggerFactory : ILoggerFactory
     {
         /// <summary>
-        /// 初始化测试日志工厂。
+        /// 初始化一个 <see cref="ThrowingLoggerFactory" /> 类型的实例。
         /// </summary>
         /// <param name="error">需要由日志输出触发的异常。</param>
         public ThrowingLoggerFactory(Exception error) => Error = error;
@@ -549,7 +549,7 @@ public class ModuleLifecycleTest
     /// <summary>
     /// 仅提供异步关闭和释放的测试模块。
     /// </summary>
-    public class AsyncOnlyLifecycleModule : BingModule, IBingAsyncModuleShutdown, IAsyncDisposable
+    public class AsyncOnlyLifecycleModule : BingModule, IBingModuleShutdown, IAsyncDisposable
     {
         /// <summary>
         /// 当前模块使用的事件记录器。
@@ -656,7 +656,7 @@ public class ModuleLifecycleTest
     /// <summary>
     /// 使用异步初始化和关闭钩子的测试模块。
     /// </summary>
-    public class AsyncModule : BingModule, IBingAsyncModuleInitializer, IBingAsyncModuleShutdown
+    public class AsyncModule : BingModule, IBingAsyncModuleInitializer, IBingModuleShutdown
     {
         /// <summary>
         /// 当前模块使用的事件记录器。
@@ -684,7 +684,7 @@ public class ModuleLifecycleTest
     /// <summary>
     /// 订阅事件并运行后台任务的异步资源模块。
     /// </summary>
-    public class AsyncResourceModule : BingModule, IBingAsyncModuleInitializer, IBingAsyncModuleShutdown
+    public class AsyncResourceModule : BingModule, IBingAsyncModuleInitializer, IBingModuleShutdown
     {
         /// <summary>
         /// 当前订阅的事件源。
@@ -773,7 +773,7 @@ public class ModuleLifecycleTest
     /// <summary>
     /// 同时验证异步关闭、异步释放和同步释放选择的模块。
     /// </summary>
-    public class AsyncDisposableModule : BingModule, IBingAsyncModuleShutdown, IAsyncDisposable, IDisposable
+    public class AsyncDisposableModule : BingModule, IBingModuleShutdown, IAsyncDisposable, IDisposable
     {
         /// <summary>
         /// 当前模块使用的事件记录器。

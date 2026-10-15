@@ -62,7 +62,7 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     private readonly BingPluginContainer _pluginContainer = new();
 
     /// <summary>
-    /// 初始化模块注册记录。
+    /// 初始化一个 <see cref="BingModuleRegistration" /> 类型的实例。
     /// </summary>
     /// <param name="services">应用服务集合。</param>
     /// <param name="legacy">是否使用旧兼容注册入口。</param>
@@ -90,7 +90,7 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     internal bool AutoRegisterServices { get; private set; }
 
     /// <summary>
-    /// 约定服务是否已在主配置前注册。
+    /// 获取或设置约定服务是否已在主配置前注册。
     /// </summary>
     internal bool ConventionServicesRegistered { get; set; }
 
@@ -103,6 +103,11 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     /// 获取模块运行时是否已附加根服务提供程序。
     /// </summary>
     internal bool IsAttached => _provider != null;
+
+    /// <summary>
+    /// 获取是否由 Generic Host 在启动阶段初始化模块。
+    /// </summary>
+    internal bool InitializeOnHostStart { get; private set; }
 
     /// <inheritdoc />
     public IReadOnlyList<BingModuleDescriptor> Modules => _modules;
@@ -156,6 +161,15 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
             throw new InvalidOperationException("模块配置已失败，请丢弃当前服务集合并重新创建应用。");
         if (_provider != null || _runtimeReleased)
             throw new InvalidOperationException("模块运行时已创建，不能继续注册模块。");
+    }
+
+    /// <summary>
+    /// 启用 Generic Host 启动时的模块初始化。
+    /// </summary>
+    internal void EnableHostedInitialization()
+    {
+        EnsureConfigurable();
+        InitializeOnHostStart = true;
     }
 
     /// <summary>
@@ -326,18 +340,23 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
         catch (Exception ex) { errors.Add(ex); }
         finally
         {
-            foreach (var builder in Services.Select(d => d.ImplementationInstance)
-                         .OfType<BingBuilder>().Distinct())
+            try
             {
-                try { builder.ClearModuleReferences(); }
-                catch (Exception ex) { errors.Add(ex); }
+                foreach (var builder in Services.Select(d => d.ImplementationInstance)
+                             .OfType<BingBuilder>().Distinct())
+                {
+                    try { builder.ClearModuleReferences(); }
+                    catch (Exception ex) { errors.Add(ex); }
+                }
             }
+            catch (Exception ex) { errors.Add(ex); }
             lock (_gate)
             {
                 _provider = null;
                 foreach (var descriptor in _modules)
                     descriptor.ClearInstance();
-                RemoveOwnedModuleDescriptors(ordered);
+                try { RemoveOwnedModuleDescriptors(ordered); }
+                catch (Exception ex) { errors.Add(ex); }
                 _pluginContainer.Clear();
                 _owned.Clear();
                 _released.Clear();
@@ -351,8 +370,11 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     /// 移除服务集合中直接引用已拥有模块的服务描述符。
     /// </summary>
     /// <param name="modules">已经进入释放流程的模块实例。</param>
+    /// <remarks>只读服务集合无法移除描述符，模块资源仍由注册记录释放。</remarks>
     private void RemoveOwnedModuleDescriptors(IEnumerable<BingModule> modules)
     {
+        // 宿主构建后可能锁定服务集合；资源释放不依赖描述符能否移除。
+        if (Services.IsReadOnly) return;
         var owned = new HashSet<BingModule>(modules, ModuleReferenceComparer.Instance);
         for (var index = Services.Count - 1; index >= 0; index--)
         {
@@ -378,8 +400,9 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     }
 
     /// <summary>
-    /// 异步标记配置失败并释放已创建模块。
+    /// 标记配置失败并释放已创建模块。
     /// </summary>
+    /// <param name="error">导致配置失败的原始异常。</param>
     internal async Task FailConfigurationAsync(Exception error)
     {
         Failed = true;
@@ -390,30 +413,4 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
             .Select(d => d.ImplementationInstance).OfType<Bing.Logging.StartupLogger>().FirstOrDefault();
         logger?.LogInfos.Clear();
     }
-}
-
-/// <summary>
-/// 将宿主停止通知转发给模块生命周期管理器。
-/// </summary>
-/// <remarks>
-/// Web 管道装配仍由调用方在 <c>UseBing</c> 或 <c>UseBingAsync</c> 时完成。
-/// </remarks>
-internal sealed class BingModuleHostedService : IHostedService
-{
-    /// <summary>
-    /// 模块生命周期管理器。
-    /// </summary>
-    private readonly IBingModuleManager _manager;
-
-    /// <summary>
-    /// 初始化宿主停止适配器。
-    /// </summary>
-    /// <param name="manager">模块生命周期管理器。</param>
-    public BingModuleHostedService(IBingModuleManager manager) => _manager = manager;
-
-    /// <inheritdoc />
-    public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-    /// <inheritdoc />
-    public Task StopAsync(CancellationToken cancellationToken) => _manager.ShutdownAsync(cancellationToken);
 }

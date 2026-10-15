@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0;</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="../../../../../common.props" />
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Bing.Core/Bing.Core.csproj" />
+    <ProjectReference Include="../Bing.Core.PluginLazyHelper/Bing.Core.PluginLazyHelper.csproj" />
+  </ItemGroup>
+</Project>

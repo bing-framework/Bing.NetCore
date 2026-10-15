@@ -24,7 +24,7 @@ public sealed class BingModuleDescriptor
     private readonly Assembly _assembly;
 
     /// <summary>
-    /// 初始化模块描述符。
+    /// 初始化一个 <see cref="BingModuleDescriptor" /> 类型的实例。
     /// </summary>
     /// <param name="instance">模块实例。</param>
     /// <param name="dependencies">模块直接依赖的类型集合。</param>
@@ -80,35 +80,4 @@ public sealed class BingModuleDescriptor
     /// 获取模块在当前模块图中的执行序号。
     /// </summary>
     public int ExecutionOrder { get; }
-}
-
-/// <summary>
-/// 当前应用已经冻结的模块目录。
-/// </summary>
-public interface IBingModuleContainer
-{
-    /// <summary>
-    /// 获取按执行顺序排列的只读模块描述符。
-    /// </summary>
-    IReadOnlyList<BingModuleDescriptor> Modules { get; }
-}
-
-/// <summary>
-/// 构建并校验模块图的加载器契约。
-/// </summary>
-/// <remarks>
-/// 注册应用前可按实例注册自定义加载器，以替换默认的模块发现和排序实现。
-/// </remarks>
-public interface IBingModuleLoader
-{
-    /// <summary>
-    /// 创建并排序模块描述符。
-    /// </summary>
-    /// <param name="roots">模块图的根类型。</param>
-    /// <param name="excludedModules">禁止加载的模块类型。</param>
-    /// <returns>按执行顺序排列的模块描述符集合。</returns>
-    /// <remarks>
-    /// 加载失败时，实现必须释放已经创建的模块实例。
-    /// </remarks>
-    IReadOnlyList<BingModuleDescriptor> LoadModules(IEnumerable<Type> roots, IEnumerable<Type> excludedModules);
 }

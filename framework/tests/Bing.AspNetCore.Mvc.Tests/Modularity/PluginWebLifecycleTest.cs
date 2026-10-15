@@ -143,7 +143,7 @@ public sealed class PluginWebHostModule : BingModule { }
 /// <summary>
 /// Web 插件测试的异步生命周期模块。
 /// </summary>
-public sealed class PluginWebLifecycleModule : BingModule, IBingAsyncModuleInitializer, IBingAsyncModuleShutdown
+public sealed class PluginWebLifecycleModule : BingModule, IBingAsyncModuleInitializer, IBingModuleShutdown
 {
     /// <inheritdoc />
     public Task InitializeAsync(BingModuleInitializationContext context, CancellationToken cancellationToken)

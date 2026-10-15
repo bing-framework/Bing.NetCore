@@ -494,7 +494,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualRootModule : EqualModuleBase, IDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualRootModule" /> 类型的实例。
         /// </summary>
         public EqualRootModule() { }
         /// <inheritdoc />
@@ -507,7 +507,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualChildModule : EqualModuleBase, IDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualChildModule" /> 类型的实例。
         /// </summary>
         public EqualChildModule() { }
         /// <inheritdoc />
@@ -521,7 +521,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualAsyncRootModule : EqualAsyncModuleBase
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualAsyncRootModule" /> 类型的实例。
         /// </summary>
         public EqualAsyncRootModule() { }
         /// <inheritdoc />
@@ -540,7 +540,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualAsyncChildModule : EqualAsyncModuleBase
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualAsyncChildModule" /> 类型的实例。
         /// </summary>
         public EqualAsyncChildModule() { }
         /// <inheritdoc />
@@ -560,7 +560,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualFailingRootModule : EqualModuleBase, IDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualFailingRootModule" /> 类型的实例。
         /// </summary>
         public EqualFailingRootModule() { }
         /// <inheritdoc />
@@ -577,7 +577,7 @@ public class ModuleResourceRegressionTest
     private sealed class EqualFailingChildModule : EqualModuleBase, IDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="EqualFailingChildModule" /> 类型的实例。
         /// </summary>
         public EqualFailingChildModule() { }
         /// <inheritdoc />
@@ -607,7 +607,7 @@ public class ModuleResourceRegressionTest
     private sealed class ThrowingConstructorRootModule : BingModule, IDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="ThrowingConstructorRootModule" /> 类型的实例。
         /// </summary>
         public ThrowingConstructorRootModule() { }
         /// <inheritdoc />
@@ -620,7 +620,7 @@ public class ModuleResourceRegressionTest
     private sealed class ThrowingConstructorDependencyModule : BingModule
     {
         /// <summary>
-        /// 初始化并抛出测试异常。
+        /// 初始化一个 <see cref="ThrowingConstructorDependencyModule" /> 类型的实例。
         /// </summary>
         public ThrowingConstructorDependencyModule() => throw new InvalidOperationException("intentional constructor failure");
     }
@@ -653,7 +653,7 @@ public class ModuleResourceRegressionTest
     /// <summary>
     /// 在关闭钩子中响应取消并记录释放顺序的模块基类。
     /// </summary>
-    private abstract class CancellationShutdownModule : BingModule, IBingAsyncModuleShutdown, IDisposable
+    private abstract class CancellationShutdownModule : BingModule, IBingModuleShutdown, IDisposable
     {
         /// <summary>
         /// 获取或设置共享关闭测试状态。
@@ -688,7 +688,7 @@ public class ModuleResourceRegressionTest
     private sealed class CancellationRootModule : CancellationShutdownModule
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="CancellationRootModule" /> 类型的实例。
         /// </summary>
         public CancellationRootModule() { }
     }
@@ -699,7 +699,7 @@ public class ModuleResourceRegressionTest
     private sealed class CancellationChildModule : CancellationShutdownModule
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="CancellationChildModule" /> 类型的实例。
         /// </summary>
         public CancellationChildModule() { }
     }
@@ -707,10 +707,10 @@ public class ModuleResourceRegressionTest
     /// <summary>
     /// 仅提供异步关闭和异步释放的模块。
     /// </summary>
-    private sealed class AsyncOnlyModule : BingModule, IBingAsyncModuleShutdown, IAsyncDisposable
+    private sealed class AsyncOnlyModule : BingModule, IBingModuleShutdown, IAsyncDisposable
     {
         /// <summary>
-        /// 初始化测试模块。
+        /// 初始化一个 <see cref="AsyncOnlyModule" /> 类型的实例。
         /// </summary>
         public AsyncOnlyModule() { }
         /// <inheritdoc />
@@ -796,7 +796,7 @@ public class ModuleResourceRegressionTest
     private sealed class RetainedNormalModule : BingModule, IDisposable
     {
         /// <summary>
-        /// 初始化模块。
+        /// 初始化一个 <see cref="RetainedNormalModule" /> 类型的实例。
         /// </summary>
         public RetainedNormalModule() { }
 
@@ -815,8 +815,11 @@ public class ModuleResourceRegressionTest
         public static WeakReference<BingModule> LastInstance { get; set; }
 
         /// <summary>
-        /// 初始化模块并记录弱引用。
+        /// 初始化一个 <see cref="RetainedConfigurationFailureModule" /> 类型的实例。
         /// </summary>
+        /// <remarks>
+        /// 初始化模块并记录弱引用。
+        /// </remarks>
         public RetainedConfigurationFailureModule() => LastInstance = new WeakReference<BingModule>(this);
 
         /// <inheritdoc />
@@ -838,8 +841,11 @@ public class ModuleResourceRegressionTest
         public static WeakReference<BingModule> LastInstance { get; set; }
 
         /// <summary>
-        /// 初始化模块并记录弱引用。
+        /// 初始化一个 <see cref="RetainedValidateOnBuildModule" /> 类型的实例。
         /// </summary>
+        /// <remarks>
+        /// 初始化模块并记录弱引用。
+        /// </remarks>
         public RetainedValidateOnBuildModule() => LastInstance = new WeakReference<BingModule>(this);
 
         /// <inheritdoc />
@@ -852,8 +858,11 @@ public class ModuleResourceRegressionTest
     private sealed class RetainedRequiresMissingService
     {
         /// <summary>
-        /// 初始化并请求未注册依赖。
+        /// 初始化一个 <see cref="RetainedRequiresMissingService" /> 类型的实例。
         /// </summary>
+        /// <remarks>
+        /// 初始化并请求未注册依赖。
+        /// </remarks>
         /// <param name="dependency">故意未注册的依赖。</param>
         public RetainedRequiresMissingService(RetainedMissingService dependency) { }
     }

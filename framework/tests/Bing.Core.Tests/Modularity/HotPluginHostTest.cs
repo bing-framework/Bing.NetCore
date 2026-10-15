@@ -34,9 +34,22 @@ public sealed class HotPluginHostTest
     /// </summary>
     private const string PostFailureModule = "Bing.Core.PluginFixtures.FixtureHotPostFailureModule";
     /// <summary>
+    /// 异步后置初始化接口失败模块。
+    /// </summary>
+    private const string AsyncPostFailureModule = "Bing.Core.PluginFixtures.FixtureHotAsyncPostFailureModule";
+    /// <summary>
+    /// 异步前置初始化接口失败模块。
+    /// </summary>
+    private const string AsyncPreFailureModule = "Bing.Core.PluginFixtures.FixtureHotAsyncPreFailureModule";
+    /// <summary>
     /// 服务配置前置阶段失败模块。
     /// </summary>
     private const string PreConfigurationFailureModule = "Bing.Core.PluginFixtures.FixtureHotPreConfigurationFailureModule";
+    /// <summary>
+    /// 异步前置配置接口失败模块。
+    /// </summary>
+    private const string AsyncPreConfigurationFailureModule =
+        "Bing.Core.PluginFixtures.FixtureHotAsyncPreConfigurationFailureModule";
     /// <summary>
     /// 服务配置主阶段失败模块。
     /// </summary>
@@ -61,6 +74,10 @@ public sealed class HotPluginHostTest
     /// 等待后置初始化的模块。
     /// </summary>
     private const string PendingPostModule = "Bing.Core.PluginFixtures.FixtureHotPendingPostModule";
+    /// <summary>
+    /// 独立异步后置初始化接口等待模块。
+    /// </summary>
+    private const string AsyncPendingPostModule = "Bing.Core.PluginFixtures.FixtureHotAsyncPendingPostModule";
     /// <summary>
     /// 附加程序集模块。
     /// </summary>
@@ -344,7 +361,9 @@ public sealed class HotPluginHostTest
     /// </summary>
     [Theory]
     [InlineData(PreFailureModule, "PreInitialize", "candidate pre failure")]
+    [InlineData(AsyncPreFailureModule, "PreInitialize", "candidate async pre failure")]
     [InlineData(PostFailureModule, "PostInitialize", "candidate post failure")]
+    [InlineData(AsyncPostFailureModule, "PostInitialize", "candidate async post failure")]
     public async Task ReloadAsync_InitializationPhaseFailure_ShouldKeepCurrentGeneration(
         string candidateModule, string phase, string message)
     {
@@ -375,6 +394,7 @@ public sealed class HotPluginHostTest
     /// </summary>
     [Theory]
     [InlineData(PreConfigurationFailureModule, "PreConfigureServices", "candidate pre configure failure")]
+    [InlineData(AsyncPreConfigurationFailureModule, "PreConfigureServices", "candidate async pre configure failure")]
     [InlineData(ConfigurationFailureModule, "AddServices", "candidate configure failure")]
     [InlineData(PostConfigurationFailureModule, "PostConfigureServices", "candidate post configure failure")]
     public async Task ReloadAsync_AsyncConfigurationFailureAtAnyPhase_ShouldKeepCurrentGenerationAndCollectCandidate(
@@ -521,6 +541,58 @@ public sealed class HotPluginHostTest
 
         host.Plugins.Single().Id.ShouldBe("Contoso.Candidate");
         await AssertCollectedAsync(oldContext);
+    }
+
+    /// <summary>
+    /// 独立异步后置接口完成后才发布候选代，切走后释放一次并回收上下文。
+    /// </summary>
+    [Fact]
+    public async Task ReloadAsync_AsyncPostInterface_ShouldPublishThenCollectCandidate()
+    {
+        using var workspace = new PluginTestWorkspace();
+        var directory = workspace.CreatePlugin("Contoso.Live", "1.0.0", new[] { TopModule },
+            directoryName: "valid");
+        var candidate = workspace.CreatePlugin("Contoso.Candidate", "1.0.0",
+            new[] { AsyncPendingPostModule }, directoryName: "candidate");
+        var successor = workspace.CreatePlugin("Contoso.Next", "1.0.0", new[] { TopModule },
+            directoryName: "successor");
+        var entered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var disposals = 0;
+        Action signalEntered = () => entered.TrySetResult(true);
+        Action<int> recordDispose = _ => Interlocked.Increment(ref disposals);
+        await using var host = new BingHotPluginHost<PluginHostModule>(
+            options => options.PluginSources.AddDirectory(directory),
+            services =>
+            {
+                services.AddSingleton(release);
+                services.AddSingleton(signalEntered);
+                services.AddSingleton(recordDispose);
+            });
+
+        await host.ReloadAsync();
+        directory = candidate;
+        var reload = host.ReloadAsync();
+        try
+        {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            reload.IsCompleted.ShouldBeFalse();
+            host.Plugins.Single().Id.ShouldBe("Contoso.Live");
+            var active = await host.RunAsync((provider, _) => Task.FromResult(
+                provider.GetRequiredService<IBingPluginContainer>().Plugins.Single().Id));
+            active.ShouldBe("Contoso.Live");
+        }
+        finally { release.TrySetResult(true); }
+        await reload;
+
+        host.Plugins.Single().Id.ShouldBe("Contoso.Candidate");
+        var candidateContext = await CaptureContextAsync(host);
+        directory = successor;
+        await host.ReloadAsync();
+        disposals.ShouldBe(1);
+        await AssertCollectedAsync(candidateContext);
+        await host.DisposeAsync();
+        disposals.ShouldBe(1);
     }
 
     /// <summary>

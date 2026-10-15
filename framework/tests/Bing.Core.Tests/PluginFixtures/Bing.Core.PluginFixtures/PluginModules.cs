@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.Loader;
+using Bing.Aspects;
 using Bing.Core.Modularity;
 using Bing.DependencyInjection;
 using Bing.Core.PluginScanFixtures;
@@ -177,13 +178,34 @@ public static class PluginFixtureState
 public interface IPluginFixtureService { }
 
 /// <summary>
+/// 带有忽略拦截标记的插件服务契约。
+/// </summary>
+[IgnoreAspect]
+public interface IIgnoredPluginService
+{
+    /// <summary>
+    /// 返回插件服务状态。
+    /// </summary>
+    string GetStatus();
+}
+
+/// <summary>
+/// 忽略拦截的插件服务实现。
+/// </summary>
+public sealed class IgnoredPluginService : IIgnoredPluginService
+{
+    /// <inheritdoc />
+    public string GetStatus() => "plugin-ready";
+}
+
+/// <summary>
 /// 用于验证插件程序集自动扫描的服务。
 /// </summary>
 [Dependency(ServiceLifetime.Singleton)]
 public sealed class PluginFixtureService : IPluginFixtureService
 {
     /// <summary>
-    /// 初始化插件测试服务。
+    /// 初始化一个 <see cref="PluginFixtureService" /> 类型的实例。
     /// </summary>
     public PluginFixtureService() => PluginFixtureState.RecordAddServices();
 }
@@ -243,7 +265,7 @@ public sealed class FixtureIndependentModule : BingModule { }
 /// 用于验证插件异步初始化、关闭和资源释放的模块。
 /// </summary>
 public sealed class FixtureAsyncLifecycleModule : BingModule, IBingAsyncModuleInitializer,
-    IBingAsyncModuleShutdown, IAsyncDisposable
+    IBingModuleShutdown, IAsyncDisposable
 {
     /// <inheritdoc />
     public async Task InitializeAsync(BingModuleInitializationContext context, CancellationToken cancellationToken)
@@ -278,7 +300,7 @@ public sealed class FixtureAsyncLifecycleModule : BingModule, IBingAsyncModuleIn
 /// 向宿主记录动态插件的初始化、关闭和释放顺序。
 /// </summary>
 public sealed class FixtureHotLifecycleModule : BingModule, IBingAsyncModuleInitializer,
-    IBingAsyncModuleShutdown, IAsyncDisposable
+    IBingModuleShutdown, IAsyncDisposable
 {
     /// <summary>
     /// 保存初始化期间取得的宿主生命周期记录回调。
@@ -320,7 +342,7 @@ public abstract class FixtureAbstractModule : BingModule { }
 public sealed class FixtureNoPublicConstructorModule : BingModule
 {
     /// <summary>
-    /// 初始化无公共构造函数的测试模块。
+    /// 初始化一个 <see cref="FixtureNoPublicConstructorModule" /> 类型的实例。
     /// </summary>
     private FixtureNoPublicConstructorModule() { }
 }
@@ -341,7 +363,7 @@ public sealed class FixtureOrdinaryType { }
 public sealed class PluginConfigurationMarker
 {
     /// <summary>
-    /// 初始化配置标记。
+    /// 初始化一个 <see cref="PluginConfigurationMarker" /> 类型的实例。
     /// </summary>
     /// <param name="value">宿主配置值。</param>
     public PluginConfigurationMarker(string value) => Value = value;
@@ -369,7 +391,7 @@ public interface IPluginObservedConfiguration
 public sealed class PluginObservedConfiguration : IPluginObservedConfiguration
 {
     /// <summary>
-    /// 初始化插件配置值。
+    /// 初始化一个 <see cref="PluginObservedConfiguration" /> 类型的实例。
     /// </summary>
     /// <param name="value">插件读取到的配置值。</param>
     public PluginObservedConfiguration(string value) => Value = value;
@@ -429,6 +451,36 @@ public sealed class FixtureHotPostFailureModule : BingModule
         context.ServiceProvider.GetService<Action<WeakReference>>()?.Invoke(
             new WeakReference(AssemblyLoadContext.GetLoadContext(GetType().Assembly)));
         throw new InvalidOperationException("candidate post failure");
+    }
+}
+
+/// <summary>
+/// 用于验证热更新异步后置初始化接口失败的模块。
+/// </summary>
+public sealed class FixtureHotAsyncPostFailureModule : BingModule, IOnPostApplicationInitialization
+{
+    /// <inheritdoc />
+    Task IOnPostApplicationInitialization.OnPostApplicationInitializationAsync(
+        BingModuleInitializationContext context, CancellationToken cancellationToken)
+    {
+        context.ServiceProvider.GetService<Action<WeakReference>>()?.Invoke(
+            new WeakReference(AssemblyLoadContext.GetLoadContext(GetType().Assembly)));
+        throw new InvalidOperationException("candidate async post failure");
+    }
+}
+
+/// <summary>
+/// 用于验证热更新异步前置初始化接口失败的模块。
+/// </summary>
+public sealed class FixtureHotAsyncPreFailureModule : BingModule, IOnPreApplicationInitialization
+{
+    /// <inheritdoc />
+    Task IOnPreApplicationInitialization.OnPreApplicationInitializationAsync(
+        BingModuleInitializationContext context, CancellationToken cancellationToken)
+    {
+        context.ServiceProvider.GetService<Action<WeakReference>>()?.Invoke(
+            new WeakReference(AssemblyLoadContext.GetLoadContext(GetType().Assembly)));
+        throw new InvalidOperationException("candidate async pre failure");
     }
 }
 
@@ -505,6 +557,17 @@ public sealed class FixtureHotPreConfigurationFailureModule : FixtureHotConfigur
     /// <inheritdoc />
     public override Task PreConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken) =>
         Fail(services, "candidate pre configure failure");
+}
+
+/// <summary>
+/// 用于验证热更新异步前置配置接口失败的模块。
+/// </summary>
+public sealed class FixtureHotAsyncPreConfigurationFailureModule : FixtureHotConfigurationFailureModuleBase,
+    IPreConfigureServices
+{
+    /// <inheritdoc />
+    Task IPreConfigureServices.PreConfigureServicesAsync(IServiceCollection services,
+        CancellationToken cancellationToken) => Fail(services, "candidate async pre configure failure");
 }
 
 /// <summary>
@@ -596,6 +659,29 @@ public sealed class FixtureHotPendingPostModule : BingModule
     /// <inheritdoc />
     public override async Task OnPostApplicationInitializationAsync(BingModuleInitializationContext context,
         CancellationToken cancellationToken)
+    {
+        context.ServiceProvider.GetRequiredService<Action>().Invoke();
+        await context.ServiceProvider.GetRequiredService<TaskCompletionSource<bool>>().Task
+            .WaitAsync(cancellationToken).ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// 在独立异步后置初始化接口完成前暂停候选代发布的模块。
+/// </summary>
+public sealed class FixtureHotAsyncPendingPostModule : FixtureHotConfigurationAsyncDisposableModuleBase,
+    IOnPostApplicationInitialization
+{
+    /// <inheritdoc />
+    public override IServiceCollection AddServices(IServiceCollection services)
+    {
+        CaptureAsyncDisposal(services);
+        return services;
+    }
+
+    /// <inheritdoc />
+    async Task IOnPostApplicationInitialization.OnPostApplicationInitializationAsync(
+        BingModuleInitializationContext context, CancellationToken cancellationToken)
     {
         context.ServiceProvider.GetRequiredService<Action>().Invoke();
         await context.ServiceProvider.GetRequiredService<TaskCompletionSource<bool>>().Task

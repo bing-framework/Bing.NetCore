@@ -560,7 +560,7 @@ public class ModuleLifecycleReviewFixTest
     /// 显式旧接口与新钩子并存的模块。
     /// </summary>
     public class BaseBridgeModule : BingModule, IBingPreConfigureServices, IBingPostConfigureServices,
-        IBingAsyncModuleInitializer, IBingAsyncModuleShutdown
+        IBingAsyncModuleInitializer, IBingModuleShutdown
     {
         /// <summary>
         /// 记录注册阶段事件。
@@ -611,7 +611,7 @@ public class ModuleLifecycleReviewFixTest
             context.ServiceProvider.GetRequiredService<ReviewState>().Events.Add("old-async-init");
             await base.OnApplicationInitializationAsync(context, cancellationToken);
         }
-        async Task IBingAsyncModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
+        async Task IBingModuleShutdown.ShutdownAsync(BingModuleShutdownContext context,
             CancellationToken cancellationToken)
         {
             context.ServiceProvider.GetRequiredService<ReviewState>().Events.Add("old-async-stop");

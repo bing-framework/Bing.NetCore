@@ -1,96 +1,101 @@
-<!-- AI_REVIEW_STATUS: NEEDS_FIX -->
+<!-- AI_REVIEW_STATUS: PASS_WITH_ISSUES -->
 AI_TASK_ID: BING-MODULE-CONTEXT-SCANNING-20260928
-AI_REVIEWED_AT: 2026-09-28T09:31:00Z
+AI_REVIEWED_AT: 2026-09-28T13:00:09.858011+00:00
 
-# 模块上下文与扫描扩展：修复后复审
+# 计划完成度复核与分类 TODO
 
 ## 结论
 
-当前两组新增主能力均已落地，没有整组尚未实现的能力。原模块完整生命周期计划 T1–T5 沿用 Round 22 验收及上轮完整回归，未发现本轮修复引入新的生命周期能力缺口。
+当前计划 CTX-01、CTX-02、SCAN-01、SCAN-02、SCAN-03、DOC-01 共 6 个实施任务均已有实现及对应证据，未发现仍未实现的计划内必需能力。本轮复核关闭 FIX-006、FIX-007；历史 FIX-001 至 FIX-005 维持 CLOSED。原生命周期 T1–T5 的基类钩子、异步注册、全模块分阶段初始化、扫描时机和热更新接入未发现新增缺口。
 
-上轮 FIX-001 至 FIX-005 中，4 项 CLOSED。FIX-002 默认路径已修复，但扩展注册场景仍存在对象保留，已用独立探针确认。当前仍有 **1 项 SHOULD_FIX / OPEN_ACTIONABLE**，不能将 execution.md 的 OPEN_ACTIONABLE=0 作为最终验收结论。
+剩余为 2 项 OPTIONAL 易用性建议、4 组明确延期的能力、1 项外部安全审计证据。PASS_WITH_ISSUES 不等于具备 ABP 全部生态能力，也不等于第三方依赖安全审计已通过。
 
-- IMPLEMENTATION_STATUS: NEEDS_FIX
-- TEST_STATUS: PARTIAL（既有回归通过；新确认边界尚无正式回归用例）
-- RESOURCE_EVIDENCE_STATUS: PARTIAL（默认路径、插件成功/失败候选回收已有证据；追加查找器后闭包保留已复现）
+- IMPLEMENTATION_STATUS: PASS
+- TEST_STATUS: PASS（复用相同源码范围的上一轮测试证据；MVC 各 1 项既有跳过）
+- RESOURCE_EVIDENCE_STATUS: PASS（限本计划弱引用、事件退订及释放次数场景）
 - PERFORMANCE_EVIDENCE_STATUS: NOT_APPLICABLE
-- EXTERNAL_GATE_STATUS: NONE
-- RELEASE_STATUS: NOT_ASSESSED
-- OPEN_ACTIONABLE: 1
-- BLOCKED_APPROVAL / BLOCKED_EXTERNAL: 0
-- GOAL_STATUS: STOPPED_REVIEW
+- EXTERNAL_GATE_STATUS: BLOCKED_EXTERNAL（NuGet 漏洞数据源）
+- RELEASE_STATUS: BLOCKED（依赖安全审计证据仍缺失，不是新增实现缺陷）
+- OPEN_ACTIONABLE: 0
 
-本轮检查完整计划、执行报告、实际调用链、测试映射、工作区及暂存区差异和相关未跟踪文件；仅修改审查报告并在忽略目录 TestResults 中创建探针，未修改生产代码、正式测试、计划或执行报告。旧审查保存在 [review-before-rereview-20260928.md](review-before-rereview-20260928.md)。
+## 逐项验收矩阵
 
-## 计划验收矩阵
-
-| 任务 | 状态 | 依据 |
+| 计划项 | 结论 | 实际调用链与证据 |
 | --- | --- | --- |
-| CTX-01 配置和宿主环境 | PASS | 最后直接实例优先；无直接注册时回退 HostBuilderContext；工厂不提前执行，环境缺失无默认值 |
-| CTX-02 生命周期上下文 | PASS | 从当前作用域读取配置及环境，无新增缓存或订阅；工厂、宿主隔离、reload 和真实生命周期测试存在 |
-| SCAN-01 声明和快照 | PASS | 模块声明、继承、应用补充、自定义 loader、去重、只读描述符及配置时机冻结已接入；未选声明的独立范围有测试 |
-| SCAN-02 DI、选项和事件 | PARTIAL | 两种模式及选项/事件语义已实现；原查找器被后续追加注册遮蔽时，筛选委托没有释放 |
-| SCAN-03 插件和回收 | PASS（已验收路径） | 私有附加 DLL、本代身份、版本切换、类型发现失败诊断及旧代/两类失败候选回收均有直接证据 |
-| DOC-01 文档和映射 | PASS（交付物） | README、迁移、ADR 和直接测试映射已存在；修复后须更新执行记录和映射 |
+| CTX-01 配置/环境访问 | PASS | ServiceCollectionInstanceReader 采用最后一次显式实例；配置/环境扩展保留 HostBuilderContext 回退，拒绝注册期执行工厂；ModuleContextAccessTest 覆盖优先级、缺失、非 Root 配置及替换 |
+| CTX-02 生命周期便捷访问 | PASS | BingModuleContextExtensions 从传入上下文的当前 provider 解析，不建额外作用域或缓存；ModuleContexts_ResolveScopedServicesFromCurrentProvider、ModuleLifecycle_UsesCurrentContextAcrossAllStages 覆盖实际生命周期 |
+| SCAN-01 声明与快照 | PASS | Prepare 在配置前创建 BingModuleAssemblyFinder，合并最终模块声明和应用附加程序集，按实际程序集去重、校验跨代、设置描述符快照；ModuleScanningTest 覆盖未选择模块、继承、只读、冻结及自定义 loader |
+| SCAN-02 DI/选项/事件 | PASS | DependencyTypeFinder 只对约定 DI 候选筛选；BingLoader 消费完整类型目录；CompleteDependencyScan 直接清理框架持有的原查找器；两种模式、晚选项、事件次数、追加查找器和弱引用均有测试 |
+| SCAN-03 插件与回收 | PASS | BingPluginLoader 在临时解析范围内完成模块元数据准备和已部署静态私有依赖预加载，finally 退订；HotPluginHost 等待异步配置及三阶段初始化后切换；私有/附加程序集、失败候选和旧代回收有测试 |
+| DOC-01 文档与映射 | PASS | Core README、迁移指南、插件指南、ADR 和 test-mapping.md 已提供使用、兼容语义及边界；本轮未改变文档契约 |
+| 原 T1–T5 生命周期 | PASS（兼容复核） | BingModuleHooks 识别有效重写及接口桥接；ConfigureModulesAsync 和 InitializeCoreAsync 按全局阶段执行，固定扫描模式；热更新 BuildGenerationAsync 在 UseBingAsync 成功后才发布新代 |
 
-按当前计划为 5 PASS / 1 PARTIAL / 0 完全未实现，不换算为代码完成百分比。
+“PASS”针对上述已批准范围，不涵盖任意动态加载、本机依赖或不可信插件沙箱。
 
-## 上轮 Finding 核对
+## 已关闭问题
 
-| Finding | 状态 | 依据 |
-| --- | --- | --- |
-| FIX-001 | CLOSED | ConfigureModulesAsync 消费复制后的 registrationMode；RegistrationModeMutation_ShouldNotRepeatOrSkipTypeEvents 覆盖同步/异步、Pre/Post、双向变更，断言事件一次、选项绑定及晚追加程序集不生效 |
-| FIX-002 | OPEN_ACTIONABLE | 普通成功、失败、关闭自动 DI 已有弱引用测试；清理只查最后一个描述符，不能保证清理框架原实例 |
-| FIX-003 | CLOSED | GetHostEnvironment 回退及直接注册优先已实现；ModuleContextAccessTest 覆盖最后上下文、无效直接注册、工厂不执行和缺失环境 |
-| FIX-004 | CLOSED | BingModuleAssemblyFinder 附加扫描来源、阶段及 LoaderErrors，插件加载器补充上下文；真实缺失类型依赖用例断言原异常及诊断字段 |
-| FIX-005 | CLOSED | HotPluginHostTest 验证附加 DLL v1/v2 身份和服务、旧代以及缺失 DLL/类型依赖两类失败候选回收；ModuleScanningTest 验证唯一未选声明、重复输入、自定义 loader 和只读集合 |
+### FIX-006：CLOSED
 
-## FIX-002：追加查找器注册后，原筛选委托仍被保留
+ReleaseAsync 在只读集合中跳过描述符移除；可变集合仍尝试移除，枚举/移除异常加入清理列表后继续清空模块实例、插件容器和所有权记录。InitializeCoreAsync 捕获意外清理异常并附加到原始异常，随后进入 Failed。
 
-- 状态：OPEN_ACTIONABLE；严重程度：MEDIUM；处理要求：SHOULD_FIX。
-- 问题：CompleteDependencyScan 使用 LastOrDefault 取最后一个 IDependencyTypeFinder 描述符，再读取其 ImplementationInstance。模块在 PostConfigureServices 中调用 AddSingleton<IDependencyTypeFinder, DependencyTypeFinder>() 追加注册后，最后一项是类型注册，清理被跳过；原实例描述符仍留在服务集合中。
-- 证据：framework/src/Bing.Core/Microsoft/Extensions/DependencyInjection/BingApplicationServiceCollectionExtensions.cs:169–171；原实例在同文件 Prepare 创建。framework/src/Bing.Core/Bing/DependencyInjection/DependencyTypeFinder.cs:18、37–41 保存并清理委托。
-- 引用路径：存活的 IServiceCollection → 较早的实例描述符 → DependencyTypeFinder → ConventionalTypeFilter → 捕获对象。追加注册改变单服务解析结果，不会移除旧描述符。
-- 复现：TestResults/context-scan-rereview/Program.cs 创建带实例筛选器的应用，在 Post 阶段可选地追加上述注册；退出独立栈帧后 GC，并保持集合存活。普通场景对象可回收，追加场景仍存活。探针未主动保存原查找器或筛选对象。
-- 影响：计划 §3.3 要求释放注册期委托，但正常扩展注册使捕获对象图被延长保留。这不是远程可利用漏洞，也不是证明服务集合自身无法回收。
-- 修复目标：清理绑定框架创建的原实例，不依赖完成时最后一个服务描述符。
-- 修复建议：由注册流程局部对象或当前注册记录明确持有原查找器，同步/异步 finally 直接完成并清空所有权引用；不通过删除用户注册或禁止扩展掩盖问题。
-- 验证要求：追加实例/类型查找器后，集合仍存活时原捕获对象可回收；成功、异常、异步取消共用确定清理路径；重新查询同时断言允许类型存在、被拒类型不存在；更新映射和执行记录。
+直接证据：真实 WebApplication 的显式关闭、Host Stop、初始化失败且关闭成功/失败共 4 个案例；自定义可变集合 RemoveAt 抛错测试验证原始异常对象、清理聚合、内部实例清空、Failed 不可重试及释放一次。未通过解除宿主只读保护或额外根容器规避问题。
 
-## 验证及证据复用
+### FIX-007：CLOSED
 
-影响分析：本轮无生产代码、公开契约、TFM、Provider 或构建图变更。审查范围为上轮 Core 修复、PluginRuntime 调用链及相关测试文档，风险集中在注册资源所有权。无 SQL/数据库或性能基准需求。
+PreloadPrivateDependencies 遍历已部署候选中的静态程序集引用，包括方法体引用和传递引用；当前代局部保存已访问集合，沿用现有程序集身份检查，不扩大服务扫描。模块元数据预检加载的附加程序集也在事件退订前补齐依赖。Resolving 在成功/失败两种路径均 finally 退订。
 
-本轮使用 SDK 8.0.424 构建并运行独立 net8.0 探针，引用上轮当前 Core 测试输出：
+PluginPrivateDependencyTest 使用不被测试宿主直接引用的 Entry/Helper/Leaf 项目，覆盖默认和可回收上下文的配置、初始化、服务调用；验证扫描范围不扩大、成功旧代及失败候选可回收、失败后旧代继续服务。既有缺失依赖、身份冲突、解析事件退订测试也包含在上一轮完整回归中。
 
-    FilterRetainedWithPostOverride(False)=False;Finders=1
-    FilterRetainedWithPostOverride(True)=True;Finders=2
+未部署且未使用的可选引用仍按原语义留到实际使用路径报错。字符串 Assembly.Load、运行中新出现 DLL 和本机 DLL 不在静态预加载支持范围，文档已明确，不将其再列为 FIX-007 未完成部分。
 
-两种场景期望均为 False；第二种未满足。git diff --check 通过。
+修复前证据保存在 [review-before-fix006007-verification.md](review-before-fix006007-verification.md)。
 
-正式回归复用同会话上一实施轮工具结果：Core net8.0/net6.0 各 487 通过；MVC 各 53 通过、1 跳过；WebApi 构建成功。本轮没有重复执行完整矩阵。这些用例未覆盖新确认的追加查找器场景，不能据此否定 Finding。
+## 验证范围
 
-测试补强纳入同项修复，不另算缺失功能：现有筛选闭包弱引用用例仅同步入口，应补异步取消；筛选结果目前只排除 SiblingService，还应确认 DynamicService 存在，防止空结果假阳性。
+本轮只读复核源码、Git 差异、计划、执行记录、测试源码与 TRX，不改业务代码、不重新运行全量测试。相关实现自上一轮验证后未在本轮修改，采用 REUSED_UNCHANGED_SCOPE；这不是对后续未知改动的验证。
 
-## TODO
+| SDK 8.0.424 的既有证据 | 核对结果 |
+| --- | --- |
+| Core net8.0 / net6.0 | 各 497 通过，0 失败 |
+| MVC net8.0 / net6.0 | 各 57 通过、1 既有跳过，0 失败 |
+| WebApi | 生成成功，0 错误、1 个 net6 支持结束警告 |
+| 新增案例 | Core 4 个、MVC 4 个，双框架全量 TRX 中均存在且通过 |
 
-### 本期：1 个问题及其验收工作
+实际运行时间为 2026-09-28 20:39–20:41（UTC+8）。证据位于 TestResults/modularity-audit-20260928：core-fix-final-net8.0/net6.0.trx、mvc-fix-final-net8.0/net6.0.trx、webapi-fix-final.log。MVC 跳过项是 RemoteStreamContentTestControllerTest.UploadRawAsync，与本轮新增资源回归无关。测试映射见 [test-mapping.md](test-mapping.md)。
 
-- [ ] FIX-002：让清理绑定框架原查找器，避免追加注册后漏清筛选委托。
-- [ ] 同项测试：覆盖追加注册、异步取消弱引用和筛选结果正向断言。
-- [ ] 同项交付：更新 execution.md / test-mapping.md，按影响范围验证并复审。
+本轮变更只有审查报告及旧报告归档，L0 核对格式与证据；无需重新编译或运行性能/容量实验。没有在本轮进行网络 CVE 查询或全仓渗透测试，不能给出“没有漏洞”的结论。
 
-以上三步属于同一根因及其交付，不是三个缺失能力。
+## 分类 TODO
 
-### 后续：4 组 DEFERRED，不属于本期缺陷
+### Completed
 
-- [ ] 自定义生命周期阶段/阶段贡献者：目前固定 Pre/Main/Post 和单一关闭阶段；需另行定义排序与异常契约。建议任务：生命周期阶段扩展点。
-- [ ] 插件在线分发与多版本求解：本地版本区间校验已实现；远程下载、升级编排和候选版本求解另立任务。
-- [ ] 不可信插件进程隔离：当前完全可信，ALC 不构成安全沙箱。建议任务：隔离插件宿主。
-- [ ] 动态 Web 管道替换：现有 UseBing/UseBingAsync 装配管道，插件代切换不重建既有管道。建议任务：Web 插件路由与管道更新。
+- [x] 当前计划 6/6 个实施任务。
+- [x] 原 T1–T5 生命周期兼容复核。
+- [x] FIX-001 至 FIX-007 已关闭，重点完成 FIX-006/007 的修复后验收。
+- [x] 使用、部署、资源边界及生产符号到测试方法映射。
 
-上述方向因本期计划明确排除而延期，不阻碍本期验收。完整 ABP 上层生态不纳入本次模块计划。
+### Open Actionable
 
-Accepted Limitations：默认上下文不可卸载；热更新为整组插件代；调用方自己保存旧代对象会阻止协作式卸载；旧静态兼容入口仅支持单宿主。
+无新的 MUST_FIX / SHOULD_FIX。当前不需要为了功能完整度继续自动修复。
 
-No-Progress Check: CHANGED（确认 FIX-002 剩余所有权边界并取得运行证据）。Next Action: STOP_REVIEW；本轮不自动修复。
+### Optional / Deferred：优先考虑的 2 项易用性增强
+
+- [ ] UX-001：热更新切换结果诊断。ReloadAsync 先发布新代，再等待旧代退出和关闭；旧代关闭抛错时调用者收到异常但新代已经生效。建议提供结构化阶段与代标识，例如是否已切换、失败发生于构建/初始化/旧代关闭。验收：同版本切换、候选失败、旧代关闭失败均能准确辨别，并确认当前服务可用性。
+- [ ] UX-002：旧代排空可观测性。提供当前/退役代标识、活动调用数和等待状态，帮助定位迟迟不结束的 RunAsync。验收：受控长调用期间可观测等待原因，退出后自动清理；不因超时强制释放仍使用中的实例。
+
+建议顺序 UX-001 → UX-002；复用同一代标识，避免两套状态定义。这两项属于后续增强，不是已批准计划的遗漏。
+
+### Blocked External：1 项安全证据
+
+- [ ] 恢复 NuGet 漏洞源访问后审计 Core、PluginRuntime 和 Web 消费者的直接/传递依赖，保存数据源时间及结果。此前 TLS/凭证失败，不能以构建/单元测试替代。
+
+### Deferred：4 组后续能力
+
+- [ ] 自定义生命周期阶段和阶段贡献者；目前固定 Pre/Main/Post。
+- [ ] 插件在线分发与多版本依赖求解；目前验证已部署版本及区间，不自动下载或选版本。
+- [ ] 不可信插件进程隔离；当前只支持完全可信代码，ALC 不是权限沙箱。
+- [ ] 动态 Web 管道替换；当前整组服务代切换不替换已装配的 Web 中间件管道。
+
+Blocked Approval：无。Not Applicable：SQL、容量/吞吐基准、发布动作。Accepted Limitations：默认上下文不可卸载、整组热更新、协作排空、旧静态入口单宿主语义、静态预加载边界。Verified Boundaries：未新增容量结论。
+
+No-Progress Check: CHANGED（修复后验收关闭 2 项）；Next Action: STOP；Goal Status: STOPPED_BLOCKED（仅外部审计仍缺证据）。本轮没有修改计划、执行报告、业务代码或测试，也未提交、推送或发送外部消息。

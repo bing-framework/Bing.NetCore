@@ -16,5 +16,29 @@
 | `BingModuleAssemblyFinder`、`BingLoader.FindTypes` | 冻结目录共享给约定 DI、选项与公开类型事件；重复程序集去重；自定义加载器和晚选项补扫沿用同一目录 | `ModuleScanningTest.ModuleAssemblyDeclaration_ShouldScanSelectedModulesOnly`、`AddBingApplication_ShouldScanSelectedAssembly_AndIgnoreUnselectedAssembly` |
 | `BingModuleAssemblyFinder` 的类型发现失败诊断、`BingPluginLoader.Load` 的错误归属 | 附加类型依赖缺失时报告扫描阶段、程序集、声明模块、插件及清单 | `HotPluginHostTest.ReloadAsync_AdditionalTypeDependencyMissing_ShouldDiagnoseAndCollectCandidate` |
 | `BingPluginLoader.Load` 的临时解析会话 | 插件私有附加程序集进入本代扫描；同名不同版本的附加 DLL 随插件代切换；失败候选和旧代上下文可回收 | `HotPluginHostTest.ReloadAsync_AdditionalAssembly_ShouldRegisterServiceAndUnloadWithGeneration`、`ReloadAsync_AdditionalAssemblyVersions_ShouldSwitchAndCollectOldContext`、`ReloadAsync_MissingAdditionalAssembly_ShouldKeepCurrentGeneration`、`ReloadAsync_AdditionalTypeDependencyMissing_ShouldDiagnoseAndCollectCandidate` |
+| `IPreConfigureServices`、`IPostConfigureServices`、`IOnPreApplicationInitialization`、`IOnPostApplicationInitialization` 与 `BingModuleHooks` | 显式与隐式接口分派、全局依赖顺序、重写优先、新旧配置接口优先级、旧入口兼容及初始化失败清理 | `ModuleNamedPhaseInterfacesTest.ExplicitInterfaces_RunOnceInDependencyOrder`、`ImplicitInterfaces_RunAllNamedPhases`、`Overrides_ReplaceNamedInterfaces`、`NewInterfacesCallingBase_RunOnceAndTakePriority`、`LegacyRegistration_RejectsNamedConfigurationInterfaces`、`LegacyRegistration_RunsNamedInitializationInterfaces`、`ExplicitPreInitializationFailure_ShutsDownStartedModule` |
 
 `ModuleScanningTest` 中扫描模式参数均覆盖 `Compatible` 与 `BeforeConfigureServices`；附加程序集的选项注册同时覆盖早注册与晚注册。现有 Core、MVC 和 WebApi 回归覆盖旧入口及 Web 宿主路径。
+
+## FIX-006 / FIX-007 直接回归映射
+
+| 最终生产符号 | 关键行为 | 测试项目与方法 |
+| --- | --- | --- |
+| `BingModuleRegistration.ReleaseAsync`、`RemoveOwnedModuleDescriptors` | 真实只读集合下释放一次，清空插件描述符；可变集合移除失败仍清内部引用 | MVC `WebModuleResourceReleaseTest.ShutdownBingAsync_AfterWebBuild_ShouldReleaseModuleAndClearPluginsOnce`、`StopAsync_AfterWebBuild_ShouldReleaseModuleAndClearPluginsOnce`；Core `ModuleDescriptorCleanupFailureTest.InitializationFailure_WhenRemoveAtThrows_ShouldPreserveCauseAndFinishCleanup` |
+| `BingModuleManager.InitializeCoreAsync` | 保留原始异常、附加清理错误、进入 Failed 并禁止重试；重复关闭/释放 | MVC `WebModuleResourceReleaseTest.UseBingAsync_FailureAfterWebBuild_ShouldPreserveCauseAndFinishCleanup`；Core `ModuleDescriptorCleanupFailureTest.InitializationFailure_WhenRemoveAtThrows_ShouldPreserveCauseAndFinishCleanup` |
+| `BingPluginLoader.Load`、`PreloadPrivateDependencies` | 默认上下文预加载方法体私有依赖和传递依赖；配置/初始化/服务调用成功，DI 扫描范围不扩大 | Core `PluginPrivateDependencyTest.DefaultContext_ShouldLoadPrivateClosureWithoutScanningIt` |
+| `BingPluginLoader.PreloadPrivateDependencies` 与热更新清理 | 私有程序集属于本代，旧代与失败候选可回收；失败不替换旧代 | Core `PluginPrivateDependencyTest.HotContext_ShouldLoadPrivateClosureAndCollectOldGeneration`、`FailedCandidate_ShouldCollectPrivateClosureAndKeepOldGeneration` |
+| `BingPluginLoader.Load` 解析事件及身份校验 | 成功/失败退订，缺失与冲突仍带诊断 | Core `PluginResourceRegressionTest.SuccessfulRegistration_ShouldUnsubscribeAssemblyResolver`、`FailedRegistration_ShouldUnsubscribeAssemblyResolver`、`LoadedAssemblyIdentityMismatch_ShouldFailResolver`；`PluginDependencyGraphTest.AddBingApplication_AssemblyIdentityConflict_ShouldFailBeforeModuleLoading`；`HotPluginHostTest.ReloadAsync_AdditionalTypeDependencyMissing_ShouldDiagnoseAndCollectCandidate` |
+
+以上方法均包含在本轮双框架完整回归中；新增独立夹具项目仅服务于测试，无新增生产依赖。
+
+## 插件热更新状态与失败诊断
+
+| 最终生产符号 | 关键行为 | 测试项目与方法 |
+| --- | --- | --- |
+| `BingHotPluginHost.Status`、`BingHotPluginHostStatus.Current`、`BingHotPluginGenerationStatus.Id`、`Plugins` | 同版本切换使用新代 ID；快照不持有插件程序集，旧代可回收 | Core `HotPluginObservabilityTest.ReloadAsync_SameVersion_ShouldChangeGenerationIdAndCollectOldContext` |
+| `BingHotPluginHostStatus.Retiring`、`BingHotPluginGenerationStatus.ActiveCalls`、`State`、`IsRetiring`、`BingHotPluginGenerationState` | 正在运行的旧代显示 Draining 和活动调用数；进入关闭钩子显示 Closing，结束后移除退役代 | Core `HotPluginObservabilityTest.ReloadAsync_ActiveCall_ShouldExposeRetiringGenerationUntilCallEnds`、`ReloadAsync_PendingShutdown_ShouldExposeClosingGeneration` |
+| `BingHotPluginReloadFailureInfo.FromException`、`AttemptId`、`PreviousGenerationId`、`CurrentGenerationId`、`Phase`、`Switched`、`BingHotPluginReloadPhase` | 保留原异常类型，区分等待取消、候选失败和已切换后的旧代关闭失败 | Core `HotPluginObservabilityTest.ReloadAsync_CanceledBeforeTurn_ShouldReportUnchangedGeneration`、`ReloadAsync_FailedCandidate_ShouldReportUnchangedGeneration`、`ReloadAsync_OldShutdownFailure_ShouldReportSwitchedGeneration` |
+| `BingHotPluginHost.ReloadAsync`、`Generation.Snapshot`、`Generation.MarkClosing` | 新旧代状态变更与切换结果采用同一代 ID；旧代排空期间仍可用新代服务 | Core `HotPluginObservabilityTest.ReloadAsync_ActiveCall_ShouldExposeRetiringGenerationUntilCallEnds`、`ReloadAsync_PendingShutdown_ShouldExposeClosingGeneration`、`ReloadAsync_OldShutdownFailure_ShouldReportSwitchedGeneration` |
+
+上述新测试在 `net8.0` 与 `net6.0` 各执行 7 个案例；宿主状态快照只含不可修改的标识、计数、枚举和插件 ID/版本信息。

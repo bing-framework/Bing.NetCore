@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Loader;
 using System.Runtime.CompilerServices;
@@ -570,7 +570,7 @@ public class ModuleScanningTest
     private sealed class DynamicScanAssembly
     {
         /// <summary>
-        /// 初始化动态程序集描述信息。
+        /// 初始化一个 <see cref="DynamicScanAssembly" /> 类型的实例。
         /// </summary>
         /// <param name="moduleType">动态模块类型。</param>
         /// <param name="siblingModuleType">同程序集中的未选模块类型。</param>

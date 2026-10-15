@@ -215,6 +215,25 @@ public sealed class WebModuleLifecycleTest
     }
 
     /// <summary>
+    /// 验证异步阶段接口共享 Web 上下文并完成管道装配。
+    /// </summary>
+    [Fact]
+    public async Task UseBingAsync_AsyncInterfaces_ShouldShareApplicationBuilderAndComposePipeline()
+    {
+        var services = CreateServices<AsyncInterfaceWebModule>();
+        using var provider = services.BuildServiceProvider();
+        var app = new ApplicationBuilder(provider);
+
+        await app.UseBingAsync();
+        app.Run(context => context.Response.WriteAsync("done"));
+        await app.Build()(new DefaultHttpContext { RequestServices = provider });
+
+        var state = provider.GetRequiredService<AsyncOverrideWebState>();
+        state.HostContexts.ShouldBe(new object[] { app, app, app });
+        state.Events.ShouldBe(new[] { "pre", "main", "post", "request" });
+    }
+
+    /// <summary>
     /// 验证 Generic Host 停止会等待新异步关闭重写完成。
     /// </summary>
     [Fact]
@@ -291,7 +310,7 @@ public sealed class WebModuleLifecycleTest
         /// </summary>
         public OperationCanceledException Original { get; set; }
         /// <summary>
-        /// 初始化 Web 模块取消状态。
+        /// 初始化一个 <see cref="WebCancelState" /> 类型的实例。
         /// </summary>
         /// <param name="source">用于触发模块初始化取消的令牌源。</param>
         public WebCancelState(CancellationTokenSource source) => Source = source;
@@ -548,6 +567,53 @@ public sealed class WebModuleLifecycleTest
     }
 
     /// <summary>
+    /// 通过异步阶段接口装配 Web 管道的测试模块。
+    /// </summary>
+    public sealed class AsyncInterfaceWebModule : AspNetCoreBingModule,
+        IOnPreApplicationInitialization, IOnPostApplicationInitialization
+    {
+        /// <inheritdoc />
+        public override IServiceCollection AddServices(IServiceCollection services)
+        {
+            services.AddSingleton<AsyncOverrideWebState>();
+            return services;
+        }
+
+        /// <inheritdoc />
+        Task IOnPreApplicationInitialization.OnPreApplicationInitializationAsync(
+            BingModuleInitializationContext context, CancellationToken cancellationToken)
+        {
+            var state = context.ServiceProvider.GetRequiredService<AsyncOverrideWebState>();
+            state.HostContexts.Add(context.HostContext);
+            state.Events.Add("pre");
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public override void UseModule(IApplicationBuilder app)
+        {
+            var state = app.ApplicationServices.GetRequiredService<AsyncOverrideWebState>();
+            state.HostContexts.Add(app);
+            state.Events.Add("main");
+            app.Use(next => async context =>
+            {
+                state.Events.Add("request");
+                await next(context);
+            });
+        }
+
+        /// <inheritdoc />
+        Task IOnPostApplicationInitialization.OnPostApplicationInitializationAsync(
+            BingModuleInitializationContext context, CancellationToken cancellationToken)
+        {
+            var state = context.ServiceProvider.GetRequiredService<AsyncOverrideWebState>();
+            state.HostContexts.Add(context.HostContext);
+            state.Events.Add("post");
+            return Task.CompletedTask;
+        }
+    }
+
+    /// <summary>
     /// 注册异步 Web 中间件的模块。
     /// </summary>
     public sealed class AsyncWebModule : BingModule, IBingAsyncModuleInitializer
@@ -665,7 +731,7 @@ public sealed class WebModuleLifecycleTest
     /// <summary>
     /// 在宿主停止期间记录异步关闭的模块。
     /// </summary>
-    public sealed class HostShutdownModule : BingModule, IBingAsyncModuleShutdown
+    public sealed class HostShutdownModule : BingModule, IBingModuleShutdown
     {
         /// <inheritdoc />
         public override IServiceCollection AddServices(IServiceCollection services)
