@@ -29,15 +29,13 @@ public class AssertHelper
     /// </summary>
     private static TException GetException<TException>(Action action) where TException : Exception
     {
-        try
-        {
-            var exception = Assert.Throws<AspectInvocationException>(action);
-            return (TException)exception.InnerException;
-        }
-        catch
-        {
-            return Assert.Throws<TException>(action);
-        }
+        var exception = Record.Exception(action);
+        Assert.NotNull(exception);
+
+        if (exception is AspectInvocationException aspectException)
+            return Assert.IsType<TException>(aspectException.InnerException);
+
+        return Assert.IsType<TException>(exception);
     }
 
     /// <summary>
@@ -59,14 +57,12 @@ public class AssertHelper
     /// </summary>
     private static async Task<TException> GetExceptionAsync<TException>(Func<Task> action) where TException : Exception
     {
-        try
-        {
-            var exception = await Assert.ThrowsAnyAsync<AspectInvocationException>(action);
-            return (TException)exception.InnerException;
-        }
-        catch
-        {
-            return await Assert.ThrowsAsync<TException>(action);
-        }
+        var exception = await Record.ExceptionAsync(action);
+        Assert.NotNull(exception);
+
+        if (exception is AspectInvocationException aspectException)
+            return Assert.IsType<TException>(aspectException.InnerException);
+
+        return Assert.IsType<TException>(exception);
     }
 }
