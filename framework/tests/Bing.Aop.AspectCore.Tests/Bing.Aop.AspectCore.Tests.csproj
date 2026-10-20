@@ -17,14 +17,18 @@
     <ProjectReference Include="..\..\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
     <ProjectReference Include="..\Bing.Core.Tests\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
-                      ReferenceOutputAssembly="false" BuildReference="true" />
+                      ReferenceOutputAssembly="false" BuildReference="true"
+                      SetConfiguration="Configuration=$(Configuration)"
+                      SetTargetFramework="TargetFramework=$(TargetFramework)" />
     <ProjectReference Include="..\Bing.Aop.AspectCore.CycleProbe\Bing.Aop.AspectCore.CycleProbe.csproj"
                       ReferenceOutputAssembly="false" BuildReference="true" />
     <ProjectReference Include="LegacyConsumer\LegacyMarkerConsumer.csproj"
-                      ReferenceOutputAssembly="false" BuildReference="true" />
+                      ReferenceOutputAssembly="false" BuildReference="true"
+                      SetConfiguration="Configuration=$(Configuration)"
+                      SetTargetFramework="TargetFramework=net6.0" />
   </ItemGroup>
 
-  <Target Name="CopyCycleProbeToTestOutput" AfterTargets="Build">
+  <Target Name="CopyCycleProbeToTestOutput" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
     <MSBuild Projects="..\Bing.Aop.AspectCore.CycleProbe\Bing.Aop.AspectCore.CycleProbe.csproj"
              Targets="GetTargetPath"
              Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
@@ -37,7 +41,20 @@
           DestinationFiles="@(_CycleProbeOutput->'$(OutDir)CycleProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
-  <Target Name="CopyLegacyMarkerConsumerToTestOutput" AfterTargets="Build">
+  <Target Name="CopyPluginFixtureToTestOutput" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+    <MSBuild Projects="..\Bing.Core.Tests\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
+      <Output TaskParameter="TargetOutputs" ItemName="_PluginFixtureTargetPath" />
+    </MSBuild>
+    <Error Condition="'@(_PluginFixtureTargetPath)' == ''"
+           Text="Bing.Core.PluginFixtures did not produce a target path for $(Configuration)/$(TargetFramework)." />
+    <Copy SourceFiles="@(_PluginFixtureTargetPath)"
+          DestinationFolder="$(OutDir)PluginFixtures"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyLegacyMarkerConsumerToTestOutput" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
     <MSBuild Projects="LegacyConsumer\LegacyMarkerConsumer.csproj"
              Targets="GetTargetPath"
              Properties="Configuration=$(Configuration);TargetFramework=net6.0">

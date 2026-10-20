@@ -22,7 +22,6 @@
 
     <ProjectReference Include="..\..\src\Bing.Core\Bing.Core.csproj" />
     <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
-    <ProjectReference Include="..\..\src\Bing.PluginRuntime\Bing.PluginRuntime.csproj" />
     <ProjectReference Include="PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
                       ReferenceOutputAssembly="false"
                       BuildReference="true" />
@@ -40,7 +39,7 @@
                       BuildReference="true" />
   </ItemGroup>
 
-  <Target Name="CopyBingCorePluginFixtures" AfterTargets="Build">
+  <Target Name="CopyBingCorePluginFixtures" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
     <MSBuild Projects="$(MSBuildProjectDirectory)\PluginFixtures\Bing.Core.PluginLazyFixture\Bing.Core.PluginLazyFixture.csproj" Targets="GetTargetPath" Properties="TargetFramework=$(TargetFramework);Configuration=$(Configuration)">
       <Output TaskParameter="TargetOutputs" ItemName="LazyFixturePaths" />
     </MSBuild>

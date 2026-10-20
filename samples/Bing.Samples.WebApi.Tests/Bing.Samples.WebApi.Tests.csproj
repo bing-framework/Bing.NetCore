@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <BingTestingUseHosting>true</BingTestingUseHosting>
     <BingTestingUseTestHost>true</BingTestingUseTestHost>
   </PropertyGroup>

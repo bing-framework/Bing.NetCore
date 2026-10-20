@@ -31,7 +31,9 @@
     <Compile Include="..\Shared\AdminLogConfigurationTest.cs" Link="AdminLogConfigurationTest.cs" />
     <Compile Include="..\Shared\AdminRateLimitingHttpPipelineTest.cs" Link="AdminRateLimitingHttpPipelineTest.cs" />
     <ProjectReference Include="..\Bing.Admin.FreeSQL.InventoryProbe\Bing.Admin.FreeSQL.InventoryProbe.csproj"
-                      ReferenceOutputAssembly="false" BuildReference="true" />
+                      ReferenceOutputAssembly="false" BuildReference="true"
+                      SetConfiguration="Configuration=$(Configuration)"
+                      SetTargetFramework="TargetFramework=net6.0" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.36" />
@@ -51,6 +53,8 @@
     <ItemGroup>
       <_InventoryProbeOutput Include="%(_InventoryProbeTargetPath.RootDir)%(_InventoryProbeTargetPath.Directory)**\*" />
     </ItemGroup>
+    <Error Condition="'@(_InventoryProbeOutput)' == ''"
+           Text="Bing.Admin.FreeSQL.InventoryProbe produced no files for $(Configuration)/net6.0." />
     <Copy SourceFiles="@(_InventoryProbeOutput)"
           DestinationFiles="@(_InventoryProbeOutput->'$(OutDir)InventoryProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>

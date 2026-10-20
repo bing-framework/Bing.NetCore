@@ -32,7 +32,9 @@
     <Compile Include="..\Shared\AdminLogConfigurationTest.cs" Link="AdminLogConfigurationTest.cs" />
     <Compile Include="..\Shared\AdminRateLimitingHttpPipelineTest.cs" Link="AdminRateLimitingHttpPipelineTest.cs" />
     <ProjectReference Include="..\Bing.Admin.EFCore.InventoryProbe\Bing.Admin.EFCore.InventoryProbe.csproj"
-                      ReferenceOutputAssembly="false" BuildReference="true" />
+                      ReferenceOutputAssembly="false" BuildReference="true"
+                      SetConfiguration="Configuration=$(Configuration)"
+                      SetTargetFramework="TargetFramework=net6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
@@ -50,6 +52,8 @@
     <ItemGroup>
       <_InventoryProbeOutput Include="%(_InventoryProbeTargetPath.RootDir)%(_InventoryProbeTargetPath.Directory)**\*" />
     </ItemGroup>
+    <Error Condition="'@(_InventoryProbeOutput)' == ''"
+           Text="Bing.Admin.EFCore.InventoryProbe produced no files for $(Configuration)/net6.0." />
     <Copy SourceFiles="@(_InventoryProbeOutput)"
           DestinationFiles="@(_InventoryProbeOutput->'$(OutDir)InventoryProbe\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>

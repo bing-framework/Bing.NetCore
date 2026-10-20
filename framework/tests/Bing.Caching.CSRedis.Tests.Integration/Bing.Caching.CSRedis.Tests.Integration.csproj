@@ -22,7 +22,7 @@
                       ReferenceOutputAssembly="false" BuildReference="true" />
   </ItemGroup>
 
-  <Target Name="CopyRedisRateLimitProbeToTestOutput" AfterTargets="Build">
+  <Target Name="CopyRedisRateLimitProbeToTestOutput" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
     <MSBuild Projects="..\Bing.Caching.CSRedis.RateLimitProbe\Bing.Caching.CSRedis.RateLimitProbe.csproj"
              Targets="GetTargetPath" Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)">
       <Output TaskParameter="TargetOutputs" ItemName="_RedisRateLimitProbeTargetPath" />

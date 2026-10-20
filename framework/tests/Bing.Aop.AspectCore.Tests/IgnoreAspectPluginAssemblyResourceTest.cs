@@ -70,22 +70,7 @@ public sealed class IgnoreAspectPluginAssemblyResourceTest
     /// <returns>当前目标框架下的夹具程序集路径。</returns>
     private static string GetFixturePath()
     {
-        var repositoryRoot = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            ".."));
-        var targetFramework = AppContext.BaseDirectory.Contains("net6.0", StringComparison.OrdinalIgnoreCase)
-            ? "net6.0"
-            : "net8.0";
-        var fixturePath = Path.Combine(repositoryRoot, "output", "debug", targetFramework, "Bing.Core.PluginFixtures.dll");
-        return File.Exists(fixturePath)
-            ? fixturePath
-            : Path.Combine(repositoryRoot, "framework", "tests", "Bing.Core.Tests", "PluginFixtures",
-                "Bing.Core.PluginFixtures", "bin", "Debug", targetFramework, "Bing.Core.PluginFixtures.dll");
+        return Path.Combine(AppContext.BaseDirectory, "PluginFixtures", "Bing.Core.PluginFixtures.dll");
     }
 
     /// <summary>
