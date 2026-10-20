@@ -318,6 +318,7 @@ public sealed class AdminHangfireRegistrationTest
         };
         if (includeAdminDependencies)
         {
+            values["Caching:Namespace"] = "bing.admin.tests";
             values["BING_CAP_CONSUMER_ENABLED"] = "true";
             values["CAP:RabbitMQ:HostName"] = "localhost";
             values["CAP:RabbitMQ:UserName"] = "test";
