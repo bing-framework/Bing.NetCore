@@ -27,7 +27,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | 你想做的事 | 直接看 |
 | --- | --- |
 | **选 ORM / 比较数据访问能力** | [能力矩阵](docs/getting-started/能力矩阵.md)（三支 × 18 项能力对照 + 决策树） |
-| **只知包名，不知该装哪个** | [包索引](docs/getting-started/包索引.md)（按场景反查 70 个包工程）／网页版 [选型向导](docs/选型向导.html) |
+| **只知包名，不知该装哪个** | [包索引](docs/getting-started/包索引.md)（按场景反查 73 个包工程）／网页版 [选型向导](docs/选型向导.html) |
 | **按模块了解功能、配置与限制** | [模块文档](docs/modules/README.md)（核心、Web、领域、数据、缓存、事件等） |
 | **想要一行不多的最小上手代码** | 网页版 [Cheat Sheet](docs/cheatsheet.html)（可打印一页纸） |
 | **要端到端场景的完整代码** | [recipes 配方集](docs/guides/recipes/README.md)（CRUD / CAP 事件 / 多租户 / RBAC / 支付 / 批量报表） |
@@ -38,7 +38,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | **想知道某个决策为何这样定** | [架构决策记录 ADR](docs/architecture/adr/README.md) |
 | **跑测试 / 写新测试 / 发版打包** | [测试指南](docs/operations/测试指南.md) · [工程化文档](docs/operations/工程化文档.md) |
 
-> 全部文档索引见 **[docs/README.md](docs/README.md)**——`docs/` 下当前有 **104 篇 Markdown**（含 14 份 ADR、6 篇 recipes、10 篇 `ai-workflow/` 历史资产和模块能力文档），按主题分目录组织。当前 70 个包工程均有包级 README，并会作为 NuGet 包说明随包发布。
+> 全部文档索引见 **[docs/README.md](docs/README.md)**——`docs/` 下当前有 **104 篇 Markdown**（含 14 份 ADR、6 篇 recipes、10 篇 `ai-workflow/` 历史资产和模块能力文档），按主题分目录组织。工程目录当前包含 70 个 `framework/src` 工程、3 个 `components/src` 工程和 12 个 Admin 工程；73 个框架与业务组件包工程均有包级 README。
 >
 > 历史英文入口 **[docs/README.en.md](docs/README.en.md)** 已翻译为中文，并保留文件名以兼容既有链接；权威入口仍为 `docs/README.md`。
 

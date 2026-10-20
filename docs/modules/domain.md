@@ -15,7 +15,7 @@ DDD 包提供实体、聚合根、值对象、仓储/存储契约和应用服务
 | `framework/src/Bing.Validation/`、`framework/src/Bing.Validation.Abstractions/` | 验证契约、DataAnnotations 及验证拦截标记。 |
 | `framework/src/Bing.ObjectMapping/`、`framework/src/Bing.AutoMapper/` | 映射契约、AutoMapper 适配与注册。 |
 
-应用服务调用仓储，具体 ORM 工作单元管理变更并提交；`UnitOfWorkAttribute` 的提交依赖 AOP 代理。聚合根记录事件与调用分发器是独立步骤，当前 EF 工作单元的事件发布钩子为空，不能把记录事件解释为自动派发。
+应用服务调用仓储，具体 ORM 工作单元管理变更并提交；`UnitOfWorkAttribute` 的提交依赖 AOP 代理。领域事件自动分发已接入 EF Core 工作单元中的受跟踪聚合根，以及 FreeSQL `StoreBase` 的写入入口；注册分发器并由框架工作单元管理事务时，工作单元会分发并在保存成功后清理事件。直接调用 FreeSQL API、原始 SQL、自定义存储器或使用外部事务不在自动接入范围内。
 
 ## 对外接口与用法
 
@@ -39,5 +39,6 @@ ORM Provider 决定仓储与工作单元实现；AOP、当前用户与审计接�
 - `IUnitOfWork` 提供 `Commit` / `CommitAsync`，不提供 `Begin`。
 - 仓储写入不会普遍自动提交；使用已有内部提交的应用服务基类时应避免重复提交。
 - 跨 ORM 的两个工作单元不构成统一事务。
-- 自动排空聚合根事件、领域对象全局验证规则配置：待实现/待确认。
+- 领域事件自动登记与分发只覆盖上述 EF Core 跟踪实体和 FreeSQL `StoreBase` 写入路径；未注册分发器时不会派发，直接使用原生 API、原始 SQL、自定义存储器时需显式登记事件源。
+- 领域对象全局验证规则：确认未实现；`DomainObjectBase` 的对应配置入口仍是占位。
 - 源生成器是编译期能力，见[工程与分析器](development.md)，不能代替运行时注册。

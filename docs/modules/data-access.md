@@ -37,7 +37,7 @@ EF Core 与 Dapper 均提供 MySQL、SQL Server、PostgreSQL、Oracle、SQLite P
 ## 已知限制与注意事项
 
 - Provider 存在不代表全部 SQL 特性可用，能力拒绝与降级应按[Provider 能力](../sql/provider-capabilities.md)判断。
-- FreeSQL 的 IQueryable 异步 Provider 仍未实现，执行器可能退化为同步；不能据此否定 FreeSQL 所有原生异步方法。
+- FreeSQL 的 IQueryable 异步兼容 Provider 已有执行包装：检查取消令牌后运行同步 LINQ，再将结果包装为 `Task`；`CanExecute` 返回 `false`，因此它不提供数据库原生异步查询。需要数据库异步 I/O 时使用 FreeSQL 仓储原生异步方法；不能把兼容包装描述为无实现，也不能据此声称它是原生异步。
 - 单次 Lambda 投影最多两个来源参数；更多来源可重复二元 Join 或先投影派生表再组合。未支持表达式会明确拒绝，Right/Full Join 受 Provider 能力限制。
 - Dapper 路径不会自动获得 ORM 的审计、仓储与跨 ORM 事务。
 - 外部数据库可运行性：待实现/待确认；代码存在与集成环境验收分别记录。
