@@ -6,7 +6,7 @@
 public class NullCondition : ICondition
 {
     /// <summary>
-    /// 初始化一个<see cref="NullCondition"/>类型的实例
+    /// 初始化一个 <see cref="NullCondition"/> 类型的实例。
     /// </summary>
     private NullCondition() { }
 
@@ -15,9 +15,6 @@ public class NullCondition : ICondition
     /// </summary>
     public static readonly NullCondition Instance = new NullCondition();
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>始终返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetCondition() => null;
 }

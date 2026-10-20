@@ -80,8 +80,7 @@ public class OrderByItemTest
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// <summary>
-/// 测试目的：验证 <see cref="OrderByBuilder"/> 的 Add / Generate 逻辑，
-/// 涵盖空输入、升降序混合、多字段组合等场景。
+/// 测试目的：验证 <see cref="OrderByBuilder"/> 的 Add / Generate 逻辑， 涵盖空输入、升降序混合、多字段组合等场景。
 /// </summary>
 public class OrderByBuilderTest
 {

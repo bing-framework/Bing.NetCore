@@ -7,9 +7,7 @@ using Xunit;
 namespace Bing.Aop.AspectCore;
 
 /// <summary>
-/// 反射结构测试：验证 <see cref="AutowiredAttribute"/>、<see cref="IgnoreAttribute"/>、
-/// <see cref="InterceptorBase"/>、<see cref="ParameterInterceptorBase"/>、<see cref="IAopProxy"/>
-/// 的类型层次结构与元数据约束。
+/// 反射结构测试：验证 <see cref="AutowiredAttribute"/>、<see cref="IgnoreAttribute"/>、 <see cref="InterceptorBase"/>、<see cref="ParameterInterceptorBase"/>、<see cref="IAopProxy"/> 的类型层次结构与元数据约束。
 /// </summary>
 public class AttributeReflectionTest
 {
@@ -18,8 +16,7 @@ public class AttributeReflectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：AutowiredAttribute 应具有 [AttributeUsage(Property | Field)]，
-    /// 确保属性注入标记只能用于属性和字段，不能用于其他目标。
+    /// 测试目的：AutowiredAttribute 应具有 [AttributeUsage(Property | Field)]， 确保属性注入标记只能用于属性和字段，不能用于其他目标。
     /// </summary>
     [Fact]
     public void AutowiredAttribute_AttributeUsage_ShouldTargetPropertyAndField()
@@ -104,8 +101,7 @@ public class AttributeReflectionTest
     }
 
     /// <summary>
-    /// 测试目的：InterceptorBase 应继承自 AbstractInterceptorAttribute，
-    /// 确保所有业务拦截器均走 AspectCore 标准方法拦截流程。
+    /// 测试目的：InterceptorBase 应继承自 AbstractInterceptorAttribute， 确保所有业务拦截器均走 AspectCore 标准方法拦截流程。
     /// </summary>
     [Fact]
     public void InterceptorBase_ShouldInheritFromAbstractInterceptorAttribute()
@@ -151,8 +147,7 @@ public class AttributeReflectionTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：IAopProxy 应是空标记接口（无成员），
-    /// 仅用于在运行时识别由 AOP 代理包装的服务实例。
+    /// 测试目的：IAopProxy 应是空标记接口（无成员）， 仅用于在运行时识别由 AOP 代理包装的服务实例。
     /// </summary>
     [Fact]
     public void IAopProxy_ShouldBeEmptyMarkerInterface()

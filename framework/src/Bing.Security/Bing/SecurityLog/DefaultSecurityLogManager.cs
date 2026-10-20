@@ -9,7 +9,7 @@ namespace Bing.SecurityLog;
 public class DefaultSecurityLogManager : ISecurityLogManager, ITransientDependency
 {
     /// <summary>
-    /// 使用安全日志配置和存储器初始化 <see cref="DefaultSecurityLogManager"/> 的实例。
+    /// 初始化一个 <see cref="DefaultSecurityLogManager"/> 类型的实例。
     /// </summary>
     /// <param name="securityLogOptions">提供安全日志启用状态和应用程序名称的选项。</param>
     /// <param name="securityLogStore">保存已创建安全日志的存储器。</param>

@@ -11,14 +11,13 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class CreationAuditedAggregateRoot<TEntity> : AggregateRoot<TEntity>, ICreationAuditedObject
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
-    /// 获取或设置聚合根的创建时间。
-    /// </summary>
+    /// <inheritdoc />
     public virtual DateTime? CreationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该聚合根的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual Guid? CreatorId { get; set; }
 
 }
@@ -32,25 +31,24 @@ public abstract class CreationAuditedAggregateRoot<TEntity> : AggregateRoot<TEnt
 public abstract class CreationAuditedAggregateRoot<TEntity, TKey> : AggregateRoot<TEntity, TKey>, ICreationAuditedObject<TKey>
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
-    /// 获取或设置聚合根的创建时间。
-    /// </summary>
+    /// <inheritdoc />
     public virtual DateTime? CreationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该聚合根的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual TKey CreatorId { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="CreationAuditedAggregateRoot{TEntity,TKey}"/> 的实例，并使用默认标识。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected CreationAuditedAggregateRoot() : this(default)
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="CreationAuditedAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected CreationAuditedAggregateRoot(TKey id) : base(id)

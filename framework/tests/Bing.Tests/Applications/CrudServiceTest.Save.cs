@@ -30,7 +30,7 @@ public partial class CrudServiceTest
     private Guid _id;
 
     /// <summary>
-    /// Id2
+    /// 用于关联第二个测试实体的标识符。
     /// </summary>
     private Guid _id2;
 
@@ -70,7 +70,7 @@ public partial class CrudServiceTest
     private IRepositorySample _repository;
 
     /// <summary>
-    /// 测试 - 初始化
+    /// 初始化一个 <see cref="CrudServiceTest"/> 类型的实例。
     /// </summary>
     public CrudServiceTest()
     {
@@ -109,6 +109,7 @@ public partial class CrudServiceTest
     /// <summary>
     /// 获取实体集合
     /// </summary>
+    /// <returns>供 CRUD 服务测试使用的实体集合。</returns>
     private List<EntitySample> GetEntities()
     {
         return new List<EntitySample> { _entity, _entity2 };

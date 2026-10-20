@@ -6,12 +6,12 @@
 public interface IDistributedEvent : IEvent
 {
     /// <summary>
-    /// 事件标识
+    /// 获取事件标识
     /// </summary>
     string EventId { get; }
 
     /// <summary>
-    /// 事件发生时间
+    /// 获取事件发生时间
     /// </summary>
     DateTime EventTime { get; }
 }

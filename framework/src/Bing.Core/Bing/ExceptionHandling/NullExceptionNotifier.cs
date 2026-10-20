@@ -11,7 +11,7 @@ public class NullExceptionNotifier : IExceptionNotifier
     public static IExceptionNotifier Instance { get; } = new NullExceptionNotifier();
 
     /// <summary>
-    /// 初始化 <see cref="NullExceptionNotifier"/> 的实例。
+    /// 初始化一个 <see cref="NullExceptionNotifier"/> 类型的实例。
     /// </summary>
     private NullExceptionNotifier()
     {

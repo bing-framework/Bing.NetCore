@@ -34,7 +34,7 @@ public sealed class SqlWriteCommand
     }
 
     /// <summary>
-    /// 使用已冻结的 Provider 和 Mutation 语义初始化命令。
+    /// 初始化一个 <see cref="SqlWriteCommand"/> 类型的实例。
     /// </summary>
     /// <param name="sql">已生成的 SQL 语句。</param>
     /// <param name="parameters">已生成的参数集合。</param>
@@ -73,7 +73,7 @@ public sealed class SqlWriteCommand
     }
 
     /// <summary>
-    /// 复制冻结命令的执行元数据。
+    /// 初始化一个 <see cref="SqlWriteCommand"/> 类型的实例。
     /// </summary>
     /// <param name="command">待复制的冻结命令。</param>
     /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
@@ -89,37 +89,39 @@ public sealed class SqlWriteCommand
     }
 
     /// <summary>
-    /// 已生成的 SQL 语句。
+    /// 获取已生成的 SQL 语句。
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 已生成的参数快照。
+    /// 获取已生成的参数快照。
     /// </summary>
     public IReadOnlyCollection<SqlParam> Parameters => _parameters.Select(SqlParameterSnapshot.CloneSqlParameter).ToArray();
 
     /// <summary>
-    /// 生成此命令的 Provider 标识；未冻结 Provider 的 Builder 命令为 <see langword="null"/>。
+    /// 获取生成 SQL 的 Provider 标识。
     /// </summary>
+    /// <remarks>通过公开构造函数创建的命令未绑定 Provider，该属性为 <see langword="null"/>。</remarks>
     public string ProviderKey { get; }
 
     /// <summary>
-    /// 写入操作类型；未冻结操作语义的 Builder 命令为 <see cref="SqlOperationKind.None"/>。
+    /// 获取写入操作类型。
     /// </summary>
+    /// <remarks>通过未指定操作类型的构造函数创建时，该属性为 <see cref="SqlOperationKind.None"/>。</remarks>
     public SqlOperationKind OperationKind { get; }
 
     /// <summary>
-    /// 是否包含 Returning 或 Output 子句。
+    /// 获取是否包含 Returning 或 Output 子句。
     /// </summary>
     public bool HasReturning { get; }
 
     /// <summary>
-    /// 是否要求实际受影响行数为一行。
+    /// 获取是否要求实际受影响行数为一行。
     /// </summary>
     public bool ValidateAffectedRows { get; }
 
     /// <summary>
-    /// 生成 SQL 时冻结的 Provider 能力档案。
+    /// 获取生成 SQL 时冻结的 Provider 能力档案。
     /// </summary>
     public SqlProviderProfile ProviderProfile { get; }
 

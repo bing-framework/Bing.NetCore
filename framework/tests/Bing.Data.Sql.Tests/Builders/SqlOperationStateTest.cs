@@ -19,7 +19,7 @@ namespace Bing.Data.Sql.Tests.Builders;
 public class SqlOperationStateTest
 {
     /// <summary>
-    /// 用于状态迁移测试的默认目标表引用。
+    /// 获取用于状态迁移测试的默认目标表引用。
     /// </summary>
     private static SqlTableReference Table => new() { TableName = "samples" };
 
@@ -1042,6 +1042,8 @@ public class SqlOperationStateTest
     /// <summary>
     /// 测试目的：所有 Insert 运行状态不得接受 Page，避免生成不会参与 Insert SQL 的孤立参数。
     /// </summary>
+    /// <param name="operationName">要验证的 Builder 操作名称。</param>
+    /// <param name="operationKind">要验证的 SQL 操作类型。</param>
     [Theory]
     [InlineData("Insert", SqlOperationKind.None)]
     [InlineData("InsertValues", SqlOperationKind.InsertValues)]
@@ -1679,6 +1681,7 @@ public class SqlOperationStateTest
     /// <summary>
     /// 在返回首个 Union Builder 后抛出异常的枚举器。
     /// </summary>
+    /// <returns>返回产生首个 Union Builder 后抛出异常的测试序列。</returns>
     private static IEnumerable<ISqlBuilder> ThrowAfterFirstUnionBuilder()
     {
         yield return new TestSqlBuilder().Select("Id").From("archived_orders");
@@ -1688,6 +1691,7 @@ public class SqlOperationStateTest
     /// <summary>
     /// 在枚举 Insert Values 行前抛出异常的集合。
     /// </summary>
+    /// <returns>返回产生首个 Insert Values 行后抛出异常的测试序列。</returns>
     private static IEnumerable<IReadOnlyList<object>> ThrowingInsertRows()
     {
         yield return new object[] { 1 };
@@ -1700,7 +1704,7 @@ public class SqlOperationStateTest
     private sealed class ThrowingMappingResolver : IEntityMappingResolver
     {
         /// <summary>
-        /// Resolve 调用次数。
+        /// 获取或设置Resolve 调用次数。
         /// </summary>
         public int ResolveCallCount { get; private set; }
 
@@ -1722,7 +1726,7 @@ public class SqlOperationStateTest
     private sealed class InvalidProjection
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -1740,7 +1744,7 @@ public class SqlOperationStateTest
     private sealed class FailingPaginationSqlBuilder : SqlBuilderBase
     {
         /// <summary>
-        /// 初始化测试 Builder。
+        /// 初始化一个 <see cref="FailingPaginationSqlBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="parameterManager">参数管理器。</param>
         public FailingPaginationSqlBuilder(IParameterManager parameterManager = null)
@@ -1749,8 +1753,11 @@ public class SqlOperationStateTest
         }
 
         /// <summary>
-        /// 获取当前 Offset 参数名，仅用于验证失败渲染状态。
+        /// 获取当前 Offset 参数名。
         /// </summary>
+        /// <remarks>
+        /// 仅用于验证失败渲染状态。
+        /// </remarks>
         public string OffsetParameterName => OffsetParam;
 
         /// <inheritdoc />
@@ -1764,7 +1771,7 @@ public class SqlOperationStateTest
     private sealed class FailingPaginationSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 测试 Provider 单例。
+        /// 获取测试 Provider 单例。
         /// </summary>
         public static FailingPaginationSqlProvider Instance { get; } = new();
 
@@ -1814,16 +1821,24 @@ public class SqlOperationStateTest
     /// </summary>
     private enum FailingClause
     {
-        /// <summary>不失败。</summary>
+        /// <summary>
+        /// 不失败。
+        /// </summary>
         None,
 
-        /// <summary>Select 子句。</summary>
+        /// <summary>
+        /// Select 子句。
+        /// </summary>
         Select,
 
-        /// <summary>From 子句。</summary>
+        /// <summary>
+        /// From 子句。
+        /// </summary>
         From,
 
-        /// <summary>Join 子句。</summary>
+        /// <summary>
+        /// Join 子句。
+        /// </summary>
         Join
     }
 
@@ -1833,7 +1848,7 @@ public class SqlOperationStateTest
     private sealed class FailingClauseFactorySqlBuilder : SqlBuilderBase
     {
         /// <summary>
-        /// 初始化测试 Builder。
+        /// 初始化一个 <see cref="FailingClauseFactorySqlBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="parameterManager">参数管理器。</param>
         public FailingClauseFactorySqlBuilder(IParameterManager parameterManager = null)
@@ -1842,7 +1857,7 @@ public class SqlOperationStateTest
         }
 
         /// <summary>
-        /// 使用指定子句工厂初始化测试 Builder。
+        /// 初始化一个 <see cref="FailingClauseFactorySqlBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="clauseFactory">可控失败子句工厂。</param>
         /// <param name="parameterManager">参数管理器。</param>
@@ -1868,7 +1883,7 @@ public class SqlOperationStateTest
     private sealed class FailingClauseFactorySqlProvider : ISqlProvider
     {
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="FailingClauseFactorySqlProvider"/> 类型的实例。
         /// </summary>
         /// <param name="clauseFactory">可控失败子句工厂。</param>
         public FailingClauseFactorySqlProvider(FailingClauseFactory clauseFactory) => ClauseFactory = clauseFactory;
@@ -1984,7 +1999,7 @@ public class SqlOperationStateTest
     private sealed class FailingIdentifierDialect : DialectBase
     {
         /// <summary>
-        /// 是否在读取标识符时抛出异常。
+        /// 获取或设置是否在读取标识符时抛出异常。
         /// </summary>
         public bool ShouldFail { get; set; } = true;
 
@@ -2000,13 +2015,13 @@ public class SqlOperationStateTest
     private sealed class InsertColumnAtomicitySample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }

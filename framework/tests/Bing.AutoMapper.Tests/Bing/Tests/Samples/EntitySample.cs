@@ -14,61 +14,47 @@ namespace Bing.Tests.Samples;
 public class EntitySample : AggregateRoot<EntitySample>, IAuditedObjectWithName
 {
     /// <summary>
-    /// 初始化一个<see cref="EntitySample"/>类型的实例
+    /// 初始化一个 <see cref="EntitySample"/> 类型的实例。
     /// </summary>
     public EntitySample() : this(Guid.NewGuid()) { }
 
     /// <summary>
-    /// 初始化一个<see cref="EntitySample"/>类型的实例
+    /// 初始化一个 <see cref="EntitySample"/> 类型的实例。
     /// </summary>
     /// <param name="id">标识</param>
     public EntitySample(Guid id) : base(id) { }
 
     /// <summary>
-    /// 名称
+    /// 获取或设置名称
     /// </summary>
     [Required(ErrorMessage = "名称不能为空")]
     public string Name { get; set; }
 
     /// <summary>
-    /// 忽略值
+    /// 获取或设置忽略值
     /// </summary>
     [Ignore]
     public string IgnoreValue { get; set; }
 
-    /// <summary>
-    /// 创建时间
-    /// </summary>
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
 
-    /// <summary>
-    /// 创建人标识
-    /// </summary>
+    /// <inheritdoc />
     public Guid? CreatorId { get; set; }
 
-    /// <summary>
-    /// 创建人
-    /// </summary>
+    /// <inheritdoc />
     public string Creator { get; set; }
 
-    /// <summary>
-    /// 最后修改时间
-    /// </summary>
+    /// <inheritdoc />
     public DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
-    /// 最后修改人标识
-    /// </summary>
+    /// <inheritdoc />
     public Guid? LastModifierId { get; set; }
 
-    /// <summary>
-    /// 最后修改人
-    /// </summary>
+    /// <inheritdoc />
     public string LastModifier { get; set; }
 
-    /// <summary>
-    /// 添加变更列表
-    /// </summary>
+    /// <inheritdoc />
     protected override void AddChanges(EntitySample other)
     {
         AddChange(x => x.Id, other.Id);
@@ -83,49 +69,38 @@ public class EntitySample : AggregateRoot<EntitySample>, IAuditedObjectWithName
 public class DtoSample : DtoBase, IAuditedObjectWithName
 {
     /// <summary>
-    /// 名称
+    /// 获取或设置名称
     /// </summary>
     [Required(ErrorMessage = "名称不能为空")]
     public string Name { get; set; }
 
     /// <summary>
-    /// 忽略值
+    /// 获取或设置忽略值
     /// </summary>
     [Ignore]
     public string IgnoreValue { get; set; }
 
-    /// <summary>
-    /// 创建时间
-    /// </summary>
+    /// <inheritdoc />
     public DateTime? CreationTime { get; set; }
 
-    /// <summary>
-    /// 创建人标识
-    /// </summary>
+    /// <inheritdoc />
     public Guid? CreatorId { get; set; }
 
-    /// <summary>
-    /// 创建人
-    /// </summary>
+    /// <inheritdoc />
     public string Creator { get; set; }
 
-    /// <summary>
-    /// 最后修改时间
-    /// </summary>
+    /// <inheritdoc />
     public DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
-    /// 最后修改人标识
-    /// </summary>
+    /// <inheritdoc />
     public Guid? LastModifierId { get; set; }
 
-    /// <summary>
-    /// 最后修改人
-    /// </summary>
+    /// <inheritdoc />
     public string LastModifier { get; set; }
 
     /// <summary>
     /// 创建空集合
     /// </summary>
+    /// <returns>不包含元素的 DTO 集合。</returns>
     public static List<DtoSample> EmptyList() => new();
 }

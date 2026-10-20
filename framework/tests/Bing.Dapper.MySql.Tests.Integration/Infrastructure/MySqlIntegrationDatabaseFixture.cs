@@ -34,12 +34,12 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     private ServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 已创建的根服务提供程序数量。
+    /// 获取或设置已创建的根服务提供程序数量。
     /// </summary>
     public int RootServiceProviderCreationCount { get; private set; }
 
     /// <summary>
-    /// 获取 MySQL 测试数据库连接字符串。
+    /// 获取或设置MySQL 测试数据库连接字符串。
     /// </summary>
     public string ConnectionString { get; private set; }
 
@@ -49,9 +49,7 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     public IServiceProvider ServiceProvider => _serviceProvider ??
         throw new ObjectDisposedException(nameof(MySqlIntegrationDatabaseFixture));
 
-    /// <summary>
-    /// 初始化 MySQL 测试数据库。
-    /// </summary>
+    /// <inheritdoc />
     public async Task InitializeAsync()
     {
         if (IntegrationTestGate.IsProviderEnabled(Provider) == false)
@@ -124,7 +122,7 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     private sealed class IntegrationMySqlUnitOfWork : MySqlUnitOfWork
     {
         /// <summary>
-        /// 初始化一个<see cref="IntegrationMySqlUnitOfWork"/>类型的实例。
+        /// 初始化一个 <see cref="IntegrationMySqlUnitOfWork"/> 类型的实例。
         /// </summary>
         /// <param name="options">数据库上下文配置。</param>
         /// <param name="serviceProvider">服务提供程序。</param>
@@ -204,9 +202,7 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     public ISqlTransactionScopeFactory GetTransactionScopeFactory() =>
         ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
 
-    /// <summary>
-    /// 释放资源。
-    /// </summary>
+    /// <inheritdoc />
     public Task DisposeAsync() => DisposeAsyncCore();
 
     /// <inheritdoc />
@@ -215,7 +211,6 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     /// <summary>
     /// 异步释放服务提供程序。
     /// </summary>
-    /// <returns>释放任务。</returns>
     private async Task DisposeAsyncCore()
     {
         if (_serviceProvider is IAsyncDisposable asyncDisposable)

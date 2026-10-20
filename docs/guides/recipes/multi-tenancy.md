@@ -43,7 +43,7 @@ app.UseMiddleware<MultiTenancyMiddleware>();   // 请求内用 ICurrentTenant.Ch
 
 ## 4. 🔴 EF Core：重写 `CreateFilterExpression` 加租户过滤
 
-**关键事实**：你可能以为「继承 `FilterBase<T>` 注册进 `IFilterManager` 就会自动生效」——**不会**。`UnitOfWorkBase.ConfigureGlobalFilters` 的开关是 `FilterManager.IsEntityEnabled<TEntity>()`，而该方法**硬编码只查 `ISoftDelete` 过滤器**（`FilterManager.cs:90-94`）。内置生效的过滤器只有软删除。
+**关键事实**：你可能以为「继承 `FilterBase<T>` 注册进 `IFilterManager` 就会自动生效」——**不会**。`UnitOfWorkBase.ConfigureGlobalFilters` 的开关是 `FilterManager.IsEntityEnabled<TEntity>()`，而该方法**硬编码只查 `ISoftDelete` 过滤器**（`FilterManager.cs:70-74`）。内置生效的过滤器只有软删除。
 
 正确做法是**重写 `protected virtual CreateFilterExpression<TEntity>()`**：
 

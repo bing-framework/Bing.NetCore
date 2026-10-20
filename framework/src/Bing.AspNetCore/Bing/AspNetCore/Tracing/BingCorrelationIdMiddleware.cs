@@ -25,7 +25,7 @@ public class BingCorrelationIdMiddleware : IMiddleware
     private readonly ICorrelationIdProvider _correlationIdProvider;
 
     /// <summary>
-    /// 初始化一个<see cref="BingCorrelationIdMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="BingCorrelationIdMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="options">跟踪关联ID配置选项信息</param>
@@ -37,10 +37,7 @@ public class BingCorrelationIdMiddleware : IMiddleware
         _correlationIdProvider = correlationIdProvider;
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = GetCorrelationIdFromRequest(context);

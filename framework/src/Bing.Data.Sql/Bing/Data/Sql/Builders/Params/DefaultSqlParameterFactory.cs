@@ -25,7 +25,7 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlParameterFactory"/>类型的实例
+    /// 初始化一个 <see cref="DefaultSqlParameterFactory"/> 类型的实例。
     /// </summary>
     /// <param name="selector">字段值转换器选择器</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -39,16 +39,7 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
         _options = options ?? new SqlMetadataOptions();
     }
 
-    /// <summary>
-    /// 创建 Sql 参数
-    /// </summary>
-    /// <param name="name">参数名</param>
-    /// <param name="value">参数值</param>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <param name="entityType">实体类型</param>
-    /// <param name="source">参数来源</param>
-    /// <returns>Sql 参数</returns>
+    /// <inheritdoc />
     public SqlParam Create(string name, object value, ColumnMappingMetadata column, DatabaseContext databaseContext,
         Type entityType = null, SqlParameterSource source = SqlParameterSource.Unknown)
     {

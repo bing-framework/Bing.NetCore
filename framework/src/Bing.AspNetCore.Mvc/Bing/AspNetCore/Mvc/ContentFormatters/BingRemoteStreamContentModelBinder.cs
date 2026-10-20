@@ -10,13 +10,14 @@ namespace Bing.AspNetCore.Mvc.ContentFormatters;
 /// <remarks>
 /// 用于处理 <see cref="RemoteStreamContent"/> 类型及其接口 <see cref="IRemoteStreamContent"/> 的绑定。
 /// </remarks>
+/// <typeparam name="TRemoteStreamContent">实现远程流内容接口的模型类型。</typeparam>
 public class BingRemoteStreamContentModelBinder<TRemoteStreamContent> : IModelBinder
     where TRemoteStreamContent : class, IRemoteStreamContent
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 绑定模型数据，用于处理文件上传场景。
-    /// </summary>
-    /// <param name="bindingContext">模型绑定上下文</param>
+    /// </remarks>
     /// <exception cref="ArgumentNullException">模型绑定上下文为空时抛出。</exception>
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {

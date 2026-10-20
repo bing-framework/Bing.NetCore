@@ -28,7 +28,7 @@ public sealed class ModificationAuditedInitializer
     private readonly DateTime? _dateTime;
 
     /// <summary>
-    /// 使用实体和修改人审计信息初始化一个 <see cref="ModificationAuditedInitializer"/> 实例。
+    /// 初始化一个 <see cref="ModificationAuditedInitializer"/> 类型的实例。
     /// </summary>
     /// <param name="entity">待初始化的实体对象。</param>
     /// <param name="userId">修改人的字符串标识。</param>
@@ -51,7 +51,7 @@ public sealed class ModificationAuditedInitializer
     public static void Init(object entity, string userId, string userName) => new ModificationAuditedInitializer(entity, userId, userName, null).Init();
 
     /// <summary>
-    /// 使用指定时间初始化实体的修改审计信息。
+    /// 初始化实体的修改审计信息。
     /// </summary>
     /// <param name="entity">待初始化的实体对象；为空时不执行任何操作。</param>
     /// <param name="userId">修改人的字符串标识。</param>
@@ -60,7 +60,7 @@ public sealed class ModificationAuditedInitializer
     public static void Init(object entity, string userId, string userName, DateTime? dateTime) => new ModificationAuditedInitializer(entity, userId, userName, dateTime).Init();
 
     /// <summary>
-    /// 按修改审计契约初始化实体的时间、人员名称和人员标识。
+    /// 初始化实体的修改审计信息。
     /// </summary>
     public void Init()
     {

@@ -11,19 +11,22 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class FullAuditedEntity<TEntity> : AuditedEntity<TEntity>, IFullAuditedObject
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置实体是否已标记为删除。
-    /// </summary>
+    /// </remarks>
     public virtual bool IsDeleted { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置实体被标记为删除的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? DeletionTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该实体为删除的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual Guid? DeleterId { get; set; }
 }
 
@@ -36,30 +39,33 @@ public abstract class FullAuditedEntity<TEntity> : AuditedEntity<TEntity>, IFull
 public abstract class FullAuditedEntity<TEntity, TKey> : AuditedEntity<TEntity, TKey>, IFullAuditedObject<TKey>
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置实体是否已标记为删除。
-    /// </summary>
+    /// </remarks>
     public virtual bool IsDeleted { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置实体被标记为删除的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? DeletionTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该实体为删除的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual TKey DeleterId { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="FullAuditedEntity{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedEntity{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected FullAuditedEntity()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="FullAuditedEntity{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedEntity{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected FullAuditedEntity(TKey id) : base(id)

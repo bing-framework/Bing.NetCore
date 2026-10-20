@@ -16,7 +16,7 @@ public class DataAnnotationValidationTest
     private readonly AggregateRootSample _sample;
 
     /// <summary>
-    /// 初始化一个<see cref="DataAnnotationValidationTest"/>类型的实例
+    /// 初始化一个 <see cref="DataAnnotationValidationTest"/> 类型的实例。
     /// </summary>
     public DataAnnotationValidationTest() => _sample = AggregateRootSample.CreateSample();
 

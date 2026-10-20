@@ -5,13 +5,13 @@ using Bing.Data.Sql.Mutations;
 namespace Bing.Data.Sql.Builders.Mutations;
 
 /// <summary>
-/// Delete SQL Builder。
+/// 用于构建 Delete SQL 的接口。
 /// </summary>
 public interface ISqlDeleteBuilder : ISqlContent, IDelete, IDeleteClauseAccessor, IDeleteUsingClauseAccessor,
     ISqlMutationContextAccessor, IAllowAllRowsMutationBuilder
 {
     /// <summary>
-    /// 是否显式允许全表删除。
+    /// 获取是否显式允许全表删除。
     /// </summary>
     bool AllowAllRows { get; }
 

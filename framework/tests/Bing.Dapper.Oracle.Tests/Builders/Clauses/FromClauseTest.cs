@@ -15,7 +15,7 @@ public class FromClauseTest
     private readonly FromClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="FromClauseTest"/> 类型的实例。
     /// </summary>
     public FromClauseTest()
     {
@@ -25,6 +25,7 @@ public class FromClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>From 子句生成的 SQL 文本。</returns>
     private string GetSql() => _clause.ToSql();
 
     /// <summary>

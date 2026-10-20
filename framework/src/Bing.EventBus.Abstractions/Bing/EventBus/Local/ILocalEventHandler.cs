@@ -6,7 +6,7 @@
 public interface ILocalEventHandler : IEventHandler
 {
     /// <summary>
-    /// 序号
+    /// 获取序号
     /// </summary>
     int Order { get; }
 }

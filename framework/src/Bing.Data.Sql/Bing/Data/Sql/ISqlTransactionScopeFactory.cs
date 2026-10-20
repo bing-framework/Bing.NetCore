@@ -15,14 +15,14 @@ public interface ISqlTransactionScopeFactory
     ISqlTransactionScope Begin();
 
     /// <summary>
-    /// 使用指定数据源开始 SQL 事务作用域。
+    /// 开始 SQL 事务作用域。
     /// </summary>
     /// <param name="dataSourceKey">逻辑数据源标识。</param>
     /// <returns>新建的 SQL 事务作用域。</returns>
     ISqlTransactionScope Begin(string dataSourceKey);
 
     /// <summary>
-    /// 使用指定隔离级别开始 SQL 事务作用域。
+    /// 开始 SQL 事务作用域。
     /// </summary>
     /// <param name="dataSourceKey">逻辑数据源标识。</param>
     /// <param name="isolationLevel">事务隔离级别。</param>
@@ -37,7 +37,7 @@ public interface ISqlTransactionScopeFactory
     Task<ISqlTransactionScope> BeginAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 使用指定数据源异步开始 SQL 事务作用域。
+    /// 异步开始 SQL 事务作用域。
     /// </summary>
     /// <param name="dataSourceKey">逻辑数据源标识。</param>
     /// <param name="cancellationToken">用于取消创建操作的令牌。</param>
@@ -45,7 +45,7 @@ public interface ISqlTransactionScopeFactory
     Task<ISqlTransactionScope> BeginAsync(string dataSourceKey, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 使用指定隔离级别异步开始 SQL 事务作用域。
+    /// 异步开始 SQL 事务作用域。
     /// </summary>
     /// <param name="dataSourceKey">逻辑数据源标识。</param>
     /// <param name="isolationLevel">事务隔离级别。</param>

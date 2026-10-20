@@ -19,7 +19,7 @@ public sealed class FreeSqlEntityModelMetadataProvider : IEntityModelMetadataPro
     private readonly IFreeSql _orm;
 
     /// <summary>
-    /// 初始化一个<see cref="FreeSqlEntityModelMetadataProvider"/>类型的实例。
+    /// 初始化一个 <see cref="FreeSqlEntityModelMetadataProvider"/> 类型的实例。
     /// </summary>
     /// <param name="orm">当前工作单元使用的 FreeSQL ORM。</param>
     public FreeSqlEntityModelMetadataProvider(IFreeSql orm)

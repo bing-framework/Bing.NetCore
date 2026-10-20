@@ -10,10 +10,13 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Collection(PostgreSqlIntegrationDatabaseCollection.Name)]
 public sealed class PostgreSqlProcedureContractTest : IAsyncLifetime
 {
+    /// <summary>
+    /// 为 PostgreSQL 存储过程契约测试提供数据库夹具。
+    /// </summary>
     private readonly PostgreSqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化 PostgreSQL 过程合同测试。
+    /// 初始化一个 <see cref="PostgreSqlProcedureContractTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">PostgreSQL 集成测试数据库固定装置。</param>
     public PostgreSqlProcedureContractTest(PostgreSqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -82,10 +85,19 @@ public sealed class PostgreSqlProcedureContractTest : IAsyncLifetime
     /// <inheritdoc />
     public Task DisposeAsync() => Task.CompletedTask;
 
+    /// <summary>
+    /// 表示 PostgreSQL 函数返回的结果行。
+    /// </summary>
     private sealed class FunctionResult
     {
+        /// <summary>
+        /// 获取或设置函数输出值。
+        /// </summary>
         public int OutputValue { get; set; }
 
+        /// <summary>
+        /// 获取或设置计算后的值。
+        /// </summary>
         public int DoubledValue { get; set; }
     }
 }

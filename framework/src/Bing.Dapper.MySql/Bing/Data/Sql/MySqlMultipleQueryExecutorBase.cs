@@ -9,7 +9,7 @@ namespace Bing.Data.Sql;
 public abstract class MySqlMultipleQueryExecutorBase : SqlMultipleQueryExecutorBase
 {
     /// <summary>
-    /// 初始化一个<see cref="MySqlMultipleQueryExecutorBase"/>类型的实例。
+    /// 初始化一个 <see cref="MySqlMultipleQueryExecutorBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="options">当前执行器配置。</param>

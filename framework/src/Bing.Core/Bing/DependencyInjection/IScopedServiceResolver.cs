@@ -8,12 +8,12 @@ namespace Bing.DependencyInjection;
 public interface IScopedServiceResolver
 {
     /// <summary>
-    /// 是否可解析
+    /// 获取是否可解析
     /// </summary>
     bool ResolveEnabled { get; }
 
     /// <summary>
-    /// <see cref="ServiceLifetime.Scoped"/>生命周期的服务提供程序
+    /// 获取生命周期的服务提供程序
     /// </summary>
     IServiceProvider ScopedProvider { get; }
 

@@ -630,7 +630,7 @@ public class TransactionActionManagerTest
 file class GuidTreeQuery : TreeQueryParameter<Guid?>
 {
     /// <summary>
-    /// 初始化一个 <see cref="GuidTreeQuery" /> 类型的实例。
+    /// 初始化一个 <see cref="GuidTreeQuery"/> 类型的实例。
     /// </summary>
     public GuidTreeQuery() { }
 }

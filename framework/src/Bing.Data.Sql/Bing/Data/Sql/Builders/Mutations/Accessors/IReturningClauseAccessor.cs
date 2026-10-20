@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface IReturningClauseAccessor
 {
     /// <summary>
-    /// Mutation Returning 子句。
+    /// 获取Mutation Returning 子句。
     /// </summary>
     IReturningClause ReturningClause { get; }
 }

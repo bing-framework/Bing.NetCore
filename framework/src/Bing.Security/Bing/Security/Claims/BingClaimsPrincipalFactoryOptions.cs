@@ -9,22 +9,24 @@ namespace Bing.Security.Claims;
 public class BingClaimsPrincipalFactoryOptions
 {
     /// <summary>
-    /// 获取静态身份主体贡献者类型列表，用于扩展稳定的身份信息。
+    /// 获取静态身份主体贡献者类型列表。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
     /// - 普通用户身份认证（OAuth2、Cookie 认证等）。<br />
     /// - 用户角色、权限固定的情况。
+    /// 用于扩展稳定的身份信息。
     /// </remarks>
     public ITypeList<IBingClaimsPrincipalContributor> Contributors { get; }
 
     /// <summary>
-    /// 获取动态身份主体贡献者类型列表，用于在认证后计算或扩展 Claims。
+    /// 获取动态身份主体贡献者类型列表。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
     /// - 需要动态计算用户角色、权限、租户信息的情况。<br />
     /// - 适配 多租户、RBAC、动态权限管理 需求。
+    /// 用于在认证后计算或扩展 Claims。
     /// </remarks>
     public ITypeList<IBingDynamicClaimsPrincipalContributor> DynamicContributors { get; }
 
@@ -41,21 +43,23 @@ public class BingClaimsPrincipalFactoryOptions
     public List<string> DynamicClaims { get; }
 
     /// <summary>
-    /// 获取或设置是否启用远程刷新 Claims 机制，默认值为 <c>true</c>。
+    /// 获取或设置是否启用远程刷新 Claims 机制。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
     /// - 微服务架构下的身份信息同步<br />
     /// - 用户信息变更后需要自动更新 Claims
+    /// 默认值为 <c>true</c>。
     /// </remarks>
     public bool IsRemoteRefreshEnabled { get; set; }
 
     /// <summary>
-    /// 获取或设置远程刷新 Claims 使用的相对 URL，默认值为 <c>/api/account/dynamic-claims/refresh</c>。
+    /// 获取或设置远程刷新 Claims 使用的相对 URL。
     /// </summary>
     /// <remarks>
     /// 默认值：`/api/account/dynamic-claims/refresh`<br />
     /// - 该 URL 用于 主动请求服务端刷新用户 Claims。
+    /// 默认值为 <c>/api/account/dynamic-claims/refresh</c>。
     /// </remarks>
     public string RemoteRefreshUrl { get; set; }
 
@@ -73,18 +77,19 @@ public class BingClaimsPrincipalFactoryOptions
     public Dictionary<string, List<string>> ClaimsMap { get; set; }
 
     /// <summary>
-    /// 获取或设置是否启用动态 Claims 计算，默认值为 <c>false</c>。
+    /// 获取或设置是否启用动态 Claims 计算。
     /// </summary>
     /// <remarks>
     /// 适用于：<br />
     /// - 动态租户信息<br />
     /// - 权限动态计算<br />
     /// - 特定业务需求需要临时调整身份信息
+    /// 默认值为 <c>false</c>。
     /// </remarks>
     public bool IsDynamicClaimsEnabled { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="BingClaimsPrincipalFactoryOptions"/> 的实例及默认贡献者、Claims 列表和映射。
+    /// 初始化一个 <see cref="BingClaimsPrincipalFactoryOptions"/> 类型的实例。
     /// </summary>
     public BingClaimsPrincipalFactoryOptions()
     {

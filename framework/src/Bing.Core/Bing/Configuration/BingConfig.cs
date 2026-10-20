@@ -16,7 +16,7 @@ public class BingConfig
     private static object _lockObj = new object();
 
     /// <summary>
-    /// 当前框架配置
+    /// 获取当前框架配置
     /// </summary>
     public static BingConfig Current
     {
@@ -35,12 +35,12 @@ public class BingConfig
     }
 
     /// <summary>
-    /// 是否启用调试日志
+    /// 获取或设置是否启用调试日志
     /// </summary>
     public bool EnabledDebug { get; set; } = true;
 
     /// <summary>
-    /// 是否启用跟踪日志
+    /// 获取或设置是否启用跟踪日志
     /// </summary>
     public bool EnabledTrace { get; set; } = true;
 }

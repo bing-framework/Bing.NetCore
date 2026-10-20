@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Params;
 internal abstract class ParameterLimitManagerBase
 {
     /// <summary>
-    /// 初始化参数数量上限管理器。
+    /// 初始化一个 <see cref="ParameterLimitManagerBase"/> 类型的实例。
     /// </summary>
     /// <param name="inner">实际保存参数及生成参数名称的内部管理器。</param>
     /// <param name="maxParameterCount">允许同时保存的最大参数数量，必须大于或等于 0。</param>
@@ -21,17 +21,17 @@ internal abstract class ParameterLimitManagerBase
     }
 
     /// <summary>
-    /// 实际保存参数及执行名称规范化的内部管理器。
+    /// 获取实际保存参数及执行名称规范化的内部管理器。
     /// </summary>
     protected IParameterManager Inner { get; }
 
     /// <summary>
-    /// 当前装饰器允许保存的最大参数数量。
+    /// 获取当前装饰器允许保存的最大参数数量。
     /// </summary>
     protected int MaxParameterCount { get; }
 
     /// <summary>
-    /// 应用参数数量限制的 Provider 标识。
+    /// 获取应用参数数量限制的 Provider 标识。
     /// </summary>
     protected string ProviderKey { get; }
 

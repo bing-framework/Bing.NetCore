@@ -11,18 +11,19 @@ namespace Bing.DependencyInjection;
 public class ScopedDictionary : ConcurrentDictionary<string, object>, IDisposable
 {
     /// <summary>
-    /// 对于当前功能有效的角色集合，用于数据权限判断
+    /// 获取或设置对于当前功能有效的角色集合。
     /// </summary>
+    /// <remarks>
+    /// 用于数据权限判断。
+    /// </remarks>
     public string[] DataAuthValidRoleNames { get; set; } = new string[0];
 
     /// <summary>
-    /// 当前用户
+    /// 获取或设置当前用户
     /// </summary>
     public ClaimsIdentity Identity { get; set; }
 
-    /// <summary>
-    /// 释放资源
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         Identity = null;

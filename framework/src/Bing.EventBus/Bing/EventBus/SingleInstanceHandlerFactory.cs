@@ -11,7 +11,7 @@ public class SingleInstanceHandlerFactory : IEventHandlerFactory
     public IEventHandler HandlerInstance { get; }
 
     /// <summary>
-    /// 使用指定单例事件处理器初始化 <see cref="SingleInstanceHandlerFactory"/> 的实例。
+    /// 初始化一个 <see cref="SingleInstanceHandlerFactory"/> 类型的实例。
     /// </summary>
     /// <param name="handler">要由工厂返回的单例事件处理器。</param>
     public SingleInstanceHandlerFactory(IEventHandler handler)

@@ -6,7 +6,7 @@
 public class TenantResolverConst
 {
     /// <summary>
-    /// 默认 HTTP 或上下文租户键，值为 <c>x-tenant-id</c>，并由 <see cref="MultiTenancyOptions"/> 默认采用。
+    /// 默认 HTTP 请求或上下文使用的租户键名，值为 <c>x-tenant-id</c>。
     /// </summary>
     public const string DefaultTenantKey = "x-tenant-id";
 }

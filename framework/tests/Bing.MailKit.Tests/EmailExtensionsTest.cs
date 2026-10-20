@@ -7,9 +7,10 @@ namespace Bing.MailKit.Tests;
 
 /// <summary>
 /// <see cref="EmailExtensions.ToMimeMessage"/> 单元测试。
-/// 验证 System.Net.Mail.MailMessage → MimeKit.MimeMessage 转换的关键行为，
-/// 不依赖 SMTP 连接，纯内存转换。
 /// </summary>
+/// <remarks>
+/// 验证 System.Net.Mail.MailMessage → MimeKit.MimeMessage 转换的关键行为， 不依赖 SMTP 连接，纯内存转换。
+/// </remarks>
 public class EmailExtensionsTest
 {
     /// <summary>

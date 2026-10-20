@@ -8,7 +8,7 @@ namespace Bing.Emailing;
 public class NullEmailSender : EmailSenderBase
 {
     /// <summary>
-    /// 使用邮件配置提供器初始化 <see cref="NullEmailSender"/> 的实例。
+    /// 初始化一个 <see cref="NullEmailSender"/> 类型的实例。
     /// </summary>
     /// <param name="provider">提供邮件配置的提供器。</param>
     public NullEmailSender(IEmailConfigProvider provider) : base(provider)

@@ -7,10 +7,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Handlers;
 
 /// <summary>
-/// <see cref="StringTypeHandler"/> 单元测试
+/// <see cref="StringTypeHandler" /> 单元测试。
 /// </summary>
 public class StringTypeHandlerTest
 {
+    /// <summary>
+    /// 字符串类型处理器。
+    /// </summary>
     private readonly StringTypeHandler _handler = new();
 
     // ═══════════════════════════════════════════════════════════

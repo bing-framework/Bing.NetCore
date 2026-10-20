@@ -13,7 +13,7 @@ namespace Bing.Permissions.Identity.Services.Implements;
 public class IdentityUserManager<TUser, TKey> : AspNetUserManager<TUser> where TUser : UserBase<TUser, TKey>
 {
     /// <summary>
-    /// 初始化一个<see cref="IdentityUserManager{TUser,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="IdentityUserManager{TUser, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="store">用户存储</param>
     /// <param name="optionsAccessor">配置</param>

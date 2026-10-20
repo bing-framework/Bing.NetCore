@@ -21,6 +21,7 @@ public class ExceptionTestController : ApiControllerBase
     /// <summary>
     /// 测试 - 用户友好异常 - ActionResult
     /// </summary>
+    /// <returns>操作结果；实际执行时始终抛出用户友好异常。</returns>
     [HttpGet("UserFriendlyException2")]
     public ActionResult UserFriendlyException2()
     {

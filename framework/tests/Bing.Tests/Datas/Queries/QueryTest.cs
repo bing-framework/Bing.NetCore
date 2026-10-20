@@ -22,7 +22,7 @@ public class QueryTest
     private IQuery<AggregateRootSample> _query;
 
     /// <summary>
-    /// 初始化一个<see cref="QueryTest"/>类型的实例
+    /// 初始化一个 <see cref="QueryTest"/> 类型的实例。
     /// </summary>
     public QueryTest() => _query = new Query<AggregateRootSample>();
 
@@ -158,7 +158,7 @@ public class QueryTest
     }
 
     /// <summary>
-    /// 添加范围查询条件 - 日期  - 不包含时间
+    /// 添加范围查询条件 - 日期 - 不包含时间
     /// </summary>
     [Fact]
     public void Test_Between_Date()
@@ -174,7 +174,7 @@ public class QueryTest
     }
 
     /// <summary>
-    /// 添加范围查询条件 - 日期  - 包含时间
+    /// 添加范围查询条件 - 日期 - 包含时间
     /// </summary>
     [Fact]
     public void Test_Between_DateTime()

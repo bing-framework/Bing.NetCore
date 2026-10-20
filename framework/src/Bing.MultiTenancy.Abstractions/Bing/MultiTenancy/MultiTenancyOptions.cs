@@ -6,7 +6,7 @@
 public class MultiTenancyOptions
 {
     /// <summary>
-    /// 初始化 <see cref="MultiTenancyOptions"/> 的实例，并使用默认租户解析键。
+    /// 初始化一个 <see cref="MultiTenancyOptions"/> 类型的实例。
     /// </summary>
     public MultiTenancyOptions()
     {
@@ -14,7 +14,7 @@ public class MultiTenancyOptions
     }
 
     /// <summary>
-    /// 获取可复用的默认空选项实例。
+    /// 可复用的默认空多租户选项实例。
     /// </summary>
     /// <remarks>
     /// 该实例公开且可变，不应作为需要隔离修改的配置副本。
@@ -37,7 +37,10 @@ public class MultiTenancyOptions
     public string DefaultTenantId { get; set; } = default!;
 
     /// <summary>
-    /// 获取或设置供租户解析贡献者读取租户标识的键名；默认值为 <see cref="TenantResolverConst.DefaultTenantKey"/>。
+    /// 获取或设置供租户解析贡献者读取租户标识的键名。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see cref="TenantResolverConst.DefaultTenantKey"/>。
+    /// </remarks>
     public string TenantKey { get; set; }
 }

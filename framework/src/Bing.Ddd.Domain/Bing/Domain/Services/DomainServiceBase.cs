@@ -10,23 +10,23 @@ namespace Bing.Domain.Services;
 public abstract class DomainServiceBase : IDomainService
 {
     /// <summary>
-    /// 初始化一个<see cref="DomainServiceBase"/>类型的实例
+    /// 初始化一个 <see cref="DomainServiceBase"/> 类型的实例。
     /// </summary>
     protected DomainServiceBase() { }
 
     /// <summary>
-    /// Lazy延迟加载服务提供程序
+    /// 获取或设置Lazy延迟加载服务提供程序
     /// </summary>
     [Autowired]
     public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
     /// <summary>
-    /// 日志工厂
+    /// 获取日志工厂
     /// </summary>
     protected ILogFactory LogFactory => LazyServiceProvider.LazyGetRequiredService<ILogFactory>();
 
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILog Log => LazyServiceProvider.LazyGetService<ILog>(provider => LogFactory?.CreateLog(GetType().FullName) ?? NullLog.Instance);
 }

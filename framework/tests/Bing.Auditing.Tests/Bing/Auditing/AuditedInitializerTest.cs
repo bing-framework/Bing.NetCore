@@ -5,69 +5,129 @@ using Xunit;
 namespace Bing.Auditing.Tests;
 
 /// <summary>
-/// <see cref="CreationAuditedInitializer"/>、<see cref="ModificationAuditedInitializer"/>、
-/// <see cref="DeletionAuditedInitializer"/> 单元测试。
-/// 直接调用 static Init 工厂方法，不依赖 DI。
+/// <see cref="CreationAuditedInitializer"/>、<see cref="ModificationAuditedInitializer"/>、 <see cref="DeletionAuditedInitializer"/> 单元测试。 直接调用 static Init 工厂方法，不依赖 DI。
 /// </summary>
 public class AuditedInitializerTest
 {
     // ──── 辅助实体定义 ────────────────────────────────────────────
 
+    /// <summary>
+    /// 仅包含创建时间的审计测试实体。
+    /// </summary>
     private class CreationTimeOnly : IHasCreationTime
     {
+        /// <inheritdoc />
         public DateTime? CreationTime { get; set; }
     }
 
+    /// <summary>
+    /// 包含 Guid 创建人标识和名称的审计测试实体。
+    /// </summary>
     private class FullCreationGuid : ICreationAuditedObject<Guid?>, IHasCreator
     {
+        /// <inheritdoc />
         public DateTime? CreationTime { get; set; }
+
+        /// <inheritdoc />
         public Guid? CreatorId { get; set; }
+
+        /// <inheritdoc />
         public string Creator { get; set; }
     }
 
+    /// <summary>
+    /// 包含 int 创建人标识和名称的审计测试实体。
+    /// </summary>
     private class FullCreationInt : ICreationAuditedObject<int>, IHasCreator
     {
+        /// <inheritdoc />
         public DateTime? CreationTime { get; set; }
+
+        /// <inheritdoc />
         public int CreatorId { get; set; }
+
+        /// <inheritdoc />
         public string Creator { get; set; }
     }
 
+    /// <summary>
+    /// 包含 string 创建人标识和名称的审计测试实体。
+    /// </summary>
     private class FullCreationString : ICreationAuditedObject<string>, IHasCreator
     {
+        /// <inheritdoc />
         public DateTime? CreationTime { get; set; }
+
+        /// <inheritdoc />
         public string CreatorId { get; set; }
+
+        /// <inheritdoc />
         public string Creator { get; set; }
     }
 
+    /// <summary>
+    /// 包含 Guid 修改人标识和名称的审计测试实体。
+    /// </summary>
     private class FullModificationGuid : IModificationAuditedObject<Guid?>, IHasModifier
     {
+        /// <inheritdoc />
         public DateTime? LastModificationTime { get; set; }
+
+        /// <inheritdoc />
         public Guid? LastModifierId { get; set; }
+
+        /// <inheritdoc />
         public string LastModifier { get; set; }
     }
 
+    /// <summary>
+    /// 包含 string 修改人标识的审计测试实体。
+    /// </summary>
     private class FullModificationString : IModificationAuditedObject<string>
     {
+        /// <inheritdoc />
         public DateTime? LastModificationTime { get; set; }
+
+        /// <inheritdoc />
         public string LastModifierId { get; set; }
     }
 
+    /// <summary>
+    /// 包含 Guid 删除人标识和名称的审计测试实体。
+    /// </summary>
     private class FullDeletionGuid : IDeletionAuditedObject<Guid?>, IHasDeleter
     {
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
+
+        /// <inheritdoc />
         public DateTime? DeletionTime { get; set; }
+
+        /// <inheritdoc />
         public Guid? DeleterId { get; set; }
+
+        /// <inheritdoc />
         public string Deleter { get; set; }
     }
 
+    /// <summary>
+    /// 包含 string 删除人标识的审计测试实体。
+    /// </summary>
     private class FullDeletionString : IDeletionAuditedObject<string>
     {
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
+
+        /// <inheritdoc />
         public DateTime? DeletionTime { get; set; }
+
+        /// <inheritdoc />
         public string DeleterId { get; set; }
     }
 
-    /// <summary>固定时间：用于断言 dateTime 参数覆盖</summary>
+    /// <summary>
+    /// 用于验证显式时间参数的固定时间。
+    /// </summary>
     private static readonly DateTime FixedTime = new DateTime(2025, 8, 1, 10, 0, 0, DateTimeKind.Local);
 
     // ════════════════════════════════════════════════════════════════

@@ -8,14 +8,14 @@ namespace Bing.Data.Sql;
 public interface ISqlConditionGroup
 {
     /// <summary>
-    /// 追加单来源 And 条件。
+    /// 追加 And 条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属的实体类型。</typeparam>
     /// <param name="predicate">单来源条件表达式。</param>
     void And<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
 
     /// <summary>
-    /// 按来源别名追加单来源 And 条件。
+    /// 追加 And 条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属的实体类型。</typeparam>
     /// <param name="predicate">单来源条件表达式。</param>
@@ -23,7 +23,7 @@ public interface ISqlConditionGroup
     void And<TEntity>(Expression<Func<TEntity, bool>> predicate, string alias) where TEntity : class;
 
     /// <summary>
-    /// 追加双来源 And 条件。
+    /// 追加 And 条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个条件来源的实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个条件来源的实体类型。</typeparam>
@@ -32,7 +32,7 @@ public interface ISqlConditionGroup
         where TFirst : class where TSecond : class;
 
     /// <summary>
-    /// 按来源别名追加双来源 And 条件。
+    /// 追加 And 条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个条件来源的实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个条件来源的实体类型。</typeparam>
@@ -44,14 +44,14 @@ public interface ISqlConditionGroup
         where TFirst : class where TSecond : class;
 
     /// <summary>
-    /// 追加单来源 Or 条件。
+    /// 追加 Or 条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属的实体类型。</typeparam>
     /// <param name="predicate">单来源条件表达式。</param>
     void Or<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
 
     /// <summary>
-    /// 按来源别名追加单来源 Or 条件。
+    /// 追加 Or 条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属的实体类型。</typeparam>
     /// <param name="predicate">单来源条件表达式。</param>
@@ -59,7 +59,7 @@ public interface ISqlConditionGroup
     void Or<TEntity>(Expression<Func<TEntity, bool>> predicate, string alias) where TEntity : class;
 
     /// <summary>
-    /// 追加双来源 Or 条件。
+    /// 追加 Or 条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个条件来源的实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个条件来源的实体类型。</typeparam>
@@ -68,7 +68,7 @@ public interface ISqlConditionGroup
         where TFirst : class where TSecond : class;
 
     /// <summary>
-    /// 按来源别名追加双来源 Or 条件。
+    /// 追加 Or 条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个条件来源的实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个条件来源的实体类型。</typeparam>
@@ -79,11 +79,15 @@ public interface ISqlConditionGroup
         string firstAlias, string secondAlias)
         where TFirst : class where TSecond : class;
 
-    /// <summary>按 And 追加嵌套条件组。</summary>
+    /// <summary>
+    /// 按 And 追加嵌套条件组。
+    /// </summary>
     /// <param name="configure">配置嵌套条件组的委托。</param>
     void AndGroup(Action<ISqlConditionGroup> configure);
 
-    /// <summary>按 Or 追加嵌套条件组。</summary>
+    /// <summary>
+    /// 按 Or 追加嵌套条件组。
+    /// </summary>
     /// <param name="configure">配置嵌套条件组的委托。</param>
     void OrGroup(Action<ISqlConditionGroup> configure);
 }

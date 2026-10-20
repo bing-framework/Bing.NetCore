@@ -10,10 +10,25 @@ namespace Bing.EntityFrameworkCore.Tests.Integration;
 /// </summary>
 public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
 {
+    /// <summary>
+    /// 测试数据库目录路径。
+    /// </summary>
     private readonly string _directoryPath = Path.Combine(Path.GetTempPath(), "bing-framework-tests", "ef-sqlite",
         Guid.NewGuid().ToString("N"));
+
+    /// <summary>
+    /// 测试服务提供程序。
+    /// </summary>
     private ServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// 第一个测试数据库的连接字符串。
+    /// </summary>
     private string _firstConnectionString;
+
+    /// <summary>
+    /// 第二个测试数据库的连接字符串。
+    /// </summary>
     private string _secondConnectionString;
 
     /// <summary>
@@ -228,7 +243,6 @@ public sealed class EfCoreSqliteMultiDatabaseIntegrationTest : IAsyncLifetime
     /// </summary>
     /// <param name="connectionString">SQLite 连接字符串。</param>
     /// <param name="name">初始记录名称。</param>
-    /// <returns>异步任务。</returns>
     private static async Task InitializeDatabaseAsync(string connectionString, string name)
     {
         await using var connection = new SqliteConnection(connectionString);
@@ -272,7 +286,7 @@ Insert Into ef_file_users(Id, Name) Values (1, @name);";
     private sealed class FileUnitOfWork : UnitOfWorkBase
     {
         /// <summary>
-        /// 初始化一个<see cref="FileUnitOfWork"/>类型的实例。
+        /// 初始化一个 <see cref="FileUnitOfWork"/> 类型的实例。
         /// </summary>
         /// <param name="options">数据库上下文配置。</param>
         /// <param name="serviceProvider">服务提供程序。</param>
@@ -286,10 +300,13 @@ Insert Into ef_file_users(Id, Name) Values (1, @name);";
     /// </summary>
     private sealed class FileTestDatabase : Bing.Data.IDatabase
     {
+        /// <summary>
+        /// 数据库上下文访问器。
+        /// </summary>
         private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
         /// <summary>
-        /// 初始化一个<see cref="FileTestDatabase"/>类型的实例。
+        /// 初始化一个 <see cref="FileTestDatabase"/> 类型的实例。
         /// </summary>
         /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
         public FileTestDatabase(IDatabaseContextAccessor databaseContextAccessor) =>

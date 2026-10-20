@@ -7,14 +7,23 @@ using Bing.Data.Sql;
 namespace Bing.Dapper.Tests.Builders.Clauses;
 
 /// <summary>
-/// <see cref="OracleJoinClause"/> 单元测试
-/// 验证 Oracle 方言下的 Join 子句生成行为（双引号标识符，:p_0 参数格式）
+/// <see cref="OracleJoinClause"/> 单元测试 验证 Oracle 方言下的 Join 子句生成行为（双引号标识符，:p_0 参数格式）
 /// </summary>
 public class OracleJoinClauseTest
 {
+    /// <summary>
+    /// Oracle 连接子句实例。
+    /// </summary>
     private readonly IParameterManager _parameterManager;
+
+    /// <summary>
+    /// Oracle 连接子句测试对象。
+    /// </summary>
     private readonly OracleJoinClause _clause;
 
+    /// <summary>
+    /// 初始化一个 <see cref="OracleJoinClauseTest"/> 类型的实例。
+    /// </summary>
     public OracleJoinClauseTest()
     {
         var builder = new OracleBuilder();
@@ -22,6 +31,10 @@ public class OracleJoinClauseTest
         _clause = (OracleJoinClause)((ISqlQueryClauseAccessor)builder).JoinClause;
     }
 
+    /// <summary>
+    /// 获取连接子句生成的 SQL。
+    /// </summary>
+    /// <returns>Join 子句生成的 SQL 文本。</returns>
     private string GetSql() => _clause.ToSql();
 
     // ── Default ───────────────────────────────────────────────────

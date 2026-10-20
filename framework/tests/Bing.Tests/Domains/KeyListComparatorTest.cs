@@ -17,7 +17,7 @@ public class KeyListComparatorTest
     private readonly KeyListComparator<Guid> _comparator;
 
     /// <summary>
-    /// 初始化一个<see cref="KeyListComparatorTest"/>类型的实例
+    /// 初始化一个 <see cref="KeyListComparatorTest"/> 类型的实例。
     /// </summary>
     public KeyListComparatorTest() => _comparator = new KeyListComparator<Guid>();
 

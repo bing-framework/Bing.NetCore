@@ -118,38 +118,38 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
     #region 属性
 
     /// <summary>
-    /// 跟踪号
+    /// 获取或设置跟踪号
     /// </summary>
     public string TraceId { get; set; }
 
     /// <summary>
-    /// Lazy延迟加载服务提供程序
+    /// 获取或设置Lazy延迟加载服务提供程序
     /// </summary>
     [Autowired]
     public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
     /// <summary>
-    /// 当前用户
+    /// 获取当前用户
     /// </summary>
     protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
 
     /// <summary>
-    /// 审计属性设置器
+    /// 获取审计属性设置器
     /// </summary>
     protected IAuditPropertySetter AuditPropertySetter => LazyServiceProvider.LazyGetRequiredService<IAuditPropertySetter>();
 
     /// <summary>
-    /// 数据过滤管理器
+    /// 获取数据过滤管理器
     /// </summary>
     protected IFilterManager FilterManager => LazyServiceProvider.LazyGetRequiredService<IFilterManager>();
 
     /// <summary>
-    /// 逻辑删除过滤器是否启用
+    /// 获取逻辑删除过滤器是否启用
     /// </summary>
     protected virtual bool IsSoftDeleteFilterEnabled => FilterManager?.IsEnabled<ISoftDelete>() ?? false;
 
     /// <summary>
-    /// 日志对象
+    /// 获取日志对象
     /// </summary>
     protected ILogger Logger { get; }
 
@@ -177,11 +177,12 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region OnConfiguring(配置)
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 配置每次创建 DbContext 时执行的基础选项。
-    /// </summary>
-    /// <param name="builder">配置生成器</param>
-    /// <remarks>每次创建新的 DbContext 对象时都会调用。</remarks>
+    ///
+    /// 每次创建新的 DbContext 对象时都会调用。
+    /// </remarks>
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         ConfiguringLog(builder);
@@ -233,11 +234,10 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region OnModelCreating(配置实体模型)
 
-    /// <summary>
-    /// 配置实体模型
-    /// </summary>
-    /// <remarks>只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置</remarks>
-    /// <param name="modelBuilder">映射生成器</param>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
+    /// </remarks>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ApplyConfigurations(modelBuilder);
@@ -369,10 +369,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region Commit(提交)
 
-    /// <summary>
-    /// 提交，返回影响的行数
-    /// </summary>
-    /// <returns>本次提交影响的实体行数。</returns>
+    /// <inheritdoc />
     public int Commit()
     {
         try
@@ -399,11 +396,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region CommitAsync(异步提交)
 
-    /// <summary>
-    /// 异步提交，返回影响的行数
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步提交操作的任务，结果为本次提交影响的实体行数。</returns>
+    /// <inheritdoc />
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -430,10 +423,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region SaveChanges(保存更改)
 
-    /// <summary>
-    /// 保存更改
-    /// </summary>
-    /// <returns>保存更改影响的实体行数。</returns>
+    /// <inheritdoc />
     public override int SaveChanges()
     {
         _pendingCreatedAuditChanges.Clear();
@@ -605,11 +595,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region SaveChangesAsync(保存)
 
-    /// <summary>
-    /// 异步保存更改
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步保存操作的任务，结果为保存更改影响的实体行数。</returns>
+    /// <inheritdoc />
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -1121,10 +1107,7 @@ public abstract class UnitOfWorkBase : DbContext, IUnitOfWork, IDatabase
 
     #region GetConnection(获取数据库连接)
 
-    /// <summary>
-    /// 获取数据库连接
-    /// </summary>
-    /// <returns>当前工作单元使用的数据库连接。</returns>
+    /// <inheritdoc />
     public IDbConnection GetConnection() => Database.GetDbConnection();
 
     #endregion

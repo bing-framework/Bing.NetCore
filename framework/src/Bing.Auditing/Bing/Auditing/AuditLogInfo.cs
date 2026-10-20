@@ -10,7 +10,7 @@ namespace Bing.Auditing;
 public class AuditLogInfo : IHasExtraProperties
 {
     /// <summary>
-    /// 初始化 <see cref="AuditLogInfo"/> 的实例及各审计明细集合。
+    /// 初始化一个 <see cref="AuditLogInfo"/> 类型的实例。
     /// </summary>
     public AuditLogInfo()
     {
@@ -27,9 +27,12 @@ public class AuditLogInfo : IHasExtraProperties
     public string ApplicationName { get; set; }
 
     /// <summary>
-    /// 获取或设置发起操作的当前用户标识；未认证或无法解析当前用户时为 <c>null</c>。
+    /// 获取或设置发起操作的当前用户标识。
     /// </summary>
-    /// <remarks>该属性描述实际发起当前操作的主体，不应与代操作用户属性混淆。</remarks>
+    /// <remarks>
+    /// 该属性描述实际发起当前操作的主体，不应与代操作用户属性混淆。
+    /// 未认证或无法解析当前用户时为 <c>null</c>。
+    /// </remarks>
     public string UserId { get; set; }
 
     /// <summary>
@@ -39,9 +42,12 @@ public class AuditLogInfo : IHasExtraProperties
     public string UserName { get; set; }
 
     /// <summary>
-    /// 获取或设置发起操作所属的当前租户标识；非多租户场景或无法解析租户时为 <c>null</c>。
+    /// 获取或设置发起操作所属的当前租户标识。
     /// </summary>
-    /// <remarks>该属性描述当前主体所在租户，不应与代操作租户属性混淆。</remarks>
+    /// <remarks>
+    /// 该属性描述当前主体所在租户，不应与代操作租户属性混淆。
+    /// 非多租户场景或无法解析租户时为 <c>null</c>。
+    /// </remarks>
     public string TenantId { get; set; }
 
     /// <summary>
@@ -51,23 +57,35 @@ public class AuditLogInfo : IHasExtraProperties
     public string TenantName { get; set; }
 
     /// <summary>
-    /// 获取或设置被当前主体代操作的用户标识；未发生代操作时为 <c>null</c>。
+    /// 获取或设置被当前主体代操作的用户标识。
     /// </summary>
+    /// <remarks>
+    /// 未发生代操作时为 <c>null</c>。
+    /// </remarks>
     public string ImpersonatorUserId { get; set; }
 
     /// <summary>
-    /// 获取或设置被当前主体代操作的租户标识；未发生代操作时为 <c>null</c>。
+    /// 获取或设置被当前主体代操作的租户标识。
     /// </summary>
+    /// <remarks>
+    /// 未发生代操作时为 <c>null</c>。
+    /// </remarks>
     public string ImpersonatorTenantId { get; set; }
 
     /// <summary>
-    /// 获取或设置被当前主体代操作的用户名；未发生代操作时为 <c>null</c>。
+    /// 获取或设置被当前主体代操作的用户名。
     /// </summary>
+    /// <remarks>
+    /// 未发生代操作时为 <c>null</c>。
+    /// </remarks>
     public string ImpersonatorUserName { get; set; }
 
     /// <summary>
-    /// 获取或设置被当前主体代操作的租户名称；未发生代操作时为 <c>null</c>。
+    /// 获取或设置被当前主体代操作的租户名称。
     /// </summary>
+    /// <remarks>
+    /// 未发生代操作时为 <c>null</c>。
+    /// </remarks>
     public string ImpersonatorTenantName { get; set; }
 
     /// <summary>
@@ -119,9 +137,12 @@ public class AuditLogInfo : IHasExtraProperties
     public string HttpMethod { get; set; }
 
     /// <summary>
-    /// 获取或设置 HTTP 响应状态码；非 HTTP 操作时为 <c>null</c>。
+    /// 获取或设置 HTTP 响应状态码。
     /// </summary>
-    /// <remarks>HTTP响应状态码。</remarks>
+    /// <remarks>
+    /// HTTP响应状态码。
+    /// 非 HTTP 操作时为 <c>null</c>。
+    /// </remarks>
     public int? HttpStatusCode { get; set; }
 
     /// <summary>
@@ -143,8 +164,11 @@ public class AuditLogInfo : IHasExtraProperties
     public List<Exception> Exceptions { get; set; }
 
     /// <summary>
-    /// 获取或设置本次审计范围内聚合的实体增删改记录；没有实体变更时为空集合。
+    /// 获取或设置本次审计范围内聚合的实体增删改记录。
     /// </summary>
+    /// <remarks>
+    /// 没有实体变更时为空集合。
+    /// </remarks>
     public List<EntityChangeInfo> EntityChanges { get; set; }
 
     /// <summary>
@@ -153,10 +177,10 @@ public class AuditLogInfo : IHasExtraProperties
     /// <remarks>用于将自定义消息添加到审计日志条目的任意字符串值。审计日志对象可能包含零个或多个注释。</remarks>
     public List<string> Comments { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回适用于诊断输出的审计日志摘要。
-    /// </summary>
-    /// <returns>包含请求、操作、异常和实体变更摘要的文本。</returns>
+    /// </remarks>
     public override string ToString()
     {
         var sb = new StringBuilder();

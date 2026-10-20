@@ -14,7 +14,7 @@ public sealed class DefaultSqlDatabaseIdentityResolver : ISqlDatabaseIdentityRes
     private readonly IReadOnlyList<ISqlDatabaseIdentityContributor> _contributors;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlDatabaseIdentityResolver"/>类型的实例。
+    /// 初始化一个 <see cref="DefaultSqlDatabaseIdentityResolver"/> 类型的实例。
     /// </summary>
     /// <param name="contributors">身份解析贡献者。</param>
     public DefaultSqlDatabaseIdentityResolver(IEnumerable<ISqlDatabaseIdentityContributor> contributors = null)

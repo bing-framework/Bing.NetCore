@@ -8,7 +8,7 @@ namespace Bing.Data.Sql;
 internal sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
 {
     /// <summary>
-    /// 初始化一个<see cref="SqlQueryFactory"/>类型的实例
+    /// 初始化一个 <see cref="SqlQueryFactory"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
@@ -28,7 +28,7 @@ internal sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
         CreateInstance<ISqlQuery>(string.IsNullOrWhiteSpace(dbKey) ? GetCurrentContext() : CreateContext(dbKey));
 
     /// <summary>
-    /// 创建固定在事务主库上下文中的查询对象。
+    /// 创建绑定到事务数据库上下文的查询对象。
     /// </summary>
     /// <param name="dbKey">数据源标识。</param>
     /// <param name="context">已解析的事务数据库上下文。</param>
@@ -40,7 +40,7 @@ internal sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
     }
 
     /// <summary>
-    /// 使用固定事务数据库上下文创建查询对象。
+    /// 创建绑定到事务数据库上下文的查询对象。
     /// </summary>
     /// <param name="context">事务数据库上下文。</param>
     /// <returns>查询对象。</returns>

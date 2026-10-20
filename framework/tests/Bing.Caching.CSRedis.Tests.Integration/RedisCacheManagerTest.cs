@@ -8,17 +8,17 @@ namespace Bing.Caching.CSRedis.Tests;
 public class RedisCacheManagerTest
 {
     /// <summary>
-    /// 缓存服务
+    /// 用于 Redis 缓存管理器测试的 CSRedis 缓存实例。
     /// </summary>
     private readonly ICache _cache;
 
     /// <summary>
-    /// 日志
+    /// 记录 CSRedis 缓存管理器测试信息的日志记录器。
     /// </summary>
     private readonly ILogger<RedisCacheManagerTest> _logger;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="RedisCacheManagerTest"/> 类型的实例。
     /// </summary>
     public RedisCacheManagerTest(ICache cache, ILogger<RedisCacheManagerTest> logger)
     {

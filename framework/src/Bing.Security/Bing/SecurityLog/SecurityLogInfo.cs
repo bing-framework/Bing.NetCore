@@ -72,16 +72,16 @@ public class SecurityLogInfo
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="SecurityLogInfo"/> 的实例及空附加属性字典。
+    /// 初始化一个 <see cref="SecurityLogInfo"/> 类型的实例。
     /// </summary>
     public SecurityLogInfo()
     {
         ExtraProperties = new Dictionary<string, object>();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回用于诊断输出的安全日志摘要。
-    /// </summary>
-    /// <returns>包含应用程序、身份和操作信息的安全日志摘要。</returns>
+    /// </remarks>
     public override string ToString() => $"SECURITY LOG: [{ApplicationName} - {Identity} -{Action}]";
 }

@@ -18,37 +18,37 @@ namespace Bing.AspNetCore.SecurityLog;
 public class AspNetCoreSecurityLogManager : DefaultSecurityLogManager
 {
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILogger<AspNetCoreSecurityLogManager> Logger { get; }
 
     /// <summary>
-    /// 当前用户
+    /// 获取当前用户
     /// </summary>
     protected ICurrentUser CurrentUser { get; }
 
     /// <summary>
-    /// 当前客户端
+    /// 获取当前客户端
     /// </summary>
     protected ICurrentClient CurrentClient { get; }
 
     /// <summary>
-    /// Http上下文访问器
+    /// 获取Http上下文访问器
     /// </summary>
     protected IHttpContextAccessor HttpContextAccessor { get; }
 
     /// <summary>
-    /// 跟踪标识提供程序
+    /// 获取跟踪标识提供程序
     /// </summary>
     protected ICorrelationIdProvider CorrelationIdProvider { get; }
 
     /// <summary>
-    /// Web客户端信息提供程序
+    /// 获取Web客户端信息提供程序
     /// </summary>
     protected IWebClientInfoProvider WebClientInfoProvider { get; }
 
     /// <summary>
-    /// /初始化一个<see cref="DefaultSecurityLogManager"/>类型的实例
+    /// 初始化一个 <see cref="AspNetCoreSecurityLogManager"/> 类型的实例。
     /// </summary>
     /// <param name="securityLogOptions">安全日志选项配置</param>
     /// <param name="securityLogStore">安全日志存储器</param>
@@ -76,10 +76,7 @@ public class AspNetCoreSecurityLogManager : DefaultSecurityLogManager
         WebClientInfoProvider = webClientInfoProvider;
     }
 
-    /// <summary>
-    /// 创建
-    /// </summary>
-    /// <returns>表示异步操作的任务，结果为包含当前请求和用户信息的安全日志。</returns>
+    /// <inheritdoc />
     protected override async Task<SecurityLogInfo> CreateAsync()
     {
         var securityLogInfo = await base.CreateAsync();

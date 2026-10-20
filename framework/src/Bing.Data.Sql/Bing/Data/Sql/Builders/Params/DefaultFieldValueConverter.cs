@@ -17,26 +17,15 @@ public class DefaultFieldValueConverter : IFieldValueConverter
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultFieldValueConverter"/>类型的实例
+    /// 初始化一个 <see cref="DefaultFieldValueConverter"/> 类型的实例。
     /// </summary>
     /// <param name="options">Sql 元数据配置</param>
     public DefaultFieldValueConverter(SqlMetadataOptions options = null) => _options = options ?? new SqlMetadataOptions();
 
-    /// <summary>
-    /// 是否支持当前列映射转换
-    /// </summary>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>是否支持转换</returns>
+    /// <inheritdoc />
     public bool CanConvert(ColumnMappingMetadata column, DatabaseContext databaseContext) => column != null;
 
-    /// <summary>
-    /// 将值转换为 Provider 可识别的参数值
-    /// </summary>
-    /// <param name="value">原始值</param>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>Provider 参数值</returns>
+    /// <inheritdoc />
     public object ConvertToProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext)
     {
         if (value == null || column == null)
@@ -64,13 +53,7 @@ public class DefaultFieldValueConverter : IFieldValueConverter
         }
     }
 
-    /// <summary>
-    /// 将 Provider 返回值转换为 CLR 值
-    /// </summary>
-    /// <param name="value">Provider 返回值</param>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>CLR 值</returns>
+    /// <inheritdoc />
     public object ConvertFromProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext)
     {
         if (value == null || column == null)

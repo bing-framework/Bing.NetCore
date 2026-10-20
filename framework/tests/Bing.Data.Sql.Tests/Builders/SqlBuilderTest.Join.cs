@@ -765,39 +765,76 @@ public partial class SqlBuilderTest
         Assert.Equal("Cross Join 不支持 On 条件。", exception.Message);
     }
 
+    /// <summary>
+    /// 提供投影别名冻结失败开关的测试 Builder。
+    /// </summary>
     private sealed class FreezeFailingSqlBuilder : TestSqlBuilder
     {
+        /// <summary>
+        /// 初始化一个 <see cref="FreezeFailingSqlBuilder"/> 类型的实例。
+        /// </summary>
         public FreezeFailingSqlBuilder()
         {
         }
 
+        /// <inheritdoc />
         protected override IJoinClause CreateJoinClause() => new FreezeFailingJoinClause(CreateClauseContext());
 
+        /// <summary>
+        /// 获取当前实体类型与别名的映射快照。
+        /// </summary>
         public IReadOnlyDictionary<Type, string> AliasData => AliasRegister.Data;
     }
 
+    /// <summary>
+    /// 提供参数管理器注入和别名快照读取能力的测试 Builder。
+    /// </summary>
     private sealed class InspectableParameterSqlBuilder : TestSqlBuilder
     {
+        /// <summary>
+        /// 初始化一个 <see cref="InspectableParameterSqlBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="parameterManager">用于测试的参数管理器。</param>
         public InspectableParameterSqlBuilder(IParameterManager parameterManager)
             : base(parameterManager: parameterManager)
         {
         }
 
+        /// <summary>
+        /// 获取当前实体类型与别名的映射快照。
+        /// </summary>
         public IReadOnlyDictionary<Type, string> AliasData => AliasRegister.Data;
     }
 
+    /// <summary>
+    /// 提供 Join 状态提交失败开关的测试连接子句。
+    /// </summary>
     private sealed class FreezeFailingJoinClause : JoinClause
     {
+        /// <summary>
+        /// 初始化一个 <see cref="FreezeFailingJoinClause"/> 类型的实例。
+        /// </summary>
+        /// <param name="context">子句使用的共享上下文。</param>
         public FreezeFailingJoinClause(SqlClauseContext context) : base(context)
         {
         }
 
+        /// <summary>
+        /// 获取或设置是否在冻结投影别名时抛出异常。
+        /// </summary>
         public bool FailFreeze { get; set; }
 
+        /// <summary>
+        /// 获取或设置是否在提交别名注册表后抛出异常。
+        /// </summary>
         public bool FailAliasCommit { get; set; }
 
+        /// <summary>
+        /// 获取或设置是否在提交连接项后抛出异常。
+        /// </summary>
         public bool FailJoinCommit { get; set; }
 
+        /// <inheritdoc />
         internal override void FreezeExistingProjectionAlias(Type entityType, SelectClause selectClause,
             IEntityAliasRegister register)
         {
@@ -806,6 +843,7 @@ public partial class SqlBuilderTest
             base.FreezeExistingProjectionAlias(entityType, selectClause, register);
         }
 
+        /// <inheritdoc />
         internal override void CommitAliasRegister(IEntityAliasRegister aliasRegister)
         {
             base.CommitAliasRegister(aliasRegister);
@@ -813,6 +851,7 @@ public partial class SqlBuilderTest
                 throw new InvalidOperationException("测试别名提交失败。");
         }
 
+        /// <inheritdoc />
         internal override void CommitJoinItem(JoinItem item)
         {
             base.CommitJoinItem(item);
@@ -821,23 +860,42 @@ public partial class SqlBuilderTest
         }
     }
 
+    /// <summary>
+    /// 提供 Join 参数状态提交失败子句的测试 Builder。
+    /// </summary>
     private sealed class CommitFailingSqlBuilder : TestSqlBuilder
     {
+        /// <summary>
+        /// 初始化一个 <see cref="CommitFailingSqlBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="parameterManager">用于测试的参数管理器。</param>
         public CommitFailingSqlBuilder(IParameterManager parameterManager) : base(parameterManager: parameterManager)
         {
         }
 
+        /// <inheritdoc />
         protected override IJoinClause CreateJoinClause() => new CommitFailingJoinClause(CreateClauseContext());
     }
 
+    /// <summary>
+    /// 提供参数管理器提交失败开关的测试连接子句。
+    /// </summary>
     private sealed class CommitFailingJoinClause : JoinClause
     {
+        /// <summary>
+        /// 初始化一个 <see cref="CommitFailingJoinClause"/> 类型的实例。
+        /// </summary>
+        /// <param name="context">子句使用的共享上下文。</param>
         public CommitFailingJoinClause(SqlClauseContext context) : base(context)
         {
         }
 
+        /// <summary>
+        /// 获取或设置是否在提交参数管理器后抛出异常。
+        /// </summary>
         public bool FailParameterCommit { get; set; }
 
+        /// <inheritdoc />
         internal override void CommitParameterManager(IParameterManager parameterManager,
             ISqlMultiSourceFromClause fromClause)
         {
@@ -847,30 +905,57 @@ public partial class SqlBuilderTest
         }
     }
 
+    /// <summary>
+    /// 在指定添加次数后抛出异常的参数管理器测试替身。
+    /// </summary>
     private sealed class ThrowingParameterManager : IParameterManager
     {
+        /// <summary>
+        /// 执行实际参数管理的内部实例。
+        /// </summary>
         private readonly ParameterManager _inner;
+
+        /// <summary>
+        /// 当前已处理的参数添加次数。
+        /// </summary>
         private int _addCount;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ThrowingParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="dialect">参数名称生成使用的 SQL 方言。</param>
+        /// <param name="failAfterAdds">触发异常前允许的添加次数。</param>
         public ThrowingParameterManager(IDialect dialect, int? failAfterAdds = null)
             : this(new ParameterManager(dialect), failAfterAdds)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="ThrowingParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="inner">实际执行参数操作的管理器。</param>
+        /// <param name="failAfterAdds">触发异常前允许的添加次数。</param>
         private ThrowingParameterManager(ParameterManager inner, int? failAfterAdds)
         {
             _inner = inner;
             FailAfterAdds = failAfterAdds;
         }
 
+        /// <summary>
+        /// 获取或设置开始抛出异常前允许的添加次数。
+        /// </summary>
         public int? FailAfterAdds { get; set; }
 
+        /// <inheritdoc />
         public string GenerateName() => _inner.GenerateName();
 
+        /// <inheritdoc />
         public string NormalizeName(string name) => _inner.NormalizeName(name);
 
+        /// <inheritdoc />
         public int Count => _inner.Count;
 
+        /// <inheritdoc />
         public void Add(string name, object value, Operator? @operator = null)
         {
             if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
@@ -878,49 +963,82 @@ public partial class SqlBuilderTest
             _inner.Add(name, value, @operator);
         }
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
 
+        /// <inheritdoc />
         public bool Contains(string name) => _inner.Contains(name);
 
+        /// <inheritdoc />
         public object GetValue(string name) => _inner.GetValue(name);
 
+        /// <inheritdoc />
         public IParameterManager Clone() => new ThrowingParameterManager(
             (ParameterManager)_inner.Clone(), FailAfterAdds);
 
+        /// <inheritdoc />
         public void Clear()
         {
             _addCount = 0;
             _inner.Clear();
         }
 
+        /// <inheritdoc />
         public IParameterManager CreateEmpty() => new ThrowingParameterManager(
             (ParameterManager)_inner.CreateEmpty(), FailAfterAdds);
     }
 
+    /// <summary>
+    /// 在指定添加次数后抛出异常的增强参数管理器测试替身。
+    /// </summary>
     private sealed class ThrowingAdvancedParameterManager : IAdvancedParameterManager
     {
+        /// <summary>
+        /// 执行实际参数管理的内部实例。
+        /// </summary>
         private readonly ParameterManager _inner;
+
+        /// <summary>
+        /// 当前已处理的参数添加次数。
+        /// </summary>
         private int _addCount;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ThrowingAdvancedParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="dialect">参数名称生成使用的 SQL 方言。</param>
+        /// <param name="failAfterAdds">触发异常前允许的添加次数。</param>
         public ThrowingAdvancedParameterManager(IDialect dialect, int? failAfterAdds = null)
             : this(new ParameterManager(dialect), failAfterAdds)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="ThrowingAdvancedParameterManager"/> 类型的实例。
+        /// </summary>
+        /// <param name="inner">实际执行参数操作的管理器。</param>
+        /// <param name="failAfterAdds">触发异常前允许的添加次数。</param>
         private ThrowingAdvancedParameterManager(ParameterManager inner, int? failAfterAdds)
         {
             _inner = inner;
             FailAfterAdds = failAfterAdds;
         }
 
+        /// <summary>
+        /// 获取或设置开始抛出异常前允许的添加次数。
+        /// </summary>
         public int? FailAfterAdds { get; set; }
 
+        /// <inheritdoc />
         public string GenerateName() => _inner.GenerateName();
 
+        /// <inheritdoc />
         public string NormalizeName(string name) => _inner.NormalizeName(name);
 
+        /// <inheritdoc />
         public int Count => _inner.Count;
 
+        /// <inheritdoc />
         public void Add(string name, object value, Operator? @operator = null)
         {
             if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
@@ -928,6 +1046,7 @@ public partial class SqlBuilderTest
             _inner.Add(name, value, @operator);
         }
 
+        /// <inheritdoc />
         public void Add(SqlParam parameter)
         {
             if (FailAfterAdds.HasValue && _addCount++ >= FailAfterAdds.Value)
@@ -935,25 +1054,33 @@ public partial class SqlBuilderTest
             _inner.Add(parameter);
         }
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => _inner.GetSqlParams();
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> ExportValues() => _inner.ExportValues();
 
+        /// <inheritdoc />
         public bool Contains(string name) => _inner.Contains(name);
 
+        /// <inheritdoc />
         public object GetValue(string name) => _inner.GetValue(name);
 
+        /// <inheritdoc />
         public IParameterManager Clone() => new ThrowingAdvancedParameterManager(
             (ParameterManager)_inner.Clone(), FailAfterAdds);
 
+        /// <inheritdoc />
         public void Clear()
         {
             _addCount = 0;
             _inner.Clear();
         }
 
+        /// <inheritdoc />
         public IParameterManager CreateEmpty() => new ThrowingAdvancedParameterManager(
             (ParameterManager)_inner.CreateEmpty(), FailAfterAdds);
     }
@@ -961,6 +1088,8 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 获取参数及其关键元数据的稳定快照。
     /// </summary>
+    /// <param name="builder">包含待捕获参数信息的测试 Builder。</param>
+    /// <returns>返回按参数名排序的参数及其元数据快照。</returns>
     private static string[] CaptureParameterMetadata(TestSqlBuilder builder)
     {
         var manager = Assert.IsAssignableFrom<IAdvancedParameterManager>(builder.ParameterManager);
@@ -968,8 +1097,10 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 获取增强参数管理器的稳定元数据快照。
+    /// 获取参数及其关键元数据的稳定快照。
     /// </summary>
+    /// <param name="manager">包含待捕获参数信息的参数管理器。</param>
+    /// <returns>返回按参数名排序的参数及其元数据快照。</returns>
     private static string[] CaptureParameterMetadata(IAdvancedParameterManager manager) =>
         manager.GetSqlParams().OrderBy(item => item.Key).Select(item =>
             $"{item.Key}|{item.Value.Value}|{item.Value.OriginalValue}|{item.Value.DbType}|{item.Value.Direction}|" +
@@ -979,6 +1110,8 @@ public partial class SqlBuilderTest
     /// <summary>
     /// 获取类型化连接来源图的稳定快照。
     /// </summary>
+    /// <param name="builder">包含待捕获连接来源的测试 Builder。</param>
+    /// <returns>返回按来源顺序排列的连接来源快照。</returns>
     private static string[] CaptureSourceGraph(TestSqlBuilder builder) => builder.GetTypedJoinSources()
         .Select(source => $"{source.SourceId}|{source.EntityType?.FullName}|{source.Alias}")
         .ToArray();

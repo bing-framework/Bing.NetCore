@@ -13,7 +13,7 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="Warning"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     public Warning(string message) : this(message, null)
@@ -21,7 +21,7 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="Warning"/> 类型的实例。
     /// </summary>
     /// <param name="exception">异常</param>
     public Warning(Exception exception) : this(null, null, exception)
@@ -29,7 +29,7 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="Warning"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="code">错误码</param>
@@ -46,14 +46,10 @@ public class Warning : Exception, IHasErrorCode, IHasHttpStatusCode
 
     #region 属性
 
-    /// <summary>
-    /// 错误码
-    /// </summary>
+    /// <inheritdoc />
     public string Code { get; set; }
 
-    /// <summary>
-    /// Http状态码
-    /// </summary>
+    /// <inheritdoc />
     public int HttpStatusCode { get; set; }
 
     #endregion

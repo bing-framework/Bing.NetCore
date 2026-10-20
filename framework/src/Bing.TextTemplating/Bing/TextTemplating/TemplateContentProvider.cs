@@ -28,7 +28,7 @@ public class TemplateContentProvider : ITemplateContentProvider, ITransientDepen
     private readonly ITemplateDefinitionManager _templateDefinitionManager;
 
     /// <summary>
-    /// 初始化一个<see cref="TemplateContentProvider"/>类型的实例
+    /// 初始化一个 <see cref="TemplateContentProvider"/> 类型的实例。
     /// </summary>
     /// <param name="templateDefinitionManager">模板定义管理器</param>
     /// <param name="serviceScopeFactory">服务作用域工厂</param>

@@ -4,10 +4,10 @@
 
 为什么需要它
 ------------
-本仓库的文档规模已经不小（docs/ 下 60+ 篇 Markdown + 67 份包级 README），
+本仓库的文档规模已经不小（docs/ 下 80+ 篇 Markdown + 70 份包级 README），
 而历史上反复出现过同一类问题，全部是「机器能查、人不一定记得查」的：
 
-* 包表漏包 —— 根 README 的 NuGet 包表只有 55 行，实际有 67 个可发包；
+* 包表漏包 —— 根 README 的 NuGet 包表曾只有 55 行，当前由源码目录动态核对；
 * 双份漂移 —— ``docs/index.md``（docfx 首页）与根 ``README.md`` 长期不同步；
 * 断链 —— 新增/重命名文档后，别处指向它的链接没人改；
 * 事实性笔误 —— ``NSubstitute``（实际是 Shouldly/Moq）、``NPostgreSql``（实际是 Npgsql）、

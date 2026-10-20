@@ -18,7 +18,7 @@ public class StoreStringLocalizerFactory : IStringLocalizerFactory
     private readonly ILocalizedStore _store;
 
     /// <summary>
-    /// 缓存
+    /// 供数据存储本地化查找器复用结果的内存缓存。
     /// </summary>
     private readonly IMemoryCache _cache;
 

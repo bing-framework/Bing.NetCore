@@ -905,7 +905,6 @@ public class DatabaseScopeAndDataSourceTest
     /// <param name="manager">数据库上下文作用域管理器。</param>
     /// <param name="accessor">数据库上下文访问器。</param>
     /// <param name="dbKey">数据库标识。</param>
-    /// <returns>异步任务。</returns>
     private static async Task ChangeDatabaseAsync(IDatabaseScopeManager manager,
         IDatabaseContextAccessor accessor, string dbKey)
     {

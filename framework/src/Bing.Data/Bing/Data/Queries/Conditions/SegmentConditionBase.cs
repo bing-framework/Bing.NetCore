@@ -39,7 +39,7 @@ public abstract class SegmentConditionBase<TEntity, TProperty, TValue> : ICondit
     private readonly Boundary _boundary;
 
     /// <summary>
-    /// 初始化一个<see cref="SegmentConditionBase{TEntity,TProperty,TValue}"/>类型的实例
+    /// 初始化一个 <see cref="SegmentConditionBase{TEntity, TProperty, TValue}"/> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>
@@ -69,10 +69,10 @@ public abstract class SegmentConditionBase<TEntity, TProperty, TValue> : ICondit
     /// <returns>范围端点的包含规则。</returns>
     protected Boundary GetBoundary() => _boundary;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 根据当前最小值、最大值和端点规则创建查询条件。
-    /// </summary>
-    /// <returns>用于筛选目标实体的谓词表达式。</returns>
+    /// </remarks>
     public Expression<Func<TEntity, bool>> GetCondition()
     {
         _builder.Clear();

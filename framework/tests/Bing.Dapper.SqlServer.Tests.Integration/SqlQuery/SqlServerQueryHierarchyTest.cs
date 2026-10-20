@@ -16,7 +16,7 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlServerQueryHierarchyTest"/>类型的实例。
+    /// 初始化一个 <see cref="SqlServerQueryHierarchyTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
     public SqlServerQueryHierarchyTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -62,7 +62,6 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     /// <summary>
     /// 写入固定邻接表树状测试数据。
     /// </summary>
-    /// <returns>写入任务。</returns>
     private async Task SeedHierarchyNodesAsync()
     {
         using var executor = _fixture.CreateExecutor();
@@ -85,22 +84,25 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     private sealed class HierarchyNode
     {
         /// <summary>
-        /// 节点标识。
+        /// 获取或设置节点标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 父节点标识；根节点为 <see langword="null"/>。
+        /// 获取或设置父节点标识。
         /// </summary>
+        /// <remarks>
+        /// 根节点的父节点标识为 <see langword="null"/>。
+        /// </remarks>
         public int? ParentId { get; set; }
 
         /// <summary>
-        /// 节点名称。
+        /// 获取或设置节点名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 从根节点开始计算的层级深度。
+        /// 获取或设置从根节点开始计算的层级深度。
         /// </summary>
         public int Depth { get; set; }
     }

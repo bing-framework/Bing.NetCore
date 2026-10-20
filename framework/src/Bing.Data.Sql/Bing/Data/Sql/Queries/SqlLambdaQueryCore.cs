@@ -23,7 +23,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         _query = new SqlQuery(executor, builder);
 
     /// <summary>
-    /// 基于已有查询对象初始化一个查询核心副本。
+    /// 初始化一个 <see cref="SqlLambdaQueryCore"/> 类型的实例。
     /// </summary>
     /// <param name="query">已有查询对象。</param>
     private SqlLambdaQueryCore(SqlQuery query) => _query = query ?? throw new ArgumentNullException(nameof(query));
@@ -50,7 +50,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// </summary>
     internal string QueryContextId => _query.QueryContextId;
 
-    /// <summary>生成当前查询的 SQL 文本。</summary>
+    /// <summary>
+    /// 生成当前查询的 SQL 文本。
+    /// </summary>
     /// <returns>当前查询的 SQL 文本。</returns>
     public string ToSql() => _query.RenderSql();
 
@@ -59,7 +61,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// </summary>
     internal void Touch() => _query.Touch();
 
-    /// <summary>同步执行当前 Lambda 查询并完整物化指定结果类型。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果列表。</returns>
@@ -73,44 +77,58 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <returns>查询到的实体；没有结果时返回类型默认值。</returns>
     internal TResult ToEntity<TResult>(int? timeout = null) => _query.ToEntity<TResult>(timeout);
 
-    /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的第一行。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并获取指定结果类型的第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行。</returns>
     public TResult First<TResult>(int? timeout = null) => _query.First<TResult>(timeout);
 
-    /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行；没有结果时返回类型默认值。</returns>
     public TResult FirstOrDefault<TResult>(int? timeout = null) => _query.FirstOrDefault<TResult>(timeout);
 
-    /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的唯一一行。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并获取指定结果类型的唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询到的唯一结果。</returns>
     public TResult Single<TResult>(int? timeout = null) => _query.Single<TResult>(timeout);
 
-    /// <summary>同步执行当前 Lambda 查询并获取指定结果类型的首行首列值。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并获取指定结果类型的首行首列值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询得到的标量值。</returns>
     public TResult Scalar<TResult>(int? timeout = null) => _query.Scalar<TResult>(timeout);
 
-    /// <summary>同步执行当前 Lambda 查询并返回指定结果类型的分页结果。</summary>
+    /// <summary>
+    /// 同步执行当前 Lambda 查询并返回指定结果类型的分页结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="pager">分页参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含分页数据和分页信息的结果。</returns>
     public PagerList<TResult> ToPage<TResult>(IPager pager = null, int? timeout = null) => _query.ToPage<TResult>(pager, timeout);
 
-    /// <summary>以同步流方式执行当前 Lambda 查询并映射为指定结果类型。</summary>
+    /// <summary>
+    /// 以同步流方式执行当前 Lambda 查询并映射为指定结果类型。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>按需读取查询结果的可枚举序列。</returns>
     public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null) => _query.AsEnumerable<TResult>(timeout);
 
-    /// <summary>异步执行当前 Lambda 查询并完整物化指定结果类型。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -128,7 +146,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _query.ToEntityAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的第一行。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并获取指定结果类型的第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -136,7 +156,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public Task<TResult> FirstAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.FirstAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -144,7 +166,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public Task<TResult> FirstOrDefaultAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的唯一一行。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并获取指定结果类型的唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -152,7 +176,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public Task<TResult> SingleAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.SingleAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行当前 Lambda 查询并获取指定结果类型的首行首列值。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并获取指定结果类型的首行首列值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -160,7 +186,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public Task<TResult> ScalarAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
         _query.ScalarAsync<TResult>(timeout, cancellationToken);
 
-    /// <summary>异步执行当前 Lambda 查询并返回指定结果类型的分页结果。</summary>
+    /// <summary>
+    /// 异步执行当前 Lambda 查询并返回指定结果类型的分页结果。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="pager">分页参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -169,7 +197,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     public Task<PagerList<TResult>> ToPageAsync<TResult>(IPager pager = null, int? timeout = null,
         CancellationToken cancellationToken = default) => _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
 
-    /// <summary>以异步流方式执行当前 Lambda 查询并映射为指定结果类型。</summary>
+    /// <summary>
+    /// 以异步流方式执行当前 Lambda 查询并映射为指定结果类型。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -183,7 +213,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <inheritdoc />
     void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
 
-    /// <summary>使用已绑定表源解析多表谓词并追加到 Where 子句。</summary>
+    /// <summary>
+    /// 追加查询条件。
+    /// </summary>
     /// <param name="expression">条件表达式。</param>
     /// <returns>追加条件后的当前查询核心。</returns>
     internal SqlLambdaQueryCore WhereCore(LambdaExpression expression)
@@ -191,7 +223,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return WhereCore(expression, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源解析谓词并追加到 Where 子句。</summary>
+    /// <summary>
+    /// 追加查询条件。
+    /// </summary>
     /// <param name="expression">条件表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     /// <returns>追加条件后的当前查询核心。</returns>
@@ -284,7 +318,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return selected;
     }
 
-    /// <summary>使用已绑定表源设置多表投影列。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <param name="expression">投影表达式。</param>
     /// <returns>设置投影后的当前查询核心。</returns>
     internal SqlLambdaQueryCore SelectCore(LambdaExpression expression)
@@ -292,7 +328,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return SelectCore(expression, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源设置投影列。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <param name="expression">投影表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     /// <returns>设置投影后的当前查询核心。</returns>
@@ -307,7 +345,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>追加指定来源的投影列。</summary>
+    /// <summary>
+    /// 追加指定来源的投影列。
+    /// </summary>
     /// <param name="expression">投影表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     internal void AppendSelectCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
@@ -337,14 +377,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         Touch();
     }
 
-    /// <summary>使用 DTO 成员初始化表达式设置多表投影列。</summary>
+    /// <summary>
+    /// 设置 DTO 查询投影。
+    /// </summary>
     /// <param name="expression">DTO 成员初始化或投影表达式。</param>
     internal void SelectTypedCore(LambdaExpression expression)
     {
         SelectTypedCore(expression, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源设置 DTO 投影。</summary>
+    /// <summary>
+    /// 设置 DTO 查询投影。
+    /// </summary>
     /// <param name="expression">DTO 成员初始化或投影表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     internal void SelectTypedCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
@@ -359,7 +403,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         Touch();
     }
 
-    /// <summary>使用严格 DTO 成员初始化投影创建冻结的类型化派生表。</summary>
+    /// <summary>
+    /// 使用严格 DTO 成员初始化投影创建冻结的类型化派生表。
+    /// </summary>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="expression">DTO 成员初始化投影表达式。</param>
     /// <param name="alias">派生表别名。</param>
@@ -390,7 +436,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
             _query.QueryContextId);
     }
 
-    /// <summary>使用已绑定表源设置多表分组列。</summary>
+    /// <summary>
+    /// 设置分组列。
+    /// </summary>
     /// <param name="expression">分组表达式。</param>
     /// <returns>追加分组列后的当前查询核心。</returns>
     internal SqlLambdaQueryCore GroupByCore(LambdaExpression expression)
@@ -398,7 +446,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return GroupByCore(expression, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源设置分组列。</summary>
+    /// <summary>
+    /// 设置分组列。
+    /// </summary>
     /// <param name="expression">分组表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     /// <returns>追加分组列后的当前查询核心。</returns>
@@ -412,7 +462,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>使用已绑定表源设置多表 Having 条件。</summary>
+    /// <summary>
+    /// 设置 Having 条件。
+    /// </summary>
     /// <param name="expression">Having 条件表达式。</param>
     /// <returns>追加 Having 条件后的当前查询核心。</returns>
     internal SqlLambdaQueryCore HavingCore(LambdaExpression expression)
@@ -420,7 +472,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return HavingCore(expression, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源设置 Having 条件。</summary>
+    /// <summary>
+    /// 设置 Having 条件。
+    /// </summary>
     /// <param name="expression">Having 条件表达式。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
     /// <returns>追加 Having 条件后的当前查询核心。</returns>
@@ -434,7 +488,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>使用已绑定表源设置多表排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <param name="expression">排序表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <returns>追加排序列后的当前查询核心。</returns>
@@ -443,7 +499,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return OrderByCore(expression, desc, GetBoundSources((ISqlQueryClauseAccessor)GetBuilder()));
     }
 
-    /// <summary>使用指定表源设置排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <param name="expression">排序表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
     /// <param name="sources">表达式参数对应的查询表源。</param>
@@ -459,7 +517,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>原子添加类型化内连接表。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
@@ -467,7 +527,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void JoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().Join<TJoin>(GetFromClause(), predicate, alias, schema));
 
-    /// <summary>按指定左侧来源将二元连接表达式扩展为当前查询图的参数布局。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftSource">连接条件左侧的已有表源。</param>
@@ -479,7 +541,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         JoinAndTouch(() => GetJoinClause().Join<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
     }
 
-    /// <summary>原子添加类型化左外连接并扩展二元来源绑定。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftSource">连接条件左侧的已有表源。</param>
@@ -489,7 +553,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().LeftJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
 
-    /// <summary>原子添加类型化右外连接并扩展二元来源绑定。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftSource">连接条件左侧的已有表源。</param>
@@ -499,7 +565,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().RightJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
 
-    /// <summary>原子添加类型化全外连接并扩展二元来源绑定。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="leftSource">连接条件左侧的已有表源。</param>
@@ -537,7 +605,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         return Expression.Lambda(predicate.Body, parameters);
     }
 
-    /// <summary>原子添加类型化左外连接表。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
@@ -545,7 +615,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void LeftJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().LeftJoin<TJoin>(GetFromClause(), predicate, alias, schema));
 
-    /// <summary>原子添加类型化右外连接表。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
@@ -553,7 +625,9 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void RightJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().RightJoin<TJoin>(GetFromClause(), predicate, alias, schema));
 
-    /// <summary>原子添加类型化全外连接表。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
     /// <param name="alias">连接表别名。</param>
@@ -561,14 +635,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void FullJoinCore<TJoin>(LambdaExpression predicate, string alias, string schema) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().FullJoin<TJoin>(GetFromClause(), predicate, alias, schema));
 
-    /// <summary>原子添加类型化派生表内连接。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
     /// <param name="predicate">连接条件表达式。</param>
     internal void JoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().Join(GetFromClause(), subquery, predicate));
 
-    /// <summary>按指定左侧来源添加二元类型化派生表内连接。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
@@ -579,14 +657,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TLeft : class where TProjection : class =>
         JoinAndTouch(() => GetJoinClause().Join(GetFromClause(), subquery, ExpandJoinPredicate(predicate, leftSource)));
 
-    /// <summary>原子添加类型化派生表左外连接。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
     /// <param name="predicate">连接条件表达式。</param>
     internal void LeftJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().LeftJoin(GetFromClause(), subquery, predicate));
 
-    /// <summary>按指定左侧来源添加二元类型化派生表左外连接。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
@@ -597,14 +679,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TLeft : class where TProjection : class =>
         JoinAndTouch(() => GetJoinClause().LeftJoin(GetFromClause(), subquery, ExpandJoinPredicate(predicate, leftSource)));
 
-    /// <summary>原子添加类型化派生表右外连接。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
     /// <param name="predicate">连接条件表达式。</param>
     internal void RightJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().RightJoin(GetFromClause(), subquery, predicate));
 
-    /// <summary>按指定左侧来源添加二元类型化派生表右外连接。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
@@ -615,14 +701,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TLeft : class where TProjection : class =>
         JoinAndTouch(() => GetJoinClause().RightJoin(GetFromClause(), subquery, ExpandJoinPredicate(predicate, leftSource)));
 
-    /// <summary>原子添加类型化派生表全外连接。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
     /// <param name="predicate">连接条件表达式。</param>
     internal void FullJoinCore<TJoin>(SqlSubquery<TJoin> subquery, LambdaExpression predicate) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().FullJoin(GetFromClause(), subquery, predicate));
 
-    /// <summary>按指定左侧来源添加二元类型化派生表全外连接。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">待连接的派生表。</param>
@@ -633,14 +723,18 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         where TLeft : class where TProjection : class =>
         JoinAndTouch(() => GetJoinClause().FullJoin(GetFromClause(), subquery, ExpandJoinPredicate(predicate, leftSource)));
 
-    /// <summary>添加类型化交叉连接表。</summary>
+    /// <summary>
+    /// 添加交叉连接。
+    /// </summary>
     /// <typeparam name="TJoin">连接表实体类型。</typeparam>
     /// <param name="alias">连接表别名。</param>
     /// <param name="schema">连接表架构名。</param>
     internal void CrossJoinCore<TJoin>(string alias, string schema) where TJoin : class =>
         JoinAndTouch(() => GetJoinClause().CrossJoin<TJoin>(alias, schema));
 
-    /// <summary>添加类型化交叉连接派生表。</summary>
+    /// <summary>
+    /// 添加交叉连接。
+    /// </summary>
     /// <typeparam name="TJoin">派生表投影类型。</typeparam>
     /// <param name="subquery">待交叉连接的派生表。</param>
     internal void CrossJoinCore<TJoin>(SqlSubquery<TJoin> subquery) where TJoin : class =>
@@ -680,19 +774,19 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 获取当前查询的根来源子句。
+    /// 获取 From 子句。
     /// </summary>
     /// <returns>当前查询的根来源子句。</returns>
     internal ISqlMultiSourceFromClause GetFromClause() => GetFromClause((ISqlQueryClauseAccessor)GetBuilder());
 
     /// <summary>
-    /// 获取当前查询的连接子句。
+    /// 获取 Join 子句。
     /// </summary>
     /// <returns>当前查询的连接子句。</returns>
     internal ISqlMultiSourceJoinClause GetJoinClause() => GetJoinClause((ISqlQueryClauseAccessor)GetBuilder());
 
     /// <summary>
-    /// 从查询子句访问器获取根来源子句。
+    /// 获取 From 子句。
     /// </summary>
     /// <param name="accessor">SQL 查询子句访问器。</param>
     /// <returns>查询的根来源子句。</returns>
@@ -701,7 +795,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 From 能力。");
 
     /// <summary>
-    /// 从查询子句访问器获取 Lambda 多源 Join 能力。
+    /// 获取 Join 子句。
     /// </summary>
     /// <param name="accessor">SQL 查询子句访问器。</param>
     /// <returns>Lambda 多源 Join 能力。</returns>
@@ -712,6 +806,8 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <summary>
     /// 从查询子句访问器获取 Lambda 多源 Select 能力。
     /// </summary>
+    /// <param name="accessor">SQL 查询子句访问器。</param>
+    /// <returns>当前查询的 Lambda 多源 Select 子句。</returns>
     internal static ISqlMultiSourceSelectClause GetSelectClause(ISqlQueryClauseAccessor accessor) =>
         accessor?.SelectClause as ISqlMultiSourceSelectClause ??
         throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Select 能力。");
@@ -719,6 +815,8 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <summary>
     /// 从查询子句访问器获取 Lambda 多源 Group By 能力。
     /// </summary>
+    /// <param name="accessor">SQL 查询子句访问器。</param>
+    /// <returns>当前查询的 Lambda 多源 Group By 子句。</returns>
     internal static ISqlMultiSourceGroupByClause GetGroupByClause(ISqlQueryClauseAccessor accessor) =>
         accessor?.GroupByClause as ISqlMultiSourceGroupByClause ??
         throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Group By 能力。");
@@ -726,6 +824,8 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <summary>
     /// 从查询子句访问器获取 Lambda 多源 Order By 能力。
     /// </summary>
+    /// <param name="accessor">SQL 查询子句访问器。</param>
+    /// <returns>当前查询的 Lambda 多源 Order By 子句。</returns>
     internal static ISqlMultiSourceOrderByClause GetOrderByClause(ISqlQueryClauseAccessor accessor) =>
         accessor?.OrderByClause as ISqlMultiSourceOrderByClause ??
         throw new NotSupportedException("当前 SQL Provider 未实现 Lambda 多源 Order By 能力。");

@@ -24,7 +24,7 @@ Status: APPROVED_FOR_EXECUTION
   - `ai_docs/tasks/sql-query-dev-v6-api-refactor/plan.md`
   - `ai_docs/tasks/sql-query-dev-v6-api-refactor/execution.md`
   - `ai_docs/tasks/sql-query-dev-v6-api-refactor/review.md`
-  - `ai_docs/tasks/sql-lambda-query-api-v4/review.md`
+  - `ai_docs/tasks/completed/sql-query-api.md#sql-lambda-query-api-v4-review`
 - 设计与治理：
   - `ai_docs/sql-lambda-query-design.md`
   - `ai_docs/sql-public-api-governance.md`

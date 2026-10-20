@@ -11,13 +11,14 @@ using Bing.Test.Shared;
 namespace Bing.Caching.FreeRedis.Tests;
 
 /// <summary>
-/// 启动配置
+/// 配置 FreeRedis 集成测试主机。
 /// </summary>
 public class Startup
 {
     /// <summary>
-    /// 配置主机
+    /// 配置集成测试主机。
     /// </summary>
+    /// <param name="hostBuilder">待配置的主机构建器。</param>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
         hostBuilder.ConfigureAppConfiguration((context, builder) =>
@@ -26,8 +27,9 @@ public class Startup
     }
 
     /// <summary>
-    /// 配置服务
+    /// 注册 FreeRedis 集成测试所需的依赖项。
     /// </summary>
+    /// <param name="services">服务集合。</param>
     public void ConfigureServices(IServiceCollection services)
     {
         if (IntegrationTestGate.IsProviderEnabled() == false)
@@ -44,14 +46,17 @@ public class Startup
             redisClient.Deserialize = JsonConvert.DeserializeObject;
             return redisClient;
         });
+        services.AddSingleton(new CacheConfiguration("bing-cache-freeredis-integration", "FreeRedis"));
         services.AddScoped<ICache, FreeRedisCacheManager>();
         // 日志
         services.AddLogging(logBuilder => logBuilder.AddXunitOutput());
     }
 
     /// <summary>
-    /// 配置日志提供程序
+    /// 配置测试日志和活动监听。
     /// </summary>
+    /// <param name="loggerFactory">用于配置测试日志的日志工厂。</param>
+    /// <param name="accessor">用于访问 xUnit 输出助手的访问器。</param>
     public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor)
     {
         var listener = new ActivityListener();

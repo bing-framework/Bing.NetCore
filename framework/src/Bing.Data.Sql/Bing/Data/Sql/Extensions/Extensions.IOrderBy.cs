@@ -25,7 +25,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加到 OrderBy 子句。
+    /// 追加 OrderBy 表达式。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -42,7 +42,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件添加到 OrderBy 子句。
+    /// 追加 OrderBy 表达式。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>

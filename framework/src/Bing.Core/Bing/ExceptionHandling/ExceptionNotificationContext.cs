@@ -23,7 +23,7 @@ public class ExceptionNotificationContext
     public bool Handled { get; set; }
 
     /// <summary>
-    /// 使用异常和可选通知元数据初始化 <see cref="ExceptionNotificationContext"/> 的实例。
+    /// 初始化一个 <see cref="ExceptionNotificationContext"/> 类型的实例。
     /// </summary>
     /// <param name="exception">要通知的异常，不能为 <c>null</c>。</param>
     /// <param name="logLevel">可选的日志级别；为空时根据异常类型推导。</param>

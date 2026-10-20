@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Metadata;
 public readonly record struct ColumnIdentifier
 {
     /// <summary>
-    /// 初始化一个<see cref="ColumnIdentifier"/>类型的实例
+    /// 初始化一个 <see cref="ColumnIdentifier"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名</param>
     public ColumnIdentifier(string name)
@@ -17,7 +17,7 @@ public readonly record struct ColumnIdentifier
     }
 
     /// <summary>
-    /// 列名
+    /// 获取列名
     /// </summary>
     public string Name { get; }
 }

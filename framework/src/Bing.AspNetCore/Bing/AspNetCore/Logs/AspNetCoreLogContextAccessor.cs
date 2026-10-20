@@ -16,22 +16,22 @@ namespace Bing.AspNetCore.Logs;
 public class AspNetCoreLogContextAccessor : LogContextAccessor
 {
     /// <summary>
-    /// Http上下文访问器
+    /// 获取Http上下文访问器
     /// </summary>
     protected IHttpContextAccessor HttpContextAccessor { get; }
 
     /// <summary>
-    /// Web客户端信息提供程序
+    /// 获取Web客户端信息提供程序
     /// </summary>
     protected IWebClientInfoProvider WebClientInfoProvider { get; }
 
     /// <summary>
-    /// 当前用户
+    /// 获取当前用户
     /// </summary>
     protected ICurrentUser CurrentUser { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="AspNetCoreLogContextAccessor"/>类型的实例
+    /// 初始化一个 <see cref="AspNetCoreLogContextAccessor"/> 类型的实例。
     /// </summary>
     /// <param name="webClientInfoProvider">Web客户端信息提供程序</param>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
@@ -46,10 +46,7 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
         CurrentUser = currentUser;
     }
 
-    /// <summary>
-    /// 创建日志上下文
-    /// </summary>
-    /// <returns>包含当前 HTTP 请求和用户信息的日志上下文。</returns>
+    /// <inheritdoc />
     protected override LogContext Create()
     {
         var context = base.Create();
@@ -69,10 +66,7 @@ public class AspNetCoreLogContextAccessor : LogContextAccessor
         return context;
     }
 
-    /// <summary>
-    /// 获取跟踪标识
-    /// </summary>
-    /// <returns>当前请求的跟踪标识；无法获取时返回新生成的标识。</returns>
+    /// <inheritdoc />
     protected override string GetTraceId()
     {
         if (TraceIdContext.Current != null)

@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface ISqlMutationClauseFactoryProvider
 {
     /// <summary>
-    /// 当前 Provider 使用的 Mutation Clause Factory。
+    /// 获取当前 Provider 使用的 Mutation Clause Factory。
     /// </summary>
     ISqlMutationClauseFactory MutationClauseFactory { get; }
 }

@@ -24,7 +24,7 @@ public class JoinClauseTest
     private readonly JoinClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="JoinClauseTest"/> 类型的实例。
     /// </summary>
     public JoinClauseTest()
     {
@@ -37,6 +37,7 @@ public class JoinClauseTest
     /// <summary>
     /// 获取Sql
     /// </summary>
+    /// <returns>返回当前连接子句生成的 SQL 片段。</returns>
     private string GetSql()
     {
         return _clause.ToSql();

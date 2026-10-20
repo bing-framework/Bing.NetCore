@@ -10,10 +10,16 @@ namespace Bing.Validation.Tests;
 // ─── 测试辅助：实现 IVerifyModel<T> 的样本模型 ────────────────────
 
 /// <summary>
-/// 合法验证模型样本（Name 有默认值，DataAnnotation 可通过）
+/// 合法验证模型样本。
 /// </summary>
+/// <remarks>
+/// Name 使用满足 DataAnnotation 约束的默认值。
+/// </remarks>
 internal class ValidatableValidModel : IVerifyModel<ValidatableValidModel>
 {
+    /// <summary>
+    /// 获取或设置模型名称。
+    /// </summary>
     [Required(ErrorMessage = "名称不能为空")]
     /// <summary>
     /// 模型名称。
@@ -35,10 +41,16 @@ internal class ValidatableValidModel : IVerifyModel<ValidatableValidModel>
 }
 
 /// <summary>
-/// 非法验证模型样本（Name 为 null，[Required] 约束失败）
+/// 非法验证模型样本。
 /// </summary>
+/// <remarks>
+/// Name 为 null，验证会违反 <see cref="RequiredAttribute" /> 约束。
+/// </remarks>
 internal class ValidatableInvalidModel : IVerifyModel<ValidatableInvalidModel>
 {
+    /// <summary>
+    /// 获取或设置模型名称。
+    /// </summary>
     [Required(ErrorMessage = "名称不能为空")]
     /// <summary>
     /// 未设置的模型名称。
@@ -60,8 +72,11 @@ internal class ValidatableInvalidModel : IVerifyModel<ValidatableInvalidModel>
 }
 
 /// <summary>
-/// 可配置验证结果的测试策略。
+/// 命名验证策略样本。
 /// </summary>
+/// <remarks>
+/// 可指定策略名称和返回的验证结果。
+/// </remarks>
 internal class NamedStrategy : IValidationStrategy<ValidatableValidModel>
 {
     /// <summary>
@@ -70,15 +85,15 @@ internal class NamedStrategy : IValidationStrategy<ValidatableValidModel>
     private readonly ValidationResult _result;
 
     /// <summary>
-    /// 策略名称。
+    /// 获取策略名称。
     /// </summary>
     public string StrategyName { get; }
 
     /// <summary>
-    /// 初始化一个 <see cref="NamedStrategy" /> 类型的实例。
+    /// 初始化一个 <see cref="NamedStrategy"/> 类型的实例。
     /// </summary>
     /// <param name="name">策略名称。</param>
-    /// <param name="result">验证结果。</param>
+    /// <param name="result">策略返回的验证结果；未指定时返回 null。</param>
     public NamedStrategy(string name, ValidationResult result = null)
     {
         StrategyName = name;
@@ -100,14 +115,14 @@ internal class NamedStrategy : IValidationStrategy<ValidatableValidModel>
 /// </summary>
 public class ValidationMeTest : IDisposable
 {
-    /// <summary>
-    /// 测试后恢复默认 ThrowHandler，避免影响其他测试
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 测试结束后恢复默认的 <see cref="ThrowHandler" />，避免影响其他测试。
+    /// </remarks>
     public void Dispose() => ValidationMe.RegisterCallbackHandler(new ThrowHandler());
 
     /// <summary>
-    /// 测试目的：默认处理器为 ThrowHandler；当验证失败且未自定义 Handler 时，
-    /// 通过 ValidationContext.Validate() 会抛出 Warning 异常。
+    /// 验证默认处理器会在验证失败时抛出 <see cref="Warning" />。
     /// </summary>
     [Fact]
     public void DefaultHandler_IsThrowHandler_ValidateShouldThrowWarning()
@@ -122,7 +137,7 @@ public class ValidationMeTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：注册 NothingHandler 后，ValidationContext 验证失败不再抛出异常。
+    /// 注册 NothingHandler 后，ValidationContext 验证失败不再抛出异常。
     /// </summary>
     [Fact]
     public void RegisterCallbackHandler_WithNothingHandler_ValidateShouldNotThrow()
@@ -137,7 +152,7 @@ public class ValidationMeTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：多次 RegisterCallbackHandler 应使用最后一次注册的处理器。
+    /// 多次 RegisterCallbackHandler 应使用最后一次注册的处理器。
     /// </summary>
     [Fact]
     public void RegisterCallbackHandler_MultipleRegistrations_UsesLast()
@@ -163,7 +178,7 @@ public class ValidationContextTest
     // ── AddStrategy ─────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：AddStrategy 传入 null 应抛出 ArgumentNullException。
+    /// AddStrategy 传入 null 应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void AddStrategy_WhenNull_ShouldThrowArgumentNullException()
@@ -176,7 +191,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：相同 StrategyName 的策略只添加一次（重复跳过）。
+    /// 相同 StrategyName 的策略只添加一次（重复跳过）。
     /// </summary>
     [Fact]
     public void AddStrategy_DuplicateName_ShouldBeIgnored()
@@ -202,7 +217,7 @@ public class ValidationContextTest
     // ── AddStrategyList ─────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：AddStrategyList 传入 null 应抛出 ArgumentNullException。
+    /// AddStrategyList 传入 null 应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void AddStrategyList_WhenNull_ShouldThrowArgumentNullException()
@@ -215,7 +230,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：AddStrategyList 接受空集合时不应抛出异常。
+    /// AddStrategyList 接受空集合时不应抛出异常。
     /// </summary>
     [Fact]
     public void AddStrategyList_WithEmptyList_ShouldNotThrow()
@@ -228,7 +243,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：AddStrategyList 批量添加多个策略，重复名称只保留第一个。
+    /// AddStrategyList 批量添加多个策略，重复名称只保留第一个。
     /// </summary>
     [Fact]
     public void AddStrategyList_WithDuplicates_ShouldSkipDuplicate()
@@ -249,7 +264,7 @@ public class ValidationContextTest
     // ── SetHandler ──────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：SetHandler 传入 null 应抛出 ArgumentNullException。
+    /// SetHandler 传入 null 应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void SetHandler_WhenNull_ShouldThrowArgumentNullException()
@@ -262,7 +277,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：第一次调用 SetHandler 应设置处理器（不叠加）。
+    /// 第一次调用 SetHandler 应设置处理器（不叠加）。
     /// </summary>
     [Fact]
     public void SetHandler_FirstCall_ShouldSetHandler()
@@ -280,7 +295,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：连续调用 SetHandler 应叠加处理器（+=），两个都被调用。
+    /// 连续调用 SetHandler 应叠加处理器（+=），两个都被调用。
     /// </summary>
     [Fact]
     public void SetHandler_MultipleCalls_ShouldAccumulate()
@@ -301,7 +316,7 @@ public class ValidationContextTest
     // ── IsValid ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：Validate 调用前 IsValid 应默认返回 true（尚未验证）。
+    /// Validate 调用前 IsValid 应默认返回 true（尚未验证）。
     /// </summary>
     [Fact]
     public void IsValid_BeforeValidate_ShouldBeTrue()
@@ -314,7 +329,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：对合法模型调用 Validate 后 IsValid 应仍为 true。
+    /// 对合法模型调用 Validate 后 IsValid 应仍为 true。
     /// </summary>
     [Fact]
     public void IsValid_AfterValidateValidModel_ShouldBeTrue()
@@ -330,8 +345,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：对非法模型调用 Validate 后（使用自定义 Handler），
-    /// 处理器被调用且 IsValid 应为 false。
+    /// 对非法模型调用 Validate 后（使用自定义 Handler）， 处理器被调用且 IsValid 应为 false。
     /// </summary>
     [Fact]
     public void IsValid_AfterValidateInvalidModel_ShouldBeFalse()
@@ -350,7 +364,7 @@ public class ValidationContextTest
     // ── Validate（带 appendAction）─────────────────────────────
 
     /// <summary>
-    /// 测试目的：appendAction 可向验证结果集合追加额外错误，影响最终 IsValid。
+    /// appendAction 可向验证结果集合追加额外错误，影响最终 IsValid。
     /// </summary>
     [Fact]
     public void Validate_WithAppendAction_ShouldIncludeAppendedErrors()
@@ -370,7 +384,7 @@ public class ValidationContextTest
     // ── GetValidationResultCollection ──────────────────────────
 
     /// <summary>
-    /// 测试目的：Validate 之前 GetValidationResultCollection 应返回 null。
+    /// Validate 之前 GetValidationResultCollection 应返回 null。
     /// </summary>
     [Fact]
     public void GetValidationResultCollection_BeforeValidate_ShouldBeNull()
@@ -383,7 +397,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：Validate 之后 GetValidationResultCollection 应返回非 null 集合。
+    /// Validate 之后 GetValidationResultCollection 应返回非 null 集合。
     /// </summary>
     [Fact]
     public void GetValidationResultCollection_AfterValidate_ShouldNotBeNull()
@@ -401,7 +415,7 @@ public class ValidationContextTest
     // ── RaiseException ─────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：未调用 Validate 时 RaiseException 不应抛出异常（ResultCollection 为 null）。
+    /// 未调用 Validate 时 RaiseException 不应抛出异常（ResultCollection 为 null）。
     /// </summary>
     [Fact]
     public void RaiseException_BeforeValidate_ShouldNotThrow()
@@ -414,7 +428,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：合法模型 Validate 后 RaiseException 不应抛出（IsValid=true）。
+    /// 合法模型 Validate 后 RaiseException 不应抛出（IsValid=true）。
     /// </summary>
     [Fact]
     public void RaiseException_AfterValidValidModel_ShouldNotThrow()
@@ -428,8 +442,7 @@ public class ValidationContextTest
     }
 
     /// <summary>
-    /// 测试目的：非法模型 Validate 后（自定义 Handler 不抛出），
-    /// RaiseException 应抛出 ValidationException。
+    /// 非法模型 Validate 后（自定义 Handler 不抛出）， RaiseException 应抛出 ValidationException。
     /// </summary>
     [Fact]
     public void RaiseException_AfterValidateInvalidModel_ShouldThrowValidationException()
@@ -453,7 +466,7 @@ public class ValidationContextTest
 public class ValidationHandleOperationTest
 {
     /// <summary>
-    /// 测试目的：构造函数传入 null 集合时应抛出 ArgumentNullException。
+    /// 构造函数传入 null 集合时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void Constructor_WhenCollectionIsNull_ShouldThrowArgumentNullException()
@@ -463,7 +476,7 @@ public class ValidationHandleOperationTest
     }
 
     /// <summary>
-    /// 测试目的：RaiseException 对有效集合不应抛出任何异常。
+    /// RaiseException 对有效集合不应抛出任何异常。
     /// </summary>
     [Fact]
     public void RaiseException_WhenValid_ShouldNotThrow()
@@ -476,7 +489,7 @@ public class ValidationHandleOperationTest
     }
 
     /// <summary>
-    /// 测试目的：RaiseException 对无效集合应抛出指定类型的异常。
+    /// RaiseException 对无效集合应抛出指定类型的异常。
     /// </summary>
     [Fact]
     public void RaiseException_WhenInvalid_ShouldThrowValidationException()
@@ -497,7 +510,7 @@ public class ValidationHandleOperationTest
 public class ValidationHandleExceptionExtensionsTest
 {
     /// <summary>
-    /// 测试目的：Handle() 扩展方法应为集合创建并返回 ValidationHandleOperation 实例。
+    /// Handle() 扩展方法应为集合创建并返回 ValidationHandleOperation 实例。
     /// </summary>
     [Fact]
     public void Handle_ShouldReturnValidationHandleOperation()
@@ -514,7 +527,7 @@ public class ValidationHandleExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：HandleAll 传入 null 的 handler 时应抛出 ArgumentNullException。
+    /// HandleAll 传入 null 的 handler 时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void HandleAll_WhenHandlerIsNull_ShouldThrowArgumentNullException()
@@ -527,7 +540,7 @@ public class ValidationHandleExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：HandleAll 传入 null 的 op 时应抛出 ArgumentNullException。
+    /// HandleAll 传入 null 的 op 时应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void HandleAll_WhenOpIsNull_ShouldThrowArgumentNullException()
@@ -538,7 +551,7 @@ public class ValidationHandleExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：HandleAll 传入 NothingHandler 对无效集合不应抛出异常，并返回 op 本身（链式调用）。
+    /// HandleAll 传入 NothingHandler 对无效集合不应抛出异常，并返回 op 本身（链式调用）。
     /// </summary>
     [Fact]
     public void HandleAll_WithNothingHandler_ShouldNotThrowAndReturnOp()
@@ -555,7 +568,7 @@ public class ValidationHandleExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：HandleAll 传入 ThrowHandler 对无效集合应抛出 Warning。
+    /// HandleAll 传入 ThrowHandler 对无效集合应抛出 Warning。
     /// </summary>
     [Fact]
     public void HandleAll_WithThrowHandler_WhenInvalid_ShouldThrowWarning()
@@ -569,7 +582,7 @@ public class ValidationHandleExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：HandleAll 对有效集合使用 ThrowHandler 不应抛出异常。
+    /// HandleAll 对有效集合使用 ThrowHandler 不应抛出异常。
     /// </summary>
     [Fact]
     public void HandleAll_WithThrowHandler_WhenValid_ShouldNotThrow()
@@ -591,7 +604,7 @@ public class ValidationHandleExceptionExtensionsTest
 public class ValidationExceptionExtensionsTest
 {
     /// <summary>
-    /// 测试目的：null 集合调用 ToException 应抛出 ArgumentNullException。
+    /// null 集合调用 ToException 应抛出 ArgumentNullException。
     /// </summary>
     [Fact]
     public void ToException_WhenCollectionIsNull_ShouldThrowArgumentNullException()
@@ -602,7 +615,7 @@ public class ValidationExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：有效集合（无错误）调用 ToException 应返回带空消息的 ValidationException。
+    /// 有效集合（无错误）调用 ToException 应返回带空消息的 ValidationException。
     /// </summary>
     [Fact]
     public void ToException_WhenValid_ShouldReturnException()
@@ -618,7 +631,7 @@ public class ValidationExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：无效集合调用 ToException 应返回包含错误信息的 ValidationException。
+    /// 无效集合调用 ToException 应返回包含错误信息的 ValidationException。
     /// </summary>
     [Fact]
     public void ToException_WhenInvalid_ShouldContainErrorMessages()
@@ -636,7 +649,7 @@ public class ValidationExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：appendAction 参数应在 ToException 时被执行，可追加额外信息。
+    /// appendAction 参数应在 ToException 时被执行，可追加额外信息。
     /// </summary>
     [Fact]
     public void ToException_WithAppendAction_ShouldInvokeAction()
@@ -654,7 +667,7 @@ public class ValidationExceptionExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：RaiseException 扩展方法对有效集合不应抛出任何异常。
+    /// RaiseException 扩展方法对有效集合不应抛出任何异常。
     /// </summary>
     [Fact]
     public void RaiseException_WhenValid_ShouldNotThrow()

@@ -21,10 +21,7 @@ namespace Bing.AspNetCore.Mvc.ExceptionHandling;
 /// </summary>
 public class BingExceptionFilter : IAsyncExceptionFilter, ITransientDependency
 {
-    /// <summary>
-    /// 异常处理
-    /// </summary>
-    /// <param name="context">异常上下文</param>
+    /// <inheritdoc />
     public async Task OnExceptionAsync(ExceptionContext context)
     {
         if (!ShouldHandleException(context))

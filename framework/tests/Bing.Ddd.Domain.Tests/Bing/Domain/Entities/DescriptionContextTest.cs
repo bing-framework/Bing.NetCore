@@ -7,10 +7,13 @@ namespace Bing.Domain.Entities;
 /// </summary>
 public class DescriptionContextTest
 {
+    /// <summary>
+    /// 供描述上下文测试使用的实体描述上下文。
+    /// </summary>
     private readonly DescriptionContext _context;
 
     /// <summary>
-    /// 初始化
+    /// 初始化一个 <see cref="DescriptionContextTest"/> 类型的实例。
     /// </summary>
     public DescriptionContextTest()
     {

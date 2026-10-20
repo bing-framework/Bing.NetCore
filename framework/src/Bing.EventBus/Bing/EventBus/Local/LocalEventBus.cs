@@ -19,17 +19,17 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
     private readonly AsyncLocal<int> _publishDepth = new AsyncLocal<int>();
 
     /// <summary>
-    /// 日志组件
+    /// 获取或设置日志组件。
     /// </summary>
     public ILogger<LocalEventBus> Logger { get; set; }
 
     /// <summary>
-    /// 本地事件总线 选项配置
+    /// 获取本地事件总线 选项配置
     /// </summary>
     protected LocalEventBusOptions Options { get; }
 
     /// <summary>
-    /// 事件处理器工厂列表
+    /// 获取事件处理器工厂列表
     /// </summary>
     protected ConcurrentDictionary<Type, List<IEventHandlerFactory>> HandlerFactories { get; }
 
@@ -54,12 +54,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         SubscribeHandlers(Options.Handlers);
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="factory">事件处理器工厂</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public override IDisposable Subscribe(Type eventType, IEventHandlerFactory factory)
     {
         lock (_handlerFactoriesGate)
@@ -74,11 +69,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         return new EventHandlerFactoryUnregistrar(this, eventType, factory);
     }
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="action">事件处理委托</param>
+    /// <inheritdoc />
     public override void Unsubscribe<TEvent>(Func<TEvent, Task> action)
     {
         Check.NotNull(action, nameof(action));
@@ -104,11 +95,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         }
     }
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="handler">事件处理器</param>
+    /// <inheritdoc />
     public override void Unsubscribe(Type eventType, IEventHandler handler)
     {
         lock (_handlerFactoriesGate)
@@ -124,11 +111,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         }
     }
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="factory">事件处理器工厂</param>
+    /// <inheritdoc />
     public override void Unsubscribe(Type eventType, IEventHandlerFactory factory)
     {
         lock (_handlerFactoriesGate)
@@ -139,10 +122,7 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         }
     }
 
-    /// <summary>
-    /// 取消全部订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
+    /// <inheritdoc />
     public override void UnsubscribeAll(Type eventType)
     {
         lock (_handlerFactoriesGate)
@@ -153,22 +133,13 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         }
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="handler">本地事件处理器</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public virtual IDisposable Subscribe<TEvent>(ILocalEventHandler<TEvent> handler) where TEvent : class
     {
         return Subscribe(typeof(TEvent), handler);
     }
 
-    /// <summary>
-    /// 发布到事件总线
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="eventData">事件数据</param>
+    /// <inheritdoc />
     protected override async Task PublishToEventBusAsync(Type eventType, object eventData)
     {
         await PublishAsync(new LocalEventMessage(Guid.NewGuid().ToString(), eventData, eventType));

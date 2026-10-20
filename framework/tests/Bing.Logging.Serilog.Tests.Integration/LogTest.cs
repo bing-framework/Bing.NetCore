@@ -18,11 +18,18 @@ public class LogTest
     /// </summary>
     private readonly ILog<LogTest> _log;
 
+    /// <summary>
+    /// 记录日志集成测试信息的日志记录器。
+    /// </summary>
     private readonly ILogger<LogTest> _logger;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="LogTest"/> 类型的实例。
     /// </summary>
+    /// <param name="serviceProvider">应用服务提供程序。</param>
+    /// <param name="log">Bing 日志接口。</param>
+    /// <param name="accessor">日志上下文访问器。</param>
+    /// <param name="logger">Microsoft 日志接口。</param>
     public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor, ILogger<LogTest> logger)
     {
         Id.StringGenerateFunc = () => Guid.NewGuid().ToString("N");
@@ -149,6 +156,9 @@ public class LogTest
             .LogTrace();
     }
 
+    /// <summary>
+    /// 验证结构化日志可以记录产品对象。
+    /// </summary>
     [Fact]
     public void Test_Log()
     {

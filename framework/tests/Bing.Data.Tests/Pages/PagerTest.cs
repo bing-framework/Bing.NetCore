@@ -13,7 +13,7 @@ public class PagerTest
     private readonly Pager _pager;
 
     /// <summary>
-    /// 初始化一个<see cref="PagerTest"/>类型的实例
+    /// 初始化一个 <see cref="PagerTest"/> 类型的实例。
     /// </summary>
     public PagerTest() => _pager = new Pager();
 

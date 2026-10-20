@@ -36,7 +36,7 @@ public partial class MySqlQueryTest : IAsyncLifetime
     private readonly ISqlTransactionScopeFactory _transactionScopeFactory;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="MySqlQueryTest"/> 类型的实例。
     /// </summary>
     public MySqlQueryTest(MySqlIntegrationDatabaseFixture fixture)
     {
@@ -47,14 +47,16 @@ public partial class MySqlQueryTest : IAsyncLifetime
         _transactionScopeFactory = fixture.GetTransactionScopeFactory();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 在每个测试类开始前清理测试数据。
-    /// </summary>
+    /// </remarks>
     public Task InitializeAsync() => _fixture.ResetAsync();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放当前测试类创建的 SQL 对象。
-    /// </summary>
+    /// </remarks>
     public Task DisposeAsync()
     {
         _sqlQuery?.Dispose();

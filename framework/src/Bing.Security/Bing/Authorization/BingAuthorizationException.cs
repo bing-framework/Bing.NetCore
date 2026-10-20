@@ -11,7 +11,7 @@ namespace Bing.Authorization;
 public class BingAuthorizationException : Warning, IHasLogLevel
 {
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="BingAuthorizationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     public BingAuthorizationException(string message) : base(message)
@@ -19,7 +19,7 @@ public class BingAuthorizationException : Warning, IHasLogLevel
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="BingAuthorizationException"/> 类型的实例。
     /// </summary>
     /// <param name="exception">异常</param>
     public BingAuthorizationException(Exception exception) : base(exception)
@@ -27,7 +27,7 @@ public class BingAuthorizationException : Warning, IHasLogLevel
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="BingAuthorizationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="code">错误码</param>
@@ -36,7 +36,7 @@ public class BingAuthorizationException : Warning, IHasLogLevel
     }
 
     /// <summary>
-    /// 初始化一个<see cref="Warning"/>类型的实例
+    /// 初始化一个 <see cref="BingAuthorizationException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="code">错误码</param>
@@ -45,8 +45,6 @@ public class BingAuthorizationException : Warning, IHasLogLevel
     {
     }
 
-    /// <summary>
-    /// 日志级别
-    /// </summary>
+    /// <inheritdoc />
     public LogLevel LogLevel { get; set; } = LogLevel.Warning;
 }

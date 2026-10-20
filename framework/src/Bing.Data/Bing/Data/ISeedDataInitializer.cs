@@ -9,7 +9,7 @@ namespace Bing.Data;
 public interface ISeedDataInitializer
 {
     /// <summary>
-    /// 种子数据初始化顺序
+    /// 获取种子数据初始化顺序
     /// </summary>
     int Order { get; }
 

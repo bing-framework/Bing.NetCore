@@ -22,8 +22,7 @@ internal class NewableStubHandler : IEventHandler { }
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// <summary>
-/// ActionEventHandler、SingleInstanceHandlerFactory、TransientEventHandlerFactory、
-/// EventHandlerDisposeWrapper 单元测试
+/// 事件处理器工厂与释放包装器的单元测试。
 /// </summary>
 public class EventHandlerFactoryTest
 {
@@ -31,7 +30,16 @@ public class EventHandlerFactoryTest
     // ActionEventHandler<TEvent>
     // ════════════════════════════════════════════════════════════════
 
-    private class SimpleEvent { public string Value { get; set; } }
+    /// <summary>
+    /// 表示委托事件处理器测试使用的事件。
+    /// </summary>
+    private class SimpleEvent
+    {
+        /// <summary>
+        /// 获取或设置事件值。
+        /// </summary>
+        public string Value { get; set; }
+    }
 
     /// <summary>
     /// 测试目的：构造时传入 Func，Action 属性应保存该委托。

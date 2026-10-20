@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IUpdateClause : ISqlClause, ISqlMutationClauseCloneable<IUpdateClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前更新目标表。
+    /// 获取当前更新目标表。
     /// </summary>
     SqlTableReference Table { get; }
 

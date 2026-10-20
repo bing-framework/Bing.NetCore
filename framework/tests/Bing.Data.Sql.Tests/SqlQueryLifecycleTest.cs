@@ -116,6 +116,7 @@ public class SqlQueryLifecycleTest
     /// <summary>
     /// 测试目的：公开 WhereIfNotEmpty 在空值或空白值时不得使已缓存的 Fluent SQL 失效。
     /// </summary>
+    /// <param name="value">要传入 WhereIfNotEmpty 的空值或空白值。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -789,6 +790,8 @@ public class SqlQueryLifecycleTest
     /// <summary>
     /// 测试目的：最终非泛型 public API 的 1～10 个根来源必须按显式 alias 和参数顺序渲染完整 SQL。
     /// </summary>
+    /// <param name="count">根来源的数量。</param>
+    /// <param name="expectedSql">预期渲染的完整 SQL。</param>
     [Theory]
     [InlineData(1, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nWhere [r1].[IntValue]=@_p_0")]
     [InlineData(2, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1], [Sample] As [r2] \r\nWhere [r1].[IntValue]=@_p_0")]
@@ -822,6 +825,8 @@ public class SqlQueryLifecycleTest
     /// <summary>
     /// 测试目的：最终非泛型 public API 的 2～10 个连续 Join 必须按显式左右 alias 渲染完整 SQL 和参数快照。
     /// </summary>
+    /// <param name="count">连续 Join 的数量。</param>
+    /// <param name="expectedSql">预期渲染的完整 SQL。</param>
     [Theory]
     [InlineData(2, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
     [InlineData(3, "Select [r1].[IntValue] \r\nFrom [Sample] As [r1] \r\nJoin [Sample] As [r2] On [r1].[IntValue]=[r2].[IntValue] \r\nJoin [Sample] As [r3] On [r2].[IntValue]=[r3].[IntValue] \r\nWhere [r1].[IntValue]=@_p_0")]
@@ -969,6 +974,7 @@ public class SqlQueryLifecycleTest
     /// <summary>
     /// 测试目的：不同规模的 IN 参数展开必须保持参数名称唯一、数量准确且 SQL 可渲染。
     /// </summary>
+    /// <param name="count">IN 条件包含的值数量。</param>
     [Theory]
     [InlineData(10)]
     [InlineData(100)]
@@ -1424,9 +1430,17 @@ public class SqlQueryLifecycleTest
             .From<Sample>("s")
             .Select<Sample>(item => new object[] { item.IntValue });
 
+    /// <summary>
+    /// 创建未配置来源和投影的 Lambda 查询描述。
+    /// </summary>
+    /// <returns>新建的 Lambda 查询描述。</returns>
     private static SqlLambdaQuery CreateLambdaQuery() =>
         SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, new TestSqlBuilder());
 
+    /// <summary>
+    /// 验证存在歧义的来源修改会失败且不改变查询状态。
+    /// </summary>
+    /// <param name="mutation">要执行的查询修改。</param>
     private static void AssertAmbiguousSourceMutationFails(Func<SqlLambdaQuery, SqlLambdaQuery> mutation)
     {
         var query = CreateLambdaQuery()
@@ -1445,6 +1459,10 @@ public class SqlQueryLifecycleTest
         Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
     }
 
+    /// <summary>
+    /// 验证重复显式别名绑定会失败且不改变查询状态。
+    /// </summary>
+    /// <param name="mutation">要执行的查询修改。</param>
     private static void AssertDuplicateExplicitAliasBindingFails(Action<SqlLambdaQuery> mutation)
     {
         var query = CreateLambdaQuery()
@@ -1466,6 +1484,11 @@ public class SqlQueryLifecycleTest
         Assert.Empty(((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams());
     }
 
+    /// <summary>
+    /// 获取 Lambda 查询内部查询对象的结构版本。
+    /// </summary>
+    /// <param name="query">待读取结构版本的查询。</param>
+    /// <returns>查询结构版本。</returns>
     private static long GetShapeVersion(SqlLambdaQuery query)
     {
         var coreField = typeof(SqlLambdaQuery).GetField("_core", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1478,6 +1501,11 @@ public class SqlQueryLifecycleTest
         return (long)shapeVersionField.GetValue(innerQuery);
     }
 
+    /// <summary>
+    /// 获取 Fluent 查询内部查询对象的结构版本。
+    /// </summary>
+    /// <param name="query">待读取结构版本的查询。</param>
+    /// <returns>查询结构版本。</returns>
     private static long GetFluentShapeVersion(SqlFluentQuery query)
     {
         var innerQueryField = typeof(SqlFluentQuery).GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1488,6 +1516,13 @@ public class SqlQueryLifecycleTest
         return (long)shapeVersionField.GetValue(innerQuery);
     }
 
+    /// <summary>
+    /// 读取 Fluent 查询内部查询对象的指定字段。
+    /// </summary>
+    /// <typeparam name="T">字段值类型。</typeparam>
+    /// <param name="query">字段所属的查询。</param>
+    /// <param name="fieldName">字段名称。</param>
+    /// <returns>字段值。</returns>
     private static T GetFluentQueryField<T>(SqlFluentQuery query, string fieldName)
     {
         var innerQueryField = typeof(SqlFluentQuery).GetField("_query", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1497,10 +1532,27 @@ public class SqlQueryLifecycleTest
         return (T)field.GetValue(innerQuery);
     }
 
+    /// <summary>
+    /// 获取 Lambda 查询缓存的结构版本。
+    /// </summary>
+    /// <param name="query">待读取缓存状态的查询。</param>
+    /// <returns>缓存对应的结构版本。</returns>
     private static long GetCachedVersion(SqlLambdaQuery query) => GetQueryField<long>(query, "_cachedVersion");
 
+    /// <summary>
+    /// 获取 Lambda 查询缓存的 SQL 文本。
+    /// </summary>
+    /// <param name="query">待读取缓存状态的查询。</param>
+    /// <returns>缓存的 SQL 文本。</returns>
     private static string GetCachedSql(SqlLambdaQuery query) => GetQueryField<string>(query, "_cachedSql");
 
+    /// <summary>
+    /// 读取 Lambda 查询内部查询对象的指定字段。
+    /// </summary>
+    /// <typeparam name="T">字段值类型。</typeparam>
+    /// <param name="query">字段所属的查询。</param>
+    /// <param name="fieldName">字段名称。</param>
+    /// <returns>字段值。</returns>
     private static T GetQueryField<T>(SqlLambdaQuery query, string fieldName)
     {
         var coreField = typeof(SqlLambdaQuery).GetField("_core", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -1513,6 +1565,16 @@ public class SqlQueryLifecycleTest
         return (T)field.GetValue(innerQuery);
     }
 
+    /// <summary>
+    /// 创建包含指定数据库环境和租户过滤器的 Lambda 查询。
+    /// </summary>
+    /// <param name="executor">查询计划执行器。</param>
+    /// <param name="metadata">实体映射元数据配置。</param>
+    /// <param name="dialect">查询使用的 SQL 方言。</param>
+    /// <param name="dbKey">数据源标识。</param>
+    /// <param name="mappingProfile">实体映射配置名称。</param>
+    /// <param name="tenantId">租户标识。</param>
+    /// <returns>已配置数据库环境的 Lambda 查询。</returns>
     private static SqlLambdaQuery CreateEnvironmentQuery(ISqlQueryPlanExecutor executor,
         SqlMetadataOptions metadata, IDialect dialect, string dbKey, string mappingProfile, string tenantId)
     {
@@ -1536,11 +1598,22 @@ public class SqlQueryLifecycleTest
             .Select<Sample>(item => new object[] { item.StringValue });
     }
 
+    /// <summary>
+    /// Lambda 投影生命周期测试使用的结果类型。
+    /// </summary>
     private sealed class SampleProjection
     {
+        /// <summary>
+        /// 获取或设置投影中的整数值。
+        /// </summary>
         public int IntValue { get; set; }
     }
 
+    /// <summary>
+    /// 从查询执行快照中读取唯一参数值。
+    /// </summary>
+    /// <param name="query">包含待读取参数的查询。</param>
+    /// <returns>执行快照中的唯一参数值。</returns>
     private static object GetParameterValue(SqlLambdaQuery query)
     {
         var snapshot = ((SqlBuilderBase)query.GetBuilder()).CreateExecutionBuilderSnapshot();
@@ -1548,6 +1621,11 @@ public class SqlQueryLifecycleTest
         return ((ISqlCommonPartAccessor)snapshot).ParameterManager.GetParams().Values.Single();
     }
 
+    /// <summary>
+    /// 从查询的参数管理器中读取唯一参数值。
+    /// </summary>
+    /// <param name="query">包含待读取参数的查询。</param>
+    /// <returns>参数管理器中的唯一参数值。</returns>
     private static object GetSingleParameterValue(SqlLambdaQuery query) =>
         ((ISqlCommonPartAccessor)query.GetBuilder()).ParameterManager.GetParams().Values.Single();
 
@@ -1600,29 +1678,50 @@ public class SqlQueryLifecycleTest
     /// </summary>
     private sealed class CountingTestSqlBuilder : TestSqlBuilder
     {
+        /// <summary>
+        /// 初始化一个 <see cref="CountingTestSqlBuilder"/> 类型的实例。
+        /// </summary>
         public CountingTestSqlBuilder() : this(new RenderCounters(), null)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="CountingTestSqlBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="parameterManager">用于测试的参数管理器。</param>
         public CountingTestSqlBuilder(IParameterManager parameterManager) : this(new RenderCounters(), parameterManager)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="CountingTestSqlBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="counters">用于共享渲染次数的计数器。</param>
         private CountingTestSqlBuilder(RenderCounters counters) : this(counters, null)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="CountingTestSqlBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="counters">用于共享渲染次数的计数器。</param>
+        /// <param name="parameterManager">用于测试的参数管理器。</param>
         private CountingTestSqlBuilder(RenderCounters counters, IParameterManager parameterManager)
             : base(parameterManager: parameterManager) => Counters = counters;
 
+        /// <summary>
+        /// 获取与克隆 Builder 共享的渲染计数器。
+        /// </summary>
         public RenderCounters Counters { get; }
 
+        /// <inheritdoc />
         public override string ToSql()
         {
             Counters.ToSqlCallCount++;
             return base.ToSql();
         }
 
+        /// <inheritdoc />
         public override ISqlBuilder Clone()
         {
             var builder = new CountingTestSqlBuilder(Counters);
@@ -1630,26 +1729,47 @@ public class SqlQueryLifecycleTest
             return builder;
         }
 
+        /// <summary>
+        /// 记录 SQL 渲染调用次数。
+        /// </summary>
         public sealed class RenderCounters
         {
+            /// <summary>
+            /// 获取或设置 ToSql 调用次数。
+            /// </summary>
             public int ToSqlCallCount { get; set; }
         }
     }
 
+    /// <summary>
+    /// 克隆时抛出预设异常的测试 Builder。
+    /// </summary>
     private sealed class ThrowingCloneBuilder : TestSqlBuilder
     {
+        /// <summary>
+        /// 克隆操作抛出的异常消息。
+        /// </summary>
         private readonly string _message;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ThrowingCloneBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="message">克隆操作抛出的异常消息。</param>
         public ThrowingCloneBuilder(string message) => _message = message;
 
+        /// <inheritdoc />
         public override ISqlBuilder Clone()
         {
             throw new InvalidOperationException(_message);
         }
     }
 
+    /// <summary>
+    /// 将当前租户标识添加为查询过滤条件的测试过滤器。
+    /// </summary>
     private sealed class TenantFilter : ISqlFilter
     {
+        /// <inheritdoc />
         public void Filter(SqlFilterContext context)
         {
             foreach (var source in context.Sources.Where(item => item.EntityType == typeof(Sample)))

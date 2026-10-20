@@ -21,7 +21,10 @@ public class ModuleInfo
     public int SortId { get; set; }
 
     /// <summary>
-    /// 获取或设置模块的层级位置；父模块代码按从上到下使用点号拼接。
+    /// 获取或设置模块的层级位置。
     /// </summary>
+    /// <remarks>
+    /// 父模块代码按从上到下使用点号拼接。
+    /// </remarks>
     public string Position { get; set; }
 }

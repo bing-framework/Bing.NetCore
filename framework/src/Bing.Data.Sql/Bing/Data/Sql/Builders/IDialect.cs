@@ -6,17 +6,17 @@
 public interface IDialect
 {
     /// <summary>
-    /// 标识符引用的起始字符。
+    /// 获取标识符引用的起始字符。
     /// </summary>
     char OpeningIdentifier { get; }
 
     /// <summary>
-    /// 标识符引用的结束字符。
+    /// 获取标识符引用的结束字符。
     /// </summary>
     char ClosingIdentifier { get; }
 
     /// <summary>
-    /// 批量 SQL 语句之间使用的分隔字符。
+    /// 获取批量 SQL 语句之间使用的分隔字符。
     /// </summary>
     char BatchSeperator { get; }
 

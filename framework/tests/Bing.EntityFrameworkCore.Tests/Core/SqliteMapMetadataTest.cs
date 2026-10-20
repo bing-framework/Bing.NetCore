@@ -84,13 +84,11 @@ public class SqliteMapMetadataTest
     private sealed class VersionedSample : IVersion
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// 版本号。
-        /// </summary>
+        /// <inheritdoc />
         public byte[] Version { get; set; }
     }
 
@@ -100,7 +98,7 @@ public class SqliteMapMetadataTest
     private sealed class PlainSample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }

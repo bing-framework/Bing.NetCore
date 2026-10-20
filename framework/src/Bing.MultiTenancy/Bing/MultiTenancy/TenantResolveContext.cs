@@ -6,7 +6,7 @@
 public class TenantResolveContext : ITenantResolveContext
 {
     /// <summary>
-    /// 初始化一个<see cref="TenantResolveContext"/>类型的实例
+    /// 初始化一个 <see cref="TenantResolveContext"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     public TenantResolveContext(IServiceProvider serviceProvider)
@@ -14,9 +14,7 @@ public class TenantResolveContext : ITenantResolveContext
         ServiceProvider = serviceProvider;
     }
 
-    /// <summary>
-    /// 服务提供程序
-    /// </summary>
+    /// <inheritdoc />
     public IServiceProvider ServiceProvider { get; }
 
     /// <inheritdoc />

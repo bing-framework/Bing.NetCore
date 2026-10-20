@@ -12,13 +12,44 @@ namespace Bing.Data.Sql.Benchmarks;
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlAggregateRenderingBenchmarks
 {
+    /// <summary>
+    /// 计数查询 Builder。
+    /// </summary>
     private MySqlBuilder _countBuilder;
+
+    /// <summary>
+    /// 多种聚合函数查询 Builder。
+    /// </summary>
     private MySqlBuilder _aggregateBuilder;
+
+    /// <summary>
+    /// 聚合表达式查询 Builder。
+    /// </summary>
     private MySqlBuilder _expressionAggregateBuilder;
+
+    /// <summary>
+    /// JSON 路径聚合查询 Builder。
+    /// </summary>
     private MySqlBuilder _rawJsonPathBuilder;
+
+    /// <summary>
+    /// 算术表达式聚合查询 Builder。
+    /// </summary>
     private MySqlBuilder _expressionArithmeticBuilder;
+
+    /// <summary>
+    /// 条件分支聚合查询 Builder。
+    /// </summary>
     private MySqlBuilder _expressionCaseBuilder;
+
+    /// <summary>
+    /// 按不同列计数的查询 Builder。
+    /// </summary>
     private MySqlBuilder _countDistinctColumnBuilder;
+
+    /// <summary>
+    /// 组合聚合表达式查询 Builder。
+    /// </summary>
     private MySqlBuilder _aggregateExpressionBuilder;
 
     /// <summary>
@@ -83,18 +114,21 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量 Count(*) 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderCountWildcard() => _countBuilder.ToSql();
 
     /// <summary>
     /// 测量十个普通和 Distinct 聚合的 ToSql 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark(Baseline = true)]
     public string RenderTenAggregates() => _aggregateBuilder.ToSql();
 
     /// <summary>
     /// 测量十个普通和 Distinct 聚合的直接追加渲染。
     /// </summary>
+    /// <returns>追加后的 SQL 文本长度。</returns>
     [Benchmark]
     public int AppendTenAggregates()
     {
@@ -106,54 +140,63 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量 Expression Case 和算术聚合渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderExpressionAggregates() => _expressionAggregateBuilder.ToSql();
 
     /// <summary>
     /// 测量完全原样 JSON Path Raw 聚合渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string AggregateRaw_JsonPath() => _rawJsonPathBuilder.ToSql();
 
     /// <summary>
     /// 测量带标识符方言转换的算术聚合表达式渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string AggregateExpression_Arithmetic() => _expressionArithmeticBuilder.ToSql();
 
     /// <summary>
     /// 测量带标识符方言转换的 Case 聚合表达式渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string AggregateExpression_Case() => _expressionCaseBuilder.ToSql();
 
     /// <summary>
     /// 测量 Count Distinct 聚合渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string Count_DistinctColumn() => _countDistinctColumnBuilder.ToSql();
 
     /// <summary>
     /// 测量十个聚合表达式的 ToSql 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string TenAggregateExpressions() => _aggregateExpressionBuilder.ToSql();
 
     /// <summary>
     /// 测量十个聚合表达式的 Clone 开销。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder Clone_TenAggregateExpressions() => _aggregateExpressionBuilder.Clone();
 
     /// <summary>
     /// 测量单个标识符 Expression 聚合的构造和解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_SimpleIdentifier() => CreateExpressionBuilder("[o].[Amount]");
 
     /// <summary>
     /// 测量包含 JSON Path 字符串的 Expression 聚合解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_JsonPathString() =>
         CreateExpressionBuilder("JsonExtract([o].[Data], '$[0].name') + [o].[Amount]");
@@ -161,6 +204,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量包含方括号文本字符串的 Expression 聚合解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_StringBracketText() =>
         CreateExpressionBuilder("Case When [o].[Code]='[legacy]' Then [o].[Amount] Else 0 End");
@@ -168,6 +212,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量包含行注释的 Expression 聚合解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_LineComment() =>
         CreateExpressionBuilder("[o].[Amount] -- [comment]\n + [o].[Tax]");
@@ -175,6 +220,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量包含块注释的 Expression 聚合解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_BlockComment() =>
         CreateExpressionBuilder("[o].[Amount] /* [comment] */ + [o].[Tax]");
@@ -182,6 +228,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量包含十个方括号标识符的 Expression 聚合解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_TenIdentifiers() => CreateExpressionBuilder(
         "[o].[A]+[o].[B]+[o].[C]+[o].[D]+[o].[E]+[o].[F]+[o].[G]+[o].[H]+[o].[I]+[o].[J]");
@@ -189,6 +236,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量十个独立 Expression 聚合的构造和解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_TenExpressions()
     {
@@ -202,6 +250,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量带显式参数的 Expression 聚合构造和解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder AggregateExpression_WithParameters() =>
         CreateExpressionBuilder("Case When [o].[Amount]>@MinAmount Then [o].[Amount] Else 0 End")
@@ -210,6 +259,7 @@ public class SqlAggregateRenderingBenchmarks
     /// <summary>
     /// 测量带空格和转义结束符的结构化聚合标识符路径解析。
     /// </summary>
+    /// <returns>配置完成的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder QuotedIdentifier_WithSpaces() => new MySqlBuilder()
         .Aggregate(SqlAggregateFunction.Sum, "[Sales Order].[Order]]Name]", "Total")
@@ -232,7 +282,14 @@ public class SqlAggregateRenderingBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlBuilderAppendToBenchmarks
 {
+    /// <summary>
+    /// 简单查询 Builder。
+    /// </summary>
     private MySqlBuilder _simpleBuilder;
+
+    /// <summary>
+    /// 复杂查询 Builder。
+    /// </summary>
     private MySqlBuilder _complexBuilder;
 
     /// <summary>
@@ -249,30 +306,35 @@ public class SqlBuilderAppendToBenchmarks
     /// <summary>
     /// 测量简单查询 ToSql 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderSimpleQuery() => _simpleBuilder.ToSql();
 
     /// <summary>
     /// 测量简单查询直接追加渲染。
     /// </summary>
+    /// <returns>追加后的 SQL 文本长度。</returns>
     [Benchmark]
     public int AppendSimpleQuery() => Append(_simpleBuilder, 256);
 
     /// <summary>
     /// 测量复杂查询 ToSql 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark(Baseline = true)]
     public string RenderComplexQuery() => _complexBuilder.ToSql();
 
     /// <summary>
     /// 测量复杂查询直接追加渲染。
     /// </summary>
+    /// <returns>追加后的 SQL 文本长度。</returns>
     [Benchmark]
     public int AppendComplexQuery() => Append(_complexBuilder, 1024);
 
     /// <summary>
     /// 测量十次 ToSql 重复渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderComplexQueryTenTimes()
     {
@@ -285,6 +347,7 @@ public class SqlBuilderAppendToBenchmarks
     /// <summary>
     /// 测量十次直接追加重复渲染。
     /// </summary>
+    /// <returns>追加后的 SQL 文本长度。</returns>
     [Benchmark]
     public int AppendComplexQueryTenTimes()
     {
@@ -300,6 +363,7 @@ public class SqlBuilderAppendToBenchmarks
     /// <summary>
     /// 创建含五个 Join、参数、Raw、子查询、CTE 和 Union 的查询。
     /// </summary>
+    /// <returns>配置完成的 MySQL Builder。</returns>
     private static MySqlBuilder CreateComplexBuilder()
     {
         var cte = new MySqlBuilder();
@@ -330,6 +394,9 @@ public class SqlBuilderAppendToBenchmarks
     /// <summary>
     /// 追加一次 SQL 并返回长度，以防止基准运行时消除调用。
     /// </summary>
+    /// <param name="builder">待追加渲染的 SQL Builder。</param>
+    /// <param name="capacity">StringBuilder 的初始容量。</param>
+    /// <returns>追加后的 SQL 文本长度。</returns>
     private static int Append(MySqlBuilder builder, int capacity)
     {
         var result = new StringBuilder(capacity);
@@ -345,7 +412,14 @@ public class SqlBuilderAppendToBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlBuilderCteAndParameterTokenBenchmarks
 {
+    /// <summary>
+    /// CTE 与参数标记扫描基准使用的查询 Builder。
+    /// </summary>
     private MySqlBuilder _debugBuilder;
+
+    /// <summary>
+    /// 用于参数标记扫描的 SQL 文本。
+    /// </summary>
     private string _debugSql;
 
     /// <summary>

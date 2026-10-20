@@ -6,7 +6,7 @@
 public class FreeSqlWrapper
 {
     /// <summary>
-    /// ORM
+    /// 获取或设置ORM
     /// </summary>
     public IFreeSql Orm { get; set; }
 }
@@ -18,7 +18,7 @@ public class FreeSqlWrapper
 public class FreeSqlWrapper<TMark>
 {
     /// <summary>
-    /// ORM
+    /// 获取或设置ORM
     /// </summary>
     public IFreeSql<TMark> Orm { get; set; }
 }

@@ -17,7 +17,7 @@ public class WhereClauseTest
     private readonly WhereClause _clause;
 
     /// <summary>
-    /// 初始化一个<see cref="WhereClauseTest"/>类型的实例
+    /// 初始化一个 <see cref="WhereClauseTest"/> 类型的实例。
     /// </summary>
     public WhereClauseTest()
     {
@@ -27,6 +27,7 @@ public class WhereClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>Where 子句生成的 SQL 文本。</returns>
     private string GetSql() => _clause.ToSql();
 
     /// <summary>

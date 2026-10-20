@@ -15,7 +15,7 @@ internal sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceRes
     private readonly ISqlParameterNameNormalizer _nameNormalizer;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlParameterSourceResolver"/>类型的实例
+    /// 尝试解析参数来源。
     /// </summary>
     /// <param name="nameNormalizer">参数名称规范化器</param>
     public DefaultSqlParameterSourceResolver(ISqlParameterNameNormalizer nameNormalizer = null) =>
@@ -55,7 +55,7 @@ internal sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceRes
     }
 
     /// <summary>
-    /// 从泛型字典解析参数
+    /// 尝试解析参数来源。
     /// </summary>
     /// <param name="source">参数字典</param>
     /// <param name="parameterName">标准参数名称</param>
@@ -75,7 +75,7 @@ internal sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceRes
     }
 
     /// <summary>
-    /// 从非泛型字典解析参数
+    /// 尝试解析参数来源。
     /// </summary>
     /// <param name="source">参数字典</param>
     /// <param name="parameterName">标准参数名称</param>

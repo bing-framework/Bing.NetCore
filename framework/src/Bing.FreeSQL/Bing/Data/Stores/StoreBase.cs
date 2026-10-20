@@ -59,10 +59,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     {
     }
 
-    /// <summary>
-    /// 添加实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Add(TEntity entity)
     {
@@ -74,10 +71,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.Add(entity);
     }
 
-    /// <summary>
-    /// 添加实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Add(IEnumerable<TEntity> entities)
     {
@@ -95,11 +89,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.AddRange(items);
     }
 
-    /// <summary>
-    /// 添加实体
-    /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
@@ -112,11 +102,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         await Set.AddAsync(entity, cancellationToken);
     }
 
-    /// <summary>
-    /// 添加实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
@@ -135,10 +121,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         await Set.AddRangeAsync(items, cancellationToken);
     }
 
-    /// <summary>
-    /// 修改实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Update(TEntity entity)
     {
@@ -149,10 +132,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.Update(entity);
     }
 
-    /// <summary>
-    /// 修改实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Update(IEnumerable<TEntity> entities)
     {
@@ -169,11 +149,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.UpdateRange(items);
     }
 
-    /// <summary>
-    /// 修改实体
-    /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -181,11 +157,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// 修改实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
@@ -203,10 +175,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         await Set.UpdateRangeAsync(items, cancellationToken);
     }
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="id">标识</param>
+    /// <inheritdoc />
     public virtual void Remove(object id)
     {
         var entity = Find(id);
@@ -214,7 +183,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     }
 
     /// <summary>
-    /// 删除
+    /// 删除实体。
     /// </summary>
     /// <param name="entity">实体</param>
     private void Delete(TEntity entity)
@@ -234,10 +203,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.Remove(entity);
     }
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     public virtual void Remove(TEntity entity)
     {
         if (entity == null)
@@ -246,10 +212,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Remove(entity.Id);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="ids">标识集合</param>
+    /// <inheritdoc />
     public virtual void Remove(IEnumerable<TKey> ids)
     {
         if (ids == null)
@@ -259,7 +222,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
     }
 
     /// <summary>
-    /// 删除实体集合
+    /// 删除实体。
     /// </summary>
     /// <param name="list">实体集合</param>
     private void Delete(List<TEntity> list)
@@ -284,10 +247,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Set.RemoveRange(list);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     public virtual void Remove(IEnumerable<TEntity> entities)
     {
         if (entities == null)
@@ -301,11 +261,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Remove(items.Select(t => t.Id));
     }
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="id">标识</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -313,11 +269,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Delete(entity);
     }
 
-    /// <summary>
-    /// 移除实体
-    /// </summary>
-    /// <param name="entity">实体</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -327,11 +279,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         await RemoveAsync(entity.Id, cancellationToken);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="ids">标识集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -341,11 +289,7 @@ public abstract class StoreBase<TEntity, TKey> : QueryStoreBase<TEntity, TKey>, 
         Delete(entities);
     }
 
-    /// <summary>
-    /// 移除实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

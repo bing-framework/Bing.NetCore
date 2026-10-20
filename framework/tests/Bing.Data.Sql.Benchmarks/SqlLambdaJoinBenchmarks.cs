@@ -21,8 +21,19 @@ namespace Bing.Data.Sql.Benchmarks;
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlLambdaJoinBenchmarks
 {
+    /// <summary>
+    /// 当前 Lambda 查询。
+    /// </summary>
     private SqlLambdaQuery _query;
+
+    /// <summary>
+    /// 查询计划执行器。
+    /// </summary>
     private ISqlQueryPlanExecutor _executor;
+
+    /// <summary>
+    /// Builder 共享服务。
+    /// </summary>
     private SqlBuilderServices _services;
 
     /// <summary>
@@ -31,8 +42,11 @@ public class SqlLambdaJoinBenchmarks
     private DataFilter _dataFilter;
 
     /// <summary>
-    /// 连续 Join 的来源数量；1 表示一个根来源，后续值各增加对应数量的 Join。
+    /// 获取或设置连续 Join 的来源数量。
     /// </summary>
+    /// <remarks>
+    /// 1 表示一个根来源，后续值各增加对应数量的 Join。
+    /// </remarks>
     [Params(1, 2, 5, 10)]
     public int SourceCount { get; set; }
 
@@ -51,6 +65,7 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 测量连续二元 Join 的构建和 SQL 渲染成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark(Baseline = true)]
     public string BuildJoinAndRender()
     {
@@ -61,12 +76,14 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 测量冻结结构的重复渲染成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string RenderExistingJoin() => _query.ToSql();
 
     /// <summary>
     /// 测量 WhereIf 为 true 时的构建和渲染成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string WhereIfTrue()
     {
@@ -78,6 +95,7 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 测量 WhereIf 为 false 时不改变查询结构的成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string WhereIfFalse()
     {
@@ -89,6 +107,7 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 测量参数化动态过滤的渲染成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string DynamicFilterRender()
     {
@@ -100,15 +119,21 @@ public class SqlLambdaJoinBenchmarks
     /// <summary>
     /// 测量公开查询描述的 Builder Clone 成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string CloneQuery() => _query.Clone().ToSql();
 
     /// <summary>
     /// 测量创建 Join 查询执行快照的成本。
     /// </summary>
+    /// <returns>执行快照中的 SQL。</returns>
     [Benchmark]
     public string CreateExecutionSnapshot() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(_query.GetBuilder()).Sql;
 
+    /// <summary>
+    /// 构建当前来源数量对应的 Lambda 查询。
+    /// </summary>
+    /// <returns>构建的 Lambda 查询。</returns>
     private SqlLambdaQuery BuildQuery()
     {
         var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new BenchmarkBuilder(_services))
@@ -133,6 +158,11 @@ public class SqlLambdaJoinBenchmarks
         return query;
     }
 
+    /// <summary>
+    /// 向查询追加指定数量的连续 Join。
+    /// </summary>
+    /// <param name="query">待追加 Join 的查询。</param>
+    /// <param name="count">需要追加的来源数量。</param>
     private static void AddJoinsThrough(SqlLambdaQuery query, int count)
     {
         if (count >= 2)
@@ -155,54 +185,109 @@ public class SqlLambdaJoinBenchmarks
             query.Join<Root09, Root10>((left, right) => left.Id == right.ParentId);
     }
 
+    /// <summary>
+    /// 创建空操作查询计划执行器。
+    /// </summary>
+    /// <returns>空操作查询计划执行器。</returns>
     private static ISqlQueryPlanExecutor CreateExecutor() =>
         DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
 
+    /// <summary>
+    /// Benchmark 使用的空操作代理。
+    /// </summary>
     private class NoOpExecutor : DispatchProxy
     {
+        /// <inheritdoc />
         protected override object Invoke(MethodInfo targetMethod, object[] args) =>
             targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
     }
 
+    /// <summary>
+    /// Benchmark 使用的 SQL Builder。
+    /// </summary>
     private sealed class BenchmarkBuilder : SqlBuilderBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="BenchmarkBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="services">Builder 共享服务。</param>
         public BenchmarkBuilder(SqlBuilderServices services)
             : this(services, null)
         {
         }
 
+        /// <summary>
+        /// 初始化一个 <see cref="BenchmarkBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="services">Builder 共享服务。</param>
+        /// <param name="parameterManager">参数管理器。</param>
         private BenchmarkBuilder(SqlBuilderServices services, IParameterManager parameterManager)
             : base(BenchmarkSqlProvider.Instance, services, parameterManager)
         {
         }
 
+        /// <inheritdoc />
         protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
             new BenchmarkBuilder(Services, parameterManager);
     }
 
+    /// <summary>
+    /// Benchmark 使用的 SQL Provider。
+    /// </summary>
     private sealed class BenchmarkSqlProvider : ISqlProvider
     {
+        /// <summary>
+        /// 获取 Provider 单例。
+        /// </summary>
         public static BenchmarkSqlProvider Instance { get; } = new();
+
+        /// <inheritdoc />
         public string Key => "benchmark.sqlserver";
+
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
+
+        /// <inheritdoc />
         public IDialect Dialect { get; } = new BenchmarkDialect();
+
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory { get; } = new DefaultSqlClauseFactory();
+
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => DefaultSqlTableReferenceParser.Instance;
+
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer { get; } = new BenchmarkPaginationRenderer();
+
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
+
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
     }
 
+    /// <summary>
+    /// Benchmark 使用的分页渲染器。
+    /// </summary>
     private sealed class BenchmarkPaginationRenderer : ISqlPaginationRenderer
     {
+        /// <inheritdoc />
         public string Render(string offsetParameterName, string limitParameterName) =>
             $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
     }
 
+    /// <summary>
+    /// Benchmark 使用的 SQL 方言。
+    /// </summary>
     private sealed class BenchmarkDialect : DialectBase
     {
+        /// <inheritdoc />
         public override char OpeningIdentifier => '[';
+
+        /// <inheritdoc />
         public override char ClosingIdentifier => ']';
+
+        /// <inheritdoc />
         public override string GetPrefix() => "@";
     }
 
@@ -211,19 +296,163 @@ public class SqlLambdaJoinBenchmarks
     /// </summary>
     private class Root01 : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
         public int ParentId { get; set; }
+
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
-    private class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root03 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root04 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root05 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root06 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root07 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root08 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root09 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root10 { public int Id { get; set; } public int ParentId { get; set; } }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root02
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root03
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root04
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root05
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root06
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root07
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root08
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root09
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的 Join 来源实体。
+    /// </summary>
+    private class Root10
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
 }
 
 /// <summary>
@@ -234,7 +463,14 @@ public class SqlLambdaJoinBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlLambdaFixedJoinBenchmarks
 {
+    /// <summary>
+    /// 查询计划执行器。
+    /// </summary>
     private ISqlQueryPlanExecutor _executor;
+
+    /// <summary>
+    /// Builder 共享服务。
+    /// </summary>
     private SqlBuilderServices _services;
 
     /// <summary>
@@ -250,6 +486,7 @@ public class SqlLambdaFixedJoinBenchmarks
     /// <summary>
     /// 测量重复实体 Join 的别名解析成本。
     /// </summary>
+    /// <returns>渲染后的 SQL。</returns>
     [Benchmark]
     public string BuildRepeatedEntityJoin()
     {
@@ -264,6 +501,7 @@ public class SqlLambdaFixedJoinBenchmarks
     /// <summary>
     /// 测量 Join 失败后异常返回的成本。
     /// </summary>
+    /// <returns>成功或异常类型的标识。</returns>
     [Benchmark]
     public string JoinFailure()
     {
@@ -282,12 +520,45 @@ public class SqlLambdaFixedJoinBenchmarks
         }
     }
 
+    /// <summary>
+    /// Benchmark 使用的空操作代理。
+    /// </summary>
     private class NoOpExecutor : DispatchProxy
     {
+        /// <inheritdoc />
         protected override object Invoke(MethodInfo targetMethod, object[] args) =>
             targetMethod.ReturnType.IsValueType ? Activator.CreateInstance(targetMethod.ReturnType) : null;
     }
 
-    private class Root01 { public int Id { get; set; } public int ParentId { get; set; } }
-    private class Root02 { public int Id { get; set; } public int ParentId { get; set; } }
+    /// <summary>
+    /// Benchmark 使用的父实体。
+    /// </summary>
+    private class Root01
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
+
+    /// <summary>
+    /// Benchmark 使用的子实体。
+    /// </summary>
+    private class Root02
+    {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置父实体标识。
+        /// </summary>
+        public int ParentId { get; set; }
+    }
 }

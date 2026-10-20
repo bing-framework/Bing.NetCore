@@ -54,6 +54,7 @@ public class SqlMultipleQueryExecutorTest
     /// <summary>
     /// 测试目的：Provider 不支持多结果集时，同步入口必须在打开连接或创建命令前拒绝有效命令。
     /// </summary>
+    /// <param name="failureReason">多结果集能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -79,6 +80,7 @@ public class SqlMultipleQueryExecutorTest
     /// <summary>
     /// 测试目的：Provider 不支持多结果集时，异步入口必须在打开连接或创建命令前拒绝有效命令。
     /// </summary>
+    /// <param name="failureReason">多结果集能力不可用时应报告的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -154,9 +156,10 @@ public class SqlMultipleQueryExecutorTest
     private sealed class UnsupportedMultipleQueryExecutor : SqlMultipleQueryExecutorBase
     {
         /// <summary>
-        /// 初始化一个<see cref="UnsupportedMultipleQueryExecutor"/>类型的实例。
+        /// 初始化一个 <see cref="UnsupportedMultipleQueryExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="connection">用于创建测试配置的数据库连接。</param>
         public UnsupportedMultipleQueryExecutor(IServiceProvider serviceProvider, IDbConnection connection = null)
             : base(serviceProvider, CreateOptions(connection))
         {
@@ -172,7 +175,7 @@ public class SqlMultipleQueryExecutorTest
     private sealed class SkippingMultipleQueryExecutor : SqlMultipleQueryExecutorBase
     {
         /// <summary>
-        /// 初始化测试执行器。
+        /// 初始化一个 <see cref="SkippingMultipleQueryExecutor"/> 类型的实例。
         /// </summary>
         public SkippingMultipleQueryExecutor(IServiceProvider serviceProvider, IDbConnection connection)
             : base(serviceProvider, CreateOptions(connection))
@@ -180,7 +183,7 @@ public class SqlMultipleQueryExecutorTest
         }
 
         /// <summary>
-        /// 执行前 Hook 调用次数。
+        /// 获取或设置执行前 Hook 调用次数。
         /// </summary>
         public int ExecuteBeforeCount { get; private set; }
 
@@ -199,6 +202,7 @@ public class SqlMultipleQueryExecutorTest
     /// 创建固定到多结果集测试 Provider 的执行选项。
     /// </summary>
     /// <param name="connection">测试连接。</param>
+    /// <returns>返回绑定指定连接和多结果集测试 Provider 的 SQL 选项。</returns>
     private static SqlOptions CreateOptions(IDbConnection connection)
     {
         var options = new SqlOptions { Connection = connection, DatabaseType = DatabaseType.SqlServer };
@@ -218,6 +222,9 @@ public class SqlMultipleQueryExecutorTest
     /// <summary>
     /// 创建注册仅支持单结果集 Provider 的测试服务容器。
     /// </summary>
+    /// <param name="supportsMultipleResultSets">是否启用多结果集能力。</param>
+    /// <param name="failureReason">多结果集能力不可用时应报告的失败原因。</param>
+    /// <returns>返回注册指定多结果集能力的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(bool supportsMultipleResultSets = false,
         SqlCapabilityFailureReason? failureReason = null)
     {
@@ -233,13 +240,16 @@ public class SqlMultipleQueryExecutorTest
     /// </summary>
     private sealed class UnsupportedMultipleResultProvider : ISqlProvider, ISqlProviderProfileProvider
     {
-        /// <summary>测试 Provider Key。</summary>
+        /// <summary>
+        /// 多结果集能力测试 Provider 的稳定标识，值为 <c>test.multiple.unsupported</c>。
+        /// </summary>
         public const string ProviderKey = "test.multiple.unsupported";
 
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="UnsupportedMultipleResultProvider"/> 类型的实例。
         /// </summary>
         /// <param name="supportsMultipleResultSets">是否支持多结果集。</param>
+        /// <param name="failureReason">不支持多结果集时使用的能力拒绝原因。</param>
         public UnsupportedMultipleResultProvider(bool supportsMultipleResultSets,
             SqlCapabilityFailureReason? failureReason = null) => Profile = new SqlProviderProfile
         {

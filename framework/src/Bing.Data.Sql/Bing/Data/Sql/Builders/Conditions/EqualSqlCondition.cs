@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Conditions;
 public class EqualSqlCondition : SqlConditionBase
 {
     /// <summary>
-    /// 初始化一个<see cref="EqualSqlCondition"/>类型的实例
+    /// 初始化一个 <see cref="EqualSqlCondition"/> 类型的实例。
     /// </summary>
     /// <param name="parameterManager">参数管理器</param>
     /// <param name="column">列名</param>

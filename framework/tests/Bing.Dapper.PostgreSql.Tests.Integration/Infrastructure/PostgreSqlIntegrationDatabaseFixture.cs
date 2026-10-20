@@ -20,12 +20,12 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     private const string Provider = "PostgreSql";
 
     /// <summary>
-    /// 主数据源键。
+    /// PostgreSQL 集成测试主数据源的逻辑键，值为 <c>primary</c>。
     /// </summary>
     public const string PrimaryDatabaseKey = "primary";
 
     /// <summary>
-    /// 报表数据源键。
+    /// PostgreSQL 集成测试报表数据源的逻辑键，值为 <c>reporting</c>。
     /// </summary>
     public const string ReportingDatabaseKey = "reporting";
 
@@ -35,17 +35,17 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     private ServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 获取 PostgreSQL 专用测试数据库连接字符串。
+    /// 获取或设置PostgreSQL 专用测试数据库连接字符串。
     /// </summary>
     public string ConnectionString { get; private set; }
 
     /// <summary>
-    /// 获取主数据源连接字符串。
+    /// 获取或设置主数据源连接字符串。
     /// </summary>
     public string PrimaryConnectionString { get; private set; }
 
     /// <summary>
-    /// 获取报表数据源连接字符串。
+    /// 获取或设置报表数据源连接字符串。
     /// </summary>
     public string ReportingConnectionString { get; private set; }
 
@@ -55,9 +55,10 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     public IServiceProvider ServiceProvider => _serviceProvider ??
         throw new ObjectDisposedException(nameof(PostgreSqlIntegrationDatabaseFixture));
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 初始化 PostgreSQL 测试数据库和服务容器。
-    /// </summary>
+    /// </remarks>
     public async Task InitializeAsync()
     {
         if (IntegrationTestGate.IsProviderEnabled(Provider) == false)
@@ -105,7 +106,6 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     /// <summary>
     /// 清理 PostgreSQL 专用测试表数据。
     /// </summary>
-    /// <returns>异步清理任务。</returns>
     public async Task ResetAsync()
     {
         if (IntegrationTestGate.IsProviderEnabled(Provider) == false)
@@ -177,9 +177,10 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
         return names;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放服务容器和 PostgreSQL 连接池。
-    /// </summary>
+    /// </remarks>
     public Task DisposeAsync() => DisposeAsyncCore();
 
     /// <inheritdoc />
@@ -188,7 +189,6 @@ public sealed class PostgreSqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyn
     /// <summary>
     /// 释放 PostgreSQL 集成测试资源。
     /// </summary>
-    /// <returns>异步释放任务。</returns>
     private async Task DisposeAsyncCore()
     {
         if (_serviceProvider is IAsyncDisposable asyncDisposable)

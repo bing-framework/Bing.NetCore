@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.AspNetCore.Authentication.JwtBearer\Bing.AspNetCore.Authentication.JwtBearer.csproj" />
     <ProjectReference Include="..\..\src\Bing.AspNetCore.Mvc\Bing.AspNetCore.Mvc.csproj" />
+    <ProjectReference Include="..\..\src\Bing.DynamicApi.Contracts\Bing.DynamicApi.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Bing.AspNetCore\Bing.AspNetCore.csproj" />
   </ItemGroup>
 

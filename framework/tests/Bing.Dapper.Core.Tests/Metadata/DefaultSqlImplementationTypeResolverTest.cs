@@ -8,7 +8,7 @@ using Xunit;
 namespace Bing.Dapper.Core.Tests.Metadata;
 
 /// <summary>
-/// <see cref="SqlProviderRuntime"/> 单元测试。
+/// <see cref="SqlProviderRuntime"/> 注册行为测试。
 /// </summary>
 public class SqlProviderRuntimeRegistrationTest
 {
@@ -85,31 +85,77 @@ public class SqlProviderRuntimeRegistrationTest
                 typeof(AlternateExecutorService))));
     }
 
+    /// <summary>
+    /// 用于 Provider 注册测试的查询服务实现。
+    /// </summary>
     private class QueryService : SqlQueryBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="QueryService"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">提供查询依赖项的服务提供程序。</param>
+        /// <param name="options">查询配置。</param>
         public QueryService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
     }
 
+    /// <summary>
+    /// 使用替代类型标识的查询服务测试实现。
+    /// </summary>
     private sealed class AlternateQueryService : QueryService
     {
+        /// <summary>
+        /// 初始化一个 <see cref="AlternateQueryService"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">提供查询依赖项的服务提供程序。</param>
+        /// <param name="options">查询配置。</param>
         public AlternateQueryService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
     }
 
+    /// <summary>
+    /// 用于 Provider 注册测试的执行器实现。
+    /// </summary>
     private class ExecutorService : SqlExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ExecutorService"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">提供执行依赖项的服务提供程序。</param>
+        /// <param name="options">执行器配置。</param>
         public ExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
     }
 
+    /// <summary>
+    /// 使用替代类型标识的执行器测试实现。
+    /// </summary>
     private sealed class AlternateExecutorService : ExecutorService
     {
+        /// <summary>
+        /// 初始化一个 <see cref="AlternateExecutorService"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">提供执行依赖项的服务提供程序。</param>
+        /// <param name="options">执行器配置。</param>
         public AlternateExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
     }
 
+    /// <summary>
+    /// 用于 Provider 注册测试的多结果集执行器实现。
+    /// </summary>
     private sealed class MultipleQueryExecutorService : SqlMultipleQueryExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="MultipleQueryExecutorService"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">提供执行依赖项的服务提供程序。</param>
+        /// <param name="options">执行器配置。</param>
         public MultipleQueryExecutorService(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options) { }
+
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
     }
 

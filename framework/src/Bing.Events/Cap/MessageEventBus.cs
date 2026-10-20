@@ -13,17 +13,17 @@ namespace Bing.Events.Cap;
 public class MessageEventBus : IMessageEventBus
 {
     /// <summary>
-    /// 事件发布器
+    /// 获取或设置事件发布器
     /// </summary>
     public ICapPublisher Publisher { get; set; }
 
     /// <summary>
-    /// 事务操作管理器
+    /// 获取或设置事务操作管理器
     /// </summary>
     public ITransactionActionManager TransactionActionManager { get; set; }
 
     /// <summary>
-    /// 日志
+    /// 获取日志
     /// </summary>
     protected ILogger<MessageEventBus> Logger { get; }
 
@@ -42,12 +42,7 @@ public class MessageEventBus : IMessageEventBus
         Logger = logger ?? NullLogger<MessageEventBus>.Instance;
     }
 
-    /// <summary>
-    /// 发布事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="event">事件</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : IMessageEvent
     {

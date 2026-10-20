@@ -17,7 +17,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery> : TreesCont
     where TQuery : class, ITreeQueryParameter, new()
 {
     /// <summary>
-    /// 初始化一个<see cref="TreesControllerBase{TTreeResult,TDto,TQuery}"/>类型的实例
+    /// 初始化一个 <see cref="TreesControllerBase{TTreeResult, TDto, TQuery}"/> 类型的实例。
     /// </summary>
     /// <param name="service">树型服务</param>
     protected TreesControllerBase(ITreesAppService<TDto, TQuery, Guid?> service) : base(service)
@@ -43,7 +43,7 @@ public abstract class TreesControllerBase<TTreeResult, TDto, TQuery, TParentId> 
     private readonly ITreesAppService<TDto, TQuery, TParentId> _service;
 
     /// <summary>
-    /// 初始化一个<see cref="TreesControllerBase{TTreeResult,TDto,TQuery,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="TreesControllerBase{TTreeResult, TDto, TQuery, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="service">树型服务</param>
     protected TreesControllerBase(ITreesAppService<TDto, TQuery, TParentId> service) => _service = service;

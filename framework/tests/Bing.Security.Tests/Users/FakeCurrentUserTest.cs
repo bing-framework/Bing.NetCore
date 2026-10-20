@@ -7,8 +7,7 @@ using Xunit;
 namespace Bing.Security.Tests.Users;
 
 /// <summary>
-/// <see cref="FakeCurrentUser"/> 自身行为测试——
-/// 确认测试基建（test double）的契约符合 <see cref="ICurrentUser"/> 预期。
+/// <see cref="FakeCurrentUser"/> 自身行为测试—— 确认测试基建（test double）的契约符合 <see cref="ICurrentUser"/> 预期。
 /// </summary>
 public class FakeCurrentUserTest
 {

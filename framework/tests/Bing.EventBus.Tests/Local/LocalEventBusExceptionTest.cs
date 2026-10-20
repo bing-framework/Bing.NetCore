@@ -12,6 +12,10 @@ public class LocalEventBusExceptionTest
 {
     // ==================== 辅助 ====================
 
+    /// <summary>
+    /// 创建本地事件总线测试实例。
+    /// </summary>
+    /// <returns>配置完成的本地事件总线。</returns>
     private static LocalEventBus CreateBus()
     {
         var services = new ServiceCollection();
@@ -20,6 +24,9 @@ public class LocalEventBusExceptionTest
         return new LocalEventBus(options, sp.GetRequiredService<IServiceScopeFactory>());
     }
 
+    /// <summary>
+    /// 表示用于验证处理器异常传播的事件。
+    /// </summary>
     private class FaultyEvent : IEvent { }
 
     // ==================== 单个处理器抛出异常 ====================

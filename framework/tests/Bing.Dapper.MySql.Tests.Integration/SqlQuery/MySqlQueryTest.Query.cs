@@ -51,7 +51,7 @@ public partial class MySqlQueryTest
     /// </summary>
     /// <param name="id">公司标识。</param>
     /// <param name="name">公司名称。</param>
-    /// <returns>表示异步写入操作的任务。</returns>
+    /// <param name="merchantId">商户标识；未提供时不关联商户。</param>
     private Task InitDottedCompanyDataAsync(Guid id, string name, Guid? merchantId = null) => _sqlExecutor.ExecuteSqlAsync(
         "Insert Into `Merchants.Company`(CompanyId,MerchantId,Name) Values(@CompanyId,@MerchantId,@Name)",
         new { CompanyId = id, MerchantId = merchantId, Name = name });
@@ -61,7 +61,6 @@ public partial class MySqlQueryTest
     /// </summary>
     /// <param name="id">商户标识。</param>
     /// <param name="name">商户名称。</param>
-    /// <returns>表示异步写入操作的任务。</returns>
     private Task InitDottedMerchantDataAsync(Guid id, string name) => _sqlExecutor.ExecuteSqlAsync(
         "Insert Into `Merchants.Merchant`(MerchantId,Name) Values(@MerchantId,@Name)",
         new { MerchantId = id, Name = name });

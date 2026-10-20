@@ -5,8 +5,9 @@
 /// </summary>
 public abstract class DtoBase : RequestBase, IDto
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置数据传输对象的字符串标识。
-    /// </summary>
+    /// </remarks>
     public string Id { get; set; }
 }

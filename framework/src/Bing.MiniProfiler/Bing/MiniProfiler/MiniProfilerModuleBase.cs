@@ -12,22 +12,16 @@ namespace Bing.MiniProfiler;
 [Description(nameof(Bing.AspNetCore.AspNetCoreBingModule))]
 public abstract class MiniProfilerModuleBase : Bing.AspNetCore.AspNetCoreBingModule
 {
-    /// <summary>
-    /// 模块级别。级别越小越先启动
-    /// </summary>
+    /// <inheritdoc />
     public override ModuleLevel Level => ModuleLevel.Application;
 
-    /// <summary>
-    /// 模块启动顺序。模块启动的顺序先按级别启动，同一级别内部再按此顺序启动，
-    /// 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为>0的顺序值
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 模块启动的顺序先按级别启动，同一级别内部再按此顺序启动， 级别默认为0，表示无依赖，需要在同级别有依赖顺序的时候，再重写为&gt;0的顺序值
+    /// </remarks>
     public override int Order => 0;
 
-    /// <summary>
-    /// 添加服务。将模块服务添加到依赖注入服务容器中
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>完成 MiniProfiler 注册后的服务集合。</returns>
+    /// <inheritdoc />
     public override IServiceCollection AddServices(IServiceCollection services)
     {
         var action = GetMiniProfilerAction(services);
@@ -35,10 +29,7 @@ public abstract class MiniProfilerModuleBase : Bing.AspNetCore.AspNetCoreBingMod
         return services;
     }
 
-    /// <summary>
-    /// 应用AspNetCore的服务业务
-    /// </summary>
-    /// <param name="app">应用程序构建器</param>
+    /// <inheritdoc />
     public override void UseModule(IApplicationBuilder app)
     {
         app.UseMiniProfiler();

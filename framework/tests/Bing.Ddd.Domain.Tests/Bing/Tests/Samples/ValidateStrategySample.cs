@@ -8,15 +8,10 @@ namespace Bing.Tests.Samples;
 /// </summary>
 public class ValidateStrategySample : IValidationStrategy<AggregateRootSample>
 {
-    /// <summary>
-    /// 策略名称
-    /// </summary>
+    /// <inheritdoc />
     public string StrategyName => nameof(ValidateStrategySample);
 
-    /// <summary>
-    /// 验证
-    /// </summary>
-    /// <param name="obj">对象</param>
+    /// <inheritdoc />
     public ValidationResult Validate(AggregateRootSample obj)
     {
         if (obj.Name.Length > 3)

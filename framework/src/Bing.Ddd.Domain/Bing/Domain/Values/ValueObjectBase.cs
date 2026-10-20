@@ -11,18 +11,13 @@ namespace Bing.Domain.Values;
 /// <typeparam name="TValueObject">值对象类型</typeparam>
 public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObject>, IEquatable<TValueObject> where TValueObject : ValueObjectBase<TValueObject>
 {
-    /// <summary>
-    /// 相等性比较
-    /// </summary>
-    /// <param name="other">值对象</param>
-    /// <returns>当前值对象与指定值对象相等时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool Equals(TValueObject other) => this == other;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 相等性比较
-    /// </summary>
-    /// <param name="other">值对象</param>
-    /// <returns>当前值对象与指定对象相等时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// </remarks>
     public override bool Equals(object other) => Equals(other as TValueObject);
 
     /// <summary>
@@ -42,16 +37,17 @@ public abstract class ValueObjectBase<TValueObject> : DomainObjectBase<TValueObj
     }
 
     /// <summary>
-    /// 不相等比较
+    /// 判断两个值对象是否不相等。
     /// </summary>
     /// <param name="left">值对象</param>
     /// <param name="right">值对象</param>
+    /// <returns>值对象不相等时为 <see langword="true"/>。</returns>
     public static bool operator !=(ValueObjectBase<TValueObject> left, ValueObjectBase<TValueObject> right) => !(left == right);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取哈希
-    /// </summary>
-    /// <returns>基于值对象属性计算的哈希代码。</returns>
+    /// </remarks>
     public override int GetHashCode()
     {
         var properties = GetType().GetTypeInfo().GetProperties();

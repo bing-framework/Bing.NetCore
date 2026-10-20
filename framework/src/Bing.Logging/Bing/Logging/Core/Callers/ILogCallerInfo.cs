@@ -6,17 +6,17 @@
 public interface ILogCallerInfo
 {
     /// <summary>
-    /// 成员名称（方法名）
+    /// 获取成员名称（方法名）
     /// </summary>
     string MemberName { get; }
 
     /// <summary>
-    /// 文件路径
+    /// 获取文件路径
     /// </summary>
     string FilePath { get; }
 
     /// <summary>
-    /// 行号
+    /// 获取行号
     /// </summary>
     int LineNumber { get; }
 

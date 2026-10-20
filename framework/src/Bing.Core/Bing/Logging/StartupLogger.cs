@@ -96,8 +96,11 @@ public class StartupLogger
         public string Message { get; set; }
 
         /// <summary>
-        /// 获取或设置关联异常；没有异常时为空。
+        /// 获取或设置关联异常。
         /// </summary>
+        /// <remarks>
+        /// 没有异常时为空。
+        /// </remarks>
         public Exception Exception { get; set; }
 
         /// <summary>

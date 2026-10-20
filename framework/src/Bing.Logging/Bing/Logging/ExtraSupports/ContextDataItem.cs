@@ -6,7 +6,7 @@
 public class ContextDataItem
 {
     /// <summary>
-    /// 使用名称、类型、值和输出标志初始化一个 <see cref="ContextDataItem"/> 实例。
+    /// 初始化一个 <see cref="ContextDataItem"/> 类型的实例。
     /// </summary>
     /// <param name="name">上下文数据项名称。</param>
     /// <param name="type">上下文数据项的运行时类型。</param>

@@ -5,6 +5,9 @@ namespace Bing.Test.Shared;
 /// </summary>
 public static class IntegrationTestGate
 {
+    /// <summary>
+    /// 全局集成测试开关的环境变量名称。
+    /// </summary>
     internal const string GlobalEnvironmentVariable = "RUN_INTEGRATION_TESTS";
 
     /// <summary>

@@ -13,19 +13,13 @@ namespace Bing.Analyzers;
 [Generator]
 internal class ChangeTrackableSourceGenerator : ISourceGenerator
 {
-    /// <summary>
-    /// 初始化代码生成器
-    /// </summary>
-    /// <param name="context">生成器初始化上下文</param>
+    /// <inheritdoc />
     public void Initialize(GeneratorInitializationContext context)
     {
         context.RegisterForSyntaxNotifications(() => new DomainObjectBaseSyntaxReceiver());
     }
 
-    /// <summary>
-    /// 执行代码生成
-    /// </summary>
-    /// <param name="context">生成器执行上下文</param>
+    /// <inheritdoc />
     public void Execute(GeneratorExecutionContext context)
     {
         var log = new StringBuilder();
@@ -137,7 +131,7 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
     struct BuilderPropertyInfo
     {
         /// <summary>
-        /// 根据属性符号初始化生成器属性信息。
+        /// 初始化一个 <see cref="BuilderPropertyInfo"/> 类型的实例。
         /// </summary>
         /// <param name="property">待转换的属性符号。</param>
         public BuilderPropertyInfo(IPropertySymbol property) : this()
@@ -149,22 +143,22 @@ internal class ChangeTrackableSourceGenerator : ISourceGenerator
         }
 
         /// <summary>
-        /// 属性名称。
+        /// 获取或设置属性名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 属性类型文本。
+        /// 获取或设置属性类型文本。
         /// </summary>
         public string Type { get; set; }
 
         /// <summary>
-        /// 对应的参数名称。
+        /// 获取或设置对应的参数名称。
         /// </summary>
         public string ParameterName { get; set; }
 
         /// <summary>
-        /// 对应的后备字段名称。
+        /// 获取或设置对应的后备字段名称。
         /// </summary>
         public string BackingFieldName { get; set; }
 
@@ -219,7 +213,7 @@ internal static class Extensions
     }
 
     /// <summary>
-    /// 使用模板渲染序列中的每个元素。
+    /// 使用模板渲染序列元素。
     /// </summary>
     /// <typeparam name="T">序列元素类型。</typeparam>
     /// <param name="source">待渲染的元素序列。</param>
@@ -232,7 +226,7 @@ internal static class Extensions
     }
 
     /// <summary>
-    /// 使用带索引的模板渲染序列中的每个元素。
+    /// 使用模板渲染序列元素。
     /// </summary>
     /// <typeparam name="T">序列元素类型。</typeparam>
     /// <param name="source">待渲染的元素序列。</param>

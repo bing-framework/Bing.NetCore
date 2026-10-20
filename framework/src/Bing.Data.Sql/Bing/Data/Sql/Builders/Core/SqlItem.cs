@@ -19,7 +19,7 @@ public class SqlItem
     private string _name;
 
     /// <summary>
-    /// 前缀
+    /// 限定 SQL 项名称的前缀段，用于渲染完整标识符。
     /// </summary>
     private string _prefix;
 
@@ -33,27 +33,36 @@ public class SqlItem
     #region 属性
 
     /// <summary>
-    /// 是否使用原始值
+    /// 获取是否使用原始值
     /// </summary>
     public bool IsRaw { get; }
 
     /// <summary>
-    /// 前缀，范例：t.a As b，值为 t
+    /// 获取前缀。
     /// </summary>
+    /// <remarks>
+    /// 范例：t.a As b，值为 t。
+    /// </remarks>
     public string Prefix => _prefix.SafeString();
 
     /// <summary>
-    /// 获取 SQL 项名称；原始项保留原始文本，结构化项读取时规范化空值。
+    /// 获取 SQL 项名称。
     /// </summary>
+    /// <remarks>
+    /// 原始项保留原始文本，结构化项读取时规范化空值。
+    /// </remarks>
     public string Name => IsRaw ? _name : _name.SafeString();
 
     /// <summary>
-    /// 别名，范例：t.a As b，值为 b
+    /// 获取别名。
     /// </summary>
+    /// <remarks>
+    /// 范例：t.a As b，值为 b。
+    /// </remarks>
     public string Alias => _alias.SafeString();
 
     /// <summary>
-    /// 数据库名称
+    /// 获取或设置数据库名称
     /// </summary>
     public string DatabaseName { get; private set; }
 

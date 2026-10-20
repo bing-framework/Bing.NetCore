@@ -17,7 +17,7 @@ public class OracleBuilderTest
     private readonly OracleBuilder _builder;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="OracleBuilderTest"/> 类型的实例。
     /// </summary>
     public OracleBuilderTest() 
     {

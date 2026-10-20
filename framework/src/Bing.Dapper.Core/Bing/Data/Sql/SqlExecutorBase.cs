@@ -28,7 +28,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="SqlExecutorBase"/>类型的实例
+    /// 初始化一个 <see cref="SqlExecutorBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="options">Sql配置</param>
@@ -198,13 +198,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #region ExecuteSql(执行 SQL 文本)
 
-    /// <summary>
-    /// 执行指定的SQL语句
-    /// </summary>
-    /// <param name="sql">执行的SQL语句</param>
-    /// <param name="param">SQL参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <returns>操作影响的行数</returns>
+    /// <inheritdoc />
     public virtual int ExecuteSql(string sql, object param = null, int? timeout = null)
         => ExecuteSqlCore(sql, param, timeout, null);
 
@@ -239,14 +233,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #region ExecuteSqlAsync(执行Sql增删改操作)
 
-    /// <summary>
-    /// 执行指定的SQL语句
-    /// </summary>
-    /// <param name="sql">执行的SQL语句</param>
-    /// <param name="param">SQL参数</param>
-    /// <param name="timeout">执行超时时间。单位：秒</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>操作影响的行数</returns>
+    /// <inheritdoc />
     public virtual async Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null,
         CancellationToken cancellationToken = default)
         => await ExecuteSqlCoreAsync(sql, param, timeout, cancellationToken, null).ConfigureAwait(false);
@@ -285,13 +272,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #region ExecuteProcedure(执行存储过程增删改操作)
 
-    /// <summary>
-    /// 执行存储过程增删改操作
-    /// </summary>
-    /// <param name="procedure">存储过程</param>
-    /// <param name="param">SQL参数</param>
-    /// <param name="timeout">执行超时时间，单位：秒</param>
-    /// <returns>包含受影响行数及本次输出参数访问器的过程执行结果。</returns>
+    /// <inheritdoc />
     public virtual SqlProcedureResult<int> ExecuteProcedure(string procedure, object param = null, int? timeout = null)
     {
         EnsureWritableDataSource();
@@ -320,14 +301,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #region ExecuteProcedureAsync(执行存储过程增删改操作)
 
-    /// <summary>
-    /// 执行存储过程增删改操作
-    /// </summary>
-    /// <param name="procedure">存储过程</param>
-    /// <param name="param">SQL参数</param>
-    /// <param name="timeout">执行超时时间，单位：秒</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示包含受影响行数及本次输出参数访问器的过程执行结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<SqlProcedureResult<int>> ExecuteProcedureAsync(string procedure, object param = null,
         int? timeout = null,
         CancellationToken cancellationToken = default)
@@ -409,7 +383,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     private sealed class DirectExecutionContext
     {
         /// <summary>
-        /// 当前命令的执行前诊断消息。
+        /// 获取或设置当前命令的执行前诊断消息。
         /// </summary>
         public DiagnosticsMessage Message { get; set; }
     }
@@ -439,14 +413,14 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         ExecuteSqlAsync(sql, (object)param, timeout, cancellationToken);
 
     /// <summary>
-    /// 创建绑定当前 Executor 数据源和映射服务的实体写入 Builder。
+    /// 创建实体写入 Builder。
     /// </summary>
     /// <returns>实体写入 Builder。</returns>
     private ISqlEntityMutationCommandBuilder CreateMutationBuilder() =>
         CreateMutationBuilder(ResolveMutationProvider());
 
     /// <summary>
-    /// 使用指定 Provider 创建绑定当前 Executor 共享服务的实体写入 Builder。
+    /// 创建实体写入 Builder。
     /// </summary>
     /// <param name="provider">已解析的当前 SQL Provider。</param>
     /// <returns>实体写入 Builder。</returns>
@@ -1082,7 +1056,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <summary>
-    /// 验证带并发令牌的优化批量命令是否更新了全部目标实体。
+    /// 验证并发命令影响的行数。
     /// </summary>
     /// <param name="batch">待验证的批量命令。</param>
     /// <param name="affectedRows">实际受影响的行数。</param>
@@ -1120,7 +1094,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     }
 
     /// <summary>
-    /// 验证单体带并发令牌的命令是否影响了一行。
+    /// 验证并发命令影响的行数。
     /// </summary>
     /// <param name="command">待验证的单体写入命令。</param>
     /// <param name="affectedRows">实际受影响的行数。</param>

@@ -7,15 +7,21 @@
 public class EntityPropertyChangeInfo
 {
     /// <summary>
-    /// 获取或设置属性变更后的值；实体删除时为 <c>null</c>。
+    /// 获取或设置属性变更后的值。
     /// </summary>
-    /// <remarks>属性的新值，如果实体已被删除则为<c>null</c>。</remarks>
+    /// <remarks>
+    /// 属性的新值，如果实体已被删除则为<c>null</c>。
+    /// 实体删除时为 <c>null</c>。
+    /// </remarks>
     public virtual string NewValue { get; set; }
 
     /// <summary>
-    /// 获取或设置属性变更前的值；实体新建时为 <c>null</c>。
+    /// 获取或设置属性变更前的值。
     /// </summary>
-    /// <remarks>变更前旧/初始值，如果实体是新创建则为<c>null</c>。</remarks>
+    /// <remarks>
+    /// 变更前旧/初始值，如果实体是新创建则为<c>null</c>。
+    /// 实体新建时为 <c>null</c>。
+    /// </remarks>
     public virtual string OriginalValue { get; set; }
 
     /// <summary>

@@ -28,7 +28,7 @@ public class AmbientDataContextAmbientScopeProvider<T> : IAmbientScopeProvider<T
     private readonly IAmbientDataContext _dataContext;
 
     /// <summary>
-    /// 使用环境数据上下文初始化 <see cref="AmbientDataContextAmbientScopeProvider{T}"/> 的实例。
+    /// 初始化一个 <see cref="AmbientDataContextAmbientScopeProvider{T}"/> 类型的实例。
     /// </summary>
     /// <param name="dataContext">保存当前范围标识的环境数据上下文。</param>
     public AmbientDataContextAmbientScopeProvider(IAmbientDataContext dataContext)
@@ -99,7 +99,7 @@ public class AmbientDataContextAmbientScopeProvider<T> : IAmbientScopeProvider<T
         public T Value { get; }
 
         /// <summary>
-        /// 使用范围值和外层范围项初始化 <see cref="ScopeItem"/> 的实例。
+        /// 初始化一个 <see cref="ScopeItem"/> 类型的实例。
         /// </summary>
         /// <param name="value">当前范围保存的值。</param>
         /// <param name="outer">创建当前范围前的外层范围项。</param>

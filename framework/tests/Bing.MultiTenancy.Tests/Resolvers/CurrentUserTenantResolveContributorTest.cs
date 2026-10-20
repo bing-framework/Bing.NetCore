@@ -27,7 +27,7 @@ public class CurrentUserTenantResolveContributorTest
     private readonly Mock<ICurrentUser> _mockCurrentUser;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="CurrentUserTenantResolveContributorTest"/> 类型的实例。
     /// </summary>
     public CurrentUserTenantResolveContributorTest()
     {

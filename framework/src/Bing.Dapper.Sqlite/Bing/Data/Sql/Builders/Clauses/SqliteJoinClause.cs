@@ -11,14 +11,17 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// </summary>
 public class SqliteJoinClause : JoinClause
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 初始化一个 <see cref="SqliteJoinClause"/> 类型的实例。
+    /// </summary>
+    /// <param name="context">SQL 子句运行上下文。</param>
     public SqliteJoinClause(SqlClauseContext context)
         : this(context, null)
     {
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 SQLite 表连接子句。
+    /// 初始化一个 <see cref="SqliteJoinClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="joinItems">已克隆的连接项。</param>

@@ -39,7 +39,7 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     private readonly IEntityAliasRegister _register;
 
     /// <summary>
-    /// 初始化一个<see cref="OrderByClause"/>类型的实例
+    /// 初始化一个 <see cref="OrderByClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="items">排序项列表</param>
@@ -54,11 +54,7 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
         _register = context.AliasRegister;
     }
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">重绑定后的子句运行上下文。</param>
-    /// <returns>使用指定运行上下文创建的独立 Order By 子句。</returns>
+    /// <inheritdoc />
     public virtual IOrderByClause Clone(SqlClauseContext context) =>
         CreateClone(context, new List<OrderByItem>(_items));
 
@@ -71,11 +67,7 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     protected virtual OrderByClause CreateClone(SqlClauseContext context, List<OrderByItem> items) =>
         new OrderByClause(context, items);
 
-    /// <summary>
-    /// 排序
-    /// </summary>
-    /// <param name="order">排序列表</param>
-    /// <param name="tableAlias">表别名</param>
+    /// <inheritdoc />
     public void OrderBy(string order, string tableAlias = null)
     {
         if (string.IsNullOrWhiteSpace(order))
@@ -118,12 +110,7 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
             (item.Prefix.IsEmpty() || string.Equals(t.Prefix, item.Prefix, StringComparison.OrdinalIgnoreCase)));
     }
 
-    /// <summary>
-    /// 排序
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="column">排序列</param>
-    /// <param name="desc">是否倒序</param>
+    /// <inheritdoc />
     public void OrderBy<TEntity>(Expression<Func<TEntity, object>> column, bool desc = false)
     {
         if (column == null)
@@ -152,13 +139,11 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
             _items.Add(new OrderByItem(desc ? $"{item} Desc" : item, raw: true));
     }
 
+    /// <inheritdoc />
     void ISqlMultiSourceOrderByClause.AppendBoundColumns(IEnumerable<string> columns, bool desc) =>
         AddBoundColumns(columns, desc);
 
-    /// <summary>
-    /// 添加到OrderBy子句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <inheritdoc />
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -169,10 +154,10 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
         _items.Add(new OrderByItem(sql, raw: true));
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 在分页查询中验证排序项是否存在。
-    /// </summary>
-    /// <param name="isPage">是否处于分页查询。</param>
+    /// </remarks>
     public void Validate(bool isPage)
     {
         if (isPage == false)
@@ -204,10 +189,7 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     /// <inheritdoc />
     public void Clear() => _items.Clear();
 
-    /// <summary>
-    /// 获取Sql。
-    /// </summary>
-    /// <returns>当前 Order By 子句的 SQL 文本；没有排序项时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();

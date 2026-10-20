@@ -11,23 +11,17 @@ namespace Bing;
 [Serializable]
 public class BusinessException : Exception, IBusinessException, IHasErrorCode, IHasErrorDetails, IHasLogLevel
 {
-    /// <summary>
-    /// 错误码
-    /// </summary>
+    /// <inheritdoc />
     public string Code { get; set; }
 
-    /// <summary>
-    /// 错误详情
-    /// </summary>
+    /// <inheritdoc />
     public string Details { get; set; }
 
-    /// <summary>
-    /// 日志级别
-    /// </summary>
+    /// <inheritdoc />
     public LogLevel LogLevel { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="BusinessException"/>类型的实例
+    /// 初始化一个 <see cref="BusinessException"/> 类型的实例。
     /// </summary>
     /// <param name="code">错误码</param>
     /// <param name="message">错误消息</param>
@@ -48,7 +42,7 @@ public class BusinessException : Exception, IBusinessException, IHasErrorCode, I
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BusinessException"/>类型的实例
+    /// 初始化一个 <see cref="BusinessException"/> 类型的实例。
     /// </summary>
     /// <param name="serializationInfo">序列化信息</param>
     /// <param name="context">流上下文</param>

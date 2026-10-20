@@ -252,17 +252,17 @@ public partial class MySqlQueryTest
     private sealed class DottedCompanyJoinResult
     {
         /// <summary>
-        /// 公司标识。
+        /// 获取或设置公司标识。
         /// </summary>
         public Guid CompanyId { get; set; }
 
         /// <summary>
-        /// 公司名称。
+        /// 获取或设置公司名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 商户名称。
+        /// 获取或设置商户名称。
         /// </summary>
         public string MerchantName { get; set; }
     }

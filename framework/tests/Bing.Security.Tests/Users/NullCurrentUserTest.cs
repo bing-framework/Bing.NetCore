@@ -9,6 +9,9 @@ namespace Bing.Security.Tests.Users;
 /// </summary>
 public class NullCurrentUserTest
 {
+    /// <summary>
+    /// 空当前用户实例。
+    /// </summary>
     private readonly ICurrentUser _user = NullCurrentUser.Instance;
 
     /// <summary>

@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public interface ISqlCommonPartAccessor
 {
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     IDialect Dialect { get; }
 
     /// <summary>
-    /// 参数管理器。
+    /// 获取参数管理器。
     /// </summary>
     IParameterManager ParameterManager { get; }
 }

@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IMutationWhereClause : ISqlClause, ISqlMutationClauseCloneable<IMutationWhereClause>, ISqlValidatable
 {
     /// <summary>
-    /// 是否尚未配置筛选条件。
+    /// 获取是否尚未配置筛选条件。
     /// </summary>
     bool IsEmpty { get; }
 

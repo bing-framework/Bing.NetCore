@@ -525,17 +525,11 @@ public class QueryStoreBaseTest
     }
 
     /// <summary>
-    /// 创建注入数据库访问依赖的测试存储。
+    /// 创建用于查询行为测试的存储器。
     /// </summary>
     /// <param name="unitOfWork">测试工作单元。</param>
     /// <param name="serviceProvider">作用域服务提供程序。</param>
-    /// <returns>已配置的测试存储。</returns>
-    /// <summary>
-    /// 创建注入数据库访问依赖的测试存储。
-    /// </summary>
-    /// <param name="unitOfWork">测试工作单元。</param>
-    /// <param name="serviceProvider">作用域服务提供程序。</param>
-    /// <returns>已配置的测试存储。</returns>
+    /// <returns>测试查询存储器。</returns>
     private static TestQueryStore CreateStore(MySqlUnitOfWork unitOfWork, IServiceProvider serviceProvider)
     {
         return new TestQueryStore(unitOfWork, serviceProvider.GetRequiredService<ISqlQueryFactory>(),
@@ -599,7 +593,7 @@ public class QueryStoreBaseTest
     private sealed class TestUnitOfWork : MySqlUnitOfWork
     {
         /// <summary>
-        /// 初始化一个 <see cref="TestUnitOfWork" /> 类型的实例。
+        /// 初始化一个 <see cref="TestUnitOfWork"/> 类型的实例。
         /// </summary>
         /// <param name="wrapper">FreeSQL 包装器。</param>
         /// <param name="serviceProvider">服务提供程序。</param>
@@ -615,9 +609,13 @@ public class QueryStoreBaseTest
     private sealed class TestQueryStore : QueryStoreBase<StoreSample, int>
     {
         /// <summary>
-        /// 初始化一个 <see cref="TestQueryStore" /> 类型的实例。
+        /// 初始化一个 <see cref="TestQueryStore"/> 类型的实例。
         /// </summary>
         /// <param name="unitOfWork">工作单元。</param>
+        /// <param name="sqlQueryFactory">SQL 查询工厂。</param>
+        /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
+        /// <param name="metadataOptions">SQL 元数据选项。</param>
+        /// <param name="typeConverterResolver">类型转换器解析器。</param>
         public TestQueryStore(MySqlUnitOfWork unitOfWork, ISqlQueryFactory sqlQueryFactory,
             IDatabaseContextAccessor databaseContextAccessor, SqlMetadataOptions metadataOptions,
             ITypeConverterResolver typeConverterResolver) : base(unitOfWork, sqlQueryFactory, databaseContextAccessor,
@@ -702,32 +700,32 @@ public class QueryStoreBaseTest
         }
 
         /// <summary>
-        /// 服务提供程序。
+        /// 获取服务提供程序。
         /// </summary>
         private ServiceProvider ServiceProvider { get; }
 
         /// <summary>
-        /// 服务作用域。
+        /// 获取服务作用域。
         /// </summary>
         public IServiceScope Scope { get; }
 
         /// <summary>
-        /// FreeSQL 实例。
+        /// 获取FreeSQL 实例。
         /// </summary>
         private IFreeSql Orm { get; }
 
         /// <summary>
-        /// 工作单元。
+        /// 获取工作单元。
         /// </summary>
         public TestUnitOfWork UnitOfWork { get; }
 
         /// <summary>
-        /// 测试存储器。
+        /// 获取测试存储器。
         /// </summary>
         public TestStore Store { get; }
 
         /// <summary>
-        /// 测试查询存储器。
+        /// 获取测试查询存储器。
         /// </summary>
         public TestQueryStore QueryStore { get; }
 
@@ -780,21 +778,17 @@ public class QueryStoreBaseTest
         private readonly IServiceProvider _innerProvider;
 
         /// <summary>
-        /// 已请求的服务类型。
+        /// 获取已请求的服务类型。
         /// </summary>
         public List<Type> RequestedServiceTypes { get; } = new();
 
         /// <summary>
-        /// 初始化一个 <see cref="RecordingServiceProvider" /> 类型的实例。
+        /// 初始化一个 <see cref="RecordingServiceProvider"/> 类型的实例。
         /// </summary>
         /// <param name="innerProvider">内部服务提供程序。</param>
         public RecordingServiceProvider(IServiceProvider innerProvider) => _innerProvider = innerProvider;
 
-        /// <summary>
-        /// 获取服务实例。
-        /// </summary>
-        /// <param name="serviceType">服务类型。</param>
-        /// <returns>服务实例。</returns>
+        /// <inheritdoc />
         public object GetService(Type serviceType)
         {
             RequestedServiceTypes.Add(serviceType);
@@ -844,13 +838,11 @@ public class QueryStoreBaseTest
     [Table(Name = "scope_items")]
     private sealed class StoreSample : Bing.Domain.Entities.IKey<int>
     {
-        /// <summary>
-        /// 标识。
-        /// </summary>
+        /// <inheritdoc />
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -861,7 +853,7 @@ public class QueryStoreBaseTest
     private sealed class SideEffectStoreSample : Bing.Domain.Entities.IKey<int>
     {
         /// <summary>
-        /// 标识读取次数。
+        /// 获取或设置标识读取次数。
         /// </summary>
         public int IdReadCount { get; private set; }
 

@@ -16,8 +16,7 @@ public class LoggerWrapperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：传入 null ILogger 时，构造器应抛出 ArgumentNullException，
-    /// 防止在后续调用时触发 NullReferenceException。
+    /// 测试目的：传入 null ILogger 时，构造器应抛出 ArgumentNullException， 防止在后续调用时触发 NullReferenceException。
     /// </summary>
     [Fact]
     public void Constructor_NullLogger_ShouldThrowArgumentNullException()
@@ -32,8 +31,7 @@ public class LoggerWrapperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：IsEnabled 应委托给底层 ILogger，返回 ILogger 的判断结果，
-    /// 确保级别过滤行为与底层提供程序一致。
+    /// 测试目的：IsEnabled 应委托给底层 ILogger，返回 ILogger 的判断结果， 确保级别过滤行为与底层提供程序一致。
     /// </summary>
     [Theory]
     [InlineData(LogLevel.Trace, true)]
@@ -59,8 +57,7 @@ public class LoggerWrapperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：BeginScope 应委托给底层 ILogger 并返回其 IDisposable，
-    /// 确保结构化日志作用域行为不被截断。
+    /// 测试目的：BeginScope 应委托给底层 ILogger 并返回其 IDisposable， 确保结构化日志作用域行为不被截断。
     /// </summary>
     [Fact]
     public void BeginScope_ShouldDelegateToUnderlyingLogger()
@@ -86,8 +83,7 @@ public class LoggerWrapperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Log&lt;TState&gt; 应委托给底层 ILogger.Log 一次，
-    /// 确保日志写入操作不丢失。
+    /// 测试目的：Log&lt;TState&gt; 应委托给底层 ILogger.Log 一次， 确保日志写入操作不丢失。
     /// </summary>
     [Fact]
     public void Log_ShouldDelegateToUnderlyingLogger()
@@ -116,10 +112,9 @@ public class LoggerWrapperTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：LogTrace / LogDebug / LogInformation / LogWarning / LogError / LogCritical
-    /// 均应委托给底层 ILogger 写入对应级别的日志，
-    /// 确保便捷方法不会静默丢弃日志。
+    /// 验证各日志级别便捷方法会委托给底层 ILogger。
     /// </summary>
+    /// <remarks>覆盖 Trace、Debug、Information、Warning、Error 和 Critical 级别。</remarks>
     [Theory]
     [InlineData(LogLevel.Trace)]
     [InlineData(LogLevel.Debug)]

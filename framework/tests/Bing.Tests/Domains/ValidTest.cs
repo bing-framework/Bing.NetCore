@@ -21,7 +21,7 @@ public class ValidTest : IDisposable
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ValidTest"/> 类型的实例。
     /// </summary>
     public ValidTest()
     {
@@ -34,9 +34,7 @@ public class ValidTest : IDisposable
         _serviceProvider = services.BuildServiceContextProvider();
     }
 
-    /// <summary>
-    /// 测试清理
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
     }

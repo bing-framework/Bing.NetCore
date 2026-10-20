@@ -18,10 +18,7 @@ public abstract class BingOptionsBase : IBingOptions
     /// </summary>
     internal IList<IBingOptionsExtension> Extensions { get; }
 
-    /// <summary>
-    /// 添加配置项扩展。
-    /// </summary>
-    /// <param name="extension">要添加的配置项扩展。</param>
+    /// <inheritdoc />
     public void AddExtension(IBingOptionsExtension extension)
     {
         if (extension == null)

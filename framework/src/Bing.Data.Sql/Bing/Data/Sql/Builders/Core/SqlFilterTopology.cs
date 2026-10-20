@@ -7,10 +7,14 @@ namespace Bing.Data.Sql.Builders.Core;
 /// </summary>
 public enum SqlFilterSourceKind
 {
-    /// <summary>根 From 来源。</summary>
+    /// <summary>
+    /// 根 From 来源。
+    /// </summary>
     Root,
 
-    /// <summary>Join 引入的来源。</summary>
+    /// <summary>
+    /// Join 引入的来源。
+    /// </summary>
     Join
 }
 
@@ -19,19 +23,29 @@ public enum SqlFilterSourceKind
 /// </summary>
 public enum SqlFilterJoinKind
 {
-    /// <summary>内连接。</summary>
+    /// <summary>
+    /// 内连接。
+    /// </summary>
     Inner,
 
-    /// <summary>左外连接。</summary>
+    /// <summary>
+    /// 左外连接。
+    /// </summary>
     Left,
 
-    /// <summary>右外连接。</summary>
+    /// <summary>
+    /// 右外连接。
+    /// </summary>
     Right,
 
-    /// <summary>全外连接。</summary>
+    /// <summary>
+    /// 全外连接。
+    /// </summary>
     Full,
 
-    /// <summary>交叉连接。</summary>
+    /// <summary>
+    /// 交叉连接。
+    /// </summary>
     Cross
 }
 
@@ -41,7 +55,7 @@ public enum SqlFilterJoinKind
 public sealed class SqlFilterSource
 {
     /// <summary>
-    /// 初始化结构化过滤来源。
+    /// 初始化一个 <see cref="SqlFilterSource"/> 类型的实例。
     /// </summary>
     /// <param name="sourceId">查询图内稳定来源标识。</param>
     /// <param name="entityType">来源实体类型。</param>
@@ -55,16 +69,24 @@ public sealed class SqlFilterSource
         Kind = kind;
     }
 
-    /// <summary>查询图内稳定来源标识。</summary>
+    /// <summary>
+    /// 获取查询图内稳定来源标识。
+    /// </summary>
     public string SourceId { get; }
 
-    /// <summary>关联实体类型。</summary>
+    /// <summary>
+    /// 获取关联实体类型。
+    /// </summary>
     public Type EntityType { get; }
 
-    /// <summary>最终 SQL 中使用的表别名。</summary>
+    /// <summary>
+    /// 获取最终 SQL 中使用的表别名。
+    /// </summary>
     public string Alias { get; }
 
-    /// <summary>来源在查询图中的角色。</summary>
+    /// <summary>
+    /// 获取来源在查询图中的角色。
+    /// </summary>
     public SqlFilterSourceKind Kind { get; }
 }
 
@@ -74,7 +96,7 @@ public sealed class SqlFilterSource
 public sealed class SqlFilterJoin
 {
     /// <summary>
-    /// 初始化 Join 拓扑边。
+    /// 初始化一个 <see cref="SqlFilterJoin"/> 类型的实例。
     /// </summary>
     /// <param name="kind">Join 类型。</param>
     /// <param name="leftSourceIds">Join 左侧输入中所有结构化来源标识。</param>
@@ -86,13 +108,22 @@ public sealed class SqlFilterJoin
         RightSourceId = rightSourceId;
     }
 
-    /// <summary>Join 类型。</summary>
+    /// <summary>
+    /// 获取Join 类型。
+    /// </summary>
     public SqlFilterJoinKind Kind { get; }
 
-    /// <summary>Join 左侧输入中所有结构化来源标识。</summary>
+    /// <summary>
+    /// 获取Join 左侧输入中所有结构化来源标识。
+    /// </summary>
     public IReadOnlyList<string> LeftSourceIds { get; }
 
-    /// <summary>Join 右侧结构化来源标识；原始来源时为 null。</summary>
+    /// <summary>
+    /// 获取Join 右侧结构化来源标识。
+    /// </summary>
+    /// <remarks>
+    /// 原始来源时为 null。
+    /// </remarks>
     public string RightSourceId { get; }
 }
 
@@ -102,7 +133,7 @@ public sealed class SqlFilterJoin
 internal sealed class SqlFilterPredicate
 {
     /// <summary>
-    /// 初始化来源级过滤谓词。
+    /// 初始化一个 <see cref="SqlFilterPredicate"/> 类型的实例。
     /// </summary>
     /// <param name="sourceId">谓词归属来源标识。</param>
     /// <param name="column">已转义的完整列引用。</param>
@@ -116,16 +147,24 @@ internal sealed class SqlFilterPredicate
         Operator = @operator;
     }
 
-    /// <summary>谓词归属来源标识。</summary>
+    /// <summary>
+    /// 获取谓词归属来源标识。
+    /// </summary>
     public string SourceId { get; }
 
-    /// <summary>已转义的完整列引用。</summary>
+    /// <summary>
+    /// 获取已转义的完整列引用。
+    /// </summary>
     public string Column { get; }
 
-    /// <summary>参数值。</summary>
+    /// <summary>
+    /// 获取参数值。
+    /// </summary>
     public object Value { get; }
 
-    /// <summary>比较运算符。</summary>
+    /// <summary>
+    /// 获取比较运算符。
+    /// </summary>
     public Operator Operator { get; }
 }
 
@@ -135,7 +174,7 @@ internal sealed class SqlFilterPredicate
 internal sealed class SqlFilterPlacement
 {
     /// <summary>
-    /// 初始化谓词放置决定。
+    /// 初始化一个 <see cref="SqlFilterPlacement"/> 类型的实例。
     /// </summary>
     /// <param name="predicate">待放置谓词。</param>
     /// <param name="joinSourceId">目标 Join 右侧来源；null 表示最终 Where。</param>
@@ -145,9 +184,16 @@ internal sealed class SqlFilterPlacement
         JoinSourceId = joinSourceId;
     }
 
-    /// <summary>待放置谓词。</summary>
+    /// <summary>
+    /// 获取待放置谓词。
+    /// </summary>
     public SqlFilterPredicate Predicate { get; }
 
-    /// <summary>目标 Join 右侧来源；null 表示最终 Where。</summary>
+    /// <summary>
+    /// 获取目标 Join 右侧来源。
+    /// </summary>
+    /// <remarks>
+    /// null 表示最终 Where。
+    /// </remarks>
     public string JoinSourceId { get; }
 }

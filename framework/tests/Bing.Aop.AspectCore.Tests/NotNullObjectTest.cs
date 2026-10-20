@@ -7,10 +7,13 @@ namespace Bing.Aop.AspectCore;
 /// </summary>
 public class NotNullObjectTest
 {
+    /// <summary>
+    /// 供非空对象验证测试使用的服务实例。
+    /// </summary>
     private readonly ITestService2 _service2;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="NotNullObjectTest"/> 类型的实例。
     /// </summary>
     public NotNullObjectTest(ITestService2 service2)
     {
@@ -61,8 +64,7 @@ public class NotNullObjectTest
     // ── 多参数拦截 ────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：第一个参数为空时，多参数方法应抛出 ArgumentNullException
-    /// （参数 A 先于参数 B 被拦截）。
+    /// 测试目的：第一个参数为空时，多参数方法应抛出 ArgumentNullException （参数 A 先于参数 B 被拦截）。
     /// </summary>
     [Fact]
     public void NotEmpty_WhenFirstParamEmpty_ShouldThrowArgumentNullException()
@@ -72,8 +74,7 @@ public class NotNullObjectTest
     }
 
     /// <summary>
-    /// 测试目的：第二个参数为空时，多参数方法应抛出 ArgumentNullException
-    /// （参数 B 的拦截在 A 通过后触发）。
+    /// 测试目的：第二个参数为空时，多参数方法应抛出 ArgumentNullException （参数 B 的拦截在 A 通过后触发）。
     /// </summary>
     [Fact]
     public void NotEmpty_WhenSecondParamEmpty_ShouldThrowArgumentNullException()

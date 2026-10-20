@@ -197,6 +197,7 @@ public class ExecutionLeaseTest
     /// <summary>
     /// 创建声明过程能力的测试服务容器。
     /// </summary>
+    /// <returns>返回注册执行租约测试 Provider 的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider()
     {
         var provider = new Mock<ISqlProvider>();
@@ -215,6 +216,7 @@ public class ExecutionLeaseTest
     /// <summary>
     /// 创建固定到执行租约测试 Provider 的 SQL 配置。
     /// </summary>
+    /// <returns>返回绑定执行租约测试 Provider 的 SQL 配置。</returns>
     private static SqlOptions CreateOptions()
     {
         var options = new SqlOptions();
@@ -237,7 +239,7 @@ public class ExecutionLeaseTest
     private sealed class ReentrantQuery : SqlQueryBase
     {
         /// <summary>
-        /// 初始化测试 Query。
+        /// 初始化一个 <see cref="ReentrantQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         public ReentrantQuery(IServiceProvider serviceProvider) : base(serviceProvider, CreateOptions())
@@ -245,17 +247,17 @@ public class ExecutionLeaseTest
         }
 
         /// <summary>
-        /// 是否验证重入行为。
+        /// 获取或设置是否验证重入行为。
         /// </summary>
         public bool VerifyReentrantOperation { get; set; }
 
         /// <summary>
-        /// 是否在执行前抛出受控异常。
+        /// 获取或设置是否在执行前抛出受控异常。
         /// </summary>
         public bool ThrowOnExecuteBefore { get; set; }
 
         /// <summary>
-        /// 重入执行抛出的异常。
+        /// 获取或设置重入执行抛出的异常。
         /// </summary>
         public InvalidOperationException ReentrantException { get; private set; }
 
@@ -297,7 +299,7 @@ public class ExecutionLeaseTest
     private sealed class ReentrantExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化测试 Executor。
+        /// 初始化一个 <see cref="ReentrantExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         public ReentrantExecutor(IServiceProvider serviceProvider) : base(serviceProvider, CreateOptions())
@@ -305,12 +307,12 @@ public class ExecutionLeaseTest
         }
 
         /// <summary>
-        /// 是否验证重入行为。
+        /// 获取或设置是否验证重入行为。
         /// </summary>
         public bool VerifyReentrantOperation { get; set; }
 
         /// <summary>
-        /// 重入执行抛出的异常。
+        /// 获取或设置重入执行抛出的异常。
         /// </summary>
         public InvalidOperationException ReentrantException { get; private set; }
 

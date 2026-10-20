@@ -32,7 +32,7 @@ public class BingExceptionHandlingMiddleware : IMiddleware
     private readonly Func<object, Task> _clearCacheHeaderDelegate;
 
     /// <summary>
-    /// 初始化一个<see cref="BingExceptionHandlingMiddleware"/>类型的实例
+    /// 初始化一个 <see cref="BingExceptionHandlingMiddleware"/> 类型的实例。
     /// </summary>
     /// <param name="next">方法</param>
     /// <param name="logger">日志</param>
@@ -43,10 +43,7 @@ public class BingExceptionHandlingMiddleware : IMiddleware
         _clearCacheHeaderDelegate = ClearCacheHeaders;
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         try

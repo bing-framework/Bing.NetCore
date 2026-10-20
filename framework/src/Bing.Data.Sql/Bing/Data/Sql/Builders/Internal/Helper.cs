@@ -24,62 +24,62 @@ internal sealed class Helper
     private readonly SqlClauseContext _context;
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     private IDialect _dialect => _context.Dialect;
 
     /// <summary>
-    /// 实体解析器。
+    /// 获取实体解析器。
     /// </summary>
     private IEntityResolver _resolver => _context.EntityResolver;
 
     /// <summary>
-    /// 实体别名注册器。
+    /// 获取实体别名注册器。
     /// </summary>
     private IEntityAliasRegister _register => _context.AliasRegister;
 
     /// <summary>
-    /// 参数管理器。
+    /// 获取参数管理器。
     /// </summary>
     private IParameterManager _parameterManager => _context.ParameterManager;
 
     /// <summary>
-    /// 实体映射解析器。
+    /// 获取实体映射解析器。
     /// </summary>
     private IEntityMappingResolver _entityMappingResolver => _context.Services.EntityMappingResolver;
 
     /// <summary>
-    /// 数据库上下文访问器。
+    /// 获取数据库上下文访问器。
     /// </summary>
     private IDatabaseContextAccessor _databaseContextAccessor => _context.Services.DatabaseContextAccessor;
 
     /// <summary>
-    /// SQL 参数工厂。
+    /// 获取SQL 参数工厂。
     /// </summary>
     private ISqlParameterFactory _sqlParameterFactory => _context.Services.ParameterFactory;
 
     /// <summary>
-    /// SQL 元数据配置。
+    /// 获取SQL 元数据配置。
     /// </summary>
     private SqlMetadataOptions _options => _context.Services.MetadataOptions;
 
     /// <summary>
-    /// SQL 配置。
+    /// 获取SQL 配置。
     /// </summary>
     private SqlOptions _sqlOptions => _context.Services.Options;
 
     /// <summary>
-    /// SQL 数据库上下文解析器。
+    /// 获取SQL 数据库上下文解析器。
     /// </summary>
     private ISqlDatabaseContextResolver _databaseContextResolver => _context.Services.DatabaseContextResolver;
 
     /// <summary>
-    /// Builder 生命周期内固定的数据库上下文。
+    /// 获取Builder 生命周期内固定的数据库上下文。
     /// </summary>
     private DatabaseContext _databaseContext => _context.ExecutionContext.DatabaseContext;
 
     /// <summary>
-    /// 使用已绑定的子句运行上下文初始化辅助操作。
+    /// 初始化一个 <see cref="Helper"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     internal Helper(SqlClauseContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -154,7 +154,7 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建查询条件并将其参数写入参数管理器。
+    /// 创建查询条件。
     /// </summary>
     /// <param name="expression">列名</param>
     /// <param name="type">实体类型</param>
@@ -167,7 +167,7 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建查询条件并添加参数
+    /// 创建查询条件。
     /// </summary>
     /// <param name="expression">列名表达式</param>
     /// <param name="type">实体类型</param>
@@ -182,7 +182,7 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 使用原始列名、格式化列名和实体类型创建查询条件。
+    /// 创建查询条件。
     /// </summary>
     /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
     /// <param name="column">已格式化的列名。</param>
@@ -197,7 +197,7 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建查询条件并添加参数
+    /// 创建查询条件。
     /// </summary>
     /// <param name="column">列名</param>
     /// <param name="value">值</param>
@@ -334,7 +334,7 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 将参数添加到当前实例的参数管理器，并尽可能附加 SQL 参数元数据。
+    /// 添加查询参数。
     /// </summary>
     /// <param name="paramName">参数名称。</param>
     /// <param name="value">参数值。</param>
@@ -347,7 +347,7 @@ internal sealed class Helper
         rawColumn, source);
 
     /// <summary>
-    /// 向指定参数管理器添加参数。
+    /// 添加查询参数。
     /// </summary>
     /// <param name="parameterManager">目标参数管理器。</param>
     /// <param name="paramName">参数名。</param>

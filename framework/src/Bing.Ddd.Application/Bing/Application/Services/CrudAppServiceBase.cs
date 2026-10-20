@@ -24,7 +24,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TQueryParameter> :
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 初始化一个<see cref="CrudAppServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
+    /// 初始化一个 <see cref="CrudAppServiceBase{TEntity, TDto, TQueryParameter}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="repository">仓储</param>
@@ -48,7 +48,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TQueryParameter, TKey> :
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 初始化一个<see cref="CrudAppServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="CrudAppServiceBase{TEntity, TDto, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="repository">仓储</param>
@@ -74,7 +74,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TQueryParamete
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 初始化一个<see cref="CrudAppServiceBase{TEntity,TDto,TRequest,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="CrudAppServiceBase{TEntity, TDto, TRequest, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="repository">仓储</param>
@@ -114,7 +114,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     private readonly IRepository<TEntity, TKey> _repository;
 
     /// <summary>
-    /// 初始化一个<see cref="CrudAppServiceBase{TEntity,TDto,TRequest,TCreateRequest,TUpdateRequest,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="CrudAppServiceBase{TEntity, TDto, TRequest, TCreateRequest, TUpdateRequest, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="repository">仓储</param>
@@ -133,28 +133,17 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
     /// <returns>由请求参数转换得到的实体。</returns>
     protected virtual TEntity ToEntity(TRequest request) => request.MapTo<TEntity>();
 
-    /// <summary>
-    /// 创建参数转换为实体
-    /// </summary>
-    /// <param name="request">创建参数</param>
-    /// <returns>由创建参数转换得到的实体。</returns>
+    /// <inheritdoc />
     protected override TEntity ToEntityFromCreateRequest(TCreateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
-    /// <summary>
-    /// 修改参数转换为实体
-    /// </summary>
-    /// <param name="request">修改参数</param>
-    /// <returns>由修改参数转换得到的实体。</returns>
+    /// <inheritdoc />
     protected override TEntity ToEntityFromUpdateRequest(TUpdateRequest request) => typeof(TCreateRequest) == typeof(TRequest) ? ToEntity(Conv.To<TRequest>(request)) : request.MapTo<TEntity>();
 
     #endregion
 
     #region Save(保存)
 
-    /// <summary>
-    /// 保存
-    /// </summary>
-    /// <param name="request">请求参数</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">请求参数或转换后的实体为空时抛出。</exception>
     public virtual async Task SaveAsync(TRequest request)
     {
@@ -207,13 +196,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TRequest, TCreateRequest
 
     #region BatchSave(批量保存)
 
-    /// <summary>
-    /// 批量保存
-    /// </summary>
-    /// <param name="addList">新增列表</param>
-    /// <param name="updateList">修改列表</param>
-    /// <param name="deleteList">删除列表</param>
-    /// <returns>表示批量保存结果的异步操作，结果为新增和修改后的数据传输对象列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TDto>> SaveAsync(List<TRequest> addList, List<TRequest> updateList, List<TRequest> deleteList)
     {
         if (addList == null && updateList == null && deleteList == null)
@@ -383,7 +366,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     private readonly IRepository<TEntity, TKey> _repository;
 
     /// <summary>
-    /// 初始化一个<see cref="CrudAppServiceBase{TEntity,TDto,TCreateRequest,TUpdateRequest,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="CrudAppServiceBase{TEntity, TDto, TCreateRequest, TUpdateRequest, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="repository">仓储</param>
@@ -439,12 +422,8 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     /// <param name="entity">实体</param>
     protected virtual void CreateAfter(TEntity entity) => AddLog(entity);
 
-    /// <summary>
-    /// 创建
-    /// </summary>
-    /// <param name="request">创建参数</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">创建请求或转换后的实体为空时抛出。</exception>
-    /// <returns>新创建实体的标识字符串。</returns>
     public virtual async Task<string> CreateAsync(TCreateRequest request)
     {
         if (request == null)
@@ -533,10 +512,7 @@ public abstract class CrudAppServiceBase<TEntity, TDto, TCreateRequest, TUpdateR
     {
     }
 
-    /// <summary>
-    /// 修改
-    /// </summary>
-    /// <param name="request">修改参数</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">修改请求或转换后的实体为空时抛出。</exception>
     public virtual async Task UpdateAsync(TUpdateRequest request)
     {

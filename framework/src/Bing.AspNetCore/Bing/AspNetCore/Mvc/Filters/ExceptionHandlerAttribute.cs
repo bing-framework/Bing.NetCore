@@ -9,10 +9,7 @@ namespace Bing.AspNetCore.Mvc.Filters;
 /// </summary>
 public class ExceptionHandlerAttribute : ExceptionFilterAttribute
 {
-    /// <summary>
-    /// 异常处理
-    /// </summary>
-    /// <param name="context">异常上下文</param>
+    /// <inheritdoc />
     public override void OnException(ExceptionContext context)
     {
         context.ExceptionHandled = true;

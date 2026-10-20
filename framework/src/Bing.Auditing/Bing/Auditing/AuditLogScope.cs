@@ -6,7 +6,7 @@
 public class AuditLogScope : IAuditLogScope
 {
     /// <summary>
-    /// 使用指定审计日志初始化 <see cref="AuditLogScope"/> 的实例。
+    /// 初始化一个 <see cref="AuditLogScope"/> 类型的实例。
     /// </summary>
     /// <param name="log">要暴露给当前作用域的审计日志。</param>
     public AuditLogScope(AuditLogInfo log)

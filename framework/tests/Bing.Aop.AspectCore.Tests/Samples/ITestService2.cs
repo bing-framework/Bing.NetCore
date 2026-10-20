@@ -12,6 +12,7 @@ public interface ITestService2 : ISingletonDependency
     /// 获取 object，值不能为 null
     /// </summary>
     /// <param name="value">参数</param>
+    /// <returns>通过非空值校验的对象。</returns>
     object GetNotNullObject([NotNull] object value);
 
     /// <summary>
@@ -19,5 +20,6 @@ public interface ITestService2 : ISingletonDependency
     /// </summary>
     /// <param name="a">参数A</param>
     /// <param name="b">参数B</param>
+    /// <returns>通过参数校验后生成的字符串。</returns>
     string GetBothNotEmpty([NotEmpty] string a, [NotEmpty] string b);
 }

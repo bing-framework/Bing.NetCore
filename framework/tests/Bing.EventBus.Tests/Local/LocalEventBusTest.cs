@@ -16,7 +16,7 @@ public class LocalEventBusTest
     private readonly ILocalEventBus _eventBus;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="LocalEventBusTest"/> 类型的实例。
     /// </summary>
     public LocalEventBusTest(ILocalEventBus eventBus)
     {

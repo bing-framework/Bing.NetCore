@@ -16,12 +16,15 @@ public class TemplateContentContributorContext
     public IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// 获取请求的区域性名称；未显式指定区域性时可以为 <c>null</c>。
+    /// 获取请求的区域性名称。
     /// </summary>
+    /// <remarks>
+    /// 未显式指定区域性时可以为 <c>null</c>。
+    /// </remarks>
     public string Culture { get; }
 
     /// <summary>
-    /// 使用模板定义、服务提供程序和可选区域性初始化 <see cref="TemplateContentContributorContext"/> 的实例。
+    /// 初始化一个 <see cref="TemplateContentContributorContext"/> 类型的实例。
     /// </summary>
     /// <param name="templateDefinition">正在构造内容的模板定义。</param>
     /// <param name="serviceProvider">用于解析模板相关服务的服务提供程序。</param>

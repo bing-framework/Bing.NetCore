@@ -4,8 +4,15 @@ using Xunit.Abstractions;
 
 namespace Bing.Tests;
 
+/// <summary>
+/// 深度克隆扩展测试。
+/// </summary>
 public class CloneTest : TestBase
 {
+    /// <summary>
+    /// 初始化一个 <see cref="CloneTest"/> 类型的实例。
+    /// </summary>
+    /// <param name="output">当前测试的输出辅助对象。</param>
     public CloneTest(ITestOutputHelper output) : base(output)
     {
     }

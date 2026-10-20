@@ -15,12 +15,12 @@ namespace Bing.AspNetCore.ExceptionHandling;
 public class DefaultHttpExceptionStatusCodeFinder : IHttpExceptionStatusCodeFinder, ITransientDependency
 {
     /// <summary>
-    /// 异常Http状态码选项配置
+    /// 获取异常Http状态码选项配置
     /// </summary>
     protected BingExceptionHttpStatusCodeOptions Options { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultHttpExceptionStatusCodeFinder"/>类型的实例
+    /// 初始化一个 <see cref="DefaultHttpExceptionStatusCodeFinder"/> 类型的实例。
     /// </summary>
     /// <param name="options">异常Http状态码选项配置</param>
     public DefaultHttpExceptionStatusCodeFinder(IOptions<BingExceptionHttpStatusCodeOptions> options)
@@ -28,12 +28,7 @@ public class DefaultHttpExceptionStatusCodeFinder : IHttpExceptionStatusCodeFind
         Options = options.Value;
     }
 
-    /// <summary>
-    /// 获取状态码
-    /// </summary>
-    /// <param name="httpContext">Http上下文</param>
-    /// <param name="exception">异常</param>
-    /// <returns>与异常对应的 HTTP 状态码。</returns>
+    /// <inheritdoc />
     public virtual HttpStatusCode GetStatusCode(HttpContext httpContext, Exception exception)
     {
         // 如果设置了Http状态码，则返回指定Http状态码

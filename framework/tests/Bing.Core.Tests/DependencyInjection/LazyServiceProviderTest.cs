@@ -12,6 +12,11 @@ public class LazyServiceProviderTest
 {
     // ==================== 辅助 ====================
 
+    /// <summary>
+    /// 根据注册配置创建根服务提供程序和独立作用域。
+    /// </summary>
+    /// <param name="configure">用于配置服务集合的委托。</param>
+    /// <returns>根服务提供程序及其创建的作用域。</returns>
     private static (IServiceProvider root, IServiceScope scope) BuildScope(
         Action<IServiceCollection> configure)
     {

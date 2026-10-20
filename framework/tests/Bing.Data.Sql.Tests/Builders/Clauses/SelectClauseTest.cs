@@ -16,7 +16,7 @@ public class SelectClauseTest
     private SelectClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="SelectClauseTest"/> 类型的实例。
     /// </summary>
     public SelectClauseTest()
     {
@@ -26,6 +26,7 @@ public class SelectClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>返回当前选择子句生成的 SQL 语句。</returns>
     private string GetSql()
     {
         return _clause.ToSql();
@@ -412,17 +413,17 @@ public class SelectClauseTest
     private sealed class MemberInitProjection
     {
         /// <summary>
-        /// 显示名称。
+        /// 获取或设置显示名称。
         /// </summary>
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// 主邮箱。
+        /// 获取或设置主邮箱。
         /// </summary>
         public string PrimaryEmail { get; set; }
 
         /// <summary>
-        /// 次邮箱。
+        /// 获取或设置次邮箱。
         /// </summary>
         public string SecondaryEmail { get; set; }
     }

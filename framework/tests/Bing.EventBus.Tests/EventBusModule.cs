@@ -63,7 +63,7 @@ public class LocalEventHandlerTypeFinder : FinderBase<Type>, ILocalEventHandlerT
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 初始化一个<see cref="LocalEventHandlerTypeFinder"/>类型的实例
+    /// 初始化一个 <see cref="LocalEventHandlerTypeFinder"/> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器</param>
     public LocalEventHandlerTypeFinder(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;

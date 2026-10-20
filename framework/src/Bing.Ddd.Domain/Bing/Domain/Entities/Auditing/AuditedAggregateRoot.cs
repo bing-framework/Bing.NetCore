@@ -11,14 +11,16 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class AuditedAggregateRoot<TEntity> : CreationAuditedAggregateRoot<TEntity>, IAuditedObject
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根最后一次修改的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该聚合根的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual Guid? LastModifierId { get; set; }
 }
 
@@ -31,25 +33,27 @@ public abstract class AuditedAggregateRoot<TEntity> : CreationAuditedAggregateRo
 public abstract class AuditedAggregateRoot<TEntity, TKey> : CreationAuditedAggregateRoot<TEntity, TKey>, IAuditedObject<TKey>
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根最后一次修改的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该聚合根的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual TKey LastModifierId { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="AuditedAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="AuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected AuditedAggregateRoot()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="AuditedAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="AuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected AuditedAggregateRoot(TKey id) : base(id)

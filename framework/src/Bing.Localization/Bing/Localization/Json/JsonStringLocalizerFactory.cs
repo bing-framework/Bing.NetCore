@@ -23,7 +23,7 @@ public class JsonStringLocalizerFactory : IStringLocalizerFactory
     private readonly ILoggerFactory _loggerFactory;
 
     /// <summary>
-    /// 缓存
+    /// 供创建的 JSON 本地化查找器共享使用的可选内存缓存。
     /// </summary>
     private readonly IMemoryCache _cache;
 

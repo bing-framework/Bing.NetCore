@@ -28,7 +28,7 @@ public class QueryServiceTest
     private Guid _id;
 
     /// <summary>
-    /// Id2
+    /// 用于关联第二个测试实体的标识符。
     /// </summary>
     private Guid _id2;
 
@@ -53,7 +53,7 @@ public class QueryServiceTest
     private IRepositorySample _repository;
 
     /// <summary>
-    /// 测试 - 初始化
+    /// 初始化一个 <see cref="QueryServiceTest"/> 类型的实例。
     /// </summary>
     public QueryServiceTest()
     {
@@ -89,6 +89,7 @@ public class QueryServiceTest
     /// <summary>
     /// 获取实体集合
     /// </summary>
+    /// <returns>供查询服务测试使用的实体集合。</returns>
     private List<EntitySample> GetEntities()
     {
         return new List<EntitySample> { _entity, _entity2 };

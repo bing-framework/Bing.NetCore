@@ -37,7 +37,7 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
     private readonly JwtOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="JsonWebTokenBuilder"/>类型的实例
+    /// 初始化一个 <see cref="JsonWebTokenBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="tokenStore">Jwt令牌存储器</param>
     /// <param name="tokenPayloadStore">令牌Payload存储器</param>
@@ -52,19 +52,16 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         _tokenHandler = new JwtSecurityTokenHandler();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 使用默认 JWT 配置创建访问令牌和刷新令牌，并保存令牌、设备绑定及刷新负载。
-    /// </summary>
-    /// <param name="payload">负载</param>
-    /// <returns>创建并保存的 JSON Web Token。</returns>
+    /// </remarks>
     public async Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload) => await CreateAsync(payload, _options);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 使用指定 JWT 配置生成刷新令牌并保存关联信息；访问令牌沿用当前构建器配置生成。
-    /// </summary>
-    /// <param name="payload">负载</param>
-    /// <param name="options">Jwt选项配置</param>
-    /// <returns>创建并保存的 JSON Web Token。</returns>
+    /// </remarks>
     public async Task<JsonWebToken> CreateAsync(IDictionary<string, string> payload, JwtOptions options)
     {
         if (string.IsNullOrWhiteSpace(options.Secret))
@@ -127,11 +124,10 @@ internal sealed class JsonWebTokenBuilder : IJsonWebTokenBuilder
         return userId;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 校验刷新令牌后生成新的访问令牌和刷新令牌；旧令牌有效时会在生成成功后被删除。
-    /// </summary>
-    /// <param name="refreshToken">刷新令牌</param>
-    /// <returns>创建并保存的新 JSON Web Token。</returns>
+    /// </remarks>
     public async Task<JsonWebToken> RefreshAsync(string refreshToken)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))

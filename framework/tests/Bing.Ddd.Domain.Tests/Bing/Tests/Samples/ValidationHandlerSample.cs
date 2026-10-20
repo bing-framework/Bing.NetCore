@@ -7,9 +7,6 @@ namespace Bing.Tests.Samples;
 /// </summary>
 public class ValidationHandlerSample : IValidationCallbackHandler
 {
-    /// <summary>
-    /// 处理验证错误
-    /// </summary>
-    /// <param name="results">验证结果集合</param>
+    /// <inheritdoc />
     public void Handle(IValidationResult results) { }
 }

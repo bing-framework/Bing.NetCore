@@ -39,14 +39,14 @@ public interface ISingleTypeCache<TKey, TValue> : IGetable<TKey, TValue>, IReade
     bool Set(TKey key, TValue value);
 
     /// <summary>
-    /// 移除指定键。
+    /// 移除缓存项。
     /// </summary>
     /// <param name="key">要移除的键。</param>
     /// <returns>键存在且已移除时返回 <c>true</c>；不存在时返回 <c>false</c>。</returns>
     bool Remove(TKey key);
 
     /// <summary>
-    /// 移除多个键。
+    /// 移除缓存项。
     /// </summary>
     /// <param name="keys">要移除的键数组。</param>
     /// <returns>实现定义的批量移除结果。</returns>

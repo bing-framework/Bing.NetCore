@@ -31,7 +31,7 @@ public abstract class BingException : Exception, IHasErrorCode
     protected const long DEFAULT_EXTEND_ERROR_CODE = 1002;
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     protected BingException()
         : this(DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE, EMPTY_FLAG)
@@ -39,7 +39,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="errorMessage">错误消息</param>
     /// <param name="innerException">内部异常</param>
@@ -49,7 +49,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="errorMessage">错误消息</param>
     /// <param name="flag">错误标识</param>
@@ -60,7 +60,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="errorMessage">错误消息</param>
@@ -71,7 +71,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="info">序列化信息</param>
     /// <param name="context">流上下文</param>
@@ -84,7 +84,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="errorCode">错误码</param>
     /// <param name="errorMessage">错误消息</param>
@@ -101,7 +101,7 @@ public abstract class BingException : Exception, IHasErrorCode
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingException"/>类型的实例
+    /// 初始化一个 <see cref="BingException"/> 类型的实例。
     /// </summary>
     /// <param name="options">Bing框架异常选项配置</param>
     protected BingException(BingExceptionOptions options) 
@@ -112,18 +112,16 @@ public abstract class BingException : Exception, IHasErrorCode
         Flag = options.Flag;
     }
 
-    /// <summary>
-    /// 错误码
-    /// </summary>
+    /// <inheritdoc />
     public virtual string Code { get; protected set; }
 
     /// <summary>
-    /// 错误标识
+    /// 获取或设置错误标识
     /// </summary>
     public string Flag { get; protected set; }
 
     /// <summary>
-    /// 额外数据
+    /// 获取额外数据
     /// </summary>
     public Dictionary<string, object> ExtraData { get; }
 

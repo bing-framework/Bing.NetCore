@@ -30,25 +30,19 @@ public class MessageEvent : Event, IClusterEventMetadata
     /// </summary>
     public string Name { get; set; }
 
-    /// <summary>
-    /// 事件数据
-    /// </summary>
+    /// <inheritdoc />
     public object Data { get; set; }
 
-    /// <summary>
-    /// 回调名称
-    /// </summary>
+    /// <inheritdoc />
     public string Callback { get; set; }
 
-    /// <summary>
-    /// 是否立即发送消息
-    /// </summary>
+    /// <inheritdoc />
     public bool Send { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 输出包含事件标识、时间、消息信息和序列化数据的日志文本。
-    /// </summary>
-    /// <returns>包含事件信息的日志文本。</returns>
+    /// </remarks>
     public override string ToString()
     {
         var result = new StringBuilder();

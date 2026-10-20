@@ -21,18 +21,27 @@ public class BingExceptionOptions
     protected const long DefaultExtendErrorCode = 1002;
 
     /// <summary>
-    /// 获取或设置异常消息或消息键，默认值为 <see cref="DefaultErrorMessage"/>。
+    /// 获取或设置异常消息或消息键。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see cref="DefaultErrorMessage"/>。
+    /// </remarks>
     public string Message { get; set; } = DefaultErrorMessage;
 
     /// <summary>
-    /// 获取或设置异常标识，默认值为 <see cref="EmptyFlag"/>。
+    /// 获取或设置异常标识。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see cref="EmptyFlag"/>。
+    /// </remarks>
     public string Flag { get; set; } = EmptyFlag;
 
     /// <summary>
-    /// 获取或设置异常错误码，默认值为 <see cref="DefaultExtendErrorCode"/>。
+    /// 获取或设置异常错误码。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <see cref="DefaultExtendErrorCode"/>。
+    /// </remarks>
     public long ErrorCode { get; set; } = DefaultExtendErrorCode;
 
     /// <summary>
@@ -41,7 +50,10 @@ public class BingExceptionOptions
     public Exception InnerException { get; set; }
 
     /// <summary>
-    /// 获取或设置附加错误数据字典，用于携带主错误码之外的结构化信息。
+    /// 获取或设置附加错误数据字典。
     /// </summary>
+    /// <remarks>
+    /// 用于携带主错误码之外的结构化信息。
+    /// </remarks>
     public Dictionary<string, object> ExtraErrors { get; set; } = new Dictionary<string, object>();
 }

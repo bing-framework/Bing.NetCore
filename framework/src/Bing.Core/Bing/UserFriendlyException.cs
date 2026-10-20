@@ -10,7 +10,7 @@ namespace Bing;
 public class UserFriendlyException : BusinessException, IUserFriendlyException
 {
     /// <summary>
-    /// 初始化一个<see cref="UserFriendlyException"/>类型的实例
+    /// 初始化一个 <see cref="UserFriendlyException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="code">错误码</param>
@@ -28,7 +28,7 @@ public class UserFriendlyException : BusinessException, IUserFriendlyException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="UserFriendlyException"/>类型的实例
+    /// 初始化一个 <see cref="UserFriendlyException"/> 类型的实例。
     /// </summary>
     /// <param name="serializationInfo">序列化信息</param>
     /// <param name="context">流上下文</param>

@@ -12,7 +12,7 @@ namespace Bing.Data.Sql.Tests.Samples;
 internal sealed class TestMutationSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
-    /// 测试 Provider 单例。
+    /// 获取测试 Provider 单例。
     /// </summary>
     public static TestMutationSqlProvider Instance { get; } = new();
 

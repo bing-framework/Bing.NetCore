@@ -16,7 +16,7 @@ public class DefaultTenantStore : ITenantStore
     private readonly BingDefaultTenantStoreOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultTenantStore"/>类型的实例
+    /// 初始化一个 <see cref="DefaultTenantStore"/> 类型的实例。
     /// </summary>
     /// <param name="options">默认租户存储选项配置</param>
     public DefaultTenantStore(IOptionsMonitor<BingDefaultTenantStoreOptions> options) => _options = options.CurrentValue;

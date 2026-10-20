@@ -9,12 +9,12 @@ namespace Bing.Identity.JwtBearer.Internal;
 internal sealed class JsonWebTokenStore : JsonWebTokenStoreBase, IJsonWebTokenStore
 {
     /// <summary>
-    /// 缓存
+    /// 存储和读取 JSON Web Token 记录的缓存提供程序。
     /// </summary>
     private readonly ICache _cache;
 
     /// <summary>
-    /// 初始化一个<see cref="JsonWebTokenStore"/>类型的实例
+    /// 初始化一个 <see cref="JsonWebTokenStore"/> 类型的实例。
     /// </summary>
     /// <param name="cache">缓存</param>
     public JsonWebTokenStore(ICache cache) => _cache = cache;

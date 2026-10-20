@@ -23,18 +23,21 @@ public sealed class ColumnMappingOptions
     public DbType? DbType { get; set; }
 
     /// <summary>
-    /// 获取或设置字符、二进制或 Provider 支持类型的长度约束；未设置时使用 Provider 或 ADO 默认行为。
+    /// 获取或设置字符、二进制或 Provider 支持类型的长度约束。
     /// </summary>
+    /// <remarks>未设置时使用 Provider 或 ADO.NET 默认行为。</remarks>
     public int? Size { get; set; }
 
     /// <summary>
-    /// 获取或设置数值列或参数的总有效位数；通常与 <see cref="Scale"/> 配合使用。
+    /// 获取或设置数值列或参数的总有效位数。
     /// </summary>
+    /// <remarks>通常与 <see cref="Scale"/> 配合使用。</remarks>
     public byte? Precision { get; set; }
 
     /// <summary>
-    /// 获取或设置数值列或参数的小数位数；通常与 <see cref="Precision"/> 配合使用。
+    /// 获取或设置数值列或参数的小数位数。
     /// </summary>
+    /// <remarks>通常与 <see cref="Precision"/> 配合使用。</remarks>
     public byte? Scale { get; set; }
 
     /// <summary>

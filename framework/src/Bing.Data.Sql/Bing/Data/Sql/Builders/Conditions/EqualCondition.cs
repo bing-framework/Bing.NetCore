@@ -16,7 +16,7 @@ public class EqualCondition : ICondition
     private readonly string _right;
 
     /// <summary>
-    /// 初始化一个<see cref="EqualCondition"/>类型的实例
+    /// 初始化一个 <see cref="EqualCondition"/> 类型的实例。
     /// </summary>
     /// <param name="left">左操作数</param>
     /// <param name="right">右操作数</param>
@@ -26,9 +26,6 @@ public class EqualCondition : ICondition
         _right = right;
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>返回由左右操作数和等于运算符组成的 SQL 条件。</returns>
+    /// <inheritdoc />
     public string GetCondition() => $"{_left}={_right}";
 }

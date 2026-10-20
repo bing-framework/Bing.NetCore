@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface ISqlReturningDialect
 {
     /// <summary>
-    /// 返回结果子句在 Mutation 语句中的位置。
+    /// 获取返回结果子句在 Mutation 语句中的位置。
     /// </summary>
     SqlReturningClausePosition Position { get; }
 

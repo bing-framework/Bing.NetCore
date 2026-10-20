@@ -14,17 +14,17 @@ namespace Bing.Permissions.Identity.Services.Implements;
 public class SignInManager<TUser, TKey> : ISignInManager<TUser, TKey> where TUser : UserBase<TUser, TKey>
 {
     /// <summary>
-    /// Identity登录管理
+    /// 获取Identity登录管理
     /// </summary>
     protected Microsoft.AspNetCore.Identity.SignInManager<TUser> IdentitySignInManager { get; }
 
     /// <summary>
-    /// 用户管理
+    /// 获取用户管理
     /// </summary>
     protected IUserManager<TUser, TKey> UserManager { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="SignInManager{TUser,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="SignInManager{TUser, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="identitySignInManager">Identity登录管理</param>
     /// <param name="userManager">用户管理</param>
@@ -37,14 +37,7 @@ public class SignInManager<TUser, TKey> : ISignInManager<TUser, TKey> where TUse
 
     #region SignInAsync(登录)
 
-    /// <summary>
-    /// 登录
-    /// </summary>
-    /// <param name="user">用户</param>
-    /// <param name="password">密码</param>
-    /// <param name="isPersistent">cookie是否持久保留。设置为false，当关闭浏览器则cookie失效</param>
-    /// <param name="lockoutOnFailure">达到登录失败次数是否锁定</param>
-    /// <returns>表示登录结果的异步操作。</returns>
+    /// <inheritdoc />
     public virtual async Task<SignInResult> SignInAsync(TUser user, string password, bool isPersistent = false, bool lockoutOnFailure = true)
     {
         if (user == null)
@@ -80,9 +73,7 @@ public class SignInManager<TUser, TKey> : ISignInManager<TUser, TKey> where TUse
 
     #region SignOutAsync(退出登录)
 
-    /// <summary>
-    /// 退出登录
-    /// </summary>
+    /// <inheritdoc />
     public virtual async Task SignOutAsync() => await IdentitySignInManager.SignOutAsync();
 
     #endregion

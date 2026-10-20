@@ -13,8 +13,11 @@ public interface IValidationResult : IEnumerable<ValidationResult>
     int Count { get; }
 
     /// <summary>
-    /// 获取验证是否通过；集合中不存在验证错误时返回 <c>true</c>。
+    /// 获取验证是否通过。
     /// </summary>
+    /// <remarks>
+    /// 集合中不存在验证错误时返回 <c>true</c>。
+    /// </remarks>
     bool IsValid { get; }
 
     /// <summary>

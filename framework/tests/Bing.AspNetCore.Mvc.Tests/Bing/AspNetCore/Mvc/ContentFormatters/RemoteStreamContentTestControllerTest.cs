@@ -3,10 +3,13 @@ using System.Net.Http.Headers;
 
 namespace Bing.AspNetCore.Mvc.ContentFormatters;
 
+/// <summary>
+/// 验证远程流内容控制器的 HTTP 响应。
+/// </summary>
 public class RemoteStreamContentTestControllerTest : BingAspNetCoreTestBase
 {
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="RemoteStreamContentTestControllerTest"/> 类型的实例。
     /// </summary>
     public RemoteStreamContentTestControllerTest(HttpClient client)
     {

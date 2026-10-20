@@ -6,7 +6,7 @@
 public interface IHasHttpStatusCode
 {
     /// <summary>
-    /// Http状态码
+    /// 获取Http状态码
     /// </summary>
     int HttpStatusCode { get; }
 }

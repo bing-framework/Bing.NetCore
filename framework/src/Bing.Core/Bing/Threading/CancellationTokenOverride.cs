@@ -11,7 +11,7 @@ public class CancellationTokenOverride
     public CancellationToken CancellationToken { get; }
 
     /// <summary>
-    /// 使用取消令牌初始化 <see cref="CancellationTokenOverride"/> 的实例。
+    /// 初始化一个 <see cref="CancellationTokenOverride"/> 类型的实例。
     /// </summary>
     /// <param name="cancellationToken">当前范围要提供的取消令牌。</param>
     public CancellationTokenOverride(CancellationToken cancellationToken)

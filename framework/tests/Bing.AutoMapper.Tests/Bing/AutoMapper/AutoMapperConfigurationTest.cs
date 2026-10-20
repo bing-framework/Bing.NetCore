@@ -16,6 +16,7 @@ public class AutoMapperConfigurationTest
     /// <summary>
     /// 创建配置好的 MapperConfiguration（包含所有 IObjectMapperProfile 实现）
     /// </summary>
+    /// <returns>包含已注册映射配置的对象映射配置实例。</returns>
     private static MapperConfiguration CreateConfiguration()
     {
         var allAssemblyFinder = new AppDomainAllAssemblyFinder();

@@ -23,7 +23,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     private readonly PostgreSqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="PostgreSqlQueryTest"/>类型的实例。
+    /// 初始化一个 <see cref="PostgreSqlQueryTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">PostgreSQL 集成测试数据库固定装置。</param>
     public PostgreSqlQueryTest(PostgreSqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -521,7 +521,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <param name="amount">产品金额。</param>
     /// <param name="occurredAt">发生时间。</param>
     /// <param name="payload">JSONB 载荷。</param>
-    /// <returns>异步写入任务。</returns>
+    /// <param name="userId">用户标识。</param>
     private async Task InsertProductAsync(Guid id, string code, string name = "name", decimal? amount = 1m,
         DateTime? occurredAt = null, string payload = null, string userId = null)
     {
@@ -540,6 +540,7 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <param name="amount">产品金额。</param>
     /// <param name="occurredAt">发生时间。</param>
     /// <param name="payload">JSONB 载荷。</param>
+    /// <param name="userId">用户标识。</param>
     /// <returns>产品参数集合。</returns>
     private static SqlParam[] CreateProductParameters(Guid id, string code, string name, decimal? amount,
         DateTime occurredAt, string payload = null, string userId = null) =>
@@ -556,7 +557,6 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     /// <summary>
     /// 写入流式测试产品数据。
     /// </summary>
-    /// <returns>异步写入任务。</returns>
     private async Task SeedProductsAsync()
     {
         await InsertProductAsync(Guid.NewGuid(), "stream-1");
@@ -580,32 +580,32 @@ public sealed partial class PostgreSqlQueryTest : IAsyncLifetime
     private sealed class IntegrationProduct
     {
         /// <summary>
-        /// 产品标识。
+        /// 获取或设置产品标识。
         /// </summary>
         public Guid Id { get; set; }
 
         /// <summary>
-        /// 产品编码。
+        /// 获取或设置产品编码。
         /// </summary>
         public string Code { get; set; }
 
         /// <summary>
-        /// 产品名称。
+        /// 获取或设置产品名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 产品金额。
+        /// 获取或设置产品金额。
         /// </summary>
         public decimal Amount { get; set; }
 
         /// <summary>
-        /// 产品发生时间。
+        /// 获取或设置产品发生时间。
         /// </summary>
         public DateTime OccurredAt { get; set; }
 
         /// <summary>
-        /// 产品 JSONB 载荷。
+        /// 获取或设置产品 JSONB 载荷。
         /// </summary>
         public string Payload { get; set; }
     }

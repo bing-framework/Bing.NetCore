@@ -285,7 +285,7 @@ public sealed class PostgreSqlMutationBuilderTest
     private sealed class MutationSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -296,14 +296,20 @@ public sealed class PostgreSqlMutationBuilderTest
     [Table("samples")]
     private sealed class UpdateMutationSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>并发令牌。</summary>
+        /// <summary>
+        /// 获取或设置并发令牌。
+        /// </summary>
         [ConcurrencyCheck]
         public string Version { get; set; }
     }
@@ -314,11 +320,15 @@ public sealed class PostgreSqlMutationBuilderTest
     [Table("alias_collision_samples")]
     private sealed class AliasCollisionMutationSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [Key]
         public int Id { get; set; }
 
-        /// <summary>更新值。</summary>
+        /// <summary>
+        /// 获取或设置更新值。
+        /// </summary>
         [Column("__key_Id")]
         public string Value { get; set; }
     }
@@ -329,12 +339,16 @@ public sealed class PostgreSqlMutationBuilderTest
     [Table("returning_samples", Schema = "public")]
     private sealed class ReturningMutationSample
     {
-        /// <summary>主键。</summary>
+        /// <summary>
+        /// 获取或设置主键。
+        /// </summary>
         [Key]
         [Column("sample_id")]
         public int Id { get; set; }
 
-        /// <summary>名称。</summary>
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
         [Column("sample_name")]
         public string Name { get; set; }
     }

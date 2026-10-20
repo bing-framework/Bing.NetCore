@@ -8,10 +8,13 @@ namespace Bing.Validation.Tests;
 // ─── 测试用模型 ────────────────────────────────────────────────────
 
 /// <summary>
-/// 所有字段均满足验证规则的测试模型。
+/// 通过数据注解验证的有效模型。
 /// </summary>
 internal class ValidModel
 {
+    /// <summary>
+    /// 获取或设置验证用姓名。
+    /// </summary>
     [Required(ErrorMessage = "姓名不能为空")]
     [StringLength(20, ErrorMessage = "姓名不超过20个字符")]
     /// <summary>
@@ -19,6 +22,9 @@ internal class ValidModel
     /// </summary>
     public string Name { get; set; } = "测试";
 
+    /// <summary>
+    /// 获取或设置验证用年龄。
+    /// </summary>
     [Range(0, 150, ErrorMessage = "年龄必须在 0~150 之间")]
     /// <summary>
     /// 测试年龄。
@@ -27,16 +33,22 @@ internal class ValidModel
 }
 
 /// <summary>
-/// 包含无效字段值的测试模型。
+/// 违反数据注解约束的验证模型。
 /// </summary>
 internal class InvalidModel
 {
+    /// <summary>
+    /// 获取或设置待验证姓名。
+    /// </summary>
     [Required(ErrorMessage = "姓名不能为空")]
     /// <summary>
     /// 未设置的姓名。
     /// </summary>
     public string Name { get; set; } // null → 验证失败
 
+    /// <summary>
+    /// 获取或设置待验证数值。
+    /// </summary>
     [Range(1, 10, ErrorMessage = "数值必须在 1~10 之间")]
     /// <summary>
     /// 超出有效范围的数值。
@@ -45,16 +57,22 @@ internal class InvalidModel
 }
 
 /// <summary>
-/// 包含多个错误字段的测试模型。
+/// 包含多个必填字段的验证模型。
 /// </summary>
 internal class MultiErrorModel
 {
+    /// <summary>
+    /// 获取或设置待验证字段 A。
+    /// </summary>
     [Required(ErrorMessage = "字段A不能为空")]
     /// <summary>
     /// 第一个必填字段。
     /// </summary>
     public string FieldA { get; set; }
 
+    /// <summary>
+    /// 获取或设置待验证字段 B。
+    /// </summary>
     [Required(ErrorMessage = "字段B不能为空")]
     /// <summary>
     /// 第二个必填字段。
@@ -70,7 +88,7 @@ public class ValidationResultCollectionCompatibilityTest
     // ── IsValid ────────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：空集合应报告有效（无错误）。
+    /// 空集合应报告有效（无错误）。
     /// </summary>
     [Fact]
     public void IsValid_WhenEmpty_ShouldBeTrue()
@@ -84,7 +102,7 @@ public class ValidationResultCollectionCompatibilityTest
     }
 
     /// <summary>
-    /// 测试目的：添加 ValidationResult 后应报告无效。
+    /// 添加 ValidationResult 后应报告无效。
     /// </summary>
     [Fact]
     public void IsValid_AfterAddError_ShouldBeFalse()
@@ -103,7 +121,7 @@ public class ValidationResultCollectionCompatibilityTest
     // ── 构造函数 ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：从字符串构造时，集合应包含对应的单条错误消息。
+    /// 从字符串构造时，集合应包含对应的单条错误消息。
     /// </summary>
     [Fact]
     public void Constructor_WithString_ShouldContainSingleError()
@@ -118,7 +136,7 @@ public class ValidationResultCollectionCompatibilityTest
     }
 
     /// <summary>
-    /// 测试目的：从空字符串构造时，集合应为空（有效）。
+    /// 从空字符串构造时，集合应为空（有效）。
     /// </summary>
     [Fact]
     public void Constructor_WithEmptyString_ShouldBeValid()
@@ -133,7 +151,7 @@ public class ValidationResultCollectionCompatibilityTest
     // ── AddRange ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：AddRange 应一次性加入多条错误，Count 正确反映总数。
+    /// AddRange 应一次性加入多条错误，Count 正确反映总数。
     /// </summary>
     [Fact]
     public void AddRange_ShouldAddAllErrors()
@@ -195,7 +213,7 @@ public class ValidationResultCollectionCompatibilityTest
     // ── ToString ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：有效时 ToString 应返回空字符串（或者不含错误描述）。
+    /// 有效时 ToString 应返回空字符串（或者不含错误描述）。
     /// </summary>
     [Fact]
     public void ToString_WhenValid_ShouldReturnEmptyOrSpecialString()
@@ -211,7 +229,7 @@ public class ValidationResultCollectionCompatibilityTest
     }
 
     /// <summary>
-    /// 测试目的：含多个错误时 ToString 应包含"验证错误"关键字（中文提示文本）。
+    /// 含多个错误时 ToString 应包含"验证错误"关键字（中文提示文本）。
     /// </summary>
     [Fact]
     public void ToString_WhenMultipleErrors_ShouldContainErrorCountKeyword()
@@ -237,7 +255,7 @@ public class DataAnnotationValidationTest
     // ── 有效模型 ───────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：满足所有 DataAnnotation 约束的模型应验证通过。
+    /// 满足所有 DataAnnotation 约束的模型应验证通过。
     /// </summary>
     [Fact]
     public void Validate_WithValidModel_ShouldReturnValidResult()
@@ -255,7 +273,7 @@ public class DataAnnotationValidationTest
     // ── 无效模型 ───────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：违反 [Required] 和 [Range] 约束的模型应返回相应错误信息。
+    /// 违反 [Required] 和 [Range] 约束的模型应返回相应错误信息。
     /// </summary>
     [Fact]
     public void Validate_WithInvalidModel_ShouldReturnErrors()
@@ -272,7 +290,7 @@ public class DataAnnotationValidationTest
     }
 
     /// <summary>
-    /// 测试目的：多字段违规时，所有错误都应被收集（非 fail-fast）。
+    /// 多字段违规时，所有错误都应被收集（非 fail-fast）。
     /// </summary>
     [Fact]
     public void Validate_WithMultipleViolations_ShouldCollectAllErrors()
@@ -290,7 +308,7 @@ public class DataAnnotationValidationTest
     // ── null 边界 ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：传入 null 时应抛出 ArgumentNullException，而非 NullReferenceException。
+    /// 传入 null 时应抛出 ArgumentNullException，而非 NullReferenceException。
     /// </summary>
     [Fact]
     public void Validate_WhenTargetIsNull_ShouldThrowArgumentNullException()
@@ -308,7 +326,7 @@ public class ValidationHandlerTest
     // ── ThrowHandler ───────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：ThrowHandler 在验证失败时应抛出 Warning 异常。
+    /// ThrowHandler 在验证失败时应抛出 Warning 异常。
     /// </summary>
     [Fact]
     public void ThrowHandler_WhenInvalid_ShouldThrowWarning()
@@ -322,7 +340,7 @@ public class ValidationHandlerTest
     }
 
     /// <summary>
-    /// 测试目的：ThrowHandler 在验证通过时不应抛出任何异常。
+    /// ThrowHandler 在验证通过时不应抛出任何异常。
     /// </summary>
     [Fact]
     public void ThrowHandler_WhenValid_ShouldNotThrow()
@@ -338,7 +356,7 @@ public class ValidationHandlerTest
     // ── NothingHandler ─────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：NothingHandler 无论验证结果如何都不应抛出任何异常（空操作）。
+    /// NothingHandler 无论验证结果如何都不应抛出任何异常（空操作）。
     /// </summary>
     [Fact]
     public void NothingHandler_WhenInvalid_ShouldNotThrow()
@@ -352,7 +370,7 @@ public class ValidationHandlerTest
     }
 
     /// <summary>
-    /// 测试目的：NothingHandler 对有效结果也不抛异常（确认接口完整性）。
+    /// NothingHandler 对有效结果也不抛异常（确认接口完整性）。
     /// </summary>
     [Fact]
     public void NothingHandler_WhenValid_ShouldNotThrow()

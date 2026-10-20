@@ -48,6 +48,8 @@ public sealed class SqlMutationClauseTest
     /// <summary>
     /// 测试目的：目标表子句未配置表时，验证应按操作类型返回明确的错误，避免在后续 SQL 渲染时失败。
     /// </summary>
+    /// <param name="executionKind">要验证的 Mutation 执行类型。</param>
+    /// <param name="message">目标表缺失时预期的错误消息。</param>
     [Theory]
     [InlineData(MutationSqlExecutionKind.Insert, "Insert 未指定目标表。")]
     [InlineData(MutationSqlExecutionKind.Update, "Update 未指定目标表。")]
@@ -75,6 +77,8 @@ public sealed class SqlMutationClauseTest
     /// <summary>
     /// 测试目的：独立 Mutation 表子句渲染失败时，不得向调用方缓冲区遗留关键字前缀。
     /// </summary>
+    /// <param name="clauseType">要单独渲染的目标表子句类型。</param>
+    /// <param name="message">目标表缺失时预期的错误消息。</param>
     [Theory]
     [InlineData("Insert", "未指定写操作目标表。")]
     [InlineData("Update", "未指定写操作目标表。")]
@@ -319,7 +323,7 @@ public sealed class SqlMutationClauseTest
     private sealed class SingleRowValuesProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 测试 Provider 单例。
+        /// 获取测试 Provider 单例。
         /// </summary>
         public static SingleRowValuesProvider Instance { get; } = new();
 
@@ -360,7 +364,7 @@ public sealed class SqlMutationClauseTest
     private sealed class FailingValuesRenderProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 测试 Provider 单例。
+        /// 获取测试 Provider 单例。
         /// </summary>
         public static FailingValuesRenderProvider Instance { get; } = new();
 

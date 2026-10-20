@@ -181,6 +181,8 @@ public class SqlProviderResolverTest
     /// <summary>
     /// 通过公开服务注册创建 Provider 解析器。
     /// </summary>
+    /// <param name="providers">要注册到测试容器的 SQL Provider。</param>
+    /// <returns>返回包含 SQL Core 服务和指定 Provider 的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(params ISqlProvider[] providers)
     {
         var services = new ServiceCollection();

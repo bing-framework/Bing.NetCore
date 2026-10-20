@@ -47,7 +47,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个 <see cref="StoreBase{TEntity,TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="StoreBase{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">当前工作单元。</param>
     protected StoreBase(IUnitOfWork unitOfWork) => UnitOfWork = (UnitOfWorkBase)unitOfWork;
@@ -57,17 +57,17 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region 属性
 
     /// <summary>
-    /// 当前工作单元。
+    /// 获取当前工作单元。
     /// </summary>
     protected UnitOfWorkBase UnitOfWork { get; }
 
     /// <summary>
-    /// 当前实体集。
+    /// 获取当前实体集。
     /// </summary>
     protected DbSet<TEntity> Set => UnitOfWork.Set<TEntity>();
 
     /// <summary>
-    /// 查询时是否跟踪实体。
+    /// 获取或设置查询时是否跟踪实体。
     /// </summary>
     protected bool IsTracking { get; private set; } = true;
 
@@ -474,10 +474,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
 
     #region Update(修改实体)
 
-    /// <summary>
-    /// 修改实体
-    /// </summary>
-    /// <param name="entity">实体</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体为空时抛出。</exception>
     public virtual void Update(TEntity entity)
     {
@@ -540,10 +537,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
             UnitOfWork.Update(entity);
     }
 
-    /// <summary>
-    /// 修改实体集合
-    /// </summary>
-    /// <param name="entities">实体集合</param>
+    /// <inheritdoc />
     /// <exception cref="ArgumentNullException">实体集合为空时抛出。</exception>
     public virtual void Update(IEnumerable<TEntity> entities)
     {
@@ -615,7 +609,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <summary>
-    /// 删除
+    /// 删除实体。
     /// </summary>
     /// <param name="entity">实体</param>
     private void Delete(TEntity entity)
@@ -632,7 +626,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     }
 
     /// <summary>
-    /// 删除实体集合
+    /// 删除实体。
     /// </summary>
     /// <param name="list">实体集合</param>
     private void Delete(List<TEntity> list)
@@ -709,9 +703,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
 
     #region Dispose(释放)
 
-    /// <summary>
-    /// 释放
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         _disposed = true;

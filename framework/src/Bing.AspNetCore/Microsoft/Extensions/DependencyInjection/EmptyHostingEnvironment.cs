@@ -7,34 +7,25 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 internal class EmptyHostingEnvironment : Microsoft.AspNetCore.Hosting.IWebHostEnvironment
 {
-    /// <summary>
-    /// 环境名称
-    /// </summary>
+    /// <inheritdoc />
     public string EnvironmentName { get; set; }
 
-    /// <summary>
-    /// 应用程序名称
-    /// </summary>
+    /// <inheritdoc />
     public string ApplicationName { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// Web根路径，即wwwroot
-    /// </summary>
+    /// </remarks>
     public string WebRootPath { get; set; }
 
-    /// <summary>
-    /// Web根路径文件提供程序
-    /// </summary>
+    /// <inheritdoc />
     public IFileProvider WebRootFileProvider { get; set; }
 
-    /// <summary>
-    /// 根路径
-    /// </summary>
+    /// <inheritdoc />
     public string ContentRootPath { get; set; }
 
-    /// <summary>
-    /// 根路径文件提供程序
-    /// </summary>
+    /// <inheritdoc />
     public IFileProvider ContentRootFileProvider { get; set; }
 
 }

@@ -6,7 +6,7 @@
 public interface IPager : IPagerBase
 {
     /// <summary>
-    /// 排序条件
+    /// 获取或设置排序条件
     /// </summary>
     string Order { get; set; }
 

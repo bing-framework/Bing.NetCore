@@ -74,15 +74,16 @@ public interface ICrudAppService<TDto, TRequest, in TCreateRequest, in TUpdateRe
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 保存
+    /// 异步保存请求数据。
     /// </summary>
     /// <param name="request">请求参数</param>
     [UnitOfWork]
     Task SaveAsync([Valid] TRequest request);
 
     /// <summary>
-    /// 批量保存
+    /// 异步保存请求数据。
     /// </summary>
+    /// <remarks>按新增、修改和删除列表批量处理请求数据。</remarks>
     /// <param name="addList">新增列表</param>
     /// <param name="updateList">修改列表</param>
     /// <param name="deleteList">删除列表</param>

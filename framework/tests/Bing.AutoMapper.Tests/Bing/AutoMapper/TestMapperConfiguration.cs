@@ -8,9 +8,7 @@ namespace Bing.AutoMapper;
 /// </summary>
 public class TestMapperConfiguration : Profile, IObjectMapperProfile
 {
-    /// <summary>
-    /// 创建映射配置
-    /// </summary>
+    /// <inheritdoc />
     public void CreateMap()
     {
         CreateMap<Sample, Sample4>()

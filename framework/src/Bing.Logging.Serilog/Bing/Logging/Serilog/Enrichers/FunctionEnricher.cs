@@ -8,7 +8,7 @@ namespace Bing.Logging.Serilog.Enrichers;
 internal class FunctionEnricher : ILogEventEnricher
 {
     /// <summary>
-    /// 键名
+    /// 写入日志事件的属性名称。
     /// </summary>
     private readonly string _key;
 
@@ -33,7 +33,7 @@ internal class FunctionEnricher : ILogEventEnricher
     private readonly object _parameter;
 
     /// <summary>
-    /// 初始化一个<see cref="FunctionEnricher"/>类型的实例
+    /// 初始化一个 <see cref="FunctionEnricher"/> 类型的实例。
     /// </summary>
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
@@ -44,7 +44,7 @@ internal class FunctionEnricher : ILogEventEnricher
     }
 
     /// <summary>
-    /// 初始化一个<see cref="FunctionEnricher"/>类型的实例
+    /// 初始化一个 <see cref="FunctionEnricher"/> 类型的实例。
     /// </summary>
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
@@ -57,7 +57,7 @@ internal class FunctionEnricher : ILogEventEnricher
     }
 
     /// <summary>
-    /// 初始化一个<see cref="FunctionEnricher"/>类型的实例
+    /// 初始化一个 <see cref="FunctionEnricher"/> 类型的实例。
     /// </summary>
     /// <param name="key">键名</param>
     /// <param name="func">操作函数</param>
@@ -67,11 +67,7 @@ internal class FunctionEnricher : ILogEventEnricher
         _func2 = func;
     }
 
-    /// <summary>
-    /// 扩展属性
-    /// </summary>
-    /// <param name="logEvent">日志事件</param>
-    /// <param name="propertyFactory">日志事件属性工厂</param>
+    /// <inheritdoc />
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         try

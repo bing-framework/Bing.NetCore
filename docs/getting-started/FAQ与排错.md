@@ -44,14 +44,18 @@ services.AddModule<AppModule>();             // ❌ 编译不过
 
 ### Q6 为什么找不到 `AddCache` / `AddCaching`？缓存怎么注册？
 
-**正解**：框架**没有** `ICache` 的注册扩展（`Bing.EasyCaching` 中的实现整段被注释，不可用）。必须手工注册：
+**正解**：框架没有通用的 `AddCache` / `AddCaching` 入口。使用 `Bing.EasyCaching` 时，应按模式调用 `AddMemoryCaching`、`AddRedisCaching` 或 `AddHybridCaching`；客户端分片使用 `AddShardedRedisCaching` / `AddShardedHybridCaching`。直接使用 CSRedis 或 FreeRedis 时，才需要手工注册客户端和对应缓存管理器：
 
 ```csharp
-RedisHelper.Initialization(...);                                  // CSRedisCore
-services.AddScoped<ICache, CSRedisCacheManager>();                // 或 FreeRedisCacheManager
+using Bing.Caching;
+using Bing.Caching.CSRedis;
+
+services.AddSingleton(new CSRedis.CSRedisClient(redisConnectionString));
+services.AddSingleton(new CacheConfiguration("admin", "admin-csredis"));
+services.AddScoped<ICache, CSRedisCacheManager>();
 ```
 
-详见 [使用文档 §8.1](使用文档.md)。
+连接串由宿主提供；仅初始化静态 `RedisHelper` 不能满足缓存管理器的构造依赖。FreeRedis 同样需要客户端、`CacheConfiguration` 和管理器。详见[缓存模块](../modules/caching.md)及各包 README。
 
 ### Q7 启用 AOP 的入口叫什么？
 
@@ -161,7 +165,7 @@ services.AddSqlDataSource("crm", DatabaseType.SqlServer, connStr,
 
 ### Q23 有哪些「看起来应该有、实际不存在」的注册入口？
 
-**正解**：`AddCache` / `AddCaching` / `AddCSRedis` / `AddMultiTenancy` / `UseMultiTenancy` / `AddPermissions` / `AddValidation` / `AddExceptionHandling`（只有 `UseBingExceptionHandling`）/ `AddObjectMapping` / `AddSecurity` / `AddEmailing` / `AddSerilog`（只有 `UseBingSerilogEnrichers`）/ `AddBingMvc` / `AddEventBus` / `AddAop`。完整清单见 [架构文档 §12.8](../architecture/架构文档.md)。
+**正解**：`AddCache` / 通用 `AddCaching` / `AddCSRedis` / `AddMultiTenancy` / `UseMultiTenancy` / `AddPermissions` / `AddValidation` / `AddExceptionHandling`（只有 `UseBingExceptionHandling`）/ `AddObjectMapping` / `AddSecurity` / `AddEmailing` / `AddSerilog`（只有 `UseBingSerilogEnrichers`）/ `AddBingMvc` / `AddEventBus` / `AddAop` 不存在。`Bing.EasyCaching` 的具体入口是 `AddMemoryCaching`、`AddRedisCaching`、`AddHybridCaching` 及其分片变体。完整清单见 [架构文档 §12.8](../architecture/架构文档.md)。
 
 ---
 

@@ -15,15 +15,12 @@ public abstract class BaseTypeFinderBase<TBaseType> : FinderBase<Type>, ITypeFin
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 初始化一个<see cref="BaseTypeFinderBase{TBaseType}"/>类型的实例
+    /// 初始化一个 <see cref="BaseTypeFinderBase{TBaseType}"/> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器</param>
     protected BaseTypeFinderBase(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
-    /// <summary>
-    /// 重写已实现所有项的查找
-    /// </summary>
-    /// <returns>继承指定基类的类型数组。</returns>
+    /// <inheritdoc />
     protected override Type[] FindAllItems()
     {
         var assemblies = _allAssemblyFinder.FindAll(true);

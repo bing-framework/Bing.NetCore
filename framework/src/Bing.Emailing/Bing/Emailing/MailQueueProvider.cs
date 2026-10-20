@@ -12,26 +12,15 @@ public class MailQueueProvider : IMailQueueProvider
     /// </summary>
     private static readonly ConcurrentQueue<EmailBox> MailQueue = new ConcurrentQueue<EmailBox>();
 
-    /// <summary>
-    /// 队列邮件数量
-    /// </summary>
+    /// <inheritdoc />
     public int Count => MailQueue.Count;
 
-    /// <summary>
-    /// 队列是否为空
-    /// </summary>
+    /// <inheritdoc />
     public bool IsEmpty => MailQueue.IsEmpty;
 
-    /// <summary>
-    /// 入队
-    /// </summary>
-    /// <param name="box">电子邮件</param>
+    /// <inheritdoc />
     public void Enqueue(EmailBox box) => MailQueue.Enqueue(box);
 
-    /// <summary>
-    /// 尝试出队，获取电子邮件
-    /// </summary>
-    /// <param name="box">电子邮件</param>
-    /// <returns>成功取出邮件时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public bool TryDequeue(out EmailBox box) => MailQueue.TryDequeue(out box);
 }

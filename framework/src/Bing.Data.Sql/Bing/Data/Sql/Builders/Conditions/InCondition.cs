@@ -19,7 +19,7 @@ public class InCondition : ICondition
     private readonly IList<string> _values;
 
     /// <summary>
-    /// 初始化一个<see cref="InCondition"/>类型的实例
+    /// 初始化一个 <see cref="InCondition"/> 类型的实例。
     /// </summary>
     /// <param name="name">列名</param>
     /// <param name="values">值集合</param>
@@ -29,10 +29,7 @@ public class InCondition : ICondition
         _values = values;
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>返回由列名和值集合组成的 <c>In</c> SQL 条件；列名或值集合为空时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_name) || _values == null)

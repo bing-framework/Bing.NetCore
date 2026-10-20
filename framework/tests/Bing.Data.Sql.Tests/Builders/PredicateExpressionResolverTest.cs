@@ -24,7 +24,7 @@ public class PredicateExpressionResolverTest
     private readonly PredicateExpressionResolver _resolver;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="PredicateExpressionResolverTest"/> 类型的实例。
     /// </summary>
     public PredicateExpressionResolverTest()
     {

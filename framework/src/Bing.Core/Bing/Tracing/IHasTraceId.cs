@@ -6,7 +6,7 @@
 public interface IHasTraceId
 {
     /// <summary>
-    /// 跟踪标识
+    /// 获取或设置跟踪标识
     /// </summary>
     string TraceId { get; set; }
 }

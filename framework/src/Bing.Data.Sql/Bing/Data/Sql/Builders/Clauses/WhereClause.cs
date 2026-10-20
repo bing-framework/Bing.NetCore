@@ -28,7 +28,7 @@ public class WhereClause : IWhereClause
     private readonly SqlClauseContext Context;
 
     /// <summary>
-    /// SQL 生成器。
+    /// 获取SQL 生成器。
     /// </summary>
     protected ISqlBuilder Builder => Context.Builder;
 
@@ -43,12 +43,12 @@ public class WhereClause : IWhereClause
     private readonly PredicateExpressionResolver _expressionResolver;
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     private IDialect _dialect => Context.Dialect;
 
     /// <summary>
-    /// 实体解析器。
+    /// 获取实体解析器。
     /// </summary>
     private IEntityResolver _resolver => Context.EntityResolver;
 
@@ -62,7 +62,7 @@ public class WhereClause : IWhereClause
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="WhereClause"/>类型的实例
+    /// 初始化一个 <see cref="WhereClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     public WhereClause(SqlClauseContext context)
@@ -71,7 +71,7 @@ public class WhereClause : IWhereClause
     }
 
     /// <summary>
-    /// 使用运行上下文初始化 Where 子句。
+    /// 初始化一个 <see cref="WhereClause"/> 类型的实例。
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     /// <param name="condition">查询条件。</param>
@@ -87,11 +87,7 @@ public class WhereClause : IWhereClause
 
     #region 克隆
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <returns>独立的 Where 子句。</returns>
+    /// <inheritdoc />
     public virtual IWhereClause Clone(SqlClauseContext context) =>
         CreateClone(context, new SqlCondition(_condition?.GetCondition()));
 
@@ -119,10 +115,7 @@ public class WhereClause : IWhereClause
 
     #region 条件连接
 
-    /// <summary>
-    /// And连接条件
-    /// </summary>
-    /// <param name="condition">查询条件</param>
+    /// <inheritdoc />
     public void And(ICondition condition)
     {
         if (string.IsNullOrWhiteSpace(condition?.GetCondition()))
@@ -133,10 +126,7 @@ public class WhereClause : IWhereClause
         _condition = result;
     }
 
-    /// <summary>
-    /// Or连接条件
-    /// </summary>
-    /// <param name="condition">查询条件</param>
+    /// <inheritdoc />
     public void Or(ICondition condition)
     {
         if (string.IsNullOrWhiteSpace(condition?.GetCondition()))
@@ -159,11 +149,7 @@ public class WhereClause : IWhereClause
         return new SqlCondition(sqlBuilder.MergeSubqueryParameters(builder, builder.GetCondition()));
     }
 
-    /// <summary>
-    /// Or连接条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="conditions">查询条件</param>
+    /// <inheritdoc />
     public void Or<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
     {
         if (conditions == null || conditions.Length == 0)
@@ -171,11 +157,7 @@ public class WhereClause : IWhereClause
         AppendOrPredicates(conditions.Where(condition => condition != null));
     }
 
-    /// <summary>
-    /// Or连接条件（值为空时忽略条件）
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="conditions">查询条件</param>
+    /// <inheritdoc />
     public void OrIfNotEmpty<TEntity>(params Expression<Func<TEntity, bool>>[] conditions)
     {
         if (conditions == null || conditions.Length == 0)
@@ -244,7 +226,7 @@ public class WhereClause : IWhereClause
         private readonly IParameterManager _target;
 
         /// <summary>
-        /// 预检参数管理器。
+        /// 获取预检参数管理器。
         /// </summary>
         protected IParameterManager Probe { get; }
 
@@ -254,7 +236,7 @@ public class WhereClause : IWhereClause
         private readonly List<Action<IParameterManager>> _operations = new();
 
         /// <summary>
-        /// 初始化参数写入缓冲区。
+        /// 初始化一个 <see cref="BufferedParameterManager"/> 类型的实例。
         /// </summary>
         /// <param name="target">真实参数管理器。</param>
         public BufferedParameterManager(IParameterManager target)
@@ -319,12 +301,12 @@ public class WhereClause : IWhereClause
     private sealed class BufferedAdvancedParameterManager : BufferedParameterManager, IAdvancedParameterManager
     {
         /// <summary>
-        /// 预检增强参数管理器。
+        /// 获取预检增强参数管理器。
         /// </summary>
         private IAdvancedParameterManager AdvancedProbe => (IAdvancedParameterManager)Probe;
 
         /// <summary>
-        /// 初始化增强参数写入缓冲区。
+        /// 初始化一个 <see cref="BufferedAdvancedParameterManager"/> 类型的实例。
         /// </summary>
         /// <param name="target">真实增强参数管理器。</param>
         public BufferedAdvancedParameterManager(IAdvancedParameterManager target)
@@ -387,31 +369,17 @@ public class WhereClause : IWhereClause
 
     #region Where基础方法
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <param name="condition">查询条件</param>
+    /// <inheritdoc />
     public void Where(ICondition condition) => And(condition);
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void Where(string column, object value, Operator @operator = Operator.Equal)
     {
         Context.ValidateOperation(SqlOperationAction.QueryClause);
         And(_helper.CreateCondition(column, value, @operator));
     }
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal)
         where TEntity : class
     {
@@ -419,11 +387,7 @@ public class WhereClause : IWhereClause
         And(_helper.CreateCondition(expression, typeof(TEntity), value, @operator));
     }
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">查询条件表达式</param>
+    /// <inheritdoc />
     public void Where<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
     {
         if (expression == null)
@@ -437,13 +401,10 @@ public class WhereClause : IWhereClause
 
     #region Where子查询
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="builder">子查询Sql生成器</param>
-    /// <param name="operator">运算符</param>
-    /// <remarks>In 和 NotIn 使用子查询集合语义，其他运算符按标量子查询条件处理。</remarks>
+    /// <inheritdoc />
+    /// <remarks>
+    /// In 和 NotIn 使用子查询集合语义，其他运算符按标量子查询条件处理。
+    /// </remarks>
     public void Where(string column, ISqlBuilder builder, Operator @operator = Operator.Equal)
     {
         if (builder == null)
@@ -464,22 +425,11 @@ public class WhereClause : IWhereClause
         And(SqlConditionFactory.Create(column, sql, @operator));
     }
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="builder">子查询Sql生成器</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder, Operator @operator = Operator.Equal) 
         where TEntity : class => Where(_helper.GetColumn(expression), builder, @operator);
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="action">子查询操作</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void Where(string column, Action<ISqlBuilder> action, Operator @operator = Operator.Equal)
     {
         if (action == null)
@@ -490,13 +440,7 @@ public class WhereClause : IWhereClause
         Where(column, builder, @operator);
     }
 
-    /// <summary>
-    /// 设置子查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="action">子查询操作</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void Where<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action, Operator @operator = Operator.Equal) 
         where TEntity : class => Where(_helper.GetColumn(expression), action, @operator);
 
@@ -504,12 +448,7 @@ public class WhereClause : IWhereClause
 
     #region WhereIfNotEmpty
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="value">值，如果该值为空，则忽略该查询条件</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void WhereIfNotEmpty(string column, object value, Operator @operator = Operator.Equal)
     {
         if (string.IsNullOrWhiteSpace(value.SafeString()))
@@ -517,13 +456,7 @@ public class WhereClause : IWhereClause
         Where(column, value, @operator);
     }
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="value">值，如果该值为空，则忽略该查询条件</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void WhereIfNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression, object value, Operator @operator = Operator.Equal) where TEntity : class
     {
         if (expression == null)
@@ -533,11 +466,7 @@ public class WhereClause : IWhereClause
         Where(expression, value, @operator);
     }
 
-    /// <summary>
-    /// 设置查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">查询条件表达式，如果参数值为空，则忽略该查询条件</param>
+    /// <inheritdoc />
     public void WhereIfNotEmpty<TEntity>(Expression<Func<TEntity, bool>> expression) where TEntity : class
     {
         if (expression == null)
@@ -552,34 +481,20 @@ public class WhereClause : IWhereClause
 
     #region IsNull/IsNotNull
 
-    /// <summary>
-    /// 设置Is Null条件
-    /// </summary>
-    /// <param name="column">列名</param>
+    /// <inheritdoc />
     public void IsNull(string column) => And(_helper.CreateCondition(column, null, Operator.Equal));
 
-    /// <summary>
-    /// 设置Is Null条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void IsNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class => IsNull(_helper.GetColumn(expression));
 
-    /// <summary>
-    /// 设置Is Not Null条件
-    /// </summary>
-    /// <param name="column">列名</param>
+    /// <inheritdoc />
     public void IsNotNull(string column)
     {
         column = _helper.GetColumn(column);
         And(new IsNotNullCondition(column));
     }
 
-    /// <summary>
-    /// 设置Is Not Null条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void IsNotNull<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
     {
         var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
@@ -590,10 +505,7 @@ public class WhereClause : IWhereClause
 
     #region IsEmpty/IsNotEmpty
 
-    /// <summary>
-    /// 设置空条件
-    /// </summary>
-    /// <param name="column">列名</param>
+    /// <inheritdoc />
     public void IsEmpty(string column)
     {
         column = _helper.GetColumn(column);
@@ -605,21 +517,14 @@ public class WhereClause : IWhereClause
         And(new OrCondition(new IsNullCondition(column), new EqualCondition(column, "''")));
     }
 
-    /// <summary>
-    /// 设置空条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void IsEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
     {
         var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
         IsEmpty(column);
     }
 
-    /// <summary>
-    /// 设置非空条件
-    /// </summary>
-    /// <param name="column">列名</param>
+    /// <inheritdoc />
     public void IsNotEmpty(string column)
     {
         column = _helper.GetColumn(column);
@@ -631,11 +536,7 @@ public class WhereClause : IWhereClause
         And(new AndCondition(new IsNotNullCondition(column), new NotEqualCondition(column, "''")));
     }
 
-    /// <summary>
-    /// 设置非空条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
+    /// <inheritdoc />
     public void IsNotEmpty<TEntity>(Expression<Func<TEntity, object>> expression) where TEntity : class
     {
         var column = _helper.GetColumn(_resolver.GetColumn(expression), typeof(TEntity));
@@ -646,44 +547,22 @@ public class WhereClause : IWhereClause
 
     #region In/NotIn
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="values">值集合</param>
+    /// <inheritdoc />
     public void In(string column, IEnumerable<object> values) => Where(column, values, Operator.In);
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="values">值集合</param>
+    /// <inheritdoc />
     public void In<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values)
         where TEntity : class =>
         Where(expression, values, Operator.In);
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void In(string column, ISqlBuilder builder) => AppendSqlBuilder("In", column, builder);
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void In<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => 
         In(_helper.GetColumn(expression), builder);
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void In(string column, Action<ISqlBuilder> action)
     {
         if (action == null)
@@ -694,52 +573,25 @@ public class WhereClause : IWhereClause
         In(column, builder);
     }
 
-    /// <summary>
-    /// 设置In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void In<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => 
         In(_helper.GetColumn(expression), action);
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="values">值集合</param>
+    /// <inheritdoc />
     public void NotIn(string column, IEnumerable<object> values) => Where(column, values, Operator.NotIn);
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="values">值集合</param>
+    /// <inheritdoc />
     public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, IEnumerable<object> values) where TEntity : class => 
         Where(expression, values, Operator.NotIn);
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void NotIn(string column, ISqlBuilder builder) => AppendSqlBuilder("Not In", column, builder);
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, ISqlBuilder builder) => 
         NotIn(_helper.GetColumn(expression), builder);
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void NotIn(string column, Action<ISqlBuilder> action)
     {
         if (action == null)
@@ -750,12 +602,7 @@ public class WhereClause : IWhereClause
         NotIn(column, builder);
     }
 
-    /// <summary>
-    /// 设置Not In条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void NotIn<TEntity>(Expression<Func<TEntity, object>> expression, Action<ISqlBuilder> action) => NotIn(_helper.GetColumn(expression), action);
 
     /// <summary>
@@ -776,10 +623,7 @@ public class WhereClause : IWhereClause
 
     #region Exists/NotExists
 
-    /// <summary>
-    /// 设置Exists条件
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void Exists(ISqlBuilder builder)
     {
         if (builder == null)
@@ -788,10 +632,7 @@ public class WhereClause : IWhereClause
         AppendSql(result);
     }
 
-    /// <summary>
-    /// 设置Exists条件
-    /// </summary>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void Exists(Action<ISqlBuilder> action)
     {
         if (action == null)
@@ -802,10 +643,7 @@ public class WhereClause : IWhereClause
         Exists(builder);
     }
 
-    /// <summary>
-    /// 设置Not Exists条件
-    /// </summary>
-    /// <param name="builder">Sql生成器</param>
+    /// <inheritdoc />
     public void NotExists(ISqlBuilder builder)
     {
         if (builder == null)
@@ -814,10 +652,7 @@ public class WhereClause : IWhereClause
         AppendSql(result);
     }
 
-    /// <summary>
-    /// 设置Not Exists条件
-    /// </summary>
-    /// <param name="action">子查询操作</param>
+    /// <inheritdoc />
     public void NotExists(Action<ISqlBuilder> action)
     {
         if (action == null)
@@ -832,85 +667,42 @@ public class WhereClause : IWhereClause
 
     #region Between
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, int? min, int? max, Boundary boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, long? min, long? max, Boundary boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, float? min, float? max, Boundary boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, double? min, double? max, Boundary boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, decimal? min, decimal? max, Boundary boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
         Where(_helper.Between(expression, typeof(TEntity), min, max, boundary));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <typeparam name="TEntity">实体类型</typeparam>
-    /// <param name="expression">列名表达式</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="includeTime">是否包含时间</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between<TEntity>(Expression<Func<TEntity, object>> expression, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) where TEntity : class
     {
         ValidateBetweenOperation(min, max);
@@ -918,58 +710,28 @@ public class WhereClause : IWhereClause
             GetMax(min, max, includeTime), GetBoundary(boundary, includeTime)));
     }
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, int? min, int? max, Boundary boundary) =>
         HandleBetween(column, min, max, boundary);
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, long? min, long? max, Boundary boundary) =>
         HandleBetween(column, min, max, boundary);
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, float? min, float? max, Boundary boundary) =>
         HandleBetween(column, min, max, boundary);
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, double? min, double? max, Boundary boundary) =>
         HandleBetween(column, min, max, boundary);
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, decimal? min, decimal? max, Boundary boundary) =>
         HandleBetween(column, min, max, boundary);
 
     /// <summary>
-    /// 处理范围查询条件
+    /// 处理范围查询条件。
     /// </summary>
     /// <typeparam name="T">值类型</typeparam>
     /// <param name="column">列名</param>
@@ -988,14 +750,7 @@ public class WhereClause : IWhereClause
     }
 
 
-    /// <summary>
-    /// 添加范围查询条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="min">最小值</param>
-    /// <param name="max">最大值</param>
-    /// <param name="includeTime">是否包含时间</param>
-    /// <param name="boundary">包含边界</param>
+    /// <inheritdoc />
     public void Between(string column, DateTime? min, DateTime? max, bool includeTime, Boundary? boundary) =>
         HandleBetween(column, min, max, includeTime, boundary);
 
@@ -1013,7 +768,7 @@ public class WhereClause : IWhereClause
     }
 
     /// <summary>
-    /// 处理日期范围查询。
+    /// 处理范围查询条件。
     /// </summary>
     /// <param name="column">列名。</param>
     /// <param name="min">最小值。</param>
@@ -1078,10 +833,7 @@ public class WhereClause : IWhereClause
 
     #region 其他操作
 
-    /// <summary>
-    /// 添加到Where子句
-    /// </summary>
-    /// <param name="sql">Sql语句</param>
+    /// <inheritdoc />
     public void AppendSql(string sql)
     {
         if (string.IsNullOrWhiteSpace(sql))
@@ -1105,10 +857,7 @@ public class WhereClause : IWhereClause
     /// <inheritdoc />
     public void Clear() => _condition = null;
 
-    /// <summary>
-    /// 输出Sql。
-    /// </summary>
-    /// <returns>当前 Where 子句的 SQL 文本；没有条件时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string ToSql()
     {
         var result = new StringBuilder();
@@ -1116,10 +865,7 @@ public class WhereClause : IWhereClause
         return result.Length == 0 ? null : result.ToString();
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>当前查询条件的 SQL 文本；没有条件时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public string GetCondition() => _condition?.GetCondition();
 
     #endregion

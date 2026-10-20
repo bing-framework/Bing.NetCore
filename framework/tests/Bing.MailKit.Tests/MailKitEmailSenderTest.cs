@@ -33,6 +33,10 @@ public class MailKitEmailSenderTest : TestBase
     /// </summary>
     private readonly List<string> _to;
 
+    /// <summary>
+    /// 初始化一个 <see cref="MailKitEmailSenderTest"/> 类型的实例。
+    /// </summary>
+    /// <param name="output">测试输出写入器。</param>
     public MailKitEmailSenderTest(ITestOutputHelper output) : base(output)
     {
         _emailConfigProvider = new DefaultEmailConfigProvider(new EmailConfig

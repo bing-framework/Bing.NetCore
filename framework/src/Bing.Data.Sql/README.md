@@ -3,9 +3,9 @@
 
 > ORM 无关的流利 SQL 引擎：`ISqlQuery` / `ISqlBuilder` / `IDialect` / `ISqlProvider`。
 >
-> **目标框架**：`netstandard2.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：361
+> **目标框架**：`netstandard2.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：363
 >
-> **上游 Bing 包**：`Bing.Data.Sql.Analyzers`
+> **上游 Bing 包**：`Bing.Data.Sql.Analyzers`、`Bing.Data`
 >
 > **三方依赖**：`Microsoft.CodeAnalysis.PublicApiAnalyzers`
 
@@ -57,7 +57,7 @@ query.SqlInterpolated($"select * from User where Name = {name}");
 
 ## 与其它包的关系
 
-**本包依赖**：`Bing.Data.Sql.Analyzers`
+**本包依赖**：`Bing.Data.Sql.Analyzers`、`Bing.Data`
 
 **依赖本包**：`Bing.Dapper.Core`、`Bing.EntityFrameworkCore`
 

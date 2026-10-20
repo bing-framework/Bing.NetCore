@@ -24,9 +24,9 @@ docs/
 ├── getting-started/             入门：使用 / 选型 / 查包 / 查词 / 查 API / 迁移过来 / 排错
 ├── architecture/                架构：结构与依赖 / 设计动机 / 子系统深挖 / 事件机制 / 功能缺口
 │   └── adr/                     架构决策记录（14 份）
-├── modules/                     当前已实现能力：入口 / 实现位置 / 配置 / 限制
 ├── guides/                      指南：建模 / 扩展 / 配置 / 实践 / 横切能力 / 组件库
 │   └── recipes/                 端到端配方（6 篇）
+├── modules/                     按模块说明功能、实现、用法、配置及限制（12 篇）
 ├── operations/                  运维与质量：日志可观测 / 安全 / 性能 / 测试 / 工程化 / 资产
 ├── sql/                         数据访问专项（10 篇）
 ├── testing/                     集成测试
@@ -68,10 +68,12 @@ docs/
 | **想知道某个决策为什么这样定** | [架构决策记录 ADR](architecture/adr/README.md)（14 份决策，含被否决的备选方案与负面后果） |
 | **跑测试 / 写新测试** | [测试指南](operations/测试指南.md)（工程布局、门控变量、`Bing.Test.Shared`、RS00xx 门禁、eng 脚本） |
 | **只知道包名，不知道装哪个** | [包索引](getting-started/包索引.md)（按「我要做 X」反查 70 个包工程） |
+| **核对文档与当前代码是否一致** | [文档与代码对照清单](operations/文档与代码对照清单.md)（已实现、缺失、过时、待实现/待确认） |
+| **按模块了解功能、配置与限制** | [模块文档索引](modules/README.md)（12 个模块的跨包实现与用法） |
 | **不确定组合，想要交互式推荐** | [选型向导](选型向导.html)（浏览器打开，几个问题 → 包清单 + 启动代码） |
 | **想要一页纸速查 / 打印贴墙** | [Cheat Sheet](cheatsheet.html)（从零到 CRUD API 的全部代码） |
 | **要端到端的完整场景代码** | [recipes 配方集](guides/recipes/README.md)（CRUD、CAP 事件、多租户、RBAC、支付、批量报表） |
-| **要用边缘组件（支付 / OAuth / 缓存 / 日志 Sink / 链路追踪）** | [组件库文档](guides/组件库文档.md)（9 个包，含状态徽章与"入口不在 `IServiceCollection`"的提醒） |
+| **要用边缘组件（支付 / OAuth / 日志 Sink / 链路追踪）** | [组件库文档](guides/组件库文档.md)（含状态徽章与“入口不在 `IServiceCollection`”的提醒） |
 | **深入某个横切能力（邮件 / 模板 / 锁 / 本地化 / 事件总线）** | [横切能力文档](guides/横切能力文档.md)（《使用文档》§8 的详解版） |
 | **要写事件（本地 / 消息）** | [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md)（定义 / 区别 / 选型对照表 + 两套各五步上手） |
 | **要发事件 / 用 CAP / 领域事件** | 先看 [事件与一致性](modules/events-and-consistency.md)（当前入口与边界）→ [事件与消息文档](architecture/事件与消息文档.md)（四套机制对照）→ [分布式事件使用说明](guides/分布式事件使用说明.md)（CAP 全链路手册） |
@@ -105,7 +107,7 @@ docs/
 | [文档与源码核对报告](architecture/documentation-audit.md) | 记录本轮盘点范围、已归档能力、已修正的过时结论，以及待实现/待确认边界。 |
 | [功能与文档对照清单](architecture/feature-documentation-matrix.md) | 按职责域对应生产工程、实现状态、文档状态与当前入口，集中列出描述不符和未实现项。 |
 | [能力矩阵](getting-started/能力矩阵.md) | **数据访问选型**：EF Core / FreeSQL / Bing.Data.Sql+Dapper 三支在 TFM、数据库覆盖、工作单元、`IStore`、软删除、审计、乐观锁、多租户、批量、跨库、存储过程、事务、迁移、异步等 18 个维度上的对照总表；含三分钟选型决策树、各支注册入口与实现位置、已知限制 9 条、按场景推荐、混用注意事项、三支都不行的事。 |
-| [功能完成度与已知缺口](architecture/功能完成度.md) | **如实记录框架没做完的部分**（只描述、不改代码）：FreeSQL 通用 IQueryable 异步入口同步回退、Dapper 支**框架自认的 10 处** `ProviderImplementationGap`（附"Auto 策略会自动降级"这一可实际利用的事实）、Lambda 多源查询 6 处不支持、`Bing.EasyCaching` 注册扩展**整文件注释**、`admin` 参考实现**三块整段注释**、全仓 25 处被注释的注册调用、零引用的死包（`Bing.Events.Cap.MySql` / `Bing.EventBus.Abstractions`）、Oracle 与 Doris 未验证。含**自行复核方法与缺口的三种处置方式**。 |
+| [功能完成度与已知缺口](architecture/功能完成度.md) | 源码中的显式占位、Provider 能力边界、参考宿主装配缺口及外部验收限制；不把历史任务结论当作当前行为。 |
 | [术语表](getting-started/术语表.md) | **Glossary**：模块与启动、依赖注入、领域层、数据访问、事件消息、横切、Bing.Data.Sql 专有词的中文解释与对应类型；末尾 6 组**易混词辨析**（`IStore` vs `IRepository`、工作单元 vs 事务、本地 vs 消息事件、`Level` vs `[DependsOnModule]`、软删除过滤器 vs `IDataFilter`、两个 `AddMySqlUnitOfWork`）。 |
 | [最佳实践](guides/最佳实践.md) | **怎么写才对**：12 组 ✅/❌ 对照（模块顺序、非 Web 宿主 `UseBing()`、DI 生命周期倒挂、实体注入仓储、循环提交、跨 ORM 事务、消息幂等、`[EventHandler]`、凭据硬编码、FreeSQL 异步退化、公开 API 基线…），规则分 🔴 必须 / 🟡 建议，末尾反模式速查表。 |
 | [性能指南](operations/性能指南.md) | 基于 `artifacts/benchmarks/` **实测数据**（net8.0 / RyuJIT AVX2 / BDN 0.14.0）的性能建议：映射缓存命中 vs 冷启动（**17×**）、Builder 重复渲染（**约 60×**）、`Clone()` 开销、调试 SQL 渲染、批量写入的非线性（1000 实体 **127 ms / 463 MB**）；含缓存热路径地图、6 个已知陷阱、基准运行命令与优化清单。 |
@@ -122,9 +124,12 @@ docs/
 | [事件与消息文档](architecture/事件与消息文档.md) | 四套事件机制的对照：进程内事件、CAP 集成事件、工作单元派发的 DDD 领域事件和遗留总线；说明 Outbox、幂等、顺序、类型名冲突与事务外延迟发送风险。 |
 | [分布式事件使用说明](guides/分布式事件使用说明.md) | 《事件与消息文档》的**操作手册版**——只讲分布式这一套（`IMessageEventBus` + CAP 8.0.1）讲到能照抄：装包与注册、定义 `IMessageEvent`、发布两个重载、订阅三件套（`ICapSubscribe` + `[EventHandler]` + `EventHandlerBase`）、处理器发现机制与分组并发、`bing-trace-id` 贯通、**Outbox 链路的三个前提**（⚠ 基类工作单元不认识 CAP，登记动作还会**忽略传入的事务**）、CAP 配置实例、注册入口全表、admin 登录消息完整示例、陷阱与防误用清单、自行复核命令。 |
 | [本地事件与消息事件使用说明](guides/本地事件与消息事件使用说明.md) | **两套机制的对称手册**：`ISimpleEventBus`（进程内）与 `IMessageEventBus`（跨服务 / CAP）的定义、**逐维度对照表**（契约 / 范围 / 持久化 / 可靠投递 / 事务参与 / 延迟发布 / 处理器发现 / 异常隔离 / 适用与不适用场景）、各自五步上手（装包 → 注册 → 定义 → 发布 → 订阅）、⚠ **本地事件处理器必须手工注册**（不注册则 `PublishAsync` **静默无操作**）、⚠ **本地事件全仓零生产调用、无任何真实处理器实现**（示例为本手册构造）、`Send` 默认值为 **`false`**（此前他处写成 `true` 是错的）、两级发布链路、陷阱与防误用清单。 |
-| [组件库文档](guides/组件库文档.md) | **9 个包的使用说明**（支付、**第三方 OAuth 登录 16 提供方**、业务基础类型、EasyCaching、FreeRedis、Exceptionless Sink、Mvc.UI、SkyAPM SQL 追踪、两个 Analyzers）。每个包标注状态徽章（✅ 可用 / 🔌 非标准入口 / 🧩 需手动装配 / ⚠ 入口缺失）。 |
+| [组件库文档](guides/组件库文档.md) | 支付、OAuth、业务类型、缓存、诊断及分析器的使用说明，标明入口形态与未实现路径。 |
 | [迁移指南](migrations/README.md) | **升级导航**：7.0.0 已知破坏性变更（Dapper 事务/连接收敛、SQL Fluent 收敛）、目标框架与 SDK 事实、注册入口陷阱速查、覆盖边界声明、升级验收清单。 |
-| [包索引](getting-started/包索引.md) | **按用途反查包**：从「我要做 X」找该装哪些包（15 类场景），以及 70 个包工程的一句话速览表（含 TFM、分层、依赖和当前文档缺口）。配合 [选型向导](选型向导.html) 使用效果最佳。 |
+| [包索引](getting-started/包索引.md) | **按用途反查包**：从「我要做 X」找该装哪些包（15 类场景），并提供 70 个可发包的一句话速览表（含 TFM、分层、依赖与文档缺口）。配合 [选型向导](选型向导.html) 使用效果最佳。 |
+| [模块文档](modules/README.md) | 12 个模块的功能、实现路径、接口示例、依赖配置及已知限制。 |
+| [文档更新清单](operations/本次文档更新清单.md) | 本轮新增、更新和翻译的逐文件交付记录。 |
+| [文档与代码对照清单](operations/文档与代码对照清单.md) | **盘点结果**：逐模块记录代码状态、文档状态、修订动作和待实现/待确认项。 |
 | [recipes 配方集](guides/recipes/README.md) | **端到端可运行场景代码**：① `crud-efcore`（EF Core + MySQL 完整 CRUD，含 DTO 映射、分页、软删除、`IVersion` 并发冲突处理）② `cap-event-outbox`（本地事件 + CAP 消息 + Outbox 事务一致性）③ `multi-tenancy`（租户解析链 + 三种租户 Store + ⚠ 自定义过滤器必须自己套用）④ `rbac-authorization`（JWT 签发校验 + 全局 Authorize + 权限树）⑤ `payment`（`AddPay` 配置与支付宝/微信下发-回调闭环）⑥ `bulk-and-report`（批量写入与报表查询的性能取舍）。每个配方含完整代码与验收清单。 |
 | [选型向导](选型向导.html) | **交互式 HTML 工具**（浏览器打开即可用，无需部署）：回答几个问题（宿主类型 / 要不要全功能 ORM / 目标数据库 / 是否需要分布式事件 / 是否多租户…）→ 自动输出**该装哪几个包**与**可直接复制的 `Program.cs` / `AppModule` 代码**。纯粹的静态页面，数据固化自 [包索引](getting-started/包索引.md)。 |
 | [Cheat Sheet](cheatsheet.html) | **一页纸速查**（浅色、适合 `Ctrl+P` 打印贴墙）：实体/聚合根模板、`IStore` 仓储写法、应用服务模板、注册入口总表、常用调用片段、十个最容易踩的坑。所有 API 均已按源码核准，可直接复制。 |
@@ -141,8 +146,8 @@ docs/
 | 文档 | 说明 |
 | --- | --- |
 | [工程化文档](operations/工程化文档.md) | **维护者手册**：解决方案与 props 分层（`common` / `framework` / `version` / `version.dev` / `asset/props`）、统一输出目录、**公开 API 门禁（RS0016/17/18/RS0026 与 PublicAPI 基线）**、测试与集成门控变量、基准测试命令、AppVeyor 5 个 lane 与 GitHub Actions、`eng/ci` 三个脚本与 ProviderEvidence CLI、**发版与 NuGet 打包手工流程（含发版清单）**、代码模板 `templates/`、产物目录 `artifacts/`。 |
-| [adr/README.md](architecture/adr/README.md) | **架构决策记录（ADR）**：14 份决策，覆盖模块启动、DI、多 ORM、UoW、异常、目标框架、源生成器，以及模块运行时、热插件、生命周期和扫描范围。 |
-| [资产索引](operations/资产索引.md) | 非产品文档类资产的说明：`ai_docs/`（约 79 md 的 AI 任务档案，**历史快照需谨慎**）、`artifacts/`（不入库的过程产物）、`templates/`（CodeSmith 代码生成器，年代较早）、`docs/plans/` 与 `docs/ai-workflow/`。含"还能不能信"的时效性声明与维护约定。 |
+| [adr/README.md](architecture/adr/README.md) | **架构决策记录（ADR）**：14 份决策，记录背景、被否决方案与后果，覆盖模块启动、DI、多 ORM、UoW、异常、目标框架、源生成器、模块运行时和插件等。 |
+| [资产索引](operations/资产索引.md) | 非产品文档类资产说明：`ai_docs/` 历史任务档案、`artifacts/` 本地产物、旧 CodeSmith 模板及 AI 协作记录；含时效性声明与维护约定。 |
 | [CHANGELOG.md](CHANGELOG.md) | **文档体系自身的变更记录**（不是框架发行说明）：新增/重构了哪些文档、修正了哪些事实错误、建立了哪些维护约定。**改文档前先读它的 §1 维护约定。** |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | **贡献指南**：构建、运行测试（⚠ 路径为 `framework/tests/`）、代码规范（中文注释 / UTF-8）、公开 API 门禁处理、基准与 CI 脚本、新增 Provider 与改动的测试门槛、**文档维护约定表**。 |
 | [../AGENTS.md](../AGENTS.md) | AI 工具（Copilot/Codex/Gemini/Claude 等）在本仓库的执行规范：默认中文、UTF-8 强制、`Bing.Data.Sql` 改动的测试覆盖门槛、提交前可追溯映射等。**贡献代码前必读**。 |
@@ -153,7 +158,7 @@ docs/
 
 ## 5. 配套资源
 
-- **包级 README**：70 个可发包工程均有包级 README，并通过 `asset/props/package.props` 内嵌进 nupkg。模板与结构规范见[工程化文档 §7.1](operations/工程化文档.md)。
+- **包级 README**：70 个可发包工程均有包级 README；由 `asset/props/package.props` 的 `PackageReadmeFile` 自动内嵌进 nupkg 并在 nuget.org 包页面展示。模板与结构规范见[工程化文档 §7.1](operations/工程化文档.md)。
 - **架构与数据流图**：`docs/images/`（6 张 PNG，附 SVG 源文件）——分层架构、写路径+事件 Outbox、模块启动序列、读路径、异常与统一响应管道、模块分层全景。
 - **交互式工具（本地打开即可用）**：[选型向导](选型向导.html)（几个问题 → 包清单 + 可复制启动代码）、[一页纸 Cheat Sheet](cheatsheet.html)（打印版 API 速查）。两者都是零依赖静态 HTML，**不进 docfx 站点**（docfx 只收 `*.md` / `*.yml`），请在本地浏览器打开。
 - **参考实现**：[`modules/admin/README.md`](../modules/admin/README.md)（12 个工程，领域 → 仓储 → 应用服务 → Web API 完整组织；两个宿主互斥，迁移/种子未接通，见文档第 5 节）。

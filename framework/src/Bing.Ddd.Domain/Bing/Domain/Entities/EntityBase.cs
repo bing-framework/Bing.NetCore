@@ -17,10 +17,10 @@ public abstract class EntityBase : DomainObjectBase, IEntity
     /// <inheritdoc />
     public abstract object[] GetKeys();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回包含实体类型和标识值的诊断文本。
-    /// </summary>
-    /// <returns>实体的诊断文本表示。</returns>
+    /// </remarks>
     public override string ToString() => $"[Entity: {GetType().Name}] Keys = {GetKeys().Join(", ")}";
 
     /// <summary>
@@ -42,12 +42,12 @@ public abstract class EntityBase<TEntity> : EntityBase<TEntity, Guid>
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 初始化 <see cref="EntityBase{TEntity}"/> 的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity}"/> 类型的实例。
     /// </summary>
     protected EntityBase() { }
 
     /// <summary>
-    /// 使用标识初始化 <see cref="EntityBase{TEntity}"/> 的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected EntityBase(Guid id) : base(id) { }
@@ -68,27 +68,23 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     public virtual TKey Id { get; protected set; }
 
     /// <summary>
-    /// 初始化 <see cref="EntityBase{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected EntityBase() { }
 
     /// <summary>
-    /// 使用标识初始化 <see cref="EntityBase{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected EntityBase(TKey id) => Id = id;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 判断当前实体是否与另一个对象表示同一数据记录。
-    /// </summary>
-    /// <param name="other">要比较的对象。</param>
-    /// <returns>两个对象表示同一非默认标识的实体时返回 <c>true</c>；否则返回 <c>false</c>。</returns>
+    /// </remarks>
     public override bool Equals(object other) => this == (other as EntityBase<TEntity, TKey>);
 
-    /// <summary>
-    /// 用作特定类型的哈希函数。
-    /// </summary>
-    /// <returns>基于实体标识计算的哈希代码。</returns>
+    /// <inheritdoc />
     public override int GetHashCode() => ReferenceEquals(Id, null) ? 0 : Id.GetHashCode();
 
     /// <summary>
@@ -143,10 +139,10 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     /// <returns>为当前实体生成的标识。</returns>
     protected virtual TKey CreateId() => EntityHelper.CreateKey<TKey>();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 验证实体状态。
-    /// </summary>
-    /// <param name="results">用于收集验证失败信息的结果集合。</param>
+    /// </remarks>
     protected override void Validate(ValidationResultCollection results) => ValidateId(results);
 
     /// <summary>

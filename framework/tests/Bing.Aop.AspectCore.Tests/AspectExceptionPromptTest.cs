@@ -9,6 +9,9 @@ namespace Bing.Aop.AspectCore;
 /// </summary>
 public class AspectExceptionPromptTest
 {
+    /// <summary>
+    /// 供异常提示测试使用的提示实例。
+    /// </summary>
     private readonly AspectExceptionPrompt _prompt = new();
 
     /// <summary>

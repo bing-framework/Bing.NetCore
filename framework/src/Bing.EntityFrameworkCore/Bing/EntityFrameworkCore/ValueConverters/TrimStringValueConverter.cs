@@ -9,7 +9,7 @@ namespace Bing.EntityFrameworkCore.ValueConverters;
 public class TrimStringValueConverter : ValueConverter<string, string>
 {
     /// <summary>
-    /// 初始化一个<see cref="TrimStringValueConverter"/>类型的实例
+    /// 初始化一个 <see cref="TrimStringValueConverter"/> 类型的实例。
     /// </summary>
     public TrimStringValueConverter() : base(value => value.SafeString(), value => value)
     {

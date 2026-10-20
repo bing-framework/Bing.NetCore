@@ -16,8 +16,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：默认构造后 Contributors 和 DynamicContributors 不为 null，且初始为空，
-    /// 防止遍历时触发 NullReferenceException。
+    /// 测试目的：默认构造后 Contributors 和 DynamicContributors 不为 null，且初始为空， 防止遍历时触发 NullReferenceException。
     /// </summary>
     [Fact]
     public void Options_Default_ContributorListsShouldBeEmptyAndNotNull()
@@ -33,8 +32,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     }
 
     /// <summary>
-    /// 测试目的：默认构造后 DynamicClaims 包含 UserName、Role、Email 等预定义字段，
-    /// 确保动态 Claims 刷新覆盖关键身份字段。
+    /// 测试目的：默认构造后 DynamicClaims 包含 UserName、Role、Email 等预定义字段， 确保动态 Claims 刷新覆盖关键身份字段。
     /// </summary>
     [Fact]
     public void Options_Default_DynamicClaimsShouldContainExpectedFields()
@@ -53,8 +51,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     }
 
     /// <summary>
-    /// 测试目的：默认构造后 IsRemoteRefreshEnabled = true，RemoteRefreshUrl 不为空，
-    /// 确保微服务身份同步开箱即用。
+    /// 测试目的：默认构造后 IsRemoteRefreshEnabled = true，RemoteRefreshUrl 不为空， 确保微服务身份同步开箱即用。
     /// </summary>
     [Fact]
     public void Options_Default_RemoteRefreshShouldBeEnabledWithDefaultUrl()
@@ -69,8 +66,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     }
 
     /// <summary>
-    /// 测试目的：默认构造后 ClaimsMap 包含 UserName、Role、Email 的映射条目，
-    /// 确保 OpenID Connect 标准声明能被正确转换。
+    /// 测试目的：默认构造后 ClaimsMap 包含 UserName、Role、Email 的映射条目， 确保 OpenID Connect 标准声明能被正确转换。
     /// </summary>
     [Fact]
     public void Options_Default_ClaimsMapShouldContainDefaultMappings()
@@ -88,8 +84,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     }
 
     /// <summary>
-    /// 测试目的：默认构造后 IsDynamicClaimsEnabled = false，
-    /// 防止在未显式开启时误启用动态 Claims 计算导致性能损耗。
+    /// 测试目的：默认构造后 IsDynamicClaimsEnabled = false， 防止在未显式开启时误启用动态 Claims 计算导致性能损耗。
     /// </summary>
     [Fact]
     public void Options_Default_IsDynamicClaimsEnabledShouldBeFalse()
@@ -106,8 +101,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：构造器应正确存储 ClaimsPrincipal 和 ServiceProvider，
-    /// 确保贡献者能通过 context 访问依赖。
+    /// 测试目的：构造器应正确存储 ClaimsPrincipal 和 ServiceProvider， 确保贡献者能通过 context 访问依赖。
     /// </summary>
     [Fact]
     public void Context_Constructor_ShouldSetClaimsPrincipalAndServiceProvider()
@@ -144,8 +138,7 @@ public class BingClaimsPrincipalFactoryOptionsAndContextTest
     }
 
     /// <summary>
-    /// 测试目的：GetRequiredService&lt;T&gt;() 应从 ServiceProvider 正确解析服务，
-    /// 确保贡献者能按需获取依赖实例。
+    /// 测试目的：GetRequiredService&lt;T&gt;() 应从 ServiceProvider 正确解析服务， 确保贡献者能按需获取依赖实例。
     /// </summary>
     [Fact]
     public void Context_GetRequiredService_ShouldResolveFromServiceProvider()

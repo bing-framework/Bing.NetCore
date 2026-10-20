@@ -22,7 +22,7 @@ public class DateTimeSegmentConditionTest
     private readonly DateTime? _max;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="DateTimeSegmentConditionTest"/> 类型的实例。
     /// </summary>
     public DateTimeSegmentConditionTest()
     {

@@ -3,7 +3,7 @@
 namespace Bing.MultiTenancy;
 
 /// <summary>
-/// 租户规范化器，使用不区分区域性的大写转换方式 <c>ToUpperInvariant()</c> 进行规范化。
+/// 使用不依赖当前区域性的规则规范化租户名称。
 /// </summary>
 public class UpperInvariantTenantNormalizer : ITenantNormalizer, ITransientDependency
 {

@@ -18,16 +18,24 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// </summary>
     private enum QueryPhase
     {
-        /// <summary>可继续修改查询结构的草稿阶段。</summary>
+        /// <summary>
+        /// 可继续修改查询结构的草稿阶段。
+        /// </summary>
         Draft,
 
-        /// <summary>已生成执行计划且不能继续修改的冻结阶段。</summary>
+        /// <summary>
+        /// 已生成执行计划且不能继续修改的冻结阶段。
+        /// </summary>
         Frozen,
 
-        /// <summary>正在执行查询的阶段。</summary>
+        /// <summary>
+        /// 正在执行查询的阶段。
+        /// </summary>
         Executing,
 
-        /// <summary>执行已完成的阶段。</summary>
+        /// <summary>
+        /// 执行已完成的阶段。
+        /// </summary>
         Completed
     }
 
@@ -72,7 +80,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     private string _cachedSql;
 
     /// <summary>
-    /// 使用独立 SQL Builder 初始化查询描述。
+    /// 初始化一个 <see cref="SqlQuery"/> 类型的实例。
     /// </summary>
     /// <param name="executor">绑定根查询连接、事务和诊断状态的内部执行器。</param>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
@@ -183,7 +191,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询并完整物化指定类型的结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -199,7 +207,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public TResult ToEntity<TResult>(int? timeout = null) => _executor.SingleOrDefault<TResult>(GetPlan(), timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -211,7 +219,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToList(GetPlan(), map, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为三个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -224,7 +232,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         int? timeout = null) => _executor.ToList(GetPlan(), map, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为四个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -239,7 +247,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToList(GetPlan(), map, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为五个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -255,7 +263,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToList(GetPlan(), map, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为六个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -272,7 +280,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToList(GetPlan(), map, timeout);
 
     /// <summary>
-    /// 同步执行当前 Fluent 查询，并将每行映射为七个对象后完整物化结果集。
+    /// 同步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -342,7 +350,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.AsEnumerable<TResult>(GetPlan(), timeout);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询并完整物化指定类型的结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -363,7 +371,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为两个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -377,7 +385,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为三个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -392,7 +400,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为四个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -408,7 +416,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为五个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -426,7 +434,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为六个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -445,7 +453,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         cancellationToken);
 
     /// <summary>
-    /// 异步执行当前 Fluent 查询，并将每行映射为七个对象后完整物化结果集。
+    /// 异步执行查询并返回结果集。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>

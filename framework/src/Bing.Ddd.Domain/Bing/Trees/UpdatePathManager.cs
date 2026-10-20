@@ -24,13 +24,13 @@ public class UpdatePathManager<TEntity, TKey, TParentId>
     private readonly ITreeRepository<TEntity, TKey, TParentId> _repository;
 
     /// <summary>
-    /// 初始化一个<see cref="UpdatePathManager{TEntity,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="UpdatePathManager{TEntity, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="repository">仓储</param>
     public UpdatePathManager(ITreeCompactRepository<TEntity, TKey, TParentId> repository) => _compactRepository = repository;
 
     /// <summary>
-    /// 初始化一个<see cref="UpdatePathManager{TEntity,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="UpdatePathManager{TEntity, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="repository">仓储</param>
     public UpdatePathManager(ITreeRepository<TEntity, TKey, TParentId> repository) => _repository = repository;

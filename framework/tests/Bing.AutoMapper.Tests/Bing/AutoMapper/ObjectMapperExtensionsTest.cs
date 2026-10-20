@@ -16,7 +16,7 @@ namespace Bing.AutoMapper;
 public class ObjectMapperExtensionsTest
 {
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ObjectMapperExtensionsTest"/> 类型的实例。
     /// </summary>
     public ObjectMapperExtensionsTest()
     {

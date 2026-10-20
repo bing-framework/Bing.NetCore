@@ -11,19 +11,22 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class FullAuditedAggregateRoot<TEntity> : AuditedAggregateRoot<TEntity>, IFullAuditedObject
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根是否已标记为删除。
-    /// </summary>
+    /// </remarks>
     public virtual bool IsDeleted { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根被标记为删除的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? DeletionTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该聚合根为删除的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual Guid? DeleterId { get; set; }
 }
 
@@ -36,30 +39,33 @@ public abstract class FullAuditedAggregateRoot<TEntity> : AuditedAggregateRoot<T
 public abstract class FullAuditedAggregateRoot<TEntity, TKey> : AuditedAggregateRoot<TEntity, TKey>, IFullAuditedObject<TKey>
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根是否已标记为删除。
-    /// </summary>
+    /// </remarks>
     public virtual bool IsDeleted { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置聚合根被标记为删除的时间。
-    /// </summary>
+    /// </remarks>
     public virtual DateTime? DeletionTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置标记该聚合根为删除的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual TKey DeleterId { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="FullAuditedAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected FullAuditedAggregateRoot()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="FullAuditedAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 初始化一个 <see cref="FullAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected FullAuditedAggregateRoot(TKey id) : base(id)

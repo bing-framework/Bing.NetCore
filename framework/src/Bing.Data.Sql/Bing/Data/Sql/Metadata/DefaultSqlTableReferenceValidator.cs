@@ -13,7 +13,7 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
     private readonly ISqlObjectNameCapabilityProvider _capabilityProvider;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlTableReferenceValidator"/>类型的实例。
+    /// 初始化一个 <see cref="DefaultSqlTableReferenceValidator"/> 类型的实例。
     /// </summary>
     /// <param name="capabilityProvider">SQL 对象名称能力提供器。</param>
     public DefaultSqlTableReferenceValidator(ISqlObjectNameCapabilityProvider capabilityProvider = null)

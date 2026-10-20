@@ -8,18 +8,27 @@ namespace Bing.TextTemplating;
 public class BingTextTemplatingOptions
 {
     /// <summary>
-    /// 获取模板定义提供程序类型列表，默认初始化为空列表；注册项用于发现和构建模板定义。
+    /// 获取模板定义提供程序类型列表。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空列表；注册项用于发现和构建模板定义。
+    /// </remarks>
     public ITypeList<ITemplateDefinitionProvider> DefinitionProviders { get; }
 
     /// <summary>
-    /// 获取模板内容贡献者类型列表，默认初始化为空列表；注册项用于向模板渲染上下文贡献内容。
+    /// 获取模板内容贡献者类型列表。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空列表；注册项用于向模板渲染上下文贡献内容。
+    /// </remarks>
     public ITypeList<ITemplateContentContributor> ContentContributors { get; }
 
     /// <summary>
-    /// 获取按引擎名称索引的渲染引擎实现类型字典，默认初始化为空字典；键名必须与模板选用的引擎名称一致。
+    /// 获取按引擎名称索引的渲染引擎实现类型字典。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空字典；键名必须与模板选用的引擎名称一致。
+    /// </remarks>
     public IDictionary<string, Type> RenderingEngines { get; }
 
     /// <summary>
@@ -29,7 +38,7 @@ public class BingTextTemplatingOptions
     public string DefaultRenderingEngine { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="BingTextTemplatingOptions"/> 的实例及其空注册集合。
+    /// 初始化一个 <see cref="BingTextTemplatingOptions"/> 类型的实例。
     /// </summary>
     public BingTextTemplatingOptions()
     {

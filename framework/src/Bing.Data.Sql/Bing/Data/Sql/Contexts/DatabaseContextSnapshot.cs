@@ -3,12 +3,11 @@ using Bing.Data;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 数据库上下文快照帮助器。
-/// </summary>
+/// 创建数据库上下文快照。
 public static class DatabaseContextSnapshot
 {
     /// <summary>
-    /// 创建默认深快照。
+    /// 创建数据库上下文快照。
     /// </summary>
     /// <param name="source">源数据库上下文。</param>
     /// <returns>独立的数据库上下文快照。</returns>
@@ -28,7 +27,7 @@ public static class DatabaseContextSnapshot
     }
 
     /// <summary>
-    /// 创建独立的 SQL 数据源描述深快照。
+    /// 创建数据库上下文快照。
     /// </summary>
     /// <param name="source">源 SQL 数据源描述。</param>
     /// <returns>独立的 SQL 数据源描述快照。</returns>

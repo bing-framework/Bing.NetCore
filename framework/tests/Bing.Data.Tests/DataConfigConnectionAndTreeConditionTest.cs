@@ -11,11 +11,21 @@ namespace Bing.Data.Tests;
 
 // ─── 测试辅助：实体样本（同时实现 IPath + IEnabled + IParentId<Guid?>）────────
 
+/// <summary>
+/// 表示树形条件测试使用的实体。
+/// </summary>
 file class TreeEntity : IPath, IEnabled, IParentId<Guid?>
 {
+    /// <inheritdoc />
     public string Path { get; set; }
+
+    /// <inheritdoc />
     public int Level { get; set; }
+
+    /// <inheritdoc />
     public bool Enabled { get; set; }
+
+    /// <inheritdoc />
     public Guid? ParentId { get; set; }
 }
 
@@ -366,6 +376,13 @@ public class DefaultDatabaseTest
 /// </summary>
 public class TreeConditionTest
 {
+    /// <summary>
+    /// 创建树查询参数模拟对象。
+    /// </summary>
+    /// <param name="path">实体路径。</param>
+    /// <param name="level">树层级。</param>
+    /// <param name="enabled">实体启用状态。</param>
+    /// <returns>已配置的树查询参数模拟对象。</returns>
     private static Mock<ITreeQueryParameter<Guid?>> CreateParam(
         string path = null, int? level = null, bool? enabled = null)
     {

@@ -21,7 +21,7 @@ public class DefaultMailKitSmtpBuilder : IMailKitSmtpBuilder
     private readonly IMailKitConfigProvider _mailKitConfigProvider;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultMailKitSmtpBuilder"/>类型的实例
+    /// 初始化一个 <see cref="DefaultMailKitSmtpBuilder"/> 类型的实例。
     /// </summary>
     /// <param name="emailConfigProvider">电子邮件配置提供器</param>
     /// <param name="mailKitConfigProvider">MailKit配置提供器</param>
@@ -31,10 +31,7 @@ public class DefaultMailKitSmtpBuilder : IMailKitSmtpBuilder
         _mailKitConfigProvider = mailKitConfigProvider;
     }
 
-    /// <summary>
-    /// 生成SMTP客户端
-    /// </summary>
-    /// <returns>已配置的 SMTP 客户端。</returns>
+    /// <inheritdoc />
     public virtual SmtpClient Build()
     {
         var client = new SmtpClient();

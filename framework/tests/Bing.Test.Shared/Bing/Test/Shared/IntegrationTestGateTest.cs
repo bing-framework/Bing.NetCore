@@ -20,22 +20,61 @@ public sealed class EnvironmentVariableTestCollection
 [Collection(EnvironmentVariableTestCollection.Name)]
 public sealed class IntegrationTestGateTest : IDisposable
 {
+    /// <summary>
+    /// MySQL 集成测试开关环境变量名称。
+    /// </summary>
     private const string MySqlVariable = "RUN_MYSQL_INTEGRATION_TESTS";
+    /// <summary>
+    /// Doris 集成测试开关环境变量名称。
+    /// </summary>
     private const string DorisVariable = "RUN_DORIS_INTEGRATION_TESTS";
+    /// <summary>
+    /// PostgreSQL 集成测试开关环境变量名称。
+    /// </summary>
     private const string PostgreSqlVariable = "RUN_POSTGRESQL_INTEGRATION_TESTS";
+    /// <summary>
+    /// SQL Server 集成测试开关环境变量名称。
+    /// </summary>
     private const string SqlServerVariable = "RUN_SQLSERVER_INTEGRATION_TESTS";
+    /// <summary>
+    /// Oracle 集成测试开关环境变量名称。
+    /// </summary>
     private const string OracleVariable = "RUN_ORACLE_INTEGRATION_TESTS";
+    /// <summary>
+    /// 数据库重置开关环境变量名称。
+    /// </summary>
     private const string ResetVariable = "ALLOW_DATABASE_RESET_FOR_TESTS";
+    /// <summary>
+    /// 默认连接字符串环境变量名称。
+    /// </summary>
     private const string DefaultConnectionVariable = "ConnectionStrings__DefaultConnection";
+    /// <summary>
+    /// MySQL 连接字符串环境变量名称。
+    /// </summary>
     private const string MySqlConnectionVariable = "ConnectionStrings__MySqlConnection";
+    /// <summary>
+    /// Doris 连接字符串环境变量名称。
+    /// </summary>
     private const string DorisConnectionVariable = "ConnectionStrings__DorisConnection";
+    /// <summary>
+    /// PostgreSQL 连接字符串环境变量名称。
+    /// </summary>
     private const string PostgreSqlConnectionVariable = "ConnectionStrings__PostgreSqlConnection";
+    /// <summary>
+    /// SQL Server 连接字符串环境变量名称。
+    /// </summary>
     private const string SqlServerConnectionVariable = "ConnectionStrings__SqlServerConnection";
+    /// <summary>
+    /// PostgreSQL 旧版集成测试开关环境变量名称。
+    /// </summary>
     private const string LegacyPostgreSqlVariable = "RUN_PGSQL_INTEGRATION_TESTS";
+    /// <summary>
+    /// 测试前保存的环境变量值。
+    /// </summary>
     private readonly Dictionary<string, string> _originalValues = new();
 
     /// <summary>
-    /// 初始化集成测试环境变量隔离。
+    /// 初始化一个 <see cref="IntegrationTestGateTest"/> 类型的实例。
     /// </summary>
     public IntegrationTestGateTest()
     {
@@ -55,7 +94,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 全局集成测试开关应启用所有Provider。
+    /// 全局集成测试开关应启用所有Provider。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldEnableAllProvidersWhenGlobalSwitchIsEnabled()
@@ -67,7 +106,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - MySQL开关应仅启用MySQL集成测试。
+    /// MySQL开关应仅启用MySQL集成测试。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldEnableOnlyMySqlWhenMySqlSwitchIsEnabled()
@@ -78,7 +117,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：Doris 专属开关只能启用受控 Doris 只读集成测试。
+    /// Doris 专属开关只能启用受控 Doris 只读集成测试。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldEnableOnlyDorisWhenDorisSwitchIsEnabled()
@@ -92,7 +131,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - MySQL开关不应启用PostgreSQL集成测试。
+    /// MySQL开关不应启用PostgreSQL集成测试。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldNotEnablePostgreSqlWhenOnlyMySqlSwitchIsEnabled()
@@ -103,7 +142,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - Oracle 开关应仅启用 Oracle 集成测试，不启用其他 Provider。
+    /// Oracle 开关应仅启用 Oracle 集成测试，不启用其他 Provider。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldEnableOnlyOracleWhenOracleSwitchIsEnabled()
@@ -115,7 +154,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - Oracle 开关缺失时跳过原因应包含全局和 Oracle 专属配置名称。
+    /// Oracle 开关缺失时跳过原因应包含全局和 Oracle 专属配置名称。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldDescribeOracleSwitchWhenOracleIsDisabled()
@@ -127,7 +166,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 环境变量值比较应忽略大小写。
+    /// 环境变量值比较应忽略大小写。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldIgnoreEnvironmentVariableValueCasing()
@@ -138,7 +177,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：全局开关显式为 false 时，Provider 专属 true 仍必须启用对应测试。
+    /// 全局开关显式为 false 时，Provider 专属 true 仍必须启用对应测试。
     /// </summary>
     [Fact]
     public void GetSkipReason_WhenGlobalIsFalseAndProviderIsTrue_ShouldEnableProvider()
@@ -152,7 +191,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：除 true 外的开关值不得意外启用集成测试。
+    /// 除 true 外的开关值不得意外启用集成测试。
     /// </summary>
     /// <param name="value">待验证的环境变量值。</param>
     [Theory]
@@ -176,7 +215,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：PostgreSQL 只接受规范 RUN_POSTGRESQL_INTEGRATION_TESTS 变量，不接受未文档化的别名。
+    /// PostgreSQL 只接受规范 RUN_POSTGRESQL_INTEGRATION_TESTS 变量，不接受未文档化的别名。
     /// </summary>
     [Fact]
     public void GetSkipReason_WhenOnlyLegacyPostgreSqlVariableIsTrue_ShouldKeepProviderDisabled()
@@ -194,7 +233,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 未配置开关时应返回清晰的跳过原因。
+    /// 未配置开关时应返回清晰的跳过原因。
     /// </summary>
     [Fact]
     public void GetSkipReason_ShouldReturnClearReasonWhenSwitchIsMissing()
@@ -206,7 +245,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - Provider名称应规范化为环境变量名称。
+    /// Provider名称应规范化为环境变量名称。
     /// </summary>
     [Fact]
     public void GetProviderEnvironmentVariable_ShouldNormalizeProviderName()
@@ -217,8 +256,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 数据库安全校验应拒绝危险数据库名称。
+    /// 数据库安全校验应拒绝危险数据库名称。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("bing_prod_test")]
     [InlineData("production-bing_test")]
@@ -229,7 +269,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - bing_mysql_test应被识别为合法测试数据库。
+    /// bing_mysql_test应被识别为合法测试数据库。
     /// </summary>
     [Fact]
     public void IsSafeTestDatabaseName_ShouldAllowMySqlTestDatabaseName()
@@ -238,7 +278,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - bing_product_test不应因包含prod被误判。
+    /// bing_product_test不应因包含prod被误判。
     /// </summary>
     [Fact]
     public void IsSafeTestDatabaseName_ShouldAllowProductTestDatabaseName()
@@ -247,8 +287,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - MySQL系统数据库应被拒绝。
+    /// MySQL系统数据库应被拒绝。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("mysql")]
     [InlineData("information_schema")]
@@ -260,8 +301,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - SQLServer系统数据库应被拒绝。
+    /// SQLServer系统数据库应被拒绝。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("master")]
     [InlineData("model")]
@@ -273,8 +315,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - PostgreSQL系统数据库应被拒绝。
+    /// PostgreSQL系统数据库应被拒绝。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("postgres")]
     [InlineData("template0")]
@@ -285,8 +328,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 明确生产数据库名称应被拒绝。
+    /// 明确生产数据库名称应被拒绝。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("bing-prod_test")]
     [InlineData("bing_production_test")]
@@ -298,8 +342,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 没有测试后缀的数据库应被拒绝。
+    /// 没有测试后缀的数据库应被拒绝。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("bing_framework")]
     [InlineData("bing_product")]
@@ -309,8 +354,9 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 数据库安全校验应允许约定后缀。
+    /// 数据库安全校验应允许约定后缀。
     /// </summary>
+    /// <param name="databaseName">待验证的数据库名称。</param>
     [Theory]
     [InlineData("bing_dapper_test")]
     [InlineData("bing_dapper_tests")]
@@ -322,7 +368,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 整库重置应要求Provider开关和双显式开关。
+    /// 整库重置应要求Provider开关和双显式开关。
     /// </summary>
     [Fact]
     public void EnsureResetAllowed_ShouldRequireProviderAndResetSwitch()
@@ -338,7 +384,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - Provider专属连接字符串应优先于默认连接字符串。
+    /// Provider专属连接字符串应优先于默认连接字符串。
     /// </summary>
     [Fact]
     public void Resolve_ShouldPreferProviderSpecificConnectionString()
@@ -353,7 +399,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：Doris 集成测试必须优先解析 Doris 专属连接字符串，不能误用 MySQL Provider 配置。
+    /// Doris 集成测试必须优先解析 Doris 专属连接字符串，不能误用 MySQL Provider 配置。
     /// </summary>
     [Fact]
     public void Resolve_WhenDorisConnectionIsConfigured_ShouldUseDorisSpecificConnectionString()
@@ -372,7 +418,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：Doris 连接字符串缺失时应给出专属配置指引，且不得泄露敏感信息。
+    /// Doris 连接字符串缺失时应给出专属配置指引，且不得泄露敏感信息。
     /// </summary>
     [Fact]
     public void Resolve_WhenDorisConnectionIsMissing_ShouldProvideSafeConfigurationGuidance()
@@ -389,7 +435,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - Provider专属连接字符串缺失时应回退默认连接字符串。
+    /// Provider专属连接字符串缺失时应回退默认连接字符串。
     /// </summary>
     [Fact]
     public void Resolve_ShouldFallbackToDefaultConnectionStringWhenProviderConnectionIsMissing()
@@ -403,7 +449,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 连接字符串缺失错误应说明Provider配置且不包含密码。
+    /// 连接字符串缺失错误应说明Provider配置且不包含密码。
     /// </summary>
     [Fact]
     public void Resolve_ShouldProvideSafeConfigurationGuidanceWhenConnectionStringIsMissing()
@@ -418,7 +464,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试 - 安全校验错误不应包含数据库密码。
+    /// 安全校验错误不应包含数据库密码。
     /// </summary>
     [Fact]
     public void EnsureDatabaseOperationAllowed_ShouldNotExposePasswordInException()
@@ -433,7 +479,7 @@ public sealed class IntegrationTestGateTest : IDisposable
     }
 
     /// <summary>
-    /// 测试目的：SQL Server 专属连接字符串必须优先于默认连接字符串，并被环境隔离清理。
+    /// SQL Server 专属连接字符串必须优先于默认连接字符串，并被环境隔离清理。
     /// </summary>
     [Fact]
     public void Resolve_WhenSqlServerConnectionIsConfigured_ShouldUseProviderSpecificConnectionString()
@@ -450,9 +496,7 @@ public sealed class IntegrationTestGateTest : IDisposable
         Assert.Equal(sqlServerConnectionString, result);
     }
 
-    /// <summary>
-    /// 释放环境变量。
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         foreach (var item in _originalValues)

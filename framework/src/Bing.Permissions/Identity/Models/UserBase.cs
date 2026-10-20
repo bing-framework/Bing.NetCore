@@ -9,19 +9,25 @@ namespace Bing.Permissions.Identity.Models;
 /// <summary>
 /// 用户基类
 /// </summary>
+/// <typeparam name="TUser">用户实体类型。</typeparam>
+/// <typeparam name="TKey">用户标识类型。</typeparam>
 public partial class UserBase<TUser, TKey>
 {
     /// <summary>
-    /// 获取或设置用于处理用户密码的加密器；该属性不映射到数据库。
+    /// 获取或设置用于处理用户密码的加密器。
     /// </summary>
+    /// <remarks>
+    /// 该属性不映射到数据库。
+    /// </remarks>
     [NotMapped]
     public IEncryptor Encryptor { get; set; }
 
     #region Init(初始化)
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 初始化用户实体，并在必要时根据手机号或邮箱补充用户名。
-    /// </summary>
+    /// </remarks>
     public override void Init()
     {
         base.Init();
@@ -48,10 +54,10 @@ public partial class UserBase<TUser, TKey>
 
     #region Validate(验证)
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 验证用户实体；用户名为空时先抛出验证警告。
-    /// </summary>
-    /// <returns>验证成功时返回基类生成的验证结果。</returns>
+    /// </remarks>
     public override IValidationResult Validate()
     {
         if (UserName.IsEmpty())

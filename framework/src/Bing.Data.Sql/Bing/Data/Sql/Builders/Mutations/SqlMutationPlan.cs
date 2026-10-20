@@ -45,22 +45,22 @@ internal sealed class SqlMutationPlan
     }
 
     /// <summary>
-    /// 实体映射。
+    /// 获取实体映射。
     /// </summary>
     public EntityMappingMetadata Mapping { get; }
 
     /// <summary>
-    /// 当前操作应写入的列。
+    /// 获取当前操作应写入的列。
     /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> WriteColumns { get; }
 
     /// <summary>
-    /// 主键列。
+    /// 获取主键列。
     /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> Keys { get; }
 
     /// <summary>
-    /// 并发令牌列。
+    /// 获取并发令牌列。
     /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> ConcurrencyColumns { get; }
 

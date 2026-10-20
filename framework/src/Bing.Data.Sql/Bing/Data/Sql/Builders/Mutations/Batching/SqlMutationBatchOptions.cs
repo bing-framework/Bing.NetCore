@@ -1,17 +1,18 @@
 namespace Bing.Data.Sql.Builders.Mutations.Batching;
 
 /// <summary>
-/// 批量 Mutation 的通用选项。
+/// 配置批量数据变更操作的通用选项。
 /// </summary>
 public class SqlMutationBatchOptions
 {
     /// <summary>
-    /// 用户指定的每批实体数量；为空时由规划器按 Provider 限制计算。
+    /// 获取或设置每批处理的实体数量。
     /// </summary>
+    /// <remarks>未设置时由规划器按 Provider 限制计算。</remarks>
     public int? BatchSize { get; set; }
 
     /// <summary>
-    /// 单条命令允许的最大参数数量；为空时采用 Provider 限制。
+    /// 获取或设置单条命令允许的最大参数数量。
     /// </summary>
     /// <remarks>
     /// 当 Provider 声明硬性参数上限时，该值只能收紧限制，不能放宽 Provider 上限。
@@ -19,12 +20,13 @@ public class SqlMutationBatchOptions
     public int? MaxParameterCount { get; set; }
 
     /// <summary>
-    /// 单条命令允许的最大 SQL 字符数；为空时不额外限制。
+    /// 获取或设置单条命令允许的最大 SQL 字符数。
     /// </summary>
+    /// <remarks>未设置时不额外限制。</remarks>
     public int? MaxSqlLength { get; set; }
 
     /// <summary>
-    /// 是否在一个事务中执行全部批次。
+    /// 获取或设置是否在一个事务中执行全部批次。
     /// </summary>
     public bool UseTransaction { get; set; } = true;
 

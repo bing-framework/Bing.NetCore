@@ -82,7 +82,7 @@ public class FreeSqlEntityModelMetadataProviderTest
     private sealed class DottedCompany
     {
         /// <summary>
-        /// 公司名称。
+        /// 获取或设置公司名称。
         /// </summary>
         [Column(Name = "company_name")]
         public string CompanyName { get; set; }
@@ -94,7 +94,7 @@ public class FreeSqlEntityModelMetadataProviderTest
     private sealed class UnmappedCompany
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }

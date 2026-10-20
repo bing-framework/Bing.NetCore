@@ -6,32 +6,32 @@
 public interface IMessageEvent : IEvent
 {
     /// <summary>
-    /// 事件标识
+    /// 获取或设置事件标识
     /// </summary>
     string Id { get; set; }
 
     /// <summary>
-    /// 事件发生时间
+    /// 获取或设置事件发生时间
     /// </summary>
     DateTime Time { get; set; }
 
     /// <summary>
-    /// 消息名称
+    /// 获取或设置消息名称
     /// </summary>
     string Name { get; set; }
 
     /// <summary>
-    /// 事件数据
+    /// 获取或设置事件数据
     /// </summary>
     object Data { get; set; }
 
     /// <summary>
-    /// 回调名称
+    /// 获取或设置回调名称
     /// </summary>
     string Callback { get; set; }
 
     /// <summary>
-    /// 是否立即发送消息
+    /// 获取或设置是否立即发送消息
     /// </summary>
     bool Send { get; set; }
 }

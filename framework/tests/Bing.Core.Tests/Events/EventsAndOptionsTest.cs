@@ -9,6 +9,9 @@ namespace Bing.Core.Tests;
 
 // ─── 测试辅助：带 EventName 特性的事件 ────────────────────────────
 
+/// <summary>
+/// 使用显式事件名称的测试事件。
+/// </summary>
 [EventName("my.custom.event")]
 file class NamedEvent : Event { }
 
@@ -20,6 +23,7 @@ file class UnnamedEvent : Event { }
 /// <summary>
 /// 泛型事件，使用 GenericEventNameAttribute 注解前缀
 /// </summary>
+/// <typeparam name="T">事件数据类型。</typeparam>
 [GenericEventName(Prefix = "pre.")]
 file class GenericPrefixEvent<T> : Event { }
 

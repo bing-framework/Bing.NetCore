@@ -10,8 +10,7 @@ using Xunit;
 namespace Bing.MailKit.Tests;
 
 /// <summary>
-/// <see cref="EmailBox"/> 默认值与属性赋值测试。
-/// 验证集合属性初始化、IsBodyHtml 默认值及字符串属性读写。
+/// <see cref="EmailBox"/> 默认值与属性赋值测试。 验证集合属性初始化、IsBodyHtml 默认值及字符串属性读写。
 /// </summary>
 public class EmailBoxTest
 {
@@ -104,8 +103,7 @@ public class EmailBoxTest
 }
 
 /// <summary>
-/// <see cref="EmailConfig"/> 配置默认值测试。
-/// 验证 Port/SleepInterval 默认值及其余属性的零值/null 初始化。
+/// <see cref="EmailConfig"/> 配置默认值测试。 验证 Port/SleepInterval 默认值及其余属性的零值/null 初始化。
 /// </summary>
 public class EmailConfigTest
 {
@@ -192,8 +190,7 @@ public class EmailConfigTest
 }
 
 /// <summary>
-/// <see cref="DefaultEmailConfigProvider"/> 测试。
-/// 验证 GetConfig/GetConfigAsync 返回构造时注入的配置对象（引用相等）。
+/// <see cref="DefaultEmailConfigProvider"/> 测试。 验证 GetConfig/GetConfigAsync 返回构造时注入的配置对象（引用相等）。
 /// </summary>
 public class DefaultEmailConfigProviderTest
 {
@@ -230,8 +227,7 @@ public class DefaultEmailConfigProviderTest
 }
 
 /// <summary>
-/// <see cref="MemoryStreamAttachment"/> 附件测试。
-/// 验证 GetFileStream/GetName/Dispose 行为。
+/// <see cref="MemoryStreamAttachment"/> 附件测试。 验证 GetFileStream/GetName/Dispose 行为。
 /// </summary>
 public class MemoryStreamAttachmentTest
 {
@@ -296,8 +292,7 @@ public class MemoryStreamAttachmentTest
 }
 
 /// <summary>
-/// <see cref="MailKitConfig"/> 配置测试。
-/// 验证可空属性的默认值及赋值行为。
+/// <see cref="MailKitConfig"/> 配置测试。 验证可空属性的默认值及赋值行为。
 /// </summary>
 public class MailKitConfigTest
 {
@@ -343,8 +338,7 @@ public class MailKitConfigTest
 }
 
 /// <summary>
-/// <see cref="DefaultMailKitConfigProvider"/> 测试。
-/// 验证 GetConfig/GetConfigAsync 返回注入的配置引用。
+/// <see cref="DefaultMailKitConfigProvider"/> 测试。 验证 GetConfig/GetConfigAsync 返回注入的配置引用。
 /// </summary>
 public class DefaultMailKitConfigProviderTest
 {
@@ -381,12 +375,17 @@ public class DefaultMailKitConfigProviderTest
 }
 
 /// <summary>
-/// <see cref="NullEmailSender"/> 测试（通过 <see cref="EmailSenderBase"/> 行为验证）。
-/// NullEmailSender.SendEmail 为空实现，因此不依赖 SMTP，适合纯单元测试。
-/// 覆盖：构造校验、ConfigProvider 引用、NormalizeMail 行为、多签名 Send/SendAsync。
+/// 验证空邮件发送器与邮件基类的行为。
 /// </summary>
+/// <remarks>空发送器不会连接 SMTP；测试覆盖构造校验、配置引用、邮件规范化及发送方法。</remarks>
 public class NullEmailSenderTest
 {
+    /// <summary>
+    /// 创建指定发件人信息的邮件配置提供程序。
+    /// </summary>
+    /// <param name="fromAddress">发件人地址。</param>
+    /// <param name="displayName">发件人显示名称。</param>
+    /// <returns>邮件配置提供程序。</returns>
     private static IEmailConfigProvider CreateConfigProvider(
         string fromAddress = "noreply@example.com",
         string displayName = "Test Sender")
@@ -464,8 +463,10 @@ public class NullEmailSenderTest
 
     /// <summary>
     /// 测试目的：NormalizeMail 应对未设置编码的 MailMessage 填充 UTF-8。
-    /// 验证 HeadersEncoding/SubjectEncoding/BodyEncoding 均被设为 Encoding.UTF8。
     /// </summary>
+    /// <remarks>
+    /// 验证 HeadersEncoding/SubjectEncoding/BodyEncoding 均被设为 Encoding.UTF8。
+    /// </remarks>
     [Fact]
     public void Send_NormalizeMail_ShouldSetUtf8Encodings()
     {
@@ -587,8 +588,7 @@ public class NullEmailSenderTest
 }
 
 /// <summary>
-/// <see cref="MailQueueService"/> 测试。
-/// 验证 Enqueue 是否正确委托给 <see cref="IMailQueueProvider"/>。
+/// <see cref="MailQueueService"/> 测试。 验证 Enqueue 是否正确委托给 <see cref="IMailQueueProvider"/>。
 /// </summary>
 public class MailQueueServiceTest
 {
@@ -635,9 +635,10 @@ public class MailQueueServiceTest
 
 /// <summary>
 /// <see cref="MailQueueProvider"/> 基本操作测试。
-/// 注意：MailQueueProvider 内部使用静态 ConcurrentQueue，测试间可能共享状态，
-/// 因此每个测试在操作后应清理自己入队的元素，以减少测试间干扰。
 /// </summary>
+/// <remarks>
+/// 注意：MailQueueProvider 内部使用静态 ConcurrentQueue，测试间可能共享状态， 因此每个测试在操作后应清理自己入队的元素，以减少测试间干扰。
+/// </remarks>
 public class MailQueueProviderTest
 {
     /// <summary>

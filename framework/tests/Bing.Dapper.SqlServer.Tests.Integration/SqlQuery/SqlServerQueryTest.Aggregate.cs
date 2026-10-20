@@ -19,21 +19,15 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化 SQL Server 聚合集成测试。
+    /// 初始化一个 <see cref="SqlServerQueryAggregateTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
     public SqlServerQueryAggregateTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
 
-    /// <summary>
-    /// 每个测试前清空受控测试表。
-    /// </summary>
-    /// <returns>异步任务。</returns>
+    /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
-    /// <summary>
-    /// 测试类结束时无需额外清理。
-    /// </summary>
-    /// <returns>已完成任务。</returns>
+    /// <inheritdoc />
     public Task DisposeAsync() => Task.CompletedTask;
 
     /// <summary>
@@ -111,10 +105,14 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     [System.ComponentModel.DataAnnotations.Schema.Table("BingSqlAggregateIntegration", Schema = "dbo")]
     private sealed class SqlServerOutputRow
     {
-        /// <summary>标识。</summary>
+        /// <summary>
+        /// 获取或设置标识。
+        /// </summary>
         public int Id { get; set; }
 
-        /// <summary>用户标识。</summary>
+        /// <summary>
+        /// 获取或设置用户标识。
+        /// </summary>
         public string UserId { get; set; }
     }
 }

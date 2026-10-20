@@ -6,7 +6,7 @@
 public static class ValidationMe
 {
     /// <summary>
-    /// 默认验证回调处理器
+    /// 获取或设置默认验证回调处理器
     /// </summary>
     private static IValidationCallbackHandler DefaultCallbackHandler { get; set; }
 

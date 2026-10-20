@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <AssemblyName>Bing.DynamicApi.WebApiClient</AssemblyName>
+    <PackageId>Bing.DynamicApi.WebApiClient</PackageId>
+    <Description>Bing 动态 API 的 WebApiClientCore 类型化 SDK 集成。</Description>
+  </PropertyGroup>
+
+  <Import Project="..\..\..\common.props" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WebApiClientCore" Version="2.1.6" />
+  </ItemGroup>
+</Project>

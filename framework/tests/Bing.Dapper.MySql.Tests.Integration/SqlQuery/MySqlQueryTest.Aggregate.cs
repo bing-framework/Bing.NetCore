@@ -221,7 +221,6 @@ public partial class MySqlQueryTest
     /// <summary>
     /// 写入包含重复值与 null 的聚合测试数据。
     /// </summary>
-    /// <returns>异步写入任务。</returns>
     private async Task SeedAggregateDataAsync()
     {
         await InsertAggregateProductAsync("aggregate-1", "A", 10m);
@@ -236,7 +235,6 @@ public partial class MySqlQueryTest
     /// <param name="code">产品编码。</param>
     /// <param name="userId">用户标识。</param>
     /// <param name="price">产品金额。</param>
-    /// <returns>异步写入任务。</returns>
     private Task InsertAggregateProductAsync(string code, string userId, decimal? price) => _sqlExecutor.ExecuteSqlAsync(
         "Insert Product(ProductId,Code,UserId,Price) Values(@productId,@code,@userId,@price)",
         new { productId = Guid.NewGuid(), code, userId, price });
@@ -248,12 +246,12 @@ public partial class MySqlQueryTest
 public sealed class MySqlAggregateResult
 {
     /// <summary>
-    /// 去重后的用户数量。
+    /// 获取或设置去重后的用户数量。
     /// </summary>
     public int UserCount { get; set; }
 
     /// <summary>
-    /// 去重后的金额合计。
+    /// 获取或设置去重后的金额合计。
     /// </summary>
     public decimal DistinctAmount { get; set; }
 }

@@ -18,7 +18,7 @@ public class IntEntityTest
     private IntAggregateRootSample _sample2;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="IntEntityTest"/> 类型的实例。
     /// </summary>
     public IntEntityTest()
     {

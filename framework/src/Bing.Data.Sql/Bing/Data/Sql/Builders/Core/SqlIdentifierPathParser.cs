@@ -128,28 +128,34 @@ internal sealed class SqlIdentifierPath
     private readonly IReadOnlyList<string> _segments;
 
     /// <summary>
-    /// 初始化一个<see cref="SqlIdentifierPath"/>类型的实例。
+    /// 初始化一个 <see cref="SqlIdentifierPath"/> 类型的实例。
     /// </summary>
     /// <param name="segments">已解析的逻辑标识符段。</param>
     public SqlIdentifierPath(IReadOnlyList<string> segments) => _segments = segments;
 
     /// <summary>
-    /// 数据库名称；路径少于三段时返回 null。
+    /// 获取数据库名称。
     /// </summary>
+    /// <remarks>
+    /// 路径少于三段时返回 null。
+    /// </remarks>
     public string DatabaseName => _segments.Count == 3 ? _segments[0] : null;
 
     /// <summary>
-    /// 表、架构或别名前缀；路径少于两段时返回 null。
+    /// 获取表、架构或别名前缀。
     /// </summary>
+    /// <remarks>
+    /// 路径少于两段时返回 null。
+    /// </remarks>
     public string Prefix => _segments.Count > 1 ? _segments[^2] : null;
 
     /// <summary>
-    /// 列名称。
+    /// 获取列名称。
     /// </summary>
     public string Name => _segments[^1];
 
     /// <summary>
-    /// 用于历史便捷聚合 API 默认 Alias 的叶子列名称。
+    /// 获取用于历史便捷聚合 API 默认 Alias 的叶子列名称。
     /// </summary>
     public string LeafName => Name;
 }

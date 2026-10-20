@@ -13,7 +13,7 @@ public sealed class FormattedSqlItem : SqlItem
     private readonly string _sql;
 
     /// <summary>
-    /// 初始化一个<see cref="FormattedSqlItem"/>类型的实例
+    /// 初始化一个 <see cref="FormattedSqlItem"/> 类型的实例。
     /// </summary>
     /// <param name="sql">已格式化 SQL</param>
     public FormattedSqlItem(string sql)

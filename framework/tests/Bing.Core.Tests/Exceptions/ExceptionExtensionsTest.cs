@@ -18,7 +18,7 @@ public class ExceptionExtensionsTest
     private readonly IDisposable _promptRegistration;
 
     /// <summary>
-    /// 初始化一个 <see cref="ExceptionExtensionsTest" /> 类型的实例。
+    /// 初始化一个 <see cref="ExceptionExtensionsTest"/> 类型的实例。
     /// </summary>
     public ExceptionExtensionsTest()
     {

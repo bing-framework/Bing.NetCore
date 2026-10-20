@@ -15,7 +15,7 @@ public sealed class SqlBatchUpdateRenderContext
     private readonly SqlMutationPlanCache _planCache;
 
     /// <summary>
-    /// 初始化批量 Update 渲染上下文。
+    /// 初始化一个 <see cref="SqlBatchUpdateRenderContext"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
     /// <param name="services">Builder 共享服务。</param>
@@ -43,31 +43,49 @@ public sealed class SqlBatchUpdateRenderContext
         _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver, Services.MetadataOptions);
     }
 
-    /// <summary>当前 SQL Provider。</summary>
+    /// <summary>
+    /// 获取当前 SQL Provider。
+    /// </summary>
     public ISqlProvider Provider { get; }
 
-    /// <summary>Builder 共享服务。</summary>
+    /// <summary>
+    /// 获取Builder 共享服务。
+    /// </summary>
     public SqlBuilderServices Services { get; }
 
-    /// <summary>当前数据库上下文。</summary>
+    /// <summary>
+    /// 获取当前数据库上下文。
+    /// </summary>
     public DatabaseContext DatabaseContext { get; }
 
-    /// <summary>实体映射信息。</summary>
+    /// <summary>
+    /// 获取实体映射信息。
+    /// </summary>
     public EntityMappingMetadata Mapping { get; }
 
-    /// <summary>需要写入的列。</summary>
+    /// <summary>
+    /// 获取需要写入的列。
+    /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> UpdateColumns { get; }
 
-    /// <summary>主键列。</summary>
+    /// <summary>
+    /// 获取主键列。
+    /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> Keys { get; }
 
-    /// <summary>并发令牌列。</summary>
+    /// <summary>
+    /// 获取并发令牌列。
+    /// </summary>
     public IReadOnlyList<ColumnMappingMetadata> ConcurrencyColumns { get; }
 
-    /// <summary>待更新实体。</summary>
+    /// <summary>
+    /// 获取待更新实体。
+    /// </summary>
     public IReadOnlyList<object> Entities { get; }
 
-    /// <summary>更新选项。</summary>
+    /// <summary>
+    /// 获取更新选项。
+    /// </summary>
     public SqlUpdateOptions Options { get; }
 
     /// <summary>

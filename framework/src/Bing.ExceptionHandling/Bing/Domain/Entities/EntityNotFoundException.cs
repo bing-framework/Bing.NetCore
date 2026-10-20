@@ -26,19 +26,22 @@ public class EntityNotFoundException : BingException
     public Type EntityType { get; set; }
 
     /// <summary>
-    /// 获取或设置未找到的实体标识；未按标识查询时为空。
+    /// 获取或设置未找到的实体标识。
     /// </summary>
+    /// <remarks>
+    /// 未按标识查询时为空。
+    /// </remarks>
     public object Id { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     public EntityNotFoundException() : this(DEFAULT_ERROR_MSG)
     {
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     public EntityNotFoundException(Type entityType) : this(entityType, null, null, null)
@@ -46,7 +49,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="id">实体标识</param>
@@ -55,7 +58,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="id">实体标识</param>
@@ -72,7 +75,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="id">实体标识</param>
@@ -85,7 +88,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="id">实体标识</param>
@@ -115,7 +118,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     public EntityNotFoundException(string message)
@@ -124,7 +127,7 @@ public class EntityNotFoundException : BingException
     }
 
     /// <summary>
-    /// 初始化一个<see cref="EntityNotFoundException"/>类型的实例
+    /// 初始化一个 <see cref="EntityNotFoundException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>

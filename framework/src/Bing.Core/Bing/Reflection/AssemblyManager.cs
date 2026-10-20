@@ -21,12 +21,12 @@ public static class AssemblyManager
     };
 
     /// <summary>
-    /// 获取按程序集筛选规则收集的全部程序集。
+    /// 由 <see cref="Init"/> 按当前筛选规则收集并复用的程序集快照。
     /// </summary>
     private static Assembly[] _allAssemblies;
 
     /// <summary>
-    /// 获取已收集程序集中的全部类型。
+    /// 从当前程序集快照提取并复用的类型集合。
     /// </summary>
     private static Type[] _allTypes;
 
@@ -42,7 +42,7 @@ public static class AssemblyManager
     }
 
     /// <summary>
-    /// 程序集过滤函数
+    /// 获取或设置程序集过滤函数
     /// </summary>
     public static Func<AssemblyName, bool> AssemblyFilterFunc { private get; set; }
 

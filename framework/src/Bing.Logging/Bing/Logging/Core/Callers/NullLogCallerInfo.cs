@@ -11,24 +11,15 @@ public struct NullLogCallerInfo : ILogCallerInfo
     // ReSharper disable once InconsistentNaming
     public static readonly NullLogCallerInfo Instance = new NullLogCallerInfo();
 
-    /// <summary>
-    /// 成员名称（方法名）
-    /// </summary>
+    /// <inheritdoc />
     public string MemberName => null;
 
-    /// <summary>
-    /// 文件路径
-    /// </summary>
+    /// <inheritdoc />
     public string FilePath => null;
 
-    /// <summary>
-    /// 行号
-    /// </summary>
+    /// <inheritdoc />
     public int LineNumber => 0;
 
-    /// <summary>
-    /// 转换为参数
-    /// </summary>
-    /// <returns>空值。</returns>
+    /// <inheritdoc />
     public dynamic ToParams() => null;
 }

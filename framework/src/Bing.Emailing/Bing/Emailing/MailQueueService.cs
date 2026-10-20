@@ -11,14 +11,11 @@ public class MailQueueService : IMailQueueService
     private readonly IMailQueueProvider _provider;
 
     /// <summary>
-    /// 初始化一个<see cref="MailQueueService"/>类型的实例
+    /// 初始化一个 <see cref="MailQueueService"/> 类型的实例。
     /// </summary>
     /// <param name="provider">邮件队列提供程序</param>
     public MailQueueService(IMailQueueProvider provider) => _provider = provider;
 
-    /// <summary>
-    /// 入队
-    /// </summary>
-    /// <param name="box">电子邮件</param>
+    /// <inheritdoc />
     public void Enqueue(EmailBox box) => _provider.Enqueue(box);
 }

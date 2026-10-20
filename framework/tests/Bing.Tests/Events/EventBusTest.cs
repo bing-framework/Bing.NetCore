@@ -18,7 +18,7 @@ public class EventBusTest : TestBase
     private readonly IEventHandler<EventSample> _handler;
 
     /// <summary>
-    /// 初始化一个<see cref="EventBusTest"/>类型的实例
+    /// 初始化一个 <see cref="EventBusTest"/> 类型的实例。
     /// </summary>
     public EventBusTest(ITestOutputHelper output) : base(output)
     {

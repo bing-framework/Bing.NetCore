@@ -11,28 +11,34 @@ namespace Bing.AspNetCore.Mvc.Models;
 public class ControllerDescriptor
 {
     /// <summary>
-    /// 获取控制器所属的 ASP.NET Core 区域名称。
+    /// 获取或设置控制器所属的 ASP.NET Core 区域名称。
     /// </summary>
     public string Area { get; protected set; }
 
     /// <summary>
-    /// 获取移除 <c>Controller</c> 后缀的控制器名称。
+    /// 获取或设置移除 Controller 后缀的控制器名称。
     /// </summary>
     public string Name { get; protected set; }
 
     /// <summary>
-    /// 获取控制器的显示描述；未配置 <see cref="DescriptionAttribute"/> 时为空。
+    /// 获取或设置控制器的显示描述。
     /// </summary>
+    /// <remarks>
+    /// 未配置 时为空。
+    /// </remarks>
     public string Description { get; protected set; }
 
     /// <summary>
-    /// 获取控制器类型的反射信息；该成员不会参与 JSON 序列化。
+    /// 获取控制器类型的反射信息。
     /// </summary>
+    /// <remarks>
+    /// 该成员不会参与 JSON 序列化。
+    /// </remarks>
     [JsonIgnore]
     public TypeInfo TypeInfo { get; }
 
     /// <summary>
-    /// 使用控制器类型反射信息初始化 <see cref="ControllerDescriptor"/> 的实例。
+    /// 初始化一个 <see cref="ControllerDescriptor"/> 类型的实例。
     /// </summary>
     /// <param name="typeInfo">控制器类型的反射信息。</param>
     public ControllerDescriptor(TypeInfo typeInfo)

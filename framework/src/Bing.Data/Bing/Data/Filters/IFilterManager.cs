@@ -8,14 +8,14 @@ namespace Bing.Data.Filters;
 public interface IFilterManager : IFilterSwitch, IScopedDependency
 {
     /// <summary>
-    /// 按过滤器类型获取已注册的过滤器。
+    /// 按类型获取已注册的过滤器。
     /// </summary>
     /// <typeparam name="TFilterType">过滤器实现类型。</typeparam>
     /// <returns>指定类型的过滤器实例；未注册时返回 <see langword="null"/>。</returns>
     IFilter GetFilter<TFilterType>() where TFilterType : class;
 
     /// <summary>
-    /// 按运行时类型获取已注册的过滤器。
+    /// 按类型获取已注册的过滤器。
     /// </summary>
     /// <param name="filterType">过滤器实现类型。</param>
     /// <returns>指定类型的过滤器实例；未注册时返回 <see langword="null"/>。</returns>

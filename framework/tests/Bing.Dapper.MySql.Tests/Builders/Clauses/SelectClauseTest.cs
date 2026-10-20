@@ -15,7 +15,7 @@ public class SelectClauseTest
     private readonly SelectClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="SelectClauseTest"/> 类型的实例。
     /// </summary>
     public SelectClauseTest()
     {
@@ -25,6 +25,7 @@ public class SelectClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>Select 子句生成的 SQL 文本。</returns>
     private string GetSql() => _clause.ToSql();
 
     /// <summary>

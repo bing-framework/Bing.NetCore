@@ -217,6 +217,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// <summary>
     /// 创建只读数据源使用的测试连接。
     /// </summary>
+    /// <returns>返回状态为关闭的只读数据源测试连接。</returns>
     private static Mock<IDbConnection> CreateConnection()
     {
         var connection = new Mock<IDbConnection>();
@@ -228,6 +229,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// 创建只读数据源执行器。
     /// </summary>
     /// <param name="connection">外部测试连接。</param>
+    /// <returns>返回绑定指定连接和只读数据源配置的测试执行器。</returns>
     private static ReadOnlyTestExecutor CreateExecutor(IDbConnection connection) =>
         new(CreateServiceProvider(), CreateOptions(connection));
 
@@ -235,6 +237,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// 创建只读数据源配置。
     /// </summary>
     /// <param name="connection">外部测试连接。</param>
+    /// <returns>返回绑定指定连接和只读数据源上下文的 SQL 配置。</returns>
     private static SqlOptions CreateOptions(IDbConnection connection)
     {
         var options = new SqlOptions { Connection = connection };
@@ -253,6 +256,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// <summary>
     /// 创建测试服务提供程序。
     /// </summary>
+    /// <returns>返回注册 SQL Core 服务的服务提供程序。</returns>
     private static IServiceProvider CreateServiceProvider()
     {
         var services = new ServiceCollection();
@@ -263,6 +267,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// <summary>
     /// 创建结构化 Mutation Builder。
     /// </summary>
+    /// <returns>返回配置了更新操作的 SQL Builder 测试替身。</returns>
     private static Mock<ISqlBuilder> CreateMutationBuilder()
     {
         var builder = new Mock<ISqlBuilder>();
@@ -281,6 +286,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// <param name="executor">当前测试执行器。</param>
     /// <param name="operation">待执行的批量 Mutation 类型。</param>
     /// <param name="entities">待写入的实体序列。</param>
+    /// <returns>返回批量操作影响的行数。</returns>
     private static int ExecuteBatch(ReadOnlyTestExecutor executor, BatchMutationOperation operation,
         IEnumerable<ReadOnlyEntity> entities) => operation switch
     {
@@ -296,6 +302,7 @@ public class ReadOnlyDataSourceExecutionTest
     /// <param name="executor">当前测试执行器。</param>
     /// <param name="operation">待执行的批量 Mutation 类型。</param>
     /// <param name="entities">待写入的实体序列。</param>
+    /// <returns>返回表示异步批量操作影响行数的任务。</returns>
     private static Task<int> ExecuteBatchAsync(ReadOnlyTestExecutor executor, BatchMutationOperation operation,
         IEnumerable<ReadOnlyEntity> entities) => operation switch
     {
@@ -311,7 +318,7 @@ public class ReadOnlyDataSourceExecutionTest
     private sealed class ReadOnlyTestExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化只读数据源执行器测试替身。
+        /// 初始化一个 <see cref="ReadOnlyTestExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">测试服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -359,7 +366,7 @@ public class ReadOnlyDataSourceExecutionTest
     private sealed class ThrowingEnumerable<T> : IEnumerable<T>
     {
         /// <summary>
-        /// 已发起的枚举次数。
+        /// 获取或设置已发起的枚举次数。
         /// </summary>
         public int EnumerationCount { get; private set; }
 
@@ -380,7 +387,7 @@ public class ReadOnlyDataSourceExecutionTest
     private sealed class ReadOnlyTestQuery : SqlQueryBase
     {
         /// <summary>
-        /// 初始化只读数据源查询测试替身。
+        /// 初始化一个 <see cref="ReadOnlyTestQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">测试服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>

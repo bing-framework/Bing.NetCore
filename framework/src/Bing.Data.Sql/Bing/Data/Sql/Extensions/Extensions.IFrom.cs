@@ -5,12 +5,11 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// From子句扩展
-/// </summary>
+/// 设置查询来源。
 public static partial class Extensions
 {
     /// <summary>
-    /// 设置表名
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -19,7 +18,7 @@ public static partial class Extensions
     public static T From<T>(this T source, string table) where T : IFrom => From(source, table, null);
 
     /// <summary>
-    /// 设置表名
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -35,7 +34,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置结构化表引用。
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -52,10 +51,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置或追加完整原始 From 表达式。
-    /// 首次追加时，如果存在结构化 From，将替换原 From；后续追加仅按调用顺序直接拼接，不会自动添加空格、逗号或其他分隔符。
-    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
+    /// 追加原始 From 表达式。
     /// </summary>
+    /// <remarks>
+    /// 首次追加时，如果存在结构化 From，将替换原 From；后续追加仅按调用顺序直接拼接，不会自动添加空格、逗号或其他分隔符。 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
+    /// </remarks>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始 From 文本；空白文本将被忽略。</param>
@@ -71,7 +71,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件追加原始 From SQL。
+    /// 追加原始 From 表达式。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -82,7 +82,7 @@ public static partial class Extensions
         condition ? AppendFrom(source, sql) : source;
 
     /// <summary>
-    /// 设置子查询表
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -98,7 +98,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置子查询表
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -114,7 +114,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述设置子查询表。
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">支持 From 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>

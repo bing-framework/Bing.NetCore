@@ -8,19 +8,14 @@ namespace Bing.AspNetCore.Logs;
 public class DefaultRequestResponseLogCreator : IRequestResponseLogCreator
 {
     /// <summary>
-    /// 初始化一个<see cref="DefaultRequestResponseLogCreator"/>类型的实例s
+    /// 初始化一个 <see cref="DefaultRequestResponseLogCreator"/> 类型的实例。
     /// </summary>
     public DefaultRequestResponseLogCreator() => Log = new RequestResponseLog();
 
-    /// <summary>
-    /// 请求响应日志
-    /// </summary>
+    /// <inheritdoc />
     public RequestResponseLog Log { get; private set; }
 
-    /// <summary>
-    /// 输出Json字符串
-    /// </summary>
-    /// <returns>请求响应日志的 JSON 字符串。</returns>
+    /// <inheritdoc />
     public string ToJsonString()
     {
         var jsonString = JsonHelper.ToJson(Log);

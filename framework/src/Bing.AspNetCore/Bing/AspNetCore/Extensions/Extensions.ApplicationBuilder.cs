@@ -12,7 +12,7 @@ namespace Bing.AspNetCore.Extensions;
 public static class BingApplicationBuilderExtensions
 {
     /// <summary>
-    /// 注册真实IP中间件
+    /// 注册真实 IP 转发支持。
     /// </summary>
     /// <param name="builder">应用程序生成器</param>
     /// <param name="setupAct">配置操作</param>
@@ -25,7 +25,7 @@ public static class BingApplicationBuilderExtensions
     }
 
     /// <summary>
-    /// 注册真实IP
+    /// 注册真实 IP 转发支持。
     /// </summary>
     /// <param name="hostBuilder">Web主机生成器</param>
     /// <param name="headerKey">请求头键名</param>
@@ -63,8 +63,11 @@ public static class BingApplicationBuilderExtensions
     }
 
     /// <summary>
-    /// 注册请求响应日志中间件。必须调用 services.AddRequestResponseLog 方法方可正常使用
+    /// 注册请求响应日志中间件。
     /// </summary>
+    /// <remarks>
+    /// 必须调用 services.AddRequestResponseLog 方法方可正常使用
+    /// </remarks>
     /// <param name="builder">应用程序生成器</param>
     /// <returns>应用程序生成器实例。</returns>
     public static IApplicationBuilder UseRequestResponseLog(this IApplicationBuilder builder) => builder.UseMiddleware<RequestResponseLoggerMiddleware>();

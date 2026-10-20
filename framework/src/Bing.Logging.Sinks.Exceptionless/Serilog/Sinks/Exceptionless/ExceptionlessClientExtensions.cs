@@ -65,10 +65,7 @@ public static class ExceptionlessClientExtensions
     }
 
     /// <summary>
-    /// 展开属性
-    /// <para>
-    /// 删除了<see cref="LogEventPropertyValue"/>实现的结构化。
-    /// </para>
+    /// 展开属性 <para> 删除了<see cref="LogEventPropertyValue"/>实现的结构化。 </para>
     /// </summary>
     /// <param name="value">日志事件属性值</param>
     /// <returns>展开后的属性值</returns>

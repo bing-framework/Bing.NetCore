@@ -6,7 +6,7 @@
 public class AsyncLocalCurrentTenantAccessor : ICurrentTenantAccessor
 {
     /// <summary>
-    /// 实例
+    /// 获取实例
     /// </summary>
     public static AsyncLocalCurrentTenantAccessor Instance { get; } = new();
 
@@ -15,9 +15,7 @@ public class AsyncLocalCurrentTenantAccessor : ICurrentTenantAccessor
     /// </summary>
     private readonly AsyncLocal<BasicTenantInfo?> _currentScope;
 
-    /// <summary>
-    /// 当前基本租户信息
-    /// </summary>
+    /// <inheritdoc />
     public BasicTenantInfo? Current
     {
         get => _currentScope.Value;
@@ -25,7 +23,7 @@ public class AsyncLocalCurrentTenantAccessor : ICurrentTenantAccessor
     }
 
     /// <summary>
-    /// 初始化一个<see cref="AsyncLocalCurrentTenantAccessor"/>类型的实例
+    /// 初始化一个 <see cref="AsyncLocalCurrentTenantAccessor"/> 类型的实例。
     /// </summary>
     public AsyncLocalCurrentTenantAccessor() => _currentScope = new AsyncLocal<BasicTenantInfo?>();
 }

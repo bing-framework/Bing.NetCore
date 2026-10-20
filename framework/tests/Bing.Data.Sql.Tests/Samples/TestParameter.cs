@@ -6,7 +6,7 @@
 public class TestParameter
 {
     /// <summary>
-    /// 编码
+    /// 获取或设置编码
     /// </summary>
     public string Code { get; set; }
 }

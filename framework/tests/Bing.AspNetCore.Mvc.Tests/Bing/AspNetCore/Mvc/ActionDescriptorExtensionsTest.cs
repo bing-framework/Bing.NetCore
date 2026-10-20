@@ -10,14 +10,18 @@ using Xunit;
 namespace Bing.AspNetCore.Mvc;
 
 /// <summary>
-/// <see cref="ActionDescriptorExtensions"/> 单元测试
-/// 覆盖所有扩展方法：IsControllerAction/IsPageAction/AsControllerActionDescriptor/
-/// AsPageAction/GetMethodInfo/GetReturnType/HasObjectResult
+/// 验证 <c>ActionDescriptorExtensions</c> 的操作描述符扩展行为。
 /// </summary>
+/// <remarks>测试覆盖控制器操作、页面操作、方法信息、返回类型及对象结果判断。</remarks>
 public class ActionDescriptorExtensionsTest
 {
     // ── 辅助方法：创建 ControllerActionDescriptor ────────────────
 
+    /// <summary>
+    /// 创建指向测试控制器方法的操作描述符。
+    /// </summary>
+    /// <param name="methodName">控制器方法名称。</param>
+    /// <returns>控制器操作描述符。</returns>
     private static ControllerActionDescriptor CreateControllerDescriptor(
         string methodName = nameof(FakeController.ReturnsString))
     {
@@ -99,8 +103,7 @@ public class ActionDescriptorExtensionsTest
     // ── AsControllerActionDescriptor ──────────────────────────────
 
     /// <summary>
-    /// 测试目的：对 ControllerActionDescriptor 调用 AsControllerActionDescriptor 应成功，
-    /// 返回同一引用。
+    /// 测试目的：对 ControllerActionDescriptor 调用 AsControllerActionDescriptor 应成功， 返回同一引用。
     /// </summary>
     [Fact]
     public void AsControllerActionDescriptor_WithControllerDescriptor_ShouldReturnSameInstance()
@@ -284,11 +287,37 @@ public class ActionDescriptorExtensionsTest
 
 // ── 测试用辅助 Controller ─────────────────────────────────────────────────
 
+/// <summary>
+/// 提供操作描述符测试使用的控制器方法。
+/// </summary>
 internal class FakeController
 {
+    /// <summary>
+    /// 返回字符串结果。
+    /// </summary>
+    /// <returns>空字符串。</returns>
     public string ReturnsString() => string.Empty;
+
+    /// <summary>
+    /// 执行无返回值的操作。
+    /// </summary>
     public void ReturnsVoid() { }
+
+    /// <summary>
+    /// 返回操作结果接口。
+    /// </summary>
+    /// <returns>空的 <see cref="IActionResult" /> 结果。</returns>
     public IActionResult ReturnsIActionResult() => null!;
+
+    /// <summary>
+    /// 返回 JSON 操作结果。
+    /// </summary>
+    /// <returns>空的 <see cref="JsonResult" /> 实例。</returns>
     public JsonResult ReturnsJsonResult() => null!;
+
+    /// <summary>
+    /// 返回对象操作结果。
+    /// </summary>
+    /// <returns>空的 <see cref="ObjectResult" /> 实例。</returns>
     public ObjectResult ReturnsObjectResult() => null!;
 }

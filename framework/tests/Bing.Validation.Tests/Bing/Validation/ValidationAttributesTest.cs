@@ -8,10 +8,13 @@ namespace Bing.Validation.Tests;
 // ── 测试用模型定义（仅 string 参数属性，确保属性语法合法）──────────────────
 
 /// <summary>
-/// 字母格式验证模型。
+/// 仅包含字母验证字段的测试模型。
 /// </summary>
 internal class LetterModel
 {
+    /// <summary>
+    /// 获取或设置待验证的字母内容。
+    /// </summary>
     [Letter]
     /// <summary>
     /// 待验证的字母文本。
@@ -20,10 +23,13 @@ internal class LetterModel
 }
 
 /// <summary>
-/// 中文格式验证模型。
+/// 仅包含中文验证字段的测试模型。
 /// </summary>
 internal class ChineseModel
 {
+    /// <summary>
+    /// 获取或设置待验证的中文内容。
+    /// </summary>
     [Chinese]
     /// <summary>
     /// 待验证的中文文本。
@@ -32,10 +38,13 @@ internal class ChineseModel
 }
 
 /// <summary>
-/// 身份证号码验证模型。
+/// 仅包含身份证号验证字段的测试模型。
 /// </summary>
 internal class IdCardModel
 {
+    /// <summary>
+    /// 获取或设置待验证的身份证号。
+    /// </summary>
     [IdCard]
     /// <summary>
     /// 待验证的身份证号码。
@@ -44,10 +53,13 @@ internal class IdCardModel
 }
 
 /// <summary>
-/// 邮政编码验证模型。
+/// 仅包含中国邮政编码验证字段的测试模型。
 /// </summary>
 internal class PostalModel
 {
+    /// <summary>
+    /// 获取或设置待验证的邮政编码。
+    /// </summary>
     [PostalCodeOfChina]
     /// <summary>
     /// 待验证的邮政编码。
@@ -56,10 +68,13 @@ internal class PostalModel
 }
 
 /// <summary>
-/// QQ 号码验证模型。
+/// 仅包含 QQ 号验证字段的测试模型。
 /// </summary>
 internal class QQModel
 {
+    /// <summary>
+    /// 获取或设置待验证的 QQ 号。
+    /// </summary>
     [QQ]
     /// <summary>
     /// 待验证的 QQ 号码。
@@ -68,16 +83,22 @@ internal class QQModel
 }
 
 /// <summary>
-/// 同时使用多种格式特性的验证模型。
+/// 同时包含字母和中文验证字段的测试模型。
 /// </summary>
 internal class MultiAttributeModel
 {
+    /// <summary>
+    /// 获取或设置待验证的字母内容。
+    /// </summary>
     [Letter]
     /// <summary>
     /// 待验证的字母文本。
     /// </summary>
     public string Code { get; set; }
 
+    /// <summary>
+    /// 获取或设置待验证的中文内容。
+    /// </summary>
     [Chinese]
     /// <summary>
     /// 待验证的中文文本。
@@ -93,8 +114,9 @@ public class ValidationAttributesTest
     // ── [Letter] ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：纯英文字母值应通过 [Letter] 验证。
+    /// 纯英文字母值应通过 [Letter] 验证。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData("abc")]
     [InlineData("ABC")]
@@ -112,8 +134,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：包含非字母字符（数字、空格、中文）的值应使 [Letter] 验证失败。
+    /// 包含非字母字符（数字、空格、中文）的值应使 [Letter] 验证失败。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData("abc123")]
     [InlineData("Hello World")]
@@ -131,8 +154,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串值应通过 [Letter] 验证（允许空值，非必填）。
+    /// null 或空字符串值应通过 [Letter] 验证（允许空值，非必填）。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -151,8 +175,9 @@ public class ValidationAttributesTest
     // ── [Chinese] ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：纯中文字符串应通过 [Chinese] 验证。
+    /// 纯中文字符串应通过 [Chinese] 验证。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData("张三")]
     [InlineData("你好世界")]
@@ -169,8 +194,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：含英文字母或数字的字符串应使 [Chinese] 验证失败。
+    /// 含英文字母或数字的字符串应使 [Chinese] 验证失败。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData("abc")]
     [InlineData("张三abc")]
@@ -188,8 +214,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [Chinese] 验证（允许空值）。
+    /// null 或空字符串应通过 [Chinese] 验证（允许空值）。
     /// </summary>
+    /// <param name="value">待验证的字符串。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -208,8 +235,9 @@ public class ValidationAttributesTest
     // ── [Money] (直接实例化测试，decimal 不支持属性语法中的编译时常量) ─────
 
     /// <summary>
-    /// 测试目的：在 (Min, Max] 范围内的金额值应通过 MoneyAttribute 验证。
+    /// 在 (Min, Max] 范围内的金额值应通过 MoneyAttribute 验证。
     /// </summary>
+    /// <param name="rawValue">待验证的金额文本。</param>
     [Theory]
     [InlineData("1")]
     [InlineData("500")]
@@ -229,8 +257,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：等于 Min（不满足 > Min）或超出 Max 的值应验证失败。
+    /// 等于 Min（不满足 > Min）或超出 Max 的值应验证失败。
     /// </summary>
+    /// <param name="rawValue">待验证的金额文本。</param>
     [Theory]
     [InlineData("0")]     // 等于 Min，不满足 > 0
     [InlineData("1001")]  // 超过 Max
@@ -251,7 +280,7 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 值（空值场景）应通过 MoneyAttribute 验证，不强制要求填写。
+    /// null 值（空值场景）应通过 MoneyAttribute 验证，不强制要求填写。
     /// </summary>
     [Fact]
     public void MoneyAttribute_Null_ShouldPass()
@@ -270,8 +299,9 @@ public class ValidationAttributesTest
     // ── [IdCard] ──────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：符合身份证格式（15 位或 18 位含 X/x）的字符串应通过 [IdCard] 验证。
+    /// 符合身份证格式（15 位或 18 位含 X/x）的字符串应通过 [IdCard] 验证。
     /// </summary>
+    /// <param name="value">待验证的身份证号。</param>
     [Theory]
     [InlineData("11010519491231002X")]   // 18 位含 X
     [InlineData("110105194912310020")]   // 18 位纯数字
@@ -289,8 +319,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：不符合身份证格式的字符串应验证失败。
+    /// 不符合身份证格式的字符串应验证失败。
     /// </summary>
+    /// <param name="value">待验证的身份证号。</param>
     [Theory]
     [InlineData("1234567")]             // 位数太少
     [InlineData("abcdefghijklmnopqr")] // 全为字母
@@ -308,8 +339,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [IdCard] 验证（允许空值）。
+    /// null 或空字符串应通过 [IdCard] 验证（允许空值）。
     /// </summary>
+    /// <param name="value">待验证的身份证号。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -328,8 +360,9 @@ public class ValidationAttributesTest
     // ── [PostalCodeOfChina] ────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：6 位纯数字邮政编码应通过 [PostalCodeOfChina] 验证。
+    /// 6 位纯数字邮政编码应通过 [PostalCodeOfChina] 验证。
     /// </summary>
+    /// <param name="value">待验证的邮政编码。</param>
     [Theory]
     [InlineData("100000")]
     [InlineData("200001")]
@@ -347,8 +380,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：位数不足、含字母或超出 6 位的编码应验证失败。
+    /// 位数不足、含字母或超出 6 位的编码应验证失败。
     /// </summary>
+    /// <param name="value">待验证的邮政编码。</param>
     [Theory]
     [InlineData("12345")]     // 只有 5 位
     [InlineData("1234567")]   // 7 位超出
@@ -368,8 +402,9 @@ public class ValidationAttributesTest
     // ── [QQ] ──────────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：满足 QQ 号规则（非 0 开头、5~11 位数字）应通过 [QQ] 验证。
+    /// 满足 QQ 号规则（非 0 开头、5~11 位数字）应通过 [QQ] 验证。
     /// </summary>
+    /// <param name="value">待验证的 QQ 号。</param>
     [Theory]
     [InlineData("10001")]
     [InlineData("123456789")]
@@ -387,8 +422,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：以 0 开头、位数不足或含非数字字符的值应验证失败。
+    /// 以 0 开头、位数不足或含非数字字符的值应验证失败。
     /// </summary>
+    /// <param name="value">待验证的 QQ 号。</param>
     [Theory]
     [InlineData("0001")]      // 以 0 开头
     [InlineData("1234")]      // 只有 4 位，不足 5 位
@@ -406,8 +442,9 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：null 或空字符串应通过 [QQ] 验证（允许空值）。
+    /// null 或空字符串应通过 [QQ] 验证（允许空值）。
     /// </summary>
+    /// <param name="value">待验证的 QQ 号。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -426,7 +463,7 @@ public class ValidationAttributesTest
     // ── 多属性模型 ────────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：同一模型上多个属性均违规时，所有错误应被汇总收集（非 fail-fast）。
+    /// 同一模型上多个属性均违规时，所有错误应被汇总收集（非 fail-fast）。
     /// </summary>
     [Fact]
     public void MultipleAttributes_WhenBothInvalid_ShouldCollectAllErrors()
@@ -443,7 +480,7 @@ public class ValidationAttributesTest
     }
 
     /// <summary>
-    /// 测试目的：同一模型上多个属性均合法时，验证应通过。
+    /// 同一模型上多个属性均合法时，验证应通过。
     /// </summary>
     [Fact]
     public void MultipleAttributes_WhenBothValid_ShouldPass()

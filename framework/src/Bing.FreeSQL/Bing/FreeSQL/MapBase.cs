@@ -11,14 +11,11 @@ namespace Bing.FreeSQL;
 public abstract class MapBase<TEntity> : IMap where TEntity : class
 {
     /// <summary>
-    /// 模型生成器
+    /// 获取或设置模型生成器
     /// </summary>
     protected ICodeFirst ModelBuilder { get; private set; }
 
-    /// <summary>
-    /// 映射配置
-    /// </summary>
-    /// <param name="modelBuilder">模型生成器</param>
+    /// <inheritdoc />
     public void Map(ICodeFirst modelBuilder)
     {
         ModelBuilder = modelBuilder;

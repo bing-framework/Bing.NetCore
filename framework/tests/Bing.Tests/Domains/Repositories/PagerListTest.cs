@@ -16,7 +16,7 @@ public class PagerListTest
     private readonly PagerList<AggregateRootSample> _list;
 
     /// <summary>
-    /// 初始化一个<see cref="PagerListTest"/>类型的实例
+    /// 初始化一个 <see cref="PagerListTest"/> 类型的实例。
     /// </summary>
     public PagerListTest()
     {

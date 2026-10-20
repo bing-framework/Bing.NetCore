@@ -13,12 +13,12 @@ public delegate void DataHandler(object o, DataEventArgs e);
 public class DataEventArgs : EventArgs
 {
     /// <summary>
-    /// 数据
+    /// 获取数据
     /// </summary>
     public object Data { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="DataEventArgs"/>类型的实例
+    /// 初始化一个 <see cref="DataEventArgs"/> 类型的实例。
     /// </summary>
     /// <param name="data">数据</param>
     public DataEventArgs(object data = null) => Data = data;

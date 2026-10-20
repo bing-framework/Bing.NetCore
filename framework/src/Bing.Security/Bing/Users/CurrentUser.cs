@@ -22,19 +22,15 @@ public class CurrentUser : ICurrentUser, ITransientDependency
     private readonly ICurrentPrincipalAccessor _principalAccessor;
 
     /// <summary>
-    /// 初始化一个<see cref="CurrentUser"/>类型的实例
+    /// 初始化一个 <see cref="CurrentUser"/> 类型的实例。
     /// </summary>
     /// <param name="principalAccessor">安全主体访问器</param>
     public CurrentUser(ICurrentPrincipalAccessor principalAccessor) => _principalAccessor = principalAccessor;
 
-    /// <summary>
-    /// 是否已认证
-    /// </summary>
+    /// <inheritdoc />
     public virtual bool IsAuthenticated => !string.IsNullOrWhiteSpace(UserId);
 
-    /// <summary>
-    /// 用户标识
-    /// </summary>
+    /// <inheritdoc />
     public virtual string UserId
     {
         get
@@ -50,9 +46,7 @@ public class CurrentUser : ICurrentUser, ITransientDependency
         }
     }
 
-    /// <summary>
-    /// 用户名
-    /// </summary>
+    /// <inheritdoc />
     public virtual string UserName
     {
         get
@@ -64,36 +58,24 @@ public class CurrentUser : ICurrentUser, ITransientDependency
         }
     }
 
-    /// <summary>
-    /// 手机号码
-    /// </summary>
+    /// <inheritdoc />
     public virtual string PhoneNumber => this.FindClaimValue(BingClaimTypes.PhoneNumber);
 
-    /// <summary>
-    /// 是否已验证手机号码
-    /// </summary>
+    /// <inheritdoc />
     public virtual bool PhoneNumberVerified => string.Equals(this.FindClaimValue(BingClaimTypes.PhoneNumberVerified), "true",
         StringComparison.InvariantCultureIgnoreCase);
 
-    /// <summary>
-    /// 电子邮箱
-    /// </summary>
+    /// <inheritdoc />
     public virtual string Email => this.FindClaimValue(BingClaimTypes.Email);
 
-    /// <summary>
-    /// 是否已验证邮箱
-    /// </summary>
+    /// <inheritdoc />
     public virtual bool EmailVerified => string.Equals(this.FindClaimValue(BingClaimTypes.EmailVerified), "true",
         StringComparison.InvariantCultureIgnoreCase);
 
-    /// <summary>
-    /// 租户标识
-    /// </summary>
+    /// <inheritdoc />
     public virtual string TenantId => _principalAccessor.Principal?.FindTenantId()?.ToString();
 
-    /// <summary>
-    /// 角色列表
-    /// </summary>
+    /// <inheritdoc />
     public virtual string[] Roles
     {
         get
@@ -105,30 +87,15 @@ public class CurrentUser : ICurrentUser, ITransientDependency
         }
     }
 
-    /// <summary>
-    /// 查找声明
-    /// </summary>
-    /// <param name="claimType">声明类型</param>
-    /// <returns>指定类型的第一个声明；未找到时返回 null。</returns>
+    /// <inheritdoc />
     public virtual Claim FindClaim(string claimType) => _principalAccessor.Principal?.Claims.FirstOrDefault(c => c.Type == claimType);
 
-    /// <summary>
-    /// 查找声明列表
-    /// </summary>
-    /// <param name="claimType">声明类型</param>
-    /// <returns>指定类型的声明数组；未找到时返回空数组。</returns>
+    /// <inheritdoc />
     public virtual Claim[] FindClaims(string claimType) => _principalAccessor.Principal?.Claims.Where(c => c.Type == claimType).ToArray() ?? EmptyClaimsArray;
 
-    /// <summary>
-    /// 获取所有声明列表
-    /// </summary>
-    /// <returns>当前安全主体的全部声明；不存在安全主体时返回空数组。</returns>
+    /// <inheritdoc />
     public virtual Claim[] GetAllClaims() => _principalAccessor.Principal?.Claims.ToArray() ?? EmptyClaimsArray;
 
-    /// <summary>
-    /// 是否包含指定角色
-    /// </summary>
-    /// <param name="roleName">角色名</param>
-    /// <returns>当前用户属于指定角色时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public virtual bool IsInRole(string roleName) => FindClaims(BingClaimTypes.Role).Any(c => c.Value == roleName);
 }

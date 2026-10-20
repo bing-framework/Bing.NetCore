@@ -8,7 +8,7 @@ namespace Bing.Localization.Tests;
 public class LocalizedManagerTest
 {
     /// <summary>
-    /// 模拟缓存
+    /// 模拟本地化资源管理器使用的内存缓存。
     /// </summary>
     private readonly Mock<IMemoryCache> _mockMemoryCache;
 
@@ -23,7 +23,7 @@ public class LocalizedManagerTest
     private readonly LocalizedManager _manager;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="LocalizedManagerTest"/> 类型的实例。
     /// </summary>
     public LocalizedManagerTest()
     {

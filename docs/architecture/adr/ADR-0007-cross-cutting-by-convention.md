@@ -34,6 +34,7 @@
 | `AddRedisDistributedLock` | 分布式锁需要连接配置 |
 | `AddAutoMapper` | 映射 Profile 扫描 |
 | `AddJwt` | 认证方案注册 |
+| `AddMemoryCaching` / `AddRedisCaching` / `AddHybridCaching` | 当前 EasyCaching 按模式装配；客户端分片有独立入口 |
 | `EnableAop` | 启用 AOP（**不是 `AddAop`**） |
 
 ## 后果
@@ -47,7 +48,7 @@
 **负面**
 
 - **可发现性最差的一项决策**。典型抱怨包括：
-  - "缓存怎么没有 `AddCache`？"（答案：要 `RedisHelper.Initialization(...)` 后手工 `AddScoped<ICache, CSRedisCacheManager>()`）
+  - "缓存怎么没有 `AddCache`？"（当前答案：EasyCaching 有按模式的注册入口；CSRedis/FreeRedis 需注入客户端、`CacheConfiguration` 和管理器，见[缓存模块](../../modules/caching.md)）
   - "文本模板怎么注册？"（答案：**没有任何 `IServiceCollection` 扩展**，必须手动装配 `BingTextTemplatingOptions`）
   - "AOP 为什么是 `EnableAop` 不是 `AddAop`？"
 - 入口名抽查后发现若干不对称：`Exceptionless` 的入口在 **`Serilog` 命名空间**（`WriteTo.Exceptionless`）、`SkyApm` 的入口是 `AddSqlQuery(this SkyApmExtensions)`、`AddPay` **返回 `void` 不能链式**——三者都不在 `IServiceCollection` 上。

@@ -256,6 +256,9 @@ public sealed class SqlMutationPlanCacheTest
         Assert.Equal("test.beta", beta.ProviderKey);
     }
 
+    /// <summary>
+    /// 验证仅大小写不同的物理表名会生成独立且完整的 SQL。
+    /// </summary>
     [Fact]
     public void Builder_WhenPhysicalTableNameDiffersOnlyByCase_ShouldRenderIndependentCompleteSql()
     {
@@ -291,6 +294,13 @@ public sealed class SqlMutationPlanCacheTest
     /// <summary>
     /// 创建直接缓存测试使用的映射。
     /// </summary>
+    /// <param name="entityType">映射对应的实体类型。</param>
+    /// <param name="database">映射所属的数据库名称。</param>
+    /// <param name="schema">映射所属的架构名称。</param>
+    /// <param name="table">映射对应的表名称。</param>
+    /// <param name="profile">映射使用的配置标识。</param>
+    /// <param name="route">映射使用的路由标识。</param>
+    /// <returns>返回包含指定实体、表和路由信息的测试映射。</returns>
     private static EntityMappingMetadata CreateMapping(Type entityType = null, string database = null,
         string schema = null, string table = "getter_sources", string profile = null, string route = null) => new()
     {
@@ -316,12 +326,12 @@ public sealed class SqlMutationPlanCacheTest
     private sealed class GetterSource
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 版本。
+        /// 获取或设置版本。
         /// </summary>
         public string Version { get; set; }
     }
@@ -332,7 +342,7 @@ public sealed class SqlMutationPlanCacheTest
     private sealed class OtherGetterSource
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -344,13 +354,13 @@ public sealed class SqlMutationPlanCacheTest
     private sealed class MutationCacheEntity
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -360,31 +370,51 @@ public sealed class SqlMutationPlanCacheTest
     /// </summary>
     private sealed class KeyedMutationSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
+        /// <summary>
+        /// 初始化一个 <see cref="KeyedMutationSqlProvider"/> 类型的实例。
+        /// </summary>
+        /// <param name="key">Provider 路由标识。</param>
         public KeyedMutationSqlProvider(string key) => Key = key;
 
+        /// <inheritdoc />
         public string Key { get; }
 
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
 
+        /// <inheritdoc />
         public IDialect Dialect => TestMutationSqlProvider.Instance.Dialect;
 
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory => TestMutationSqlProvider.Instance.ClauseFactory;
 
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => TestMutationSqlProvider.Instance.TableReferenceParser;
 
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer => TestMutationSqlProvider.Instance.PaginationRenderer;
 
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => TestMutationSqlProvider.Instance.ParameterManagerFactory;
 
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => TestMutationSqlProvider.Instance.ParamLiteralsResolver;
 
+        /// <inheritdoc />
         public SqlProviderProfile Profile => TestMutationSqlProvider.Instance.Profile;
     }
 
+    /// <summary>
+    /// 返回可变表名以验证大小写敏感缓存键的映射解析器。
+    /// </summary>
     private sealed class CaseSensitiveMutationMappingResolver : DefaultEntityMappingResolver
     {
+        /// <summary>
+        /// 获取或设置当前解析器返回的表名。
+        /// </summary>
         public string TableName { get; set; }
 
+        /// <inheritdoc />
         protected override string GetTableName(EntityModelMetadata model, EntityMappingOptions mappingOptions) =>
             TableName;
     }

@@ -59,7 +59,7 @@ public class StringLocalizerTest
     private readonly IStringLocalizer<Resource6> _resource6Localizer;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="StringLocalizerTest"/> 类型的实例。
     /// </summary>
     public StringLocalizerTest(
         IStringLocalizer<Resource1> resource1Localizer, 

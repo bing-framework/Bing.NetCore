@@ -14,7 +14,7 @@ public class DefaultFieldValueConverterSelector : IFieldValueConverterSelector
     private readonly IReadOnlyList<IFieldValueConverter> _converters;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultFieldValueConverterSelector"/>类型的实例
+    /// 初始化一个 <see cref="DefaultFieldValueConverterSelector"/> 类型的实例。
     /// </summary>
     /// <param name="converters">字段值转换器集合</param>
     /// <param name="options">Sql 元数据配置</param>
@@ -27,26 +27,14 @@ public class DefaultFieldValueConverterSelector : IFieldValueConverterSelector
         _converters = items;
     }
 
-    /// <summary>
-    /// 将值转换为 Provider 可识别的参数值
-    /// </summary>
-    /// <param name="value">原始值</param>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>Provider 参数值</returns>
+    /// <inheritdoc />
     public object ConvertToProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext)
     {
         var converter = GetConverter(column, databaseContext);
         return converter == null ? value : converter.ConvertToProvider(value, column, databaseContext);
     }
 
-    /// <summary>
-    /// 将 Provider 返回值转换为 CLR 值
-    /// </summary>
-    /// <param name="value">Provider 返回值</param>
-    /// <param name="column">列映射元数据</param>
-    /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>CLR 值</returns>
+    /// <inheritdoc />
     public object ConvertFromProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext)
     {
         var converter = GetConverter(column, databaseContext);

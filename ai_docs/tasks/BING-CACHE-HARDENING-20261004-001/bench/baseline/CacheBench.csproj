@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefineConstants>BASELINE</DefineConstants>
+  </PropertyGroup>
+  <Import Project="..\..\..\..\..\eng\baselines.props" />
+  <ItemGroup>
+    <Compile Include="..\Program.cs" Link="Program.cs" />
+    <ProjectReference Include="$(BaselineSourceRoot)\framework\src\Bing.Caching.FreeRedis\Bing.Caching.FreeRedis.csproj" />
+    <ProjectReference Include="$(BaselineSourceRoot)\framework\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
+    <PackageReference Include="StackExchange.Redis" Version="2.5.43" />
+  </ItemGroup>
+</Project>

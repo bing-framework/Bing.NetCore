@@ -9,7 +9,7 @@ namespace Bing.EventBus;
 public class MessageEvent : IMessageEvent
 {
     /// <summary>
-    /// 初始化一个<see cref="MessageEvent"/>类型的实例
+    /// 初始化一个 <see cref="MessageEvent"/> 类型的实例。
     /// </summary>
     public MessageEvent()
     {
@@ -35,10 +35,10 @@ public class MessageEvent : IMessageEvent
     /// <inheritdoc />
     public bool Send { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 输出日志
-    /// </summary>
-    /// <returns>包含事件标识、时间、名称、回调和数据的文本。</returns>
+    /// </remarks>
     public override string ToString()
     {
         var result = new StringBuilder();

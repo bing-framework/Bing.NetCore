@@ -11,6 +11,8 @@ public class SqlExpressionIdentifierResolverTest
     /// <summary>
     /// 测试 - 普通 SQL 上下文中的单段、多段和四段方括号标识符应按方言转换。
     /// </summary>
+    /// <param name="expression">包含方括号标识符的 SQL 表达式。</param>
+    /// <param name="expected">预期转换后的 SQL 表达式。</param>
     [Theory]
     [InlineData("[Amount]", "$Amount&")]
     [InlineData("[sales].[Orders].[Amount]", "$sales&.$Orders&.$Amount&")]
@@ -59,6 +61,7 @@ public class SqlExpressionIdentifierResolverTest
     /// <summary>
     /// 测试 - 空白和不含方括号标识符的表达式应原样返回。
     /// </summary>
+    /// <param name="expression">待解析的 SQL 表达式。</param>
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
@@ -75,6 +78,7 @@ public class SqlExpressionIdentifierResolverTest
     /// <summary>
     /// 测试 - 未闭合或无效词法上下文应按现有合同抛出参数异常。
     /// </summary>
+    /// <param name="expression">包含无效词法结构的 SQL 表达式。</param>
     [Theory]
     [InlineData("[Amount")]
     [InlineData("[]")]

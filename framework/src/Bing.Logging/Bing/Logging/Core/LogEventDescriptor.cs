@@ -6,7 +6,7 @@
 public class LogEventDescriptor
 {
     /// <summary>
-    /// 初始化 <see cref="LogEventDescriptor"/> 的实例及其空日志上下文。
+    /// 初始化一个 <see cref="LogEventDescriptor"/> 类型的实例。
     /// </summary>
     public LogEventDescriptor()
     {
@@ -19,8 +19,11 @@ public class LogEventDescriptor
     public LogEventContext Context { get; }
 
     /// <summary>
-    /// 获取或设置技术调用链的跟踪标识；未关联跟踪时可以为 <c>null</c>。
+    /// 获取或设置技术调用链的跟踪标识。
     /// </summary>
+    /// <remarks>
+    /// 未关联跟踪时可以为 <c>null</c>。
+    /// </remarks>
     public string TraceId { get; set; }
 
     /// <summary>
@@ -29,7 +32,10 @@ public class LogEventDescriptor
     public string TraceName { get; set; }
 
     /// <summary>
-    /// 获取或设置跨技术调用链关联业务操作的业务跟踪标识；未关联业务操作时可以为 <c>null</c>。
+    /// 获取或设置跨技术调用链关联业务操作的业务跟踪标识。
     /// </summary>
+    /// <remarks>
+    /// 未关联业务操作时可以为 <c>null</c>。
+    /// </remarks>
     public string BusinessTraceId { get; set; }
 }

@@ -8,29 +8,44 @@ namespace Bing.Dapper.Tests.Infrastructure;
 /// </summary>
 public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisposable
 {
+    /// <summary>
+    /// SQLite 双数据源测试中首个数据源的逻辑键，值为 <c>first</c>。
+    /// </summary>
     private const string FirstDatabaseKey = "first";
+
+    /// <summary>
+    /// SQLite 双数据源测试中第二个数据源的逻辑键，值为 <c>second</c>。
+    /// </summary>
     private const string SecondDatabaseKey = "second";
+
+    /// <summary>
+    /// 存储测试数据库文件所在的临时目录。
+    /// </summary>
     private readonly string _directoryPath = Path.Combine(Path.GetTempPath(), "bing-framework-tests", "sqlite",
         Guid.NewGuid().ToString("N"));
+
+    /// <summary>
+    /// 存储测试服务提供程序。
+    /// </summary>
     private ServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 获取第一个测试数据库文件路径。
+    /// 获取或设置第一个测试数据库文件路径。
     /// </summary>
     public string FirstDatabasePath { get; private set; }
 
     /// <summary>
-    /// 获取第二个测试数据库文件路径。
+    /// 获取或设置第二个测试数据库文件路径。
     /// </summary>
     public string SecondDatabasePath { get; private set; }
 
     /// <summary>
-    /// 获取第一个测试数据库连接字符串。
+    /// 获取或设置第一个测试数据库连接字符串。
     /// </summary>
     public string FirstConnectionString { get; private set; }
 
     /// <summary>
-    /// 获取第二个测试数据库连接字符串。
+    /// 获取或设置第二个测试数据库连接字符串。
     /// </summary>
     public string SecondConnectionString { get; private set; }
 
@@ -39,9 +54,10 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// </summary>
     public IServiceProvider ServiceProvider => _serviceProvider ?? throw new ObjectDisposedException(nameof(SqliteIntegrationDatabaseFixture));
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 初始化 SQLite 测试数据库和服务容器。
-    /// </summary>
+    /// </remarks>
     public async Task InitializeAsync()
     {
         Directory.CreateDirectory(_directoryPath);
@@ -174,7 +190,6 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// <param name="amount">样例金额。</param>
     /// <param name="secretText">样例敏感文本。</param>
     /// <param name="dbKey">数据源标识。</param>
-    /// <returns>插入任务。</returns>
     public async Task InsertSampleAsync(string name, decimal? amount, string secretText,
         string dbKey = FirstDatabaseKey)
     {
@@ -188,9 +203,10 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
         await command.ExecuteNonQueryAsync();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放数据库、服务容器和临时文件。
-    /// </summary>
+    /// </remarks>
     public Task DisposeAsync() => DisposeAsyncCore();
 
     /// <inheritdoc />
@@ -199,7 +215,6 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// <summary>
     /// 释放资源。
     /// </summary>
-    /// <returns>释放任务。</returns>
     private Task DisposeAsyncCore()
     {
         _serviceProvider?.Dispose();
@@ -214,7 +229,6 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// 初始化指定 SQLite 数据库的表结构。
     /// </summary>
     /// <param name="connectionString">数据库连接字符串。</param>
-    /// <returns>初始化任务。</returns>
     private static async Task InitializeDatabaseAsync(string connectionString)
     {
         await using var connection = new SqliteConnection(connectionString);
@@ -259,7 +273,6 @@ Create Table If Not Exists Arity10(Id Integer Not Null, Name Text Null, NextId I
     /// 清理指定 SQLite 数据库的数据。
     /// </summary>
     /// <param name="connectionString">数据库连接字符串。</param>
-    /// <returns>清理任务。</returns>
     private static async Task ResetDatabaseAsync(string connectionString)
     {
         await using var connection = new SqliteConnection(connectionString);
@@ -297,23 +310,26 @@ Create Table If Not Exists Arity10(Id Integer Not Null, Name Text Null, NextId I
     private sealed class TestDatabase : IDatabase
     {
         /// <summary>
-        /// 默认 SQLite 测试数据库连接字符串。
+        /// 获取或设置默认 SQLite 测试数据库连接字符串。
         /// </summary>
         public static string DefaultConnectionString { get; set; }
 
+        /// <summary>
+        /// 为 SQLite 集成测试提供数据库上下文访问器。
+        /// </summary>
         private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
         /// <summary>
-        /// 初始化一个<see cref="TestDatabase"/>类型的实例。
+        /// 初始化一个 <see cref="TestDatabase"/> 类型的实例。
         /// </summary>
         /// <param name="databaseContextAccessor">数据库上下文访问器。</param>
         public TestDatabase(IDatabaseContextAccessor databaseContextAccessor) =>
             _databaseContextAccessor = databaseContextAccessor;
 
-        /// <summary>
+        /// <inheritdoc />
+        /// <remarks>
         /// 获取当前数据源的 SQLite 连接。
-        /// </summary>
-        /// <returns>SQLite 连接。</returns>
+        /// </remarks>
         public System.Data.IDbConnection GetConnection()
         {
             var connectionString = _databaseContextAccessor.Current?.DataSource?.ConnectionString ??

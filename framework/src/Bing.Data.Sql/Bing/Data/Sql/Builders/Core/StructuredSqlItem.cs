@@ -13,7 +13,7 @@ namespace Bing.Data.Sql.Builders.Core;
 public sealed class StructuredSqlItem : SqlItem
 {
     /// <summary>
-    /// 结构化表引用。
+    /// 获取结构化表引用。
     /// </summary>
     public SqlTableReference Reference { get; }
 
@@ -53,7 +53,7 @@ public sealed class StructuredSqlItem : SqlItem
     private bool _isCrossDatabaseValidated;
 
     /// <summary>
-    /// 初始化一个<see cref="StructuredSqlItem"/>类型的实例。
+    /// 初始化一个 <see cref="StructuredSqlItem"/> 类型的实例。
     /// </summary>
     /// <param name="reference">结构化表引用。</param>
     /// <param name="objectNameFormatter">SQL 对象名称格式化器。</param>

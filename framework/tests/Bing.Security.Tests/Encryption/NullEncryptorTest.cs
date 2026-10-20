@@ -9,6 +9,9 @@ namespace Bing.Security.Tests.Encryption;
 /// </summary>
 public class NullEncryptorTest
 {
+    /// <summary>
+    /// 空加密器实例。
+    /// </summary>
     private readonly IEncryptor _encryptor = NullEncryptor.Instance;
 
     // ═══════════════════════════════════════════════════════════

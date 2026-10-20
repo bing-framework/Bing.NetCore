@@ -29,7 +29,7 @@ internal sealed class MultiSourcePredicateExpressionResolver
     private readonly IParameterManager _parameterManager;
 
     /// <summary>
-    /// 初始化多表谓词解析器。
+    /// 初始化一个 <see cref="MultiSourcePredicateExpressionResolver"/> 类型的实例。
     /// </summary>
     /// <param name="expression">待解析的谓词表达式。</param>
     /// <param name="sources">当前查询的根表源。</param>
@@ -95,7 +95,7 @@ internal sealed class MultiSourcePredicateExpressionResolver
     }
 
     /// <summary>
-    /// 解析列或参数操作数。
+    /// 解析列表达式。
     /// </summary>
     /// <param name="expression">待解析的操作数表达式。</param>
     /// <returns>列 SQL 或参数占位符。</returns>
@@ -103,7 +103,7 @@ internal sealed class MultiSourcePredicateExpressionResolver
         _bindings.TryGetSource(expression, out var source) ? ResolveColumn(expression, source) : AddParameter(Lambdas.GetValue(expression));
 
     /// <summary>
-    /// 解析绑定列。
+    /// 解析列表达式。
     /// </summary>
     /// <param name="expression">待解析的列表达式。</param>
     /// <returns>列 SQL。</returns>
@@ -115,7 +115,7 @@ internal sealed class MultiSourcePredicateExpressionResolver
     }
 
     /// <summary>
-    /// 使用来源绑定解析列。
+    /// 解析列表达式。
     /// </summary>
     /// <param name="expression">待解析的列表达式。</param>
     /// <param name="source">列所属的表来源。</param>

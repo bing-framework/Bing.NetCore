@@ -10,7 +10,7 @@ namespace Bing.MultiTenancy;
 public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransientDependency
 {
     /// <summary>
-    /// 初始化一个<see cref="TenantConfigurationProvider"/>类型的实例
+    /// 初始化一个 <see cref="TenantConfigurationProvider"/> 类型的实例。
     /// </summary>
     /// <param name="tenantResolver">租户解析器</param>
     /// <param name="tenantStore">租户存储器</param>
@@ -32,35 +32,31 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
     }
 
     /// <summary>
-    /// 租户解析器
+    /// 获取租户解析器
     /// </summary>
     protected virtual ITenantResolver TenantResolver { get; }
 
     /// <summary>
-    /// 租户存储器
+    /// 获取租户存储器
     /// </summary>
     protected virtual ITenantStore TenantStore { get; }
 
     /// <summary>
-    /// 租户规范化器
+    /// 获取租户规范化器
     /// </summary>
     protected virtual ITenantNormalizer TenantNormalizer { get; }
 
     /// <summary>
-    /// 租户解析结果访问器
+    /// 获取租户解析结果访问器
     /// </summary>
     protected virtual ITenantResolveResultAccessor TenantResolveResultAccessor { get; }
 
     /// <summary>
-    /// 国际化
+    /// 获取国际化
     /// </summary>
     protected virtual IStringLocalizer<BingMultiTenancyResource> StringLocalizer { get; }
 
-    /// <summary>
-    /// 获取租户配置
-    /// </summary>
-    /// <param name="saveResolveResult">是否保存解析结果。默认：false</param>
-    /// <returns>包含当前租户配置的异步任务；未解析到租户时任务结果为 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public virtual async Task<TenantConfiguration?> GetAsync(bool saveResolveResult = false)
     {
         var resolveResult = await TenantResolver.ResolveTenantIdOrNameAsync();

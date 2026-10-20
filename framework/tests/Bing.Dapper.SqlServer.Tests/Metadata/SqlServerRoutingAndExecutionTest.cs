@@ -30,7 +30,7 @@ using Moq;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// SqlServer 路由与执行测试
+/// SqlServer 路由与执行测试。
 /// </summary>
 public class SqlServerRoutingAndExecutionTest
 {
@@ -1322,8 +1322,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：普通同步 Executor 的执行、回滚、错误钩子和完成钩子同时失败时，
-    /// 原始执行异常必须排在聚合异常首位，后续清理异常按生命周期顺序保留。
+    /// 测试目的：普通同步 Executor 的执行、回滚、错误钩子和完成钩子同时失败时， 原始执行异常必须排在聚合异常首位，后续清理异常按生命周期顺序保留。
     /// </summary>
     [Fact]
     public void ExecuteSql_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
@@ -1352,8 +1351,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：普通异步 Executor 的异常聚合规则必须与同步入口一致，
-    /// 取消或命令失败均不得被回滚或 Hook 异常覆盖。
+    /// 测试目的：普通异步 Executor 的异常聚合规则必须与同步入口一致， 取消或命令失败均不得被回滚或 Hook 异常覆盖。
     /// </summary>
     [Fact]
     public async Task ExecuteSqlAsync_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
@@ -1383,8 +1381,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多结果集命令在创建读取器失败时，执行、回滚、错误 Hook 和完成 Hook 异常
-    /// 必须按生命周期顺序聚合，不能由清理步骤覆盖原始数据库异常。
+    /// 测试目的：多结果集命令在创建读取器失败时，执行、回滚、错误 Hook 和完成 Hook 异常 必须按生命周期顺序聚合，不能由清理步骤覆盖原始数据库异常。
     /// </summary>
     [Fact]
     public void ExecuteMultiple_WhenOperationAndCleanupFail_ShouldPreserveLifecycleExceptionOrder()
@@ -1443,8 +1440,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多结果集在执行前被跳过且完成 Hook 失败时，只能执行一次完成清理，
-    /// 不得将完成 Hook 异常重新识别为数据库执行异常。
+    /// 测试目的：多结果集在执行前被跳过且完成 Hook 失败时，只能执行一次完成清理， 不得将完成 Hook 异常重新识别为数据库执行异常。
     /// </summary>
     [Fact]
     public void ExecuteMultiple_WhenBeforeHookSkipsAndCompletionFails_ShouldCompleteOnlyOnce()
@@ -1467,8 +1463,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步多结果集在执行前被跳过且完成 Hook 失败时，也只能执行一次完成清理，
-    /// 不得额外调用错误 Hook 或重复释放执行状态。
+    /// 测试目的：异步多结果集在执行前被跳过且完成 Hook 失败时，也只能执行一次完成清理， 不得额外调用错误 Hook 或重复释放执行状态。
     /// </summary>
     [Fact]
     public async Task ExecuteMultipleAsync_WhenBeforeHookSkipsAndCompletionFails_ShouldCompleteOnlyOnce()
@@ -1645,8 +1640,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多结果集提前释放 Reader 且回滚失败时，Reader 释放异常必须位于聚合异常首位，
-    /// 回滚异常不得覆盖该主异常。
+    /// 测试目的：多结果集提前释放 Reader 且回滚失败时，Reader 释放异常必须位于聚合异常首位， 回滚异常不得覆盖该主异常。
     /// </summary>
     [Fact]
     public void ExecuteMultiple_WhenReaderDisposeAndRollbackFail_ShouldPreserveBothExceptions()
@@ -1673,8 +1667,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多结果集同步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时，
-    /// 主异常及全部清理异常必须按生命周期顺序聚合，且每项资源只清理一次。
+    /// 测试目的：多结果集同步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时， 主异常及全部清理异常必须按生命周期顺序聚合，且每项资源只清理一次。
     /// </summary>
     [Fact]
     public void ExecuteMultiple_WhenAllCleanupResourcesFail_ShouldPreserveLeaseFailureOrder()
@@ -1734,8 +1727,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：异步多结果集读取在开始前取消且 Reader 释放失败时，取消异常必须位于聚合异常首位，
-    /// Reader 释放异常不得被完成回调或执行租约释放覆盖。
+    /// 测试目的：异步多结果集读取在开始前取消且 Reader 释放失败时，取消异常必须位于聚合异常首位， Reader 释放异常不得被完成回调或执行租约释放覆盖。
     /// </summary>
     [Fact]
     public async Task ExecuteMultipleAsync_WhenCancelledAndReaderDisposeFail_ShouldPreserveBothExceptions()
@@ -1762,8 +1754,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：多结果集异步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时，
-    /// 异步清理必须保持同步路径相同的异常顺序和一次性资源释放语义。
+    /// 测试目的：多结果集异步释放同时发生 Reader、事务回滚、错误 Hook、完成 Hook 和执行租约失败时， 异步清理必须保持同步路径相同的异常顺序和一次性资源释放语义。
     /// </summary>
     [Fact]
     public async Task ExecuteMultipleAsync_WhenAllCleanupResourcesFail_ShouldPreserveLeaseFailureOrder()
@@ -1990,8 +1981,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：完整消费多结果集后事务提交失败时，应发布错误诊断而不是成功诊断，
-    /// 使观测系统可以准确识别资源完成阶段的失败。
+    /// 测试目的：完整消费多结果集后事务提交失败时，应发布错误诊断而不是成功诊断， 使观测系统可以准确识别资源完成阶段的失败。
     /// </summary>
     [Fact]
     public void ExecuteMultiple_WhenCommitFails_ShouldPublishErrorDiagnostics()
@@ -2328,8 +2318,9 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：DiagnosticListener、Activity、Logger Scope 和 Error 事件必须共享同一 QueryContext、ExecutionId、Parent 和 Phase。
+    /// 验证 SQL 执行异常诊断信息共享同一执行上下文。
     /// </summary>
+    /// <remarks>DiagnosticListener、Activity、Logger Scope 和 Error 事件共享 QueryContext、ExecutionId、Parent 和 Phase。</remarks>
     [Fact]
     public void ExecuteSql_WhenAllDiagnosticsAreEnabled_ShouldShareExecutionIdentityOnError()
     {
@@ -3459,8 +3450,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：自动分页的数据查询失败时，应回滚 Count 阶段创建的主库短事务，
-    /// 并恢复调用方 Pager 的未知总数状态，避免后续执行错误跳过 Count。
+    /// 测试目的：自动分页的数据查询失败时，应回滚 Count 阶段创建的主库短事务， 并恢复调用方 Pager 的未知总数状态，避免后续执行错误跳过 Count。
     /// </summary>
     [Fact]
     public void ToPage_WhenDataExecutionFails_ShouldRollbackTransactionAndRestorePager()
@@ -3483,8 +3473,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：Count 完成后、Data 执行前发生取消时，应回滚主库短事务，
-    /// 不得让执行租约释放掩盖未完成事务。
+    /// 测试目的：Count 完成后、Data 执行前发生取消时，应回滚主库短事务， 不得让执行租约释放掩盖未完成事务。
     /// </summary>
     [Fact]
     public async Task ToPageAsync_WhenCancelledAfterCount_ShouldRollbackTransactionAndRestorePager()
@@ -3510,8 +3499,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：Data 阶段被执行前 Hook 跳过时，分页执行仍应完成 Count 阶段启动的主库短事务，
-    /// 防止 Root Query 持有遗留事务。
+    /// 测试目的：Data 阶段被执行前 Hook 跳过时，分页执行仍应完成 Count 阶段启动的主库短事务， 防止 Root Query 持有遗留事务。
     /// </summary>
     [Fact]
     public void ToPage_WhenDataExecutionIsSkipped_ShouldCompleteCountTransaction()
@@ -3597,8 +3585,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：Count 成功后的回调修改调用方 Pager 时，数据页和返回值仍应使用调用开始时的分页输入，
-    /// 且仅将成功计算的总数回写到调用方。
+    /// 测试目的：Count 成功后的回调修改调用方 Pager 时，数据页和返回值仍应使用调用开始时的分页输入， 且仅将成功计算的总数回写到调用方。
     /// </summary>
     [Fact]
     public void ToPage_WhenCountCallbackMutatesPager_ShouldUseInitialPagerSnapshot()
@@ -4020,8 +4007,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：直接过程执行必须在同一结果对象中返回受影响行数和本次输出参数，
-    /// 不得通过 Executor 的最近一次可变状态读取输出值。
+    /// 测试目的：直接过程执行必须在同一结果对象中返回受影响行数和本次输出参数， 不得通过 Executor 的最近一次可变状态读取输出值。
     /// </summary>
     [Fact]
     public void ExecuteProcedure_WhenOutputParameterConfigured_ShouldReturnExecutionResult()
@@ -4043,8 +4029,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：原生 Dapper DynamicParameters 包含输出参数时，框架也必须在过程结果中返回本次执行的值快照，
-    /// 不得静默丢失输出参数。
+    /// 测试目的：原生 Dapper DynamicParameters 包含输出参数时，框架也必须在过程结果中返回本次执行的值快照， 不得静默丢失输出参数。
     /// </summary>
     [Fact]
     public void ExecuteProcedure_WhenDynamicParametersContainOutput_ShouldReturnSnapshot()
@@ -4203,8 +4188,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：过程查询每次终结执行都应返回独立的输出参数访问器，
-    /// 同步和异步结果不得依赖 Root Query 的最近一次共享状态。
+    /// 测试目的：过程查询每次终结执行都应返回独立的输出参数访问器， 同步和异步结果不得依赖 Root Query 的最近一次共享状态。
     /// </summary>
     [Fact]
     public async Task ProcedureDescription_WhenOutputParametersConfigured_ShouldExposeFinalValues()
@@ -4238,8 +4222,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：同一个过程描述连续执行时，前一次结果必须保留自己的输出参数访问器，
-    /// 后一次执行不得覆盖已返回结果。
+    /// 测试目的：同一个过程描述连续执行时，前一次结果必须保留自己的输出参数访问器， 后一次执行不得覆盖已返回结果。
     /// </summary>
     [Fact]
     public void ProcedureDescription_WhenExecutedSequentially_ShouldRetainEachOutputParameterAccessor()
@@ -4263,9 +4246,9 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试目的：过程结果必须保留执行结束时的输出值快照，并支持 Guid、DateTimeOffset、TimeSpan 与 byte[] 转换，
-    /// 后续修改驱动参数值不得影响已返回结果。
+    /// 验证过程输出值以独立快照返回并支持类型转换。
     /// </summary>
+    /// <remarks>覆盖 Guid、DateTimeOffset、TimeSpan 和 byte[]；返回结果不受后续驱动参数修改影响。</remarks>
     [Fact]
     public void ProcedureDescription_WhenOutputValuesAreMutable_ShouldReturnIndependentTypedSnapshot()
     {
@@ -4869,7 +4852,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建服务集合
+    /// 创建服务集合。
     /// </summary>
     /// <param name="metadataOptions">Sql 元数据配置</param>
     /// <returns>服务集合</returns>
@@ -4883,7 +4866,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建路由元数据配置
+    /// 创建路由元数据配置。
     /// </summary>
     /// <returns>Sql 元数据配置</returns>
     private static SqlMetadataOptions CreateRoutingMetadataOptions()
@@ -4933,7 +4916,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建样例结果集
+    /// 创建样例结果集。
     /// </summary>
     /// <param name="items">结果项</param>
     /// <returns>数据表</returns>
@@ -4967,7 +4950,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建查询对象
+    /// 创建查询对象。
     /// </summary>
     /// <param name="connection">数据库连接</param>
     /// <returns>查询对象</returns>
@@ -5003,7 +4986,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建用于验证 SQL 渲染次数的查询对象。
+    /// 创建可计数的 SQL Server 查询对象。
     /// </summary>
     /// <param name="connection">数据库连接。</param>
     /// <param name="traceEnabled">是否启用 Trace 日志。</param>
@@ -5012,7 +4995,7 @@ public class SqlServerRoutingAndExecutionTest
         => CreateCountingQuery(connection, new TraceLoggerFactory(traceEnabled));
 
     /// <summary>
-    /// 创建指定日志工厂的可计数 SQL Server 查询对象。
+    /// 创建可计数的 SQL Server 查询对象。
     /// </summary>
     /// <param name="connection">测试连接。</param>
     /// <param name="loggerFactory">日志工厂。</param>
@@ -5039,7 +5022,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建拥有连接的查询对象
+    /// 创建拥有连接的查询对象。
     /// </summary>
     /// <param name="connection">数据库连接</param>
     /// <returns>查询对象</returns>
@@ -5060,7 +5043,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建执行器
+    /// 创建执行器。
     /// </summary>
     /// <param name="connection">数据库连接</param>
     /// <returns>执行器</returns>
@@ -5072,7 +5055,7 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建拥有连接的执行器
+    /// 创建拥有连接的执行器。
     /// </summary>
     /// <param name="connection">数据库连接</param>
     /// <returns>执行器</returns>
@@ -5115,6 +5098,8 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 创建包含官方 SQL Server Provider 能力的测试服务提供程序。
     /// </summary>
+    /// <param name="correlationIdProvider">关联标识提供程序。</param>
+    /// <returns>已注册 SQL Server Provider 的服务提供程序。</returns>
     private static ServiceProvider CreateSqlServerTestProvider(ICorrelationIdProvider correlationIdProvider = null)
     {
         var services = new ServiceCollection();
@@ -5127,6 +5112,9 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 创建使用外部 Fake ADO 连接的官方 SQL Server Provider 服务图。
     /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <param name="metadataOptions">SQL 元数据选项。</param>
+    /// <returns>已注册 SQL Server Provider 的服务提供程序。</returns>
     private static ServiceProvider CreateSqlServerScopeProvider(IDbConnection connection,
         SqlMetadataOptions metadataOptions = null)
     {
@@ -5144,6 +5132,8 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 创建通过连接解析器提供所有权连接的官方 SQL Server Provider 服务图。
     /// </summary>
+    /// <param name="connection">数据库连接。</param>
+    /// <returns>已注册 SQL Server Provider 的服务提供程序。</returns>
     private static ServiceProvider CreateSqlServerOwnedScopeProvider(CaptureDbConnection connection)
     {
         var services = new ServiceCollection();
@@ -5157,8 +5147,11 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建使用外部连接的 SQL Server 配置模板。
+    /// 创建 SQL Server 配置模板。
     /// </summary>
+    /// <typeparam name="T">SQL 配置类型。</typeparam>
+    /// <param name="connection">数据库连接。</param>
+    /// <returns>配置模板。</returns>
     private static SqlOptions<T> CreateSqlServerOptions<T>(IDbConnection connection)
         where T : class
     {
@@ -5168,8 +5161,11 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 创建使用连接字符串的 SQL Server 配置模板。
+    /// 创建 SQL Server 配置模板。
     /// </summary>
+    /// <typeparam name="T">SQL 配置类型。</typeparam>
+    /// <param name="connectionString">连接字符串。</param>
+    /// <returns>配置模板。</returns>
     private static SqlOptions<T> CreateSqlServerOptions<T>(string connectionString)
         where T : class
     {
@@ -5181,6 +5177,10 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 直接构造测试派生 Root 对象，避免测试实现参与 Provider 运行时映射。
     /// </summary>
+    /// <typeparam name="T">测试对象类型。</typeparam>
+    /// <param name="serviceProvider">服务提供程序。</param>
+    /// <param name="configure">配置回调。</param>
+    /// <returns>创建的测试对象。</returns>
     private static T CreateSqlServerTestRoot<T>(IServiceProvider serviceProvider, Action<SqlOptions<T>> configure)
         where T : class
     {
@@ -5190,9 +5190,10 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 配置主库短事务策略
+    /// 配置主库短事务策略。
     /// </summary>
-    /// <param name="query">SQL 查询对象</param>
+    /// <param name="query">SQL 查询对象。</param>
+    /// <param name="providerKey">Provider 标识。</param>
     private static void ConfigurePrimaryReadTransaction(ISqlQuery query, string providerKey = null)
     {
         SqlQueryRuntimeBinding.BindDatabaseContext(query, new DatabaseContext
@@ -5211,6 +5212,7 @@ public class SqlServerRoutingAndExecutionTest
     /// <summary>
     /// 创建声明原生异步事务能力的离线测试 Provider 服务图。
     /// </summary>
+    /// <returns>已注册原生异步测试 Provider 的服务提供程序。</returns>
     private static ServiceProvider CreateNativeAsyncTestProvider()
     {
         var services = new ServiceCollection();
@@ -5331,12 +5333,23 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class CaptureConnectionResolver : ISqlDbConnectionFactoryResolver
     {
+        /// <summary>
+        /// 返回的测试连接。
+        /// </summary>
         private readonly IDbConnection _connection;
 
+        /// <summary>
+        /// 初始化一个 <see cref="CaptureConnectionResolver"/> 类型的实例。
+        /// </summary>
+        /// <param name="connection">数据库连接。</param>
         public CaptureConnectionResolver(IDbConnection connection) => _connection = connection;
 
+        /// <summary>
+        /// 获取或设置最后一次使用的 Provider Key。
+        /// </summary>
         public string LastProviderKey { get; private set; }
 
+        /// <inheritdoc />
         public IDbConnection Create(string providerKey, string connectionString)
         {
             LastProviderKey = providerKey;
@@ -5349,29 +5362,44 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class NativeAsyncTestProvider : ISqlProvider, ISqlProviderProfileProvider
     {
+        /// <summary>
+        /// 获取 Provider 单例。
+        /// </summary>
         public static NativeAsyncTestProvider Instance { get; } = new();
 
+        /// <summary>
+        /// 初始化一个 <see cref="NativeAsyncTestProvider"/> 类型的实例。
+        /// </summary>
         private NativeAsyncTestProvider()
         {
         }
 
+        /// <inheritdoc />
         public string Key => "test.native-async";
 
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
 
+        /// <inheritdoc />
         public IDialect Dialect => SqlServerSqlProvider.Instance.Dialect;
 
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory => SqlServerSqlProvider.Instance.ClauseFactory;
 
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => SqlServerSqlProvider.Instance.TableReferenceParser;
 
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer => SqlServerSqlProvider.Instance.PaginationRenderer;
 
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory =>
             SqlServerSqlProvider.Instance.ParameterManagerFactory;
 
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => SqlServerSqlProvider.Instance.ParamLiteralsResolver;
 
+        /// <inheritdoc />
         public SqlProviderProfile Profile { get; } = new()
         {
             Query = new SqlProviderQueryCapabilities
@@ -5395,32 +5423,64 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试查询对象
+    /// 测试查询对象。
     /// </summary>
     private sealed class InspectableSqlServerQuery : SqlServerSqlQueryBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="InspectableSqlServerQuery"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
         public InspectableSqlServerQuery(IServiceProvider serviceProvider,
             SqlOptions<InspectableSqlServerQuery> options)
             : base(serviceProvider, options)
         {
         }
 
+        /// <summary>
+        /// 获取当前 SQL 选项。
+        /// </summary>
         public SqlOptions CurrentOptions => Options;
 
+        /// <summary>
+        /// 获取当前 SQL 文本。
+        /// </summary>
         public string CurrentSql => GetSql();
 
+        /// <summary>
+        /// 调用连接字符串解析。
+        /// </summary>
+        /// <returns>解析后的连接字符串。</returns>
         public string InvokeResolveConnectionString() => ResolveConnectionString();
 
+        /// <summary>
+        /// 获取根查询 SQL。
+        /// </summary>
         public string RootSql => SqlBuilder.ToSql();
 
+        /// <summary>
+        /// 获取根查询参数。
+        /// </summary>
         public IReadOnlyDictionary<string, object> RootParameters => SqlBuilder.GetParams();
 
+    /// <summary>
+    /// 配置数据库上下文。
+    /// </summary>
+    /// <param name="context">数据库上下文。</param>
     public void ConfigureDatabaseContext(DatabaseContext context) => Options.SetDatabaseContext(context);
 
+        /// <summary>
+        /// 配置根查询 SQL。
+        /// </summary>
         public void ConfigureRootSql() => SqlBuilder.Select("RootId").From("RootUsers").Where("RootId", 7);
 
+        /// <summary>
+        /// 获取或设置最后一次查询命令标志。
+        /// </summary>
         public CommandFlags LastQueryCommandFlags { get; private set; }
 
+        /// <inheritdoc />
         protected override CommandDefinition CreateQueryCommandDefinition(string sql, object parameters,
             IDbTransaction transaction, int? timeout, bool buffered, CancellationToken cancellationToken = default,
             CommandType? commandType = null)
@@ -5437,13 +5497,22 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class CountingDiagnosticsSqlServerQuery : SqlServerSqlQueryBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="CountingDiagnosticsSqlServerQuery"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
         public CountingDiagnosticsSqlServerQuery(IServiceProvider serviceProvider,
             SqlOptions<CountingDiagnosticsSqlServerQuery> options) : base(serviceProvider, options)
         {
         }
 
+        /// <summary>
+        /// 获取或设置执行前诊断调用次数。
+        /// </summary>
         public int BeforeCount { get; private set; }
 
+        /// <inheritdoc />
         protected override DiagnosticsMessage ExecuteBefore(string sql, object parameter,
             IDbConnection connection, IReadOnlyCollection<SqlParameterDiagnosticInfo> parameterMetadata = null)
         {
@@ -5458,7 +5527,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ThrowingBeforeSqlServerQuery : SqlServerSqlQueryBase
     {
         /// <summary>
-        /// 初始化一个<see cref="ThrowingBeforeSqlServerQuery"/>类型的实例。
+        /// 初始化一个 <see cref="ThrowingBeforeSqlServerQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5468,7 +5537,7 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// 完成清理钩子调用次数。
+        /// 获取或设置完成清理钩子调用次数。
         /// </summary>
         public int AfterCount { get; private set; }
 
@@ -5485,7 +5554,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ThrowingErrorSqlServerQuery : SqlServerSqlQueryBase
     {
         /// <summary>
-        /// 初始化一个<see cref="ThrowingErrorSqlServerQuery"/>类型的实例。
+        /// 初始化一个 <see cref="ThrowingErrorSqlServerQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5505,7 +5574,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ThrowingCompletionSqlServerQuery : SqlServerSqlQueryBase
     {
         /// <summary>
-        /// 初始化一个<see cref="ThrowingCompletionSqlServerQuery"/>类型的实例。
+        /// 初始化一个 <see cref="ThrowingCompletionSqlServerQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5515,7 +5584,7 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// 完成钩子调用次数。
+        /// 获取或设置完成钩子调用次数。
         /// </summary>
         public int AfterCount { get; private set; }
 
@@ -5533,7 +5602,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class CountingSqlServerQuery : SqlServerSqlQueryBase
     {
         /// <summary>
-        /// 初始化一个<see cref="CountingSqlServerQuery"/>类型的实例。
+        /// 初始化一个 <see cref="CountingSqlServerQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5543,17 +5612,17 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// SQL 渲染计数器。
+        /// 获取 SQL 渲染计数器。
         /// </summary>
         public SqlRenderCounters Counters { get; } = new();
 
         /// <summary>
-        /// 捕获的原始 SQL。
+        /// 获取或设置捕获的原始 SQL。
         /// </summary>
         public string TraceSql { get; private set; }
 
         /// <summary>
-        /// 捕获的调试 SQL。
+        /// 获取或设置捕获的调试 SQL。
         /// </summary>
         public string TraceDebugSql { get; private set; }
 
@@ -5576,10 +5645,13 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class SecondPlanSkippingSqlServerQuery : SqlServerSqlQueryBase
     {
+        /// <summary>
+        /// 执行前钩子调用次数。
+        /// </summary>
         private int _executeBeforeCount;
 
         /// <summary>
-        /// 初始化一个<see cref="SecondPlanSkippingSqlServerQuery"/>类型的实例。
+        /// 初始化一个 <see cref="SecondPlanSkippingSqlServerQuery"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5598,17 +5670,17 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class SqlRenderCounters
     {
         /// <summary>
-        /// ToSql 调用次数。
+        /// 获取或设置 ToSql 调用次数。
         /// </summary>
         public int ToSqlCallCount { get; set; }
 
         /// <summary>
-        /// ToDebugSql 调用次数。
+        /// 获取或设置 ToDebugSql 调用次数。
         /// </summary>
         public int ToDebugSqlCallCount { get; set; }
 
         /// <summary>
-        /// 最后一次调试渲染的 SQL 输入。
+        /// 获取或设置最后一次调试渲染的 SQL 输入。
         /// </summary>
         public string LastDebugSqlInput { get; set; }
     }
@@ -5618,10 +5690,13 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class CountingSqlServerBuilder : SqlServerBuilder
     {
+        /// <summary>
+        /// SQL 渲染计数器。
+        /// </summary>
         private readonly SqlRenderCounters _counters;
 
         /// <summary>
-        /// 初始化一个<see cref="CountingSqlServerBuilder"/>类型的实例。
+        /// 初始化一个 <see cref="CountingSqlServerBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="counters">SQL 渲染计数器。</param>
         public CountingSqlServerBuilder(SqlRenderCounters counters)
@@ -5665,10 +5740,13 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class TraceLoggerFactory : ILoggerFactory
     {
+        /// <summary>
+        /// 测试日志器。
+        /// </summary>
         private readonly TraceLogger _logger;
 
         /// <summary>
-        /// 初始化一个<see cref="TraceLoggerFactory"/>类型的实例。
+        /// 初始化一个 <see cref="TraceLoggerFactory"/> 类型的实例。
         /// </summary>
         /// <param name="traceEnabled">是否启用 Trace 日志。</param>
         public TraceLoggerFactory(bool traceEnabled)
@@ -5677,12 +5755,12 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// 已格式化的 Trace 日志文本。
+        /// 获取已格式化的 Trace 日志文本。
         /// </summary>
         public IReadOnlyList<string> Messages => _logger.Messages;
 
         /// <summary>
-        /// 已捕获的结构化日志 Scope。
+        /// 获取已捕获的结构化日志 Scope。
         /// </summary>
         public IReadOnlyList<IReadOnlyDictionary<string, object>> Scopes => _logger.Scopes;
 
@@ -5701,24 +5779,33 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class TraceLogger : ILogger
     {
+        /// <summary>
+        /// 是否启用 Trace 日志。
+        /// </summary>
         private readonly bool _traceEnabled;
+        /// <summary>
+        /// 已捕获的日志消息。
+        /// </summary>
         private readonly List<string> _messages = new();
 
         /// <summary>
-        /// 初始化一个<see cref="TraceLogger"/>类型的实例。
+        /// 初始化一个 <see cref="TraceLogger"/> 类型的实例。
         /// </summary>
         /// <param name="traceEnabled">是否启用 Trace 日志。</param>
         public TraceLogger(bool traceEnabled) => _traceEnabled = traceEnabled;
 
         /// <summary>
-        /// 已格式化的 Trace 日志文本。
+        /// 获取已格式化的 Trace 日志文本。
         /// </summary>
         public IReadOnlyList<string> Messages => _messages;
 
+        /// <summary>
+        /// 已捕获的日志作用域。
+        /// </summary>
         private readonly List<IReadOnlyDictionary<string, object>> _scopes = new();
 
         /// <summary>
-        /// 已捕获的结构化日志 Scope。
+        /// 获取已捕获的结构化日志 Scope。
         /// </summary>
         public IReadOnlyList<IReadOnlyDictionary<string, object>> Scopes => _scopes;
 
@@ -5748,7 +5835,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class EmptyScope : IDisposable
     {
         /// <summary>
-        /// 空释放作用域实例。
+        /// 获取空释放作用域实例。
         /// </summary>
         public static EmptyScope Instance { get; } = new();
 
@@ -5761,29 +5848,46 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class FixedCorrelationIdProvider : ICorrelationIdProvider
     {
+        /// <summary>
+        /// 固定的关联标识。
+        /// </summary>
         private readonly string _correlationId;
 
+        /// <summary>
+        /// 初始化一个 <see cref="FixedCorrelationIdProvider"/> 类型的实例。
+        /// </summary>
+        /// <param name="correlationId">关联标识。</param>
         public FixedCorrelationIdProvider(string correlationId) => _correlationId = correlationId;
 
+        /// <inheritdoc />
         public string Get() => _correlationId;
 
+        /// <inheritdoc />
         public IDisposable Change(string correlationId) => EmptyScope.Instance;
     }
 
     /// <summary>
-    /// 计数查询接口
+    /// 计数查询接口。
     /// </summary>
     private interface ICountedSqlServerQuery : ISqlQuery
     {
     }
 
     /// <summary>
-    /// 计数查询对象
+    /// 计数查询对象。
     /// </summary>
     private sealed class CountedSqlServerQuery : SqlServerSqlQueryBase, ICountedSqlServerQuery
     {
+        /// <summary>
+        /// 获取或设置已创建的查询实例数量。
+        /// </summary>
         public static int CreatedCount { get; set; }
 
+        /// <summary>
+        /// 初始化一个 <see cref="CountedSqlServerQuery"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
         public CountedSqlServerQuery(IServiceProvider serviceProvider,
             SqlOptions<CountedSqlServerQuery> options)
             : base(serviceProvider, options)
@@ -5797,12 +5901,21 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class BindingFailureSqlQueryFactory : ISqlQueryFactory
     {
+        /// <summary>
+        /// 内部查询工厂。
+        /// </summary>
         private readonly ISqlQueryFactory _innerFactory;
+        /// <summary>
+        /// 无效的子实例。
+        /// </summary>
         private readonly ISqlQuery _invalidChild;
+        /// <summary>
+        /// 所有者创建状态。
+        /// </summary>
         private bool _ownerCreated;
 
         /// <summary>
-        /// 初始化一个<see cref="BindingFailureSqlQueryFactory"/>类型的实例。
+        /// 初始化一个 <see cref="BindingFailureSqlQueryFactory"/> 类型的实例。
         /// </summary>
         /// <param name="innerFactory">实际查询工厂。</param>
         /// <param name="invalidChild">不实现内部绑定器的子查询。</param>
@@ -5829,10 +5942,13 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class BindingFailureSqlExecutorFactory : ISqlExecutorFactory
     {
+        /// <summary>
+        /// 无效的子实例。
+        /// </summary>
         private readonly ISqlExecutor _invalidChild;
 
         /// <summary>
-        /// 初始化一个<see cref="BindingFailureSqlExecutorFactory"/>类型的实例。
+        /// 初始化一个 <see cref="BindingFailureSqlExecutorFactory"/> 类型的实例。
         /// </summary>
         /// <param name="invalidChild">不实现内部绑定器的子执行器。</param>
         public BindingFailureSqlExecutorFactory(ISqlExecutor invalidChild) => _invalidChild = invalidChild;
@@ -5847,7 +5963,7 @@ public class SqlServerRoutingAndExecutionTest
     private class DisposeTrackingSqlQueryProxy : DispatchProxy
     {
         /// <summary>
-        /// Dispose 调用次数。
+        /// 获取或设置 Dispose 调用次数。
         /// </summary>
         public int DisposeCount { get; private set; }
 
@@ -5870,10 +5986,15 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 测试执行器
+    /// 测试执行器。
     /// </summary>
     private sealed class InspectableSqlServerExecutor : SqlServerSqlExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="InspectableSqlServerExecutor"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">SQL 配置。</param>
         public InspectableSqlServerExecutor(IServiceProvider serviceProvider,
             SqlOptions<InspectableSqlServerExecutor> options)
             : base(serviceProvider, options)
@@ -5893,8 +6014,15 @@ public class SqlServerRoutingAndExecutionTest
             ExecuteAfter(message);
         }
 
+        /// <summary>
+        /// 配置数据库上下文。
+        /// </summary>
+        /// <param name="context">数据库上下文。</param>
         public void ConfigureDatabaseContext(DatabaseContext context) => Options.SetDatabaseContext(context);
 
+        /// <summary>
+        /// 启用租户诊断。
+        /// </summary>
         public void EnableTenantDiagnostics() => Options.IncludeTenantIdInDiagnostics = true;
     }
 
@@ -5904,7 +6032,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class LifecycleSqlServerExecutor : SqlServerSqlExecutorBase
     {
         /// <summary>
-        /// 初始化生命周期测试执行器。
+        /// 初始化一个 <see cref="LifecycleSqlServerExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">SQL 配置。</param>
@@ -5914,27 +6042,27 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// 是否在错误诊断 Hook 中抛出受控异常。
+        /// 获取或设置是否在错误诊断 Hook 中抛出受控异常。
         /// </summary>
         public bool ThrowOnErrorHook { get; set; }
 
         /// <summary>
-        /// 是否在业务完成 Hook 中抛出受控异常。
+        /// 获取或设置是否在业务完成 Hook 中抛出受控异常。
         /// </summary>
         public bool ThrowOnCompletionHook { get; set; }
 
         /// <summary>
-        /// 是否在执行前 Hook 中跳过当前命令。
+        /// 获取或设置是否在执行前 Hook 中跳过当前命令。
         /// </summary>
         public bool SkipBeforeExecution { get; set; }
 
         /// <summary>
-        /// 错误诊断 Hook 调用次数。
+        /// 获取或设置错误诊断 Hook 调用次数。
         /// </summary>
         public int ErrorHookCount { get; private set; }
 
         /// <summary>
-        /// 业务完成 Hook 调用次数。
+        /// 获取或设置业务完成 Hook 调用次数。
         /// </summary>
         public int CompletionHookCount { get; private set; }
 
@@ -5966,7 +6094,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class LifecycleSqlServerMultipleQueryExecutor : SqlServerSqlMultipleQueryExecutorBase
     {
         /// <summary>
-        /// 初始化测试执行器。
+        /// 初始化一个 <see cref="LifecycleSqlServerMultipleQueryExecutor"/> 类型的实例。
         /// </summary>
         /// <param name="serviceProvider">服务提供程序。</param>
         /// <param name="options">执行器配置。</param>
@@ -5976,41 +6104,40 @@ public class SqlServerRoutingAndExecutionTest
         }
 
         /// <summary>
-        /// 指示错误 Hook 是否抛出异常。
+        /// 获取或设置错误 Hook 是否抛出异常。
         /// </summary>
         public bool ThrowOnErrorHook { get; set; }
 
         /// <summary>
-        /// 指示业务完成 Hook 是否抛出异常。
+        /// 获取或设置业务完成 Hook 是否抛出异常。
         /// </summary>
         public bool ThrowOnCompletionHook { get; set; }
 
         /// <summary>
-        /// 是否在执行前 Hook 中跳过当前命令。
+        /// 获取或设置是否在执行前 Hook 中跳过当前命令。
         /// </summary>
         public bool SkipBeforeExecution { get; set; }
 
         /// <summary>
-        /// 错误 Hook 调用次数。
+        /// 获取或设置错误 Hook 调用次数。
         /// </summary>
         public int ErrorHookCount { get; private set; }
 
         /// <summary>
-        /// 业务完成 Hook 调用次数。
+        /// 获取或设置业务完成 Hook 调用次数。
         /// </summary>
         public int CompletionHookCount { get; private set; }
 
         /// <summary>
-        /// 是否让执行租约释放时抛出异常。
+        /// 获取或设置是否让执行租约释放时抛出异常。
         /// </summary>
         public bool ThrowOnExecutionLeaseDispose { get; set; }
 
         /// <summary>
-        /// 执行租约释放次数。
+        /// 获取或设置执行租约释放次数。
         /// </summary>
         public int ExecutionLeaseDisposeCount { get; private set; }
 
-        /// <inheritdoc />
         /// <inheritdoc />
         protected override bool ExecuteBefore() => SkipBeforeExecution == false && base.ExecuteBefore();
 
@@ -6051,10 +6178,13 @@ public class SqlServerRoutingAndExecutionTest
     /// </summary>
     private sealed class TestExecutionLease : IDisposable
     {
+        /// <summary>
+        /// 释放回调。
+        /// </summary>
         private Action _dispose;
 
         /// <summary>
-        /// 初始化可控执行租约。
+        /// 初始化一个 <see cref="TestExecutionLease"/> 类型的实例。
         /// </summary>
         /// <param name="dispose">释放回调。</param>
         public TestExecutionLease(Action dispose) => _dispose = dispose;
@@ -6064,24 +6194,24 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 字符串映射测试样例
+    /// 字符串映射测试样例。
     /// </summary>
     private sealed class MappedSample
     {
         /// <summary>
-        /// 标识
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称
+        /// 获取或设置名称。
         /// </summary>
         [StringLength(20)]
         [Column(TypeName = "nvarchar(20)")]
         public string Name { get; set; }
 
         /// <summary>
-        /// 二进制载荷。
+        /// 获取或设置二进制载荷。
         /// </summary>
         public byte[] Payload { get; set; }
     }
@@ -6092,18 +6222,16 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class SoftDeleteMappedSample : ISoftDelete
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// 是否已删除。
-        /// </summary>
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
@@ -6113,7 +6241,7 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class DerivedMappedSample
     {
         /// <summary>
-        /// 所有者标识。
+        /// 获取或设置所有者标识。
         /// </summary>
         public int OwnerId { get; set; }
     }
@@ -6124,12 +6252,12 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ProcedureSplitSample
     {
         /// <summary>
-        /// 角色标识。
+        /// 获取或设置角色标识。
         /// </summary>
         public int SplitId { get; set; }
 
         /// <summary>
-        /// 角色名称。
+        /// 获取或设置角色名称。
         /// </summary>
         public string SplitName { get; set; }
     }
@@ -6140,12 +6268,12 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ProcedureJoinResult
     {
         /// <summary>
-        /// 用户名称。
+        /// 获取或设置用户名称。
         /// </summary>
         public string UserName { get; set; }
 
         /// <summary>
-        /// 角色名称。
+        /// 获取或设置角色名称。
         /// </summary>
         public string RoleName { get; set; }
     }
@@ -6156,152 +6284,198 @@ public class SqlServerRoutingAndExecutionTest
     private sealed class ConcurrencySample
     {
         /// <summary>
-        /// 主键。
+        /// 获取或设置主键。
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// 更新后的名称。
+        /// 获取或设置更新后的名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 并发令牌。
+        /// 获取或设置并发令牌。
         /// </summary>
         [ConcurrencyCheck]
         public int Version { get; set; }
     }
 
     /// <summary>
-    /// 捕获参数的数据库连接
+    /// 捕获参数的数据库连接。
     /// </summary>
     private sealed class CaptureDbConnection : DbConnection
     {
+        /// <summary>
+        /// 测试连接状态。
+        /// </summary>
         private ConnectionState _state = ConnectionState.Open;
 
+        /// <summary>
+        /// 获取或设置最后一次创建的参数。
+        /// </summary>
         public List<CaptureDbParameter> LastCreatedParameters { get; private set; } = new();
 
+        /// <summary>
+        /// 获取或设置最后一次执行的命令文本。
+        /// </summary>
         public string LastCommandText { get; private set; }
 
         /// <summary>
-        /// 当前连接按执行顺序捕获的命令文本。
+        /// 获取当前连接按执行顺序捕获的命令文本。
         /// </summary>
         public List<string> ExecutedCommandTexts { get; } = new();
 
+        /// <summary>
+        /// 获取或设置最后一次命令类型。
+        /// </summary>
         public CommandType LastCommandType { get; private set; } = CommandType.Text;
 
+        /// <summary>
+        /// 获取或设置标量执行结果。
+        /// </summary>
         public object ScalarResult { get; set; } = 1;
 
+        /// <summary>
+        /// 获取或设置非查询执行结果。
+        /// </summary>
         public int NonQueryResult { get; set; } = 1;
 
+        /// <summary>
+        /// 获取或设置结果集。
+        /// </summary>
         public DataTable ResultSet { get; set; } = new();
 
         /// <summary>
-        /// 命令完成时由测试驱动写入的输出参数值。
+        /// 获取命令完成时由测试驱动写入的输出参数值。
         /// </summary>
         public IDictionary<string, object> OutputParameterValues { get; } =
             new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// 获取或设置数据读取器创建次数。
+        /// </summary>
         public int ReaderCreateCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置数据读取器释放次数。
+        /// </summary>
         public int ReaderDisposeCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置异步数据读取器释放次数。
+        /// </summary>
         public int AsyncReaderDisposeCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置是否在执行命令时抛出异常。
+        /// </summary>
         public bool ThrowOnExecute { get; set; }
 
         /// <summary>
-        /// 是否在标量执行时抛出异常。
+        /// 获取或设置是否在标量执行时抛出异常。
         /// </summary>
         public bool ThrowOnScalarExecute { get; set; }
 
         /// <summary>
-        /// 标量命令成功执行后的回调。
+        /// 获取或设置标量命令成功执行后的回调。
         /// </summary>
         public Action OnScalarExecuted { get; set; }
 
         /// <summary>
-        /// 数据读取器创建后的测试回调。
+        /// 获取或设置数据读取器创建后的测试回调。
         /// </summary>
         public Action OnReaderCreated { get; set; }
 
         /// <summary>
-        /// 数据读取器每次异步读取前的测试回调。
+        /// 获取或设置数据读取器每次异步读取前的测试回调。
         /// </summary>
         public Func<Task> OnReaderReadAsync { get; set; }
 
         /// <summary>
-        /// 是否在读取器释放时抛出异常。
+        /// 获取或设置是否在读取器释放时抛出异常。
         /// </summary>
         public bool ThrowOnReaderDispose { get; set; }
 
         /// <summary>
-        /// 是否在 Dapper 初始化行解析器读取架构信息时抛出异常。
+        /// 获取或设置是否在 Dapper 初始化行解析器读取架构信息时抛出异常。
         /// </summary>
         public bool ThrowOnReaderParserInitialization { get; set; }
 
         /// <summary>
-        /// 是否让本连接创建的事务在回滚时抛出异常。
+        /// 获取或设置是否让本连接创建的事务在回滚时抛出异常。
         /// </summary>
         public bool ThrowOnTransactionRollback { get; set; }
 
         /// <summary>
-        /// 是否让本连接创建的事务在提交时抛出异常。
+        /// 获取或设置是否让本连接创建的事务在提交时抛出异常。
         /// </summary>
         public bool ThrowOnTransactionCommit { get; set; }
 
         /// <summary>
-        /// 是否在同步开始事务时抛出异常。
+        /// 获取或设置是否在同步开始事务时抛出异常。
         /// </summary>
         public bool ThrowOnBegin { get; set; }
 
         /// <summary>
-        /// 是否在原生异步开始事务时抛出异常。
+        /// 获取或设置是否在原生异步开始事务时抛出异常。
         /// </summary>
         public bool ThrowOnAsyncBegin { get; set; }
 
         /// <summary>
-        /// 是否在连接释放时抛出异常。
+        /// 获取或设置是否在连接释放时抛出异常。
         /// </summary>
         public bool ThrowOnDispose { get; set; }
 
         /// <summary>
-        /// 是否在连接关闭时抛出异常。
+        /// 获取或设置是否在连接关闭时抛出异常。
         /// </summary>
         public bool ThrowOnClose { get; set; }
 
         /// <summary>
-        /// 连接关闭次数。
+        /// 获取或设置连接关闭次数。
         /// </summary>
         public int CloseCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置最后一次创建的事务。
+        /// </summary>
         public CaptureDbTransaction LastTransaction { get; private set; }
 
+        /// <summary>
+        /// 获取或设置异步开始事务次数。
+        /// </summary>
         public int AsyncBeginCount { get; private set; }
 
         /// <summary>
-        /// 连接释放次数。
+        /// 获取或设置连接释放次数。
         /// </summary>
         public int DisposeCount { get; private set; }
 
         /// <summary>
-        /// 原生异步释放次数。
+        /// 获取或设置原生异步释放次数。
         /// </summary>
         public int AsyncDisposeCount { get; private set; }
 
+        /// <inheritdoc />
         public override string ConnectionString { get; set; }
 
+        /// <inheritdoc />
         public override string Database => "test";
 
+        /// <inheritdoc />
         public override string DataSource => "test";
 
+        /// <inheritdoc />
         public override string ServerVersion => "1.0";
 
+        /// <inheritdoc />
         public override ConnectionState State => _state;
 
+        /// <inheritdoc />
         public override void ChangeDatabase(string databaseName) { }
 
+        /// <inheritdoc />
         public override void Close()
         {
             CloseCount++;
@@ -6310,8 +6484,10 @@ public class SqlServerRoutingAndExecutionTest
                 throw new InvalidOperationException("connection close failed");
         }
 
+        /// <inheritdoc />
         public override void Open() => _state = ConnectionState.Open;
 
+        /// <inheritdoc />
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
             if (ThrowOnBegin)
@@ -6324,8 +6500,10 @@ public class SqlServerRoutingAndExecutionTest
             return LastTransaction;
         }
 
+        /// <inheritdoc />
         protected override DbCommand CreateDbCommand() => new CaptureDbCommand(this);
 
+        /// <inheritdoc />
         protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -6341,6 +6519,7 @@ public class SqlServerRoutingAndExecutionTest
             return ValueTask.FromResult<DbTransaction>(LastTransaction);
         }
 
+        /// <inheritdoc />
         public override Task OpenAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -6348,6 +6527,7 @@ public class SqlServerRoutingAndExecutionTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing == false)
@@ -6358,6 +6538,7 @@ public class SqlServerRoutingAndExecutionTest
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc />
         public override ValueTask DisposeAsync()
         {
             AsyncDisposeCount++;
@@ -6365,9 +6546,19 @@ public class SqlServerRoutingAndExecutionTest
             return ValueTask.CompletedTask;
         }
 
+        /// <summary>
+        /// 设置命令参数。
+        /// </summary>
+        /// <param name="parameters">命令参数集合。</param>
         public void SetParameters(IEnumerable<CaptureDbParameter> parameters) =>
             LastCreatedParameters = parameters.ToList();
 
+        /// <summary>
+        /// 设置命令信息。
+        /// </summary>
+        /// <param name="commandText">命令文本。</param>
+        /// <param name="commandType">命令类型。</param>
+        /// <param name="parameters">命令参数集合。</param>
         public void SetCommand(string commandText, CommandType commandType, IEnumerable<CaptureDbParameter> parameters)
         {
             LastCommandText = commandText;
@@ -6382,6 +6573,10 @@ public class SqlServerRoutingAndExecutionTest
             SetParameters(parameters);
         }
 
+        /// <summary>
+        /// 创建测试数据读取器。
+        /// </summary>
+        /// <returns>创建的数据读取器。</returns>
         public DbDataReader CreateReader()
         {
             ReaderCreateCount++;
@@ -6391,43 +6586,69 @@ public class SqlServerRoutingAndExecutionTest
             return reader;
         }
 
+        /// <summary>
+        /// 记录读取器释放。
+        /// </summary>
         public void OnReaderDisposed() => ReaderDisposeCount++;
 
+        /// <summary>
+        /// 记录异步读取器释放。
+        /// </summary>
         public void OnReaderDisposedAsync() => AsyncReaderDisposeCount++;
     }
 
     /// <summary>
-    /// 捕获参数的数据库命令
+    /// 捕获参数的数据库命令。
     /// </summary>
     private sealed class CaptureDbCommand : DbCommand
     {
+        /// <summary>
+        /// 所属测试连接。
+        /// </summary>
         private readonly CaptureDbConnection _connection;
+        /// <summary>
+        /// 命令参数集合。
+        /// </summary>
         private readonly CaptureDbParameterCollection _parameters = new();
 
+        /// <summary>
+        /// 初始化一个 <see cref="CaptureDbCommand"/> 类型的实例。
+        /// </summary>
+        /// <param name="connection">数据库连接。</param>
         public CaptureDbCommand(CaptureDbConnection connection) => _connection = connection;
 
+        /// <inheritdoc />
         public override string CommandText { get; set; }
 
+        /// <inheritdoc />
         public override int CommandTimeout { get; set; }
 
+        /// <inheritdoc />
         public override CommandType CommandType { get; set; }
 
+        /// <inheritdoc />
         public override bool DesignTimeVisible { get; set; }
 
+        /// <inheritdoc />
         public override UpdateRowSource UpdatedRowSource { get; set; }
 
+        /// <inheritdoc />
         protected override DbConnection DbConnection
         {
             get => _connection;
             set { }
         }
 
+        /// <inheritdoc />
         protected override DbParameterCollection DbParameterCollection => _parameters;
 
+        /// <inheritdoc />
         protected override DbTransaction DbTransaction { get; set; }
 
+        /// <inheritdoc />
         public override void Cancel() { }
 
+        /// <inheritdoc />
         public override int ExecuteNonQuery()
         {
             if (_connection.ThrowOnExecute)
@@ -6436,6 +6657,7 @@ public class SqlServerRoutingAndExecutionTest
             return _connection.NonQueryResult;
         }
 
+        /// <inheritdoc />
         public override object ExecuteScalar()
         {
             if (_connection.ThrowOnScalarExecute)
@@ -6445,10 +6667,13 @@ public class SqlServerRoutingAndExecutionTest
             return _connection.ScalarResult;
         }
 
+        /// <inheritdoc />
         public override void Prepare() { }
 
+        /// <inheritdoc />
         protected override DbParameter CreateDbParameter() => new CaptureDbParameter();
 
+        /// <inheritdoc />
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             if (_connection.ThrowOnExecute)
@@ -6457,6 +6682,7 @@ public class SqlServerRoutingAndExecutionTest
             return _connection.CreateReader();
         }
 
+        /// <inheritdoc />
         public override Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
             if (_connection.ThrowOnExecute)
@@ -6465,6 +6691,7 @@ public class SqlServerRoutingAndExecutionTest
             return Task.FromResult(_connection.NonQueryResult);
         }
 
+        /// <inheritdoc />
         public override Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
             if (_connection.ThrowOnScalarExecute)
@@ -6476,96 +6703,141 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 捕获释放行为的数据读取器
+    /// 捕获释放行为的数据读取器。
     /// </summary>
     private sealed class CaptureDbDataReader : DbDataReader
     {
+        /// <summary>
+        /// 被包装的数据读取器。
+        /// </summary>
         private readonly DbDataReader _reader;
+        /// <summary>
+        /// 所属测试连接。
+        /// </summary>
         private readonly CaptureDbConnection _connection;
 
+        /// <summary>
+        /// 初始化一个 <see cref="CaptureDbDataReader"/> 类型的实例。
+        /// </summary>
+        /// <param name="reader">数据读取器。</param>
+        /// <param name="connection">数据库连接。</param>
         public CaptureDbDataReader(DbDataReader reader, CaptureDbConnection connection)
         {
             _reader = reader;
             _connection = connection;
         }
 
+        /// <inheritdoc />
         public override int Depth => _reader.Depth;
 
+        /// <inheritdoc />
         public override int FieldCount => _reader.FieldCount;
 
+        /// <inheritdoc />
         public override bool HasRows => _reader.HasRows;
 
+        /// <inheritdoc />
         public override bool IsClosed => _reader.IsClosed;
 
+        /// <inheritdoc />
         public override int RecordsAffected => _reader.RecordsAffected;
 
+        /// <inheritdoc />
         public override object this[int ordinal] => _reader[ordinal];
 
+        /// <inheritdoc />
         public override object this[string name] => _reader[name];
 
+        /// <inheritdoc />
         public override bool GetBoolean(int ordinal) => _reader.GetBoolean(ordinal);
 
+        /// <inheritdoc />
         public override byte GetByte(int ordinal) => _reader.GetByte(ordinal);
 
+        /// <inheritdoc />
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length) =>
             _reader.GetBytes(ordinal, dataOffset, buffer, bufferOffset, length);
 
+        /// <inheritdoc />
         public override char GetChar(int ordinal) => _reader.GetChar(ordinal);
 
+        /// <inheritdoc />
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length) =>
             _reader.GetChars(ordinal, dataOffset, buffer, bufferOffset, length);
 
+        /// <inheritdoc />
         public override string GetDataTypeName(int ordinal) => _reader.GetDataTypeName(ordinal);
 
+        /// <inheritdoc />
         public override DateTime GetDateTime(int ordinal) => _reader.GetDateTime(ordinal);
 
+        /// <inheritdoc />
         public override decimal GetDecimal(int ordinal) => _reader.GetDecimal(ordinal);
 
+        /// <inheritdoc />
         public override double GetDouble(int ordinal) => _reader.GetDouble(ordinal);
 
+        /// <inheritdoc />
         public override IEnumerator GetEnumerator() => ((IEnumerable)_reader).GetEnumerator();
 
+        /// <inheritdoc />
         public override Type GetFieldType(int ordinal)
         {
             ThrowIfParserInitializationFails();
             return _reader.GetFieldType(ordinal);
         }
 
+        /// <inheritdoc />
         public override float GetFloat(int ordinal) => _reader.GetFloat(ordinal);
 
+        /// <inheritdoc />
         public override Guid GetGuid(int ordinal) => _reader.GetGuid(ordinal);
 
+        /// <inheritdoc />
         public override short GetInt16(int ordinal) => _reader.GetInt16(ordinal);
 
+        /// <inheritdoc />
         public override int GetInt32(int ordinal) => _reader.GetInt32(ordinal);
 
+        /// <inheritdoc />
         public override long GetInt64(int ordinal) => _reader.GetInt64(ordinal);
 
+        /// <inheritdoc />
         public override string GetName(int ordinal)
         {
             ThrowIfParserInitializationFails();
             return _reader.GetName(ordinal);
         }
 
+        /// <inheritdoc />
         public override int GetOrdinal(string name) => _reader.GetOrdinal(name);
 
+        /// <inheritdoc />
         public override DataTable GetSchemaTable() => _reader.GetSchemaTable();
 
+        /// <inheritdoc />
         public override string GetString(int ordinal) => _reader.GetString(ordinal);
 
+        /// <inheritdoc />
         public override object GetValue(int ordinal) => _reader.GetValue(ordinal);
 
+        /// <inheritdoc />
         public override int GetValues(object[] values) => _reader.GetValues(values);
 
+        /// <inheritdoc />
         public override bool IsDBNull(int ordinal) => _reader.IsDBNull(ordinal);
 
+        /// <inheritdoc />
         public override bool NextResult() => _reader.NextResult();
 
+        /// <inheritdoc />
         public override Task<bool> NextResultAsync(CancellationToken cancellationToken) =>
             _reader.NextResultAsync(cancellationToken);
 
+        /// <inheritdoc />
         public override bool Read() => _reader.Read();
 
+        /// <inheritdoc />
         public override async Task<bool> ReadAsync(CancellationToken cancellationToken)
         {
             if (_connection.OnReaderReadAsync != null)
@@ -6573,11 +6845,14 @@ public class SqlServerRoutingAndExecutionTest
             return await _reader.ReadAsync(cancellationToken);
         }
 
+        /// <inheritdoc />
         public override T GetFieldValue<T>(int ordinal) => _reader.GetFieldValue<T>(ordinal);
 
+        /// <inheritdoc />
         public override Task<T> GetFieldValueAsync<T>(int ordinal, CancellationToken cancellationToken) =>
             _reader.GetFieldValueAsync<T>(ordinal, cancellationToken);
 
+        /// <inheritdoc />
         public override ValueTask DisposeAsync()
         {
             _connection.OnReaderDisposedAsync();
@@ -6585,6 +6860,7 @@ public class SqlServerRoutingAndExecutionTest
             return ValueTask.CompletedTask;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -6609,48 +6885,66 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 捕获参数集合
+    /// 捕获参数集合。
     /// </summary>
     private sealed class CaptureDbParameterCollection : DbParameterCollection
     {
+        /// <summary>
+        /// 获取参数项列表。
+        /// </summary>
         public List<CaptureDbParameter> Items { get; } = new();
 
+        /// <inheritdoc />
         public override int Count => Items.Count;
 
+        /// <inheritdoc />
         public override object SyncRoot { get; } = new();
 
+        /// <inheritdoc />
         public override int Add(object value)
         {
             Items.Add((CaptureDbParameter)value);
             return Items.Count - 1;
         }
 
+        /// <inheritdoc />
         public override void AddRange(Array values)
         {
             foreach (var value in values)
                 Add(value);
         }
 
+        /// <inheritdoc />
         public override void Clear() => Items.Clear();
 
+        /// <inheritdoc />
         public override bool Contains(object value) => Items.Contains((CaptureDbParameter)value);
 
+        /// <inheritdoc />
         public override bool Contains(string value) => Items.Any(t => t.ParameterName == value);
 
+        /// <inheritdoc />
         public override void CopyTo(Array array, int index) => Items.ToArray().CopyTo(array, index);
 
+        /// <inheritdoc />
         public override IEnumerator GetEnumerator() => Items.GetEnumerator();
 
+        /// <inheritdoc />
         public override int IndexOf(object value) => Items.IndexOf((CaptureDbParameter)value);
 
+        /// <inheritdoc />
         public override int IndexOf(string parameterName) => Items.FindIndex(t => t.ParameterName == parameterName);
 
+        /// <inheritdoc />
         public override void Insert(int index, object value) => Items.Insert(index, (CaptureDbParameter)value);
 
+        /// <inheritdoc />
         public override void Remove(object value) => Items.Remove((CaptureDbParameter)value);
 
+        /// <inheritdoc />
         public override void RemoveAt(int index) => Items.RemoveAt(index);
 
+        /// <inheritdoc />
         public override void RemoveAt(string parameterName)
         {
             var index = IndexOf(parameterName);
@@ -6658,13 +6952,17 @@ public class SqlServerRoutingAndExecutionTest
                 Items.RemoveAt(index);
         }
 
+        /// <inheritdoc />
         protected override DbParameter GetParameter(int index) => Items[index];
 
+        /// <inheritdoc />
         protected override DbParameter GetParameter(string parameterName) =>
             Items.FirstOrDefault(t => t.ParameterName == parameterName);
 
+        /// <inheritdoc />
         protected override void SetParameter(int index, DbParameter value) => Items[index] = (CaptureDbParameter)value;
 
+        /// <inheritdoc />
         protected override void SetParameter(string parameterName, DbParameter value)
         {
             var index = IndexOf(parameterName);
@@ -6679,78 +6977,127 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// 捕获数据库参数
+    /// 捕获数据库参数。
     /// </summary>
     private sealed class CaptureDbParameter : DbParameter
     {
+        /// <inheritdoc />
         public override DbType DbType { get; set; }
 
+        /// <inheritdoc />
         public override ParameterDirection Direction { get; set; } = ParameterDirection.Input;
 
+        /// <inheritdoc />
         public override bool IsNullable { get; set; }
 
+        /// <inheritdoc />
         public override string ParameterName { get; set; }
 
+        /// <inheritdoc />
         public override string SourceColumn { get; set; }
 
+        /// <inheritdoc />
         public override object Value { get; set; }
 
+        /// <inheritdoc />
         public override bool SourceColumnNullMapping { get; set; }
 
+        /// <inheritdoc />
         public override int Size { get; set; }
 
+        /// <inheritdoc />
         public override byte Precision { get; set; }
 
+        /// <inheritdoc />
         public override byte Scale { get; set; }
 
+        /// <inheritdoc />
         public override void ResetDbType() { }
     }
 
     /// <summary>
-    /// 捕获数据库事务
+    /// 捕获数据库事务。
     /// </summary>
     private sealed class CaptureDbTransaction : DbTransaction
     {
+        /// <summary>
+        /// 所属测试连接。
+        /// </summary>
         private readonly CaptureDbConnection _connection;
 
+        /// <summary>
+        /// 事务隔离级别。
+        /// </summary>
         private readonly IsolationLevel _isolationLevel;
 
+        /// <summary>
+        /// 初始化一个 <see cref="CaptureDbTransaction"/> 类型的实例。
+        /// </summary>
+        /// <param name="connection">数据库连接。</param>
+        /// <param name="isolationLevel">事务隔离级别。</param>
         public CaptureDbTransaction(CaptureDbConnection connection, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             _connection = connection;
             _isolationLevel = isolationLevel;
         }
 
+        /// <summary>
+        /// 获取或设置同步提交次数。
+        /// </summary>
         public int CommitCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置同步回滚次数。
+        /// </summary>
         public int RollbackCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置异步提交次数。
+        /// </summary>
         public int AsyncCommitCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置异步回滚次数。
+        /// </summary>
         public int AsyncRollbackCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置事务释放次数。
+        /// </summary>
         public int DisposeCount { get; private set; }
 
+        /// <summary>
+        /// 获取或设置是否在事务释放时抛出异常。
+        /// </summary>
         public bool ThrowOnDispose { get; set; }
 
+        /// <summary>
+        /// 获取或设置是否在同步提交时抛出异常。
+        /// </summary>
         public bool ThrowOnCommit { get; set; }
 
+        /// <summary>
+        /// 获取或设置是否在同步回滚时抛出异常。
+        /// </summary>
         public bool ThrowOnRollback { get; set; }
 
         /// <summary>
-        /// 同步提交开始后的测试回调。
+        /// 获取或设置同步提交开始后的测试回调。
         /// </summary>
         public Action OnCommit { get; set; }
 
         /// <summary>
-        /// 异步提交开始后的测试回调。
+        /// 获取或设置异步提交开始后的测试回调。
         /// </summary>
         public Func<Task> OnCommitAsync { get; set; }
 
+        /// <inheritdoc />
         public override IsolationLevel IsolationLevel => _isolationLevel;
 
+        /// <inheritdoc />
         protected override DbConnection DbConnection => _connection;
 
+        /// <inheritdoc />
         public override void Commit()
         {
             CommitCount++;
@@ -6759,6 +7106,7 @@ public class SqlServerRoutingAndExecutionTest
                 throw new InvalidOperationException("commit failed");
         }
 
+        /// <inheritdoc />
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             AsyncCommitCount++;
@@ -6768,6 +7116,7 @@ public class SqlServerRoutingAndExecutionTest
                 throw new InvalidOperationException("commit failed");
         }
 
+        /// <inheritdoc />
         public override void Rollback()
         {
             RollbackCount++;
@@ -6775,6 +7124,7 @@ public class SqlServerRoutingAndExecutionTest
                 throw new InvalidOperationException("rollback failed");
         }
 
+        /// <inheritdoc />
         public override Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             AsyncRollbackCount++;
@@ -6783,6 +7133,7 @@ public class SqlServerRoutingAndExecutionTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing == false)
@@ -6794,21 +7145,39 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
-    /// Sql 诊断观察器
+    /// Sql 诊断观察器。
     /// </summary>
     private sealed class SqlDiagnosticObserver : IObserver<DiagnosticListener>,
         IObserver<KeyValuePair<string, object>>, IDisposable
     {
+        /// <summary>
+        /// 诊断消息回调。
+        /// </summary>
         private readonly Action<DiagnosticsMessage> _onMessage;
+        /// <summary>
+        /// 诊断事件筛选器。
+        /// </summary>
         private readonly Func<string, bool> _eventFilter;
 
         /// <summary>
         /// 是否在 DiagnosticListener 订阅层应用事件筛选。
         /// </summary>
         private readonly bool _subscribeWithEventFilter;
+        /// <summary>
+        /// 全量诊断订阅。
+        /// </summary>
         private readonly IDisposable _allSubscription;
+        /// <summary>
+        /// 诊断监听器订阅。
+        /// </summary>
         private IDisposable _listenerSubscription;
 
+        /// <summary>
+        /// 初始化一个 <see cref="SqlDiagnosticObserver"/> 类型的实例。
+        /// </summary>
+        /// <param name="onMessage">诊断消息回调。</param>
+        /// <param name="eventFilter">诊断事件筛选器。</param>
+        /// <param name="subscribeWithEventFilter">是否在订阅层应用事件筛选。</param>
         public SqlDiagnosticObserver(Action<DiagnosticsMessage> onMessage, Func<string, bool> eventFilter = null,
             bool subscribeWithEventFilter = false)
         {
@@ -6818,6 +7187,7 @@ public class SqlServerRoutingAndExecutionTest
             _allSubscription = DiagnosticListener.AllListeners.Subscribe(this);
         }
 
+        /// <inheritdoc />
         public void OnNext(DiagnosticListener value)
         {
             if (value.Name != SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
@@ -6827,16 +7197,20 @@ public class SqlServerRoutingAndExecutionTest
                 : value.Subscribe(this);
         }
 
+        /// <inheritdoc />
         public void OnNext(KeyValuePair<string, object> value)
         {
             if (_eventFilter(value.Key) && value.Value is DiagnosticsMessage message)
                 _onMessage(message);
         }
 
+        /// <inheritdoc />
         public void OnCompleted() { }
 
+        /// <inheritdoc />
         public void OnError(Exception error) { }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _listenerSubscription?.Dispose();

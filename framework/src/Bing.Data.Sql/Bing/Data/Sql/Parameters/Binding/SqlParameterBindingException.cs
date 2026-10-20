@@ -6,7 +6,7 @@ namespace Bing.Data.Sql;
 public sealed class SqlParameterBindingException : Exception
 {
     /// <summary>
-    /// 初始化一个<see cref="SqlParameterBindingException"/>类型的实例
+    /// 初始化一个 <see cref="SqlParameterBindingException"/> 类型的实例。
     /// </summary>
     /// <param name="parameterName">参数名称</param>
     /// <param name="context">参数绑定上下文</param>
@@ -24,32 +24,32 @@ public sealed class SqlParameterBindingException : Exception
     }
 
     /// <summary>
-    /// 参数名称
+    /// 获取参数名称
     /// </summary>
     public string ParameterName { get; }
 
     /// <summary>
-    /// SQL 语句
+    /// 获取SQL 语句
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 数据源标识
+    /// 获取数据源标识
     /// </summary>
     public string DbKey { get; }
 
     /// <summary>
-    /// 参数源类型
+    /// 获取参数源类型
     /// </summary>
     public Type SourceType { get; }
 
     /// <summary>
-    /// 实体类型
+    /// 获取实体类型
     /// </summary>
     public Type EntityType { get; }
 
     /// <summary>
-    /// 关联属性名称
+    /// 获取关联属性名称
     /// </summary>
     public string PropertyName { get; }
 

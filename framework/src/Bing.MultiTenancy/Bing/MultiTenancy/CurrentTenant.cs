@@ -22,7 +22,7 @@ public class CurrentTenant : ICurrentTenant, ITransientDependency
     public string? Name => _currentTenantAccessor.Current?.Name;
 
     /// <summary>
-    /// 使用指定当前租户访问器初始化 <see cref="CurrentTenant"/> 的实例。
+    /// 初始化一个 <see cref="CurrentTenant"/> 类型的实例。
     /// </summary>
     /// <param name="currentTenantAccessor">保存当前异步执行流租户信息的访问器。</param>
     public CurrentTenant(ICurrentTenantAccessor currentTenantAccessor) => _currentTenantAccessor = currentTenantAccessor;

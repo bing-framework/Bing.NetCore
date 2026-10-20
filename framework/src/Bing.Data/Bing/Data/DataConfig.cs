@@ -16,13 +16,19 @@ public class DataConfig
     public SqlOptions SqlOptions { get; set; }
 
     /// <summary>
-    /// 获取或设置是否自动提交事务；默认值为 <c>false</c>。
+    /// 获取或设置是否自动提交事务。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>false</c>。
+    /// </remarks>
     public bool AutoCommit { get; set; } = false;
 
     /// <summary>
-    /// 获取或设置是否启用并发版本号验证；默认值为 <c>true</c>。
+    /// 获取或设置是否启用并发版本号验证。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>true</c>。
+    /// </remarks>
     public bool EnabledValidateVersion { get; set; } = true;
 
     /// <summary>
@@ -34,8 +40,11 @@ public class DataConfig
     public Action<string, string, object> AdoLogInterceptor { get; set; } = null;
 
     /// <summary>
-    /// 获取或设置是否启用逻辑删除记录过滤；默认值为 <c>true</c>。
+    /// 获取或设置是否启用逻辑删除记录过滤。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>true</c>。
+    /// </remarks>
     public bool EnabledDeleteFilter { get; set; } = true;
 
     /// <summary>

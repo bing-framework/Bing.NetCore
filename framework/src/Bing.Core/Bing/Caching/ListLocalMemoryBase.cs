@@ -7,11 +7,22 @@
 public abstract class ListLocalMemoryBase<T> : IListCache<T>
 {
     /// <inheritdoc />
-    public int Count => GetCache().Count;
+    public int Count
+    {
+        get
+        {
+            lock (GetSyncCache())
+                return GetCache().Count;
+        }
+    }
 
     /// <inheritdoc />
-    /// <remarks>直接返回内部可变列表；调用方修改该列表会绕过当前类的同步控制。</remarks>
-    public virtual IList<T> ReaderAll() => GetCache();
+    /// <remarks>返回读取时的列表快照；快照中的项目不会被深度复制。</remarks>
+    public virtual IList<T> ReaderAll()
+    {
+        lock (GetSyncCache())
+            return new List<T>(GetCache());
+    }
 
     /// <summary>
     /// 清空缓存中的全部项目。
@@ -23,30 +34,31 @@ public abstract class ListLocalMemoryBase<T> : IListCache<T>
     }
 
     /// <inheritdoc />
-    /// <remarks>存在性检查与后续添加不构成单个原子操作，派生类应提供稳定的同步对象。</remarks>
     public virtual bool Add(T item)
     {
-        if (Exists(item))
-            return false;
         lock (GetSyncCache())
         {
-            GetCache().Add(item);
+            var cache = GetCache();
+            if (cache.Contains(item))
+                return false;
+            cache.Add(item);
             return true;
         }
     }
 
     /// <inheritdoc />
-    /// <remarks>存在性检查与后续移除不构成单个原子操作。</remarks>
     public virtual bool Remove(T item)
     {
-        if (!Exists(item))
-            return false;
         lock (GetSyncCache())
             return GetCache().Remove(item);
     }
 
     /// <inheritdoc />
-    public virtual bool Exists(T item) => GetCache().Contains(item);
+    public virtual bool Exists(T item)
+    {
+        lock (GetSyncCache())
+            return GetCache().Contains(item);
+    }
 
     /// <summary>
     /// 获取当前缓存使用的内部可变列表。

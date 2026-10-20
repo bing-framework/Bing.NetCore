@@ -5,9 +5,9 @@ using Bing.Extensions;
 namespace Bing.Trees;
 
 /// <summary>
-/// 树型表格结果
+/// 将树节点序列转换为供树形表格使用的节点结果列表。
 /// </summary>
-/// <typeparam name="TNode">树型节点类型</typeparam>
+/// <typeparam name="TNode">树形节点类型。</typeparam>
 public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : TreeDto<TNode>
 {
     /// <summary>
@@ -26,7 +26,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
     private readonly bool _async;
 
     /// <summary>
-    /// 初始化一个<see cref="TreeTableResult{TNode}"/>类型的实例
+    /// 初始化一个 <see cref="TreeTableResult{TNode}"/> 类型的实例。
     /// </summary>
     /// <param name="data">树型参数列表</param>
     /// <param name="async">是否异步加载</param>
@@ -37,10 +37,7 @@ public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : Tree
         _result = new List<TNode>();
     }
 
-    /// <summary>
-    /// 获取树型表格结果
-    /// </summary>
-    /// <returns>树型表格节点结果列表。</returns>
+    /// <inheritdoc />
     public List<TNode> GetResult()
     {
         if (_data == null)

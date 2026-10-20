@@ -7,10 +7,13 @@ namespace Bing.Domain.Entities;
 /// </summary>
 public class ListComparatorTest
 {
+    /// <summary>
+    /// 比较实体列表及其整数标识的比较器。
+    /// </summary>
     private readonly ListComparator<IntAggregateRootSample, int> _comparator;
 
     /// <summary>
-    /// 初始化
+    /// 初始化一个 <see cref="ListComparatorTest"/> 类型的实例。
     /// </summary>
     public ListComparatorTest()
     {

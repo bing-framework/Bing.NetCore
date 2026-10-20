@@ -16,9 +16,7 @@ public class DefaultInitLogger<T> : IInitLogger<T>
         Entries = new List<BingInitLogEntry>();
     }
 
-    /// <summary>
-    /// 获取已记录的初始化日志条目。
-    /// </summary>
+    /// <inheritdoc />
     public List<BingInitLogEntry> Entries { get; }
 
     /// <inheritdoc />

@@ -16,28 +16,21 @@ public abstract class TreePersistentObjectBase : TreePersistentObjectBase<Guid, 
 /// <typeparam name="TParentId">父节点标识类型。</typeparam>
 public abstract class TreePersistentObjectBase<TKey, TParentId> : PersistentObjectBase<TKey>, IParentId<TParentId>, IPath, IEnabled, ISortId
 {
-    /// <summary>
-    /// 获取或设置父节点标识。
-    /// </summary>
+    /// <inheritdoc />
     public TParentId ParentId { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点的物化路径。
-    /// </summary>
+    /// <inheritdoc />
     public virtual string Path { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点在树中的层级。
-    /// </summary>
+    /// <inheritdoc />
     public int Level { get; set; }
 
-    /// <summary>
-    /// 获取或设置节点是否启用。
-    /// </summary>
+    /// <inheritdoc />
     public bool Enabled { get; set; }
 
-    /// <summary>
-    /// 获取或设置同级节点的排序号；为空时不指定排序号。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 为空时不指定排序号。
+    /// </remarks>
     public int? SortId { get; set; }
 }

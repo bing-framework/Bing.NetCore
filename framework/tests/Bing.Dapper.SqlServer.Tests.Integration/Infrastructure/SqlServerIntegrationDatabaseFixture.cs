@@ -25,7 +25,7 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     private ServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 获取 SQL Server 测试数据库连接字符串。
+    /// 获取或设置SQL Server 测试数据库连接字符串。
     /// </summary>
     public string ConnectionString { get; private set; }
 
@@ -35,10 +35,10 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     public IServiceProvider ServiceProvider => _serviceProvider ??
         throw new ObjectDisposedException(nameof(SqlServerIntegrationDatabaseFixture));
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 初始化受控 SQL Server 测试表和查询服务。
-    /// </summary>
-    /// <returns>异步任务。</returns>
+    /// </remarks>
     public async Task InitializeAsync()
     {
         if (IntegrationTestGate.IsProviderEnabled(Provider) == false)
@@ -69,7 +69,6 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     /// <summary>
     /// 清空受控 SQL Server 聚合集成测试表。
     /// </summary>
-    /// <returns>异步任务。</returns>
     public async Task ResetAsync()
     {
         if (IntegrationTestGate.IsProviderEnabled(Provider) == false)
@@ -83,7 +82,6 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     /// <summary>
     /// 写入受控 SQL Server 聚合测试数据。
     /// </summary>
-    /// <returns>异步任务。</returns>
     public async Task SeedAggregateDataAsync()
     {
         IntegrationDatabaseSafetyValidator.EnsureResetAllowed(ConnectionString, Provider);
@@ -111,10 +109,10 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor() =>
         ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放服务提供程序和 SQL Server 连接池。
-    /// </summary>
-    /// <returns>异步任务。</returns>
+    /// </remarks>
     public Task DisposeAsync() => DisposeAsyncCore();
 
     /// <inheritdoc />
@@ -123,7 +121,6 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     /// <summary>
     /// 执行异步释放。
     /// </summary>
-    /// <returns>异步任务。</returns>
     private async Task DisposeAsyncCore()
     {
         if (_serviceProvider is IAsyncDisposable asyncDisposable)

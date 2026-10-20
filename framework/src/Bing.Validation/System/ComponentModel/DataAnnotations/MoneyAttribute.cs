@@ -15,12 +15,12 @@ public class MoneyAttribute : ValidationAttribute
     private const string ErrorMsg = "'{0}' 必须是大于 {1}，小于或等于 {2}";
 
     /// <summary>
-    /// 最小值
+    /// 获取或设置最小值
     /// </summary>
     public decimal Min { get; set; }
 
     /// <summary>
-    /// 最大值
+    /// 获取或设置最大值
     /// </summary>
     public decimal Max { get; set; }
 
@@ -35,11 +35,7 @@ public class MoneyAttribute : ValidationAttribute
         Max = max;
     }
 
-    /// <summary>
-    /// 格式化错误消息
-    /// </summary>
-    /// <param name="name">发生验证错误的成员名称。</param>
-    /// <returns>格式化后的错误消息。</returns>
+    /// <inheritdoc />
     public override string FormatErrorMessage(string name)
     {
         if (ErrorMessage == null && ErrorMessageResourceName == null)
@@ -47,12 +43,7 @@ public class MoneyAttribute : ValidationAttribute
         return base.FormatErrorMessage(name);
     }
 
-    /// <summary>
-    /// 是否验证通过
-    /// </summary>
-    /// <param name="value">待验证的值。</param>
-    /// <param name="validationContext">验证上下文。</param>
-    /// <returns>验证通过时返回 <see cref="ValidationResult.Success"/>；验证失败时返回包含错误消息的验证结果。</returns>
+    /// <inheritdoc />
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         if (value.SafeString().IsEmpty())

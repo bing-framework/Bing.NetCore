@@ -9,7 +9,7 @@ namespace Bing.Caching.Internal;
 internal static class Helper
 {
     /// <summary>
-    /// 字典缓存
+    /// 按运行时类型缓存对象公共实例属性的字典转换委托。
     /// </summary>
     private static readonly ConcurrentDictionary<Type, Func<object, Dictionary<string, object>>> DictionaryCache =
         new ConcurrentDictionary<Type, Func<object, Dictionary<string, object>>>();

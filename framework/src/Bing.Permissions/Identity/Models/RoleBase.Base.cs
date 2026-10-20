@@ -17,7 +17,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     #region 属性
 
     /// <summary>
-    /// 角色编码
+    /// 获取或设置角色编码
     /// </summary>
     [Display(Name = "角色编码")]
     [Required(ErrorMessage = "角色编码不能为空")]
@@ -25,7 +25,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     public string Code { get; set; }
 
     /// <summary>
-    /// 角色名称
+    /// 获取或设置角色名称
     /// </summary>
     [Display(Name = "角色名称")]
     [Required(ErrorMessage = "角色名称不能为空")]
@@ -33,7 +33,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     public string Name { get; set; }
 
     /// <summary>
-    /// 标准化角色名称
+    /// 获取或设置标准化角色名称
     /// </summary>
     [Display(Name = "标准化角色名称")]
     [Required(ErrorMessage = "标准化角色名称不能为空")]
@@ -41,7 +41,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     public string NormalizedName { get; set; }
 
     /// <summary>
-    /// 角色类型
+    /// 获取或设置角色类型
     /// </summary>
     [Display(Name = "角色类型")]
     [Required(ErrorMessage = "角色类型不能为空")]
@@ -49,75 +49,65 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     public string Type { get; set; }
 
     /// <summary>
-    /// 是否管理员角色
+    /// 获取或设置是否管理员角色
     /// </summary>
     [Display(Name = "是否管理员角色")]
     [Required(ErrorMessage = "是否管理员角色不能为空")]
     public bool IsAdmin { get; set; }
 
     /// <summary>
-    /// 是否默认角色
+    /// 获取或设置是否默认角色
     /// </summary>
     [Display(Name = "是否默认角色")]
     [Required(ErrorMessage = "是否默认角色不能为空")]
     public bool IsDefault { get; set; }
 
     /// <summary>
-    /// 是否系统角色
+    /// 获取或设置是否系统角色
     /// </summary>
     [Display(Name = "是否系统角色")]
     [Required(ErrorMessage = "是否系统角色不能为空")]
     public bool IsSystem { get; set; }
 
     /// <summary>
-    /// 备注
+    /// 获取或设置备注
     /// </summary>
     [Display(Name = "备注")]
     [StringLength(500, ErrorMessage = "备注输入过长，不能超过500位")]
     public string Remark { get; set; }
 
     /// <summary>
-    /// 拼音简码
+    /// 获取或设置拼音简码
     /// </summary>
     [Display(Name = "拼音简码")]
     [StringLength(200, ErrorMessage = "拼音简码输入过长，不能超过200位")]
     public string PinYin { get; set; }
 
     /// <summary>
-    /// 签名
+    /// 获取或设置签名
     /// </summary>
     [Display(Name = "签名")]
     [StringLength(256, ErrorMessage = "签名输入过长，不能超过256位")]
     public string Sign { get; set; }
 
-    /// <summary>
-    /// 是否删除
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "是否删除")]
     [Required(ErrorMessage = "是否删除不能为空")]
     public bool IsDeleted { get; set; }
 
-    /// <summary>
-    /// 创建时间
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "创建时间")]
     public DateTime? CreationTime { get; set; }
 
-    /// <summary>
-    /// 创建人标识
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "创建人标识")]
     public Guid? CreatorId { get; set; }
 
-    /// <summary>
-    /// 最后修改时间
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "最后修改时间")]
     public DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
-    /// 最后修改人标识
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "最后修改人标识")]
     public Guid? LastModifierId { get; set; }
 
@@ -126,7 +116,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="TreeEntityBase{TEntity,TKey,TParentId}"/>类型的实例
+    /// 初始化一个 <see cref="RoleBase{TRole, TKey, TParentId}"/> 类型的实例。
     /// </summary>
     /// <param name="id">标识</param>
     /// <param name="path">路径</param>
@@ -137,9 +127,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
 
     #region AddDescriptions(添加描述)
 
-    /// <summary>
-    /// 添加描述
-    /// </summary>
+    /// <inheritdoc />
     protected override void AddDescriptions()
     {
         AddDescription(t => t.Id);
@@ -166,10 +154,7 @@ public abstract partial class RoleBase<TRole, TKey, TParentId> : TreeEntityBase<
 
     #region AddChanges(添加变更列表)
 
-    /// <summary>
-    /// 添加变更列表
-    /// </summary>
-    /// <param name="other">用于比较的角色对象。</param>
+    /// <inheritdoc />
     protected override void AddChanges(TRole other)
     {
         AddChange(t => t.Id, other.Id);

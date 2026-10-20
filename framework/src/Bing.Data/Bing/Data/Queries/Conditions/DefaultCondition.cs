@@ -14,14 +14,11 @@ public class DefaultCondition<TEntity> : ICondition<TEntity> where TEntity : cla
     private readonly Expression<Func<TEntity, bool>> _condition;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultCondition{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="DefaultCondition{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="condition">查询条件</param>
     public DefaultCondition(Expression<Func<TEntity, bool>> condition) => _condition = condition;
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>构造函数传入的查询条件表达式。</returns>
+    /// <inheritdoc />
     public Expression<Func<TEntity, bool>> GetCondition() => _condition;
 }

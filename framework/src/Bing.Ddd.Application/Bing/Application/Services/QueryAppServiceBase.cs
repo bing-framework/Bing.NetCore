@@ -19,7 +19,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter> : Quer
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 初始化一个<see cref="QueryAppServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
+    /// 初始化一个 <see cref="QueryAppServiceBase{TEntity, TDto, TQueryParameter}"/> 类型的实例。
     /// </summary>
     /// <param name="store">查询存储器</param>
     protected QueryAppServiceBase(IQueryStore<TEntity, Guid> store) : base(store)
@@ -45,12 +45,12 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
     private readonly IQueryStore<TEntity, TKey> _store;
 
     /// <summary>
-    /// 查询时是否跟踪对象
+    /// 获取查询时是否跟踪对象
     /// </summary>
     protected virtual bool IsTracking => false;
 
     /// <summary>
-    /// 初始化一个<see cref="QueryAppServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="QueryAppServiceBase{TEntity, TDto, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="store">查询存储器</param>
     protected QueryAppServiceBase(IQueryStore<TEntity, TKey> store) => _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -64,11 +64,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
 
     #region GetByIdAsync(通过编号获取)
 
-    /// <summary>
-    /// 通过编号获取
-    /// </summary>
-    /// <param name="id">实体编号</param>
-    /// <returns>实体存在时返回转换后的数据传输对象；不存在时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public virtual async Task<TDto> GetByIdAsync(object id)
     {
         var key = Conv.To<TKey>(id);
@@ -79,11 +75,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
 
     #region GetByIdsAsync(通过编号列表获取)
 
-    /// <summary>
-    /// 通过编号列表获取
-    /// </summary>
-    /// <param name="ids">用逗号分隔带额Id列表，范例："1,2"</param>
-    /// <returns>按标识查询并转换后的数据传输对象列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TDto>> GetByIdsAsync(string ids)
     {
         var entities = await _store.FindByIdsAsync(ids);
@@ -94,10 +86,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
 
     #region GetAll(获取全部)
 
-    /// <summary>
-    /// 获取全部
-    /// </summary>
-    /// <returns>全部实体转换后的数据传输对象列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TDto>> GetAllAsync()
     {
         var entities = await _store.FindAllAsync();
@@ -120,11 +109,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
         return ExecuteQuery(parameter).ToList().Select(ToDto).ToList();
     }
 
-    /// <summary>
-    /// 查询
-    /// </summary>
-    /// <param name="parameter">查询参数</param>
-    /// <returns>异步查询得到的数据传输对象列表；参数为空时返回空列表。</returns>
+    /// <inheritdoc />
     public virtual async Task<List<TDto>> QueryAsync(TQueryParameter parameter)
     {
         if (parameter == null)
@@ -187,11 +172,7 @@ public abstract class QueryAppServiceBase<TEntity, TDto, TQueryParameter, TKey> 
         return queryable.ToPagerList(query.GetPager()).Convert(ToDto);
     }
 
-    /// <summary>
-    /// 分页查询
-    /// </summary>
-    /// <param name="parameter">查询参数</param>
-    /// <returns>异步分页查询结果；参数为空时返回空分页结果。</returns>
+    /// <inheritdoc />
     public virtual async Task<PagerList<TDto>> PagerQueryAsync(TQueryParameter parameter)
     {
         if (parameter == null)

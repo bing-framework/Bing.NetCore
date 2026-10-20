@@ -5,7 +5,7 @@
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L4 领域层 ｜ **当前版本**：7.0.0 ｜ **源文件**：5
 >
-> **上游 Bing 包**：无（本包是叶子/基础包）
+> **上游 Bing 包**：`Bing.ObjectMapping`、`Bing.Ddd.Application.Contracts`、`Bing.Ddd.Domain`
 
 ---
 

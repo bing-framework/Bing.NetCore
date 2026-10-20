@@ -8,9 +8,7 @@ using Xunit;
 namespace Bing.Logging.Tests;
 
 /// <summary>
-/// <see cref="LogContext"/>、<see cref="LogContextAccessor"/>、<see cref="LogFactory"/>、
-/// <see cref="BingLoggingBuilder"/>、<see cref="ContextDataTypes"/>、<see cref="NullLogCallerInfo"/>
-/// 单元测试
+/// <see cref="LogContext"/>、<see cref="LogContextAccessor"/>、<see cref="LogFactory"/>、 <see cref="BingLoggingBuilder"/>、<see cref="ContextDataTypes"/>、<see cref="NullLogCallerInfo"/> 单元测试
 /// </summary>
 public class LogContextAndFactoryTest
 {
@@ -19,8 +17,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：默认构造后 Data 字典不为 null，Tags 列表不为 null，
-    /// 防止使用方直接访问时触发 NullReferenceException。
+    /// 测试目的：默认构造后 Data 字典不为 null，Tags 列表不为 null， 防止使用方直接访问时触发 NullReferenceException。
     /// </summary>
     [Fact]
     public void LogContext_Default_DataAndTagsShouldNotBeNull()
@@ -36,8 +33,7 @@ public class LogContextAndFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：所有 string 属性默认应为 null，IsWebEnv 默认应为 false，
-    /// 确保不携带意外默认值影响上游逻辑。
+    /// 测试目的：所有 string 属性默认应为 null，IsWebEnv 默认应为 false， 确保不携带意外默认值影响上游逻辑。
     /// </summary>
     [Fact]
     public void LogContext_Default_StringPropertiesShouldBeNullAndIsWebEnvFalse()
@@ -149,8 +145,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：当 LogContext.Current 为 null 时，LogContextAccessor.Context 应创建并返回新实例，
-    /// 确保不返回 null。
+    /// 测试目的：当 LogContext.Current 为 null 时，LogContextAccessor.Context 应创建并返回新实例， 确保不返回 null。
     /// </summary>
     [Fact]
     public void LogContextAccessor_Context_WhenCurrentIsNull_ShouldCreateNew()
@@ -175,8 +170,7 @@ public class LogContextAndFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：新创建的 LogContext 应包含非空的 TraceId，
-    /// 确保分布式追踪字段不为空。
+    /// 测试目的：新创建的 LogContext 应包含非空的 TraceId， 确保分布式追踪字段不为空。
     /// </summary>
     [Fact]
     public void LogContextAccessor_Context_ShouldHaveNonNullTraceId()
@@ -205,8 +199,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：传入 null ILoggerFactory 时，构造器应抛出 ArgumentNullException，
-    /// 防止在运行时遇到意外 NRE。
+    /// 测试目的：传入 null ILoggerFactory 时，构造器应抛出 ArgumentNullException， 防止在运行时遇到意外 NRE。
     /// </summary>
     [Fact]
     public void LogFactory_Constructor_NullLoggerFactory_ShouldThrow()
@@ -220,8 +213,7 @@ public class LogContextAndFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：CreateLog(string) 应返回非 null 的 ILog 实例，
-    /// 确保工厂方法按 categoryName 正确创建日志操作对象。
+    /// 测试目的：CreateLog(string) 应返回非 null 的 ILog 实例， 确保工厂方法按 categoryName 正确创建日志操作对象。
     /// </summary>
     [Fact]
     public void LogFactory_CreateLog_WithCategoryName_ShouldReturnNonNullLog()
@@ -243,8 +235,7 @@ public class LogContextAndFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：CreateLog(Type) 应返回非 null 的 ILog 实例，
-    /// 确保按类型创建日志对象的路径正确。
+    /// 测试目的：CreateLog(Type) 应返回非 null 的 ILog 实例， 确保按类型创建日志对象的路径正确。
     /// </summary>
     [Fact]
     public void LogFactory_CreateLog_WithType_ShouldReturnNonNullLog()
@@ -270,8 +261,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：构造器应将 IServiceCollection 正确存储到 Services 属性，
-    /// 确保扩展方法可以通过 builder.Services 注册依赖。
+    /// 测试目的：构造器应将 IServiceCollection 正确存储到 Services 属性， 确保扩展方法可以通过 builder.Services 注册依赖。
     /// </summary>
     [Fact]
     public void BingLoggingBuilder_Constructor_ShouldSetServicesProperty()
@@ -291,8 +281,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ContextDataTypes 中的常量前缀应保持稳定，
-    /// 防止意外重命名导致 Serilog/日志提供程序的扩展属性键失配。
+    /// 测试目的：ContextDataTypes 中的常量前缀应保持稳定， 防止意外重命名导致 Serilog/日志提供程序的扩展属性键失配。
     /// </summary>
     [Fact]
     public void ContextDataTypes_Constants_ShouldMatchExpectedValues()
@@ -308,8 +297,7 @@ public class LogContextAndFactoryTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：NullLogCallerInfo.Instance 所有属性应返回 null/0/null，
-    /// 用于调用者信息不可用时的安全兜底。
+    /// 测试目的：NullLogCallerInfo.Instance 所有属性应返回 null/0/null， 用于调用者信息不可用时的安全兜底。
     /// </summary>
     [Fact]
     public void NullLogCallerInfo_Instance_AllPropertiesShouldBeNullOrDefault()
@@ -325,8 +313,7 @@ public class LogContextAndFactoryTest
     }
 
     /// <summary>
-    /// 测试目的：NullLogCallerInfo.Instance 多次访问应返回值语义相同的结构，
-    /// 确保 struct 使用安全一致。
+    /// 测试目的：NullLogCallerInfo.Instance 多次访问应返回值语义相同的结构， 确保 struct 使用安全一致。
     /// </summary>
     [Fact]
     public void NullLogCallerInfo_Instance_MultipleAccess_ShouldBeConsistent()

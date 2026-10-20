@@ -49,10 +49,7 @@ public class RealIpMiddleware : IMiddleware
         _trustedProxies = ParseTrustedProxies(_options.TrustedProxies);
     }
 
-    /// <summary>
-    /// 执行中间件拦截逻辑
-    /// </summary>
-    /// <param name="context">Http上下文</param>
+    /// <inheritdoc />
     public async Task InvokeAsync(HttpContext context)
     {
         var headers = context.Request.Headers;
@@ -181,11 +178,10 @@ public class RealIpOptions
 /// </summary>
 public class RealIpFilter : IStartupFilter
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 配置真实客户端 IP 中间件的请求管道。
-    /// </summary>
-    /// <param name="next">后续请求管道委托。</param>
-    /// <returns>已添加真实 IP 中间件的请求管道配置委托。</returns>
+    /// </remarks>
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
     {
         app.UseMiddleware<RealIpMiddleware>();

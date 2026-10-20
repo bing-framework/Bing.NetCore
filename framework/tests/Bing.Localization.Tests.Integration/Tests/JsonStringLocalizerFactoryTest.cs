@@ -14,7 +14,7 @@ public class JsonStringLocalizerFactoryTest
     private readonly IStringLocalizerFactory _factory;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="JsonStringLocalizerFactoryTest"/> 类型的实例。
     /// </summary>
     public JsonStringLocalizerFactoryTest(IStringLocalizerFactory factory)
     {

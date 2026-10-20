@@ -19,7 +19,7 @@ public sealed class MySqlIntegrationDatabaseFixtureTest
     private readonly MySqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="MySqlIntegrationDatabaseFixtureTest"/>类型的实例。
+    /// 初始化一个 <see cref="MySqlIntegrationDatabaseFixtureTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">MySQL 集成测试数据库固定装置。</param>
     public MySqlIntegrationDatabaseFixtureTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;

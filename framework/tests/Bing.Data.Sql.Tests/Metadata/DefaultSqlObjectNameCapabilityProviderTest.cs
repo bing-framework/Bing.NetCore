@@ -12,6 +12,10 @@ public class DefaultSqlObjectNameCapabilityProviderTest
     /// <summary>
     /// 测试目的：验证每个受支持 Provider 应返回精确的对象名称能力合同。
     /// </summary>
+    /// <param name="databaseType">要验证的数据库类型。</param>
+    /// <param name="supportsDatabase">该 Provider 是否支持数据库限定名称。</param>
+    /// <param name="supportsSchema">该 Provider 是否支持架构限定名称。</param>
+    /// <param name="maximumNameParts">对象名称允许的最大组成部分数。</param>
     [Theory]
     [InlineData(DatabaseType.MySql, false, true, 2)]
     [InlineData(DatabaseType.Doris, false, true, 2)]

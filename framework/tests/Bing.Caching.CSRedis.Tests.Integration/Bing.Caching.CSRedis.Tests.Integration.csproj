@@ -13,6 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\CacheContractAssertions.cs" Link="CacheContractAssertions.cs" />
+    <Compile Include="..\CacheCoordinationAssertions.cs" Link="CacheCoordinationAssertions.cs" />
     <ProjectReference Include="..\..\src\Bing.Caching.CSRedis\Bing.Caching.CSRedis.csproj" />
     <ProjectReference Include="..\..\src\Bing.Locks.CSRedis\Bing.Locks.CSRedis.csproj" />
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />

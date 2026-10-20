@@ -11,7 +11,7 @@ namespace Bing.Tests.Net.Mail.Smtp;
 public class SmtpEmailSenderTest:TestBase
 {
     /// <summary>
-    /// 配置提供程序
+    /// 为 SMTP 邮件发送测试提供邮件配置的提供器。
     /// </summary>
     private readonly IEmailConfigProvider _configProvider;
     /// <summary>
@@ -24,6 +24,10 @@ public class SmtpEmailSenderTest:TestBase
     /// </summary>
     private readonly List<string> _to;
 
+    /// <summary>
+    /// 初始化一个 <see cref="SmtpEmailSenderTest"/> 类型的实例。
+    /// </summary>
+    /// <param name="output">当前测试的输出辅助对象。</param>
     public SmtpEmailSenderTest(ITestOutputHelper output) : base(output)
     {
         _configProvider=new DefaultEmailConfigProvider(new EmailConfig()

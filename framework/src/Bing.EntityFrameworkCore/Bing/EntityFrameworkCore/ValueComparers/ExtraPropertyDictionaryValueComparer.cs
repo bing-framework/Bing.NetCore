@@ -8,7 +8,9 @@ namespace Bing.EntityFrameworkCore.ValueComparers;
 /// </summary>
 public class ExtraPropertyDictionaryValueComparer : ValueComparer<ExtraPropertyDictionary>
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// 初始化一个 <see cref="ExtraPropertyDictionaryValueComparer"/> 类型的实例。
+    /// </summary>
     public ExtraPropertyDictionaryValueComparer() : base(
         (d1, d2) => d1.SequenceEqual(d2),
         d => d.Aggregate(0, (key, value) => HashCode.Combine(key, value.GetHashCode())),

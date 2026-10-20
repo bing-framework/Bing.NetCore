@@ -114,7 +114,7 @@ internal static class DatabaseContextScopeStack
     private sealed class ScopeFrame
     {
         /// <summary>
-        /// 初始化一个<see cref="ScopeFrame"/>类型的实例。
+        /// 初始化一个 <see cref="ScopeFrame"/> 类型的实例。
         /// </summary>
         /// <param name="scopeId">作用域标识。</param>
         /// <param name="parent">父级作用域帧。</param>
@@ -129,22 +129,22 @@ internal static class DatabaseContextScopeStack
         }
 
         /// <summary>
-        /// 作用域标识。
+        /// 获取作用域标识。
         /// </summary>
         public Guid ScopeId { get; }
 
         /// <summary>
-        /// 父级作用域帧。
+        /// 获取父级作用域帧。
         /// </summary>
         public ScopeFrame Parent { get; }
 
         /// <summary>
-        /// 父级数据库上下文快照。
+        /// 获取父级数据库上下文快照。
         /// </summary>
         public DatabaseContext ParentContext { get; }
 
         /// <summary>
-        /// 当前数据库上下文快照。
+        /// 获取当前数据库上下文快照。
         /// </summary>
         public DatabaseContext Context { get; }
     }
@@ -170,7 +170,7 @@ internal static class DatabaseContextScopeStack
         private readonly ScopeFrame _frame;
 
         /// <summary>
-        /// 初始化一个<see cref="Scope"/>类型的实例。
+        /// 初始化一个 <see cref="Scope"/> 类型的实例。
         /// </summary>
         /// <param name="accessor">数据库上下文访问器。</param>
         /// <param name="stack">作用域帧栈。</param>
@@ -182,9 +182,10 @@ internal static class DatabaseContextScopeStack
             _frame = frame;
         }
 
-        /// <summary>
+        /// <inheritdoc />
+        /// <remarks>
         /// 释放作用域并恢复父级数据库上下文。
-        /// </summary>
+        /// </remarks>
         public void Dispose()
         {
             _stack.Exit(_accessor, _frame);

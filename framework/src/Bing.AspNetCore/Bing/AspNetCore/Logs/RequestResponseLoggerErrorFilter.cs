@@ -20,10 +20,7 @@ public class RequestResponseLoggerErrorFilter : Attribute, IExceptionFilter
         return context.RequestServices.GetRequiredService<IRequestResponseLogCreator>().Log;
     }
 
-    /// <summary>
-    /// 执行操作异常
-    /// </summary>
-    /// <param name="context">异常上下文</param>
+    /// <inheritdoc />
     public void OnException(ExceptionContext context)
     {
         var log = GetLog(context.HttpContext);

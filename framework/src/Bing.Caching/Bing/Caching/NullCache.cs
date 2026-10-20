@@ -6,7 +6,7 @@
 public sealed class NullCache : ILocalCache
 {
     /// <summary>
-    /// 获取全局共享的空缓存实例。
+    /// 全局共享的空缓存实例。
     /// </summary>
     /// <remarks>
     /// 该实例是进程内共享的无操作单例。读取始终视为未命中，写入、删除和清理不产生持久化副作用；带数据获取委托的读取会直接调用该委托，不会缓存返回值。
@@ -20,10 +20,12 @@ public sealed class NullCache : ILocalCache
     public bool Exists(string key) => false;
 
     /// <inheritdoc />
-    public Task<bool> ExistsAsync(CacheKey key, CancellationToken cancellationToken = default) => Task.FromResult(false);
+    public Task<bool> ExistsAsync(CacheKey key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) : Task.FromResult(false);
 
     /// <inheritdoc />
-    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default) => Task.FromResult(false);
+    public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) : Task.FromResult(false);
 
     /// <inheritdoc />
     public T Get<T>(CacheKey key) => default;
@@ -38,21 +40,54 @@ public sealed class NullCache : ILocalCache
     public T Get<T>(string key, Func<T> dataRetriever, CacheOptions options = null) => dataRetriever == null ? default : dataRetriever();
 
     /// <inheritdoc />
-    public Task<object> GetAsync(string key, Type type, CancellationToken cancellationToken = default) => null;
+    public Task<object> GetAsync(string key, Type type, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<object>(cancellationToken) : Task.FromResult<object>(null);
 
     /// <inheritdoc />
-    public Task<T> GetAsync<T>(CacheKey key, CancellationToken cancellationToken = default) => Task.FromResult<T>(default);
+    public Task<T> GetAsync<T>(CacheKey key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<T>(cancellationToken) : Task.FromResult<T>(default);
 
     /// <inheritdoc />
-    public Task<T> GetAsync<T>(string key, CancellationToken cancellationToken = default) => Task.FromResult<T>(default);
+    public Task<T> GetAsync<T>(string key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<T>(cancellationToken) : Task.FromResult<T>(default);
 
     /// <inheritdoc />
-    public async Task<T> GetAsync<T>(CacheKey key, Func<Task<T>> dataRetriever, CacheOptions options = null, CancellationToken cancellationToken = default) =>
-        dataRetriever == null ? default : await dataRetriever();
+    public Task<T> GetAsync<T>(CacheKey key, Func<Task<T>> dataRetriever, CacheOptions options = null, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<T>(cancellationToken);
+
+        return dataRetriever == null ? Task.FromResult<T>(default) : dataRetriever();
+    }
 
     /// <inheritdoc />
-    public async Task<T> GetAsync<T>(string key, Func<Task<T>> dataRetriever, CacheOptions options = null, CancellationToken cancellationToken = default) =>
-        dataRetriever == null ? default : await dataRetriever();
+    public Task<T> GetAsync<T>(string key, Func<Task<T>> dataRetriever, CacheOptions options = null, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<T>(cancellationToken);
+
+        return dataRetriever == null ? Task.FromResult<T>(default) : dataRetriever();
+    }
+
+    /// <inheritdoc />
+    public Task<T> GetAsync<T>(CacheKey key, Func<CancellationToken, Task<T>> dataRetriever,
+        CacheOptions options = null, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<T>(cancellationToken);
+
+        return dataRetriever == null ? Task.FromResult<T>(default) : dataRetriever(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<T> GetAsync<T>(string key, Func<CancellationToken, Task<T>> dataRetriever,
+        CacheOptions options = null, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<T>(cancellationToken);
+
+        return dataRetriever == null ? Task.FromResult<T>(default) : dataRetriever(cancellationToken);
+    }
 
     /// <inheritdoc />
     public List<T> GetAll<T>(IEnumerable<CacheKey> keys) => [];
@@ -61,16 +96,46 @@ public sealed class NullCache : ILocalCache
     public List<T> GetAll<T>(IEnumerable<string> keys) => [];
 
     /// <inheritdoc />
-    public Task<List<T>> GetAllAsync<T>(IEnumerable<CacheKey> keys, CancellationToken cancellationToken = default) => Task.FromResult(new List<T>());
+    public Task<List<T>> GetAllAsync<T>(IEnumerable<CacheKey> keys, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<List<T>>(cancellationToken) : Task.FromResult(new List<T>());
 
     /// <inheritdoc />
-    public Task<List<T>> GetAllAsync<T>(IEnumerable<string> keys, CancellationToken cancellationToken = default) => Task.FromResult(new List<T>());
+    public Task<List<T>> GetAllAsync<T>(IEnumerable<string> keys, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<List<T>>(cancellationToken) : Task.FromResult(new List<T>());
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<CacheEntry<T>> GetAllStreamAsync<T>(IEnumerable<CacheKey> keys,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await Task.CompletedTask;
+        yield break;
+    }
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<CacheEntry<T>> GetAllStreamAsync<T>(IEnumerable<string> keys,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await Task.CompletedTask;
+        yield break;
+    }
 
     /// <inheritdoc />
     public List<T> GetByPrefix<T>(string prefix) => [];
 
     /// <inheritdoc />
-    public Task<List<T>> GetByPrefixAsync<T>(string prefix, CancellationToken cancellationToken = default) => Task.FromResult(new List<T>());
+    public Task<List<T>> GetByPrefixAsync<T>(string prefix, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<List<T>>(cancellationToken) : Task.FromResult(new List<T>());
+
+    /// <inheritdoc />
+    public async IAsyncEnumerable<CacheEntry<T>> GetByPrefixStreamAsync<T>(string prefix,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await Task.CompletedTask;
+        yield break;
+    }
 
     /// <inheritdoc />
     public bool TrySet<T>(CacheKey key, T value, CacheOptions options = null) => false;
@@ -79,10 +144,12 @@ public sealed class NullCache : ILocalCache
     public bool TrySet<T>(string key, T value, CacheOptions options = null) => false;
 
     /// <inheritdoc />
-    public Task<bool> TrySetAsync<T>(CacheKey key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.FromResult(false);
+    public Task<bool> TrySetAsync<T>(CacheKey key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) : Task.FromResult(false);
 
     /// <inheritdoc />
-    public Task<bool> TrySetAsync<T>(string key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.FromResult(false);
+    public Task<bool> TrySetAsync<T>(string key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled<bool>(cancellationToken) : Task.FromResult(false);
 
     /// <inheritdoc />
     public void Set<T>(CacheKey key, T value, CacheOptions options = null)
@@ -95,10 +162,12 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task SetAsync<T>(CacheKey key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task SetAsync<T>(CacheKey key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
-    public Task SetAsync<T>(string key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task SetAsync<T>(string key, T value, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void SetAll<T>(IDictionary<CacheKey, T> items, CacheOptions options = null)
@@ -111,10 +180,12 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task SetAllAsync<T>(IDictionary<CacheKey, T> items, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task SetAllAsync<T>(IDictionary<CacheKey, T> items, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
-    public Task SetAllAsync<T>(IDictionary<string, T> items, CacheOptions options = null, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task SetAllAsync<T>(IDictionary<string, T> items, CacheOptions options = null, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void Remove(CacheKey key)
@@ -127,10 +198,12 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task RemoveAsync(CacheKey key, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveAsync(CacheKey key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
-    public Task RemoveAsync(string key, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveAsync(string key, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void RemoveAll(IEnumerable<CacheKey> keys)
@@ -143,10 +216,12 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task RemoveAllAsync(IEnumerable<CacheKey> keys, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveAllAsync(IEnumerable<CacheKey> keys, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
-    public Task RemoveAllAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveAllAsync(IEnumerable<string> keys, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void RemoveByPrefix(string prefix)
@@ -154,7 +229,8 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void RemoveByPattern(string pattern)
@@ -162,7 +238,8 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 
     /// <inheritdoc />
     public void Clear()
@@ -170,5 +247,6 @@ public sealed class NullCache : ILocalCache
     }
 
     /// <inheritdoc />
-    public Task ClearAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task ClearAsync(CancellationToken cancellationToken = default) =>
+        cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
 }

@@ -10,7 +10,7 @@ namespace Bing.SecurityLog;
 public class SimpleSecurityLogStore : ISecurityLogStore, ITransientDependency
 {
     /// <summary>
-    /// 使用日志记录器和安全日志选项初始化 <see cref="SimpleSecurityLogStore"/> 的实例。
+    /// 初始化一个 <see cref="SimpleSecurityLogStore"/> 类型的实例。
     /// </summary>
     /// <param name="logger">用于输出安全日志的日志记录器。</param>
     /// <param name="securityLogOptions">提供安全日志启用状态的选项。</param>

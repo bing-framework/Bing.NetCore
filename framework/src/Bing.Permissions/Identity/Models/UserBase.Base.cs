@@ -16,14 +16,14 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     #region 属性
 
     /// <summary>
-    /// 用户名
+    /// 获取或设置用户名
     /// </summary>
     [Display(Name = "用户名")]
     [StringLength(256, ErrorMessage = "用户名输入过长，不能超过256位")]
     public string UserName { get; set; }
 
     /// <summary>
-    /// 标准化用户名
+    /// 获取或设置标准化用户名
     /// </summary>
     [Display(Name = "标准化用户名")]
     [StringLength(256, ErrorMessage = "标准化用户名输入过长，不能超过256位")]
@@ -37,75 +37,75 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     public string Nickname { get; set; }
 
     /// <summary>
-    /// 电子邮箱
+    /// 获取或设置电子邮箱
     /// </summary>
     [Display(Name = "电子邮箱")]
     [StringLength(256, ErrorMessage = "电子邮箱s输入过长，不能超过256位")]
     public string Email { get; set; }
 
     /// <summary>
-    /// 标准化的电子邮箱
+    /// 获取或设置标准化的电子邮箱
     /// </summary>
     [Display(Name = "标准化的电子邮箱")]
     [StringLength(256, ErrorMessage = "标准化的电子邮箱输入过长，不能超过256位")]
     public string NormalizedEmail { get; set; }
 
     /// <summary>
-    /// 邮箱已确认
+    /// 获取或设置邮箱已确认
     /// </summary>
     [Display(Name = "邮箱已确认")]
     public bool EmailConfirmed { get; set; }
 
     /// <summary>
-    /// 手机号码
+    /// 获取或设置手机号码
     /// </summary>
     [Display(Name = "手机号码")]
     [StringLength(64, ErrorMessage = "手机号码输入过长，不能超过64位")]
     public string PhoneNumber { get; set; }
 
     /// <summary>
-    /// 手机号码已确认
+    /// 获取或设置手机号码已确认
     /// </summary>
     [Display(Name = "手机已确认")]
     public bool PhoneNumberConfirmed { get; set; }
 
     /// <summary>
-    /// 密码
+    /// 获取或设置密码
     /// </summary>
     [Display(Name = "密码")]
     [StringLength(256, ErrorMessage = "密码输入过长，不能超过256位")]
     public string Password { get; set; }
 
     /// <summary>
-    /// 密码哈希值
+    /// 获取或设置密码哈希值
     /// </summary>
     [Display(Name = "密码哈希值")]
     [StringLength(1024, ErrorMessage = "密码哈希值输入过长，不能超过1024位")]
     public string PasswordHash { get; set; }
 
     /// <summary>
-    /// 安全码
+    /// 获取或设置安全码
     /// </summary>
     [Display(Name = "安全码")]
     [StringLength(256, ErrorMessage = "安全码输入过长，不能超过256位")]
     public string SafePassword { get; set; }
 
     /// <summary>
-    /// 安全码哈希值
+    /// 获取或设置安全码哈希值
     /// </summary>
     [Display(Name = "安全码哈希值")]
     [StringLength(1024, ErrorMessage = "安全码哈希值输入过长，不能超过1024位")]
     public string SafePasswordHash { get; set; }
 
     /// <summary>
-    /// 安全戳
+    /// 获取或设置安全戳
     /// </summary>
     [Display(Name = "安全戳")]
     [StringLength(1024, ErrorMessage = "安全戳输入过长，不能超过1024位")]
     public string SecurityStamp { get; set; }
 
     /// <summary>
-    /// 启用双因子身份验证
+    /// 获取或设置启用双因子身份验证
     /// </summary>
     [Display(Name = "启用双因子身份验证")]
     public bool TwoFactorEnabled { get; set; }
@@ -117,108 +117,98 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// 冻结时间
+    /// 获取或设置冻结时间
     /// </summary>
     [Display(Name = "冻结时间")]
     public DateTime? DisabledTime { get; set; }
 
     /// <summary>
-    /// 锁定截止时间
+    /// 获取或设置锁定截止时间
     /// </summary>
     [Display(Name = "锁定截止时间")]
     public DateTimeOffset? LockoutEnd { get; set; }
 
     /// <summary>
-    /// 启用锁定
+    /// 获取或设置启用锁定
     /// </summary>
     [Display(Name = "启用锁定")]
     public bool LockoutEnabled { get; set; }
 
     /// <summary>
-    /// 是否系统用户
+    /// 获取或设置是否系统用户
     /// </summary>
     [Display(Name = "是否系统用户")]
     public bool IsSystem { get; set; }
 
     /// <summary>
-    /// 登录失败次数
+    /// 获取或设置登录失败次数
     /// </summary>
     [Display(Name = "登录失败次数")]
     public int AccessFailedCount { get; set; }
 
     /// <summary>
-    /// 登录次数
+    /// 获取或设置登录次数
     /// </summary>
     [Display(Name = "登录次数")]
     public int? LoginCount { get; set; }
 
     /// <summary>
-    /// 注册Ip
+    /// 获取或设置注册Ip
     /// </summary>
     [Display(Name = "注册Ip")]
     [StringLength(30, ErrorMessage = "注册Ip输入过长，不能超过30位")]
     public string RegisterIp { get; set; }
 
     /// <summary>
-    /// 上次登录时间
+    /// 获取或设置上次登录时间
     /// </summary>
     [Display(Name = "上次登录时间")]
     public DateTime? LastLoginTime { get; set; }
 
     /// <summary>
-    /// 上次登录Ip
+    /// 获取或设置上次登录Ip
     /// </summary>
     [Display(Name = "上次登录Ip")]
     [StringLength(30, ErrorMessage = "上次登录Ip输入过长，不能超过30位")]
     public string LastLoginIp { get; set; }
 
     /// <summary>
-    /// 本次登录时间
+    /// 获取或设置本次登录时间
     /// </summary>
     [Display(Name = "本次登录时间")]
     public DateTime? CurrentLoginTime { get; set; }
 
     /// <summary>
-    /// 本次登录Ip
+    /// 获取或设置本次登录Ip
     /// </summary>
     [Display(Name = "本次登录Ip")]
     [StringLength(30, ErrorMessage = "本次登录Ip输入过长，不能超过30位")]
     public string CurrentLoginIp { get; set; }
 
     /// <summary>
-    /// 备注
+    /// 获取或设置备注
     /// </summary>
     [Display(Name = "备注")]
     [StringLength(500, ErrorMessage = "备注输入过长，不能超过500位")]
     public string Remark { get; set; }
 
-    /// <summary>
-    /// 创建时间
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "创建时间")]
     public DateTime? CreationTime { get; set; }
 
-    /// <summary>
-    /// 创建人
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "创建人")]
     public Guid? CreatorId { get; set; }
 
-    /// <summary>
-    /// 最后修改时间
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "最后修改时间")]
     public DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
-    /// 最后修改人
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "最后修改人")]
     public Guid? LastModifierId { get; set; }
 
-    /// <summary>
-    /// 是否删除
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "是否删除")]
     public bool IsDeleted { get; set; }
 
@@ -227,7 +217,7 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="AggregateRoot{TEntity,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="UserBase{TUser, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">标识</param>
     protected UserBase(TKey id) : base(id) { }
@@ -236,9 +226,7 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
 
     #region AddDescriptions(添加描述)
 
-    /// <summary>
-    /// 添加描述
-    /// </summary>
+    /// <inheritdoc />
     protected override void AddDescriptions()
     {
         AddDescription(t => t.Id);
@@ -277,10 +265,7 @@ public abstract partial class UserBase<TUser, TKey> : AggregateRoot<TUser, TKey>
 
     #region AddChanges(添加变更列表)
 
-    /// <summary>
-    /// 添加变更列表
-    /// </summary>
-    /// <param name="other">用于比较的用户对象。</param>
+    /// <inheritdoc />
     protected override void AddChanges(TUser other)
     {
         AddChange(t => t.Id, other.Id);

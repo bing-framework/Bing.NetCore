@@ -8,7 +8,7 @@ namespace Bing.Logging;
 public interface IHasLogLevel
 {
     /// <summary>
-    /// 日志级别
+    /// 获取或设置日志级别
     /// </summary>
     LogLevel LogLevel { get; set; }
 }

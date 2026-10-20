@@ -24,7 +24,7 @@ public sealed class DatabaseScopeManager : IDatabaseScopeManager
     private readonly ISqlDataSourceResolver _dataSourceResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="DatabaseScopeManager"/>类型的实例
+    /// 初始化一个 <see cref="DatabaseScopeManager"/> 类型的实例。
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>

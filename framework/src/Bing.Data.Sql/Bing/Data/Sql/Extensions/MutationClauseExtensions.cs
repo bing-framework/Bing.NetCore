@@ -11,12 +11,11 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Mutation Clause 的 Fluent API 扩展。
-/// </summary>
+/// 设置 Insert 目标表。
 public static class MutationClauseExtensions
 {
     /// <summary>
-    /// 设置统一 Builder 的 Insert 目标实体表。
+    /// 设置 Insert 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">统一 SQL Builder。</param>
@@ -30,7 +29,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 设置统一 Builder 的 Insert 目标实体表和目标列。
+    /// 设置 Insert 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">统一 SQL Builder。</param>
@@ -51,7 +50,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 设置统一 Builder 的 Insert 目标表。
+    /// 设置 Insert 目标表。
     /// </summary>
     /// <param name="source">统一 SQL Builder。</param>
     /// <param name="table">可由当前 Provider 解析的目标表文本。</param>
@@ -72,7 +71,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 设置 Insert 目标实体表。
+    /// 设置 Insert 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">Insert Builder。</param>
@@ -81,7 +80,7 @@ public static class MutationClauseExtensions
         InsertInto<ISqlInsertBuilder, TEntity>(source);
 
     /// <summary>
-    /// 设置 Insert 目标实体表。
+    /// 设置 Insert 目标表。
     /// </summary>
     /// <typeparam name="T">支持 Insert 子句访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
@@ -149,7 +148,7 @@ public static class MutationClauseExtensions
         Columns<ISqlInsertBuilder>(source, columns);
 
     /// <summary>
-    /// 依据实体映射添加可写 Insert 列。
+    /// 添加 Insert 目标列。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">Insert Builder。</param>
@@ -160,7 +159,7 @@ public static class MutationClauseExtensions
         Columns<ISqlInsertBuilder, TEntity>(source, columns);
 
     /// <summary>
-    /// 依据实体映射添加可写 Insert 列。
+    /// 添加 Insert 目标列。
     /// </summary>
     /// <typeparam name="T">支持 Insert 和 Mutation 上下文访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
@@ -182,7 +181,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 添加一行 Insert Values。
+    /// 添加 Insert 值。
     /// </summary>
     /// <typeparam name="T">支持 Insert 子句访问的 Builder 类型。</typeparam>
     /// <param name="source">Insert Builder。</param>
@@ -198,7 +197,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 添加一行 Insert Values。
+    /// 添加 Insert 值。
     /// </summary>
     /// <param name="source">Insert Builder。</param>
     /// <param name="values">本行参数值。</param>
@@ -207,7 +206,7 @@ public static class MutationClauseExtensions
         Values<ISqlInsertBuilder>(source, values);
 
     /// <summary>
-    /// 添加多行 Insert Values。
+    /// 添加 Insert 值。
     /// </summary>
     /// <typeparam name="T">支持 Insert 子句访问的 Builder 类型。</typeparam>
     /// <param name="source">Insert Builder。</param>
@@ -223,7 +222,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 添加多行 Insert Values。
+    /// 添加 Insert 值。
     /// </summary>
     /// <param name="source">Insert Builder。</param>
     /// <param name="rows">待插入值行集合。</param>
@@ -232,7 +231,7 @@ public static class MutationClauseExtensions
         Values<ISqlInsertBuilder>(source, rows);
 
     /// <summary>
-    /// 设置 Update 目标实体表。
+    /// 设置 Update 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">Update Builder。</param>
@@ -241,7 +240,7 @@ public static class MutationClauseExtensions
         Update<ISqlUpdateBuilder, TEntity>(source);
 
     /// <summary>
-    /// 设置 Update 目标实体表。
+    /// 设置 Update 目标表。
     /// </summary>
     /// <typeparam name="T">支持 Update 子句访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
@@ -379,7 +378,7 @@ public static class MutationClauseExtensions
         Set<ISqlUpdateBuilder>(source, column, value);
 
     /// <summary>
-    /// 使用实体映射设置可更新列的参数化值。
+    /// 设置 Update 列值。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <typeparam name="TValue">属性值类型。</typeparam>
@@ -392,7 +391,7 @@ public static class MutationClauseExtensions
         Set<ISqlUpdateBuilder, TEntity, TValue>(source, column, value);
 
     /// <summary>
-    /// 使用实体映射设置可更新列的参数化值。
+    /// 设置 Update 列值。
     /// </summary>
     /// <typeparam name="T">支持 Update 和 Mutation 上下文访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
@@ -418,7 +417,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 设置 Delete 目标实体表。
+    /// 设置 Delete 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
     /// <param name="source">Delete Builder。</param>
@@ -427,7 +426,7 @@ public static class MutationClauseExtensions
         DeleteFrom<ISqlDeleteBuilder, TEntity>(source);
 
     /// <summary>
-    /// 设置 Delete 目标实体表。
+    /// 设置 Delete 目标表。
     /// </summary>
     /// <typeparam name="T">支持 Delete 子句访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
@@ -532,7 +531,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 使用 And 追加 Update 筛选条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <param name="source">Update Builder。</param>
     /// <param name="condition">查询条件。</param>
@@ -541,7 +540,7 @@ public static class MutationClauseExtensions
         WhereMutation(source, condition);
 
     /// <summary>
-    /// 使用 And 追加 Delete 筛选条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <param name="source">Delete Builder。</param>
     /// <param name="condition">查询条件。</param>
@@ -550,7 +549,7 @@ public static class MutationClauseExtensions
         WhereMutation(source, condition);
 
     /// <summary>
-    /// 根据统一 Builder 当前操作状态追加查询或 Mutation 条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <param name="source">统一 SQL Builder。</param>
     /// <param name="condition">要追加的筛选条件。</param>
@@ -567,7 +566,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 根据统一 Builder 当前操作状态追加参数化查询或 Mutation 条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <param name="source">统一 SQL Builder。</param>
     /// <param name="column">参与比较的列名。</param>
@@ -600,7 +599,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 使用实体映射追加参数化 Mutation 条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
     /// <typeparam name="TValue">条件属性值类型。</typeparam>
@@ -614,7 +613,7 @@ public static class MutationClauseExtensions
         Where<ISqlUpdateBuilder, TEntity, TValue>(source, column, value, @operator);
 
     /// <summary>
-    /// 使用实体映射追加参数化 Mutation 条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
     /// <typeparam name="TValue">条件属性值类型。</typeparam>
@@ -628,7 +627,7 @@ public static class MutationClauseExtensions
         Where<ISqlDeleteBuilder, TEntity, TValue>(source, column, value, @operator);
 
     /// <summary>
-    /// 根据当前操作状态为统一 Builder 追加参数化条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
     /// <typeparam name="TValue">条件属性值类型。</typeparam>
@@ -659,7 +658,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 使用实体映射追加参数化 Mutation 条件。
+    /// 追加筛选条件。
     /// </summary>
     /// <typeparam name="T">支持 Mutation Where 和上下文访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
@@ -709,7 +708,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 使用 Or 追加 Update 筛选条件。
+    /// 追加 Or 筛选条件。
     /// </summary>
     /// <param name="source">Update Builder。</param>
     /// <param name="condition">查询条件。</param>
@@ -718,7 +717,7 @@ public static class MutationClauseExtensions
         OrWhereMutation(source, condition);
 
     /// <summary>
-    /// 使用 Or 追加 Delete 筛选条件。
+    /// 追加 Or 筛选条件。
     /// </summary>
     /// <param name="source">Delete Builder。</param>
     /// <param name="condition">查询条件。</param>
@@ -727,7 +726,7 @@ public static class MutationClauseExtensions
         OrWhereMutation(source, condition);
 
     /// <summary>
-    /// 根据统一 Builder 当前操作状态追加查询或 Mutation Or 条件。
+    /// 追加 Or 筛选条件。
     /// </summary>
     /// <param name="source">统一 SQL Builder。</param>
     /// <param name="condition">要以 Or 方式追加的筛选条件。</param>
@@ -778,7 +777,7 @@ public static class MutationClauseExtensions
         AllowAllRows<ISqlDeleteBuilder>(source, allowAllRows);
 
     /// <summary>
-    /// 为统一 Mutation Builder 添加结构化返回列。
+    /// 添加 Mutation 返回列。
     /// </summary>
     /// <param name="source">统一 SQL Builder。</param>
     /// <param name="columns">单段物理列名集合。</param>
@@ -800,7 +799,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 根据实体映射为统一 Mutation Builder 添加结构化返回投影。
+    /// 添加 Mutation 返回列。
     /// </summary>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
     /// <param name="source">统一 SQL Builder。</param>
@@ -907,7 +906,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 获取多个直接实体属性访问的属性名。
+    /// 获取实体投影中的属性名。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="expression">包含至少一个直接属性访问的数组表达式。</param>
@@ -923,7 +922,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 获取匿名对象或单个直接属性投影中的属性名。
+    /// 获取实体投影中的属性名。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="expression">单个属性或匿名对象属性投影表达式。</param>

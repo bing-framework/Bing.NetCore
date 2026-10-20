@@ -36,7 +36,7 @@ public class ParameterManager : IAdvancedParameterManager
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="ParameterManager"/>类型的实例
+    /// 初始化一个 <see cref="ParameterManager"/> 类型的实例。
     /// </summary>
     /// <param name="dialect">Sql方言</param>
     public ParameterManager(IDialect dialect)
@@ -48,7 +48,7 @@ public class ParameterManager : IAdvancedParameterManager
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ParameterManager"/>类型的实例
+    /// 初始化一个 <see cref="ParameterManager"/> 类型的实例。
     /// </summary>
     /// <param name="parameterManager">参数管理器</param>
     protected ParameterManager(ParameterManager parameterManager)
@@ -83,7 +83,7 @@ public class ParameterManager : IAdvancedParameterManager
     #region 属性
 
     /// <summary>
-    /// Sql方言
+    /// 获取Sql方言
     /// </summary>
     protected IDialect Dialect { get; }
 
@@ -139,10 +139,7 @@ public class ParameterManager : IAdvancedParameterManager
         AddSqlParam(CreateLegacySqlParam(name, value));
     }
 
-    /// <summary>
-    /// 添加增强参数
-    /// </summary>
-    /// <param name="parameter">Sql 参数</param>
+    /// <inheritdoc />
     public void Add(SqlParam parameter)
     {
         if (parameter == null)
@@ -284,9 +281,7 @@ public class ParameterManager : IAdvancedParameterManager
 
     #region Clear(清空参数)
 
-    /// <summary>
-    /// 清空参数
-    /// </summary>
+    /// <inheritdoc />
     public virtual void Clear()
     {
         _paramIndex = 0;
@@ -298,16 +293,13 @@ public class ParameterManager : IAdvancedParameterManager
 
     #region Clone(克隆)
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <returns>当前参数管理器的独立副本。</returns>
+    /// <inheritdoc />
     public virtual IParameterManager Clone() => new ParameterManager(this);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 创建保留当前方言配置的空参数管理器。
-    /// </summary>
-    /// <returns>不包含参数和值的独立参数管理器。</returns>
+    /// </remarks>
     public virtual IParameterManager CreateEmpty() => new ParameterManager(Dialect);
 
     #endregion

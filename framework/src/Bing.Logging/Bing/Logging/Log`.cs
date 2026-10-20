@@ -14,7 +14,7 @@ public class Log<TCategoryName> : ILog<TCategoryName>
     private readonly ILog _log;
 
     /// <summary>
-    /// 初始化一个<see cref="Log{TCategoryName}"/>类型的实例
+    /// 初始化一个 <see cref="Log{TCategoryName}"/> 类型的实例。
     /// </summary>
     /// <param name="factory">日志操作工厂</param>
     public Log(ILogFactory factory)

@@ -20,20 +20,16 @@ public abstract class SeedDataInitializerBase<TEntity, TKey> : ISeedDataInitiali
     /// </summary>
     private readonly IServiceProvider _rootProvider;
 
-    /// <summary>
-    /// 种子数据初始化顺序
-    /// </summary>
+    /// <inheritdoc />
     public virtual int Order => 0;
 
     /// <summary>
-    /// 初始化一个<see cref="SeedDataInitializerBase{TEntity,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="SeedDataInitializerBase{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="rootProvider">服务提供程序</param>
     protected SeedDataInitializerBase(IServiceProvider rootProvider) => _rootProvider = rootProvider;
 
-    /// <summary>
-    /// 初始化种子数据
-    /// </summary>
+    /// <inheritdoc />
     public async Task InitializeAsync()
     {
         var entities = SeedData();

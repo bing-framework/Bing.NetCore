@@ -5,9 +5,10 @@ namespace Bing.Dapper.Tests.SqlQuery;
 
 /// <summary>
 /// 同容器多 Provider 集成测试。
-/// 该兼容性测试只在本地显式设置 <c>RUN_INTEGRATION_TESTS=true</c> 时运行，并需要
-/// 配置 MySQL、PostgreSQL 和 SQL Server 的 Provider 专属连接字符串。
 /// </summary>
+/// <remarks>
+/// 该兼容性测试只在本地显式设置 <c>RUN_INTEGRATION_TESTS=true</c> 时运行，并需要 配置 MySQL、PostgreSQL 和 SQL Server 的 Provider 专属连接字符串。
+/// </remarks>
 public class MultiProviderQueryTest
 {
     /// <summary>
@@ -21,7 +22,7 @@ public class MultiProviderQueryTest
     private readonly ISqlQueryFactory _queryFactory;
 
     /// <summary>
-    /// 初始化一个<see cref="MultiProviderQueryTest"/>类型的实例。
+    /// 初始化一个 <see cref="MultiProviderQueryTest"/> 类型的实例。
     /// </summary>
     /// <param name="databaseScopeManager">数据库作用域管理器。</param>
     /// <param name="queryFactory">SQL 查询工厂。</param>

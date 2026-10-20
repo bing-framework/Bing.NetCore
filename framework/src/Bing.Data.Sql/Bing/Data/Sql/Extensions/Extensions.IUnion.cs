@@ -5,15 +5,17 @@ using Bing.Data.Sql.Builders.Core;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// 联合操作扩展
-/// </summary>
+/// 执行 Union 集合操作。
 public static partial class Extensions
 {
     #region Union(联合多个查询，Union会排除重复结果行)
 
     /// <summary>
-    /// 联合多个查询。Union会排除重复结果行
+    /// 执行 Union 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union 操作会排除重复结果行。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
@@ -26,8 +28,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 联合操作
+    /// 执行 Union 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union 操作会排除重复结果行。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="operation">操作方式</param>
@@ -57,8 +62,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 联合多个查询。Union会排除重复结果行
+    /// 执行 Union 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union 操作会排除重复结果行。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
@@ -71,7 +79,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述执行 Union。
+    /// 执行 Union 集合操作。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -85,8 +93,11 @@ public static partial class Extensions
     #region UnionAll(联合多个查询，Union All不会排除重复结果行)
 
     /// <summary>
-    /// 联合多个查询。Union All不会排除重复结果行
+    /// 执行 Union All 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union All 操作会保留重复结果行。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器列表</param>
@@ -99,8 +110,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 联合多个查询。Union All不会排除重复结果行
+    /// 执行 Union All 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union All 操作会保留重复结果行。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="builders">Sql生成器集合</param>
@@ -113,8 +127,11 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述执行 Union All。
+    /// 执行 Union All 集合操作。
     /// </summary>
+    /// <remarks>
+    /// Union All 操作会保留重复结果行。
+    /// </remarks>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
     /// <param name="queries">要参与 Union All 的查询描述。</param>
@@ -127,7 +144,7 @@ public static partial class Extensions
     #region Intersect(交集)
 
     /// <summary>
-    /// 交集
+    /// 执行 Intersect 集合操作。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -141,7 +158,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 交集
+    /// 执行 Intersect 集合操作。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -155,7 +172,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述执行 Intersect。
+    /// 执行 Intersect 集合操作。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -169,7 +186,7 @@ public static partial class Extensions
     #region Except(并集)
 
     /// <summary>
-    /// 差集
+    /// 执行 Except 集合操作。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -183,7 +200,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 差集
+    /// 执行 Except 集合操作。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -197,7 +214,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述执行 Except。
+    /// 执行 Except 集合操作。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>

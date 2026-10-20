@@ -10,7 +10,7 @@ namespace Bing.Datas.EntityFramework.Oracle;
 public abstract class OracleUnitOfWorkBase : UnitOfWorkBase
 {
     /// <summary>
-    /// 初始化一个<see cref="OracleUnitOfWorkBase"/>类型的实例
+    /// 初始化一个 <see cref="OracleUnitOfWorkBase"/> 类型的实例。
     /// </summary>
     /// <param name="options">配置</param>
     /// <param name="serviceProvider">服务提供器</param>
@@ -19,10 +19,6 @@ public abstract class OracleUnitOfWorkBase : UnitOfWorkBase
     {
     }
 
-    /// <summary>
-    /// 获取映射实例列表
-    /// </summary>
-    /// <param name="assembly">程序集</param>
-    /// <returns>指定程序集中的映射实例集合。</returns>
+    /// <inheritdoc />
     protected override IEnumerable<Bing.Datas.EntityFramework.Core.IMap> GetMapInstances(Assembly assembly) => Reflection.Reflections.GetInstancesByInterface<IMap>(assembly);
 }

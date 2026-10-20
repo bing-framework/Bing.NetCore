@@ -50,7 +50,7 @@ public interface IEntityConfigurationTypeFinder
 public struct EntityTypeConfigurationMetadata
 {
     /// <summary>
-    /// 初始化一个<see cref="EntityTypeConfigurationMetadata"/>类型的实例
+    /// 初始化一个 <see cref="EntityTypeConfigurationMetadata"/> 类型的实例。
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <param name="methodInfo">方法信息</param>
@@ -63,17 +63,17 @@ public struct EntityTypeConfigurationMetadata
     }
 
     /// <summary>
-    /// 实体类型
+    /// 获取实体类型
     /// </summary>
     public Type EntityType { get; }
 
     /// <summary>
-    /// 方法信息
+    /// 获取方法信息
     /// </summary>
     public MethodInfo MethodInfo { get; }
 
     /// <summary>
-    /// 实体类型配置
+    /// 获取实体类型配置
     /// </summary>
     public object EntityTypeConfiguration { get; }
 }

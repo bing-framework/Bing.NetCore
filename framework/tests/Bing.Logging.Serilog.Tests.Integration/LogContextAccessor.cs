@@ -8,13 +8,11 @@ namespace Bing.Logging.Tests;
 public class LogContextAccessor : ILogContextAccessor
 {
     /// <summary>
-    /// 日志上下文键名
+    /// 在线程命名数据槽中保存日志上下文的键，值为 <c>Bing.Logging.LogContext</c>。
     /// </summary>
     public const string LogContextKey = "Bing.Logging.LogContext";
 
-    /// <summary>
-    /// 日志上下文
-    /// </summary>
+    /// <inheritdoc />
     public LogContext Context
     {
         get

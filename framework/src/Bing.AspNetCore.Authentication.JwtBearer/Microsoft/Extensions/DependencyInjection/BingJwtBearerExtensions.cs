@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class BingJwtBearerExtensions
 {
     /// <summary>
-    /// 添加 JWT Bearer 认证（默认 Scheme 名称）。
+    /// 注册 JWT Bearer 认证。
     /// </summary>
     /// <param name="builder">身份认证构建器</param>
     /// <returns>身份认证构建器</returns>
@@ -20,7 +20,7 @@ public static class BingJwtBearerExtensions
         => builder.AddBingJwtBearer(JwtBearerDefaults.AuthenticationScheme, _ => { });
 
     /// <summary>
-    /// 添加 JWT Bearer 认证（默认 Scheme 名称，可配置）。
+    /// 注册 JWT Bearer 认证。
     /// </summary>
     /// <param name="builder">身份认证构建器</param>
     /// <param name="configureOptions">JWT 配置选项</param>
@@ -29,7 +29,7 @@ public static class BingJwtBearerExtensions
         => builder.AddBingJwtBearer(JwtBearerDefaults.AuthenticationScheme, configureOptions);
 
     /// <summary>
-    /// 添加 JWT Bearer 认证（支持自定义 Scheme）。
+    /// 注册 JWT Bearer 认证。
     /// </summary>
     /// <param name="builder">身份认证构建器</param>
     /// <param name="authenticationScheme">自定义 Scheme 名称</param>
@@ -39,7 +39,7 @@ public static class BingJwtBearerExtensions
         => builder.AddBingJwtBearer(authenticationScheme, "Bearer", configureOptions);
 
     /// <summary>
-    /// 添加 JWT Bearer 认证（支持自定义 Scheme 和显示名称）。
+    /// 注册 JWT Bearer 认证。
     /// </summary>
     /// <param name="builder">身份认证构建器</param>
     /// <param name="authenticationScheme">自定义 Scheme 名称</param>

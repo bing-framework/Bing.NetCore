@@ -32,55 +32,73 @@ public sealed class SqlProcedureQuery
         _parameters = SqlQueryPlan.SnapshotParameters(parameters);
     }
 
-    /// <summary>获取要执行的存储过程名称。</summary>
+    /// <summary>
+    /// 获取要执行的存储过程名称。
+    /// </summary>
     public string Procedure { get; }
 
-    /// <summary>获取由参数绑定器处理的输入和输出参数源。</summary>
+    /// <summary>
+    /// 获取由参数绑定器处理的输入和输出参数源。
+    /// </summary>
     public object Parameters => SqlQueryPlan.SnapshotParameters(_parameters);
 
-    /// <summary>同步执行过程并完整物化结果列表。</summary>
+    /// <summary>
+    /// 同步执行过程并完整物化结果列表。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含结果列表和输出参数的执行结果。</returns>
     public SqlProcedureResult<List<TResult>> ExecuteList<TResult>(int? timeout = null) =>
         Execute(plan => _executor.ToList<TResult>(plan, timeout));
 
-    /// <summary>同步执行过程并获取第一行。</summary>
+    /// <summary>
+    /// 同步执行过程并获取第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含第一行结果和输出参数的执行结果。</returns>
     public SqlProcedureResult<TResult> ExecuteFirst<TResult>(int? timeout = null) =>
         Execute(plan => _executor.First<TResult>(plan, timeout));
 
-    /// <summary>同步执行过程并获取第一行或默认值。</summary>
+    /// <summary>
+    /// 同步执行过程并获取第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含第一行或默认值以及输出参数的执行结果。</returns>
     public SqlProcedureResult<TResult> ExecuteFirstOrDefault<TResult>(int? timeout = null) =>
         Execute(plan => _executor.FirstOrDefault<TResult>(plan, timeout));
 
-    /// <summary>同步执行过程并获取唯一一行。</summary>
+    /// <summary>
+    /// 同步执行过程并获取唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含唯一结果和输出参数的执行结果。</returns>
     public SqlProcedureResult<TResult> ExecuteSingle<TResult>(int? timeout = null) =>
         Execute(plan => _executor.Single<TResult>(plan, timeout));
 
-    /// <summary>同步执行过程并获取唯一一行或默认值。</summary>
+    /// <summary>
+    /// 同步执行过程并获取唯一一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含唯一结果或默认值以及输出参数的执行结果。</returns>
     public SqlProcedureResult<TResult> ExecuteSingleOrDefault<TResult>(int? timeout = null) =>
         Execute(plan => _executor.SingleOrDefault<TResult>(plan, timeout));
 
-    /// <summary>同步执行过程并获取首行首列值。</summary>
+    /// <summary>
+    /// 同步执行过程并获取首行首列值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含标量值和输出参数的执行结果。</returns>
     public SqlProcedureResult<TResult> ExecuteScalar<TResult>(int? timeout = null) =>
         Execute(plan => _executor.Scalar<TResult>(plan, timeout));
 
-    /// <summary>异步执行过程并完整物化结果列表。</summary>
+    /// <summary>
+    /// 异步执行过程并完整物化结果列表。
+    /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -89,7 +107,9 @@ public sealed class SqlProcedureQuery
         CancellationToken cancellationToken = default) => ExecuteAsync(plan =>
         _executor.ToListAsync<TResult>(plan, timeout, cancellationToken));
 
-    /// <summary>异步执行过程并获取第一行。</summary>
+    /// <summary>
+    /// 异步执行过程并获取第一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -98,7 +118,9 @@ public sealed class SqlProcedureQuery
         CancellationToken cancellationToken = default) => ExecuteAsync(plan =>
         _executor.FirstAsync<TResult>(plan, timeout, cancellationToken));
 
-    /// <summary>异步执行过程并获取第一行或默认值。</summary>
+    /// <summary>
+    /// 异步执行过程并获取第一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -107,7 +129,9 @@ public sealed class SqlProcedureQuery
         CancellationToken cancellationToken = default) => ExecuteAsync(plan =>
         _executor.FirstOrDefaultAsync<TResult>(plan, timeout, cancellationToken));
 
-    /// <summary>异步执行过程并获取唯一一行。</summary>
+    /// <summary>
+    /// 异步执行过程并获取唯一一行。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -116,7 +140,9 @@ public sealed class SqlProcedureQuery
         CancellationToken cancellationToken = default) => ExecuteAsync(plan =>
         _executor.SingleAsync<TResult>(plan, timeout, cancellationToken));
 
-    /// <summary>异步执行过程并获取唯一一行或默认值。</summary>
+    /// <summary>
+    /// 异步执行过程并获取唯一一行或默认值。
+    /// </summary>
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -125,7 +151,9 @@ public sealed class SqlProcedureQuery
         CancellationToken cancellationToken = default) => ExecuteAsync(plan =>
         _executor.SingleOrDefaultAsync<TResult>(plan, timeout, cancellationToken));
 
-    /// <summary>异步执行过程并获取首行首列值。</summary>
+    /// <summary>
+    /// 异步执行过程并获取首行首列值。
+    /// </summary>
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -180,7 +208,7 @@ public sealed class SqlProcedureQuery
     private sealed class OutputParametersReceiver
     {
         /// <summary>
-        /// 获取输出参数访问器快照。
+        /// 获取或设置输出参数访问器快照。
         /// </summary>
         public ISqlOutputParameterAccessor OutputParameters { get; private set; }
 

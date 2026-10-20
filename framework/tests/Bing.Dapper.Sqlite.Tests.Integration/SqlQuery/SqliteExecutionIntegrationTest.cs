@@ -13,8 +13,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
+/// <summary>
+/// 标记需要受控 SQLite 合同环境的测试。
+/// </summary>
 internal sealed class SqliteContractFactAttribute : FactAttribute
 {
+    /// <summary>
+    /// 初始化一个 <see cref="SqliteContractFactAttribute"/> 类型的实例。
+    /// </summary>
     public SqliteContractFactAttribute()
     {
         var missingVariables = new[]
@@ -37,10 +43,13 @@ internal sealed class SqliteContractFactAttribute : FactAttribute
 [Trait("Database", "Sqlite")]
 public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 {
+    /// <summary>
+    /// 为 SQLite 执行集成测试提供数据库夹具。
+    /// </summary>
     private readonly SqliteIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化一个<see cref="SqliteExecutionIntegrationTest"/>类型的实例。
+    /// 初始化一个 <see cref="SqliteExecutionIntegrationTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQLite 集成测试数据库固定装置。</param>
     public SqliteExecutionIntegrationTest(SqliteIntegrationDatabaseFixture fixture) => _fixture = fixture;
@@ -152,6 +161,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         }
     }
 
+    /// <summary>
+    /// 获取解决方案工作区根目录。
+    /// </summary>
+    /// <returns>工作区根目录路径。</returns>
     private static string GetWorkspaceRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -160,6 +173,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return directory?.FullName ?? Directory.GetCurrentDirectory();
     }
 
+    /// <summary>
+    /// 获取 SQLite 集成运行所需的结果路径。
+    /// </summary>
+    /// <returns>包含制品和测试结果相对路径及完整路径的元组。</returns>
     private static (string ArtifactRelativePath, string ArtifactPath, string TrxRelativePath, string TrxPath)
         GetRunContext()
     {
@@ -182,11 +199,24 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return (artifactRelativePath, artifactPath, trxRelativePath, trxPath);
     }
 
+    /// <summary>
+    /// 获取必需的环境变量值。
+    /// </summary>
+    /// <param name="name">环境变量名称。</param>
+    /// <returns>去除首尾空白后的环境变量值。</returns>
+    /// <exception cref="InvalidOperationException">环境变量未配置或为空时抛出。</exception>
     private static string GetRequiredEnvironmentValue(string name) =>
         string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name))
             ? throw new InvalidOperationException($"缺少受控 SQLite 合同环境变量：{name}。")
             : Environment.GetEnvironmentVariable(name).Trim();
 
+    /// <summary>
+    /// 获取并验证单层文件名。
+    /// </summary>
+    /// <param name="name">存储文件名的环境变量名称。</param>
+    /// <param name="extension">允许的文件扩展名。</param>
+    /// <returns>验证后的文件名。</returns>
+    /// <exception cref="InvalidOperationException">文件名不符合格式要求时抛出。</exception>
     private static string GetRequiredFileName(string name, string extension)
     {
         var value = GetRequiredEnvironmentValue(name);
@@ -197,6 +227,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return value;
     }
 
+    /// <summary>
+    /// 规范化并验证测试结果目录。
+    /// </summary>
+    /// <param name="value">待验证的相对目录。</param>
+    /// <returns>使用正斜杠分隔的规范化相对目录。</returns>
+    /// <exception cref="InvalidOperationException">目录不属于允许的工作区制品目录时抛出。</exception>
     private static string NormalizeResultsDirectory(string value)
     {
         var normalized = value.Replace('\\', '/').Trim('/');
@@ -207,6 +243,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return normalized;
     }
 
+    /// <summary>
+    /// 将工作区内的相对路径解析为完整路径。
+    /// </summary>
+    /// <param name="workspaceRoot">工作区根目录。</param>
+    /// <param name="relativePath">工作区内的相对路径。</param>
+    /// <returns>解析后的完整路径。</returns>
+    /// <exception cref="InvalidOperationException">解析路径超出工作区时抛出。</exception>
     private static string ResolveWorkspacePath(string workspaceRoot, string relativePath)
     {
         var fullPath = Path.GetFullPath(Path.Combine(workspaceRoot,
@@ -218,6 +261,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return fullPath;
     }
 
+    /// <summary>
+    /// 获取 SQLite 引擎版本。
+    /// </summary>
+    /// <returns>SQLite 引擎版本字符串。</returns>
     private async Task<string> GetSqliteVersionAsync()
     {
         await using var connection = new SqliteConnection(_fixture.FirstConnectionString);
@@ -227,6 +274,19 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         return Convert.ToString(await command.ExecuteScalarAsync());
     }
 
+    /// <summary>
+    /// 创建 SQLite 集成运行证据元数据。
+    /// </summary>
+    /// <param name="scenario">已验证的场景名称。</param>
+    /// <param name="trxPath">测试结果文件相对路径。</param>
+    /// <param name="artifactPath">证据制品相对路径。</param>
+    /// <param name="databaseVersion">SQLite 引擎版本。</param>
+    /// <param name="providerVersion">Provider 版本。</param>
+    /// <param name="driverVersion">数据库驱动版本。</param>
+    /// <param name="sourceIdentity">测试程序集源码标识。</param>
+    /// <param name="startedAtUtc">集成运行开始时间。</param>
+    /// <param name="evidenceSessionId">证据会话标识。</param>
+    /// <returns>集成运行证据元数据。</returns>
     private static ProviderIntegrationEvidenceMetadata CreateIntegrationEvidence(string scenario,
         string trxPath, string artifactPath, string databaseVersion, string providerVersion,
         string driverVersion, string sourceIdentity, DateTimeOffset startedAtUtc, string evidenceSessionId) => new(providerVersion,
@@ -3840,7 +3900,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// </summary>
     /// <param name="name">样例名称。</param>
     /// <param name="dbKey">数据源标识。</param>
-    /// <returns>写入任务。</returns>
     private async Task InsertAsync(string name, string dbKey = "first")
     {
         var manager = _fixture.GetDatabaseScopeManager();
@@ -3854,7 +3913,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// </summary>
     /// <param name="name">样例名称。</param>
     /// <param name="amount">样例金额。</param>
-    /// <returns>写入任务。</returns>
     private async Task InsertAggregateSampleAsync(string name, decimal? amount)
     {
         using var executor = _fixture.CreateExecutor();
@@ -3864,7 +3922,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <summary>
     /// 写入包含重复值和空值的聚合测试数据。
     /// </summary>
-    /// <returns>写入任务。</returns>
     private async Task SeedAggregateSamplesAsync()
     {
         await InsertAggregateSampleAsync("A", 10m);
@@ -3876,7 +3933,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <summary>
     /// 写入流式测试样例记录。
     /// </summary>
-    /// <returns>写入任务。</returns>
     private async Task SeedAsync()
     {
         await InsertAsync("one");
@@ -3900,7 +3956,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// 写入指定长度的 Arity 连续 Join 链和每表干扰行。
     /// </summary>
     /// <param name="count">链中的表数量。</param>
-    /// <returns>写入任务。</returns>
     private async Task SeedArityChainAsync(int count)
     {
         using var executor = _fixture.CreateExecutor();
@@ -3923,7 +3978,6 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     /// <param name="manager">数据库作用域管理器。</param>
     /// <param name="dbKey">数据源标识。</param>
     /// <param name="name">样例名称。</param>
-    /// <returns>写入任务。</returns>
     private async Task InsertInScopeAsync(IDatabaseScopeManager manager, string dbKey, string name)
     {
         await Task.Yield();
@@ -3937,17 +3991,17 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class Sample
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 金额。
+        /// 获取或设置金额。
         /// </summary>
         public decimal? Amount { get; set; }
     }
@@ -3958,22 +4012,25 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class HierarchyNode
     {
         /// <summary>
-        /// 节点标识。
+        /// 获取或设置节点标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 父节点标识；根节点为 <see langword="null"/>。
+        /// 获取或设置父节点标识。
         /// </summary>
+        /// <remarks>
+        /// 根节点的父节点标识为 <see langword="null"/>。
+        /// </remarks>
         public int? ParentId { get; set; }
 
         /// <summary>
-        /// 节点名称。
+        /// 获取或设置节点名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 从根节点开始计算的层级深度。
+        /// 获取或设置从根节点开始计算的层级深度。
         /// </summary>
         public int Depth { get; set; }
     }
@@ -3984,12 +4041,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleName
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -4000,12 +4057,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SamplePair
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string SampleName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string RelatedName { get; set; }
     }
@@ -4016,17 +4073,17 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleTriple
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string FirstName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string SecondName { get; set; }
 
         /// <summary>
-        /// 第三段样例名称。
+        /// 获取或设置第三段样例名称。
         /// </summary>
         public string ThirdName { get; set; }
     }
@@ -4037,22 +4094,22 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleQuad
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string FirstName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string SecondName { get; set; }
 
         /// <summary>
-        /// 第三段样例名称。
+        /// 获取或设置第三段样例名称。
         /// </summary>
         public string ThirdName { get; set; }
 
         /// <summary>
-        /// 第四段样例名称。
+        /// 获取或设置第四段样例名称。
         /// </summary>
         public string FourthName { get; set; }
     }
@@ -4063,27 +4120,27 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleQuint
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string FirstName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string SecondName { get; set; }
 
         /// <summary>
-        /// 第三段样例名称。
+        /// 获取或设置第三段样例名称。
         /// </summary>
         public string ThirdName { get; set; }
 
         /// <summary>
-        /// 第四段样例名称。
+        /// 获取或设置第四段样例名称。
         /// </summary>
         public string FourthName { get; set; }
 
         /// <summary>
-        /// 第五段样例名称。
+        /// 获取或设置第五段样例名称。
         /// </summary>
         public string FifthName { get; set; }
     }
@@ -4094,32 +4151,32 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleSext
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string FirstName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string SecondName { get; set; }
 
         /// <summary>
-        /// 第三段样例名称。
+        /// 获取或设置第三段样例名称。
         /// </summary>
         public string ThirdName { get; set; }
 
         /// <summary>
-        /// 第四段样例名称。
+        /// 获取或设置第四段样例名称。
         /// </summary>
         public string FourthName { get; set; }
 
         /// <summary>
-        /// 第五段样例名称。
+        /// 获取或设置第五段样例名称。
         /// </summary>
         public string FifthName { get; set; }
 
         /// <summary>
-        /// 第六段样例名称。
+        /// 获取或设置第六段样例名称。
         /// </summary>
         public string SixthName { get; set; }
     }
@@ -4130,37 +4187,37 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SampleSept
     {
         /// <summary>
-        /// 第一段样例名称。
+        /// 获取或设置第一段样例名称。
         /// </summary>
         public string FirstName { get; set; }
 
         /// <summary>
-        /// 第二段样例名称。
+        /// 获取或设置第二段样例名称。
         /// </summary>
         public string SecondName { get; set; }
 
         /// <summary>
-        /// 第三段样例名称。
+        /// 获取或设置第三段样例名称。
         /// </summary>
         public string ThirdName { get; set; }
 
         /// <summary>
-        /// 第四段样例名称。
+        /// 获取或设置第四段样例名称。
         /// </summary>
         public string FourthName { get; set; }
 
         /// <summary>
-        /// 第五段样例名称。
+        /// 获取或设置第五段样例名称。
         /// </summary>
         public string FifthName { get; set; }
 
         /// <summary>
-        /// 第六段样例名称。
+        /// 获取或设置第六段样例名称。
         /// </summary>
         public string SixthName { get; set; }
 
         /// <summary>
-        /// 第七段样例名称。
+        /// 获取或设置第七段样例名称。
         /// </summary>
         public string SeventhName { get; set; }
     }
@@ -4171,12 +4228,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class AggregateResult
     {
         /// <summary>
-        /// 去重后的非空名称数量。
+        /// 获取或设置去重后的非空名称数量。
         /// </summary>
         public int DistinctNameCount { get; set; }
 
         /// <summary>
-        /// 去重后的非空金额总和。
+        /// 获取或设置去重后的非空金额总和。
         /// </summary>
         public decimal DistinctAmount { get; set; }
     }
@@ -4187,12 +4244,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class LambdaJoinResult
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// 租户标识。
+        /// 获取或设置租户标识。
         /// </summary>
         public string TenantId { get; set; }
     }
@@ -4203,12 +4260,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class LambdaSubqueryResult
     {
         /// <summary>
-        /// 样例标识。
+        /// 获取或设置样例标识。
         /// </summary>
         public int SampleId { get; set; }
 
         /// <summary>
-        /// 租户标识。
+        /// 获取或设置租户标识。
         /// </summary>
         public string TenantId { get; set; }
     }
@@ -4219,15 +4276,19 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     [Table("soft_delete_samples")]
     private sealed class SqliteSoftDeleteSample : ISoftDelete
     {
-        /// <summary>数据库生成的主键。</summary>
+        /// <summary>
+        /// 获取或设置数据库生成的主键。
+        /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        /// <summary>样例名称。</summary>
+        /// <summary>
+        /// 获取或设置样例名称。
+        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>逻辑删除状态。</summary>
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
@@ -4237,12 +4298,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class LambdaMemberInitResult
     {
         /// <summary>
-        /// 显示名称。
+        /// 获取或设置显示名称。
         /// </summary>
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// 可空金额。
+        /// 获取或设置可空金额。
         /// </summary>
         public decimal? OptionalAmount { get; set; }
     }
@@ -4253,11 +4314,31 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class SqliteDiagnosticObserver : IObserver<DiagnosticListener>,
         IObserver<KeyValuePair<string, object>>, IDisposable
     {
+        /// <summary>
+        /// 处理 SQL 诊断消息的回调。
+        /// </summary>
         private readonly Action<DiagnosticsMessage> _onMessage;
+
+        /// <summary>
+        /// 处理 SQL 诊断事件的回调。
+        /// </summary>
         private readonly Action<string, DiagnosticsMessage> _onEvent;
+
+        /// <summary>
+        /// 订阅所有诊断监听器的句柄。
+        /// </summary>
         private readonly IDisposable _allSubscription;
+
+        /// <summary>
+        /// 订阅目标 SQL 诊断监听器的句柄。
+        /// </summary>
         private IDisposable _listenerSubscription;
 
+        /// <summary>
+        /// 初始化一个 <see cref="SqliteDiagnosticObserver"/> 类型的实例。
+        /// </summary>
+        /// <param name="onMessage">SQL 诊断消息回调。</param>
+        /// <param name="onEvent">SQL 诊断事件回调。</param>
         public SqliteDiagnosticObserver(Action<DiagnosticsMessage> onMessage,
             Action<string, DiagnosticsMessage> onEvent = null)
         {
@@ -4266,12 +4347,14 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             _allSubscription = DiagnosticListener.AllListeners.Subscribe(this);
         }
 
+        /// <inheritdoc />
         public void OnNext(DiagnosticListener listener)
         {
             if (listener.Name == SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
                 _listenerSubscription = listener.Subscribe(this);
         }
 
+        /// <inheritdoc />
         public void OnNext(KeyValuePair<string, object> value)
         {
             if (value.Value is not DiagnosticsMessage message)
@@ -4281,10 +4364,13 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             _onEvent?.Invoke(value.Key, message);
         }
 
+        /// <inheritdoc />
         public void OnCompleted() { }
 
+        /// <inheritdoc />
         public void OnError(Exception error) { }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _listenerSubscription?.Dispose();
@@ -4298,12 +4384,12 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     private sealed class OrderSample
     {
         /// <summary>
-        /// 订单标识。
+        /// 获取或设置订单标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 订单名称。
+        /// 获取或设置订单名称。
         /// </summary>
         public string Name { get; set; }
     }

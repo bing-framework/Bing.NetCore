@@ -6,7 +6,7 @@
 public class NullEncryptor : IEncryptor
 {
     /// <summary>
-    /// 获取可复用的空对象加密器实例。
+    /// 供进程内复用的空对象加密器实例。
     /// </summary>
     public static readonly IEncryptor Instance = new NullEncryptor();
 

@@ -2295,6 +2295,12 @@ public class SqlQueryDescriptionTest
         Assert.Equal(new object[] { 10 }, query.GetParams().Values.ToArray());
     }
 
+    /// <summary>
+    /// 构建指定数据源数量的多表查询。
+    /// </summary>
+    /// <param name="rootQuery">查询根对象。</param>
+    /// <param name="sourceCount">数据源数量，取值范围为 3 至 10。</param>
+    /// <returns>构建的多表查询。</returns>
     private static SqlLambdaQuery BuildJoinMatrixQuery(ISqlQuery rootQuery, int sourceCount)
     {
         if (sourceCount < 3 || sourceCount > 10)
@@ -2384,6 +2390,10 @@ public class SqlQueryDescriptionTest
         return query;
     }
 
+    /// <summary>
+    /// 创建多数据源查询测试对象。
+    /// </summary>
+    /// <returns>配置完成的查询对象。</returns>
     private static ISqlQuery CreateMultiSourceQuery()
     {
         var services = new ServiceCollection();
@@ -2419,7 +2429,7 @@ public class SqlQueryDescriptionTest
     private sealed class QueryParameterSample
     {
         /// <summary>
-        /// 状态。
+        /// 获取或设置状态。
         /// </summary>
         public string Status { get; set; }
     }
@@ -2430,7 +2440,7 @@ public class SqlQueryDescriptionTest
     private sealed class MultiSourceUser
     {
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
     }
@@ -2441,7 +2451,7 @@ public class SqlQueryDescriptionTest
     private sealed class MultiSourceReview
     {
         /// <summary>
-        /// 用户标识。
+        /// 获取或设置用户标识。
         /// </summary>
         public int UserId { get; set; }
     }
@@ -2452,7 +2462,7 @@ public class SqlQueryDescriptionTest
     private sealed class MultiSourcePermission
     {
         /// <summary>
-        /// 用户标识。
+        /// 获取或设置用户标识。
         /// </summary>
         public int UserId { get; set; }
     }
@@ -2463,17 +2473,17 @@ public class SqlQueryDescriptionTest
     private sealed class MultiSourceProjection
     {
         /// <summary>
-        /// 所有者标识。
+        /// 获取或设置所有者标识。
         /// </summary>
         public int OwnerId { get; set; }
 
         /// <summary>
-        /// 审核用户标识。
+        /// 获取或设置审核用户标识。
         /// </summary>
         public int ReviewUserId { get; set; }
 
         /// <summary>
-        /// 未投影的嵌套 DTO。
+        /// 获取或设置未投影的嵌套 DTO。
         /// </summary>
         public NestedProjection Profile { get; set; }
     }
@@ -2484,22 +2494,22 @@ public class SqlQueryDescriptionTest
     private sealed class HighArityProjection
     {
         /// <summary>
-        /// 首个来源标识。
+        /// 获取或设置首个来源标识。
         /// </summary>
         public int FirstId { get; set; }
 
         /// <summary>
-        /// 第四个来源标识。
+        /// 获取或设置第四个来源标识。
         /// </summary>
         public int FourthId { get; set; }
 
         /// <summary>
-        /// 第七个来源标识。
+        /// 获取或设置第七个来源标识。
         /// </summary>
         public int SeventhId { get; set; }
 
         /// <summary>
-        /// 未投影成员。
+        /// 获取或设置未投影成员。
         /// </summary>
         public int UnprojectedId { get; set; }
     }
@@ -2510,7 +2520,7 @@ public class SqlQueryDescriptionTest
     private sealed class NestedProjection
     {
         /// <summary>
-        /// 与外层已投影成员同名的属性。
+        /// 获取或设置与外层已投影成员同名的属性。
         /// </summary>
         public int OwnerId { get; set; }
     }
@@ -2520,11 +2530,18 @@ public class SqlQueryDescriptionTest
     /// </summary>
     private sealed class TenantSqliteDataSourceResolver : ISqlDataSourceResolver
     {
+        /// <summary>
+        /// 存储第一个租户的 SQLite 连接字符串。
+        /// </summary>
         private readonly string _firstConnectionString;
+
+        /// <summary>
+        /// 存储第二个租户的 SQLite 连接字符串。
+        /// </summary>
         private readonly string _secondConnectionString;
 
         /// <summary>
-        /// 初始化按租户选择物理 SQLite 数据库的解析器。
+        /// 初始化一个 <see cref="TenantSqliteDataSourceResolver"/> 类型的实例。
         /// </summary>
         public TenantSqliteDataSourceResolver(string firstConnectionString, string secondConnectionString)
         {
@@ -2554,10 +2571,13 @@ public class SqlQueryDescriptionTest
     /// </summary>
     private sealed class TrackingDatabaseIdentityResolver : ISqlDatabaseIdentityResolver
     {
+        /// <summary>
+        /// 保存默认数据库身份解析器。
+        /// </summary>
         private readonly DefaultSqlDatabaseIdentityResolver _inner = new();
 
         /// <summary>
-        /// 解析调用次数。
+        /// 获取或设置解析调用次数。
         /// </summary>
         public int CallCount { get; private set; }
 
@@ -2577,8 +2597,18 @@ public class SqlQueryDescriptionTest
     }
 }
 
+/// <summary>
+/// 提供查询描述测试辅助方法。
+/// </summary>
 internal static class QueryDescriptionTestExtensions
 {
+    /// <summary>
+    /// 读取测试对象中的查询参数。
+    /// </summary>
+    /// <param name="source">查询描述对象。</param>
+    /// <returns>查询参数字典。</returns>
+    /// <exception cref="ArgumentException">对象未提供查询构建器访问契约时抛出。</exception>
+    /// <exception cref="InvalidOperationException">查询构建器未提供参数读取能力时抛出。</exception>
     public static IReadOnlyDictionary<string, object> GetParams(this object source)
     {
         var accessor = source.GetType().GetInterface("Bing.Data.Sql.ISqlQueryBuilderAccessor");

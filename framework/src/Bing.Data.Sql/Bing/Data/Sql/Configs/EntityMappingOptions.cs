@@ -33,8 +33,9 @@ public sealed class EntityMappingOptions
     public string Database { get; set; }
 
     /// <summary>
-    /// 获取或设置数据库架构；在 MySQL 和 Doris 中表示数据库名称。
+    /// 获取或设置数据库架构。
     /// </summary>
+    /// <remarks>在 MySQL 和 Doris 中，该值表示数据库名称。</remarks>
     public string Schema { get; set; }
 
     /// <summary>
@@ -51,8 +52,9 @@ public sealed class EntityMappingOptions
     public string TableRouteKey { get; set; }
 
     /// <summary>
-    /// 获取按属性名索引的列映射配置集合；键不区分大小写。
+    /// 获取按属性名索引的列映射配置集合。
     /// </summary>
+    /// <remarks>键比较不区分大小写。</remarks>
     public IDictionary<string, ColumnMappingOptions> Columns { get; } =
         new Dictionary<string, ColumnMappingOptions>(StringComparer.OrdinalIgnoreCase);
 }

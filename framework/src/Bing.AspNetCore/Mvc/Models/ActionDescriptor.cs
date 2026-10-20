@@ -10,28 +10,34 @@ namespace Bing.AspNetCore.Mvc.Models;
 public class ActionDescriptor
 {
     /// <summary>
-    /// 获取当前操作所属的控制器描述。
+    /// 获取或设置当前操作所属的控制器描述。
     /// </summary>
     public ControllerDescriptor Controller { get; protected set; }
 
     /// <summary>
-    /// 获取操作方法名称。
+    /// 获取或设置操作方法名称。
     /// </summary>
     public string Name { get; protected set; }
 
     /// <summary>
-    /// 获取操作的显示描述；未配置 <see cref="DescriptionAttribute"/> 时为空。
+    /// 获取或设置操作的显示描述。
     /// </summary>
+    /// <remarks>
+    /// 未配置 时为空。
+    /// </remarks>
     public string Description { get; protected set; }
 
     /// <summary>
-    /// 获取操作方法的反射信息；该成员不会参与 JSON 序列化。
+    /// 获取或设置操作方法的反射信息。
     /// </summary>
+    /// <remarks>
+    /// 该成员不会参与 JSON 序列化。
+    /// </remarks>
     [JsonIgnore]
     public MethodInfo MethodInfo { get; protected set; }
 
     /// <summary>
-    /// 使用控制器描述和方法反射信息初始化 <see cref="ActionDescriptor"/> 的实例。
+    /// 初始化一个 <see cref="ActionDescriptor"/> 类型的实例。
     /// </summary>
     /// <param name="controller">操作所属的控制器描述。</param>
     /// <param name="methodInfo">操作方法的反射信息。</param>

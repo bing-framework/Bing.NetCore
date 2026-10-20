@@ -21,12 +21,12 @@ public class SignInResult
     public string Message { get; set; }
 
     /// <summary>
-    /// 初始化一个登录失败的 <see cref="SignInResult"/> 实例。
+    /// 初始化一个 <see cref="SignInResult"/> 类型的实例。
     /// </summary>
     public SignInResult() => State = SignInState.Failed;
 
     /// <summary>
-    /// 使用指定状态、用户标识和消息初始化一个 <see cref="SignInResult"/> 实例。
+    /// 初始化一个 <see cref="SignInResult"/> 类型的实例。
     /// </summary>
     /// <param name="state">登录处理状态。</param>
     /// <param name="userId">登录成功时对应的用户标识。</param>

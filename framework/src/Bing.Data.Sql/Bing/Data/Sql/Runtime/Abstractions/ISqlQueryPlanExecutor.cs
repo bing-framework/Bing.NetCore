@@ -11,7 +11,7 @@ public partial interface ISqlQueryPlanExecutor
 {
 
     /// <summary>
-    /// 同步执行查询计划并完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="plan">待执行的查询计划。</param>
@@ -20,7 +20,7 @@ public partial interface ISqlQueryPlanExecutor
     List<TResult> ToList<TResult>(SqlQueryPlan plan, int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为两个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -33,7 +33,7 @@ public partial interface ISqlQueryPlanExecutor
         int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为三个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -47,7 +47,7 @@ public partial interface ISqlQueryPlanExecutor
         int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为四个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -62,7 +62,7 @@ public partial interface ISqlQueryPlanExecutor
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为五个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -78,7 +78,7 @@ public partial interface ISqlQueryPlanExecutor
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为六个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -95,7 +95,7 @@ public partial interface ISqlQueryPlanExecutor
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout);
 
     /// <summary>
-    /// 同步执行查询计划并将每行映射为七个对象后完整物化结果集。
+    /// 同步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -158,7 +158,7 @@ public partial interface ISqlQueryPlanExecutor
     TResult Scalar<TResult>(SqlQueryPlan plan, int? timeout);
 
     /// <summary>
-    /// 异步执行查询计划并完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="plan">待执行的查询计划。</param>
@@ -169,7 +169,7 @@ public partial interface ISqlQueryPlanExecutor
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为两个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -183,7 +183,7 @@ public partial interface ISqlQueryPlanExecutor
         int? timeout, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为三个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -198,7 +198,7 @@ public partial interface ISqlQueryPlanExecutor
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为四个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -214,7 +214,7 @@ public partial interface ISqlQueryPlanExecutor
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为五个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -232,7 +232,7 @@ public partial interface ISqlQueryPlanExecutor
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为六个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>
@@ -251,7 +251,7 @@ public partial interface ISqlQueryPlanExecutor
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// 异步执行查询计划并将每行映射为七个对象后完整物化结果集。
+    /// 异步执行查询计划并返回结果列表。
     /// </summary>
     /// <typeparam name="TFirst">第一个对象映射类型。</typeparam>
     /// <typeparam name="TSecond">第二个对象映射类型。</typeparam>

@@ -8,12 +8,12 @@ namespace Bing.Data.Sql.Builders;
 public sealed class SqliteDialect : DialectBase
 {
     /// <summary>
-    /// 封闭构造函数
+    /// 初始化一个 <see cref="SqliteDialect"/> 类型的实例。
     /// </summary>
     private SqliteDialect() { }
 
     /// <summary>
-    /// Sqlite方言实例
+    /// 获取Sqlite方言实例
     /// </summary>
     public static SqliteDialect Instance { get; } = new();
 

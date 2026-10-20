@@ -6,7 +6,7 @@
 public interface IBusHealth
 {
     /// <summary>
-    /// 业务名称
+    /// 获取业务名称
     /// </summary>
     string Name { get; }
 }

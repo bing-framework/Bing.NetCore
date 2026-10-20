@@ -10,6 +10,10 @@ namespace Bing.MultiTenancy;
 /// </summary>
 public class TenantResolveContextTest
 {
+    /// <summary>
+    /// 创建包含模拟服务提供程序的租户解析上下文。
+    /// </summary>
+    /// <returns>租户解析上下文。</returns>
     private static TenantResolveContext CreateContext() =>
         new(Mock.Of<IServiceProvider>());
 
@@ -133,11 +137,15 @@ public class NullTenantResolveResultAccessorTest
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// <summary>
-/// 测试目的：验证 <see cref="DefaultTenantStore"/> 在不同查询场景下的行为，
-/// 使用 IOptionsMonitor&lt;BingDefaultTenantStoreOptions&gt; Mock 隔离真实配置系统。
+/// 测试目的：验证 <see cref="DefaultTenantStore"/> 在不同查询场景下的行为， 使用 IOptionsMonitor&lt;BingDefaultTenantStoreOptions&gt; Mock 隔离真实配置系统。
 /// </summary>
 public class DefaultTenantStoreTest
 {
+    /// <summary>
+    /// 创建包含指定租户配置的默认租户存储。
+    /// </summary>
+    /// <param name="tenants">需要加载的租户配置。</param>
+    /// <returns>默认租户存储。</returns>
     private static DefaultTenantStore CreateStore(params TenantConfiguration[] tenants)
     {
         var options = new BingDefaultTenantStoreOptions { Tenants = tenants };

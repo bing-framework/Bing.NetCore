@@ -10,20 +10,17 @@ namespace Bing.Data.Queries.Conditions;
 public class OrCondition<TEntity> : ICondition<TEntity> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个<see cref="OrCondition{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="OrCondition{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="left">查询条件1</param>
     /// <param name="right">查询条件2</param>
     public OrCondition(Expression<Func<TEntity, bool>> left, Expression<Func<TEntity, bool>> right) => Predicate = left.Or(right);
 
     /// <summary>
-    /// 查询条件
+    /// 获取或设置查询条件
     /// </summary>
     protected Expression<Func<TEntity, bool>> Predicate { get; set; }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>组合后的查询条件表达式。</returns>
+    /// <inheritdoc />
     public virtual Expression<Func<TEntity, bool>> GetCondition() => Predicate;
 }

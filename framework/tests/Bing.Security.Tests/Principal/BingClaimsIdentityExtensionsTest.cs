@@ -7,22 +7,25 @@ using Xunit;
 namespace Bing.Security.Tests.Principal;
 
 /// <summary>
-/// <see cref="BingClaimsIdentityExtensions"/> 单元测试。
-/// 覆盖所有扩展方法（ClaimsPrincipal 版本 + IIdentity 版本 + ClaimsIdentity 操作方法）。
+/// <see cref="BingClaimsIdentityExtensions"/> 单元测试。 覆盖所有扩展方法（ClaimsPrincipal 版本 + IIdentity 版本 + ClaimsIdentity 操作方法）。
 /// </summary>
 public class BingClaimsIdentityExtensionsTest
 {
     #region 辅助方法
 
     /// <summary>
-    /// 使用给定的声明集合构建 ClaimsPrincipal
+    /// 使用给定的声明集合构建 ClaimsPrincipal。
     /// </summary>
+    /// <param name="claims">声明集合。</param>
+    /// <returns>由指定声明构建的主体。</returns>
     private static ClaimsPrincipal BuildPrincipal(params Claim[] claims) =>
         new(new ClaimsIdentity(claims, "TestAuth"));
 
     /// <summary>
-    /// 使用给定的声明集合构建 ClaimsIdentity
+    /// 使用给定的声明集合构建 ClaimsIdentity。
     /// </summary>
+    /// <param name="claims">声明集合。</param>
+    /// <returns>由指定声明构建的身份。</returns>
     private static ClaimsIdentity BuildIdentity(params Claim[] claims) =>
         new(claims, "TestAuth");
 

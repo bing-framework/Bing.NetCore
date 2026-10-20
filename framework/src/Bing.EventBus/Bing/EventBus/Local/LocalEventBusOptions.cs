@@ -16,6 +16,9 @@ public class LocalEventBusOptions
     /// <summary>
     /// 获取本地事件处理器类型列表，默认初始化为空列表。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空列表。
+    /// </remarks>
     public ITypeList<IEventHandler> Handlers { get; }
 
     /// <summary>

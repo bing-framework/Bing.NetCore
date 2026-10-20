@@ -22,11 +22,34 @@ namespace Bing.Data.Sql.Benchmarks;
 /// </summary>
 public abstract class SqliteDapperE2EBenchmarkInfrastructure
 {
+    /// <summary>
+    /// 基准测试使用的临时 SQLite 数据库文件路径。
+    /// </summary>
     private string _databasePath;
+
+    /// <summary>
+    /// 基准测试使用的无 Trace 服务提供程序。
+    /// </summary>
     private ServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// 基准测试使用的 Trace 服务提供程序。
+    /// </summary>
     private ServiceProvider _traceServiceProvider;
+
+    /// <summary>
+    /// 无 Trace 查询场景使用的查询工厂。
+    /// </summary>
     private ISqlQueryFactory _queryFactory;
+
+    /// <summary>
+    /// Trace 查询场景使用的查询工厂。
+    /// </summary>
     private ISqlQueryFactory _traceQueryFactory;
+
+    /// <summary>
+    /// 基准测试使用的多结果集执行器。
+    /// </summary>
     private ISqlMultipleQueryExecutor _multipleQueryExecutor;
 
     /// <summary>
@@ -49,6 +72,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 查询、映射和列表物化的完整成本。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     protected int ExecuteQueryToList()
     {
         using var query = CreateQuery(_queryFactory);
@@ -63,6 +87,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 单实体终结路径。
     /// </summary>
+    /// <returns>查询到的实体标识。</returns>
     protected int ExecuteQueryToEntity()
     {
         using var query = CreateQuery(_queryFactory);
@@ -78,6 +103,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 同步流式读取和释放路径。
     /// </summary>
+    /// <returns>流式读取的行数。</returns>
     protected int ExecuteStreamToList()
     {
         using var query = CreateQuery(_queryFactory);
@@ -96,6 +122,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 异步流式读取路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回流式读取的行数。</returns>
     protected async Task<int> ExecuteStreamAsyncToList()
     {
         using var query = CreateQuery(_queryFactory);
@@ -112,6 +139,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量异步流在取消后释放读取器的路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回取消路径结果（捕获预期取消时为 1，否则为 0）。</returns>
     protected async Task<int> ExecuteStreamAsyncCancelled()
     {
         using var query = CreateQuery(_queryFactory);
@@ -136,6 +164,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 双对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     protected int ExecuteMapTwoTypes()
     {
         using var query = CreateQuery(_queryFactory);
@@ -154,6 +183,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 五对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     protected int ExecuteMapFiveTypes()
     {
         using var query = CreateQuery(_queryFactory);
@@ -173,6 +203,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 七对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     protected int ExecuteMapSevenTypes()
     {
         using var query = CreateQuery(_queryFactory);
@@ -193,6 +224,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量 SQLite Dapper 多结果集读取和结果对象释放路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回两个结果集计数之和。</returns>
     protected async Task<int> ExecuteQueryMultiple()
     {
         var command = _multipleQueryExecutor.CreateBatch()
@@ -208,6 +240,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量多结果集只读取首个结果后提前释放的路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回首个结果集的行数。</returns>
     protected async Task<int> ExecuteQueryMultipleDisposeEarly()
     {
         var command = _multipleQueryExecutor.CreateBatch()
@@ -221,6 +254,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量单实体基数异常路径，并确认异常可被调用方捕获。
     /// </summary>
+    /// <returns>基数异常验证结果（捕获预期异常时为 1，否则为 0）。</returns>
     protected int ExecuteQueryToEntityCardinalityFailure()
     {
         using var query = CreateQuery(_queryFactory);
@@ -239,6 +273,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量仅启用 Activity 时的查询诊断路径。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     protected int ExecuteQueryWithActivity()
     {
         using var activity = new Activity("bing-sql-benchmark").Start();
@@ -248,6 +283,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// <summary>
     /// 测量启用 Trace 日志时的查询路径。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     protected int ExecuteQueryWithTrace()
     {
         using var query = CreateQuery(_traceQueryFactory);
@@ -275,6 +311,12 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
             File.Delete(_databasePath);
     }
 
+    /// <summary>
+    /// 创建 SQLite 基准测试所需的服务提供程序。
+    /// </summary>
+    /// <param name="connectionString">SQLite 数据库连接字符串。</param>
+    /// <param name="enableTrace">是否启用 Trace 日志。</param>
+    /// <returns>已注册 SQLite 服务的服务提供程序。</returns>
     private static ServiceProvider CreateServiceProvider(string connectionString, bool enableTrace)
     {
         var services = new ServiceCollection();
@@ -291,6 +333,11 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
         return services.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// 从指定工厂创建查询对象。
+    /// </summary>
+    /// <param name="queryFactory">用于创建查询的工厂。</param>
+    /// <returns>新创建的查询对象。</returns>
     private static ISqlQuery CreateQuery(ISqlQueryFactory queryFactory) => queryFactory.Create();
 
     /// <summary>
@@ -305,6 +352,11 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
             throw new InvalidOperationException($"SQLite E2E validation failed for {path}: expected {expected}, actual {actual}.");
     }
 
+    /// <summary>
+    /// 创建样例表并写入指定数量的行。
+    /// </summary>
+    /// <param name="connectionString">SQLite 数据库连接字符串。</param>
+    /// <param name="rowCount">要写入的样例行数。</param>
     private void SeedDatabase(string connectionString, int rowCount)
     {
         using var connection = new SqliteConnection(connectionString);
@@ -330,53 +382,119 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
         transaction.Commit();
     }
 
+    /// <summary>
+    /// 列表查询使用的 SQLite 样例行。
+    /// </summary>
     private sealed class SqliteBenchmarkRow
     {
+        /// <summary>
+        /// 获取或设置样例行标识。
+        /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置样例行名称。
+        /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 单列查询使用的 SQLite 样例对象。
+    /// </summary>
     private sealed class SqliteBenchmarkName
     {
+        /// <summary>
+        /// 获取或设置样例名称。
+        /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 双列映射查询使用的 SQLite 样例对象。
+    /// </summary>
     private sealed class SqliteBenchmarkPair
     {
+        /// <summary>
+        /// 获取或设置样例标识。
+        /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置样例名称。
+        /// </summary>
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// 五项多映射查询使用的 SQLite 样例对象。
+    /// </summary>
     private sealed class SqliteBenchmarkFive
     {
+        /// <summary>
+        /// 获取或设置样例标识。
+        /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置映射得到的名称集合。
+        /// </summary>
         public string Names { get; set; }
     }
 
+    /// <summary>
+    /// 七项多映射查询使用的 SQLite 样例对象。
+    /// </summary>
     private sealed class SqliteBenchmarkSeven
     {
+        /// <summary>
+        /// 获取或设置样例标识。
+        /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 获取或设置映射得到的名称集合。
+        /// </summary>
         public string Names { get; set; }
     }
 
+    /// <summary>
+    /// 用于观测诊断事件的空操作订阅者。
+    /// </summary>
     protected sealed class NoOpDiagnosticObserver : IObserver<DiagnosticListener>,
         IObserver<KeyValuePair<string, object>>, IDisposable
     {
+        /// <summary>
+        /// 所有诊断监听器的订阅句柄。
+        /// </summary>
         private readonly IDisposable _allListenersSubscription;
+
+        /// <summary>
+        /// SQL 查询诊断监听器的订阅句柄。
+        /// </summary>
         private IDisposable _listenerSubscription;
 
+        /// <summary>
+        /// 初始化一个 <see cref="NoOpDiagnosticObserver"/> 类型的实例。
+        /// </summary>
         public NoOpDiagnosticObserver() => _allListenersSubscription = DiagnosticListener.AllListeners.Subscribe(this);
 
+        /// <inheritdoc />
         public void OnNext(DiagnosticListener value)
         {
             if (value.Name == SqlQueryDiagnosticListenerNames.DiagnosticListenerName)
                 _listenerSubscription = value.Subscribe(this);
         }
 
+        /// <inheritdoc />
         public void OnNext(KeyValuePair<string, object> value) { }
+
+        /// <inheritdoc />
         public void OnCompleted() { }
+
+        /// <inheritdoc />
         public void OnError(Exception error) { }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _listenerSubscription?.Dispose();
@@ -384,28 +502,52 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
         }
     }
 
+    /// <summary>
+    /// 为 Trace 基准提供空操作日志记录器的 Provider。
+    /// </summary>
     private sealed class TraceEnabledNoOpLoggerProvider : ILoggerProvider
     {
+        /// <inheritdoc />
         public ILogger CreateLogger(string categoryName) => TraceEnabledNoOpLogger.Instance;
 
+        /// <inheritdoc />
         public void Dispose() { }
     }
 
+    /// <summary>
+    /// 接收 Trace 级别事件但不输出内容的日志记录器。
+    /// </summary>
     private sealed class TraceEnabledNoOpLogger : ILogger
     {
+        /// <summary>
+        /// 获取共享的空操作日志记录器实例。
+        /// </summary>
         public static TraceEnabledNoOpLogger Instance { get; } = new();
 
+        /// <inheritdoc />
         public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+
+        /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Trace;
+
+        /// <inheritdoc />
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
             Func<TState, Exception, string> formatter)
         {
         }
     }
 
+    /// <summary>
+    /// 表示空操作日志作用域的共享对象。
+    /// </summary>
     private sealed class NullScope : IDisposable
     {
+        /// <summary>
+        /// 获取共享的空操作作用域实例。
+        /// </summary>
         public static NullScope Instance { get; } = new();
+
+        /// <inheritdoc />
         public void Dispose() { }
     }
 }
@@ -416,7 +558,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
 public abstract class SqliteDapperE2EScalableBenchmarksBase : SqliteDapperE2EBenchmarkInfrastructure
 {
     /// <summary>
-    /// SQLite 样例行数。
+    /// 获取或设置SQLite 样例行数。
     /// </summary>
     [Params(1, 100, 1000)]
     public int RowCount { get; set; }
@@ -447,48 +589,56 @@ public abstract class SqliteDapperE2EScalableBenchmarksBase : SqliteDapperE2EBen
     /// <summary>
     /// 测量 SQLite Dapper 查询、映射和列表物化的完整成本。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     [Benchmark]
     public int QueryToList() => ExecuteQueryToList();
 
     /// <summary>
     /// 测量 SQLite Dapper 同步流式读取和释放路径。
     /// </summary>
+    /// <returns>流式读取的行数。</returns>
     [Benchmark]
     public int StreamToList() => ExecuteStreamToList();
 
     /// <summary>
     /// 测量 SQLite Dapper 异步流式读取路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回流式读取的行数。</returns>
     [Benchmark]
     public Task<int> StreamAsyncToList() => ExecuteStreamAsyncToList();
 
     /// <summary>
     /// 测量 SQLite Dapper 双对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     [Benchmark]
     public int MapTwoTypes() => ExecuteMapTwoTypes();
 
     /// <summary>
     /// 测量 SQLite Dapper 五对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     [Benchmark]
     public int MapFiveTypes() => ExecuteMapFiveTypes();
 
     /// <summary>
     /// 测量 SQLite Dapper 七对象映射路径。
     /// </summary>
+    /// <returns>映射返回的行数。</returns>
     [Benchmark]
     public int MapSevenTypes() => ExecuteMapSevenTypes();
 
     /// <summary>
     /// 测量 SQLite Dapper 多结果集读取和结果对象释放路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回两个结果集计数之和。</returns>
     [Benchmark]
     public Task<int> QueryMultiple() => ExecuteQueryMultiple();
 
     /// <summary>
     /// 测量多结果集只读取首个结果后提前释放的路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回首个结果集的行数。</returns>
     [Benchmark]
     public Task<int> QueryMultipleDisposeEarly() => ExecuteQueryMultipleDisposeEarly();
 }
@@ -545,6 +695,7 @@ public class SqliteDapperE2ETerminalBenchmarks : SqliteDapperE2EFixedBenchmarksB
     /// <summary>
     /// 测量 SQLite Dapper 单实体终结路径。
     /// </summary>
+    /// <returns>查询到的实体标识。</returns>
     [Benchmark]
     public int QueryToEntity() => ExecuteQueryToEntity();
 }
@@ -575,6 +726,7 @@ public class SqliteDapperE2ECancellationBenchmarks : SqliteDapperE2EFixedBenchma
     /// <summary>
     /// 测量异步流在取消后释放读取器的路径。
     /// </summary>
+    /// <returns>异步操作任务，完成后返回取消路径结果（捕获预期取消时为 1，否则为 0）。</returns>
     [Benchmark]
     public Task<int> StreamAsyncCancelled() => ExecuteStreamAsyncCancelled();
 }
@@ -605,6 +757,7 @@ public class SqliteDapperE2ECardinalityBenchmarks : SqliteDapperE2EFixedBenchmar
     /// <summary>
     /// 测量单实体基数异常路径，并确认异常可被调用方捕获。
     /// </summary>
+    /// <returns>基数异常验证结果（捕获预期异常时为 1，否则为 0）。</returns>
     [Benchmark]
     public int QueryToEntityCardinalityFailure() => ExecuteQueryToEntityCardinalityFailure();
 }
@@ -635,6 +788,7 @@ public class SqliteDapperE2EActivityBenchmarks : SqliteDapperE2EFixedBenchmarksB
     /// <summary>
     /// 测量仅启用 Activity 时的查询诊断路径。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     [Benchmark]
     public int QueryWithActivity() => ExecuteQueryWithActivity();
 }
@@ -665,6 +819,7 @@ public class SqliteDapperE2ETraceBenchmarks : SqliteDapperE2EFixedBenchmarksBase
     /// <summary>
     /// 测量启用 Trace 日志时的查询路径。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     [Benchmark]
     public int QueryWithTrace() => ExecuteQueryWithTrace();
 }
@@ -676,6 +831,9 @@ public class SqliteDapperE2ETraceBenchmarks : SqliteDapperE2EFixedBenchmarksBase
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqliteDapperE2EDiagnosticSteadyBenchmarks : SqliteDapperE2EFixedBenchmarksBase
 {
+    /// <summary>
+    /// 基准周期内保持的诊断订阅句柄。
+    /// </summary>
     private IDisposable _observer;
 
     /// <summary>
@@ -703,6 +861,7 @@ public class SqliteDapperE2EDiagnosticSteadyBenchmarks : SqliteDapperE2EFixedBen
     /// <summary>
     /// 测量已订阅 DiagnosticListener 时的稳态查询路径。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     [Benchmark]
     public int QueryWithDiagnosticListener() => ExecuteQueryToList();
 }
@@ -733,6 +892,7 @@ public class SqliteDapperE2EDiagnosticSubscribeBenchmarks : SqliteDapperE2EFixed
     /// <summary>
     /// 测量建立订阅后执行一次查询的成本。
     /// </summary>
+    /// <returns>查询返回的行数。</returns>
     [Benchmark]
     public int SubscribeDiagnosticListenerAndQuery()
     {
@@ -741,6 +901,9 @@ public class SqliteDapperE2EDiagnosticSubscribeBenchmarks : SqliteDapperE2EFixed
     }
 }
 
+/// <summary>
+/// 用 DryJob 验证 SQLite Dapper E2E 基准可运行的轻量场景。
+/// </summary>
 [MemoryDiagnoser]
 [DryJob]
 public class SqliteDapperE2ESmokeBenchmarks : SqliteDapperE2EScalableBenchmarksBase

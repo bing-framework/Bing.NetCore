@@ -15,8 +15,6 @@ public abstract class PersistentObjectBase : PersistentObjectBase<Guid>
 /// <typeparam name="TKey">标识类型</typeparam>
 public abstract class PersistentObjectBase<TKey> : PersistentEntityBase<TKey>, IVersion
 {
-    /// <summary>
-    /// 版本号（乐观锁）
-    /// </summary>
+    /// <inheritdoc />
     public byte[] Version { get; set; }
 }

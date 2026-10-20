@@ -6,7 +6,7 @@
 public class JsonLocalizationOptions : LocalizationOptions
 {
     /// <summary>
-    /// 初始化 <see cref="JsonLocalizationOptions"/> 的实例，并将资源路径设为 <c>Resources</c>。
+    /// 初始化一个 <see cref="JsonLocalizationOptions"/> 类型的实例。
     /// </summary>
     public JsonLocalizationOptions()
     {

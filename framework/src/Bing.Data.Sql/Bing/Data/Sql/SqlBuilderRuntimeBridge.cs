@@ -26,7 +26,7 @@ public static class SqlBuilderRuntimeBridge
         SqlBuilderBase.ContainsParameterToken(sql, parameterName);
 
     /// <summary>
-    /// 判断 Builder 是否必须创建独立执行快照。
+    /// 判断查询是否需要执行快照。
     /// </summary>
     /// <param name="builder">待检查的 SQL Builder。</param>
     /// <returns>动态过滤或数据边界要求快照时返回 <see langword="true"/>。</returns>
@@ -34,7 +34,7 @@ public static class SqlBuilderRuntimeBridge
         builder is SqlBuilderBase { RequiresRenderSnapshot: true };
 
     /// <summary>
-    /// 创建 SQL 与参数状态一致的执行快照。
+    /// 创建执行快照。
     /// </summary>
     /// <param name="builder">待冻结的 SQL Builder。</param>
     /// <returns>本次执行使用的 SQL 与 Builder 快照。</returns>
@@ -42,7 +42,7 @@ public static class SqlBuilderRuntimeBridge
         => CreateExecutionSnapshot(builder, false);
 
     /// <summary>
-    /// 创建 SQL 与参数状态一致的执行快照，并按需生成调试 SQL。
+    /// 创建执行快照。
     /// </summary>
     /// <param name="builder">待冻结的 SQL Builder。</param>
     /// <param name="includeDebugSql">是否同时生成调试 SQL。</param>
@@ -64,7 +64,7 @@ public static class SqlBuilderRuntimeBridge
     }
 
     /// <summary>
-    /// 创建查询计划的执行快照。
+    /// 创建执行快照。
     /// </summary>
     /// <param name="plan">待执行的查询计划。</param>
     /// <returns>查询计划对应的 SQL 与参数快照。</returns>
@@ -72,7 +72,7 @@ public static class SqlBuilderRuntimeBridge
         => CreateExecutionSnapshot(plan, false);
 
     /// <summary>
-    /// 创建查询计划的执行快照，并按需生成调试 SQL。
+    /// 创建执行快照。
     /// </summary>
     /// <param name="plan">待执行的查询计划。</param>
     /// <param name="includeDebugSql">是否同时生成调试 SQL。</param>
@@ -156,7 +156,7 @@ public static class SqlBuilderRuntimeBridge
     }
 
     /// <summary>
-    /// 创建当前页数据查询计划。
+    /// 创建分页查询计划。
     /// </summary>
     /// <param name="plan">原始结构化查询计划。</param>
     /// <param name="pager">本次分页参数。</param>
@@ -177,7 +177,7 @@ public static class SqlBuilderRuntimeBridge
     }
 
     /// <summary>
-    /// 创建原生 SQL 文本的安全分页计划。
+    /// 创建分页查询计划。
     /// </summary>
     /// <param name="plan">原生 SQL 文本计划。</param>
     /// <param name="pager">本次分页参数。</param>
@@ -381,15 +381,13 @@ public static class SqlBuilderRuntimeBridge
             }
         }
 
-        /// <summary>
+        /// <inheritdoc />
+        /// <remarks>
         /// 获取原生 SQL 的来源参数对象。
-        /// </summary>
+        /// </remarks>
         public object Source { get; }
 
-        /// <summary>
-        /// 获取合并后的参数项集合。
-        /// </summary>
-        /// <returns>包含来源参数和分页参数的参数项集合。</returns>
+        /// <inheritdoc />
         public IReadOnlyCollection<SqlParameterMapItem> GetItems() => _items;
 
         /// <summary>

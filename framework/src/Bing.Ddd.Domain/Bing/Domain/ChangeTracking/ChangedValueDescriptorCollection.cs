@@ -19,7 +19,7 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     private readonly IList<string> _changedNameList;
 
     /// <summary>
-    /// 初始化一个<see cref="ChangedValueDescriptorCollection"/>类型的实例
+    /// 初始化一个 <see cref="ChangedValueDescriptorCollection"/> 类型的实例。
     /// </summary>
     public ChangedValueDescriptorCollection()
     {
@@ -28,7 +28,7 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ChangedValueDescriptorCollection"/>类型的实例
+    /// 初始化一个 <see cref="ChangedValueDescriptorCollection"/> 类型的实例。
     /// </summary>
     /// <param name="descriptors">变更值描述符集合</param>
     public ChangedValueDescriptorCollection(ChangedValueDescriptorCollection descriptors) : this()
@@ -38,16 +38,10 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
         Populate(descriptors);
     }
 
-    /// <summary>
-    /// 获取迭代器
-    /// </summary>
-    /// <returns>变更值描述符的泛型枚举器。</returns>
+    /// <inheritdoc />
     public IEnumerator<ChangedValueDescriptor> GetEnumerator() => _list.GetEnumerator();
 
-    /// <summary>
-    /// 获取迭代器
-    /// </summary>
-    /// <returns>变更值描述符的枚举器。</returns>
+    /// <inheritdoc />
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
@@ -119,10 +113,10 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
         _changedNameList.Clear();
     }
 
-    /// <summary>
-    /// 输出变更信息
-    /// </summary>
-    /// <returns>当前变更值集合的文本表示。</returns>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 按顺序拼接变更值描述；集合为空时返回空字符串。
+    /// </remarks>
     public override string ToString()
     {
         if (!_list.Any())

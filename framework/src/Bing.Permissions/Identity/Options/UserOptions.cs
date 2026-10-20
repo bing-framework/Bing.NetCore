@@ -6,12 +6,18 @@
 public class UserOptions
 {
     /// <summary>
-    /// 获取或设置用户名允许使用的字符集合，默认包含大小写英文字母、数字及 <c>-._@+</c>。
+    /// 获取或设置用户名允许使用的字符集合。
     /// </summary>
+    /// <remarks>
+    /// 默认包含大小写英文字母、数字及 <c>-._@+</c>。
+    /// </remarks>
     public string UserNameCharacters { get; set; } = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
     /// <summary>
-    /// 获取或设置是否要求用户电子邮件地址唯一，默认不启用。
+    /// 获取或设置是否要求用户电子邮件地址唯一。
     /// </summary>
+    /// <remarks>
+    /// 默认不启用。
+    /// </remarks>
     public bool UniqueEmail { get; set; }
 }

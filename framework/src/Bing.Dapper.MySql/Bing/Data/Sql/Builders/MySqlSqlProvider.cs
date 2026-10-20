@@ -11,12 +11,12 @@ namespace Bing.Data.Sql.Builders;
 public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
 {
     /// <summary>
-    /// 可在线程间安全共享的 MySQL Provider 单例。
+    /// 获取可在线程间安全共享的 MySQL Provider 单例。
     /// </summary>
     public static MySqlSqlProvider Instance { get; } = new();
 
     /// <summary>
-    /// 初始化 MySQL Provider 单例。
+    /// 初始化一个 <see cref="MySqlSqlProvider"/> 类型的实例。
     /// </summary>
     private MySqlSqlProvider() { }
 

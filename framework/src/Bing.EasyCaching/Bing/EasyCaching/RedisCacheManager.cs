@@ -8,18 +8,21 @@ namespace Bing.EasyCaching;
 public class RedisCacheManager : CacheManager, IRedisCache
 {
     /// <summary>
-    /// Redis缓存提供器
+    /// 执行 Redis 缓存操作的提供器。
     /// </summary>
     private readonly IRedisCachingProvider _provider;
 
     /// <summary>
-    /// 初始化EasyCaching Redis缓存服务
+    /// 初始化一个 <see cref="RedisCacheManager"/> 类型的实例。
     /// </summary>
     /// <param name="factory">EasyCaching缓存提供器工厂</param>
-    public RedisCacheManager(IEasyCachingProviderFactory factory) : base(factory?.GetCachingProvider(CacheProviderKey.RedisCache))
+    /// <param name="configuration">缓存实例配置</param>
+    public RedisCacheManager(IEasyCachingProviderFactory factory, CacheConfiguration configuration)
+        : base(factory?.GetCachingProvider(configuration?.ProviderName), configuration)
     {
         if (factory == null)
             throw new ArgumentNullException(nameof(factory));
-        _provider = factory.GetRedisProvider(CacheProviderKey.RedisCache);
+        _provider = factory.GetRedisProvider(configuration.ProviderName);
+        SetCoordinator(new RedisLeaseCoordinator(factory.GetCachingProvider(configuration.ProviderName), configuration));
     }
 }

@@ -5,11 +5,7 @@
 /// </summary>
 public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
 {
-    /// <summary>
-    /// 设置值
-    /// </summary>
-    /// <param name="parameter">参数</param>
-    /// <param name="value">值</param>
+    /// <inheritdoc />
     public override void SetValue(System.Data.IDbDataParameter parameter, Guid value)
     {
         if (parameter == null || value == Guid.Empty)
@@ -23,11 +19,7 @@ public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
         parameter.Value = result;
     }
 
-    /// <summary>
-    /// 转换值
-    /// </summary>
-    /// <param name="value">值</param>
-    /// <returns>转换后的 Guid 值；输入为空时返回空 Guid。</returns>
+    /// <inheritdoc />
     public override Guid Parse(object value)
     {
         if (value == null)

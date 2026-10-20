@@ -6,8 +6,7 @@ using Xunit;
 namespace Bing.Logging.Tests;
 
 /// <summary>
-/// <see cref="LoggerConfigurationExtensions.ConfigLogLevel"/> 单元测试。
-/// 通过公共 API 间接验证 LogLevelSwitcher 的映射逻辑。
+/// <see cref="LoggerConfigurationExtensions.ConfigLogLevel"/> 单元测试。 通过公共 API 间接验证 LogLevelSwitcher 的映射逻辑。
 /// </summary>
 public class LoggerConfigurationExtensionsTest
 {
@@ -16,8 +15,7 @@ public class LoggerConfigurationExtensionsTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：source 为 null 时应抛出 ArgumentNullException，
-    /// 防止链式调用时静默失败。
+    /// 测试目的：source 为 null 时应抛出 ArgumentNullException， 防止链式调用时静默失败。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_NullSource_ShouldThrowArgumentNullException()
@@ -31,8 +29,7 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：configuration 为 null 时应抛出 ArgumentNullException，
-    /// 确保配置缺失时有明确的错误提示。
+    /// 测试目的：configuration 为 null 时应抛出 ArgumentNullException， 确保配置缺失时有明确的错误提示。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_NullConfiguration_ShouldThrowArgumentNullException()
@@ -46,8 +43,7 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：Logging:LogLevel 节点为空时，ConfigLogLevel 应不抛异常并返回原配置，
-    /// 确保没有日志配置节时可以安全使用。
+    /// 测试目的：Logging:LogLevel 节点为空时，ConfigLogLevel 应不抛异常并返回原配置， 确保没有日志配置节时可以安全使用。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_EmptyLoggingSection_ShouldNotThrow()
@@ -61,9 +57,9 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：Logging:LogLevel 包含 Default 条目时，ConfigLogLevel 应不抛异常，
-    /// 验证 Default 键走 MinimumLevel.ControlledBy 分支。
+    /// 验证默认日志级别配置不会抛出异常。
     /// </summary>
+    /// <remarks><c>Logging:LogLevel:Default</c> 配置走 <c>MinimumLevel.ControlledBy</c> 分支。</remarks>
     [Fact]
     public void ConfigLogLevel_WithDefaultLevel_ShouldNotThrow()
     {
@@ -81,9 +77,9 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：Logging:LogLevel 包含 Override 条目（非 Default）时，ConfigLogLevel 应不抛异常，
-    /// 验证 Override 键走 MinimumLevel.Override 分支。
+    /// 验证覆盖日志级别配置不会抛出异常。
     /// </summary>
+    /// <remarks>非 Default 的 <c>Logging:LogLevel</c> 条目走 <c>MinimumLevel.Override</c> 分支。</remarks>
     [Fact]
     public void ConfigLogLevel_WithOverrideLevel_ShouldNotThrow()
     {
@@ -102,8 +98,7 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：同时包含 Default 和 Override 条目时，ConfigLogLevel 应全部处理，不抛异常，
-    /// 验证混合配置场景。
+    /// 测试目的：同时包含 Default 和 Override 条目时，ConfigLogLevel 应全部处理，不抛异常， 验证混合配置场景。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_WithDefaultAndOverride_ShouldNotThrow()
@@ -124,8 +119,7 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：ConfigLogLevel 应返回原 LoggerConfiguration 实例（方法链支持），
-    /// 确保调用者可以继续链式配置。
+    /// 测试目的：ConfigLogLevel 应返回原 LoggerConfiguration 实例（方法链支持）， 确保调用者可以继续链式配置。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_ShouldReturnSameLoggerConfiguration()
@@ -146,10 +140,9 @@ public class LoggerConfigurationExtensionsTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Logging:LogLevel 支持 Trace / Debug / Information / Warning / Error / Critical / None
-    /// 全部七个 MSLogging 级别字符串，ConfigLogLevel 均不应抛异常，
-    /// 确保 LogLevelSwitcher.Switch(string) 覆盖所有有效输入。
+    /// 验证所有 Microsoft 日志级别配置均可正常处理。
     /// </summary>
+    /// <remarks>覆盖 Trace、Debug、Information、Warning、Error、Critical 和 None 七个级别，验证 <c>LogLevelSwitcher.Switch(string)</c> 支持全部有效输入。</remarks>
     [Theory]
     [InlineData("Trace")]
     [InlineData("Debug")]
@@ -174,8 +167,7 @@ public class LoggerConfigurationExtensionsTest
     }
 
     /// <summary>
-    /// 测试目的：未知日志级别字符串时，Switch 应 fallback 为 Warning 而不是抛异常，
-    /// 确保配置文件拼写错误不会导致应用启动失败。
+    /// 测试目的：未知日志级别字符串时，Switch 应 fallback 为 Warning 而不是抛异常， 确保配置文件拼写错误不会导致应用启动失败。
     /// </summary>
     [Fact]
     public void ConfigLogLevel_UnknownLevel_ShouldFallbackWithoutThrowing()

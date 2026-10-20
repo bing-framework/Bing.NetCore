@@ -6,13 +6,13 @@
 public class LoggerWrapper : ILoggerWrapper
 {
     /// <summary>
-    /// 初始化一个<see cref="LoggerWrapper"/>类型的实例
+    /// 初始化一个 <see cref="LoggerWrapper"/> 类型的实例。
     /// </summary>
     /// <param name="logger">日志记录器</param>
     public LoggerWrapper(ILogger logger) => Logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
-    /// 日志记录器
+    /// 获取日志记录器
     /// </summary>
     protected ILogger Logger { get; }
 

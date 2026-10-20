@@ -11,14 +11,13 @@ namespace Bing.Domain.Entities.Auditing;
 public abstract class CreationAuditedEntity<TEntity> : EntityBase<TEntity>, ICreationAuditedObject
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
-    /// 获取或设置实体的创建时间。
-    /// </summary>
+    /// <inheritdoc />
     public virtual DateTime? CreationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual Guid? CreatorId { get; set; }
 }
 
@@ -31,25 +30,24 @@ public abstract class CreationAuditedEntity<TEntity> : EntityBase<TEntity>, ICre
 public abstract class CreationAuditedEntity<TEntity, TKey> : EntityBase<TEntity, TKey>, ICreationAuditedObject<TKey>
     where TEntity : class, IEntity, IVerifyModel<TEntity>
 {
-    /// <summary>
-    /// 获取或设置实体的创建时间。
-    /// </summary>
+    /// <inheritdoc />
     public virtual DateTime? CreationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该实体的用户标识。
-    /// </summary>
+    /// </remarks>
     public virtual TKey CreatorId { get; set; }
 
     /// <summary>
-    /// 初始化 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 的实例。
+    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     protected CreationAuditedEntity()
     {
     }
 
     /// <summary>
-    /// 使用指定标识初始化 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 的实例。
+    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected CreationAuditedEntity(TKey id) : base(id)

@@ -29,14 +29,14 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 基于已有查询核心初始化一个查询描述副本。
+    /// 初始化一个 <see cref="SqlLambdaQuery"/> 类型的实例。
     /// </summary>
     /// <param name="query">已有查询描述。</param>
     internal SqlLambdaQuery(SqlLambdaQuery query) => _core = query?._core ??
         throw new ArgumentNullException(nameof(query));
 
     /// <summary>
-    /// 基于内部执行核心初始化一个查询描述。
+    /// 初始化一个 <see cref="SqlLambdaQuery"/> 类型的实例。
     /// </summary>
     /// <param name="core">Lambda 查询执行核心。</param>
     private SqlLambdaQuery(SqlLambdaQueryCore core) => _core = core ?? throw new ArgumentNullException(nameof(core));
@@ -179,7 +179,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.HavingCore(expression, sources);
 
     /// <summary>
-    /// 使用指定左侧来源添加类型化内连接。
+    /// 添加内连接。
     /// </summary>
     /// <typeparam name="TJoin">待连接的右侧实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
@@ -190,7 +190,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TJoin : class => _core.JoinCore<TJoin>(predicate, leftSource, alias, schema);
 
     /// <summary>
-    /// 使用指定左侧来源添加类型化左外连接。
+    /// 添加左外连接。
     /// </summary>
     /// <typeparam name="TJoin">待连接的右侧实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
@@ -201,7 +201,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TJoin : class => _core.LeftJoinCore<TJoin>(predicate, leftSource, alias, schema);
 
     /// <summary>
-    /// 使用指定左侧来源添加类型化右外连接。
+    /// 添加右外连接。
     /// </summary>
     /// <typeparam name="TJoin">待连接的右侧实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
@@ -212,7 +212,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TJoin : class => _core.RightJoinCore<TJoin>(predicate, leftSource, alias, schema);
 
     /// <summary>
-    /// 使用指定左侧来源添加类型化全外连接。
+    /// 添加全外连接。
     /// </summary>
     /// <typeparam name="TJoin">待连接的右侧实体类型。</typeparam>
     /// <param name="predicate">连接条件表达式。</param>
@@ -223,7 +223,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TJoin : class => _core.FullJoinCore<TJoin>(predicate, leftSource, alias, schema);
 
     /// <summary>
-    /// 按指定左侧来源添加类型化派生表内连接。
+    /// 添加内连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -235,7 +235,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.JoinCore<TLeft, TProjection>(subquery, predicate, leftSource);
 
     /// <summary>
-    /// 按指定左侧来源添加类型化派生表左外连接。
+    /// 添加左外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -247,7 +247,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.LeftJoinCore<TLeft, TProjection>(subquery, predicate, leftSource);
 
     /// <summary>
-    /// 按指定左侧来源添加类型化派生表右外连接。
+    /// 添加右外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -259,7 +259,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.RightJoinCore<TLeft, TProjection>(subquery, predicate, leftSource);
 
     /// <summary>
-    /// 按指定左侧来源添加类型化派生表全外连接。
+    /// 添加全外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -271,7 +271,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.FullJoinCore<TLeft, TProjection>(subquery, predicate, leftSource);
 
     /// <summary>
-    /// 添加类型化交叉连接表。
+    /// 添加交叉连接。
     /// </summary>
     /// <typeparam name="TEntity">待连接的实体类型。</typeparam>
     /// <param name="alias">表别名。</param>
@@ -280,7 +280,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         _core.CrossJoinCore<TEntity>(alias, schema);
 
     /// <summary>
-    /// 添加类型化派生表交叉连接。
+    /// 添加交叉连接。
     /// </summary>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -330,7 +330,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置单来源投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回投影列的表达式。</param>
@@ -341,7 +341,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名设置单来源投影。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回投影列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -353,7 +355,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置单来源 DTO 投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
@@ -365,7 +367,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名设置单来源 DTO 投影。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
     /// <param name="projection">返回投影对象的表达式。</param>
@@ -379,7 +383,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -391,7 +395,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名设置双来源投影。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="columns">返回投影列的双来源表达式。</param>
@@ -406,7 +412,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源 DTO 投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -420,7 +426,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名设置双来源 DTO 投影。</summary>
+    /// <summary>
+    /// 设置查询投影。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
@@ -435,7 +443,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>使用单来源 DTO 投影创建类型化派生表。</summary>
+    /// <summary>
+    /// 创建投影子查询。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="projection">返回派生表列的表达式。</param>
@@ -448,7 +458,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
     }
 
-    /// <summary>按来源别名使用单来源 DTO 投影创建类型化派生表。</summary>
+    /// <summary>
+    /// 创建投影子查询。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="projection">返回派生表列的表达式。</param>
@@ -462,7 +474,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return SelectSubqueryCore<TProjection>(projection, alias, new[] { ResolveSource<TEntity>(sourceAlias) });
     }
 
-    /// <summary>使用双来源 DTO 投影创建类型化派生表。</summary>
+    /// <summary>
+    /// 创建投影子查询。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -476,7 +490,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
     }
 
-    /// <summary>按两个来源别名使用 DTO 投影创建类型化派生表。</summary>
+    /// <summary>
+    /// 创建投影子查询。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
@@ -495,14 +511,14 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置实体默认投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TEntity>() where TEntity : class => Select<TEntity>(false);
 
     /// <summary>
-    /// 设置实体默认投影。
+    /// 设置查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="propertyAsAlias">是否将属性名作为列别名。</param>
@@ -518,7 +534,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 追加单来源投影。
+    /// 追加查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回追加列的表达式；传入 null 时使用默认投影行为。</param>
@@ -527,7 +543,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => AppendSelect(columns, false);
 
     /// <summary>
-    /// 追加单来源投影。
+    /// 追加查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回追加列的表达式；传入 null 时使用默认投影行为。</param>
@@ -544,7 +560,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名追加投影列。</summary>
+    /// <summary>
+    /// 追加查询投影。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回追加列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -557,7 +575,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 追加单来源 DTO 投影列。
+    /// 追加查询投影。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
@@ -570,7 +588,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名追加单来源 DTO 投影列。</summary>
+    /// <summary>
+    /// 追加查询投影。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TProjection">投影结果类型。</typeparam>
     /// <param name="projection">返回追加投影对象的表达式。</param>
@@ -595,7 +615,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>使用单来源属性创建聚合投影。</summary>
+    /// <summary>
+    /// 添加聚合投影。
+    /// </summary>
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
     /// <param name="column">返回聚合列的实体成员表达式。</param>
@@ -605,7 +627,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, object>> column)
         where TEntity : class => Aggregate(function, column, null, false);
 
-    /// <summary>使用单来源属性创建聚合投影。</summary>
+    /// <summary>
+    /// 添加聚合投影。
+    /// </summary>
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
     /// <param name="column">返回聚合列的实体成员表达式。</param>
@@ -615,7 +639,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, object>> column, string columnAlias)
         where TEntity : class => Aggregate(function, column, columnAlias, false);
 
-    /// <summary>使用单来源属性创建聚合投影。</summary>
+    /// <summary>
+    /// 添加聚合投影。
+    /// </summary>
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
     /// <param name="column">返回聚合列的实体成员表达式。</param>
@@ -636,7 +662,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 按来源别名追加单来源聚合投影。
+    /// 添加聚合投影。
     /// </summary>
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
@@ -650,7 +676,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => Aggregate(function, column, alias, columnAlias, false);
 
     /// <summary>
-    /// 按来源别名追加单来源聚合投影。
+    /// 添加聚合投影。
     /// </summary>
     /// <typeparam name="TEntity">聚合列所属的实体类型。</typeparam>
     /// <param name="function">要执行的聚合函数。</param>
@@ -674,7 +700,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 追加单来源条件。
+    /// 追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回条件的表达式。</param>
@@ -685,7 +711,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名追加单来源条件。</summary>
+    /// <summary>
+    /// 追加查询条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回条件的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -697,7 +725,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 追加双来源条件。
+    /// 追加查询条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -709,7 +737,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名追加双来源条件。</summary>
+    /// <summary>
+    /// 追加查询条件。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="predicate">返回条件的双来源表达式。</param>
@@ -724,7 +754,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 追加单来源参数条件。
+    /// 追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TValue">条件值类型。</typeparam>
@@ -735,7 +765,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => Where(column, value, Operator.Equal);
 
     /// <summary>
-    /// 追加单来源参数条件。
+    /// 追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TValue">条件值类型。</typeparam>
@@ -753,7 +783,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名追加单来源参数条件。</summary>
+    /// <summary>
+    /// 追加查询条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TValue">条件值类型。</typeparam>
     /// <param name="column">返回条件列的表达式。</param>
@@ -765,7 +797,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => Where(column, value, alias, Operator.Equal);
 
     /// <summary>
-    /// 按来源别名追加单来源参数条件。
+    /// 追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <typeparam name="TValue">条件值类型。</typeparam>
@@ -785,7 +817,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 按条件追加单来源条件。
+    /// 按条件追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
@@ -798,7 +830,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按条件和来源别名追加单来源条件。</summary>
+    /// <summary>
+    /// 按条件追加查询条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
     /// <param name="predicate">返回条件的表达式。</param>
@@ -812,7 +846,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 按条件追加单来源参数条件。
+    /// 按条件追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
@@ -823,7 +857,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => WhereIf(condition, column, value, Operator.Equal);
 
     /// <summary>
-    /// 按条件追加单来源参数条件。
+    /// 按条件追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
@@ -840,7 +874,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按条件和来源别名追加单来源参数条件。</summary>
+    /// <summary>
+    /// 按条件追加查询条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
     /// <param name="column">返回条件列的表达式。</param>
@@ -852,7 +888,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         where TEntity : class => WhereIf(condition, column, value, alias, Operator.Equal);
 
     /// <summary>
-    /// 按条件和来源别名追加单来源参数条件。
+    /// 按条件追加查询条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="condition">是否追加条件。</param>
@@ -891,7 +927,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Join<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
         where TLeft : class where TRight : class => Join(predicate, (string)null);
 
-    /// <summary>添加内连接。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
@@ -906,7 +944,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 使用高级来源选项添加内连接。
+    /// 添加内连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
@@ -931,7 +969,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery LeftJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
         where TLeft : class where TRight : class => LeftJoin(predicate, (string)null);
 
-    /// <summary>添加左外连接。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
@@ -946,7 +986,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 使用高级来源选项添加左外连接。
+    /// 添加左外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
@@ -971,7 +1011,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery RightJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
         where TLeft : class where TRight : class => RightJoin(predicate, (string)null);
 
-    /// <summary>添加右外连接。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
@@ -986,7 +1028,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 使用高级来源选项添加右外连接。
+    /// 添加右外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
@@ -1011,7 +1053,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery FullJoin<TLeft, TRight>(Expression<Func<TLeft, TRight, bool>> predicate)
         where TLeft : class where TRight : class => FullJoin(predicate, (string)null);
 
-    /// <summary>添加全外连接。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
     /// <param name="predicate">返回 Join 条件的双来源表达式。</param>
@@ -1026,7 +1070,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 使用高级来源选项添加全外连接。
+    /// 添加全外连接。
     /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TRight">右侧来源实体类型。</typeparam>
@@ -1041,7 +1085,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按指定左侧来源添加类型化派生表内连接。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1051,7 +1097,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate)
         where TLeft : class where TProjection : class => Join(subquery, predicate, null);
 
-    /// <summary>按指定左侧来源添加类型化派生表内连接。</summary>
+    /// <summary>
+    /// 添加内连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1066,7 +1114,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按指定左侧来源添加类型化派生表左外连接。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1076,7 +1126,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate)
         where TLeft : class where TProjection : class => LeftJoin(subquery, predicate, null);
 
-    /// <summary>按指定左侧来源添加类型化派生表左外连接。</summary>
+    /// <summary>
+    /// 添加左外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1091,7 +1143,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按指定左侧来源添加类型化派生表右外连接。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1101,7 +1155,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate)
         where TLeft : class where TProjection : class => RightJoin(subquery, predicate, null);
 
-    /// <summary>按指定左侧来源添加类型化派生表右外连接。</summary>
+    /// <summary>
+    /// 添加右外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1116,7 +1172,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按指定左侧来源添加类型化派生表全外连接。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1126,7 +1184,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate)
         where TLeft : class where TProjection : class => FullJoin(subquery, predicate, null);
 
-    /// <summary>按指定左侧来源添加类型化派生表全外连接。</summary>
+    /// <summary>
+    /// 添加全外连接。
+    /// </summary>
     /// <typeparam name="TLeft">左侧来源实体类型。</typeparam>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
@@ -1154,7 +1214,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>添加类型化派生表交叉连接。</summary>
+    /// <summary>
+    /// 添加交叉连接。
+    /// </summary>
     /// <typeparam name="TProjection">派生表投影类型。</typeparam>
     /// <param name="subquery">类型化派生表查询。</param>
     /// <returns>当前查询描述。</returns>
@@ -1165,7 +1227,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源分组列。
+    /// 设置分组列。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1177,7 +1239,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名设置双来源分组列。</summary>
+    /// <summary>
+    /// 设置分组列。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="columns">返回分组列的双来源表达式。</param>
@@ -1191,7 +1255,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>设置单来源分组列。</summary>
+    /// <summary>
+    /// 设置分组列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回分组列的表达式。</param>
     /// <returns>当前查询描述。</returns>
@@ -1201,7 +1267,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名设置单来源分组列。</summary>
+    /// <summary>
+    /// 设置分组列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回分组列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -1213,7 +1281,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源排序列。
+    /// 设置排序列。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1225,7 +1293,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源排序列。
+    /// 设置排序列。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1239,7 +1307,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名设置双来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的双来源表达式。</param>
@@ -1252,7 +1322,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return OrderBy(columns, firstAlias, secondAlias, false);
     }
 
-    /// <summary>按两个来源别名设置双来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的双来源表达式。</param>
@@ -1267,7 +1339,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>设置单来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
     /// <returns>当前查询描述。</returns>
@@ -1276,7 +1350,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return OrderBy(columns, false);
     }
 
-    /// <summary>设置单来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
     /// <param name="desc">是否按降序排序。</param>
@@ -1287,7 +1363,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名设置单来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -1297,7 +1375,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return OrderBy(columns, alias, false);
     }
 
-    /// <summary>按来源别名设置单来源排序列。</summary>
+    /// <summary>
+    /// 设置排序列。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -1311,7 +1391,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置双来源 Having 条件。
+    /// 设置 Having 条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1323,7 +1403,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按两个来源别名设置双来源 Having 条件。</summary>
+    /// <summary>
+    /// 设置 Having 条件。
+    /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的双来源表达式。</param>
@@ -1337,7 +1419,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>设置单来源 Having 条件。</summary>
+    /// <summary>
+    /// 设置 Having 条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的表达式。</param>
     /// <returns>当前查询描述。</returns>
@@ -1347,7 +1431,9 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return this;
     }
 
-    /// <summary>按来源别名设置单来源 Having 条件。</summary>
+    /// <summary>
+    /// 设置 Having 条件。
+    /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
@@ -1381,7 +1467,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 按表达式参数位置解析当前查询中的来源。
+    /// 解析 Lambda 表达式引用的表源。
     /// </summary>
     /// <param name="expression">需要解析来源的 Lambda 表达式。</param>
     /// <returns>与表达式参数顺序一致的表源集合。</returns>

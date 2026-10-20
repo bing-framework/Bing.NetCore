@@ -14,7 +14,7 @@ public interface IMultiTenant : IMultiTenant<Guid?>
 public interface IMultiTenant<TKey>
 {
     /// <summary>
-    /// 租户标识
+    /// 获取或设置租户标识
     /// </summary>
     TKey TenantId { get; set; }
 }

@@ -26,7 +26,7 @@ public class ColumnCollection
     public ColumnItem this[int index] => _items[index];
 
     /// <summary>
-    /// 集合数量
+    /// 获取集合数量
     /// </summary>
     public int Count => _items.Count;
 
@@ -35,7 +35,7 @@ public class ColumnCollection
     #region 构造函数
 
     /// <summary>
-    /// 初始化一个<see cref="ColumnCollection"/>类型的实例
+    /// 初始化一个 <see cref="ColumnCollection"/> 类型的实例。
     /// </summary>
     /// <param name="items">列集合</param>
     public ColumnCollection(List<ColumnItem> items = null) => _items = items ?? new List<ColumnItem>();

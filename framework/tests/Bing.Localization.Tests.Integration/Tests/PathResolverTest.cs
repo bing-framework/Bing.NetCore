@@ -20,7 +20,7 @@ public class PathResolverTest
     private readonly ITestOutputHelper _output;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="PathResolverTest"/> 类型的实例。
     /// </summary>
     public PathResolverTest(ITestOutputHelper output)
     {

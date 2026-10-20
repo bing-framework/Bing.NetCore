@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
-/// 实体属性元数据。
+/// 描述实体 CLR 属性的列映射和写入约束元数据。
 /// </summary>
 public sealed class EntityPropertyMetadata
 {

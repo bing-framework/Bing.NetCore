@@ -16,23 +16,35 @@ public class BingAspNetCoreSerilogOptions
     public class AllEnricherPropertyNames
     {
         /// <summary>
-        /// 获取或设置租户标识对应的日志属性名称，默认值为 <c>TenantId</c>。
+        /// 获取或设置租户标识对应的日志属性名称。
         /// </summary>
+        /// <remarks>
+        /// 默认值为 <c>TenantId</c>。
+        /// </remarks>
         public string TenantId { get; set; } = "TenantId";
 
         /// <summary>
-        /// 获取或设置用户标识对应的日志属性名称，默认值为 <c>UserId</c>。
+        /// 获取或设置用户标识对应的日志属性名称。
         /// </summary>
+        /// <remarks>
+        /// 默认值为 <c>UserId</c>。
+        /// </remarks>
         public string UserId { get; set; } = "UserId";
 
         /// <summary>
-        /// 获取或设置客户端标识对应的日志属性名称，默认值为 <c>ClientId</c>。
+        /// 获取或设置客户端标识对应的日志属性名称。
         /// </summary>
+        /// <remarks>
+        /// 默认值为 <c>ClientId</c>。
+        /// </remarks>
         public string ClientId { get; set; } = "ClientId";
 
         /// <summary>
-        /// 获取或设置关联标识对应的日志属性名称，默认值为 <c>CorrelationId</c>。
+        /// 获取或设置关联标识对应的日志属性名称。
         /// </summary>
+        /// <remarks>
+        /// 默认值为 <c>CorrelationId</c>。
+        /// </remarks>
         public string CorrelationId { get; set; } = "CorrelationId";
     }
 }

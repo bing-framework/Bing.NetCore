@@ -76,17 +76,17 @@ public partial class MySqlQueryTest
     private sealed class ProductItemProjection
     {
         /// <summary>
-        /// 产品编码。
+        /// 获取或设置产品编码。
         /// </summary>
         public string ProductCode { get; set; }
 
         /// <summary>
-        /// 产品项编码。
+        /// 获取或设置产品项编码。
         /// </summary>
         public string Sku { get; set; }
 
         /// <summary>
-        /// 产品项数量。
+        /// 获取或设置产品项数量。
         /// </summary>
         public int Quantity { get; set; }
     }

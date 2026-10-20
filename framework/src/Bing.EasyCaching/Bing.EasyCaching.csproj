@@ -18,10 +18,15 @@
     <PackageReference Include="EasyCaching.InMemory" Version="$(EasyCaching-RefVersion)" />
     <PackageReference Include="EasyCaching.Redis" Version="$(EasyCaching-RefVersion)" />
     <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="$(EasyCaching-RefVersion)" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bing.Caching\Bing.Caching.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bing.EasyCaching.Tests" />
   </ItemGroup>
 
 </Project>

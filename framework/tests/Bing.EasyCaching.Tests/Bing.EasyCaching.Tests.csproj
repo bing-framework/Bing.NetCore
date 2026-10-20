@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\..\framework.tests.props" />
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\CacheContractAssertions.cs" Link="CacheContractAssertions.cs" />
+    <Compile Include="..\CacheCoordinationAssertions.cs" Link="CacheCoordinationAssertions.cs" />
+    <ProjectReference Include="..\..\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
+    <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+  </ItemGroup>
+</Project>

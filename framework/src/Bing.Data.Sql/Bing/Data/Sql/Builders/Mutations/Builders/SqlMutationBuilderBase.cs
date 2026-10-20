@@ -32,23 +32,24 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor
             new DefaultSqlMutationClauseFactory();
     }
 
-    /// <summary>
-    /// 当前 Mutation 上下文。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取当前 Mutation 上下文。
+    /// </remarks>
     public SqlMutationContext MutationContext { get; }
 
     /// <summary>
-    /// 当前 Mutation Clause Factory。
+    /// 获取当前 Mutation Clause Factory。
     /// </summary>
     protected ISqlMutationClauseFactory ClauseFactory { get; }
 
     /// <summary>
-    /// 当前 SQL Provider。
+    /// 获取当前 SQL Provider。
     /// </summary>
     protected ISqlProvider Provider => MutationContext.Provider;
 
     /// <summary>
-    /// 当前参数管理器。
+    /// 获取当前参数管理器。
     /// </summary>
     protected IParameterManager ParameterManager => MutationContext.ParameterManager;
 

@@ -40,105 +40,147 @@ public class DefaultSqlParameterBinderTest
     private sealed class Sample
     {
         /// <summary>
-        /// 受长度约束的字符串属性。
+        /// 获取或设置受长度约束的字符串值。
         /// </summary>
         [System.ComponentModel.DataAnnotations.StringLength(20)]
         public string StringValue { get; set; }
     }
 
     /// <summary>
-    /// 测试用命令对象
+    /// 测试用命令对象。
     /// </summary>
     private sealed class FakeDbCommand : IDbCommand
     {
+        /// <summary>
+        /// 测试命令的参数集合。
+        /// </summary>
         private readonly FakeParameterCollection _parameters = new();
 
+        /// <summary>
+        /// 获取已创建的数据库参数。
+        /// </summary>
         public List<IDbDataParameter> CreatedParameters => _parameters.Items;
 
+        /// <inheritdoc />
         public string CommandText { get; set; }
 
+        /// <inheritdoc />
         public int CommandTimeout { get; set; }
 
+        /// <inheritdoc />
         public CommandType CommandType { get; set; }
 
+        /// <inheritdoc />
         public IDbConnection Connection { get; set; }
 
+        /// <inheritdoc />
         public IDataParameterCollection Parameters => _parameters;
 
+        /// <inheritdoc />
         public IDbTransaction Transaction { get; set; }
 
+        /// <inheritdoc />
         public UpdateRowSource UpdatedRowSource { get; set; }
 
+        /// <inheritdoc />
         public void Cancel() { }
 
+        /// <inheritdoc />
         public IDbDataParameter CreateParameter() => new FakeDbDataParameter();
 
+        /// <inheritdoc />
         public void Dispose() { }
 
+        /// <inheritdoc />
         public int ExecuteNonQuery() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public IDataReader ExecuteReader() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public IDataReader ExecuteReader(CommandBehavior behavior) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object ExecuteScalar() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void Prepare() { }
     }
 
     /// <summary>
-    /// 测试用参数集合
+    /// 测试用参数集合。
     /// </summary>
     private sealed class FakeParameterCollection : IDataParameterCollection
     {
+        /// <summary>
+        /// 获取参数项列表。
+        /// </summary>
         public List<IDbDataParameter> Items { get; } = new();
 
+        /// <inheritdoc />
         public object this[string parameterName]
         {
             get => Items.FirstOrDefault(t => t.ParameterName == parameterName);
             set => throw new NotSupportedException();
         }
 
+        /// <inheritdoc />
         public object this[int index]
         {
             get => Items[index];
             set => throw new NotSupportedException();
         }
 
+        /// <inheritdoc />
         public bool IsFixedSize => false;
 
+        /// <inheritdoc />
         public bool IsReadOnly => false;
 
+        /// <inheritdoc />
         public int Count => Items.Count;
 
+        /// <inheritdoc />
         public bool IsSynchronized => false;
 
+        /// <inheritdoc />
         public object SyncRoot { get; } = new();
 
+        /// <inheritdoc />
         public int Add(object value)
         {
             Items.Add((IDbDataParameter)value);
             return Items.Count - 1;
         }
 
+        /// <inheritdoc />
         public void Clear() => Items.Clear();
 
+        /// <inheritdoc />
         public bool Contains(string parameterName) => Items.Any(t => t.ParameterName == parameterName);
 
+        /// <inheritdoc />
         public bool Contains(object value) => Items.Contains((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void CopyTo(Array array, int index) => Items.ToArray().CopyTo(array, index);
 
+        /// <inheritdoc />
         public IEnumerator GetEnumerator() => Items.GetEnumerator();
 
+        /// <inheritdoc />
         public int IndexOf(string parameterName) => Items.FindIndex(t => t.ParameterName == parameterName);
 
+        /// <inheritdoc />
         public int IndexOf(object value) => Items.IndexOf((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void Insert(int index, object value) => Items.Insert(index, (IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void Remove(object value) => Items.Remove((IDbDataParameter)value);
 
+        /// <inheritdoc />
         public void RemoveAt(string parameterName)
         {
             var index = IndexOf(parameterName);
@@ -146,32 +188,43 @@ public class DefaultSqlParameterBinderTest
                 Items.RemoveAt(index);
         }
 
+        /// <inheritdoc />
         public void RemoveAt(int index) => Items.RemoveAt(index);
     }
 
     /// <summary>
-    /// 测试用数据库参数
+    /// 测试用数据库参数。
     /// </summary>
     private sealed class FakeDbDataParameter : IDbDataParameter
     {
+        /// <inheritdoc />
         public byte Precision { get; set; }
 
+        /// <inheritdoc />
         public byte Scale { get; set; }
 
+        /// <inheritdoc />
         public int Size { get; set; }
 
+        /// <inheritdoc />
         public DbType DbType { get; set; }
 
+        /// <inheritdoc />
         public ParameterDirection Direction { get; set; } = ParameterDirection.Input;
 
+        /// <inheritdoc />
         public bool IsNullable => true;
 
+        /// <inheritdoc />
         public string ParameterName { get; set; }
 
+        /// <inheritdoc />
         public string SourceColumn { get; set; }
 
+        /// <inheritdoc />
         public DataRowVersion SourceVersion { get; set; }
 
+        /// <inheritdoc />
         public object Value { get; set; }
     }
 }

@@ -11,10 +11,7 @@ namespace Bing.Datas.EntityFramework.SqlServer;
 /// <typeparam name="TEntity">实体类型</typeparam>
 public abstract class AggregateRootMap<TEntity> : MapBase<TEntity>, IMap where TEntity : class
 {
-    /// <summary>
-    /// 映射乐观离线锁
-    /// </summary>
-    /// <param name="builder">实体类型生成器</param>
+    /// <inheritdoc />
     protected override void MapVersion(EntityTypeBuilder<TEntity> builder)
     {
         if (typeof(IVersion).IsAssignableFrom(typeof(TEntity)) == false)

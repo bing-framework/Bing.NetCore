@@ -15,7 +15,7 @@ public abstract class RepositoryBase<TEntity> : RepositoryBase<TEntity, Guid>, I
     where TEntity : class, IAggregateRoot<TEntity, Guid>
 {
     /// <summary>
-    /// 初始化一个<see cref="RepositoryBase{TEntity}"/>类型的实例
+    /// 初始化一个 <see cref="RepositoryBase{TEntity}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
@@ -39,7 +39,7 @@ public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, 
     where TEntity : class, IAggregateRoot<TEntity, TKey>
 {
     /// <summary>
-    /// 初始化一个<see cref="RepositoryBase{TEntity,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="RepositoryBase{TEntity, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="sqlQueryFactory">SQL 查询对象工厂</param>
@@ -53,9 +53,6 @@ public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, 
     {
     }
 
-    /// <summary>
-    /// 获取工作单元
-    /// </summary>
-    /// <returns>当前仓储使用的工作单元。</returns>
+    /// <inheritdoc />
     public IUnitOfWork GetUnitOfWork() => UnitOfWork;
 }

@@ -37,7 +37,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     private readonly ExceptionlessClient _client;
 
     /// <summary>
-    /// 初始化一个<see cref="ExceptionlessSink"/>类型的实例
+    /// 初始化一个 <see cref="ExceptionlessSink"/> 类型的实例。
     /// </summary>
     /// <param name="apiKey">API密钥</param>
     /// <param name="serverUrl">Exceptionless服务器地址</param>
@@ -71,7 +71,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
     }
 
     /// <summary>
-    /// 初始化一个<see cref="ExceptionlessSink"/>类型的实例
+    /// 初始化一个 <see cref="ExceptionlessSink"/> 类型的实例。
     /// </summary>
     /// <param name="additionalOperation">附加信息操作函数</param>
     /// <param name="includeProperties">是否包含属性列表</param>
@@ -91,10 +91,7 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
         _client.Configuration.SetDefaultMinLogLevel(LogLevelSwitcher.Switch(restrictedToMinimumLevel));
     }
 
-    /// <summary>
-    /// 提交
-    /// </summary>
-    /// <param name="logEvent">日志事件</param>
+    /// <inheritdoc />
     public void Emit(LogEvent logEvent)
     {
         if (logEvent == null || !_client.Configuration.IsValid)
@@ -169,8 +166,6 @@ public class ExceptionlessSink : ILogEventSink, IDisposable
         builder.Submit();
     }
 
-    /// <summary>
-    /// 释放资源
-    /// </summary>
+    /// <inheritdoc />
     void IDisposable.Dispose() => _client?.ProcessQueueAsync().GetAwaiter().GetResult();
 }

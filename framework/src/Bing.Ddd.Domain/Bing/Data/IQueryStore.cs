@@ -29,20 +29,20 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     IQueryable<TEntity> FindAsNoTracking();
 
     /// <summary>
-    /// 获取查询对象
+    /// 获取实体查询数据源。
     /// </summary>
     /// <returns>跟踪实体的查询数据源。</returns>
     IQueryable<TEntity> Find();
 
     /// <summary>
-    /// 查找
+    /// 获取实体查询数据源。
     /// </summary>
     /// <param name="criteria">查询条件</param>
     /// <returns>应用查询条件后的实体查询数据源。</returns>
     IQueryable<TEntity> Find(ICondition<TEntity> criteria);
 
     /// <summary>
-    /// 查找
+    /// 获取实体查询数据源。
     /// </summary>
     /// <param name="predicate">查询条件</param>
     /// <returns>应用查询条件后的实体查询数据源。</returns>

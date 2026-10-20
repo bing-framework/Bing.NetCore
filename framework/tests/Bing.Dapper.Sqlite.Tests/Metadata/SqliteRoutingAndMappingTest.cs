@@ -147,7 +147,7 @@ public class SqliteRoutingAndMappingTest
     private sealed class RoutingSample
     {
         /// <summary>
-        /// 名称
+        /// 获取或设置名称
         /// </summary>
         public string Name { get; set; }
     }

@@ -21,27 +21,30 @@ public class JoinItem : IJoinOn
     #region 属性
 
     /// <summary>
-    /// 连接类型
+    /// 获取连接类型
     /// </summary>
     public string JoinType { get; }
 
     /// <summary>
-    /// 表
+    /// 获取表
     /// </summary>
     public SqlItem Table { get; }
 
     /// <summary>
-    /// 表实体类型
+    /// 获取表实体类型
     /// </summary>
     public Type Type { get; }
 
     /// <summary>
-    /// 类型化派生表的绑定来源；普通连接为 null。
+    /// 获取或设置类型化派生表的绑定来源。
     /// </summary>
+    /// <remarks>
+    /// 普通连接为 null。
+    /// </remarks>
     internal TableSource Source { get; set; }
 
     /// <summary>
-    /// 连接条件
+    /// 获取或设置连接条件
     /// </summary>
     public ICondition Condition { get; private set; }
 
@@ -136,10 +139,7 @@ public class JoinItem : IJoinOn
 
     #region On(设置连接条件)
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <param name="condition">连接条件</param>
+    /// <inheritdoc />
     public void On(ICondition condition)
     {
         EnsureSupportsOn();
@@ -148,12 +148,7 @@ public class JoinItem : IJoinOn
         Condition = new AndCondition(Condition, condition);
     }
 
-    /// <summary>
-    /// 设置连接条件
-    /// </summary>
-    /// <param name="column">列名</param>
-    /// <param name="value">值</param>
-    /// <param name="operator">运算符</param>
+    /// <inheritdoc />
     public void On(string column, object value, Operator @operator = Operator.Equal)
     {
         EnsureSupportsOn();

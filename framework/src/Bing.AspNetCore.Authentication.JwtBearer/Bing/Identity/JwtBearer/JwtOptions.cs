@@ -12,13 +12,19 @@ public class JwtOptions
     public string Secret { get; set; }
 
     /// <summary>
-    /// 获取或设置 JWT 发行方，默认值为 <c>bing_identity</c>。
+    /// 获取或设置 JWT 发行方。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>bing_identity</c>。
+    /// </remarks>
     public string Issuer { get; set; } = "bing_identity";
 
     /// <summary>
-    /// 获取或设置 JWT 受众，默认值为 <c>bing_client</c>。
+    /// 获取或设置 JWT 受众。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>bing_client</c>。
+    /// </remarks>
     public string Audience { get; set; } = "bing_client";
 
     /// <summary>

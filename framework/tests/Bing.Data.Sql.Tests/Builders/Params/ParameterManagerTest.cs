@@ -18,7 +18,7 @@ public class ParameterManagerTest
     private readonly ParameterManager _manager;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="ParameterManagerTest"/> 类型的实例。
     /// </summary>
     public ParameterManagerTest()
     {

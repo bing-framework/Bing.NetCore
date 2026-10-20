@@ -6,12 +6,12 @@ namespace Bing.Data.Sql.Builders.Params;
 internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase, IAdvancedParameterManager
 {
     /// <summary>
-    /// 以增强参数管理器视图访问内部管理器。
+    /// 获取以增强参数管理器视图访问内部管理器。
     /// </summary>
     private IAdvancedParameterManager AdvancedInner => (IAdvancedParameterManager)Inner;
 
     /// <summary>
-    /// 初始化带参数数量上限的增强参数管理器。
+    /// 初始化一个 <see cref="AdvancedParameterLimitManager"/> 类型的实例。
     /// </summary>
     /// <param name="inner">实际保存参数元数据的增强参数管理器。</param>
     /// <param name="maxParameterCount">允许保存的最大参数数量。</param>

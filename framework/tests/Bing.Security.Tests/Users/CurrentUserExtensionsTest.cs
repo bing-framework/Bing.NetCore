@@ -8,9 +8,7 @@ using Xunit;
 namespace Bing.Security.Tests.Users;
 
 /// <summary>
-/// <see cref="CurrentUserExtensions"/> 单元测试
-/// 所有测试使用 <see cref="FakeCurrentUser"/> 替代真实 HttpContext/Principal，
-/// 确保测试无外部依赖、快速、可重复。
+/// <see cref="CurrentUserExtensions"/> 单元测试 所有测试使用 <see cref="FakeCurrentUser"/> 替代真实 HttpContext/Principal， 确保测试无外部依赖、快速、可重复。
 /// </summary>
 public class CurrentUserExtensionsTest
 {

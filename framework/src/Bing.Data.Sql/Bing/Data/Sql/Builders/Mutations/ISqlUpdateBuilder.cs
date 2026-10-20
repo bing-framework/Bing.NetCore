@@ -5,13 +5,13 @@ using Bing.Data.Sql.Mutations;
 namespace Bing.Data.Sql.Builders.Mutations;
 
 /// <summary>
-/// Update SQL Builder。
+/// 用于构建 Update SQL 的接口。
 /// </summary>
 public interface ISqlUpdateBuilder : ISqlContent, IUpdate, IUpdateClauseAccessor, ISqlMutationContextAccessor,
     IAllowAllRowsMutationBuilder
 {
     /// <summary>
-    /// 是否显式允许全表更新。
+    /// 获取是否显式允许全表更新。
     /// </summary>
     bool AllowAllRows { get; }
 

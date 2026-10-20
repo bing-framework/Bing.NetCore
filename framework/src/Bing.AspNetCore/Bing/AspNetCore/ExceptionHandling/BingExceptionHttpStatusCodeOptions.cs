@@ -14,8 +14,11 @@ public class BingExceptionHttpStatusCodeOptions
     public IDictionary<string, HttpStatusCode> ErrorCodeToHttpStatusCodeMappings { get; }
 
     /// <summary>
-    /// 获取或设置是否对所有异常响应统一返回 HTTP 200，默认值为 <c>true</c>。
+    /// 获取或设置是否对所有异常响应统一返回 HTTP 200。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>true</c>。
+    /// </remarks>
     public bool GlobalHttpStatusCode200 { get; set; } = true;
 
     /// <summary>

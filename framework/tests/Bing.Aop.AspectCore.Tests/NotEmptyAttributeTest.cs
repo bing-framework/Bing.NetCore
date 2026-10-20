@@ -13,7 +13,7 @@ public class NotEmptyAttributeTest
     private readonly ITestService _service;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="NotEmptyAttributeTest"/> 类型的实例。
     /// </summary>
     public NotEmptyAttributeTest(ITestService service)
     {

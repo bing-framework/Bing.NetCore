@@ -7,10 +7,13 @@ namespace Bing.Domain.Entities;
 /// </summary>
 public class KeyListComparatorTest
 {
+    /// <summary>
+    /// 比较整数键列表的比较器。
+    /// </summary>
     private readonly KeyListComparator<int> _comparator;
 
     /// <summary>
-    /// 初始化
+    /// 初始化一个 <see cref="KeyListComparatorTest"/> 类型的实例。
     /// </summary>
     public KeyListComparatorTest()
     {

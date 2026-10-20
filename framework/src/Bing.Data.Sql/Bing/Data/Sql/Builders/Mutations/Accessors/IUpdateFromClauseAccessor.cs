@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface IUpdateFromClauseAccessor
 {
     /// <summary>
-    /// Update From 来源子句。
+    /// 获取Update From 来源子句。
     /// </summary>
     IUpdateFromClause UpdateFromClause { get; }
 }

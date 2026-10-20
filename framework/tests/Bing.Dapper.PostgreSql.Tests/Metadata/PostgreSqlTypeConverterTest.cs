@@ -7,11 +7,13 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="PostgreSqlTypeConverter"/> 单元测试。
-/// 验证每个 PostgreSQL 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
+/// <see cref="PostgreSqlTypeConverter"/> 单元测试。 验证每个 PostgreSQL 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
 /// </summary>
 public class PostgreSqlTypeConverterTest
 {
+    /// <summary>
+    /// 用于 PostgreSQL 类型转换测试的转换器。
+    /// </summary>
     private readonly PostgreSqlTypeConverter _converter = new();
 
     // ═══════════════════════════════════════════════════════════

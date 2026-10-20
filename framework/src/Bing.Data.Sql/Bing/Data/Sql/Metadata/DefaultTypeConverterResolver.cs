@@ -14,7 +14,7 @@ public sealed class DefaultTypeConverterResolver : ITypeConverterResolver
     private readonly IReadOnlyDictionary<DatabaseType, ITypeConverter> _converters;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultTypeConverterResolver"/>类型的实例
+    /// 初始化一个 <see cref="DefaultTypeConverterResolver"/> 类型的实例。
     /// </summary>
     /// <param name="registrations">数据库类型转换器注册项集合</param>
     public DefaultTypeConverterResolver(IEnumerable<DatabaseTypeConverterRegistration> registrations = null)
@@ -26,11 +26,7 @@ public sealed class DefaultTypeConverterResolver : ITypeConverterResolver
             ?? new Dictionary<DatabaseType, ITypeConverter>();
     }
 
-    /// <summary>
-    /// 解析数据库类型转换器
-    /// </summary>
-    /// <param name="databaseType">数据库类型</param>
-    /// <returns>数据类型转换器</returns>
+    /// <inheritdoc />
     public ITypeConverter Resolve(DatabaseType databaseType)
     {
         _converters.TryGetValue(databaseType, out var converter);

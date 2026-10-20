@@ -5,9 +5,7 @@ using Xunit;
 namespace Bing.Auditing.Tests;
 
 /// <summary>
-/// <see cref="AuditLogInfo"/>、<see cref="AuditLogActionInfo"/>、
-/// <see cref="EntityChangeInfo"/>、<see cref="EntityPropertyChangeInfo"/>、
-/// <see cref="AuditedPropertyConst"/> 单元测试。
+/// <see cref="AuditLogInfo"/>、<see cref="AuditLogActionInfo"/>、 <see cref="EntityChangeInfo"/>、<see cref="EntityPropertyChangeInfo"/>、 <see cref="AuditedPropertyConst"/> 单元测试。
 /// </summary>
 public class AuditLogInfoAndEntityChangeTest
 {
@@ -350,8 +348,7 @@ public class EntityChangeTypeTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：枚举各成员的整数值应符合规范（0=Created, 1=Updated, 2=Deleted），
-    /// 防止序列化/数据库映射时因数值变动导致历史数据错误。
+    /// 测试目的：枚举各成员的整数值应符合规范（0=Created, 1=Updated, 2=Deleted）， 防止序列化/数据库映射时因数值变动导致历史数据错误。
     /// </summary>
     [Fact]
     public void EntityChangeType_Values_ShouldMatchExpected()
@@ -373,8 +370,7 @@ public class EntityChangeTypeTest
     }
 
     /// <summary>
-    /// 测试目的：EntityChangeType.Created 应为默认值（0），
-    /// 确保未显式赋值时行为可预测。
+    /// 测试目的：EntityChangeType.Created 应为默认值（0）， 确保未显式赋值时行为可预测。
     /// </summary>
     [Fact]
     public void EntityChangeType_Default_ShouldBeCreated()

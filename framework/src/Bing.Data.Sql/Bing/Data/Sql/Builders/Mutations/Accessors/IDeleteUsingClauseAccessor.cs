@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Accessors;
 public interface IDeleteUsingClauseAccessor
 {
     /// <summary>
-    /// Delete Using 来源子句。
+    /// 获取Delete Using 来源子句。
     /// </summary>
     IDeleteUsingClause DeleteUsingClause { get; }
 }

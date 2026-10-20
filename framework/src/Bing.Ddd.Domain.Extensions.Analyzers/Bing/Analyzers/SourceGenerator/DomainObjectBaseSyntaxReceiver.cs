@@ -9,14 +9,11 @@ namespace Bing.Analyzers.SourceGenerator;
 sealed class DomainObjectBaseSyntaxReceiver : ISyntaxReceiver
 {
     /// <summary>
-    /// 候选类集合
+    /// 获取候选类集合
     /// </summary>
     public List<ClassDeclarationSyntax> CandidateClasses { get; } = new();
 
-    /// <summary>
-    /// 访问语法节点
-    /// </summary>
-    /// <param name="syntaxNode">语法节点</param>
+    /// <inheritdoc />
     public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
     {
         if (syntaxNode is not ClassDeclarationSyntax classDeclarationSyntax)

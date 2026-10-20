@@ -5,23 +5,26 @@ using Xunit.Abstractions;
 namespace Bing.Dapper.Tests.SqlQuery;
 
 /// <summary>
-/// SqlServer SQL 查询集成测试骨架。
-/// 所有测试方法使用 <see cref="IntegrationFactAttribute"/> 标注，
-/// 在未设置 RUN_SQLSERVER_INTEGRATION_TESTS=true 时自动跳过。
-///
-/// 运行前提：
-/// - 设置环境变量 RUN_SQLSERVER_INTEGRATION_TESTS=true
-/// - 设置环境变量 ConnectionStrings__SqlServerConnection（或创建 appsettings.Development.json）
-/// - SQL Server 实例可访问，数据库和账号已准备好
+/// 验证 SQL Server 查询执行行为。
 /// </summary>
+/// <remarks>测试由 <see cref="IntegrationFactAttribute"/> 管控，并需要配置 SQL Server 连接及专用集成测试开关。</remarks>
 public class SqlServerQueryTest
 {
+    /// <summary>
+    /// 写入 SQL Server 查询测试输出的测试输出助手。
+    /// </summary>
     private readonly ITestOutputHelper _output;
+
+    /// <summary>
+    /// 用于 SQL Server 查询测试的查询实例。
+    /// </summary>
     private readonly ISqlQuery _sqlQuery;
 
     /// <summary>
-    /// 初始化测试
+    /// 初始化一个 <see cref="SqlServerQueryTest"/> 类型的实例。
     /// </summary>
+    /// <param name="output">测试输出写入器。</param>
+    /// <param name="sqlQuery">SQL 查询服务。</param>
     public SqlServerQueryTest(ITestOutputHelper output, ISqlQuery sqlQuery)
     {
         _output = output;

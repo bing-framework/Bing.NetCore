@@ -10,7 +10,7 @@ namespace Bing.Threading;
 public class NoneCancellationTokenProvider : ICancellationTokenProvider
 {
     /// <summary>
-    /// 获取可全局复用的不可取消令牌提供程序实例。
+    /// 始终提供 <see cref="CancellationToken.None"/> 的共享回退实例。
     /// </summary>
     public static readonly ICancellationTokenProvider Instance = new NoneCancellationTokenProvider();
 

@@ -30,7 +30,7 @@ public class WhereClauseTest
     private WhereClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="WhereClauseTest"/> 类型的实例。
     /// </summary>
     public WhereClauseTest()
     {
@@ -43,6 +43,7 @@ public class WhereClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>返回当前条件子句生成的 SQL 片段。</returns>
     private string GetSql() => _clause.ToSql();
 
     #endregion
@@ -293,6 +294,7 @@ public class WhereClauseTest
     /// <summary>
     /// 测试目的：关系比较条件不能接受 null，避免生成始终未知的 SQL 三值逻辑表达式。
     /// </summary>
+    /// <param name="operator">用于验证的关系比较运算符。</param>
     [Theory]
     [InlineData(Operator.Greater)]
     [InlineData(Operator.GreaterEqual)]
@@ -528,7 +530,7 @@ public class WhereClauseTest
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 通过lambda设置列名  - 添加条件
+    /// 测试 - 设置条件 - 通过lambda设置列名 - 添加条件
     /// </summary>
     [Fact]
     public void Test_WhereIfNotEmpty_3()
@@ -539,7 +541,7 @@ public class WhereClauseTest
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 通过lambda设置列名  - 忽略条件
+    /// 测试 - 设置条件 - 通过lambda设置列名 - 忽略条件
     /// </summary>
     [Fact]
     public void Test_WhereIfNotEmpty_4()
@@ -550,7 +552,7 @@ public class WhereClauseTest
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 通过lambda设置列名  - 添加条件
+    /// 测试 - 设置条件 - 通过lambda设置列名 - 添加条件
     /// </summary>
     [Fact]
     public void Test_WhereIfNotEmpty_5()
@@ -561,7 +563,7 @@ public class WhereClauseTest
     }
 
     /// <summary>
-    /// 测试 - 设置条件 - 通过lambda设置列名  - 忽略条件
+    /// 测试 - 设置条件 - 通过lambda设置列名 - 忽略条件
     /// </summary>
     [Fact]
     public void Test_WhereIfNotEmpty_6()
@@ -838,6 +840,7 @@ public class WhereClauseTest
     /// <summary>
     /// 测试目的：通用 In 入口接收标量、字符串或二进制值时应在添加参数前拒绝，不能退化为集合条件。
     /// </summary>
+    /// <param name="value">用于验证 In 参数边界的非集合值。</param>
     [Theory]
     [InlineData(1)]
     [InlineData("tenant-a")]
@@ -946,6 +949,7 @@ public class WhereClauseTest
     /// <summary>
     /// 测试目的：通用 NotIn 入口接收标量、字符串或二进制值时应在添加参数前拒绝，避免恒真条件扩大查询结果。
     /// </summary>
+    /// <param name="value">用于验证 NotIn 参数边界的非集合值。</param>
     [Theory]
     [InlineData(1)]
     [InlineData("tenant-a")]
@@ -978,6 +982,7 @@ public class WhereClauseTest
     /// <summary>
     /// 在产生首个值后抛出异常的测试集合。
     /// </summary>
+    /// <returns>返回产生首个值后抛出异常的测试序列。</returns>
     private static IEnumerable<object> ThrowAfterFirstValue()
     {
         yield return "first";
@@ -1298,7 +1303,7 @@ public class WhereClauseTest
     }
 
     /// <summary>
-    /// 测试范围查询 - 日期 - 包含时间  - 最大值为空
+    /// 测试范围查询 - 日期 - 包含时间 - 最大值为空
     /// </summary>
     [Fact]
     public void Test_Between_DateTime_5()

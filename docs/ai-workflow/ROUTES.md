@@ -1,6 +1,8 @@
 # 工作流程闭环路线
 
-Universal Agent Workflow V4.4 支持两条闭环线路，并统一使用四个公共 Skill：
+通用 Agent 工作流 V4.4 支持两条闭环线路，并统一使用四个公共 Skill：
+
+> 本文是跨 Harness 的协作协议与历史资产说明，不是产品实现保证；实际执行以当前 Skill、脚本和源码为准。
 
 ```text
 create-plan
@@ -23,17 +25,17 @@ ai_docs/tasks/<taskId>/
 ```text
 Copilot / Codex
       ↓
-Create Plan
+创建计划
       ↓
-Execute
+执行
       ↓
-Review
+审查
       ├─ PASS → 完成
       └─ NEEDS_FIX
              ↓
-            Fix
+            修复
              ↓
-          Re-review
+          重新审查
              ↓
             PASS
 ```
@@ -68,7 +70,7 @@ $fix-review
 $review-code
 ```
 
-Codex 可按角色配置 `executionMode=goal`，复杂 Plan / Execute / Review / Fix 都可以使用 Goal 目标推理。
+Codex 可按角色配置 `executionMode=goal`，复杂计划 / 执行 / 审查 / 修复都可以使用 Goal 目标推理。
 
 ## 路线二：Copilot / Codex + Antigravity
 
@@ -76,31 +78,31 @@ Codex 可按角色配置 `executionMode=goal`，复杂 Plan / Execute / Review /
 
 ```text
 Copilot / Codex
-= Planner + Reviewer
+= 规划者 + 审查者
 
 Antigravity
-= Executor + Fixer
+= 执行者 + 修复者
 ```
 
 闭环：
 
 ```text
 Copilot / Codex
-Create Plan
+创建计划
       ↓
 Antigravity Goal
-Execute
+执行
       ↓
 Copilot / Codex
-Review
+审查
       ↓
 NEEDS_FIX
       ↓
 Antigravity Goal
-Fix
+修复
       ↓
 Copilot / Codex
-Re-review
+重新审查
       ↓
 PASS
 ```
@@ -118,8 +120,8 @@ node .agents/scripts/goal-task.mjs fix-review <taskId> --harness antigravity
 
 - taskId 不变；
 - plan.md / execution.md / review.md 协议不变；
-- MUST_FIX + SHOULD_FIX 默认进入 Review Fix；
+- MUST_FIX + SHOULD_FIX 默认进入审查修复；
 - OPTIONAL 默认不自动修；
 - 不自动 commit/push/PR；
-- Planner / Reviewer 与 Executor / Fixer 可以来自不同 Harness；
+- 规划者 / 审查者与执行者 / 修复者可以来自不同 Harness；
 - Goal 只控制自主执行深度，不改变 Skill 的任务边界。

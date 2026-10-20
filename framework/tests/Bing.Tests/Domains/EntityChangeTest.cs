@@ -20,7 +20,7 @@ public class EntityChangeTest
     private readonly AggregateRootSample _sample2;
 
     /// <summary>
-    /// 初始化一个<see cref="EntityChangeTest"/>类型的实例
+    /// 初始化一个 <see cref="EntityChangeTest"/> 类型的实例。
     /// </summary>
     public EntityChangeTest()
     {

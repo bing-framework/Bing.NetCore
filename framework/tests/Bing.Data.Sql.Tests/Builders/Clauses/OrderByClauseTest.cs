@@ -16,7 +16,7 @@ public class OrderByClauseTest
     private OrderByClause _clause;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="OrderByClauseTest"/> 类型的实例。
     /// </summary>
     public OrderByClauseTest()
     {
@@ -26,6 +26,7 @@ public class OrderByClauseTest
     /// <summary>
     /// 获取Sql语句
     /// </summary>
+    /// <returns>返回当前排序子句生成的 SQL 片段。</returns>
     private string GetSql()
     {
         return _clause.ToSql();

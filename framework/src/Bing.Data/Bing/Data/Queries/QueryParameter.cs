@@ -1,12 +1,10 @@
 ﻿namespace Bing.Data.Queries;
 
 /// <summary>
-/// 查询参数
+/// 提供关键字和分页条件的查询参数。
 /// </summary>
 public class QueryParameter : Pager, IQueryParameter
 {
-    /// <summary>
-    /// 搜索关键字
-    /// </summary>
+    /// <inheritdoc />
     public string Keyword { get; set; }
 }

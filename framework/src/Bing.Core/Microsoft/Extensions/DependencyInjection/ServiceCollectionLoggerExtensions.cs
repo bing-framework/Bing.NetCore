@@ -17,7 +17,7 @@ public static class ServiceCollectionLoggerExtensions
     public static ILogger<T> GetInitLogger<T>(this IServiceCollection services) => services.GetSingletonInstance<IInitLoggerFactory>().Create<T>();
 
     /// <summary>
-    /// 添加服务调试日志
+    /// 记录新增服务的调试信息。
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="oldDescriptors">旧的服务描述集合</param>
@@ -40,7 +40,7 @@ public static class ServiceCollectionLoggerExtensions
     }
 
     /// <summary>
-    /// 添加服务调试日志
+    /// 记录新增服务的调试信息。
     /// </summary>
     /// <typeparam name="TServiceType">服务类型</typeparam>
     /// <typeparam name="TImplementType">服务实现类型</typeparam>
@@ -55,7 +55,7 @@ public static class ServiceCollectionLoggerExtensions
     }
 
     /// <summary>
-    /// 服务调试日志
+    /// 记录新增服务的调试信息。
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="serviceType">服务类型</param>

@@ -22,7 +22,7 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
     private readonly ISqlParameterSourceResolver _sourceResolver;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlParameterResolver"/>类型的实例
+    /// 初始化一个 <see cref="DefaultSqlParameterResolver"/> 类型的实例。
     /// </summary>
     /// <param name="nameNormalizer">参数名称规范化器</param>
     /// <param name="sourceResolver">参数源解析器</param>
@@ -51,7 +51,7 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
     }
 
     /// <summary>
-    /// 从参数源提取原始参数绑定项。
+    /// 创建参数绑定项。
     /// </summary>
     /// <param name="source">参数源，可以是 <see cref="SqlParam"/> 序列、字典或普通对象。</param>
     /// <returns>按参数源类型解析得到的参数绑定项集合。</returns>
@@ -76,7 +76,7 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
     }
 
     /// <summary>
-    /// 创建原始参数绑定项
+    /// 创建参数绑定项。
     /// </summary>
     /// <param name="name">参数名称</param>
     /// <param name="value">参数值</param>
@@ -94,7 +94,7 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
     }
 
     /// <summary>
-    /// 通过增强参数创建绑定项
+    /// 创建参数绑定项。
     /// </summary>
     /// <param name="parameter">增强参数</param>
     /// <returns>参数绑定项</returns>

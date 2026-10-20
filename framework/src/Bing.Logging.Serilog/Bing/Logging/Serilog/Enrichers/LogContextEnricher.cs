@@ -14,11 +14,7 @@ internal class LogContextEnricher : ILogEventEnricher
     /// </summary>
     private LogContext _context;
 
-    /// <summary>
-    /// 扩展属性
-    /// </summary>
-    /// <param name="logEvent">日志事件</param>
-    /// <param name="propertyFactory">日志事件属性工厂</param>
+    /// <inheritdoc />
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (!ServiceLocator.Instance.IsProviderEnabled)

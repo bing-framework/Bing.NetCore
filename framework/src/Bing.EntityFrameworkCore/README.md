@@ -5,7 +5,7 @@
 >
 > **目标框架**：`net6.0` ｜ **分层**：L3 数据访问实现层 ｜ **当前版本**：7.0.0 ｜ **源文件**：39
 >
-> **上游 Bing 包**：`Bing.Data.Sql`、`Bing.Dapper.Core`、`Bing.Ddd.Domain`、`Bing.Auditing`
+> **上游 Bing 包**：`Bing.Data.Sql`、`Bing.Ddd.Domain`、`Bing.Auditing`
 >
 > **三方依赖**：`Microsoft.Bcl.HashCode`、`Microsoft.EntityFrameworkCore`、`Microsoft.EntityFrameworkCore.Relational`、`Microsoft.EntityFrameworkCore.Abstractions`
 
@@ -43,7 +43,7 @@ services.AddMySqlUnitOfWork<IAdminUnitOfWork, AdminUnitOfWork>(connection);
 
 ## 与其它包的关系
 
-**本包依赖**：`Bing.Data.Sql`、`Bing.Dapper.Core`、`Bing.Ddd.Domain`、`Bing.Auditing`
+**本包依赖**：`Bing.Data.Sql`、`Bing.Ddd.Domain`、`Bing.Auditing`
 
 **依赖本包**：`Bing.EntityFrameworkCore.MySql`、`Bing.EntityFrameworkCore.Oracle`、`Bing.EntityFrameworkCore.PostgreSql`、`Bing.EntityFrameworkCore.SqlServer`、`Bing.EntityFrameworkCore.Sqlite`
 

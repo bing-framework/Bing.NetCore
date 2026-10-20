@@ -14,7 +14,7 @@ public class DefaultServiceScopeFactory : IHybridServiceScopeFactory
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 使用底层服务作用域工厂初始化 <see cref="DefaultServiceScopeFactory"/> 的实例。
+    /// 初始化一个 <see cref="DefaultServiceScopeFactory"/> 类型的实例。
     /// </summary>
     /// <param name="serviceScopeFactory">实际创建服务作用域的底层工厂。</param>
     public DefaultServiceScopeFactory(IServiceScopeFactory serviceScopeFactory) => ServiceScopeFactory = serviceScopeFactory;

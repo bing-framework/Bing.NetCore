@@ -21,7 +21,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     protected internal readonly DescriptionContext DescriptionContext;
 
     /// <summary>
-    /// 初始化领域对象的验证辅助上下文。
+    /// 初始化一个 <see cref="DomainObjectBase"/> 类型的实例。
     /// </summary>
     protected DomainObjectBase()
     {
@@ -52,7 +52,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     protected abstract void AddChangesInternal(object newObj);
 
     /// <summary>
-    /// 添加单个属性的变更描述。
+    /// 记录领域对象变更。
     /// </summary>
     /// <typeparam name="TValue">属性值类型。</typeparam>
     /// <param name="propertyName">发生变更的属性名称。</param>
@@ -73,13 +73,13 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     protected virtual void AddDescriptions() { }
 
     /// <summary>
-    /// 添加原始描述文本。
+    /// 添加对象描述信息。
     /// </summary>
     /// <param name="description">要添加的描述文本。</param>
     protected void AddDescription(string description) => DescriptionContext.Add(description);
 
     /// <summary>
-    /// 添加具有显示名称和值的描述信息。
+    /// 添加对象描述信息。
     /// </summary>
     /// <typeparam name="TValue">属性值类型。</typeparam>
     /// <param name="name">属性显示名称。</param>
@@ -88,10 +88,10 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
 
     #endregion
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 输出当前对象的描述信息。
-    /// </summary>
-    /// <returns>基于当前对象状态重新生成的描述文本。</returns>
+    /// </remarks>
     public override string ToString()
     {
         DescriptionContext.FlushCache();
@@ -113,7 +113,7 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
     private readonly Lazy<ValidationContext<TObject>> _validationContext;
 
     /// <summary>
-    /// 初始化 <see cref="DomainObjectBase{TObject}"/> 的实例。
+    /// 初始化一个 <see cref="DomainObjectBase{TObject}"/> 类型的实例。
     /// </summary>
     protected DomainObjectBase()
     {
@@ -122,16 +122,11 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
 
     #region Validation(验证)
 
-    /// <summary>
-    /// 设置验证回调处理器。
-    /// </summary>
-    /// <param name="handler">处理验证回调的处理器。</param>
+    /// <inheritdoc />
     public void SetValidationCallback(IValidationCallbackHandler handler) => 
         _validationContext.Value.SetHandler(op => op.HandleAll(handler));
 
-    /// <summary>
-    /// 启用全局验证规则。
-    /// </summary>
+    /// <inheritdoc />
     /// <exception cref="NotImplementedException">当前版本尚未实现全局验证规则配置时抛出。</exception>
     public void UseValidationRules()
     {
@@ -139,22 +134,16 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
         throw new NotImplementedException();
     }
 
-    /// <summary>
-    /// 应用单个验证策略。
-    /// </summary>
-    /// <param name="strategy">要添加的验证策略。</param>
+    /// <inheritdoc />
     public void UseStrategy(IValidationStrategy<TObject> strategy) => _validationContext.Value.AddStrategy(strategy);
 
-    /// <summary>
-    /// 应用多个验证策略。
-    /// </summary>
-    /// <param name="strategies">要添加的验证策略集合。</param>
+    /// <inheritdoc />
     public void UseStrategyList(IEnumerable<IValidationStrategy<TObject>> strategies) => _validationContext.Value.AddStrategyList(strategies);
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行验证并返回结果集合。
-    /// </summary>
-    /// <returns>当前验证上下文收集的验证结果。</returns>
+    /// </remarks>
     public override IValidationResult Validate()
     {
         _validationContext.Value.Validate(Validate);
@@ -186,7 +175,7 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
     protected virtual void AddChanges(TObject newObj) { }
 
     /// <summary>
-    /// 记录当前对象指定属性与新值之间的变更。
+    /// 记录领域对象变更。
     /// </summary>
     /// <typeparam name="TProperty">目标属性类型。</typeparam>
     /// <typeparam name="TValue">新值类型。</typeparam>
@@ -196,7 +185,7 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
         ChangeTrackingContext.Add(expression, AssignableType(this), newValue);
 
     /// <summary>
-    /// 记录两个可跟踪领域对象之间的变更。
+    /// 记录领域对象变更。
     /// </summary>
     /// <typeparam name="TDomainObject">变更后的领域对象类型。</typeparam>
     /// <param name="beforeChange">变更前的可跟踪对象。</param>
@@ -206,7 +195,7 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
         ChangeTrackingContext.Add(beforeChange, afterChange);
 
     /// <summary>
-    /// 记录两个领域对象集合之间的变更。
+    /// 记录领域对象变更。
     /// </summary>
     /// <typeparam name="TDomainObject">变更后领域对象的类型。</typeparam>
     /// <param name="leftObjs">变更前的可跟踪对象集合。</param>
@@ -220,7 +209,7 @@ public abstract class DomainObjectBase<TObject> : DomainObjectBase, IVerifyModel
     #region Description(描述)
 
     /// <summary>
-    /// 根据当前对象的指定属性添加描述信息。
+    /// 添加对象描述信息。
     /// </summary>
     /// <typeparam name="TProperty">属性值类型。</typeparam>
     /// <param name="expression">用于选择描述属性的成员访问表达式。</param>

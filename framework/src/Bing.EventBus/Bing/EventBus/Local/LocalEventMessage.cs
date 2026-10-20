@@ -6,22 +6,22 @@
 public class LocalEventMessage
 {
     /// <summary>
-    /// 事件标识
+    /// 获取事件标识
     /// </summary>
     public string EventId { get; }
 
     /// <summary>
-    /// 事件数据
+    /// 获取事件数据
     /// </summary>
     public object EventData { get; }
 
     /// <summary>
-    /// 事件类型
+    /// 获取事件类型
     /// </summary>
     public Type EventType { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="LocalEventMessage"/>类型的实例
+    /// 初始化一个 <see cref="LocalEventMessage"/> 类型的实例。
     /// </summary>
     /// <param name="eventId">事件标识</param>
     /// <param name="eventData">事件数据</param>

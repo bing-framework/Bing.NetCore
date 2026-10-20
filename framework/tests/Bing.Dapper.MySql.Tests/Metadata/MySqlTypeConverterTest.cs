@@ -5,10 +5,13 @@ using Bing.Data.Metadata;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// 测试目的：验证 <see cref="MySqlTypeConverter"/> 将 MySql 数据类型字符串正确转换为 <see cref="DbType"/>
+/// 测试目的：验证 <see cref="MySqlTypeConverter" /> 将 MySql 数据类型字符串正确转换为 <see cref="DbType" />。
 /// </summary>
 public class MySqlTypeConverterTest
 {
+    /// <summary>
+    /// MySQL 类型转换器。
+    /// </summary>
     private readonly MySqlTypeConverter _converter = new();
 
     #region Null / Whitespace
@@ -165,6 +168,7 @@ public class MySqlTypeConverterTest
     /// <summary>
     /// 测试目的：text/tinytext/mediumtext/longtext 均应映射为 String。
     /// </summary>
+    /// <param name="dataType">MySQL 数据类型名称。</param>
     [Theory]
     [InlineData("text")]
     [InlineData("tinytext")]
@@ -238,6 +242,7 @@ public class MySqlTypeConverterTest
     /// <summary>
     /// 测试目的：int/integer/mediumint 均应映射为 Int32。
     /// </summary>
+    /// <param name="dataType">MySQL 数据类型名称。</param>
     [Theory]
     [InlineData("int")]
     [InlineData("integer")]
@@ -297,6 +302,7 @@ public class MySqlTypeConverterTest
     /// <summary>
     /// 测试目的：decimal/numeric 均应映射为 Decimal。
     /// </summary>
+    /// <param name="dataType">MySQL 数据类型名称。</param>
     [Theory]
     [InlineData("decimal")]
     [InlineData("numeric")]
@@ -342,6 +348,7 @@ public class MySqlTypeConverterTest
     /// <summary>
     /// 测试目的：datetime/timestamp 均应映射为 DateTime。
     /// </summary>
+    /// <param name="dataType">MySQL 数据类型名称。</param>
     [Theory]
     [InlineData("datetime")]
     [InlineData("timestamp")]
@@ -361,6 +368,7 @@ public class MySqlTypeConverterTest
     /// <summary>
     /// 测试目的：blob/tinyblob/mediumblob/longblob 均应映射为 Binary。
     /// </summary>
+    /// <param name="dataType">MySQL 数据类型名称。</param>
     [Theory]
     [InlineData("blob")]
     [InlineData("tinyblob")]

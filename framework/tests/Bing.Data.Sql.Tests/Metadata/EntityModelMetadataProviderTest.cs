@@ -159,66 +159,130 @@ public class EntityModelMetadataProviderTest
         mapping.Columns.ContainsKey(nameof(AnnotatedEntity.Ignored)).ShouldBeFalse();
     }
 
+    /// <summary>
+    /// 使用常见 Id 命名约定的测试实体。
+    /// </summary>
     private sealed class ConventionIdEntity
     {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
         public int Id { get; set; }
     }
 
+    /// <summary>
+    /// 使用实体类型名称加 Id 命名约定的测试实体。
+    /// </summary>
     private sealed class ConventionNamedEntity
     {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
         public int ConventionNamedEntityId { get; set; }
     }
 
+    /// <summary>
+    /// 使用数据注解配置表和列元数据的测试实体。
+    /// </summary>
     [Table("sales_orders", Schema = "sales")]
     private sealed class AnnotatedEntity
     {
+        /// <summary>
+        /// 获取或设置租户键值。
+        /// </summary>
         [Key]
         public int TenantId { get; set; }
 
+        /// <summary>
+        /// 获取或设置订单键值。
+        /// </summary>
         [Key]
         public int OrderId { get; set; }
 
+        /// <summary>
+        /// 获取或设置订单代码。
+        /// </summary>
         [Column("order_code", TypeName = "varchar(32)")]
         [Required]
         [StringLength(20)]
         public string Code { get; set; }
 
+        /// <summary>
+        /// 获取或设置订单说明。
+        /// </summary>
         [MaxLength(40)]
         public string Description { get; set; }
 
+        /// <summary>
+        /// 获取或设置数据库生成的标识值。
+        /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Identity { get; set; }
 
+        /// <summary>
+        /// 获取或设置数据库计算的数值。
+        /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal Computed { get; set; }
 
+        /// <summary>
+        /// 获取或设置时间戳并发令牌。
+        /// </summary>
         [Timestamp]
         public byte[] Version { get; set; }
 
+        /// <summary>
+        /// 获取或设置字符串并发令牌。
+        /// </summary>
         [ConcurrencyCheck]
         public string ETag { get; set; }
 
+        /// <summary>
+        /// 获取或设置不映射到数据库的说明。
+        /// </summary>
         [NotMapped]
         public string Ignored { get; set; }
     }
 
+    /// <summary>
+    /// 具有表注解但使用约定列元数据的测试实体。
+    /// </summary>
     [Table("annotated_fallback")]
     private sealed class AnnotatedFallbackEntity
     {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
         public int Id { get; set; }
     }
 
+    /// <summary>
+    /// 返回固定表名并沿用约定属性元数据的 Provider 测试替身。
+    /// </summary>
     private sealed class FixedEntityModelMetadataProvider : IEntityModelMetadataProvider
     {
+        /// <summary>
+        /// 该 Provider 支持的实体类型。
+        /// </summary>
         private readonly Type _entityType;
+
+        /// <summary>
+        /// 该 Provider 返回的表名。
+        /// </summary>
         private readonly string _tableName;
 
+        /// <summary>
+        /// 初始化一个 <see cref="FixedEntityModelMetadataProvider"/> 类型的实例。
+        /// </summary>
+        /// <param name="entityType">该 Provider 支持的实体类型。</param>
+        /// <param name="tableName">该实体映射的表名。</param>
         public FixedEntityModelMetadataProvider(Type entityType, string tableName)
         {
             _entityType = entityType;
             _tableName = tableName;
         }
 
+        /// <inheritdoc />
         public EntityModelMetadata GetMetadata(Type entityType)
         {
             if (entityType != _entityType)
@@ -227,6 +291,7 @@ public class EntityModelMetadataProviderTest
             return new EntityModelMetadata(entityType, _tableName, string.Empty, properties);
         }
 
+        /// <inheritdoc />
         public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
     }
 }

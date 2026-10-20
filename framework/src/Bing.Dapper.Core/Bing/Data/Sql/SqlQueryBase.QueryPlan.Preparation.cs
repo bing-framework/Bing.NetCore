@@ -40,7 +40,7 @@ public abstract partial class SqlQueryBase
     private sealed class PreparedQueryPlan
     {
         /// <summary>
-        /// 初始化查询计划准备结果。
+        /// 初始化一个 <see cref="PreparedQueryPlan"/> 类型的实例。
         /// </summary>
         /// <param name="plan">原始查询计划。</param>
         /// <param name="command">本次执行的准备命令。</param>
@@ -51,27 +51,27 @@ public abstract partial class SqlQueryBase
         }
 
         /// <summary>
-        /// 原始查询计划。
+        /// 获取原始查询计划。
         /// </summary>
         public SqlQueryPlan Plan { get; }
 
         /// <summary>
-        /// 本次执行的准备命令。
+        /// 获取本次执行的准备命令。
         /// </summary>
         public SqlPreparedCommand Command { get; }
 
         /// <summary>
-        /// 最终执行 SQL。
+        /// 获取最终执行 SQL。
         /// </summary>
         public string Sql => Command.Sql;
 
         /// <summary>
-        /// Dapper 使用的绑定参数。
+        /// 获取Dapper 使用的绑定参数。
         /// </summary>
         public object DapperParameters => Command.DapperParameters;
 
         /// <summary>
-        /// Trace 使用的原始参数源。
+        /// 获取Trace 使用的原始参数源。
         /// </summary>
         public object ParameterSource => Command.ParameterSource;
 

@@ -8,7 +8,7 @@ namespace Bing.Localization.Tests;
 public class StoreStringLocalizerTest
 {
     /// <summary>
-    /// 模拟缓存
+    /// 模拟数据存储本地化查找器使用的内存缓存。
     /// </summary>
     private readonly Mock<IMemoryCache> _mockMemoryCache;
 
@@ -28,7 +28,7 @@ public class StoreStringLocalizerTest
     private IStringLocalizer _localizer;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="StoreStringLocalizerTest"/> 类型的实例。
     /// </summary>
     public StoreStringLocalizerTest()
     {

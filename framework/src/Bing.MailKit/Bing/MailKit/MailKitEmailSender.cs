@@ -16,7 +16,7 @@ public class MailKitEmailSender : EmailSenderBase, IMailKitEmailSender
     private readonly IMailKitSmtpBuilder _smtpBuilder;
 
     /// <summary>
-    /// 初始化一个<see cref="MailKitEmailSender"/>类型的实例
+    /// 初始化一个 <see cref="MailKitEmailSender"/> 类型的实例。
     /// </summary>
     /// <param name="provider">电子邮件配置提供器</param>
     /// <param name="smtpBuilder">SMTP 生成器</param>
@@ -25,10 +25,7 @@ public class MailKitEmailSender : EmailSenderBase, IMailKitEmailSender
         _smtpBuilder = smtpBuilder;
     }
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="mail">邮件</param>
+    /// <inheritdoc />
     protected override void SendEmail(MailMessage mail)
     {
         using var client = BuildSmtpClient();
@@ -37,10 +34,7 @@ public class MailKitEmailSender : EmailSenderBase, IMailKitEmailSender
         client.Disconnect(true);
     }
 
-    /// <summary>
-    /// 发送邮件
-    /// </summary>
-    /// <param name="mail">邮件</param>
+    /// <inheritdoc />
     protected override async Task SendEmailAsync(MailMessage mail)
     {
         using var client = BuildSmtpClient();

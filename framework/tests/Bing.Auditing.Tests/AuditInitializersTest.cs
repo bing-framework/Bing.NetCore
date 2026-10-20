@@ -15,8 +15,19 @@ namespace Bing.Auditing.Tests;
 /// </summary>
 public class CreationAuditedInitializerTest
 {
+    /// <summary>
+    /// 用于测试创建审计初始化的用户标识。
+    /// </summary>
     private static readonly string UserId = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// 用于测试创建审计初始化的用户名。
+    /// </summary>
     private static readonly string UserName = "Alice";
+
+    /// <summary>
+    /// 用于验证创建时间初始化的固定时间。
+    /// </summary>
     private static readonly DateTime FixedTime = new(2025, 6, 1, 12, 0, 0);
 
     // -----------------------------------------------------------------
@@ -199,7 +210,14 @@ public class CreationAuditedInitializerTest
 /// </summary>
 public class DeletionAuditedInitializerTest
 {
+    /// <summary>
+    /// 用于测试删除审计初始化的用户标识。
+    /// </summary>
     private static readonly string UserId = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// 用于测试删除审计初始化的用户名。
+    /// </summary>
     private static readonly string UserName = "Admin";
 
     /// <summary>
@@ -288,8 +306,19 @@ public class DeletionAuditedInitializerTest
 /// </summary>
 public class ModificationAuditedInitializerTest
 {
+    /// <summary>
+    /// 用于测试修改审计初始化的用户标识。
+    /// </summary>
     private static readonly string UserId = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// 用于测试修改审计初始化的用户名。
+    /// </summary>
     private static readonly string UserName = "Editor";
+
+    /// <summary>
+    /// 用于验证修改时间初始化的固定时间。
+    /// </summary>
     private static readonly DateTime FixedTime = new(2025, 9, 1, 8, 0, 0);
 
     /// <summary>

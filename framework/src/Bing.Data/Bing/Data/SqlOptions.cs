@@ -9,13 +9,19 @@ namespace Bing.Data;
 public class SqlOptions
 {
     /// <summary>
-    /// 获取或设置数据库类型；默认值为 SQL Server。
+    /// 获取或设置数据库类型。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 SQL Server。
+    /// </remarks>
     public DatabaseType DatabaseType { get; set; } = DatabaseType.SqlServer;
 
     /// <summary>
-    /// 是否在 SQL 诊断消息中包含租户标识，默认为 false。
+    /// 获取或设置是否在 SQL 诊断消息中包含租户标识。
     /// </summary>
+    /// <remarks>
+    /// 默认为 false。
+    /// </remarks>
     public bool IncludeTenantIdInDiagnostics { get; set; }
 
     /// <summary>
@@ -32,7 +38,7 @@ public class SqlOptions
     public IDbConnection Connection { get; set; }
 
     /// <summary>
-    /// 查询语法能力覆盖配置。
+    /// 获取或设置查询语法能力覆盖配置。
     /// </summary>
     /// <remarks>
     /// 此配置优先于数据源能力配置；<see cref="SqlQueryCapabilityState.Inherit"/> 表示不覆盖前一层声明。

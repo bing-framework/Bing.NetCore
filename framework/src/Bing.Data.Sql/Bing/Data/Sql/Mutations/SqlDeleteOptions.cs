@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Mutations;
 public class SqlDeleteOptions
 {
     /// <summary>
-    /// 并发令牌不匹配时的处理方式。默认抛出异常。
+    /// 获取或初始化并发令牌不匹配时的处理方式。默认抛出异常。
     /// </summary>
     public SqlConcurrencyConflictBehavior ConcurrencyConflictBehavior { get; init; } =
         SqlConcurrencyConflictBehavior.Throw;

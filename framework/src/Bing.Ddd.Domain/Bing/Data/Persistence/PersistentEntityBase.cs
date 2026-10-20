@@ -14,23 +14,20 @@ public abstract class PersistentEntityBase : PersistentEntityBase<Guid> { }
 /// <typeparam name="TKey">实体标识类型。</typeparam>
 public abstract class PersistentEntityBase<TKey> : IKey<TKey>
 {
-    /// <summary>
-    /// 获取或设置实体的持久化标识。
-    /// </summary>
+    /// <inheritdoc />
     [Key]
     public TKey Id { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 判断当前实体是否与指定对象表示同一个持久化实体。
-    /// </summary>
-    /// <param name="other">要比较的对象。</param>
-    /// <returns>对象类型和非默认标识均相同，且标识值相等时返回 <see langword="true"/>。</returns>
+    /// </remarks>
     public override bool Equals(object other) => this == (PersistentEntityBase<TKey>)other;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 返回基于实体标识的哈希代码；标识为空时返回 0。
-    /// </summary>
-    /// <returns>基于实体标识计算的哈希代码。</returns>
+    /// </remarks>
     public override int GetHashCode() => ReferenceEquals(Id, null) ? 0 : Id.GetHashCode();
 
     /// <summary>

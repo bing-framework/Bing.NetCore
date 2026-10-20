@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IReturningClause : ISqlClause, ISqlMutationClauseCloneable<IReturningClause>, ISqlValidatable
 {
     /// <summary>
-    /// 是否尚未配置返回列。
+    /// 获取是否尚未配置返回列。
     /// </summary>
     bool IsEmpty { get; }
 

@@ -21,7 +21,7 @@ public class EventHandlerFactoryUnregistrar : IDisposable
     private readonly IEventHandlerFactory _factory;
 
     /// <summary>
-    /// 初始化一个<see cref="EventHandlerFactoryUnregistrar"/>类型的实例
+    /// 初始化一个 <see cref="EventHandlerFactoryUnregistrar"/> 类型的实例。
     /// </summary>
     /// <param name="eventBus">事件总线</param>
     /// <param name="eventType">事件类型</param>
@@ -33,9 +33,7 @@ public class EventHandlerFactoryUnregistrar : IDisposable
         _factory = factory;
     }
 
-    /// <summary>
-    /// 释放资源
-    /// </summary>
+    /// <inheritdoc />
     public void Dispose()
     {
         _eventBus.Unsubscribe(_eventType, _factory);

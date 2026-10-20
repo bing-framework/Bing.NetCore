@@ -332,7 +332,7 @@ public class AppendJoinAndOnCompositionTest
     private sealed class FailingOnColumnDialect : DialectBase
     {
         /// <summary>
-        /// 是否抛出格式化异常。
+        /// 获取或设置是否抛出格式化异常。
         /// </summary>
         public bool ShouldFail { get; set; } = true;
 

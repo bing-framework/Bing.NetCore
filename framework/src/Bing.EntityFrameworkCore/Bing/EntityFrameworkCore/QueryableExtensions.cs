@@ -12,7 +12,7 @@ public static partial class QueryableExtensions
     #region Page(分页，包含排序)
 
     /// <summary>
-    /// 分页，包含排序
+    /// 应用分页和排序。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
@@ -26,13 +26,14 @@ public static partial class QueryableExtensions
     }
 
     /// <summary>
-    /// 分页，包含排序，并将取消令牌传递给总数查询。
+    /// 应用分页和排序。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="query">数据源</param>
     /// <param name="pager">分页对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>表示异步操作的任务，结果为已应用排序和分页条件的数据源。</returns>
+    /// <remarks>执行总数查询时使用指定的取消令牌。</remarks>
     /// <exception cref="ArgumentNullException">当数据源或分页对象为空时抛出。</exception>
     /// <exception cref="ArgumentException">当未设置排序字段时抛出。</exception>
     public static async Task<IQueryable<TEntity>> PageAsync<TEntity>(this IQueryable<TEntity> query, IPager pager,

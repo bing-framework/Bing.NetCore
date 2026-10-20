@@ -19,7 +19,7 @@ public sealed class MySqlCrossDatabaseFactAttribute : FactAttribute
     public const string DatabaseNameEnvironmentVariable = "BING_INTEGRATION_MYSQL_CROSS_DATABASE_NAME";
 
     /// <summary>
-    /// 初始化跨数据库集成测试特性。
+    /// 初始化一个 <see cref="MySqlCrossDatabaseFactAttribute"/> 类型的实例。
     /// </summary>
     public MySqlCrossDatabaseFactAttribute()
     {

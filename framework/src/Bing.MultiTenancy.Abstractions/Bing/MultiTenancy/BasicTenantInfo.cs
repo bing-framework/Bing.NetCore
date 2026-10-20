@@ -6,8 +6,11 @@
 public class BasicTenantInfo
 {
     /// <summary>
-    /// 获取租户标识；无当前租户或尚未解析时为 <c>null</c>。
+    /// 获取租户标识。
     /// </summary>
+    /// <remarks>
+    /// 无当前租户或尚未解析时为 <c>null</c>。
+    /// </remarks>
     public string? TenantId { get; }
 
     /// <summary>
@@ -16,7 +19,7 @@ public class BasicTenantInfo
     public string? Name { get; }
 
     /// <summary>
-    /// 使用租户标识和可选名称初始化 <see cref="BasicTenantInfo"/> 的实例。
+    /// 初始化一个 <see cref="BasicTenantInfo"/> 类型的实例。
     /// </summary>
     /// <param name="tenantId">租户标识；可以为 <c>null</c>。</param>
     /// <param name="name">租户的可选显示名称。</param>

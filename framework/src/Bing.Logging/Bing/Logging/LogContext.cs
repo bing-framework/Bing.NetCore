@@ -6,72 +6,72 @@
 public class LogContext
 {
     /// <summary>
-    /// 初始化一个<see cref="LogContext"/>类型的实例
+    /// 初始化一个 <see cref="LogContext"/> 类型的实例。
     /// </summary>
     public LogContext() => Data = new Dictionary<string, object>();
 
     /// <summary>
-    /// 跟踪标识
+    /// 获取或设置跟踪标识
     /// </summary>
     public string TraceId { get; set; }
 
     /// <summary>
-    /// 用户标识
+    /// 获取或设置用户标识
     /// </summary>
     public string UserId { get; set; }
 
     /// <summary>
-    /// 租户标识
+    /// 获取或设置租户标识
     /// </summary>
     public string TenantId { get; set; }
 
     /// <summary>
-    /// 应用程序
+    /// 获取或设置应用程序
     /// </summary>
     public string Application { get; set; }
 
     /// <summary>
-    /// 执行环境
+    /// 获取或设置执行环境
     /// </summary>
     public string Environment { get; set; }
 
     /// <summary>
-    /// IP
+    /// 获取或设置IP
     /// </summary>
     public string Ip { get; set; }
 
     /// <summary>
-    /// 主机
+    /// 获取或设置主机
     /// </summary>
     public string Host { get; set; }
 
     /// <summary>
-    /// 浏览器
+    /// 获取或设置浏览器
     /// </summary>
     public string Browser { get; set; }
 
     /// <summary>
-    /// 请求地址
+    /// 获取或设置请求地址
     /// </summary>
     public string Url { get; set; }
 
     /// <summary>
-    /// 会话标识
+    /// 获取或设置会话标识
     /// </summary>
     public string SessionId { get; set; }
 
     /// <summary>
-    /// 是否Web环境
+    /// 获取或设置是否Web环境
     /// </summary>
     public bool IsWebEnv { get; set; }
 
     /// <summary>
-    /// 标签列表
+    /// 获取或设置标签列表
     /// </summary>
     public List<string> Tags { get; set; } = new();
 
     /// <summary>
-    /// 扩展数据
+    /// 获取扩展数据
     /// </summary>
     public IDictionary<string, object> Data { get; }
 
@@ -82,7 +82,7 @@ public class LogContext
     private static readonly AsyncLocal<LogContext> _current = new();
 
     /// <summary>
-    /// 当前日志上下文
+    /// 获取或设置当前日志上下文
     /// </summary>
     public static LogContext Current
     {

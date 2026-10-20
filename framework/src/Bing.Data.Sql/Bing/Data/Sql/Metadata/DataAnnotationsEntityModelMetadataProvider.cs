@@ -9,11 +9,10 @@ namespace Bing.Data.Sql.Metadata;
 /// </summary>
 public sealed class DataAnnotationsEntityModelMetadataProvider : ConventionEntityModelMetadataProvider
 {
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 读取实体类型上的 DataAnnotations 映射元数据。
-    /// </summary>
-    /// <param name="entityType">待读取元数据的实体类型。</param>
-    /// <returns>DataAnnotations 实体模型元数据；未声明相关特性时返回 <see langword="null"/>。</returns>
+    /// </remarks>
     public override EntityModelMetadata GetMetadata(Type entityType)
     {
         if (entityType == null || HasDataAnnotations(entityType) == false)

@@ -33,7 +33,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加实体表达式聚合列。
+    /// 添加聚合列。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -223,7 +223,7 @@ public static partial class Extensions
     #region From子句
 
     /// <summary>
-    /// 设置表名
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -232,7 +232,7 @@ public static partial class Extensions
         where TEntity : class => From<TEntity>(source, null, null);
 
     /// <summary>
-    /// 设置表名
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -242,7 +242,7 @@ public static partial class Extensions
         where TEntity : class => From<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 设置表名
+    /// 设置查询来源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -260,7 +260,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置结构化表引用。
+    /// 设置查询来源。
     /// </summary>
     /// <param name="source">Sql生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -279,7 +279,7 @@ public static partial class Extensions
     #region Join子句
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -288,7 +288,7 @@ public static partial class Extensions
         where TEntity : class => Join<TEntity>(source, null, null);
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -298,7 +298,7 @@ public static partial class Extensions
         where TEntity : class => Join<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -316,7 +316,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 内连接结构化表引用。
+    /// 添加内连接表源。
     /// </summary>
     /// <param name="source">Sql生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -331,7 +331,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -340,7 +340,7 @@ public static partial class Extensions
         where TEntity : class => LeftJoin<TEntity>(source, null, null);
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -350,7 +350,7 @@ public static partial class Extensions
         where TEntity : class => LeftJoin<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -368,7 +368,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 左外连接结构化表引用。
+    /// 添加左外连接表源。
     /// </summary>
     /// <param name="source">Sql生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -385,7 +385,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -394,7 +394,7 @@ public static partial class Extensions
         where TEntity : class => RightJoin<TEntity>(source, null, null);
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -404,7 +404,7 @@ public static partial class Extensions
         where TEntity : class => RightJoin<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -422,7 +422,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 右外连接结构化表引用。
+    /// 添加右外连接表源。
     /// </summary>
     /// <param name="source">Sql生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -439,7 +439,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加实体全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -448,7 +448,7 @@ public static partial class Extensions
         where TEntity : class => FullJoin<TEntity>(source, null, null);
 
     /// <summary>
-    /// 添加带别名的实体全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -458,7 +458,7 @@ public static partial class Extensions
         where TEntity : class => FullJoin<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 添加实体全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -476,7 +476,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化全外连接表引用。
+    /// 添加全外连接表源。
     /// </summary>
     /// <param name="source">SQL 生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -493,7 +493,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加实体交叉连接表。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -502,7 +502,7 @@ public static partial class Extensions
         where TEntity : class => CrossJoin<TEntity>(source, null, null);
 
     /// <summary>
-    /// 添加带别名的实体交叉连接表。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -512,7 +512,7 @@ public static partial class Extensions
         where TEntity : class => CrossJoin<TEntity>(source, alias, null);
 
     /// <summary>
-    /// 添加实体交叉连接表。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="source">SQL 生成器。</param>
@@ -530,7 +530,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化交叉连接表引用。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <param name="source">SQL 生成器。</param>
     /// <param name="reference">结构化表引用。</param>
@@ -648,7 +648,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -668,7 +668,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -685,7 +685,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置子查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -705,7 +705,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置子查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -725,7 +725,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置查询条件
+    /// 按条件设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -739,7 +739,7 @@ public static partial class Extensions
         condition ? source.Where(expression, value, @operator) : source;
 
     /// <summary>
-    /// 设置查询条件
+    /// 按条件设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -751,7 +751,7 @@ public static partial class Extensions
         condition ? source.Where(expression) : source;
 
     /// <summary>
-    /// 设置子查询条件
+    /// 按条件设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -766,7 +766,7 @@ public static partial class Extensions
         condition ? source.Where(expression, subBuilder, @operator) : source;
 
     /// <summary>
-    /// 设置子查询条件
+    /// 按条件设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -817,7 +817,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置相等查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -833,7 +833,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置不相等查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -849,7 +849,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置大于查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -865,7 +865,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置小于查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -881,7 +881,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置大于等于查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -897,7 +897,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置小于等于查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -913,7 +913,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置模糊匹配查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -929,7 +929,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置头匹配查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -945,7 +945,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 设置尾匹配查询条件
+    /// 设置查询条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -1262,7 +1262,7 @@ public static partial class Extensions
     #region GroupBy子句
 
     /// <summary>
-    /// 按实体属性表达式分组。
+    /// 添加 GroupBy 分组条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>
@@ -1279,7 +1279,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 分组
+    /// 添加 GroupBy 分组条件。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <param name="source">Sql生成器</param>

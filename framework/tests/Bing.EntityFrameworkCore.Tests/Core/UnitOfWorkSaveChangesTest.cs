@@ -610,12 +610,12 @@ public class UnitOfWorkSaveChangesTest
         }
 
         /// <summary>
-        /// 测试实体集合。
+        /// 获取或设置测试实体集合。
         /// </summary>
         public DbSet<SaveSample> Samples { get; set; }
 
         /// <summary>
-        /// 事件发布次数。
+        /// 获取或设置事件发布次数。
         /// </summary>
         public int PublishEventsCount { get; private set; }
 
@@ -699,12 +699,12 @@ public class UnitOfWorkSaveChangesTest
         private readonly List<DomainEvent> _events = new();
 
         /// <summary>
-        /// 标识。
+        /// 获取或设置标识。
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
 

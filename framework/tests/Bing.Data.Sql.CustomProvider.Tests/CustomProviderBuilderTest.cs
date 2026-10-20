@@ -23,7 +23,7 @@ namespace Bing.Data.Sql.CustomProvider.Tests;
 public class CustomProviderBuilderTest
 {
     /// <summary>
-    /// 测试 - 外部程序集应只通过公开 Provider Runtime SPI 路由 Builder、Query、Executor 和连接工厂，不依赖友元访问。
+    /// 外部程序集应只通过公开 Provider Runtime SPI 路由 Builder、Query、Executor 和连接工厂，不依赖友元访问。
     /// </summary>
     [Fact]
     public void ProviderRuntime_WhenRegisteredFromExternalAssembly_ShouldRoutePublicSqlServicesWithoutFriendAccess()
@@ -58,7 +58,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 应可仅通过公开 SPI 创建全部 SQL 子句。
+    /// 外部 Provider 应可仅通过公开 SPI 创建全部 SQL 子句。
     /// </summary>
     [Fact]
     public void Constructor_WhenUsingPublicProviderSpi_ShouldCreateAllClauses()
@@ -82,7 +82,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 统一 Builder 必须通过外部 Provider 的可选 Mutation Clause Factory 创建 Update From、Delete Using 与 Returning 子句。
+    /// 统一 Builder 必须通过外部 Provider 的可选 Mutation Clause Factory 创建 Update From、Delete Using 与 Returning 子句。
     /// </summary>
     [Fact]
     public void MutationClauseFactory_WhenUnifiedBuilderUsesOptionalProviderSpi_ShouldCreateCustomClausesAndPreserveCloneState()
@@ -119,7 +119,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 专用 Update 与 Delete Builder 必须选择外部 Provider 的可选 Mutation 子句，并在 Clone 与 Clear 后保持隔离。
+    /// 专用 Update 与 Delete Builder 必须选择外部 Provider 的可选 Mutation 子句，并在 Clone 与 Clear 后保持隔离。
     /// </summary>
     [Fact]
     public void MutationClauseFactory_WhenDedicatedBuildersUseOptionalProviderSpi_ShouldCreateCustomClausesAndIsolateLifecycle()
@@ -164,11 +164,17 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class ExternalQuery : SqlQueryBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ExternalQuery"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">查询选项。</param>
         public ExternalQuery(IServiceProvider serviceProvider, SqlOptions<ExternalQuery> options)
             : base(serviceProvider, options)
         {
         }
 
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() =>
             new CustomSqlBuilder(CreateSqlBuilderServices());
     }
@@ -178,11 +184,17 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class ExternalExecutor : SqlExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ExternalExecutor"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">执行器选项。</param>
         public ExternalExecutor(IServiceProvider serviceProvider, SqlOptions<ExternalExecutor> options)
             : base(serviceProvider, options)
         {
         }
 
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() =>
             new CustomSqlBuilder(CreateSqlBuilderServices());
     }
@@ -192,12 +204,18 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class ExternalMultipleQueryExecutor : SqlMultipleQueryExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ExternalMultipleQueryExecutor"/> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">服务提供程序。</param>
+        /// <param name="options">执行器选项。</param>
         public ExternalMultipleQueryExecutor(IServiceProvider serviceProvider,
             SqlOptions<ExternalMultipleQueryExecutor> options)
             : base(serviceProvider, options)
         {
         }
 
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() =>
             new CustomSqlBuilder(CreateSqlBuilderServices());
     }
@@ -207,37 +225,52 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class ExternalConnection : IDbConnection
     {
+        /// <summary>
+        /// 初始化一个 <see cref="ExternalConnection"/> 类型的实例。
+        /// </summary>
+        /// <param name="connectionString">连接字符串。</param>
         public ExternalConnection(string connectionString) => ConnectionString = connectionString;
 
+        /// <inheritdoc />
         public string ConnectionString { get; set; }
 
+        /// <inheritdoc />
         public int ConnectionTimeout => 0;
 
+        /// <inheritdoc />
         public string Database => "external";
 
+        /// <inheritdoc />
         public ConnectionState State => ConnectionState.Closed;
 
+        /// <inheritdoc />
         public IDbTransaction BeginTransaction() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public IDbTransaction BeginTransaction(IsolationLevel il) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void ChangeDatabase(string databaseName) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void Close()
         {
         }
 
+        /// <inheritdoc />
         public IDbCommand CreateCommand() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void Open() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public void Dispose()
         {
         }
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 应能生成包含 From、Join 和 Where 的完整 SQL 与参数。
+    /// 外部 Provider 应能生成包含 From、Join 和 Where 的完整 SQL 与参数。
     /// </summary>
     [Fact]
     public void Build_WhenFromJoinWhereConfigured_ShouldRenderSqlAndParameters()
@@ -258,7 +291,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 的表引用解析器应参与 From、Join 及 Clone 后新增 Join 的字符串表名解析。
+    /// 外部 Provider 的表引用解析器应参与 From、Join 及 Clone 后新增 Join 的字符串表名解析。
     /// </summary>
     [Fact]
     public void TableReferenceParser_WhenCustomNamesConfigured_ShouldRenderParserResultsAcrossClone()
@@ -278,7 +311,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：公开 Builder 工厂应按 Provider 实例创建对应外部 Builder。
+    /// 公开 Builder 工厂应按 Provider 实例创建对应外部 Builder。
     /// </summary>
     [Fact]
     public void Factory_WhenProviderRegistered_ShouldCreateExpectedBuilder()
@@ -297,7 +330,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Provider Key 应为大小写不敏感的正式创建入口，并接受首尾空白。
+    /// Provider Key 应为大小写不敏感的正式创建入口，并接受首尾空白。
     /// </summary>
     [Fact]
     public void Factory_WhenProviderKeyUsesDifferentCaseAndWhitespace_ShouldCreateExpectedBuilder()
@@ -316,7 +349,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Factory 应将调用方提供的查询级共享服务原样传递给外部 Builder。
+    /// Factory 应将调用方提供的查询级共享服务原样传递给外部 Builder。
     /// </summary>
     [Fact]
     public void Factory_WhenQueryServicesAreProvided_ShouldPassSameInstanceToBuilder()
@@ -336,7 +369,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：不同 Key 的外部 Provider 应可复用同一个 DatabaseType，并始终通过 Key 显式创建。
+    /// 不同 Key 的外部 Provider 应可复用同一个 DatabaseType，并始终通过 Key 显式创建。
     /// </summary>
     [Fact]
     public void Factory_WhenDifferentProviderKeysShareDatabaseType_ShouldAllowRegistration()
@@ -358,7 +391,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：未知和重复 Provider Key 应返回包含 Key 的明确异常。
+    /// 未知和重复 Provider Key 应返回包含 Key 的明确异常。
     /// </summary>
     [Fact]
     public void Factory_WhenProviderKeyIsUnknownOrDuplicated_ShouldThrowWithKey()
@@ -377,7 +410,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Provider 声明参数上限时，新增参数应在达到上限后被拒绝，已有参数仍可替换。
+    /// Provider 声明参数上限时，新增参数应在达到上限后被拒绝，已有参数仍可替换。
     /// </summary>
     [Fact]
     public void ParameterLimit_WhenLimitReached_ShouldRejectNewParameterAndAllowReplacement()
@@ -398,7 +431,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：参数上限配置应在 New 与 Clone 后保留，且 New 不继承来源参数。
+    /// 参数上限配置应在 New 与 Clone 后保留，且 New 不继承来源参数。
     /// </summary>
     [Fact]
     public void ParameterLimit_WhenBuilderIsNewOrCloned_ShouldPreserveLimitAndIsolateParameters()
@@ -425,8 +458,9 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：显式注入普通或增强参数管理器时，Provider 参数上限均不应被绕过。
+    /// 显式注入普通或增强参数管理器时，Provider 参数上限均不应被绕过。
     /// </summary>
+    /// <param name="useAdvancedManager">是否使用增强参数管理器。</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -449,7 +483,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 的分页渲染器应参与完整 SQL 输出。
+    /// 外部 Provider 的分页渲染器应参与完整 SQL 输出。
     /// </summary>
     [Fact]
     public void PaginationRenderer_WhenSkipAndTakeConfigured_ShouldRenderProviderSql()
@@ -467,7 +501,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：New 应复用共享服务，同时提供独立且为空的参数管理器。
+    /// New 应复用共享服务，同时提供独立且为空的参数管理器。
     /// </summary>
     [Fact]
     public void New_WhenSourceContainsParameters_ShouldShareServicesAndIsolateParameters()
@@ -489,7 +523,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Clone 修改 Join 与参数后不得影响来源 Builder 的 SQL 或参数。
+    /// Clone 修改 Join 与参数后不得影响来源 Builder 的 SQL 或参数。
     /// </summary>
     [Fact]
     public void Clone_WhenJoinAndParametersChange_ShouldPreserveSourceAndIsolateState()
@@ -514,7 +548,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 的自定义子句在首次创建、Clear、New 和 Clone 后均应保持实际运行类型，且 Clone 必须保留列状态。
+    /// 外部 Provider 的自定义子句在首次创建、Clear、New 和 Clone 后均应保持实际运行类型，且 Clone 必须保留列状态。
     /// </summary>
     [Fact]
     public void CustomClause_WhenBuilderLifecycleChanges_ShouldPreserveTypeAndCloneState()
@@ -536,7 +570,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 的五个自定义 Lambda Clause 在 Clone 后必须继续实现各自 optional SPI。
+    /// 外部 Provider 的五个自定义 Lambda Clause 在 Clone 后必须继续实现各自 optional SPI。
     /// </summary>
     [Fact]
     public void CustomLambdaClauses_WhenBuilderIsCloned_ShouldPreserveAllOptionalSpi()
@@ -572,7 +606,7 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：外部 Provider 的多源 Lambda 路径应通过五个公开 SPI 生成完整且稳定的 SQL，不能依赖默认具体 Clause 类型。
+    /// 外部 Provider 的多源 Lambda 路径应通过五个公开 SPI 生成完整且稳定的 SQL，不能依赖默认具体 Clause 类型。
     /// </summary>
     [Fact]
     public void Lambda_WhenCustomProviderClausesAreUsed_ShouldRenderCompleteMultiSourceSql()
@@ -610,6 +644,9 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class CustomCustomer
     {
+        /// <summary>
+        /// 获取或设置客户标识。
+        /// </summary>
         public int Id { get; set; }
     }
 
@@ -618,8 +655,14 @@ public class CustomProviderBuilderTest
     /// </summary>
     private sealed class CustomOrder
     {
+        /// <summary>
+        /// 获取或设置客户标识。
+        /// </summary>
         public int CustomerId { get; set; }
 
+        /// <summary>
+        /// 获取或设置订单金额。
+        /// </summary>
         public decimal Amount { get; set; }
     }
 
@@ -634,7 +677,7 @@ public class CustomProviderBuilderTest
         private readonly IParameterManager _inner;
 
         /// <summary>
-        /// 初始化基础参数管理器测试代理。
+        /// 初始化一个 <see cref="PlainParameterManager"/> 类型的实例。
         /// </summary>
         /// <param name="dialect">参数名称使用的 SQL 方言。</param>
         public PlainParameterManager(IDialect dialect) : this(new ParameterManager(dialect))
@@ -642,7 +685,7 @@ public class CustomProviderBuilderTest
         }
 
         /// <summary>
-        /// 使用已有内部管理器初始化基础参数管理器测试代理。
+        /// 初始化一个 <see cref="PlainParameterManager"/> 类型的实例。
         /// </summary>
         /// <param name="inner">实际存储参数的内部管理器。</param>
         private PlainParameterManager(IParameterManager inner) => _inner = inner;

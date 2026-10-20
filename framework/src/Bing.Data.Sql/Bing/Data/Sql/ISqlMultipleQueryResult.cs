@@ -9,27 +9,27 @@ namespace Bing.Data.Sql;
 public interface ISqlMultipleQueryResult : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// 读取当前结果集的动态行集合。
+    /// 读取当前结果集。
     /// </summary>
     /// <returns>已物化的当前结果集。</returns>
     List<dynamic> Read();
 
     /// <summary>
-    /// 读取当前结果集的实体集合。
+    /// 读取当前结果集。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <returns>已物化的当前结果集。</returns>
     List<TEntity> Read<TEntity>();
 
     /// <summary>
-    /// 异步读取当前结果集的动态行集合。
+    /// 异步读取当前结果集。
     /// </summary>
     /// <param name="cancellationToken">开始读取当前结果集前使用的取消令牌。</param>
     /// <returns>表示最终结果集的异步操作。</returns>
     Task<List<dynamic>> ReadAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 异步读取当前结果集的实体集合。
+    /// 异步读取当前结果集。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="cancellationToken">开始读取当前结果集前使用的取消令牌。</param>

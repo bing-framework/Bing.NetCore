@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Mutations.Contexts;
 public sealed class SqlMutationContext
 {
     /// <summary>
-    /// 统一 Builder 的操作状态管理器。
+    /// 获取或设置统一 Builder 的操作状态管理器。
     /// </summary>
     internal ISqlOperationStateManager OperationStateManager { get; set; }
 
@@ -30,27 +30,27 @@ public sealed class SqlMutationContext
     }
 
     /// <summary>
-    /// 当前 SQL Provider。
+    /// 获取当前 SQL Provider。
     /// </summary>
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// 当前 SQL 方言。
+    /// 获取当前 SQL 方言。
     /// </summary>
     public IDialect Dialect => Provider.Dialect;
 
     /// <summary>
-    /// 当前命令参数管理器。
+    /// 获取当前命令参数管理器。
     /// </summary>
     public IParameterManager ParameterManager { get; }
 
     /// <summary>
-    /// Builder 生命周期间共享的服务集合。
+    /// 获取Builder 生命周期间共享的服务集合。
     /// </summary>
     public SqlBuilderServices Services { get; }
 
     /// <summary>
-    /// Builder 生命周期内固定的执行上下文。
+    /// 获取Builder 生命周期内固定的执行上下文。
     /// </summary>
     public SqlBuilderExecutionContext ExecutionContext { get; }
 

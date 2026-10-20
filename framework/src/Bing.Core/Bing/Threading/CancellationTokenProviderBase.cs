@@ -6,13 +6,14 @@
 public abstract class CancellationTokenProviderBase : ICancellationTokenProvider
 {
     /// <summary>
-    /// 获取在环境作用域中保存取消令牌覆盖值的稳定上下文键。
+    /// 标识环境作用域中取消令牌覆盖值的上下文键，值为 <c>Bing.Threading.CancellationToken.Override</c>。
     /// </summary>
     public const string CancellationTokenOverrideContextKey = "Bing.Threading.CancellationToken.Override";
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取当前有效的异步任务取消令牌。
-    /// </summary>
+    /// </remarks>
     public abstract CancellationToken Token { get; }
 
     /// <summary>
@@ -26,7 +27,7 @@ public abstract class CancellationTokenProviderBase : ICancellationTokenProvider
     protected CancellationTokenOverride OverrideValue => CancellationTokenOverrideScopeProvider.GetValue(CancellationTokenOverrideContextKey);
 
     /// <summary>
-    /// 使用取消令牌覆盖范围提供程序初始化 <see cref="CancellationTokenProviderBase"/> 的实例。
+    /// 初始化一个 <see cref="CancellationTokenProviderBase"/> 类型的实例。
     /// </summary>
     /// <param name="cancellationTokenOverrideScopeProvider">保存取消令牌覆盖值的环境范围提供程序。</param>
     protected CancellationTokenProviderBase(IAmbientScopeProvider<CancellationTokenOverride> cancellationTokenOverrideScopeProvider)

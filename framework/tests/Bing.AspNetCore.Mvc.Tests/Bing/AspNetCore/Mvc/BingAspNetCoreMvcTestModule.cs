@@ -4,6 +4,7 @@ using Bing.Core.Modularity;
 using Bing.Helpers;
 using Bing.Http.Clients;
 using Bing.Http;
+using Bing.AspNetCore.Mvc.DynamicApi;
 using Bing.Serialization.SystemTextJson;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -36,6 +37,12 @@ public class BingAspNetCoreMvcTestModule : AspNetCoreBingModule
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
         RegisterHttpContextAccessor(services);
+        services.AddScoped<IDynamicApiTestAppService, DynamicApiTestAppServiceProxy>();
+        services.AddBingDynamicApi(typeof(DynamicApiTestAppService).Assembly, options =>
+        {
+            options.TypePredicate = type => type == typeof(DynamicApiTestAppService)
+                                           || type == typeof(DisabledDynamicApiTestAppService);
+        });
         services.Configure((Microsoft.AspNetCore.Mvc.JsonOptions options) =>
         {
             options.JsonSerializerOptions.Converters.Add(new DateTimeJsonConverter());
@@ -63,8 +70,9 @@ public class BingAspNetCoreMvcTestModule : AspNetCoreBingModule
     }
 
     /// <summary>
-    /// 注册Http上下文访问器
+    /// 注册 HTTP 上下文访问器。
     /// </summary>
+    /// <param name="services">测试宿主服务集合。</param>
     private void RegisterHttpContextAccessor(IServiceCollection services)
     {
         var httpContextAccessor = new HttpContextAccessor();
@@ -73,16 +81,18 @@ public class BingAspNetCoreMvcTestModule : AspNetCoreBingModule
     }
 
     /// <summary>
-    /// 注册默认的Http客户端
+    /// 注册默认 HTTP 客户端。
     /// </summary>
+    /// <param name="services">测试宿主服务集合。</param>
     private void RegisterDefaultHttpClient(IServiceCollection services)
     {
         services.TryAddSingleton<HttpClient>(sp => ((TestServer)sp.GetRequiredService<IServer>()).CreateClient());
     }
 
     /// <summary>
-    /// 注册Bing框架封装的Http客户端
+    /// 注册 Bing HTTP 客户端。
     /// </summary>
+    /// <param name="services">测试宿主服务集合。</param>
     private void RegisterBingHttpClient(IServiceCollection services)
     {
         services.AddTransient<IHttpClient>(t =>

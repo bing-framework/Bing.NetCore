@@ -7,9 +7,7 @@ using Xunit;
 namespace Bing.ExceptionHandling.Tests;
 
 /// <summary>
-/// <see cref="EntityNotFoundException"/>、<see cref="RemoteServiceErrorInfo"/>、
-/// <see cref="RemoteServiceErrorResponse"/>、<see cref="RemoteServiceValidationErrorInfo"/>、
-/// <see cref="BingExceptionHandlingOptions"/> 单元测试
+/// <see cref="EntityNotFoundException"/>、<see cref="RemoteServiceErrorInfo"/>、 <see cref="RemoteServiceErrorResponse"/>、<see cref="RemoteServiceValidationErrorInfo"/>、 <see cref="BingExceptionHandlingOptions"/> 单元测试
 /// </summary>
 public class ErrorInfoAndEntityNotFoundTest
 {
@@ -18,8 +16,7 @@ public class ErrorInfoAndEntityNotFoundTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：无参构造应使用默认错误消息，不抛异常，
-    /// 便于快速抛出"实体不存在"而不必传入具体信息。
+    /// 测试目的：无参构造应使用默认错误消息，不抛异常， 便于快速抛出"实体不存在"而不必传入具体信息。
     /// </summary>
     [Fact]
     public void EntityNotFoundException_DefaultConstructor_ShouldHaveDefaultMessage()
@@ -48,8 +45,7 @@ public class ErrorInfoAndEntityNotFoundTest
     }
 
     /// <summary>
-    /// 测试目的：传入 entityType + id 时，两个属性均应被正确赋值，
-    /// 且消息中应包含类型名和 id 信息。
+    /// 测试目的：传入 entityType + id 时，两个属性均应被正确赋值， 且消息中应包含类型名和 id 信息。
     /// </summary>
     [Fact]
     public void EntityNotFoundException_WithEntityTypeAndId_ShouldSetBothProperties()
@@ -77,8 +73,7 @@ public class ErrorInfoAndEntityNotFoundTest
     }
 
     /// <summary>
-    /// 测试目的：传入 innerException 时，InnerException 应正确传递，
-    /// 不丢失原始异常上下文。
+    /// 测试目的：传入 innerException 时，InnerException 应正确传递， 不丢失原始异常上下文。
     /// </summary>
     [Fact]
     public void EntityNotFoundException_WithInnerException_ShouldChainInnerException()
@@ -94,8 +89,7 @@ public class ErrorInfoAndEntityNotFoundTest
     }
 
     /// <summary>
-    /// 测试目的：EntityNotFoundException 应继承自 BingException，
-    /// 确保框架统一异常处理链路能识别并处理此类异常。
+    /// 测试目的：EntityNotFoundException 应继承自 BingException， 确保框架统一异常处理链路能识别并处理此类异常。
     /// </summary>
     [Fact]
     public void EntityNotFoundException_ShouldInheritFromBingException()
@@ -109,8 +103,7 @@ public class ErrorInfoAndEntityNotFoundTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：无参构造后所有属性应为 null，
-    /// 确保空错误信息不携带垃圾默认值。
+    /// 测试目的：无参构造后所有属性应为 null， 确保空错误信息不携带垃圾默认值。
     /// </summary>
     [Fact]
     public void RemoteServiceErrorInfo_DefaultConstructor_AllPropertiesShouldBeNull()
@@ -146,8 +139,7 @@ public class ErrorInfoAndEntityNotFoundTest
     }
 
     /// <summary>
-    /// 测试目的：仅传 message 时，Details / Code / Data 应保持 null，
-    /// 确保可选参数的默认行为正确。
+    /// 测试目的：仅传 message 时，Details / Code / Data 应保持 null， 确保可选参数的默认行为正确。
     /// </summary>
     [Fact]
     public void RemoteServiceErrorInfo_Constructor_OnlyMessage_ShouldLeaveOthersNull()
@@ -167,8 +159,7 @@ public class ErrorInfoAndEntityNotFoundTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：RemoteServiceErrorResponse 构造器应将传入的 Error 正确存储，
-    /// 确保 HTTP 响应封装后的 Error 属性可正常读取。
+    /// 测试目的：RemoteServiceErrorResponse 构造器应将传入的 Error 正确存储， 确保 HTTP 响应封装后的 Error 属性可正常读取。
     /// </summary>
     [Fact]
     public void RemoteServiceErrorResponse_Constructor_ShouldSetError()
@@ -252,8 +243,7 @@ public class ErrorInfoAndEntityNotFoundTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：默认配置中 SendExceptionDetailsToClients 应为 false（安全默认），
-    /// SendStackTraceToClients 应为 true（调试友好）。
+    /// 测试目的：默认配置中 SendExceptionDetailsToClients 应为 false（安全默认）， SendStackTraceToClients 应为 true（调试友好）。
     /// </summary>
     [Fact]
     public void BingExceptionHandlingOptions_Defaults_ShouldMatchExpected()

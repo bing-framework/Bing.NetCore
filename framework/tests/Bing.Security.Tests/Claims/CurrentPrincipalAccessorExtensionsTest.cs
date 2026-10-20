@@ -10,6 +10,9 @@ namespace Bing.Security.Tests.Claims;
 /// </summary>
 public class CurrentPrincipalAccessorExtensionsTest
 {
+    /// <summary>
+    /// 当前线程主体访问器。
+    /// </summary>
     private readonly ThreadCurrentPrincipalAccessor _accessor = new();
 
     // ═══════════════════════════════════════════════════════════
@@ -17,8 +20,7 @@ public class CurrentPrincipalAccessorExtensionsTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Change(Claim) 应将单个 Claim 包装为 ClaimsPrincipal 后更新当前主体，
-    /// 使 Principal.FindFirst 能找到该 Claim。
+    /// 测试目的：Change(Claim) 应将单个 Claim 包装为 ClaimsPrincipal 后更新当前主体， 使 Principal.FindFirst 能找到该 Claim。
     /// </summary>
     [Fact]
     public void Change_WithSingleClaim_ShouldSetPrincipalWithThatClaim()
@@ -58,8 +60,7 @@ public class CurrentPrincipalAccessorExtensionsTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Change(IEnumerable&lt;Claim&gt;) 应将多个 Claim 一起包装为 ClaimsPrincipal，
-    /// 使 Principal 中能找到所有指定 Claim。
+    /// 测试目的：Change(IEnumerable&lt;Claim&gt;) 应将多个 Claim 一起包装为 ClaimsPrincipal， 使 Principal 中能找到所有指定 Claim。
     /// </summary>
     [Fact]
     public void Change_WithMultipleClaims_ShouldSetPrincipalWithAllClaims()
@@ -103,8 +104,7 @@ public class CurrentPrincipalAccessorExtensionsTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：Change(ClaimsIdentity) 应将给定身份包装为 ClaimsPrincipal，
-    /// 主体的 AuthenticationType 应与传入 Identity 一致。
+    /// 测试目的：Change(ClaimsIdentity) 应将给定身份包装为 ClaimsPrincipal， 主体的 AuthenticationType 应与传入 Identity 一致。
     /// </summary>
     [Fact]
     public void Change_WithClaimsIdentity_ShouldSetPrincipalWithThatIdentity()

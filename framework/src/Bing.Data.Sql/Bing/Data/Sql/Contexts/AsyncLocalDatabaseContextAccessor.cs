@@ -6,8 +6,11 @@ namespace Bing.Data.Sql;
 public sealed class AsyncLocalDatabaseContextAccessor : IDatabaseContextAccessor
 {
     /// <summary>
-    /// 当前数据库上下文快照。读取该属性返回独立副本，直接修改返回值不会写回当前异步执行上下文，应通过设置该属性或 <see cref="DatabaseContextAccessorExtensions.Update"/> 更新。
+    /// 当前数据库上下文快照。
     /// </summary>
+    /// <remarks>
+    /// 读取该属性返回独立副本，直接修改返回值不会写回当前异步执行上下文，应通过设置该属性或 <see cref="DatabaseContextAccessorExtensions.Update"/> 更新。
+    /// </remarks>
     private readonly AsyncLocal<DatabaseContext> _current = new();
 
     /// <inheritdoc />

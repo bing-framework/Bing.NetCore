@@ -9,27 +9,27 @@ namespace Bing.Validation;
 public class ValidationContext<TObject> where TObject : class, IVerifyModel<TObject>
 {
     /// <summary>
-    /// 对象实例
+    /// 获取或设置对象实例
     /// </summary>
     private TObject Instance { get; set; }
 
     /// <summary>
-    /// 验证策略列表
+    /// 获取验证策略列表
     /// </summary>
     private List<IValidationStrategy<TObject>> ValidateStrategyList { get; }
 
     /// <summary>
-    /// 验证结果集合
+    /// 获取或设置验证结果集合
     /// </summary>
     private ValidationResultCollection ResultCollection { get; set; }
 
     /// <summary>
-    /// 处理操作
+    /// 获取或设置处理操作
     /// </summary>
     private Action<ValidationHandleOperation> Handle { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="ValidationContext{TObject}"/>类型的实例
+    /// 初始化一个 <see cref="ValidationContext{TObject}"/> 类型的实例。
     /// </summary>
     /// <param name="instanceToValidate">验证实例</param>
     public ValidationContext(TObject instanceToValidate)
@@ -39,7 +39,7 @@ public class ValidationContext<TObject> where TObject : class, IVerifyModel<TObj
     }
 
     /// <summary>
-    /// 是否已验证
+    /// 获取是否已验证
     /// </summary>
     public bool IsValid => ResultCollection?.IsValid ?? true;
 

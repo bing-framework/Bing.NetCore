@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IDeleteClause : ISqlClause, ISqlMutationClauseCloneable<IDeleteClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前删除目标表。
+    /// 获取当前删除目标表。
     /// </summary>
     SqlTableReference Table { get; }
 

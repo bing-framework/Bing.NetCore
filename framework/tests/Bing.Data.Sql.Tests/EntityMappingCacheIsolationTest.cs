@@ -295,6 +295,9 @@ public class EntityMappingCacheIsolationTest
         Assert.Equal("cache_samples_beta", beta.Table.TableName);
     }
 
+    /// <summary>
+    /// 验证仅大小写不同的物理表名使用独立缓存项。
+    /// </summary>
     [Fact]
     public void Resolve_WhenPhysicalNamesDifferOnlyByCase_ShouldUseIndependentCacheEntries()
     {
@@ -654,7 +657,7 @@ public class EntityMappingCacheIsolationTest
     private sealed class CacheSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -665,7 +668,7 @@ public class EntityMappingCacheIsolationTest
     private sealed class OtherCacheSample
     {
         /// <summary>
-        /// 名称。
+        /// 获取或设置名称。
         /// </summary>
         public string Name { get; set; }
     }
@@ -676,7 +679,7 @@ public class EntityMappingCacheIsolationTest
     private sealed class CountingEntityModelMetadataProvider : IEntityModelMetadataProvider
     {
         /// <summary>
-        /// 获取元数据的调用次数。
+        /// 获取或设置元数据的调用次数。
         /// </summary>
         public int MetadataCallCount { get; private set; }
 
@@ -698,7 +701,7 @@ public class EntityMappingCacheIsolationTest
     private sealed class FailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider
     {
         /// <summary>
-        /// 获取元数据的调用次数。
+        /// 获取或设置元数据的调用次数。
         /// </summary>
         public int MetadataCallCount { get; private set; }
 
@@ -721,7 +724,14 @@ public class EntityMappingCacheIsolationTest
     /// </summary>
     private sealed class BlockingFailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider
     {
+        /// <summary>
+        /// 允许首次阻塞的元数据读取继续执行的信号。
+        /// </summary>
         private readonly ManualResetEventSlim _releaseFirstCall = new();
+
+        /// <summary>
+        /// 元数据读取调用次数。
+        /// </summary>
         private int _metadataCallCount;
 
         /// <summary>
@@ -730,7 +740,7 @@ public class EntityMappingCacheIsolationTest
         public int MetadataCallCount => Volatile.Read(ref _metadataCallCount);
 
         /// <summary>
-        /// 首次 provider 调用已进入阻塞点。
+        /// 获取首次 provider 调用已进入阻塞点。
         /// </summary>
         public ManualResetEventSlim FirstCallEntered { get; } = new();
 
@@ -763,7 +773,7 @@ public class EntityMappingCacheIsolationTest
     private sealed class RuntimeRouteMappingResolver : DefaultEntityMappingResolver
     {
         /// <summary>
-        /// 使用指定缓存配置初始化运行时路由映射解析器。
+        /// 初始化一个 <see cref="RuntimeRouteMappingResolver"/> 类型的实例。
         /// </summary>
         /// <param name="options">实体映射缓存配置。</param>
         public RuntimeRouteMappingResolver(SqlMetadataOptions options = null)
@@ -772,7 +782,7 @@ public class EntityMappingCacheIsolationTest
         }
 
         /// <summary>
-        /// 当前路由后缀。
+        /// 获取或设置当前路由后缀。
         /// </summary>
         public string RouteSuffix { get; set; }
 
@@ -790,10 +800,13 @@ public class EntityMappingCacheIsolationTest
     /// </summary>
     private sealed class CountingMappingResolver : DefaultEntityMappingResolver
     {
+        /// <summary>
+        /// 最终映射创建次数。
+        /// </summary>
         private int _mappingCreationCount;
 
         /// <summary>
-        /// 最终映射构造次数。
+        /// 获取最终映射构造次数。
         /// </summary>
         public int MappingCreationCount => Volatile.Read(ref _mappingCreationCount);
 

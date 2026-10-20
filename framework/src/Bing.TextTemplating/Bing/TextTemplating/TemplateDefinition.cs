@@ -13,18 +13,27 @@ public class TemplateDefinition
     public string Name { get; }
 
     /// <summary>
-    /// 获取模板是否用作其他模板的布局，默认值为 <c>false</c>。
+    /// 获取模板是否用作其他模板的布局。
     /// </summary>
+    /// <remarks>
+    /// 默认值为 <c>false</c>。
+    /// </remarks>
     public bool IsLayout { get; }
 
     /// <summary>
-    /// 获取或设置应用于当前模板的布局模板名称；未使用布局时可以为 <c>null</c>。
+    /// 获取或设置应用于当前模板的布局模板名称。
     /// </summary>
+    /// <remarks>
+    /// 未使用布局时可以为 <c>null</c>。
+    /// </remarks>
     public string Layout { get; set; }
 
     /// <summary>
-    /// 获取或设置当前模板使用的渲染引擎名称；未设置时由默认渲染引擎回退策略决定。
+    /// 获取或设置当前模板使用的渲染引擎名称。
     /// </summary>
+    /// <remarks>
+    /// 未设置时由默认渲染引擎回退策略决定。
+    /// </remarks>
     public string RenderEngine { get; set; }
 
     /// <summary>
@@ -39,12 +48,15 @@ public class TemplateDefinition
     }
 
     /// <summary>
-    /// 获取可供模板提供者和渲染器使用的扩展属性字典，默认初始化为空字典。
+    /// 获取可供模板提供者和渲染器使用的扩展属性字典。
     /// </summary>
+    /// <remarks>
+    /// 默认初始化为空字典。
+    /// </remarks>
     public Dictionary<string, object> Properties { get; }
 
     /// <summary>
-    /// 使用模板名称及可选布局信息初始化 <see cref="TemplateDefinition"/> 的实例。
+    /// 初始化一个 <see cref="TemplateDefinition"/> 类型的实例。
     /// </summary>
     /// <param name="name">模板的稳定注册名称。</param>
     /// <param name="isLayout">是否将该模板标记为布局模板，默认值为 <c>false</c>。</param>

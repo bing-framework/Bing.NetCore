@@ -6,7 +6,7 @@ namespace Bing.Data.Sql.Builders.Core;
 public sealed class DefaultSqlTableReferenceParser : ISqlTableReferenceParser
 {
     /// <summary>
-    /// 默认实例。
+    /// 获取默认实例。
     /// </summary>
     public static DefaultSqlTableReferenceParser Instance { get; } = new();
 

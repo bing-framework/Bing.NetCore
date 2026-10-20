@@ -6,7 +6,7 @@
 public interface IEventHandler
 {
     /// <summary>
-    /// 是否启用
+    /// 获取是否启用
     /// </summary>
     bool Enabled { get; }
 }

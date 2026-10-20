@@ -17,12 +17,12 @@ public sealed class ChangeTrackingContext
     private readonly ChangedValueDescriptorCollection _changedValueCollection;
 
     /// <summary>
-    /// 初始化一个<see cref="ChangeTrackingContext"/>类型的实例
+    /// 初始化一个 <see cref="ChangeTrackingContext"/> 类型的实例。
     /// </summary>
     public ChangeTrackingContext() => _changedValueCollection = new ChangedValueDescriptorCollection();
 
     /// <summary>
-    /// 初始化一个<see cref="ChangeTrackingContext"/>类型的实例
+    /// 初始化一个 <see cref="ChangeTrackingContext"/> 类型的实例。
     /// </summary>
     /// <param name="collection">变更值集合</param>
     public ChangeTrackingContext(ChangedValueDescriptorCollection collection) =>
@@ -135,9 +135,6 @@ public sealed class ChangeTrackingContext
     /// <returns>当前上下文中的变更信息文本。</returns>
     public string Output() => _changedValueCollection.ToString();
 
-    /// <summary>
-    /// 输出字符串
-    /// </summary>
-    /// <returns>当前上下文中的变更信息文本。</returns>
+    /// <inheritdoc />
     public override string ToString() => Output();
 }

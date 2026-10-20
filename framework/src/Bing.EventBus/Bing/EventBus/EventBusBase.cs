@@ -14,12 +14,12 @@ namespace Bing.EventBus;
 public abstract class EventBusBase : IEventBus
 {
     /// <summary>
-    /// 服务作用域工厂
+    /// 获取服务作用域工厂
     /// </summary>
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="EventBusBase"/>类型的实例
+    /// 初始化一个 <see cref="EventBusBase"/> 类型的实例。
     /// </summary>
     /// <param name="serviceScopeFactory">服务作用域工厂</param>
     protected EventBusBase(IServiceScopeFactory serviceScopeFactory)
@@ -27,132 +27,73 @@ public abstract class EventBusBase : IEventBus
         ServiceScopeFactory = serviceScopeFactory;
     }
 
-    /// <summary>
-    /// 发布事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="eventData">事件数据</param>
+    /// <inheritdoc />
     public Task PublishAsync<TEvent>(TEvent eventData) where TEvent : class
     {
         return PublishAsync(typeof(TEvent), eventData);
     }
 
-    /// <summary>
-    /// 发布事件
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="eventData">事件数据</param>
+    /// <inheritdoc />
     public virtual async Task PublishAsync(Type eventType, object eventData)
     {
         await PublishToEventBusAsync(eventType, eventData);
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="action">事件处理委托</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public virtual IDisposable Subscribe<TEvent>(Func<TEvent, Task> action) where TEvent : class
     {
         return Subscribe(typeof(TEvent), new ActionEventHandler<TEvent>(action));
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <typeparam name="THandler">事件处理器类型</typeparam>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public virtual IDisposable Subscribe<TEvent, THandler>() where TEvent : class where THandler : IEventHandler, new()
     {
         return Subscribe(typeof(TEvent), new TransientEventHandlerFactory<THandler>());
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="handler">事件处理器</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public virtual IDisposable Subscribe(Type eventType, IEventHandler handler)
     {
         return Subscribe(eventType, new SingleInstanceHandlerFactory(handler));
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="factory">事件处理器工厂</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public virtual IDisposable Subscribe<TEvent>(IEventHandlerFactory factory) where TEvent : class
     {
         return Subscribe(typeof(TEvent), factory);
     }
 
-    /// <summary>
-    /// 订阅事件
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="factory">事件处理器工厂</param>
-    /// <returns>用于取消本次订阅的释放句柄。</returns>
+    /// <inheritdoc />
     public abstract IDisposable Subscribe(Type eventType, IEventHandlerFactory factory);
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="action">事件处理委托</param>
+    /// <inheritdoc />
     public abstract void Unsubscribe<TEvent>(Func<TEvent, Task> action) where TEvent : class;
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="handler">本地事件处理器</param>
+    /// <inheritdoc />
     public virtual void Unsubscribe<TEvent>(ILocalEventHandler<TEvent> handler) where TEvent : class
     {
         Unsubscribe(typeof(TEvent), handler);
     }
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="handler">事件处理器</param>
+    /// <inheritdoc />
     public abstract void Unsubscribe(Type eventType, IEventHandler handler);
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
-    /// <param name="factory">事件处理器工厂</param>
+    /// <inheritdoc />
     public virtual void Unsubscribe<TEvent>(IEventHandlerFactory factory) where TEvent : class
     {
         Unsubscribe(typeof(TEvent), factory);
     }
 
-    /// <summary>
-    /// 取消订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
-    /// <param name="factory">事件处理器工厂</param>
+    /// <inheritdoc />
     public abstract void Unsubscribe(Type eventType, IEventHandlerFactory factory);
 
-    /// <summary>
-    /// 取消全部订阅
-    /// </summary>
-    /// <typeparam name="TEvent">事件类型</typeparam>
+    /// <inheritdoc />
     public void UnsubscribeAll<TEvent>() where TEvent : class
     {
         UnsubscribeAll(typeof(TEvent));
     }
 
-    /// <summary>
-    /// 取消全部订阅
-    /// </summary>
-    /// <param name="eventType">事件类型</param>
+    /// <inheritdoc />
     public abstract void UnsubscribeAll(Type eventType);
 
     /// <summary>
@@ -301,17 +242,17 @@ public abstract class EventBusBase : IEventBus
     protected class EventTypeWithEventHandlerFactories
     {
         /// <summary>
-        /// 事件类型
+        /// 获取事件类型
         /// </summary>
         public Type EventType { get; }
 
         /// <summary>
-        /// 事件处理器工厂列表
+        /// 获取事件处理器工厂列表
         /// </summary>
         public List<IEventHandlerFactory> EventHandlerFactories { get; }
 
         /// <summary>
-        /// 初始化一个<see cref="EventTypeWithEventHandlerFactories"/>类型的实例
+        /// 初始化一个 <see cref="EventTypeWithEventHandlerFactories"/> 类型的实例。
         /// </summary>
         /// <param name="eventType">事件类型</param>
         /// <param name="eventHandlerFactories">事件处理器工厂列表</param>
@@ -329,17 +270,14 @@ public abstract class EventBusBase : IEventBus
     protected struct SynchronizationContextRemover : INotifyCompletion
     {
         /// <summary>
-        /// 是否已完成
+        /// 获取是否已完成
         /// </summary>
         public bool IsCompleted
         {
             get => SynchronizationContext.Current == null;
         }
 
-        /// <summary>
-        /// 完成操作
-        /// </summary>
-        /// <param name="continuation">继续操作</param>
+        /// <inheritdoc />
         public void OnCompleted(Action continuation)
         {
             var prevContext = SynchronizationContext.Current;

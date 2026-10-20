@@ -13,6 +13,9 @@ namespace Bing.AspNetCore.Mvc.Validation;
 /// </summary>
 public class ModelStateValidatorTest
 {
+    /// <summary>
+    /// 用于验证模型状态处理行为的验证器。
+    /// </summary>
     private readonly ModelStateValidator _validator = new();
 
     // ═══════════════════════════════════════════════════════════
@@ -20,8 +23,7 @@ public class ModelStateValidatorTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ModelState 有效时，AddErrors 不应向 validationResult 添加任何错误，
-    /// 确保有效请求不会被意外标记为失败。
+    /// 测试目的：ModelState 有效时，AddErrors 不应向 validationResult 添加任何错误， 确保有效请求不会被意外标记为失败。
     /// </summary>
     [Fact]
     public void AddErrors_WhenModelStateIsValid_ShouldAddNoErrors()
@@ -39,8 +41,7 @@ public class ModelStateValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：ModelState 包含一个错误时，AddErrors 应将该错误添加到 validationResult，
-    /// 确保字段级验证错误可以被正确收集。
+    /// 测试目的：ModelState 包含一个错误时，AddErrors 应将该错误添加到 validationResult， 确保字段级验证错误可以被正确收集。
     /// </summary>
     [Fact]
     public void AddErrors_WhenModelStateHasOneError_ShouldAddOneError()
@@ -61,8 +62,7 @@ public class ModelStateValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：ModelState 包含多个字段错误时，AddErrors 应全部收集，
-    /// 确保批量验证场景下所有错误不丢失。
+    /// 测试目的：ModelState 包含多个字段错误时，AddErrors 应全部收集， 确保批量验证场景下所有错误不丢失。
     /// </summary>
     [Fact]
     public void AddErrors_WhenModelStateHasMultipleErrors_ShouldAddAll()
@@ -81,8 +81,7 @@ public class ModelStateValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：同一字段有多个错误时，AddErrors 应逐条收集，
-    /// 确保单字段多验证规则场景下所有错误均被记录。
+    /// 测试目的：同一字段有多个错误时，AddErrors 应逐条收集， 确保单字段多验证规则场景下所有错误均被记录。
     /// </summary>
     [Fact]
     public void AddErrors_WhenSameFieldHasMultipleErrors_ShouldAddEachError()
@@ -106,8 +105,7 @@ public class ModelStateValidatorTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：ModelState 有效时，Validate 应不抛异常，
-    /// 确保正常请求不受验证器影响。
+    /// 测试目的：ModelState 有效时，Validate 应不抛异常， 确保正常请求不受验证器影响。
     /// </summary>
     [Fact]
     public void Validate_WhenModelStateIsValid_ShouldNotThrow()
@@ -120,8 +118,7 @@ public class ModelStateValidatorTest
     }
 
     /// <summary>
-    /// 测试目的：ModelState 包含错误时，Validate 当前实现不抛异常（早返回），
-    /// 确保调用方不会因 Validate 本身崩溃。
+    /// 测试目的：ModelState 包含错误时，Validate 当前实现不抛异常（早返回）， 确保调用方不会因 Validate 本身崩溃。
     /// </summary>
     [Fact]
     public void Validate_WhenModelStateHasErrors_ShouldNotThrow()

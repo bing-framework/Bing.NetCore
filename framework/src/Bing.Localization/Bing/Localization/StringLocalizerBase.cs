@@ -9,7 +9,7 @@ namespace Bing.Localization;
 public abstract class StringLocalizerBase : IStringLocalizer
 {
     /// <summary>
-    /// 缓存
+    /// 缓存已解析本地化字符串的内存缓存。
     /// </summary>
     protected readonly IMemoryCache Cache;
 
@@ -24,7 +24,7 @@ public abstract class StringLocalizerBase : IStringLocalizer
     protected LocalizationOptions Options;
 
     /// <summary>
-    /// 初始化一个<see cref="StringLocalizerBase"/>类型的实例
+    /// 初始化一个 <see cref="StringLocalizerBase"/> 类型的实例。
     /// </summary>
     /// <param name="cache">内存缓存</param>
     /// <param name="type">资源类型</param>
@@ -136,10 +136,6 @@ public abstract class StringLocalizerBase : IStringLocalizer
         return new LocalizedString(result.Name, string.Format(result.Value, arguments), false, result.SearchedLocation);
     }
 
-    /// <summary>
-    /// 获取全部本地化字符串
-    /// </summary>
-    /// <param name="includeParentCultures">是否包含父区域</param>
-    /// <returns>当前资源类型的全部本地化字符串。</returns>
+    /// <inheritdoc />
     public abstract IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures);
 }

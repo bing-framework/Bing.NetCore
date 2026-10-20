@@ -11,7 +11,7 @@ namespace Bing.Auditing;
 public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
 {
     /// <summary>
-    /// 使用当前用户和时钟服务初始化 <see cref="AuditPropertySetter"/> 的实例。
+    /// 初始化一个 <see cref="AuditPropertySetter"/> 类型的实例。
     /// </summary>
     /// <param name="currentUser">提供当前用户标识和名称的服务。</param>
     /// <param name="clock">提供当前时间的服务，可在测试中替换为测试时钟。</param>
@@ -31,10 +31,10 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
     /// </summary>
     protected IClock Clock { get; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 为目标对象填充尚未设置的创建时间、创建人标识和创建人名称。
-    /// </summary>
-    /// <param name="targetObject">要填充创建审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
+    /// </remarks>
     public virtual void SetCreationProperties(object targetObject)
     {
         if (targetObject == null)
@@ -44,10 +44,10 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
         SetCreator(targetObject);
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 为目标对象填充最后修改时间、最后修改人标识和最后修改人名称。
-    /// </summary>
-    /// <param name="targetObject">要填充修改审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
+    /// </remarks>
     public virtual void SetModificationProperties(object targetObject)
     {
         if (targetObject == null)
@@ -57,10 +57,10 @@ public class AuditPropertySetter : IAuditPropertySetter, ITransientDependency
         SetLastModifier(targetObject);
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 为目标对象填充删除时间、删除人标识和删除人名称。
-    /// </summary>
-    /// <param name="targetObject">要填充删除审计属性的对象；为 <c>null</c> 时不执行任何操作。</param>
+    /// </remarks>
     public virtual void SetDeletionProperties(object targetObject)
     {
         if (targetObject == null)

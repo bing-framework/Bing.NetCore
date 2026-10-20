@@ -24,12 +24,12 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 {
 
     /// <summary>
-    /// 是否已配置会输出的行限制。
+    /// 获取是否已配置会输出的行限制。
     /// </summary>
     internal bool HasLimit => IsLimit;
 
     /// <summary>
-    /// 是否需要通过独立渲染快照应用动态数据边界。
+    /// 获取是否需要通过独立渲染快照应用动态数据边界。
     /// </summary>
     internal bool RequiresRenderSnapshot => ShouldRenderFromSnapshot();
     #region 字段
@@ -170,77 +170,75 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     #region 属性
 
     /// <summary>
-    /// 实体映射解析器
+    /// 获取或设置实体映射解析器
     /// </summary>
     protected IEntityMappingResolver EntityMappingResolver { get; private set; }
 
-    /// <summary>
-    /// SQL 提供程序。
-    /// </summary>
+    /// <inheritdoc />
     public ISqlProvider Provider { get; }
 
     /// <summary>
-    /// SQL Builder 可共享服务。
+    /// 获取或设置SQL Builder 可共享服务。
     /// </summary>
     protected SqlBuilderServices Services { get; private set; }
 
     /// <summary>
-    /// 实体模型原始元数据提供器。
+    /// 获取或设置实体模型原始元数据提供器。
     /// </summary>
     protected IEntityModelMetadataProvider EntityModelMetadataProvider { get; private set; }
 
     /// <summary>
-    /// SQL 对象名称格式化器。
+    /// 获取或设置SQL 对象名称格式化器。
     /// </summary>
     protected ISqlObjectNameFormatter ObjectNameFormatter { get; private set; }
 
     /// <summary>
-    /// 跨数据库查询校验器。
+    /// 获取或设置跨数据库查询校验器。
     /// </summary>
     protected ISqlCrossDatabaseQueryValidator CrossDatabaseQueryValidator { get; private set; }
 
     /// <summary>
-    /// SQL 表引用验证器。
+    /// 获取或设置SQL 表引用验证器。
     /// </summary>
     protected ISqlTableReferenceValidator TableReferenceValidator { get; private set; }
 
     /// <summary>
-    /// 数据库上下文访问器
+    /// 获取或设置数据库上下文访问器
     /// </summary>
     protected IDatabaseContextAccessor DatabaseContextAccessor { get; private set; }
 
     /// <summary>
-    /// Sql 参数工厂
+    /// 获取或设置Sql 参数工厂
     /// </summary>
     protected ISqlParameterFactory SqlParameterFactory { get; private set; }
 
     /// <summary>
-    /// Sql 元数据配置
+    /// 获取或设置Sql 元数据配置
     /// </summary>
     protected SqlMetadataOptions MetadataOptions { get; private set; }
 
     /// <summary>
-    /// Sql 配置
+    /// 获取或设置Sql 配置
     /// </summary>
     protected SqlOptions Options { get; private set; }
 
     /// <summary>
-    /// SQL 数据库上下文解析器
+    /// 获取或设置SQL 数据库上下文解析器
     /// </summary>
     protected ISqlDatabaseContextResolver DatabaseContextResolver { get; private set; }
 
     /// <summary>
-    /// Builder 生命周期内固定的执行上下文。
+    /// 获取或设置Builder 生命周期内固定的执行上下文。
     /// </summary>
     internal SqlBuilderExecutionContext ExecutionContext { get; private set; }
 
     /// <summary>
-    /// 实体解析器
+    /// 获取或设置实体解析器
     /// </summary>
     protected IEntityResolver EntityResolver { get; private set; }
 
     /// <summary>
-    /// 实体别名注册器
+    /// 获取或设置实体别名注册器
     /// </summary>
     protected IEntityAliasRegister AliasRegister { get; private set; }
 
@@ -249,9 +247,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     protected DatabaseType ExecutionProviderDatabaseType => ExecutionContext.DatabaseType ?? Provider.DatabaseType;
 
-    /// <summary>
-    /// 参数管理器
-    /// </summary>
+    /// <inheritdoc />
     public IParameterManager ParameterManager
     {
         get
@@ -265,39 +261,25 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         }
     }
 
-    /// <summary>
-    /// Sql方言
-    /// </summary>
+    /// <inheritdoc />
     public IDialect Dialect => Provider.Dialect;
 
-    /// <summary>
-    /// Select子句
-    /// </summary>
+    /// <inheritdoc />
     public ISelectClause SelectClause => _selectClause ??= CreateSelectClause();
 
-    /// <summary>
-    /// From子句
-    /// </summary>
+    /// <inheritdoc />
     public IFromClause FromClause => _fromClause ??= CreateFromClause();
 
-    /// <summary>
-    /// Join子句
-    /// </summary>
+    /// <inheritdoc />
     public IJoinClause JoinClause => _joinClause ??= CreateJoinClause();
 
-    /// <summary>
-    /// Where子句
-    /// </summary>
+    /// <inheritdoc />
     public IWhereClause WhereClause => _whereClause ??= CreateWhereClause();
 
-    /// <summary>
-    /// 分组子句
-    /// </summary>
+    /// <inheritdoc />
     public IGroupByClause GroupByClause => _groupByClause ??= CreateGroupByClause();
 
-    /// <summary>
-    /// 排序子句
-    /// </summary>
+    /// <inheritdoc />
     public IOrderByClause OrderByClause => _orderByClause ??= CreateOrderByClause();
 
     /// <inheritdoc />
@@ -385,13 +367,16 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         _mutationWhereClause ??= MutationClauseFactory.CreateWhere(MutationContext);
 
     /// <summary>
-    /// 是否显式允许无条件 Update/Delete。
+    /// 获取或设置是否显式允许无条件 Update/Delete。
     /// </summary>
     protected bool AllowAllRows { get; private set; }
 
     /// <summary>
-    /// 获取当前 Provider 提供的 Mutation 子句工厂；未提供时使用默认工厂。
+    /// 获取当前 Provider 提供的 Mutation 子句工厂。
     /// </summary>
+    /// <remarks>
+    /// 未提供时使用默认工厂。
+    /// </remarks>
     private ISqlMutationClauseFactory MutationClauseFactory => _mutationClauseFactory ??=
         (Provider as ISqlMutationClauseFactoryProvider)?.MutationClauseFactory ?? new DefaultSqlMutationClauseFactory();
 
@@ -420,52 +405,47 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         : new ReturningClause(MutationContext);
 
     /// <summary>
-    /// 参数字面值解析器
+    /// 获取参数字面值解析器
     /// </summary>
     protected IParamLiteralsResolver ParamLiteralsResolver => _paramLiteralsResolver ??= GetParamLiteralsResolver();
 
     /// <summary>
-    /// 跳过行数参数名
+    /// 获取或设置跳过行数参数名
     /// </summary>
     protected string OffsetParam { get; private set; }
 
     /// <summary>
-    /// 限制行数参数名
+    /// 获取或设置限制行数参数名
     /// </summary>
     protected string LimitParam { get; private set; }
 
-    /// <summary>
-    /// 分页
-    /// </summary>
+    /// <inheritdoc />
     public IPager Pager { get; private set; }
 
     /// <summary>
-    /// 是否分组
+    /// 获取是否分组
     /// </summary>
     public bool IsGroup => GroupByClause.IsGroup;
 
     /// <summary>
-    /// 是否限制行数
+    /// 获取是否限制行数
     /// </summary>
     protected bool IsLimit => string.IsNullOrWhiteSpace(LimitParam) == false;
 
-    /// <summary>
-    /// 是否包含联合操作
-    /// </summary>
+    /// <inheritdoc />
     public bool IsUnion => UnionItems.Count > 0;
 
-    /// <summary>
-    /// 联合操作项集合
-    /// </summary>
+    /// <inheritdoc />
     public List<BuilderItem> UnionItems { get; private set; }
 
-    /// <summary>
-    /// 公用表表达式CTE集合
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// 获取或设置公用表表达式CTE集合
+    /// </remarks>
     public List<BuilderItem> CteItems { get; private set; }
 
     /// <summary>
-    /// Builder 创建时冻结的查询语法能力。
+    /// 获取或设置Builder 创建时冻结的查询语法能力。
     /// </summary>
     private SqlQueryCapabilities QueryCapabilities { get; set; }
 
@@ -474,7 +454,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     #region 构造函数
 
     /// <summary>
-    /// 使用 SQL 提供程序和共享服务初始化 SQL Builder。
+    /// 初始化一个 <see cref="SqlBuilderBase"/> 类型的实例。
     /// </summary>
     /// <param name="provider">SQL 提供程序。</param>
     /// <param name="services">可共享服务。</param>
@@ -628,10 +608,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     #region Clone(克隆)
 
-    /// <summary>
-    /// 克隆
-    /// </summary>
-    /// <returns>当前 SQL Builder 的独立副本。</returns>
+    /// <inheritdoc />
     public virtual ISqlBuilder Clone()
     {
         var result = CreateBuilder(null);
@@ -764,12 +741,12 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     internal object GetExecutionScope() => Options;
 
     /// <summary>
-    /// 当前 Builder 引用的类型化子查询父上下文。
+    /// 获取当前 Builder 引用的类型化子查询父上下文。
     /// </summary>
     internal string ParentQueryContextId => _parentQueryContextId;
 
     /// <summary>
-    /// 记录类型化子查询的父上下文，重复引用时保留最外层父关系。
+    /// 渲染子查询。
     /// </summary>
     /// <param name="parentQueryContextId">父查询上下文标识。</param>
     internal void RegisterSubqueryParent(string parentQueryContextId)
@@ -779,7 +756,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 渲染子查询并合并独立参数上下文。
+    /// 渲染子查询。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
     /// <returns>参数名称已合并后的子查询 SQL。</returns>
@@ -789,7 +766,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 使用指定的候选参数和重命名映射渲染子查询。
+    /// 渲染子查询。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
     /// <param name="parameterManager">接收子查询参数的候选管理器。</param>
@@ -810,7 +787,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 合并独立子查询参数，并在名称冲突时保持重命名结果稳定。
+    /// 合并子查询参数。
     /// </summary>
     /// <param name="builder">子查询生成器。</param>
     /// <param name="sql">已经生成的子查询 SQL 或条件 SQL。</param>
@@ -821,7 +798,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 合并指定渲染快照中的子查询参数，并使用源 Builder 记录稳定的重命名结果。
+    /// 合并子查询参数。
     /// </summary>
     /// <param name="builder">原始子查询生成器，用于缓存参数重命名关系。</param>
     /// <param name="parameterSource">与 SQL 同一渲染快照的参数来源。</param>
@@ -1458,10 +1435,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     #region Clear(清空)
 
-    /// <summary>
-    /// 清空并初始化
-    /// </summary>
-    /// <returns>已清空并重新初始化的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder Clear()
     {
         var aliasRegister = new EntityAliasRegister();
@@ -1516,10 +1490,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return this;
     }
 
-    /// <summary>
-    /// 清空Select子句
-    /// </summary>
-    /// <returns>已清空 Select 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearSelect()
     {
         _selectClause = CreateSelectClause();
@@ -1545,10 +1516,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         _selectClause = selectClause;
     }
 
-    /// <summary>
-    /// 清空From子句
-    /// </summary>
-    /// <returns>已清空 From 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearFrom()
     {
         var fromClause = CreateFromClause();
@@ -1557,10 +1525,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return this;
     }
 
-    /// <summary>
-    /// 清空Join子句
-    /// </summary>
-    /// <returns>已清空 Join 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearJoin()
     {
         var joinClause = CreateJoinClause();
@@ -1569,10 +1534,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return this;
     }
 
-    /// <summary>
-    /// 清空Where子句
-    /// </summary>
-    /// <returns>已清空 Where 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearWhere()
     {
         var whereClause = CreateWhereClause();
@@ -1581,40 +1543,28 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return this;
     }
 
-    /// <summary>
-    /// 清空GroupBy子句
-    /// </summary>
-    /// <returns>已清空 GroupBy 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearGroupBy()
     {
         _groupByClause = CreateGroupByClause();
         return this;
     }
 
-    /// <summary>
-    /// 清空OrderBy子句
-    /// </summary>
-    /// <returns>已清空 OrderBy 子句的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearOrderBy()
     {
         _orderByClause = CreateOrderByClause();
         return this;
     }
 
-    /// <summary>
-    /// 清空Sql参数
-    /// </summary>
-    /// <returns>已清空 SQL 参数的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearSqlParams()
     {
         ParameterManager.Clear();
         return this;
     }
 
-    /// <summary>
-    /// 清空分页参数
-    /// </summary>
-    /// <returns>已清空分页参数的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearPageParams()
     {
         ClearParameters(OffsetParam, LimitParam);
@@ -1653,20 +1603,14 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         }
     }
 
-    /// <summary>
-    /// 清空联合操作项
-    /// </summary>
-    /// <returns>已清空联合操作项的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearUnionBuilders()
     {
         UnionItems = new List<BuilderItem>();
         return this;
     }
 
-    /// <summary>
-    /// 清空公用表表达式
-    /// </summary>
-    /// <returns>已清空公用表表达式的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder ClearCte()
     {
         CteItems = new List<BuilderItem>();
@@ -1677,10 +1621,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     #region New(创建Sql生成器)
 
-    /// <summary>
-    /// 创建Sql生成器
-    /// </summary>
-    /// <returns>使用当前 Provider 和执行上下文创建的独立 SQL Builder。</returns>
+    /// <inheritdoc />
     public virtual ISqlBuilder New()
     {
         var result = CreateBuilder(CreateEmptyParameterManager());
@@ -1710,10 +1651,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     #region ToSql(生成Sql)
 
-    /// <summary>
-    /// 生成Sql语句
-    /// </summary>
-    /// <returns>当前 Builder 生成的 SQL 文本。</returns>
+    /// <inheritdoc />
     public virtual string ToSql()
     {
         if (ShouldRenderFromSnapshot())
@@ -1917,7 +1855,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 验证当前查询使用的语法均已由冻结能力配置确认。
+    /// 验证查询语法能力。
     /// </summary>
     private void ValidateQueryCapabilities()
     {
@@ -1934,7 +1872,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 在结构化 Lambda Join 提交前验证 Provider 的 Join 能力。
+    /// 验证查询语法能力。
     /// </summary>
     /// <param name="joinType">待验证的 Join 类型。</param>
     internal void ValidateTypedJoinCapability(string joinType)
@@ -1946,7 +1884,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 验证集合操作语法能力。
+    /// 验证查询语法能力。
     /// </summary>
     /// <param name="operation">集合操作关键字。</param>
     private void ValidateQueryCapability(string operation)
@@ -1965,7 +1903,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     }
 
     /// <summary>
-    /// 验证单项查询语法能力。
+    /// 验证查询语法能力。
     /// </summary>
     /// <param name="capability">能力状态。</param>
     /// <param name="name">语法名称。</param>
@@ -2235,21 +2173,14 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     #region GetCondition(获取查询条件)
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>当前 Builder 的查询条件 SQL；没有条件时返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public virtual string GetCondition() => WhereClause.GetCondition();
 
     #endregion
 
     #region Pager(设置分页)
 
-    /// <summary>
-    /// 设置跳过行数
-    /// </summary>
-    /// <param name="count">跳过的行数</param>
-    /// <returns>已设置跳过行数的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder Skip(int count)
     {
         ValidateOperation(SqlOperationAction.Paging);
@@ -2285,11 +2216,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return parameter;
     }
 
-    /// <summary>
-    /// 设置获取行数
-    /// </summary>
-    /// <param name="count">获取的行数</param>
-    /// <returns>已设置获取行数的当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder Take(int count)
     {
         ValidateOperation(SqlOperationAction.Paging);
@@ -2321,11 +2248,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         return LimitParam;
     }
 
-    /// <summary>
-    /// 设置分页
-    /// </summary>
-    /// <param name="pager">分页参数</param>
-    /// <returns>已设置分页参数的当前 Builder；输入为空时返回当前 Builder。</returns>
+    /// <inheritdoc />
     public ISqlBuilder Page(IPager pager)
     {
         if (pager == null)
@@ -2748,12 +2671,12 @@ internal sealed class SqlBuilderRenderSnapshot
     }
 
     /// <summary>
-    /// 渲染后的 SQL。
+    /// 获取渲染后的 SQL。
     /// </summary>
     public string Sql { get; }
 
     /// <summary>
-    /// 与 SQL 对应的参数来源 Builder。
+    /// 获取与 SQL 对应的参数来源 Builder。
     /// </summary>
     public ISqlBuilder Builder { get; }
 }
@@ -2806,7 +2729,7 @@ internal enum SqlBuilderOperationState
 internal sealed class ReferenceComparer<T> : IEqualityComparer<T> where T : class
 {
     /// <summary>
-    /// 比较器实例。
+    /// 获取比较器实例。
     /// </summary>
     public static ReferenceComparer<T> Instance { get; } = new();
 

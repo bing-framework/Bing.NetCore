@@ -11,6 +11,7 @@ public class SqlAggregateDescriptorTest
     /// <summary>
     /// 测试 - 描述对象应保留函数、去重、参数类型和数据库名称，并支持不可变复制。
     /// </summary>
+    /// <param name="argumentKindValue">SQL 聚合参数类型的枚举数值。</param>
     [Theory]
     [InlineData((int)SqlAggregateArgumentKind.Column)]
     [InlineData((int)SqlAggregateArgumentKind.Expression)]

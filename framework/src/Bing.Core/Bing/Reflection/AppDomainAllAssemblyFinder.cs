@@ -17,21 +17,18 @@ public class AppDomainAllAssemblyFinder : FinderBase<Assembly>, IAllAssemblyFind
     private readonly bool _filterNetAssembly;
 
     /// <summary>
-    /// 跳过的程序集
+    /// 匹配后应从程序集发现结果中排除的程序集名称正则表达式。
     /// </summary>
     protected const string SkipAssemblies =
         "^System|^Mscorlib|^msvcr120|^Netstandard|^Microsoft|^Autofac|^AutoMapper|^EntityFramework|^Newtonsoft|^Castle|^NLog|^Pomelo|^AspectCore|^Xunit|^Nito|^Npgsql|^Exceptionless|^MySqlConnector|^Anonymously Hosted|^libuv|^api-ms|^clrcompression|^clretwrc|^clrjit|^coreclr|^dbgshim|^e_sqlite3|^hostfxr|^hostpolicy|^MessagePack|^mscordaccore|^mscordbi|^mscorrc|sni|sos|SOS.NETCore|^sos_amd64|^SQLitePCLRaw|^StackExchange|^Swashbuckle|WindowsBase|ucrtbase|^DotNetCore.CAP|^MongoDB|^Confluent.Kafka|^librdkafka|^EasyCaching|^RabbitMQ|^Consul|^Dapper|^EnyimMemcachedCore|^Pipelines|^DnsClient|^IdentityModel|^zlib|^testhost|^dotMemory|^NSubstitute|^Hangfire|^AspectCore|^CSRedisCore|^Remotion.Linq|^Window|^runtime.|^api-ms-win-core|^dotnet|^JetBrains";
 
     /// <summary>
-    /// 初始化一个<see cref="AppDomainAllAssemblyFinder"/>类型的实例
+    /// 初始化一个 <see cref="AppDomainAllAssemblyFinder"/> 类型的实例。
     /// </summary>
     /// <param name="filterNetAssembly">过滤Net程序集</param>
     public AppDomainAllAssemblyFinder(bool filterNetAssembly = true) => _filterNetAssembly = filterNetAssembly;
 
-    /// <summary>
-    /// 重写已实现所有项的查找
-    /// </summary>
-    /// <returns>当前应用程序域中符合筛选条件的程序集数组。</returns>
+    /// <inheritdoc />
     protected override Assembly[] FindAllItems()
     {
         return AssemblyManager.AllAssemblies;

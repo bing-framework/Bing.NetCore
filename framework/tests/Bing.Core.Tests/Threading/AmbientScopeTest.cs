@@ -89,6 +89,10 @@ public class AmbientScopeTest
 
     // ==================== AmbientDataContextAmbientScopeProvider ====================
 
+    /// <summary>
+    /// 创建基于 AsyncLocal 的字符串环境作用域提供程序。
+    /// </summary>
+    /// <returns>新的环境作用域提供程序。</returns>
     private static AmbientDataContextAmbientScopeProvider<string> CreateProvider()
     {
         var ctx = new AsyncLocalAmbientDataContext();

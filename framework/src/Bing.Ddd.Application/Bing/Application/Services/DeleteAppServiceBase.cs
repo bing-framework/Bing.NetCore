@@ -18,7 +18,7 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter> : Del
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 初始化一个<see cref="DeleteAppServiceBase{TEntity,TDto,TQueryParameter}"/>类型的实例
+    /// 初始化一个 <see cref="DeleteAppServiceBase{TEntity, TDto, TQueryParameter}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="store">存储器</param>
@@ -52,12 +52,12 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
     private readonly IStore<TEntity, TKey> _store;
 
     /// <summary>
-    /// 实体描述
+    /// 获取实体描述
     /// </summary>
     protected string EntityDescription { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="DeleteAppServiceBase{TEntity,TDto,TQueryParameter,TKey}"/>类型的实例
+    /// 初始化一个 <see cref="DeleteAppServiceBase{TEntity, TDto, TQueryParameter, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     /// <param name="store">存储器</param>
@@ -118,10 +118,7 @@ public abstract class DeleteAppServiceBase<TEntity, TDto, TQueryParameter, TKey>
 
     #endregion
 
-    /// <summary>
-    /// 删除
-    /// </summary>
-    /// <param name="ids">用逗号分隔的Id列表，范例："1,2"</param>
+    /// <inheritdoc />
     public virtual async Task DeleteAsync(string ids)
     {
         if (string.IsNullOrWhiteSpace(ids))

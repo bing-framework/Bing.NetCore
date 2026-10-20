@@ -58,7 +58,7 @@ public sealed class SqlQueryPlan
     private string _phase = "Data";
 
     /// <summary>
-    /// 使用 Fluent SQL Builder 创建查询计划。
+    /// 初始化一个 <see cref="SqlQueryPlan"/> 类型的实例。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
@@ -71,7 +71,7 @@ public sealed class SqlQueryPlan
     }
 
     /// <summary>
-    /// 使用原生 SQL 文本和参数源创建查询计划。
+    /// 初始化一个 <see cref="SqlQueryPlan"/> 类型的实例。
     /// </summary>
     /// <param name="commandText">要原样执行的 SQL 文本。</param>
     /// <param name="parameters">由参数绑定器处理的参数源。</param>
@@ -89,18 +89,27 @@ public sealed class SqlQueryPlan
     }
 
     /// <summary>
-    /// 当前计划使用的 Fluent SQL Builder；原生文本计划为 null。
+    /// 获取当前计划使用的 Fluent SQL Builder。
     /// </summary>
+    /// <remarks>
+    /// 原生文本计划为 null。
+    /// </remarks>
     internal ISqlBuilder Builder { get; }
 
     /// <summary>
-    /// 当前计划使用的原生 SQL 文本；Fluent 计划为 null。
+    /// 获取当前计划使用的原生 SQL 文本。
     /// </summary>
+    /// <remarks>
+    /// Fluent 计划为 null。
+    /// </remarks>
     public string CommandText { get; }
 
     /// <summary>
-    /// 当前原生 SQL 文本计划的参数源；Fluent 计划为 null。
+    /// 获取当前原生 SQL 文本计划的参数源。
     /// </summary>
+    /// <remarks>
+    /// Fluent 计划为 null。
+    /// </remarks>
     public object Parameters { get; }
 
     /// <summary>
@@ -114,7 +123,7 @@ public sealed class SqlQueryPlan
     public CommandType CommandType { get; }
 
     /// <summary>
-    /// 指示当前计划是否使用 Fluent SQL Builder。
+    /// 获取指示当前计划是否使用 Fluent SQL Builder。
     /// </summary>
     public bool IsBuilderPlan => Builder != null;
 
@@ -216,7 +225,7 @@ public sealed class SqlQueryPlan
         _outputParametersReceiver?.Invoke(outputParameters);
 
     /// <summary>
-    /// 通知当前计划已成功完成数据库执行。
+    /// 通知查询计划执行已完成。
     /// </summary>
     /// <remarks>
     /// 过程输出参数必须在事务提交和成功诊断之前复制，避免快照失败被误判为成功执行。
@@ -224,14 +233,14 @@ public sealed class SqlQueryPlan
     public void NotifyExecutionCompleted() => _outputParametersCompletion?.Invoke();
 
     /// <summary>
-    /// 创建 Fluent SQL Builder 查询计划。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <returns>仅包含该 Builder 的查询计划。</returns>
     public static SqlQueryPlan Create(ISqlBuilder builder) => new(builder, "Id");
 
     /// <summary>
-    /// 创建 Fluent SQL Builder 查询计划。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
@@ -239,7 +248,7 @@ public sealed class SqlQueryPlan
     public static SqlQueryPlan Create(ISqlBuilder builder, string splitOn) => new(builder, splitOn);
 
     /// <summary>
-    /// 创建原生 SQL 文本查询计划。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="commandText">要原样执行的 SQL 文本。</param>
     /// <param name="parameters">由参数绑定器处理的参数源。</param>
@@ -248,7 +257,7 @@ public sealed class SqlQueryPlan
         new(commandText, parameters, "Id", System.Data.CommandType.Text);
 
     /// <summary>
-    /// 创建原生 SQL 文本查询计划。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="commandText">要原样执行的 SQL 文本。</param>
     /// <param name="parameters">由参数绑定器处理的参数源。</param>
@@ -258,7 +267,7 @@ public sealed class SqlQueryPlan
         new(commandText, parameters, splitOn, System.Data.CommandType.Text);
 
     /// <summary>
-    /// 创建原生 SQL 文本查询计划。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="commandText">要原样执行的 SQL 文本。</param>
     /// <param name="parameters">由参数绑定器处理的参数源。</param>
@@ -269,7 +278,7 @@ public sealed class SqlQueryPlan
         new(commandText, parameters, splitOn, commandType);
 
     /// <summary>
-    /// 创建原生 SQL 查询参数快照。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="parameters">调用方提供的参数源。</param>
     /// <returns>常见可变参数容器的独立副本；不具备通用克隆语义的对象保持原引用。</returns>
@@ -289,7 +298,7 @@ public sealed class SqlQueryPlan
 }
 
 /// <summary>
-/// SQL 描述的参数快照帮助器。
+/// 创建 SQL 查询参数快照。
 /// </summary>
 /// <remarks>
 /// 仅复制具有确定容器语义的字典、数组和集合；实体、动态参数和映射对象保留原引用，
@@ -298,7 +307,7 @@ public sealed class SqlQueryPlan
 internal static class SqlParameterSnapshot
 {
     /// <summary>
-    /// 创建参数源快照。
+    /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="parameters">原始参数源。</param>
     /// <returns>可安全用于后续执行的参数源。</returns>
@@ -348,7 +357,7 @@ internal static class SqlParameterSnapshot
     }
 
     /// <summary>
-    /// 复制增强参数及其可变值。
+    /// 复制 SQL 参数。
     /// </summary>
     /// <param name="parameter">原始增强参数。</param>
     /// <returns>执行专属增强参数。</returns>
@@ -356,7 +365,7 @@ internal static class SqlParameterSnapshot
         => CloneSqlParameter(parameter, parameter?.Name);
 
     /// <summary>
-    /// 创建增强 SQL 参数副本并替换参数名称。
+    /// 复制 SQL 参数。
     /// </summary>
     /// <param name="parameter">源参数。</param>
     /// <param name="name">目标参数名。</param>

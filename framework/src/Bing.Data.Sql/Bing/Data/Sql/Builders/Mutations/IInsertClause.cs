@@ -9,7 +9,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 public interface IInsertClause : ISqlClause, ISqlMutationClauseCloneable<IInsertClause>, ISqlValidatable
 {
     /// <summary>
-    /// 当前插入目标表。
+    /// 获取当前插入目标表。
     /// </summary>
     SqlTableReference Table { get; }
 

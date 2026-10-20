@@ -5,12 +5,11 @@ using Bing.Data.Sql.Metadata;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Join子句扩展
-/// </summary>
+/// 添加内连接表源。
 public static partial class Extensions
 {
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -19,7 +18,7 @@ public static partial class Extensions
     public static T Join<T>(this T source, string table) where T : IJoin => Join(source, table, null);
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -35,7 +34,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化内连接表引用。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -52,7 +51,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化左连接表引用。
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -70,9 +69,10 @@ public static partial class Extensions
 
     /// <summary>
     /// 追加原始内连接表表达式。
-    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。
-    /// 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
     /// </summary>
+    /// <remarks>
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
+    /// </remarks>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
@@ -88,7 +88,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件追加原始内连接 SQL。
+    /// 追加原始内连接表表达式。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -99,7 +99,7 @@ public static partial class Extensions
         condition ? AppendJoin(source, sql) : source;
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -115,7 +115,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 内连接
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -131,7 +131,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述添加内连接子查询。
+    /// 添加内连接表源。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -142,7 +142,7 @@ public static partial class Extensions
         Join(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -151,7 +151,7 @@ public static partial class Extensions
     public static T LeftJoin<T>(this T source, string table) where T : IJoin => LeftJoin(source, table, null);
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -168,9 +168,10 @@ public static partial class Extensions
 
     /// <summary>
     /// 追加原始左连接表表达式。
-    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。
-    /// 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
     /// </summary>
+    /// <remarks>
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
+    /// </remarks>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
@@ -186,7 +187,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件追加原始左连接 SQL。
+    /// 追加原始左连接表表达式。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -197,7 +198,7 @@ public static partial class Extensions
         condition ? AppendLeftJoin(source, sql) : source;
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -213,7 +214,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 左外连接
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -229,7 +230,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述添加左连接子查询。
+    /// 添加左外连接表源。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -240,7 +241,7 @@ public static partial class Extensions
         LeftJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -249,7 +250,7 @@ public static partial class Extensions
     public static T RightJoin<T>(this T source, string table) where T : IJoin => RightJoin(source, table, null);
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -265,7 +266,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化右连接表引用。
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -283,9 +284,10 @@ public static partial class Extensions
 
     /// <summary>
     /// 追加原始右连接表表达式。
-    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。
-    /// 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
     /// </summary>
+    /// <remarks>
+    /// 原始文本不会经过标识符解析、Schema 解析、方言格式化或别名注册；可通过 <c>AppendOn</c> 向最后一个连接继续添加条件。 调用方负责 SQL 安全性及通过 <c>AddParam</c> 显式提供占位符参数。
+    /// </remarks>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
     /// <param name="sql">原始连接文本；空白文本将被忽略。</param>
@@ -301,7 +303,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 按条件追加原始右连接 SQL。
+    /// 追加原始右连接表表达式。
     /// </summary>
     /// <typeparam name="T">源类型。</typeparam>
     /// <param name="source">源。</param>
@@ -312,7 +314,7 @@ public static partial class Extensions
         condition ? AppendRightJoin(source, sql) : source;
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -328,7 +330,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 右外连接
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
@@ -344,7 +346,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 使用 Fluent 查询描述添加右连接子查询。
+    /// 添加右外连接表源。
     /// </summary>
     /// <typeparam name="T">支持 Join 子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -355,7 +357,7 @@ public static partial class Extensions
         RightJoin(source, GetQueryBuilder(query, nameof(query)), alias);
 
     /// <summary>
-    /// 添加全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -364,7 +366,7 @@ public static partial class Extensions
     public static T FullJoin<T>(this T source, string table) where T : IJoin => FullJoin(source, table, null);
 
     /// <summary>
-    /// 添加全外连接表。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -380,7 +382,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化全外连接表引用。
+    /// 添加全外连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -412,7 +414,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加交叉连接表。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -421,7 +423,7 @@ public static partial class Extensions
     public static T CrossJoin<T>(this T source, string table) where T : IJoin => CrossJoin(source, table, null);
 
     /// <summary>
-    /// 添加交叉连接表。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -437,7 +439,7 @@ public static partial class Extensions
     }
 
     /// <summary>
-    /// 添加结构化交叉连接表引用。
+    /// 添加交叉连接表源。
     /// </summary>
     /// <typeparam name="T">支持连接子句的源类型。</typeparam>
     /// <param name="source">当前查询源。</param>
@@ -503,8 +505,10 @@ public static partial class Extensions
 
     /// <summary>
     /// 向最后一个连接添加 On 原始条件。
-    /// 空白条件会被忽略；没有连接时非空条件会抛出 <see cref="InvalidOperationException"/>，且不会保存并应用到后续连接。
     /// </summary>
+    /// <remarks>
+    /// 空白条件会被忽略；没有连接时非空条件会抛出 <see cref="InvalidOperationException"/>，且不会保存并应用到后续连接。
+    /// </remarks>
     /// <typeparam name="T">源类型</typeparam>
     /// <param name="source">源</param>
     /// <param name="sql">On 条件文本；方括号标识符会按当前方言解析。</param>

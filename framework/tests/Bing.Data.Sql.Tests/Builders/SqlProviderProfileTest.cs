@@ -17,8 +17,9 @@ namespace Bing.Data.Sql.Tests.Builders;
 public sealed class SqlProviderProfileTest
 {
     /// <summary>
-    /// 测试目的：统一 Profile 应按 Query、Mutation、Execution、Transaction、Procedure 和 Limits 责任域公开不可变能力。
+    /// 验证统一 Provider Profile 保留全部能力域。
     /// </summary>
+    /// <remarks>能力域包括 Query、Mutation、Execution、Transaction、Procedure 和 Limits。</remarks>
     [Fact]
     public void Profile_WhenConfigured_ShouldPreserveAllCapabilityDomains()
     {
@@ -172,6 +173,7 @@ public sealed class SqlProviderProfileTest
     /// <summary>
     /// 测试目的：能力拒绝异常应同时保留既有消息和可编程读取的结构化原因。
     /// </summary>
+    /// <param name="reason">要保留在能力异常中的失败原因。</param>
     [Theory]
     [InlineData(SqlCapabilityFailureReason.DatabaseUnsupported)]
     [InlineData(SqlCapabilityFailureReason.ProviderImplementationGap)]
@@ -286,12 +288,12 @@ public sealed class SqlProviderProfileTest
     private sealed class ProfileSqlBuilder : SqlBuilderBase
     {
         /// <summary>
-        /// 初始化测试 Builder。
+        /// 初始化一个 <see cref="ProfileSqlBuilder"/> 类型的实例。
         /// </summary>
         public ProfileSqlBuilder() : this(null) { }
 
         /// <summary>
-        /// 初始化携带指定参数管理器的测试 Builder。
+        /// 初始化一个 <see cref="ProfileSqlBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="parameterManager">当前 Builder 使用的参数管理器。</param>
         private ProfileSqlBuilder(IParameterManager parameterManager)
@@ -310,7 +312,7 @@ public sealed class SqlProviderProfileTest
     private sealed class ProfileSqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 可共享的测试 Provider 单例。
+        /// 获取可共享的测试 Provider 单例。
         /// </summary>
         public static ProfileSqlProvider Instance { get; } = new();
 
@@ -370,7 +372,7 @@ public sealed class SqlProviderProfileTest
     private sealed class NoProfileSqlProvider : ISqlProvider
     {
         /// <summary>
-        /// 未声明 Profile 的测试 Provider 单例。
+        /// 获取未声明 Profile 的测试 Provider 单例。
         /// </summary>
         public static NoProfileSqlProvider Instance { get; } = new();
 
@@ -441,7 +443,7 @@ public sealed class SqlProviderProfileTest
     private sealed class IncompleteProfileSqlBuilder : SqlBuilderBase
     {
         /// <summary>
-        /// 初始化测试 Builder。
+        /// 初始化一个 <see cref="IncompleteProfileSqlBuilder"/> 类型的实例。
         /// </summary>
         public IncompleteProfileSqlBuilder() : base(new IncompleteProfileSqlProvider(), new SqlBuilderServices())
         {

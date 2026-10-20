@@ -16,7 +16,7 @@ public class OrCondition : ICondition
     private readonly string _right;
 
     /// <summary>
-    /// 初始化一个<see cref="OrCondition"/>类型的实例
+    /// 初始化一个 <see cref="OrCondition"/> 类型的实例。
     /// </summary>
     /// <param name="left">左操作数</param>
     /// <param name="right">右操作数</param>
@@ -27,7 +27,7 @@ public class OrCondition : ICondition
     }
 
     /// <summary>
-    /// 初始化一个<see cref="OrCondition"/>类型的实例
+    /// 初始化一个 <see cref="OrCondition"/> 类型的实例。
     /// </summary>
     /// <param name="left">左操作数</param>
     /// <param name="right">右操作数</param>
@@ -37,10 +37,7 @@ public class OrCondition : ICondition
         _right = right?.GetCondition();
     }
 
-    /// <summary>
-    /// 获取查询条件
-    /// </summary>
-    /// <returns>返回由非空左右条件使用 <c>Or</c> 连接形成的 SQL 条件；一侧为空时返回另一侧。</returns>
+    /// <inheritdoc />
     public string GetCondition()
     {
         if (string.IsNullOrWhiteSpace(_left))

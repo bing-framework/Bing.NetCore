@@ -1,12 +1,12 @@
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
-/// 根据完整 Join 拓扑为来源级过滤谓词选择不会改变外连接保留语义的位置。
+/// 规划过滤谓词放置位置。
 /// </summary>
 internal static class SqlFilterPlacementPlanner
 {
     /// <summary>
-    /// 规划全部过滤谓词的最终放置位置。
+    /// 规划过滤谓词放置位置。
     /// </summary>
     /// <param name="context">收集来源、拓扑和谓词贡献的过滤器上下文。</param>
     /// <returns>按谓词提交顺序排列的放置决定。</returns>
@@ -19,7 +19,7 @@ internal static class SqlFilterPlacementPlanner
     }
 
     /// <summary>
-    /// 为一个来源级谓词选择最终放置位置。
+    /// 规划过滤谓词放置位置。
     /// </summary>
     /// <param name="joins">按 SQL 顺序排列的 Join 拓扑。</param>
     /// <param name="predicate">待放置谓词。</param>

@@ -10,14 +10,14 @@ public interface IOrderByClause : ISqlClause, ISqlClauseCloneable<IOrderByClause
 {
 
     /// <summary>
-    /// 添加原始排序列表。
+    /// 添加排序条件。
     /// </summary>
     /// <param name="order">排序列表。</param>
     /// <param name="tableAlias">可选表别名。</param>
     void OrderBy(string order, string tableAlias = null);
 
     /// <summary>
-    /// 添加实体列排序。
+    /// 添加排序条件。
     /// </summary>
     /// <typeparam name="TEntity">排序实体类型。</typeparam>
     /// <param name="column">排序列表达式。</param>

@@ -10,17 +10,17 @@ namespace Bing.AspNetCore.Uploads;
 public interface IFileUploadService
 {
     /// <summary>
-    /// 上传文件。单文件
+    /// 异步上传文件。
     /// </summary>
-    /// <param name="param">参数</param>
+    /// <param name="param">单文件上传参数。</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>表示异步操作的任务，结果为已保存文件的描述信息。</returns>
     Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
-    /// 上传文件。多文件
+    /// 异步上传文件。
     /// </summary>
-    /// <param name="param">参数</param>
+    /// <param name="param">多文件上传参数。</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>表示异步操作的任务，结果为已保存文件描述信息的集合。</returns>
     Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken));

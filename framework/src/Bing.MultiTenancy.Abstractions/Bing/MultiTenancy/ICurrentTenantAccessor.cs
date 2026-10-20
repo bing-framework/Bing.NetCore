@@ -6,7 +6,7 @@
 public interface ICurrentTenantAccessor
 {
     /// <summary>
-    /// 当前基本租户信息
+    /// 获取或设置当前基本租户信息
     /// </summary>
     BasicTenantInfo? Current { get; set; }
 }

@@ -222,10 +222,13 @@ public class QueryCapabilityValidationTest
     /// </summary>
     private sealed class CapabilitySqlBuilder : SqlBuilderBase
     {
+        /// <summary>
+        /// 当前测试 Builder 使用的 Provider 查询能力。
+        /// </summary>
         private readonly SqlQueryCapabilities _providerCapabilities;
 
         /// <summary>
-        /// 初始化测试 Builder。
+        /// 初始化一个 <see cref="CapabilitySqlBuilder"/> 类型的实例。
         /// </summary>
         /// <param name="providerCapabilities">Provider 能力基线。</param>
         /// <param name="options">SQL 选项。</param>
@@ -249,7 +252,7 @@ public class QueryCapabilityValidationTest
     private sealed class CapabilitySqlProvider : ISqlProvider, ISqlProviderProfileProvider
     {
         /// <summary>
-        /// 初始化测试 Provider。
+        /// 初始化一个 <see cref="CapabilitySqlProvider"/> 类型的实例。
         /// </summary>
         /// <param name="queryCapabilities">查询能力基线。</param>
         public CapabilitySqlProvider(SqlQueryCapabilities queryCapabilities) => Profile = new SqlProviderProfile

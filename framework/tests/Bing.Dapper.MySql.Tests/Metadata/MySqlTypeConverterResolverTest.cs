@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// MySql 类型转换器解析器测试
+/// MySql 类型转换器解析器测试。
 /// </summary>
 public class MySqlTypeConverterResolverTest
 {
@@ -34,10 +34,11 @@ public class MySqlTypeConverterResolverTest
     }
 
     /// <summary>
-    /// 测试数据库
+    /// 测试数据库。
     /// </summary>
     private sealed class TestDatabase : IDatabase
     {
+        /// <inheritdoc />
         public IDbConnection GetConnection() => null;
     }
 }

@@ -34,12 +34,12 @@ public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttp
     public int HttpStatusCode { get; set; }
 
     /// <summary>
-    /// 远程服务错误信息
+    /// 获取或设置远程服务错误信息
     /// </summary>
     public RemoteServiceErrorInfo Error { get; set; }
 
     /// <summary>
-    /// 初始化一个<see cref="BingRemoteCallException"/>类型的实例
+    /// 初始化一个 <see cref="BingRemoteCallException"/> 类型的实例。
     /// </summary>
     /// <param name="message">错误消息</param>
     /// <param name="innerException">内部异常</param>
@@ -49,7 +49,7 @@ public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttp
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingRemoteCallException"/>类型的实例
+    /// 初始化一个 <see cref="BingRemoteCallException"/> 类型的实例。
     /// </summary>
     /// <param name="serializationInfo">序列化信息</param>
     /// <param name="context">流上下文</param>
@@ -59,7 +59,7 @@ public class BingRemoteCallException : BingException, IHasErrorDetails, IHasHttp
     }
 
     /// <summary>
-    /// 初始化一个<see cref="BingRemoteCallException"/>类型的实例
+    /// 初始化一个 <see cref="BingRemoteCallException"/> 类型的实例。
     /// </summary>
     /// <param name="error">远程服务错误信息</param>
     /// <param name="innerException">内部异常</param>

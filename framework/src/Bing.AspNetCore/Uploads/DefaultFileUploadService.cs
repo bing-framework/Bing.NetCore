@@ -11,12 +11,7 @@ namespace Bing.AspNetCore.Uploads;
 /// </summary>
 internal class DefaultFileUploadService : IFileUploadService
 {
-    /// <summary>
-    /// 上传文件。单文件
-    /// </summary>
-    /// <param name="param">参数</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为已保存文件的描述信息。</returns>
+    /// <inheritdoc />
     public async Task<FileDescriptor> UploadAsync(SingleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (param.FormFile == null || param.FormFile.Length < 1)
@@ -65,12 +60,7 @@ internal class DefaultFileUploadService : IFileUploadService
         return fileInfo;
     }
 
-    /// <summary>
-    /// 上传文件。多文件
-    /// </summary>
-    /// <param name="param">参数</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为已保存文件描述信息的集合。</returns>
+    /// <inheritdoc />
     public async Task<IEnumerable<FileDescriptor>> UploadAsync(MultipleFileUploadParam param, CancellationToken cancellationToken = default(CancellationToken))
     {
         if (param.FormFiles == null || !param.FormFiles.Any())
@@ -95,12 +85,7 @@ internal class DefaultFileUploadService : IFileUploadService
         return await Task.WhenAll(tasks);
     }
 
-    /// <summary>
-    /// 保存文件
-    /// </summary>
-    /// <param name="formFile">表单文件</param>
-    /// <param name="savePath">保存路径</param>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <inheritdoc />
     public async Task SaveAsync(IFormFile formFile, string savePath, CancellationToken cancellationToken = default(CancellationToken))
     {
         using (var stream = new FileStream(savePath, FileMode.Create))
@@ -109,13 +94,7 @@ internal class DefaultFileUploadService : IFileUploadService
         }
     }
 
-    /// <summary>
-    /// 保存文件并返回文件MD5值
-    /// </summary>
-    /// <param name="formFile">表单文件</param>
-    /// <param name="savePath">保存路径</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>表示异步操作的任务，结果为已保存文件的 MD5 哈希值。</returns>
+    /// <inheritdoc />
     public async Task<string> SaveWithMd5Async(IFormFile formFile, string savePath,
         CancellationToken cancellationToken = default(CancellationToken))
     {

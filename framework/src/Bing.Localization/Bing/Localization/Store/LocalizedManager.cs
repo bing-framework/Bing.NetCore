@@ -14,7 +14,7 @@ public class LocalizedManager : ILocalizedManager
     private readonly ILocalizedStore _store;
 
     /// <summary>
-    /// 缓存
+    /// 按区域、资源类型和资源名称缓存本地化字符串的内存缓存。
     /// </summary>
     private readonly IMemoryCache _cache;
 
@@ -24,7 +24,7 @@ public class LocalizedManager : ILocalizedManager
     private readonly LocalizationOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="LocalizedManager"/>类型的实例
+    /// 初始化一个 <see cref="LocalizedManager"/> 类型的实例。
     /// </summary>
     /// <param name="store">本地化资源存储器</param>
     /// <param name="cache">缓存</param>
@@ -36,9 +36,7 @@ public class LocalizedManager : ILocalizedManager
         _options = options.Value ?? new LocalizationOptions();
     }
 
-    /// <summary>
-    /// 加载全部本地化资源
-    /// </summary>
+    /// <inheritdoc />
     public virtual void LoadAllResources()
     {
         var cultures = GetCultures();
@@ -59,10 +57,7 @@ public class LocalizedManager : ILocalizedManager
         return result.Distinct().ToList();
     }
 
-    /// <summary>
-    /// 加载全部本地化资源
-    /// </summary>
-    /// <param name="culture">区域文化。范例：zh-CN</param>
+    /// <inheritdoc />
     public void LoadAllResources(string culture)
     {
         if (string.IsNullOrWhiteSpace(culture))
@@ -77,11 +72,7 @@ public class LocalizedManager : ILocalizedManager
             LoadAllResources(culture, type);
     }
 
-    /// <summary>
-    /// 加载全部本地化资源
-    /// </summary>
-    /// <param name="culture">区域文化。范例：zh-CN</param>
-    /// <param name="type">资源类型</param>
+    /// <inheritdoc />
     public virtual void LoadAllResources(string culture, string type)
     {
         if (string.IsNullOrWhiteSpace(culture))
@@ -107,10 +98,7 @@ public class LocalizedManager : ILocalizedManager
         _cache.Set(cacheKey, localizedString, TimeSpan.FromSeconds(CacheHelper.GetExpiration(_options)));
     }
 
-    /// <summary>
-    /// 加载指定类型的本地化资源
-    /// </summary>
-    /// <param name="type">资源类型</param>
+    /// <inheritdoc />
     public void LoadResourcesByType(string type)
     {
         var cultures = GetCultures();

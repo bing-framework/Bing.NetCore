@@ -6,7 +6,7 @@
 public interface IHasErrorDetails
 {
     /// <summary>
-    /// 错误详情
+    /// 获取错误详情
     /// </summary>
     string Details { get; }
 }

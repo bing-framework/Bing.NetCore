@@ -5,11 +5,7 @@
 /// </summary>
 public class AspectExceptionPrompt : IExceptionPrompt
 {
-    /// <summary>
-    /// 获取异常提示
-    /// </summary>
-    /// <param name="exception">异常</param>
-    /// <returns>异常提示文本；不适用或异常为空时返回空值或空字符串。</returns>
+    /// <inheritdoc />
     public string GetPrompt(Exception exception)
     {
         if (exception == null)
@@ -23,11 +19,7 @@ public class AspectExceptionPrompt : IExceptionPrompt
         return string.Empty;
     }
 
-    /// <summary>
-    /// 获取原始异常
-    /// </summary>
-    /// <param name="exception">异常</param>
-    /// <returns>解除 AOP 包装后的原始异常。</returns>
+    /// <inheritdoc />
     public Exception GetRawException(Exception exception)
     {
         if (exception is AspectCore.DynamicProxy.AspectInvocationException aspectInvocationException)

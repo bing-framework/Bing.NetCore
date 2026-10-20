@@ -8,7 +8,7 @@ namespace Bing.DependencyInjection;
 public class TransientCachedServiceProvider : CachedServiceProviderBase, ITransientCachedServiceProvider, ITransientDependency
 {
     /// <summary>
-    /// 使用服务提供程序初始化 <see cref="TransientCachedServiceProvider"/> 的实例。
+    /// 初始化一个 <see cref="TransientCachedServiceProvider"/> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">用于解析并缓存服务的服务提供程序。</param>
     public TransientCachedServiceProvider(IServiceProvider serviceProvider) 

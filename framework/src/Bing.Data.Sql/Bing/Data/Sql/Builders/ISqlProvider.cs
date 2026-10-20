@@ -13,7 +13,7 @@ namespace Bing.Data.Sql.Builders;
 public interface ISqlProvider
 {
     /// <summary>
-    /// Provider 唯一标识。
+    /// 获取Provider 唯一标识。
     /// </summary>
     /// <remarks>
     /// 标识在注册时忽略大小写并移除首尾空白；<see cref="DatabaseType"/> 仅用于官方 Provider 的兼容查找与路由。
@@ -21,37 +21,37 @@ public interface ISqlProvider
     string Key { get; }
 
     /// <summary>
-    /// 数据库类型。
+    /// 获取数据库类型。
     /// </summary>
     DatabaseType DatabaseType { get; }
 
     /// <summary>
-    /// SQL 方言。
+    /// 获取SQL 方言。
     /// </summary>
     IDialect Dialect { get; }
 
     /// <summary>
-    /// SQL 子句工厂。
+    /// 获取SQL 子句工厂。
     /// </summary>
     ISqlClauseFactory ClauseFactory { get; }
 
     /// <summary>
-    /// 表引用解析器。
+    /// 获取表引用解析器。
     /// </summary>
     ISqlTableReferenceParser TableReferenceParser { get; }
 
     /// <summary>
-    /// 分页 SQL 渲染器。
+    /// 获取分页 SQL 渲染器。
     /// </summary>
     ISqlPaginationRenderer PaginationRenderer { get; }
 
     /// <summary>
-    /// 参数管理器工厂。
+    /// 获取参数管理器工厂。
     /// </summary>
     IParameterManagerFactory ParameterManagerFactory { get; }
 
     /// <summary>
-    /// 参数字面值解析器。
+    /// 获取参数字面值解析器。
     /// </summary>
     IParamLiteralsResolver ParamLiteralsResolver { get; }
 }

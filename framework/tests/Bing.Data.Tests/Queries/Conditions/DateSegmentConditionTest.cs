@@ -29,7 +29,7 @@ public class DateSegmentConditionTest
     private readonly DateTime? _max;
 
     /// <summary>
-    /// 初始化一个<see cref="DateSegmentConditionTest"/>类型的实例
+    /// 初始化一个 <see cref="DateSegmentConditionTest"/> 类型的实例。
     /// </summary>
     public DateSegmentConditionTest(ITestOutputHelper output)
     {

@@ -31,11 +31,34 @@ public class SqlMetadataBenchmarks
     /// </summary>
     private DefaultEntityMappingResolver _lruMappingResolver;
 
+    /// <summary>
+    /// 基础映射解析基准使用的解析器。
+    /// </summary>
     private DefaultEntityMappingResolver _mappingResolver;
+
+    /// <summary>
+    /// 版本化映射快照基准使用的解析器。
+    /// </summary>
     private VersionedEntityMappingResolver _versionedMappingResolver;
+
+    /// <summary>
+    /// 当前参数规模下的实体映射配置。
+    /// </summary>
     private EntityMappingOptions[] _mappingConfigurations;
+
+    /// <summary>
+    /// 物理对象名称格式化器。
+    /// </summary>
     private readonly DefaultSqlObjectNameFormatter _formatter = new();
+
+    /// <summary>
+    /// 元数据基准使用的 SQL 方言。
+    /// </summary>
     private readonly BenchmarkDialect _dialect = new();
+
+    /// <summary>
+    /// 元数据解析基准使用的数据库上下文。
+    /// </summary>
     private readonly DatabaseContext _databaseContext = new()
     {
         DbKey = "benchmark",
@@ -68,7 +91,15 @@ public class SqlMetadataBenchmarks
         MappingProfile = "evicting",
         DataSource = new SqlDataSourceDescriptor { DatabaseType = DatabaseType.SqlServer }
     };
+
+    /// <summary>
+    /// 指示当前迭代是否使用触发 LRU 淘汰的上下文。
+    /// </summary>
     private bool _useLruEvictingContext;
+
+    /// <summary>
+    /// SQL Server 格式化基准使用的表引用。
+    /// </summary>
     private readonly SqlTableReference _reference = new()
     {
         Database = "benchmark",
@@ -76,16 +107,24 @@ public class SqlMetadataBenchmarks
         TableName = "orders",
         Alias = "o"
     };
+
+    /// <summary>
+    /// MySQL 格式化基准使用的表引用。
+    /// </summary>
     private readonly SqlTableReference _mySqlReference = new()
     {
         Schema = "benchmark",
         TableName = "orders",
         Alias = "o"
     };
+
+    /// <summary>
+    /// 元数据基准使用的 SQL Builder。
+    /// </summary>
     private BenchmarkBuilder _builder;
 
     /// <summary>
-    /// 映射配置规模。
+    /// 获取或设置映射配置规模。
     /// </summary>
     [Params(1, 10, 100)]
     public int MappingConfigurationCount { get; set; }
@@ -202,12 +241,17 @@ public class SqlMetadataBenchmarks
         return _lruMappingResolver.Resolve(typeof(BenchmarkEntity), context);
     }
 
-    /// <summary>测量完整映射配置快照的发布成本。</summary>
+    /// <summary>
+    /// 测量完整映射配置快照的发布成本。
+    /// </summary>
+    /// <returns>新发布的映射版本号。</returns>
     [Benchmark]
     public long PublishMappingSnapshot() =>
         _versionedMappingResolver.PublishMappings(_mappingConfigurations);
 
-    /// <summary>测量多个独立路由并发首次解析的总成本。</summary>
+    /// <summary>
+    /// 测量多个独立路由并发首次解析的总成本。
+    /// </summary>
     [Benchmark]
     public void ResolveDistinctMappingsConcurrently()
     {
@@ -272,47 +316,93 @@ public class SqlMetadataBenchmarks
     [Benchmark]
     public ISqlBuilder CloneBuilder() => _builder.Clone();
 
+    /// <summary>
+    /// 映射元数据基准使用的实体模型。
+    /// </summary>
     private sealed class BenchmarkEntity
     {
+        /// <summary>
+        /// 获取或设置实体标识。
+        /// </summary>
         public int Id { get; set; }
     }
 
+    /// <summary>
+    /// 为元数据基准构造 SQL 的测试 Builder。
+    /// </summary>
     private sealed class BenchmarkBuilder : SqlBuilderBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="BenchmarkBuilder"/> 类型的实例。
+        /// </summary>
+        /// <param name="parameterManager">用于管理 SQL 参数的实例。</param>
         public BenchmarkBuilder(IParameterManager parameterManager = null)
             : base(BenchmarkSqlProvider.Instance, SqlBuilderServices.CreateDefault(), parameterManager)
         {
         }
 
+        /// <inheritdoc />
         protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
             new BenchmarkBuilder(parameterManager);
     }
 
+    /// <summary>
+    /// 为元数据基准配置 SQL Server 风格的 Provider。
+    /// </summary>
     private sealed class BenchmarkSqlProvider : ISqlProvider
     {
+        /// <summary>
+        /// 获取共享的基准 Provider 实例。
+        /// </summary>
         public static BenchmarkSqlProvider Instance { get; } = new();
+
+        /// <inheritdoc />
         public string Key => "benchmark.sqlserver";
+
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
+
+        /// <inheritdoc />
         public IDialect Dialect { get; } = new BenchmarkDialect();
+
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory { get; } = new DefaultSqlClauseFactory();
+
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => DefaultSqlTableReferenceParser.Instance;
+
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer { get; } = new BenchmarkPaginationRenderer();
+
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => DefaultParameterManagerFactory.Instance;
+
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver { get; } = new ParamLiteralsResolver();
     }
 
+    /// <summary>
+    /// 输出 SQL Server 分页子句的基准实现。
+    /// </summary>
     private sealed class BenchmarkPaginationRenderer : ISqlPaginationRenderer
     {
+        /// <inheritdoc />
         public string Render(string offsetParameterName, string limitParameterName) =>
             $"Offset {offsetParameterName} Rows Fetch Next {limitParameterName} Rows Only";
     }
 
+    /// <summary>
+    /// 使用 SQL Server 标识符规则的元数据基准方言。
+    /// </summary>
     private sealed class BenchmarkDialect : DialectBase
     {
+        /// <inheritdoc />
         public override char OpeningIdentifier => '[';
 
+        /// <inheritdoc />
         public override char ClosingIdentifier => ']';
 
+        /// <inheritdoc />
         public override string GetPrefix() => "@";
     }
 }
@@ -330,7 +420,7 @@ public class ParameterManagerSnapshotBenchmarks
     private ParameterManager _parameterManager;
 
     /// <summary>
-    /// 参数集合规模。
+    /// 获取或设置参数集合规模。
     /// </summary>
     [Params(10, 100, 1000)]
     public int ParameterCount { get; set; }
@@ -391,8 +481,15 @@ public class ParameterManagerSnapshotBenchmarks
     }
 }
 
+/// <summary>
+/// 启动 SQL 基准程序并选择要运行的基准集合。
+/// </summary>
 internal static class Program
 {
+    /// <summary>
+    /// 根据命令行参数运行基准测试。
+    /// </summary>
+    /// <param name="args">传递给基准程序的命令行参数。</param>
     private static void Main(string[] args)
     {
         if (args.Contains("--ci-smoke", StringComparer.OrdinalIgnoreCase))
@@ -425,24 +522,28 @@ public class MySqlTableNameParserBenchmarks
     /// <summary>
     /// 测量简单物理表名解析。
     /// </summary>
+    /// <returns>解析出的物理表名。</returns>
     [Benchmark]
     public string ParseSimpleTable() => MySqlTableNameParser.Parse("orders").TableName;
 
     /// <summary>
     /// 测量带点物理表名解析。
     /// </summary>
+    /// <returns>解析出的物理表名。</returns>
     [Benchmark]
     public string ParseDottedPhysicalTable() => MySqlTableNameParser.Parse("Merchants.Company").TableName;
 
     /// <summary>
     /// 测量反引号带点物理表名解析。
     /// </summary>
+    /// <returns>解析出的物理表名。</returns>
     [Benchmark]
     public string ParseQuotedDottedPhysicalTable() => MySqlTableNameParser.Parse("`Merchants.Company`").TableName;
 
     /// <summary>
     /// 测量限定带点物理表名解析。
     /// </summary>
+    /// <returns>解析出的物理表名。</returns>
     [Benchmark]
     public string ParseQualifiedDottedPhysicalTable() =>
         MySqlTableNameParser.Parse("`archive_db`.`Merchants.Company`").TableName;
@@ -450,6 +551,7 @@ public class MySqlTableNameParserBenchmarks
     /// <summary>
     /// 测量包含别名的限定表名解析。
     /// </summary>
+    /// <returns>解析出的表别名。</returns>
     [Benchmark]
     public string ParseQualifiedTableWithAlias() =>
         MySqlTableNameParser.Parse("`archive_db`.`Merchants.Company` As merchant").Alias;
@@ -462,9 +564,24 @@ public class MySqlTableNameParserBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderBenchmarks
 {
+    /// <summary>
+    /// 简单表查询 Builder。
+    /// </summary>
     private MySqlBuilder _simpleBuilder;
+
+    /// <summary>
+    /// 带点号物理表名查询 Builder。
+    /// </summary>
     private MySqlBuilder _dottedTableBuilder;
+
+    /// <summary>
+    /// 带数据库限定的点号物理表名查询 Builder。
+    /// </summary>
     private MySqlBuilder _qualifiedTableBuilder;
+
+    /// <summary>
+    /// Join、参数和分页组合查询 Builder。
+    /// </summary>
     private MySqlBuilder _complexBuilder;
 
     /// <summary>
@@ -484,36 +601,42 @@ public class MySqlBuilderBenchmarks
     /// <summary>
     /// 测量简单表 SQL 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderSimpleTable() => _simpleBuilder.ToSql();
 
     /// <summary>
     /// 测量带点物理表 SQL 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderDottedPhysicalTable() => _dottedTableBuilder.ToSql();
 
     /// <summary>
     /// 测量限定带点物理表 SQL 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderQualifiedDottedPhysicalTable() => _qualifiedTableBuilder.ToSql();
 
     /// <summary>
     /// 测量复杂 Join、参数和分页 SQL 渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderComplexQuery() => _complexBuilder.ToSql();
 
     /// <summary>
     /// 测量复杂 Builder 克隆。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneComplexBuilder() => _complexBuilder.Clone();
 
     /// <summary>
     /// 创建复杂 MySQL Builder。
     /// </summary>
+    /// <returns>配置完成的 MySQL Builder。</returns>
     private static MySqlBuilder CreateComplexBuilder()
     {
         var builder = new MySqlBuilder();
@@ -536,6 +659,9 @@ public class MySqlBuilderBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlRepeatedRenderBenchmarks
 {
+    /// <summary>
+    /// 用于重复 SQL 渲染的 MySQL Builder。
+    /// </summary>
     private MySqlBuilder _builder;
 
     /// <summary>
@@ -558,24 +684,29 @@ public class MySqlRepeatedRenderBenchmarks
     /// <summary>
     /// 测量单次重复渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderOnce() => _builder.ToSql();
 
     /// <summary>
     /// 测量十次重复渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderTenTimes() => Render(10);
 
     /// <summary>
     /// 测量一百次重复渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string RenderOneHundredTimes() => Render(100);
 
     /// <summary>
     /// 执行固定次数的 SQL 渲染。
     /// </summary>
+    /// <param name="count">重复渲染次数。</param>
+    /// <returns>生成的 SQL 文本。</returns>
     private string Render(int count)
     {
         string sql = null;
@@ -595,24 +726,29 @@ public class MySqlAppendBenchmarks
     /// <summary>
     /// 测量一个原始 Join 片段的构建和渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildOneRawJoin() => BuildRawJoins(1);
 
     /// <summary>
     /// 测量五个原始 Join 片段的构建和渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildFiveRawJoins() => BuildRawJoins(5);
 
     /// <summary>
     /// 测量二十个原始 Join 片段的构建和渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildTwentyRawJoins() => BuildRawJoins(20);
 
     /// <summary>
     /// 构造指定数量的原始 Join 片段。
     /// </summary>
+    /// <param name="count">要构建的原始 Join 数量。</param>
+    /// <returns>生成的 SQL 文本。</returns>
     private static string BuildRawJoins(int count)
     {
         var builder = new MySqlBuilder();
@@ -636,48 +772,59 @@ public class MySqlBuilderConstructionBenchmarks
     /// <summary>
     /// 测量仅 From 的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildFromOnly() => CreateBuilder(0, 0, false).ToSql();
 
     /// <summary>
     /// 测量一个结构化 Join 的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildOneStructuredJoin() => CreateBuilder(1, 0, false).ToSql();
 
     /// <summary>
     /// 测量五个结构化 Join 的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildFiveStructuredJoins() => CreateBuilder(5, 0, false).ToSql();
 
     /// <summary>
     /// 测量二十个结构化 Join 的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildTwentyStructuredJoins() => CreateBuilder(20, 0, false).ToSql();
 
     /// <summary>
     /// 测量包含十个参数的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildWithTenParameters() => CreateBuilder(1, 10, false).ToSql();
 
     /// <summary>
     /// 测量包含五十个参数的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildWithFiftyParameters() => CreateBuilder(1, 50, false).ToSql();
 
     /// <summary>
     /// 测量原始与结构化 Join 混合的 Builder 构建与渲染。
     /// </summary>
+    /// <returns>生成的 SQL 文本。</returns>
     [Benchmark]
     public string BuildMixedRawAndStructuredJoins() => CreateBuilder(5, 10, true).ToSql();
 
     /// <summary>
     /// 创建指定规模的 MySQL Builder。
     /// </summary>
+    /// <param name="includeRawJoin">是否在偶数索引的连接中使用原始 Join。</param>
+    /// <param name="joinCount">要创建的 Join 数量。</param>
+    /// <param name="parameterCount">要添加的参数数量。</param>
+    /// <returns>配置完成的 MySQL Builder。</returns>
     private static MySqlBuilder CreateBuilder(int joinCount, int parameterCount, bool includeRawJoin)
     {
         var builder = new MySqlBuilder();
@@ -706,13 +853,44 @@ public class MySqlBuilderConstructionBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class MySqlBuilderCloneBenchmarks
 {
+    /// <summary>
+    /// 仅包含 From 子句的 Builder。
+    /// </summary>
     private MySqlBuilder _fromOnlyBuilder;
+
+    /// <summary>
+    /// 包含一个 Join 的 Builder。
+    /// </summary>
     private MySqlBuilder _oneJoinBuilder;
+
+    /// <summary>
+    /// 包含五个 Join 的 Builder。
+    /// </summary>
     private MySqlBuilder _fiveJoinBuilder;
+
+    /// <summary>
+    /// 包含二十个 Join 的 Builder。
+    /// </summary>
     private MySqlBuilder _twentyJoinBuilder;
+
+    /// <summary>
+    /// 包含十个参数的 Builder。
+    /// </summary>
     private MySqlBuilder _tenParameterBuilder;
+
+    /// <summary>
+    /// 包含五十个参数的 Builder。
+    /// </summary>
     private MySqlBuilder _fiftyParameterBuilder;
+
+    /// <summary>
+    /// 同时包含 Join、参数和聚合的 Builder。
+    /// </summary>
     private MySqlBuilder _mixedBuilder;
+
+    /// <summary>
+    /// 包含十个聚合项的 Builder。
+    /// </summary>
     private MySqlBuilder _tenAggregateBuilder;
 
     /// <summary>
@@ -748,42 +926,49 @@ public class MySqlBuilderCloneBenchmarks
     /// <summary>
     /// 测量仅 From Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneFromOnly() => _fromOnlyBuilder.Clone();
 
     /// <summary>
     /// 测量一个 Join Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneOneJoin() => _oneJoinBuilder.Clone();
 
     /// <summary>
     /// 测量五个 Join Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneFiveJoins() => _fiveJoinBuilder.Clone();
 
     /// <summary>
     /// 测量二十个 Join Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneTwentyJoins() => _twentyJoinBuilder.Clone();
 
     /// <summary>
     /// 测量十个参数 Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneWithTenParameters() => _tenParameterBuilder.Clone();
 
     /// <summary>
     /// 测量五十个参数 Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneWithFiftyParameters() => _fiftyParameterBuilder.Clone();
 
     /// <summary>
     /// 测量原始与结构化 Join 混合 Builder Clone。
     /// </summary>
+    /// <returns>克隆的 SQL Builder。</returns>
     [Benchmark]
     public ISqlBuilder CloneMixedRawAndStructuredJoins() => _mixedBuilder.Clone();
 
@@ -797,6 +982,10 @@ public class MySqlBuilderCloneBenchmarks
     /// <summary>
     /// 创建指定规模的 MySQL Builder。
     /// </summary>
+    /// <param name="includeRawJoin">是否在偶数索引的连接中使用原始 Join。</param>
+    /// <param name="joinCount">要创建的 Join 数量。</param>
+    /// <param name="parameterCount">要添加的参数数量。</param>
+    /// <returns>配置完成的 MySQL Builder。</returns>
     private static MySqlBuilder CreateBuilder(int joinCount, int parameterCount, bool includeRawJoin)
     {
         var builder = new MySqlBuilder();
@@ -839,7 +1028,14 @@ public class MySqlBuilderCloneBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlDebugRenderingBenchmarks
 {
+    /// <summary>
+    /// 调试 SQL 渲染基准使用的查询 Builder。
+    /// </summary>
     private MySqlBuilder _builder;
+
+    /// <summary>
+    /// 预先生成的执行 SQL。
+    /// </summary>
     private string _sql;
 
     /// <summary>
@@ -879,11 +1075,18 @@ public class SqlDebugRenderingBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlDebugRenderingLargeParameterBenchmarks
 {
+    /// <summary>
+    /// 大参数调试 SQL 基准使用的查询 Builder。
+    /// </summary>
     private MySqlBuilder _builder;
+
+    /// <summary>
+    /// 预先生成的执行 SQL。
+    /// </summary>
     private string _sql;
 
     /// <summary>
-    /// 调试 SQL 中的参数数量。
+    /// 获取或设置调试 SQL 中的参数数量。
     /// </summary>
     [Params(10, 50, 100)]
     public int ParameterCount { get; set; }
@@ -923,6 +1126,9 @@ public class SqlDebugRenderingLargeParameterBenchmarks
 [SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
 public class SqlQueryExecutionPreparationBenchmarks
 {
+    /// <summary>
+    /// 执行准备基准使用的 MySQL Builder。
+    /// </summary>
     private MySqlBuilder _builder;
 
     /// <summary>

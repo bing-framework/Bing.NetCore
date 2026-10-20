@@ -18,7 +18,7 @@ public class StoreStringLocalizer : StringLocalizerBase
     private readonly ILocalizedStore _store;
 
     /// <summary>
-    /// 初始化一个<see cref="StoreStringLocalizer"/>类型的实例
+    /// 初始化一个 <see cref="StoreStringLocalizer"/> 类型的实例。
     /// </summary>
     /// <param name="logger">日志</param>
     /// <param name="cache">内存缓存</param>
@@ -32,12 +32,7 @@ public class StoreStringLocalizer : StringLocalizerBase
         _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
-    /// <summary>
-    /// 获取本地化字符串结果
-    /// </summary>
-    /// <param name="name">资源名称</param>
-    /// <param name="arguments">参数列表</param>
-    /// <returns>格式化后的本地化字符串。</returns>
+    /// <inheritdoc />
     protected override LocalizedString GetResult(string name, params object[] arguments)
     {
         var culture = Culture.GetCurrentUICulture();
@@ -45,13 +40,7 @@ public class StoreStringLocalizer : StringLocalizerBase
         return FormatResult(result, name, arguments);
     }
 
-    /// <summary>
-    /// 获取资源值
-    /// </summary>
-    /// <param name="culture">区域文化</param>
-    /// <param name="name">资源名称</param>
-    /// <param name="type">资源类型</param>
-    /// <returns>资源值；未找到资源时返回 null。</returns>
+    /// <inheritdoc />
     protected override string GetValue(CultureInfo culture, string name, string type)
     {
         var result = _store.GetValue(culture.Name, type, name);
@@ -59,11 +48,7 @@ public class StoreStringLocalizer : StringLocalizerBase
         return result;
     }
 
-    /// <summary>
-    /// 获取全部本地化字符串
-    /// </summary>
-    /// <param name="includeParentCultures">是否包含父区域</param>
-    /// <returns>当前文化及可选父文化的本地化字符串集合。</returns>
+    /// <inheritdoc />
     public override IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var result = new List<LocalizedString>();

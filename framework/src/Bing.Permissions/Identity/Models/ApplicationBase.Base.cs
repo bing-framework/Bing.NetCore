@@ -53,34 +53,36 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     [StringLength(500)]
     public string Remark { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置应用程序是否已软删除。
-    /// </summary>
+    /// </remarks>
     [Display(Name = "是否删除")]
     [Required(ErrorMessage = "是否删除不能为空")]
     public bool IsDeleted { get; set; }
 
-    /// <summary>
-    /// 获取或设置应用程序创建时间。
-    /// </summary>
+    /// <inheritdoc />
     [Display(Name = "创建时间")]
     public DateTime? CreationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置创建该应用程序的用户标识。
-    /// </summary>
+    /// </remarks>
     [Display(Name = "创建人标识")]
     public Guid? CreatorId { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置应用程序最后修改时间。
-    /// </summary>
+    /// </remarks>
     [Display(Name = "最后修改时间")]
     public DateTime? LastModificationTime { get; set; }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置最后修改该应用程序的用户标识。
-    /// </summary>
+    /// </remarks>
     [Display(Name = "最后修改人标识")]
     public Guid? LastModifierId { get; set; }
 
@@ -89,7 +91,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
     #region 构造函数
 
     /// <summary>
-    /// 使用指定标识初始化一个应用程序实体。
+    /// 初始化一个 <see cref="ApplicationBase{TApplication, TKey}"/> 类型的实例。
     /// </summary>
     /// <param name="id">应用程序标识。</param>
     protected ApplicationBase(TKey id) : base(id) { }
@@ -98,9 +100,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
 
     #region AddDescriptions(添加描述)
 
-    /// <summary>
-    /// 添加描述
-    /// </summary>
+    /// <inheritdoc />
     protected override void AddDescriptions()
     {
         AddDescription(t => t.Id);
@@ -119,10 +119,7 @@ public abstract partial class ApplicationBase<TApplication, TKey> : AggregateRoo
 
     #region AddChanges(添加变更列表)
 
-    /// <summary>
-    /// 添加变更列表
-    /// </summary>
-    /// <param name="other">用于比较的应用对象。</param>
+    /// <inheritdoc />
     protected override void AddChanges(TApplication other)
     {
         AddChange(t => t.Id, other.Id);

@@ -29,7 +29,7 @@ public partial class MySqlExecutorTest : IAsyncLifetime
     private readonly ISqlExecutor _sqlExecutor2;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="MySqlExecutorTest"/> 类型的实例。
     /// </summary>
     public MySqlExecutorTest(ITestOutputHelper output, MySqlIntegrationDatabaseFixture fixture)
     {
@@ -39,14 +39,16 @@ public partial class MySqlExecutorTest : IAsyncLifetime
         _sqlExecutor2 = fixture.CreateExecutor();
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 在每个测试类开始前清理测试数据。
-    /// </summary>
+    /// </remarks>
     public Task InitializeAsync() => _fixture.ResetAsync();
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 释放当前测试类创建的 SQL 执行器。
-    /// </summary>
+    /// </remarks>
     public Task DisposeAsync()
     {
         _sqlExecutor?.Dispose();

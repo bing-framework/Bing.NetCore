@@ -14,7 +14,7 @@ public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper
     public IEventHandler EventHandler { get; }
 
     /// <summary>
-    /// 使用事件处理器和可选资源释放操作初始化 <see cref="EventHandlerDisposeWrapper"/> 的实例。
+    /// 初始化一个 <see cref="EventHandlerDisposeWrapper"/> 类型的实例。
     /// </summary>
     /// <param name="eventHandler">要包装的事件处理器。</param>
     /// <param name="disposeAction">释放包装器时执行的可选资源释放操作。</param>
@@ -24,8 +24,9 @@ public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper
         _disposeAction = disposeAction;
     }
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 执行构造时提供的资源释放操作。
-    /// </summary>
+    /// </remarks>
     public void Dispose() => _disposeAction?.Invoke();
 }

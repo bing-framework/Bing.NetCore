@@ -6,16 +6,14 @@ using Xunit;
 namespace Bing.ExceptionHandling.Tests;
 
 /// <summary>
-/// <see cref="EntityNotFoundException"/> 单元测试
-/// 直接 new 被测类，不依赖任何外部服务。
+/// <see cref="EntityNotFoundException"/> 单元测试 直接 new 被测类，不依赖任何外部服务。
 /// </summary>
 public class EntityNotFoundExceptionTest
 {
     // ── Default constructor ────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：默认构造后，Message 应包含通用的"找不到实体"语义，
-    /// Flag 应为 "__ENTITY_NOT_FOUND_FLG"，Code 应为 "1010"。
+    /// 测试目的：默认构造后，Message 应包含通用的"找不到实体"语义， Flag 应为 "__ENTITY_NOT_FOUND_FLG"，Code 应为 "1010"。
     /// </summary>
     [Fact]
     public void DefaultConstructor_ShouldSetDefaultMessageFlagAndCode()
@@ -32,8 +30,7 @@ public class EntityNotFoundExceptionTest
     // ── Constructor(Type entityType) ──────────────────────────────
 
     /// <summary>
-    /// 测试目的：通过实体类型构造时，EntityType 应正确赋值，
-    /// Message 应包含该类型的完全限定名。
+    /// 测试目的：通过实体类型构造时，EntityType 应正确赋值， Message 应包含该类型的完全限定名。
     /// </summary>
     [Fact]
     public void Constructor_WithEntityType_ShouldSetEntityTypeInMessage()
@@ -50,8 +47,7 @@ public class EntityNotFoundExceptionTest
     // ── Constructor(Type entityType, object id) ───────────────────
 
     /// <summary>
-    /// 测试目的：通过实体类型和 Id 构造时，EntityType 和 Id 均应被设置，
-    /// Message 应同时包含类型名和 Id 值。
+    /// 测试目的：通过实体类型和 Id 构造时，EntityType 和 Id 均应被设置， Message 应同时包含类型名和 Id 值。
     /// </summary>
     [Fact]
     public void Constructor_WithEntityTypeAndId_ShouldSetBothAndIncludeInMessage()
@@ -104,8 +100,7 @@ public class EntityNotFoundExceptionTest
     // ── Constructor(string message) ───────────────────────────────
 
     /// <summary>
-    /// 测试目的：通过自定义消息构造时，Message 应与传入值一致，
-    /// EntityType 和 Id 均为 null。
+    /// 测试目的：通过自定义消息构造时，Message 应与传入值一致， EntityType 和 Id 均为 null。
     /// </summary>
     [Fact]
     public void Constructor_WithCustomMessage_ShouldSetMessage()
@@ -142,8 +137,7 @@ public class EntityNotFoundExceptionTest
     // ── Is-a hierarchy ────────────────────────────────────────────
 
     /// <summary>
-    /// 测试目的：EntityNotFoundException 应继承自 BingException，
-    /// 满足框架统一异常类型层次约定。
+    /// 测试目的：EntityNotFoundException 应继承自 BingException， 满足框架统一异常类型层次约定。
     /// </summary>
     [Fact]
     public void EntityNotFoundException_ShouldInheritFromBingException()
@@ -157,5 +151,8 @@ public class EntityNotFoundExceptionTest
 
     // ── 辅助实体类型 ──────────────────────────────────────────────
 
+    /// <summary>
+    /// 表示实体未找到异常测试使用的实体类型。
+    /// </summary>
     private class SampleEntity { }
 }

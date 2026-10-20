@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
-/// 实体模型元数据。
+/// 描述 CLR 实体类型的表、架构和属性元数据。
 /// </summary>
 public sealed class EntityModelMetadata
 {

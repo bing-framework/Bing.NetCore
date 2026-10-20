@@ -55,18 +55,18 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     #region 属性
 
     /// <summary>
-    /// 跟踪号
+    /// 获取或设置跟踪号
     /// </summary>
     public string TraceId { get; set; }
 
     /// <summary>
-    /// Lazy延迟加载服务提供程序
+    /// 获取或设置Lazy延迟加载服务提供程序
     /// </summary>
     [Autowired]
     public virtual ILazyServiceProvider LazyServiceProvider { get; set; }
 
     /// <summary>
-    /// 当前用户
+    /// 获取当前用户
     /// </summary>
     protected ICurrentUser CurrentUser => LazyServiceProvider.LazyGetRequiredService<ICurrentUser>();
 
@@ -181,20 +181,17 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #region OnConfiguring(配置)
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 配置当前工作单元使用的 FreeSql CodeFirst 映射。
-    /// </summary>
-    /// <param name="builder">配置生成器</param>
+    /// </remarks>
     protected override void OnConfiguring(DbContextOptionsBuilder builder) => base.OnConfiguring(builder);
 
     #endregion
 
     #region OnModelCreating(配置映射)
 
-    /// <summary>
-    /// 配置映射
-    /// </summary>
-    /// <param name="modelBuilder">映射生成器</param>
+    /// <inheritdoc />
     protected override void OnModelCreating(ICodeFirst modelBuilder)
     {
         var mappers = GetMaps();
@@ -243,10 +240,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #region Commit(提交)
 
-    /// <summary>
-    /// 提交，返回影响的行数
-    /// </summary>
-    /// <returns>保存更改影响的行数。</returns>
+    /// <inheritdoc />
     public int Commit()
     {
         try
@@ -265,11 +259,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #region CommitAsync(异步提交)
 
-    /// <summary>
-    /// 提交，返回影响的行数
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>包含保存更改影响行数的异步任务。</returns>
+    /// <inheritdoc />
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -288,10 +278,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #region SaveChanges(保存更改)
 
-    /// <summary>
-    /// 保存更改。
-    /// </summary>
-    /// <returns>保存更改影响的行数。</returns>
+    /// <inheritdoc />
     public override int SaveChanges()
     {
         RegisterAuditChangeCallback();
@@ -315,7 +302,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     }
 
     /// <summary>
-    /// 手工创建事务提交。
+    /// 提交事务并保存更改。
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器。</param>
     /// <returns>保存更改影响的行数。</returns>
@@ -360,11 +347,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
 
     #region SaveChangesAsync(异步保存更改)
 
-    /// <summary>
-    /// 异步保存更改
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>包含保存更改影响行数的异步任务。</returns>
+    /// <inheritdoc />
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -389,7 +372,7 @@ public abstract class UnitOfWorkBase : DbContext, Bing.Uow.IUnitOfWork, IDatabas
     }
 
     /// <summary>
-    /// 手工创建事务提交
+    /// 提交事务并保存更改。
     /// </summary>
     /// <param name="transactionActionManager">事务操作管理器</param>
     /// <param name="cancellationToken">取消令牌</param>

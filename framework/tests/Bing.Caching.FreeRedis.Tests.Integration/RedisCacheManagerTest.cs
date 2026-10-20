@@ -3,23 +3,25 @@
 namespace Bing.Caching.FreeRedis.Tests;
 
 /// <summary>
-/// Redis 缓存管理器测试
+/// FreeRedis 缓存管理器集成测试。
 /// </summary>
 public class RedisCacheManagerTest
 {
     /// <summary>
-    /// 缓存服务
+    /// 用于验证 Redis 缓存管理器行为的缓存实例。
     /// </summary>
     private readonly ICache _cache;
 
     /// <summary>
-    /// 日志
+    /// 记录 Redis 缓存集成测试信息的日志记录器。
     /// </summary>
     private readonly ILogger<RedisCacheManagerTest> _logger;
 
     /// <summary>
-    /// 测试初始化
+    /// 初始化一个 <see cref="RedisCacheManagerTest"/> 类型的实例。
     /// </summary>
+    /// <param name="cache">待测试的缓存实例。</param>
+    /// <param name="logger">测试日志记录器。</param>
     public RedisCacheManagerTest(ICache cache, ILogger<RedisCacheManagerTest> logger)
     {
         _cache = cache;
@@ -29,7 +31,7 @@ public class RedisCacheManagerTest
     #region Get
 
     /// <summary>
-    /// 测试 - 获取缓存
+    /// 验证读取缓存。
     /// </summary>
 
     [Fact]
@@ -54,7 +56,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 获取缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象读取缓存。
     /// </summary>
     [Fact]
     public void Test_Get_2()
@@ -78,7 +80,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 从缓存中获取数据 - 默认8小时过期
+    /// 验证默认缓存过期时间为八小时。
     /// </summary>
     [Fact]
     public void Test_Get_3()
@@ -98,7 +100,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 从缓存中获取数据 - 设置缓存键对象
+    /// 验证使用缓存键对象读取带默认过期时间的缓存。
     /// </summary>
     [Fact]
     public void Test_Get_4()
@@ -122,7 +124,7 @@ public class RedisCacheManagerTest
     #region GetAll
 
     /// <summary>
-    /// 测试 - 获取缓存 - 获取集合
+    /// 验证读取缓存集合。
     /// </summary>
     [Fact]
     public void Test_GetAll_1()
@@ -144,7 +146,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 获取缓存 - 获取集合,设置缓存键对象
+    /// 验证使用缓存键对象读取缓存集合。
     /// </summary>
     [Fact]
     public void Test_GetAll_2()
@@ -170,7 +172,7 @@ public class RedisCacheManagerTest
     #region GetAsync
 
     /// <summary>
-    /// 测试 - 获取缓存
+    /// 验证异步读取缓存。
     /// </summary>
     [Fact]
     public async Task Test_GetAsync_1()
@@ -194,7 +196,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 获取缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象异步读取缓存。
     /// </summary>
     [Fact]
     public async Task Test_GetAsync_2()
@@ -218,7 +220,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 从缓存中获取数据 - 默认8小时过期
+    /// 验证异步读取缓存的默认过期时间为八小时。
     /// </summary>
     [Fact]
     public async Task Test_GetAsync_3()
@@ -242,7 +244,7 @@ public class RedisCacheManagerTest
     #region GetAllAsync
 
     /// <summary>
-    /// 测试 - 获取缓存 - 获取集合
+    /// 验证异步读取缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_GetAllAsync_1()
@@ -264,7 +266,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 获取缓存 - 获取集合,设置缓存键对象
+    /// 验证使用缓存键对象异步读取缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_GetAllAsync_2()
@@ -290,7 +292,7 @@ public class RedisCacheManagerTest
     #region GetByPrefix
 
     /// <summary>
-    /// 测试 - 通过缓存键前缀获取数据
+    /// 验证按缓存键前缀读取缓存。
     /// </summary>
     [Fact]
     public void Test_GetByPrefix_1()
@@ -316,7 +318,7 @@ public class RedisCacheManagerTest
     #region GetByPrefixAsync
 
     /// <summary>
-    /// 测试 - 通过缓存键前缀获取数据
+    /// 验证异步按缓存键前缀读取缓存。
     /// </summary>
     [Fact]
     public async Task Test_GetByPrefixAsync_1()
@@ -342,7 +344,7 @@ public class RedisCacheManagerTest
     #region TrySet
 
     /// <summary>
-    /// 测试 - 设置缓存
+    /// 验证写入缓存时仅在键不存在时成功。
     /// </summary>
     [Fact]
     public void Test_TrySet_1()
@@ -369,7 +371,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象写入时仅在键不存在时成功。
     /// </summary>
     [Fact]
     public void Test_TrySet_2()
@@ -400,7 +402,7 @@ public class RedisCacheManagerTest
     #region TrySetAsync
 
     /// <summary>
-    /// 测试 - 设置缓存
+    /// 验证异步写入缓存时仅在键不存在时成功。
     /// </summary>
     [Fact]
     public async Task Test_TrySetAsync_1()
@@ -427,7 +429,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象异步写入时仅在键不存在时成功。
     /// </summary>
     [Fact]
     public async Task Test_TrySetAsync_2()
@@ -458,7 +460,7 @@ public class RedisCacheManagerTest
     #region Set
 
     /// <summary>
-    /// 测试 - 设置缓存
+    /// 验证覆盖写入缓存。
     /// </summary>
     [Fact]
     public void Test_Set_1()
@@ -484,7 +486,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存- 设置缓存键对象
+    /// 验证使用缓存键对象覆盖写入缓存。
     /// </summary>
     [Fact]
     public void Test_Set_2()
@@ -514,7 +516,7 @@ public class RedisCacheManagerTest
     #region SetAll
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置集合
+    /// 验证批量写入缓存集合。
     /// </summary>
     [Fact]
     public void Test_SetAll_1()
@@ -534,7 +536,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置集合,设置缓存键对象
+    /// 验证使用缓存键对象批量写入缓存集合。
     /// </summary>
     [Fact]
     public void Test_SetAll_2()
@@ -558,7 +560,7 @@ public class RedisCacheManagerTest
     #region SetAsync
 
     /// <summary>
-    /// 测试 - 设置缓存
+    /// 验证异步覆盖写入缓存。
     /// </summary>
     [Fact]
     public async Task Test_SetAsync_1()
@@ -584,7 +586,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象异步覆盖写入缓存。
     /// </summary>
     [Fact]
     public async Task Test_SetAsync_2()
@@ -610,7 +612,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置集合
+    /// 验证异步批量写入缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_SetAllAsync_1()
@@ -626,11 +628,15 @@ public class RedisCacheManagerTest
         Assert.Equal(1, await _cache.GetAsync<int>(key));
         Assert.Equal(2, await _cache.GetAsync<int>(key2));
 
+        // 已存在键仍必须被批量写入覆盖。
+        await _cache.SetAllAsync(new Dictionary<string, int> { { key, 3 } });
+        Assert.Equal(3, await _cache.GetAsync<int>(key));
+
         await _cache.ClearAsync();
     }
 
     /// <summary>
-    /// 测试 - 设置缓存 - 设置集合,设置缓存键对象
+    /// 验证使用缓存键对象异步批量写入缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_SetAllAsync_2()
@@ -654,7 +660,7 @@ public class RedisCacheManagerTest
     #region Exists
 
     /// <summary>
-    /// 测试 - 缓存是否已存在
+    /// 验证检查缓存是否存在。
     /// </summary>
     [Fact]
     public void Test_Exists_1()
@@ -675,7 +681,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 缓存是否已存在 - 设置缓存键对象
+    /// 验证使用缓存键对象检查缓存是否存在。
     /// </summary>
     [Fact]
     public void Test_Exists_2()
@@ -700,7 +706,7 @@ public class RedisCacheManagerTest
     #region ExistsAsync
 
     /// <summary>
-    /// 测试 - 缓存是否已存在
+    /// 验证异步检查缓存是否存在。
     /// </summary>
     [Fact]
     public async Task Test_ExistsAsync_1()
@@ -721,7 +727,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 缓存是否已存在 - 设置缓存键对象
+    /// 验证使用缓存键对象异步检查缓存是否存在。
     /// </summary>
     [Fact]
     public async Task Test_ExistsAsync_2()
@@ -746,7 +752,7 @@ public class RedisCacheManagerTest
     #region Remove
 
     /// <summary>
-    /// 测试 - 移除缓存
+    /// 验证移除缓存。
     /// </summary>
     [Fact]
     public void Test_Remove_1()
@@ -766,7 +772,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象移除缓存。
     /// </summary>
     [Fact]
     public void Test_Remove_2()
@@ -786,7 +792,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存集合
+    /// 验证批量移除缓存集合。
     /// </summary>
     [Fact]
     public void Test_RemoveAll_1()
@@ -808,7 +814,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存集合 - 设置缓存键对象
+    /// 验证使用缓存键对象批量移除缓存集合。
     /// </summary>
     [Fact]
     public void Test_RemoveAll_2()
@@ -834,7 +840,7 @@ public class RedisCacheManagerTest
     #region RemoveAsync
 
     /// <summary>
-    /// 测试 - 移除缓存
+    /// 验证异步移除缓存。
     /// </summary>
     [Fact]
     public async Task Test_RemoveAsync_1()
@@ -854,7 +860,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存 - 设置缓存键对象
+    /// 验证使用缓存键对象异步移除缓存。
     /// </summary>
     [Fact]
     public async Task Test_RemoveAsync_2()
@@ -874,7 +880,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存集合
+    /// 验证异步批量移除缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_RemoveAllAsync_1()
@@ -896,7 +902,7 @@ public class RedisCacheManagerTest
     }
 
     /// <summary>
-    /// 测试 - 移除缓存集合 - 设置缓存键对象
+    /// 验证使用缓存键对象异步批量移除缓存集合。
     /// </summary>
     [Fact]
     public async Task Test_RemoveAllAsync_2()
@@ -922,7 +928,7 @@ public class RedisCacheManagerTest
     #region RemoveByPrefix
 
     /// <summary>
-    /// 测试 - 通过缓存键前缀移除缓存
+    /// 验证按缓存键前缀移除缓存。
     /// </summary>
     [Fact]
     public void Test_RemoveByPrefix_1()
@@ -948,7 +954,7 @@ public class RedisCacheManagerTest
     #region RemoveByPrefixAsync
 
     /// <summary>
-    /// 测试 - 通过缓存键前缀移除缓存
+    /// 验证异步按缓存键前缀移除缓存。
     /// </summary>
     [Fact]
     public async Task Test_RemoveByPrefixAsync_1()
@@ -974,7 +980,7 @@ public class RedisCacheManagerTest
     #region RemoveByPattern
 
     /// <summary>
-    /// 测试 - 通过缓存键模式移除缓存
+    /// 验证按缓存键模式移除缓存。
     /// </summary>
     [Fact]
     public void RemoveByPattern()
@@ -1000,7 +1006,7 @@ public class RedisCacheManagerTest
     #region RemoveByPatternAsync
 
     /// <summary>
-    /// 测试通过缓存键模式移除缓存
+    /// 验证异步按缓存键模式移除缓存。
     /// </summary>
     [Fact]
     public async Task RemoveByPatternAsync()
@@ -1026,7 +1032,7 @@ public class RedisCacheManagerTest
     #region Clear
 
     /// <summary>
-    /// 测试 - 清空缓存
+    /// 验证清空缓存。
     /// </summary>
     [Fact]
     public void Test_Clear()
@@ -1052,7 +1058,7 @@ public class RedisCacheManagerTest
     #region ClearAsync
 
     /// <summary>
-    /// 测试 - 清空缓存
+    /// 验证异步清空缓存。
     /// </summary>
     [Fact]
     public async Task Test_ClearAsync()

@@ -12,7 +12,7 @@ public readonly struct BusHealthResult
     private static readonly IReadOnlyDictionary<string, object> _emptyReadOnlyDictionary = new Dictionary<string, object>();
 
     /// <summary>
-    /// 使用业务健康状态和可选诊断信息初始化 <see cref="BusHealthResult"/> 的实例。
+    /// 初始化一个 <see cref="BusHealthResult"/> 类型的实例。
     /// </summary>
     /// <param name="status">业务健康状态。</param>
     /// <param name="description">可选的状态说明。</param>
@@ -27,22 +27,22 @@ public readonly struct BusHealthResult
     }
 
     /// <summary>
-    /// 获取附加诊断数据；未提供时为空只读字典。
+    /// 检查结果附带的诊断数据；未提供时使用共享空只读字典。
     /// </summary>
     public readonly IReadOnlyDictionary<string, object> Data;
 
     /// <summary>
-    /// 获取可选的状态说明。
+    /// 检查结果的可选状态说明。
     /// </summary>
     public readonly string Description;
 
     /// <summary>
-    /// 获取导致当前状态的可选异常。
+    /// 导致当前降级或不健康状态的可选异常。
     /// </summary>
     public readonly Exception Exception;
 
     /// <summary>
-    /// 获取业务健康状态。
+    /// 本次检查得到的业务健康状态。
     /// </summary>
     public readonly BusHealthStatus Status;
 

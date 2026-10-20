@@ -2,7 +2,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://mit-license.org/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/bing-framework/Bing.NetCore)
 
-**简体中文** ｜ [English](README.en.md)
+**简体中文** ｜ [原英文入口的中文译文](README.en.md)
 
 Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团队的开发输出能力，由常用公共操作类（工具类、帮助类）、分层架构基类，第三方组件封装，第三方业务接口封装等组成。
 
@@ -15,7 +15,8 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | 文档 | 定位 |
 | --- | --- |
 | [使用文档](docs/getting-started/使用文档.md) | 安装配置、快速上手、核心 API 与典型示例（§3.3 注册入口速查） |
-| [架构文档](docs/architecture/架构文档.md) | 分层结构、真实模块依赖图、模块清单（51 个工程）、注册入口完整清单（§12） |
+| [架构文档](docs/architecture/架构文档.md) | 分层结构、真实模块依赖图、核心模块清单与注册入口完整清单（§12） |
+| [代码对照清单](docs/operations/文档与代码对照清单.md) | 当前代码与文档覆盖状态、缺口及待确认项 |
 | [设计思路文档](docs/architecture/设计思路文档.md) | 设计动机、关键决策与权衡、数据流与扩展方式 |
 | [子系统深挖](docs/architecture/子系统深挖.md) | CAP / FreeSQL / Bing.Data.Sql 的代码级实现解析 |
 
@@ -27,6 +28,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 | --- | --- |
 | **选 ORM / 比较数据访问能力** | [能力矩阵](docs/getting-started/能力矩阵.md)（三支 × 18 项能力对照 + 决策树） |
 | **只知包名，不知该装哪个** | [包索引](docs/getting-started/包索引.md)（按场景反查 70 个包工程）／网页版 [选型向导](docs/选型向导.html) |
+| **按模块了解功能、配置与限制** | [模块文档](docs/modules/README.md)（核心、Web、领域、数据、缓存、事件等） |
 | **想要一行不多的最小上手代码** | 网页版 [Cheat Sheet](docs/cheatsheet.html)（可打印一页纸） |
 | **要端到端场景的完整代码** | [recipes 配方集](docs/guides/recipes/README.md)（CRUD / CAP 事件 / 多租户 / RBAC / 支付 / 批量报表） |
 | **读文档被术语卡住** | [术语表](docs/getting-started/术语表.md) |
@@ -66,6 +68,9 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 |[Bing.AspNetCore.Mvc.Contracts](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|[![Bing.AspNetCore.Mvc.Contracts](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.Contracts.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.Contracts/)|
 |[Bing.AspNetCore.Mvc](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|[![Bing.AspNetCore.Mvc](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc/)|
 |[Bing.AspNetCore.Mvc.UI](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/v/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/vpre/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|[![Bing.AspNetCore.Mvc.UI](https://img.shields.io/nuget/dt/Bing.AspNetCore.Mvc.UI.svg)](https://www.nuget.org/packages/Bing.AspNetCore.Mvc.UI/)|
+|[Bing.DynamicApi.Contracts](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/v/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/vpre/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|[![Bing.DynamicApi.Contracts](https://img.shields.io/nuget/dt/Bing.DynamicApi.Contracts.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Contracts/)|
+|[Bing.DynamicApi.Client](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/v/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/vpre/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|[![Bing.DynamicApi.Client](https://img.shields.io/nuget/dt/Bing.DynamicApi.Client.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client/)|
+|[Bing.DynamicApi.WebApiClient](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/v/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/vpre/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|[![Bing.DynamicApi.WebApiClient](https://img.shields.io/nuget/dt/Bing.DynamicApi.WebApiClient.svg)](https://www.nuget.org/packages/Bing.DynamicApi.WebApiClient/)|
 |[Bing.AspNetCore.MultiTenancy](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/v/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/vpre/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|[![Bing.AspNetCore.MultiTenancy](https://img.shields.io/nuget/dt/Bing.AspNetCore.MultiTenancy.svg)](https://www.nuget.org/packages/Bing.AspNetCore.MultiTenancy/)|
 |[Bing.MiniProfiler](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/v/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/vpre/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|[![Bing.MiniProfiler](https://img.shields.io/nuget/dt/Bing.MiniProfiler.svg)](https://www.nuget.org/packages/Bing.MiniProfiler/)|
 |[Bing.Logging](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/v/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/vpre/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|[![Bing.Logging](https://img.shields.io/nuget/dt/Bing.Logging.svg)](https://www.nuget.org/packages/Bing.Logging/)|
@@ -120,7 +125,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 
 以下是我们在项目开发和部署时使用的工具和组件，这个列表会经常更新。
 
-> 如果没有标注版本号，则采用最新版本。
+> 构建依赖版本以工程、导入的 `.props` 与 `global.json` 为准；本节是工具与技术清单，不保证使用最新版。
 
 1. 开发工具
   - [Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/vs/)

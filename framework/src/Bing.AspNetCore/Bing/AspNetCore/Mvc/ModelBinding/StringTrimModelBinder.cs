@@ -9,10 +9,7 @@ namespace Bing.AspNetCore.Mvc.ModelBinding;
 /// </summary>
 public class StringTrimModelBinder : IModelBinder
 {
-    /// <summary>
-    /// 绑定模型
-    /// </summary>
-    /// <param name="bindingContext">模型绑定上下文</param>
+    /// <inheritdoc />
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         Check.NotNull(bindingContext, nameof(bindingContext));

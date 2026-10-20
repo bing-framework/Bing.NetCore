@@ -111,7 +111,7 @@ public static partial class BingServiceProviderExtensions
     }
 
     /// <summary>
-    /// 获取指定类型的日志对象
+    /// 获取日志对象。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="type">类型</param>
@@ -124,7 +124,7 @@ public static partial class BingServiceProviderExtensions
     }
 
     /// <summary>
-    /// 获取指定对象给类型的日志对象
+    /// 获取日志对象。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="instance">要获取日志的类型对象，一般指当前类，即this</param>
@@ -137,7 +137,7 @@ public static partial class BingServiceProviderExtensions
     }
 
     /// <summary>
-    /// 获取指定名称的日志对象
+    /// 获取日志对象。
     /// </summary>
     /// <param name="serviceProvider">服务提供程序</param>
     /// <param name="name">名称</param>

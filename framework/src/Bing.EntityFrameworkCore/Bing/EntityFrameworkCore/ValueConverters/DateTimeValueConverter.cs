@@ -9,7 +9,7 @@ namespace Bing.EntityFrameworkCore.ValueConverters;
 public class DateTimeValueConverter : ValueConverter<DateTime?, DateTime?>
 {
     /// <summary>
-    /// 初始化一个<see cref="DateTimeValueConverter"/>类型的实例
+    /// 初始化一个 <see cref="DateTimeValueConverter"/> 类型的实例。
     /// </summary>
     public DateTimeValueConverter() : base(date => Normalize(date), date => ToLocalTime(date))
     {

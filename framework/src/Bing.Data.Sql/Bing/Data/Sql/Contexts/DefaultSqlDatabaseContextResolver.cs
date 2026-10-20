@@ -18,7 +18,7 @@ public sealed class DefaultSqlDatabaseContextResolver : ISqlDatabaseContextResol
     private readonly SqlMetadataOptions _options;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultSqlDatabaseContextResolver"/>类型的实例
+    /// 初始化一个 <see cref="DefaultSqlDatabaseContextResolver"/> 类型的实例。
     /// </summary>
     /// <param name="databaseContextAccessor">数据库上下文访问器</param>
     /// <param name="options">Sql 元数据配置</param>

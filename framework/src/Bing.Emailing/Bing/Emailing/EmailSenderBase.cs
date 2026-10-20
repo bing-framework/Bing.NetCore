@@ -9,12 +9,12 @@ namespace Bing.Emailing;
 public abstract class EmailSenderBase : IEmailSender
 {
     /// <summary>
-    /// 电子邮件配置提供器
+    /// 获取电子邮件配置提供器
     /// </summary>
     public IEmailConfigProvider ConfigProvider { get; }
 
     /// <summary>
-    /// 初始化一个<see cref="EmailSenderBase"/>类型的实例
+    /// 初始化一个 <see cref="EmailSenderBase"/> 类型的实例。
     /// </summary>
     /// <param name="provider">电子邮件配置提供器</param>
     protected EmailSenderBase(IEmailConfigProvider provider) => ConfigProvider = provider ?? throw new ArgumentNullException(nameof(provider));

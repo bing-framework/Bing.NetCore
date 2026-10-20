@@ -8,11 +8,7 @@ namespace Bing.AspNetCore.Mvc.ModelBinding;
 /// </summary>
 public class StringTrimModelBinderProvider : IModelBinderProvider
 {
-    /// <summary>
-    /// 获取绑定器
-    /// </summary>
-    /// <param name="context">模型绑定提供程序上下文</param>
-    /// <returns>目标类型为字符串时返回 Trim 模型绑定器，否则返回 <see langword="null"/>。</returns>
+    /// <inheritdoc />
     public IModelBinder GetBinder(ModelBinderProviderContext context)
     {
         Check.NotNull(context, nameof(context));

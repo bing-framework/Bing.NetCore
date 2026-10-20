@@ -1,4 +1,6 @@
-# 排错指南
+# 工作流故障排查
+
+> 本文属于 Agent 协作协议的历史排查记录，不是产品功能说明或实现保证；实际行为以当前 Skill、脚本与源码为准。
 
 ## 先运行
 
@@ -8,7 +10,7 @@ node .agents/scripts/workflow-doctor.mjs
 
 ## 飞书测试
 
-Dry run：
+试运行：
 
 ```bash
 node .agents/scripts/notify-feishu.mjs --dry-run --workspace .
@@ -46,7 +48,7 @@ AI_EXECUTION_FINISHED_AT
 .agents/hooks.json
 ```
 
-Stop command：
+停止命令：
 
 ```text
 node ./scripts/stop-guard.mjs
@@ -130,13 +132,13 @@ FEISHU_WEBHOOK_URL=...
 node .agents/scripts/notify-feishu.mjs --send-test --workspace .
 ```
 
-Plan 测试：
+计划测试：
 
 ```bash
 node .agents/scripts/workflow-notify.mjs plan-created <taskId> --source copilot --force
 ```
 
-Review 测试：
+审查测试：
 
 ```bash
 node .agents/scripts/workflow-notify.mjs review-completed <taskId> --source copilot --force
@@ -150,7 +152,7 @@ node .agents/scripts/workflow-notify.mjs review-completed <taskId> --source copi
 node .agents/scripts/task-state.mjs status
 ```
 
-Review Fix 应看到：
+审查修复应看到：
 
 ```json
 "fixScope": "recommended"

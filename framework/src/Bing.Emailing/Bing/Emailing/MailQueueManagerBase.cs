@@ -28,18 +28,17 @@ public abstract class MailQueueManagerBase : IMailQueueManager
     /// </summary>
     private Thread _thread;
 
-    /// <summary>
+    /// <inheritdoc />
+    /// <remarks>
     /// 获取或设置后台邮件发送线程是否正在运行。
-    /// </summary>
+    /// </remarks>
     public bool IsRunning { get; protected set; } = false;
 
-    /// <summary>
-    /// 获取当前待发送邮件数量。
-    /// </summary>
+    /// <inheritdoc />
     public int Count => _mailQueueProvider.Count;
 
     /// <summary>
-    /// 初始化一个<see cref="MailQueueManagerBase"/>类型的实例
+    /// 初始化一个 <see cref="MailQueueManagerBase"/> 类型的实例。
     /// </summary>
     /// <param name="emailConfigProvider">电子邮件配置提供器</param>
     /// <param name="mailQueueProvider">邮件队列提供程序</param>
@@ -49,9 +48,7 @@ public abstract class MailQueueManagerBase : IMailQueueManager
         _mailQueueProvider = mailQueueProvider;
     }
 
-    /// <summary>
-    /// 运行
-    /// </summary>
+    /// <inheritdoc />
     public virtual void Run()
     {
         if (IsRunning || (_thread != null && _thread.IsAlive))
@@ -70,9 +67,7 @@ public abstract class MailQueueManagerBase : IMailQueueManager
         WriteLog($"线程已经启动，线程ID是: {_thread.ManagedThreadId}", LogLevel.Information);
     }
 
-    /// <summary>
-    /// 停止
-    /// </summary>
+    /// <inheritdoc />
     public virtual void Stop()
     {
         if (_tryStop)

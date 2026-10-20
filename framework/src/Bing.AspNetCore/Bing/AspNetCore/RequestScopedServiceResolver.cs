@@ -15,59 +15,39 @@ public class RequestScopedServiceResolver : IScopedServiceResolver
     /// </summary>
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    /// <summary>
-    /// 是否可解析
-    /// </summary>
+    /// <inheritdoc />
     public bool ResolveEnabled => _httpContextAccessor.HttpContext != null;
 
-    /// <summary>
-    /// <see cref="ServiceLifetime.Scoped"/>生命周期的服务提供程序
-    /// </summary>
+    /// <inheritdoc />
     public IServiceProvider ScopedProvider => _httpContextAccessor.HttpContext.RequestServices;
 
     /// <summary>
-    /// 是否空请求服务
+    /// 获取是否空请求服务
     /// </summary>
     protected bool EmptyRequestService => _httpContextAccessor.HttpContext.RequestServices == null;
 
     /// <summary>
-    /// 初始化一个<see cref="RequestScopedServiceResolver"/>类型的实例
+    /// 初始化一个 <see cref="RequestScopedServiceResolver"/> 类型的实例。
     /// </summary>
     /// <param name="httpContextAccessor">Http上下文访问器</param>
     public RequestScopedServiceResolver(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
-    /// <summary>
-    /// 获取指定服务类型的实例
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <returns>当前请求作用域中的服务实例；无法解析时返回默认值。</returns>
+    /// <inheritdoc />
     public T GetService<T>() => ResolveEnabled
         ? EmptyRequestService ? default : ScopedProvider.GetService<T>()
         : default;
 
-    /// <summary>
-    /// 获取指定服务类型的实例
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <returns>当前请求作用域中的服务实例；无法解析时返回 null。</returns>
+    /// <inheritdoc />
     public object GetService(Type serviceType) => ResolveEnabled
         ? EmptyRequestService ? null : ScopedProvider.GetService(serviceType)
         : null;
 
-    /// <summary>
-    /// 获取指定服务类型的所有实例
-    /// </summary>
-    /// <typeparam name="T">服务类型</typeparam>
-    /// <returns>当前请求作用域中解析到的服务实例集合；无请求作用域时返回空集合。</returns>
+    /// <inheritdoc />
     public IEnumerable<T> GetServices<T>() => ResolveEnabled
         ? EmptyRequestService ? new List<T>() : ScopedProvider.GetServices<T>()
         : new List<T>();
 
-    /// <summary>
-    /// 获取指定服务类型的所有实例
-    /// </summary>
-    /// <param name="serviceType">服务类型</param>
-    /// <returns>当前请求作用域中解析到的服务实例集合；无请求作用域时返回空集合。</returns>
+    /// <inheritdoc />
     public IEnumerable<object> GetServices(Type serviceType) => ResolveEnabled
         ? EmptyRequestService ? new List<object>() : ScopedProvider.GetServices(serviceType)
         : new List<object>();

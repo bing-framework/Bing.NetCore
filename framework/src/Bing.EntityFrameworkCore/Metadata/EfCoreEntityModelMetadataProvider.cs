@@ -18,7 +18,7 @@ public sealed class EfCoreEntityModelMetadataProvider : IEntityModelMetadataProv
     private readonly IModel _model;
 
     /// <summary>
-    /// 初始化一个<see cref="EfCoreEntityModelMetadataProvider"/>类型的实例。
+    /// 初始化一个 <see cref="EfCoreEntityModelMetadataProvider"/> 类型的实例。
     /// </summary>
     /// <param name="model">当前 DbContext 的关系模型。</param>
     public EfCoreEntityModelMetadataProvider(IModel model)
@@ -68,7 +68,7 @@ public sealed class EfCoreEntityModelMetadataProvider : IEntityModelMetadataProv
     }
 
     /// <summary>
-    /// 获取 EF Core 关系注解的字符串值。
+    /// 获取 EF Core 注解的字符串值。
     /// </summary>
     /// <param name="entity">EF Core 实体类型元数据。</param>
     /// <param name="name">注解名称。</param>
@@ -77,7 +77,7 @@ public sealed class EfCoreEntityModelMetadataProvider : IEntityModelMetadataProv
         entity.FindAnnotation(name)?.Value as string;
 
     /// <summary>
-    /// 获取 EF Core 属性关系注解的字符串值。
+    /// 获取 EF Core 注解的字符串值。
     /// </summary>
     /// <param name="property">EF Core 属性元数据。</param>
     /// <param name="name">注解名称。</param>

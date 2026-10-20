@@ -6,12 +6,12 @@
 public interface IEntityAliasRegister
 {
     /// <summary>
-    /// From子句设置的实体类型
+    /// 获取或设置From子句设置的实体类型
     /// </summary>
     Type FromType { get; set; }
 
     /// <summary>
-    /// 实体别名
+    /// 获取实体别名
     /// </summary>
     IReadOnlyDictionary<Type, string> Data { get; }
 

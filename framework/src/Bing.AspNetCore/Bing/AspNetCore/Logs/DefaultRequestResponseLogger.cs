@@ -14,15 +14,12 @@ public class DefaultRequestResponseLogger : IRequestResponseLogger
     private readonly ILogger<RequestResponseLog> _logger;
 
     /// <summary>
-    /// 初始化一个<see cref="DefaultRequestResponseLogger"/>类型的实例
+    /// 初始化一个 <see cref="DefaultRequestResponseLogger"/> 类型的实例。
     /// </summary>
     /// <param name="logger">日志记录器</param>
     public DefaultRequestResponseLogger(ILogger<RequestResponseLog> logger) => _logger = logger;
 
-    /// <summary>
-    /// 写入日志
-    /// </summary>
-    /// <param name="logCreator">请求响应日志创建者</param>
+    /// <inheritdoc />
     public void Log(IRequestResponseLogCreator logCreator)
     {
         if (_logger.IsEnabled(LogLevel.Trace) == false)
