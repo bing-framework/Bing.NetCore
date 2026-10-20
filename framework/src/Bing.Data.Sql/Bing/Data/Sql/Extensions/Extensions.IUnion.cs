@@ -6,6 +6,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 执行 Union 集合操作。
+/// </summary>
 public static partial class Extensions
 {
     #region Union(联合多个查询，Union会排除重复结果行)

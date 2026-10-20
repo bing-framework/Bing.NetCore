@@ -6,6 +6,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 添加内连接表源。
+/// </summary>
 public static partial class Extensions
 {
     /// <summary>

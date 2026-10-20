@@ -12,6 +12,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 设置 Insert 目标表。
+/// </summary>
 public static class MutationClauseExtensions
 {
     /// <summary>

@@ -5,6 +5,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 添加 Select 列。
+/// </summary>
 public static class SelectClauseExtensions
 {
     /// <summary>

@@ -6,6 +6,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 设置查询来源。
+/// </summary>
 public static partial class Extensions
 {
     /// <summary>

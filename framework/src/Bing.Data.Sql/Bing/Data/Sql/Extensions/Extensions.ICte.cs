@@ -6,6 +6,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 设置公用表表达式（CTE）。
+/// </summary>
 public static partial class Extensions
 {
     /// <summary>

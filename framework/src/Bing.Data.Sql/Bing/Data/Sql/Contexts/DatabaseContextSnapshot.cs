@@ -4,6 +4,7 @@ namespace Bing.Data.Sql;
 
 /// <summary>
 /// 创建数据库上下文快照。
+/// </summary>
 public static class DatabaseContextSnapshot
 {
     /// <summary>

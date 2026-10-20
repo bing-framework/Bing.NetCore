@@ -42,6 +42,7 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
 
     /// <summary>
     /// 添加条件。
+    /// </summary>
     internal ICondition Condition => _condition;
 
     /// <inheritdoc />

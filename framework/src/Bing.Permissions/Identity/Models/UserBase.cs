@@ -9,8 +9,6 @@ namespace Bing.Permissions.Identity.Models;
 /// <summary>
 /// 用户基类
 /// </summary>
-/// <typeparam name="TUser">用户实体类型。</typeparam>
-/// <typeparam name="TKey">用户标识类型。</typeparam>
 public partial class UserBase<TUser, TKey>
 {
     /// <summary>
