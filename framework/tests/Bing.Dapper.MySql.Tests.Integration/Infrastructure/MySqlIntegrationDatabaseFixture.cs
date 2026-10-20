@@ -1,4 +1,3 @@
-using AspectCore.Extensions.DependencyInjection;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Dapper;
