@@ -97,7 +97,7 @@ public sealed class EasyClusterFailureIntegrationTest
 
             using var rebuilt = BuildRedis(configuration);
             var cache = rebuilt.GetRequiredService<IRedisCache>();
-            var requested = keys.Reverse().Take(80)
+            var requested = Enumerable.Reverse(keys).Take(80)
                 .Concat(new[] { keys[0], prefix + "missing" })
                 .ToArray();
             var expected = requested.Select(key => values.TryGetValue(key, out var value) ? value : 0);

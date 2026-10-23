@@ -87,7 +87,7 @@ public sealed class EasyClusterRestartIntegrationTest
         var values = keys.Select((key, index) =>
                 new KeyValuePair<string, int>(key, index + 1))
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
-        var requested = keys.Reverse().Take(80)
+        var requested = Enumerable.Reverse(keys).Take(80)
             .Concat(new[] { keys[0], prefix + "missing" })
             .ToArray();
         var physicalKeys = keys.Select(key => CacheKeyFormat.GetPhysicalKey(configuration, key))

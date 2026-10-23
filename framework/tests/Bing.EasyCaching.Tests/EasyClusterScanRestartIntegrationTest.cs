@@ -183,7 +183,7 @@ public sealed class EasyClusterScanRestartIntegrationTest
 
             using var rebuilt = BuildClusterCache(configuration, 7000);
             var rebuiltCache = rebuilt.GetRequiredService<IRedisCache>();
-            var requested = keys.Reverse().Take(80)
+            var requested = Enumerable.Reverse(keys).Take(80)
                 .Concat(new[] { keys[0], prefix + "missing" })
                 .ToArray();
             var expected = requested.Select(key =>

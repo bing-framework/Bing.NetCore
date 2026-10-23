@@ -372,7 +372,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
                 catch (Exception ex) { errors.Add(ex); }
             }
             var context = new BingModuleShutdownContext(scope?.ServiceProvider ?? _provider);
-            foreach (var module in (_initializationOrder ?? _started.ToArray()).Reverse()
+            foreach (var module in Enumerable.Reverse(_initializationOrder ?? _started.ToArray())
                          .Where(module => _started.Contains(module, ModuleReferenceComparer.Instance)))
             {
                 try

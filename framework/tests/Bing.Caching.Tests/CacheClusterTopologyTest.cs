@@ -107,7 +107,7 @@ public class CacheClusterTopologyTest
         var localMaster = Nodes.Replace(
             "one 127.0.0.1:7001@17001 master - 0 1 1 connected 0-5000",
             "one 127.0.0.1:7001@17001 myself,master - 0 1 1 connected 0-5000");
-        var reordered = string.Join("\n", localMaster.Split('\n').Reverse());
+        var reordered = string.Join("\n", Enumerable.Reverse(localMaster.Split('\n')));
 
         CacheClusterTopology.GetLocalMasterId(localMaster).ShouldBe("one");
         CacheClusterTopology.GetLocalMasterId(reordered).ShouldBe("one");
@@ -167,7 +167,7 @@ public class CacheClusterTopologyTest
         Should.Throw<InvalidOperationException>(() => CacheClusterTopology.EnsureUnchanged(
             before, CacheClusterTopology.GetSlotOwnershipSnapshot(after)));
 
-        var reordered = string.Join("\n", Nodes.Split('\n').Reverse());
+        var reordered = string.Join("\n", Enumerable.Reverse(Nodes.Split('\n')));
         Should.NotThrow(() => CacheClusterTopology.EnsureUnchanged(
             before, CacheClusterTopology.GetSlotOwnershipSnapshot(reordered)));
 
@@ -194,7 +194,7 @@ public class CacheClusterTopologyTest
                 CacheClusterTopology.EnsureSameView(expected, divergent))
             .Message.ShouldContain("槽位视图不一致");
         Should.NotThrow(() => CacheClusterTopology.EnsureSameView(expected,
-            string.Join("\n", Nodes.Split('\n').Reverse())));
+            string.Join("\n", Enumerable.Reverse(Nodes.Split('\n')))));
     }
 
     /// <summary>

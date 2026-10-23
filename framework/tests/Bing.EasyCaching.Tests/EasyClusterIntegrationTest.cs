@@ -155,7 +155,7 @@ public sealed class EasyClusterIntegrationTest
         var keys = Enumerable.Range(0, 120).Select(index => prefix + index).ToArray();
         var values = keys.Select((key, index) => new KeyValuePair<string, int>(key, index + 1))
             .ToDictionary(item => item.Key, item => item.Value);
-        var requested = keys.Reverse().Take(80).Concat(new[] { keys[0], prefix + "missing" }).ToArray();
+        var requested = Enumerable.Reverse(keys).Take(80).Concat(new[] { keys[0], prefix + "missing" }).ToArray();
         var physicalKeys = keys.Select(key => CacheKeyFormat.GetPhysicalKey(configuration, key)).ToArray();
 
         AssertCrossSlot(physicalKeys);

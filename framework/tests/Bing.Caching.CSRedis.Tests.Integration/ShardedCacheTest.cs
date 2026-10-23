@@ -176,7 +176,7 @@ public class ShardedCacheTest
             .ToDictionary(item => item.Key, item => item.Value, StringComparer.Ordinal);
         var nullKey = prefix + "null";
         var missingKey = prefix + "missing";
-        var requested = keys.Reverse().Take(80)
+        var requested = Enumerable.Reverse(keys).Take(80)
             .Concat(new[] { keys[0], nullKey, missingKey, keys[0] }).ToArray();
 
         try
