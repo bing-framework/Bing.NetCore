@@ -199,16 +199,22 @@ public sealed class OrderedEventConsumerTest
         await host.StartAsync();
         try
         {
-            await failure.WaitForFailureAsync(TimeSpan.FromSeconds(10));
-            await Task.Delay(250);
-            Assert.InRange(failure.Attempts, 1, 4);
-            Assert.Empty(observation.EventIds);
+            await failure.WaitForAttemptsAsync(3, TimeSpan.FromSeconds(10));
         }
         finally
         {
             using var stopping = new CancellationTokenSource(TimeSpan.FromSeconds(5));
             await host.StopAsync(stopping.Token);
         }
+
+        var attempts = failure.AttemptTimestamps;
+        Assert.True(attempts.Length >= 3, $"Expected at least three construction attempts, but observed {attempts.Length}.");
+        for (var index = 1; index < attempts.Length; index++)
+        {
+            var interval = attempts[index] - attempts[index - 1];
+            Assert.True(interval >= 100, $"Expected at least 100 ms between attempts, but observed {interval} ms.");
+        }
+        Assert.Empty(observation.EventIds);
     }
 
     /// <summary>
@@ -936,39 +942,40 @@ public sealed class OrderedEventConsumerTest
     private sealed class PersistentHandlerConstructionFailure
     {
         /// <summary>
-        /// 构造尝试次数。
+        /// 保存各次构造尝试的单调时钟时间。
         /// </summary>
-        private int _attempts;
+        private readonly ConcurrentQueue<long> _attemptTimestamps = new();
 
         /// <summary>
-        /// 首次失败信号。
+        /// 每次构造尝试的完成信号。
         /// </summary>
-        private readonly TaskCompletionSource<bool> _failed =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly SemaphoreSlim _attemptRecorded = new(0);
 
         /// <summary>
-        /// 获取构造尝试次数。
+        /// 获取构造尝试时间快照。
         /// </summary>
-        internal int Attempts => Volatile.Read(ref _attempts);
+        internal long[] AttemptTimestamps => _attemptTimestamps.ToArray();
 
         /// <summary>
         /// 抛出持续构造故障。
         /// </summary>
         internal void Throw()
         {
-            Interlocked.Increment(ref _attempts);
-            _failed.TrySetResult(true);
+            _attemptTimestamps.Enqueue(Environment.TickCount64);
+            _attemptRecorded.Release();
             throw new InvalidOperationException("测试处理器持续构造失败。");
         }
 
         /// <summary>
-        /// 等待首次构造失败。
+        /// 在给定截止时间内等待指定次数的构造尝试。
         /// </summary>
+        /// <param name="count">需要观察的构造尝试次数。</param>
         /// <param name="timeout">等待超时时间。</param>
-        internal async Task WaitForFailureAsync(TimeSpan timeout)
+        internal async Task WaitForAttemptsAsync(int count, TimeSpan timeout)
         {
             using var cancellation = new CancellationTokenSource(timeout);
-            await _failed.Task.WaitAsync(cancellation.Token);
+            while (_attemptTimestamps.Count < count)
+                await _attemptRecorded.WaitAsync(cancellation.Token);
         }
     }
 
