@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Application.Contracts\Bing.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\Bing.Core.Tests\PluginFixtures\Bing.Core.PluginFixtures\Bing.Core.PluginFixtures.csproj"
                       ReferenceOutputAssembly="false" BuildReference="true"
                       SetConfiguration="Configuration=$(Configuration)"
