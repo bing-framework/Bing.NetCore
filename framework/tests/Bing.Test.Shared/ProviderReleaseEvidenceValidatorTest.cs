@@ -644,7 +644,8 @@ public sealed class ProviderReleaseEvidenceValidatorTest
             var directory = new DirectoryInfo(AppContext.BaseDirectory);
             while (directory != null)
             {
-                if (File.Exists(Path.Combine(directory.FullName, "Bing.All.sln")))
+                if (File.Exists(Path.Combine(directory.FullName, "Bing.All.slnx")) ||
+                    File.Exists(Path.Combine(directory.FullName, "Bing.All.sln")))
                     return directory.FullName;
                 directory = directory.Parent;
             }
