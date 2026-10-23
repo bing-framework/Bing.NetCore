@@ -13,35 +13,42 @@ namespace Bing.Events.Cap;
 public class CapTraceAttribute : InterceptorBase
 {
     /// <inheritdoc />
-    public override async Task Invoke(AspectContext context, AspectDelegate next)
+    public override Task Invoke(AspectContext context, AspectDelegate next)
     {
-        var parameters = context.GetParameters();
-        var param = parameters.FirstOrDefault(x => x.ParameterInfo.GetCustomAttribute<FromCapAttribute>() != null);
-        if (param == null)
-        {
-            await next(context);
-            return;
-        }
-
-        if (param.Value is CapHeader capHeader)
-        {
-            InitTraceIdContext(capHeader);
-            await next(context);
-        }
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _ = InvokeCoreAsync(context, next, completion);
+        return completion.Task;
     }
 
-    /// <summary>
-    /// 初始化跟踪标识上下文
-    /// </summary>
-    /// <param name="capHeader">包含跟踪标识的 CAP 消息头。</param>
-    private static void InitTraceIdContext(CapHeader capHeader)
+    private static async Task InvokeCoreAsync(AspectContext context, AspectDelegate next,
+        TaskCompletionSource completion)
     {
-        if (!capHeader.TryGetValue(Headers.TraceId, out var traceId))
-            return;
+        var parent = TraceIdContext.Current;
+        Exception invocationException = null;
+        try
+        {
+            var parameters = context.GetParameters();
+            var param = parameters.FirstOrDefault(x =>
+                x.ParameterInfo.GetCustomAttribute<FromCapAttribute>() != null);
+            if (param?.Value is CapHeader capHeader &&
+                capHeader.TryGetValue(Headers.TraceId, out var traceId) &&
+                !string.IsNullOrEmpty(traceId))
+                TraceIdContext.Current = new TraceIdContext(traceId);
 
-        if (TraceIdContext.Current == null)
-            TraceIdContext.Current = new TraceIdContext(traceId);
+            await next(context);
+        }
+        catch (Exception exception)
+        {
+            invocationException = exception;
+        }
+        finally
+        {
+            TraceIdContext.Current = parent;
+        }
+
+        if (invocationException == null)
+            completion.TrySetResult();
         else
-            TraceIdContext.Current.TraceId = traceId;
+            completion.TrySetException(invocationException);
     }
 }

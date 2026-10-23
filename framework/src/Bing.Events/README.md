@@ -81,6 +81,14 @@ public class OrderHandler : ICapSubscribe
 
 ## 注意事项
 
+### CAP 消息跟踪
+
+`CapTraceAttribute` 是显式 opt-in 的方法拦截器；只有被 AspectCore 代理且方法声明 `[CapTrace]` 时才运行，不会自动为所有 CAP 订阅开启跟踪。它读取第一个 `[FromCap]` 参数：没有标记参数、参数值为 `null` 或不是 `CapHeader` 时仍调用目标一次并保留父上下文。实际 CAP 还会先按原生规则绑定 `[FromCap]` 参数；拦截器不会让 CAP 支持原本不支持的参数类型。
+
+缺少 `bing-trace-id`、头值为 `null` 或空串时沿用父 `TraceIdContext`。非空值原样传播，包括纯空白字符串；不会 trim，也不会把父对象的 `RootId`、`ParentId` 或 `ChildId` 复制到新上下文。有效值使用独立对象，`CapTraceAttribute.Invoke` 在拦截管道完成、失败或取消后恢复原父引用。AspectCore 的已取消 Task 快路径由该拦截器局部适配：管道 Task 在恢复后以原 `OperationCanceledException` fault，使外层拦截器仍观察到失败并保留取消令牌。直接代理回归见 [CapTraceAttributeTest](../../tests/Bing.EventBus.Tests/Cap/CapTraceAttributeTest.cs)。
+
+Admin 另有真实 CAP 消费路径：`modules/admin/src/Bing.Admin/Modules/CapModule.cs` 注册的 `CapSubscribeInvoker` 在 `GetInstance` 中为有效非空头值创建独立上下文；它不在 `GetInstance` 立即恢复，而由 CAP 8.0.1 原生 `ISubscribeInvoker.InvokeAsync` 的 async 调用边界恢复调用方状态。目标和订阅 filter 都能看到消息 trace，调用返回后父引用及其字段不变；真实生命周期回归见 [AdminCapTraceInvocationTest](../../../modules/admin/tests/Bing.Admin.EFCore.Tests/AdminCapTraceInvocationTest.cs)。这不表示 FreeSQL 调用器或任意原生 CAP 注册自动获得相同跟踪行为。
+
 仓库里还有一套遗留的 `Bing.EventBus`（命名空间 `Bing.EventBus`），它与本包都有 `IEventBus` / `IMessageEventBus`，同时 using 会歧义。新代码请使用 `Bing.Events`。必须保留旧 `IMessageEventBus` 的宿主可以引用 `Bing.Events.EventBusAdapter`，在注册 CAP 后显式调用 `services.AddLegacyCapMessageEventBusAdapter()`；适配器不自动双派发。
 
 `MessageEvent` 的可选 `TenantId`、`Stream`、`EntityKey`、`Sequence`、`ContractVersion` 和 `TraceId` 经 `ClusterEventHeaders` 写入 CAP 消息头。有序事件需要正序号、业务流和实体键。该元数据不提供序号分配或顺序保证。

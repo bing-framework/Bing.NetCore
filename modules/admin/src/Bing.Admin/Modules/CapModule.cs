@@ -294,11 +294,10 @@ namespace Bing.Admin.Modules
                 return;
             if (!capHeader.TryGetValue("bing-trace-id", out var traceId))
                 return;
+            if (string.IsNullOrEmpty(traceId))
+                return;
             _logger.LogDebug("Init TraceId: {0}", traceId);
-            if (TraceIdContext.Current == null)
-                TraceIdContext.Current = new TraceIdContext(traceId);
-            else
-                TraceIdContext.Current.TraceId = traceId;
+            TraceIdContext.Current = new TraceIdContext(traceId);
         }
     }
 }
