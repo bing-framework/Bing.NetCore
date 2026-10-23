@@ -24,6 +24,8 @@ SQLite 集成测试使用临时文件，不依赖网络、容器或数据库凭�
 
 MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受保护 CI 或本机专用测试环境中设置对应变量后执行：
 
+四个 Dapper 集成测试项目不会自动加载同目录的 `integration.local.runsettings`。普通 VSTest 只有在命令显式传入 `--settings <path>` 时才使用指定文件。不要把包含 `RUN_INTEGRATION_TESTS=true` 的本机配置作为默认测试配置。
+
 | Provider | 启用变量 | 连接字符串变量 |
 | --- | --- | --- |
 | MySQL | `RUN_MYSQL_INTEGRATION_TESTS=true` | `ConnectionStrings__MySqlConnection` |
@@ -31,7 +33,9 @@ MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受�
 | SQL Server | `RUN_SQLSERVER_INTEGRATION_TESTS=true` | `ConnectionStrings__SqlServerConnection` |
 | Oracle | `RUN_ORACLE_INTEGRATION_TESTS=true` | `ConnectionStrings__OracleConnection` |
 
-`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥、环境变量或未跟踪的 `integration.runsettings.local` 注入，日志、异常和测试输出不得回显密码。受保护 Provider runner 可在本机显式读取目标项目的 `.local` 文件，并且只导入目标 Provider gate、目标连接、reset 授权和 MySQL 跨库选项；settings 文件中的全局 gate 与其他 Provider 变量会被忽略，但进程环境中已有的冲突变量会由 preflight 拒绝。Provider CI 禁止读取 `.local`，也禁止 `ConnectionStrings__DefaultConnection` 回退。仓库当前不跟踪外部 Provider 的公共 `integration.runsettings` 模板。
+`RUN_INTEGRATION_TESTS=true` 仅用于本地同时验证多个外部 Provider；受保护 Provider CI 不得设置它。PostgreSQL 的唯一规范 gate 是 `RUN_POSTGRESQL_INTEGRATION_TESTS=true`，不支持 `RUN_PGSQL_INTEGRATION_TESTS`。连接字符串应通过 CI 密钥、环境变量或显式传入普通 VSTest 的未跟踪 Settings 文件注入，日志、异常和测试输出不得回显密码。
+
+Provider runner 的 `-RunSettingsPath`（别名 `-Settings`）只接受仓库内名为 `integration.runsettings.local` 的 UTF-8 XML 文件。runner 仅导入当前 Provider gate、当前 Provider 连接、reset 授权和 MySQL 跨库选项；设置文件中的全局 gate 与其他 Provider 变量会被忽略，进程环境中已有的冲突变量会由 preflight 拒绝。`-ResultsDirectory` 必须是仓库内 `artifacts/provider-test-results` 的相对路径，并应为每次运行指定唯一子目录。Provider CI 禁止读取本地 Settings，也禁止 `ConnectionStrings__DefaultConnection` 回退。仓库当前不跟踪外部 Provider 的公共 Settings 模板。
 
 Provider 在导入配置或 preflight 失败时仍以非零退出，并在 `artifacts/provider-test-results/<run>/provider-startup-diagnostic.json` 写入脱敏诊断。诊断只包含 Provider、测试程序集、TFM、配置来源、gate、连接是否配置、安全数据库名、reset、可达性、`ExecutionStatus` 和 `BlockedReason`；常见原因包括 `ProviderGateDisabled`、`SettingsMissing`、`ConnectionMissing`、`UnsafeDatabase`、`ResetDenied` 和 `Unreachable`。原始异常和连接字符串不会写入该制品，因此该 JSON 不能被解释为测试通过。
 
@@ -50,7 +54,8 @@ Provider 在导入配置或 preflight 失败时仍以非零退出，并在 `arti
 ```powershell
 .\eng\ci\Invoke-ProviderIntegrationTests.ps1 `
     -Provider PostgreSql -Framework net8.0 `
-    -Settings .\framework\tests\Bing.Dapper.PostgreSql.Tests.Integration\integration.runsettings.local
+    -Settings .\integration.runsettings.local `
+    -ResultsDirectory artifacts/provider-test-results/full-suite-recovery
 ```
 
 如果 MySQL 服务器使用 `caching_sha2_password`，本机 Settings 必须提供受信 TLS，或由管理员为专用测试账号配置受控 RSA public key retrieval；runner 不会自动放宽 TLS/RSA 安全策略，也不会把认证失败标记为 Skip。

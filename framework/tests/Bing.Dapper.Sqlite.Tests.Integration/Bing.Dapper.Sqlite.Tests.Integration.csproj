@@ -13,7 +13,4 @@
     <ProjectReference Include="..\Bing.Test.Shared\Bing.Test.Shared.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(CI)' != 'true' And '$(ContinuousIntegrationBuild)' != 'true' And Exists('$(MSBuildProjectDirectory)\integration.local.runsettings')">
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\integration.local.runsettings</RunSettingsFilePath>
-  </PropertyGroup>
 </Project>
