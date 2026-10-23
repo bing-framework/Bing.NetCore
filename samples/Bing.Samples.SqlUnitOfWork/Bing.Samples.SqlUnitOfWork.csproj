@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.16" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.0" />
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="8.0.1" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\framework\src\Bing.Dapper.Sqlite\Bing.Dapper.Sqlite.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.EntityFrameworkCore.Sqlite\Bing.EntityFrameworkCore.Sqlite.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.EntityFrameworkCore.MySql\Bing.EntityFrameworkCore.MySql.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+  </ItemGroup>
+
+</Project>

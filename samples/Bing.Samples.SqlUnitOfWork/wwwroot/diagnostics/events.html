@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CAP 事件诊断</title>
+  <style>
+    :root { color-scheme: light; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; color: #18212b; background: #f4f6f7; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #fff; border-bottom: 1px solid #dce2e5; padding: 18px 24px; }
+    main { max-width: 1440px; margin: 0 auto; padding: 20px 24px 40px; }
+    h1 { display: inline; margin: 0; font-size: 21px; font-weight: 650; }
+    .meta { color: #596671; font-size: 13px; margin-left: 16px; }
+    a { color: #145e7a; }
+    .source-line { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 13px 0; color: #3e4c57; font-size: 13px; }
+    .source-line strong { color: #18212b; font-weight: 600; }
+    form { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)) auto; gap: 10px; padding: 14px 0 18px; border-top: 1px solid #dce2e5; border-bottom: 1px solid #dce2e5; }
+    label { display: grid; gap: 5px; color: #596671; font-size: 12px; }
+    input, select { width: 100%; min-width: 0; height: 36px; border: 1px solid #bcc7cd; border-radius: 3px; background: #fff; color: #18212b; padding: 0 9px; font: inherit; font-size: 13px; }
+    button { align-self: end; height: 36px; border: 1px solid #155f78; border-radius: 3px; background: #155f78; color: #fff; padding: 0 17px; font: inherit; font-size: 13px; cursor: pointer; }
+    button:hover { background: #104b60; }
+    section { margin-top: 22px; }
+    h2 { margin: 0 0 10px; font-size: 15px; font-weight: 650; }
+    .table-wrap { overflow-x: auto; border: 1px solid #dce2e5; background: #fff; }
+    table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid #e7ecee; text-align: left; vertical-align: top; }
+    th { background: #eef2f3; color: #47545e; font-weight: 600; white-space: nowrap; }
+    td { max-width: 260px; overflow-wrap: anywhere; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .status { font-weight: 650; }
+    .status[data-value="committed"], .status[data-value="Succeeded"] { color: #17683b; }
+    .status[data-value="rolled-back"], .status[data-value="Failed"] { color: #a3332b; }
+    .status[data-value="partial-commit"], .status[data-value="in-progress"], .status[data-value="pending"] { color: #9a5a0a; }
+    .status[data-value="not-committed"] { color: #a3332b; }
+    .status[data-value="unknown"], .status[data-value="unobserved"] { color: #6a737a; }
+    .empty, .error { padding: 16px; color: #66737c; }
+    .error { color: #a3332b; }
+    @media (max-width: 900px) { form { grid-template-columns: repeat(2, minmax(120px, 1fr)); } button { grid-column: 2; } }
+    @media (max-width: 560px) { header { padding: 15px 16px; } main { padding: 14px 16px 28px; } form { grid-template-columns: 1fr; } button { grid-column: auto; } .meta { display: block; margin: 7px 0 0; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CAP 事件诊断</h1>
+    <span class="meta" id="observedAt">读取中</span>
+    <span class="meta"><a id="dashboardLink" hidden target="_blank" rel="noopener noreferrer">CAP Dashboard</a></span>
+  </header>
+  <main>
+    <div id="sources" class="source-line" aria-live="polite"></div>
+    <form id="filters">
+      <label>操作 ID<input name="operationId" autocomplete="off"></label>
+      <label>事件 ID<input name="eventId" autocomplete="off"></label>
+      <label>Trace ID<input name="traceId" autocomplete="off"></label>
+      <label>数据源<select name="source"><option value="">全部</option><option value="orders">orders</option><option value="reporting">reporting</option></select></label>
+      <label>状态<select name="status"><option value="">全部</option><option value="committed">已提交</option><option value="rolled-back">已回滚</option><option value="partial-commit">部分提交</option><option value="pending">待投递</option><option value="Failed">消费失败</option><option value="Succeeded">消费成功</option><option value="unknown">未知</option></select></label>
+      <button type="submit">查询</button>
+    </form>
+    <section>
+      <h2>操作与数据源事实</h2>
+      <div class="table-wrap"><table><thead><tr><th>操作 ID</th><th>Job ID</th><th>场景</th><th>执行结果</th><th>Root ID</th><th>orders 数据库观测 / 行 / Outbox</th><th>reporting 数据库观测 / 行 / Outbox</th><th>事件</th><th>消费尝试 / 副作用</th><th>逐源提交后通知失败</th><th>请求错误</th></tr></thead><tbody id="operations"></tbody></table></div>
+    </section>
+    <section>
+      <h2>事件、Outbox 与消费</h2>
+      <div class="table-wrap"><table><thead><tr><th>操作 ID</th><th>Event ID</th><th>来源 / 主题</th><th>Trace ID</th><th>CAP 原生 Id 集</th><th>Outbox / 数据库行观测</th><th>CAP received 当前记录 / 条数</th><th>ConsumerName / Group</th><th>所有尝试 (ID / 时间 / 状态 / 错误)</th><th>副作用</th><th>证据来源</th></tr></thead><tbody id="events"></tbody></table></div>
+    </section>
+    <section>
+      <h2>操作过程记录</h2>
+      <div class="table-wrap"><table><thead><tr><th>操作 ID</th><th>Event ID</th><th>数据源</th><th>步骤</th><th>时间 (UTC)</th></tr></thead><tbody id="processSteps"></tbody></table></div>
+    </section>
+    <div id="resultState" class="empty" aria-live="polite"></div>
+  </main>
+  <script>
+    const form = document.querySelector('#filters');
+    const operationsBody = document.querySelector('#operations');
+    const eventsBody = document.querySelector('#events');
+    const processStepsBody = document.querySelector('#processSteps');
+    const resultState = document.querySelector('#resultState');
+    const sources = document.querySelector('#sources');
+    const observedAt = document.querySelector('#observedAt');
+    const dashboardLink = document.querySelector('#dashboardLink');
+
+    function cell(row, value, className) {
+      const td = document.createElement('td');
+      td.textContent = value == null || value === '' ? '未观测' : String(value);
+      if (className) {
+        td.className = className;
+        td.dataset.value = String(value ?? '').toLowerCase();
+      }
+      row.append(td);
+    }
+
+    function renderOperations(items) {
+      operationsBody.replaceChildren();
+      for (const item of items) {
+        const row = document.createElement('tr');
+        cell(row, item.operationId);
+        cell(row, item.jobId);
+        cell(row, item.scenario);
+        cell(row, `${item.status} / ${item.executionOutcome || '结果未知'}`, 'status');
+        cell(row, item.rootId);
+        cell(row, `${item.ordersCommitStatus} / ${item.ordersBusinessRows} / ${item.ordersOutboxRows}`);
+        cell(row, `${item.reportingCommitStatus} / ${item.reportingBusinessRows} / ${item.reportingOutboxRows}`);
+        cell(row, item.eventCount);
+        cell(row, `${item.consumerAttempts} / ${item.consumerEffects}`);
+        cell(row, (item.callbackFailures || []).map(failure =>
+          `${failure.source || '源未知'} #${failure.resourceSequence ?? '?'} ${failure.outcome}: ${failure.error}`).join('\n'));
+        cell(row, item.error || item.observationError);
+        operationsBody.append(row);
+      }
+    }
+
+    function renderEvents(items) {
+      eventsBody.replaceChildren();
+      for (const item of items) {
+        const row = document.createElement('tr');
+        cell(row, item.operationId);
+        cell(row, item.eventId);
+        cell(row, `${item.source} / ${item.topic}`);
+        cell(row, item.traceId);
+        cell(row, (item.capMessageIds || []).join(', '));
+        cell(row, `${item.outboxStatus} / retry ${item.outboxRetries} / ${item.databaseCommitStatus}`,
+          item.outboxStatus === 'unknown' || item.outboxStatus === 'unobserved' ? 'status' : null);
+        cell(row, `${item.capReceivedStatus} / ${item.capReceivedMessageCount}`);
+        cell(row, (item.consumerNames || []).join(', '));
+        cell(row, (item.consumerAttemptDetails || []).map(attempt =>
+          `#${attempt.attemptId} ${attempt.createdAt ? new Date(attempt.createdAt).toISOString() : '时间未知'} ${attempt.status}${attempt.error ? `: ${attempt.error}` : ''}`).join('\n') || `${item.consumerStatus} / ${item.consumerAttempts}`);
+        cell(row, item.consumerEffectCount);
+        cell(row, item.evidenceSource);
+        eventsBody.append(row);
+      }
+    }
+
+    function renderProcessSteps(items) {
+      processStepsBody.replaceChildren();
+      for (const operation of items) {
+        for (const step of operation.processSteps || []) {
+          const row = document.createElement('tr');
+          cell(row, operation.operationId);
+          cell(row, step.eventId);
+          cell(row, step.source);
+          cell(row, step.step);
+          cell(row, new Date(step.at).toISOString());
+          processStepsBody.append(row);
+        }
+      }
+    }
+
+    async function load() {
+      resultState.className = 'empty';
+      resultState.textContent = '读取中';
+      const query = new URLSearchParams(new FormData(form));
+      for (const [key, value] of [...query.entries()]) if (!value) query.delete(key);
+      try {
+        const response = await fetch(`/api/diagnostics/events?${query}`, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        observedAt.textContent = `观测时间 ${new Date(data.observedAt).toLocaleString()}`;
+        sources.replaceChildren();
+        for (const source of data.dataSources) {
+          const item = document.createElement('span');
+          const strong = document.createElement('strong');
+          strong.textContent = `${source.source}: ${source.status}`;
+          item.append(strong, document.createTextNode(` · ${source.databaseName || '数据库未知'} · CAP Outbox ${source.capPublishedObserved ? '已观测' : '未观测'} · CAP received ${source.capReceivedObserved ? '已观测' : '未观测'} · Consumer ${source.consumerTablesObserved ? '已观测' : '未观测'}${source.error ? ` · ${source.error}` : ''}`));
+          sources.append(item);
+        }
+        if (data.capDashboardUrl) {
+          dashboardLink.href = data.capDashboardUrl;
+          dashboardLink.hidden = false;
+        } else {
+          dashboardLink.hidden = true;
+        }
+        renderOperations(data.operations);
+        renderEvents(data.events);
+        renderProcessSteps(data.operations);
+        resultState.textContent = data.operations.length || data.events.length ? '' : '没有匹配的记录';
+      } catch (error) {
+        resultState.className = 'error';
+        resultState.textContent = `读取失败：${error.message}`;
+      }
+    }
+
+    form.addEventListener('submit', event => { event.preventDefault(); load(); });
+    load();
+  </script>
+</body>
+</html>

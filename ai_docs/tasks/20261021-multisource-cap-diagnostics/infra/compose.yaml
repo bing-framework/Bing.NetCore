@@ -1,0 +1,41 @@
+name: bing-multisource-cap-diagnostics
+
+services:
+  mysql:
+    image: mysql:8.0.16
+    environment:
+      MYSQL_ROOT_PASSWORD: cap_root_local_only
+    ports:
+      - "127.0.0.1:13307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pcap_root_local_only"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    environment:
+      RABBITMQ_DEFAULT_USER: cap_local
+      RABBITMQ_DEFAULT_PASS: cap_local_only
+      RABBITMQ_DEFAULT_VHOST: sqluow
+    ports:
+      - "127.0.0.1:5673:5672"
+      - "127.0.0.1:15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

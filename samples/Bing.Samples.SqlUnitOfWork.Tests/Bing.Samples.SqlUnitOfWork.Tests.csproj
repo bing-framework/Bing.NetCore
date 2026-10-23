@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BingTestingUseHosting>true</BingTestingUseHosting>
+    <BingTestingUseTestHost>true</BingTestingUseTestHost>
+  </PropertyGroup>
+
+  <Import Project="..\..\framework.tests.props" />
+
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP.MySql" Version="8.0.1" />
+    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bing.Samples.SqlUnitOfWork\Bing.Samples.SqlUnitOfWork.csproj" />
+    <ProjectReference Include="..\Bing.Samples.SqlUnitOfWork.Consumer\Bing.Samples.SqlUnitOfWork.Consumer.csproj" />
+    <ProjectReference Include="..\..\framework\src\Bing.Events\Bing.Events.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:5000
+
+### 同库跨层提交
+POST {{baseUrl}}/api/scenarios/cross-layer-commit
+
+### 同库跨层回滚
+POST {{baseUrl}}/api/scenarios/cross-layer-rollback
+
+### 双库提交
+POST {{baseUrl}}/api/scenarios/multi-database-commit
+
+### 双库回滚
+POST {{baseUrl}}/api/scenarios/multi-database-rollback
+
+### 捕获 SQL 异常后仍拒绝提交
+POST {{baseUrl}}/api/scenarios/caught-sql-exception
+
+### 创建并释放 100 个工厂 Query
+POST {{baseUrl}}/api/scenarios/factory-query-lifetime
+
+### EF SaveChanges 与 Dapper 共用事务（EfBridge 模式）
+POST {{baseUrl}}/api/scenarios/ef-dapper-commit
+
+### 只读 scope 隔离探针
+POST {{baseUrl}}/api/scenarios/scope-isolation-probe
+
+### executor root 提交（需 SqlUow:OperationsEnabled=true）
+POST {{baseUrl}}/api/operation-scenarios/operation-success
+
+### executor 在写入后失败并回滚（需 SqlUow:OperationsEnabled=true）
+POST {{baseUrl}}/api/operation-scenarios/operation-failure
+
+### EF tracked-only 自动保存（需 EfBridge 和 SqlUow:OperationsEnabled=true）
+POST {{baseUrl}}/api/operation-scenarios/operation-ef-tracked-only
+
+### BackgroundService 入队
+POST {{baseUrl}}/api/worker/scenarios/cross-layer-commit
+
+### Hangfire Server 入队
+POST {{baseUrl}}/api/jobs/scenarios/multi-database-commit
+
+### Hangfire executor 入队（需 SqlUow:OperationsEnabled=true）
+POST {{baseUrl}}/api/jobs/scenarios/operation-success
+
+### 将值替换为上一个异步响应中的 operationId
+@operationId = replace-with-operation-id
+GET {{baseUrl}}/api/operations/{{operationId}}

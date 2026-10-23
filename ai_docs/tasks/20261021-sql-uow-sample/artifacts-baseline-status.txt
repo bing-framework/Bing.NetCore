@@ -1,0 +1,71 @@
+## dev_v6.0...origin/dev_v6.0
+ M ai_docs/tasks/20261021-merged-code-audit/backlog.md
+ M ai_docs/tasks/20261021-merged-code-audit/final-report.md
+ M docs/migrations/sql-transaction-api-vNext.md
+ M docs/sql/migration-guide.md
+ M docs/sql/sqlquery-usage.md
+ M docs/testing/database-integration-tests.md
+ M framework/src/Bing.Dapper.Core/Bing.Dapper.Core.csproj
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/DapperServiceCollectionExtensions.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlExecutorBase.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlMultipleQueryExecutorBase.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlQueryBase.QueryPlan.Paging.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlQueryBase.QueryPlan.Streaming.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlQueryBase.Transaction.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlQueryBase.cs
+ M framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlTransactionScopeFactory.cs
+ M framework/src/Bing.Data.Sql/AssemblyInfo.cs
+ M framework/src/Bing.Ddd.Application.AspectCore/Bing/DependencyInjection/BingUnitOfWorkExtensions.cs
+ M framework/src/Bing.EntityFrameworkCore/Bing.EntityFrameworkCore.csproj
+ M framework/src/Bing.EntityFrameworkCore/Core/EfCoreSqlQueryFactory.cs
+ M framework/src/Bing.EntityFrameworkCore/Core/StoreBase.cs
+ M framework/src/Bing.EntityFrameworkCore/Core/UnitOfWorkBase.cs
+ M framework/src/Bing.EntityFrameworkCore/Extensions/EfCoreSqlQueryServiceCollectionExtensions.cs
+ M framework/src/Bing.Uow/README.md
+ M framework/tests/Bing.Aop.AspectCore.Tests/UnitOfWorkAdapterTest.cs
+ M framework/tests/Bing.Dapper.Core.Tests/DependencyInjection/DapperCoreServiceCollectionExtensionsTest.cs
+ M framework/tests/Bing.Dapper.Core.Tests/Factories/SqlFactoryTest.cs
+ M framework/tests/Bing.Dapper.MySql.Tests/Metadata/MySqlProviderRegistrationTest.cs
+ M framework/tests/Bing.Dapper.Oracle.Tests/Metadata/OracleProviderRegistrationTest.cs
+ M framework/tests/Bing.Dapper.PostgreSql.Tests/Metadata/PostgreSqlProviderRegistrationTest.cs
+ M framework/tests/Bing.Dapper.SqlServer.Tests/Metadata/MultiProviderRegistrationTest.cs
+ M framework/tests/Bing.Dapper.SqlServer.Tests/Metadata/SqlServerRoutingAndExecutionTest.cs
+ M framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj
+ M framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Infrastructure/SqliteIntegrationDatabaseFixture.cs
+ M framework/tests/Bing.Data.Sql.Benchmarks/SqlMetadataBenchmarks.cs
+ M framework/tests/Bing.Data.Sql.Benchmarks/SqliteDapperE2EBenchmarks.cs
+ M framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqlQueryFactoryTest.cs
+ M framework/tests/Bing.FreeSQL.Tests/Bing.FreeSQL.Tests.csproj
+?? ai_docs/tasks/20261021-f008-sql-factory-scope/
+?? ai_docs/tasks/20261021-sql-multidb-unit-of-work/
+?? ai_docs/tasks/20261021-sql-uow-sample/
+?? framework/src/Bing.Dapper.Core/Bing/Data/Sql/DapperSqlUnitOfWorkResource.cs
+?? framework/src/Bing.Dapper.Core/Bing/Data/Sql/SqlQueryBase.UnitOfWork.cs
+?? framework/src/Bing.EntityFrameworkCore/Core/EfCoreSqlUnitOfWorkConnectionProvider.cs
+?? framework/src/Bing.Uow/Bing/Uow/IUnitOfWorkConnectionProvider.cs
+?? framework/src/Bing.Uow/Bing/Uow/IUnitOfWorkResource.cs
+?? framework/src/Bing.Uow/Bing/Uow/IUnitOfWorkScope.cs
+?? framework/src/Bing.Uow/Bing/Uow/IUnitOfWorkScopeManager.cs
+?? framework/src/Bing.Uow/Bing/Uow/UnitOfWorkScope.cs
+?? framework/src/Bing.Uow/Bing/Uow/UnitOfWorkScopeManager.cs
+?? framework/src/Bing.Uow/Bing/Uow/UnitOfWorkScopeOptions.cs
+?? framework/src/Bing.Uow/Bing/Uow/UnitOfWorkScopeServiceCollectionExtensions.cs
+?? framework/tests/Bing.Dapper.Core.Tests/DapperSqlUnitOfWorkResourceTest.cs
+?? framework/tests/Bing.Dapper.Core.Tests/DependencyInjection/SqlFactoryRegistrationContractTest.cs
+?? framework/tests/Bing.Dapper.SqlServer.Tests/UnitOfWork/
+?? framework/tests/Bing.Dapper.Sqlite.Tests.Integration/SqlQuery/SqlFactoryCacheScopeContractTest.cs
+?? framework/tests/Bing.Dapper.Sqlite.Tests.Integration/SqlQuery/SqlFactoryScopeContractTest.cs
+?? framework/tests/Bing.Dapper.Sqlite.Tests.Integration/SqlQuery/SqlTransactionScopeFilterContractTest.cs
+?? framework/tests/Bing.Dapper.Sqlite.Tests.Integration/SqlQuery/SqliteUnitOfWorkContractTest.cs
+?? framework/tests/Bing.Data.Sql.Benchmarks/SqlUnitOfWorkProbe.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqlQueryFactoryRegistrationContractTest.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqlQueryFactoryScopeFilterContractTest.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqlUnitOfWorkConnectionProviderTest.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqlUnitOfWorkResourceTest.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Core/EfCoreSqliteUnitOfWorkTestSupport.cs
+?? framework/tests/Bing.EntityFrameworkCore.Tests/Integration/EfCoreSqliteUnitOfWorkContractTest.cs
+?? framework/tests/Bing.FreeSQL.Tests/Data/Stores/QueryStoreBaseUnitOfWorkTest.cs
+?? framework/tests/Bing.Uow.Tests/BackgroundScopeConsumerTest.cs
+?? framework/tests/Bing.Uow.Tests/UnitOfWorkScopeApiContractTest.cs
+?? framework/tests/Bing.Uow.Tests/UnitOfWorkScopeRegistrationTest.cs
+?? framework/tests/Bing.Uow.Tests/UnitOfWorkScopeTest.cs
