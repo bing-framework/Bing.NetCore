@@ -16,8 +16,8 @@ public static class BingCapHostRoleExtensions
     /// <param name="services">已完成 <see cref="Extensions.AddCapEventBus"/> 注册的服务集合。</param>
     /// <returns>原服务集合。</returns>
     /// <remarks>
-    /// 该方法移除 CAP 原生消费者注册器和包含接收重试的处理服务器，保留 Dispatcher、存储及启动衔接，
-    /// 因而仍可将业务事务中的出箱消息发布到代理。默认未调用时保持 CAP 的发布和消费行为。
+    /// 该方法移除 CAP 原生消费者注册处理器别名，同时保留 CAP 处理服务器；处理服务器包含发布 Outbox
+    /// 重试、延迟消息和清理任务。默认未调用时保持 CAP 的发布和消费行为。
     /// 调用方必须在其他进程或宿主中运行同一逻辑消费者组；本方法不会创建消费者工作进程。
     /// </remarks>
     public static IServiceCollection EnableBingCapPublisherOnly(this IServiceCollection services)
@@ -31,10 +31,9 @@ public static class BingCapHostRoleExtensions
             if (descriptor.ServiceType != typeof(IProcessingServer))
                 continue;
 
-            // CAP 用返回类型为 IConsumerRegister 的工厂注册消费者别名；另一个处理器包含接收重试。
+            // CAP 用返回类型为 IConsumerRegister 的工厂注册消费者处理别名。
             var isConsumerAlias = descriptor.ImplementationFactory?.Method.ReturnType == typeof(IConsumerRegister);
-            var isCapProcessingServer = descriptor.ImplementationType == typeof(CapProcessingServer);
-            if (isConsumerAlias || isCapProcessingServer)
+            if (isConsumerAlias)
                 services.RemoveAt(index);
         }
         return services;

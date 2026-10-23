@@ -13,7 +13,7 @@ namespace Bing.EventBus.Tests.Cap;
 public sealed class CapHostRoleRegistrationTest
 {
     /// <summary>
-    /// 验证仅发布角色保留 Dispatcher 并移除消费者处理器。
+    /// 验证仅发布角色保留 CAP Outbox 重试处理器并移除消费者处理器别名。
     /// </summary>
     [Fact]
     public void EnableBingCapPublisherOnly_ShouldKeepDispatcherAndRemoveConsumers()
@@ -24,10 +24,12 @@ public sealed class CapHostRoleRegistrationTest
         services.EnableBingCapPublisherOnly();
 
         var processors = services.Where(item => item.ServiceType == typeof(IProcessingServer)).ToArray();
-        Assert.Single(processors);
-        Assert.Equal(typeof(IDispatcher), processors[0].ImplementationFactory?.Method.ReturnType);
+        Assert.Equal(2, processors.Length);
+        Assert.Contains(processors, item => item.ImplementationFactory?.Method.ReturnType == typeof(IDispatcher));
+        Assert.Contains(processors, item => item.ImplementationType?.Name == "CapProcessingServer");
+        Assert.DoesNotContain(processors,
+            item => item.ImplementationFactory?.Method.ReturnType == typeof(IConsumerRegister));
         Assert.Contains(services, item => item.ServiceType == typeof(IConsumerRegister));
-        Assert.DoesNotContain(processors, item => item.ImplementationType?.Name == "CapProcessingServer");
     }
 
     /// <summary>

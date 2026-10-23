@@ -16,12 +16,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.28" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bing.EventBus\Bing.EventBus.csproj" />
     <ProjectReference Include="..\..\src\Bing.Events.EventBusAdapter\Bing.Events.EventBusAdapter.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Uow\Bing.Uow.csproj" />
   </ItemGroup>
 
 </Project>

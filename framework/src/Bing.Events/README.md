@@ -3,7 +3,7 @@
 
 > 事件总线：本地事件 + 基于 DotNetCore.CAP 的分布式事件。
 >
-> **目标框架**：`net6.0` ｜ **分层**：横切 / 事件 ｜ **当前版本**：7.0.0 ｜ **源文件**：11
+> **目标框架**：`net6.0` ｜ **分层**：横切 / 事件 ｜ **当前版本**：7.0.0 ｜ **源文件**：51
 >
 > **上游 Bing 包**：`Bing.Aop.AspectCore`、`Bing.Data`
 >
@@ -59,7 +59,7 @@ public class OrderHandler : ICapSubscribe
 
 `AddCapEventBus` 将 CAP 宿主启动衔接到 `IBootstrapper.BootstrapAsync`：`Host.StartAsync` 等待该启动流程结束，停止在启动结束后执行，避免 CAP 8.0.1 启动期间取消造成取消源提前释放。重复注册不会增加第二个 CAP 宿主；其他 HostedService 保留原顺序。
 
-蓝绿 Web 角色可以在完成 `AddCapEventBus` 后调用 `services.EnableBingCapPublisherOnly()`。该入口只移除 CAP 原生消费者注册和接收重试处理器，保留 Dispatcher、存储初始化和出箱发布；消费者必须由使用相同逻辑组名的独立工作进程运行。Admin 宿主的 `BING_HOST_ROLE=consumer` 会跳过 HTTP 业务模块和 EFCore Hangfire，并通过 Generic Host 启动模块生命周期，但不能替代完整的消费者镜像、就绪探针和排空协议。未调用时保持完整发布与消费行为，不能把 `BING_CAP_CONSUMER_ENABLED=false` 之外的环境变量当作自动角色隔离。
+蓝绿 Web 角色可以在完成 `AddCapEventBus` 后调用 `services.EnableBingCapPublisherOnly()`。该入口移除 CAP 原生消费者处理器别名，同时保留 `CapProcessingServer`，以维持 CAP 自带的失败 Outbox 重试、延迟消息和清理处理；消费者必须由使用相同逻辑组名的独立工作进程运行。Admin 宿主的 `BING_HOST_ROLE=consumer` 会跳过 HTTP 业务模块和 EFCore Hangfire，并通过 Generic Host 启动模块生命周期，但不能替代完整的消费者镜像、就绪探针和排空协议。未调用时保持完整发布与消费行为，不能把 `BING_CAP_CONSUMER_ENABLED=false` 之外的环境变量当作自动角色隔离。
 
 停止超时只结束调用方等待，清理任务继续运行。应重新等待 `StopAsync` 完成后再释放根容器；不响应取消的处理器仍可能延长清理。该衔接不等于 RabbitMQ 订阅就绪或 CAP 在途业务全部排空，仍需就绪探针及业务排空协议。直接使用原生 `AddCap`、`IBootstrapper` 或 `IConsumerRegister.Start` 不经过此宿主衔接。
 

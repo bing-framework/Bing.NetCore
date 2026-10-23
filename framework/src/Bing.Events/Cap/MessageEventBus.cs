@@ -43,6 +43,10 @@ public class MessageEventBus : IMessageEventBus
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// <see cref="IMessageEvent.Send"/> 为 <see langword="false"/> 时，发布作为延迟 action 登记到事务完成回调；
+    /// <see langword="true"/> 时立即调用 CAP。事务内立即写当前 Uow Outbox 请使用 <see cref="IUnitOfWorkMessagePublisher"/>。
+    /// </remarks>
     public Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : IMessageEvent
     {
