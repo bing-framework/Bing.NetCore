@@ -1,4 +1,5 @@
 ﻿using System;
+using AspectCore.Extensions.Hosting;
 using System.IO;
 using Bing.Logging.Serilog;
 using Microsoft.Extensions.Configuration;
@@ -6,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Extensions.Logging;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
-using serilog = Serilog;
 
 namespace Bing.Logging.Tests;
 
@@ -22,42 +23,38 @@ public class Startup
     /// </summary>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
-        AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-        hostBuilder.ConfigureAppConfiguration((context, builder) =>
+        hostBuilder
+            .ConfigureDefaults(null)
+            .UseServiceContext()
+            .ConfigureAppConfiguration((context, builder) =>
         {
             builder.AddJsonFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"));
         });
     }
 
     /// <summary>
-    /// 进程退出时释放日志实例，用于解决Seq无法写入的问题
-    /// </summary>
-    private void CurrentDomain_ProcessExit(object sender, EventArgs e)
-    {
-        var log = (serilog.Core.Logger)serilog.Log.Logger;
-        log.Dispose();
-    }
-
-    /// <summary>
     /// 配置服务
     /// </summary>
-    public void ConfigureServices(IServiceCollection services)
+    public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
         services.AddBingLogging(x => { });
         services.AddSingleton<ILogContextAccessor, LogContextAccessor>();
-        services.AddLogging(loggingBuilder =>
+        services.AddLogging(loggingBuilder => loggingBuilder.AddXunitOutput());
+        services.AddSingleton<InMemoryLogEventSink>();
+        services.AddSingleton<global::Serilog.ILogger>(serviceProvider =>
         {
-            var configuration = services.GetConfiguration();
-            serilog.Log.Logger = new serilog.LoggerConfiguration()
+            var configuration = context.Configuration;
+            return new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithLogContext()
                 .Enrich.WithLogLevel()
                 .ReadFrom.Configuration(configuration)
                 .ConfigLogLevel(configuration)
+                .WriteTo.Sink(serviceProvider.GetRequiredService<InMemoryLogEventSink>())
                 .CreateLogger();
-            loggingBuilder.AddSerilog();
-            loggingBuilder.AddXunitOutput();
         });
+        services.AddSingleton<ILoggerProvider>(serviceProvider =>
+            new SerilogLoggerProvider(serviceProvider.GetRequiredService<global::Serilog.ILogger>(), dispose: false));
         services.AddBing();
     }
 

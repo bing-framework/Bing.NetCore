@@ -4,6 +4,7 @@ using Bing.Helpers;
 using Bing.Logging.Tests.Samples;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using Xunit;
 
 namespace Bing.Logging.Tests;
@@ -23,6 +24,8 @@ public class LogTest
     /// </summary>
     private readonly ILogger<LogTest> _logger;
 
+    private readonly InMemoryLogEventSink _eventSink;
+
     /// <summary>
     /// 初始化一个 <see cref="LogTest"/> 类型的实例。
     /// </summary>
@@ -30,12 +33,15 @@ public class LogTest
     /// <param name="log">Bing 日志接口。</param>
     /// <param name="accessor">日志上下文访问器。</param>
     /// <param name="logger">Microsoft 日志接口。</param>
-    public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor, ILogger<LogTest> logger)
+    /// <param name="eventSink">内存事件收集器。</param>
+    public LogTest(IServiceProvider serviceProvider, ILog<LogTest> log, ILogContextAccessor accessor,
+        ILogger<LogTest> logger, InMemoryLogEventSink eventSink)
     {
         Id.StringGenerateFunc = () => Guid.NewGuid().ToString("N");
         serviceProvider.UseBing();
         _log = log;
         _logger = logger;
+        _eventSink = eventSink;
     }
 
     /// <summary>
@@ -162,7 +168,17 @@ public class LogTest
     [Fact]
     public void Test_Log()
     {
-        var product = new Product() { Code = "007", Name = "隔壁老王", Price = 996 };
-        _logger.LogInformation("Test Log: {@Product}", product);
+        var correlationId = $"corr-{Guid.NewGuid():N}";
+        var productCode = $"product-{Guid.NewGuid():N}";
+        var product = new Product { Code = productCode, Name = "structured", Price = 996 };
+        using (_logger.BeginScope(new Dictionary<string, object> { ["Tenant"] = correlationId }))
+            _logger.LogInformation("Test Log for {CorrelationId}: {@Product}", correlationId, product);
+
+        var logEvent = Assert.Single(_eventSink.Events, item =>
+            item.Properties.TryGetValue("Tenant", out var value) && value.ToString().Trim('"') == correlationId);
+        Assert.Equal(LogEventLevel.Information, logEvent.Level);
+        var productValue = Assert.IsType<StructureValue>(logEvent.Properties["Product"]);
+        var actualCode = Assert.Single(productValue.Properties, item => item.Name == "Code");
+        Assert.Equal(productCode, actualCode.Value.ToString().Trim('"'));
     }
 }
