@@ -24,6 +24,8 @@
       href: architecture/documentation-audit.md
     - name: 功能与文档对照清单
       href: architecture/feature-documentation-matrix.md
+    - name: ABP 基础设施支持矩阵
+      href: architecture/abp-infrastructure-support-matrix.md
     - name: 架构文档
       href: architecture/架构文档.md
     - name: 设计思路文档
