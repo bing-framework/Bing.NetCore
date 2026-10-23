@@ -102,7 +102,7 @@ services.AddSqlDataSource("reporting", DatabaseType.Sqlite, connectionString);
 | 版本号 | `7.0.0`（`VersionQuality` = `20250319-1`） | `version.props` |
 | 类库默认 TFM | **`netstandard2.0`**（`netstandard2.1` 已注释掉） | `framework.props` |
 | 测试工程 TFM | `net8.0;net6.0` | `framework.tests.props` |
-| 构建 SDK | **8.0.424**（`rollForward` 依 `global.json`） | `global.json` |
+| 构建 SDK | **10.0.400**（`rollForward` 依 `global.json`） | `global.json` |
 | Web / 上层工程 | 多为 `net6.0`（如 `Bing.AspNetCore.Mvc.UI`、`Bing.Extensions.SkyApm.Diagnostics.Sql`） | 各工程 `.csproj` |
 | 多目标工程 | 目前仅少数（如 `Bing.AspNetCore.Abstractions`）；**不要假定所有包都能被 `netstandard2.0` 消费者引用** | 各工程 `.csproj` |
 

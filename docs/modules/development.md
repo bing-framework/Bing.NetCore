@@ -20,7 +20,7 @@
 ## 对外接口与用法
 
 ```powershell
-dotnet build Bing.All.sln --no-restore
+dotnet build Bing.All.slnx --no-restore
 python eng/ci/check-docs.py
 python eng/ci/sync-docs-index.py --check
 ```

@@ -16,7 +16,7 @@ Bing.NetCore 是一个基于 .NET 构建的应用框架。它面向需要快速�
 | | |
 | --- | --- |
 | **目标框架** | 类库：`netstandard2.0` · Web / 应用宿主：`net6.0` |
-| **构建 SDK** | [`global.json`](global.json) 固定为 **.NET SDK 8.0.424** |
+| **构建 SDK** | [`global.json`](global.json) 固定为 **.NET SDK 10.0.400** |
 | **模块化** | 通过 `IBingModule` + `[DependsOnModule]` 显式声明模块图，并采用两阶段启动 |
 | **依赖注入** | 基于约定的自动注册（标记接口 + `[Dependency]`），底层使用 MSDI |
 | **数据访问** | 三种并存选项：EF Core（5 个 Provider）、FreeSQL（MySql）、Dapper（`Bing.Data.Sql` 引擎） |
@@ -167,7 +167,7 @@ public class EntityFrameworkCoreModule : BingModule
 ## 构建与测试
 
 ```bash
-dotnet build Bing.All.sln
+dotnet build Bing.All.slnx
 dotnet test framework/tests/<TestProject>/<TestProject>.csproj
 ```
 

@@ -95,4 +95,4 @@ docfx ./docs/docfx.json --serve
 | 站点导航 | `docs/toc.yml` | 新增文档请同步登记，否则站点上看不到 |
 | 自动部署 | `.github/workflows/docfx.yml` | push 到 `main` / `master` / `dev` 时自动构建发布 |
 
-> 环境事实：仓库当前默认目标框架 `netstandard2.0` / `net6.0`，构建 SDK 由 `global.json` 固定为 **8.0.424**。若本地预览失败，先用 `dotnet --version` 确认 SDK 与 `global.json` 一致。
+> 环境事实：仓库当前默认目标框架 `netstandard2.0` / `net6.0`，构建 SDK 由 `global.json` 固定为 **10.0.400**。若本地预览失败，先用 `dotnet --version` 确认 SDK 与 `global.json` 一致。

@@ -1,0 +1,303 @@
+<Solution>
+  <Folder Name="/01-framework/" />
+  <Folder Name="/01-framework/01-src/">
+    <Project Path="framework/src/Bing.Authorization.Abstractions/Bing.Authorization.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.DynamicApi.Client/Bing.DynamicApi.Client.csproj" />
+    <Project Path="framework/src/Bing.Permissions/Bing.Permissions.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/00-Core/">
+    <Project Path="framework/src/Bing.Aop.AspectCore/Bing.Aop.AspectCore.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore.Abstractions/Bing.AspNetCore.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore/Bing.AspNetCore.csproj" />
+    <Project Path="framework/src/Bing.Core/Bing.Core.csproj" />
+    <Project Path="framework/src/Bing.Data/Bing.Data.csproj" />
+    <Project Path="framework/src/Bing.ExceptionHandling/Bing.ExceptionHandling.csproj" />
+    <Project Path="framework/src/Bing.Localization.Abstractions/Bing.Localization.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.Localization/Bing.Localization.csproj" />
+    <Project Path="framework/src/Bing.Security/Bing.Security.csproj" />
+    <Project Path="framework/src/Bing.Uow/Bing.Uow.csproj" />
+    <Project Path="framework/src/Bing.Validation.Abstractions/Bing.Validation.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.Validation/Bing.Validation.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/02-Logging/" />
+  <Folder Name="/01-framework/01-src/02-Logging/Logging/">
+    <Project Path="framework/src/Bing.Logging.Serilog/Bing.Logging.Serilog.csproj" />
+    <Project Path="framework/src/Bing.Logging.Sinks.Exceptionless/Bing.Logging.Sinks.Exceptionless.csproj" />
+    <Project Path="framework/src/Bing.Logging/Bing.Logging.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/03-Events/">
+    <Project Path="framework/src/Bing.EventBus.Abstractions/Bing.EventBus.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.EventBus/Bing.EventBus.csproj" />
+    <Project Path="framework/src/Bing.Events.Cap.MySql/Bing.Events.Cap.MySql.csproj" />
+    <Project Path="framework/src/Bing.Events.EventBusAdapter/Bing.Events.EventBusAdapter.csproj" />
+    <Project Path="framework/src/Bing.Events/Bing.Events.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/05-Caching/">
+    <Project Path="framework/src/Bing.Caching.CSRedis/Bing.Caching.CSRedis.csproj" />
+    <Project Path="framework/src/Bing.Caching.FreeRedis/Bing.Caching.FreeRedis.csproj" />
+    <Project Path="framework/src/Bing.Caching/Bing.Caching.csproj" />
+    <Project Path="framework/src/Bing.EasyCaching/Bing.EasyCaching.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/09-Tenant/">
+    <Project Path="framework/src/Bing.AspNetCore.MultiTenancy/Bing.AspNetCore.MultiTenancy.csproj" />
+    <Project Path="framework/src/Bing.MultiTenancy.Abstractions/Bing.MultiTenancy.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.MultiTenancy/Bing.MultiTenancy.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/10-Domain/">
+    <Project Path="framework/src/Bing.Auditing.Contracts/Bing.Auditing.Contracts.csproj" />
+    <Project Path="framework/src/Bing.Auditing/Bing.Auditing.csproj" />
+    <Project Path="framework/src/Bing.Ddd.Domain.Extensions.Analyzers/Bing.Ddd.Domain.Extensions.Analyzers.csproj" />
+    <Project Path="framework/src/Bing.Ddd.Domain/Bing.Ddd.Domain.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/11-Data/" />
+  <Folder Name="/01-framework/01-src/11-Data/01-Core/">
+    <Project Path="framework/src/Bing.Data.Sql.Analyzers/Bing.Data.Sql.Analyzers.csproj" />
+    <Project Path="framework/src/Bing.Data.Sql/Bing.Data.Sql.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/11-Data/02-EntityFrameworkCore/">
+    <Project Path="framework/src/Bing.EntityFrameworkCore.MySql/Bing.EntityFrameworkCore.MySql.csproj" />
+    <Project Path="framework/src/Bing.EntityFrameworkCore.Oracle/Bing.EntityFrameworkCore.Oracle.csproj" />
+    <Project Path="framework/src/Bing.EntityFrameworkCore.PostgreSql/Bing.EntityFrameworkCore.PostgreSql.csproj" />
+    <Project Path="framework/src/Bing.EntityFrameworkCore.Sqlite/Bing.EntityFrameworkCore.Sqlite.csproj" />
+    <Project Path="framework/src/Bing.EntityFrameworkCore.SqlServer/Bing.EntityFrameworkCore.SqlServer.csproj" />
+    <Project Path="framework/src/Bing.EntityFrameworkCore/Bing.EntityFrameworkCore.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/11-Data/03-Dapper/">
+    <Project Path="framework/src/Bing.Dapper.Core/Bing.Dapper.Core.csproj" />
+    <Project Path="framework/src/Bing.Dapper.MySql/Bing.Dapper.MySql.csproj" />
+    <Project Path="framework/src/Bing.Dapper.Oracle/Bing.Dapper.Oracle.csproj" />
+    <Project Path="framework/src/Bing.Dapper.PostgreSql/Bing.Dapper.PostgreSql.csproj" />
+    <Project Path="framework/src/Bing.Dapper.Sqlite/Bing.Dapper.Sqlite.csproj" />
+    <Project Path="framework/src/Bing.Dapper.SqlServer/Bing.Dapper.SqlServer.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/11-Data/04-FreeSql/">
+    <Project Path="framework/src/Bing.FreeSQL.MySql/Bing.FreeSQL.MySql.csproj" />
+    <Project Path="framework/src/Bing.FreeSQL/Bing.FreeSQL.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/12-Application/">
+    <Project Path="framework/src/Bing.Ddd.Application.Contracts/Bing.Ddd.Application.Contracts.csproj" />
+    <Project Path="framework/src/Bing.Ddd.Application/Bing.Ddd.Application.csproj" />
+    <Project Path="framework/src/Bing.DynamicApi.Contracts/Bing.DynamicApi.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/13-Web/">
+    <Project Path="framework/src/Bing.AspNetCore.Authentication.JwtBearer/Bing.AspNetCore.Authentication.JwtBearer.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore.Mvc.Contracts/Bing.AspNetCore.Mvc.Contracts.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore.Mvc.UI/Bing.AspNetCore.Mvc.UI.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore.Mvc/Bing.AspNetCore.Mvc.csproj" />
+    <Project Path="framework/src/Bing.AspNetCore.Serilog/Bing.AspNetCore.Serilog.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/">
+    <Project Path="framework/src/Bing.MiniProfiler/Bing.MiniProfiler.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/Emailing/">
+    <Project Path="framework/src/Bing.Emailing/Bing.Emailing.csproj" />
+    <Project Path="framework/src/Bing.MailKit/Bing.MailKit.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/Locks/">
+    <Project Path="framework/src/Bing.Locks.CSRedis/Bing.Locks.CSRedis.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/ObjectMapping/">
+    <Project Path="framework/src/Bing.AutoMapper/Bing.AutoMapper.csproj" />
+    <Project Path="framework/src/Bing.ObjectMapping/Bing.ObjectMapping.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/SkyApm/">
+    <Project Path="framework/src/Bing.Extensions.SkyApm.Diagnostics.Sql/Bing.Extensions.SkyApm.Diagnostics.Sql.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/01-src/Components/TextTemplating/">
+    <Project Path="framework/src/Bing.TextTemplating.Scriban/Bing.TextTemplating.Scriban.csproj" />
+    <Project Path="framework/src/Bing.TextTemplating/Bing.TextTemplating.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/">
+    <Project Path="framework/tests/Bing.Data.Sql.Analyzers.Tests/Bing.Data.Sql.Analyzers.Tests.csproj" />
+    <Project Path="framework/tests/Bing.EventBus.Tests/Bing.EventBus.Tests.csproj" />
+    <Project Path="framework/tests/Bing.MailKit.Tests/Bing.MailKit.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Test.Shared/Bing.Test.Shared.csproj" />
+    <Project Path="framework/tests/Bing.Tests/Bing.Tests.csproj" />
+    <Project Path="tests/Bing.Tests.Samples/Bing.Tests.Samples.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/01-Core/">
+    <Project Path="framework/tests/Bing.Aop.AspectCore.Tests/Bing.Aop.AspectCore.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/Bing.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/02-Logging/">
+    <Project Path="framework/tests/Bing.Logging.Serilog.Tests.Integration/Bing.Logging.Serilog.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Logging.Serilog.Tests/Bing.Logging.Serilog.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Logging.Tests/Bing.Logging.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/05-Caching/">
+    <Project Path="framework/tests/Bing.Caching.CSRedis.Tests.Integration/Bing.Caching.CSRedis.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Caching.FreeRedis.Tests.Integration/Bing.Caching.FreeRedis.Tests.Integration.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/06-Localization/">
+    <Project Path="framework/tests/Bing.Localization.Resources/Bing.Localization.Resources.csproj" />
+    <Project Path="framework/tests/Bing.Localization.Tests.Integration/Bing.Localization.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Localization.Tests/Bing.Localization.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/09-Tenant/">
+    <Project Path="framework/tests/Bing.MultiTenancy.Tests/Bing.MultiTenancy.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/10-Domain/">
+    <Project Path="framework/tests/Bing.Auditing.Tests/Bing.Auditing.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Data.Tests/Bing.Data.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Ddd.Domain.Tests/Bing.Ddd.Domain.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/10-Share/">
+    <Project Path="framework/tests/Bing.TestShare.MySql/Bing.TestShare.MySql.csproj" />
+    <Project Path="framework/tests/Bing.TestShare/Bing.TestShare.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/12-Data/">
+    <Project Path="framework/tests/Bing.EntityFrameworkCore.Tests/Bing.EntityFrameworkCore.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/12-Data/01-Core/">
+    <Project Path="framework/tests/Bing.Data.Sql.CustomProvider.Tests/Bing.Data.Sql.CustomProvider.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/12-Data/02-Dapper/">
+    <Project Path="framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.Doris.Tests.Integration/Bing.Dapper.Doris.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.MySql.Tests.Integration/Bing.Dapper.MySql.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.MySql.Tests/Bing.Dapper.MySql.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.Oracle.Tests.Integration/Bing.Dapper.Oracle.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.Oracle.Tests/Bing.Dapper.Oracle.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.PostgreSql.Tests.Integration/Bing.Dapper.PostgreSql.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.PostgreSql.Tests/Bing.Dapper.PostgreSql.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.Sqlite.Tests/Bing.Dapper.Sqlite.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.SqlServer.Tests.Integration/Bing.Dapper.SqlServer.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Dapper.SqlServer.Tests/Bing.Dapper.SqlServer.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj" />
+    <Project Path="framework/tests/Bing.FreeSQL.Tests/Bing.FreeSQL.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/13-Web/">
+    <Project Path="framework/tests/Bing.AspNetCore.Mvc.Tests/Bing.AspNetCore.Mvc.Tests.csproj" />
+    <Project Path="framework/tests/Bing.DynamicApi.Client.Tests/Bing.DynamicApi.Client.Tests.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/Components/" />
+  <Folder Name="/01-framework/02-tests/Components/ObjectMapping/">
+    <Project Path="framework/tests/Bing.AutoMapper.Tests/Bing.AutoMapper.Tests.csproj" />
+  </Folder>
+  <Folder Name="/02-components/" />
+  <Folder Name="/02-components/01-src/">
+    <File Path="components/src/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/02-components/01-src/01-Biz/">
+    <Project Path="components/src/Bing.Biz.OAuthLogin/Bing.Biz.OAuthLogin.csproj" />
+    <Project Path="components/src/Bing.Biz.Payments/Bing.Biz.Payments.csproj" />
+    <Project Path="components/src/Bing.Biz/Bing.Biz.csproj" />
+  </Folder>
+  <Folder Name="/02-components/02-tests/">
+    <Project Path="components/tests/Bing.Biz.Payments.Tests/Bing.Biz.Payments.Tests.csproj" />
+  </Folder>
+  <Folder Name="/03-modules/" />
+  <Folder Name="/03-modules/01-admin/" />
+  <Folder Name="/03-modules/01-admin/01-Presentation/">
+    <Project Path="modules/admin/src/Bing.Admin.FreeSQL/Bing.Admin.FreeSQL.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin/Bing.Admin.csproj" />
+  </Folder>
+  <Folder Name="/03-modules/01-admin/02-Service/">
+    <Project Path="modules/admin/src/Bing.Admin.EventHandlers/Bing.Admin.EventHandlers.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Service.Shared/Bing.Admin.Service.Shared.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Service/Bing.Admin.Service.csproj" />
+  </Folder>
+  <Folder Name="/03-modules/01-admin/03-Domain/">
+    <Project Path="modules/admin/src/Bing.Admin.Commons.Domain/Bing.Admin.Commons.Domain.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Domain.Shared/Bing.Admin.Domain.Shared.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Systems.Domain/Bing.Admin.Systems.Domain.csproj" />
+  </Folder>
+  <Folder Name="/03-modules/01-admin/04-Infrastructure/">
+    <Project Path="modules/admin/src/Bing.Admin.Data.EFCore/Bing.Admin.Data.EFCore.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Data.FreeSQL/Bing.Admin.Data.FreeSQL.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Data/Bing.Admin.Data.csproj" />
+    <Project Path="modules/admin/src/Bing.Admin.Infrastructure/Bing.Admin.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/04-samples/">
+    <Project Path="samples/Bing.Samples.Hangfire/Bing.Samples.Hangfire.csproj" />
+    <Project Path="samples/Bing.Samples.SqlUnitOfWork.Tests/Bing.Samples.SqlUnitOfWork.Tests.csproj" />
+    <Project Path="samples/Bing.Samples.SqlUnitOfWork/Bing.Samples.SqlUnitOfWork.csproj" />
+    <Project Path="samples/Bing.Samples.WebApi/Bing.Samples.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/framework/" />
+  <Folder Name="/framework/src/">
+    <Project Path="framework/src/Bing.DynamicApi.WebApiClient/Bing.DynamicApi.WebApiClient.csproj" />
+  </Folder>
+  <Folder Name="/framework/tests/">
+    <Project Path="framework/tests/Bing.Aop.AspectCore.CycleProbe/Bing.Aop.AspectCore.CycleProbe.csproj" />
+    <Project Path="framework/tests/Bing.Aop.AspectCore.Tests/LegacyConsumer/LegacyMarkerConsumer.csproj" />
+    <Project Path="framework/tests/Bing.Caching.CSRedis.RateLimitProbe/Bing.Caching.CSRedis.RateLimitProbe.csproj" />
+    <Project Path="framework/tests/Bing.Caching.Tests/Bing.Caching.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginFixtures.V2/Bing.Core.PluginFixtures.V2.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginFixtures/Bing.Core.PluginFixtures.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginLazyFixture/Bing.Core.PluginLazyFixture.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginLazyHelper/Bing.Core.PluginLazyHelper.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginLazyLeaf/Bing.Core.PluginLazyLeaf.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginScanDependency/Bing.Core.PluginScanDependency.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginScanFixtures.V2/Bing.Core.PluginScanFixtures.V2.csproj" />
+    <Project Path="framework/tests/Bing.Core.Tests/PluginFixtures/Bing.Core.PluginScanFixtures/Bing.Core.PluginScanFixtures.csproj" />
+    <Project Path="framework/tests/Bing.DynamicApi.WebApiClient.Tests/Bing.DynamicApi.WebApiClient.Tests.csproj" />
+    <Project Path="framework/tests/Bing.EasyCaching.Tests/Bing.EasyCaching.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Events.Ordering.MySqlProbe/Bing.Events.Ordering.MySqlProbe.csproj" />
+    <Project Path="framework/tests/Bing.ExceptionHandling.Tests/Bing.ExceptionHandling.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Security.Tests/Bing.Security.Tests.csproj" />
+    <Project Path="framework/tests/Bing.TextTemplating.Tests/Bing.TextTemplating.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Uow.Tests/Bing.Uow.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Validation.Tests/Bing.Validation.Tests.csproj" />
+  </Folder>
+  <Folder Name="/modules/" />
+  <Folder Name="/modules/admin/" />
+  <Folder Name="/modules/admin/tests/">
+    <Project Path="modules/admin/tests/Bing.Admin.EFCore.InventoryProbe/Bing.Admin.EFCore.InventoryProbe.csproj" />
+    <Project Path="modules/admin/tests/Bing.Admin.EFCore.Tests/Bing.Admin.EFCore.Tests.csproj" />
+    <Project Path="modules/admin/tests/Bing.Admin.FreeSQL.InventoryProbe/Bing.Admin.FreeSQL.InventoryProbe.csproj" />
+    <Project Path="modules/admin/tests/Bing.Admin.FreeSQL.Tests/Bing.Admin.FreeSQL.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Bing.Samples.SqlUnitOfWork.Consumer/Bing.Samples.SqlUnitOfWork.Consumer.csproj" />
+    <Project Path="samples/Bing.Samples.WebApi.Tests/Bing.Samples.WebApi.Tests.csproj" />
+  </Folder>
+  <Folder Name="/_SolutionItems/" />
+  <Folder Name="/_SolutionItems/asset/" />
+  <Folder Name="/_SolutionItems/asset/images/">
+    <File Path="asset/images/icon.png" />
+  </Folder>
+  <Folder Name="/_SolutionItems/asset/props/">
+    <File Path="asset/props/misc.props" />
+    <File Path="asset/props/package.props" />
+    <File Path="asset/props/sourcelink.env.props" />
+    <File Path="asset/props/target.feature.props" />
+  </Folder>
+  <Folder Name="/_SolutionItems/asset/props/testing/">
+    <File Path="asset/props/testing/testing.compatibility.props" />
+    <File Path="asset/props/testing/testing.packages.props" />
+    <File Path="asset/props/testing/testing.props" />
+    <File Path="asset/props/testing/testing.settings.props" />
+  </Folder>
+  <Folder Name="/_SolutionItems/asset/props/testing/hosting/">
+    <File Path="asset/props/testing/hosting/testing.hosting.compatibility.props" />
+    <File Path="asset/props/testing/hosting/testing.hosting.packages.props" />
+    <File Path="asset/props/testing/hosting/testing.hosting.props" />
+    <File Path="asset/props/testing/hosting/testing.hosting.settings.props" />
+  </Folder>
+  <Folder Name="/_SolutionItems/docs/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/_SolutionItems/scripts/">
+    <File Path="framework/Publish.bat" />
+    <File Path="framework/UnPublish.bat" />
+  </Folder>
+  <Folder Name="/_SolutionItems/solution/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="common.props" />
+    <File Path="common.tests.props" />
+    <File Path="framework.props" />
+    <File Path="framework.tests.props" />
+    <File Path="LICENSE" />
+    <File Path="testshare.tests.props" />
+    <File Path="version.dev.props" />
+    <File Path="version.props" />
+  </Folder>
+  <Project Path="eng/Bing.ProviderEvidence.Cli/Bing.ProviderEvidence.Cli.csproj" />
+  <Project Path="framework/src/Bing.Ddd.Application.AspectCore/Bing.Ddd.Application.AspectCore.csproj" />
+  <Project Path="framework/src/Bing.PluginRuntime/Bing.PluginRuntime.csproj" />
+</Solution>

@@ -16,7 +16,7 @@ app.UseBing();                                // Web；非 Web 用 serviceProvid
 
 ## 1. 样例总览
 
-| 工程 | TFM | 演示点 | 注册的模块 | 外部依赖 | 在 `Bing.All.sln` 中 |
+| 工程 | TFM | 演示点 | 注册的模块 | 外部依赖 | 在 `Bing.All.slnx` 中 |
 | --- | --- | --- | --- | --- | --- |
 | [`Bing.Samples.WebApi`](Bing.Samples.WebApi/README.md) | `net6.0` | **最小 Web 宿主骨架**：模块系统 + AOP 宿主 + `UseBing` 管道 | `AppModule`（依赖 `AspNetCoreModule`） | 无 | ✅ |
 | [`Bing.Samples.Hangfire`](Bing.Samples.Hangfire/README.md) | `net6.0` | 后台任务：Hangfire 与框架 DI 打通、TraceId 跨任务传递、Serilog + Exceptionless 日志 | `AppModule` / `LogModule` / `HangfireModule` | 可选 Exceptionless 服务（通过配置注入） | ✅ |
@@ -43,7 +43,7 @@ dotnet run --project samples/<工程名>/<工程名>.csproj
 | Bing.Samples.SqlUnitOfWork | `dotnet run --project samples/Bing.Samples.SqlUnitOfWork/Bing.Samples.SqlUnitOfWork.csproj` | `http://localhost:5000`；`EfBridge` 用 `-- --SqlUow:Storage=EfBridge` |
 | Bing.Samples.Winform | `dotnet run --project samples/Bing.Samples.Winform/Bing.Samples.Winform.csproj` | Windows 桌面窗口（需 Windows + `win-x64`） |
 
-构建 SDK 由根目录 `global.json` 固定为 **8.0.424**，样例本身目标框架是 `net6.0`——请先 `dotnet --version` 确认。
+构建 SDK 由根目录 `global.json` 固定为 **10.0.400**，样例本身目标框架是 `net6.0`——请先 `dotnet --version` 确认。
 
 ---
 
@@ -63,5 +63,5 @@ dotnet run --project samples/<工程名>/<工程名>.csproj
 
 - **WebApi 是最小宿主示例**：`Bing.Samples.WebApi` 提供 `SampleController` 验证 `ILazyServiceProvider` 属性注入；多数据源事务链路见 `Bing.Samples.SqlUnitOfWork`。
 - **Hangfire 样例的 Exceptionless 为可选配置**：通过 `Exceptionless:ApiKey`、`Exceptionless:ServerUrl` 或对应环境变量注入；空 API Key 时只使用本地日志，不会连接远程服务。
-- **Winform 样例不在 `Bing.All.sln` 里**，不会被整体构建覆盖，改框架后请单独编译验证。
+- **Winform 样例不在 `Bing.All.slnx` 里**，不会被整体构建覆盖，改框架后请单独编译验证。
 - 样例引用的都是 `framework/src/` 下的**工程引用**，不是 NuGet 包——因此版本号以仓库 `version.props` 为准。

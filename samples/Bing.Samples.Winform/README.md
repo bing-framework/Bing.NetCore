@@ -13,7 +13,7 @@
 | 框架引用 | `framework/src/Bing.Core`（**只引这一个**） |
 | 三方包 | `Microsoft.Extensions.Configuration.Json` 6.0.0、`Microsoft.Extensions.DependencyInjection` 6.0.1、`Microsoft.Extensions.Logging` 6.0.0 |
 | 注册的模块 | **无** |
-| 在 `Bing.All.sln` 中 | ❌ **未纳入**（不会被整体构建覆盖） |
+| 在 `Bing.All.slnx` 中 | ❌ **未纳入**（不会被整体构建覆盖） |
 
 ## 2. 启动链路
 
@@ -57,7 +57,7 @@ Web 形态用 `app.UseBing()`；非 Web 形态应当用 **`serviceProvider.UseBi
 
 ### 3.3 不在解决方案里
 
-`Bing.All.sln` 中**没有**这个工程（只有 `Bing.Samples.WebApi` 与 `Bing.Samples.Hangfire`）。改了 `Bing.Core` 后，整体构建不会帮你发现这里的编译问题，需要单独编译验证。
+`Bing.All.slnx` 中**没有**这个工程（只有 `Bing.Samples.WebApi` 与 `Bing.Samples.Hangfire`）。改了 `Bing.Core` 后，整体构建不会帮你发现这里的编译问题，需要单独编译验证。
 
 ## 4. 运行
 

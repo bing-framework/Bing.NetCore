@@ -6,15 +6,16 @@
 
 ## 1. 环境要求
 
-- **构建 SDK**：由仓库根目录 [`global.json`](global.json) 固定（当前 **.NET SDK 8.0.424**）。请先 `dotnet --version` 确认一致，不要用系统默认的其它版本。
+- **构建 SDK**：由仓库根目录 [`global.json`](global.json) 固定为 **.NET SDK 10.0.400**。请先 `dotnet --version` 确认一致，不要用系统默认的其它版本。
 - **目标框架**：类库默认 `netstandard2.0`（最大化可复用性）；Web / 应用层为 `net6.0`。新增工程请沿用所在层的约定（见 `common.props`、`framework.props`、`framework.tests.props`）。
-- **IDE**：Visual Studio 2022 / VS Code / JetBrains Rider（项目由 JetBrains 提供开源授权）。
+- **IDE**：SDK 10.0.400 最低要求 Visual Studio 18.0，推荐配套 18.9；VS Code / JetBrains Rider 请确认其使用的 MSBuild 与 SDK 版本受支持。
+- **解决方案格式**：根主方案为 `Bing.All.slnx`。[MSBuild 命令行从 17.12 起支持 SLNX](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-solution-build)，Visual Studio 17.14 起稳定支持该格式；格式支持版本与 SDK 10.0.400 的 IDE 兼容要求不同，详见[格式说明](https://devblogs.microsoft.com/dotnet/introducing-slnx-support-dotnet-cli/)及[版本支持矩阵](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs)。
 - **编码**：所有文本文件统一 **UTF-8**。详见 `AGENTS.md` 的「UTF-8 规则（强制）」。
 
 ## 2. 构建
 
 ```bash
-dotnet build Bing.All.sln
+dotnet build Bing.All.slnx
 ```
 
 单工程构建：
@@ -34,14 +35,14 @@ dotnet build framework/src/Bing.Core/Bing.Core.csproj
 dotnet test framework/tests/<测试工程>/<测试工程>.csproj
 
 # 全量（较慢）
-dotnet test Bing.All.sln
+dotnet test Bing.All.slnx
 ```
 
 **测试工程组织**：
 
 - 约 30 个工程，位于 `framework/tests/`，`*.Tests`（单元）与 `*.Tests.Integration`（集成）**成对出现**；
 - 共享基建：`Bing.Test.Shared` / `Bing.TestShare(.MySql)`；
-- `components/tests/Bing.Biz.Payments.Tests` **独立于 `Bing.All.sln`**，需单独跑；
+- `components/tests/Bing.Biz.Payments.Tests` 已纳入 `Bing.All.slnx`；主方案 Release TRX 在 net6.0 和 net8.0 各记录 11 项（10 passed、0 failed、1 NotExecuted）。常规全量测试无需重复单跑；仅在定向开发或排查该项目测试时运行 `dotnet test components/tests/Bing.Biz.Payments.Tests/Bing.Biz.Payments.Tests.csproj`。
 - 框架为 xunit（V2/V3）+ VSTest runner + Shouldly / Moq / Coverlet。
 
 **集成测试的门控规则（重要）**：

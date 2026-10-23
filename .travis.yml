@@ -1,7 +1,6 @@
 language: csharp
 mono: none
-dist: focal
-dotnet: 8.0
+dist: jammy
 os:
 #- osx
 - linux
@@ -9,11 +8,44 @@ branches:
   only:
   - master
 script:
-- dotnet restore
-- dotnet build -c Release
-- dotnet test ./framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj -c Release -f net8.0 --no-restore --nologo
-- dotnet test ./framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj -c Release -f net8.0 --no-restore --nologo
-- dotnet test ./framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj -c Release -f net8.0 --no-restore --nologo
+  - |
+    set -euo pipefail
+    install_root="$TRAVIS_BUILD_DIR/.ci-dotnet"
+    installer="$TRAVIS_BUILD_DIR/.ci-dotnet-install.sh"
+    mkdir -p "$install_root"
+    curl --fail --silent --show-error --location https://dot.net/v1/dotnet-install.sh --output "$installer"
+    bash "$installer" --jsonfile "$TRAVIS_BUILD_DIR/global.json" --install-dir "$install_root" --no-path
+    for channel in 6.0 8.0; do
+      bash "$installer" --runtime dotnet --channel "$channel" --install-dir "$install_root" --skip-non-versioned-files --no-path
+      bash "$installer" --runtime aspnetcore --channel "$channel" --install-dir "$install_root" --skip-non-versioned-files --no-path
+    done
+    export DOTNET_ROOT="$install_root"
+    export PATH="$DOTNET_ROOT:$PATH"
+    case ":$PATH:" in
+      *":$DOTNET_ROOT:"*) ;;
+      *) echo "DOTNET_ROOT is not visible on PATH" >&2; exit 1 ;;
+    esac
+    resolved_dotnet="$(command -v dotnet)"
+    case "$resolved_dotnet" in
+      "$DOTNET_ROOT"/*) ;;
+      *) echo "The task-local dotnet was not selected: $resolved_dotnet" >&2; exit 1 ;;
+    esac
+    test "$(dotnet --version)" = "10.0.400"
+    printf 'DOTNET_ROOT=%s\n' "$DOTNET_ROOT"
+    sdks="$(dotnet --list-sdks)"
+    printf '%s\n' "$sdks"
+    printf '%s\n' "$sdks" | grep -F '10.0.400 [' | grep -F "[$DOTNET_ROOT/sdk]"
+    runtimes="$(dotnet --list-runtimes)"
+    printf '%s\n' "$runtimes"
+    for runtime in 'Microsoft.NETCore.App 6.0.' 'Microsoft.NETCore.App 8.0.' 'Microsoft.AspNetCore.App 6.0.' 'Microsoft.AspNetCore.App 8.0.'; do
+      family="${runtime% *}"
+      printf '%s\n' "$runtimes" | grep -F "$runtime" | grep -F "[$DOTNET_ROOT/shared/$family]"
+    done
+    dotnet restore Bing.All.slnx
+    dotnet build Bing.All.slnx -c Release --no-restore
+    dotnet test ./framework/tests/Bing.Data.Sql.Tests/Bing.Data.Sql.Tests.csproj -c Release -f net8.0 --no-restore --nologo
+    dotnet test ./framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj -c Release -f net8.0 --no-restore --nologo
+    dotnet test ./framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj -c Release -f net8.0 --no-restore --nologo
 #deploy:
 #  skip_cleanup: true
 #  provider: script

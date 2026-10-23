@@ -53,6 +53,8 @@ services.AddSqlDataSource("reporting", DatabaseType.Sqlite, connectionString);
 
 `IDatabaseConnectionAccessor` 和 `IDatabase` 未删除，仍服务于 EF Core、FreeSQL 等跨 ORM 集成。Dapper 不再解析或包装这些契约。EF Core Shared 模式的连接与事务绑定是框架内部行为；应用代码仍通过 EF Core 工作单元管理其生命周期。
 
+需要在一个业务操作中协调多个独立 Query/Executor 或多个数据源时，可新增注册 `IUnitOfWorkScopeManager`，不必改变本节的显式单库迁移。业务 scope 中默认 Dapper Query 会按冻结配置登记各自的本地连接/事务；已映射的 EF Core Shared 可以显式复用 EF context。`ISqlTransactionScopeFactory` 仍是独立的显式单库事务 owner，不会自动加入业务 scope。EF 映射、提交边界和迁移示例见 [SQL 迁移指南](../sql/migration-guide.md#业务多数据源-uow)。
+
 ## 验收
 
 迁移后应确认：

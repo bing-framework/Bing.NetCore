@@ -128,7 +128,7 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
 > 构建依赖版本以工程、导入的 `.props` 与 `global.json` 为准；本节是工具与技术清单，不保证使用最新版。
 
 1. 开发工具
-  - [Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/vs/)
+  - Visual Studio 18.0+（SDK 10.0.400 最低版本；推荐配套 18.9，见[版本支持矩阵](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs)）
   - [Resharper Ultimate](https://www.jetbrains.com/resharper/)
 
 2. 数据库
@@ -149,7 +149,8 @@ Bing是一个基于`.net core`平台下的应用框架，旨在提升小型团�
   - Docker
 
 6. `SDK`以及`Runtime`
-  - 构建用 SDK 由仓库根目录 [`global.json`](global.json) 固定（当前为 **.NET SDK 8.0.424**），请以此为准
+  - 构建用 SDK 由仓库根目录 [`global.json`](global.json) 固定为 **.NET SDK 10.0.400**，请以此为准
+  - 主解决方案使用 `Bing.All.slnx`；[MSBuild 命令行从 17.12 起支持](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-solution-build)，Visual Studio 17.14 起稳定可用；这些是格式支持版本，SDK 10.0.400 的 IDE 最低版本为 Visual Studio 18.0，推荐配套 18.9（见[SLNX 说明](https://devblogs.microsoft.com/dotnet/introducing-slnx-support-dotnet-cli/)与[SDK/Visual Studio 支持矩阵](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs)）
   - 运行目标框架：类库默认 `netstandard2.0`；Web / 应用层为 `net6.0`
 
 7. 单元测试以及模拟框架

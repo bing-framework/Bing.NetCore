@@ -23,7 +23,7 @@
 
 ## 使用前须知（请务必读）
 
-1. **这些是「配方」不是「可编译工程」**。代码取自仓库真实模式（参考实现 `modules/admin`、样例 `samples/`、以及各包 README），但**没有作为独立工程加入 `Bing.All.sln` 进行编译验证**。跨版本升级后请先对照源码再复制。
+1. **这些是「配方」不是「可编译工程」**。代码取自仓库真实模式（参考实现 `modules/admin`、样例 `samples/`、以及各包 README），但**没有作为独立工程加入 `Bing.All.slnx` 进行编译验证**。跨版本升级后请先对照源码再复制。
 2. **命名空间以源码为准**。框架有几处「包名 ≠ 运行时命名空间」的不一致（如 EF Core 运行时是 `Bing.Datas.EntityFramework.Core`，PostgreSQL 的命名空间是 `Bing.Datas.EntityFramework.PgSql`），配方中已标注。
 3. **每个配方末尾都有「注意事项」**——那部分是踩坑高发区，别跳过。
 4. 想找包看 [包索引](../../getting-started/包索引.md)；想选 ORM 看 [能力矩阵](../../getting-started/能力矩阵.md)；想知道对错看 [最佳实践](../最佳实践.md)。

@@ -18,15 +18,110 @@ environment:
     - PROVIDER_TEST_LANE: postgresql
     - PROVIDER_TEST_LANE: sqlserver
     - PROVIDER_TEST_LANE: release
-#before_build:
-#  - cmd: dotnet restore
+before_build:
+  - ps: |
+      $ErrorActionPreference = 'Stop'
+      $dotnetRoot = Join-Path $env:APPVEYOR_BUILD_FOLDER '.ci-dotnet'
+      $installer = Join-Path $env:TEMP 'dotnet-install.ps1'
+      $globalJson = Join-Path $env:APPVEYOR_BUILD_FOLDER 'global.json'
+      Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -OutFile $installer
+
+      & $installer -JsonFile $globalJson -InstallDir $dotnetRoot -NoPath
+      if (-not $?) { throw 'SDK installation failed.' }
+      foreach ($channel in @('6.0', '8.0')) {
+        & $installer -Runtime dotnet -Channel $channel -InstallDir $dotnetRoot -SkipNonVersionedFiles -NoPath
+        if (-not $?) { throw ".NET runtime installation failed for $channel." }
+        & $installer -Runtime aspnetcore -Channel $channel -InstallDir $dotnetRoot -SkipNonVersionedFiles -NoPath
+        if (-not $?) { throw "ASP.NET Core runtime installation failed for $channel." }
+      }
+
+      $previousPath = $env:PATH
+      $env:DOTNET_ROOT = $dotnetRoot
+      $env:PATH = "$dotnetRoot;$previousPath"
+      Set-AppveyorBuildVariable -Name 'DOTNET_ROOT' -Value $dotnetRoot
+      Set-AppveyorBuildVariable -Name 'PATH' -Value $env:PATH
+
+      $resolvedDotnet = (Get-Command dotnet -CommandType Application).Source
+      if (-not $resolvedDotnet.StartsWith($dotnetRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "The task-local dotnet was not selected: $resolvedDotnet"
+      }
+      if ((& dotnet --version).Trim() -ne '10.0.400') { throw 'Expected .NET SDK 10.0.400.' }
+      $runtimes = & dotnet --list-runtimes
+      $sdks = & dotnet --list-sdks
+      $sdks
+      $sdkPath = Join-Path $dotnetRoot 'sdk'
+      if (-not ($sdks | Where-Object { $_.StartsWith('10.0.400 ', [StringComparison]::Ordinal) -and $_.EndsWith("[$sdkPath]", [StringComparison]::OrdinalIgnoreCase) })) {
+        throw 'SDK 10.0.400 was not installed under DOTNET_ROOT.'
+      }
+      $runtimes
+      foreach ($runtime in @('Microsoft.NETCore.App 6.0.', 'Microsoft.NETCore.App 8.0.', 'Microsoft.AspNetCore.App 6.0.', 'Microsoft.AspNetCore.App 8.0.')) {
+        $runtimeFamily = $runtime.Substring(0, $runtime.LastIndexOf(' '))
+        $runtimePath = Join-Path (Join-Path $dotnetRoot 'shared') $runtimeFamily
+        if (-not ($runtimes | Where-Object { $_.StartsWith($runtime, [StringComparison]::Ordinal) -and $_.EndsWith("[$runtimePath]", [StringComparison]::OrdinalIgnoreCase) })) {
+          throw "Required runtime is missing: $runtime"
+        }
+      }
 build:
   verbosity: minimal
   parallel: true
 build_script:
-  - cmd: dotnet build -c Release
+  - ps: |
+      $ErrorActionPreference = 'Stop'
+      $dotnetRoot = Join-Path $env:APPVEYOR_BUILD_FOLDER '.ci-dotnet'
+      if ($env:DOTNET_ROOT -ne $dotnetRoot -or ($env:PATH -split ';')[0] -ne $dotnetRoot) {
+        throw 'Task-local DOTNET_ROOT/PATH did not persist from before_build.'
+      }
+      $resolvedDotnet = (Get-Command dotnet -CommandType Application).Source
+      if (-not $resolvedDotnet.StartsWith($dotnetRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "The task-local dotnet is not first on PATH: $resolvedDotnet"
+      }
+      if ((& dotnet --version).Trim() -ne '10.0.400') { throw 'Expected .NET SDK 10.0.400 in build_script.' }
+      $sdks = & dotnet --list-sdks
+      $sdks
+      $sdkPath = Join-Path $dotnetRoot 'sdk'
+      if (-not ($sdks | Where-Object { $_.StartsWith('10.0.400 ', [StringComparison]::Ordinal) -and $_.EndsWith("[$sdkPath]", [StringComparison]::OrdinalIgnoreCase) })) {
+        throw 'SDK 10.0.400 is not available under DOTNET_ROOT in build_script.'
+      }
+      $runtimes = & dotnet --list-runtimes
+      $runtimes
+      foreach ($runtime in @('Microsoft.NETCore.App 6.0.', 'Microsoft.NETCore.App 8.0.', 'Microsoft.AspNetCore.App 6.0.', 'Microsoft.AspNetCore.App 8.0.')) {
+        $runtimeFamily = $runtime.Substring(0, $runtime.LastIndexOf(' '))
+        $runtimePath = Join-Path (Join-Path $dotnetRoot 'shared') $runtimeFamily
+        if (-not ($runtimes | Where-Object { $_.StartsWith($runtime, [StringComparison]::Ordinal) -and $_.EndsWith("[$runtimePath]", [StringComparison]::OrdinalIgnoreCase) })) {
+          throw "Required runtime is missing in build_script: $runtime"
+        }
+      }
+      & dotnet restore Bing.All.slnx
+      if ($LASTEXITCODE -ne 0) { throw 'Solution restore failed.' }
+      & dotnet build Bing.All.slnx -c Release --no-restore
+      if ($LASTEXITCODE -ne 0) { throw 'Solution build failed.' }
 test_script:
   - ps: |
+      $ErrorActionPreference = 'Stop'
+      $dotnetRoot = Join-Path $env:APPVEYOR_BUILD_FOLDER '.ci-dotnet'
+      if ($env:DOTNET_ROOT -ne $dotnetRoot -or ($env:PATH -split ';')[0] -ne $dotnetRoot) {
+        throw 'Task-local DOTNET_ROOT/PATH did not persist through build_script.'
+      }
+      $resolvedDotnet = (Get-Command dotnet -CommandType Application).Source
+      if (-not $resolvedDotnet.StartsWith($dotnetRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "The task-local dotnet is not first on PATH: $resolvedDotnet"
+      }
+      if ((& dotnet --version).Trim() -ne '10.0.400') { throw 'Expected .NET SDK 10.0.400 in test_script.' }
+      $sdks = & dotnet --list-sdks
+      $sdks
+      $sdkPath = Join-Path $dotnetRoot 'sdk'
+      if (-not ($sdks | Where-Object { $_.StartsWith('10.0.400 ', [StringComparison]::Ordinal) -and $_.EndsWith("[$sdkPath]", [StringComparison]::OrdinalIgnoreCase) })) {
+        throw 'SDK 10.0.400 is not available under DOTNET_ROOT in test_script.'
+      }
+      $runtimes = & dotnet --list-runtimes
+      $runtimes
+      foreach ($runtime in @('Microsoft.NETCore.App 6.0.', 'Microsoft.NETCore.App 8.0.', 'Microsoft.AspNetCore.App 6.0.', 'Microsoft.AspNetCore.App 8.0.')) {
+        $runtimeFamily = $runtime.Substring(0, $runtime.LastIndexOf(' '))
+        $runtimePath = Join-Path (Join-Path $dotnetRoot 'shared') $runtimeFamily
+        if (-not ($runtimes | Where-Object { $_.StartsWith($runtime, [StringComparison]::Ordinal) -and $_.EndsWith("[$runtimePath]", [StringComparison]::OrdinalIgnoreCase) })) {
+          throw "Required runtime is missing in test_script: $runtime"
+        }
+      }
       $lane = if ([string]::IsNullOrWhiteSpace($env:PROVIDER_TEST_LANE)) { 'common' } else { $env:PROVIDER_TEST_LANE }
       switch ($lane) {
         'common' {
@@ -38,7 +133,7 @@ test_script:
           'ConnectionStrings__PostgreSqlConnection', 'ConnectionStrings__SqlServerConnection',
           'ConnectionStrings__OracleConnection', 'ConnectionStrings__DorisConnection' |
             ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
-          dotnet test -c Release -p:CI=true --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+          dotnet test Bing.All.slnx -c Release -p:CI=true --logger:"trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
           if ($LASTEXITCODE -ne 0) { throw 'Common test lane failed.' }
           dotnet run --project .\framework\tests\Bing.Data.Sql.Benchmarks\Bing.Data.Sql.Benchmarks.csproj -c Release --no-build -- --ci-smoke --filter "*SqlCiSmokeBenchmarks*" --artifacts "BenchmarkDotNet.Artifacts\ci"
           if ($LASTEXITCODE -ne 0) { throw 'CI benchmark smoke failed.' }
