@@ -1,4 +1,4 @@
-﻿using Bing.Data.Sql;
+using Bing.Data.Sql;
 using Bing.Tests.Configs;
 
 namespace Bing.Dapper.Tests.SqlExecutor;
@@ -17,7 +17,7 @@ public partial class MySqlExecutorTest
         var id = Guid.NewGuid();
         var sql = "Insert Product(ProductId,Code) Values(@ProductId,@Code)";
         await _sqlExecutor.ExecuteSqlAsync(sql, new { ProductId = id, Code = "abc" });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var result = await query.Query().Select("Code").From("Product").Where("ProductId", id).ScalarAsync<string>();
         Assert.Equal(TestConfig.Value, result);
     }
@@ -30,7 +30,7 @@ public partial class MySqlExecutorTest
     {
         // Arrange
         var id = Guid.NewGuid();
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
 
         // Act
         var inserted = await executor.ExecuteSqlAsync("Insert Product(ProductId,Code,Name) Values(@id,@code,@name)",

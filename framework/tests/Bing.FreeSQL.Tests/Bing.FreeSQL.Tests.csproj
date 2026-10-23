@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Include="..\..\..\deploy\migrations\inventory\002-exact-identities.mysql.sql"
           Link="InventoryMigrations\002-exact-identities.mysql.sql" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL\Bing.FreeSQL.csproj" />
     <ProjectReference Include="..\..\src\Bing.FreeSQL.MySql\Bing.FreeSQL.MySql.csproj" />

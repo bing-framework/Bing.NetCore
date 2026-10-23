@@ -4,6 +4,7 @@ using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Test.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -19,16 +20,25 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlServerQueryAggregateTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
-    public SqlServerQueryAggregateTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
+    public SqlServerQueryAggregateTest(SqlServerIntegrationDatabaseFixture fixture)
+    {
+        _fixture = fixture;
+        _serviceScope = fixture.CreateScope();
+    }
 
     /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
     /// <inheritdoc />
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await _serviceScope.DisposeAsync();
 
     /// <summary>
     /// 测试 - SQL Server 应真实执行统一聚合、条件表达式、Raw 参数和显式参数绑定。
@@ -42,7 +52,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
         await _fixture.SeedAggregateDataAsync();
 
         // Act
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var countAll = await CreateAggregateDescription(query).CountAll().ScalarAsync<int>();
         var distinctUsers = await CreateAggregateDescription(query).CountColumn("p.UserId", distinct: true).ScalarAsync<int>();
         var total = await CreateAggregateDescription(query).Sum("p.Amount").ScalarAsync<decimal>();
@@ -71,7 +81,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
     public async Task ExecuteQueryAsync_WhenInsertOutputIsConfigured_ShouldMaterializeReturnedRows()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         IEnumerable<IReadOnlyList<object>> values = new IReadOnlyList<object>[]
         {
             new object[] { "output-first", 1m, true },

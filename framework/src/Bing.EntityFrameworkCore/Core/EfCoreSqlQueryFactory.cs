@@ -2,8 +2,10 @@ using Bing.Data.Enums;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
+using Bing.Uow;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Datas.EntityFramework.Core;
 
@@ -91,7 +93,10 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
         var databaseType = ResolveDatabaseType(unitOfWork);
         var dataSource = ResolveDataSource(databaseType, dbKey);
         if (mode == EfCoreSqlConnectionMode.Shared)
+        {
             EnsureSharedConnectionMatches(unitOfWork, dataSource);
+            EnsureMappedContextMatches(unitOfWork, dataSource.Key);
+        }
         var query = CreateQuery(dataSource);
         try
         {
@@ -123,6 +128,16 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
             query.Dispose();
             throw;
         }
+    }
+
+    /// <summary>
+    /// 确认显式数据源映射选中的 context 与 Shared Query 使用同一实例。
+    /// </summary>
+    private static void EnsureMappedContextMatches(UnitOfWorkBase unitOfWork, string dataSourceKey)
+    {
+        var provider = unitOfWork.ServiceProvider.GetServices<IUnitOfWorkConnectionProvider>()
+            .OfType<IEfCoreSqlUnitOfWorkConnectionProvider>().SingleOrDefault();
+        provider?.EnsureMappedContextMatches(unitOfWork, dataSourceKey);
     }
 
     /// <summary>

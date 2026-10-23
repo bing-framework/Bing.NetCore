@@ -27,7 +27,11 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// <summary>
     /// 存储测试服务提供程序。
     /// </summary>
-    private ServiceProvider _serviceProvider;
+    private ServiceProvider _rootServiceProvider;
+
+    private IServiceScope _serviceScope;
+
+    private IServiceProvider _serviceProvider;
 
     /// <summary>
     /// 获取或设置第一个测试数据库文件路径。
@@ -99,7 +103,9 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
             setupAction: descriptor => descriptor.MappingProfile = "first-profile");
         services.AddSqlDataSource(SecondDatabaseKey, DatabaseType.Sqlite, SecondConnectionString);
         services.AddSqliteProvider();
-        _serviceProvider = services.BuildServiceProvider();
+        _rootServiceProvider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        _serviceScope = _rootServiceProvider.CreateScope();
+        _serviceProvider = _serviceScope.ServiceProvider;
 
         await InitializeDatabaseAsync(FirstConnectionString);
         await InitializeDatabaseAsync(SecondConnectionString);
@@ -217,7 +223,10 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// </summary>
     private Task DisposeAsyncCore()
     {
-        _serviceProvider?.Dispose();
+        _serviceScope?.Dispose();
+        _serviceScope = null;
+        _rootServiceProvider?.Dispose();
+        _rootServiceProvider = null;
         _serviceProvider = null;
         SqliteConnection.ClearAllPools();
         if (Directory.Exists(_directoryPath))

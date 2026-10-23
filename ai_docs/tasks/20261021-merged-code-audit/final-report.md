@@ -1,5 +1,9 @@
 # 第 2 次独立验收报告（Fix Round 1 后）
 
+## 后续状态更新（2026-10-21）
+
+F008 SQL 工厂作用域已由独立任务通过第二轮验收并关闭；原两类 root provider 与过滤状态故障已修复。详情见 [F008 独立验收最终结果](../20261021-f008-sql-factory-scope/final-report.md) 和 [迁移说明](../20261021-f008-sql-factory-scope/migration.md)。下文的 `BLOCKED_APPROVAL` 与“未修复”判断是本报告形成时的状态快照，由本段最新状态覆盖；其余 2 项确定功能、2 项候选和外部门禁状态仍按原报告记录。默认五类工厂为 Scoped；Singleton/后台消费者应按业务操作通过 `IServiceScopeFactory` 创建 scope。
+
 **通过：I01–I07 为 7/7，FIX-001–006 为 6/6 CLOSED；OPEN_ACTIONABLE=0。** 实现和批准的本地测试通过；发布仍 BLOCKED，自动 Review/Fix 循环停止。
 
 ```text

@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data;
 using Bing.Data.Enums;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +12,43 @@ namespace Bing.Dapper.Tests.Metadata;
 /// </summary>
 public class OracleProviderRegistrationTest
 {
+    /// <summary>
+    /// 测试目的：Oracle Query 使用请求作用域的过滤器状态，并在切换后生成完整 SQL。
+    /// </summary>
+    [Fact]
+    public void Query_WhenScopedFilterChanges_ShouldRenderCompleteOracleSql()
+    {
+        var services = new ServiceCollection();
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, "Data Source=localhost;User Id=scope_test;");
+        using var root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = root.CreateScope();
+        var filter = scope.ServiceProvider.GetRequiredService<IDataFilter>();
+        using var query = scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create();
+        var source = query.From<OracleScopeProbeEntity>();
+
+        var enabled = source.ToSql();
+        var enabledSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(
+            ((ISqlQueryBuilderAccessor)source).GetSqlBuilder());
+        string disabled;
+        SqlBuilderExecutionSnapshot disabledSnapshot;
+        using (filter.Disable<ISoftDelete>())
+        {
+            disabled = source.ToSql();
+            disabledSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(
+                ((ISqlQueryBuilderAccessor)source).GetSqlBuilder());
+        }
+
+        Assert.Equal("Select \"scope_probe\".\"Id\",\"scope_probe\".\"IsDeleted\" \r\nFrom \"scope_probe\" \r\nWhere \"scope_probe\".\"IsDeleted\"=:p_0", enabled);
+        Assert.Equal("Select \"scope_probe\".\"Id\",\"scope_probe\".\"IsDeleted\" \r\nFrom \"scope_probe\"", disabled);
+        Assert.Equal(enabled, enabledSnapshot.Sql);
+        Assert.Equal(":p_0", Assert.Single(enabledSnapshot.Parameters).Name);
+        Assert.Equal(0, Assert.Single(enabledSnapshot.Parameters).Value);
+        Assert.Equal(disabled, disabledSnapshot.Sql);
+        Assert.Empty(disabledSnapshot.Parameters);
+        Assert.Equal(enabled, source.ToSql());
+    }
+
     /// <summary>
     /// 测试目的：注册 Oracle Provider 后，查询和执行器选项应使用 Oracle 数据库类型。
     /// </summary>
@@ -91,5 +130,30 @@ public class OracleProviderRegistrationTest
         Assert.Equal("value", Assert.Single(parameters).Value);
         Assert.True(parameters.ContainsKey("p0_1"));
         Assert.DoesNotContain(parameters.Keys, key => key.StartsWith(":"));
+    }
+
+    /// <summary>
+    /// 测试目的：Oracle Provider 未注册 Multiple runtime 时应在连接创建前明确失败。
+    /// </summary>
+    [Fact]
+    public void MultipleQueryExecutorFactory_WhenOracleHasNoRuntime_ShouldThrowBeforeOpeningConnection()
+    {
+        var services = new ServiceCollection();
+        services.AddOracleProvider();
+        services.AddSqlDataSource("default", DatabaseType.Oracle, "Data Source=localhost;User Id=scope_test;");
+        using var root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = root.CreateScope();
+        var factory = scope.ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => factory.Create());
+
+        Assert.Contains(nameof(ISqlMultipleQueryExecutor), exception.Message);
+    }
+
+    [Table("scope_probe")]
+    private sealed class OracleScopeProbeEntity : ISoftDelete
+    {
+        public int Id { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

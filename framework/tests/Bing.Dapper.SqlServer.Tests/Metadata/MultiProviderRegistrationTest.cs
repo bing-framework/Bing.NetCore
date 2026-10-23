@@ -1,7 +1,9 @@
 using System.Data;
+using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Metadata;
 using Bing.Dapper;
@@ -19,6 +21,59 @@ namespace Bing.Dapper.Tests.Metadata;
 /// </summary>
 public class MultiProviderRegistrationTest
 {
+    /// <summary>
+    /// 测试目的：正反 Provider 顺序与重复注册均应保持 Scoped 工厂数量、跨作用域边界及具名路由。
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AddProviders_WhenOrderIsReversedAndRegistrationsRepeat_ShouldKeepScopedFactoryContracts(
+        bool reverseOrder)
+    {
+        var setup = CreateValidatedProvider(reverseOrder);
+        using var provider = setup.Provider;
+        var factoryServiceTypes = new[]
+        {
+            typeof(ISqlQueryFactory),
+            typeof(ISqlExecutorFactory),
+            typeof(ISqlMultipleQueryExecutorFactory),
+            typeof(ISqlTransactionScopeFactory)
+        };
+
+        foreach (var serviceType in factoryServiceTypes)
+        {
+            var descriptor = Assert.Single(setup.Services,
+                item => item.ServiceType == serviceType);
+            Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime);
+        }
+
+        using var scopeA = provider.CreateScope();
+        using var scopeB = provider.CreateScope();
+        foreach (var serviceType in factoryServiceTypes)
+        {
+            var factoryA = scopeA.ServiceProvider.GetRequiredService(serviceType);
+            Assert.Same(factoryA, scopeA.ServiceProvider.GetRequiredService(serviceType));
+            Assert.NotSame(factoryA, scopeB.ServiceProvider.GetRequiredService(serviceType));
+        }
+
+        Assert.Same(scopeA.ServiceProvider.GetRequiredService<SqlMetadataOptions>(),
+            scopeB.ServiceProvider.GetRequiredService<SqlMetadataOptions>());
+        Assert.Same(scopeA.ServiceProvider.GetRequiredService<IEntityMappingResolver>(),
+            scopeB.ServiceProvider.GetRequiredService<IEntityMappingResolver>());
+        Assert.Same(scopeA.ServiceProvider.GetRequiredService<ISqlProviderResolver>(),
+            scopeB.ServiceProvider.GetRequiredService<ISqlProviderResolver>());
+
+        var queryFactory = scopeA.ServiceProvider.GetRequiredService<ISqlQueryFactory>();
+        using var mysql = queryFactory.Create("mysql");
+        using var postgreSql = queryFactory.Create("pgsql");
+        Assert.Equal(
+            "Select `multi_provider_route_probe`.`Id`,`multi_provider_route_probe`.`Name` \r\nFrom `multi_provider_route_probe`",
+            mysql.From<MultiProviderRouteProbe>().ToSql());
+        Assert.Equal(
+            "Select \"multi_provider_route_probe\".\"Id\",\"multi_provider_route_probe\".\"Name\" \r\nFrom \"multi_provider_route_probe\"",
+            postgreSql.From<MultiProviderRouteProbe>().ToSql());
+    }
+
     /// <summary>
     /// 测试目的：同容器直接注入根查询时应按当前数据库上下文路由，而非返回第一个 Provider 的实现。
     /// </summary>
@@ -242,6 +297,72 @@ public class MultiProviderRegistrationTest
                 source.MappingProfile = "doris";
             });
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// 创建开启 scope 验证的多 Provider 容器，并按指定方向重复注册核心服务和 Provider。
+    /// </summary>
+    /// <param name="reverseOrder">是否逆序注册 Provider。</param>
+    /// <returns>已验证作用域行为的根容器。</returns>
+    private static (ServiceProvider Provider, IServiceCollection Services) CreateValidatedProvider(bool reverseOrder)
+    {
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSqlCore();
+        if (reverseOrder)
+        {
+            services.AddOracleProvider();
+            services.AddOracleProvider();
+            services.AddSqliteProvider();
+            services.AddSqliteProvider();
+            services.AddSqlServerProvider();
+            services.AddSqlServerProvider();
+            services.AddPostgreSqlProvider();
+            services.AddPostgreSqlProvider();
+            services.AddMySqlProvider();
+            services.AddMySqlProvider();
+        }
+        else
+        {
+            services.AddMySqlProvider();
+            services.AddMySqlProvider();
+            services.AddPostgreSqlProvider();
+            services.AddPostgreSqlProvider();
+            services.AddSqlServerProvider();
+            services.AddSqlServerProvider();
+            services.AddSqliteProvider();
+            services.AddSqliteProvider();
+            services.AddOracleProvider();
+            services.AddOracleProvider();
+        }
+        services.AddSqlDataSource("mysql", DatabaseType.MySql, "Server=mysql;Database=test;");
+        services.AddSqlDataSource("pgsql", DatabaseType.PgSql, "Host=pgsql;Database=test;");
+        services.AddSqlDataSource("sqlserver", DatabaseType.SqlServer, "Server=sqlserver;Database=test;");
+        services.AddSqlDataSource("sqlite", DatabaseType.Sqlite, "Data Source=:memory:");
+        services.AddSqlDataSource("oracle", DatabaseType.Oracle, "User Id=bing;Password=secret;Data Source=oracle-test");
+
+        Assert.Equal(1, services.Count(descriptor => descriptor.ServiceType == typeof(ISqlProviderResolver)));
+        foreach (var providerType in new[]
+                 {
+                     typeof(MySqlSqlProvider), typeof(PostgreSqlSqlProvider), typeof(SqlServerSqlProvider),
+                     typeof(SqliteSqlProvider), typeof(OracleSqlProvider)
+                 })
+            Assert.Single(services, descriptor => descriptor.ServiceType == typeof(ISqlProvider) &&
+                                                  providerType.IsInstanceOfType(descriptor.ImplementationInstance));
+
+        return (services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateScopes = true,
+            ValidateOnBuild = true
+        }), services);
+    }
+
+    [Table("multi_provider_route_probe")]
+    private sealed class MultiProviderRouteProbe
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
     }
 
     /// <summary>

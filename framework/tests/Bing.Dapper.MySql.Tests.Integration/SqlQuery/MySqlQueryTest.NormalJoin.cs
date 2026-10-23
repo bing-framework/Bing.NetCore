@@ -19,7 +19,7 @@ public partial class MySqlQueryTest
         var productId = Guid.NewGuid();
         await InitProductDataAsync(productId, "join-inner");
         await InsertProductItemAsync(Guid.NewGuid(), productId, "inner-sku", 3);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("p.Code As ProductCode,i.Sku As Sku,i.Quantity As Quantity")
             .AppendFrom("Product p")
             .Join("ProductItem", "i").AppendOn("i.ProductId=p.ProductId")
@@ -45,7 +45,7 @@ public partial class MySqlQueryTest
         // Arrange
         var productId = Guid.NewGuid();
         await InitProductDataAsync(productId, "join-left");
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("p.Code As ProductCode,i.Sku As Sku")
             .AppendFrom("Product p")
             .LeftJoin("ProductItem", "i").AppendOn("i.ProductId=p.ProductId")
@@ -64,7 +64,7 @@ public partial class MySqlQueryTest
     /// </summary>
     private async Task InsertProductItemAsync(Guid itemId, Guid productId, string sku, int quantity)
     {
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert ProductItem(ProductItemId,ProductId,Sku,Quantity,Enabled) Values(@itemId,@productId,@sku,@quantity,@enabled)",
             new { itemId, productId, sku, quantity, enabled = true });

@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Bing.Data;
 using Bing.Data.Sql;
+using System.Threading;
 using Bing.Domain.Entities;
 using Bing.Exceptions;
 using Bing.Extensions;
@@ -40,7 +41,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <summary>
     /// 当前存储器是否已释放。
     /// </summary>
-    private bool _disposed;
+    private int _disposed;
 
     #endregion
 
@@ -140,10 +141,12 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
 
     /// <inheritdoc />
     [Obsolete("请使用 FindById 方法")]
-    public virtual TEntity Find(object id) => id.SafeString().IsEmpty() ? null : Set.Find(id);
+    public virtual TEntity Find(object id) => UnitOfWork.ExecuteWithOperationCancellationBoundary(
+        () => id.SafeString().IsEmpty() ? null : Set.Find(id));
 
     /// <inheritdoc />
-    public virtual TEntity FindById(object id) => id.SafeString().IsEmpty() ? null : Set.Find(id);
+    public virtual TEntity FindById(object id) => UnitOfWork.ExecuteWithOperationCancellationBoundary(
+        () => id.SafeString().IsEmpty() ? null : Set.Find(id));
 
     #endregion
 
@@ -153,19 +156,23 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     [Obsolete("请使用 FindByIdAsync 方法")]
     public virtual async Task<TEntity> FindAsync(object id, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (id.SafeString().IsEmpty())
-            return null;
-        return await Set.FindAsync(new[] { id }, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            if (id.SafeString().IsEmpty())
+                return null;
+            return await Set.FindAsync(new[] { id }, token);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<TEntity> FindByIdAsync(object id, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (id.SafeString().IsEmpty())
-            return null;
-        return await Set.FindAsync(new[] { id }, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            if (id.SafeString().IsEmpty())
+                return null;
+            return await Set.FindAsync(new[] { id }, token);
+        }).ConfigureAwait(false);
     }
 
     #endregion
@@ -178,7 +185,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual List<TEntity> FindByIds(IEnumerable<TKey> ids)
     {
-        return ids == null ? null : Find(t => ids.Contains(t.Id)).ToList();
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => ids == null ? null : Find(t => ids.Contains(t.Id)).ToList());
     }
 
     /// <inheritdoc />
@@ -197,15 +205,16 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return ids == null ? null : await Find(t => ids.Contains(t.Id)).ToListAsync(cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            ids == null ? Task.FromResult<List<TEntity>>(null) : Find(t => ids.Contains(t.Id)).ToListAsync(token))
+            .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsAsync(string ids, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await FindByIdsAsync(Conv.ToList<TKey>(ids), cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+            await FindByIdsAsync(Conv.ToList<TKey>(ids), token).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     #endregion
@@ -229,7 +238,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual List<TEntity> FindByIdsNoTracking(IEnumerable<TKey> ids)
     {
-        return ids == null ? null : FindAsNoTracking().Where(t => ids.Contains(t.Id)).ToList();
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => ids == null ? null : FindAsNoTracking().Where(t => ids.Contains(t.Id)).ToList());
     }
 
     /// <inheritdoc />
@@ -245,9 +255,12 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<TEntity> FindByIdNoTrackingAsync(TKey id, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        var entities = await FindByIdsNoTrackingAsync((IEnumerable<TKey>)new[] { id }, cancellationToken);
-        return entities == null || entities.Count == 0 ? null : entities[0];
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            var entities = await FindByIdsNoTrackingAsync((IEnumerable<TKey>)new[] { id }, token)
+                .ConfigureAwait(false);
+            return entities == null || entities.Count == 0 ? null : entities[0];
+        }).ConfigureAwait(false);
     }
 
     #endregion
@@ -260,15 +273,16 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return ids == null ? null : await FindAsNoTracking().Where(t => ids.Contains(t.Id)).ToListAsync(cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            ids == null ? Task.FromResult<List<TEntity>>(null) :
+                FindAsNoTracking().Where(t => ids.Contains(t.Id)).ToListAsync(token)).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindByIdsNoTrackingAsync(string ids, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await FindByIdsNoTrackingAsync(Conv.ToList<TKey>(ids), cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+            await FindByIdsNoTrackingAsync(Conv.ToList<TKey>(ids), token).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     #endregion
@@ -276,14 +290,18 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     #region Single(查找单个实体)
 
     /// <inheritdoc />
-    public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate) => Find().FirstOrDefault(predicate);
+    public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate) =>
+        UnitOfWork.ExecuteWithOperationCancellationBoundary(() => Find().FirstOrDefault(predicate));
 
     /// <inheritdoc />
     public virtual TEntity Single(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action)
     {
-        if (action == null)
-            return Single(predicate);
-        return action(Find()).FirstOrDefault(predicate);
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(() =>
+        {
+            if (action == null)
+                return Find().FirstOrDefault(predicate);
+            return action(Find()).FirstOrDefault(predicate);
+        });
     }
 
     #endregion
@@ -293,17 +311,19 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return await Find().FirstOrDefaultAsync(predicate, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken,
+            token => Find().FirstOrDefaultAsync(predicate, token)).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> action, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (action == null)
-            return await SingleAsync(predicate, cancellationToken);
-        return await action(Find()).FirstOrDefaultAsync(predicate, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            if (action == null)
+                return await SingleAsync(predicate, token).ConfigureAwait(false);
+            return await action(Find()).FirstOrDefaultAsync(predicate, token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     #endregion
@@ -313,7 +333,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual List<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate = null)
     {
-        return predicate == null ? Find().ToList() : Find(predicate).ToList();
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => predicate == null ? Find().ToList() : Find(predicate).ToList());
     }
 
     #endregion
@@ -323,10 +344,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (predicate == null)
-            return await Find().ToListAsync(cancellationToken);
-        return await Find(predicate).ToListAsync(cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            predicate == null ? Find().ToListAsync(token) : Find(predicate).ToListAsync(token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -336,7 +355,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual List<TEntity> FindAllNoTracking(Expression<Func<TEntity, bool>> predicate = null)
     {
-        return predicate == null ? FindAsNoTracking().ToList() : FindAsNoTracking().Where(predicate).ToList();
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(() =>
+            predicate == null ? FindAsNoTracking().ToList() : FindAsNoTracking().Where(predicate).ToList());
     }
 
     #endregion
@@ -346,10 +366,9 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<List<TEntity>> FindAllNoTrackingAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (predicate == null)
-            return await FindAsNoTracking().ToListAsync(cancellationToken);
-        return await FindAsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            predicate == null ? FindAsNoTracking().ToListAsync(token) :
+                FindAsNoTracking().Where(predicate).ToListAsync(token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -359,21 +378,26 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public bool Exists(TKey id)
     {
-        if (id.SafeString().IsEmpty())
-            return false;
-        return Exists(t => Equals(id, t.Id));
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(() =>
+        {
+            if (id.SafeString().IsEmpty())
+                return false;
+            return Find().Any(t => Equals(id, t.Id));
+        });
     }
 
     /// <inheritdoc />
     public virtual bool Exists(TKey[] ids)
     {
-        return ids != null && Exists(t => ids.Contains(t.Id));
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => ids != null && Find().Any(t => ids.Contains(t.Id)));
     }
 
     /// <inheritdoc />
     public virtual bool Exists(Expression<Func<TEntity, bool>> predicate)
     {
-        return predicate != null && Find().Any(predicate);
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => predicate != null && Find().Any(predicate));
     }
 
     #endregion
@@ -383,22 +407,26 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public async Task<bool> ExistsAsync(TKey id)
     {
-        if (id.SafeString().IsEmpty())
-            return false;
-        return await ExistsAsync(t => Equals(id, t.Id));
+        return await WithOperationCancellationAsync(CancellationToken.None, async token =>
+        {
+            if (id.SafeString().IsEmpty())
+                return false;
+            return await ExistsAsync(t => Equals(id, t.Id), token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(params TKey[] ids)
     {
-        return ids != null && await ExistsAsync(t => ids.Contains(t.Id));
+        return await WithOperationCancellationAsync(CancellationToken.None, async token =>
+            ids != null && await ExistsAsync(t => ids.Contains(t.Id), token).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return predicate != null && await Find().AnyAsync(predicate, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            predicate == null ? Task.FromResult(false) : Find().AnyAsync(predicate, token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -408,7 +436,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual int Count(Expression<Func<TEntity, bool>> predicate = null)
     {
-        return predicate == null ? Find().Count() : Find().Count(predicate);
+        return UnitOfWork.ExecuteWithOperationCancellationBoundary(
+            () => predicate == null ? Find().Count() : Find().Count(predicate));
     }
 
     #endregion
@@ -418,10 +447,8 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate = null, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        return predicate == null
-            ? await Find().CountAsync(cancellationToken)
-            : await Find().CountAsync(predicate, cancellationToken);
+        return await WithOperationCancellationAsync(cancellationToken, token =>
+            predicate == null ? Find().CountAsync(token) : Find().CountAsync(predicate, token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -453,21 +480,25 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        ThrowIfDisposed();
-        if (entity == null)
-            throw new ArgumentNullException(nameof(entity));
-        await Set.AddAsync(entity, cancellationToken);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            ThrowIfDisposed();
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+            await Set.AddAsync(entity, token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        ThrowIfDisposed();
-        if (entities == null)
-            throw new ArgumentNullException(nameof(entities));
-        await Set.AddRangeAsync(entities, cancellationToken);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            ThrowIfDisposed();
+            if (entities == null)
+                throw new ArgumentNullException(nameof(entities));
+            await Set.AddRangeAsync(entities, token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     #endregion
@@ -651,41 +682,66 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public virtual async Task RemoveAsync(object id, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        ThrowIfDisposed();
-        var entity = await FindByIdAsync(id, cancellationToken);
-        Delete(entity);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            ThrowIfDisposed();
+            var entity = await FindByIdAsync(id, token).ConfigureAwait(false);
+            Delete(entity);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (entity == null)
-            return;
-        await RemoveAsync(entity.Id, cancellationToken);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            if (entity != null)
+                await RemoveAsync(entity.Id, token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        ThrowIfDisposed();
-        if (ids == null)
-            return;
-        var entities = await FindByIdsAsync(ids, cancellationToken);
-        Delete(entities);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            ThrowIfDisposed();
+            if (ids == null)
+                return;
+            var entities = await FindByIdsAsync(ids, token).ConfigureAwait(false);
+            Delete(entities);
+        }).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task RemoveAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
-        if (entities == null)
-            return;
-        await RemoveAsync(entities.Select(t => t.Id), cancellationToken);
+        await WithOperationCancellationAsync(cancellationToken, async token =>
+        {
+            if (entities != null)
+                await RemoveAsync(entities.Select(t => t.Id), token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     #endregion
+
+    private async Task<TResult> WithOperationCancellationAsync<TResult>(CancellationToken callerToken,
+        Func<CancellationToken, Task<TResult>> action)
+    {
+        using var lease = UnitOfWork.CreateOperationCancellationLease(callerToken);
+        using var cancellationRegistration = UnitOfWork.RegisterOperationCancellation(lease.Token);
+        lease.Token.ThrowIfCancellationRequested();
+        return await action(lease.Token).ConfigureAwait(false);
+    }
+
+    private async Task WithOperationCancellationAsync(CancellationToken callerToken,
+        Func<CancellationToken, Task> action)
+    {
+        using var lease = UnitOfWork.CreateOperationCancellationLease(callerToken);
+        using var cancellationRegistration = UnitOfWork.RegisterOperationCancellation(lease.Token);
+        lease.Token.ThrowIfCancellationRequested();
+        await action(lease.Token).ConfigureAwait(false);
+    }
 
     #region ThrowIfDisposed(已释放则抛出异常)
 
@@ -695,7 +751,7 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <exception cref="ObjectDisposedException">当前存储对象已释放时抛出。</exception>
     protected void ThrowIfDisposed()
     {
-        if (_disposed)
+        if (Volatile.Read(ref _disposed) != 0)
             throw new ObjectDisposedException(GetType().Name);
     }
 
@@ -706,7 +762,11 @@ public abstract class StoreBase<TEntity, TKey> : IStore<TEntity, TKey> where TEn
     /// <inheritdoc />
     public void Dispose()
     {
-        _disposed = true;
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
+        var query = _sqlQuery;
+        _sqlQuery = null;
+        query?.Dispose();
     }
 
     #endregion

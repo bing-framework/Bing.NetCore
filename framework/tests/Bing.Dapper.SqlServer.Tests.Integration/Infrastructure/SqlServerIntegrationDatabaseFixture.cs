@@ -63,7 +63,7 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
         services.AddSqlDataSource("default", DatabaseType.SqlServer, ConnectionString);
         services.AddLogging();
         services.AddBing();
-        _serviceProvider = services.BuildServiceProvider();
+        _serviceProvider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
     }
 
     /// <summary>
@@ -91,23 +91,33 @@ public sealed class SqlServerIntegrationDatabaseFixture : IAsyncLifetime, IAsync
     }
 
     /// <summary>
-    /// 创建 SQL Server 查询对象。
+    /// 为一次 SQL Server 测试操作创建异步服务作用域。
     /// </summary>
+    /// <returns>由调用方负责释放的异步服务作用域。</returns>
+    public AsyncServiceScope CreateScope() => ServiceProvider.CreateAsyncScope();
+
+    /// <summary>
+    /// 在显式服务作用域内创建 SQL Server 查询对象。
+    /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>新的 SQL 查询对象。</returns>
-    public ISqlQuery CreateQuery() => ServiceProvider.GetRequiredService<ISqlQuery>();
+    public ISqlQuery CreateQuery(IServiceProvider serviceProvider) => serviceProvider.GetRequiredService<ISqlQuery>();
 
     /// <summary>
-    /// 创建 SQL Server 执行器。
+    /// 在显式服务作用域内创建 SQL Server 执行器。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>新的 SQL 执行器。</returns>
-    public ISqlExecutor CreateExecutor() => ServiceProvider.GetRequiredService<ISqlExecutor>();
+    public ISqlExecutor CreateExecutor(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlExecutor>();
 
     /// <summary>
-    /// 创建 SQL Server 多结果集执行器。
+    /// 在显式服务作用域内创建 SQL Server 多结果集执行器。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>多结果集执行器。</returns>
-    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor() =>
-        ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
+    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
     /// <inheritdoc />
     /// <remarks>

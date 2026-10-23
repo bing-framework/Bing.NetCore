@@ -68,7 +68,7 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         await DatabaseScript.InitializeAsync(connection);
         var services = new ServiceCollection();
         AddMySqlIntegrationTestServices(services, ConnectionString);
-        _serviceProvider = services.BuildServiceProvider();
+        _serviceProvider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
         RootServiceProviderCreationCount++;
     }
 
@@ -111,7 +111,8 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
         var options = new DbContextOptionsBuilder<IntegrationMySqlUnitOfWork>()
             .UseMySql(connectionString, ServerVersion.Parse("8.0.0"))
             .Options;
-        using var unitOfWork = new IntegrationMySqlUnitOfWork(options, serviceProvider);
+        using var scope = serviceProvider.CreateScope();
+        using var unitOfWork = new IntegrationMySqlUnitOfWork(options, scope.ServiceProvider);
         return new EfCoreEntityModelMetadataProvider(unitOfWork.Model);
     }
 
@@ -164,42 +165,58 @@ public sealed class MySqlIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDisp
     }
 
     /// <summary>
-    /// 创建 MySQL SQL 查询对象。
+    /// 为一次 MySQL 测试操作创建异步服务作用域。
     /// </summary>
+    /// <returns>由调用方负责释放的异步服务作用域。</returns>
+    public AsyncServiceScope CreateScope() => ServiceProvider.CreateAsyncScope();
+
+    /// <summary>
+    /// 在显式服务作用域内创建 MySQL SQL 查询对象。
+    /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>SQL 查询对象。</returns>
-    public ISqlQuery CreateQuery() => GetQueryFactory().Create();
+    public ISqlQuery CreateQuery(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlQueryFactory>().Create();
 
     /// <summary>
-    /// 创建 MySQL SQL 执行对象。
+    /// 在显式服务作用域内创建 MySQL SQL 执行对象。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>SQL 执行对象。</returns>
-    public ISqlExecutor CreateExecutor() => GetExecutorFactory().Create();
+    public ISqlExecutor CreateExecutor(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlExecutorFactory>().Create();
 
     /// <summary>
-    /// 创建 MySQL 多结果集查询执行器。
+    /// 在显式服务作用域内创建 MySQL 多结果集查询执行器。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>多结果集查询执行器。</returns>
-    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor() =>
-        ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
+    public ISqlMultipleQueryExecutor CreateMultipleQueryExecutor(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
 
     /// <summary>
-    /// 获取 SQL 查询工厂。
+    /// 从显式服务作用域获取 SQL 查询工厂。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>SQL 查询工厂。</returns>
-    public ISqlQueryFactory GetQueryFactory() => ServiceProvider.GetRequiredService<ISqlQueryFactory>();
+    public ISqlQueryFactory GetQueryFactory(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlQueryFactory>();
 
     /// <summary>
-    /// 获取 SQL 执行器工厂。
+    /// 从显式服务作用域获取 SQL 执行器工厂。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>SQL 执行器工厂。</returns>
-    public ISqlExecutorFactory GetExecutorFactory() => ServiceProvider.GetRequiredService<ISqlExecutorFactory>();
+    public ISqlExecutorFactory GetExecutorFactory(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlExecutorFactory>();
 
     /// <summary>
-    /// 获取 SQL 事务作用域工厂。
+    /// 从显式服务作用域获取 SQL 事务作用域工厂。
     /// </summary>
+    /// <param name="serviceProvider">测试操作的作用域服务提供程序。</param>
     /// <returns>SQL 事务作用域工厂。</returns>
-    public ISqlTransactionScopeFactory GetTransactionScopeFactory() =>
-        ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
+    public ISqlTransactionScopeFactory GetTransactionScopeFactory(IServiceProvider serviceProvider) =>
+        serviceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
 
     /// <inheritdoc />
     public Task DisposeAsync() => DisposeAsyncCore();

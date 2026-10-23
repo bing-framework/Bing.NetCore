@@ -1,5 +1,6 @@
 ﻿using Bing.Data.Sql;
 using Bing.Dapper.Tests.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Bing.Dapper.Tests.SqlExecutor;
@@ -14,6 +15,11 @@ public partial class MySqlExecutorTest : IAsyncLifetime
     /// MySQL 集成测试数据库固定装置。
     /// </summary>
     private readonly MySqlIntegrationDatabaseFixture _fixture;
+
+    /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
 
     /// <summary>
     /// 测试输出工具
@@ -35,8 +41,9 @@ public partial class MySqlExecutorTest : IAsyncLifetime
     {
         _output = output;
         _fixture = fixture;
-        _sqlExecutor = fixture.CreateExecutor();
-        _sqlExecutor2 = fixture.CreateExecutor();
+        _serviceScope = fixture.CreateScope();
+        _sqlExecutor = fixture.CreateExecutor(_serviceScope.ServiceProvider);
+        _sqlExecutor2 = fixture.CreateExecutor(_serviceScope.ServiceProvider);
     }
 
     /// <inheritdoc />
@@ -49,10 +56,10 @@ public partial class MySqlExecutorTest : IAsyncLifetime
     /// <remarks>
     /// 释放当前测试类创建的 SQL 执行器。
     /// </remarks>
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
         _sqlExecutor?.Dispose();
         _sqlExecutor2?.Dispose();
-        return Task.CompletedTask;
+        await _serviceScope.DisposeAsync();
     }
 }

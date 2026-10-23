@@ -120,17 +120,18 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<ISqlBuilderFactory, SqlBuilderFactory>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlFilter, IsDeletedFilter>());
         services.TryAddSingleton<ISqlEntityMutationCommandBuilderFactory, SqlEntityMutationCommandBuilderFactory>();
-        services.TryAddSingleton<ISqlQueryFactory, SqlQueryFactory>();
+        services.TryAddScoped<ISqlQueryFactory, SqlQueryFactory>();
         services.TryAddTransient<ISqlQuery>(provider =>
             provider.GetRequiredService<ISqlQueryFactory>().Create());
-        services.TryAddSingleton<ISqlExecutorFactory, SqlExecutorFactory>();
+        services.TryAddScoped<ISqlExecutorFactory, SqlExecutorFactory>();
         services.TryAddTransient<ISqlExecutor>(provider =>
             provider.GetRequiredService<ISqlExecutorFactory>().Create());
-        services.TryAddSingleton<ISqlMultipleQueryExecutorFactory, SqlMultipleQueryExecutorFactory>();
+        services.TryAddScoped<ISqlMultipleQueryExecutorFactory, SqlMultipleQueryExecutorFactory>();
         services.TryAddTransient<ISqlMultipleQueryExecutor>(provider =>
             provider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create());
-        services.TryAddSingleton<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();
+        services.TryAddScoped<ISqlTransactionScopeFactory, SqlTransactionScopeFactory>();
         services.TryAddSingleton<ISqlDbConnectionFactoryResolver, DefaultSqlDbConnectionFactoryResolver>();
+        services.TryAddScoped<ISqlUnitOfWorkResourceAccessor, SqlUnitOfWorkResourceAccessor>();
         return services;
     }
 

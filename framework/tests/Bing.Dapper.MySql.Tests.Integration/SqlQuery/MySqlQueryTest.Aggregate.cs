@@ -19,7 +19,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedAggregateDataAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = CreateAggregateDescription(query).CountColumn("p.Price", "Count");
 
         // Act
@@ -39,7 +39,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedAggregateDataAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = CreateAggregateDescription(query).CountColumn("p.Price", "Count", distinct: true);
 
         // Act
@@ -61,7 +61,7 @@ public partial class MySqlQueryTest
         await SeedAggregateDataAsync();
 
         // Act
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var sum = CreateAggregateDescription(query).Sum("p.Price", "Total").Scalar<decimal>();
         var distinctSum = CreateAggregateDescription(query).Sum("p.Price", "Total", distinct: true).Scalar<decimal>();
         var average = CreateAggregateDescription(query).Avg("p.Price", "Average").Scalar<decimal>();
@@ -87,7 +87,7 @@ public partial class MySqlQueryTest
         await SeedAggregateDataAsync();
 
         // Act
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var maximum = CreateAggregateDescription(query).Max("p.Price", "Maximum", distinct: true).Scalar<decimal>();
         var minimum = CreateAggregateDescription(query).Min("p.Price", "Minimum", distinct: true).Scalar<decimal>();
 
@@ -106,7 +106,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedAggregateDataAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = CreateAggregateDescription(query).CountColumn("p.UserId", "UserCount", distinct: true);
 
         // Act
@@ -126,7 +126,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedAggregateDataAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var sumQuery = CreateAggregateDescription(query)
             .AggregateExpression(SqlAggregateFunction.Sum, "[p].[Price] * 2", "DoubleTotal");
         var countQuery = CreateAggregateDescription(query).AggregateExpression(SqlAggregateFunction.Count,
@@ -151,7 +151,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedAggregateDataAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = CreateAggregateDescription(query)
             .CountColumn("p.UserId", "UserCount", distinct: true)
             .Sum("p.Price", "DistinctAmount", distinct: true);
@@ -175,7 +175,7 @@ public partial class MySqlQueryTest
         // Arrange
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-first");
         await InitProductDataAsync(Guid.NewGuid(), "count-qualified-second");
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().CountColumn("p.ProductId", "Count").From("Product", "p");
 
         // Act
@@ -200,7 +200,7 @@ public partial class MySqlQueryTest
             new { productId = firstId, code = "sum-qualified-first", price = 12.5m });
         await _sqlExecutor.ExecuteSqlAsync("Insert Product(ProductId,Code,Price) Values(@productId,@code,@price)",
             new { productId = secondId, code = "sum-qualified-second", price = 7.5m });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Sum("p.Price", "Total").From("Product", "p");
 
         // Act

@@ -1,5 +1,6 @@
 using Bing.Data.Sql;
 using Bing.Test.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -14,23 +15,13 @@ public class MultiProviderQueryTest
     /// <summary>
     /// 数据库作用域管理器。
     /// </summary>
-    private readonly IDatabaseScopeManager _databaseScopeManager;
-
-    /// <summary>
-    /// SQL 查询工厂。
-    /// </summary>
-    private readonly ISqlQueryFactory _queryFactory;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     /// <summary>
     /// 初始化一个 <see cref="MultiProviderQueryTest"/> 类型的实例。
     /// </summary>
-    /// <param name="databaseScopeManager">数据库作用域管理器。</param>
-    /// <param name="queryFactory">SQL 查询工厂。</param>
-    public MultiProviderQueryTest(IDatabaseScopeManager databaseScopeManager, ISqlQueryFactory queryFactory)
-    {
-        _databaseScopeManager = databaseScopeManager;
-        _queryFactory = queryFactory;
-    }
+    /// <param name="scopeFactory">SQL 服务作用域工厂。</param>
+    public MultiProviderQueryTest(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
 
     /// <summary>
     /// 测试 - 同一个容器应根据 dbKey 在 MySQL、PostgreSQL 和 SQL Server 之间切换查询 Provider。
@@ -57,8 +48,12 @@ public class MultiProviderQueryTest
     /// <returns>查询结果。</returns>
     private async Task<int> ExecuteSelectOneAsync(string dbKey)
     {
-        using (_databaseScopeManager.Use(dbKey))
-        using (var query = _queryFactory.Create())
+        using var serviceScope = _scopeFactory.CreateScope();
+        var serviceProvider = serviceScope.ServiceProvider;
+        var databaseScopeManager = serviceProvider.GetRequiredService<IDatabaseScopeManager>();
+        var queryFactory = serviceProvider.GetRequiredService<ISqlQueryFactory>();
+        using (databaseScopeManager.Use(dbKey))
+        using (var query = queryFactory.Create())
         {
             return await query.Query().AppendSelect("1").AppendFrom("(Select 1 as Value) t").ScalarAsync<int>();
         }

@@ -1,6 +1,7 @@
 using Bing.Data.Sql;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Test.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -16,16 +17,25 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlServerQueryHierarchyTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
-    public SqlServerQueryHierarchyTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
+    public SqlServerQueryHierarchyTest(SqlServerIntegrationDatabaseFixture fixture)
+    {
+        _fixture = fixture;
+        _serviceScope = fixture.CreateScope();
+    }
 
     /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
     /// <inheritdoc />
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await _serviceScope.DisposeAsync();
 
     /// <summary>
     /// 测试目的：SQL Server 邻接表递归 CTE 应使用 With 关键字并通过自关联返回完整层级和稳定深度排序。
@@ -37,7 +47,7 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     {
         // Arrange
         await SeedHierarchyNodesAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var tree = query.Query().AppendSelect("Id,ParentId,Name,0 As Depth")
             .From("dbo.BingSqlHierarchyIntegration").IsNull("ParentId")
             .UnionAll(query.Query().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")
@@ -64,7 +74,7 @@ public sealed class SqlServerQueryHierarchyTest : IAsyncLifetime
     /// </summary>
     private async Task SeedHierarchyNodesAsync()
     {
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         foreach (var node in new[]
                  {
                      new { id = 1, parentId = (int?)null, name = "root" },

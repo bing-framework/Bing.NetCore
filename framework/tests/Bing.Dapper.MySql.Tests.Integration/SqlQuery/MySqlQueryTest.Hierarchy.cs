@@ -17,7 +17,7 @@ public partial class MySqlQueryTest
     {
         // Arrange
         await SeedHierarchyNodesAsync();
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var tree = query.Query().AppendSelect("Id,ParentId,Name,0 As Depth").From("IntegrationHierarchyNode")
             .IsNull("ParentId")
             .UnionAll(query.Query().AppendSelect("n.Id,n.ParentId,n.Name,t.Depth + 1 As Depth")

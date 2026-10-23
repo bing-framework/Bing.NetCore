@@ -23,16 +23,25 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlServerExecutionContractTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成测试数据库固定装置。</param>
-    public SqlServerExecutionContractTest(SqlServerIntegrationDatabaseFixture fixture) => _fixture = fixture;
+    public SqlServerExecutionContractTest(SqlServerIntegrationDatabaseFixture fixture)
+    {
+        _fixture = fixture;
+        _serviceScope = fixture.CreateScope();
+    }
 
     /// <inheritdoc />
     public Task InitializeAsync() => _fixture.ResetAsync();
 
     /// <inheritdoc />
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await _serviceScope.DisposeAsync();
 
     /// <summary>
     /// 测试目的：SQL Server 应保留 decimal、datetime2 和显式 null 参数，并按实体类型完整物化结果。
@@ -44,14 +53,14 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     {
         // Arrange
         var createdAt = new DateTime(2026, 9, 3, 12, 30, 15, 123, DateTimeKind.Unspecified);
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlContractIntegration(Code,NullableValue,Amount,CreatedAt,Enabled) " +
             "Values(@code,@nullableValue,@amount,@createdAt,@enabled)",
             new { code = "typed-row", nullableValue = (int?)null, amount = 12.3456m, createdAt, enabled = true });
 
         // Act
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var rows = await query.Sql(
                 "Select Code,NullableValue,Amount,CreatedAt,Enabled From dbo.BingSqlContractIntegration " +
                 "Where Code=@code", new { code = "typed-row" })
@@ -75,13 +84,13 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Query_WhenStreamingAndPreCancelled_ShouldReturnRowsAndCancel()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlContractIntegration(Code,NullableValue,Amount,CreatedAt,Enabled) " +
             "Values(@code,@nullableValue,@amount,@createdAt,@enabled)",
             new { code = "stream-row", nullableValue = (int?)7, amount = 1.25m,
                 createdAt = new DateTime(2026, 9, 3), enabled = true });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Sql("Select Code,NullableValue,Amount,CreatedAt,Enabled " +
             "From dbo.BingSqlContractIntegration Order By Id");
 
@@ -108,7 +117,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Transaction_WhenCompletedOrRolledBack_ShouldKeepExpectedVisibility()
     {
         // Arrange
-        var transactionScopeFactory = _fixture.ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
+        var transactionScopeFactory = _serviceScope.ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
         var committedCode = "committed-row";
         var rolledBackCode = "rolled-back-row";
 
@@ -136,7 +145,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
         }
 
         // Assert
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var rows = await query.Sql(
                 "Select Code From dbo.BingSqlContractIntegration Where Code In (@committedCode,@rolledBackCode)",
                 new { committedCode, rolledBackCode })
@@ -151,7 +160,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Transaction_WhenScopeIsDisposedWithoutCompletion_ShouldRollbackChanges()
     {
         // Arrange
-        var transactionScopeFactory = _fixture.ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
+        var transactionScopeFactory = _serviceScope.ServiceProvider.GetRequiredService<ISqlTransactionScopeFactory>();
         using (var scope = transactionScopeFactory.Begin())
         using (var executor = scope.CreateExecutor())
         {
@@ -163,7 +172,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
         }
 
         // Act
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var count = await query.Sql(
                 "Select Count(*) From dbo.BingSqlContractIntegration Where Code=@code",
                 new { code = "implicit-rollback" })
@@ -186,7 +195,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
             new BatchRow { Code = "batch-second", Name = "before" },
             new BatchRow { Code = "batch-third", Name = "before" }
         };
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
 
         // Act
         var inserted = await executor.InsertBatchAsync(rows, new SqlBatchInsertOptions
@@ -194,7 +203,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
             BatchSize = 2,
             UseTransaction = true
         });
-        using var idQuery = _fixture.CreateQuery();
+        using var idQuery = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var ids = await idQuery.Sql(
                 "Select Id From dbo.BingSqlBatchIntegration Where Code In (@first,@second,@third) Order By Code",
                 new { first = "batch-first", second = "batch-second", third = "batch-third" })
@@ -220,7 +229,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
         Assert.Equal(3, inserted);
         Assert.Equal(3, updated);
         Assert.Equal(3, deleted);
-        using var countQuery = _fixture.CreateQuery();
+        using var countQuery = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         Assert.Equal(0, await countQuery.Sql("Select Count(*) From dbo.BingSqlBatchIntegration")
             .ScalarAsync<int>());
     }
@@ -237,14 +246,14 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
             new BatchRow { Code = "duplicate-first", Name = "first" },
             new BatchRow { Code = "duplicate-first", Name = "second" }
         };
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
 
         // Act
         await Assert.ThrowsAnyAsync<Exception>(() => executor.InsertBatchAsync(rows,
             new SqlBatchInsertOptions { BatchSize = 1, UseTransaction = true }));
 
         // Assert
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         Assert.Equal(0, await query.Sql("Select Count(*) From dbo.BingSqlBatchIntegration")
             .ScalarAsync<int>());
     }
@@ -256,11 +265,11 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Query_WhenInParameterCountIs2098_ShouldExecuteSuccessfully()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "in-2098", name = "boundary" });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var id = await query.Sql(
                 "Select Id From dbo.BingSqlBatchIntegration Where Code=@code",
                 new { code = "in-2098" })
@@ -284,11 +293,11 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Query_WhenInParameterCountIs2099_ShouldRejectAtSqlServerLimit()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "in-2099", name = "boundary" });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var id = await query.Sql(
                 "Select Id From dbo.BingSqlBatchIntegration Where Code=@code",
                 new { code = "in-2099" })
@@ -313,11 +322,11 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Query_WhenInParameterCountIs2100_ShouldRejectAtSqlServerLimit()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "in-2100", name = "boundary" });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var id = await query.Sql(
                 "Select Id From dbo.BingSqlBatchIntegration Where Code=@code",
                 new { code = "in-2100" })
@@ -342,11 +351,11 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task Query_WhenInParameterCountIs2101_ShouldRejectAndRemainReusable()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "in-2101", name = "boundary" });
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var id = await query.Sql(
                 "Select Id From dbo.BingSqlBatchIntegration Where Code=@code",
                 new { code = "in-2101" })
@@ -376,7 +385,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task ExecuteProcedureAsync_WhenOutputDirectionsAreConfigured_ShouldReturnValuesAndRows()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         var parameters = new SqlParameterCollection()
             .Add("InputValue", 3, DbType.Int32)
             .Add(new SqlParam("InputOutputValue", 5, DbType.Int32, ParameterDirection.InputOutput))
@@ -400,7 +409,7 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task ExecuteProcedureAsync_WhenCancellationIsRequested_ShouldCancelBeforeExecution()
     {
         // Arrange
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
@@ -416,14 +425,14 @@ public sealed class SqlServerExecutionContractTest : IAsyncLifetime
     public async Task ExecuteMultiple_WhenFirstResultIsReadAndDisposedEarly_ShouldReleaseResources()
     {
         // Arrange
-        using var seedExecutor = _fixture.CreateExecutor();
+        using var seedExecutor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await seedExecutor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "multiple-first", name = "first" });
         await seedExecutor.ExecuteSqlAsync(
             "Insert Into dbo.BingSqlBatchIntegration(Code,Name) Values(@code,@name)",
             new { code = "multiple-second", name = "second" });
-        using var executor = _fixture.CreateMultipleQueryExecutor();
+        using var executor = _fixture.CreateMultipleQueryExecutor(_serviceScope.ServiceProvider);
         var command = executor.CreateBatch()
             .Append("Select Code From dbo.BingSqlBatchIntegration Order By Code")
             .Append("Select Count(*) From dbo.BingSqlBatchIntegration")

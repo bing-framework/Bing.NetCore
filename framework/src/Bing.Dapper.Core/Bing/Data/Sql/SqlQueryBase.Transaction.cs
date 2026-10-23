@@ -111,6 +111,8 @@ public abstract partial class SqlQueryBase
     protected IDbTransaction GetQueryTransaction()
     {
         _transactionScopeLease?.EnsureActive();
+        if (_unitOfWorkResource != null)
+            return EnsureUnitOfWorkTransaction();
         var transaction = GetExecutionTransaction();
         if (transaction != null)
             return transaction;
@@ -133,6 +135,8 @@ public abstract partial class SqlQueryBase
     {
         _transactionScopeLease?.EnsureActive();
         cancellationToken.ThrowIfCancellationRequested();
+        if (_unitOfWorkResource != null)
+            return await EnsureUnitOfWorkTransactionAsync(cancellationToken).ConfigureAwait(false);
         var transaction = GetExecutionTransaction();
         if (transaction != null)
             return transaction;
@@ -185,6 +189,11 @@ public abstract partial class SqlQueryBase
     /// </summary>
     protected void RollbackQueryTransaction()
     {
+        if (_unitOfWorkResource != null)
+        {
+            MarkUnitOfWorkRollbackOnly();
+            return;
+        }
         if (_primaryReadTransactionStarted == false)
             return;
         try
@@ -203,6 +212,11 @@ public abstract partial class SqlQueryBase
     /// <remarks>清理阶段不得继承业务操作的取消令牌。</remarks>
     private protected async Task RollbackQueryTransactionAsync()
     {
+        if (_unitOfWorkResource != null)
+        {
+            MarkUnitOfWorkRollbackOnly();
+            return;
+        }
         if (_primaryReadTransactionStarted == false)
             return;
         try
@@ -394,6 +408,8 @@ public abstract partial class SqlQueryBase
     {
         if (cancellationToken.CanBeCanceled == false)
             return;
+        if (cancellationToken.IsCancellationRequested)
+            MarkPreCancelledUnitOfWorkExecution();
         cancellationToken.ThrowIfCancellationRequested();
         var profile = GetRequiredProviderProfile();
         if (profile.Execution.SupportsCancellation)

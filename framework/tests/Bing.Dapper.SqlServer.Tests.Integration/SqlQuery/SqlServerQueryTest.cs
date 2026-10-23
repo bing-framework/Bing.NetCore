@@ -1,5 +1,6 @@
 using Bing.Data.Sql;
 using Bing.Test.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -8,7 +9,7 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// 验证 SQL Server 查询执行行为。
 /// </summary>
 /// <remarks>测试由 <see cref="IntegrationFactAttribute"/> 管控，并需要配置 SQL Server 连接及专用集成测试开关。</remarks>
-public class SqlServerQueryTest
+public class SqlServerQueryTest : IDisposable
 {
     /// <summary>
     /// 写入 SQL Server 查询测试输出的测试输出助手。
@@ -21,14 +22,27 @@ public class SqlServerQueryTest
     private readonly ISqlQuery _sqlQuery;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly IServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlServerQueryTest"/> 类型的实例。
     /// </summary>
     /// <param name="output">测试输出写入器。</param>
-    /// <param name="sqlQuery">SQL 查询服务。</param>
-    public SqlServerQueryTest(ITestOutputHelper output, ISqlQuery sqlQuery)
+    /// <param name="scopeFactory">SQL 服务作用域工厂。</param>
+    public SqlServerQueryTest(ITestOutputHelper output, IServiceScopeFactory scopeFactory)
     {
         _output = output;
-        _sqlQuery = sqlQuery;
+        _serviceScope = scopeFactory.CreateScope();
+        _sqlQuery = _serviceScope.ServiceProvider.GetRequiredService<ISqlQuery>();
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _sqlQuery.Dispose();
+        _serviceScope.Dispose();
     }
 
     /// <summary>

@@ -75,10 +75,38 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     {
         if (command == null)
             throw new ArgumentNullException(nameof(command));
-        cancellationToken.ThrowIfCancellationRequested();
+        if (cancellationToken.IsCancellationRequested)
+        {
+            EnsureCancellationSupported(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
         ValidateCommand(command);
-        EnsureCancellationSupported(cancellationToken);
-        var executionLease = AcquireExecutionLease();
+        var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
+        try
+        {
+            EnsureCancellationSupported(operationToken);
+            if (operationToken.IsCancellationRequested)
+            {
+                MarkPreCancelledUnitOfWorkExecution();
+                operationToken.ThrowIfCancellationRequested();
+            }
+        }
+        catch
+        {
+            operationCancellation.Dispose();
+            throw;
+        }
+        IDisposable executionLease;
+        try
+        {
+            executionLease = AcquireExecutionLease();
+        }
+        catch
+        {
+            operationCancellation.Dispose();
+            throw;
+        }
         DiagnosticsMessage message = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
@@ -89,23 +117,29 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
             if (ExecuteBefore() == false)
             {
                 skippedExecution = true;
+                operationCancellation.Dispose();
+                operationCancellation = null;
                 return CompleteSkippedExecution(executionLease, cleanupExceptions);
             }
             var connection = GetExecutionConnection();
             var preparedCommand = PrepareCommand(command.Sql, command.Parameters);
-            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
             message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
             reader = await connection.QueryMultipleAsync(new CommandDefinition(preparedCommand.Sql,
                 preparedCommand.DapperParameters, transaction,
-                commandTimeout: timeout, cancellationToken: cancellationToken));
-            cancellationToken.ThrowIfCancellationRequested();
-            return new SqlMultipleQueryResult(reader, executionLease,
+                commandTimeout: timeout, cancellationToken: operationToken));
+            operationToken.ThrowIfCancellationRequested();
+            var result = new SqlMultipleQueryResult(reader, executionLease,
                 (completed, exception) => CompleteExecution(completed, message, exception),
-                (completed, exception) => CompleteExecutionAsync(completed, message, exception));
+                (completed, exception) => CompleteExecutionAsync(completed, message, exception),
+                operationToken, operationCancellation);
+            operationCancellation = null;
+            return result;
         }
         catch (Exception) when (skippedExecution)
         {
+            operationCancellation?.Dispose();
             throw;
         }
         catch (Exception exception)
@@ -119,6 +153,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteAfter((object)null));
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => operationCancellation?.Dispose());
         SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         return null;
     }
@@ -151,6 +186,7 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     {
         var cleanupExceptions = new List<Exception>();
         var lifecycleException = exception;
+        completed &= lifecycleException == null;
         if (completed)
         {
             try
@@ -193,10 +229,12 @@ public abstract class SqlMultipleQueryExecutorBase : SqlQueryBase, ISqlMultipleQ
     {
         var cleanupExceptions = new List<Exception>();
         var lifecycleException = exception;
+        completed &= lifecycleException == null;
         if (completed)
         {
             try
             {
+                // 结果集已完整消费，提交属于清理阶段，不继承之后才取消的业务令牌。
                 await CompleteQueryTransactionAsync(CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception completionException)

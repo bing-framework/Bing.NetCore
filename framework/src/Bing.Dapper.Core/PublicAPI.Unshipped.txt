@@ -23,3 +23,5 @@ Bing.Data.Sql.SqlExecutorBase.ExecuteReturningAsync<TResult>(Bing.Data.Sql.Mutat
 Bing.Data.Sql.SqlMultipleQueryExecutorBase.SqlMultipleQueryExecutorBase(System.IServiceProvider serviceProvider, Bing.Data.SqlOptions options) -> void
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedure(string procedure, object param = null, int? timeout = null) -> Bing.Data.Sql.SqlProcedureResult<int>
 virtual Bing.Data.Sql.SqlExecutorBase.ExecuteProcedureAsync(string procedure, object param = null, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.Sql.SqlProcedureResult<int>>
+Bing.Data.Sql.ISqlUnitOfWorkResourceAccessor
+Bing.Data.Sql.ISqlUnitOfWorkResourceAccessor.GetResource(Bing.Uow.IUnitOfWorkScope scope, Bing.Data.Sql.DatabaseContext context, string connectionStringOverride = null, bool createDapperResource = true, bool requireComparableIdentity = false) -> Bing.Uow.IUnitOfWorkConnectionResource

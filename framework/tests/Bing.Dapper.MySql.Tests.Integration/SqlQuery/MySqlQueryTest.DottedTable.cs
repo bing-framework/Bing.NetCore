@@ -66,7 +66,7 @@ public partial class MySqlQueryTest
         var merchantId = Guid.NewGuid();
         await InitDottedMerchantDataAsync(merchantId, "merchant-structured");
         await InitDottedCompanyDataAsync(companyId, "company-structured", merchantId);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From("Merchants.Company", "c")
             .LeftJoin("Merchants.Merchant", "m")
@@ -97,7 +97,7 @@ public partial class MySqlQueryTest
         var merchantId = Guid.NewGuid();
         await InitDottedMerchantDataAsync(merchantId, "merchant-typed");
         await InitDottedCompanyDataAsync(companyId, "company-typed", merchantId);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query()
             .Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From(new SqlTableReference
@@ -138,7 +138,7 @@ public partial class MySqlQueryTest
         var merchantId = Guid.NewGuid();
         await InitDottedMerchantDataAsync(merchantId, "merchant-raw");
         await InitDottedCompanyDataAsync(companyId, "company-raw", merchantId);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().AppendSelect("c.CompanyId,c.Name,m.Name As MerchantName")
             .AppendFrom("`Merchants.Company` As `c`")
             .AppendLeftJoin("`Merchants.Merchant` As `m`")
@@ -167,7 +167,7 @@ public partial class MySqlQueryTest
         // Arrange
         var companyId = Guid.NewGuid();
         await InitDottedCompanyDataAsync(companyId, "company-without-merchant", Guid.NewGuid());
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .From("Merchants.Company", "c")
             .LeftJoin("Merchants.Merchant", "m")
@@ -194,7 +194,7 @@ public partial class MySqlQueryTest
         // Arrange
         var companyId = Guid.NewGuid();
         await InitDottedCompanyDataAsync(companyId, "company-raw-parameter");
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("c.CompanyId,c.Name")
             .AppendFrom("(Select * From `Merchants.Company` Where `CompanyId`=@Id) As `c`")
             .AddParam("Id", companyId);
@@ -230,7 +230,7 @@ public partial class MySqlQueryTest
         var merchantId = Guid.NewGuid();
         await InitDottedMerchantDataAsync(merchantId, "merchant-raw-parameter");
         await InitDottedCompanyDataAsync(companyId, "company-raw-parameter", merchantId);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         var description = query.Query().Select("c.CompanyId,c.Name,m.Name As MerchantName")
             .AppendFrom("`Merchants.Company` As `c`")
             .AppendJoin("`Merchants.Merchant` As `m` On `m`.`MerchantId`=`c`.`MerchantId` And `m`.`MerchantId`=@MerchantId")

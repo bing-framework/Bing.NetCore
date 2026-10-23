@@ -3,6 +3,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Metadata;
 using Bing.Test.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 
 namespace Bing.Dapper.Tests.SqlQuery;
@@ -13,7 +14,7 @@ namespace Bing.Dapper.Tests.SqlQuery;
 [Collection(MySqlIntegrationDatabaseCollection.Name)]
 [Trait("Category", "Integration")]
 [Trait("Database", "MySql")]
-public sealed class MySqlCrossDatabaseQueryTest
+public sealed class MySqlCrossDatabaseQueryTest : IAsyncLifetime
 {
     /// <summary>
     /// 为 MySQL 跨数据库集成测试提供数据库夹具。
@@ -21,10 +22,25 @@ public sealed class MySqlCrossDatabaseQueryTest
     private readonly MySqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="MySqlCrossDatabaseQueryTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">MySQL 集成测试数据库固定装置。</param>
-    public MySqlCrossDatabaseQueryTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
+    public MySqlCrossDatabaseQueryTest(MySqlIntegrationDatabaseFixture fixture)
+    {
+        _fixture = fixture;
+        _serviceScope = fixture.CreateScope();
+    }
+
+    /// <inheritdoc />
+    public Task InitializeAsync() => _fixture.ResetAsync();
+
+    /// <inheritdoc />
+    public async Task DisposeAsync() => await _serviceScope.DisposeAsync();
 
     /// <summary>
     /// 测试 - 显式启用跨数据库环境时应执行带点物理表查询。
@@ -43,7 +59,7 @@ public sealed class MySqlCrossDatabaseQueryTest
         {
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "cross-database-company");
-            using var query = _fixture.CreateQuery();
+            using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var description = query.Query().AppendSelect("c.CompanyId,c.Name")
                 .AppendFrom($"{tableName} As `c`")
                 .Where("c.CompanyId", companyId);
@@ -80,7 +96,7 @@ public sealed class MySqlCrossDatabaseQueryTest
         {
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "string-cross-database-company");
-            using var query = _fixture.CreateQuery();
+            using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var description = query.Query().Select("c.CompanyId,c.Name")
                 .From(tableName, "c")
                 .Where("c.CompanyId", companyId);
@@ -119,7 +135,7 @@ public sealed class MySqlCrossDatabaseQueryTest
         {
             await CreateCompanyTableAsync(connection, tableName);
             await InsertCompanyAsync(connection, tableName, companyId, null, "structured-cross-database-company");
-            using var query = _fixture.CreateQuery();
+            using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var description = query.Query().Select("c.CompanyId,c.Name");
             description.From(new SqlTableReference
             {
@@ -170,14 +186,14 @@ public sealed class MySqlCrossDatabaseQueryTest
             await InsertCompanyAsync(connection, "`Merchants.Company`", unmatchedCompanyId, Guid.NewGuid(),
                 "cross-database-company-without-merchant");
 
-            using var matchedRootQuery = _fixture.CreateQuery();
+            using var matchedRootQuery = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var matchedQuery = CreateStructuredCrossDatabaseJoinQuery(matchedRootQuery, databaseName, matchedCompanyId);
 
             // Act
             var sql = matchedQuery.ToSql();
             var parameterNames = matchedQuery.GetParams().Keys.ToArray();
             var matchedResult = matchedQuery.FirstOrDefault<CrossDatabaseCompanyResult>();
-            using var unmatchedRootQuery = _fixture.CreateQuery();
+            using var unmatchedRootQuery = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var unmatchedQuery = CreateStructuredCrossDatabaseJoinQuery(unmatchedRootQuery, databaseName,
                 unmatchedCompanyId);
             var unmatchedResult = unmatchedQuery.FirstOrDefault<CrossDatabaseCompanyResult>();
@@ -224,7 +240,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await InsertMerchantAsync(connection, merchantTable, merchantId, "string-cross-database-merchant");
             await InsertCompanyAsync(connection, "`Merchants.Company`", companyId, merchantId,
                 "string-cross-database-company");
-            using var query = _fixture.CreateQuery();
+            using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var description = query.Query().Select("c.CompanyId,c.Name,m.Name As MerchantName")
                 .From("Merchants.Company", "c")
                 .Join(merchantTable, "m")
@@ -274,7 +290,7 @@ public sealed class MySqlCrossDatabaseQueryTest
             await CreateMerchantTableAsync(connection, merchantTable);
             await InsertCompanyAsync(connection, "`Merchants.Company`", companyId, Guid.NewGuid(),
                 "string-cross-database-company-without-merchant");
-            using var query = _fixture.CreateQuery();
+            using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
             var description = query.Query().Select("c.CompanyId,c.Name,m.Name As MerchantName")
                 .From("Merchants.Company", "c")
                 .LeftJoin(merchantTable, "m")

@@ -616,8 +616,9 @@ public class SqlFactoryTest
         AddTestProvider(services, "test.mysql", DatabaseType.MySql);
         services.AddSqlProviderRuntime(new SqlProviderRuntime("test.mysql", typeof(MySqlTestQuery),
             typeof(MySqlTestExecutor)));
-        using var provider = services.BuildServiceProvider();
-        var accessor = provider.GetRequiredService<IDatabaseContextAccessor>();
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = provider.CreateScope();
+        var accessor = scope.ServiceProvider.GetRequiredService<IDatabaseContextAccessor>();
         accessor.Current = new DatabaseContext
         {
             DbKey = "tenant-primary",
@@ -632,7 +633,7 @@ public class SqlFactoryTest
                 ConnectionString = "Server=tenant;Database=app;"
             }
         };
-        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var factory = scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
         var query = factory.Create();

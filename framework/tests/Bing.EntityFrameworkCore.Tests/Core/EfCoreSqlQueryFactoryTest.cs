@@ -23,6 +23,34 @@ public class EfCoreSqlQueryFactoryTest
         "Data Source=file:ef-core-query-factory?mode=memory&cache=shared";
 
     /// <summary>
+    /// 测试目的：EF Core 适配工厂应为 Scoped，且重复注册时保持幂等。
+    /// </summary>
+    [Fact]
+    public void AddEfCoreSqlQueryFactory_WhenCalledRepeatedly_ShouldRegisterScopedFactory()
+    {
+        var services = new ServiceCollection();
+        services.AddSqliteProvider();
+        services.AddSqlDataSource("default", DatabaseType.Sqlite, SharedMemoryConnectionString);
+        services.AddEfCoreSqlQueryFactory();
+        services.AddEfCoreSqlQueryFactory();
+
+        var registration = Assert.Single(services, item => item.ServiceType == typeof(IEfCoreSqlQueryFactory));
+        Assert.Equal(ServiceLifetime.Scoped, registration.Lifetime);
+
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var firstScope = provider.CreateScope();
+        using var secondScope = provider.CreateScope();
+        var firstFactory = firstScope.ServiceProvider.GetRequiredService<IEfCoreSqlQueryFactory>();
+
+        Assert.Same(firstFactory, firstScope.ServiceProvider.GetRequiredService<IEfCoreSqlQueryFactory>());
+        Assert.NotSame(firstFactory, secondScope.ServiceProvider.GetRequiredService<IEfCoreSqlQueryFactory>());
+        Assert.Same(firstScope.ServiceProvider.GetRequiredService<ISqlQueryFactory>(),
+            firstScope.ServiceProvider.GetRequiredService<ISqlQueryFactory>());
+        Assert.NotSame(firstScope.ServiceProvider.GetRequiredService<ISqlQueryFactory>(),
+            secondScope.ServiceProvider.GetRequiredService<ISqlQueryFactory>());
+    }
+
+    /// <summary>
     /// 测试目的：公共查询基类不应暴露仅供框架桥接使用的资源和元数据绑定 SPI。
     /// </summary>
     [Fact]
@@ -563,7 +591,7 @@ public class EfCoreSqlQueryFactoryTest
     /// <param name="connectionStrings">可选的数据库连接字符串集合。</param>
     /// <param name="identityContributor">可选的数据库身份贡献器。</param>
     /// <returns>服务提供程序。</returns>
-    private static ServiceProvider CreateServiceProvider(SqlMetadataOptions metadataOptions = null,
+    private static TestServiceScope CreateServiceProvider(SqlMetadataOptions metadataOptions = null,
         ConnectionStringCollection connectionStrings = null,
         ISqlDatabaseIdentityContributor identityContributor = null)
     {
@@ -578,7 +606,8 @@ public class EfCoreSqlQueryFactoryTest
         services.AddSqliteProvider();
         services.AddSqlDataSource("default", DatabaseType.Sqlite, SharedMemoryConnectionString);
         services.AddEfCoreSqlQueryFactory();
-        return services.BuildServiceProvider();
+        var root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        return new TestServiceScope(root);
     }
 
     /// <summary>
@@ -586,7 +615,7 @@ public class EfCoreSqlQueryFactoryTest
     /// </summary>
     /// <param name="metadataOptions">Sql 元数据配置。</param>
     /// <returns>服务提供程序。</returns>
-    private static ServiceProvider CreateServiceProviderWithoutDefault(SqlMetadataOptions metadataOptions)
+    private static TestServiceScope CreateServiceProviderWithoutDefault(SqlMetadataOptions metadataOptions)
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -594,7 +623,31 @@ public class EfCoreSqlQueryFactoryTest
         services.AddSqlCore();
         services.AddSqliteProvider();
         services.AddEfCoreSqlQueryFactory();
-        return services.BuildServiceProvider();
+        var root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        return new TestServiceScope(root);
+    }
+
+    /// <summary>
+    /// 为每个 EF Core 测试提供显式请求作用域，并拥有其根容器的生命周期。
+    /// </summary>
+    private sealed class TestServiceScope : IServiceProvider, IDisposable
+    {
+        private readonly ServiceProvider _root;
+        private readonly IServiceScope _scope;
+
+        public TestServiceScope(ServiceProvider root)
+        {
+            _root = root;
+            _scope = root.CreateScope();
+        }
+
+        public object GetService(Type serviceType) => _scope.ServiceProvider.GetService(serviceType);
+
+        public void Dispose()
+        {
+            _scope.Dispose();
+            _root.Dispose();
+        }
     }
 
     /// <summary>

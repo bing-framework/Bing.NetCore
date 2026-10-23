@@ -106,15 +106,21 @@ public abstract partial class SqlQueryBase
     /// <param name="completeTransaction">当前内部计划成功后是否完成事务。</param>
     /// <returns>表示最终执行结果的异步操作。</returns>
     private async Task<TResult> InternalQueryPlanAsync<TResult>(SqlQueryPlan plan,
-        Func<IDbConnection, string, object, IDbTransaction, Task<TResult>> operation,
+        Func<IDbConnection, string, object, IDbTransaction, CancellationToken, Task<TResult>> operation,
         CancellationToken cancellationToken, bool acquireExecutionLease = true, bool completeTransaction = true)
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
+        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
+        EnsureCancellationSupported(operationToken);
+        if (operationToken.IsCancellationRequested)
+        {
+            MarkPreCancelledUnitOfWorkExecution();
+            operationToken.ThrowIfCancellationRequested();
+        }
         if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
             EnsureWritableDataSource();
         var executionLease = acquireExecutionLease ? AcquireExecutionLease() : null;
@@ -129,14 +135,15 @@ public abstract partial class SqlQueryBase
             {
                 var preparedPlan = PrepareQueryPlan(plan);
                 var connection = GetExecutionConnection();
-                var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
                 message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
                 using var logScope = BeginExecutionLogScope(message);
                 WritePlanTraceLog(preparedPlan);
-                result = await operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction);
+                result = await operation(connection, preparedPlan.Sql, preparedPlan.DapperParameters, transaction,
+                    operationToken);
                 plan.NotifyExecutionCompleted();
                 if (completeTransaction)
-                    await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                    await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
                 ExecuteAfter(message);
             }
             return result;

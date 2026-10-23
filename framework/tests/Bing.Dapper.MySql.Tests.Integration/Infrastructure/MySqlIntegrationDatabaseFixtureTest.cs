@@ -25,39 +25,6 @@ public sealed class MySqlIntegrationDatabaseFixtureTest
     public MySqlIntegrationDatabaseFixtureTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
 
     /// <summary>
-    /// 测试 - MySQL 集成服务注册不连接数据库也应解析 SQL 核心服务。
-    /// </summary>
-    [Fact]
-    public void ServiceRegistration_ShouldResolveSqlCoreServicesWithoutDatabaseConnection()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        MySqlIntegrationDatabaseFixture.AddMySqlIntegrationTestServices(services,
-            "Server=invalid;Database=bing_dapper_test;User Id=test;Password=test;");
-        using var provider = services.BuildServiceProvider();
-
-        // Act
-        var queryFactory = provider.GetRequiredService<ISqlQueryFactory>();
-        var executorFactory = provider.GetRequiredService<ISqlExecutorFactory>();
-        var transactionScopeFactory = provider.GetRequiredService<ISqlTransactionScopeFactory>();
-        var databaseContextResolver = provider.GetRequiredService<ISqlDatabaseContextResolver>();
-        var dataSourceResolver = provider.GetRequiredService<ISqlDataSourceResolver>();
-        var entityMappingResolver = provider.GetRequiredService<IEntityMappingResolver>();
-        var entityModelMetadataProvider = provider.GetRequiredService<IEntityModelMetadataProvider>();
-
-        // Assert
-        Assert.NotNull(queryFactory);
-        Assert.NotNull(executorFactory);
-        Assert.NotNull(transactionScopeFactory);
-        Assert.NotNull(databaseContextResolver);
-        Assert.NotNull(dataSourceResolver);
-        Assert.NotNull(entityMappingResolver);
-        Assert.IsType<EfCoreEntityModelMetadataProvider>(entityModelMetadataProvider);
-        Assert.Equal("ProductId", entityModelMetadataProvider.GetMetadata(typeof(Product))
-            .Properties[nameof(Product.Id)].ColumnName);
-    }
-
-    /// <summary>
     /// 测试目的：固定装置应使用唯一根服务容器解析 SQL 工厂和独立对象。
     /// </summary>
     [IntegrationFact("MySql")]
@@ -66,11 +33,15 @@ public sealed class MySqlIntegrationDatabaseFixtureTest
     public void Fixture_WhenIntegrationEnabled_ShouldResolveSqlFactoriesFromSingleRootProvider()
     {
         Assert.Equal(1, _fixture.RootServiceProviderCreationCount);
-        Assert.NotNull(_fixture.GetQueryFactory());
-        Assert.NotNull(_fixture.GetExecutorFactory());
-        Assert.NotNull(_fixture.GetTransactionScopeFactory());
-        using var query = _fixture.CreateQuery();
-        using var executor = _fixture.CreateExecutor();
+        Assert.Throws<InvalidOperationException>(() =>
+            _fixture.ServiceProvider.GetRequiredService<ISqlQueryFactory>());
+        using var scope = _fixture.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
+        Assert.NotNull(_fixture.GetQueryFactory(serviceProvider));
+        Assert.NotNull(_fixture.GetExecutorFactory(serviceProvider));
+        Assert.NotNull(_fixture.GetTransactionScopeFactory(serviceProvider));
+        using var query = _fixture.CreateQuery(serviceProvider);
+        using var executor = _fixture.CreateExecutor(serviceProvider);
         Assert.NotNull(query);
         Assert.NotNull(executor);
     }
@@ -86,5 +57,37 @@ public sealed class MySqlIntegrationDatabaseFixtureTest
         Assert.NotNull(_fixture.ServiceProvider.GetService(typeof(ISqlDatabaseContextResolver)));
         Assert.NotNull(_fixture.ServiceProvider.GetService(typeof(ISqlDataSourceResolver)));
         Assert.NotNull(_fixture.ServiceProvider.GetService(typeof(IEntityMappingResolver)));
+    }
+}
+
+/// <summary>
+/// 不连接外部数据库的 MySQL 服务注册测试。
+/// </summary>
+public sealed class MySqlServiceRegistrationTest
+{
+    /// <summary>
+    /// MySQL 集成服务注册不连接数据库也应解析 SQL 核心服务。
+    /// </summary>
+    [Fact]
+    public void ServiceRegistration_ShouldResolveSqlCoreServicesWithoutDatabaseConnection()
+    {
+        var services = new ServiceCollection();
+        MySqlIntegrationDatabaseFixture.AddMySqlIntegrationTestServices(services,
+            "Server=invalid;Database=bing_dapper_test;User Id=test;Password=test;");
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = provider.CreateScope();
+        var scopedProvider = scope.ServiceProvider;
+
+        Assert.NotNull(scopedProvider.GetRequiredService<ISqlQueryFactory>());
+        Assert.NotNull(scopedProvider.GetRequiredService<ISqlExecutorFactory>());
+        Assert.NotNull(scopedProvider.GetRequiredService<ISqlTransactionScopeFactory>());
+        Assert.NotNull(scopedProvider.GetRequiredService<ISqlDatabaseContextResolver>());
+        Assert.NotNull(scopedProvider.GetRequiredService<ISqlDataSourceResolver>());
+        Assert.NotNull(scopedProvider.GetRequiredService<IEntityMappingResolver>());
+
+        var entityModelMetadataProvider = scopedProvider.GetRequiredService<IEntityModelMetadataProvider>();
+        Assert.IsType<EfCoreEntityModelMetadataProvider>(entityModelMetadataProvider);
+        Assert.Equal("ProductId", entityModelMetadataProvider.GetMetadata(typeof(Product))
+            .Properties[nameof(Product.Id)].ColumnName);
     }
 }

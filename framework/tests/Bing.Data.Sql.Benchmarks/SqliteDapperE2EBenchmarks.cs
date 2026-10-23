@@ -32,10 +32,14 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// </summary>
     private ServiceProvider _serviceProvider;
 
+    private IServiceScope _serviceScope;
+
     /// <summary>
     /// 基准测试使用的 Trace 服务提供程序。
     /// </summary>
     private ServiceProvider _traceServiceProvider;
+
+    private IServiceScope _traceServiceScope;
 
     /// <summary>
     /// 无 Trace 查询场景使用的查询工厂。
@@ -63,9 +67,11 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
         var connectionString = $"Data Source={_databasePath};Mode=ReadWriteCreate;Pooling=False";
         _serviceProvider = CreateServiceProvider(connectionString, enableTrace: false);
         _traceServiceProvider = enableTrace ? CreateServiceProvider(connectionString, enableTrace: true) : null;
-        _queryFactory = _serviceProvider.GetRequiredService<ISqlQueryFactory>();
-        _traceQueryFactory = _traceServiceProvider?.GetRequiredService<ISqlQueryFactory>();
-        _multipleQueryExecutor = _serviceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
+        _serviceScope = _serviceProvider.CreateScope();
+        _traceServiceScope = _traceServiceProvider?.CreateScope();
+        _queryFactory = _serviceScope.ServiceProvider.GetRequiredService<ISqlQueryFactory>();
+        _traceQueryFactory = _traceServiceScope?.ServiceProvider.GetRequiredService<ISqlQueryFactory>();
+        _multipleQueryExecutor = _serviceScope.ServiceProvider.GetRequiredService<ISqlMultipleQueryExecutorFactory>().Create();
         SeedDatabase(connectionString, rowCount);
     }
 
@@ -302,6 +308,10 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     {
         _multipleQueryExecutor?.Dispose();
         _multipleQueryExecutor = null;
+        _serviceScope?.Dispose();
+        _serviceScope = null;
+        _traceServiceScope?.Dispose();
+        _traceServiceScope = null;
         _serviceProvider?.Dispose();
         _serviceProvider = null;
         _traceServiceProvider?.Dispose();
@@ -330,7 +340,7 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
                 builder.SetMinimumLevel(LogLevel.Trace);
                 builder.AddProvider(new TraceEnabledNoOpLoggerProvider());
             });
-        return services.BuildServiceProvider();
+        return services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
     }
 
     /// <summary>

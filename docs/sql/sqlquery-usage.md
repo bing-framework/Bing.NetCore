@@ -344,6 +344,34 @@ await using (var scope = factory.Create())
 
 事务 API 在 7.0.0 有破坏性变更，迁移细节见 [事务 API 迁移](../migrations/sql-transaction-api-vNext.md)。
 
+### 8.1 业务 Uow 跨 Query 与数据源
+
+多数据源业务操作使用 `IUnitOfWorkScopeManager`。同一数据源的独立 Query、仓储 Query 和 Executor 在首次执行时共享当前 root 的连接与本地事务：
+
+```csharp
+await using var businessScope = scopeManager.Begin();
+using var applicationQuery = queryFactory.Create("orders");
+using var repositoryQuery = queryFactory.Create("orders");
+using var orderExecutor = executorFactory.Create("orders");
+using var reportExecutor = executorFactory.Create("reporting");
+
+await orderExecutor.ExecuteSqlAsync(
+    "Update Orders Set Status = @status Where Id = @id",
+    new { status = "Processed", id }, cancellationToken: cancellationToken);
+_ = await applicationQuery.Sql("Select Count(*) From Orders Where Id = @id")
+    .ScalarAsync<int>(cancellationToken: cancellationToken);
+_ = await repositoryQuery.Sql("Select Count(*) From OrderLines Where OrderId = @id")
+    .ScalarAsync<int>(cancellationToken: cancellationToken);
+await reportExecutor.ExecuteSqlAsync(
+    "Insert Into ReportQueue(OrderId) Values (@id)", new { id }, cancellationToken: cancellationToken);
+
+await businessScope.CompleteAsync(cancellationToken);
+```
+
+在组合根注册 `services.AddUnitOfWorkScopes()`。Query 在 scope 前创建但尚未执行时，可在首次执行时加入该 scope；已在 Uow 外执行过的 Query 不会迁移。`requiresNew` 中请从工厂创建新的 Query/Executor。无业务 Uow 时仍使用原有自动提交行为。
+
+`ISqlTransactionScopeFactory` 创建的显式单库事务继续独立管理，不会自动加入业务 Uow。多数据源 root 依次提交每个本地事务；不能把它作为分布式原子事务使用。只读汇总可以创建 `IsTransactional = false` 的业务 scope，但这种 scope 不回滚写入。
+
 ---
 
 ## 9. 调试：只看 SQL 不执行

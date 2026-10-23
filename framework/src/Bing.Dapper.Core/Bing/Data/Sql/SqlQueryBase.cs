@@ -723,6 +723,8 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         if (ExecutionLeaseFactory != null)
             return ExecutionLeaseFactory();
         var transactionScopeExecutionLease = _transactionScopeLease?.AcquireExecutionLease();
+        IDisposable unitOfWorkExecutionLease = null;
+        var acquiredInstanceLease = false;
         try
         {
             lock (_executionStateLock)
@@ -731,11 +733,16 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
                 if (_executionLease != 0)
                     throw new InvalidOperationException("同一个 SQL Query 或 Executor 实例不支持并发执行，请为每个操作创建独立实例。");
                 _executionLease = 1;
+                acquiredInstanceLease = true;
             }
-            return new ExecutionLease(this, transactionScopeExecutionLease);
+            unitOfWorkExecutionLease = AcquireUnitOfWorkResourceLease();
+            return new ExecutionLease(this, transactionScopeExecutionLease, unitOfWorkExecutionLease);
         }
         catch
         {
+            unitOfWorkExecutionLease?.Dispose();
+            if (acquiredInstanceLease)
+                ReleaseExecutionLease();
             transactionScopeExecutionLease?.Dispose();
             throw;
         }
@@ -766,39 +773,61 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
         private IDisposable _transactionScopeExecutionLease;
 
         /// <summary>
+        /// 当前执行关联的 Uow 资源租约。
+        /// </summary>
+        private IDisposable _unitOfWorkExecutionLease;
+
+        /// <summary>
         /// 初始化一个 <see cref="ExecutionLease"/> 类型的实例。
         /// </summary>
         /// <param name="owner">所属查询对象。</param>
         /// <param name="transactionScopeExecutionLease">关联的事务作用域执行租约。</param>
-        public ExecutionLease(SqlQueryBase owner, IDisposable transactionScopeExecutionLease)
+        /// <param name="unitOfWorkExecutionLease">关联的 Uow 资源租约。</param>
+        public ExecutionLease(SqlQueryBase owner, IDisposable transactionScopeExecutionLease,
+            IDisposable unitOfWorkExecutionLease)
         {
             _owner = owner;
             _transactionScopeExecutionLease = transactionScopeExecutionLease;
+            _unitOfWorkExecutionLease = unitOfWorkExecutionLease;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             var owner = Interlocked.Exchange(ref _owner, null);
+            Interlocked.Exchange(ref _unitOfWorkExecutionLease, null)?.Dispose();
             owner?.ReleaseExecutionLease();
             Interlocked.Exchange(ref _transactionScopeExecutionLease, null)?.Dispose();
         }
     }
 
     /// <inheritdoc />
-    void ISqlQueryRuntimeBindingController.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source) =>
+    void ISqlQueryRuntimeBindingController.BindOwnedConnection(IDbConnection connection, SqlConnectionSource source)
+    {
+        EnsureNoUnitOfWorkRuntimeBinding();
         BindConnection(connection, SqlResourceOwnership.Owned, source);
+    }
 
     /// <inheritdoc />
-    void ISqlQueryRuntimeBindingController.BindExternalConnection(IDbConnection connection, SqlConnectionSource source) =>
+    void ISqlQueryRuntimeBindingController.BindExternalConnection(IDbConnection connection, SqlConnectionSource source)
+    {
+        EnsureNoUnitOfWorkRuntimeBinding();
         BindConnection(connection, SqlResourceOwnership.External, source);
+    }
 
     /// <inheritdoc />
-    void ISqlQueryRuntimeBindingController.BindExternalTransactionResolver(Func<IDbTransaction> resolver) =>
+    void ISqlQueryRuntimeBindingController.BindExternalTransactionResolver(Func<IDbTransaction> resolver)
+    {
+        EnsureNoUnitOfWorkRuntimeBinding();
         BindExternalTransactionResolver(resolver);
+    }
 
     /// <inheritdoc />
-    void ISqlQueryRuntimeBindingController.BindDatabaseContext(DatabaseContext context) => BindDatabaseContext(context);
+    void ISqlQueryRuntimeBindingController.BindDatabaseContext(DatabaseContext context)
+    {
+        EnsureNoUnitOfWorkRuntimeBinding();
+        BindDatabaseContext(context);
+    }
 
     /// <inheritdoc />
     void ISqlQueryRuntimeBindingController.BindEntityMappingResolver(IEntityMappingResolver resolver) =>
@@ -850,12 +879,15 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// <param name="connection">数据库连接。</param>
     /// <param name="ownership">连接所有权。</param>
     /// <param name="source">连接来源。</param>
-    private void BindConnection(IDbConnection connection, SqlResourceOwnership ownership, SqlConnectionSource source)
+    /// <param name="validateExternalIdentity">是否按外部连接契约校验物理身份。</param>
+    private void BindConnection(IDbConnection connection, SqlResourceOwnership ownership, SqlConnectionSource source,
+        bool validateExternalIdentity = true)
     {
         if (connection == null)
             throw new ArgumentNullException(nameof(connection));
         EnsureConnectionCanBeReplaced(connection);
-        ValidateExternalConnectionDatabaseIdentity(connection);
+        if (validateExternalIdentity)
+            ValidateExternalConnectionDatabaseIdentity(connection);
         if (_connection != null && ReferenceEquals(_connection, connection))
         {
             _connectionOwnership = ownership;

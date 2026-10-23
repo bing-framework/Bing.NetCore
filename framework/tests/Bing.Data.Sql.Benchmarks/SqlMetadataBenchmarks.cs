@@ -492,6 +492,15 @@ internal static class Program
     /// <param name="args">传递给基准程序的命令行参数。</param>
     private static void Main(string[] args)
     {
+        if (args.Contains("--uow-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var outputOption = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            if (outputOption < 0 || outputOption + 1 >= args.Length)
+                throw new ArgumentException("--uow-probe requires --output <json-path>.");
+            Environment.ExitCode = SqlUnitOfWorkProbe.Run(args[outputOption + 1]);
+            return;
+        }
         if (args.Contains("--ci-smoke", StringComparer.OrdinalIgnoreCase))
         {
             var benchmarkArgs = args

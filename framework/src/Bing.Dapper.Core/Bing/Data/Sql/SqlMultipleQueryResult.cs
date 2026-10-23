@@ -33,6 +33,16 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private IDisposable _executionLease;
 
     /// <summary>
+    /// 合成后的业务操作取消令牌。
+    /// </summary>
+    private readonly CancellationToken _operationToken;
+
+    /// <summary>
+    /// 持有至结果集 reader 释放的操作取消源租约。
+    /// </summary>
+    private IDisposable _operationCancellation;
+
+    /// <summary>
     /// 指示当前读取器正在读取或释放，禁止并发访问同一结果集。
     /// </summary>
     private bool _operationInProgress;
@@ -66,6 +76,32 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         Func<SqlMapper.GridReader, bool> isConsumed,
         Action<SqlMapper.GridReader> disposeReader,
         Func<SqlMapper.GridReader, Task> disposeReaderAsync)
+        : this(reader, executionLease, complete, completeAsync, isConsumed, disposeReader, disposeReaderAsync,
+            CancellationToken.None, null)
+    {
+    }
+
+    /// <summary>
+    /// 初始化一个持有操作取消源的多结果集读取结果。
+    /// </summary>
+    internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+        Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
+        CancellationToken operationToken, IDisposable operationCancellation)
+        : this(reader, executionLease, complete, completeAsync, currentReader => currentReader.IsConsumed,
+            currentReader => currentReader.Dispose(), currentReader => SqlTransactionAsyncAdapter.DisposeAsync(currentReader),
+            operationToken, operationCancellation)
+    {
+    }
+
+    /// <summary>
+    /// 初始化一个 <see cref="SqlMultipleQueryResult"/> 类型的实例。
+    /// </summary>
+    internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
+        Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
+        Func<SqlMapper.GridReader, bool> isConsumed,
+        Action<SqlMapper.GridReader> disposeReader,
+        Func<SqlMapper.GridReader, Task> disposeReaderAsync,
+        CancellationToken operationToken, IDisposable operationCancellation)
     {
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         _executionLease = executionLease ?? throw new ArgumentNullException(nameof(executionLease));
@@ -74,6 +110,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         IsConsumed = isConsumed ?? throw new ArgumentNullException(nameof(isConsumed));
         DisposeReader = disposeReader ?? throw new ArgumentNullException(nameof(disposeReader));
         DisposeReaderAsync = disposeReaderAsync ?? throw new ArgumentNullException(nameof(disposeReaderAsync));
+        _operationToken = operationToken;
+        _operationCancellation = operationCancellation;
     }
 
     /// <summary>
@@ -199,20 +237,37 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private async Task<TResult> ReadAsync<TResult>(Func<SqlMapper.GridReader, Task<TResult>> read,
         CancellationToken cancellationToken)
     {
-        var reader = BeginRead();
-        try
+        CancellationTokenSource linkedSource = null;
+        var effectiveToken = _operationToken;
+        if (cancellationToken.CanBeCanceled)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return await read(reader);
+            if (_operationToken.CanBeCanceled && cancellationToken != _operationToken)
+            {
+                linkedSource = CancellationTokenSource.CreateLinkedTokenSource(_operationToken, cancellationToken);
+                effectiveToken = linkedSource.Token;
+            }
+            else
+                effectiveToken = cancellationToken;
         }
-        catch (Exception exception)
+        using (linkedSource)
         {
-            await DisposeAfterFailureAsync(exception).ConfigureAwait(false);
-            throw;
-        }
-        finally
-        {
-            EndOperation();
+            var reader = BeginRead();
+            try
+            {
+                effectiveToken.ThrowIfCancellationRequested();
+                var result = await read(reader).ConfigureAwait(false);
+                effectiveToken.ThrowIfCancellationRequested();
+                return result;
+            }
+            catch (Exception exception)
+            {
+                await DisposeAfterFailureAsync(exception).ConfigureAwait(false);
+                throw;
+            }
+            finally
+            {
+                EndOperation();
+            }
         }
     }
 
@@ -320,6 +375,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         }
         SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
             () => Interlocked.Exchange(ref _executionLease, null)?.Dispose());
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
+            () => Interlocked.Exchange(ref _operationCancellation, null)?.Dispose());
     }
 
     /// <summary>
@@ -357,6 +414,8 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
         await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions,
             () => SqlTransactionAsyncAdapter.DisposeAsync(Interlocked.Exchange(ref _executionLease, null)))
             .ConfigureAwait(false);
+        SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
+            () => Interlocked.Exchange(ref _operationCancellation, null)?.Dispose());
     }
 
     /// <summary>

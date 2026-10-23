@@ -20,6 +20,20 @@ dotnet test .\framework\tests\Bing.EntityFrameworkCore.Tests\Bing.EntityFramewor
 
 SQLite 集成测试使用临时文件，不依赖网络、容器或数据库凭据。覆盖内容包括 Scope 提交/回滚、子 Query/Executor 租约、连接所有权、数据库上下文固定、EF Shared/Independent 和独立连接工厂。
 
+## 多数据源业务 Uow
+
+本地双源 SQL contract 使用两个不同的真实 SQLite 文件，net6/net8 均运行：
+
+```powershell
+dotnet test framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj -c Release -f net6.0
+dotnet test framework/tests/Bing.Dapper.Sqlite.Tests.Integration/Bing.Dapper.Sqlite.Tests.Integration.csproj -c Release -f net8.0
+dotnet test framework/tests/Bing.EntityFrameworkCore.Tests/Bing.EntityFrameworkCore.Tests.csproj -c Release -f net6.0
+```
+
+`SqliteUnitOfWorkContractTest` 验证 Query/Executor 共享、两文件分别提交/回滚、首次执行亲和、分页、同步/异步 reader、stream、Multiple 和显式单库事务排除。`MixedProviders_ShouldManageIndependentResources` 使用 MySQL Provider Key 映射到本地 SQLite 测试连接，验证 Provider 路由和资源隔离；它不是 MySQL 服务端集成证据。EF bridge 在 net6 的 `EfCoreSqliteUnitOfWorkContractTest` 覆盖应用先/仓储先、原生 SaveChanges flush 后整体提交/回滚及回调时序。
+
+FreeSQL consumer 测试分别使用 FreeSQL native 与 Dapper Uow 的临时 SQLite 文件：一个 root 回滚不改变 FreeSQL 自己已提交的 native 操作。两个文件分离以避免 SQLite 单文件写锁；测试不声称 native CRUD 自动加入 Dapper 事务。所有这些测试都不启用外部 Provider gate，也不启动 Hangfire server。
+
 ## 外部 Provider 门控
 
 MySQL、PostgreSQL、SQL Server 与 Oracle 集成测试默认跳过。仅在受保护 CI 或本机专用测试环境中设置对应变量后执行：

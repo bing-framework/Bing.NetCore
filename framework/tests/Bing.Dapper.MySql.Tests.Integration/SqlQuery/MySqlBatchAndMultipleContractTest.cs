@@ -3,6 +3,7 @@ using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Tests.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -18,10 +19,19 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
     private readonly MySqlIntegrationDatabaseFixture _fixture;
 
     /// <summary>
+    /// 当前测试方法的 SQL 服务作用域。
+    /// </summary>
+    private readonly AsyncServiceScope _serviceScope;
+
+    /// <summary>
     /// 初始化一个 <see cref="MySqlBatchAndMultipleContractTest"/> 类型的实例。
     /// </summary>
     /// <param name="fixture">MySQL 集成测试数据库固定装置。</param>
-    public MySqlBatchAndMultipleContractTest(MySqlIntegrationDatabaseFixture fixture) => _fixture = fixture;
+    public MySqlBatchAndMultipleContractTest(MySqlIntegrationDatabaseFixture fixture)
+    {
+        _fixture = fixture;
+        _serviceScope = fixture.CreateScope();
+    }
 
     /// <summary>
     /// 测试目的：MySQL 的实体批量 Insert、Update、逻辑 Delete 应保持影响行数和数据库状态一致。
@@ -35,7 +45,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
             Code = $"batch-{index}",
             Name = "before"
         }).ToArray();
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
 
         // Act
         var inserted = await executor.InsertBatchAsync(entities, new SqlBatchInsertOptions
@@ -64,7 +74,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
         Assert.Equal(3, inserted);
         Assert.Equal(3, updated);
         Assert.Equal(3, deleted);
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         Assert.Equal(3, query.Sql("Select Count(*) From Product Where IsDeleted = 1").Scalar<int>());
     }
 
@@ -81,14 +91,14 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
             new Product(id) { Code = "batch-first" },
             new Product(id) { Code = "batch-duplicate" }
         };
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
 
         // Act
         await Assert.ThrowsAnyAsync<Exception>(() => executor.InsertBatchAsync(entities,
             new SqlBatchInsertOptions { BatchSize = 1, UseTransaction = true }));
 
         // Assert
-        using var query = _fixture.CreateQuery();
+        using var query = _fixture.CreateQuery(_serviceScope.ServiceProvider);
         Assert.Equal(0, query.Sql("Select Count(*) From Product").Scalar<int>());
     }
 
@@ -101,7 +111,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
         // Arrange
         await InsertProductAsync("multiple-first");
         await InsertProductAsync("multiple-second");
-        using var executor = _fixture.CreateMultipleQueryExecutor();
+        using var executor = _fixture.CreateMultipleQueryExecutor(_serviceScope.ServiceProvider);
         var command = CreateMultipleQueryCommand(executor);
 
         // Act
@@ -124,7 +134,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
     {
         // Arrange
         await InsertProductAsync("multiple-async");
-        using var executor = _fixture.CreateMultipleQueryExecutor();
+        using var executor = _fixture.CreateMultipleQueryExecutor(_serviceScope.ServiceProvider);
         var command = CreateMultipleQueryCommand(executor);
 
         // Act
@@ -149,7 +159,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
     public Task InitializeAsync() => _fixture.ResetAsync();
 
     /// <inheritdoc />
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await _serviceScope.DisposeAsync();
 
     /// <summary>
     /// 向测试数据库插入产品记录。
@@ -157,7 +167,7 @@ public sealed class MySqlBatchAndMultipleContractTest : IAsyncLifetime
     /// <param name="code">产品代码。</param>
     private async Task InsertProductAsync(string code)
     {
-        using var executor = _fixture.CreateExecutor();
+        using var executor = _fixture.CreateExecutor(_serviceScope.ServiceProvider);
         await executor.ExecuteSqlAsync("Insert Product(ProductId,Code) Values(@id,@code)",
             new { id = Guid.NewGuid(), code });
     }

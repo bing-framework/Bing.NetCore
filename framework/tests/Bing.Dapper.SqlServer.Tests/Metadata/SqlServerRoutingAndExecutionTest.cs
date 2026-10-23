@@ -150,6 +150,43 @@ public class SqlServerRoutingAndExecutionTest
     }
 
     /// <summary>
+    /// 测试目的：SQL Server Query 使用请求作用域的过滤器状态，并在切换后生成完整 SQL。
+    /// </summary>
+    [Fact]
+    public void Query_WhenScopedFilterChanges_ShouldRenderCompleteSql()
+    {
+        var services = new ServiceCollection();
+        services.AddSqlServerProvider();
+        services.AddSqlDataSource("default", DatabaseType.SqlServer, "Server=localhost;Database=scope_test;");
+        using var root = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = root.CreateScope();
+        var filter = scope.ServiceProvider.GetRequiredService<IDataFilter>();
+        using var query = scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create();
+        var source = query.From<SoftDeleteMappedSample>();
+
+        var enabled = source.ToSql();
+        var enabledSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(
+            ((ISqlQueryBuilderAccessor)source).GetSqlBuilder());
+        string disabled;
+        SqlBuilderExecutionSnapshot disabledSnapshot;
+        using (filter.Disable<ISoftDelete>())
+        {
+            disabled = source.ToSql();
+            disabledSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(
+                ((ISqlQueryBuilderAccessor)source).GetSqlBuilder());
+        }
+
+        Assert.Equal("Select [SoftDeleteMappedSample].[Id],[SoftDeleteMappedSample].[Name],[SoftDeleteMappedSample].[IsDeleted] \r\nFrom [SoftDeleteMappedSample] \r\nWhere [SoftDeleteMappedSample].[IsDeleted]=@_p_0", enabled);
+        Assert.Equal("Select [SoftDeleteMappedSample].[Id],[SoftDeleteMappedSample].[Name],[SoftDeleteMappedSample].[IsDeleted] \r\nFrom [SoftDeleteMappedSample]", disabled);
+        Assert.Equal(enabled, enabledSnapshot.Sql);
+        Assert.Equal("@_p_0", Assert.Single(enabledSnapshot.Parameters).Name);
+        Assert.Equal(false, Assert.Single(enabledSnapshot.Parameters).Value);
+        Assert.Equal(disabled, disabledSnapshot.Sql);
+        Assert.Empty(disabledSnapshot.Parameters);
+        Assert.Equal(enabled, source.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：无行限制的类型化派生表不应保留内部排序，避免 SQL Server 派生表的无效 Order By 语法。
     /// </summary>
     [Fact]
@@ -496,8 +533,11 @@ public class SqlServerRoutingAndExecutionTest
         };
         var services = CreateServices(metadataOptions);
         services.AddSqlServerProvider();
-        using var provider = services.BuildServiceProvider();
-        var factory = provider.GetRequiredService<ISqlQueryFactory>();
+        var connectionResolver = new CountingConnectionResolver();
+        services.AddSingleton<ISqlDbConnectionFactoryResolver>(connectionResolver);
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var scope = provider.CreateScope();
+        var factory = scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>();
 
         // Act
         var exception = Should.Throw<InvalidOperationException>(() =>
@@ -506,6 +546,7 @@ public class SqlServerRoutingAndExecutionTest
         // Assert
         exception.Message.ShouldContain("reporting");
         exception.Message.ShouldContain("ReportingConnection");
+        connectionResolver.CallCount.ShouldBe(0);
     }
 
     /// <summary>
@@ -5354,6 +5395,21 @@ public class SqlServerRoutingAndExecutionTest
         {
             LastProviderKey = providerKey;
             return _connection;
+        }
+    }
+
+    private sealed class CountingConnectionResolver : ISqlDbConnectionFactoryResolver
+    {
+        /// <summary>
+        /// 获取连接解析调用次数。
+        /// </summary>
+        public int CallCount { get; private set; }
+
+        /// <inheritdoc />
+        public IDbConnection Create(string providerKey, string connectionString)
+        {
+            CallCount++;
+            throw new InvalidOperationException("The connection resolver should not be called.");
         }
     }
 

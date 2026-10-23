@@ -186,10 +186,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         if (_queryFactory is SqlQueryFactory factory)
         {
             query = factory.CreateForTransaction(dbKey, out var factoryContext);
+            GetRuntimeQuery(query).SetExplicitTransactionScopeMode();
             return factoryContext;
         }
         query = _queryFactory.Create(dbKey);
-        var context = query is SqlQueryBase sqlQuery ? sqlQuery.GetDatabaseContext() : null;
+        var runtimeQuery = query as SqlQueryBase;
+        runtimeQuery?.SetExplicitTransactionScopeMode();
+        var context = runtimeQuery?.GetDatabaseContext();
         if (context == null)
             throw new InvalidOperationException("事务查询对象必须提供固定数据库上下文");
         return context;
@@ -1021,6 +1024,39 @@ internal static class SqlTransactionAsyncAdapter
         }
         cancellationToken.ThrowIfCancellationRequested();
         return new SqlTransactionAsyncOperationResult<IDbTransaction>(connection.BeginTransaction(isolationLevel),
+            SqlTransactionExecutionMode.SynchronousFallback);
+    }
+
+    /// <summary>
+    /// 异步以 Provider 默认隔离级别开始事务。
+    /// </summary>
+    /// <param name="connection">已打开的数据库连接。</param>
+    /// <param name="cancellationToken">开始事务使用的取消令牌。</param>
+    /// <param name="capabilities">当前 Provider 的事务能力声明。</param>
+    /// <param name="providerKey">当前 Provider Key。</param>
+    /// <returns>事务和实际执行模式。</returns>
+    internal static async Task<SqlTransactionAsyncOperationResult<IDbTransaction>> BeginDefaultWithModeAsync(
+        IDbConnection connection, CancellationToken cancellationToken,
+        SqlProviderTransactionCapabilities capabilities, string providerKey)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var hasDefaultAsyncMember = HasProviderAsyncMember(connection, "BeginTransactionAsync", cancellationToken);
+        var hasIsolationAsyncMember = HasProviderAsyncMember(connection, "BeginTransactionAsync",
+            IsolationLevel.Unspecified, cancellationToken);
+        var hasNativeMember = hasDefaultAsyncMember || hasIsolationAsyncMember;
+        EnsureProfileMatches(capabilities?.SupportsNativeAsyncBegin == true, hasNativeMember, "Begin", providerKey);
+        if (hasNativeMember && capabilities?.SupportsNativeAsyncBegin != false)
+        {
+            var invocation = hasDefaultAsyncMember
+                ? await TryInvokeAsync(connection, "BeginTransactionAsync", cancellationToken).ConfigureAwait(false)
+                : await TryInvokeAsync(connection, "BeginTransactionAsync", IsolationLevel.Unspecified,
+                    cancellationToken).ConfigureAwait(false);
+            if (invocation.Result is IDbTransaction transaction)
+                return new SqlTransactionAsyncOperationResult<IDbTransaction>(transaction,
+                    SqlTransactionExecutionMode.NativeAsync);
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+        return new SqlTransactionAsyncOperationResult<IDbTransaction>(connection.BeginTransaction(),
             SqlTransactionExecutionMode.SynchronousFallback);
     }
 

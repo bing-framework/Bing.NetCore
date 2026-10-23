@@ -68,19 +68,19 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureCancellationSupported(cancellationToken);
         EnsureWritableDataSource();
         ValidateReturningMutationCommand(command);
-        return await ExecuteDirectAsync(async context =>
+        return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return new List<TResult>();
             var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
             var result = await ExecuteMaterializedQueryAsync<TResult>(connection,
                 CreateQueryCommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, buffered: true,
-                    cancellationToken), cancellationToken);
-            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                    operationToken), operationToken);
+            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);
@@ -116,18 +116,18 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureCancellationSupported(cancellationToken);
         EnsureWritableDataSource();
         ValidateExecutableMutationCommand(command);
-        return await ExecuteDirectAsync(async context =>
+        return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return 0;
             var preparedCommand = PrepareCommand(command);
             var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
             var result = await connection.ExecuteAsync(new CommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
-                cancellationToken: cancellationToken));
-            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+                cancellationToken: operationToken));
+            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);
@@ -209,8 +209,10 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="param">SQL 参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="validateResult">在事务提交前验证受影响行数的回调。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>操作影响的行数。</returns>
-    private int ExecuteSqlCore(string sql, object param, int? timeout, Action<int> validateResult)
+    private int ExecuteSqlCore(string sql, object param, int? timeout, Action<int> validateResult,
+        bool executionLeaseAlreadyHeld = false)
     {
         return ExecuteDirect(context =>
         {
@@ -226,7 +228,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             CompleteQueryTransaction();
             ExecuteAfter(context.Message);
             return result;
-        });
+        }, executionLeaseAlreadyHeld);
     }
 
     #endregion
@@ -246,26 +248,27 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <param name="validateResult">在事务提交前验证受影响行数的回调。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>表示操作影响行数的异步操作。</returns>
     private async Task<int> ExecuteSqlCoreAsync(string sql, object param, int? timeout,
-        CancellationToken cancellationToken, Action<int> validateResult)
+        CancellationToken cancellationToken, Action<int> validateResult, bool executionLeaseAlreadyHeld = false)
     {
-        return await ExecuteDirectAsync(async context =>
+        return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return 0;
             var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
             var command = PrepareCommand(sql, param);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
             var result = await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
-                cancellationToken: cancellationToken));
+                cancellationToken: operationToken));
             validateResult?.Invoke(result);
-            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
             return result;
-        }, cancellationToken).ConfigureAwait(false);
+        }, cancellationToken, executionLeaseAlreadyHeld).ConfigureAwait(false);
     }
 
     #endregion
@@ -310,20 +313,20 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         EnsureWritableDataSource();
         EnsureStoredProceduresSupported();
         EnsureOutputParametersSupported(param);
-        return await ExecuteDirectAsync(async context =>
+        return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return new SqlProcedureResult<int>(0, null);
             var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
             var command = PrepareProcedureCommand(procedure, param);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
             var result = await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
-                GetProcedureCommandType(), cancellationToken: cancellationToken));
+                GetProcedureCommandType(), cancellationToken: operationToken));
             var procedureResult = new SqlProcedureResult<int>(result,
                 CreateOutputParameterAccessor(command.DapperParameters));
-            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
             return procedureResult;
         }, cancellationToken).ConfigureAwait(false);
@@ -334,21 +337,23 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// </summary>
     /// <typeparam name="TResult">命令结果类型。</typeparam>
     /// <param name="operation">实际命令操作。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>命令操作的结果。</returns>
     /// <remarks>
     /// 原始操作异常始终作为主异常保留；回滚、错误诊断、业务完成 Hook 和执行租约释放失败
     /// 按生命周期顺序追加为清理异常，避免任一清理步骤覆盖诊断根因。
     /// </remarks>
-    private TResult ExecuteDirect<TResult>(Func<DirectExecutionContext, TResult> operation)
+    private TResult ExecuteDirect<TResult>(Func<DirectExecutionContext, TResult> operation,
+        bool executionLeaseAlreadyHeld = false)
     {
-        var executionLease = AcquireExecutionLease();
+        var executionLease = executionLeaseAlreadyHeld ? null : AcquireExecutionLease();
         var context = new DirectExecutionContext();
         return SqlQueryPlanLifecycle.Execute(() => operation(context), (exception, cleanupExceptions) =>
         {
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
                 () => ExecuteError(context.Message, exception));
-        }, result => ExecuteAfter(result), executionLease.Dispose);
+        }, result => ExecuteAfter(result), () => executionLease?.Dispose());
     }
 
     /// <summary>
@@ -357,24 +362,32 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <typeparam name="TResult">命令结果类型。</typeparam>
     /// <param name="operation">实际异步命令操作。</param>
     /// <param name="cancellationToken">调用方传入的取消令牌。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>表示命令操作结果的异步任务。</returns>
     /// <remarks>
     /// 与同步入口保持相同的主异常和清理异常排序，确保取消异常不会被清理异常覆盖。
     /// </remarks>
-    private async Task<TResult> ExecuteDirectAsync<TResult>(Func<DirectExecutionContext, Task<TResult>> operation,
-        CancellationToken cancellationToken)
+    private async Task<TResult> ExecuteDirectAsync<TResult>(
+        Func<DirectExecutionContext, CancellationToken, Task<TResult>> operation,
+        CancellationToken cancellationToken, bool executionLeaseAlreadyHeld = false)
     {
-        EnsureCancellationSupported(cancellationToken);
-        cancellationToken.ThrowIfCancellationRequested();
-        var executionLease = AcquireExecutionLease();
+        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
+        EnsureCancellationSupported(operationToken);
+        if (operationToken.IsCancellationRequested)
+        {
+            MarkPreCancelledUnitOfWorkExecution();
+            operationToken.ThrowIfCancellationRequested();
+        }
+        var executionLease = executionLeaseAlreadyHeld ? null : AcquireExecutionLease();
         var context = new DirectExecutionContext();
-        return await SqlQueryPlanLifecycle.ExecuteAsync(() => operation(context), async (exception, cleanupExceptions) =>
+        return await SqlQueryPlanLifecycle.ExecuteAsync(() => operation(context, operationToken), async (exception, cleanupExceptions) =>
         {
             await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
                 .ConfigureAwait(false);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
                 () => ExecuteError(context.Message, exception));
-        }, result => ExecuteAfter(result), executionLease.Dispose).ConfigureAwait(false);
+        }, result => ExecuteAfter(result), () => executionLease?.Dispose()).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -897,6 +910,28 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             return 0;
         EnsureWritableDataSource();
         var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
+
+        var executionLease = AcquireExecutionLease();
+        if (HasUnitOfWorkResource)
+        {
+            try
+            {
+                if (useTransaction && !IsUnitOfWorkRootTransactional)
+                    throw new InvalidOperationException("当前业务工作单元未启用事务，无法满足批量写入的事务要求。");
+                return ExecuteMutationCommands(this, orderedBatches, timeout, executionLeaseAlreadyHeld: true);
+            }
+            catch
+            {
+                MarkUnitOfWorkExecutionFailure();
+                throw;
+            }
+            finally
+            {
+                executionLease?.Dispose();
+            }
+        }
+        executionLease?.Dispose();
+
         if (useTransaction == false)
             return ExecuteMutationCommands(this, orderedBatches, timeout);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
@@ -935,23 +970,51 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     private async Task<int> ExecuteMutationBatchAsync(IEnumerable<SqlMutationBatchCommand> batches,
         bool useTransaction, int? timeout, CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
         if (batches == null)
             return 0;
+        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
+        EnsureCancellationSupported(operationToken);
         using var enumerator = batches.GetEnumerator();
         if (enumerator.MoveNext() == false)
             return 0;
         EnsureWritableDataSource();
         var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
+
+        var executionLease = AcquireExecutionLease();
+        if (HasUnitOfWorkResource)
+        {
+            try
+            {
+                operationToken.ThrowIfCancellationRequested();
+                if (useTransaction && !IsUnitOfWorkRootTransactional)
+                    throw new InvalidOperationException("当前业务工作单元未启用事务，无法满足批量写入的事务要求。");
+                return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, operationToken,
+                    executionLeaseAlreadyHeld: true).ConfigureAwait(false);
+            }
+            catch
+            {
+                MarkUnitOfWorkExecutionFailure();
+                throw;
+            }
+            finally
+            {
+                executionLease?.Dispose();
+            }
+        }
+        executionLease?.Dispose();
+
+        operationToken.ThrowIfCancellationRequested();
+
         if (useTransaction == false)
-            return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, cancellationToken).ConfigureAwait(false);
+            return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, operationToken).ConfigureAwait(false);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
-        await using var scope = await factory.BeginAsync(GetDatabaseContext()?.DbKey, cancellationToken).ConfigureAwait(false);
+        await using var scope = await factory.BeginAsync(GetDatabaseContext()?.DbKey, operationToken).ConfigureAwait(false);
         int result;
         try
         {
-            result = await ExecuteMutationCommandsAsync(scope.CreateExecutor(), orderedBatches, timeout, cancellationToken)
+            result = await ExecuteMutationCommandsAsync(scope.CreateExecutor(), orderedBatches, timeout, operationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception executionException)
@@ -968,10 +1031,10 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            await scope.CommitAsync(CancellationToken.None).ConfigureAwait(false);
+            operationToken.ThrowIfCancellationRequested();
+            await scope.CommitAsync(operationToken).ConfigureAwait(false);
         }
-        catch (OperationCanceledException cancellationException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException cancellationException) when (operationToken.IsCancellationRequested)
         {
             try
             {
@@ -992,9 +1055,10 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="executor">用于执行命令的 SQL 执行器。</param>
     /// <param name="batches">按执行顺序排列的命令批次。</param>
     /// <param name="timeout">单条命令执行超时时间，单位为秒。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>所有命令影响行数的总和。</returns>
-    private static int ExecuteMutationCommands(ISqlExecutor executor, IEnumerable<SqlMutationBatchCommand> batches,
-        int? timeout)
+    private int ExecuteMutationCommands(ISqlExecutor executor, IEnumerable<SqlMutationBatchCommand> batches,
+        int? timeout, bool executionLeaseAlreadyHeld = false)
     {
         var result = 0;
         foreach (var batch in batches)
@@ -1002,7 +1066,9 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             var batchResult = 0;
             foreach (var command in batch.Commands)
             {
-                var commandResult = executor.ExecuteSql(command.Sql, command.Parameters, timeout);
+                var commandResult = executionLeaseAlreadyHeld && ReferenceEquals(executor, this)
+                    ? ExecuteMutationCommand(command, timeout, executionLeaseAlreadyHeld: true)
+                    : executor.ExecuteSql(command.Sql, command.Parameters, timeout);
                 ValidateAffectedRows(command, commandResult);
                 batchResult = checked(batchResult + commandResult);
             }
@@ -1019,9 +1085,11 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <param name="batches">按执行顺序排列的命令批次。</param>
     /// <param name="timeout">单条命令执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">每条命令执行前检查的取消令牌。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>表示异步执行并返回总影响行数的任务。</returns>
-    private static async Task<int> ExecuteMutationCommandsAsync(ISqlExecutor executor,
-        IEnumerable<SqlMutationBatchCommand> batches, int? timeout, CancellationToken cancellationToken)
+    private async Task<int> ExecuteMutationCommandsAsync(ISqlExecutor executor,
+        IEnumerable<SqlMutationBatchCommand> batches, int? timeout, CancellationToken cancellationToken,
+        bool executionLeaseAlreadyHeld = false)
     {
         var result = 0;
         foreach (var batch in batches)
@@ -1030,8 +1098,11 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
             foreach (var command in batch.Commands)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var commandResult = await executor.ExecuteSqlAsync(command.Sql, command.Parameters, timeout,
-                    cancellationToken).ConfigureAwait(false);
+                var commandResult = executionLeaseAlreadyHeld && ReferenceEquals(executor, this)
+                    ? await ExecuteSqlCoreAsync(command.Sql, command.Parameters, timeout, cancellationToken, null,
+                        executionLeaseAlreadyHeld: true).ConfigureAwait(false)
+                    : await executor.ExecuteSqlAsync(command.Sql, command.Parameters, timeout,
+                        cancellationToken).ConfigureAwait(false);
                 ValidateAffectedRows(command, commandResult);
                 batchResult = checked(batchResult + commandResult);
             }
@@ -1072,11 +1143,12 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// </summary>
     /// <param name="command">待执行的单体 Mutation 命令。</param>
     /// <param name="timeout">命令执行超时时间，单位为秒。</param>
+    /// <param name="executionLeaseAlreadyHeld">调用方是否已持有当前 Query 的执行租约。</param>
     /// <returns>命令实际影响的行数。</returns>
-    private int ExecuteMutationCommand(SqlWriteCommand command, int? timeout)
+    private int ExecuteMutationCommand(SqlWriteCommand command, int? timeout, bool executionLeaseAlreadyHeld = false)
     {
         return ExecuteSqlCore(command.Sql, command.Parameters, timeout,
-            affectedRows => ValidateAffectedRows(command, affectedRows));
+            affectedRows => ValidateAffectedRows(command, affectedRows), executionLeaseAlreadyHeld);
     }
 
     /// <summary>

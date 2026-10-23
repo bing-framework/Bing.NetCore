@@ -67,9 +67,16 @@ public abstract partial class SqlQueryBase
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
+        EnsureCancellationSupported(operationToken);
+        if (operationToken.IsCancellationRequested)
+        {
+            MarkPreCancelledUnitOfWorkExecution();
+            operationToken.ThrowIfCancellationRequested();
+        }
         var executionLease = AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
@@ -84,21 +91,23 @@ public abstract partial class SqlQueryBase
             if (IsPlanTotalCountUnknown(page))
             {
                 var countPlan = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
-                totalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction) =>
+                totalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction,
+                    queryToken) =>
                     Conv.ToInt(await connection.ExecuteScalarAsync(CreateQueryCommandDefinition(sql, parameters,
-                        transaction, timeout, buffered: true, cancellationToken, countPlan.CommandType))), cancellationToken,
+                        transaction, timeout, buffered: true, queryToken, countPlan.CommandType))), operationToken,
                     acquireExecutionLease: false, completeTransaction: false);
                 totalCountCalculated = true;
             }
             var pagePlan = plan.IsBuilderPlan
                 ? SqlBuilderRuntimeBridge.CreatePagePlan(plan, page)
                 : SqlBuilderRuntimeBridge.CreatePagePlan(plan, page, CreateIndependentSqlBuilder());
-            var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction) =>
+            var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction,
+                queryToken) =>
                 await ExecuteMaterializedQueryAsync<TResult>(connection,
-                    CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, cancellationToken,
-                        pagePlan.CommandType), cancellationToken), cancellationToken, acquireExecutionLease: false,
+                    CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, queryToken,
+                        pagePlan.CommandType), queryToken), operationToken, acquireExecutionLease: false,
                 completeTransaction: false);
-            await CompleteQueryTransactionAsync(cancellationToken).ConfigureAwait(false);
+            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             if (totalCountCalculated)
             {
                 page.TotalCount = totalCount;

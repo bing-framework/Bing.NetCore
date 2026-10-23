@@ -39,11 +39,20 @@ public abstract partial class SqlQueryBase
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        cancellationToken.ThrowIfCancellationRequested();
+        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        var operationToken = operationCancellation.Token;
+        var isWrite = SqlBuilderRuntimeBridge.ValidateQueryPlan(plan);
+        if (operationToken.IsCancellationRequested)
+        {
+            EnsureCancellationSupported(operationToken);
+            MarkPreCancelledUnitOfWorkExecution();
+            operationToken.ThrowIfCancellationRequested();
+        }
         EnsureStreamingSupported();
-        EnsureCancellationSupported(cancellationToken);
-        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
+        if (isWrite)
             EnsureWritableDataSource();
+        EnsureCancellationSupported(operationToken);
+        operationToken.ThrowIfCancellationRequested();
         var executionLease = AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;
@@ -64,12 +73,12 @@ public abstract partial class SqlQueryBase
                 {
                     var preparedPlan = PrepareQueryPlan(plan);
                     var connection = GetExecutionConnection();
-                    var transaction = GetQueryTransaction();
+                    var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
                     message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
                     logScope = BeginExecutionLogScope(message);
                     WritePlanTraceLog(preparedPlan);
                     reader = await connection.ExecuteReaderAsync(CreateQueryCommandDefinition(preparedPlan.Sql,
-                        preparedPlan.DapperParameters, transaction, timeout, buffered: false, cancellationToken,
+                        preparedPlan.DapperParameters, transaction, timeout, buffered: false, operationToken,
                         plan.CommandType));
                     parser = reader.GetRowParser<TResult>();
                 }
@@ -103,13 +112,13 @@ public abstract partial class SqlQueryBase
                             {
                                 if (reader is DbDataReader dbReader)
                                 {
-                                    if (await dbReader.ReadAsync(cancellationToken) == false)
+                                    if (await dbReader.ReadAsync(operationToken) == false)
                                         break;
                                     item = parser(dbReader);
                                 }
                                 else
                                 {
-                                    cancellationToken.ThrowIfCancellationRequested();
+                                    operationToken.ThrowIfCancellationRequested();
                                     if (reader.Read() == false)
                                         break;
                                     item = parser(reader);

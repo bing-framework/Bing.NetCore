@@ -1,4 +1,5 @@
 using Bing.Data.Enums;
+using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
@@ -17,23 +18,137 @@ namespace Bing.Dapper.Core.Tests.DependencyInjection;
 public class DapperCoreServiceCollectionExtensionsTest
 {
     /// <summary>
-    /// 测试目的：重复注册核心服务时应保持各核心服务的单例注册。
+    /// 测试目的：重复注册核心服务时工厂应按作用域创建，元数据仍为跨作用域单例。
     /// </summary>
     [Fact]
-    public void AddSqlCore_WhenCalledRepeatedly_ShouldKeepSingletonRegistrationsIdempotent()
+    public void AddSqlCore_WhenCalledRepeatedly_ShouldKeepScopedFactoryRegistrationsIdempotent()
     {
-        // Arrange
         var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSqlCore();
+        var factoryTypes = new[]
+        {
+            typeof(ISqlQueryFactory),
+            typeof(ISqlExecutorFactory),
+            typeof(ISqlMultipleQueryExecutorFactory),
+            typeof(ISqlTransactionScopeFactory)
+        };
 
-        // Act
+        foreach (var factoryType in factoryTypes)
+        {
+            var registration = Assert.Single(services, item => item.ServiceType == factoryType);
+            Assert.Equal(ServiceLifetime.Scoped, registration.Lifetime);
+        }
+
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        using var firstScope = provider.CreateScope();
+        using var secondScope = provider.CreateScope();
+
+        foreach (var factoryType in factoryTypes)
+        {
+            var first = firstScope.ServiceProvider.GetRequiredService(factoryType);
+            Assert.Same(first, firstScope.ServiceProvider.GetRequiredService(factoryType));
+            Assert.NotSame(first, secondScope.ServiceProvider.GetRequiredService(factoryType));
+        }
+
+        Assert.Same(firstScope.ServiceProvider.GetRequiredService<SqlMetadataOptions>(),
+            secondScope.ServiceProvider.GetRequiredService<SqlMetadataOptions>());
+        Assert.Same(firstScope.ServiceProvider.GetRequiredService<IEntityMappingResolver>(),
+            secondScope.ServiceProvider.GetRequiredService<IEntityMappingResolver>());
+        Assert.NotSame(firstScope.ServiceProvider.GetRequiredService<IDataFilter>(),
+            secondScope.ServiceProvider.GetRequiredService<IDataFilter>());
+    }
+
+    /// <summary>
+    /// 测试目的：默认 Query 和 Executor 保持 transient，不随 Uow 资源共享而缓存实例。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_ShouldKeepQueryAndExecutorServicesTransient()
+    {
+        var services = new ServiceCollection();
         services.AddSqlCore();
+
+        foreach (var serviceType in new[] { typeof(ISqlQuery), typeof(ISqlExecutor), typeof(ISqlMultipleQueryExecutor) })
+        {
+            var registration = Assert.Single(services, item => item.ServiceType == serviceType);
+            Assert.Equal(ServiceLifetime.Transient, registration.Lifetime);
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：AddSqlCore 不得覆盖调用方预注册的工厂类型、委托或实例。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_WhenFactoryIsPreRegistered_ShouldPreserveTypeFactoryAndInstance()
+    {
+        var typeServices = new ServiceCollection();
+        typeServices.AddScoped<ISqlQueryFactory, TestSqlQueryFactory>();
+        typeServices.AddSqlCore();
+        var typeRegistration = Assert.Single(typeServices, item => item.ServiceType == typeof(ISqlQueryFactory));
+        Assert.Equal(typeof(TestSqlQueryFactory), typeRegistration.ImplementationType);
+
+        var instance = new TestSqlQueryFactory();
+        var instanceServices = new ServiceCollection();
+        instanceServices.AddSingleton<ISqlQueryFactory>(instance);
+        instanceServices.AddSqlCore();
+        var instanceRegistration = Assert.Single(instanceServices, item => item.ServiceType == typeof(ISqlQueryFactory));
+        Assert.Same(instance, instanceRegistration.ImplementationInstance);
+
+        var factoryServices = new ServiceCollection();
+        Func<IServiceProvider, ISqlQueryFactory> factory = _ => instance;
+        factoryServices.AddScoped(factory);
+        factoryServices.AddSqlCore();
+        var factoryRegistration = Assert.Single(factoryServices, item => item.ServiceType == typeof(ISqlQueryFactory));
+        Assert.Same(factory, factoryRegistration.ImplementationFactory);
+    }
+
+    /// <summary>
+    /// 测试目的：调用方在 AddSqlCore 后追加的工厂仍按 DI 后注册规则覆盖解析结果。
+    /// </summary>
+    [Fact]
+    public void AddSqlCore_WhenFactoryIsRegisteredAfterCore_ShouldResolveLastRegistration()
+    {
+        var services = new ServiceCollection();
         services.AddSqlCore();
+        var customFactory = new TestSqlQueryFactory();
+        services.AddSingleton<ISqlQueryFactory>(customFactory);
+
         using var provider = services.BuildServiceProvider();
 
-        // Assert
-        Assert.Same(provider.GetRequiredService<ISqlQueryFactory>(), provider.GetRequiredService<ISqlQueryFactory>());
-        Assert.Same(provider.GetRequiredService<ISqlExecutorFactory>(), provider.GetRequiredService<ISqlExecutorFactory>());
-        Assert.Same(provider.GetRequiredService<SqlMetadataOptions>(), provider.GetRequiredService<SqlMetadataOptions>());
+        Assert.Same(customFactory, provider.GetRequiredService<ISqlQueryFactory>());
+        Assert.Equal(2, services.Count(item => item.ServiceType == typeof(ISqlQueryFactory)));
+    }
+
+    /// <summary>
+    /// 测试目的：直接向 Singleton 注入请求作用域工厂时应由 scope 校验明确拒绝。
+    /// </summary>
+    [Fact]
+    public void SingletonConsumer_WhenInjectingScopedFactory_ShouldFailScopeValidation()
+    {
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSingleton<DirectFactorySingletonConsumer>();
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+
+        Assert.Throws<InvalidOperationException>(() =>
+            provider.GetRequiredService<DirectFactorySingletonConsumer>());
+    }
+
+    /// <summary>
+    /// 测试目的：Singleton 消费者可为每次业务操作创建 scope 并在 scope 内解析 SQL 工厂。
+    /// </summary>
+    [Fact]
+    public void SingletonConsumer_WhenResolvingFactoryInsideOperationScope_ShouldSucceed()
+    {
+        var services = new ServiceCollection();
+        services.AddSqlCore();
+        services.AddSingleton<ScopedFactoryOperation>();
+        using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+
+        var consumer = provider.GetRequiredService<ScopedFactoryOperation>();
+
+        Assert.Equal("Bing.Data.Sql.SqlQueryFactory", consumer.ResolveFactoryTypeForOperation());
+        Assert.Equal("Bing.Data.Sql.SqlQueryFactory", consumer.ResolveFactoryTypeForOperation());
     }
 
     /// <summary>
@@ -87,8 +202,8 @@ public class DapperCoreServiceCollectionExtensionsTest
         services.AddSqlBuilderProvider(provider, CreateTestBuilder);
 
         // Assert
-        Assert.Single(services.Where(item => item.ServiceType == typeof(ISqlProvider)));
-        Assert.Single(services.Where(item => item.ImplementationInstance is SqlBuilderFactoryRegistration));
+        Assert.Single(services, item => item.ServiceType == typeof(ISqlProvider));
+        Assert.Single(services, item => item.ImplementationInstance is SqlBuilderFactoryRegistration);
         Assert.Throws<InvalidOperationException>(() =>
             services.AddSqlBuilderProvider(new TestSqlProvider("CUSTOM"), CreateTestBuilder));
     }
@@ -124,8 +239,8 @@ public class DapperCoreServiceCollectionExtensionsTest
         services.AddSqlBuilderProvider(provider, CreateTestBuilder);
 
         // Assert
-        Assert.Single(services.Where(item => item.ServiceType == typeof(ISqlProvider)));
-        Assert.Single(services.Where(item => item.ImplementationInstance is SqlBuilderFactoryRegistration));
+        Assert.Single(services, item => item.ServiceType == typeof(ISqlProvider));
+        Assert.Single(services, item => item.ImplementationInstance is SqlBuilderFactoryRegistration);
     }
 
     /// <summary>
@@ -547,5 +662,55 @@ public class DapperCoreServiceCollectionExtensionsTest
 
         /// <inheritdoc />
         public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
+    }
+
+    /// <summary>
+    /// 用于验证调用方自定义工厂注册语义的测试实现。
+    /// </summary>
+    private sealed class TestSqlQueryFactory : ISqlQueryFactory
+    {
+        /// <inheritdoc />
+        public ISqlQuery Create(string dbKey = null) => throw new NotSupportedException();
+    }
+
+    /// <summary>
+    /// 代表迁移前会错误捕获 Scoped 工厂的 Singleton 消费者。
+    /// </summary>
+    private sealed class DirectFactorySingletonConsumer
+    {
+        /// <summary>
+        /// 初始化 Singleton 消费者。
+        /// </summary>
+        /// <param name="factory">请求作用域 SQL 查询工厂。</param>
+        public DirectFactorySingletonConsumer(ISqlQueryFactory factory) => Factory = factory;
+
+        /// <summary>
+        /// 获取被直接捕获的 SQL 查询工厂。
+        /// </summary>
+        public ISqlQueryFactory Factory { get; }
+    }
+
+    /// <summary>
+    /// 在每次业务操作中独立创建服务作用域的 Singleton 消费者。
+    /// </summary>
+    private sealed class ScopedFactoryOperation
+    {
+        private readonly IServiceScopeFactory _scopeFactory;
+
+        /// <summary>
+        /// 初始化操作级服务作用域工厂。
+        /// </summary>
+        /// <param name="scopeFactory">DI 服务作用域工厂。</param>
+        public ScopedFactoryOperation(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
+
+        /// <summary>
+        /// 在本次业务操作的作用域内解析 SQL 查询工厂。
+        /// </summary>
+        /// <returns>作用域内查询工厂实现的类型名称。</returns>
+        public string ResolveFactoryTypeForOperation()
+        {
+            using var scope = _scopeFactory.CreateScope();
+            return scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>().GetType().FullName;
+        }
     }
 }
