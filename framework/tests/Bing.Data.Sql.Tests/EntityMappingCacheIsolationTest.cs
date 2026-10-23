@@ -11,6 +11,8 @@ namespace Bing.Data.Sql.Tests;
 /// </summary>
 public class EntityMappingCacheIsolationTest
 {
+    private const string MetadataFailureMessage = "metadata failed";
+
     /// <summary>
     /// 测试目的：修改公开实体描述副本不应污染后续映射解析使用的静态描述缓存。
     /// </summary>
@@ -366,50 +368,106 @@ public class EntityMappingCacheIsolationTest
         var mapping = resolver.Resolve(typeof(CacheSample), null);
 
         // Assert
-        Assert.Equal("metadata failed", firstException.Message);
+        Assert.Equal(MetadataFailureMessage, firstException.Message);
         Assert.Equal("cache_samples", mapping.Table.TableName);
         Assert.Equal(2, provider.MetadataCallCount);
     }
 
     /// <summary>
-    /// 测试目的：多个调用者共享首次失败的模型 Lazy 后，失败项移除应允许后续解析重试。
+    /// 测试目的：并发调用遇到首次元数据失败时，调用者显式重试后应共享成功映射。
     /// </summary>
     [Fact]
     public async Task Resolve_WhenConcurrentMetadataFailureIsRetried_ShouldAllowAllWaitersToRetry()
     {
         // Arrange
-        var provider = new BlockingFailOnceEntityModelMetadataProvider();
+        using var provider = new BlockingFailOnceEntityModelMetadataProvider();
         var resolver = new DefaultEntityMappingResolver(provider);
         const int callerCount = 8;
         using var ready = new CountdownEvent(callerCount);
         using var start = new ManualResetEventSlim();
-        var failures = 0;
+        var firstAttemptFailures = 0;
+        var businessRetries = 0;
         var tasks = Enumerable.Range(0, callerCount).Select(_ => Task.Factory.StartNew(() =>
         {
             ready.Signal();
-            start.Wait();
+            if (!start.Wait(TimeSpan.FromSeconds(10)))
+                throw new TimeoutException("Concurrent metadata test start signal timed out.");
+
+            var attempts = 1;
             try
             {
-                resolver.Resolve(typeof(CacheSample), null);
+                var mapping = resolver.Resolve(typeof(CacheSample), null);
+                return (Mapping: mapping, Attempts: attempts);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException exception) when (exception.Message == MetadataFailureMessage)
             {
-                Interlocked.Increment(ref failures);
+                Interlocked.Increment(ref firstAttemptFailures);
+                Interlocked.Increment(ref businessRetries);
+                attempts++;
+                var mapping = resolver.Resolve(typeof(CacheSample), null);
+                return (Mapping: mapping, Attempts: attempts);
             }
         }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
 
-        // Act
-        Assert.True(SpinWait.SpinUntil(() => ready.CurrentCount == 0, TimeSpan.FromSeconds(5)));
-        start.Set();
-        Assert.True(provider.FirstCallEntered.Wait(TimeSpan.FromSeconds(5)));
-        provider.ReleaseFirstCall();
-        await Task.WhenAll(tasks);
-        var mapping = resolver.Resolve(typeof(CacheSample), null);
+        try
+        {
+            Assert.True(ready.Wait(TimeSpan.FromSeconds(10)), "Concurrent callers did not reach the start gate.");
+            start.Set();
+            Assert.True(provider.FirstCallEntered.Wait(TimeSpan.FromSeconds(10)), "The first metadata load did not enter its gate.");
+            provider.ReleaseFirstCall();
+            var results = await Task.WhenAll(tasks).WaitAsync(TimeSpan.FromSeconds(20));
 
-        // Assert
-        Assert.Equal(callerCount, failures);
-        Assert.Equal(2, provider.MetadataCallCount);
-        Assert.Equal("cache_samples", mapping.Table.TableName);
+            Assert.Equal(callerCount, results.Length);
+            Assert.All(results, result => Assert.InRange(result.Attempts, 1, 2));
+            Assert.True(Volatile.Read(ref firstAttemptFailures) > 0, "The controlled first failure was not observed by any caller.");
+            Assert.Equal(Volatile.Read(ref firstAttemptFailures), Volatile.Read(ref businessRetries));
+            Assert.All(results, result => Assert.Equal("cache_samples", result.Mapping.Table.TableName));
+            Assert.All(results, result => Assert.Same(results[0].Mapping, result.Mapping));
+            Assert.Equal(2, provider.MetadataCallCount);
+
+            var cachedMapping = resolver.Resolve(typeof(CacheSample), null);
+            Assert.Same(results[0].Mapping, cachedMapping);
+            Assert.Equal(2, provider.MetadataCallCount);
+        }
+        finally
+        {
+            start.Set();
+            provider.ReleaseFirstCall();
+            await Task.WhenAll(tasks).WaitAsync(TimeSpan.FromSeconds(20));
+        }
+    }
+
+    /// <summary>
+    /// 测试目的：首次失败已传播并移除后到达的调用者应能重新加载成功元数据。
+    /// </summary>
+    [Fact]
+    public async Task Resolve_WhenCallerArrivesAfterMetadataFailureIsRemoved_ShouldLoadSuccessfully()
+    {
+        using var provider = new BlockingFailOnceEntityModelMetadataProvider();
+        var resolver = new DefaultEntityMappingResolver(provider);
+        var firstAttempt = Task.Factory.StartNew(() =>
+            Assert.Throws<InvalidOperationException>(() => resolver.Resolve(typeof(CacheSample), null)),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        try
+        {
+            Assert.True(provider.FirstCallEntered.Wait(TimeSpan.FromSeconds(10)), "The first metadata load did not enter its gate.");
+            provider.ReleaseFirstCall();
+            var failure = await firstAttempt.WaitAsync(TimeSpan.FromSeconds(10));
+
+            Assert.Equal(MetadataFailureMessage, failure.Message);
+            var mapping = resolver.Resolve(typeof(CacheSample), null);
+            var cachedMapping = resolver.Resolve(typeof(CacheSample), null);
+
+            Assert.Equal("cache_samples", mapping.Table.TableName);
+            Assert.Same(mapping, cachedMapping);
+            Assert.Equal(2, provider.MetadataCallCount);
+        }
+        finally
+        {
+            provider.ReleaseFirstCall();
+            await firstAttempt.WaitAsync(TimeSpan.FromSeconds(10));
+        }
     }
 
     /// <summary>
@@ -722,7 +780,7 @@ public class EntityMappingCacheIsolationTest
     /// <summary>
     /// 首次调用阻塞后失败、后续调用成功的模型元数据提供器。
     /// </summary>
-    private sealed class BlockingFailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider
+    private sealed class BlockingFailOnceEntityModelMetadataProvider : IEntityModelMetadataProvider, IDisposable
     {
         /// <summary>
         /// 允许首次阻塞的元数据读取继续执行的信号。
@@ -750,14 +808,22 @@ public class EntityMappingCacheIsolationTest
         public void ReleaseFirstCall() => _releaseFirstCall.Set();
 
         /// <inheritdoc />
+        public void Dispose()
+        {
+            FirstCallEntered.Dispose();
+            _releaseFirstCall.Dispose();
+        }
+
+        /// <inheritdoc />
         public EntityModelMetadata GetMetadata(Type entityType)
         {
             var call = Interlocked.Increment(ref _metadataCallCount);
             if (call == 1)
             {
                 FirstCallEntered.Set();
-                _releaseFirstCall.Wait();
-                throw new InvalidOperationException("metadata failed");
+                if (!_releaseFirstCall.Wait(TimeSpan.FromSeconds(10)))
+                    throw new TimeoutException("The first metadata load was not released.");
+                throw new InvalidOperationException(MetadataFailureMessage);
             }
             var properties = entityType.GetProperties().Select(property => new EntityPropertyMetadata(property));
             return new EntityModelMetadata(entityType, "cache_samples", "cache", properties);
