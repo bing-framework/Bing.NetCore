@@ -62,8 +62,8 @@ public sealed class BingSubscribeInvokerTest
         var result = await ((ISubscribeInvoker)invoker).InvokeAsync(context, CancellationToken.None);
 
         Assert.Equal("原生业务结果", result.Result);
-        Assert.Equal(context.DeliverMessage.Headers[Headers.MessageId], result.MessageId);
-        Assert.Equal(context.DeliverMessage.Headers[Headers.CallbackName], result.CallbackName);
+        Assert.Equal(context.DeliverMessage.Headers[DotNetCore.CAP.Messages.Headers.MessageId], result.MessageId);
+        Assert.Equal(context.DeliverMessage.Headers[DotNetCore.CAP.Messages.Headers.CallbackName], result.CallbackName);
         Assert.Same(context, invoker.ObservedContext);
         Assert.Equal(1, invoker.GetInstanceCalls);
         Assert.Equal(1, consumer.Calls);
@@ -148,7 +148,7 @@ public sealed class BingSubscribeInvokerTest
         var result = await invoker.InvokeAsync(context, CancellationToken.None);
 
         Assert.Equal("过滤器恢复结果", result.Result);
-        Assert.Equal(context.DeliverMessage.Headers[Headers.MessageId], result.MessageId);
+        Assert.Equal(context.DeliverMessage.Headers[DotNetCore.CAP.Messages.Headers.MessageId], result.MessageId);
         Assert.Same(original, filter.ObservedException);
         Assert.False(original.Data.Contains("Bing.CapConsumerCancellation"));
         Assert.Equal(1, filter.ExecutingCalls);
@@ -332,9 +332,9 @@ public sealed class BingSubscribeInvokerTest
         };
         var message = new Message(new Dictionary<string, string>
         {
-            [Headers.MessageId] = Guid.NewGuid().ToString("N"),
-            [Headers.MessageName] = "bing.tests.consumer-cancellation",
-            [Headers.CallbackName] = "bing.tests.consumer-cancellation.callback"
+            [DotNetCore.CAP.Messages.Headers.MessageId] = Guid.NewGuid().ToString("N"),
+            [DotNetCore.CAP.Messages.Headers.MessageName] = "bing.tests.consumer-cancellation",
+            [DotNetCore.CAP.Messages.Headers.CallbackName] = "bing.tests.consumer-cancellation.callback"
         }, null);
         return new ConsumerContext(descriptor, message);
     }
