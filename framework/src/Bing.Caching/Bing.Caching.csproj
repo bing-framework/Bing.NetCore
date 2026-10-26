@@ -20,6 +20,7 @@
     <InternalsVisibleTo Include="Bing.Caching.FreeRedis" />
     <InternalsVisibleTo Include="Bing.Caching.CSRedis" />
     <InternalsVisibleTo Include="Bing.EasyCaching" />
+    <InternalsVisibleTo Include="Bing.Caching.FusionCache" />
     <InternalsVisibleTo Include="Bing.Caching.Tests" />
     <InternalsVisibleTo Include="CacheBench" />
   </ItemGroup>

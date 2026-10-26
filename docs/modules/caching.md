@@ -1,10 +1,10 @@
 # 缓存模块
 
-> 内容核对：2026-10-13。对应 `Bing.Caching`、`Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis`、`Bing.EasyCaching`。
+> 内容核对：2026-10-24。对应 `Bing.Caching`、`Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis`、`Bing.EasyCaching`、`Bing.Caching.FusionCache`。
 
 ## 功能说明
 
-缓存模块提供统一的 `ICache` / `ILocalCache` / `IRedisCache` 抽象、逻辑键到物理键的命名空间规则，以及 CSRedis、FreeRedis、EasyCaching 三类实现。当前代码还覆盖批量操作、扫描删除、资源预算、单机/Cluster/客户端分片拓扑和 Hybrid 本地加分布式缓存协调。
+缓存模块提供统一的 `ICache` / `ILocalCache` / `IRedisCache` 抽象、逻辑键到物理键的命名空间规则，以及 CSRedis、FreeRedis、EasyCaching 三类实现。当前代码还覆盖批量操作、扫描删除、资源预算、单机/Cluster/客户端分片拓扑和 Hybrid 本地加分布式缓存协调。新增的 `Bing.Caching.FusionCache` 是可选的 net8.0+ Provider，通过 `IHybridCache` 提供异步单键缓存、同键回源合并、Fail-Safe 和基于标签的失效；它不替换旧 `ICache` 契约。
 
 ## 核心实现逻辑与关键文件
 
@@ -14,9 +14,18 @@
 | CSRedis | `framework/src/Bing.Caching.CSRedis/Bing/Caching/CSRedis/` | Redis 键值、批量、流式扫描、清理与协调实现。 |
 | FreeRedis | `framework/src/Bing.Caching.FreeRedis/Bing/Caching/FreeRedis/` | Redis 适配、批量、流式扫描与协调实现。 |
 | EasyCaching | `framework/src/Bing.EasyCaching/Bing/EasyCaching/` | Memory、Redis、Hybrid 注册，Cluster/分片路由、租约、失效消息、outbox 与 dead-letter 管理。 |
+| FusionCache | `framework/src/Bing.Caching.FusionCache/Bing/Caching/FusionCache/` | 官方 FusionCache 2.9.0 适配、命名隔离、输入校验、TTL 映射和回源准入。 |
 | 验证 | `framework/tests/Bing.Caching.Tests/`、`framework/tests/Bing.EasyCaching.Tests/`、两个 Redis 集成测试工程 | 契约、预算、命名空间、拓扑、故障和取消行为。 |
 
-物理键由受信任的 `CacheConfiguration` 统一生成。扫描与清理先限定命名空间，再按页数、键数、批量命令字节数等预算执行；Hybrid 写入还需要向其他节点发布失效消息。
+现有 `ICache` Provider 的物理键由受信任的 `CacheConfiguration` 统一生成；FusionCache 的独立身份前缀由 `AddBingFusionCache` 生成。扫描与清理先限定命名空间，再按页数、键数、批量命令字节数等预算执行；Hybrid 写入还需要向其他节点发布失效消息。
+
+### FusionCache 集成
+
+`IHybridCacheProvider.GetCache(name)` 显式选择 FusionCache 命名实例；`UseAsDefault` 仅在唯一实例明确启用时注册无名别名。实例身份和键/标签限制由 Bing 配置，L1/L2、Fail-Safe、刷新与超时通过官方 builder 配置。Redis L2、System.Text.Json serializer、Redis Backplane、分布式 locker、日志 provider 和 OpenTelemetry 均由宿主按需安装，不作为核心集成包的强制依赖。
+
+Redis L2 负责跨进程共享条目，Backplane 负责通知其他实例失效其 L1；只有 L2 而没有 Backplane 时，其他实例的旧 L1 可能保留到 TTL。传播最终一致，不能作为事务提交、授权撤销或原子条件写入屏障。首版只承诺异步单键契约，不提供 TrySet、任意前缀/模式扫描、批量或流式读取。详细注册方式见 [FusionCache 包 README](../../framework/src/Bing.Caching.FusionCache/README.md)，迁移步骤见 [FusionCache 迁移指南](../migrations/fusioncache-adoption.md)，可运行样例见 [Bing.Samples.FusionCache](../../samples/Bing.Samples.FusionCache/README.md)。
+
+FusionCache 的业务条目 TTL 不应覆盖内部标签/Clear 元数据的 `TagsDefaultEntryOptions` 长保留期。标签元数据默认使用前台 L2/Backplane 操作并重新抛出相关异常；业务条目的 Fail-Safe 需单独配置。启用 OpenTelemetry 工厂准入指标时，订阅 `Bing.Caching.FusionCache` meter；指标名包括 `bing.cache.factory.waiting`、`bing.cache.factory.active`、`bing.cache.factory.rejected` 与 `bing.cache.factory.wait.duration`。
 
 ## 对外接口与用法
 
@@ -49,7 +58,7 @@ var configuration = new CacheConfiguration("admin", "admin-redis")
         maxPatternLength: 256));
 ```
 
-CSRedis 与 FreeRedis 没有统一 `AddCache` 入口，应按各包 README 注册底层客户端和对应管理器。命名空间 v2 升级步骤见[缓存命名空间 v2 迁移](../migrations/cache-namespace-v2.md)。
+CSRedis 与 FreeRedis 没有统一 `AddCache` 入口，应按各包 README 注册底层客户端和对应管理器。FusionCache 使用 `AddBingFusionCache` 注册入口。命名空间 v2 升级步骤见[缓存命名空间 v2 迁移](../migrations/cache-namespace-v2.md)；从旧 Provider 迁移到 FusionCache 见 [FusionCache 迁移指南](../migrations/fusioncache-adoption.md)。
 
 ## 依赖与配置项
 
@@ -84,4 +93,6 @@ CSRedis 与 FreeRedis 没有统一 `AddCache` 入口，应按各包 README 注�
 - 客户端分片不提供跨分片事务；失败时只保证已启动任务被观察，不能回滚已成功分片。
 - EasyCaching 的 Cluster、分片、租约和 Redis outbox 能力依赖底层 Provider 暴露原生数据库；不满足时会明确抛出 `NotSupportedException`。
 - Hybrid 失效消息预算不等同于消息代理帧上限；是否具备持久 outbox 和 dead-letter 管理取决于注册方式。
+- FusionCache 使用独立物理空间，不回读旧 Provider 的载荷；灰度期间业务更新必须同时失效仍在服务的旧、新缓存空间。
+- FusionCache Backplane 与并发回源不是线性一致性协议；旧工厂可能在 Set/Remove 之后迟到写回，严格撤销或原子条件写入路径应保留旧 Provider。
 - 外部 Redis 实机验证受环境门控；未运行对应集成测试时，发布结论标注为“待实现/待确认”。

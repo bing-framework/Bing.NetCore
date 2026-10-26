@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Bing.Caching.FusionCache</AssemblyName>
+    <PackageId>Bing.Caching.FusionCache</PackageId>
+    <Description>Bing 缓存的 FusionCache 混合缓存集成。</Description>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputPath>bin/$(Configuration)/</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Caching/Bing.Caching.csproj" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.9.0" />
+    <!-- SourceLink 仅用于构建，不作为集成包的消费依赖。 -->
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+    <InternalsVisibleTo Include="Bing.Caching.FusionCache.Tests" />
+  </ItemGroup>
+</Project>

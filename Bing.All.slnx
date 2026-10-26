@@ -33,6 +33,7 @@
     <Project Path="framework/src/Bing.Events/Bing.Events.csproj" />
   </Folder>
   <Folder Name="/01-framework/01-src/05-Caching/">
+    <Project Path="framework/src/Bing.Caching.FusionCache/Bing.Caching.FusionCache.csproj" />
     <Project Path="framework/src/Bing.Caching.CSRedis/Bing.Caching.CSRedis.csproj" />
     <Project Path="framework/src/Bing.Caching.FreeRedis/Bing.Caching.FreeRedis.csproj" />
     <Project Path="framework/src/Bing.Caching/Bing.Caching.csproj" />
@@ -125,6 +126,9 @@
     <Project Path="framework/tests/Bing.Logging.Tests/Bing.Logging.Tests.csproj" />
   </Folder>
   <Folder Name="/01-framework/02-tests/05-Caching/">
+    <Project Path="framework/tests/Bing.Caching.FusionCache.Tests/Bing.Caching.FusionCache.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Caching.FusionCache.Tests.Integration/Bing.Caching.FusionCache.Tests.Integration.csproj" />
+    <Project Path="framework/tests/Bing.Caching.FusionCache.Probe/Bing.Caching.FusionCache.Probe.csproj" />
     <Project Path="framework/tests/Bing.Caching.CSRedis.Tests.Integration/Bing.Caching.CSRedis.Tests.Integration.csproj" />
     <Project Path="framework/tests/Bing.Caching.FreeRedis.Tests.Integration/Bing.Caching.FreeRedis.Tests.Integration.csproj" />
   </Folder>
@@ -211,6 +215,7 @@
     <Project Path="modules/admin/src/Bing.Admin.Infrastructure/Bing.Admin.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/04-samples/">
+    <Project Path="samples/Bing.Samples.FusionCache/Bing.Samples.FusionCache.csproj" />
     <Project Path="samples/Bing.Samples.Hangfire/Bing.Samples.Hangfire.csproj" />
     <Project Path="samples/Bing.Samples.SqlUnitOfWork.Tests/Bing.Samples.SqlUnitOfWork.Tests.csproj" />
     <Project Path="samples/Bing.Samples.SqlUnitOfWork/Bing.Samples.SqlUnitOfWork.csproj" />

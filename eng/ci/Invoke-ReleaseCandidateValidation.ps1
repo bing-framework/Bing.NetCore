@@ -30,6 +30,8 @@ if ([System.IO.Path]::IsPathRooted($normalizedResultsRoot) -or
     throw "ResultsRoot 必须是 artifacts/release-candidate 下的工作区相对目录。"
 }
 $unitProjects = @(
+    [ordered]@{ Path = "framework/tests/Bing.Caching.FusionCache.Tests/Bing.Caching.FusionCache.Tests.csproj"; Frameworks = @("net8.0", "net10.0") },
+    [ordered]@{ Path = "framework/tests/Bing.Caching.Tests/Bing.Caching.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
     [ordered]@{ Path = "framework/tests/Bing.Core.Tests/Bing.Core.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
     [ordered]@{ Path = "framework/tests/Bing.Dapper.Core.Tests/Bing.Dapper.Core.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },
     [ordered]@{ Path = "framework/tests/Bing.Dapper.MySql.Tests/Bing.Dapper.MySql.Tests.csproj"; Frameworks = @("net6.0", "net8.0") },

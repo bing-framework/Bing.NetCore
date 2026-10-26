@@ -557,6 +557,8 @@ static bool TryReadCounter(XElement counters, string name, out int value) =>
 
 static IReadOnlySet<string> GetExpectedUnitEntries() => new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
+    "Bing.Caching.FusionCache.Tests|net8.0", "Bing.Caching.FusionCache.Tests|net10.0",
+    "Bing.Caching.Tests|net6.0", "Bing.Caching.Tests|net8.0",
     "Bing.Core.Tests|net6.0", "Bing.Core.Tests|net8.0",
     "Bing.Dapper.Core.Tests|net6.0", "Bing.Dapper.Core.Tests|net8.0",
     "Bing.Dapper.MySql.Tests|net6.0", "Bing.Dapper.MySql.Tests|net8.0",
@@ -1129,47 +1131,202 @@ static string[] ParseCsvRecord(string line)
     return values.ToArray();
 }
 
+/// <summary>
+/// 保存一次 Provider 集成测试运行的证据解析结果。
+/// </summary>
+/// <remarks>
+/// 用于聚合能力矩阵、校验发布证据并生成集成测试报告。
+/// </remarks>
 sealed class IntegrationRun
 {
+    /// <summary>
+    /// 获取或设置 Provider 名称。
+    /// </summary>
     public string Provider { get; set; }
+
+    /// <summary>
+    /// 获取或设置测试运行的目标框架。
+    /// </summary>
     public string Framework { get; set; }
+
+    /// <summary>
+    /// 获取或设置本次运行的唯一标识。
+    /// </summary>
     public string RunId { get; set; }
+
+    /// <summary>
+    /// 获取或设置证据会话标识。
+    /// </summary>
     public string EvidenceSessionId { get; set; }
+
+    /// <summary>
+    /// 获取或设置运行摘要文件路径。
+    /// </summary>
     public string SummaryPath { get; set; }
+
+    /// <summary>
+    /// 获取或设置 TRX 测试结果文件路径。
+    /// </summary>
     public string TrxPath { get; set; }
+
+    /// <summary>
+    /// 获取或设置二进制清单文件路径。
+    /// </summary>
     public string BinaryManifestPath { get; set; }
+
+    /// <summary>
+    /// 获取或设置源码状态描述。
+    /// </summary>
     public string SourceState { get; set; }
+
+    /// <summary>
+    /// 获取或设置源码身份标识。
+    /// </summary>
     public string SourceIdentity { get; set; }
+
+    /// <summary>
+    /// 获取或设置 Provider 版本。
+    /// </summary>
     public string ProviderVersion { get; set; }
+
+    /// <summary>
+    /// 获取或设置数据库版本。
+    /// </summary>
     public string DatabaseVersion { get; set; }
+
+    /// <summary>
+    /// 获取或设置驱动版本。
+    /// </summary>
     public string DriverVersion { get; set; }
+
+    /// <summary>
+    /// 获取或设置运行时版本。
+    /// </summary>
     public string RuntimeVersion { get; set; }
+
+    /// <summary>
+    /// 获取或设置运行环境描述。
+    /// </summary>
     public string OperatingSystem { get; set; }
+
+    /// <summary>
+    /// 获取或设置数据库名称。
+    /// </summary>
     public string DatabaseName { get; set; }
+
+    /// <summary>
+    /// 获取或设置配置来源说明。
+    /// </summary>
     public string ConfigurationSource { get; set; }
+
+    /// <summary>
+    /// 获取或设置本次运行的执行状态。
+    /// </summary>
     public string ExecutionStatus { get; set; }
+
+    /// <summary>
+    /// 获取或设置发现的测试数量。
+    /// </summary>
     public int Discovered { get; set; }
+
+    /// <summary>
+    /// 获取或设置实际执行的测试数量。
+    /// </summary>
     public int Executed { get; set; }
+
+    /// <summary>
+    /// 获取或设置通过的测试数量。
+    /// </summary>
     public int Passed { get; set; }
+
+    /// <summary>
+    /// 获取或设置失败的测试数量。
+    /// </summary>
     public int Failed { get; set; }
+
+    /// <summary>
+    /// 获取或设置跳过的测试总数。
+    /// </summary>
     public int Skipped { get; set; }
+
+    /// <summary>
+    /// 获取或设置其中因核心依赖缺失而跳过的测试数量。
+    /// </summary>
     public int CoreSkipped { get; set; }
+
+    /// <summary>
+    /// 获取或设置其中因可选依赖缺失而跳过的测试数量。
+    /// </summary>
     public int OptionalSkipped { get; set; }
+
+    /// <summary>
+    /// 获取或设置运行完成时间（UTC）。
+    /// </summary>
     public DateTimeOffset CompletedAtUtc { get; set; }
+
+    /// <summary>
+    /// 获取或设置本次运行是否满足发布证据要求。
+    /// </summary>
     public bool ReleaseEvidenceValid { get; set; }
+
+    /// <summary>
+    /// 获取或设置已通过测试方法的名称集合。
+    /// </summary>
     public HashSet<string> PassedTestMethods { get; set; } = new(StringComparer.Ordinal);
 }
 
+/// <summary>
+/// 保存单个测试项目的单元测试运行统计。
+/// </summary>
 sealed class UnitRun
 {
+    /// <summary>
+    /// 获取或设置测试项目名称。
+    /// </summary>
     public string Project { get; set; }
+
+    /// <summary>
+    /// 获取或设置测试项目的目标框架。
+    /// </summary>
     public string Framework { get; set; }
+
+    /// <summary>
+    /// 获取或设置 TRX 测试结果文件路径。
+    /// </summary>
     public string TrxPath { get; set; }
+
+    /// <summary>
+    /// 获取或设置发现的测试数量。
+    /// </summary>
     public int Discovered { get; set; }
+
+    /// <summary>
+    /// 获取或设置实际执行的测试数量。
+    /// </summary>
     public int Executed { get; set; }
+
+    /// <summary>
+    /// 获取或设置通过的测试数量。
+    /// </summary>
     public int Passed { get; set; }
+
+    /// <summary>
+    /// 获取或设置失败的测试数量。
+    /// </summary>
     public int Failed { get; set; }
+
+    /// <summary>
+    /// 获取或设置跳过的测试数量。
+    /// </summary>
     public int Skipped { get; set; }
+
+    /// <summary>
+    /// 获取或设置运行耗时文本。
+    /// </summary>
     public string Duration { get; set; }
+
+    /// <summary>
+    /// 获取或设置程序集身份是否已通过校验。
+    /// </summary>
     public bool AssemblyIdentityValid { get; set; }
 }

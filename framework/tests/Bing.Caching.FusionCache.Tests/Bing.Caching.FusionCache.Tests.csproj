@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <EnableDITestPackages>false</EnableDITestPackages>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../samples/Bing.Samples.FusionCache/SampleFactoryLifetime.cs" Link="SampleFactoryLifetime.cs" />
+    <Compile Include="../../../samples/Bing.Samples.FusionCache/SampleCacheWarmup.cs" Link="SampleCacheWarmup.cs" />
+    <ProjectReference Include="../../src/Bing.Caching.FusionCache/Bing.Caching.FusionCache.csproj" />
+    <ProjectReference Include="../../src/Bing.EasyCaching/Bing.EasyCaching.csproj" />
+    <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" Version="2.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+  </ItemGroup>
+</Project>

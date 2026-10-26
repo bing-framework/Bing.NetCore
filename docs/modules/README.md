@@ -43,7 +43,7 @@
 | [动态 API](dynamic-api.md) | 将 `IAppService` 约定公开为 HTTP API，并提供运行时代理与 WebApiClientCore 两种客户端。 | 已实现；限制已列明 |
 | [领域与工作单元](domain.md) | DDD、应用服务、审计、验证、提交与对象映射。 | 已实现；全局规则及自动事件接入边界见专题文档 |
 | [数据访问](data-access.md) | EF Core、FreeSQL、Dapper、SQL Builder 与各数据库 Provider。 | 已实现；异步与表达式限制已列明 |
-| [缓存](caching.md) | 统一缓存抽象、Redis 适配器、EasyCaching、命名空间、拓扑、分片和 Hybrid 协调。 | 已实现；部分能力依赖 Provider |
+| [缓存](caching.md) | 统一缓存抽象、Redis 适配器、EasyCaching 与 FusionCache、命名空间、拓扑、分片和 Hybrid 协调。 | 已实现；FusionCache 提供异步单键契约，部分能力依赖 Provider |
 | [事件与消息](events.md) | 进程内发布、CAP 消息及领域事件分发的边界。 | 已实现；可靠跨进程投递使用 CAP |
 | [安全与多租户](security.md) | JWT、授权、权限、安全服务及租户解析和切换。 | 已实现；数据过滤由业务装配 |
 | [日志与诊断](observability.md) | Bing 日志、Serilog、Exceptionless、SkyAPM 与 MiniProfiler。 | 已实现；外部平台验收待确认 |

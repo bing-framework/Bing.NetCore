@@ -19,6 +19,7 @@
 | [审计归档表迁移](../../deploy/migrations/auditing/005-audit-log-archive.mysql.sql) | 当前工作树审计表升级 | `bing_audit_log_archive` 表及归档查询索引；启用显式归档前执行 |
 | [有序事件收件箱迁移](../../deploy/migrations/ordered-events/001-created-at-utc.mysql.sql) | 当前工作树有序收件箱升级 | `CreatedAtUtc` 年龄字段、历史去重表及清理前归档；需按顺序执行两份受控 MySQL 迁移 |
 | [SQL 事务 API 迁移到 7.0.0](sql-transaction-api-vNext.md) | → 7.0.0 | Dapper 连接 / 事务公开 API 收敛 |
+| [FusionCache 缓存迁移](fusioncache-adoption.md) | 旧缓存 Provider → FusionCache | 独立键空间、灰度双空间失效、冷启动、回滚和一致性限制 |
 
 ---
 
