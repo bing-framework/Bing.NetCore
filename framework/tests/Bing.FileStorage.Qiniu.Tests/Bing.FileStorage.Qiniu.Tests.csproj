@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup>
+    <EnableDITestPackages>false</EnableDITestPackages>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" />
+    <Compile Include="../../../samples/Bing.FileStorage.CapacityProbe/CapacityProbeDiskSpace.cs" Link="CapacityProbeDiskSpace.cs" />
+  </ItemGroup>
+</Project>

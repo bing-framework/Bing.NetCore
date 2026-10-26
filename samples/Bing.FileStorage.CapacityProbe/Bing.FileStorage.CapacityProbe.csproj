@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../common.props" />
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework><OutputType>Exe</OutputType><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" /></ItemGroup>
+</Project>

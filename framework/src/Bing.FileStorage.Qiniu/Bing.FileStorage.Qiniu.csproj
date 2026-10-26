@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputPath>bin/$(Configuration)/</OutputPath>
+    <Description>Bing 七牛云 Kodo S3 文件存储适配。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.FileStorage.S3/Bing.FileStorage.S3.csproj" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
