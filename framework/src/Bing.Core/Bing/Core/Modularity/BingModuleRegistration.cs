@@ -62,7 +62,7 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     private readonly BingPluginContainer _pluginContainer = new();
 
     /// <summary>
-    /// 初始化一个 <see cref="BingModuleRegistration" /> 类型的实例。
+    /// 初始化一个 <see cref="BingModuleRegistration" /> 类的新实例。
     /// </summary>
     /// <param name="services">应用服务集合。</param>
     /// <param name="legacy">是否使用旧兼容注册入口。</param>
@@ -195,11 +195,13 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     /// <summary>
     /// 设置本次注册是否启用约定 DI。
     /// </summary>
+    /// <param name="value">是否启用约定 DI。</param>
     internal void SetAutoRegisterServices(bool value) => AutoRegisterServices = value;
 
     /// <summary>
     /// 验证当前集合可用于构建 Bing 服务容器。
     /// </summary>
+    /// <exception cref="InvalidOperationException">配置未结束、配置已失败、运行时已创建或已释放时抛出。</exception>
     internal void EnsureBuildable()
     {
         lock (_gate)
@@ -208,6 +210,11 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
                 throw new InvalidOperationException("模块配置尚未结束，不能构建 Bing 服务容器。");
             if (Failed)
                 throw new InvalidOperationException("模块配置已失败，不能构建 Bing 服务容器。");
+            // 在底层容器构建前拒绝重复使用，避免失败清理误释放已附加应用的模块。
+            if (_provider != null)
+                throw new InvalidOperationException("模块运行时已创建，不能重复构建 Bing 服务容器。请为每个应用创建独立服务集合。");
+            if (_runtimeReleased)
+                throw new InvalidOperationException("模块运行时已释放，不能重新构建 Bing 服务容器。请为每个应用创建独立服务集合。");
         }
     }
 

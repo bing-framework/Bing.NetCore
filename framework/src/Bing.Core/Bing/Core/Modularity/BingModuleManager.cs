@@ -1,3 +1,4 @@
+using System.Threading;
 using Bing.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -46,6 +47,11 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     /// 应用根服务提供程序。
     /// </summary>
     private readonly IServiceProvider _provider;
+
+    /// <summary>
+    /// 当前应用惰性缓存的 scope 工厂，避免生命周期阶段重复解析同一常量工厂。
+    /// </summary>
+    private IServiceScopeFactory _scopeFactory;
 
     /// <summary>
     /// 当前应用的模块注册记录。
@@ -103,7 +109,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     private volatile bool _providerDisposing;
 
     /// <summary>
-    /// 初始化一个 <see cref="BingModuleManager" /> 类型的实例。
+    /// 初始化一个 <see cref="BingModuleManager" /> 类的新实例。
     /// </summary>
     /// <param name="provider">应用根服务提供程序。</param>
     /// <param name="registration">当前应用的模块注册记录。</param>
@@ -171,6 +177,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     /// <summary>
     /// 保留初始化结果的原始异常及取消状态。
     /// </summary>
+    /// <param name="completion">等待其结果的初始化任务。</param>
     private static async Task AwaitInitializationAsync(Task completion) =>
         await completion.ConfigureAwait(false);
 
@@ -216,7 +223,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
         try
         {
             _registration.BindLegacy(_provider);
-            if (!_registration.Legacy) scope = _provider.CreateScope();
+            if (!_registration.Legacy) scope = CreateLifecycleScope();
             var provider = scope?.ServiceProvider ?? _provider;
             var context = new BingModuleInitializationContext(provider, supplied?.HostContext, supplied?.InitializeModule);
             var modules = _registration.Modules.Select(d => d.Instance);
@@ -286,6 +293,17 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     /// 将启动日志输出到正式日志并清空缓存。
     /// </summary>
     private void FlushStartupLogs() => _provider.GetService<StartupLogger>()?.Output(_provider);
+
+    /// <summary>
+    /// 使用当前应用惰性缓存的工厂创建独立生命周期作用域。
+    /// </summary>
+    /// <returns>初始化或显式关闭阶段的新作用域。</returns>
+    private IServiceScope CreateLifecycleScope()
+    {
+        var factory = LazyInitializer.EnsureInitialized(ref _scopeFactory,
+            () => _provider.GetRequiredService<IServiceScopeFactory>());
+        return factory.CreateScope();
+    }
 
     /// <summary>
     /// 判断当前模块集合是否需要异步关闭。
@@ -368,7 +386,7 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
             // 容器 Dispose 回调期间根容器已不可解析，不尝试新建作用域。
             if (!disposingProvider)
             {
-                try { scope = _provider.CreateScope(); }
+                try { scope = CreateLifecycleScope(); }
                 catch (Exception ex) { errors.Add(ex); }
             }
             var context = new BingModuleShutdownContext(scope?.ServiceProvider ?? _provider);

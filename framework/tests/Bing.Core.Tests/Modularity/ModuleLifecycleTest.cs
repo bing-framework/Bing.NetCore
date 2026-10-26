@@ -4,6 +4,7 @@ using Bing.DependencyInjection;
 using Bing.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace Bing.Tests.Modularity;
 
@@ -20,6 +21,17 @@ public class ModuleStaticCompatibilityCollection { }
 public class ModuleLifecycleTest
 {
     /// <summary>
+    /// 测试输出写入器，用于记录 GC 存活对象类型。
+    /// </summary>
+    private readonly ITestOutputHelper _output;
+
+    /// <summary>
+    /// 初始化一个 <see cref="ModuleLifecycleTest" /> 类的新实例。
+    /// </summary>
+    /// <param name="output">测试输出，用于记录 GC 存活对象类型。</param>
+    public ModuleLifecycleTest(ITestOutputHelper output) => _output = output;
+
+    /// <summary>
     /// 创建启用作用域校验的测试服务提供程序。
     /// </summary>
     /// <typeparam name="T">根模块类型。</typeparam>
@@ -28,7 +40,9 @@ public class ModuleLifecycleTest
     private static ServiceProvider Create<T>(Recorder recorder = null) where T : BingModule
     {
         var services = new ServiceCollection();
-        services.AddSingleton(recorder ?? new Recorder());
+        var recorderInstance = recorder ?? new Recorder();
+        // 保持测试记录器单例身份，同时避免同一实例注册触发 DI 第二次解析的后台编译闭包。
+        services.AddSingleton<Recorder>(_ => recorderInstance);
         services.AddScoped<ScopedResource>();
         services.AddBingApplication<T>(o => o.AutoRegisterServices = false);
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
@@ -365,29 +379,125 @@ public class ModuleLifecycleTest
     [Fact]
     public void RepeatedClosedApplications_DoNotKeepProvidersOrModulesAlive()
     {
-        var references = Enumerable.Range(0, 12).SelectMany(_ => CreateClosedApplication()).ToArray();
+        _output.WriteLine($"ServiceLocator enabled before GC: {ServiceLocator.Instance.IsProviderEnabled}");
+        var references = Enumerable.Range(0, 12)
+            .SelectMany(index => CreateClosedApplication(index + 1)).ToArray();
         for (var i = 0; i < 3; i++)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
-        references.All(r => !r.IsAlive).ShouldBeTrue();
+        var aliveReferences = references.Where(reference => reference.IsAlive).ToArray();
+        var alive = aliveReferences.Select(reference => reference.Describe()).ToArray();
+        if (alive.Length > 0)
+        {
+            _output.WriteLine($"Alive after standard GC loop: {string.Join(", ", alive)}");
+            // 显式门控的失败采证：在额外 GC 前发布首快照；默认关闭，不影响正常测试。
+            GcCaptureHandshake.Publish(
+                "Bing.Tests.Modularity.ModuleLifecycleTest.RepeatedClosedApplications_DoNotKeepProvidersOrModulesAlive",
+                "first-nonempty-after-3-gc",
+                aliveReferences.Select(reference => reference.ToCaptureEntry()).ToArray());
+            // 仅用于诊断：再加一轮有界回收，记录第二个观察窗口是否仍存活；断言仍使用标准循环结果，单个窗口不能证明永久性。
+            for (var i = 0; i < 3; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+            var aliveAfterExtra = references.Where(reference => reference.IsAlive)
+                .Select(reference => reference.Describe()).ToArray();
+            _output.WriteLine(aliveAfterExtra.Length == 0
+                ? "All references were collected after the bounded diagnostic GC loop."
+                : $"Alive after bounded diagnostic GC loop: {string.Join(", ", aliveAfterExtra)}");
+        }
+        alive.ShouldBeEmpty();
     }
 
     /// <summary>
-    /// 创建并关闭应用后返回其弱引用。
+    /// 创建并立即关闭一个包含独立模块的应用。
     /// </summary>
-    /// <returns>提供程序、模块和记录器的弱引用。</returns>
+    /// <param name="appId">用于标识本次应用实例的序号。</param>
+    /// <returns>提供程序、模块管理器和记录器的弱引用。</returns>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static WeakReference[] CreateClosedApplication()
+    private static TrackedReference[] CreateClosedApplication(int appId)
     {
         var recorder = new Recorder();
         using var provider = Create<ParentModule>(recorder);
         provider.UseBing();
-        var module = provider.GetServices<BingModule>().OfType<ParentModule>().Single();
+        var modules = provider.GetServices<BingModule>().ToArray();
+        var manager = provider.GetRequiredService<IBingModuleManager>();
+        modules.OfType<ParentModule>().Single();
         provider.ShutdownBing();
-        return new[] { new WeakReference(provider), new WeakReference(module), new WeakReference(recorder) };
+        var references = new List<TrackedReference>
+        {
+            new TrackedReference(appId, "provider", provider),
+            new TrackedReference(appId, "manager", manager),
+            new TrackedReference(appId, "recorder", recorder)
+        };
+        references.AddRange(modules.Select(module =>
+            new TrackedReference(appId, $"module:{module.GetType().Name}", module)));
+        return references.ToArray();
+    }
+
+    /// <summary>
+    /// 保存带 appId、角色和类型标签的弱引用。
+    /// </summary>
+    /// <remarks>
+    /// 失败时只读值元数据，不再读取 <see cref="WeakReference.Target" />。
+    /// </remarks>
+    private sealed class TrackedReference
+    {
+        /// <summary>
+        /// 产生该对象的应用序号。
+        /// </summary>
+        private readonly int _appId;
+
+        /// <summary>
+        /// 对象在应用中的角色标签，例如 provider 或 recorder。
+        /// </summary>
+        private readonly string _role;
+
+        /// <summary>
+        /// 对象的完整类型名称。
+        /// </summary>
+        private readonly string _typeName;
+
+        /// <summary>
+        /// 不延长被测对象生命周期的弱引用。
+        /// </summary>
+        private readonly WeakReference _reference;
+
+        /// <summary>
+        /// 初始化一个 <see cref="TrackedReference" /> 类的新实例。
+        /// </summary>
+        /// <param name="appId">产生该对象的应用序号。</param>
+        /// <param name="role">对象在应用中的角色标签。</param>
+        /// <param name="target">要弱引用跟踪的对象。</param>
+        public TrackedReference(int appId, string role, object target)
+        {
+            _appId = appId;
+            _role = role;
+            _typeName = target.GetType().FullName ?? target.GetType().Name;
+            _reference = new WeakReference(target);
+        }
+
+        /// <summary>
+        /// 获取被跟踪对象当前是否仍存活。
+        /// </summary>
+        public bool IsAlive => _reference.IsAlive;
+
+        /// <summary>
+        /// 生成稳定的值元数据描述。
+        /// </summary>
+        /// <returns>由应用序号、角色和类型名称组成的描述文本。</returns>
+        public string Describe() => $"{_appId}:{_role}:{_typeName}";
+
+        /// <summary>
+        /// 转换为不含对象引用的采证条目。
+        /// </summary>
+        /// <returns>只包含值元数据的采证条目。</returns>
+        public GcCaptureEntry ToCaptureEntry() => new(_appId, _role, _typeName);
     }
 
     /// <summary>
@@ -526,7 +636,7 @@ public class ModuleLifecycleTest
     private sealed class ThrowingLoggerFactory : ILoggerFactory
     {
         /// <summary>
-        /// 初始化一个 <see cref="ThrowingLoggerFactory" /> 类型的实例。
+        /// 初始化一个 <see cref="ThrowingLoggerFactory" /> 类的新实例。
         /// </summary>
         /// <param name="error">需要由日志输出触发的异常。</param>
         public ThrowingLoggerFactory(Exception error) => Error = error;

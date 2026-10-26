@@ -4,9 +4,31 @@ AI_EXECUTION_STARTED_AT: 2026-10-22T11:01:37.307Z
 
 # 路线图执行状态
 
+当前限定修复已收口：Astra/xhigh确认受控DI后台编译引用机制；OpenCode/deepseek-v4.1-flash落实生命周期修复与构建恢复；[Sol/high Review2](../20261023-module-lifecycle-retention-fix/review.md)及[构建恢复专项审查](../20261023-module-lifecycle-retention-fix/build-recovery-review.md)均PASS、OPEN_ACTIONABLE=0。主线程已读取实现线程完成结果，并独立解析新候选的103份TRX及命令/退出记录：Release构建exit0（106 warnings、0 errors），默认全量exit0，12,894 Passed / 0 Failed / 1,114 NotExecuted；6份空TRX不计通过。net6为6,722/0/593，net8为6,172/0/521；两个原GC回归及六个生命周期直接回归两TFM均通过。冻结/结束/当前12项范围输入身份一致。详见[最终报告](../20261023-module-lifecycle-retention-fix/final-report.md)与[主线程原始结果核验](../20261023-module-lifecycle-retention-fix/artifacts/main-thread-final-verification.json)。
+
+当前候选的本地构建与默认全量门禁通过；不等于外部系统、clean-source发布证据或性能预算全部通过。本轮关闭外部门控，跳过项单列；未重跑已接受的受控GC实验及未变范围外库证据。旧final-candidate-checkpoint的CS2012 build FAIL/test NOT_STARTED、历史Stage B全量FAIL与Astra原始证据保留。历史锁持有者及GC自然失败的排他归因仍未确定，受控证据不表示已证明永久泄漏。阶段B实现和当前本地全量已通过，FreeSQL B04及阶段C/D仍需各自计划，不宣称G01–G12全部完成。
+
+本轮状态：Completed＝GC实现/直接回归独立验收、构建恢复独立验收、最终本地build/test与原始结果核验；Open Actionable＝0；Blocked Approval＝既有APR-001性能预算；Blocked External＝既有EXT-002受保护发布证据，本轮外部系统未执行；Not Applicable＝无关性能矩阵与旧GC假设重跑；Accepted Limitations＝历史排他归因未定、无永久回收保证；Verified Boundaries＝受控引用机制及新候选两TFM回归通过；Deferred＝FreeSQL B04、阶段C/D。No-Progress＝CHANGED（新构建候选完成最终门禁）；Next Action＝STOP本次限定修复，不追加Fix/Review或全量重跑。路线图整体仍IN_PROGRESS。工具Review5的3/3 CLOSED保持，详见[工具审查](../20261023-module-lifecycle-gc/review.md)。
+
+## 历史过程
+
+以下记录保留各历史候选当时的状态与证据，当前结论以上方状态及新候选最终报告为准。
+
+GC 第三轮复核已结束：NEEDS_FIX，FIX-001 CLOSED，FIX-002/003 仍为两个 SHOULD_FIX，无生产 MUST_FIX。剩余范围已收窄为三处报告事实冲突，以及诊断 runner 在目录/日志准备后缺最后截止准入、已启动状态记录不准确、PID 发布异常时缺自身进程 finally 清理。Reviewer 用一次纯虚拟控制复现，未运行真实产品测试。当前默认关闭的 hook 在已审范围可保留，但工具未完全验收；GC 根因仍 NOT_DETERMINED，问题 UNRESOLVED，不能把工具整改当根因进展。三轮边界已到，主线程未派发第四轮或新采证。若追加限定收尾，范围只包括这些报告/脚本修正与两条既有虚拟反例确认，不增加真实build/Core/solution/GC/dump运行；后续须有明确追加授权。
+
+GC Fix2 已交付：OpenCode 报告修正 FIX-002 候选/历史证据标签及 FIX-003 截止控制，本轮仅静态检查与虚拟时钟验证，无真实构建/Core/solution/GC/压力/dump。Sol/high 第三轮独立复核已启动，按原两项 AC 检查报告与 runner，完成后停止交回。诊断修正仍不等于生产 GC 修复，原因继续 NOT_DETERMINED，当前正式 solution FAIL 与历史 Stage B FAIL 均保留。
+
+GC Review 2 最新判定：FIX-001 CLOSED，FIX-002 当前/历史候选账本仍需修正，新增 FIX-003 为诊断 runner 跨截止后仍可启动 test、timeout 控制缺外层 watchdog。两项均 SHOULD_FIX，无生产 MUST_FIX；主线程已交 OpenCode 限定修正报告及工具，仅静态/纯虚拟时钟确认，不再执行真实构建、Core、全量、压力或 dump。Sol/high 独立分析确认：Shutdown 的发布信号早于异步尾部只在真实挂起/并发前提下形成窗口，两个实际失败夹具均同步且没有该前提证据，因此不支持将 H6 当实际 GC 根因或据此修生产。根因继续 NOT_DETERMINED，GC 问题未解决；完成限定 Fix2 后安排第三轮复核。
+
+GC 最新交付：OpenCode 已报告完成 Review 1 的两项静态修正及一次正式采证，Sol/high 的 GC Review 2 已启动（与阶段 B 的 Review 编号独立）。主线程直接解析 `gc-capture-20261023-01` 的 103 份 TRX：net6 为 6,715/1/593，net8 为 6,166/0/521，6 份零结果另列；总 12,881 Passed / 1 Failed / 1,114 NotExecuted。原目标测试两 TFM 均通过，无目标 ready/dump；新观察到 net6 `RetainedServiceCollection_NormalShutdown_AllowsProviderAndModuleCollection` 的 provider 弱引用仍存活。人为控制 dump 只验证工具，不是生产失败现场。实现者提出 Shutdown 完成信号先于异步清理退出的候选原因，尚无引用根证明，根因继续 NOT_DETERMINED。Reviewer 将核对该假设是否可由确定性信号控制回归证伪；不追加全量或压力重跑。
+
+GC 调查最新进展：Sol/high 已完成 `20261023-module-lifecycle-gc` 的 Review 1，诊断首失败条件通过三个有限对照，报告存在两个 SHOULD_FIX（结论范围、证据来源/实验偏差/文本准确性），没有生产修复要求。主线程已交 OpenCode 静态修正这两项，并采用 Reviewer 的一次性活进程采证方案：先验证默认关闭的失败握手及监视器，再在一个固定候选上执行一次有绝对截止的构建/默认全量，失败时最多一份 dump。正式批次上限15分钟、失败等待30秒、collector20秒；不续增、不重跑同假设。采集/分析工具缺失或未复现均如实停止，根因仍 NOT_DETERMINED。Reviewer 原始结论与历史 Stage B 结果保留。
+
+最新后续：用户于 2026-10-23 明确要求“继续排查 GC 问题”。原 [OpenCode / deepseek-v4.1-flash 线程](codex://threads/146cb27d-d5e7-4a10-8eb0-2e6b4ddcb905)已交付独立调查 `20261023-module-lifecycle-gc`：未复现历史失败，根因仍 `NOT_DETERMINED`，未修改生产，仅增强弱引用失败诊断。原 Sol/high 已启动该新任务的独立复核，检查诊断是否保留原场景、额外观察是否影响生命周期，以及报告中的排除结论、重复实验偏差和候选归属。当前局部/压力通过不能证明历史 GC 问题解决；原 DEF-001 为已授权调查，历史失败和阶段 B 验收结论不改写。主线程未继续重复测试，后续采证以独立复核的可执行结论为依据。
+
 按用户已批准路线图分阶段推进。阶段 A 已完成实现与独立验收；阶段 B 经用户于 2026-10-23 追加限定授权，由 OpenCode / deepseek-v4.1-flash 修复、Sol/high 完成 Review 4，FIX-005 已关闭，原八项全部 CLOSED、OPEN_ACTIONABLE=0。阶段 B 实现及受影响测试验收 PASS；最后检查点已执行并由主线程核对：Release 构建 PASS，默认全量 12,881 Passed / 1 Failed / 1,114 NotExecuted，唯一失败仍为既有 Core GC 弱引用断言，因果未定。停止本次限定修复循环，不宣称阶段 Release 或 G01–G12 全部完成。
 
-| 阶段 | 当前状态 | 交付/下一步 |
+| 阶段 | 当时状态 | 当时交付/下一步 |
 | --- | --- | --- |
 | A：G01/G12 | 实现验收通过，Review 为 PASS_WITH_ISSUES，OPEN_ACTIONABLE=0 | [交付状态](../20261022-abp-phase-a-tracing-contracts/final-report.md)；停止阶段内 Fix |
 | B：G02/G03/G09 | 实现/受影响测试 PASS；8/8 CLOSED；最终构建 PASS，全量 12,881/1/1,114 | 本次限定任务停止；B06 PARTIAL，GC 原因独立递延，FreeSQL B04 待单独计划 |
