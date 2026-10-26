@@ -22,7 +22,7 @@ public class ExceptionNotifier : IExceptionNotifier, ITransientDependency
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 初始化一个 <see cref="ExceptionNotifier"/> 类型的实例。
+    /// 初始化一个 <see cref="ExceptionNotifier" /> 类的新实例。
     /// </summary>
     /// <param name="serviceScopeFactory">用于解析异常订阅器的服务作用域工厂。</param>
     public ExceptionNotifier(IServiceScopeFactory serviceScopeFactory)
@@ -32,23 +32,37 @@ public class ExceptionNotifier : IExceptionNotifier, ITransientDependency
     }
 
     /// <inheritdoc />
-    /// <remarks>每次通知创建独立作用域，订阅器按 <see cref="IExceptionSubscriber.Order"/> 升序执行；单个订阅器失败会记录警告后继续通知后续订阅器。</remarks>
+    /// <remarks>
+    /// 每次通知创建独立异步作用域，订阅器按 <see cref="IExceptionSubscriber.Order"/> 升序执行；
+    /// 单个订阅器失败会记录警告后继续通知后续订阅器。解析失败时等待已创建依赖清理完成，
+    /// 清理失败作为附加证据保留，不覆盖仍需传播的解析主异常。
+    /// </remarks>
     public virtual async Task NotifyAsync(ExceptionNotificationContext context)
     {
         Check.NotNull(context, nameof(context));
-        using var scope = ServiceScopeFactory.CreateScope();
-        var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>().OrderBy(x => x.Order);
-        foreach (var exceptionSubscriber in exceptionSubscribers)
+        var scope = ServiceScopeFactory.CreateAsyncScope();
+        try
         {
-            try
+            var exceptionSubscribers = scope.ServiceProvider.GetServices<IExceptionSubscriber>().OrderBy(x => x.Order);
+            foreach (var exceptionSubscriber in exceptionSubscribers)
             {
-                await exceptionSubscriber.HandleAsync(context);
-            }
-            catch (Exception e)
-            {
-                Logger.LogWarning($"{exceptionSubscriber.GetType().AssemblyQualifiedName} 异常订阅器抛出异常!");
-                Logger.LogException(e, LogLevel.Warning);
+                try
+                {
+                    await exceptionSubscriber.HandleAsync(context);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning($"{exceptionSubscriber.GetType().AssemblyQualifiedName} 异常订阅器抛出异常!");
+                    Logger.LogException(e, LogLevel.Warning);
+                }
             }
         }
+        catch (Exception error)
+        {
+            try { await scope.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception cleanup) { error.Data["Bing.ExceptionHandling.ScopeCleanupError"] = cleanup; }
+            throw;
+        }
+        await scope.DisposeAsync().ConfigureAwait(false);
     }
 }
