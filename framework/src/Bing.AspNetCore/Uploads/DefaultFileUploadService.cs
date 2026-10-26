@@ -101,24 +101,14 @@ internal class DefaultFileUploadService : IFileUploadService
         string md5;
         using (var stream = new FileStream(savePath, FileMode.Create))
         {
-            md5 = Md5(stream);
             await formFile.CopyToAsync(stream, cancellationToken);
+            // 摘要必须针对已经写入的内容；原来在空流上计算会得到固定空文件摘要。
+            stream.Position = 0;
+            using var hash = MD5.Create();
+            md5 = BitConverter.ToString(await hash.ComputeHashAsync(stream, cancellationToken)).Replace("-", "");
         }
 
         return md5;
     }
 
-    /// <summary>
-    /// MD5哈希
-    /// </summary>
-    /// <param name="stream">流</param>
-    /// <returns>流内容的 MD5 哈希值；流为 null 时返回空字符串。</returns>
-    private static string Md5(Stream stream)
-    {
-        if (stream == null)
-            return string.Empty;
-
-        using var md5Hash = MD5.Create();
-        return BitConverter.ToString(md5Hash.ComputeHash(stream)).Replace("-", "");
-    }
 }

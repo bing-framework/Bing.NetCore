@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup><Nullable>enable</Nullable><OutputPath>bin/$(Configuration)/</OutputPath><Description>Bing 命名文件存储与流式公共实现。</Description></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.FileStorage.Abstractions/Bing.FileStorage.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

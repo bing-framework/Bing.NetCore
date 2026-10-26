@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup><Nullable>enable</Nullable><OutputPath>bin/$(Configuration)/</OutputPath><Description>Bing 文件存储公共契约。</Description></PropertyGroup>
+  <ItemGroup><PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" /></ItemGroup>
+</Project>

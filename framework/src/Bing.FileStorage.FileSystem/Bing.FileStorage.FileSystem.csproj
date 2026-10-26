@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup><TargetFramework>net6.0</TargetFramework><Nullable>enable</Nullable><OutputPath>bin/$(Configuration)/</OutputPath><Description>具有原子提交与持久分片恢复能力的本地文件存储。</Description></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Bing.FileStorage/Bing.FileStorage.csproj" /><PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" /></ItemGroup>
+</Project>

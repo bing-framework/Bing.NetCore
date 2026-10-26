@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><EnableDITestPackages>false</EnableDITestPackages></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../src/Bing.AspNetCore/Bing.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/Bing.FileStorage.AspNetCore/Bing.FileStorage.AspNetCore.csproj" /></ItemGroup>
+</Project>

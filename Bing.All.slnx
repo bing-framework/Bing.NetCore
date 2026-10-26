@@ -305,4 +305,17 @@
   <Project Path="eng/Bing.ProviderEvidence.Cli/Bing.ProviderEvidence.Cli.csproj" />
   <Project Path="framework/src/Bing.Ddd.Application.AspectCore/Bing.Ddd.Application.AspectCore.csproj" />
   <Project Path="framework/src/Bing.PluginRuntime/Bing.PluginRuntime.csproj" />
+  <Folder Name="/01-framework/01-src/16-FileStorage/">
+    <Project Path="framework/src/Bing.FileStorage.Abstractions/Bing.FileStorage.Abstractions.csproj" />
+    <Project Path="framework/src/Bing.FileStorage/Bing.FileStorage.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.S3/Bing.FileStorage.S3.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.AspNetCore/Bing.FileStorage.AspNetCore.csproj" />
+  </Folder>
+  <Folder Name="/01-framework/02-tests/FileStorage/">
+    <Project Path="framework/tests/Bing.FileStorage.Tests/Bing.FileStorage.Tests.csproj" />
+    <Project Path="framework/tests/Bing.FileStorage.S3.Tests/Bing.FileStorage.S3.Tests.csproj" />
+    <Project Path="framework/tests/Bing.FileStorage.AspNetCore.Tests/Bing.FileStorage.AspNetCore.Tests.csproj" />
+  </Folder>
 </Solution>
