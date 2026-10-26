@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup><TargetFramework>net6.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><Description>文件附件、持久上传会话、授权与恢复任务。</Description></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage/Bing.FileStorage.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.Security/Bing.Security.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.MultiTenancy.Abstractions/Bing.MultiTenancy.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup><TargetFramework>net6.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath></PropertyGroup>
+  <ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Bing.Biz.FileManagement/Bing.Biz.FileManagement.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.AspNetCore/Bing.FileStorage.AspNetCore.csproj" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup><EmbeddedResource Include="Console/*"><LogicalName>Bing.Biz.FileManagement.AspNetCore.Console.%(Filename)%(Extension)</LogicalName></EmbeddedResource></ItemGroup>
+</Project>

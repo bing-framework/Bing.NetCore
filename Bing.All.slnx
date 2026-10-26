@@ -323,4 +323,12 @@
   <Folder Name="/04-samples/FileManagement/">
     <Project Path="samples/Bing.FileStorage.CapacityProbe/Bing.FileStorage.CapacityProbe.csproj" />
   </Folder>
+  <Folder Name="/02-components/FileManagement/">
+    <Project Path="components/src/Bing.Biz.FileManagement/Bing.Biz.FileManagement.csproj" />
+    <Project Path="components/src/Bing.Biz.FileManagement.EntityFrameworkCore/Bing.Biz.FileManagement.EntityFrameworkCore.csproj" />
+    <Project Path="components/src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />
+    <Project Path="components/src/Bing.Biz.FileManagement.AspNetCore/Bing.Biz.FileManagement.AspNetCore.csproj" />
+    <Project Path="components/tests/Bing.Biz.FileManagement.Tests/Bing.Biz.FileManagement.Tests.csproj" />
+    <Project Path="components/tests/Bing.Biz.FileManagement.FreeSql.Tests/Bing.Biz.FileManagement.FreeSql.Tests.csproj" />
+  </Folder>
 </Solution>

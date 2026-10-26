@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <EnableDITestPackages>false</EnableDITestPackages>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
+  </ItemGroup>
+</Project>

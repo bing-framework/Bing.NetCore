@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><EnableDITestPackages>false</EnableDITestPackages></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" />
+    <Compile Include="../../../framework/tests/Bing.FileStorage.Qiniu.Tests/RecordingS3Client.cs" Link="Support/RecordingS3Client.cs" />
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
+    <ProjectReference Include="../../src/Bing.Biz.FileManagement.EntityFrameworkCore/Bing.Biz.FileManagement.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/Bing.Biz.FileManagement.AspNetCore/Bing.Biz.FileManagement.AspNetCore.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
+    <ProjectReference Include="../../src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.36" Condition="'$(TargetFramework)' == 'net6.0'" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.30" Condition="'$(TargetFramework)' == 'net8.0'" />
+  </ItemGroup>
+</Project>

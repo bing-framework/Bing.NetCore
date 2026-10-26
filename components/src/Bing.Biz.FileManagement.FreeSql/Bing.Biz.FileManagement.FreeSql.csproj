@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputPath>bin/$(Configuration)/</OutputPath>
+    <Description>FreeSql 仓储适配，用于 Bing 文件管理元数据。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Biz.FileManagement/Bing.Biz.FileManagement.csproj" />
+    <PackageReference Include="FreeSql" Version="3.5.311" />
+    <PackageReference Include="FreeSql.DbContext" Version="3.5.311" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
