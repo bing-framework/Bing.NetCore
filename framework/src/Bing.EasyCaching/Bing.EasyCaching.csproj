@@ -19,6 +19,8 @@
     <PackageReference Include="EasyCaching.Redis" Version="$(EasyCaching-RefVersion)" />
     <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="$(EasyCaching-RefVersion)" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+    <!-- 约束旧 Redis 性能计数器依赖链中的图形组件，修复 CVE-2021-24112；不改变 Provider 版本。 -->
+    <PackageReference Include="System.Drawing.Common" Version="5.0.3" />
   </ItemGroup>
 
   <ItemGroup>

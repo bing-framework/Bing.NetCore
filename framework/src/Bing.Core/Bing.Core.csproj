@@ -29,6 +29,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="$(MicrosoftPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftPackageVersion)" />
+    <!-- 修复 DependencyModel 6.0.0 传递引入的 JSON 拒绝服务漏洞，同时保持旧目标框架兼容。 -->
+    <PackageReference Include="System.Text.Json" Version="6.0.10" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftPackageVersion)" />
   </ItemGroup>
 
