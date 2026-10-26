@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../common.props" />
+  <PropertyGroup><TargetFramework>net6.0</TargetFramework><OutputType>Exe</OutputType><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><IsPackable>false</IsPackable></PropertyGroup>
+  <ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../components/src/Bing.Biz.FileManagement.EntityFrameworkCore/Bing.Biz.FileManagement.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../components/src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.3" />
+    <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
+    <PackageReference Include="FreeSql.Provider.MySqlConnector" Version="3.5.311" />
+  </ItemGroup>
+</Project>

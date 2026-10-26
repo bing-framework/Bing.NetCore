@@ -86,3 +86,5 @@ dotnet run --project samples/Bing.Samples.FusionCache/Bing.Samples.FusionCache.c
 ```
 
 命令细节及 net10.0 构建方式见 [sample README](Bing.Samples.FusionCache/README.md)。
+
+- [文件管理浏览器示例](Bing.FileManagement.Demo/README.md) 与 [1/100 GiB 容量探针](Bing.FileStorage.CapacityProbe/README.md)。

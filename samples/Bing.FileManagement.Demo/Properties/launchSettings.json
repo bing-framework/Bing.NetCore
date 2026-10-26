@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Bing.FileManagement.Demo": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:57136;http://localhost:57137"
+    }
+  }
+}

@@ -320,9 +320,6 @@
     <Project Path="framework/tests/Bing.FileStorage.Qiniu.Tests/Bing.FileStorage.Qiniu.Tests.csproj" />
     <Project Path="framework/tests/Bing.FileStorage.AspNetCore.Tests/Bing.FileStorage.AspNetCore.Tests.csproj" />
   </Folder>
-  <Folder Name="/04-samples/FileManagement/">
-    <Project Path="samples/Bing.FileStorage.CapacityProbe/Bing.FileStorage.CapacityProbe.csproj" />
-  </Folder>
   <Folder Name="/02-components/FileManagement/">
     <Project Path="components/src/Bing.Biz.FileManagement/Bing.Biz.FileManagement.csproj" />
     <Project Path="components/src/Bing.Biz.FileManagement.EntityFrameworkCore/Bing.Biz.FileManagement.EntityFrameworkCore.csproj" />
@@ -330,5 +327,12 @@
     <Project Path="components/src/Bing.Biz.FileManagement.AspNetCore/Bing.Biz.FileManagement.AspNetCore.csproj" />
     <Project Path="components/tests/Bing.Biz.FileManagement.Tests/Bing.Biz.FileManagement.Tests.csproj" />
     <Project Path="components/tests/Bing.Biz.FileManagement.FreeSql.Tests/Bing.Biz.FileManagement.FreeSql.Tests.csproj" />
+  </Folder>
+  <Folder Name="/04-samples/FileManagement/">
+    <Project Path="samples/Bing.FileManagement.Demo/Bing.FileManagement.Demo.csproj" />
+    <Project Path="samples/Bing.FileStorage.CapacityProbe/Bing.FileStorage.CapacityProbe.csproj" />
+  </Folder>
+  <Folder Name="/05-tools/FileManagement/">
+    <Project Path="tools/Bing.FileManagement.Tool/Bing.FileManagement.Tool.csproj" />
   </Folder>
 </Solution>
