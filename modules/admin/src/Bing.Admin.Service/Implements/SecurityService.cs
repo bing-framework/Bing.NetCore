@@ -152,7 +152,8 @@ namespace Bing.Admin.Service.Implements
         /// <param name="applicationCode">应用程序编码</param>
         private async Task AddRoleClaimsAsync(User user, string applicationCode)
         {
-            var roles = await RoleRepository.GetRolesAsync(user.Id);
+            // 角色仓储还用于管理界面列表；登录令牌只包含当前启用的角色。
+            var roles = (await RoleRepository.GetRolesAsync(user.Id)).Where(role => role.Enabled).ToList();
             if (!roles.Any())
                 throw new Warning($"用户：{user.UserName} 未设置任何权限，不能访问系统，请联系管理员");
             user.AddClaim(Bing.Security.Claims.BingClaimTypes.RoleIds, roles.Select(x => x.Id).Join());

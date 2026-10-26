@@ -31,11 +31,14 @@ namespace Bing.Admin
         /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
+            // 模块注册期只读取配置实例，不能解析 Web Host 的 IConfiguration 工厂。
+            services.ReplaceConfiguration(Configuration);
             var builder = services.AddBing()
                 .AddModule<LogModule>()
                 .AddModule<MapperModule>()
                 .AddModule<AppModule>()
                 .AddModule<AuthenticationModule>()
+                .AddModule<FileStorageModule>()
                 .AddModule<FreeSqlModule>()
                 //.AddModule<EntityFrameworkCoreModule>()
                 .AddModule<CacheModule>()

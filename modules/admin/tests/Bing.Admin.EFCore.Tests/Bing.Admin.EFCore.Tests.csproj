@@ -13,6 +13,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../../framework/src/Bing.Dapper.Sqlite/Bing.Dapper.Sqlite.csproj" />
+    <Compile Include="..\Shared\AdminFileControllerHttpTests.cs" Link="AdminFileControllerHttpTests.cs" />
+    <Compile Include="..\Shared\AdminFileHostIntegrationTests.cs" Link="AdminFileHostIntegrationTests.cs" />
+    <Compile Include="..\Shared\AdminQiniuStorageRegistrationTests.cs" Link="AdminQiniuStorageRegistrationTests.cs" />
+    <Compile Include="..\Shared\AdminFilePermissionInitializationTests.cs" Link="AdminFilePermissionInitializationTests.cs" />
+    <Compile Include="..\Shared\AdminUserInfoFileAuthorizationTests.cs" Link="AdminUserInfoFileAuthorizationTests.cs" />
+    <Compile Include="..\Shared\AdminUserInfoPersistenceTestEnvironment.cs" Link="AdminUserInfoPersistenceTestEnvironment.cs" />
+    <Compile Include="..\..\..\..\framework\tests\Bing.FileStorage.Qiniu.Tests\RecordingS3Client.cs" Link="RecordingS3Client.cs" />
+    <Compile Include="..\Shared\AdminFileEnhancementUpgradeTests.cs" Link="AdminFileEnhancementUpgradeTests.cs" />
+    <Compile Include="..\Shared\AdminFileGovernanceTests.cs" Link="AdminFileGovernanceTests.cs" />
+    <Compile Include="..\Shared\AdminFilePermissionHttpTests.cs" Link="AdminFilePermissionHttpTests.cs" />
+    <Compile Include="..\Shared\AdminRolePersistenceTestEnvironment.cs" Link="AdminRolePersistenceTestEnvironment.cs" />
     <Compile Include="..\Shared\AdminInventoryIntegrationCases.cs" Link="AdminMySqlCapIntegrationTest.Inventory.cs" />
     <Compile Include="..\Shared\AdminInventoryOrderExecutorTest.cs" Link="AdminInventoryOrderExecutorTest.cs" />
     <Compile Include="..\Shared\AdminInventoryProbeCleanupTest.cs" Link="AdminInventoryProbeCleanupTest.cs" />
@@ -33,20 +45,23 @@
     <Compile Include="..\Shared\AdminRateLimitingHttpPipelineTest.cs" Link="AdminRateLimitingHttpPipelineTest.cs" />
     <ProjectReference Include="..\Bing.Admin.EFCore.InventoryProbe\Bing.Admin.EFCore.InventoryProbe.csproj"
                       ReferenceOutputAssembly="false" BuildReference="true"
-                      SetConfiguration="Configuration=$(Configuration)"
-                      SetTargetFramework="TargetFramework=net6.0" />
+                      SetConfiguration="Configuration=$(Configuration)" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.36" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
+    <PackageReference Include="EasyCaching.Core" Version="1.9.2" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.9.2" />
     <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="8.0.1" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Aop.AspectCore\Bing.Aop.AspectCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Ddd.Application.AspectCore\Bing.Ddd.Application.AspectCore.csproj" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\..\..\..\framework\tests\Bing.Test.Shared\Bing.Test.Shared.csproj" />
+    <ProjectReference Include="..\..\..\..\framework\src\Bing.EasyCaching\Bing.EasyCaching.csproj" />
     <ProjectReference Include="..\..\src\Bing.Admin.Data.EFCore\Bing.Admin.Data.EFCore.csproj" />
     <ProjectReference Include="..\..\src\Bing.Admin\Bing.Admin.csproj" />
   </ItemGroup>
   <Target Name="CopyInventoryProbeToTestOutput" AfterTargets="Build">
     <MSBuild Projects="..\Bing.Admin.EFCore.InventoryProbe\Bing.Admin.EFCore.InventoryProbe.csproj"
-             Targets="GetTargetPath" Properties="Configuration=$(Configuration);TargetFramework=net6.0">
+             Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
       <Output TaskParameter="TargetOutputs" ItemName="_InventoryProbeTargetPath" />
     </MSBuild>
     <ItemGroup>

@@ -50,4 +50,15 @@
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../components/src/Bing.Biz.FileManagement.AspNetCore/Bing.Biz.FileManagement.AspNetCore.csproj" />
+    <ProjectReference Include="../../../../components/src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />
+    <ProjectReference Include="../../../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
+    <ProjectReference Include="../../../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
+    <ProjectReference Include="../../../../framework/src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" />
+    <Compile Include="../Bing.Admin/Modules/FileStorageModule.cs" Link="Modules/FileStorageModule.cs" />
+    <Compile Include="../Bing.Admin/Modules/AdminFileDeployment.cs" Link="Modules/AdminFileDeployment.cs" />
+    <Compile Include="../Bing.Admin/Apis/Commons/FileOperationsController.cs" Link="Apis/Commons/FileOperationsController.cs" />
+  </ItemGroup>
 </Project>

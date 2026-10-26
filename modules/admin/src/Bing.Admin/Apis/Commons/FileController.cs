@@ -1,32 +1,13 @@
-﻿using Bing.Admin.Service.Abstractions.Commons;
-using Bing.AspNetCore.Mvc;
+using Bing.Biz.FileManagement;
+using Bing.Biz.FileManagement.AspNetCore;
+using Bing.FileStorage;
+using Microsoft.AspNetCore.DataProtection;
 
-namespace Bing.Admin.Apis.Commons
+namespace Bing.Admin.Apis.Commons;
+
+/// <summary>文件与附件管理，统一使用 /api/files；旧 Commons.File 记录由导入工具处理。</summary>
+public class FileController : FileManagementControllerBase
 {
-    /// <summary>
-    /// 文件 控制器
-    /// </summary>
-    public class FileController : ApiControllerBase
-    {
-        /// <summary>
-        /// 文件 服务
-        /// </summary>
-        public IFileService FileService { get; }
-    
-        /// <summary>
-        /// 文件 查询服务
-        /// </summary>
-        public IQueryFileService QueryFileService { get; }
-
-        /// <summary>
-        /// 初始化一个<see cref="FileController"/>类型的实例
-        /// </summary>
-        /// <param name="service">文件服务</param>
-        /// <param name="queryService">文件查询服务</param>
-        public FileController( IFileService service, IQueryFileService queryService)
-        {
-            FileService = service;
-            QueryFileService = queryService;
-        }
-    }
+    public FileController(FileManagementService files, IFileManagementStore store, IFileStorageFactory storage,
+        FileManagementOptions options, IDataProtectionProvider protection) : base(files, store, storage, options, protection) { }
 }

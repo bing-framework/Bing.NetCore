@@ -1,10 +1,12 @@
 ﻿using AspectCore.Extensions.Hosting;
 using System;
+using Bing.Admin.Modules;
 using System.IO;
 using Bing.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.Admin
 {
@@ -17,7 +19,21 @@ namespace Bing.Admin
         /// 主函数
         /// </summary>
         /// <param name="args">参数</param>
-        public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+        public static void Main(string[] args)
+        {
+            Console.InputEncoding = new System.Text.UTF8Encoding(false);
+            Console.OutputEncoding = new System.Text.UTF8Encoding(false);
+            if (Modules.AdminFileDeployment.TryRunAsync(args, CreateFileDeploymentHost).GetAwaiter().GetResult()) return;
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        /// <summary>部署命令只装配 ORM、映射与文件服务，不创建 Redis、消息消费者或 Web 管道。</summary>
+        public static IHost CreateFileDeploymentHost(string[] args) => Host.CreateDefaultBuilder(args)
+            .UseServiceContext().ConfigureServices((context, services) =>
+            {
+                services.ReplaceConfiguration(context.Configuration);
+                services.AddBing().AddModule<MapperModule>().AddModule<FreeSqlModule>().AddModule<FileStorageModule>();
+            }).Build();
 
         /// <summary>
         /// 创建主机

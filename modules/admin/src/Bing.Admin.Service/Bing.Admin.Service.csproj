@@ -10,9 +10,11 @@
 
   <ItemGroup>
     <Compile Remove="Events\AdminOrderedEventRecovery.cs" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <ProjectReference Include="..\..\..\..\framework\src\Bing.Events\Bing.Events.csproj" />
     <ProjectReference Include="..\Bing.Admin.Data\Bing.Admin.Data.csproj" />
     <ProjectReference Include="..\Bing.Admin.Service.Shared\Bing.Admin.Service.Shared.csproj" />
+    <ProjectReference Include="..\..\..\..\components\src\Bing.Biz.FileManagement\Bing.Biz.FileManagement.csproj" />
   </ItemGroup>
 
 </Project>
