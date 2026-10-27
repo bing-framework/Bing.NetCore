@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../framework.tests.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+<ItemGroup>
+<ProjectReference Include="../../src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Runtime/Bing.Resilience.Runtime.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Polly/Bing.Resilience.Polly.csproj" />
+<ProjectReference Include="../../src/Bing.Http.Resilience/Bing.Http.Resilience.csproj" />
+<ProjectReference Include="../../src/Bing.Http.Resilience.Discovery/Bing.Http.Resilience.Discovery.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Distributed.Redis/Bing.Resilience.Distributed.Redis.csproj" />
+<PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="8.0.0" />
+<PackageReference Include="CSRedisCore" Version="3.8.670" />
+<ProjectReference Include="../../src/Bing.Resilience.Operations.Relational/Bing.Resilience.Operations.Relational.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Operations.AspNetCore/Bing.Resilience.Operations.AspNetCore.csproj" />
+<PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.36" />
+<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+<PackageReference Include="MySqlConnector" Version="2.1.2" />
+<FrameworkReference Include="Microsoft.AspNetCore.App" />
+<ProjectReference Include="../../src/Bing.Http.Resilience.Replay/Bing.Http.Resilience.Replay.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Idempotency.AspNetCore/Bing.Resilience.Idempotency.AspNetCore.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Replay/Bing.Resilience.Replay.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Compensation/Bing.Resilience.Compensation.csproj" />
+<ProjectReference Include="../../src/Bing.DynamicApi.Client.Resilience/Bing.DynamicApi.Client.Resilience.csproj" />
+<ProjectReference Include="../../src/Bing.DynamicApi.WebApiClient/Bing.DynamicApi.WebApiClient.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Operations.EntityFrameworkCore/Bing.Resilience.Operations.EntityFrameworkCore.csproj" />
+<ProjectReference Include="../../src/Bing.Resilience.Operations.FreeSql/Bing.Resilience.Operations.FreeSql.csproj" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
+<PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.311" />
+<PackageReference Include="Dapper" Version="2.1.28" />
+<Compile Include="../../../samples/Bing.Samples.ResilienceExtensions/SqliteOrderWorkflow.cs" Link="Samples/SqliteOrderWorkflow.cs" />
+</ItemGroup>
+</Project>

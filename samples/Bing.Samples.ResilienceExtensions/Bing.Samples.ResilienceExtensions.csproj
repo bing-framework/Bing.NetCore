@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><LangVersion>latest</LangVersion><IsPackable>false</IsPackable></PropertyGroup>
+<ItemGroup>
+<ProjectReference Include="../../framework/src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Runtime/Bing.Resilience.Runtime.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Http.Resilience.Discovery/Bing.Http.Resilience.Discovery.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Http.Resilience.Replay/Bing.Http.Resilience.Replay.csproj" />
+<ProjectReference Include="../../framework/src/Bing.DynamicApi.Client.Resilience/Bing.DynamicApi.Client.Resilience.csproj" />
+<ProjectReference Include="../../framework/src/Bing.DynamicApi.WebApiClient/Bing.DynamicApi.WebApiClient.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Distributed.Redis/Bing.Resilience.Distributed.Redis.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Operations.Relational/Bing.Resilience.Operations.Relational.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Replay/Bing.Resilience.Replay.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Compensation/Bing.Resilience.Compensation.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Idempotency.AspNetCore/Bing.Resilience.Idempotency.AspNetCore.csproj" />
+<ProjectReference Include="../../framework/src/Bing.Resilience.Operations.AspNetCore/Bing.Resilience.Operations.AspNetCore.csproj" />
+<PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.36" />
+<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+</ItemGroup></Project>

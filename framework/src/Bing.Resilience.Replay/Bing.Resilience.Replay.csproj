@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>带确认、租约和统一尝试账本的持久重放。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Resilience.Operations/Bing.Resilience.Operations.csproj" /></ItemGroup>
+</Project>

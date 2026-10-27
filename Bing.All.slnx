@@ -2,8 +2,20 @@
   <Folder Name="/01-framework/" />
   <Folder Name="/01-framework/01-src/">
     <Project Path="framework/src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Runtime/Bing.Resilience.Runtime.csproj" />
     <Project Path="framework/src/Bing.Resilience.Discovery/Bing.Resilience.Discovery.csproj" />
     <Project Path="framework/src/Bing.Http.Resilience.Discovery/Bing.Http.Resilience.Discovery.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Distributed/Bing.Resilience.Distributed.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Distributed.Redis/Bing.Resilience.Distributed.Redis.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Operations/Bing.Resilience.Operations.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Operations.Relational/Bing.Resilience.Operations.Relational.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Operations.EntityFrameworkCore/Bing.Resilience.Operations.EntityFrameworkCore.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Operations.FreeSql/Bing.Resilience.Operations.FreeSql.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Operations.AspNetCore/Bing.Resilience.Operations.AspNetCore.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Replay/Bing.Resilience.Replay.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Compensation/Bing.Resilience.Compensation.csproj" />
+    <Project Path="framework/src/Bing.Http.Resilience.Replay/Bing.Http.Resilience.Replay.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Idempotency.AspNetCore/Bing.Resilience.Idempotency.AspNetCore.csproj" />
     <Project Path="framework/src/Bing.Resilience.Abstractions/Bing.Resilience.Abstractions.csproj" />
     <Project Path="framework/src/Bing.Resilience/Bing.Resilience.csproj" />
     <Project Path="framework/src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" />
@@ -184,6 +196,7 @@
   <Folder Name="/01-framework/02-tests/13-Web/">
     <Project Path="framework/tests/Bing.AspNetCore.Mvc.Tests/Bing.AspNetCore.Mvc.Tests.csproj" />
     <Project Path="framework/tests/Bing.DynamicApi.Client.Tests/Bing.DynamicApi.Client.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Resilience.Extensions.Tests/Bing.Resilience.Extensions.Tests.csproj" />
     <Project Path="framework/tests/Bing.Resilience.Tests/Bing.Resilience.Tests.csproj" />
     <Project Path="framework/tests/Bing.Http.Resilience.Tests/Bing.Http.Resilience.Tests.csproj" />
     <Project Path="framework/tests/Bing.DynamicApi.Client.Resilience.Tests/Bing.DynamicApi.Client.Resilience.Tests.csproj" />
@@ -227,6 +240,7 @@
     <Project Path="modules/admin/src/Bing.Admin.Infrastructure/Bing.Admin.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/04-samples/">
+    <Project Path="samples/Bing.Samples.ResilienceExtensions/Bing.Samples.ResilienceExtensions.csproj" />
     <Project Path="samples/Bing.Samples.Resilience/Bing.Samples.Resilience.csproj" />
     <Project Path="samples/Bing.Samples.HttpResilience/Bing.Samples.HttpResilience.csproj" />
     <Project Path="samples/Bing.Samples.FusionCache/Bing.Samples.FusionCache.csproj" />

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>显式幂等写入许可与独立 HTTP 请求重放。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Http.Resilience/Bing.Http.Resilience.csproj" /><ProjectReference Include="../Bing.Resilience.Operations/Bing.Resilience.Operations.csproj" /></ItemGroup>
+</Project>

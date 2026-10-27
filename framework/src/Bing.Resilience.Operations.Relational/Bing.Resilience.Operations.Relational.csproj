@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing 持久操作 SQLite/MySQL 关系型存储。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Resilience.Operations/Bing.Resilience.Operations.csproj" /></ItemGroup>
+<ItemGroup>
+<EmbeddedResource Include="../../../docs/migrations/resilience-extensions/sqlite/001-journal.sql" LogicalName="Bing.Resilience.Migrations.Sqlite.v1.sql" />
+<EmbeddedResource Include="../../../docs/migrations/resilience-extensions/mysql/001-journal.sql" LogicalName="Bing.Resilience.Migrations.MySql.v1.sql" />
+</ItemGroup>
+</Project>

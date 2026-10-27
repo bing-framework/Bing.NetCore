@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing 分布式熔断 Redis 原子状态适配。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Resilience.Distributed/Bing.Resilience.Distributed.csproj" /><PackageReference Include="CSRedisCore" Version="3.8.670" /></ItemGroup>
+<ItemGroup><EmbeddedResource Include="CircuitState.lua" LogicalName="Bing.Resilience.Distributed.Redis.CircuitState.lua" /></ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing 分布式熔断准入协议。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Resilience/Bing.Resilience.csproj" /></ItemGroup>
+</Project>

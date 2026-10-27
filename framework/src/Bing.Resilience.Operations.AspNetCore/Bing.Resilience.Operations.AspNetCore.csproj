@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>容错持久操作和 Saga 的 ASP.NET Core 管理接入。</Description></PropertyGroup>
+<ItemGroup>
+<FrameworkReference Include="Microsoft.AspNetCore.App" />
+<EmbeddedResource Include="Console.html" LogicalName="Bing.Resilience.Operations.Console.html" />
+<ProjectReference Include="../Bing.Resilience.Operations/Bing.Resilience.Operations.csproj" />
+<ProjectReference Include="../Bing.Resilience.Replay/Bing.Resilience.Replay.csproj" />
+<ProjectReference Include="../Bing.Resilience.Compensation/Bing.Resilience.Compensation.csproj" />
+</ItemGroup>
+</Project>
