@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing Polly 容错适配。</Description></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Resilience/Bing.Resilience.csproj" />
+    <PackageReference Include="Polly.Core" Version="8.4.2" />
+    <PackageReference Include="Polly.Extensions" Version="8.4.2" />
+    <PackageReference Include="Polly.RateLimiting" Version="8.4.2" />
+    <Compile Include="../Bing.Resilience.ProviderShared/EnginePipeline.cs" Link="Internal/EnginePipeline.cs" />
+</ItemGroup>
+</Project>

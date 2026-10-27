@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing Fences 容错适配。</Description></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Resilience/Bing.Resilience.csproj" />
+    <PackageReference Include="Paramore.Fences.Core" Version="9.0.0" />
+    <PackageReference Include="Paramore.Fences.Extensions" Version="9.0.0" />
+    <PackageReference Include="Paramore.Fences.RateLimiting" Version="9.0.0" />
+    <Compile Include="../Bing.Resilience.ProviderShared/EnginePipeline.cs" Link="Internal/EnginePipeline.cs" />
+</ItemGroup>
+<PropertyGroup><DefineConstants>$(DefineConstants);BING_FENCES</DefineConstants></PropertyGroup>
+</Project>

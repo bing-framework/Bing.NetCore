@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing 容错注册与生命周期。</Description></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.Resilience.Abstractions/Bing.Resilience.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
+</ItemGroup>
+</Project>

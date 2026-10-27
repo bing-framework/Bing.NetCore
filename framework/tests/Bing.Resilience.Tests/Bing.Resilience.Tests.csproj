@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" />
+    <ProjectReference Include="../../src/Bing.Resilience.Polly/Bing.Resilience.Polly.csproj" />
+    <ProjectReference Include="../../src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="8.0.0" />
+  </ItemGroup>
+</Project>
