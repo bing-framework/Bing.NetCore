@@ -1,0 +1,7 @@
+artifacts/local-feed/
+artifacts/packages/
+consumer/bin/
+consumer/obj/
+
+artifacts/fix-round-*/local-feed/
+artifacts/fix-round-*/packages/

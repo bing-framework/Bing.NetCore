@@ -1,0 +1,4 @@
+# 可重建的包缓存和发布二进制；保留测试、审计与消费日志
+evidence/packages/**/local-feed/
+evidence/packages/**/cache/
+evidence/packages/**/publish/
