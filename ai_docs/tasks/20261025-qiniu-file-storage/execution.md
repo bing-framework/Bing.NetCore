@@ -1,8 +1,33 @@
 <!-- AI_EXECUTION_STATUS: COMPLETED -->
 AI_TASK_ID: 20261025-qiniu-file-storage
-AI_EXECUTION_FINISHED_AT: 2026-10-26T01:59:51.983217+00:00
+AI_EXECUTION_FINISHED_AT: 2026-10-26T06:30:46.134Z
 
 # 七牛云文件存储实施执行报告
+
+## 当前增量：OPT-002 / OPT-003 查询优化（2026-10-26）
+
+执行器结论：两项优化已完成，QS-01/02/03 均验收通过；`OPEN_ACTIONABLE = 0`。用户已授权优化前次审查列出的两项建议，已先更新 plan.md，再实现和验证。review.md 保留为独立审查原始证据。以下历史 QN/PQ 段落保留其当时范围；本节及 [query-optimizations 验证报告](evidence/query-optimizations/README.md) 是当前查询实现的最新结果。
+
+- OPT-002：会话增加 `includeParts=false` 轻量查询，保持原默认完整清单、所有者和租户检查。内置页面只在实际上传/恢复前读取一次完整清单，等待期间请求轻量状态，暂停可取消状态请求。6400 片真实 SQLite 元数据场景中 HTTP UTF-8 响应从 695,605 字节降至 220 字节；这是元数据验证，不是 100 GiB 容量验证。
+- OPT-003：新增可选 `IFileReadBatchStore`；EF Core、FreeSQL 在短事务中批量读取 Ready 文件和关联，不加载 Session。List/Search 保持原逐项业务权限判断、可见偏移、游标和取消语义；第三方仓储无批量能力时兼容回退。50 条结果在两 ORM 的实际 SELECT 数均从 151 降至 3，内容与顺序一致；无需数据库迁移。
+- 主代理负责契约、Web/业务/浏览器集成与最终检查；luna_worker 负责两个仓储 partial 和直接 SQLite 测试。没有修改存储 Provider、默认上传模式或任务状态机。
+
+| 验证 | 结果 |
+|---|---|
+| 精准查询、分页、HTTP | net8.0 34/34 通过 |
+| 文件管理全项目 | net6.0、net8.0 各 253 通过 / 6 个外部门控跳过 |
+| 最终状态测试数据校正后的验证 | net8.0 4/4；生产源码未变，替代同类旧证据，不重复累加 |
+| 两 Admin 文件相关集成 | 各 33 通过 / 6 个 MySQL 门控跳过 |
+| Demo 构建 | 0 警告、0 错误 |
+| 浏览器 Local / EF Core | 实际 33 MiB 上传、暂停、刷新恢复、仅补传两片、完整清单一次、轻量等待、下载内容与中止状态 GET 通过；桌面和移动视口通过，无页面/控制台错误 |
+
+证据包含源码基线与 SHA-256、测试 TRX、SQL/响应计数和浏览器脚本/网络记录，见 [manifest.json](evidence/query-optimizations/manifest.json)。本轮源代码 diff 检查通过；既有无关文件空白告警保留。此前 Provider/包消费仅按未变化存储实现范围复用，不把旧业务测试当作本轮测试。
+
+Implementation：2/2；本增量本地 Release Gates：4/4；IMPLEMENTATION_STATUS / TEST_STATUS / PERFORMANCE_EVIDENCE_STATUS：PASS。容量与七牛云端仍独立 NOT_VERIFIED / BLOCKED_EXTERNAL；整个七牛发布状态没有被本次查询优化改为通过。
+
+Completed：OPT-002、OPT-003。Open Actionable / Blocked Approval：无。Blocked External：原七牛空间、跨日恢复及 1/100 GiB 容量等门禁。Not Applicable：由 SQL 数推断云端性能。Accepted Limitations：每批读取快照不保证跨请求一致；自定义仓储兼容路径仍逐项查询；自定义业务授权内部 IO 不在本轮范围。Verified Boundaries：单批最多 100 ID、空批 0 SELECT。Deferred：无新增。No-Progress Check：CHANGED。Next Action：STOP。Goal Status：本增量 COMPLETED。
+
+已停止本轮 Demo，测试对象已调用删除/中止接口。永久删除命令曾被自动审批策略拒绝；用户再次授权清理后，两个隔离测试目录已通过 Windows 回收站操作移除，确认原路径均不存在，仍可从回收站恢复。使用 `task-finish --no-notify` 收口，不提交、推送或通知。
 
 ## 执行结论
 
@@ -223,3 +248,47 @@ Round 1 的“实际卷采样已验证”描述由本轮更正：旧测试只证
 - Deferred：OPT-001 分片定点查询优化。
 - No-Progress Check：CHANGED；Next Action：STOP；Goal Status：STOPPED_BLOCKED（仅剩独立验收/外部门禁，不自动 Fix）。
 - Git：未 commit、push、PR 或执行真实业务迁移，保留无关修改。收口使用 task-finish --no-notify，未发送外部通知。
+
+
+## 2026-10-26：OPT-001 分片分页查询性能优化
+
+### 执行结论和计划执行
+
+本轮 PQ-01、PQ-02、PQ-03 全部完成；OPT-001 在本轮执行报告中记为 CLOSED，OPEN_ACTIONABLE = 0。原 review.md 保留为此前独立审查证据，不修改 Reviewer 结论。用户的“继续优化分页查询性能优化”授权本轮计划与实施，已先将具体增量方案写入 plan.md 再开始生产修改。
+
+- PQ-01：新增可选 IMultipartFilePartReader 和 IMultipartFileStorage.GetPartAsync 扩展；工厂校验逻辑容器，旧 Provider 回退到完整列表，现有分片接口未增加必实现成员。
+- PQ-02：S3 用排他游标和 MaxParts=1 精确查询；与完整枚举共用页面验证/错误映射。拒绝错误顺序、超量条目和无效续页游标，稀疏清单中的后继片不能替代目标。代理上传回执每次 CAS 前读最新目标片，保持状态、期限、上传标识、ETag、长度、摘要校验；全量恢复与完成不变。
+- PQ-03：独立契约、两 ORM SQLite、真实 MinIO、两 Admin 及 net6.0 包消费验证通过，成本与验证报告见 [part-query-optimization/README.md](evidence/part-query-optimization/README.md)。
+
+### 成本与测试证据
+
+6400 片元数据场景中，核验尾片从全量 7 次请求/6400 条属性，变为 1 次请求/1 条属性。测量使用真实 Provider 加 SDK 元数据替身，业务测试仅实际传输尾片 3 字节；不将其当作 100 GiB 容量或云端吞吐测量。重启恢复仍完整读取 7 页；其他分片缺可信回执时不能完成。
+
+|范围|net6.0|net8.0|
+|---|---|---|
+|单片契约定向|6 通过|6 通过|
+|S3 查询定向|15 通过|15 通过|
+|Core/Local 回归|35 通过|35 通过|
+|S3 非 MinIO 回归|16 通过|16 通过|
+|Qiniu 回归|29 通过，5 跳过|29 通过，5 跳过|
+|文件管理全套|233 通过，6 跳过|233 通过，6 跳过|
+|真实 MinIO Provider|5 通过|5 通过|
+|真实 MinIO 业务/HTTP|24 通过|24 通过|
+|Admin EFCore（项目目标 net6）|185 通过，43 环境门控跳过|不适用|
+|Admin FreeSQL（项目目标 net6）|183 通过，41 环境门控跳过|不适用|
+
+定向测试与全套回归存在重叠。业务的 MinIO 门控在专用运行覆盖。七牛 3 个云端测试、平台/额外卷容量条件以及无关 Admin MySQL/CAP/Redis 测试保留门控；跳过明细见 test-summary.json。没有因跳过重复触发修复。
+
+### 影响范围、验证和基线
+
+新增生产符号位于 Abstractions；修改 Core 包装器、S3 查询、FileManagementService 回执路径。没有 Schema、HTTP、配置或 SQL 元数据改动，所以 SQL 专用门槛不适用。luna_worker 独立负责两份新契约测试，主代理负责实现、业务测试、集成与最终验证。生产符号与测试映射已追加至 test-map.md。
+
+四个 7.0.0 Release 包重新生成，net6.0 独立包消费编译/运行通过，包内 DLL 与消费者 DLL 的哈希一致。生产 API 兼容 netstandard2.0。包消费首次遇到 Windows 长路径引用解析失败，改用短路径隔离缓存后解决；未修改生产依赖。常规编译中的 ISystemClock 过时提示及 net6.0 消费 EOL 提示来自既有框架/工具链。无新代码错误。
+
+Git 基线 HEAD 为 87b68e7dadbffb2f1de58d1ea7013e678bc83888，保留无关工作区修改；baseline.json、基线生产源码和最终源码摘要均保存在本轮证据目录。全仓库 diff-check 发现其他任务计划与既有测试中的空白问题，未修改它们。本轮范围独立检查通过。
+
+### 边界与收口
+
+本轮实现 COMPLETED；七牛云端兼容和 1 GiB/100 GiB 容量依然 NOT_VERIFIED / BLOCKED_EXTERNAL，后续需独立测试空间。未运行额外容量压力测试；本轮只验证查询成本，不设置性能阈值。完整清单查询依然按页 O(N)，未增加 HTTP 流式分页协议。无计划外生产改动。
+
+已补充 Abstractions/S3 README 与七牛运维说明。未 commit、push、创建 PR、发布包、通知或运行真实业务迁移。真实 MinIO 容器恢复为原停止状态，使用 task-finish --no-notify 收口。

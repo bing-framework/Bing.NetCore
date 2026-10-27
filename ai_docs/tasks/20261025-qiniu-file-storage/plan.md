@@ -69,3 +69,63 @@ SignedParts 保留现有受限分片签名以及远端 SHA-256 校验。客户�
 - [.NET SDK 示例](https://developer.qiniu.com/kodo/12555/aws-sdk-csharp-examples)
 
 官方示例不构成本仓库固定 AWS SDK v4 及目标七牛空间的已验证证据。
+
+## 2026-10-26 增量：OPT-001 分片分页查询性能
+
+### 目标与范围
+
+OPT-001 已实施并由独立复审关闭。优化前代理上传每保存一片回执、每次 CAS 重试，都会调用 ListPartsAsync 枚举全部远端分页，只为找到一个分片；现已改为可选单片查询，以下为已完成的实施依据。
+
+通过可选的单片查询能力，S3 使用排他游标 `part-number-marker = number - 1` 和 `max-parts = 1` 定位目标分片。每次 CAS 仍读取最新远端回执，不缓存 ETag。完整会话恢复和上传完成继续枚举并核对全清单。本轮不变更 HTTP 列表协议、数据库结构、Local 清单格式或上传校验策略。
+
+### 设计决策
+
+- 新增可选接口 IMultipartFilePartReader.GetPartAsync；不向现有 IMultipartFileStorage 添加必实现成员，保留第三方 Provider 源码兼容性。
+- 提供 IMultipartFileStorage.GetPartAsync 扩展：优先使用可选能力，旧 Provider 回退到全量查询并精确匹配序号。只有分片缺失返回 null；上传会话缺失、权限、网络和取消保持原错误语义。
+- 命名工厂包装器继续验证容器，再委托底层能力或兼容路径。
+- S3 单片与完整枚举共用分页请求、结果映射和异常分类；严格核对返回序号、页大小和游标前进，缺失目标时不能把后续分片误认为目标。
+- FileManagementService.SavePartReceiptAsync 接入单片查询，保留最新会话状态/期限、后端标识、长度、SHA-256、ETag 和根版本 CAS 校验。CAS 失败后重新查远端，不复用旧结果。
+
+### 实施阶段与验收
+
+|阶段|实施范围|验收|
+|---|---|---|
+|PQ-01|公共可选能力、兼容扩展、命名工厂装配|netstandard2.0 编译；旧 Provider 回退、取消、容器校验及边界测试|
+|PQ-02|S3 精确分页查询、共用页面验证、业务回执接入|目标首片/尾片/缺失片、错误映射、异常分页、两 ORM SQLite 回执竞争及冻结回归|
+|PQ-03|请求成本证据、受影响回归、消费者验证和文档|6400 片元数据场景对比全量枚举与单片查询的实际 SDK 请求/返回条目数；net6.0/net8.0 测试；真实 MinIO 门控；net6.0 包消费|
+
+主代理负责实现和业务集成；luna_worker 负责独立的单片查询契约与 Provider 测试。新增测试仅覆盖真实行为和成本边界，不运行与本轮无关的容量压力测试。真实云端缺环境明确记为 NOT_VERIFIED，不将 SDK 替身计数当作吞吐、延迟或云端兼容证据。维护 execution.md、test-map.md 和 evidence/part-query-optimization；保留此前 review.md 为独立证据。
+
+完成标准：主调用链确实只读取目标页，兼容旧 Provider，两套 ORM 的并发校验保持有效，影响范围测试通过，记录成本对比与环境限制，完成任务状态收口；不提交、不推送。
+
+分页依据：[AWS S3 ListParts API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListParts.html)。
+
+
+## 2026-10-26 当前增量：OPT-002 / OPT-003 查询优化
+
+用户已要求实施 review.md 列出的两项可选优化。此前 QN/PQ 阶段的代码交付保持有效；七牛云端、跨平台及容量验证继续独立门控。本轮只改变查询成本，不改变数据库 Schema、默认上传模式或物理存储流程。
+
+### QS-01 轻量会话状态（OPT-002）
+
+- 现状：uploader.js 的 waitForState 每秒调用完整 GetSessionAsync；Completing/Quarantined 也读取并返回全分片清单。
+- 范围：FileManagementService、FileManagementControllerBase、Console/uploader.js、针对性业务/HTTP/浏览器测试。
+- 设计：保留 GetSessionAsync(Guid,CancellationToken) 签名，增加显式 includeParts 重载；HTTP 添加默认 true 的查询参数，false 在原所有者/租户检查后直接返回现有元数据和空 Parts，不查询任何远端或数据库分片。false 的空数组不表示尚无已上传内容。
+- 客户端：状态等待使用 false；真正进入上传/续传前获取一次完整清单并重新处理会话状态。轮询请求纳入现有 AbortController 集合，暂停/身份切换可取消；续传摘要循环观察暂停，不降低重新选文件的摘要检查。保持现有一秒轮询间隔，本轮不增加缓存或新状态机。
+- 验证：两 ORM 的 6400 片会话，轻量查询不调用 ListPartsAsync、返回大小不随分片数量增长；原详情和实际续传仍包含已校验分片。HTTP 验证默认兼容、false、所有者及租户隔离；浏览器验证等待、刷新恢复、暂停与完成。
+- 验收：主浏览器等待链实际使用轻量查询；不会把轻量空清单作为续传依据。
+
+### QS-02 批量列表授权读取（OPT-003）
+
+- 现状：ListAsync / SearchAsync 每个候选调用 AuthorizeReadAsync，两个 ORM 分别读取文件、会话、关联；每个候选额外三条 SELECT。
+- 范围：新增 IFileReadBatchStore / FileReadSnapshot（仅 File + Bindings）；EF 与 FreeSQL 新增 partial 实现；业务列表接入共享授权判定；仓储及业务 SQL 计数测试。
+- 契约：ReadReadyFilesAsync(scopeKey, fileIds, ct)，单批最多 100 个输入 ID；空批不读库，重复 ID 去重，数据库过滤 scope 和 Ready，返回脱离跟踪且同一短事务中的文件/关联快照，不加载 Session。结果不承诺顺序，业务按原候选顺序处理。
+- 兼容：IFileManagementStore 不新增必实现成员；两个内置仓储实现可选接口，自定义仓储没有能力时继续逐项读取并执行同一授权。采用独立只读快照，避免把缺少 Session 的聚合误用于写入。
+- 业务：从单文件读取授权提取统一判定（管理权限、本人未绑定、业务 Read）。列表每批加载快照，仍检查范围/Ready/创建者筛选；权限拒绝不占页容量，错误和取消继续传播，搜索游标按原候选推进。业务授权仍逐项调用，不加入跨请求权限缓存。
+- 验证：两 ORM SQLite 的同范围/跨租户/非 Ready/缺失/重复/取消/快照隔离/上限；SQL 计数验证查询数按批次增长、不查 Session。业务验证旧仓储兼容、授权拒绝跨批、管理权限、候选读取后删除、游标和取消。以 50 条实际 SQLite 数据对比兼容路径与批量路径的 SELECT 数，不推断网络吞吐。
+- 风险：批量快照语义必须保留安全边界；数据库短事务只覆盖读取，业务授权在事务外执行。
+
+### QS-03 集成、证据和收口
+
+- 依赖 QS-01/02 完成。主代理负责契约、业务/HTTP/浏览器集成、状态查询与最终验证；luna_worker 负责边界确定后的两 ORM 批量实现和直接仓储测试。先运行直接测试，再运行文件管理 net6/net8、两 Admin 文件相关测试和 Demo 构建；复用不变的 S3/Local Provider、MinIO 与大容量证据。
+- 文档说明 includeParts 及可选批量契约；更新 execution.md/test-map.md，保留 review.md 独立证据。证据写入 evidence/query-optimizations；保留既有工作区修改，不提交、推送、通知或迁移数据。
+- 完成标准：上述生产链路实际生效、既有授权/分页/续传语义通过回归、SQL/响应成本证据准确、必要构建通过，执行 task-finish --no-notify。外部云端验证缺失不阻塞本轮本地查询优化完成。
