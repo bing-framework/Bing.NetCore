@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../common.props" />
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Description>Bing 运行时动态 API 客户端的可选 HTTP 恢复适配。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.DynamicApi.Client/Bing.DynamicApi.Client.csproj" />
+    <ProjectReference Include="../Bing.Http.Resilience/Bing.Http.Resilience.csproj" />
+    <ProjectReference Include="../Bing.Resilience.Discovery/Bing.Resilience.Discovery.csproj" />
+  </ItemGroup>
+</Project>

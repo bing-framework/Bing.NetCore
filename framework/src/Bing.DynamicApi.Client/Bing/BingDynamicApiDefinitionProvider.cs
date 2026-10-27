@@ -34,6 +34,8 @@ internal sealed class BingDynamicApiDefinitionProvider
     /// 在宿主内共享按远程服务与版本隔离的描述缓存。
     /// </summary>
     private readonly BingDynamicApiDefinitionCache _cache;
+    private readonly IEnumerable<BingDynamicApiHttpPipelineBinding> _bindings;
+    private readonly IEnumerable<IBingDynamicApiDefinitionSource> _sources;
 
     /// <summary>
     /// 初始化一个 <see cref="BingDynamicApiDefinitionProvider"/> 类型的实例。
@@ -44,13 +46,15 @@ internal sealed class BingDynamicApiDefinitionProvider
     /// <param name="retryPolicy">重试策略。</param>
     /// <param name="requestHandlers">发送前请求处理器。</param>
     /// <param name="cache">共享描述缓存。</param>
+    /// <param name="bindings">适配器登记的具名客户端绑定。</param>
     public BingDynamicApiDefinitionProvider(
         IHttpClientFactory httpClientFactory,
         IOptions<BingDynamicApiClientOptions> options,
         IBingDynamicApiRequestContext requestContext,
         IBingDynamicApiRetryPolicy retryPolicy,
         IEnumerable<IBingDynamicApiRequestHandler> requestHandlers,
-        BingDynamicApiDefinitionCache cache)
+        BingDynamicApiDefinitionCache cache,
+        IEnumerable<BingDynamicApiHttpPipelineBinding> bindings)
     {
         _httpClientFactory = httpClientFactory;
         _options = options;
@@ -58,7 +62,15 @@ internal sealed class BingDynamicApiDefinitionProvider
         _retryPolicy = retryPolicy;
         _requestHandlers = requestHandlers;
         _cache = cache;
+        _bindings = bindings;
+        _sources = Array.Empty<IBingDynamicApiDefinitionSource>();
     }
+
+    /// <summary>支持可选中性描述源，旧构造函数继续保留。</summary>
+    public BingDynamicApiDefinitionProvider(IHttpClientFactory httpClientFactory, IOptions<BingDynamicApiClientOptions> options,
+        IBingDynamicApiRequestContext requestContext, IBingDynamicApiRetryPolicy retryPolicy, IEnumerable<IBingDynamicApiRequestHandler> requestHandlers,
+        BingDynamicApiDefinitionCache cache, IEnumerable<BingDynamicApiHttpPipelineBinding> bindings, IEnumerable<IBingDynamicApiDefinitionSource> sources)
+        : this(httpClientFactory, options, requestContext, retryPolicy, requestHandlers, cache, bindings) => _sources = sources;
 
     /// <summary>
     /// 异步获取远程 API 描述。
@@ -70,8 +82,13 @@ internal sealed class BingDynamicApiDefinitionProvider
     /// <remarks>取消单个等待者不会取消共享描述请求。</remarks>
     public async Task<BingDynamicApiDefinition> GetAsync(string remoteName, BingDynamicApiRemoteOptions remoteOptions, CancellationToken cancellationToken)
     {
+        var sources = _sources.Where(x => string.Equals(x.RemoteName, remoteName, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (sources.Length > 1) throw new InvalidOperationException("同一 remote 只能登记一个描述 Source。");
+        if (sources.Length == 1)
+            return await sources[0].GetAsync(new(remoteName, remoteOptions.RetryMode == BingDynamicApiRetryMode.HttpPipeline ? GetClientName(remoteName) : remoteName, remoteOptions.ApiVersion, remoteOptions.BaseUrl,
+                _requestContext.TenantId, _requestContext.Language, new JsonSerializerOptions(_options.Value.JsonSerializerOptions)), cancellationToken).ConfigureAwait(false);
         return await _cache.GetAsync(
-            (remoteName, remoteOptions.ApiVersion),
+            (remoteOptions.RetryMode == BingDynamicApiRetryMode.HttpPipeline ? GetClientName(remoteName) : remoteName, remoteOptions.ApiVersion),
             () => FetchAsync(remoteName, remoteOptions, CancellationToken.None),
             cancellationToken).ConfigureAwait(false);
     }
@@ -88,24 +105,35 @@ internal sealed class BingDynamicApiDefinitionProvider
         BingDynamicApiRemoteOptions remoteOptions,
         CancellationToken cancellationToken)
     {
-        var url = CombineUrl(remoteOptions.BaseUrl, $"api/dynamic-api/{Uri.EscapeDataString(remoteOptions.ApiVersion)}/definition");
-        var response = await SendAsync(remoteName, remoteOptions, () => new HttpRequestMessage(HttpMethod.Get, url), true, cancellationToken).ConfigureAwait(false);
-        using (response)
+        using var budget = new BingDynamicApiOperationBudget(remoteOptions.DefinitionTimeout, cancellationToken);
+        using var activity = BingDynamicApiDiagnostics.Start(remoteOptions, remoteName, BingDynamicApiRequestKind.Definition);
+        cancellationToken = budget.Token;
+        try
         {
-            if (!response.IsSuccessStatusCode)
-                throw await BingDynamicApiHttpErrors.CreateExceptionAsync(response, _options.Value.JsonSerializerOptions).ConfigureAwait(false);
+            var url = CombineUrl(remoteOptions.BaseUrl, $"api/dynamic-api/{Uri.EscapeDataString(remoteOptions.ApiVersion)}/definition");
+            var response = await SendAsync(remoteName, remoteOptions, () => new HttpRequestMessage(HttpMethod.Get, url), true, cancellationToken, BingDynamicApiRequestKind.Definition).ConfigureAwait(false);
+            using (response)
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw await BingDynamicApiHttpErrors.CreateExceptionAsync(response, _options.Value.JsonSerializerOptions).ConfigureAwait(false);
 
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var definition = await JsonSerializer.DeserializeAsync<BingDynamicApiDefinition>(stream, _options.Value.JsonSerializerOptions, cancellationToken).ConfigureAwait(false);
-            if (definition == null)
-                throw new InvalidOperationException($"远程服务 '{remoteName}' 返回了空的动态 API 定义。");
-            if (definition.SchemaVersion != 1)
-                throw new NotSupportedException($"远程服务 '{remoteName}' 返回了不支持的动态 API SchemaVersion '{definition.SchemaVersion}'。");
-            if (!string.Equals(definition.ApiVersion, remoteOptions.ApiVersion, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException($"远程服务 '{remoteName}' 返回的 API 版本 '{definition.ApiVersion}' 与配置版本 '{remoteOptions.ApiVersion}' 不一致。");
-            if (definition.Services == null)
-                throw new InvalidOperationException($"远程服务 '{remoteName}' 返回的动态 API 定义缺少 Services。");
-            return definition;
+                await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+                var definition = await JsonSerializer.DeserializeAsync<BingDynamicApiDefinition>(stream, _options.Value.JsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+                if (definition == null)
+                    throw new InvalidOperationException($"远程服务 '{remoteName}' 返回了空的动态 API 定义。");
+                if (definition.SchemaVersion != 1)
+                    throw new NotSupportedException($"远程服务 '{remoteName}' 返回了不支持的动态 API SchemaVersion '{definition.SchemaVersion}'。");
+                if (!string.Equals(definition.ApiVersion, remoteOptions.ApiVersion, StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException($"远程服务 '{remoteName}' 返回的 API 版本 '{definition.ApiVersion}' 与配置版本 '{remoteOptions.ApiVersion}' 不一致。");
+                if (definition.Services == null)
+                    throw new InvalidOperationException($"远程服务 '{remoteName}' 返回的动态 API 定义缺少 Services。");
+                return definition;
+            }
+        }
+        catch (OperationCanceledException exception) when (budget.IsTimeout(exception))
+        {
+            BingDynamicApiDiagnostics.RecordCancellation(activity, "definition_timeout");
+            throw new TimeoutException($"远程服务 '{remoteName}' 的描述下载超时。", exception);
         }
     }
 
@@ -117,6 +145,8 @@ internal sealed class BingDynamicApiDefinitionProvider
     /// <param name="requestFactory">每次尝试创建独立请求的工厂。</param>
     /// <param name="retryAllowed">是否允许按配置重放请求。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <param name="kind">请求种类。</param>
+    /// <param name="isStreamResult">是否返回调用方拥有的流。</param>
     /// <returns>最终 HTTP 响应，由调用方释放。</returns>
     /// <remarks>发送前附加配置头并执行宿主处理器；重试时释放先前响应。</remarks>
     internal async Task<HttpResponseMessage> SendAsync(
@@ -124,10 +154,13 @@ internal sealed class BingDynamicApiDefinitionProvider
         BingDynamicApiRemoteOptions remoteOptions,
         Func<HttpRequestMessage> requestFactory,
         bool retryAllowed,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        BingDynamicApiRequestKind kind = BingDynamicApiRequestKind.Invocation,
+        bool isStreamResult = false)
     {
-        var client = _httpClientFactory.CreateClient(remoteName);
-        var retries = retryAllowed ? remoteOptions.MaxRetries : 0;
+        var pipelineMode = remoteOptions.RetryMode == BingDynamicApiRetryMode.HttpPipeline;
+        var client = _httpClientFactory.CreateClient(pipelineMode ? GetClientName(remoteName) : remoteName);
+        var retries = !pipelineMode && retryAllowed ? remoteOptions.MaxRetries : 0;
         for (var attempt = 0; ; attempt++)
         {
             using var request = requestFactory();
@@ -135,6 +168,11 @@ internal sealed class BingDynamicApiDefinitionProvider
             AddConfiguredHeaders(request, remoteOptions);
             foreach (var handler in _requestHandlers)
                 await handler.HandleAsync(remoteName, request, cancellationToken).ConfigureAwait(false);
+
+            // 在宿主处理器执行后固化最终资格；管线仍会检查实际方法和请求体。
+            new BingDynamicApiRequestMetadata(remoteName, kind,
+                retryAllowed && !isStreamResult && request.Method == HttpMethod.Get && request.Content == null,
+                isStreamResult).Set(request);
 
             HttpResponseMessage response;
             try
@@ -161,6 +199,10 @@ internal sealed class BingDynamicApiDefinitionProvider
             return response;
         }
     }
+
+    /// <summary>保留注册时 HttpClient 名称的大小写。</summary>
+    private string GetClientName(string remoteName) => _bindings.Single(b =>
+        string.Equals(b.RemoteName, remoteName, StringComparison.OrdinalIgnoreCase)).HttpClientName;
 
     /// <summary>
     /// 附加静态请求头和当前上下文头。

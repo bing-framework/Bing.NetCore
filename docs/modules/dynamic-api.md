@@ -76,3 +76,7 @@ services.AddBingWebApiClient<IOrdersSdk>(options =>
 - WebApiClientCore 路径不会读取动态描述，异常模型也不同：它不包装为 `BingRemoteCallException`。
 - 服务端路由冲突会在 MVC 模型构建阶段失败；显式路由与约定路由混用时应运行端到端契约测试。
 - 动态描述目前是运行时客户端协议；OpenAPI 互操作能力：待实现/待确认。
+
+## 可选 HTTP 故障恢复
+
+已提供共享恢复包和运行时适配包；默认行为不变。接入、超时/流所有权、迁移和回滚请见[HTTP 故障恢复指南](../guides/http-resilience.md)。

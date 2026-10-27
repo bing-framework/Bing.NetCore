@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.tests.props" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Bing.Http.Resilience.Tests</RootNamespace>
+    <BingTestingUseHosting>false</BingTestingUseHosting>
+    <BingTestingUseDependencyInjection>false</BingTestingUseDependencyInjection>
+    <BingTestingUseTestHost>false</BingTestingUseTestHost>
+    <BingTestingUseShouldly>false</BingTestingUseShouldly>
+    <BingTestingUseMoq>false</BingTestingUseMoq>
+    <BingTestingUseCoverlet>false</BingTestingUseCoverlet>
+    <EnableDITestPackages>false</EnableDITestPackages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <ProjectReference Include="../../src/Bing.Http.Resilience/Bing.Http.Resilience.csproj" />
+  </ItemGroup>
+  <ItemGroup><ProjectReference Include="../../src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.10.0" /></ItemGroup>
+</Project>

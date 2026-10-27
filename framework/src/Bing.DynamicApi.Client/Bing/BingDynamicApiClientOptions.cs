@@ -78,6 +78,15 @@ public class BingDynamicApiClientOptions
 /// </summary>
 public class BingDynamicApiRemoteOptions
 {
+    /// <summary>重试执行模式，默认保留旧行为。</summary>
+    public BingDynamicApiRetryMode RetryMode { get; set; } = BingDynamicApiRetryMode.Legacy;
+
+    /// <summary>完整调用预算；null 表示不增加额外预算。</summary>
+    public TimeSpan? OperationTimeout { get; set; }
+
+    /// <summary>共享描述下载预算；不受单个等待者取消影响。</summary>
+    public TimeSpan? DefinitionTimeout { get; set; }
+
     /// <summary>
     /// 获取或设置远程服务基础地址。
     /// </summary>

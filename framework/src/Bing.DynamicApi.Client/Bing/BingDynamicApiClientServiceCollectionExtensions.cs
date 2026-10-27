@@ -1,4 +1,5 @@
 using Bing.Application.Services;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,6 +24,7 @@ public static class BingDynamicApiClientServiceCollectionExtensions
             throw new ArgumentNullException(nameof(configure));
 
         services.AddOptions<BingDynamicApiClientOptions>().Configure(configure);
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<BingDynamicApiClientOptions>, BingDynamicApiPipelineOptionsValidator>());
         services.AddHttpClient();
         services.TryAddSingleton<IBingDynamicApiRequestContext, EmptyBingDynamicApiRequestContext>();
         services.TryAddSingleton<IBingDynamicApiParameterConverter, DefaultBingDynamicApiParameterConverter>();

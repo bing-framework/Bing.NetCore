@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../framework/src/Bing.DynamicApi.Client.Resilience/Bing.DynamicApi.Client.Resilience.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.DynamicApi.WebApiClient/Bing.DynamicApi.WebApiClient.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" />
+  </ItemGroup>
+</Project>

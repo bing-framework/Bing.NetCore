@@ -129,3 +129,9 @@ await stream.CopyToAsync(destination, cancellationToken);
 ## 版本和扩展
 
 包目标框架为 `net6.0`、`net8.0`，并固定依赖 `WebApiClientCore` 2.1.6。认证、日志、JSON 序列化和请求处理可继续通过 WebApiClientCore 配置 API、`IHttpClientBuilder`、处理器和过滤器扩展；本包只增加动态上下文头透传，不另行实现代理、元数据缓存、重试或远程错误包装。
+
+## 可选 HTTP 故障恢复
+
+已提供共享恢复包和运行时适配包；默认行为不变。接入、超时/流所有权、迁移和回滚请见[HTTP 故障恢复指南](../../../docs/guides/http-resilience.md)。
+
+独立容错与 Provider 切换、固定地址池 Hedging 见[容错指南](../../../docs/guides/resilience.md)。HTTP 接入需显式注册 Fences 或 Polly Provider。

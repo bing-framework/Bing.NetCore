@@ -134,6 +134,28 @@ internal sealed class BingDynamicApiClientProxyFactory
         args ??= Array.Empty<object>();
         var remoteOptions = _options.Value.GetRemoteService(remoteName);
         var cancellationToken = GetCancellationToken(targetMethod, args);
+        using var budget = new BingDynamicApiOperationBudget(remoteOptions.OperationTimeout, cancellationToken);
+        using var activity = BingDynamicApiDiagnostics.Start(remoteOptions, remoteName, BingDynamicApiRequestKind.Invocation);
+        try
+        {
+            return await ExecuteCoreAsync(serviceType, remoteName, targetMethod, args, resultType, remoteOptions, budget.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException exception) when (budget.IsTimeout(exception))
+        {
+            BingDynamicApiDiagnostics.RecordCancellation(activity, "operation_timeout");
+            throw new TimeoutException($"远程服务 '{remoteName}' 的完整调用超时。", exception);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            BingDynamicApiDiagnostics.RecordCancellation(activity, "caller_cancelled");
+            throw;
+        }
+    }
+
+    /// <summary>使用同一预算令牌完成描述等待、发送和响应体读取。</summary>
+    private async Task<object> ExecuteCoreAsync(Type serviceType, string remoteName, MethodInfo targetMethod, object[] args,
+        Type resultType, BingDynamicApiRemoteOptions remoteOptions, CancellationToken cancellationToken)
+    {
         var definition = await _definitionProvider.GetAsync(remoteName, remoteOptions, cancellationToken).ConfigureAwait(false);
 
         var service = definition.Services.SingleOrDefault(x => string.Equals(x.ServiceTypeName, serviceType.FullName, StringComparison.Ordinal));
@@ -158,7 +180,7 @@ internal sealed class BingDynamicApiClientProxyFactory
                 remoteOptions,
                 () => CreateRequest(method, url, requestContent),
                 false,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken, isStreamResult: true).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 using (response)

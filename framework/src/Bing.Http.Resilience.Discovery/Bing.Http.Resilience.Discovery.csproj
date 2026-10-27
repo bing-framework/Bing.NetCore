@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<Import Project="../../../common.props" />
+<PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><Description>Bing HTTP 动态发现路由。</Description></PropertyGroup>
+<ItemGroup><ProjectReference Include="../Bing.Resilience.Discovery/Bing.Resilience.Discovery.csproj" /><ProjectReference Include="../Bing.Http.Resilience/Bing.Http.Resilience.csproj" /></ItemGroup>
+</Project>

@@ -29,3 +29,9 @@ public sealed class OrderConsumer(IOrderAppService orders)
 代理首次调用时请求 `{BaseUrl}/api/dynamic-api/{ApiVersion}/definition`，并按远程服务名称和 API 版本缓存描述。请求使用 `IHttpClientFactory`，支持 `Task` / `Task<T>`、路径与查询参数、JSON 请求体、multipart 文件、`IRemoteStreamContent` 下载、取消令牌和 `BingRemoteCallException`。默认重试关闭；配置的重试仅用于可重放的 GET 元数据和业务请求。
 
 宿主可注册 `IBingDynamicApiRequestHandler` 注入凭据或其他请求头，并实现 `IBingDynamicApiRequestContext` 透传租户、关联 ID 和语言。`IBingDynamicApiJsonSerializer`、`IBingDynamicApiParameterConverter` 和 `IBingDynamicApiRetryPolicy` 分别用于替换默认 JSON 序列化、简单参数转换和重试决策。重试默认关闭，且只允许对 GET 或元数据请求重试；宿主策略不能让业务请求体请求变为可重放请求。
+
+## 可选 HTTP 故障恢复
+
+已提供共享恢复包和运行时适配包；默认行为不变。接入、超时/流所有权、迁移和回滚请见[HTTP 故障恢复指南](../../../docs/guides/http-resilience.md)。
+
+独立容错与 Provider 切换、固定地址池 Hedging 见[容错指南](../../../docs/guides/resilience.md)。HTTP 接入需显式注册 Fences 或 Polly Provider。

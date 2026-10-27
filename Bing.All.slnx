@@ -2,10 +2,14 @@
   <Folder Name="/01-framework/" />
   <Folder Name="/01-framework/01-src/">
     <Project Path="framework/src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
+    <Project Path="framework/src/Bing.Resilience.Discovery/Bing.Resilience.Discovery.csproj" />
+    <Project Path="framework/src/Bing.Http.Resilience.Discovery/Bing.Http.Resilience.Discovery.csproj" />
     <Project Path="framework/src/Bing.Resilience.Abstractions/Bing.Resilience.Abstractions.csproj" />
     <Project Path="framework/src/Bing.Resilience/Bing.Resilience.csproj" />
     <Project Path="framework/src/Bing.Resilience.Fences/Bing.Resilience.Fences.csproj" />
     <Project Path="framework/src/Bing.Resilience.Polly/Bing.Resilience.Polly.csproj" />
+    <Project Path="framework/src/Bing.Http.Resilience/Bing.Http.Resilience.csproj" />
+    <Project Path="framework/src/Bing.DynamicApi.Client.Resilience/Bing.DynamicApi.Client.Resilience.csproj" />
     <Project Path="framework/src/Bing.Authorization.Abstractions/Bing.Authorization.Abstractions.csproj" />
     <Project Path="framework/src/Bing.DynamicApi.Client/Bing.DynamicApi.Client.csproj" />
     <Project Path="framework/src/Bing.Permissions/Bing.Permissions.csproj" />
@@ -181,6 +185,8 @@
     <Project Path="framework/tests/Bing.AspNetCore.Mvc.Tests/Bing.AspNetCore.Mvc.Tests.csproj" />
     <Project Path="framework/tests/Bing.DynamicApi.Client.Tests/Bing.DynamicApi.Client.Tests.csproj" />
     <Project Path="framework/tests/Bing.Resilience.Tests/Bing.Resilience.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Http.Resilience.Tests/Bing.Http.Resilience.Tests.csproj" />
+    <Project Path="framework/tests/Bing.DynamicApi.Client.Resilience.Tests/Bing.DynamicApi.Client.Resilience.Tests.csproj" />
   </Folder>
   <Folder Name="/01-framework/02-tests/Components/" />
   <Folder Name="/01-framework/02-tests/Components/ObjectMapping/">
@@ -222,6 +228,7 @@
   </Folder>
   <Folder Name="/04-samples/">
     <Project Path="samples/Bing.Samples.Resilience/Bing.Samples.Resilience.csproj" />
+    <Project Path="samples/Bing.Samples.HttpResilience/Bing.Samples.HttpResilience.csproj" />
     <Project Path="samples/Bing.Samples.FusionCache/Bing.Samples.FusionCache.csproj" />
     <Project Path="samples/Bing.Samples.Hangfire/Bing.Samples.Hangfire.csproj" />
     <Project Path="samples/Bing.Samples.SqlUnitOfWork.Tests/Bing.Samples.SqlUnitOfWork.Tests.csproj" />
