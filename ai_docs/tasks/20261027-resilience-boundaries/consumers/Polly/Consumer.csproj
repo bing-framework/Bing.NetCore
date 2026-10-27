@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <DefineConstants>$(DefineConstants);CONSUMER_POLLY</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Bing.Resilience.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Polly" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Runtime" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Discovery" Version="7.0.0" />
+    <PackageReference Include="Bing.Http.Resilience" Version="7.0.0" />
+    <PackageReference Include="Bing.Http.Resilience.Discovery" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Distributed" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Distributed.Redis" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Operations" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Operations.Relational" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Replay" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Compensation" Version="7.0.0" />
+    <PackageReference Include="Bing.Http.Resilience.Replay" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Idempotency.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Bing.DynamicApi.Client.Resilience" Version="7.0.0" />
+    <PackageReference Include="Bing.DynamicApi.WebApiClient" Version="7.0.0" />
+    <Compile Include="../Program.cs" Link="Program.cs" />
+  <PackageReference Include="Bing.Resilience.Operations.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Operations.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Bing.Resilience.Operations.FreeSql" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.36" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

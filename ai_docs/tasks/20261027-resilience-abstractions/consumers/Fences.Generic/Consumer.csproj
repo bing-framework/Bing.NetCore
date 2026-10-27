@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFrameworks>net6.0;net8.0</TargetFrameworks><OutputType>Exe</OutputType><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><LangVersion>latest</LangVersion><NoWarn>NETSDK1138</NoWarn></PropertyGroup>
+  <ItemGroup><PackageReference Include="Bing.Resilience.Fences" Version="7.0.0" /><Compile Include="../Programs/Generic.cs" Link="Program.cs" /></ItemGroup>
+</Project>
