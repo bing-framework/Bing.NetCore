@@ -31,6 +31,8 @@ services.AddBingFileManagement(options =>
 
 `GetSessionAsync(id, includeParts: false, ct)` 仅返回会话元数据和空 `Parts`，仍校验当前用户、租户和会话所有者，但不查询数据库或远端分片。适合初始化、合并、内容检查的状态轮询；空清单不代表没有已上传分片。恢复上传必须调用原 `GetSessionAsync(id, ct)` 或显式传入 `true`，取得经过远端回执校验的完整清单。
 
+两套内置仓储实现可选 `IFileReadBatchStore.ReadReadyFilesAsync`。`ListAsync` / `SearchAsync` 按最多 100 个候选 ID 批量读取同一范围的 Ready 文件和关联，在短事务后逐项执行原读取授权；不加载会话、不缓存权限、不改变候选顺序或可见分页规则。50 个命中的 SQLite 实测为 3 条 SELECT（候选、文件、关联），原逐项路径为 151 条。第三方仓储未实现该能力时继续逐项读取，无需新增必实现成员；实现时须遵守空批不读库、上限、范围/状态过滤及同事务快照约定。无需数据库迁移。
+
 持续后台任务由 `FileOperationScheduler` 执行：`Complete`、`Migrate` 使用长队列，`Initialize`、`Abort`、`Delete`、`DeleteReplica` 使用短队列；每个执行槽和维护循环使用独立异步 DI 作用域。`ShortOperationConcurrency` 默认 2，`LongOperationConcurrency` 默认 1，范围均为 1～16；`OperationPollInterval` 默认 1 秒，范围为 100 毫秒～1 分钟；`CleanupInterval` 控制独立维护周期。限制按宿主实例计算，多实例总并行量需合并预算。Admin Web Worker 默认接入此调度器；非 Web 宿主可显式调用 `FileOperationScheduler.RunAsync`。单个调度器实例不能同时重复启动。配置和调用示例见 [接入、部署与恢复](../../../docs/migrations/file-storage-adoption.md)。
 
 完整部署、权限、接口和恢复说明见 [文件存储与附件管理](../../../docs/modules/file-storage.md) 和 [接入、部署与恢复](../../../docs/migrations/file-storage-adoption.md)。

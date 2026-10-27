@@ -289,11 +289,8 @@ public sealed partial class FileManagementService
         if (entry == null || entry.File.State != FileState.Ready || (publicAccess && entry.File.Visibility != FileVisibility.Public))
             throw new FileManagementException("not_found", "文件不可访问。");
         if (publicAccess) return entry;
-        if (await _permissions.IsGrantedAsync("files.manage", ct)) return entry;
-        if (entry.Bindings.Count == 0 && entry.File.CreatorId == _user.UserId) return entry;
-        foreach (var binding in entry.Bindings)
-            if (await _authorizer.AuthorizeAsync(binding.BusinessType, binding.BusinessId, FileBusinessAccess.Read, ct)) return entry;
-        throw new FileManagementException("forbidden", "无文件访问权限。");
+        await AuthorizeReadSnapshotAsync(entry.File, entry.Bindings, ct);
+        return entry;
     }
     public async Task<FileView> GetAsync(Guid id, CancellationToken ct = default) => FileView.From((await AuthorizeReadAsync(id, ct: ct)).File);
     /// <summary>
@@ -313,14 +310,16 @@ public sealed partial class FileManagementService
         {
             ct.ThrowIfCancellationRequested();
             var candidates = await _store.ListReadyFilesAsync(scope.Key, manage ? null : _user.UserId, candidateSkip, batchSize, ct);
+            var snapshots = await ReadAuthorizationBatchAsync(scope.Key, candidates, ct);
             foreach (var candidate in candidates)
             {
                 ct.ThrowIfCancellationRequested();
-                FileEntry entry;
-                try { entry = await AuthorizeReadAsync(candidate.Id, ct: ct); }
+                FileRecord? file;
+                try { file = await ReadAuthorizedCandidateAsync(scope.Key, manage ? null : _user.UserId, candidate.Id, snapshots, ct); }
                 catch (FileManagementException ex) when (ex.Code == "forbidden" || ex.Code == "not_found") { continue; }
+                if (file == null) continue;
                 if (remainingSkip > 0) { remainingSkip--; continue; }
-                result.Add(FileView.From(entry.File));
+                result.Add(FileView.From(file));
                 if (result.Count == pageSize) return result;
             }
             if (candidates.Count < batchSize) return result;

@@ -80,11 +80,16 @@ public sealed partial class FileManagementService
         for (var batch = 0; batch < 10; batch++)
         {
             var candidates = await _store.QueryFilesAsync(query, ct);
+            var snapshots = await ReadAuthorizationBatchAsync(context.ScopeKey, candidates, ct);
             foreach (var candidate in candidates)
             {
                 ct.ThrowIfCancellationRequested();
                 result.NextPosition = new() { CreatedAt = candidate.CreatedAt, Key = candidate.RequestKey };
-                try { items.Add(FileView.From((await AuthorizeReadAsync(candidate.Id, ct: ct)).File)); }
+                try
+                {
+                    var file = await ReadAuthorizedCandidateAsync(context.ScopeKey, query.CreatorId, candidate.Id, snapshots, ct);
+                    if (file != null) items.Add(FileView.From(file));
+                }
                 catch (FileManagementException ex) when (ex.Code is "forbidden" or "not_found") { }
                 if (items.Count == take) return result;
             }
