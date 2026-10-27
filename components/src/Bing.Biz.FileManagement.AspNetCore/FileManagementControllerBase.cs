@@ -27,7 +27,8 @@ public abstract partial class FileManagementControllerBase : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateFileUpload request, CancellationToken ct)
         => Accepted(await _files.CreateUploadAsync(request, ct));
     [HttpGet("upload-sessions/{id:guid}")]
-    public async Task<IActionResult> Session(Guid id, CancellationToken ct) => Ok(await _files.GetSessionAsync(id, ct));
+    public async Task<IActionResult> Session(Guid id, CancellationToken ct, [FromQuery] bool includeParts = true)
+        => Ok(await _files.GetSessionAsync(id, includeParts, ct));
     [HttpPost("upload-sessions/{id:guid}/part-requests")]
     public async Task<IActionResult> PartRequest(Guid id, [FromBody] PartUploadRequest request, CancellationToken ct)
     {

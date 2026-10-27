@@ -58,10 +58,15 @@ async function api(path, options = {}) {
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const sha256 = async blob => btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))));
-async function getSession() { return api('/upload-sessions/' + saved.id); }
+async function getSession(includeParts = true) {
+    const controller = new AbortController(); controllers.add(controller);
+    try { return await api('/upload-sessions/' + saved.id + '?includeParts=' + includeParts, { signal: controller.signal }); }
+    finally { controllers.delete(controller); }
+}
 async function waitForState(wanted) {
     while (running) {
-        const session = await getSession();
+        const session = await getSession(false);
+        if (!running) throw new DOMException('已暂停', 'AbortError');
         if (wanted.includes(session.state)) return session;
         if ([6, 7].includes(session.state)) throw new Error('上传已中止或失败，请创建新会话。');
         status('服务端正在处理：' + ({ 0: '待初始化', 1: '上传中', 2: '完成中', 3: '已就绪', 8: '内容检查中' }[session.state] || session.state));
@@ -89,13 +94,18 @@ async function start() {
                 length: saved.size, lastModified: saved.lastModified, container: saved.container, contentType: saved.contentType || file.type || 'application/octet-stream' }) });
             saved.id = created.id; saved.fileId = created.fileId; persist();
         }
-        const session = await waitForState([1, 2, 3, 8]);
+        let session = await waitForState([1, 2, 3, 8]);
+        // 轻量轮询的空 parts 不代表没有已上传内容；只有真正续传才读取完整清单。
+        if (session.state === 1) session = await getSession();
+        if (!running) return;
         if (session.state === 3) { status('该会话已完成。文件 ID：' + saved.fileId); saved = null; persist(); await list(); return; }
         if ([2, 8].includes(session.state)) { await waitForState([3]); status('上传完成。文件 ID：' + saved.fileId); saved = null; persist(); await list(); return; }
+        if (session.state !== 1) throw new Error('会话状态已变化，请重新查询或创建上传。');
         const completed = new Set();
         let confirmed = 0;
         // 以服务端清单为准，并校验重新选择的文件内容。
         for (const part of session.parts) {
+            if (!running) throw new DOMException('已暂停', 'AbortError');
             const blob = file.slice((part.number - 1) * session.partSize, Math.min(file.size, part.number * session.partSize));
             if (await sha256(blob) !== part.sha256) throw new Error('已上传分片内容不同，拒绝错误续传。');
             completed.add(part.number); confirmed += part.length;

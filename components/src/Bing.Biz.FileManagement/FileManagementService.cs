@@ -146,9 +146,14 @@ public sealed partial class FileManagementService
         DirectUpload = _storage.GetStorage(entry.File.StoreName, entry.File.Scope()).Capabilities.HasFlag(FileStorageCapabilities.SignedParts),
         Parts = parts ?? Array.Empty<FilePart>()
     };
-    public async Task<UploadSessionView> GetSessionAsync(Guid id, CancellationToken ct = default)
+    public Task<UploadSessionView> GetSessionAsync(Guid id, CancellationToken ct = default)
+        => GetSessionAsync(id, true, ct);
+
+    /// <summary>轻量轮询可省略分片；恢复上传仍须显式取得完整、已核验的清单。</summary>
+    public async Task<UploadSessionView> GetSessionAsync(Guid id, bool includeParts, CancellationToken ct = default)
     {
         var entry = await OwnedSessionAsync(id, false, ct);
+        if (!includeParts) return View(entry);
         if (entry.File.State == FileState.Uploading && entry.File.Length != 0)
         {
             var backend = Storage(entry);
