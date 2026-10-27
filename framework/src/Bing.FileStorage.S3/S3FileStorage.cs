@@ -8,7 +8,7 @@ using Amazon.S3.Model;
 namespace Bing.FileStorage;
 
 /// <summary>绑定一个租户或主机范围的 S3 对象存储门面。</summary>
-internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, ISignedFileRequestProvider, IFileRangeReader
+internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMultipartFilePartReader, ISignedFileRequestProvider, IFileRangeReader
 {
     private const string UploadTokenMetadata = "bing-upload-token";
     private const string UploadModeMetadata = "bing-upload-mode";
@@ -353,44 +353,72 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, ISign
         ArgumentNullException.ThrowIfNull(upload);
         EnsureUploadRequest(upload);
         var parts = new List<FilePart>();
-        string? marker = null;
+        int? marker = null;
+        do
+        {
+            var page = await ReadPartPageAsync(upload, marker, _listPartsPageSize, cancellationToken).ConfigureAwait(false);
+            parts.AddRange(page.Parts);
+            marker = page.NextMarker;
+        } while (marker.HasValue);
+        return parts;
+    }
+
+    /// <summary>利用排他游标只读取目标位置的一条记录，不重复枚举此前已上传的分片。</summary>
+    public async Task<FilePart?> GetPartAsync(MultipartUpload upload, int partNumber,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(upload);
+        EnsureUploadRequest(upload);
+        upload.GetPartLength(partNumber);
+        var page = await ReadPartPageAsync(upload, partNumber - 1, 1, cancellationToken).ConfigureAwait(false);
+        var part = page.Parts.FirstOrDefault();
+        // 分片编号可以有空洞，后继分片不代表目标分片存在。
+        return part?.Number == partNumber ? part : null;
+    }
+
+    /// <summary>统一分页请求和错误分类；验证有序游标，避免错误页面被当作缺片或无限翻页。</summary>
+    private async Task<(IReadOnlyList<FilePart> Parts, int? NextMarker)> ReadPartPageAsync(MultipartUpload upload,
+        int? marker, int maxParts, CancellationToken cancellationToken)
+    {
         try
         {
-            while (true)
+            cancellationToken.ThrowIfCancellationRequested();
+            var response = await _client.ListPartsAsync(new ListPartsRequest
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var response = await _client.ListPartsAsync(new ListPartsRequest
-                {
-                    BucketName = Bucket(upload.Request.Address),
-                    Key = ObjectKey(upload.Request.Address),
-                    UploadId = upload.UploadId,
-                    PartNumberMarker = marker,
-                    MaxParts = _listPartsPageSize
-                }, cancellationToken).ConfigureAwait(false);
+                BucketName = Bucket(upload.Request.Address),
+                Key = ObjectKey(upload.Request.Address),
+                UploadId = upload.UploadId,
+                PartNumberMarker = marker?.ToString(CultureInfo.InvariantCulture),
+                MaxParts = maxParts
+            }, cancellationToken).ConfigureAwait(false);
 
-                foreach (var part in response.Parts ?? new List<PartDetail>())
+            var details = response.Parts ?? new List<PartDetail>();
+            if (details.Count > maxParts)
+                throw new FileStorageException(FileStorageError.InvalidPart, "S3 分片页面超过请求的条数上限。");
+            var parts = new List<FilePart>(details.Count);
+            var previous = marker ?? 0;
+            foreach (var part in details)
+            {
+                if (part.PartNumber == null || part.PartNumber <= previous || part.PartNumber > 10000 ||
+                    part.Size == null || part.Size < 0 || string.IsNullOrWhiteSpace(part.ETag))
+                    throw new FileStorageException(FileStorageError.InvalidPart, "S3 返回了无效或无序的分片属性。");
+                parts.Add(new FilePart
                 {
-                    if (part.PartNumber == null || part.Size == null)
-                        throw new FileStorageException(FileStorageError.InvalidPart, "S3 返回了不完整的分片属性。");
-                    parts.Add(new FilePart
-                    {
-                        Number = part.PartNumber.Value,
-                        Length = part.Size.Value,
-                        ETag = part.ETag,
-                        Sha256 = part.ChecksumSHA256
-                    });
-                }
-
-                if (response.IsTruncated != true)
-                    break;
-                var next = response.NextPartNumberMarker?.ToString(CultureInfo.InvariantCulture);
-                if (string.IsNullOrEmpty(next) || string.Equals(marker, next, StringComparison.Ordinal))
-                    throw new FileStorageException(FileStorageError.OutcomeUnknown, "S3 分片分页游标未前进。");
-                marker = next;
+                    Number = part.PartNumber.Value,
+                    Length = part.Size.Value,
+                    ETag = part.ETag,
+                    Sha256 = part.ChecksumSHA256
+                });
+                previous = part.PartNumber.Value;
             }
 
-            parts.Sort((left, right) => left.Number.CompareTo(right.Number));
-            return parts;
+            if (response.IsTruncated != true)
+                return (parts, null);
+            // S3 的续页标记为本页最后序号；拒绝倒退、跳号游标或空的截断页。
+            var next = response.NextPartNumberMarker;
+            if (parts.Count == 0 || next != previous || next <= (marker ?? 0))
+                throw new FileStorageException(FileStorageError.OutcomeUnknown, "S3 分片分页游标无效或未前进。");
+            return (parts, next);
         }
         catch (AmazonS3Exception ex)
         {

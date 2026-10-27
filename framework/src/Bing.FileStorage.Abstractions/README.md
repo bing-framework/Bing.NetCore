@@ -4,6 +4,8 @@
 
 `IFileStorage` 提供流式保存、读取、属性查询和删除；`IMultipartFileStorage`、`ISignedFileRequestProvider`、`IFileRangeReader` 分别表示可选能力。调用前检查 `Capabilities`，不要假设每个后端都支持全部能力。
 
+需要核验一个分片时，确认 `Multipart` 能力后调用 `IMultipartFileStorage.GetPartAsync(upload, number, cancellationToken)` 扩展。支持 `IMultipartFilePartReader` 的后端使用单片查询；旧 Provider 无需新增接口成员，会回退到完整清单。仅目标分片缺失返回 `null`，会话缺失、权限和网络错误仍抛出异常。工厂包装器实现该接口以提供兼容回退，不能只凭类型判断底层是否提供查询加速。
+
 ```csharp
 var address = new FileAddress("attachments", "objects/0123456789abcdef");
 var request = new FileWriteRequest(address, inputLength, FileWriteMode.Overwrite, "application/octet-stream");

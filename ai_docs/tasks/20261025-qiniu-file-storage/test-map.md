@@ -49,3 +49,34 @@
 QiniuLiveTests.Proxy_RealMultipartRangeSignedDownloadAndIdempotentCompletion、SignedParts_RejectsWrongBytes_ListsChecksum_AndExpires、Proxy_SigV4PayloadTampering_IsRejectedAndUploadCanBeAborted：net6.0/net8.0 均因缺少测试空间配置跳过。代码存在不代表目标云端通过。
 
 真实浏览器 CORS、跨日会话期限、实际应用进程重启后的云端续传，以及 1 GiB/100 GiB 容量均须在目标空间后续验收。容量入口为 CapacityProbe 的 `--backend qiniu --allow-qiniu true --gib 1|100`；本轮没有执行。
+
+
+## OPT-001：单片分页查询性能增量
+
+|最终生产符号 / 行为|项目与测试方法|
+|---|---|
+|IMultipartFilePartReader / MultipartFileStorageExtensions.GetPartAsync；可选能力优先、旧 Provider 回退、取消与序号边界、重复序号拒绝|FileStorage.Tests：MultipartPartReaderTests.LegacyProvider_FallsBackToOneFullListAndFindsRequestedPart、OptionalReader_IsPreferredOverFullList、Extension_RejectsOutOfRangePartAndHonorsCancellationBeforeProviderCall、LegacyFallback_RejectsDuplicatePartNumbers|
+|ValidatedFileStorage.GetPartAsync；容器过滤和兼容委托|FileStorage.Tests：MultipartPartReaderTests.LegacyProvider_ThroughValidatedFactoryStillUsesFallback、ValidatedFactory_RejectsUnconfiguredContainerBeforePointRead|
+|S3FileStorage.GetPartAsync / ReadPartPageAsync；精确游标、首尾稀疏片、两模式、桶及租户隔离、权限/取消|S3.Tests：S3PartQueryTests.PointQuery_UsesExclusiveMarkerAndReturnsFirstOrLastPart、PointQuery_WorksWithBothPersistedUploadModes、DefaultBackend_UsesSignedPartsMode、PointQuery_UsesMappedBucketAndScopeSpecificObjectKey、PointQuery_PropagatesAccessDeniedInsteadOfReturningMissing、PointQuery_HonorsCancellationBeforeSendingRequest|
+|S3FileStorage.ListPartsAsync / ReadPartPageAsync；全量游标完整性、异常页、6400 片成本|S3.Tests：S3PartQueryTests.FullListing_RejectsMalformedPages、FullListing_UsesValidatedMultiPageCursor、MetadataOnlyProbe_Queries6400PartsWithOneRequestAndOneReturnedPart|
+|FileManagementService.SavePartReceiptAsync；主链路点查、CAS 后重新查远端、旧响应/冻结/过期拒绝|FileManagement.Tests：ProxyUploadTests.LargeSession_ReceiptQueriesOnlyTarget_WhileResumeStillReadsAllPages、ReceiptCasConflict_RechecksRemoteVersion、OldUploadResponse_CannotOverwriteNewerReceipt、StateChangesDuringTransfer_PreventReceiptCommit、ExpiredDuringTransfer_PreventsReceiptCommit（全部两 ORM SQLite）|
+|FileManagementService.GetSessionAsync / ConfirmPartsAsync；恢复/完成保留全量可信回执核对|FileManagement.Tests：ProxyUploadTests.LargeSession_ReceiptQueriesOnlyTarget_WhileResumeStillReadsAllPages、Receipt_SurvivesReregistrationRestartAndCompletesWithoutRemoteChecksum、MissingReceiptOrChangedRemotePart_IsNotResumableAndCannotComplete|
+|真实 S3 协议点查/完整枚举一致性、NoSuchUpload、SHA-256|S3.Tests：MinioLiveTests.Minio_BasicMultipartRangeAndSignedRequests_RoundTrip（本轮真实 MinIO，两框架通过）|
+|七牛代理和直传目标空间游标验证入口|Qiniu.Tests：QiniuLiveTests.Proxy_RealMultipartRangeSignedDownloadAndIdempotentCompletion、SignedParts_RejectsWrongBytes_ListsChecksum_AndExpires（缺云端配置，未执行）|
+|发布包兼容与新接口消费|evidence/part-query-optimization/package-consumption：Abstractions netstandard2.0、四包 7.0.0 Release、net6.0 consumer 调用新接口/兼容扩展、取消传播及 DLL 哈希匹配|
+
+本轮独立证据目录：[part-query-optimization](evidence/part-query-optimization/README.md)。
+
+## OPT-002 / OPT-003：轻量状态与批量读取
+
+| 最终生产符号 / 行为 | 项目与测试方法 |
+|---|---|
+| FileManagementService.GetSessionAsync(id,includeParts,ct)；轻量模式不读远端和数据库分片，默认保持完整读取 | FileManagement.Tests：SessionStatusQueryTests.LightweightUploading_DoesNotReadRemoteOrDatabaseParts_AndPreservesDefault（两 ORM、S3 SDK 调用计数、取消） |
+| FileManagementControllerBase.Session；includeParts 默认 true，6400 片轻量响应恒定，所有者/跨租户隔离，各处理/终态查询 | FileManagement.Tests：SessionStatusQueryTests.HttpStatus_IsConstantSizeFor6400Parts_AndEnforcesOwnership（两 ORM SQLite / TestServer，100 GiB 声明的元数据测试） |
+| IFileReadBatchStore / 两 ORM ReadReadyFilesAsync；范围/Ready/缺失/重复筛选、脱离跟踪 | FileManagement.Tests：FileReadBatchStoreTests.ReadReadyFilesAsync_FiltersScopeStateAndBindingsAndReturnsDetachedSnapshots |
+| 两 ORM ReadReadyFilesAsync；1/50/100 个 ID 均两条 SELECT，不读 Session，空批/无命中/非法参数/取消 | FileManagement.Tests：FileReadBatchStoreTests.ReadReadyFilesAsync_UsesTwoSelectsForOneFiftyAndOneHundredIds、ReadReadyFilesAsync_ValidatesBeforeDatabaseAccessAndSkipsEmptyBatch |
+| FileManagementService.ListAsync / SearchAsync / ReadAuthorizationBatchAsync / ReadAuthorizedCandidateAsync；可选能力与旧仓储相同输出、真实查询成本、候选删除竞争 | FileManagement.Tests：FileReadQueryTests.FiftyFiles_BatchAndLegacyFallbackReturnSamePage_WithThreeInsteadOf151Selects、CandidateDeletedBeforeBatch_IsExcludedWithoutChangingOtherResults（两 ORM × 两入口） |
+| AuthorizeReadSnapshotAsync；批量后仍逐项授权，拒绝不占页，游标和取消/异常传播 | FileManagement.Tests：FileReadQueryTests.BatchAuthorization_PreservesDeniedCursorProgressCancellationAndErrors；FileListPaginationTests 全类；EnhancementQueryTests 全类；FileHttpTests.RealHttp_Upload_Download_Range_Signing_AndAuthorization；两 Admin 文件及用户资料附件集成 |
+| Console/uploader.js getSession / waitForState / start / pause；恢复获取全量一次、等待轻量查询、暂停取消 | query-optimizations/browser-verify.cjs 和 browser-result.json：实际 33 MiB 上传暂停、刷新后补传两片、逐字节下载验证、真实 AbortSignal；桌面/移动截图已按用户授权随临时目录移入回收站 |
+
+本增量证据目录：[query-optimizations](evidence/query-optimizations/README.md)。net6/net8 全量结果与最终状态专项按源码范围复用，不重复累加；七牛和容量门禁不纳入本地完成结论。

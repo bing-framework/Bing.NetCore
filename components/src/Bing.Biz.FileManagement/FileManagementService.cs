@@ -214,8 +214,7 @@ public sealed partial class FileManagementService
             if (entry.Session!.BackendUploadId != uploadedEntry.Session.BackendUploadId)
                 throw new FileManagementException("conflict", "上传会话已被替换。");
             // 旧请求可能晚于重传返回；每次 CAS 前核对当前后端版本，禁止重放旧回执。
-            var remote = (await ((IMultipartFileStorage)backend).ListPartsAsync(entry.Upload(), ct))
-                .SingleOrDefault(p => p.Number == receipt.Number);
+            var remote = await ((IMultipartFileStorage)backend).GetPartAsync(entry.Upload(), receipt.Number, ct);
             if (remote == null || remote.Length != receipt.Length || remote.ETag != receipt.ETag ||
                 (remote.Sha256 != null && remote.Sha256 != receipt.Sha256))
                 throw new FileManagementException("conflict", "远端分片已变化，请重新上传此分片。");

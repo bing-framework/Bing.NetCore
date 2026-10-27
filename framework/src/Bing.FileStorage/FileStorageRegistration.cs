@@ -70,7 +70,7 @@ internal sealed class FileStorageFactory : IFileStorageFactory
 }
 
 /// <summary>在所有能力入口执行同一容器校验。</summary>
-internal sealed class ValidatedFileStorage : IFileStorage, IMultipartFileStorage, ISignedFileRequestProvider, IFileRangeReader
+internal sealed class ValidatedFileStorage : IFileStorage, IMultipartFileStorage, IMultipartFilePartReader, ISignedFileRequestProvider, IFileRangeReader
 {
     private readonly IFileStorage _inner;
     private readonly ISet<string> _containers;
@@ -97,6 +97,8 @@ internal sealed class ValidatedFileStorage : IFileStorage, IMultipartFileStorage
     { Validate(upload.Request.Address); return Capability<IMultipartFileStorage>().UploadPartAsync(upload, partNumber, source, sha256, cancellationToken); }
     public Task<IReadOnlyList<FilePart>> ListPartsAsync(MultipartUpload upload, CancellationToken cancellationToken = default)
     { Validate(upload.Request.Address); return Capability<IMultipartFileStorage>().ListPartsAsync(upload, cancellationToken); }
+    public Task<FilePart?> GetPartAsync(MultipartUpload upload, int partNumber, CancellationToken cancellationToken = default)
+    { Validate(upload.Request.Address); return Capability<IMultipartFileStorage>().GetPartAsync(upload, partNumber, cancellationToken); }
     public Task<FileWriteResult> CompleteMultipartAsync(MultipartUpload upload, IReadOnlyList<FilePart> parts, CancellationToken cancellationToken = default)
     { Validate(upload.Request.Address); return Capability<IMultipartFileStorage>().CompleteMultipartAsync(upload, parts, cancellationToken); }
     public Task AbortMultipartAsync(MultipartUpload upload, CancellationToken cancellationToken = default)

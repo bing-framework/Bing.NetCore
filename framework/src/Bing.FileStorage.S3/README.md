@@ -23,3 +23,5 @@ services.AddBingS3Storage("s3-v1", options =>
 DI 注册会创建并拥有共享 SDK 客户端；存储门面按范围绑定，不会单独释放客户端。自行构造 `S3FileStorageBackend` 时，传入的客户端由调用方拥有。未配置密钥时使用 AWS 默认凭据链。协议兼容不代表已通过云厂商互操作认证；当前实际验证目标见 MinIO README。
 
 普通请求保留最多 16 项自定义元数据。`bing-upload-` 前缀由 Provider 保留，调用方不能用于新建对象或上传；Provider 的 token/mode 字段不占用这 16 项额度。S3 请求还会验证包含内部字段的元数据键和值合计不超过 2 KiB。持久化分片句柄时完整保存返回的元数据，通过 `FileWriteRequest.RestoreMultipart` 从受信记录重建请求；该恢复入口不得直接使用客户端提供的元数据。
+
+`IMultipartFileStorage.GetPartAsync` 使用 `part-number-marker = number - 1` 和 `max-parts = 1` 查询当前目标分片，缺失时返回 `null`。完整 `ListPartsAsync` 仍按配置翻页，用于恢复和完成校验。两条路径均核对返回序号与分页游标，拒绝无效页面；权限、网络错误及会话消失不会转换为缺片。游标语义依据 [AWS ListParts](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListParts.html)。

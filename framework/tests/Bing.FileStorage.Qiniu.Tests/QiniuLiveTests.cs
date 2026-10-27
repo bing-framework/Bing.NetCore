@@ -50,8 +50,11 @@ public sealed class QiniuLiveTests
             metadata: new Dictionary<string, string> { ["bing-session"] = address.Key }), size);
         try
         {
-            var first = await multipart.UploadPartAsync(upload, 1, new MemoryStream(firstBytes));
             var second = await multipart.UploadPartAsync(upload, 2, new MemoryStream(tail));
+            Assert.Null(await multipart.GetPartAsync(upload, 1));
+            Assert.Equal(second.ETag, (await multipart.GetPartAsync(upload, 2))!.ETag);
+            var first = await multipart.UploadPartAsync(upload, 1, new MemoryStream(firstBytes));
+            Assert.Equal(first.ETag, (await multipart.GetPartAsync(upload, 1))!.ETag);
             Assert.Equal(2, (await multipart.ListPartsAsync(upload)).Count);
             var result = await multipart.CompleteMultipartAsync(upload, new[] { first, second });
             Assert.Equal(size + 3, result.Properties.Length); Assert.Equal(address.Key, result.Properties.Metadata["bing-session"]);
@@ -86,6 +89,7 @@ public sealed class QiniuLiveTests
             using (var wrong = await Put(http, signed, new byte[] { 4, 5, 6 })) Assert.False(wrong.IsSuccessStatusCode);
             using (var valid = await Put(http, signed, bytes)) Assert.True(valid.IsSuccessStatusCode);
             var parts = await multipart.ListPartsAsync(upload); Assert.Equal(hash, Assert.Single(parts).Sha256);
+            Assert.Equal(hash, (await multipart.GetPartAsync(upload, 1))!.Sha256);
             var expired = await signer.SignPartAsync(upload, 1, hash, TimeSpan.FromSeconds(1));
             await Task.Delay(2200);
             using (var invalid = await Put(http, expired, bytes)) Assert.False(invalid.IsSuccessStatusCode);

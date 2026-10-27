@@ -140,11 +140,14 @@ public sealed class MinioLiveTests
             await multipart.AbortMultipartAsync(abortUpload);
             var abortedError = await Assert.ThrowsAsync<FileStorageException>(() => multipart.ListPartsAsync(abortUpload));
             Assert.Equal(FileStorageError.UploadNotFound, abortedError.Error);
+            Assert.Equal(FileStorageError.UploadNotFound,
+                (await Assert.ThrowsAsync<FileStorageException>(() => multipart.GetPartAsync(abortUpload, 1))).Error);
 
             var request = new FileWriteRequest(multipartAddress, multipartData.Length, FileWriteMode.Overwrite,
                 "application/octet-stream", new Dictionary<string, string> { ["bing-session"] = "multipart-session" });
             var upload = await multipart.CreateMultipartAsync(request, 5 * 1024 * 1024);
             Assert.Empty(await multipart.ListPartsAsync(upload));
+            Assert.Null(await multipart.GetPartAsync(upload, 1));
             var signedProvider = (ISignedFileRequestProvider)storage;
             var partLength = upload.GetPartLength(1);
             var partHash = Convert.ToBase64String(SHA256.HashData(multipartData.AsSpan(0, (int)partLength)));
@@ -157,6 +160,8 @@ public sealed class MinioLiveTests
                 put.Headers.TryAddWithoutValidation("x-amz-checksum-sha256", partHash);
                 using var response = await http.SendAsync(put);
                 response.EnsureSuccessStatusCode();
+                Assert.Equal(partHash, (await multipart.GetPartAsync(upload, 1))!.Sha256);
+                Assert.Null(await multipart.GetPartAsync(upload, 2));
 
                 var lastOffset = (int)partLength;
                 var lastData = multipartData.AsSpan(lastOffset).ToArray();
@@ -173,6 +178,7 @@ public sealed class MinioLiveTests
             Assert.Equal(2, listed.Count);
             Assert.Equal(partHash, listed[0].Sha256);
             Assert.Equal(2, listed[1].Number);
+            Assert.Equal(listed[1].ETag, (await multipart.GetPartAsync(upload, 2))!.ETag);
             var completed = await multipart.CompleteMultipartAsync(upload, listed);
             Assert.Equal(multipartData.Length, completed.Properties.Length);
             Assert.Equal("multipart-session", completed.Properties.Metadata["bing-session"]);

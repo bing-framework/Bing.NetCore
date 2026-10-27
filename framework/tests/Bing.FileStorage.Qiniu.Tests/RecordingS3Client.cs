@@ -14,6 +14,8 @@ public sealed class RecordingS3Client : AmazonS3Client
     public readonly Dictionary<string, Upload> Uploads = new();
     public readonly Dictionary<string, StoredObject> Objects = new();
     public readonly List<(string Operation, string Bucket, string Key)> Calls = new();
+    public readonly List<(string? Marker, int? MaxParts)> ListRequests = new();
+    public int ListedParts { get; private set; }
     public UploadPartRequest? LastPart { get; private set; }
     public InitiateMultipartUploadRequest? LastInitiate { get; private set; }
     public CompleteMultipartUploadRequest? LastComplete { get; private set; }
@@ -56,13 +58,15 @@ public sealed class RecordingS3Client : AmazonS3Client
     public override Task<ListPartsResponse> ListPartsAsync(ListPartsRequest request, CancellationToken ct = default)
     {
         Record("list", request.BucketName, request.Key, ct); ListCalls++;
+        ListRequests.Add((request.PartNumberMarker, request.MaxParts));
         var upload = Find(request.UploadId);
         var marker = int.TryParse(request.PartNumberMarker, out var m) ? m : 0;
         var all = upload.Parts.Where(x => x.Key > marker).OrderBy(x => x.Key).ToArray();
         var page = all.Take(request.MaxParts ?? 1000).ToArray();
+        ListedParts += page.Length;
         return Task.FromResult(new ListPartsResponse { IsTruncated = page.Length < all.Length,
             NextPartNumberMarker = page.Length == 0 ? marker : page.Last().Key,
-            Parts = page.Select(x => new PartDetail { PartNumber = x.Key, Size = x.Value.Bytes.Length,
+            Parts = page.Select(x => new PartDetail { PartNumber = x.Key, Size = x.Value.Length,
                 ETag = x.Value.ETag, ChecksumSHA256 = OmitRemoteChecksum ? null : x.Value.Hash }).ToList() });
     }
     public override Task<CompleteMultipartUploadResponse> CompleteMultipartUploadAsync(CompleteMultipartUploadRequest request, CancellationToken ct = default)
@@ -117,6 +121,10 @@ public sealed class RecordingS3Client : AmazonS3Client
         public Dictionary<string, string> Metadata = new();
         public Dictionary<int, Part> Parts = new();
     }
-    public sealed record Part(byte[] Bytes, string ETag, string Hash);
+    public sealed record Part(byte[] Bytes, string ETag, string Hash)
+    {
+        /// <summary>元数据成本测试可指定声明长度，避免为查询测试分配整个文件；实际上传默认使用字节长度。</summary>
+        public long Length { get; init; } = Bytes.LongLength;
+    }
     public sealed record StoredObject(byte[] Bytes, Dictionary<string, string> Metadata);
 }

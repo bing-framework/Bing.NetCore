@@ -120,7 +120,45 @@ public sealed class ProxyUploadTests
         var service = new FileManagementService((IFileManagementStore)(object)fault, env.Get<IFileStorageFactory>(), env.Identity, env.Identity,
             env.Get<IFilePermissionChecker>(), env.Authorizer, env.Get<FileManagementOptions>());
         await Assert.ThrowsAsync<FileManagementException>(() => Upload(service, session.Id));
-        Assert.Null((await store.FindPartAsync(session.Id, 1))!.ETag); Assert.True(client.ListCalls >= 2);
+        Assert.Null((await store.FindPartAsync(session.Id, 1))!.ETag);
+        Assert.Equal(2, client.ListCalls);
+        Assert.All(client.ListRequests, request => { Assert.Equal("0", request.Marker); Assert.Equal(1, request.MaxParts); });
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public async Task LargeSession_ReceiptQueriesOnlyTarget_WhileResumeStillReadsAllPages(bool freeSql)
+    {
+        const int count = 6400, partSize = 16 * 1024 * 1024;
+        using var client = new RecordingS3Client(); await using var env = Environment(freeSql, client);
+        env.ConfigureManagement = options =>
+        {
+            options.PartSize = partSize;
+            options.Containers["attachments"].MaxFileLength = 100L * 1024 * 1024 * 1024;
+        };
+        await env.InitializeAsync();
+        var service = env.Get<FileManagementService>();
+        var session = await service.CreateUploadAsync(new() { RequestId = Guid.NewGuid(), FileName = "many-parts.bin", Length = (long)(count - 1) * partSize + 3 });
+        await env.RunAsync();
+        await service.CreatePartRequestAsync(session.Id, new() { Number = count, Sha256 = Hash });
+        // 只模拟已有远端清单；本测试实际传输尾片的三个字节，不构成 100 GiB 容量验证。
+        var remote = client.Uploads.Values.Single();
+        for (var number = 1; number < count; number++)
+            remote.Parts[number] = new(Array.Empty<byte>(), "etag-" + number, Hash) { Length = partSize };
+        using var source = new MemoryStream(new byte[] { 1, 2, 3 });
+        var receipt = await service.UploadPartAsync(session.Id, count, source);
+        Assert.Equal(1, client.ListCalls); Assert.Equal(1, client.ListedParts);
+        Assert.Equal(("6399", (int?)1), Assert.Single(client.ListRequests));
+        Assert.Equal(receipt.ETag, (await env.Get<IFileManagementStore>().FindPartAsync(session.Id, count))!.ETag);
+
+        await env.RestartAsync();
+        service = env.Get<FileManagementService>();
+        var resumed = await service.GetSessionAsync(session.Id);
+        Assert.Equal(count, Assert.Single(resumed.Parts).Number);
+        Assert.Equal(8, client.ListCalls); Assert.Equal(6401, client.ListedParts);
+        Assert.All(client.ListRequests.Skip(1), request => Assert.Equal(1000, request.MaxParts));
+        // 完成仍需全部已验证回执，不能因尾片点查成功而接受其余未登记分片。
+        Assert.Equal("invalid_parts", (await Assert.ThrowsAsync<FileManagementException>(() => service.CompleteUploadAsync(session.Id))).Code);
     }
 
     [Theory]
