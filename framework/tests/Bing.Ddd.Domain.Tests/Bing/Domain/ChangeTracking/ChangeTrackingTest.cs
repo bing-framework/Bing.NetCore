@@ -96,10 +96,10 @@ public class ChangeTrackingTest
     }
 
     /// <summary>
-    /// 测试目的：Descriptor 描述为空时（1 参数重载），不应被添加到集合。
+    /// 测试目的：FIX-013 空描述回退到属性名，已判定的变化不得因描述为空被丢弃。
     /// </summary>
     [Fact]
-    public void Collection_AddDescriptor_EmptyDescription_ShouldNotAdd()
+    public void Collection_AddDescriptor_EmptyDescription_ShouldFallbackToPropertyName()
     {
         // Arrange
         var collection = new ChangedValueDescriptorCollection();
@@ -109,7 +109,11 @@ public class ChangeTrackingTest
         collection.Add(descriptor);
 
         // Assert
-        collection.ShouldBeEmpty();
+        var stored = collection.Single();
+        stored.PropertyName.ShouldBe("Name");
+        stored.Description.ShouldBe("Name");
+        stored.OldValue.ShouldBe("old");
+        stored.NewValue.ShouldBe("new");
     }
 
     /// <summary>
@@ -200,10 +204,10 @@ public class ChangeTrackingTest
     }
 
     /// <summary>
-    /// 测试目的：值不同时，应添加变更记录，且旧值/新值经过 Trim + toLower 处理。
+    /// 测试目的：DEC-01 按类型值判等后保留源字符串原样展示，不再小写或去空格。
     /// </summary>
     [Fact]
-    public void Context_Add_DifferentValues_ShouldTrack()
+    public void Context_Add_DifferentValues_ShouldTrackWithOriginalText()
     {
         // Arrange
         var ctx = new ChangeTrackingContext();
@@ -215,8 +219,8 @@ public class ChangeTrackingTest
         var descriptors = ctx.GetChangedValueDescriptor().ToList();
         descriptors.Count.ShouldBe(1);
         descriptors[0].PropertyName.ShouldBe("Name");
-        descriptors[0].OldValue.ShouldBe("alice");
-        descriptors[0].NewValue.ShouldBe("bob");
+        descriptors[0].OldValue.ShouldBe("\"Alice\"");
+        descriptors[0].NewValue.ShouldBe("\"Bob\"");
     }
 
     /// <summary>
@@ -236,16 +240,70 @@ public class ChangeTrackingTest
     }
 
     /// <summary>
-    /// 测试目的：大小写不同但内容相同的值应视为相等，不应记录变更。
+    /// 测试目的：DEC-01 字符串按 ordinal 区分大小写，"Alice" 与 "ALICE" 视为不同值。
     /// </summary>
     [Fact]
-    public void Context_Add_SameValueDifferentCase_ShouldNotTrack()
+    public void Context_Add_DifferentCase_ShouldTrackByOrdinal()
     {
         // Arrange
         var ctx = new ChangeTrackingContext();
 
         // Act
         ctx.Add("Name", "姓名", "Alice", "ALICE");
+
+        // Assert
+        var descriptor = ctx.GetChangedValueDescriptor().Single();
+        descriptor.OldValue.ShouldBe("\"Alice\"");
+        descriptor.NewValue.ShouldBe("\"ALICE\"");
+    }
+
+    /// <summary>
+    /// 测试目的：DEC-01 前后空格属于值内容，必须产生差异并保留空格。
+    /// </summary>
+    [Fact]
+    public void Context_Add_WhitespaceDifference_ShouldTrackAndPreserve()
+    {
+        // Arrange
+        var ctx = new ChangeTrackingContext();
+
+        // Act
+        ctx.Add("Name", "姓名", "上海", " 上海 ");
+
+        // Assert
+        var descriptor = ctx.GetChangedValueDescriptor().Single();
+        descriptor.OldValue.ShouldBe("\"上海\"");
+        descriptor.NewValue.ShouldBe("\" 上海 \"");
+    }
+
+    /// <summary>
+    /// 测试目的：DEC-01 null 与空字符串必须可区分，且都能被记录。
+    /// </summary>
+    [Fact]
+    public void Context_Add_NullVersusEmptyString_ShouldTrackAndRemainDistinct()
+    {
+        // Arrange
+        var ctx = new ChangeTrackingContext();
+
+        // Act
+        ctx.Add<string>("Name", "姓名", null, "");
+
+        // Assert
+        var descriptor = ctx.GetChangedValueDescriptor().Single();
+        descriptor.OldValue.ShouldBe("null");
+        descriptor.NewValue.ShouldBe("\"\"");
+    }
+
+    /// <summary>
+    /// 测试目的：DEC-01 decimal 按数值判等，1.0m 与 1.00m 不产生变化。
+    /// </summary>
+    [Fact]
+    public void Context_Add_DecimalSameValueDifferentScale_ShouldNotTrack()
+    {
+        // Arrange
+        var ctx = new ChangeTrackingContext();
+
+        // Act
+        ctx.Add("Amount", "金额", 1.0m, 1.00m);
 
         // Assert
         ctx.GetChangedValueDescriptor().ShouldBeEmpty();

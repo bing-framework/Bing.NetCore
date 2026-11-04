@@ -5,9 +5,9 @@ using Bing.Domain.Entities;
 namespace Bing.Tests.Samples;
 
 /// <summary>
-/// 聚合根测试样例
+/// 包含多种属性类型的聚合根测试样例。
 /// </summary>
-public class AggregateRootSample : AggregateRoot<AggregateRootSample>
+public partial class AggregateRootSample : AggregateRoot<AggregateRootSample>
 {
     /// <summary>
     /// 初始化一个 <see cref="AggregateRootSample"/> 类型的实例。
@@ -21,136 +21,136 @@ public class AggregateRootSample : AggregateRoot<AggregateRootSample>
     public AggregateRootSample(Guid id) : base(id) => IntSamples = new List<IntAggregateRootSample>();
 
     /// <summary>
-    /// 获取或设置姓名
+    /// 获取或设置名称。
     /// </summary>
     [Required(ErrorMessage = "姓名不能为空")]
     public string Name { get; set; }
 
     /// <summary>
-    /// 获取或设置编码
+    /// 获取或设置编码。
     /// </summary>
     public string Code { get; set; }
 
     /// <summary>
-    /// 获取或设置英文名
+    /// 获取或设置英文名。
     /// </summary>
     [Required(ErrorMessageResourceType = typeof(TestResource),ErrorMessageResourceName = "EnglishNameIsEmpty")]
     public string EnglishName { get; set; }
 
     /// <summary>
-    /// 获取或设置手机号
+    /// 获取或设置手机号。
     /// </summary>
     [Display(Description = "手机号")]
     public string MobilePhone { get; set; }
 
     /// <summary>
-    /// 获取或设置年龄
+    /// 获取或设置年龄。
     /// </summary>
     public int? Age { get; set; }
 
     /// <summary>
-    /// 获取或设置电话
+    /// 获取或设置电话。
     /// </summary>
     [Description("电话")]
     public int Tel { get; set; }
 
     /// <summary>
-    /// 获取或设置decimal值
+    /// 获取或设置decimal值。
     /// </summary>
     public decimal DecimalValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空decimal值
+    /// 获取或设置可空decimal值。
     /// </summary>
     public decimal? NullableDecimalValue { get; set; }
 
     /// <summary>
-    /// 获取或设置float值
+    /// 获取或设置float值。
     /// </summary>
     public float FloatValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空float值
+    /// 获取或设置可空float值。
     /// </summary>
     public float? NullableFloatValue { get; set; }
 
     /// <summary>
-    /// 获取或设置double值
+    /// 获取或设置double值。
     /// </summary>
     public double DoubleValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空double值
+    /// 获取或设置可空double值。
     /// </summary>
     public double? NullableDoubleValue { get; set; }
 
     /// <summary>
-    /// 获取或设置bool值
+    /// 获取或设置bool值。
     /// </summary>
     public bool BoolValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空bool值
+    /// 获取或设置可空bool值。
     /// </summary>
     public bool? NullableBoolValue { get; set; }
 
     /// <summary>
-    /// 获取或设置Enum值
+    /// 获取或设置Enum值。
     /// </summary>
     public EnumSample EnumValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空Enum值
+    /// 获取或设置可空Enum值。
     /// </summary>
     public EnumSample? NullableEnumValue { get; set; }
 
     /// <summary>
-    /// 获取或设置DateTime值
+    /// 获取或设置DateTime值。
     /// </summary>
     public DateTime DateValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空DateTime值
+    /// 获取或设置可空DateTime值。
     /// </summary>
     public DateTime? NullableDateValue { get; set; }
 
     /// <summary>
-    /// 获取或设置int值
+    /// 获取或设置int值。
     /// </summary>
     public int IntValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空int值
+    /// 获取或设置可空int值。
     /// </summary>
     public int? NullableIntValue { get; set; }
 
     /// <summary>
-    /// 获取或设置short值
+    /// 获取或设置short值。
     /// </summary>
     public short ShortValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空short值
+    /// 获取或设置可空short值。
     /// </summary>
     public short? NullableShortValue { get; set; }
 
     /// <summary>
-    /// 获取或设置long值
+    /// 获取或设置long值。
     /// </summary>
     public long LongValue { get; set; }
 
     /// <summary>
-    /// 获取或设置可空long值
+    /// 获取或设置可空long值。
     /// </summary>
     public long? NullableLongValue { get; set; }
 
     /// <summary>
-    /// 获取或设置导航属性
+    /// 获取或设置导航属性。
     /// </summary>
     public StringAggregateRootSample StringSample { get; set; }
 
     /// <summary>
-    /// 获取或设置导航属性集合
+    /// 获取或设置导航属性集合。
     /// </summary>
     public ICollection<IntAggregateRootSample> IntSamples { get; set; }
 
@@ -172,36 +172,38 @@ public class AggregateRootSample : AggregateRoot<AggregateRootSample>
     }
 
     /// <summary>
-    /// 创建测试样例
+    /// 创建带固定名称及联系方式的聚合根测试样例。
     /// </summary>
     /// <returns>使用随机标识初始化的聚合根样例。</returns>
     public static AggregateRootSample CreateSample() => CreateSample(Guid.NewGuid());
 
     /// <summary>
-    /// 创建测试样例
+    /// 创建带固定名称及联系方式的聚合根测试样例。
     /// </summary>
     /// <returns>使用指定标识初始化的聚合根样例。</returns>
+    /// <param name="id">目标对象或操作的标识。</param>
     public static AggregateRootSample CreateSample(Guid id) =>
         new(id) { Name = "TestName", EnglishName = "TestEnglishName", MobilePhone = "1234567890" };
 
     /// <summary>
-    /// 创建测试样例2
+    /// 创建带固定名称及联系方式的聚合根测试样例。
     /// </summary>
     /// <returns>使用随机标识初始化的第二种聚合根样例。</returns>
     public static AggregateRootSample CreateSample2() => CreateSample2(Guid.NewGuid());
 
     /// <summary>
-    /// 创建测试样例2
+    /// 创建带固定名称及联系方式的聚合根测试样例。
     /// </summary>
     /// <returns>使用指定标识初始化的第二种聚合根样例。</returns>
+    /// <param name="id">目标对象或操作的标识。</param>
     public static AggregateRootSample CreateSample2(Guid id) =>
         new(id) { Name = "TestName2", EnglishName = "TestEnglishName2", MobilePhone = "1234567891" };
 }
 
 /// <summary>
-/// 聚合根测试样例2
+/// 聚合根类型比较使用的第二组测试样例。
 /// </summary>
-public class AggregateRootSample2 : AggregateRoot<AggregateRootSample>
+public partial class AggregateRootSample2 : AggregateRoot<AggregateRootSample>
 {
     /// <summary>
     /// 初始化一个 <see cref="AggregateRootSample2"/> 类型的实例。
@@ -210,4 +212,10 @@ public class AggregateRootSample2 : AggregateRoot<AggregateRootSample>
     public AggregateRootSample2(Guid id) : base(id)
     {
     }
+
+    /// <summary>
+    /// 保留旧版手写入口；该样例的泛型目标类型为 <see cref="AggregateRootSample"/>，不参与自动生成比较。
+    /// </summary>
+    /// <param name="newObj">作为比较目标的新对象实例。</param>
+    protected override void AddChanges(AggregateRootSample newObj) { }
 }

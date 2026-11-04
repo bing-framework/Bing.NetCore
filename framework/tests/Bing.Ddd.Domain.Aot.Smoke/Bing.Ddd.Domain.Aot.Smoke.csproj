@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Configurations>Debug;Release;GraphSmoke</Configurations>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/Generated/$(Configuration)/$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+    <PublishAot Condition="'$(DomainSmokeAot)' == 'true'">true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="SmokeConfiguration" Value="$(Configuration)" />
+    <AssemblyMetadata Include="SmokeTargetFramework" Value="$(TargetFramework)" />
+    <AssemblyMetadata Include="SmokeGeneratedRoot" Value="framework/tests/Bing.Ddd.Domain.Aot.Smoke/Generated/$(Configuration)/$(TargetFramework)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Generated/**/*.cs" />
+    <ProjectReference Include="../Bing.Ddd.Domain.Aot.Fixtures/Bing.Ddd.Domain.Aot.Fixtures.csproj" />
+    <ProjectReference Include="../../src/Bing.Ddd.Domain/Bing.Ddd.Domain.csproj" />
+    <ProjectReference Include="../../src/Bing.Ddd.Domain.Extensions.Analyzers/Bing.Ddd.Domain.Extensions.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>

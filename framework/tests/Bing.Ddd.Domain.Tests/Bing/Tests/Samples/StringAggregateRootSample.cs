@@ -3,9 +3,9 @@
 namespace Bing.Tests.Samples;
 
 /// <summary>
-/// string聚合根测试样例
+/// string聚合根测试样例。
 /// </summary>
-public class StringAggregateRootSample : AggregateRoot<StringAggregateRootSample, string>
+public partial class StringAggregateRootSample : AggregateRoot<StringAggregateRootSample, string>
 {
     /// <summary>
     /// 初始化一个 <see cref="StringAggregateRootSample"/> 类型的实例。
@@ -19,7 +19,7 @@ public class StringAggregateRootSample : AggregateRoot<StringAggregateRootSample
     public StringAggregateRootSample(string id) : base(id) { }
 
     /// <summary>
-    /// 获取或设置姓名
+    /// 获取或设置名称。
     /// </summary>
     public string Name { get; set; }
 

@@ -45,13 +45,17 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     /// <summary>
-    /// 添加
+    /// 添加变更值描述符。
     /// </summary>
     /// <param name="descriptor">变更值描述符</param>
     public void Add(ChangedValueDescriptor descriptor)
     {
-        if (descriptor == null || string.IsNullOrWhiteSpace(descriptor.Description))
+        if (descriptor == null || string.IsNullOrWhiteSpace(descriptor.PropertyName))
             return;
+        // 空描述回退到属性名，不能在已判定有差异后丢弃记录。
+        if (string.IsNullOrWhiteSpace(descriptor.Description))
+            descriptor = new ChangedValueDescriptor(descriptor.PropertyName, descriptor.PropertyName,
+                descriptor.OldValue, descriptor.NewValue);
         // TODO: 此处会导致无法显示导航属性变更信息
         //if (_changedNameList.Contains(descriptor.PropertyName))
         //    return;
@@ -60,7 +64,7 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     }
 
     /// <summary>
-    /// 添加
+    /// 添加属性变更描述符。
     /// </summary>
     /// <param name="propertyName">属性名</param>
     /// <param name="description">描述</param>
@@ -70,6 +74,8 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     {
         if (string.IsNullOrWhiteSpace(propertyName))
             return;
+        if (string.IsNullOrWhiteSpace(description))
+            description = propertyName;
         // TODO: 此处会导致无法显示导航属性变更信息
         //if (_changedNameList.Contains(propertyName))
         //    return;
@@ -90,7 +96,7 @@ public class ChangedValueDescriptorCollection : IEnumerable<ChangedValueDescript
     }
 
     /// <summary>
-    /// 填充
+    /// 用变更描述符集合填充当前集合。
     /// </summary>
     /// <param name="descriptors">变更值描述符集合</param>
     public void Populate(IEnumerable<ChangedValueDescriptor> descriptors)

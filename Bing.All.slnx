@@ -164,7 +164,9 @@
   <Folder Name="/01-framework/02-tests/10-Domain/">
     <Project Path="framework/tests/Bing.Auditing.Tests/Bing.Auditing.Tests.csproj" />
     <Project Path="framework/tests/Bing.Data.Tests/Bing.Data.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Ddd.Domain.Extensions.Analyzers.Tests/Bing.Ddd.Domain.Extensions.Analyzers.Tests.csproj" />
     <Project Path="framework/tests/Bing.Ddd.Domain.Tests/Bing.Ddd.Domain.Tests.csproj" />
+    <Project Path="framework/tests/Bing.Ddd.Domain.Benchmarks/Bing.Ddd.Domain.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/01-framework/02-tests/10-Share/">
     <Project Path="framework/tests/Bing.TestShare.MySql/Bing.TestShare.MySql.csproj" />

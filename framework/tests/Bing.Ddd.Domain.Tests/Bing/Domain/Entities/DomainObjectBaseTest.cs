@@ -3,10 +3,11 @@ using Bing.Tests.Samples;
 namespace Bing.Domain.Entities;
 
 /// <summary>
-/// 测试目的：验证 DomainObjectBase.ToString() / GetChanges() 与 AddDescriptions / AddChanges 的联动行为。
+/// 验证领域对象描述与变更收集联动的测试。
 /// </summary>
 /// <remarks>
 /// 通过 AggregateRootSample（测试项目内已有的具体实现）进行黑盒验证。
+/// <para>测试目的：验证 DomainObjectBase.ToString() / GetChanges() 与 AddDescriptions / AddChanges 的联动行为。</para>
 /// </remarks>
 public class DomainObjectBaseTest
 {
@@ -156,10 +157,10 @@ public class DomainObjectBaseTest
     }
 
     /// <summary>
-    /// 测试目的：GetChanges 旧值/新值应经过 toLower + Trim 处理（ChangeTrackingContext.Add 规范）。
+    /// 测试目的：DEC-01 变更描述保留源字符串原样（区分大小写、不去空格）。
     /// </summary>
     [Fact]
-    public void GetChanges_ValuesAreLowercasedAndTrimmed()
+    public void GetChanges_PreservesOriginalTextValues()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -172,7 +173,7 @@ public class DomainObjectBaseTest
 
         // Assert
         nameChange.ShouldNotBeNull();
-        nameChange.OldValue.ShouldBe("testname");
-        nameChange.NewValue.ShouldBe("testname2");
+        nameChange.OldValue.ShouldBe("\"TestName\"");
+        nameChange.NewValue.ShouldBe("\"TestName2\"");
     }
 }

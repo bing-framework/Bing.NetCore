@@ -5,9 +5,9 @@ using Bing.Validation;
 namespace Bing.Tests.Samples;
 
 /// <summary>
-/// 树型实体测试样本（Guid 标识 + Guid? 父标识）
+/// 树型实体测试样本（Guid 标识 + Guid? 父标识）。
 /// </summary>
-public class TreeEntitySample : TreeEntityBase<TreeEntitySample>
+public partial class TreeEntitySample : TreeEntityBase<TreeEntitySample>
 {
     /// <summary>
     /// 初始化一个 <see cref="TreeEntitySample"/> 类型的实例。
@@ -21,7 +21,7 @@ public class TreeEntitySample : TreeEntityBase<TreeEntitySample>
     public TreeEntitySample(Guid id) : base(id, string.Empty, 1) { }
 
     /// <summary>
-    /// 获取或设置名称
+    /// 获取或设置名称。
     /// </summary>
     public string Name { get; set; }
 

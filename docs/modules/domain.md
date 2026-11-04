@@ -42,3 +42,7 @@ ORM Provider 决定仓储与工作单元实现；AOP、当前用户与审计接�
 - 领域事件自动登记与分发只覆盖上述 EF Core 跟踪实体和 FreeSQL `StoreBase` 写入路径；未注册分发器时不会派发，直接使用原生 API、原始 SQL、自定义存储器时需显式登记事件源。
 - 领域对象全局验证规则：确认未实现；`DomainObjectBase` 的对应配置入口仍是占位。
 - 源生成器是编译期能力，见[工程与分析器](development.md)，不能代替运行时注册。
+
+## 主键与审计用户类型
+
+按实体启用 GUID、雪花或数据库自增；独立用户键的审计基类支持业务 long / 用户 Guid。数值键创建钩子在 Flush 回填后执行，批量 AddList 保留多个默认键实体。见 [主键策略](../guides/entity-id-strategies.md)。

@@ -3,6 +3,12 @@
     <AssemblyName>Bing.Ddd.Domain.Extensions.Analyzers</AssemblyName>
     <PackageId>Bing.Ddd.Domain.Extensions.Analyzers</PackageId>
     <Description>Bing.Ddd.Domain.Extensions.Analyzers 是 Bing.Ddd.Domain 的增强开发工具，基于 Roslyn 编译时代码生成技术，为领域驱动设计（DDD）提供支持。</Description>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <Import Project="..\..\..\framework.props" />
