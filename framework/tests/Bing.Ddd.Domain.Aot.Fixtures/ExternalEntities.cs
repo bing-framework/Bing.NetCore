@@ -4,10 +4,12 @@ using Bing.Domain.Entities;
 
 namespace DomainAotFixtures;
 
-/// <summary>由另一个程序集的生成器独立生成模型，供原生消费者调用。</summary>
-public partial class ExternalEntity : DomainObjectBase<ExternalEntity>, IKey<int>
+/// <summary>由另一个程序集独立生成比较钩子，实体自身提供身份供原生消费者匹配。</summary>
+public partial class ExternalEntity : DomainObjectBase<ExternalEntity>, IEntity
 {
     public int Id { get; set; }
+    public object[] GetKeys() => new object[] { Id };
+    public void Init() { }
     [Description("外部名称")] public string Name { get; set; } = "";
     [ChangeIgnore] public string Secret => throw new InvalidOperationException("忽略字段不应被读取");
 }

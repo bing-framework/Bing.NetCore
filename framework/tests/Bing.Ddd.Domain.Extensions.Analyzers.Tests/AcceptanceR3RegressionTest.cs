@@ -137,25 +137,36 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.Equal("", RunCheck(result));
     }
 
-    /// <summary>FIX-009：显式 IEntity.GetKeys 实现必须生成可编译的接口转换调用。</summary>
+    /// <summary>FIX-009：显式 IEntity.GetKeys 实现必须在运行时按身份匹配集合成员。</summary>
     [Fact]
     public void Generate_WhenExplicitIEntityImplementation_ShouldCompile()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
+            using System.Linq;
             using Bing.Domain.Entities;
             public partial class Leaf : DomainObjectBase<Leaf>, IEntity
             {
                 public int Id { get; set; }
+                public string Name { get; set; }
                 object[] IEntity.GetKeys() => new object[] { Id };
                 public void Init() { }
             }
             public partial class Root : DomainObjectBase<Root> { public List<Leaf> Items { get; set; } }
+            public static class Check
+            {
+                public static string Run() => string.Join("|", new Root
+                    { Items = new() { new Leaf { Id = 1, Name = "old" }, new Leaf { Id = 2, Name = "same" } } }
+                    .GetChanges(new Root
+                    { Items = new() { new Leaf { Id = 2, Name = "same" }, new Leaf { Id = 1, Name = "new" } } })
+                    .Select(change => change.PropertyName));
+            }
             """);
 
         AssertNoErrors(result.Diagnostics);
         Assert.True(result.EmitSucceeded);
-        Assert.Contains("((global::Bing.Domain.Entities.IEntity)value).GetKeys()", result.GeneratedSource);
+        Assert.Contains("AddCollectionChanges(nameof(Items)", result.GeneratedSource);
+        Assert.Equal("Items[1].Name", RunCheck(result));
     }
 
     /// <summary>FIX-010：字典自带的 OrdinalIgnoreCase comparer 不得被忽略为两个键。</summary>
@@ -211,7 +222,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Root : DomainObjectBase<Root> { public string Name { get; set; } }
+            public partial class Root : DomainObjectBase<Root>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run() => "get=" + new Root { Name = "ABC" }.GetChanges(new Root { Name = "abc" }).Count()
@@ -233,7 +250,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Root : DomainObjectBase<Root> { public string Name { get; set; } }
+            public partial class Root : DomainObjectBase<Root>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()

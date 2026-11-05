@@ -114,22 +114,30 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.DoesNotContain("protected override void AddChanges", result.GeneratedSource);
     }
 
-    /// <summary>FIX-004：已声明 CaptureChanges 必须独立报告 CG021。</summary>
+    /// <summary>实体自有 CaptureChanges 与生成的 AddChanges 相互独立。</summary>
     [Fact]
-    public void Generate_WhenCaptureChangesIsDeclared_ShouldReportCg021()
+    public void Generate_WhenCaptureChangesIsDeclared_ShouldStillGenerateAddChanges()
     {
         var result = RunGenerator("""
+            using System.Linq;
             using Bing.Domain.Entities;
             public partial class Root : DomainObjectBase<Root>
             {
                 public string Name { get; set; }
                 private void CaptureChanges(object writer) { }
             }
+            public static class Check
+            {
+                public static string Run() => new Root { Name = "old" }
+                    .GetChanges(new Root { Name = "new" }).Single().PropertyName;
+            }
             """);
 
-        var diagnostic = result.Diagnostics.First(item => item.Id == "CG021");
-        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
-        Assert.True(diagnostic.Location.IsInSource);
+        AssertNoErrors(result.Diagnostics);
+        Assert.DoesNotContain(result.Diagnostics, diagnostic => diagnostic.Id == "CG021");
+        Assert.Contains("AddChange(nameof(Name)", result.GeneratedSource);
+        Assert.DoesNotContain("CaptureChanges", result.GeneratedSource);
+        Assert.Equal("Name", RunCheck(result));
     }
 
     /// <summary>DEC-02/R02：手写子 hook 必须经 GetChanges 在对象、集合与字典中一致生效。</summary>
@@ -351,10 +359,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             public partial class Root : DomainObjectBase<Root> { public List<Line> Lines { get; set; } }
-            public partial class Line : DomainObjectBase<Line>, IKey<int>
+            public partial class Line : DomainObjectBase<Line>, IEntity
             {
                 public int Id { get; set; }
                 public string Name { get; set; }
+                public object[] GetKeys() => new object[] { Id };
+                public void Init() { }
             }
             public static class Check
             {

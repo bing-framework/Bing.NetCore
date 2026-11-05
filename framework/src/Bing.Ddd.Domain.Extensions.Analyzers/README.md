@@ -46,9 +46,11 @@ public partial class User : DomainObjectBase<User> { public string Name { get; s
 
 ## ChangeGraph 生成器
 
-继承 `DomainObjectBase<TObject>` 且声明 `partial` 的实体自动生成逐成员 `AddChanges`，不需要类级标记。生成的 `AddChanges` 只做直接属性读取并调用 `AddChange`（标量）、`AddObjectChanges`（领域对象）、`AddCollectionChanges`（集合）和 `AddDictionaryChanges`（字典），由子实体自身 `GetChanges` 产生差异并按路径汇总；不再使用 Lambda、属性委托或模型参数。非 `partial` 类型报告 `CG001`；`new` 同名 hook 报告 `CG020`；普通 POCO 结构成员报告 `CG006` 且不参与自动比较（独立对象图模型仍作为可选功能生成）。
+继承 `DomainObjectBase<TObject>` 且声明 `partial` 的实体自动生成逐成员 `AddChanges`，不需要类级标记。生成的代码直接读取属性，分别调用 `AddChange`（标量）、`AddObjectChanges`（领域对象）、`AddCollectionChanges`（集合）和 `AddDictionaryChanges`（字典）；多层容器使用强类型配对方法逐层比较。子实体通过自身 `GetChanges` 产生差异并按路径汇总。普通领域对象不再生成 Graph 模型、`CaptureChanges`、Lambda 或属性比较委托。非 `partial` 类型报告 `CG001`；`new` 同名 hook 报告 `CG020`；普通 POCO 结构成员报告 `CG006` 且不参与自动比较。独立 `ChangeGraphTracker` 如需使用，应显式提供模型或适配器。
 
-成员上的 `[ChangeIgnore]` 是唯一的成员规则，只能标记当前实体声明或继承得到的成员；父实体忽略整个关系时直接标记关系属性。审计时间、`Version` 和 `IsDeleted` 固定按默认预设忽略，不再提供恢复特性。集合身份在实现 `IEntity` 时来自 `GetKeys()`（优先于 `IKey`），仅实现唯一 `IKey<TKey>` 时来自 `Id`；字典使用容器键，有序集合无身份时按索引；无序 `Set` 元素缺少身份契约时在任意嵌套层报告 `CG019`。调用方的 `WithIdentity`/`WithCollectionKey` 与手工 `ignorePaths` 已删除。生成结果直接调用属性，不使用反射、`dynamic` 或运行时表达式编译。
+成员上的 `[ChangeIgnore]` 是唯一的成员规则，只能标记当前实体声明或继承得到的成员；父实体忽略整个关系时直接标记关系属性。审计时间、`Version` 和 `IsDeleted` 固定按默认预设忽略，不再提供恢复特性。集合身份仅来自实体自身的 `IEntity.GetKeys()`；字典使用容器键，有序领域对象集合无身份时按索引，无序复杂 `Set` 元素缺少 `IEntity` 时在任意嵌套层报告 `CG019`。仅实现 `IKey<TKey>` 的普通对象不能提供领域比较逻辑，报告 `CG006` 并跳过关系；领域对象附带的 `IKey<TKey>` 不参与身份推断。不再生成 `CG022` 键类型诊断。带身份集合中的 null 元素、无效或重复身份仍会报错。同步 `IEnumerable<T>` 受支持，每侧只枚举一次。生成结果直接调用属性，不使用反射、`dynamic` 或运行时表达式编译；运行时身份读取不再扫描接口元数据。
+
+旧子对象存在、新子对象为 `null` 时，运行时直接记录关系删除，不调用子对象的比较钩子。集合属性为 `null` 等同空集合，旧明细逐项记录删除，不推断加载状态；这不同于在带身份集合中放入一个 `null` 元素。
 
 ## 更多文档
 

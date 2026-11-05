@@ -89,6 +89,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     /// <param name="description">关系描述。</param>
     /// <param name="oldValue">变更前的关系对象。</param>
     /// <param name="newValue">变更后的关系对象。</param>
+    /// <remarks>新对象为 null 时直接记录关系删除，不读取旧对象成员或调用其比较钩子。</remarks>
     protected void AddObjectChanges<TValue>(string propertyName, string description, TValue oldValue, TValue newValue)
     {
         var frame = ChangeTrackingSession.Current;
@@ -105,21 +106,34 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     /// <param name="description">集合关系描述。</param>
     /// <param name="oldItems">变更前集合。</param>
     /// <param name="newItems">变更后集合。</param>
+    /// <remarks>null 集合等同空集合；旧明细逐项删除，不推断导航加载状态。</remarks>
     protected void AddCollectionChanges<TItem>(string propertyName, string description,
-        IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems)
+        IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems) =>
+        AddCollectionChanges(propertyName, description, oldItems, newItems, false);
+
+    /// <summary>按静态集合类型补充 Set 语义；只读 Set 不一定实现运行时的 ISet 接口。</summary>
+    /// <param name="propertyName">集合关系路径。</param>
+    /// <param name="description">集合关系描述。</param>
+    /// <param name="oldItems">变更前集合。</param>
+    /// <param name="newItems">变更后集合。</param>
+    /// <param name="declaredAsSet">静态类型为 Set 时为 true。</param>
+    /// <typeparam name="TItem">集合元素类型。</typeparam>
+    protected void AddCollectionChanges<TItem>(string propertyName, string description,
+        IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems, bool declaredAsSet)
     {
         var frame = ChangeTrackingSession.Current;
         if (frame == null)
             return;
+        var isSet = declaredAsSet || oldItems is ISet<TItem> || newItems is ISet<TItem>;
+        IEqualityComparer<TItem> equality = null;
+        IComparer<TItem> ordering = null;
+        if (isSet)
+            ResolveSetComparers(propertyName, oldItems, newItems, out equality, out ordering);
         var before = oldItems?.ToList() ?? new List<TItem>();
         var after = newItems?.ToList() ?? new List<TItem>();
-        var isSet = oldItems is ISet<TItem> || newItems is ISet<TItem>;
         if (isSet && IsScalar(typeof(TItem)))
         {
-            var beforeComparer = oldItems is HashSet<TItem> oldSet ? oldSet.Comparer : null;
-            var afterComparer = newItems is HashSet<TItem> newSet ? newSet.Comparer : null;
-            CompareScalarSet(frame, propertyName, description, before, after,
-                ResolveComparer(beforeComparer, afterComparer, propertyName));
+            CompareScalarSet(frame, propertyName, description, before, after, equality, ordering);
             return;
         }
         CompareCollection(frame, propertyName, description, before, after, isSet);
@@ -140,24 +154,101 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         var frame = ChangeTrackingSession.Current;
         if (frame == null)
             return;
-        var beforeComparer = oldValues is Dictionary<TKey, TValue> oldMap ? oldMap.Comparer : null;
-        var afterComparer = newValues is Dictionary<TKey, TValue> newMap ? newMap.Comparer : null;
-        var comparer = ResolveComparer(beforeComparer, afterComparer, propertyName);
-        var before = ToDictionary(oldValues, propertyName, comparer);
-        var after = ToDictionary(newValues, propertyName, comparer);
+        foreach (var pair in GetNestedDictionaryPairs(propertyName, description, oldValues, newValues))
+            CompareValue(frame, pair.Path, description, pair.OldValue, pair.NewValue);
+    }
+
+    /// <summary>表示已按集合索引或字典键配对的两个非空值。</summary>
+    /// <typeparam name="TValue">配对值的静态类型。</typeparam>
+    protected readonly struct ChangeTrackingPair<TValue>
+    {
+        /// <summary>初始化一个带路径的配对。</summary>
+        internal ChangeTrackingPair(string path, TValue oldValue, TValue newValue)
+        {
+            Path = path;
+            OldValue = oldValue;
+            NewValue = newValue;
+        }
+
+        /// <summary>获取配对项的完整关系路径。</summary>
+        public string Path { get; }
+        /// <summary>获取旧值。</summary>
+        public TValue OldValue { get; }
+        /// <summary>获取新值。</summary>
+        public TValue NewValue { get; }
+    }
+
+    /// <summary>
+    /// 按索引或领域身份配对嵌套集合，直接记录新增、删除与空值变化。
+    /// </summary>
+    /// <remarks>生成器可在配对后按元素的静态类型继续调用固定辅助方法，无需反射或比较委托。</remarks>
+    protected IEnumerable<ChangeTrackingPair<TItem>> GetNestedCollectionPairs<TItem>(string propertyName,
+        string description, IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems) =>
+        GetNestedCollectionPairs(propertyName, description, oldItems, newItems, false);
+
+    /// <summary>按静态集合类型补充 Set 语义后配对嵌套值。</summary>
+    protected IEnumerable<ChangeTrackingPair<TItem>> GetNestedCollectionPairs<TItem>(string propertyName,
+        string description, IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems, bool declaredAsSet)
+    {
+        var frame = ChangeTrackingSession.Current;
+        if (frame == null)
+            return Array.Empty<ChangeTrackingPair<TItem>>();
+        var isSet = declaredAsSet || oldItems is ISet<TItem> || newItems is ISet<TItem>;
+        if (isSet)
+            ResolveSetComparers(propertyName, oldItems, newItems, out _, out _);
+        var before = oldItems?.ToList() ?? new List<TItem>();
+        var after = newItems?.ToList() ?? new List<TItem>();
+        return EnumerateCollectionPairs(frame, propertyName, description, before, after, isSet);
+    }
+
+    /// <summary>
+    /// 按字典自身键比较器配对嵌套值，直接记录新增、删除与空值变化。
+    /// </summary>
+    protected IEnumerable<ChangeTrackingPair<TValue>> GetNestedDictionaryPairs<TKey, TValue>(string propertyName,
+        string description, IEnumerable<KeyValuePair<TKey, TValue>> oldValues,
+        IEnumerable<KeyValuePair<TKey, TValue>> newValues)
+    {
+        var frame = ChangeTrackingSession.Current;
+        if (frame == null)
+            return Array.Empty<ChangeTrackingPair<TValue>>();
+        var beforeHash = oldValues is Dictionary<TKey, TValue> oldMap ? oldMap.Comparer : null;
+        var afterHash = newValues is Dictionary<TKey, TValue> newMap ? newMap.Comparer : null;
+        var beforeOrder = GetDictionaryOrderComparer(oldValues);
+        var afterOrder = GetDictionaryOrderComparer(newValues);
+        if ((beforeOrder != null || afterOrder != null) && (beforeHash != null || afterHash != null))
+            throw new InvalidOperationException($"容器比较器不兼容，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
+        RejectUnknownDictionary(oldValues, beforeHash, beforeOrder, propertyName);
+        RejectUnknownDictionary(newValues, afterHash, afterOrder, propertyName);
+        var ordering = beforeOrder == null && afterOrder == null
+            ? null : ResolveOrderComparer(beforeOrder, afterOrder, propertyName);
+        var equality = ordering == null ? ResolveComparer(beforeHash, afterHash, propertyName) : null;
+        var before = ToDictionary(oldValues, propertyName, equality, ordering);
+        var after = ToDictionary(newValues, propertyName, equality, ordering);
+        return EnumerateDictionaryPairs(frame, propertyName, description, before, after);
+    }
+
+    /// <summary>枚举匹配的字典值，使用旧侧键作为匹配项的路径。</summary>
+    private static IEnumerable<ChangeTrackingPair<TValue>> EnumerateDictionaryPairs<TKey, TValue>(
+        ChangeTrackingFrame frame, string propertyName, string description,
+        IDictionary<TKey, TValue> before, IDictionary<TKey, TValue> after)
+    {
         foreach (var pair in before)
         {
             var path = propertyName + "{" + FormatKey(pair.Key) + "}";
-            if (after.TryGetValue(pair.Key, out var newValue))
+            if (!after.TryGetValue(pair.Key, out var newValue))
+            {
+                AddStructural(frame, path, description, pair.Value, true, default, false);
+                continue;
+            }
+            if (pair.Value == null || newValue == null)
                 CompareValue(frame, path, description, pair.Value, newValue);
             else
-                AddStructural(frame, path, description, pair.Value, true, default, false);
+                yield return new ChangeTrackingPair<TValue>(path, pair.Value, newValue);
         }
         foreach (var pair in after)
         {
-            if (before.ContainsKey(pair.Key))
-                continue;
-            AddStructural(frame, propertyName + "{" + FormatKey(pair.Key) + "}", description, default, false, pair.Value, true);
+            if (!before.ContainsKey(pair.Key))
+                AddStructural(frame, propertyName + "{" + FormatKey(pair.Key) + "}", description, default, false, pair.Value, true);
         }
     }
 
@@ -198,7 +289,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
                 AddStructural(frame, path, description, oldValue, true, newValue, true);
                 return;
             }
-            if (TryGetIdentity(oldValue, out var oldKey) && TryGetIdentity(newValue, out var newKey) &&
+            if (TryGetIdentity(oldValue, path, out var oldKey) && TryGetIdentity(newValue, path, out var newKey) &&
                 !KeyEquals(oldKey, newKey))
             {
                 AddStructural(frame, path, description, oldValue, true, newValue, true);
@@ -206,7 +297,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
             }
             if (ChangeTrackingSession.IsInAncestorChain(oldValue, newValue))
                 return;
-            ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
+            MergeTrackableChanges(frame, path, trackable, newValue);
             return;
         }
         if (CompareContainer(frame, path, description, oldValue, newValue))
@@ -223,15 +314,22 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     private static void CompareCollection<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
         IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, bool isSet)
     {
-        if (typeof(IChangeTrackable).IsAssignableFrom(typeof(TItem)) &&
-            TryBuildIdentityMap(before, propertyName, out var beforeMap) &&
-            TryBuildIdentityMap(after, propertyName, out var afterMap))
+        foreach (var pair in EnumerateCollectionPairs(frame, propertyName, description, before, after, isSet))
+            CompareValue(frame, pair.Path, description, pair.OldValue, pair.NewValue);
+    }
+
+    /// <summary>枚举匹配的集合项，并直接记录结构性变化。</summary>
+    private static IEnumerable<ChangeTrackingPair<TItem>> EnumerateCollectionPairs<TItem>(ChangeTrackingFrame frame,
+        string propertyName, string description, IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, bool isSet)
+    {
+        if (!IsScalar(typeof(TItem)) &&
+            TryBuildIdentityMaps(before, after, propertyName, out var beforeMap, out var afterMap))
         {
             foreach (var pair in beforeMap)
             {
                 var path = propertyName + "[" + FormatKey(pair.Key) + "]";
                 if (afterMap.TryGetValue(pair.Key, out var newItem))
-                    CompareValue(frame, path, description, pair.Value, newItem);
+                    yield return new ChangeTrackingPair<TItem>(path, pair.Value, newItem);
                 else
                     AddStructural(frame, path, description, pair.Value, true, default, false);
             }
@@ -241,26 +339,60 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
                     continue;
                 AddStructural(frame, propertyName + "[" + FormatKey(pair.Key) + "]", description, default, false, pair.Value, true);
             }
-            return;
+            yield break;
         }
+        if (isSet)
+            throw new InvalidOperationException($"无序集合的复杂元素必须具有身份，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
         for (var index = 0; index < before.Count || index < after.Count; index++)
         {
             var path = propertyName + "[" + index + "]";
             var hasOld = index < before.Count;
             var hasNew = index < after.Count;
-            CompareValue(frame, path, description,
-                hasOld ? before[index] : default, hasNew ? after[index] : default, hasOld, hasNew);
+            var oldItem = hasOld ? before[index] : default;
+            var newItem = hasNew ? after[index] : default;
+            if (!hasOld || !hasNew || oldItem == null || newItem == null)
+                CompareValue(frame, path, description, oldItem, newItem, hasOld, hasNew);
+            else
+                yield return new ChangeTrackingPair<TItem>(path, oldItem, newItem);
         }
     }
 
-    /// <summary>
-    /// 比较标量集合；Set 使用容器自身相等语义报告新增和删除。
-    /// </summary>
-    private static void CompareScalarSet<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
-        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, IEqualityComparer<TItem> comparer)
+    /// <summary>取得并核对标准 Set 的比较器，拒绝无法读取的自定义容器。</summary>
+    private static void ResolveSetComparers<TItem>(string propertyName, IEnumerable<TItem> oldItems,
+        IEnumerable<TItem> newItems, out IEqualityComparer<TItem> equality, out IComparer<TItem> ordering)
     {
-        var beforeSet = new HashSet<TItem>(before, comparer);
-        var afterSet = new HashSet<TItem>(after, comparer);
+        var beforeHash = oldItems is HashSet<TItem> oldHash ? oldHash.Comparer : null;
+        var afterHash = newItems is HashSet<TItem> newHash ? newHash.Comparer : null;
+        var beforeOrder = oldItems is SortedSet<TItem> oldSorted ? oldSorted.Comparer : null;
+        var afterOrder = newItems is SortedSet<TItem> newSorted ? newSorted.Comparer : null;
+        if ((beforeOrder != null || afterOrder != null) && (beforeHash != null || afterHash != null))
+            throw new InvalidOperationException($"容器比较器不兼容，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
+        if ((oldItems != null && beforeHash == null && beforeOrder == null) ||
+            (newItems != null && afterHash == null && afterOrder == null))
+            throw new InvalidOperationException($"无法获取自定义 Set 的比较器，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
+
+        ordering = beforeOrder != null || afterOrder != null
+            ? ResolveOrderComparer(beforeOrder, afterOrder, propertyName) : null;
+        equality = ordering == null ? ResolveComparer(beforeHash, afterHash, propertyName) : null;
+    }
+
+    /// <summary>按已核对的 Set 比较器报告标量成员新增和删除。</summary>
+    private static void CompareScalarSet<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
+        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, IEqualityComparer<TItem> equality,
+        IComparer<TItem> ordering)
+    {
+        ISet<TItem> beforeSet;
+        ISet<TItem> afterSet;
+        if (ordering != null)
+        {
+            beforeSet = new SortedSet<TItem>(before, ordering);
+            afterSet = new SortedSet<TItem>(after, ordering);
+        }
+        else
+        {
+            beforeSet = new HashSet<TItem>(before, equality);
+            afterSet = new HashSet<TItem>(after, equality);
+        }
         foreach (var item in before)
         {
             if (afterSet.Contains(item))
@@ -278,38 +410,69 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     }
 
     /// <summary>
-    /// 尝试按实体身份建立元素索引；元素无身份契约时返回 false。
+    /// 尝试按实体身份建立新旧元素索引；没有身份契约的有序元素返回 false。
     /// </summary>
-    private static bool TryBuildIdentityMap<TItem>(IReadOnlyList<TItem> items, string propertyName,
-        out Dictionary<object, TItem> map)
+    private static bool TryBuildIdentityMaps<TItem>(IReadOnlyList<TItem> before, IReadOnlyList<TItem> after,
+        string path, out Dictionary<object, TItem> beforeMap, out Dictionary<object, TItem> afterMap)
     {
-        map = new Dictionary<object, TItem>();
-        foreach (var item in items)
-        {
-            if (item == null || !TryGetIdentity(item, out var key))
-                return false;
-            if (map.ContainsKey(key))
-                throw new InvalidOperationException($"集合元素身份键重复，路径: {propertyName}");
-            map.Add(key, item);
-        }
+        beforeMap = new Dictionary<object, TItem>();
+        afterMap = new Dictionary<object, TItem>();
+        var hasIdentity = typeof(IEntity).IsAssignableFrom(typeof(TItem));
+        string nullPath = null;
+        string unkeyedPath = null;
+        IndexIdentityItems(before, path, beforeMap, ref hasIdentity, ref nullPath, ref unkeyedPath);
+        IndexIdentityItems(after, path, afterMap, ref hasIdentity, ref nullPath, ref unkeyedPath);
+        if (!hasIdentity)
+            return false;
+        if (nullPath != null)
+            throw new InvalidOperationException($"带身份集合不允许 null 元素，路径: {ChangeTrackingSession.ErrorPath(nullPath)}");
+        if (unkeyedPath != null)
+            throw new InvalidOperationException($"带身份集合不能混入无身份元素，路径: {ChangeTrackingSession.ErrorPath(unkeyedPath)}");
         return true;
     }
 
     /// <summary>
-    /// 尝试按实体身份建立 object 元素索引；任一元素无身份契约时返回 false。
+    /// 为一侧集合建立身份索引，并保留首个无身份或空元素的位置。
     /// </summary>
-    private static bool TryBuildObjectIdentityMap(IReadOnlyList<object> items, string path, out Dictionary<object, object> map)
+    private static void IndexIdentityItems<TItem>(IReadOnlyList<TItem> items, string path,
+        Dictionary<object, TItem> map, ref bool hasIdentity, ref string nullPath, ref string unkeyedPath)
     {
-        map = new Dictionary<object, object>();
-        foreach (var item in items)
+        for (var index = 0; index < items.Count; index++)
         {
-            if (item == null || !TryGetIdentity(item, out var key))
-                return false;
+            var item = items[index];
+            var itemPath = path + "[" + index + "]";
+            if (item == null)
+            {
+                nullPath ??= itemPath;
+                continue;
+            }
+            if (!TryGetIdentity(item, itemPath, out var key))
+            {
+                unkeyedPath ??= itemPath;
+                continue;
+            }
+            hasIdentity = true;
+            ValidateCollectionIdentity(key, itemPath);
             if (map.ContainsKey(key))
-                throw new InvalidOperationException($"集合元素身份键重复，路径: {path}");
+                throw new InvalidOperationException($"集合元素身份键重复，路径: {ChangeTrackingSession.ErrorPath(path)}");
             map.Add(key, item);
         }
-        return true;
+    }
+
+    /// <summary>
+    /// 拒绝没有分配的单键身份；复合键中允许业务上有意义的默认分量。
+    /// </summary>
+    private static void ValidateCollectionIdentity(object key, string path)
+    {
+        var isUnassigned = key == null || key is string text && text.Length == 0 ||
+                           key is Guid guid && guid == Guid.Empty ||
+                           key is int intKey && intKey == 0 || key is long longKey && longKey == 0 ||
+                           key is short shortKey && shortKey == 0 || key is byte byteKey && byteKey == 0 ||
+                           key is uint uintKey && uintKey == 0 || key is ulong ulongKey && ulongKey == 0 ||
+                           key is ushort ushortKey && ushortKey == 0 || key is sbyte sbyteKey && sbyteKey == 0 ||
+                           key is decimal decimalKey && decimalKey == 0;
+        if (isUnassigned)
+            throw new InvalidOperationException($"集合元素身份键未分配，路径: {ChangeTrackingSession.ErrorPath(path)}");
     }
 
     /// <summary>
@@ -340,8 +503,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
                 var before = ToObjectList(oldItems);
                 var after = ToObjectList(newItems);
                 // 嵌套容器中的领域元素同样优先按实体身份匹配。
-                if (TryBuildObjectIdentityMap(before, path, out var beforeMap) &&
-                    TryBuildObjectIdentityMap(after, path, out var afterMap))
+                if (TryBuildIdentityMaps(before, after, path, out var beforeMap, out var afterMap))
                 {
                     foreach (var pair in beforeMap)
                     {
@@ -383,17 +545,28 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     private static void CompareNonGenericDictionary(ChangeTrackingFrame frame, string path, string description,
         IDictionary before, IDictionary after)
     {
-        var keys = new List<object>();
-        if (before != null) foreach (var key in before.Keys) if (!keys.Contains(key)) keys.Add(key);
-        if (after != null) foreach (var key in after.Keys) if (!keys.Contains(key)) keys.Add(key);
-        foreach (var key in keys)
+        // 以各容器自身的 Contains 匹配，不能先用 object.Equals 合并键。
+        // 若两侧对当前键集的匹配数不一致，不能选择某一侧语义继续比较。
+        var oldMatches = 0;
+        var newMatches = 0;
+        if (before != null && after != null)
+        {
+            foreach (var key in before.Keys) if (after.Contains(key)) oldMatches++;
+            foreach (var key in after.Keys) if (before.Contains(key)) newMatches++;
+        }
+        if (oldMatches != newMatches)
+            throw new InvalidOperationException($"容器键比较语义不一致，路径: {ChangeTrackingSession.ErrorPath(path)}");
+        if (before != null) foreach (var key in before.Keys)
         {
             var itemPath = path + "{" + FormatKey(key) + "}";
-            var hasOld = before != null && before.Contains(key);
             var hasNew = after != null && after.Contains(key);
             CompareObjectValue(frame, itemPath, description,
-                hasOld ? before[key] : null, hasNew ? after[key] : null, hasOld, hasNew);
+                before[key], hasNew ? after[key] : null, true, hasNew);
         }
+        if (after != null) foreach (var key in after.Keys)
+            if (before == null || !before.Contains(key))
+                CompareObjectValue(frame, path + "{" + FormatKey(key) + "}", description,
+                    null, after[key], false, true);
     }
 
     /// <summary>
@@ -428,7 +601,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
             }
             if (ChangeTrackingSession.IsInAncestorChain(oldValue, newValue))
                 return;
-            ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
+            MergeTrackableChanges(frame, path, trackable, newValue);
             return;
         }
         if (CompareContainer(frame, path, description, oldValue, newValue))
@@ -452,31 +625,33 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         return result;
     }
 
+    /// <summary>调用子对象自身的比较，并在异常时保留关系路径、恢复线程上下文。</summary>
+    private static void MergeTrackableChanges(ChangeTrackingFrame frame, string path, IChangeTrackable trackable,
+        object newValue)
+    {
+        var previous = ChangeTrackingSession.PushErrorPath(path);
+        try
+        {
+            ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
+        }
+        finally
+        {
+            ChangeTrackingSession.RestoreErrorPath(previous);
+        }
+    }
+
     /// <summary>
-    /// 读取领域身份键：IEntity.GetKeys 优先，其次唯一 IKey&lt;TKey&gt;.Id。
+    /// 通过实体自己的 GetKeys 读取身份；普通领域对象不推断主键，按有序位置配对。
     /// </summary>
-    private static bool TryGetIdentity(object value, out object key)
+    private static bool TryGetIdentity(object value, string path, out object key)
     {
         if (value is IEntity entity)
         {
             var keys = entity.GetKeys();
             if (keys == null || keys.Length == 0)
-                throw new InvalidOperationException($"实体身份键为空，路径: {value.GetType().FullName}");
+                throw new InvalidOperationException($"实体身份键为空，路径: {ChangeTrackingSession.ErrorPath(path)}，实体类型: {value.GetType().FullName}");
             key = keys.Length == 1 ? keys[0] : ChangeGraphKey.Create(keys);
             return true;
-        }
-        switch (value)
-        {
-            case IKey<int> k: key = k.Id; return true;
-            case IKey<long> k: key = k.Id; return true;
-            case IKey<short> k: key = k.Id; return true;
-            case IKey<byte> k: key = k.Id; return true;
-            case IKey<uint> k: key = k.Id; return true;
-            case IKey<ulong> k: key = k.Id; return true;
-            case IKey<ushort> k: key = k.Id; return true;
-            case IKey<sbyte> k: key = k.Id; return true;
-            case IKey<Guid> k: key = k.Id; return true;
-            case IKey<string> k: key = k.Id; return true;
         }
         key = null;
         return false;
@@ -496,7 +671,8 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     private static bool IsScalar(Type type) =>
         type == typeof(string) || type.IsPrimitive || type.IsEnum || type == typeof(decimal) ||
         type == typeof(Guid) || type == typeof(DateTime) || type == typeof(DateTimeOffset) ||
-        type == typeof(TimeSpan) || type == typeof(Uri) || Nullable.GetUnderlyingType(type) is { } inner && IsScalar(inner);
+        type == typeof(TimeSpan) || type == typeof(Uri) || type == typeof(Version) ||
+        Nullable.GetUnderlyingType(type) is { } inner && IsScalar(inner);
 
     /// <summary>
     /// 判断新旧容器比较器是否兼容；缺失一侧时使用存在侧语义。
@@ -515,25 +691,50 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         if (beforeDefault && afterDefault)
             return EqualityComparer<T>.Default;
         if (beforeDefault || afterDefault)
-            throw new InvalidOperationException($"容器比较器不兼容，路径: {propertyName}");
+            throw new InvalidOperationException($"容器比较器不兼容，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
         if (before.Equals(after))
             return before;
-        throw new InvalidOperationException($"容器比较器不一致，路径: {propertyName}");
+        throw new InvalidOperationException($"容器比较器不一致，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
+    }
+
+    /// <summary>解析排序容器比较器，不将排序等价关系降级为默认相等比较。</summary>
+    private static IComparer<T> ResolveOrderComparer<T>(IComparer<T> before, IComparer<T> after, string propertyName)
+    {
+        if (before == null) return after;
+        if (after == null) return before;
+        if (ReferenceEquals(before, after) || before.Equals(after)) return before;
+        throw new InvalidOperationException($"容器比较器不一致，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
+    }
+
+    /// <summary>读取标准排序字典的比较器。</summary>
+    private static IComparer<TKey> GetDictionaryOrderComparer<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values) =>
+        values is SortedDictionary<TKey, TValue> sorted ? sorted.Comparer :
+        values is SortedList<TKey, TValue> list ? list.Comparer : null;
+
+    /// <summary>不可读取比较器的字典不能静默降级到默认比较语义。</summary>
+    private static void RejectUnknownDictionary<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values,
+        IEqualityComparer<TKey> equality, IComparer<TKey> ordering, string propertyName)
+    {
+        if (values != null && equality == null && ordering == null &&
+            (values is IDictionary<TKey, TValue> || values is IReadOnlyDictionary<TKey, TValue>))
+            throw new InvalidOperationException($"无法获取自定义字典的比较器，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
     }
 
     /// <summary>
     /// 将字典条目序列转换为按容器键索引的字典。
     /// </summary>
-    private static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(
-        IEnumerable<KeyValuePair<TKey, TValue>> values, string propertyName, IEqualityComparer<TKey> comparer)
+    private static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(
+        IEnumerable<KeyValuePair<TKey, TValue>> values, string propertyName, IEqualityComparer<TKey> comparer,
+        IComparer<TKey> ordering)
     {
-        var result = new Dictionary<TKey, TValue>(comparer);
+        IDictionary<TKey, TValue> result = ordering == null
+            ? new Dictionary<TKey, TValue>(comparer) : new SortedDictionary<TKey, TValue>(ordering);
         if (values == null)
             return result;
         foreach (var pair in values)
         {
             if (result.ContainsKey(pair.Key))
-                throw new InvalidOperationException($"字典键重复，路径: {propertyName}");
+                throw new InvalidOperationException($"字典键重复，路径: {ChangeTrackingSession.ErrorPath(propertyName)}");
             result.Add(pair.Key, pair.Value);
         }
         return result;

@@ -114,7 +114,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
             public interface IMarker { }
-            public partial class Root : DomainObjectBase<Root>, IMarker { public string Name { get; set; } }
+            public partial class Root : DomainObjectBase<Root>, IMarker, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()
@@ -139,8 +145,20 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         var result = RunGenerator("""
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Leaf : DomainObjectBase<Leaf> { public string Name { get; set; } }
-            public partial class Root : DomainObjectBase<Root> { public object Value { get; set; } }
+            public partial class Leaf : DomainObjectBase<Leaf>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Leaf> Model = new("explicit-leaf",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
+            public partial class Root : DomainObjectBase<Root>, IChangeGraphNode
+            {
+                public object Value { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Adapted(nameof(Value), value.Value));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()
@@ -165,8 +183,20 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Alpha : DomainObjectBase<Alpha> { public int Number { get; set; } }
-            public partial class Beta : DomainObjectBase<Beta> { public string Name { get; set; } }
+            public partial class Alpha : DomainObjectBase<Alpha>, IChangeGraphNode
+            {
+                public int Number { get; set; }
+                private static readonly ChangeGraphModel<Alpha> Model = new("explicit-alpha",
+                    static (writer, value) => writer.Scalar(nameof(Number), value.Number));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
+            public partial class Beta : DomainObjectBase<Beta>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Beta> Model = new("explicit-beta",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run() => new ChangeGraphTracker()
@@ -187,8 +217,20 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Alpha : DomainObjectBase<Alpha> { public int Number { get; set; } }
-            public partial class Beta : DomainObjectBase<Beta> { public string Name { get; set; } }
+            public partial class Alpha : DomainObjectBase<Alpha>, IChangeGraphNode
+            {
+                public int Number { get; set; }
+                private static readonly ChangeGraphModel<Alpha> Model = new("explicit-alpha",
+                    static (writer, value) => writer.Scalar(nameof(Number), value.Number));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
+            public partial class Beta : DomainObjectBase<Beta>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Beta> Model = new("explicit-beta",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()

@@ -20,9 +20,9 @@ namespace Bing.Ddd.Domain.Extensions.Analyzers.Tests;
 /// </summary>
 public sealed partial class ChangeGraphSourceGeneratorTest
 {
-    /// <summary>继承领域对象基类的实体无需任何类级标记即可生成 AddChanges 与模型。</summary>
+    /// <summary>继承领域对象基类的实体无需类级标记即可生成直接比较方法。</summary>
     [Fact]
-    public void Generate_WhenEntityInheritsDomainObjectBase_ShouldEmitAddChangesAndModel()
+    public void Generate_WhenEntityInheritsDomainObjectBase_ShouldEmitOnlyAddChanges()
     {
         const string source = """
             using Bing.Domain.Entities;
@@ -37,11 +37,11 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         AssertNoErrors(result.Diagnostics);
         Assert.True(result.EmitSucceeded);
         Assert.Contains("protected override void AddChanges(global::Root other)", result.GeneratedSource);
-        Assert.Contains("GeneratedChangeGraphModel", result.GeneratedSource);
+        Assert.DoesNotContain("GeneratedChangeGraphModel", result.GeneratedSource);
         var changes = CompareGenerated(result, "Root",
             new Dictionary<string, object> { ["Name"] = "old" },
             new Dictionary<string, object> { ["Name"] = "new" });
-        Assert.Equal("Name", Assert.Single(changes.Changes).Path.Value);
+        Assert.Equal("Name", Assert.Single(changes).PropertyName);
     }
 
     /// <summary>显示及描述元数据优先且空值回退到成员名。</summary>
@@ -96,13 +96,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
 
         Assert.Equal(
             new[] { "DescriptionOnly", "DisplayAndDescription", "EmptyDescription", "EmptyDisplay", "Plain" },
-            changes.Changes.Select(change => change.Path.Value));
+            changes.Select(change => change.PropertyName).OrderBy(name => name));
         Assert.Equal(
             new[] { "属性说明", "显示名称", "EmptyDescription", "备用说明", "Plain" },
-            changes.Changes.Select(change => change.Description));
+            changes.OrderBy(change => change.PropertyName).Select(change => change.Description));
     }
 
-    /// <summary>结构值对象成员展开到拥有者模型并保留完整路径。</summary>
+    /// <summary>子领域对象各自比较并保留完整路径和默认描述。</summary>
     [Fact]
     public void Compare_WhenNestedValueObjectHasNoMetadata_ShouldFallbackDescriptionToMemberNameAndKeepFullPath()
     {
@@ -114,7 +114,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public Child Child { get; set; }
             }
 
-            public class Child
+            public partial class Child : DomainObjectBase<Child>
             {
                 public string Name { get; set; }
             }
@@ -134,10 +134,10 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             new Dictionary<string, object> { ["Child"] = beforeChild },
             new Dictionary<string, object> { ["Child"] = afterChild });
 
-        var change = Assert.Single(changes.Changes);
-        Assert.Equal("Child.Name", change.Path.Value);
+        var change = Assert.Single(changes);
+        Assert.Equal("Child.Name", change.PropertyName);
         Assert.Equal("Name", change.Description);
-        Assert.Equal("Child.Name", Assert.Single(changes.ToLegacyDescriptors()).PropertyName);
+        Assert.Equal("Child.Name", Assert.Single(changes).PropertyName);
     }
 
     /// <summary>非 partial 领域对象必须报告 CG001。</summary>
@@ -155,22 +155,24 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
         Assert.True(diagnostic.Location.IsInSource);    }
 
-    /// <summary>已声明 ChangeGraphModel 的实体必须报告 CG005。</summary>
+    /// <summary>显式声明独立图模型不会妨碍领域对象生成 AddChanges。</summary>
     [Fact]
-    public void Generate_WhenModelPropertyAlreadyExists_ShouldReportCg005()
+    public void Generate_WhenModelPropertyAlreadyExists_ShouldStillEmitAddChanges()
     {
         const string source = """
             using Bing.Domain.Entities;
             public partial class Root : DomainObjectBase<Root>
             {
                 public object ChangeGraphModel => null;
+                public string Name { get; set; }
             }
             """;
 
         var result = RunGenerator(source);
 
-        var diagnostic = result.Diagnostics.First(item => item.Id == "CG005");
-        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+        AssertNoErrors(result.Diagnostics);
+        Assert.DoesNotContain(result.Diagnostics, item => item.Id == "CG005");
+        Assert.Contains("AddChange(nameof(Name)", result.GeneratedSource);
     }
 
     /// <summary>手写 AddChanges 时不得重复生成，并在存在成员规则时报告 CG015。</summary>
@@ -216,7 +218,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         var changes = CompareGenerated(result, "Root",
             new Dictionary<string, object> { ["Visible"] = "old" },
             new Dictionary<string, object> { ["Visible"] = "new" });
-        Assert.Equal("Visible", Assert.Single(changes.Changes).Path.Value);
+        Assert.Equal("Visible", Assert.Single(changes).PropertyName);
     }
 
     /// <summary>父实体忽略整个关系时不读取子对象。</summary>
@@ -242,7 +244,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         var changes = CompareGenerated(result, "Root",
             new Dictionary<string, object> { ["Visible"] = "same" },
             new Dictionary<string, object> { ["Visible"] = "same" });
-        Assert.Empty(changes.Changes);
+        Assert.Empty(changes);
     }
 
     /// <summary>无领域身份契约的无序集合必须报告 CG019。</summary>
@@ -265,9 +267,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
     }
 
-    /// <summary>实现 IKey&lt;TKey&gt; 的集合元素按实体键匹配。</summary>
+    /// <summary>领域实体通过自身 GetKeys 提供集合匹配键。</summary>
     [Fact]
-    public void Compare_WhenSequenceElementImplementsIKey_ShouldMatchByKey()
+    public void Compare_WhenSequenceElementProvidesEntityKey_ShouldMatchByKey()
     {
         const string source = """
             using System.Collections.Generic;
@@ -276,10 +278,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             {
                 public List<Line> Lines { get; set; }
             }
-            public class Line : IKey<int>
+            public partial class Line : DomainObjectBase<Line>, IEntity
             {
                 public int Id { get; set; }
                 public string Name { get; set; }
+                public object[] GetKeys() => new object[] { Id };
+                public void Init() { }
             }
             """;
 
@@ -309,8 +313,8 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             new Dictionary<string, object> { ["Lines"] = Lines(Line(1, "old"), Line(2, "keep")) },
             new Dictionary<string, object> { ["Lines"] = Lines(Line(1, "new"), Line(2, "keep")) });
 
-        var change = Assert.Single(changes.Changes);
-        Assert.Equal("Lines[1].Name", change.Path.Value);
+        var change = Assert.Single(changes);
+        Assert.Equal("Lines[1].Name", change.PropertyName);
     }
 
     /// <summary>仅实现 IEntity 的复合身份使用 GetKeys() 顺序匹配。</summary>
@@ -324,7 +328,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             {
                 public List<Line> Lines { get; set; }
             }
-            public class Line : IEntity
+            public partial class Line : DomainObjectBase<Line>, IEntity
             {
                 public string Sku { get; set; }
                 public int Lot { get; set; }
@@ -362,8 +366,8 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             new Dictionary<string, object> { ["Lines"] = Lines(Line("A", 1, "old")) },
             new Dictionary<string, object> { ["Lines"] = Lines(Line("A", 1, "new")) });
 
-        var change = Assert.Single(changes.Changes);
-        Assert.Equal("Lines[A,1].Value", change.Path.Value);
+        var change = Assert.Single(changes);
+        Assert.Equal("Lines[A,1].Value", change.PropertyName);
     }
 
     /// <summary>静态、索引器及不可读成员不进入捕获。</summary>
@@ -399,10 +403,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public Line[][] Jagged { get; set; }
                 public Dictionary<string, List<Line>> Map { get; set; }
             }
-            public class Line : IKey<int>
+            public partial class Line : DomainObjectBase<Line>, IEntity
             {
                 public int Id { get; set; }
                 public string Name { get; set; }
+                public object[] GetKeys() => new object[] { Id };
+                public void Init() { }
             }
             """;
 
@@ -446,12 +452,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             });
 
         Assert.Equal(new[] { "DeletionTime", "LastModificationTime" },
-            changes.Changes.Select(change => change.Path.Value));
+            changes.Select(change => change.PropertyName).OrderBy(name => name));
     }
 
-    /// <summary>可空自定义结构体生成对象模型。</summary>
+    /// <summary>可空普通结构体报告不支持，而不是静默生成对象图模型。</summary>
     [Fact]
-    public void Generate_WhenNullableCustomStructIsUsed_ShouldGenerateAnObjectModel()
+    public void Generate_WhenNullableCustomStructIsUsed_ShouldReportUnsupportedStructure()
     {
         const string source = """
             using Bing.Domain.Entities;
@@ -465,6 +471,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         var result = RunGenerator(source);
         AssertNoErrors(result.Diagnostics);
         Assert.True(result.EmitSucceeded);
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
     }
 
     /// <summary>关键字属性名生成带转义的访问表达式。</summary>
@@ -502,32 +509,45 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.True(result.EmitSucceeded);
     }
 
-    /// <summary>生成的模型不使用运行时反射或动态派发。</summary>
+    /// <summary>生成的领域关系使用直接辅助调用，不使用运行时反射或动态派发。</summary>
     [Fact]
-    public void Generate_WhenEmittingGraphModels_ShouldAvoidRuntimeReflectionAndDynamicDispatch()
+    public void Generate_WhenEmittingRelationships_ShouldAvoidRuntimeReflectionAndCompareThroughGetChanges()
     {
         const string source = """
             using System.Collections.Generic;
+            using System.Linq;
             using Bing.Domain.Entities;
             public partial class Root : DomainObjectBase<Root>
             {
                 public List<Line> Lines { get; set; }
             }
-            public class Line : IKey<int>
+            public partial class Line : DomainObjectBase<Line>
             {
-                public int Id { get; set; }
                 public string Name { get; set; }
+            }
+            public static class Check
+            {
+                public static string Run() => string.Join("|", new Root
+                {
+                    Lines = new List<Line> { new Line { Name = "old" } }
+                }.GetChanges(new Root
+                {
+                    Lines = new List<Line> { new Line { Name = "new" } }
+                }).Select(change => change.PropertyName + ":" + change.OldValue + "->" + change.NewValue));
             }
             """;
 
         var result = RunGenerator(source);
         AssertNoErrors(result.Diagnostics);
+        Assert.True(result.EmitSucceeded);
+        Assert.Contains("AddCollectionChanges(nameof(Lines)", result.GeneratedSource);
         Assert.DoesNotContain("System.Reflection", result.GeneratedSource);
         Assert.DoesNotContain("dynamic ", result.GeneratedSource);
         Assert.DoesNotContain("Expression.Lambda", result.GeneratedSource);
+        Assert.Equal("Lines[0].Name:\"old\"->\"new\"", RunCheck(result));
     }
 
-    /// <summary>派生实体显式隐藏基类模型并保留派生成员。</summary>
+    /// <summary>派生实体调用自身 hook，并同时比较继承成员和派生成员。</summary>
     [Fact]
     public void DerivedGraphModel_ExplicitlyHidesBaseModelAndKeepsDerivedCapture()
     {
@@ -542,7 +562,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         var changes = CompareGenerated(result, "Derived",
             new Dictionary<string, object> { ["Name"] = "old", ["Extra"] = "old" },
             new Dictionary<string, object> { ["Name"] = "new", ["Extra"] = "new" });
-        Assert.Equal(new[] { "Extra", "Name" }, changes.Changes.Select(c => c.Path.Value));
+        Assert.Equal(new[] { "Extra", "Name" }, changes.Select(c => c.PropertyName).OrderBy(name => name));
     }
 
     /// <summary>
@@ -615,7 +635,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
     /// <param name="beforeValues">比较前对象的属性值。</param>
     /// <param name="afterValues">比较后对象的属性值。</param>
     /// <returns>比较生成模型后得到的结构化变更结果。</returns>
-    private static ChangeGraphResult CompareGenerated(GeneratorResult result, string typeName,
+    private static ChangedValueDescriptorCollection CompareGenerated(GeneratorResult result, string typeName,
         IReadOnlyDictionary<string, object> beforeValues, IReadOnlyDictionary<string, object> afterValues)
     {
         var assembly = Assembly.Load(result.AssemblyImage);
@@ -631,15 +651,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
     /// <param name="beforeValues">比较前对象的属性值。</param>
     /// <param name="afterValues">比较后对象的属性值。</param>
     /// <returns>比较生成模型后得到的结构化变更结果。</returns>
-    private static ChangeGraphResult CompareGenerated(GeneratorResult result, Type rootType,
+    private static ChangedValueDescriptorCollection CompareGenerated(GeneratorResult result, Type rootType,
         IReadOnlyDictionary<string, object> beforeValues, IReadOnlyDictionary<string, object> afterValues)
     {
         var before = CreateInstance(rootType, beforeValues);
         var after = CreateInstance(rootType, afterValues);
-        var compare = typeof(ChangeGraphTracker).GetMethods()
-            .Single(method => method.Name == nameof(ChangeGraphTracker.Compare))
-            .MakeGenericMethod(rootType);
-        return (ChangeGraphResult)compare.Invoke(new ChangeGraphTracker(), new[] { before, after });
+        return ((IChangeTrackable)before).GetChanges(after);
     }
 
     /// <summary>

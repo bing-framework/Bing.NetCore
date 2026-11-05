@@ -264,7 +264,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Root : DomainObjectBase<Root> { public string Name { get; set; } }
+            public partial class Root : DomainObjectBase<Root>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()
@@ -289,7 +295,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Root : DomainObjectBase<Root> { public string Name { get; set; } }
+            public partial class Root : DomainObjectBase<Root>, IChangeGraphNode
+            {
+                public string Name { get; set; }
+                private static readonly ChangeGraphModel<Root> Model = new("explicit-root",
+                    static (writer, value) => writer.Scalar(nameof(Name), value.Name));
+                ChangeGraphModel IChangeGraphNode.ChangeGraphModel => Model;
+            }
             public static class Check
             {
                 public static string Run()

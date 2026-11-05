@@ -1,6 +1,6 @@
 # Domain ChangeGraph Smoke
 
-该独立控制台项目展示 `ChangeGraph` 源生成器在真实 Consumer 中生成的代码，并运行嵌套对象、自引用、集合、快照和旧版 `DomainObjectBase` 行为检查。
+该独立控制台项目展示领域对象源生成器在真实 Consumer 中生成的 `AddChanges`，并运行嵌套对象、自引用和集合检查。独立 `ChangeGraphTracker` 的快照及边界测试使用 `Fixtures/ExplicitLegacyGraphModels.cs` 中显式保留的测试模型，不依赖领域对象生成器生成 Graph 模型。
 
 ## 运行并查看生成代码
 
@@ -17,7 +17,7 @@ dotnet run --project framework/tests/Bing.Ddd.Domain.Aot.Smoke/Bing.Ddd.Domain.A
 framework/tests/Bing.Ddd.Domain.Aot.Smoke/Generated/GraphSmoke/net10.0/
 ```
 
-每个参与类型都继承 `DomainObjectBase<TObject>` 并声明 `partial`，无需类级标记。`Order` 生成逐成员 `AddChanges`：标量调用 `AddChange`，关系通过 `AddObjectChanges`/`AddSequenceChanges` 调用 `Customer`、`Line` 和 `Product` 自身的 `GetChanges`。`Department` 同时配置父子关系并包含 `Parent` 自引用。`Customer`、`Product`、`Line` 各自在实体上声明忽略规则、描述或集合身份（`IKey<int>`）。`LegacySample` 是纯标量实体，生成的快速方法展示四参数 `AddChange` 调用。
+每个参与类型都继承 `DomainObjectBase<TObject>` 并声明 `partial`，无需类级标记。`Order` 生成逐成员 `AddChanges`：标量调用 `AddChange`，关系通过 `AddObjectChanges`/`AddCollectionChanges` 调用 `Customer`、`Line` 和 `Product` 自身的 `GetChanges`。`Department` 同时配置父子关系并包含 `Parent` 自引用。`Customer`、`Product`、`Line` 各自在实体上声明忽略规则、描述或集合身份（`IEntity.GetKeys()`）。`LegacySample` 是纯标量实体，生成方法展示四参数 `AddChange` 调用。`DomainNestedScenarios` 同时验证显式实体身份、额外 `IKey` 不参与身份读取，以及新子对象为 `null` 时直接记录删除。
 
 ## NativeAOT
 

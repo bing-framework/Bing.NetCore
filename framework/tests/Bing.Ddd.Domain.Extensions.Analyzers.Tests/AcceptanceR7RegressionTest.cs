@@ -25,6 +25,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public string Name { get; set; }
                 public void Init() { }
                 public object[] GetKeys() => new object[] { Id };
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => { writer.Scalar(nameof(Id), value.Id); writer.Scalar(nameof(Name), value.Name); },
+                    value => ChangeGraphKey.Create(value.GetKeys()));
             }
             public class Envelope { public List<Leaf> Children { get; set; } }
             public static class Check
@@ -33,7 +36,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 {
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
                         writer.Sequence(nameof(Envelope.Children), value.Children,
-                            Leaf.GeneratedChangeGraphModel, Leaf.GeneratedChangeGraphModel.KeySelector));
+                            Leaf.ExplicitGraphModel, Leaf.ExplicitGraphModel.KeySelector));
                     var options = ChangeGraphOptions.Default
                         .WithAdapter(model)
                         .WithKeyComparer<string>(StringComparer.OrdinalIgnoreCase);
@@ -78,6 +81,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public string Id { get; set; }
                 public void Init() { }
                 public object[] GetKeys() => new object[] { Id };
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => writer.Scalar(nameof(Id), value.Id),
+                    value => ChangeGraphKey.Create(value.GetKeys()));
             }
             public class Envelope { public List<List<Leaf>> Children { get; set; } }
             public static class Check
@@ -85,7 +91,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public static string Run()
                 {
                     var inner = ChangeGraphModel<List<Leaf>>.CreateSequenceModel<List<Leaf>, Leaf>(
-                        "inner", value => value, () => Leaf.GeneratedChangeGraphModel, Leaf.GeneratedChangeGraphModel.KeySelector);
+                        "inner", value => value, () => Leaf.ExplicitGraphModel, Leaf.ExplicitGraphModel.KeySelector);
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
                         writer.Sequence(nameof(Envelope.Children), value.Children, inner));
                     var options = ChangeGraphOptions.Default
@@ -119,6 +125,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public string Id { get; set; }
                 public void Init() { }
                 public object[] GetKeys() => new object[] { Id };
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => writer.Scalar(nameof(Id), value.Id),
+                    value => ChangeGraphKey.Create(value.GetKeys()));
             }
             public class Envelope { public List<Leaf> Children { get; set; } }
             public static class Check
@@ -127,7 +136,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 {
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
                         writer.Sequence(nameof(Envelope.Children), value.Children,
-                            Leaf.GeneratedChangeGraphModel, Leaf.GeneratedChangeGraphModel.KeySelector));
+                            Leaf.ExplicitGraphModel, Leaf.ExplicitGraphModel.KeySelector));
                     var options = ChangeGraphOptions.Default
                         .WithAdapter(model)
                         .WithKeyComparer<string>(StringComparer.OrdinalIgnoreCase);
@@ -161,6 +170,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public string Id { get; set; }
                 public void Init() { }
                 public object[] GetKeys() => new object[] { Id };
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => writer.Scalar(nameof(Id), value.Id),
+                    value => ChangeGraphKey.Create(value.GetKeys()));
             }
             public class Envelope { public Dictionary<string, Leaf> Children { get; set; } }
             public static class Check
@@ -168,7 +180,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                 public static string Run()
                 {
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
-                        writer.Dictionary(nameof(Envelope.Children), value.Children, Leaf.GeneratedChangeGraphModel));
+                        writer.Dictionary(nameof(Envelope.Children), value.Children, Leaf.ExplicitGraphModel));
                     var options = ChangeGraphOptions.Default
                         .WithAdapter(model)
                         .WithKeyComparer<string>(StringComparer.OrdinalIgnoreCase);

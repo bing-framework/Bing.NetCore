@@ -110,7 +110,7 @@ public sealed class ChangeGraphTracker
             return runtimeAdapter;
         if (_options.TryAdapter(typeof(T), out var declaredAdapter))
             return declaredAdapter;
-        throw new InvalidOperationException($"类型 {typeof(T).FullName} 没有生成 ChangeGraph 模型。请让根类型继承 DomainObjectBase<TObject> 并声明为 partial。" );
+        throw new InvalidOperationException($"类型 {typeof(T).FullName} 没有可用的 ChangeGraph 模型。请实现 IChangeGraphNode 或通过 WithAdapter 显式注册模型。");
     }
 
     /// <summary>

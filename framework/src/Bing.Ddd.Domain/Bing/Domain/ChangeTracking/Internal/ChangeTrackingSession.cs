@@ -56,6 +56,24 @@ internal static class ChangeTrackingSession
     [System.ThreadStatic]
     private static List<PairScope> _valuePairs;
 
+    /// <summary>保存当前领域关系链，仅用于异常中定位完整路径。</summary>
+    [System.ThreadStatic]
+    private static string _errorPathPrefix;
+
+    /// <summary>进入子对象比较并返回原有异常路径前缀。</summary>
+    internal static string PushErrorPath(string path)
+    {
+        var previous = _errorPathPrefix;
+        _errorPathPrefix = Prefix(previous, path);
+        return previous;
+    }
+
+    /// <summary>恢复调用子对象前的异常路径前缀。</summary>
+    internal static void RestoreErrorPath(string previous) => _errorPathPrefix = previous;
+
+    /// <summary>把当前对象中的局部路径转换成面向调用方的完整路径。</summary>
+    internal static string ErrorPath(string localPath) => Prefix(_errorPathPrefix, localPath);
+
     /// <summary>
     /// 引用对作用域。
     /// </summary>

@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace Bing.Analyzers;
 
 /// <summary>
-/// 为领域对象生成传统 AddChanges 以及类型化 ChangeGraph 模型。
+/// 为领域对象生成逐成员变更跟踪方法。
 /// </summary>
 [Generator]
 public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
@@ -28,10 +28,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     /// 定义显示特性的完全限定元数据名称。
     /// </summary>
     private const string DisplayAttributeName = "System.ComponentModel.DataAnnotations.DisplayAttribute";
-    /// <summary>
-    /// 定义变更图节点接口的完全限定元数据名称。
-    /// </summary>
-    private const string ChangeGraphNodeInterfaceName = "Bing.Domain.ChangeTracking.IChangeGraphNode";
     /// <summary>
     /// 定义变更图模型类型的完全限定元数据名称。
     /// </summary>
@@ -52,30 +48,15 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     private static readonly DiagnosticDescriptor RootShapeUnsupported = new DiagnosticDescriptor(
         "CG002", "ChangeGraph 根类型形状不受支持", "类型“{0}”不能作为 ChangeGraph 根类型（静态类型不受支持）", "ChangeGraph", DiagnosticSeverity.Error, true);
     /// <summary>
-    /// 报告生成模型属性与已有成员冲突。
-    /// </summary>
-    private static readonly DiagnosticDescriptor ExistingModelProperty = new DiagnosticDescriptor(
-        "CG005", "ChangeGraph 模型属性冲突", "类型“{0}”已经声明 ChangeGraphModel 属性，生成器无法安全添加模型入口", "ChangeGraph", DiagnosticSeverity.Error, true);
-    /// <summary>
     /// 报告成员类型无法生成对象图采集代码。
     /// </summary>
     private static readonly DiagnosticDescriptor UnsupportedMember = new DiagnosticDescriptor(
-        "CG006", "ChangeGraph 成员不受支持", "属性“{0}”的类型无法生成对象图采集代码，捕获时将按路径失败", "ChangeGraph", DiagnosticSeverity.Warning, true);
-    /// <summary>
-    /// 报告泛型闭包无界而无法生成模型。
-    /// </summary>
-    private static readonly DiagnosticDescriptor UnboundedGenericExpansion = new DiagnosticDescriptor(
-        "CG010", "ChangeGraph 泛型闭包无界", "类型“{0}”递归展开为“{1}”；无法安全生成无界泛型模型闭包", "ChangeGraph", DiagnosticSeverity.Error, true);
-    /// <summary>
-    /// 报告开放类型成员需要显式适配器。
-    /// </summary>
-    private static readonly DiagnosticDescriptor AdapterRequired = new DiagnosticDescriptor(
-        "CG011", "ChangeGraph 成员需要显式适配器", "属性“{0}”的开放类型需要通过 ChangeGraphOptions.WithAdapter 显式注册模型", "ChangeGraph", DiagnosticSeverity.Warning, true);
+        "CG006", "AddChanges 成员不受支持", "属性“{0}”的类型无法安全生成自动 AddChanges 调用，生成器将跳过该属性", "ChangeGraph", DiagnosticSeverity.Warning, true);
     /// <summary>
     /// 报告无序集合元素缺少领域身份契约。
     /// </summary>
     private static readonly DiagnosticDescriptor SetElementNeedsIdentity = new DiagnosticDescriptor(
-        "CG019", "ChangeGraph Set 元素缺少领域身份", "属性“{0}”的 Set 元素类型“{1}”未实现 IKey<TKey> 或 IEntity；无序集合必须有稳定身份键", "ChangeGraph", DiagnosticSeverity.Error, true);
+        "CG019", "AddChanges Set 元素缺少领域身份", "属性“{0}”的 Set 元素类型“{1}”未实现 IEntity；无序集合必须由 GetKeys() 提供稳定身份键", "ChangeGraph", DiagnosticSeverity.Error, true);
     /// <summary>
     /// 提示属性规则不会改写手写变更记录。
     /// </summary>
@@ -85,12 +66,7 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     /// 报告类型声明了与生成 hook 冲突的方法。
     /// </summary>
     private static readonly DiagnosticDescriptor HookSignatureConflict = new DiagnosticDescriptor(
-        "CG020", "领域对象 hook 签名冲突", "类型“{0}”声明了方法“{1}”；AddChanges hook 必须使用 override 或重命名，生成器不能重复声明", "ChangeGraph", DiagnosticSeverity.Error, true);
-    /// <summary>
-    /// 报告类型已声明生成器保留的辅助成员。
-    /// </summary>
-    private static readonly DiagnosticDescriptor CaptureChangesConflict = new DiagnosticDescriptor(
-        "CG021", "领域对象辅助成员冲突", "类型“{0}”已经声明 CaptureChanges，生成器无法安全添加采集入口", "ChangeGraph", DiagnosticSeverity.Error, true);
+        "CG020", "领域对象 hook 签名冲突", "类型“{0}”的方法“{1}”与领域对象 AddChanges hook 冲突；请重写领域基类 hook 或重命名冲突方法", "ChangeGraph", DiagnosticSeverity.Error, true);
 
     /// <inheritdoc />
     public void Initialize(GeneratorInitializationContext context) =>
@@ -117,24 +93,21 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
             if (!IsDomainObjectBase(classSymbol, domainBaseSymbol))
                 continue;
 
-            // 生成器保留 CaptureChanges；用户声明同名成员时必须定位到源声明而不是让 CS0111 落在生成文件。
-            if (classSymbol.GetMembers("CaptureChanges").Length != 0)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(CaptureChangesConflict, classSymbol.Locations.FirstOrDefault(),
-                    classSymbol.ToDisplayString()));
-                continue;
-            }
-
             var hookParameter = GetChangeParameterType(classSymbol);
-            var addChangesMembers = classSymbol.GetMembers("AddChanges").OfType<IMethodSymbol>()
-                .Where(item => !item.IsStatic).ToList();
-            var manualMethod = addChangesMembers.FirstOrDefault(item => item.IsOverride);
+            var addChangesMembers = classSymbol.GetMembers("AddChanges").OfType<IMethodSymbol>().ToList();
+            var manualMethod = addChangesMembers.FirstOrDefault(item =>
+                HasHookSignature(item, hookParameter) && IsDomainHookOverride(item, domainBaseSymbol));
             var conflictingHook = addChangesMembers.FirstOrDefault(item =>
-                !item.IsOverride && HasHookSignature(item, hookParameter));
-            if (conflictingHook != null)
+                HasHookSignature(item, hookParameter) && !IsDomainHookOverride(item, domainBaseSymbol));
+            var inheritedConflict = manualMethod == null
+                ? FindInheritedHookConflict(context.Compilation, classSymbol, domainBaseSymbol, hookParameter)
+                : null;
+            var conflict = conflictingHook ?? inheritedConflict;
+            if (conflict != null)
             {
                 context.ReportDiagnostic(Diagnostic.Create(HookSignatureConflict,
-                    conflictingHook.Locations.FirstOrDefault(), classSymbol.ToDisplayString(), conflictingHook.Name));
+                    conflictingHook?.Locations.FirstOrDefault() ?? classSymbol.Locations.FirstOrDefault(),
+                    classSymbol.ToDisplayString(), conflict.Name));
                 continue;
             }
 
@@ -144,6 +117,7 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
                 context.ReportDiagnostic(Diagnostic.Create(ManualChangeTrackingRule,
                     manualMethod.Locations.FirstOrDefault(), classSymbol.ToDisplayString()));
 
+            // 手写 override 完全拥有其变更规则；自动成员形状和身份诊断仅适用于生成 hook。
             GenerateEntityChangeTracking(context, classSymbol, manualMethod == null);
         }
     }
@@ -153,13 +127,40 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     /// </summary>
     /// <param name="method">待检查的方法符号。</param>
     /// <param name="parameterType">真实 hook 参数类型。</param>
-    /// <returns>单个参数、参数类型一致且返回 void 时为 true。</returns>
+    /// <returns>非泛型方法具有相同的按值参数时为 true；返回类型不区分 C# 方法签名。</returns>
     private static bool HasHookSignature(IMethodSymbol method, ITypeSymbol parameterType) =>
-        method.ReturnsVoid && method.Parameters.Length == 1 &&
+        method.Arity == 0 && method.Parameters.Length == 1 && method.Parameters[0].RefKind == RefKind.None &&
         SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, parameterType);
 
+    /// <summary>沿实际重写链确认方法覆盖的是领域基类的虚方法，而不是同名重载或隐藏方法。</summary>
+    private static bool IsDomainHookOverride(IMethodSymbol method, INamedTypeSymbol domainBaseSymbol)
+    {
+        if (!method.IsOverride || !method.ReturnsVoid)
+            return false;
+        for (var current = method.OverriddenMethod; current != null; current = current.OverriddenMethod)
+            if (SymbolEqualityComparer.Default.Equals(current.ContainingType.OriginalDefinition, domainBaseSymbol))
+                return true;
+        return false;
+    }
+
+    /// <summary>发现跨继承层级阻断生成重写的同签名方法。</summary>
+    private static IMethodSymbol FindInheritedHookConflict(Compilation compilation, INamedTypeSymbol type,
+        INamedTypeSymbol domainBaseSymbol, ITypeSymbol parameterType)
+    {
+        for (var current = type.BaseType; current != null &&
+             !SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, domainBaseSymbol);
+             current = current.BaseType)
+        {
+            var method = current.GetMembers("AddChanges").OfType<IMethodSymbol>().FirstOrDefault(item =>
+                HasHookSignature(item, parameterType) && compilation.IsSymbolAccessibleWithin(item, type));
+            if (method != null)
+                return IsDomainHookOverride(method, domainBaseSymbol) && !method.IsSealed ? null : method;
+        }
+        return null;
+    }
+
     /// <summary>
-    /// 校验领域对象并生成其对象图模型与变更跟踪入口。
+    /// 为领域对象生成直接读取属性的 AddChanges 重写。
     /// </summary>
     /// <param name="context">用于读取语义模型、输出源码及报告诊断的生成上下文。</param>
     /// <param name="root">需要生成变更跟踪的领域对象类型。</param>
@@ -167,6 +168,8 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     private static void GenerateEntityChangeTracking(GeneratorExecutionContext context, INamedTypeSymbol root,
         bool generateAddChanges)
     {
+        if (!generateAddChanges)
+            return;
         if (!ArePartialTypes(root))
         {
             context.ReportDiagnostic(Diagnostic.Create(RootMustBePartial, root.Locations.FirstOrDefault(), root.ToDisplayString()));
@@ -177,342 +180,161 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
             context.ReportDiagnostic(Diagnostic.Create(RootShapeUnsupported, root.Locations.FirstOrDefault(), root.ToDisplayString()));
             return;
         }
-        if (root.GetMembers("ChangeGraphModel").Length != 0 ||
-            root.GetMembers("GeneratedChangeGraphModel").Length != 0 ||
-            root.GetMembers("CaptureChanges").Length != 0)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(ExistingModelProperty, root.Locations.FirstOrDefault(), root.ToDisplayString()));
-            return;
-        }
-
-        var builder = new GraphBuilder(context, root);
-        var rootModel = builder.EnsureModel(root);
-        if (rootModel == null || builder.HasUnboundedGenericExpansion)
-            return;
-
-        var source = new StringBuilder();
-        source.AppendLine("// <auto-generated />");
-        source.AppendLine("#nullable disable");
-        var namespaceName = root.ContainingNamespace.IsGlobalNamespace ? null : root.ContainingNamespace.ToDisplayString();
-        if (!string.IsNullOrWhiteSpace(namespaceName))
-        {
-            source.Append("namespace ").Append(namespaceName).AppendLine(";");
-            source.AppendLine();
-        }
-
-        var typeChain = GetTypeChain(root);
-        foreach (var type in typeChain)
-        {
-            AppendPartialTypeDeclaration(source, type, context, SymbolEqualityComparer.Default.Equals(type, root));
-            source.AppendLine("{");
-        }
-        source.AppendLine("    /// <summary>获取源生成的对象图模型。</summary>");
-        source.Append("    public ");
-        if (HasBaseGraphModel(root, context))
-            source.Append("new ");
-        source.Append("global::").Append(ChangeGraphModelName).AppendLine(" ChangeGraphModel => __ChangeGraph.Model0;");
-        source.AppendLine("    /// <summary>获取当前类型的独立生成模型，供其他实体直接调用。</summary>");
-        source.Append("    public ");
-        if (HasBaseGraphModel(root, context))
-            source.Append("new ");
-        source.Append("static global::").Append(ChangeGraphModelName).Append("<").Append(TypeName(root))
-            .AppendLine("> GeneratedChangeGraphModel => __ChangeGraph.Model0;");
-        source.AppendLine();
-        source.AppendLine("    /// <summary>采集自身成员；关系成员调用对应实体模型并共享当前会话。</summary>");
-        source.Append("    private void CaptureChanges(global::Bing.Domain.ChangeTracking.ChangeGraphWriter<")
-            .Append(TypeName(root)).AppendLine("> writer)");
-        source.AppendLine("    {");
-        foreach (var member in rootModel.Members)
-            EmitMember(source, member, root, context, "this");
-        source.AppendLine("    }");
-        source.AppendLine();
-        source.AppendLine("    private static class __ChangeGraph");
-        source.AppendLine("    {");
-        foreach (var model in builder.Models.Where(model => !model.IsExternal))
-            EmitModel(source, model, root, context, model == rootModel);
-        source.AppendLine("    }");
-        for (var index = typeChain.Count - 1; index >= 0; index--)
-            source.AppendLine("}");
-
-        context.AddSource(GetHintName(root, "ChangeGraph"), SourceText.From(source.ToString(), Encoding.UTF8));
-
-        if (!generateAddChanges)
-            return;
-        // 所有实体使用同一逐成员 hook：标量直接比较，领域对象调用子 GetChanges，集合按身份或索引匹配。
-        GenerateMemberAddChanges(context, root, rootModel);
+        var members = BuildAddChangesMembers(context, root);
+        GenerateMemberAddChanges(context, root, members);
     }
 
     /// <summary>
-    /// 判断基类是否提供变更图模型。
+    /// 按属性类型建立直接 AddChanges 所需的有限静态形状。
     /// </summary>
-    /// <param name="root">需要生成变更跟踪的领域类型。</param>
-    /// <param name="context">用于读取领域基类符号的生成上下文。</param>
-    /// <returns>基类已有可访问模型成员或同为源码内生成的领域对象时为 true，否则为 false。</returns>
-    private static bool HasBaseGraphModel(INamedTypeSymbol root, GeneratorExecutionContext context)
+    private static List<AddChangesMemberInfo> BuildAddChangesMembers(GeneratorExecutionContext context,
+        INamedTypeSymbol owner)
     {
-        var domainBaseSymbol = context.Compilation.GetTypeByMetadataName(DomainObjectBaseName);
-        // 基类的模型可能仍待本轮生成，不能只查询已有成员符号；源码内声明的领域对象视为会生成。
-        for (var current = root.BaseType; current != null; current = current.BaseType)
+        var members = new List<AddChangesMemberInfo>();
+        foreach (var property in GetPublicInstanceProperties(owner))
         {
-            if (current.GetMembers("ChangeGraphModel").Any(member => member.DeclaredAccessibility != Accessibility.Private))
-                return true;
-            if (current.DeclaringSyntaxReferences.Length != 0 && IsDomainObjectBase(current, domainBaseSymbol))
-                return true;
-        }
-        return false;
-    }
+            if (property.Name == "ChangeGraphModel" && property.Type.ToDisplayString() == ChangeGraphModelName)
+                continue;
+            if (ShouldIgnoreChangeProperty(owner, property))
+                continue;
 
-    /// <summary>
-    /// 输出对象或容器的变更图模型字段。
-    /// </summary>
-    /// <param name="source">接收生成源码的文本缓冲区。</param>
-    /// <param name="model">需要构建或输出的变更图模型信息。</param>
-    private static void EmitModel(StringBuilder source, GraphModelInfo model, INamedTypeSymbol owner,
-        GeneratorExecutionContext context, bool ownsCapture = false)
-    {
-        if (model.Shape != GraphModelShape.Object)
-        {
-            EmitCollectionModel(source, model);
-            return;
-        }
-        source.Append("        internal static readonly global::").Append(ChangeGraphModelName).Append("<")
-            .Append(TypeName(model.Type)).Append("> Model").Append(model.Index).Append(" = new global::")
-            .Append(ChangeGraphModelName).Append("<").Append(TypeName(model.Type)).Append(">(");
-        // 独立泛型模型必须区分 Box<int>/Box<string>，并区分不同程序集中的同名实体。
-        // typeof 是静态类型引用；不扫描运行时成员，也不动态构造泛型。
-        source.Append("typeof(").Append(TypeOfTypeName(model.Type)).Append(").AssemblyQualifiedName + \":\" + ")
-            .Append(ToLiteral(model.ModelId)).Append(", ");
-        if (ownsCapture)
-            source.Append("static (writer, value) => value.CaptureChanges(writer), ");
-        else
-        {
-            source.AppendLine("static (writer, value) =>");
-            source.AppendLine("        {");
-            foreach (var member in model.Members)
-                EmitMember(source, member, owner, context);
-            source.Append("        }, ");
-        }
-        source.Append(BuildKeySelector(model.Key));
-        source.Append(", new string[] { ")
-            .Append(string.Join(", ", model.Members.Where(member => member.Kind != GraphMemberKind.Unsupported)
-                .Select(member => ToLiteral(member.Property.Name))))
-            .Append(" }, ");
-        var collectionMembers = model.Members.Where(IsSequenceOrSetMember).ToList();
-        if (collectionMembers.Count == 0)
-            source.Append("null");
-        else
-        {
-            source.Append("new global::System.Collections.Generic.Dictionary<string, global::System.Type> { ");
-            foreach (var member in collectionMembers)
+            if (!ValidateSetIdentities(context, property, property.Type,
+                    new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default), 0))
+                continue;
+
+            var shape = BuildAddChangesTypeShape(property.Type,
+                new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default), 0);
+            if (shape.Kind == AddChangesShapeKind.Unsupported)
             {
-                var elementType = GetCollectionElementType(member);
-                source.Append("{ ").Append(ToLiteral(member.Property.Name)).Append(", typeof(")
-                    .Append(TypeOfTypeName(elementType)).Append(") }, ");
+                ReportSimplifiedUnsupported(context, property);
+                continue;
             }
-            source.Append("}");
+            members.Add(new AddChangesMemberInfo(property, shape));
         }
-        source.AppendLine(");");
-        source.AppendLine();
+        return members;
     }
 
     /// <summary>
-    /// 输出容器形状的变更图模型字段。
+    /// 递归识别标量、领域关系和同步容器，不展开普通对象属性。
     /// </summary>
-    /// <param name="source">接收生成源码的文本缓冲区。</param>
-    /// <param name="model">需要构建或输出的变更图模型信息。</param>
-    private static void EmitCollectionModel(StringBuilder source, GraphModelInfo model)
+    private static AddChangesTypeShape BuildAddChangesTypeShape(ITypeSymbol type,
+        HashSet<ITypeSymbol> activeTypes, int depth)
     {
-        var modelType = model.Shape == GraphModelShape.Nullable ? NullableValueTypeName(model.Type) : TypeName(model.Type);
-        var id = ToLiteral(model.ModelId);
-        source.Append("        internal static readonly global::").Append(ChangeGraphModelName).Append("<")
-            .Append(modelType).Append("> Model").Append(model.Index).Append(" = ");
-        switch (model.Shape)
+        // 有限深度上限也能挡住逐层改写类型参数的无限容器闭包。
+        if (type == null || type.TypeKind == TypeKind.Error || depth >= 64 || IsUnsupportedContainer(type))
+            return new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported);
+        if (IsScalarType(type))
+            return new AddChangesTypeShape(type, AddChangesShapeKind.Scalar);
+
+        if (TryGetDictionary(type, out var keyType, out var valueType))
         {
-            case GraphModelShape.Sequence:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateSequenceModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.ElementType)).Append(">( ");
-                source.Append(id).Append(", static value => value, static () => ").Append(ModelReference(model.ElementModel))
-                    .Append(", ").Append(ElementKeyResolver(model.ElementModel, model.ElementKey)).AppendLine(" );");
-                break;
-            case GraphModelShape.ScalarSequence:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateScalarSequenceModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.ElementType)).Append(">( ")
-                    .Append(id).AppendLine(", static value => value );");
-                break;
-            case GraphModelShape.Dictionary:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateDictionaryModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.KeyType)).Append(", ").Append(TypeName(model.ValueType)).Append(">( ")
-                    .Append(id).Append(", static value => value, static () => ").Append(ModelReference(model.ValueModel)).AppendLine(" );");
-                break;
-            case GraphModelShape.ScalarDictionary:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateScalarDictionaryModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.KeyType)).Append(", ").Append(TypeName(model.ValueType)).Append(">( ")
-                    .Append(id).AppendLine(", static value => value );");
-                break;
-            case GraphModelShape.Set:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateSetModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.ElementType)).Append(">( ")
-                    .Append(id).Append(", static value => value, static () => ").Append(ModelReference(model.ElementModel))
-                    .Append(", ").Append(ElementKeyResolver(model.ElementModel, model.ElementKey)).AppendLine(" );");
-                break;
-            case GraphModelShape.ScalarSet:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType).Append(">.CreateScalarSetModel<")
-                    .Append(modelType).Append(", ").Append(TypeName(model.ElementType)).Append(">( ")
-                    .Append(id).AppendLine(", static value => value );");
-                break;
-            case GraphModelShape.Adapter:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(modelType)
-                    .Append(">.CreateAdapterModel<").Append(modelType).Append(">( ").Append(id).AppendLine(" );");
-                break;
-            case GraphModelShape.Nullable:
-                source.Append("global::").Append(ChangeGraphModelName).Append("<").Append(NullableValueTypeName(model.Type))
-                    .Append(">.CreateNullableModel<").Append(TypeName(model.ElementType)).Append(">( ")
-                    .Append(id).Append(", static () => ").Append(ModelReference(model.ElementModel)).AppendLine(" );");
-                break;
+            if (!activeTypes.Add(type))
+                return new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported);
+            try
+            {
+                var child = BuildAddChangesTypeShape(valueType, activeTypes, depth + 1);
+                return child.Kind == AddChangesShapeKind.Unsupported
+                    ? new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported)
+                    : new AddChangesTypeShape(type, AddChangesShapeKind.Dictionary, keyType, child);
+            }
+            finally { activeTypes.Remove(type); }
         }
-        source.AppendLine();
-    }
 
-    /// <summary>
-    /// 判断成员是否为序列或集合形状。
-    /// </summary>
-    /// <param name="member">包含属性符号及捕获形状的成员信息。</param>
-    /// <returns>成员为标量或对象序列、集合时为 true，否则为 false。</returns>
-    private static bool IsSequenceOrSetMember(GraphMemberInfo member) =>
-        member.Kind == GraphMemberKind.SequenceScalar || member.Kind == GraphMemberKind.SequenceObject ||
-        member.Kind == GraphMemberKind.SetScalar || member.Kind == GraphMemberKind.SetObject;
-
-    /// <summary>生成对实体自身模型或本地容器模型的直接引用。</summary>
-    private static string ModelReference(GraphModelInfo model) => model.IsExternal
-        ? TypeName(model.Type) + ".GeneratedChangeGraphModel"
-        : "__ChangeGraph.Model" + model.Index;
-
-    /// <summary>实体的集合身份规则由该实体自己的模型提供。</summary>
-    private static string ElementKeyReference(GraphModelInfo model, KeySpec key) => model.IsExternal
-        ? ModelReference(model) + ".KeySelector"
-        : BuildKeySelector(key);
-
-    /// <summary>容器初始化时延迟读取实体键，避免双向关系的静态初始化环。</summary>
-    private static string ElementKeyResolver(GraphModelInfo model, KeySpec key) => model.IsExternal
-        ? "keySelectorResolver: static () => " + ModelReference(model) + ".KeySelector"
-        : BuildKeySelector(key);
-
-    /// <summary>
-    /// 解析序列或集合成员的元素类型。
-    /// </summary>
-    /// <param name="member">包含属性符号及捕获形状的成员信息。</param>
-    /// <returns>成员的集合元素类型；成员形状不匹配时抛出异常。</returns>
-    private static ITypeSymbol GetCollectionElementType(GraphMemberInfo member)
-    {
-        if (TryGetSet(member.Property.Type, out var setElement))
-            return setElement;
-        if (TryGetSequence(member.Property.Type, out var sequenceElement))
-            return sequenceElement;
-        throw new InvalidOperationException("集合成员元数据与生成的成员形状不一致。");
-    }
-
-    /// <summary>
-    /// 输出成员捕获及异常包装代码。
-    /// </summary>
-    /// <param name="source">接收生成源码的文本缓冲区。</param>
-    /// <param name="member">包含属性符号及捕获形状的成员信息。</param>
-    /// <param name="owner">报告诊断与解析静态资源访问所用的拥有者类型。</param>
-    /// <param name="context">用于读取语义模型、输出源码及报告诊断的生成上下文。</param>
-    /// <param name="ownerVar">生成捕获代码时访问成员所用的对象变量名。</param>
-    private static void EmitMember(StringBuilder source, GraphMemberInfo member, INamedTypeSymbol owner,
-        GeneratorExecutionContext context, string ownerVar = "value")
-    {
-        var name = member.Property.Name;
-        var value = ownerVar + "." + EscapeIdentifier(name);
-        var literalName = ToLiteral(name);
-        var literalDescription = GetLegacyDescriptionExpression(member.Property, owner, context);
-        source.Append("            if (!writer.IsIgnored(").Append(literalName).AppendLine("))");
-        source.AppendLine("            {");
-        source.AppendLine("                try");
-        source.AppendLine("                {");
-        switch (member.Kind)
+        // Set 同样实现 IEnumerable<T>，因此必须在普通序列之前识别。
+        if (TryGetSet(type, out var setElementType))
         {
-            case GraphMemberKind.Scalar:
-                source.Append("                    writer.Scalar(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.Object:
-                source.Append("                    writer.Object(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(ModelReference(member.ChildModel)).Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.SequenceScalar:
-                source.Append("                    writer.SequenceScalar(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.SequenceObject:
-                source.Append("                    writer.Sequence(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(ModelReference(member.ChildModel)).Append(", ")
-                    .Append(ElementKeyReference(member.ChildModel, member.ElementKey)).Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.DictionaryScalar:
-                source.Append("                    writer.DictionaryScalar(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.DictionaryObject:
-                source.Append("                    writer.Dictionary(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(ModelReference(member.ChildModel)).Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.SetScalar:
-                source.Append("                    writer.SetScalar(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.SetObject:
-                source.Append("                    writer.Set(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(ModelReference(member.ChildModel)).Append(", ")
-                    .Append(ElementKeyReference(member.ChildModel, member.ElementKey)).Append(", ").Append(literalDescription).AppendLine(");");
-                break;
-            case GraphMemberKind.Unsupported:
-                source.Append("                    writer.Unsupported(").Append(literalName).AppendLine(");");
-                break;
-            case GraphMemberKind.Adapted:
-                source.Append("                    writer.Adapted(").Append(literalName).Append(", ").Append(value)
-                    .Append(", ").Append(literalDescription).AppendLine(");");
-                break;
+            if (!activeTypes.Add(type))
+                return new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported);
+            try
+            {
+                var child = BuildAddChangesTypeShape(setElementType, activeTypes, depth + 1);
+                return child.Kind == AddChangesShapeKind.Unsupported
+                    ? new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported)
+                    : new AddChangesTypeShape(type, AddChangesShapeKind.Set, null, child);
+            }
+            finally { activeTypes.Remove(type); }
         }
-        source.AppendLine("                }");
-        source.AppendLine("                catch (global::System.Exception exception)");
-        source.AppendLine("                {");
-        source.Append("                    throw writer.CreateCaptureException(").Append(literalName).AppendLine(", exception);");
-        source.AppendLine("                }");
-        source.AppendLine("            }");
+
+        if (TryGetSequence(type, out var elementType))
+        {
+            if (!activeTypes.Add(type))
+                return new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported);
+            try
+            {
+                var child = BuildAddChangesTypeShape(elementType, activeTypes, depth + 1);
+                return child.Kind == AddChangesShapeKind.Unsupported
+                    ? new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported)
+                    : new AddChangesTypeShape(type, AddChangesShapeKind.Sequence, null, child);
+            }
+            finally { activeTypes.Remove(type); }
+        }
+
+        if (IsChangeTrackableType(type))
+            return new AddChangesTypeShape(type, AddChangesShapeKind.Object);
+        return new AddChangesTypeShape(type, AddChangesShapeKind.Unsupported);
     }
 
-    /// <summary>
-    /// 构造变更标识键的选择器源码。
-    /// </summary>
-    /// <param name="key">元素标识键定义；可为空以表示无键。</param>
-    /// <returns>键选择器的 Lambda 源码；未定义键成员时为文本 null。</returns>
-    private static string BuildKeySelector(KeySpec key)
+    /// <summary>判断领域对象的属性是否排除在自动比较之外。</summary>
+    private static bool ShouldIgnoreChangeProperty(INamedTypeSymbol owner, IPropertySymbol property) =>
+        FindAttribute(property, ChangeIgnoreAttributeName) != null || property.Name == "Version" ||
+        property.Name == "IsDeleted" || IsAuditProperty(owner, property);
+
+    /// <summary>递归检查无序集合每一层的复杂元素是否声明稳定身份。</summary>
+    private static bool ValidateSetIdentities(GeneratorExecutionContext context, IPropertySymbol property,
+        ITypeSymbol type, HashSet<ITypeSymbol> activeTypes, int depth)
     {
-        if (key == null)
-            return "null";
-        if (key.UsesGetKeys)
-            return "static value => { if (value == null) return null; " +
-                   "var keys = ((global::Bing.Domain.Entities.IEntity)value).GetKeys(); " +
-                   "return keys.Length == 1 ? keys[0] : (object)global::Bing.Domain.ChangeTracking.ChangeGraphKey.Create(keys); }";
-        if (key.Members.Count == 0)
-            return "null";
-        var guard = key.Members[0].Property.ContainingType.IsReferenceType ? "value == null ? null : " : string.Empty;
-        var accesses = key.Members.Select(member => "(object)" + member.BuildAccess("value")).ToList();
-        if (!key.IsExplicit && key.Members.Count == 1)
-            return "static value => " + guard + accesses[0];
-        var arguments = string.Join(", ", accesses);
-        return "static value => " + guard + "global::Bing.Domain.ChangeTracking.ChangeGraphKey.Create(" + arguments + ")";
+        if (type == null || depth >= 64 || IsScalarType(type) || IsUnsupportedContainer(type))
+            return true;
+
+        if (TryGetDictionary(type, out var dictionaryValueType))
+        {
+            if (!activeTypes.Add(type))
+                return true;
+            try { return ValidateSetIdentities(context, property, dictionaryValueType, activeTypes, depth + 1); }
+            finally { activeTypes.Remove(type); }
+        }
+
+        // Set 同样实现 IEnumerable<T>，先检查元素身份再递归其子容器。
+        if (TryGetSet(type, out var setElementType))
+        {
+            if (!IsScalarType(setElementType) && !ImplementsEntityContract(setElementType))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(SetElementNeedsIdentity, property.Locations.FirstOrDefault(),
+                    property.ToDisplayString(), setElementType.ToDisplayString()));
+                return false;
+            }
+            if (!activeTypes.Add(type))
+                return true;
+            try { return ValidateSetIdentities(context, property, setElementType, activeTypes, depth + 1); }
+            finally { activeTypes.Remove(type); }
+        }
+
+        if (TryGetSequence(type, out var elementType))
+        {
+            if (!activeTypes.Add(type))
+                return true;
+            try { return ValidateSetIdentities(context, property, elementType, activeTypes, depth + 1); }
+            finally { activeTypes.Remove(type); }
+        }
+        return true;
+    }
+
+    /// <summary>判断类型是否通过 IEntity 明确提供自身身份。</summary>
+    private static bool ImplementsEntityContract(ITypeSymbol type)
+    {
+        if (type == null)
+            return false;
+        if (type.ToDisplayString() == "Bing.Domain.Entities.IEntity")
+            return true;
+        return type.AllInterfaces.Any(item => item.Name == "IEntity" && item.Arity == 0 &&
+                                               item.ContainingNamespace.ToDisplayString() == "Bing.Domain.Entities");
     }
 
     /// <summary>
-    /// 为实体生成逐成员变更比较方法；关系成员调用子实体 GetChanges 并汇总结果。
+    /// 为每个领域对象生成逐成员比较方法与必要的嵌套容器静态辅助方法。
     /// </summary>
-    /// <param name="context">用于读取语义模型、输出源码及报告诊断的生成上下文。</param>
-    /// <param name="classSymbol">需要生成变更跟踪代码的领域类型。</param>
-    /// <param name="model">当前实体的成员模型。</param>
     private static void GenerateMemberAddChanges(GeneratorExecutionContext context, INamedTypeSymbol classSymbol,
-        GraphModelInfo model)
+        List<AddChangesMemberInfo> members)
     {
         var namespaceName = classSymbol.ContainingNamespace.IsGlobalNamespace ? null : classSymbol.ContainingNamespace.ToDisplayString();
         var source = new StringBuilder();
@@ -526,9 +348,18 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
         var typeChain = GetTypeChain(classSymbol);
         foreach (var type in typeChain)
         {
-            AppendPartialTypeDeclaration(source, type, context, false);
+            AppendPartialTypeDeclaration(source, type, context);
             source.AppendLine("{");
         }
+
+        var helperIndex = 0;
+        var helperNames = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var member in members)
+        {
+            if (member.Shape.HasNestedContainer)
+                member.NestedHelper = CreateNestedChangeHelper(member.Shape, classSymbol, ref helperIndex, helperNames);
+        }
+
         var parameterType = GetChangeParameterType(classSymbol);
         source.Append("    protected override void AddChanges(").Append(TypeName(parameterType)).AppendLine(" other)");
         source.AppendLine("    {");
@@ -536,22 +367,83 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
         if (!direct)
             AppendComparedObject(source, classSymbol, parameterType);
         var otherVar = direct ? "other" : "typedOther";
-        foreach (var member in model.Members)
-        {
-            if (member.Kind == GraphMemberKind.Unsupported)
-                continue;
-            EmitSimplifiedMemberChange(source, member, classSymbol, context, otherVar);
-        }
+        foreach (var member in members)
+            EmitAddChangesMember(source, member, classSymbol, context, otherVar);
         source.AppendLine("    }");
+
+        foreach (var member in members)
+            EmitNestedChangeHelpers(source, classSymbol, member.NestedHelper);
+
         for (var index = typeChain.Count - 1; index >= 0; index--)
             source.AppendLine("}");
         context.AddSource(GetHintName(classSymbol, "AddChanges"), SourceText.From(source.ToString(), Encoding.UTF8));
     }
 
-    /// <summary>
-    /// 输出单个成员的简化变更调用：直接属性读取 + 固定辅助方法。
-    /// </summary>
-    private static void EmitSimplifiedMemberChange(StringBuilder source, GraphMemberInfo member,
+    /// <summary>创建当前成员递归所需的静态容器辅助方法链。</summary>
+    private static NestedChangeHelperInfo CreateNestedChangeHelper(AddChangesTypeShape shape,
+        INamedTypeSymbol owner, ref int index, HashSet<string> usedNames)
+    {
+        if (!shape.HasNestedContainer)
+            return null;
+        var childHelper = CreateNestedChangeHelper(shape.ChildShape, owner, ref index, usedNames);
+        string methodName;
+        do { methodName = "__BingCompareNestedChanges" + index++; }
+        while (usedNames.Contains(methodName) || owner.GetMembers(methodName).Length != 0);
+        usedNames.Add(methodName);
+        return new NestedChangeHelperInfo(shape, methodName, childHelper);
+    }
+
+    /// <summary>输出一个嵌套容器辅助方法及其静态子方法调用。</summary>
+    private static void EmitNestedChangeHelpers(StringBuilder source, INamedTypeSymbol owner,
+        NestedChangeHelperInfo helper)
+    {
+        if (helper == null)
+            return;
+        EmitNestedChangeHelper(source, owner, helper);
+        EmitNestedChangeHelpers(source, owner, helper.ChildHelper);
+    }
+
+    /// <summary>输出单个 typed pair 遍历，路径和描述由运行时 helper 维护。</summary>
+    private static void EmitNestedChangeHelper(StringBuilder source, INamedTypeSymbol owner,
+        NestedChangeHelperInfo helper)
+    {
+        var shape = helper.Shape;
+        source.Append("    private static void ").Append(helper.MethodName).Append("(").Append(TypeName(owner))
+            .Append(" owner, string path, string description, ").Append(TypeName(shape.Type))
+            .AppendLine(" oldValue, " + TypeName(shape.Type) + " newValue)");
+        source.AppendLine("    {");
+        if (shape.Kind == AddChangesShapeKind.Dictionary)
+        {
+            source.Append("        foreach (var pair in owner.GetNestedDictionaryPairs<")
+                .Append(TypeName(shape.KeyType)).Append(", ").Append(TypeName(shape.ChildShape.Type))
+                .AppendLine(">(path, description, oldValue, newValue))");
+        }
+        else
+        {
+            source.Append("        foreach (var pair in owner.GetNestedCollectionPairs<")
+                .Append(TypeName(shape.ChildShape.Type)).Append(">(path, description, oldValue, newValue");
+            if (shape.Kind == AddChangesShapeKind.Set)
+                source.Append(", true");
+            source.AppendLine("))");
+        }
+        source.AppendLine("        {");
+        if (helper.ChildHelper != null)
+        {
+            source.Append("            ").Append(helper.ChildHelper.MethodName)
+                .AppendLine("(owner, pair.Path, description, pair.OldValue, pair.NewValue);");
+        }
+        else
+        {
+            EmitContainerChangeCall(source, shape.ChildShape, "pair.Path", "description",
+                "pair.OldValue", "pair.NewValue", "            ", "owner.");
+        }
+        source.AppendLine("        }");
+        source.AppendLine("    }");
+        source.AppendLine();
+    }
+
+    /// <summary>输出单个成员的一行静态调用，嵌套容器入口调用 typed helper。</summary>
+    private static void EmitAddChangesMember(StringBuilder source, AddChangesMemberInfo member,
         INamedTypeSymbol owner, GeneratorExecutionContext context, string otherVar)
     {
         var property = member.Property;
@@ -560,91 +452,59 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
         var description = GetLegacyDescriptionExpression(property, owner, context);
         var oldValue = "this." + name;
         var newValue = otherVar + "." + name;
-        switch (member.Kind)
+        if (member.NestedHelper != null)
         {
-            case GraphMemberKind.Scalar:
-                source.Append("        AddChange(").Append(nameOf).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
-                return;
-            case GraphMemberKind.Object:
-                if (!IsChangeTrackableType(member.Property.Type))
-                {
-                    ReportSimplifiedUnsupported(context, property);
-                    return;
-                }
-                source.Append("        AddObjectChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
-                return;
-            case GraphMemberKind.SequenceScalar:
-            case GraphMemberKind.SetScalar:
-                source.Append("        AddCollectionChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
-                return;
-            case GraphMemberKind.SequenceObject:
-            case GraphMemberKind.SetObject:
-                if (!IsSimplifiedElementSupported(member.ChildModel))
-                {
-                    ReportSimplifiedUnsupported(context, property);
-                    return;
-                }
-                source.Append("        AddCollectionChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
-                return;
-            case GraphMemberKind.DictionaryScalar:
-            case GraphMemberKind.DictionaryObject:
-                if (member.Kind == GraphMemberKind.DictionaryObject && !IsSimplifiedElementSupported(member.ChildModel))
-                {
-                    ReportSimplifiedUnsupported(context, property);
-                    return;
-                }
-                source.Append("        AddDictionaryChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
-                return;
-            case GraphMemberKind.Adapted:
-            default:
-                ReportSimplifiedUnsupported(context, property);
-                return;
+            source.Append("        ").Append(member.NestedHelper.MethodName).Append("(this, ")
+                .Append(nameOf).Append(", ").Append(description).Append(", ")
+                .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
+            return;
         }
+        EmitLeafChangeCall(source, member.Shape, nameOf, description, oldValue, newValue);
     }
 
-    /// <summary>
-    /// 判断集合元素模型是否可由简化主链处理。
-    /// </summary>
-    private static bool IsSimplifiedElementSupported(GraphModelInfo model)
+    /// <summary>按静态叶类型选择运行时现有的固定比较方法。</summary>
+    private static void EmitLeafChangeCall(StringBuilder source, AddChangesTypeShape shape, string propertyName,
+        string description, string oldValue, string newValue)
     {
-        if (model == null)
-            return false;
-        if (model.IsExternal || IsChangeTrackableType(model.Type))
-            return true;
-        switch (model.Shape)
+        switch (shape.Kind)
         {
-            case GraphModelShape.ScalarSequence:
-            case GraphModelShape.ScalarSet:
-            case GraphModelShape.ScalarDictionary:
-                return true;
-            case GraphModelShape.Sequence:
-            case GraphModelShape.Set:
-                return IsSimplifiedElementSupported(model.ElementModel);
-            case GraphModelShape.Dictionary:
-                return IsSimplifiedElementSupported(model.ValueModel);
+            case AddChangesShapeKind.Scalar:
+                source.Append("        AddChange(").Append(propertyName).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
+                return;
+            case AddChangesShapeKind.Object:
+                source.Append("        AddObjectChanges(").Append(propertyName).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
+                return;
+            case AddChangesShapeKind.Sequence:
+            case AddChangesShapeKind.Set:
+                EmitContainerChangeCall(source, shape, propertyName, description, oldValue, newValue, "        ");
+                return;
+            case AddChangesShapeKind.Dictionary:
+                EmitContainerChangeCall(source, shape, propertyName, description, oldValue, newValue, "        ");
+                return;
             default:
-                return false;
+                return;
         }
     }
 
-    /// <summary>
-    /// 报告简化主链不支持的成员类型。
-    /// </summary>
+    /// <summary>输出一个不再嵌套容器的 AddCollectionChanges/AddDictionaryChanges 调用。</summary>
+    private static void EmitContainerChangeCall(StringBuilder source, AddChangesTypeShape shape,
+        string propertyName, string description, string oldValue, string newValue, string indentation,
+        string receiver = null)
+    {
+        var method = shape.Kind == AddChangesShapeKind.Dictionary ? "AddDictionaryChanges" : "AddCollectionChanges";
+        source.Append(indentation).Append(receiver).Append(method).Append("(").Append(propertyName).Append(", ")
+            .Append(description).Append(", ").Append(oldValue).Append(", ").Append(newValue);
+        if (shape.Kind == AddChangesShapeKind.Set)
+            source.Append(", true");
+        source.AppendLine(");");
+    }
+
+    /// <summary>报告当前直接 AddChanges 不支持的静态成员。</summary>
     private static void ReportSimplifiedUnsupported(GeneratorExecutionContext context, IPropertySymbol property) =>
         context.ReportDiagnostic(Diagnostic.Create(UnsupportedMember, property.Locations.FirstOrDefault(),
             property.ToDisplayString()));
-
-    /// <summary>输出结构模型引用；没有模型时输出 null。</summary>
-    private static string ModelOrNull(GraphModelInfo model) => model == null ? "null" : ModelReference(model);
-
-    /// <summary>输出集合元素身份选择器；没有身份时为 null。</summary>
-    private static string KeyOrNull(GraphMemberInfo member) =>
-        member.ChildModel == null ? "null" : ElementKeyReference(member.ChildModel, member.ElementKey);
 
     /// <summary>
     /// 判断类型是否实现变更跟踪契约（领域实体）。
@@ -652,8 +512,9 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     /// <param name="type">待判断的类型符号。</param>
     /// <returns>实现 IChangeTrackable 时为 true。</returns>
     private static bool IsChangeTrackableType(ITypeSymbol type) =>
-        type != null && type.AllInterfaces.Any(item =>
-            item.ToDisplayString() == "Bing.Domain.ChangeTracking.IChangeTrackable");
+        type != null && (type.ToDisplayString() == "Bing.Domain.ChangeTracking.IChangeTrackable" ||
+                         type.AllInterfaces.Any(item =>
+                             item.ToDisplayString() == "Bing.Domain.ChangeTracking.IChangeTrackable"));
 
     /// <summary>
     /// 判断类型是否继承真实领域对象基类。
@@ -721,9 +582,8 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     /// <param name="source">接收生成源码的文本缓冲区。</param>
     /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
     /// <param name="context">用于读取语义模型、输出源码及报告诊断的生成上下文。</param>
-    /// <param name="implementsGraphNode">是否为当前分部声明补充变更图节点接口。</param>
     private static void AppendPartialTypeDeclaration(StringBuilder source, INamedTypeSymbol type,
-        GeneratorExecutionContext context, bool implementsGraphNode)
+        GeneratorExecutionContext context)
     {
         source.Append(GetAccessibility(type));
         if (type.IsStatic)
@@ -763,8 +623,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
         source.Append(" ").Append(EscapeIdentifier(type.Name));
         if (type.TypeParameters.Length != 0)
             source.Append("<").Append(string.Join(", ", type.TypeParameters.Select(parameter => EscapeIdentifier(parameter.Name)))).Append(">");
-        if (implementsGraphNode)
-            source.Append(" : global::").Append(ChangeGraphNodeInterfaceName);
         if (type.TypeParameters.Length != 0)
             AppendConstraintClauses(source, declaration, context);
         source.AppendLine();
@@ -1002,14 +860,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     }
 
     /// <summary>
-    /// 判断接口是否为领域实体键契约。
-    /// </summary>
-    /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
-    /// <returns>名称、泛型元数及命名空间均匹配领域 IKey 契约时为 true，否则为 false。</returns>
-    private static bool IsIKeyInterface(INamedTypeSymbol type) =>
-        type.Name == "IKey" && type.Arity == 1 && type.ContainingNamespace.ToDisplayString() == "Bing.Domain.Entities";
-
-    /// <summary>
     /// 沿重写链查找指定特性。
     /// </summary>
     /// <param name="symbol">需要检查的类型或成员符号。</param>
@@ -1042,14 +892,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     }
 
     /// <summary>
-    /// 构造对象图模型的稳定标识。
-    /// </summary>
-    /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
-    /// <returns>类型全名作为模型标识。</returns>
-    private static string GetModelId(ITypeSymbol type) =>
-        type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-    /// <summary>
     /// 生成不包含可空引用修饰符的类型名称。
     /// </summary>
     /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
@@ -1063,16 +905,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
     }
 
     /// <summary>
-    /// 生成显式保留可空值类型的类型名称。
-    /// </summary>
-    /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
-    /// <returns>可空值类型使用全限定 Nullable 写法，其他类型使用普通生成名称。</returns>
-    private static string NullableValueTypeName(ITypeSymbol type) =>
-        type is INamedTypeSymbol nullable && nullable.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
-            ? "global::System.Nullable<" + TypeName(nullable.TypeArguments[0]) + ">"
-            : TypeName(type);
-
-    /// <summary>
     /// 生成保留可空信息的泛型约束类型名称。
     /// </summary>
     /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
@@ -1084,13 +916,6 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
                       SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier;
         return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithMiscellaneousOptions(options));
     }
-
-    /// <summary>
-    /// 生成 typeof 表达式使用的类型名称。
-    /// </summary>
-    /// <param name="type">需要检查、构建模型或格式化名称的类型符号。</param>
-    /// <returns>移除可空引用修饰符后的全限定类型名称。</returns>
-    private static string TypeOfTypeName(ITypeSymbol type) => TypeName(type);
 
     /// <summary>
     /// 为标识符添加逐字标识前缀。

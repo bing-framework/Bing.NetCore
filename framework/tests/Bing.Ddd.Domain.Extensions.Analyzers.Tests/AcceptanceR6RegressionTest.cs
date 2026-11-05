@@ -18,7 +18,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Leaf : DomainObjectBase<Leaf> { public string Name { get; set; } }
+            public partial class Leaf : DomainObjectBase<Leaf>
+            {
+                public string Name { get; set; }
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => writer.Scalar(nameof(Name), value.Name));
+            }
             public class Envelope { public string Label { get; set; } public Leaf Child { get; set; } }
             public static class Check
             {
@@ -27,7 +32,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
                     {
                         writer.Scalar(nameof(Envelope.Label), value.Label);
-                        writer.Object(nameof(Envelope.Child), value.Child, Leaf.GeneratedChangeGraphModel);
+                        writer.Object(nameof(Envelope.Child), value.Child, Leaf.ExplicitGraphModel);
                     });
                     var options = ChangeGraphOptions.Default
                         .WithAdapter(model)
@@ -52,7 +57,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             using System.Linq;
             using Bing.Domain.Entities;
             using Bing.Domain.ChangeTracking;
-            public partial class Leaf : DomainObjectBase<Leaf> { public string Name { get; set; } }
+            public partial class Leaf : DomainObjectBase<Leaf>
+            {
+                public string Name { get; set; }
+                public static ChangeGraphModel<Leaf> ExplicitGraphModel = new("leaf",
+                    (writer, value) => writer.Scalar(nameof(Name), value.Name));
+            }
             public class Envelope { public string Label { get; set; } public Leaf Child { get; set; } }
             public static class Check
             {
@@ -61,7 +71,7 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                     var model = new ChangeGraphModel<Envelope>("envelope", (writer, value) =>
                     {
                         writer.Scalar(nameof(Envelope.Label), value.Label);
-                        writer.Object(nameof(Envelope.Child), value.Child, Leaf.GeneratedChangeGraphModel);
+                        writer.Object(nameof(Envelope.Child), value.Child, Leaf.ExplicitGraphModel);
                     });
                     return string.Join("|", new ChangeGraphTracker(ChangeGraphOptions.Default.WithAdapter(model)).Compare(
                         new Envelope { Label = "ABC", Child = new Leaf { Name = "ABC" } },

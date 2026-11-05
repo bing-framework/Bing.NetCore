@@ -92,7 +92,9 @@ Require(legacyChange.PropertyName == "Name" && legacyChange.Description == "旧�
         legacyChange.OldValue == "\"old\"" && legacyChange.NewValue == "\"new\"",
     "Legacy DomainObjectBase 入口输出描述和四参数 AddChange 结果");
 
+DomainNestedScenarios.Run();
 ReviewScenarios.Run();
+HookOverrideScenarios.Run();
 PrintGeneratedSources();
 Console.WriteLine("全部 Domain ChangeGraph Smoke 检查通过。");
 
@@ -173,11 +175,11 @@ static void PrintGeneratedSources()
     Console.WriteLine("生成文件目录: " + directory);
     foreach (var name in new[]
              {
-                 "Order.ChangeGraph.g.cs",
-                 "Customer.ChangeGraph.g.cs",
-                 "Line.ChangeGraph.g.cs",
-                 "Product.ChangeGraph.g.cs",
-                 "Department.ChangeGraph.g.cs",
+                 "Order.AddChanges.g.cs",
+                 "Customer.AddChanges.g.cs",
+                 "Line.AddChanges.g.cs",
+                 "Product.AddChanges.g.cs",
+                 "Department.AddChanges.g.cs",
                  "LegacySample.AddChanges.g.cs"
              })
         Console.WriteLine("  " + directory + "/" + generator + "/" + name);
@@ -197,38 +199,46 @@ public partial class Order : DomainObjectBase<Order>
     public override IValidationResult Validate() => null!;
 }
 
-public partial class Customer : DomainObjectBase<Customer>, IKey<int>
+public partial class Customer : DomainObjectBase<Customer>, IEntity
 {
     public int Id { get; set; }
     [Description("客户名称")]
     public string Name { get; set; } = string.Empty;
     [ChangeIgnore]
     public string InternalCode { get; set; } = string.Empty;
+    public void Init() { }
+    public object[] GetKeys() => new object[] { Id };
 }
 
-public partial class Line : DomainObjectBase<Line>, IKey<int>
+public partial class Line : DomainObjectBase<Line>, IEntity
 {
     public int Id { get; set; }
     [Display(Name = "行金额")]
     public decimal Amount { get; set; }
     public Product Product { get; set; } = null!;
+    public void Init() { }
+    public object[] GetKeys() => new object[] { Id };
 }
 
-public partial class Product : DomainObjectBase<Product>, IKey<int>
+public partial class Product : DomainObjectBase<Product>, IEntity
 {
     public int Id { get; set; }
     [Description("商品名称")]
     public string Name { get; set; } = string.Empty;
     [ChangeIgnore]
     public string InternalCode { get; set; } = string.Empty;
+    public void Init() { }
+    public object[] GetKeys() => new object[] { Id };
 }
 
-public partial class Department : DomainObjectBase<Department>, IKey<int>
+public partial class Department : DomainObjectBase<Department>, IEntity
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public Department? Parent { get; set; }
     public List<Department> Children { get; set; } = new();
+    public void Init() { }
+    public object[] GetKeys() => new object[] { Id };
 }
 
 public partial class LegacySample : DomainObjectBase<LegacySample>

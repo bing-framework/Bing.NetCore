@@ -9,5 +9,6 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <ProjectReference Include="../../src/Bing.Ddd.Domain/Bing.Ddd.Domain.csproj" />
     <ProjectReference Include="../../src/Bing.Ddd.Domain.Extensions.Analyzers/Bing.Ddd.Domain.Extensions.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../../samples/Bing.Samples.ChangeTracking/Bing.Samples.ChangeTracking.csproj" />
   </ItemGroup>
 </Project>

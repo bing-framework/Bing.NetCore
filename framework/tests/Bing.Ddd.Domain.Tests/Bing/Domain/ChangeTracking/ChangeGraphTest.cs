@@ -402,9 +402,9 @@ public class ChangeGraphTest
 }
 
 /// <summary>
-/// 包含订单节点、集合与审计时间的对象图模型。
+/// 包含订单节点、集合与审计时间的独立对象图夹具，使用显式模型而不参与领域 hook 生成。
 /// </summary>
-public partial class OrderGraph : DomainObjectBase<OrderGraph>, IHasCreationTime, IHasModificationTime
+public partial class OrderGraph : IHasCreationTime, IHasModificationTime
 {
     /// <summary>
     /// 获取或设置主键。

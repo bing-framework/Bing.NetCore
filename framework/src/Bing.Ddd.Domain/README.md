@@ -66,7 +66,7 @@ public class OrderService(IRepository<Order, Guid> repo) { }
 
 ## 变更跟踪（GetChanges）
 
-继承 `DomainObjectBase<TObject>` 并声明 `partial` 的领域对象会在编译期生成自己的 `AddChanges(TObject other)`，无需任何类级标记。生成代码只读取 `this.Property` / `other.Property`，并调用四个固定的运行时辅助方法：
+继承 `DomainObjectBase<TObject>` 并声明 `partial` 的领域对象会在编译期生成自己的 `AddChanges(TObject other)`，无需任何类级标记。生成代码直接读取 `this.Property` / `other.Property`，简单成员调用固定的运行时辅助方法；多层容器使用强类型配对方法逐层处理：
 
 ```csharp
 public partial class Order : DomainObjectBase<Order>
@@ -92,7 +92,25 @@ protected override void AddChanges(Order other)
 - `AddCollectionChanges<T>`：有序集合按索引或实体身份匹配，Set 按元素身份或容器相等语义匹配；元素是领域对象时调用其自身 `GetChanges`。
 - `AddDictionaryChanges<TKey,TValue>`：使用字典容器自身键比较器匹配键；值是领域对象时调用值的 `GetChanges`，标量值使用类型值比较。
 
-集合身份来自领域契约：实现 `IEntity` 时使用 `GetKeys()`（复合键按既有顺序），仅实现唯一 `IKey<TKey>` 时使用 `Id`；`Dictionary` 使用容器键，有序集合无身份时按索引。无序复杂 `Set` 的元素缺少身份契约时，生成器报告 `CG019` 并拒绝生成。父实体不能为子实体另选身份键。
+继承 `DomainObjectBase<TObject>` 即可自动生成比较方法，无需实现 `IKey<TKey>`。集合中需要按身份匹配的实体通过现有 `IEntity.GetKeys()` 提供键（复合键按返回顺序）；`EntityBase<TEntity, TKey>` 已经提供该实现，并继承领域对象基类。普通领域对象没有实体身份时按有序位置匹配，不根据属性名或 `IKey<TKey>` 猜测主键。身份读取不扫描接口元数据，也不反射读取领域属性。
+
+有身份集合不能包含 null 元素，也不能使用未分配的单键（null、空字符串、数值零或 `Guid.Empty`）；复合键中允许有意义的默认分量。身份重复或无法使用时异常包含关系路径。有序集合没有身份时按索引；无序复杂 `Set` 的元素缺少身份契约时，生成器报告 `CG019`。父实体不能为子实体另选身份键。
+
+子关系按传入值比较：旧子对象存在、新子对象为 `null` 时直接记录一条删除，例如 `Customer: <object> -> <missing>`，不继续读取子属性或调用子对象比较钩子。集合属性为 `null` 等同空集合，旧集合里的明细逐项记录删除；双方为空不产生变化。不推断导航加载状态。根对象直接调用 `before.GetChanges(null)` 仍返回空结果，关系删除由父对象的生成方法记录。
+
+`Dictionary<TKey,TValue>`、`SortedDictionary<TKey,TValue>`、`SortedList<TKey,TValue>`、`HashSet<T>` 和 `SortedSet<T>` 的自定义比较器在嵌套容器中逐层使用，两侧比较器不兼容时明确报错；无法读取比较器的自定义字典或 Set 不会静默降级为默认相等语义。普通 `IEnumerable<T>` 每侧只枚举一次。手写 `AddChanges` 需要比较多层容器时，可以使用强类型配对方法，例如：
+
+```csharp
+protected override void AddChanges(Product other)
+{
+    foreach (var pair in GetNestedDictionaryPairs(nameof(Tags), "商品标签", Tags, other.Tags))
+        AddCollectionChanges(pair.Path, "商品标签", pair.OldValue, pair.NewValue);
+}
+```
+
+这里 `Tags` 的类型为 `Dictionary<string, HashSet<string>>`。配对方法会记录外层新增、删除和空值变化；内层 `AddCollectionChanges` 使用各自的 Set 比较器。手写规则不能依靠擦除类型后的通用容器分支推断任意自定义容器的比较器。
+
+静态类型为 `IReadOnlySet<T>` 时，生成代码会保留 Set 语义：实例是 `HashSet<T>` 或 `SortedSet<T>` 时使用其比较器，其他不公开比较器的只读 Set 会带路径报错。手写规则可以调用 `AddCollectionChanges(name, description, oldValue, newValue, declaredAsSet: true)` 指明只读 Set。
 
 审计时间、`Version` 和 `IsDeleted` 固定由生成器按默认预设忽略；需要跟踪这些字段时请手写 `AddChanges`。`[ChangeIgnore]` 只能标记当前实体声明或继承得到的成员，父实体忽略整个关系时直接标记关系属性。特殊比较（忽略大小写、浮点容差）由实体手写 `AddChanges` 表达。
 
@@ -114,13 +132,20 @@ foreach (var change in changes)
 `ChangeGraphTracker` / `ChangeGraphModel` / `ChangeGraphOptions` 仍作为**独立功能**保留，用于冻结快照、结构/适配器比较等场景；它不再参与 `DomainObjectBase.GetChanges` 的生成实现，也不作为领域对象的隐式回退。
 
 ```csharp
-var options = ChangeGraphOptions.Default
-    .WithTrackMoves()
-    .WithKeyComparer<string>(StringComparer.Ordinal);
+// 独立引擎需要显式模型，不依赖领域对象生成的 AddChanges。
+var model = new ChangeGraphModel<OrderSnapshot>("order",
+    (writer, order) => writer.Scalar(nameof(OrderSnapshot.Number), order.Number));
+var options = ChangeGraphOptions.Default.WithAdapter(model);
 var tracker = new ChangeGraphTracker(options);
+var order = new OrderSnapshot { Number = "A" };
 var snapshot = tracker.Capture(order);
-// 修改 order 后：
+order.Number = "B";
 var changes = tracker.CompareSnapshot(snapshot, order);
+
+public sealed class OrderSnapshot
+{
+    public string Number { get; set; }
+}
 ```
 
 ## 许可证
