@@ -540,251 +540,104 @@ public sealed partial class ChangeTrackableSourceGenerator : ISourceGenerator
         {
             if (member.Kind == GraphMemberKind.Unsupported)
                 continue;
-            EmitMemberChange(source, member, classSymbol, context, "this", otherVar,
-                "nameof(" + EscapeLegacyIdentifier(member.Property.Name) + ")");
+            EmitSimplifiedMemberChange(source, member, classSymbol, context, otherVar);
         }
         source.AppendLine("    }");
-        var structureModels = new List<GraphModelInfo>();
-        CollectStructureModels(model, model.Index, structureModels, new HashSet<int>());
-        foreach (var structureModel in structureModels.OrderBy(item => item.Index))
-            EmitShapeComparison(source, structureModel, classSymbol, context);
         for (var index = typeChain.Count - 1; index >= 0; index--)
             source.AppendLine("}");
         context.AddSource(GetHintName(classSymbol, "AddChanges"), SourceText.From(source.ToString(), Encoding.UTF8));
     }
 
     /// <summary>
-    /// 输出单个成员的变更比较调用。
+    /// 输出单个成员的简化变更调用：直接属性读取 + 固定辅助方法。
     /// </summary>
-    private static void EmitMemberChange(StringBuilder source, GraphMemberInfo member, INamedTypeSymbol owner,
-        GeneratorExecutionContext context, string oldOwner, string newOwner, string pathExpression)
+    private static void EmitSimplifiedMemberChange(StringBuilder source, GraphMemberInfo member,
+        INamedTypeSymbol owner, GeneratorExecutionContext context, string otherVar)
     {
         var property = member.Property;
         var name = EscapeLegacyIdentifier(property.Name);
         var nameOf = "nameof(" + name + ")";
         var description = GetLegacyDescriptionExpression(property, owner, context);
-        var oldValue = oldOwner + "." + name;
-        var newValue = newOwner + "." + name;
+        var oldValue = "this." + name;
+        var newValue = otherVar + "." + name;
         switch (member.Kind)
         {
             case GraphMemberKind.Scalar:
-                source.Append("        AddChange(").Append(pathExpression).Append(", ").Append(description).Append(", ")
+                source.Append("        AddChange(").Append(nameOf).Append(", ").Append(description).Append(", ")
                     .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
                 return;
             case GraphMemberKind.Object:
-                EmitObjectChange(source, member, description, oldValue, newValue, pathExpression, owner, context);
-                return;
-            case GraphMemberKind.Adapted:
-                source.Append("        AddObjectChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(", null, null);");
+                if (!IsChangeTrackableType(member.Property.Type))
+                {
+                    ReportSimplifiedUnsupported(context, property);
+                    return;
+                }
+                source.Append("        AddObjectChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
                 return;
             case GraphMemberKind.SequenceScalar:
-                source.Append("        AddSequenceChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(", null, null);");
+            case GraphMemberKind.SetScalar:
+                source.Append("        AddCollectionChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
                 return;
             case GraphMemberKind.SequenceObject:
-                source.Append("        AddSequenceChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).Append(", ")
-                    .Append(KeyOrNull(member)).Append(", ").Append(ModelOrNull(member.ChildModel)).Append(", ")
-                    .Append(ElementComparer(member, KeyOrNull(member))).AppendLine(");");
+            case GraphMemberKind.SetObject:
+                if (!IsSimplifiedElementSupported(member.ChildModel))
+                {
+                    ReportSimplifiedUnsupported(context, property);
+                    return;
+                }
+                source.Append("        AddCollectionChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
                 return;
             case GraphMemberKind.DictionaryScalar:
-                source.Append("        AddDictionaryChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(", null, null);");
-                return;
             case GraphMemberKind.DictionaryObject:
-                source.Append("        AddDictionaryChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).Append(", ")
-                    .Append(ModelOrNull(member.ChildModel)).Append(", ").Append(KeyOrNull(member)).Append(", ")
-                    .Append(ElementComparer(member, KeyOrNull(member))).AppendLine(");");
+                if (member.Kind == GraphMemberKind.DictionaryObject && !IsSimplifiedElementSupported(member.ChildModel))
+                {
+                    ReportSimplifiedUnsupported(context, property);
+                    return;
+                }
+                source.Append("        AddDictionaryChanges(").Append(nameOf).Append(", ").Append(description).Append(", ")
+                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(");");
                 return;
-            case GraphMemberKind.SetScalar:
-                source.Append("        AddSetChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).AppendLine(", null, null);");
-                return;
-            case GraphMemberKind.SetObject:
-                source.Append("        AddSetChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-                    .Append(oldValue).Append(", ").Append(newValue).Append(", ")
-                    .Append(KeyOrNull(member)).Append(", ").Append(ModelOrNull(member.ChildModel)).Append(", ")
-                    .Append(ElementComparer(member, KeyOrNull(member))).AppendLine(");");
+            case GraphMemberKind.Adapted:
+            default:
+                ReportSimplifiedUnsupported(context, property);
                 return;
         }
     }
 
     /// <summary>
-    /// 输出对象成员的比较：领域对象调用 GetChanges，普通结构递归到生成方法。
+    /// 判断集合元素模型是否可由简化主链处理。
     /// </summary>
-    private static void EmitObjectChange(StringBuilder source, GraphMemberInfo member, string description,
-        string oldValue, string newValue, string pathExpression, INamedTypeSymbol owner,
-        GeneratorExecutionContext context)
-    {
-        var comparer = ElementComparer(member, KeyOrNull(member));
-        if (comparer != null && comparer.StartsWith("__CompareShape", StringComparison.Ordinal))
-        {
-            source.Append("        ").Append(comparer).Append("(")
-                .Append(oldValue).Append(", ").Append(newValue).Append(", ")
-                .Append(pathExpression).Append(", ").Append(description).AppendLine(");");
-            return;
-        }
-        source.Append("        AddObjectChanges(").Append(pathExpression).Append(", ").Append(description).Append(", ")
-            .Append(oldValue).Append(", ").Append(newValue).Append(", ")
-            .Append(ModelOrNull(member.ChildModel)).Append(", ").Append(KeyOrNull(member)).AppendLine(");");
-    }
-
-    /// <summary>
-    /// 构造集合元素比较委托源码。
-    /// </summary>
-    private static string ElementComparer(GraphMemberInfo member, string keyExpression) =>
-        ElementComparer(member.ChildModel, keyExpression);
-
-    /// <summary>
-    /// 按元素模型构造比较委托源码。
-    /// </summary>
-    private static string ElementComparer(GraphModelInfo model, string keyExpression)
+    private static bool IsSimplifiedElementSupported(GraphModelInfo model)
     {
         if (model == null)
-            return "null";
+            return false;
         if (model.IsExternal || IsChangeTrackableType(model.Type))
-            return "(oldItem, newItem, itemPath, itemDescription) => AddObjectChanges(itemPath, itemDescription, oldItem, newItem, "
-                   + ModelReference(model) + ", " + keyExpression + ")";
-        if (model.Shape != GraphModelShape.Adapter)
-            return "__CompareShape" + model.Index;
-        return "null";
-    }
-
-    /// <summary>
-    /// 输出容器或普通结构模型的比较方法。
-    /// </summary>
-    private static void EmitShapeComparison(StringBuilder source, GraphModelInfo model, INamedTypeSymbol owner,
-        GeneratorExecutionContext context)
-    {
-        if (model == null || model.IsExternal)
-            return;
-        if (model.Shape != GraphModelShape.Object && !IsContainerShape(model.Shape) &&
-            model.Shape != GraphModelShape.Nullable)
-            return;
-        var typeName = model.Shape == GraphModelShape.Nullable ? NullableValueTypeName(model.Type) : TypeName(model.Type);
-        source.Append("    private void __CompareShape").Append(model.Index).Append("(")
-            .Append(typeName).Append(" oldValue, ").Append(typeName).AppendLine(" newValue, string path, string description)");
-        source.AppendLine("    {");
-        if (model.Shape == GraphModelShape.Nullable)
-        {
-            source.AppendLine("        if (!oldValue.HasValue && !newValue.HasValue) return;");
-            source.AppendLine("        if (!oldValue.HasValue || !newValue.HasValue) { AddStructuralChange(path, description, oldValue, newValue); return; }");
-            if (model.ElementModel != null)
-                source.Append("        __CompareShape").Append(model.ElementModel.Index)
-                    .AppendLine("(oldValue.Value, newValue.Value, path, description);");
-            source.AppendLine("    }");
-            return;
-        }
-        var referenceType = model.Type.IsReferenceType;
-        if (referenceType)
-        {
-            source.AppendLine("        if (oldValue == null && newValue == null) return;");
-            source.AppendLine("        if (oldValue == null || newValue == null) { AddStructuralChange(path, description, oldValue, newValue); return; }");
-            source.AppendLine("        if (!TryEnterShape(oldValue, newValue)) return;");
-            source.AppendLine("        try");
-            source.AppendLine("        {");
-        }
+            return true;
         switch (model.Shape)
         {
-            case GraphModelShape.Object:
-                foreach (var member in model.Members)
-                {
-                    if (member.Kind == GraphMemberKind.Unsupported)
-                        continue;
-                    var memberPath = "CombinePath(path, " + ToLiteral(member.Property.Name) + ")";
-                    EmitMemberChange(source, member, owner, context, "oldValue", "newValue", memberPath);
-                }
-                break;
-            case GraphModelShape.Sequence:
             case GraphModelShape.ScalarSequence:
-                EmitSequenceShape(source, model);
-                break;
-            case GraphModelShape.Dictionary:
-            case GraphModelShape.ScalarDictionary:
-                EmitDictionaryShape(source, model);
-                break;
-            case GraphModelShape.Set:
             case GraphModelShape.ScalarSet:
-                EmitSetShape(source, model);
-                break;
+            case GraphModelShape.ScalarDictionary:
+                return true;
+            case GraphModelShape.Sequence:
+            case GraphModelShape.Set:
+                return IsSimplifiedElementSupported(model.ElementModel);
+            case GraphModelShape.Dictionary:
+                return IsSimplifiedElementSupported(model.ValueModel);
+            default:
+                return false;
         }
-        if (referenceType)
-        {
-            source.AppendLine("        }");
-            source.AppendLine("        finally { ExitShape(oldValue, newValue); }");
-        }
-        source.AppendLine("    }");
-    }
-
-    /// <summary>判断模型是否为容器形状。</summary>
-    private static bool IsContainerShape(GraphModelShape shape) =>
-        shape == GraphModelShape.Sequence || shape == GraphModelShape.ScalarSequence ||
-        shape == GraphModelShape.Dictionary || shape == GraphModelShape.ScalarDictionary ||
-        shape == GraphModelShape.Set || shape == GraphModelShape.ScalarSet;
-
-    /// <summary>输出序列形状比较调用。</summary>
-    private static void EmitSequenceShape(StringBuilder source, GraphModelInfo model)
-    {
-        if (model.Shape == GraphModelShape.ScalarSequence)
-        {
-            source.AppendLine("        AddSequenceChanges(path, description, oldValue, newValue, null, null, null);");
-            return;
-        }
-        var key = model.ElementModel == null ? "null" : ElementKeyReference(model.ElementModel, model.ElementKey);
-        source.Append("        AddSequenceChanges(path, description, oldValue, newValue, ").Append(key)
-            .Append(", ").Append(ModelOrNull(model.ElementModel)).Append(", ")
-            .Append(ElementComparer(model.ElementModel, key)).AppendLine(");");
-    }
-
-    /// <summary>输出字典形状比较调用。</summary>
-    private static void EmitDictionaryShape(StringBuilder source, GraphModelInfo model)
-    {
-        if (model.Shape == GraphModelShape.ScalarDictionary)
-        {
-            source.AppendLine("        AddDictionaryChanges(path, description, oldValue, newValue, null, null, null);");
-            return;
-        }
-        var key = model.ValueModel == null ? "null" : ElementKeyReference(model.ValueModel, null);
-        source.Append("        AddDictionaryChanges(path, description, oldValue, newValue, ")
-            .Append(ModelOrNull(model.ValueModel)).Append(", ").Append(key).Append(", ")
-            .Append(ElementComparer(model.ValueModel, key)).AppendLine(");");
-    }
-
-    /// <summary>输出集合形状比较调用。</summary>
-    private static void EmitSetShape(StringBuilder source, GraphModelInfo model)
-    {
-        if (model.Shape == GraphModelShape.ScalarSet)
-        {
-            source.AppendLine("        AddSetChanges(path, description, oldValue, newValue, null, null, null);");
-            return;
-        }
-        var key = model.ElementModel == null ? "null" : ElementKeyReference(model.ElementModel, model.ElementKey);
-        source.Append("        AddSetChanges(path, description, oldValue, newValue, ").Append(key)
-            .Append(", ").Append(ModelOrNull(model.ElementModel)).Append(", ")
-            .Append(ElementComparer(model.ElementModel, key)).AppendLine(");");
     }
 
     /// <summary>
-    /// 收集根模型中需要生成比较方法的普通结构与容器。
+    /// 报告简化主链不支持的成员类型。
     /// </summary>
-    private static void CollectStructureModels(GraphModelInfo model, int rootIndex, List<GraphModelInfo> result,
-        HashSet<int> visited)
-    {
-        if (model == null || !visited.Add(model.Index))
-            return;
-        if (model.Index != rootIndex && !model.IsExternal &&
-            (model.Shape == GraphModelShape.Object || IsContainerShape(model.Shape) ||
-             model.Shape == GraphModelShape.Nullable))
-            result.Add(model);
-        foreach (var member in model.Members)
-        {
-            CollectStructureModels(member.ChildModel, rootIndex, result, visited);
-        }
-        CollectStructureModels(model.ElementModel, rootIndex, result, visited);
-        CollectStructureModels(model.ValueModel, rootIndex, result, visited);
-    }
+    private static void ReportSimplifiedUnsupported(GeneratorExecutionContext context, IPropertySymbol property) =>
+        context.ReportDiagnostic(Diagnostic.Create(UnsupportedMember, property.Locations.FirstOrDefault(),
+            property.ToDisplayString()));
 
     /// <summary>输出结构模型引用；没有模型时输出 null。</summary>
     private static string ModelOrNull(GraphModelInfo model) => model == null ? "null" : ModelReference(model);

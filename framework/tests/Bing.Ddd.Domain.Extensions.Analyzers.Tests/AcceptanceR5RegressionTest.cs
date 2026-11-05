@@ -10,9 +10,9 @@ namespace Bing.Ddd.Domain.Extensions.Analyzers.Tests;
 /// </summary>
 public sealed partial class ChangeGraphSourceGeneratorTest
 {
-    /// <summary>FIX-007：struct 包装内的领域对象必须执行手写 hook。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenStructWrapperContainsManualHook_ShouldOnlyEmitSelectedMember()
+    public void Generate_WhenStructWrapperContainsPocoStructure_ShouldReportCg006()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
@@ -38,13 +38,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Value.Child.City", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
-    /// <summary>FIX-007：可空 struct 包装同样遵守子实体手写 hook。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenNullableStructWrapperContainsManualHook_ShouldOnlyEmitSelectedMember()
+    public void Generate_WhenNullableStructWrapperContainsPocoStructure_ShouldReportCg006()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
@@ -70,13 +70,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Value.Child.City", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
-    /// <summary>FIX-007：struct 包装作为列表元素时仍执行手写 hook。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenStructWrapperInsideList_ShouldOnlyEmitSelectedMember()
+    public void Generate_WhenStructWrapperInsideList_ShouldReportCg006()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
@@ -102,8 +102,8 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Items[0].Child.City", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
     /// <summary>FIX-011：接口根不得被空适配器覆盖领域模型。</summary>

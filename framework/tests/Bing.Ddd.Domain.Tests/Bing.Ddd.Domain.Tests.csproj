@@ -8,8 +8,14 @@
   <PropertyGroup>
     <EnableDITestPackages>false</EnableDITestPackages>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated/$(Configuration)/$(TargetFramework)</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Bing.Auditing\Bing.Auditing.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Domain\Bing.Ddd.Domain.csproj" />
     <ProjectReference Include="..\..\src\Bing.Ddd.Domain.Extensions.Analyzers\Bing.Ddd.Domain.Extensions.Analyzers.csproj"
                       OutputItemType="Analyzer"

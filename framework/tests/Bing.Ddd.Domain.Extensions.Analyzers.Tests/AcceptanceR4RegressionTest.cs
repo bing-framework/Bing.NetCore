@@ -126,9 +126,9 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.Contains("Items", exception.InnerException!.Message);
     }
 
-    /// <summary>FIX-007：列表中的包装结构必须递归到手写 hook。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenWrapperInsideList_ShouldUseChildHook()
+    public void Generate_WhenPocoStructureInsideList_ShouldReportCg006()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
@@ -154,13 +154,13 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Items[0].Child.City", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
-    /// <summary>FIX-007：嵌套列表中的普通结构相等时不得退化为类型名差异。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenStructureInsideNestedListEqual_ShouldBeEmpty()
+    public void Generate_WhenNestedPocoStructureIsUsed_ShouldReportCg006()
     {
         var result = RunGenerator("""
             using System.Collections.Generic;
@@ -176,64 +176,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
                     }.GetChanges(new Root
                     {
                         Items = new() { new() { new Value { Number = 1 } } }
-                    }).Select(change => change.PropertyName + ":" + change.OldValue + "->" + change.NewValue));
-            }
-            """);
-
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal(string.Empty, RunCheck(result));
-    }
-
-    /// <summary>FIX-010：嵌套 HashSet 保留自身 comparer。</summary>
-    [Fact]
-    public void GetChanges_WhenNestedSetUsesComparer_ShouldBeEmpty()
-    {
-        var result = RunGenerator("""
-            using System;
-            using System.Collections.Generic;
-            using System.Linq;
-            using Bing.Domain.Entities;
-            public partial class Root : DomainObjectBase<Root> { public List<HashSet<string>> Items { get; set; } }
-            public static class Check
-            {
-                public static string Run() => string.Join("|", new Root
-                    {
-                        Items = new() { new(StringComparer.OrdinalIgnoreCase) { "A" } }
-                    }.GetChanges(new Root
-                    {
-                        Items = new() { new(StringComparer.OrdinalIgnoreCase) { "a" } }
                     }).Select(change => change.PropertyName));
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal(string.Empty, RunCheck(result));
-    }
-
-    /// <summary>FIX-010：嵌套字典保留自身 comparer，只报告一条键值变更。</summary>
-    [Fact]
-    public void GetChanges_WhenNestedDictionaryUsesComparer_ShouldReportSingleEntry()
-    {
-        var result = RunGenerator("""
-            using System;
-            using System.Collections.Generic;
-            using System.Linq;
-            using Bing.Domain.Entities;
-            public partial class Root : DomainObjectBase<Root> { public List<Dictionary<string, int>> Items { get; set; } }
-            public static class Check
-            {
-                public static string Run() => string.Join("|", new Root
-                    {
-                        Items = new() { new(StringComparer.OrdinalIgnoreCase) { ["A"] = 1 } }
-                    }.GetChanges(new Root
-                    {
-                        Items = new() { new(StringComparer.OrdinalIgnoreCase) { ["a"] = 2 } }
-                    }).Select(change => change.PropertyName + ":" + change.OldValue + "->" + change.NewValue));
-            }
-            """);
-
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Items[0]{A}:1->2", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
     /// <summary>FIX-018：单侧 null 容器使用存在侧 comparer，不应误报冲突。</summary>

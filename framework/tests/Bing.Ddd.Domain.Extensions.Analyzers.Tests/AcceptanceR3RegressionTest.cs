@@ -109,11 +109,12 @@ public sealed partial class ChangeGraphSourceGeneratorTest
         Assert.Equal("Items[0][0].City", RunCheck(result));
     }
 
-    /// <summary>FIX-007：普通包装对象内的领域对象同样必须执行手写 hook。</summary>
+    /// <summary>修订 4：普通 POCO 结构不参与自动比较，需报告 CG006。</summary>
     [Fact]
-    public void GetChanges_WhenStructureWrapperContainsManualHook_ShouldOnlyEmitSelectedMember()
+    public void Generate_WhenPocoStructureWrapsDomainChild_ShouldReportCg006()
     {
         var result = RunGenerator("""
+            using System.Collections.Generic;
             using System.Linq;
             using Bing.Domain.Entities;
             public partial class Leaf : DomainObjectBase<Leaf>
@@ -132,8 +133,8 @@ public sealed partial class ChangeGraphSourceGeneratorTest
             }
             """);
 
-        AssertNoErrors(result.Diagnostics);
-        Assert.Equal("Wrapper.Child.City", RunCheck(result));
+        Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Id == "CG006");
+        Assert.Equal("", RunCheck(result));
     }
 
     /// <summary>FIX-009：显式 IEntity.GetKeys 实现必须生成可编译的接口转换调用。</summary>

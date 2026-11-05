@@ -82,136 +82,51 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         ChangeTrackingContext.Add(propertyName, description, oldValue, newValue);
 
     /// <summary>
-    /// 比较并汇总单个关系对象。
+    /// 比较并汇总单个领域关系对象。
     /// </summary>
     /// <typeparam name="TValue">关系对象的静态类型。</typeparam>
     /// <param name="propertyName">关系属性路径。</param>
     /// <param name="description">关系描述。</param>
     /// <param name="oldValue">变更前的关系对象。</param>
     /// <param name="newValue">变更后的关系对象。</param>
-    /// <param name="structureModel">关系对象为普通结构时使用的冻结模型；领域对象忽略该参数。</param>
-    /// <param name="keySelector">关系对象的领域身份选择器；无身份时为 null。</param>
-    protected void AddObjectChanges<TValue>(string propertyName, string description, TValue oldValue, TValue newValue,
-        ChangeGraphModel<TValue> structureModel = null, Func<TValue, object> keySelector = null)
+    protected void AddObjectChanges<TValue>(string propertyName, string description, TValue oldValue, TValue newValue)
     {
         var frame = ChangeTrackingSession.Current;
         if (frame == null)
             return;
-        CompareValue(frame, propertyName, description, oldValue, newValue, structureModel, keySelector);
+        CompareValue(frame, propertyName, description, oldValue, newValue);
     }
 
     /// <summary>
-    /// 记录结构性新增或删除；供生成的结构比较方法在单侧缺失时使用。
-    /// </summary>
-    /// <typeparam name="TValue">关系对象类型。</typeparam>
-    /// <param name="propertyName">关系路径。</param>
-    /// <param name="description">关系描述。</param>
-    /// <param name="oldValue">变更前的对象。</param>
-    /// <param name="newValue">变更后的对象。</param>
-    protected void AddStructuralChange<TValue>(string propertyName, string description, TValue oldValue, TValue newValue)
-    {
-        var frame = ChangeTrackingSession.Current;
-        if (frame == null)
-            return;
-        AddStructural(frame, propertyName, description, oldValue, true, newValue, true, null);
-    }
-
-    /// <summary>
-    /// 组合关系路径与成员名。
-    /// </summary>
-    /// <param name="path">关系路径；为空时直接返回成员名。</param>
-    /// <param name="member">成员名。</param>
-    /// <returns>组合后的路径。</returns>
-    protected static string CombinePath(string path, string member) => ChangeTrackingSession.Combine(path, member);
-
-    /// <summary>
-    /// 进入普通结构/容器的引用对作用域；回边返回 false。
-    /// </summary>
-    /// <param name="oldValue">旧值。</param>
-    /// <param name="newValue">新值。</param>
-    /// <returns>首次进入返回 true；已在祖先作用域时返回 false。</returns>
-    protected static bool TryEnterShape(object oldValue, object newValue) =>
-        ChangeTrackingSession.TryEnterPair(oldValue, newValue);
-
-    /// <summary>
-    /// 退出普通结构/容器的引用对作用域。
-    /// </summary>
-    /// <param name="oldValue">旧值。</param>
-    /// <param name="newValue">新值。</param>
-    protected static void ExitShape(object oldValue, object newValue) =>
-        ChangeTrackingSession.ExitPair(oldValue, newValue);
-
-    /// <summary>
-    /// 比较并汇总有序集合关系。
+    /// 比较并汇总集合关系；有序集合按索引或实体身份匹配，Set 按元素身份或容器相等语义匹配。
     /// </summary>
     /// <typeparam name="TItem">集合元素类型。</typeparam>
     /// <param name="propertyName">集合关系路径。</param>
     /// <param name="description">集合关系描述。</param>
     /// <param name="oldItems">变更前集合。</param>
     /// <param name="newItems">变更后集合。</param>
-    /// <param name="keySelector">元素身份选择器；为 null 时按索引配对。</param>
-    /// <param name="itemModel">元素为普通结构时使用的冻结模型。</param>
-    /// <param name="compare">元素自身比较委托；由生成器按元素形状提供。</param>
-    protected void AddSequenceChanges<TItem>(string propertyName, string description, IEnumerable<TItem> oldItems,
-        IEnumerable<TItem> newItems, Func<TItem, object> keySelector, ChangeGraphModel<TItem> itemModel = null,
-        Action<TItem, TItem, string, string> compare = null)
+    protected void AddCollectionChanges<TItem>(string propertyName, string description,
+        IEnumerable<TItem> oldItems, IEnumerable<TItem> newItems)
     {
         var frame = ChangeTrackingSession.Current;
         if (frame == null)
             return;
         var before = oldItems?.ToList() ?? new List<TItem>();
         var after = newItems?.ToList() ?? new List<TItem>();
-        if (keySelector == null)
-        {
-            for (var index = 0; index < before.Count || index < after.Count; index++)
-            {
-                var path = propertyName + "[" + index + "]";
-                if (index < before.Count && index < after.Count)
-                    CompareElement(frame, path, description, before[index], after[index], itemModel, compare);
-                else if (index < before.Count)
-                    AddStructural(frame, path, description, before[index], true, default, false, itemModel);
-                else
-                    AddStructural(frame, path, description, default, false, after[index], true, itemModel);
-            }
-            return;
-        }
-        CompareKeyed(frame, propertyName, description, before, after, keySelector, itemModel, compare);
-    }
-
-    /// <summary>
-    /// 比较并汇总无序对象或标量集合关系。
-    /// </summary>
-    /// <typeparam name="TItem">集合元素类型。</typeparam>
-    /// <param name="propertyName">集合关系路径。</param>
-    /// <param name="description">集合关系描述。</param>
-    /// <param name="oldItems">变更前集合。</param>
-    /// <param name="newItems">变更后集合。</param>
-    /// <param name="keySelector">元素身份选择器；标量集合为 null。</param>
-    /// <param name="itemModel">元素为普通结构时使用的冻结模型。</param>
-    /// <param name="compare">元素自身比较委托；由生成器按元素形状提供。</param>
-    protected void AddSetChanges<TItem>(string propertyName, string description, IEnumerable<TItem> oldItems,
-        IEnumerable<TItem> newItems, Func<TItem, object> keySelector, ChangeGraphModel<TItem> itemModel = null,
-        Action<TItem, TItem, string, string> compare = null)
-    {
-        var frame = ChangeTrackingSession.Current;
-        if (frame == null)
-            return;
-        if (keySelector == null)
+        var isSet = oldItems is ISet<TItem> || newItems is ISet<TItem>;
+        if (isSet && IsScalar(typeof(TItem)))
         {
             var beforeComparer = oldItems is HashSet<TItem> oldSet ? oldSet.Comparer : null;
             var afterComparer = newItems is HashSet<TItem> newSet ? newSet.Comparer : null;
-            var comparer = ResolveContainerComparer(beforeComparer, afterComparer, propertyName);
-            CompareScalarSet(frame, propertyName, description,
-                oldItems?.ToList() ?? new List<TItem>(), newItems?.ToList() ?? new List<TItem>(), comparer);
+            CompareScalarSet(frame, propertyName, description, before, after,
+                ResolveComparer(beforeComparer, afterComparer, propertyName));
             return;
         }
-        CompareKeyed(frame, propertyName, description,
-            oldItems?.ToList() ?? new List<TItem>(), newItems?.ToList() ?? new List<TItem>(),
-            keySelector, itemModel, compare);
+        CompareCollection(frame, propertyName, description, before, after, isSet);
     }
 
     /// <summary>
-    /// 比较并汇总字典关系。
+    /// 比较并汇总字典关系；键按容器自身比较器匹配，值按自身领域或标量语义比较。
     /// </summary>
     /// <typeparam name="TKey">字典键类型。</typeparam>
     /// <typeparam name="TValue">字典值类型。</typeparam>
@@ -219,116 +134,83 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     /// <param name="description">字典关系描述。</param>
     /// <param name="oldValues">变更前字典条目。</param>
     /// <param name="newValues">变更后字典条目。</param>
-    /// <param name="valueModel">字典值为普通结构时使用的冻结模型。</param>
-    /// <param name="keySelector">字典值的领域身份选择器；无身份时为 null。</param>
-    /// <param name="compare">字典值自身比较委托；由生成器按值形状提供。</param>
     protected void AddDictionaryChanges<TKey, TValue>(string propertyName, string description,
-        IEnumerable<KeyValuePair<TKey, TValue>> oldValues, IEnumerable<KeyValuePair<TKey, TValue>> newValues,
-        ChangeGraphModel<TValue> valueModel = null, Func<TValue, object> keySelector = null,
-        Action<TValue, TValue, string, string> compare = null)
+        IEnumerable<KeyValuePair<TKey, TValue>> oldValues, IEnumerable<KeyValuePair<TKey, TValue>> newValues)
     {
         var frame = ChangeTrackingSession.Current;
         if (frame == null)
             return;
         var beforeComparer = oldValues is Dictionary<TKey, TValue> oldMap ? oldMap.Comparer : null;
         var afterComparer = newValues is Dictionary<TKey, TValue> newMap ? newMap.Comparer : null;
-        var comparer = ResolveContainerComparer(beforeComparer, afterComparer, propertyName);
+        var comparer = ResolveComparer(beforeComparer, afterComparer, propertyName);
         var before = ToDictionary(oldValues, propertyName, comparer);
         var after = ToDictionary(newValues, propertyName, comparer);
         foreach (var pair in before)
         {
-            var path = propertyName + "{" + GraphCaptureContext.FormatKey(pair.Key) + "}";
+            var path = propertyName + "{" + FormatKey(pair.Key) + "}";
             if (after.TryGetValue(pair.Key, out var newValue))
-                CompareElement(frame, path, description, pair.Value, newValue, valueModel, compare);
+                CompareValue(frame, path, description, pair.Value, newValue);
             else
-                AddStructural(frame, path, description, pair.Value, true, default, false, valueModel);
+                AddStructural(frame, path, description, pair.Value, true, default, false);
         }
         foreach (var pair in after)
         {
             if (before.ContainsKey(pair.Key))
                 continue;
-            var path = propertyName + "{" + GraphCaptureContext.FormatKey(pair.Key) + "}";
-            AddStructural(frame, path, description, default, false, pair.Value, true, valueModel);
+            AddStructural(frame, propertyName + "{" + FormatKey(pair.Key) + "}", description, default, false, pair.Value, true);
         }
-    }
-
-    /// <summary>
-    /// 比较单个元素；优先使用生成器提供的元素比较委托。
-    /// </summary>
-    private static void CompareElement<TItem>(ChangeTrackingFrame frame, string path, string description,
-        TItem oldValue, TItem newValue, ChangeGraphModel<TItem> itemModel,
-        Action<TItem, TItem, string, string> compare)
-    {
-        if (oldValue == null && newValue == null)
-            return;
-        if (compare != null)
-        {
-            compare(oldValue, newValue, path, description);
-            return;
-        }
-        CompareValue(frame, path, description, oldValue, newValue, itemModel, null);
     }
 
     /// <summary>
     /// 比较单个值并按关系路径合并差异。
     /// </summary>
     private static void CompareValue<TValue>(ChangeTrackingFrame frame, string path, string description,
-        TValue oldValue, TValue newValue, ChangeGraphModel<TValue> structureModel,
-        Func<TValue, object> keySelector, bool hasOld = true, bool hasNew = true)
+        TValue oldValue, TValue newValue, bool hasOld = true, bool hasNew = true)
     {
         if (!hasOld && !hasNew)
             return;
         if (!hasOld)
         {
-            AddStructural(frame, path, description, default, false, newValue, true, structureModel);
+            AddStructural(frame, path, description, default, false, newValue, true);
             return;
         }
         if (!hasNew)
         {
-            AddStructural(frame, path, description, oldValue, true, default, false, structureModel);
+            AddStructural(frame, path, description, oldValue, true, default, false);
             return;
         }
-        // 两侧槽位都存在时，双 null 表示无变化；单侧 null 才是关系新增或删除。
         if (oldValue == null && newValue == null)
             return;
         if (oldValue == null)
         {
-            AddStructural(frame, path, description, default, false, newValue, true, structureModel);
+            AddStructural(frame, path, description, default, false, newValue, true);
             return;
         }
         if (newValue == null)
         {
-            AddStructural(frame, path, description, oldValue, true, default, false, structureModel);
+            AddStructural(frame, path, description, oldValue, true, default, false);
             return;
         }
         if (oldValue is IChangeTrackable trackable)
         {
             if (oldValue.GetType() != newValue.GetType())
             {
-                AddStructural(frame, path, description, oldValue, true, newValue, true, structureModel);
+                AddStructural(frame, path, description, oldValue, true, newValue, true);
                 return;
             }
-            // 已具备领域身份的关系先判配对：不同身份是删除旧实体并新增新实体。
-            if (keySelector != null && !Equals(keySelector(oldValue), keySelector(newValue)))
+            if (TryGetIdentity(oldValue, out var oldKey) && TryGetIdentity(newValue, out var newKey) &&
+                !KeyEquals(oldKey, newKey))
             {
-                AddStructural(frame, path, description, oldValue, true, newValue, true, structureModel);
+                AddStructural(frame, path, description, oldValue, true, newValue, true);
                 return;
             }
             if (ChangeTrackingSession.IsInAncestorChain(oldValue, newValue))
                 return;
-            var childChanges = trackable.GetChanges(newValue);
-            ChangeTrackingSession.Merge(frame, path, childChanges);
+            ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
             return;
         }
-        // 任意层容器在到达领域对象前继续递归，避免用结构模型替代子实体 hook。
         if (CompareContainer(frame, path, description, oldValue, newValue))
             return;
-        if (structureModel != null)
-        {
-            var tracker = new ChangeGraphTracker(ChangeGraphOptions.Default.WithAdapter(structureModel));
-            ChangeTrackingSession.Merge(frame, path, tracker.Compare(oldValue, newValue).ToLegacyDescriptors());
-            return;
-        }
         if (EqualityComparer<TValue>.Default.Equals(oldValue, newValue))
             return;
         ChangeTrackingSession.Add(frame, path, description,
@@ -336,7 +218,102 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     }
 
     /// <summary>
-    /// 递归比较非领域容器；元素递归到领域对象时回到 GetChanges。
+    /// 比较集合；领域元素有身份契约时按身份匹配，否则按索引配对。
+    /// </summary>
+    private static void CompareCollection<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
+        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, bool isSet)
+    {
+        if (typeof(IChangeTrackable).IsAssignableFrom(typeof(TItem)) &&
+            TryBuildIdentityMap(before, propertyName, out var beforeMap) &&
+            TryBuildIdentityMap(after, propertyName, out var afterMap))
+        {
+            foreach (var pair in beforeMap)
+            {
+                var path = propertyName + "[" + FormatKey(pair.Key) + "]";
+                if (afterMap.TryGetValue(pair.Key, out var newItem))
+                    CompareValue(frame, path, description, pair.Value, newItem);
+                else
+                    AddStructural(frame, path, description, pair.Value, true, default, false);
+            }
+            foreach (var pair in afterMap)
+            {
+                if (beforeMap.ContainsKey(pair.Key))
+                    continue;
+                AddStructural(frame, propertyName + "[" + FormatKey(pair.Key) + "]", description, default, false, pair.Value, true);
+            }
+            return;
+        }
+        for (var index = 0; index < before.Count || index < after.Count; index++)
+        {
+            var path = propertyName + "[" + index + "]";
+            var hasOld = index < before.Count;
+            var hasNew = index < after.Count;
+            CompareValue(frame, path, description,
+                hasOld ? before[index] : default, hasNew ? after[index] : default, hasOld, hasNew);
+        }
+    }
+
+    /// <summary>
+    /// 比较标量集合；Set 使用容器自身相等语义报告新增和删除。
+    /// </summary>
+    private static void CompareScalarSet<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
+        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, IEqualityComparer<TItem> comparer)
+    {
+        var beforeSet = new HashSet<TItem>(before, comparer);
+        var afterSet = new HashSet<TItem>(after, comparer);
+        foreach (var item in before)
+        {
+            if (afterSet.Contains(item))
+                continue;
+            ChangeTrackingSession.Add(frame, propertyName + "[" + ScalarValueFormatter.Format(item) + "]", description,
+                ScalarValueFormatter.Format(item), "<missing>");
+        }
+        foreach (var item in after)
+        {
+            if (beforeSet.Contains(item))
+                continue;
+            ChangeTrackingSession.Add(frame, propertyName + "[" + ScalarValueFormatter.Format(item) + "]", description,
+                "<missing>", ScalarValueFormatter.Format(item));
+        }
+    }
+
+    /// <summary>
+    /// 尝试按实体身份建立元素索引；元素无身份契约时返回 false。
+    /// </summary>
+    private static bool TryBuildIdentityMap<TItem>(IReadOnlyList<TItem> items, string propertyName,
+        out Dictionary<object, TItem> map)
+    {
+        map = new Dictionary<object, TItem>();
+        foreach (var item in items)
+        {
+            if (item == null || !TryGetIdentity(item, out var key))
+                return false;
+            if (map.ContainsKey(key))
+                throw new InvalidOperationException($"集合元素身份键重复，路径: {propertyName}");
+            map.Add(key, item);
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 尝试按实体身份建立 object 元素索引；任一元素无身份契约时返回 false。
+    /// </summary>
+    private static bool TryBuildObjectIdentityMap(IReadOnlyList<object> items, string path, out Dictionary<object, object> map)
+    {
+        map = new Dictionary<object, object>();
+        foreach (var item in items)
+        {
+            if (item == null || !TryGetIdentity(item, out var key))
+                return false;
+            if (map.ContainsKey(key))
+                throw new InvalidOperationException($"集合元素身份键重复，路径: {path}");
+            map.Add(key, item);
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 递归比较非领域容器；元素到达领域对象时回到其 GetChanges。
     /// </summary>
     private static bool CompareContainer(ChangeTrackingFrame frame, string path, string description,
         object oldValue, object newValue)
@@ -362,17 +339,33 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
             {
                 var before = ToObjectList(oldItems);
                 var after = ToObjectList(newItems);
+                // 嵌套容器中的领域元素同样优先按实体身份匹配。
+                if (TryBuildObjectIdentityMap(before, path, out var beforeMap) &&
+                    TryBuildObjectIdentityMap(after, path, out var afterMap))
+                {
+                    foreach (var pair in beforeMap)
+                    {
+                        var itemPath = path + "[" + FormatKey(pair.Key) + "]";
+                        if (afterMap.TryGetValue(pair.Key, out var newItem))
+                            CompareObjectValue(frame, itemPath, description, pair.Value, newItem, true, true);
+                        else
+                            AddStructural(frame, itemPath, description, pair.Value, true, null, false);
+                    }
+                    foreach (var pair in afterMap)
+                    {
+                        if (beforeMap.ContainsKey(pair.Key))
+                            continue;
+                        AddStructural(frame, path + "[" + FormatKey(pair.Key) + "]", description, null, false, pair.Value, true);
+                    }
+                    return true;
+                }
                 for (var index = 0; index < before.Count || index < after.Count; index++)
                 {
                     var itemPath = path + "[" + index + "]";
                     var hasOld = index < before.Count;
                     var hasNew = index < after.Count;
-                    if (hasOld && hasNew)
-                        CompareObjectValue(frame, itemPath, description, before[index], after[index], true, true);
-                    else if (hasOld)
-                        AddStructural(frame, itemPath, description, before[index], true, null, false, (ChangeGraphModel<object>)null);
-                    else
-                        AddStructural(frame, itemPath, description, null, false, after[index], true, (ChangeGraphModel<object>)null);
+                    CompareObjectValue(frame, itemPath, description,
+                        hasOld ? before[index] : null, hasNew ? after[index] : null, hasOld, hasNew);
                 }
                 return true;
             }
@@ -395,7 +388,7 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         if (after != null) foreach (var key in after.Keys) if (!keys.Contains(key)) keys.Add(key);
         foreach (var key in keys)
         {
-            var itemPath = path + "{" + GraphCaptureContext.FormatKey(key) + "}";
+            var itemPath = path + "{" + FormatKey(key) + "}";
             var hasOld = before != null && before.Contains(key);
             var hasNew = after != null && after.Contains(key);
             CompareObjectValue(frame, itemPath, description,
@@ -404,39 +397,38 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     }
 
     /// <summary>
-    /// 比较单个 object 值并分派领域对象、容器与结构/标量。
+    /// 比较单个 object 值并分派领域对象、容器与标量。
     /// </summary>
     private static void CompareObjectValue(ChangeTrackingFrame frame, string path, string description,
         object oldValue, object newValue, bool hasOld, bool hasNew)
     {
         if (!hasOld)
         {
-            AddStructural(frame, path, description, null, false, newValue, true, (ChangeGraphModel<object>)null);
+            AddStructural(frame, path, description, null, false, newValue, true);
             return;
         }
         if (!hasNew)
         {
-            AddStructural(frame, path, description, oldValue, true, null, false, (ChangeGraphModel<object>)null);
+            AddStructural(frame, path, description, oldValue, true, null, false);
             return;
         }
         if (oldValue == null && newValue == null)
             return;
         if (oldValue == null || newValue == null)
         {
-            AddStructural(frame, path, description, oldValue, true, newValue, true, (ChangeGraphModel<object>)null);
+            AddStructural(frame, path, description, oldValue, true, newValue, true);
             return;
         }
         if (oldValue is IChangeTrackable trackable)
         {
-            if (oldValue.GetType() == newValue.GetType() &&
-                !ChangeTrackingSession.IsInAncestorChain(oldValue, newValue))
+            if (oldValue.GetType() != newValue.GetType())
             {
-                ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
+                AddStructural(frame, path, description, oldValue, true, newValue, true);
+                return;
             }
-            else
-            {
-                AddStructural(frame, path, description, oldValue, true, newValue, true, (ChangeGraphModel<object>)null);
-            }
+            if (ChangeTrackingSession.IsInAncestorChain(oldValue, newValue))
+                return;
+            ChangeTrackingSession.Merge(frame, path, trackable.GetChanges(newValue));
             return;
         }
         if (CompareContainer(frame, path, description, oldValue, newValue))
@@ -461,63 +453,55 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     }
 
     /// <summary>
-    /// 按身份键匹配并比较集合元素。
+    /// 读取领域身份键：IEntity.GetKeys 优先，其次唯一 IKey&lt;TKey&gt;.Id。
     /// </summary>
-    private static void CompareKeyed<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
-        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, Func<TItem, object> keySelector,
-        ChangeGraphModel<TItem> itemModel, Action<TItem, TItem, string, string> compare)
+    private static bool TryGetIdentity(object value, out object key)
     {
-        var beforeMap = new Dictionary<object, TItem>();
-        foreach (var item in before)
-            AddKeyedItem(beforeMap, RequireKey(keySelector, item, propertyName), item, propertyName);
-        var afterMap = new Dictionary<object, TItem>();
-        foreach (var item in after)
-            AddKeyedItem(afterMap, RequireKey(keySelector, item, propertyName), item, propertyName);
-        foreach (var pair in beforeMap)
+        if (value is IEntity entity)
         {
-            var path = propertyName + "[" + GraphCaptureContext.FormatKey(pair.Key) + "]";
-            if (afterMap.TryGetValue(pair.Key, out var newItem))
-                CompareElement(frame, path, description, pair.Value, newItem, itemModel, compare);
-            else
-                AddStructural(frame, path, description, pair.Value, true, default, false, itemModel);
+            var keys = entity.GetKeys();
+            if (keys == null || keys.Length == 0)
+                throw new InvalidOperationException($"实体身份键为空，路径: {value.GetType().FullName}");
+            key = keys.Length == 1 ? keys[0] : ChangeGraphKey.Create(keys);
+            return true;
         }
-        foreach (var pair in afterMap)
+        switch (value)
         {
-            if (beforeMap.ContainsKey(pair.Key))
-                continue;
-            var path = propertyName + "[" + GraphCaptureContext.FormatKey(pair.Key) + "]";
-            AddStructural(frame, path, description, default, false, pair.Value, true, itemModel);
+            case IKey<int> k: key = k.Id; return true;
+            case IKey<long> k: key = k.Id; return true;
+            case IKey<short> k: key = k.Id; return true;
+            case IKey<byte> k: key = k.Id; return true;
+            case IKey<uint> k: key = k.Id; return true;
+            case IKey<ulong> k: key = k.Id; return true;
+            case IKey<ushort> k: key = k.Id; return true;
+            case IKey<sbyte> k: key = k.Id; return true;
+            case IKey<Guid> k: key = k.Id; return true;
+            case IKey<string> k: key = k.Id; return true;
         }
+        key = null;
+        return false;
     }
 
     /// <summary>
-    /// 比较标量集合，按容器自身相等语义报告新增和删除。
+    /// 比较两个身份键；复合键按分量逐项比较。
     /// </summary>
-    private static void CompareScalarSet<TItem>(ChangeTrackingFrame frame, string propertyName, string description,
-        IReadOnlyList<TItem> before, IReadOnlyList<TItem> after, IEqualityComparer<TItem> comparer)
-    {
-        var beforeSet = new HashSet<TItem>(before, comparer);
-        var afterSet = new HashSet<TItem>(after, comparer);
-        foreach (var item in before)
-        {
-            if (afterSet.Contains(item))
-                continue;
-            var path = propertyName + "[" + ScalarValueFormatter.Format(item) + "]";
-            ChangeTrackingSession.Add(frame, path, description, ScalarValueFormatter.Format(item), "<missing>");
-        }
-        foreach (var item in after)
-        {
-            if (beforeSet.Contains(item))
-                continue;
-            var path = propertyName + "[" + ScalarValueFormatter.Format(item) + "]";
-            ChangeTrackingSession.Add(frame, path, description, "<missing>", ScalarValueFormatter.Format(item));
-        }
-    }
+    private static bool KeyEquals(object left, object right) =>
+        left is ChangeGraphKey a && right is ChangeGraphKey b
+            ? a.Equals(b)
+            : Equals(left, right);
+
+    /// <summary>
+    /// 判断类型是否按标量比较。
+    /// </summary>
+    private static bool IsScalar(Type type) =>
+        type == typeof(string) || type.IsPrimitive || type.IsEnum || type == typeof(decimal) ||
+        type == typeof(Guid) || type == typeof(DateTime) || type == typeof(DateTimeOffset) ||
+        type == typeof(TimeSpan) || type == typeof(Uri) || Nullable.GetUnderlyingType(type) is { } inner && IsScalar(inner);
 
     /// <summary>
     /// 判断新旧容器比较器是否兼容；缺失一侧时使用存在侧语义。
     /// </summary>
-    private static IEqualityComparer<T> ResolveContainerComparer<T>(IEqualityComparer<T> before,
+    private static IEqualityComparer<T> ResolveComparer<T>(IEqualityComparer<T> before,
         IEqualityComparer<T> after, string propertyName)
     {
         if (before == null)
@@ -535,27 +519,6 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
         if (before.Equals(after))
             return before;
         throw new InvalidOperationException($"容器比较器不一致，路径: {propertyName}");
-    }
-
-    /// <summary>
-    /// 读取元素身份键；缺失或重复时抛出带关系路径的异常。
-    /// </summary>
-    private static object RequireKey<TItem>(Func<TItem, object> keySelector, TItem item, string propertyName)
-    {
-        var key = keySelector(item);
-        if (key == null)
-            throw new InvalidOperationException($"集合元素身份键为空，路径: {propertyName}");
-        return key;
-    }
-
-    /// <summary>
-    /// 登记元素身份键；重复时抛出带关系路径的异常。
-    /// </summary>
-    private static void AddKeyedItem<TItem>(Dictionary<object, TItem> map, object key, TItem item, string propertyName)
-    {
-        if (map.ContainsKey(key))
-            throw new InvalidOperationException($"集合元素身份键重复，路径: {propertyName}");
-        map.Add(key, item);
     }
 
     /// <summary>
@@ -580,23 +543,31 @@ public abstract class DomainObjectBase : IDomainObject, IChangeTrackable
     /// 记录关系的结构性新增或删除。
     /// </summary>
     private static void AddStructural<TValue>(ChangeTrackingFrame frame, string path, string description,
-        TValue oldValue, bool hasOld, TValue newValue, bool hasNew, ChangeGraphModel<TValue> structureModel)
+        TValue oldValue, bool hasOld, TValue newValue, bool hasNew)
     {
-        var oldText = hasOld ? FormatPayload(oldValue, structureModel) : "<missing>";
-        var newText = hasNew ? FormatPayload(newValue, structureModel) : "<missing>";
+        var oldText = hasOld ? FormatPayload(oldValue) : "<missing>";
+        var newText = hasNew ? FormatPayload(newValue) : "<missing>";
         ChangeTrackingSession.Add(frame, path, description, oldText, newText);
     }
 
     /// <summary>
-    /// 使用冻结模型格式化关系载荷；没有模型时退回类型值展示。
+    /// 格式化结构事件载荷；不调用领域对象 ToString 或反射读取成员。
     /// </summary>
-    private static string FormatPayload<TValue>(TValue value, ChangeGraphModel<TValue> structureModel)
+    private static string FormatPayload(object value)
     {
-        if (structureModel == null)
-            return ScalarValueFormatter.Format(value);
-        var tracker = new ChangeGraphTracker(ChangeGraphOptions.Default.WithAdapter(structureModel));
-        return ChangeGraphLegacyExtensions.FormatSnapshot(tracker.Capture(value));
+        if (value == null)
+            return "null";
+        if (value is IChangeTrackable)
+            return "<object>";
+        if (value is IEnumerable && value is not string)
+            return "<collection>";
+        return ScalarValueFormatter.Format(value);
     }
+
+    /// <summary>
+    /// 使用标量格式化规则格式化容器键。
+    /// </summary>
+    private static string FormatKey(object key) => GraphCaptureContext.FormatKey(key);
 
     #endregion
 

@@ -46,7 +46,7 @@ public partial class User : DomainObjectBase<User> { public string Name { get; s
 
 ## ChangeGraph 生成器
 
-继承 `DomainObjectBase<TObject>` 且声明 `partial` 的实体自动生成独立的 `CaptureChanges`、`GeneratedChangeGraphModel` 和逐成员 `AddChanges`，不需要类级标记。生成的 `AddChanges` 对标量调用 `AddChange`，对领域对象/集合/字典调用 `AddObjectChanges`、`AddSequenceChanges`、`AddSetChanges`、`AddDictionaryChanges`，由子实体自身 `GetChanges` 产生差异并按路径汇总。非 `partial` 类型报告 `CG001`；`new` 同名 hook 报告 `CG020`，自声明 `CaptureChanges` 报告 `CG021`。
+继承 `DomainObjectBase<TObject>` 且声明 `partial` 的实体自动生成逐成员 `AddChanges`，不需要类级标记。生成的 `AddChanges` 只做直接属性读取并调用 `AddChange`（标量）、`AddObjectChanges`（领域对象）、`AddCollectionChanges`（集合）和 `AddDictionaryChanges`（字典），由子实体自身 `GetChanges` 产生差异并按路径汇总；不再使用 Lambda、属性委托或模型参数。非 `partial` 类型报告 `CG001`；`new` 同名 hook 报告 `CG020`；普通 POCO 结构成员报告 `CG006` 且不参与自动比较（独立对象图模型仍作为可选功能生成）。
 
 成员上的 `[ChangeIgnore]` 是唯一的成员规则，只能标记当前实体声明或继承得到的成员；父实体忽略整个关系时直接标记关系属性。审计时间、`Version` 和 `IsDeleted` 固定按默认预设忽略，不再提供恢复特性。集合身份在实现 `IEntity` 时来自 `GetKeys()`（优先于 `IKey`），仅实现唯一 `IKey<TKey>` 时来自 `Id`；字典使用容器键，有序集合无身份时按索引；无序 `Set` 元素缺少身份契约时在任意嵌套层报告 `CG019`。调用方的 `WithIdentity`/`WithCollectionKey` 与手工 `ignorePaths` 已删除。生成结果直接调用属性，不使用反射、`dynamic` 或运行时表达式编译。
 
@@ -62,7 +62,7 @@ public partial class User : DomainObjectBase<User> { public string Name { get; s
 
 MIT —— 详见仓库根目录 [LICENSE](https://github.com/bing-framework/Bing.NetCore/blob/master/LICENSE)。
 
-属性 `[ChangeIgnore]` 只改变自动生成的读取代码；手写 `AddChanges` override 的逻辑由调用者维护，不会被该标记重写。只包含标量的实体生成直接四参数 `AddChange("Name", "描述", this.Name, other.Name)`；含关系或集合的实体使用完整图比较并转换为描述符，审计预设、大小写和嵌套路径与 Graph 一致。`[ChangeIgnore]` 沿重写链解析，`new` 隐藏属性独立解析。
+属性 `[ChangeIgnore]` 只改变自动生成的读取代码；手写 `AddChanges` override 的逻辑由调用者维护，不会被该标记重写。自动生成的标量、对象、集合和字典调用全部使用直接属性读取与固定辅助方法。`[ChangeIgnore]` 沿重写链解析，`new` 隐藏属性独立解析。
 
 领域类型同时具有手写 `AddChanges` override 和有效的 `[ChangeIgnore]` 成员规则时，生成器在手写方法处报告 `CG015`（Info），提示该规则不会改写手写逻辑。没有属性规则或使用自动生成 `AddChanges` 的类型不会收到该提示。
 
