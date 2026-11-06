@@ -6,8 +6,17 @@ using Xunit;
 
 namespace Bing.FileStorage.S3.Tests;
 
-public sealed class MinioRecoveryTests
+/// <summary>
+/// 覆盖回源并发和批量载荷遵守资源限制等测试场景。
+/// </summary>
+public sealed class MinioRecoveryTests : IClassFixture<MinioBucketFixture>
 {
+    /// <summary>初始化桶后运行恢复用例，使该测试类可以单独执行。</summary>
+    public MinioRecoveryTests(MinioBucketFixture fixture) { }
+
+    /// <summary>
+    /// 验证 MinIO 完成上传校验 ETag、保持幂等并拒绝后续分片。
+    /// </summary>
     [MinioFact]
     public async Task Complete_ValidatesETag_IsIdempotent_AndRejectsLateParts()
     {
@@ -33,6 +42,9 @@ public sealed class MinioRecoveryTests
         finally { await multipart.AbortMultipartAsync(upload); await storage.DeleteAsync(address); }
     }
 
+    /// <summary>
+    /// 验证预签名分片按期过期且不可更改校验和。
+    /// </summary>
     [MinioFact]
     public async Task PresignedPart_Expires_AndCannotChangeChecksum()
     {
@@ -61,6 +73,10 @@ public sealed class MinioRecoveryTests
         }
         finally { await multipart.AbortMultipartAsync(upload); await storage.DeleteAsync(address); }
     }
+    /// <summary>
+    /// 创建 MinIO 恢复实机测试容器。
+    /// </summary>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider CreateServices()
     {
         var services = new ServiceCollection(); services.AddBingFileStorage(o => o.DefaultStore = "minio");

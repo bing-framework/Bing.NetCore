@@ -5,23 +5,70 @@ namespace Bing.FileStorage.FileSystem;
 
 internal sealed partial class FileSystemStorage
 {
+    /// <summary>
+    /// 本地分片上传的持久化清单。
+    /// </summary>
     private sealed class Manifest
     {
+        /// <summary>
+        /// 获取或设置逻辑文件容器名称。
+        /// </summary>
         public string Container { get; set; } = "";
+        /// <summary>
+        /// 获取或设置对象键。
+        /// </summary>
         public string Key { get; set; } = "";
+        /// <summary>
+        /// 获取或设置内容字节数。
+        /// </summary>
         public long Length { get; set; }
+        /// <summary>
+        /// 获取或设置每个分片的字节数。
+        /// </summary>
         public int PartSize { get; set; }
+        /// <summary>
+        /// 获取或设置写入策略。
+        /// </summary>
         public FileWriteMode Mode { get; set; }
+        /// <summary>
+        /// 获取或设置内容的 MIME 类型。
+        /// </summary>
         public string ContentType { get; set; } = "";
+        /// <summary>
+        /// 获取或设置随文件保存的自定义元数据。
+        /// </summary>
         public Dictionary<string, string> Metadata { get; set; } = new();
+        /// <summary>
+        /// 获取或设置本地分片上传的持久化处理阶段。
+        /// </summary>
         public string State { get; set; } = "uploading";
+        /// <summary>
+        /// 获取或设置已经完成的分片记录。
+        /// </summary>
         public List<FilePart> Parts { get; set; } = new();
     }
+    /// <summary>
+    /// 验证分片上传标识并生成会话目录路径。
+    /// </summary>
+    /// <param name="id">分片上传标识。</param>
+    /// <returns>经过根目录范围和链接检查的上传会话目录路径。</returns>
+    /// <remarks>
+    /// 上传标识不是 N 格式的 Guid 时抛出 UploadNotFound 错误。
+    /// </remarks>
     private string SessionPath(string id)
     {
         if (!Guid.TryParseExact(id, "N", out _)) throw new FileStorageException(FileStorageError.UploadNotFound, "本地上传标识无效。");
         return LocalPaths.Under(_root, "uploads", id);
     }
+    /// <summary>
+    /// 打开分片上传会话的独占锁文件。
+    /// </summary>
+    /// <param name="directory">上传会话目录。</param>
+    /// <param name="ct">用于取消锁等待的令牌。</param>
+    /// <returns>持有独占锁的文件流。</returns>
+    /// <remarks>
+    /// 会话目录不存在时抛出 UploadNotFound 错误；遇到锁冲突时最多重试 600 次。
+    /// </remarks>
     private static async Task<FileStream> LockAsync(string directory, CancellationToken ct)
     {
         var path = Path.Combine(directory, "session.lock");
@@ -35,6 +82,16 @@ internal sealed partial class FileSystemStorage
             catch (IOException) when (attempt < 600) { await Task.Delay(50, ct); }
         }
     }
+    /// <summary>
+    /// 读取并验证分片上传清单。
+    /// </summary>
+    /// <param name="directory">上传会话目录。</param>
+    /// <param name="upload">要核对的分片上传请求。</param>
+    /// <param name="ct">用于取消清单读取的令牌。</param>
+    /// <returns>与上传请求匹配的持久化清单。</returns>
+    /// <remarks>
+    /// 清单不存在时抛出 UploadNotFound 错误；容器、对象键、长度、分片大小、模式、内容类型或元数据不匹配时抛出 Conflict 错误。
+    /// </remarks>
     private static async Task<Manifest> LoadAsync(string directory, MultipartUpload upload, CancellationToken ct)
     {
         var path = Path.Combine(directory, "manifest.json");
@@ -49,6 +106,15 @@ internal sealed partial class FileSystemStorage
             throw new FileStorageException(FileStorageError.Conflict, "上传句柄与持久清单不一致。");
         return manifest;
     }
+    /// <summary>
+    /// 以耐久方式保存分片上传清单。
+    /// </summary>
+    /// <param name="directory">上传会话目录。</param>
+    /// <param name="manifest">要保存的分片上传清单。</param>
+    /// <param name="ct">用于取消写入的令牌。</param>
+    /// <remarks>
+    /// 先写入临时文件并刷新到持久存储，再替换 manifest.json；无论写入结果如何都会尝试删除临时文件。
+    /// </remarks>
     private static async Task PersistAsync(string directory, Manifest manifest, CancellationToken ct)
     {
         var temporary = Path.Combine(directory, Guid.NewGuid().ToString("N") + ".json.tmp");
@@ -60,6 +126,7 @@ internal sealed partial class FileSystemStorage
         }
         finally { LocalPaths.DeleteIfPresent(temporary); }
     }
+    /// <inheritdoc />
     public async Task<MultipartUpload> CreateMultipartAsync(FileWriteRequest request, int partSize, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -72,6 +139,7 @@ internal sealed partial class FileSystemStorage
             Length = request.Length, PartSize = partSize, Mode = request.Mode, ContentType = request.ContentType, Metadata = new(request.Metadata) }, cancellationToken);
         return handle;
     }
+    /// <inheritdoc />
     public async Task<FilePart> UploadPartAsync(MultipartUpload upload, int partNumber, Stream source, string? sha256 = null, CancellationToken cancellationToken = default)
     {
         var length = upload.GetPartLength(partNumber);
@@ -109,6 +177,7 @@ internal sealed partial class FileSystemStorage
         }
         finally { LocalPaths.DeleteIfPresent(temporary); }
     }
+    /// <inheritdoc />
     public async Task<IReadOnlyList<FilePart>> ListPartsAsync(MultipartUpload upload, CancellationToken cancellationToken = default)
     {
         var directory = SessionPath(upload.UploadId);
@@ -117,6 +186,7 @@ internal sealed partial class FileSystemStorage
         if (manifest.State == "aborted") throw new FileStorageException(FileStorageError.UploadNotFound, "会话已中止。");
         return manifest.Parts.OrderBy(p => p.Number).ToArray();
     }
+    /// <inheritdoc />
     public async Task<FileWriteResult> CompleteMultipartAsync(MultipartUpload upload, IReadOnlyList<FilePart> parts, CancellationToken cancellationToken = default)
     {
         FileStorageStreams.ValidateParts(upload, parts);
@@ -169,10 +239,18 @@ internal sealed partial class FileSystemStorage
         }
         finally { LocalPaths.DeleteIfPresent(temporary); }
     }
+    /// <summary>
+    /// 安全删除上传会话中的分片文件。
+    /// </summary>
+    /// <param name="directory">上传会话目录。</param>
+    /// <remarks>
+    /// 仅处理 *.part 文件，并在删除前检查文件链接。
+    /// </remarks>
     private static void RemoveParts(string directory)
     {
         foreach (var path in Directory.EnumerateFiles(directory, "*.part")) { LocalPaths.CheckLinks(path); LocalPaths.DeleteIfPresent(path); }
     }
+    /// <inheritdoc />
     public async Task AbortMultipartAsync(MultipartUpload upload, CancellationToken cancellationToken = default)
     {
         var directory = SessionPath(upload.UploadId);

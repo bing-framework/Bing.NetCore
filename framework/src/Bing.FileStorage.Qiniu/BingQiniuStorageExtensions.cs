@@ -2,27 +2,79 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bing.FileStorage;
 
-/// <summary>七牛 S3 存储配置；实际空间保持私有，密钥只在服务端使用。</summary>
+/// <summary>
+/// 七牛 S3 存储配置。
+/// </summary>
+/// <remarks>实际空间保持私有，密钥只在服务端使用。</remarks>
 public sealed class BingQiniuStorageOptions
 {
-    /// <summary>区域对应的 HTTPS S3 服务地址，例如 https://s3.cn-east-1.qiniucs.com。</summary>
+    /// <summary>
+    /// 获取或设置区域对应的 HTTPS S3 服务地址。
+    /// </summary>
+    /// <remarks>
+    /// <para>默认值为空字符串。</para>
+    /// <para>例如 https://s3.cn-east-1.qiniucs.com。</para>
+    /// </remarks>
     public string Endpoint { get; set; } = "";
-    /// <summary>S3 区域标识；不能使用原生 Kodo 区域简称代替。</summary>
+    /// <summary>
+    /// 获取或设置S3 区域标识。
+    /// </summary>
+    /// <remarks>不能使用原生 Kodo 区域简称代替。默认值为空字符串。</remarks>
     public string Region { get; set; } = "";
+    /// <summary>
+    /// 获取或设置存储服务访问密钥标识。
+    /// </summary>
+    /// <remarks>默认值为空字符串。</remarks>
     public string AccessKey { get; set; } = "";
+    /// <summary>
+    /// 获取或设置存储服务私密密钥。
+    /// </summary>
+    /// <remarks>默认值为空字符串。</remarks>
     public string SecretKey { get; set; } = "";
+    /// <summary>
+    /// 获取或设置隔离当前应用对象键的命名空间。
+    /// </summary>
+    /// <remarks>默认值为 <c>&quot;bing&quot;</c>。</remarks>
     public string StorageNamespace { get; set; } = "bing";
+    /// <summary>
+    /// 获取或设置是否使用路径式存储桶寻址。
+    /// </summary>
+    /// <remarks>默认值为 true。</remarks>
     public bool ForcePathStyle { get; set; } = true;
+    /// <summary>
+    /// 获取或设置查询分片清单时的单页大小。
+    /// </summary>
+    /// <remarks>默认值为 1000。</remarks>
     public int ListPartsPageSize { get; set; } = 1000;
-    /// <summary>每个允许使用的逻辑容器均须映射到控制台显示的 S3 空间名。</summary>
+    /// <summary>
+    /// 获取或设置每个允许使用的逻辑容器均须映射到控制台显示的 S3 空间名。
+    /// </summary>
     public Dictionary<string, string> ContainerBuckets { get; set; } = new(StringComparer.Ordinal);
-    /// <summary>默认代理上传；仅在目标空间通过强校验直传验证后显式选择 SignedParts。</summary>
+    /// <summary>
+    /// 获取或设置默认代理上传。
+    /// </summary>
+    /// <remarks>仅在目标空间通过强校验直传验证后显式选择 SignedParts。</remarks>
     public S3UploadMode UploadMode { get; set; } = S3UploadMode.ServerProxy;
 }
 
-/// <summary>通过现有 S3 Provider 注册七牛命名存储实例。</summary>
+/// <summary>
+/// 七牛 S3 兼容文件存储注册扩展。
+/// </summary>
+/// <remarks>
+/// 通过现有 S3 Provider 注册七牛命名存储实例。
+/// </remarks>
 public static class BingQiniuStorageExtensions
 {
+    /// <summary>
+    /// 验证 Qiniu S3 端点并注册存储后端。
+    /// </summary>
+    /// <param name="services">要添加后端的依赖注入服务集合。</param>
+    /// <param name="name">后端名称。</param>
+    /// <param name="configure">配置 Qiniu 存储选项的委托。</param>
+    /// <returns>原依赖注入服务集合。</returns>
+    /// <remarks>
+    /// Endpoint 必须是与 Region 匹配的 HTTPS S3 服务地址；凭据和逻辑容器映射必须配置。
+    /// </remarks>
     public static IServiceCollection AddBingQiniuStorage(this IServiceCollection services, string name,
         Action<BingQiniuStorageOptions> configure)
     {

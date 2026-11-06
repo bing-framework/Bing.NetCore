@@ -7,10 +7,19 @@ using Xunit;
 
 namespace Bing.FileStorage.S3.Tests;
 
+/// <summary>
+/// 覆盖并发获取同一锁时只能有一个持有者等测试场景。
+/// </summary>
 public sealed class S3PartQueryTests
 {
+    /// <summary>
+    /// 定义 S3 分片查询测试使用的分片大小。
+    /// </summary>
     private const int PartSize = 5 * 1024 * 1024;
 
+    /// <summary>
+    /// 验证分片点查使用排他游标且正确处理首尾及缺失分片。
+    /// </summary>
     [Fact]
     public async Task PointQuery_UsesExclusiveMarkerAndReturnsFirstOrLastPart()
     {
@@ -40,6 +49,11 @@ public sealed class S3PartQueryTests
         Assert.All(client.Requests, request => Assert.Equal(1, request.MaxParts));
     }
 
+    /// <summary>
+    /// 验证分片点查兼容两种持久化上传模式。
+    /// </summary>
+    /// <param name="mode">分片上传模式。</param>
+    /// <param name="expectedCapability">预期的文件存储能力。</param>
     [Theory]
     [InlineData(S3UploadMode.SignedParts, FileStorageCapabilities.SignedParts)]
     [InlineData(S3UploadMode.ServerProxy, FileStorageCapabilities.ServerVerifiedParts)]
@@ -54,6 +68,9 @@ public sealed class S3PartQueryTests
         Assert.NotEqual(FileStorageCapabilities.None, storage.Capabilities & expectedCapability);
     }
 
+    /// <summary>
+    /// 验证默认 S3 后端使用签名分片模式。
+    /// </summary>
     [Fact]
     public async Task DefaultBackend_UsesSignedPartsMode()
     {
@@ -66,6 +83,9 @@ public sealed class S3PartQueryTests
         Assert.NotEqual(FileStorageCapabilities.None, storage.Capabilities & FileStorageCapabilities.SignedParts);
     }
 
+    /// <summary>
+    /// 验证分片点查使用映射桶与范围隔离的对象键。
+    /// </summary>
     [Fact]
     public async Task PointQuery_UsesMappedBucketAndScopeSpecificObjectKey()
     {
@@ -84,6 +104,9 @@ public sealed class S3PartQueryTests
         Assert.All(client.Requests, request => Assert.Equal("upload", request.UploadId));
     }
 
+    /// <summary>
+    /// 验证分片点查保留拒绝访问错误而不误报缺失。
+    /// </summary>
     [Fact]
     public async Task PointQuery_PropagatesAccessDeniedInsteadOfReturningMissing()
     {
@@ -100,6 +123,9 @@ public sealed class S3PartQueryTests
         Assert.Equal(FileStorageError.AccessDenied, error.Error);
     }
 
+    /// <summary>
+    /// 验证分片点查在发送请求前响应取消。
+    /// </summary>
     [Fact]
     public async Task PointQuery_HonorsCancellationBeforeSendingRequest()
     {
@@ -114,6 +140,11 @@ public sealed class S3PartQueryTests
         Assert.Empty(client.Requests);
     }
 
+    /// <summary>
+    /// 验证完整分片列表拒绝结构异常的页面。
+    /// </summary>
+    /// <param name="kind">用于选择待测输入形态的场景标记。</param>
+    /// <param name="expected">预期的断言结果。</param>
     [Theory]
     [InlineData("empty-truncated", FileStorageError.OutcomeUnknown)]
     [InlineData("wrong-cursor", FileStorageError.OutcomeUnknown)]
@@ -141,6 +172,9 @@ public sealed class S3PartQueryTests
         Assert.Equal(expected, error.Error);
     }
 
+    /// <summary>
+    /// 验证完整分片列表按经校验的多页游标继续读取。
+    /// </summary>
     [Fact]
     public async Task FullListing_UsesValidatedMultiPageCursor()
     {
@@ -168,6 +202,9 @@ public sealed class S3PartQueryTests
         Assert.All(client.Requests, request => Assert.Equal(2, request.MaxParts));
     }
 
+    /// <summary>
+    /// 验证大量分片中的目标点查只发送一次请求并返回一条记录。
+    /// </summary>
     [Fact]
     public async Task MetadataOnlyProbe_Queries6400PartsWithOneRequestAndOneReturnedPart()
     {
@@ -205,9 +242,23 @@ public sealed class S3PartQueryTests
         Assert.Equal(1, client.ReturnedPartCount);
     }
 
+    /// <summary>
+    /// 创建指定作用域及上传模式的 S3 测试存储。
+    /// </summary>
+    /// <param name="client">执行测试请求的客户端。</param>
+    /// <param name="mode">分片上传模式。</param>
+    /// <param name="scope">文件存储作用域；未指定时使用宿主作用域。</param>
+    /// <param name="pageSize">分片列表的分页大小。</param>
+    /// <returns>已绑定目标作用域的测试文件存储。</returns>
     private static IFileStorage CreateStorage(RecordingS3Client client, S3UploadMode mode, StorageScope? scope = null, int pageSize = 1000) =>
         new S3FileStorageBackend("s3", Options(mode, pageSize), client).Bind(scope ?? StorageScope.Host);
 
+    /// <summary>
+    /// 创建指定上传模式及分页大小的 S3 选项。
+    /// </summary>
+    /// <param name="mode">分片上传模式。</param>
+    /// <param name="pageSize">分片列表的分页大小。</param>
+    /// <returns>包含上传模式、容器映射及分页设置的选项。</returns>
     private static BingS3StorageOptions Options(S3UploadMode mode, int pageSize = 1000) => new()
     {
         StorageNamespace = "test",
@@ -219,6 +270,13 @@ public sealed class S3PartQueryTests
         }
     };
 
+    /// <summary>
+    /// 创建指定分片数的上传测试会话。
+    /// </summary>
+    /// <param name="partCount">测试上传的分片数量。</param>
+    /// <param name="mode">分片上传模式。</param>
+    /// <param name="address">目标文件地址；未指定时使用测试地址。</param>
+    /// <returns>包含写入请求及分片设置的测试上传会话。</returns>
     private static MultipartUpload Upload(int partCount, S3UploadMode mode, FileAddress? address = null)
     {
         var length = partCount == 0 ? 0 : (long)PartSize * (partCount - 1) + 3;
@@ -228,8 +286,19 @@ public sealed class S3PartQueryTests
         return new MultipartUpload("upload", request, PartSize);
     }
 
+    /// <summary>
+    /// 解析分片分页标记。
+    /// </summary>
+    /// <param name="marker">分片分页标记；空值表示初始页。</param>
+    /// <returns>解析得到的分页序号；标记为空或无效时为零。</returns>
     private static int ParseMarker(string? marker) => int.TryParse(marker, out var value) ? value : 0;
 
+    /// <summary>
+    /// 创建指定编号及长度的分片详情。
+    /// </summary>
+    /// <param name="number">文件分片编号。</param>
+    /// <param name="length">内容长度，单位为字节。</param>
+    /// <returns>包含编号、长度及实体标签的分片详情。</returns>
     private static PartDetail Detail(int number, long length) => new()
     {
         PartNumber = number,
@@ -237,16 +306,31 @@ public sealed class S3PartQueryTests
         ETag = "etag-" + number
     };
 
+    /// <summary>
+    /// 创建完整的分片列表响应。
+    /// </summary>
+    /// <param name="parts">需要返回的分片详情集合。</param>
+    /// <returns>包含全部给定分片且未截断的列表响应。</returns>
     private static ListPartsResponse Page(IEnumerable<PartDetail> parts) => new()
     {
         IsTruncated = false,
         Parts = parts.ToList()
     };
 
+    /// <summary>
+    /// 为S3PartQueryTests测试记录并观察相关调用状态。
+    /// </summary>
     private sealed class RecordingS3Client : AmazonS3Client
     {
+        /// <summary>
+        /// 保存模拟 S3 客户端处理列表请求的委托。
+        /// </summary>
         private readonly Func<ListPartsRequest, ListPartsResponse> _handler;
 
+        /// <summary>
+        /// 初始化一个 <see cref="RecordingS3Client" /> 类型的实例。
+        /// </summary>
+        /// <param name="handler">用于处理相应请求或事件的处理器。</param>
         public RecordingS3Client(Func<ListPartsRequest, ListPartsResponse> handler)
             : base(new BasicAWSCredentials("test-access", "test-secret"), new AmazonS3Config
             {
@@ -256,9 +340,16 @@ public sealed class S3PartQueryTests
                 UseHttp = true
             }) => _handler = handler;
 
+        /// <summary>
+        /// 获取已记录的请求列表。
+        /// </summary>
         public List<ListPartsCall> Requests { get; } = new();
+        /// <summary>
+        /// 获取分片查询实际返回的数量。
+        /// </summary>
         public int ReturnedPartCount { get; private set; }
 
+        /// <inheritdoc />
         public override Task<ListPartsResponse> ListPartsAsync(ListPartsRequest request, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -269,6 +360,9 @@ public sealed class S3PartQueryTests
             return Task.FromResult(response);
         }
 
+        /// <summary>
+        /// 清空 S3 请求记录及返回分片计数。
+        /// </summary>
         public void ResetCounts()
         {
             Requests.Clear();
@@ -276,5 +370,13 @@ public sealed class S3PartQueryTests
         }
     }
 
+    /// <summary>
+    /// 记录分片列表请求使用的存储桶、对象和分页参数。
+    /// </summary>
+    /// <param name="Bucket">存储桶名称。</param>
+    /// <param name="Key">租户键。</param>
+    /// <param name="UploadId">分片上传标识。</param>
+    /// <param name="Marker">分片分页标记。</param>
+    /// <param name="MaxParts">本次最多返回的分片数。</param>
     private sealed record ListPartsCall(string Bucket, string Key, string UploadId, string? Marker, int? MaxParts);
 }

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputPath>bin/$(Configuration)/</OutputPath>
+    <Description>Bing Aliyun OSS 文件存储 Provider。</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Bing.FileStorage.Abstractions/Bing.FileStorage.Abstractions.csproj" />
+    <ProjectReference Include="../Bing.FileStorage/Bing.FileStorage.csproj" />
+    <PackageReference Include="AlibabaCloud.OSS.V2" Version="0.3.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

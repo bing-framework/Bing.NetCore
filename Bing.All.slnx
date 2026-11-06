@@ -1,6 +1,10 @@
 <Solution>
   <Folder Name="/01-framework/" />
   <Folder Name="/01-framework/01-src/">
+    <Project Path="framework/src/Bing.FileStorage.Pan115/Bing.FileStorage.Pan115.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.AliyunDrive/Bing.FileStorage.AliyunDrive.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.AliyunOss/Bing.FileStorage.AliyunOss.csproj" />
+    <Project Path="framework/src/Bing.FileStorage.RemoteDrive/Bing.FileStorage.RemoteDrive.csproj" />
     <Project Path="framework/src/Bing.Resilience.BuiltIn/Bing.Resilience.BuiltIn.csproj" />
     <Project Path="framework/src/Bing.Resilience.Runtime/Bing.Resilience.Runtime.csproj" />
     <Project Path="framework/src/Bing.Resilience.Discovery/Bing.Resilience.Discovery.csproj" />
@@ -348,6 +352,8 @@
     <Project Path="framework/tests/Bing.FileStorage.Tests/Bing.FileStorage.Tests.csproj" />
     <Project Path="framework/tests/Bing.FileStorage.S3.Tests/Bing.FileStorage.S3.Tests.csproj" />
     <Project Path="framework/tests/Bing.FileStorage.Qiniu.Tests/Bing.FileStorage.Qiniu.Tests.csproj" />
+    <Project Path="framework/tests/Bing.FileStorage.RemoteDrive.Tests/Bing.FileStorage.RemoteDrive.Tests.csproj" />
+    <Project Path="framework/tests/Bing.FileStorage.AliyunOss.Tests/Bing.FileStorage.AliyunOss.Tests.csproj" />
     <Project Path="framework/tests/Bing.FileStorage.AspNetCore.Tests/Bing.FileStorage.AspNetCore.Tests.csproj" />
   </Folder>
   <Folder Name="/02-components/FileManagement/">

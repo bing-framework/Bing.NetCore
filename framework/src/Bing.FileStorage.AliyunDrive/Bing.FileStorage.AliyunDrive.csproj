@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../framework.props" />
+  <PropertyGroup><TargetFramework>net6.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><OutputPath>bin/$(Configuration)/</OutputPath><Description>阿里云盘官方开放平台持久中转适配。</Description></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Bing.FileStorage.RemoteDrive/Bing.FileStorage.RemoteDrive.csproj" /><PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" /></ItemGroup>
+</Project>

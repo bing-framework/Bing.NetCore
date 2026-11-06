@@ -1,17 +1,21 @@
 using System.Security.Cryptography;
 using System.Text;
-using Amazon.Runtime;
 using Amazon.S3;
-using Amazon.S3.Model;
 using Bing.FileStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Bing.FileStorage.S3.Tests;
 
+/// <summary>
+/// 仅在配置 MinIO 测试端点时运行真实服务测试。
+/// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class MinioFactAttribute : FactAttribute
 {
+    /// <summary>
+    /// 初始化一个 <see cref="MinioFactAttribute" /> 类型的实例。
+    /// </summary>
     public MinioFactAttribute()
     {
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("BING_FILE_STORAGE_MINIO_ENDPOINT")))
@@ -19,8 +23,17 @@ public sealed class MinioFactAttribute : FactAttribute
     }
 }
 
-public sealed class MinioLiveTests
+/// <summary>
+/// 组织MinioLive相关测试场景。
+/// </summary>
+public sealed class MinioLiveTests : IClassFixture<MinioBucketFixture>
 {
+    /// <summary>由 xUnit 等待桶初始化完成后再构造测试，保留类之间的并行执行。</summary>
+    public MinioLiveTests(MinioBucketFixture fixture) { }
+
+    /// <summary>
+    /// 验证 MinIO 基础读写、分片、范围及签名请求。
+    /// </summary>
     [MinioFact]
     public async Task Minio_BasicMultipartRangeAndSignedRequests_RoundTrip()
     {
@@ -29,16 +42,6 @@ public sealed class MinioLiveTests
 
         var accessKey = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_MINIO_ACCESS_KEY") ?? "bingtest";
         var secretKey = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_MINIO_SECRET_KEY") ?? "bingtest-password-2026";
-        var config = new AmazonS3Config
-        {
-            ServiceURL = endpoint,
-            ForcePathStyle = true,
-            AuthenticationRegion = "us-east-1",
-            UseHttp = new Uri(endpoint).Scheme == Uri.UriSchemeHttp
-        };
-        using var adminClient = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
-        await EnsureBucketAsync(adminClient, "attachments");
-
         var services = new ServiceCollection();
         services.AddBingFileStorage(options => options.DefaultStore = "minio-test");
         services.AddBingMinioStorage("minio-test", options =>
@@ -206,36 +209,47 @@ public sealed class MinioLiveTests
         }
     }
 
-    private static async Task EnsureBucketAsync(IAmazonS3 client, string bucket)
-    {
-        try
-        {
-            await client.GetBucketLocationAsync(new GetBucketLocationRequest { BucketName = bucket });
-        }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "NoSuchBucket")
-        {
-            await client.PutBucketAsync(new PutBucketRequest { BucketName = bucket });
-        }
-    }
-
+    /// <summary>
+    /// 包装NonSeekRead流并提供对应的读取行为。
+    /// </summary>
     private sealed class NonSeekReadStream : Stream
     {
+        /// <summary>
+        /// 保存不可定位读取流包装的内存流。
+        /// </summary>
         private readonly MemoryStream _inner;
+        /// <summary>
+        /// 初始化一个 <see cref="NonSeekReadStream" /> 类型的实例。
+        /// </summary>
+        /// <param name="bytes">当前内容的字节数或字节数据。</param>
         public NonSeekReadStream(byte[] bytes) => _inner = new MemoryStream(bytes, writable: false);
+        /// <inheritdoc />
         public override bool CanRead => _inner.CanRead;
+        /// <inheritdoc />
         public override bool CanSeek => false;
+        /// <inheritdoc />
         public override bool CanWrite => false;
+        /// <inheritdoc />
         public override long Length => throw new NotSupportedException();
+        /// <inheritdoc />
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        /// <inheritdoc />
         public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+        /// <inheritdoc />
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
             _inner.ReadAsync(buffer, cancellationToken);
+        /// <inheritdoc />
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
             _inner.ReadAsync(buffer, offset, count, cancellationToken);
+        /// <inheritdoc />
         public override void Flush() { }
+        /// <inheritdoc />
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void SetLength(long value) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -244,17 +258,33 @@ public sealed class MinioLiveTests
         }
     }
 
+    /// <summary>
+    /// 包装GeneratedNonSeekRead流并提供对应的读取行为。
+    /// </summary>
     private sealed class GeneratedNonSeekReadStream : Stream
     {
+        /// <summary>
+        /// 记录生成式不可定位读取流剩余可读取的字节数。
+        /// </summary>
         private long _remaining;
 
+        /// <summary>
+        /// 初始化一个 <see cref="GeneratedNonSeekReadStream" /> 类型的实例。
+        /// </summary>
+        /// <param name="length">内容的长度，单位为字节。</param>
         public GeneratedNonSeekReadStream(long length) => _remaining = length;
+        /// <inheritdoc />
         public override bool CanRead => true;
+        /// <inheritdoc />
         public override bool CanSeek => false;
+        /// <inheritdoc />
         public override bool CanWrite => false;
+        /// <inheritdoc />
         public override long Length => throw new NotSupportedException();
+        /// <inheritdoc />
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
+        /// <inheritdoc />
         public override int Read(byte[] buffer, int offset, int count)
         {
             var read = (int)Math.Min(count, _remaining);
@@ -263,6 +293,7 @@ public sealed class MinioLiveTests
             return read;
         }
 
+        /// <inheritdoc />
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -272,15 +303,20 @@ public sealed class MinioLiveTests
             return ValueTask.FromResult(read);
         }
 
+        /// <inheritdoc />
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(Read(buffer, offset, count));
         }
 
+        /// <inheritdoc />
         public override void Flush() { }
+        /// <inheritdoc />
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void SetLength(long value) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }

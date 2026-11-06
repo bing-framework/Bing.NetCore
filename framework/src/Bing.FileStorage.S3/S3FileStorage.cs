@@ -7,20 +7,62 @@ using Amazon.S3.Model;
 
 namespace Bing.FileStorage;
 
-/// <summary>绑定一个租户或主机范围的 S3 对象存储门面。</summary>
+/// <summary>
+/// 绑定操作范围的 S3 文件存储门面。
+/// </summary>
+/// <remarks>
+/// 绑定一个租户或主机范围的 S3 对象存储门面。
+/// </remarks>
 internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMultipartFilePartReader, ISignedFileRequestProvider, IFileRangeReader
 {
+    /// <summary>
+    /// 定义 S3 上传令牌在对象元数据中使用的键。
+    /// </summary>
     private const string UploadTokenMetadata = "bing-upload-token";
+    /// <summary>
+    /// 定义 S3 上传模式在对象元数据中使用的键。
+    /// </summary>
     private const string UploadModeMetadata = "bing-upload-mode";
+    /// <summary>
+    /// 定义 S3 预签名地址的最长有效期。
+    /// </summary>
     private static readonly TimeSpan MaxSignatureLifetime = TimeSpan.FromDays(7);
 
+    /// <summary>
+    /// 保存 S3 存储使用的命名空间前缀。
+    /// </summary>
     private readonly string _storageNamespace;
+    /// <summary>
+    /// 保存 S3 客户端实例。
+    /// </summary>
     private readonly IAmazonS3 _client;
+    /// <summary>
+    /// 保存列举分片时使用的分页大小。
+    /// </summary>
     private readonly int _listPartsPageSize;
+    /// <summary>
+    /// 保存容器名称到 S3 存储桶的映射。
+    /// </summary>
     private readonly IReadOnlyDictionary<string, string> _containerBuckets;
+    /// <summary>
+    /// 保存 S3 上传使用的模式。
+    /// </summary>
     private readonly S3UploadMode _uploadMode;
+    /// <summary>
+    /// 获取是否通过服务器代理上传。
+    /// </summary>
     private bool ServerProxy => _uploadMode == S3UploadMode.ServerProxy;
 
+    /// <summary>
+    /// 初始化一个 <see cref="S3FileStorage" /> 类型的实例。
+    /// </summary>
+    /// <param name="name">实例使用的名称。</param>
+    /// <param name="storageNamespace">文件对象使用的逻辑存储命名空间。</param>
+    /// <param name="scope">实例所属的作用范围。</param>
+    /// <param name="client">用于访问对应后端或服务的客户端。</param>
+    /// <param name="listPartsPageSize">列出分片时每页读取的分片数量。</param>
+    /// <param name="containerBuckets">逻辑容器名称到后端存储桶名称的映射。</param>
+    /// <param name="uploadMode">文件上传所采用的模式。</param>
     public S3FileStorage(string name, string storageNamespace, StorageScope scope, IAmazonS3 client, int listPartsPageSize,
         IReadOnlyDictionary<string, string> containerBuckets, S3UploadMode uploadMode)
     {
@@ -33,12 +75,16 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         _uploadMode = uploadMode;
     }
 
+    /// <inheritdoc />
     public string Name { get; }
+    /// <inheritdoc />
     public StorageScope Scope { get; }
+    /// <inheritdoc />
     public FileStorageCapabilities Capabilities =>
         FileStorageCapabilities.Multipart | FileStorageCapabilities.SignedDownload |
         (ServerProxy ? FileStorageCapabilities.ServerVerifiedParts : FileStorageCapabilities.SignedParts) | FileStorageCapabilities.Range;
 
+    /// <inheritdoc />
     public async Task<FileWriteResult> SaveAsync(FileWriteRequest request, Stream source, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -75,6 +121,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task ReadAsync(FileAddress address, Func<Stream, CancellationToken, Task> consume, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(address);
@@ -104,6 +151,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
             await consume(response.ResponseStream, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<FileProperties?> GetPropertiesAsync(FileAddress address, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(address);
@@ -132,6 +180,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task DeleteAsync(FileAddress address, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(address);
@@ -159,6 +208,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task ReadRangeAsync(FileAddress address, long offset, long length,
         Func<Stream, CancellationToken, Task> consume, CancellationToken cancellationToken = default)
     {
@@ -213,6 +263,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task<MultipartUpload> CreateMultipartAsync(FileWriteRequest request, int partSize,
         CancellationToken cancellationToken = default)
     {
@@ -263,6 +314,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task<FilePart> UploadPartAsync(MultipartUpload upload, int partNumber, Stream source,
         string? sha256 = null, CancellationToken cancellationToken = default)
     {
@@ -347,6 +399,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<FilePart>> ListPartsAsync(MultipartUpload upload,
         CancellationToken cancellationToken = default)
     {
@@ -363,7 +416,10 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         return parts;
     }
 
-    /// <summary>利用排他游标只读取目标位置的一条记录，不重复枚举此前已上传的分片。</summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>利用排他游标只读取目标位置的一条记录，不重复枚举此前已上传的分片。</para>
+    /// </remarks>
     public async Task<FilePart?> GetPartAsync(MultipartUpload upload, int partNumber,
         CancellationToken cancellationToken = default)
     {
@@ -376,7 +432,14 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         return part?.Number == partNumber ? part : null;
     }
 
-    /// <summary>统一分页请求和错误分类；验证有序游标，避免错误页面被当作缺片或无限翻页。</summary>
+    /// <summary>
+    /// 读取并校验一个 S3 分片分页结果。
+    /// </summary>
+    /// <param name="upload">要读取分片列表的上传会话。</param>
+    /// <param name="marker">上一页最后一个分片编号；为 null 时从第一页开始读取。</param>
+    /// <param name="maxParts">本页允许返回的最大分片数。</param>
+    /// <param name="cancellationToken">用于取消请求的令牌。</param>
+    /// <returns>已校验的分片列表，以及存在后续页时的下一页标记；没有后续页时标记为 null。</returns>
     private async Task<(IReadOnlyList<FilePart> Parts, int? NextMarker)> ReadPartPageAsync(MultipartUpload upload,
         int? marker, int maxParts, CancellationToken cancellationToken)
     {
@@ -434,6 +497,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task<FileWriteResult> CompleteMultipartAsync(MultipartUpload upload, IReadOnlyList<FilePart> parts,
         CancellationToken cancellationToken = default)
     {
@@ -497,6 +561,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public async Task AbortMultipartAsync(MultipartUpload upload, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(upload);
@@ -528,6 +593,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public Task<SignedFileRequest> SignDownloadAsync(FileAddress address, TimeSpan lifetime, string? fileName = null,
         CancellationToken cancellationToken = default)
     {
@@ -566,6 +632,7 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <inheritdoc />
     public Task<SignedFileRequest> SignPartAsync(MultipartUpload upload, int partNumber, string sha256,
         TimeSpan lifetime, CancellationToken cancellationToken = default)
     {
@@ -614,6 +681,16 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <summary>
+    /// 写入空文件并确认对象写入结果。
+    /// </summary>
+    /// <param name="request">包含目标地址、内容类型和元数据的写入请求。</param>
+    /// <param name="source">应为空的源数据流。</param>
+    /// <param name="cancellationToken">用于取消写入及结果查询的令牌。</param>
+    /// <returns>确认写入成功的文件位置和属性。</returns>
+    /// <remarks>
+    /// 方法为写入生成 Provider 上传标记；发生服务调用异常时会查询对象并核对标记，以确认写入结果。
+    /// </remarks>
     private async Task<FileWriteResult> SaveEmptyAsync(FileWriteRequest request, Stream source, CancellationToken cancellationToken)
     {
         var operationToken = Guid.NewGuid().ToString("N");
@@ -665,6 +742,12 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <summary>
+    /// 核对已完成的 S3 分片对象是否与上传会话一致。
+    /// </summary>
+    /// <param name="upload">已完成的分片上传会话。</param>
+    /// <param name="cancellationToken">用于取消对象属性查询的令牌。</param>
+    /// <returns>长度及上传标记均与会话匹配的文件位置和属性。</returns>
     private async Task<FileWriteResult> ConfirmCompletedObjectAsync(MultipartUpload upload, CancellationToken cancellationToken)
     {
         var properties = await GetPropertiesAsync(upload.Request.Address, cancellationToken).ConfigureAwait(false);
@@ -675,6 +758,16 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         return new FileWriteResult(new FileLocation(Name, Scope, upload.Request.Address), properties);
     }
 
+    /// <summary>
+    /// 根据对象状态核对 S3 分片完成操作的失败结果。
+    /// </summary>
+    /// <param name="upload">待核对的分片上传会话。</param>
+    /// <param name="failure">分片完成操作抛出的异常。</param>
+    /// <param name="cancellationToken">用于取消对象属性查询的令牌。</param>
+    /// <returns>对象长度和上传标记与会话匹配时返回已确认的文件位置和属性。</returns>
+    /// <remarks>
+    /// 对象被其他上传标记占用时报告冲突；无法确认完成结果时报告结果未知。
+    /// </remarks>
     private async Task<FileWriteResult> ReconcileCompleteFailureAsync(MultipartUpload upload, Exception failure,
         CancellationToken cancellationToken)
     {
@@ -715,6 +808,17 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
             failure is AmazonServiceException serviceException ? serviceException.RequestId : null);
     }
 
+    /// <summary>
+    /// 根据对象状态核对 S3 写入操作的失败结果。
+    /// </summary>
+    /// <param name="request">原始文件写入请求。</param>
+    /// <param name="token">本次写入使用的 Provider 上传标记。</param>
+    /// <param name="failure">写入操作抛出的异常。</param>
+    /// <param name="cancellationToken">用于取消对象属性查询的令牌。</param>
+    /// <returns>对象长度和上传标记与本次写入匹配时返回已确认的文件位置和属性。</returns>
+    /// <remarks>
+    /// 无法确认写入结果时会映射原始异常或报告结果未知；对象被其他上传标记占用时报告冲突。
+    /// </remarks>
     private async Task<FileWriteResult> ReconcileWriteFailureAsync(FileWriteRequest request, string token,
         Exception failure, CancellationToken cancellationToken)
     {
@@ -743,10 +847,25 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         };
     }
 
+    /// <summary>
+    /// 检查对象属性中的上传标记是否与分片会话一致。
+    /// </summary>
+    /// <param name="upload">包含预期上传标记的分片上传会话。</param>
+    /// <param name="properties">待检查对象的属性。</param>
+    /// <returns>元数据中存在且两个上传标记相同时返回 true，否则返回 false。</returns>
     private bool MatchesUploadToken(MultipartUpload upload, FileProperties properties) =>
         upload.Request.Metadata.TryGetValue(UploadTokenMetadata, out var token) &&
         properties.Metadata.TryGetValue(UploadTokenMetadata, out var actual) && actual == token;
 
+    /// <summary>
+    /// 比较两组分片的编号、长度、ETag 和适用的校验和。
+    /// </summary>
+    /// <param name="expected">上传会话记录的预期分片。</param>
+    /// <param name="actual">从存储服务读取的实际分片。</param>
+    /// <returns>两组分片数量及逐项信息匹配时返回 true；数量或分片信息不匹配时返回 false。</returns>
+    /// <remarks>
+    /// 非代理模式下，预期校验和存在但与实际值不匹配时会抛出校验和错误。
+    /// </remarks>
     private bool PartsMatch(IReadOnlyList<FilePart> expected, IReadOnlyList<FilePart> actual)
     {
         if (expected.Count != actual.Count)
@@ -762,6 +881,11 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         return true;
     }
 
+    /// <summary>
+    /// 将 S3 对象元数据响应转换为文件属性。
+    /// </summary>
+    /// <param name="response">存储服务返回的对象元数据响应。</param>
+    /// <returns>由响应生成的文件属性。</returns>
     private FileProperties ToProperties(GetObjectMetadataResponse response)
     {
         var metadata = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -785,12 +909,25 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         };
     }
 
+    /// <summary>
+    /// 创建用于访问指定文件地址的 S3 对象请求。
+    /// </summary>
+    /// <param name="address">目标文件地址。</param>
+    /// <returns>包含目标存储桶和对象键的请求。</returns>
     private GetObjectRequest ObjectRequest(FileAddress address) => new()
     {
         BucketName = Bucket(address),
         Key = ObjectKey(address)
     };
 
+    /// <summary>
+    /// 解析并验证文件地址对应的 S3 存储桶。
+    /// </summary>
+    /// <param name="address">包含逻辑容器的文件地址。</param>
+    /// <returns>配置映射后的有效 S3 存储桶名称。</returns>
+    /// <remarks>
+    /// 配置了逻辑容器映射但找不到对应项，或存储桶名称无效时会抛出配置错误。
+    /// </remarks>
     private string Bucket(FileAddress address)
     {
         var bucket = address.Container;
@@ -800,8 +937,20 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         return bucket;
     }
 
+    /// <summary>
+    /// 生成指定文件地址对应的命名空间对象键。
+    /// </summary>
+    /// <param name="address">目标文件地址。</param>
+    /// <returns>包含存储命名空间和作用域的对象键。</returns>
     private string ObjectKey(FileAddress address) => FileStorageStreams.ObjectKey(_storageNamespace, Scope, address);
 
+    /// <summary>
+    /// 验证分片上传请求与当前存储配置兼容。
+    /// </summary>
+    /// <param name="upload">待验证的分片上传会话。</param>
+    /// <remarks>
+    /// 验证目标存储桶和元数据长度，并检查会话记录的上传模式及 Provider 上传标记。
+    /// </remarks>
     private void EnsureUploadRequest(MultipartUpload upload)
     {
         _ = Bucket(upload.Request.Address);
@@ -815,8 +964,20 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
             throw new FileStorageException(FileStorageError.Conflict, "S3 上传会话的 Provider 元数据无效。");
     }
 
+    /// <summary>
+    /// 检查字符串是否为 32 位十六进制上传标记。
+    /// </summary>
+    /// <param name="value">待检查的字符串。</param>
+    /// <returns>长度为 32 且全部由十六进制字符组成时返回 true，否则返回 false。</returns>
     private static bool IsToken(string value) => value.Length == 32 && value.All(Uri.IsHexDigit);
 
+    /// <summary>
+    /// 验证文件元数据的键和值长度总和未超过 S3 限制。
+    /// </summary>
+    /// <param name="metadata">待验证的元数据字典。</param>
+    /// <remarks>
+    /// 键和值长度总和超过 2 KiB 时抛出参数异常。
+    /// </remarks>
     private static void ValidateMetadataSize(IReadOnlyDictionary<string, string> metadata)
     {
         // FileWriteRequest 已限定为 ASCII；S3 用户元数据键和值的合计上限为 2 KiB。
@@ -824,6 +985,13 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
             throw new ArgumentException("S3 元数据（包含 Provider 字段）不能超过 2 KiB。", nameof(metadata));
     }
 
+    /// <summary>
+    /// 验证字符串是否符合 S3 存储桶名称约束。
+    /// </summary>
+    /// <param name="bucket">待验证的存储桶名称。</param>
+    /// <remarks>
+    /// 名称为空、长度超出 3 至 63 个字符、采用 IP 地址格式或包含不符合约束的字符及组合时抛出配置错误。
+    /// </remarks>
     internal static void ValidateBucket(string bucket)
     {
         if (string.IsNullOrEmpty(bucket) || bucket.Length is < 3 or > 63 || IPAddress.TryParse(bucket, out _) || bucket.Contains("..", StringComparison.Ordinal) ||
@@ -834,17 +1002,40 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
                 "逻辑容器不能作为合法 S3 Bucket 名称使用；Bucket 名称须为 3 至 63 个小写 DNS 字符。");
     }
 
+    /// <summary>
+    /// 检查 S3 异常是否表示对象不存在。
+    /// </summary>
+    /// <param name="ex">待检查的 S3 异常。</param>
+    /// <returns>错误代码为 NoSuchKey 或 NotFound，或状态为 404 且错误代码不是 NoSuchBucket 时返回 true，否则返回 false。</returns>
     private static bool IsMissingObject(AmazonS3Exception ex) =>
         ex.ErrorCode is "NoSuchKey" or "NotFound" || ex.StatusCode == HttpStatusCode.NotFound && ex.ErrorCode != "NoSuchBucket";
 
+    /// <summary>
+    /// 检查 S3 异常是否表示分片上传不存在。
+    /// </summary>
+    /// <param name="ex">待检查的 S3 异常。</param>
+    /// <returns>错误代码为 NoSuchUpload 时返回 true，否则返回 false。</returns>
     private static bool IsNoSuchUpload(AmazonS3Exception ex) => ex.ErrorCode == "NoSuchUpload";
 
+    /// <summary>
+    /// 验证签名有效期在允许范围内。
+    /// </summary>
+    /// <param name="lifetime">待验证的签名有效期。</param>
+    /// <remarks>
+    /// 有效期必须大于零且不超过最大签名有效期；超出范围时抛出参数异常。
+    /// </remarks>
     private static void ValidateLifetime(TimeSpan lifetime)
     {
         if (lifetime <= TimeSpan.Zero || lifetime > MaxSignatureLifetime)
             throw new ArgumentOutOfRangeException(nameof(lifetime), "签名有效期必须大于 0 且不超过 7 天。");
     }
 
+    /// <summary>
+    /// 以固定时间比较两个 Base64 编码值。
+    /// </summary>
+    /// <param name="left">第一个 Base64 编码值。</param>
+    /// <param name="right">第二个 Base64 编码值。</param>
+    /// <returns>两个值可解码、长度相同且字节相同时返回 true；否则返回 false。</returns>
     private static bool FixedEquals(string left, string right)
     {
         try
@@ -859,6 +1050,15 @@ internal sealed class S3FileStorage : IFileStorage, IMultipartFileStorage, IMult
         }
     }
 
+    /// <summary>
+    /// 将 Amazon 服务异常映射为文件存储异常。
+    /// </summary>
+    /// <param name="ex">待映射的 Amazon 服务异常。</param>
+    /// <param name="uncertain">是否将未识别的失败映射为结果未知。</param>
+    /// <returns>包含对应文件存储错误类别、原始异常和请求标识的异常对象。</returns>
+    /// <remarks>
+    /// 未识别的失败在 uncertain 为 true 时映射为结果未知，否则映射为服务不可用。
+    /// </remarks>
     private static FileStorageException MapException(AmazonServiceException ex, bool uncertain = false)
     {
         var s3 = ex as AmazonS3Exception;

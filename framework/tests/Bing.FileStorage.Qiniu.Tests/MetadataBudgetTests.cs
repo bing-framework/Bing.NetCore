@@ -3,10 +3,23 @@ using Xunit;
 
 namespace Bing.FileStorage.Qiniu.Tests;
 
+/// <summary>
+/// 覆盖文本值不为空并去除首尾空白等测试场景。
+/// </summary>
 public sealed class MetadataBudgetTests
 {
+    /// <summary>
+    /// 创建指定条目数的测试元数据。
+    /// </summary>
+    /// <param name="count">预期记录数或待执行的操作数。</param>
+    /// <returns>解析或构造的键值集合。</returns>
     private static Dictionary<string, string> Metadata(int count) => Enumerable.Range(0, count).ToDictionary(i => "key-" + i, i => "value-" + i);
 
+    /// <summary>
+    /// 验证自定义元数据预算在保存及恢复分片上传后保持有效。
+    /// </summary>
+    /// <param name="count">预期记录数或待执行的操作数。</param>
+    /// <param name="mode">分片上传模式。</param>
     [Theory]
     [InlineData(14, S3UploadMode.ServerProxy)] [InlineData(15, S3UploadMode.ServerProxy)] [InlineData(16, S3UploadMode.ServerProxy)]
     [InlineData(14, S3UploadMode.SignedParts)] [InlineData(15, S3UploadMode.SignedParts)] [InlineData(16, S3UploadMode.SignedParts)]
@@ -34,6 +47,10 @@ public sealed class MetadataBudgetTests
         Assert.Equal(upload.Request.Metadata["bing-upload-token"], restored.Request.Metadata["bing-upload-token"]);
     }
 
+    /// <summary>
+    /// 验证新请求即使使用恢复工厂也拒绝保留元数据键。
+    /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [InlineData("bing-upload-token")] [InlineData("bing-upload-mode")] [InlineData("bing-upload-unknown")]
     public async Task NewRequests_RejectReservedMetadata_EvenUsingRestoreFactory(string key)
@@ -48,6 +65,9 @@ public sealed class MetadataBudgetTests
         Assert.Empty(client.Calls);
     }
 
+    /// <summary>
+    /// 验证元数据数量或后端字节预算超限时不调用 SDK。
+    /// </summary>
     [Fact]
     public async Task ExcessCustomCountOrBackendBytes_FailsBeforeSdkCall()
     {

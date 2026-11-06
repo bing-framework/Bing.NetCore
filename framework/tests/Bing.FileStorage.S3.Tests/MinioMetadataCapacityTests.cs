@@ -1,14 +1,20 @@
-using Amazon.Runtime;
-using Amazon.S3;
-using Amazon.S3.Model;
 using Bing.FileStorage;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Bing.FileStorage.S3.Tests;
 
-public sealed class MinioMetadataCapacityTests
+/// <summary>
+/// 覆盖注册幂等、保留预注册实现，并且默认管理器按 DI scope 隔离等测试场景。
+/// </summary>
+public sealed class MinioMetadataCapacityTests : IClassFixture<MinioBucketFixture>
 {
+    /// <summary>等待异步夹具准备桶，不依赖其它实机测试先执行。</summary>
+    public MinioMetadataCapacityTests(MinioBucketFixture fixture) { }
+
+    /// <summary>
+    /// 验证 MinIO 为不同大小的对象持久化十六项元数据。
+    /// </summary>
     [MinioFact]
     public async Task Minio_SaveAsync_PersistsSixteenMetadataItemsForEmptyAndNonEmptyObjects()
     {
@@ -16,17 +22,6 @@ public sealed class MinioMetadataCapacityTests
             ?? throw new InvalidOperationException("真实 MinIO 测试端点未配置。");
         var accessKey = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_MINIO_ACCESS_KEY") ?? "bingtest";
         var secretKey = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_MINIO_SECRET_KEY") ?? "bingtest-password-2026";
-        var config = new AmazonS3Config
-        {
-            ServiceURL = endpoint,
-            ForcePathStyle = true,
-            AuthenticationRegion = "us-east-1",
-            UseHttp = new Uri(endpoint).Scheme == Uri.UriSchemeHttp
-        };
-
-        using var adminClient = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
-        await EnsureBucketAsync(adminClient, "attachments");
-
         var services = new ServiceCollection();
         services.AddBingFileStorage(options => options.DefaultStore = "minio-metadata-capacity");
         services.AddBingMinioStorage("minio-metadata-capacity", options =>
@@ -74,18 +69,11 @@ public sealed class MinioMetadataCapacityTests
         }
     }
 
-    private static async Task EnsureBucketAsync(IAmazonS3 client, string bucket)
-    {
-        try
-        {
-            await client.GetBucketLocationAsync(new GetBucketLocationRequest { BucketName = bucket });
-        }
-        catch (AmazonS3Exception exception) when (exception.ErrorCode == "NoSuchBucket")
-        {
-            await client.PutBucketAsync(new PutBucketRequest { BucketName = bucket });
-        }
-    }
-
+    /// <summary>
+    /// 验证 MinIO 对象元数据与预期一致。
+    /// </summary>
+    /// <param name="expected">预期的断言结果。</param>
+    /// <param name="actual">实际观测值。</param>
     private static void AssertMetadata(IReadOnlyDictionary<string, string> expected, IReadOnlyDictionary<string, string> actual)
     {
         Assert.Equal(expected.Count, actual.Count(pair => !FileWriteRequest.IsMultipartMetadata(pair.Key)));

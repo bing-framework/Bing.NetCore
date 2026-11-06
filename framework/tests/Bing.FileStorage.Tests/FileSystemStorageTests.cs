@@ -5,13 +5,34 @@ using Xunit;
 
 namespace Bing.FileStorage.Tests;
 
+/// <summary>
+/// 覆盖CSRedis 缓存管理器满足共享缓存契约等测试场景。
+/// </summary>
 public sealed class FileSystemStorageTests : IDisposable
 {
+    /// <summary>
+    /// 保存文件系统存储测试使用的临时根目录。
+    /// </summary>
     private readonly string _root = Path.Combine(Path.GetTempPath(), "bing-storage-tests", Guid.NewGuid().ToString("N"));
+    /// <summary>
+    /// 创建绑定指定租户的本地文件存储。
+    /// </summary>
+    /// <param name="tenant">隔离测试数据的租户标识。</param>
+    /// <returns>已绑定目标作用域的测试文件存储。</returns>
     private IFileStorage Storage(string tenant = "tenant-a") => new FileSystemStorageBackend("local", _root).Bind(StorageScope.ForTenant(tenant));
+    /// <summary>
+    /// 保存文件系统存储测试使用的文件地址。
+    /// </summary>
     private readonly FileAddress _address = new("attachments", "objects/test");
+    /// <summary>
+    /// 定义文件系统存储测试使用的分片大小。
+    /// </summary>
     private const int PartSize = 5 * 1024 * 1024;
+    /// <inheritdoc />
     public void Dispose() { if (Directory.Exists(_root)) Directory.Delete(_root, true); }
+    /// <summary>
+    /// 验证容量超限在发布文件前失败。
+    /// </summary>
     [Fact]
     public async Task CapacityFailure_IsEarly_AndDoesNotPublish()
     {
@@ -23,6 +44,9 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Equal(FileStorageError.CapacityExceeded, error.Error);
         Assert.Null(await storage.GetPropertiesAsync(_address));
     }
+    /// <summary>
+    /// 验证离线清理支持预览并保留对象及近期临时文件。
+    /// </summary>
     [Fact]
     public void OfflineCleanup_Previews_AndPreservesObjectsAndRecentTemporaryFiles()
     {
@@ -38,6 +62,10 @@ public sealed class FileSystemStorageTests : IDisposable
         FileSystemStorageMaintenance.CleanupTemporaryFiles(_root, "bing", DateTimeOffset.UtcNow.AddDays(-1), true);
         Assert.False(File.Exists(old)); Assert.True(File.Exists(recent)); Assert.True(File.Exists(committed));
     }
+    /// <summary>
+    /// 验证文件存取元数据、流所有权与删除行为。
+    /// </summary>
+    /// <param name="length">内容长度，单位为字节。</param>
     [Theory]
     [InlineData(0)]
     [InlineData(99)]
@@ -58,6 +86,11 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Null(await storage.GetPropertiesAsync(_address));
         Assert.Equal(FileStorageError.NotFound, (await Assert.ThrowsAsync<FileStorageException>(() => storage.ReadAsync(_address, (_, _) => Task.CompletedTask))).Error);
     }
+    /// <summary>
+    /// 验证长度不匹配不会发布部分文件或覆盖已有文件。
+    /// </summary>
+    /// <param name="actual">实际观测值。</param>
+    /// <param name="declared">声明的内容字节数。</param>
     [Theory]
     [InlineData(4, 3)]
     [InlineData(2, 3)]
@@ -70,6 +103,9 @@ public sealed class FileSystemStorageTests : IDisposable
         await storage.ReadAsync(_address, (s, _) => { Assert.Equal(42, s.ReadByte()); Assert.Equal(-1, s.ReadByte()); return Task.CompletedTask; });
         Assert.Empty(Directory.EnumerateFiles(_root, "*.tmp", SearchOption.AllDirectories));
     }
+    /// <summary>
+    /// 验证并发仅新建写入只允许一个调用成功。
+    /// </summary>
     [Fact]
     public async Task CreateOnly_IsAtomicUnderConcurrency()
     {
@@ -81,6 +117,9 @@ public sealed class FileSystemStorageTests : IDisposable
         }));
         Assert.Equal(1, results.Count(x => x)); Assert.Equal(1, (await storage.GetPropertiesAsync(_address))!.Length);
     }
+    /// <summary>
+    /// 验证取消写入不会发布未完成文件。
+    /// </summary>
     [Fact]
     public async Task CancelledWrite_PreservesExistingContent()
     {
@@ -89,6 +128,10 @@ public sealed class FileSystemStorageTests : IDisposable
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => storage.SaveAsync(new(_address, 2, FileWriteMode.CreateOnly), new MemoryStream(new byte[2]), cts.Token));
         Assert.Null(await storage.GetPropertiesAsync(_address));
     }
+    /// <summary>
+    /// 验证文件地址拒绝不安全的对象键。
+    /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [InlineData("../escape")]
     [InlineData("a/../b")]
@@ -97,6 +140,9 @@ public sealed class FileSystemStorageTests : IDisposable
     [InlineData("a//b")]
     [InlineData("con")]
     public void RejectsUnsafeObjectKeys(string key) => Assert.Throws<ArgumentException>(() => new FileAddress("attachments", key));
+    /// <summary>
+    /// 验证范围及租户名称区分大小写并支持长 Unicode 标识。
+    /// </summary>
     [Fact]
     public async Task ScopeIsolation_AndLongUnicodeTenant()
     {
@@ -107,6 +153,9 @@ public sealed class FileSystemStorageTests : IDisposable
         await Storage(longTenant).SaveAsync(new(_address, 0, FileWriteMode.CreateOnly), Stream.Null);
         Assert.NotNull(await Storage(longTenant).GetPropertiesAsync(_address));
     }
+    /// <summary>
+    /// 验证范围读取使用内容偏移并遵循长度边界。
+    /// </summary>
     [Fact]
     public async Task Range_UsesContentOffset_AndBounds()
     {
@@ -116,6 +165,9 @@ public sealed class FileSystemStorageTests : IDisposable
         { using var output = new MemoryStream(); await s.CopyToAsync(output, ct); Assert.Equal(new byte[] { 3, 4 }, output.ToArray()); });
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => ((IFileRangeReader)storage).ReadRangeAsync(_address, 4, 2, (_, _) => Task.CompletedTask));
     }
+    /// <summary>
+    /// 验证分片重启、重复完成及迟到上传的行为。
+    /// </summary>
     [Fact]
     public async Task Multipart_Restart_RepeatComplete_AndLatePart()
     {
@@ -135,6 +187,9 @@ public sealed class FileSystemStorageTests : IDisposable
         { using var output = new MemoryStream(); await s.CopyToAsync(output, ct); Assert.Equal(1, output.ToArray()[0]); Assert.Equal(new byte[] { 2, 3, 4 }, output.ToArray().TakeLast(3)); });
         Assert.Empty(Directory.EnumerateFiles(_root, "*.part", SearchOption.AllDirectories));
     }
+    /// <summary>
+    /// 验证分片校验、回执、中止与上传句柄隔离。
+    /// </summary>
     [Fact]
     public async Task Multipart_Checksum_ETag_Abort_AndHandleIsolation()
     {
@@ -151,6 +206,9 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Null(await Storage().GetPropertiesAsync(_address));
         Assert.Empty(Directory.EnumerateFiles(_root, "*.part", SearchOption.AllDirectories));
     }
+    /// <summary>
+    /// 验证零长度分片上传可以完成并重复确认。
+    /// </summary>
     [Fact]
     public async Task EmptyMultipart_CanCompleteAndRetry()
     {
@@ -159,6 +217,9 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Equal(0, (await multi.CompleteMultipartAsync(handle, Array.Empty<FilePart>())).Properties.Length);
         Assert.Equal(0, (await multi.CompleteMultipartAsync(handle, Array.Empty<FilePart>())).Properties.Length);
     }
+    /// <summary>
+    /// 验证工厂保留旧存储且拒绝未配置容器。
+    /// </summary>
     [Fact]
     public async Task Factory_KeepsOldStore_AndRejectsUnconfiguredContainer()
     {
@@ -173,6 +234,9 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Null(await factory.GetStorage(factory.DefaultStore, StorageScope.Host).GetPropertiesAsync(_address));
         await Assert.ThrowsAsync<ArgumentException>(() => factory.GetStorage("new", StorageScope.Host).GetPropertiesAsync(new("unknown", "file")));
     }
+    /// <summary>
+    /// 验证在途分片不能替换已经冻结的完成结果。
+    /// </summary>
     [Fact]
     public async Task InFlightPart_CannotReplaceFrozenCompletion()
     {
@@ -187,6 +251,9 @@ public sealed class FileSystemStorageTests : IDisposable
         Assert.Equal(FileStorageError.Conflict, (await Assert.ThrowsAsync<FileStorageException>(() => pending)).Error);
         await storage.ReadAsync(_address, (stream, _) => { Assert.Equal(1, stream.ReadByte()); return Task.CompletedTask; });
     }
+    /// <summary>
+    /// 验证存储后端拒绝链接根目录。
+    /// </summary>
     [Fact]
     public void LinkedRoot_IsRejected()
     {
@@ -205,33 +272,69 @@ public sealed class FileSystemStorageTests : IDisposable
         try { Assert.Equal(FileStorageError.AccessDenied, Assert.Throws<FileStorageException>(() => new FileSystemStorageBackend("local", link)).Error); }
         finally { Directory.Delete(link); }
     }
+    /// <summary>
+    /// 包装Gated流并提供对应的读取行为。
+    /// </summary>
     private sealed class GatedStream : MemoryStream
     {
+        /// <summary>
+        /// 获取操作启动时使用的通知源。
+        /// </summary>
         public TaskCompletionSource<bool> Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        /// <summary>
+        /// 获取恢复被暂停操作的通知源。
+        /// </summary>
         public TaskCompletionSource<bool> Resume { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        /// <summary>
+        /// 初始化一个 <see cref="GatedStream" /> 类型的实例。
+        /// </summary>
         public GatedStream() : base(new byte[] { 9 }) { }
+        /// <inheritdoc />
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct) => ReadAsync(buffer.AsMemory(offset, count), ct).AsTask();
+        /// <inheritdoc />
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
         {
             Started.TrySetResult(true); await Resume.Task.WaitAsync(ct);
             return await base.ReadAsync(buffer, ct);
         }
     }
+    /// <summary>
+    /// 包装NonSeek流并提供对应的读取行为。
+    /// </summary>
     private sealed class NonSeekStream : Stream
     {
+        /// <summary>
+        /// 保存不可定位流包装的内部流。
+        /// </summary>
         private readonly Stream _inner;
+        /// <summary>
+        /// 初始化一个 <see cref="NonSeekStream" /> 类型的实例。
+        /// </summary>
+        /// <param name="inner">由当前包装器保留或转发的内部对象或异常。</param>
         public NonSeekStream(Stream inner) { _inner = inner; }
+        /// <inheritdoc />
         public override bool CanRead => _inner.CanRead;
+        /// <inheritdoc />
         public override bool CanSeek => false;
+        /// <inheritdoc />
         public override bool CanWrite => false;
+        /// <inheritdoc />
         public override long Length => throw new NotSupportedException();
+        /// <inheritdoc />
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        /// <inheritdoc />
         public override int Read(byte[] buffer, int offset, int count) => _inner.Read(buffer, offset, count);
+        /// <inheritdoc />
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => _inner.ReadAsync(buffer, offset, count, cancellationToken);
+        /// <inheritdoc />
         public override void Flush() { }
+        /// <inheritdoc />
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void SetLength(long value) => throw new NotSupportedException();
+        /// <inheritdoc />
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        /// <inheritdoc />
         protected override void Dispose(bool disposing) { if (disposing) _inner.Dispose(); base.Dispose(disposing); }
     }
 }

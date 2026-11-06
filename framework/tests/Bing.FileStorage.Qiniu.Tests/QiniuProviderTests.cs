@@ -7,16 +7,33 @@ using Xunit;
 
 namespace Bing.FileStorage.Qiniu.Tests;
 
+/// <summary>
+/// 覆盖同步相同键回源的等待超时清理等测试场景。
+/// </summary>
 public sealed class QiniuProviderTests
 {
+    /// <summary>
+    /// 创建指定上传模式的七牛测试选项。
+    /// </summary>
+    /// <param name="mode">分片上传模式。</param>
+    /// <returns>包含上传模式、容器映射及分页设置的选项。</returns>
     internal static BingS3StorageOptions Options(S3UploadMode mode = S3UploadMode.ServerProxy) => new()
     {
         StorageNamespace = "tests", UploadMode = mode, ListPartsPageSize = 1,
         ContainerBuckets = new() { ["attachments"] = "qiniu-actual-bucket", ["public"] = "qiniu-actual-bucket" }
     };
+    /// <summary>
+    /// 创建绑定宿主作用域的七牛测试存储。
+    /// </summary>
+    /// <param name="client">执行测试请求的客户端。</param>
+    /// <param name="mode">分片上传模式。</param>
+    /// <returns>已绑定目标作用域的测试文件存储。</returns>
     internal static IFileStorage Storage(RecordingS3Client client, S3UploadMode mode = S3UploadMode.ServerProxy) =>
         new S3FileStorageBackend("qiniu", Options(mode), client).Bind(StorageScope.Host);
 
+    /// <summary>
+    /// 验证七牛默认使用代理模式并冻结桶映射。
+    /// </summary>
     [Fact]
     public async Task Registration_DefaultsToProxy_AndSnapshotsBucketMappings()
     {
@@ -39,6 +56,13 @@ public sealed class QiniuProviderTests
         Assert.Equal(FileStorageError.Configuration, (await Assert.ThrowsAsync<FileStorageException>(() => storage.GetPropertiesAsync(new("public", "file")))).Error);
     }
 
+    /// <summary>
+    /// 验证七牛注册拒绝无效连接或桶映射配置。
+    /// </summary>
+    /// <param name="endpoint">恢复操作所针对的服务端点标识。</param>
+    /// <param name="region">用于校验的 S3 区域配置。</param>
+    /// <param name="key">用于关联测试操作的键。</param>
+    /// <param name="mapping">是否提供存储容器映射。</param>
     [Theory]
     [InlineData("http://s3.cn-east-1.qiniucs.com", "cn-east-1", "key", true)]
     [InlineData("https://s3.cn-east-1.qiniucs.com", "cn-east-2", "key", true)]
@@ -51,6 +75,9 @@ public sealed class QiniuProviderTests
         { o.Endpoint = endpoint; o.Region = region; o.AccessKey = key; o.SecretKey = "secret"; if (mapping) o.ContainerBuckets["attachments"] = "actual-bucket"; }));
     }
 
+    /// <summary>
+    /// 验证代理存储完整读写流程使用映射桶和逻辑键。
+    /// </summary>
     [Fact]
     public async Task Proxy_SaveReadRangeEmptyDelete_UseMappedBucketAndLogicalKeys()
     {
@@ -77,6 +104,9 @@ public sealed class QiniuProviderTests
         Assert.Contains(client.Calls, c => c.Key == "tests/h/attachments/file");
     }
 
+    /// <summary>
+    /// 验证代理分片分页、回执校验与丢失完成响应的恢复。
+    /// </summary>
     [Fact]
     public async Task Proxy_MultipartPaginates_ValidatesReceipts_RecoversLostCompletion()
     {
@@ -97,6 +127,9 @@ public sealed class QiniuProviderTests
         Assert.All(client.Calls, c => Assert.Equal("qiniu-actual-bucket", c.Bucket));
     }
 
+    /// <summary>
+    /// 验证代理上传拒绝长度、校验、取消及签名能力错误。
+    /// </summary>
     [Fact]
     public async Task Proxy_RejectsWrongLengthChecksumCancellationAndSigning()
     {
@@ -112,6 +145,9 @@ public sealed class QiniuProviderTests
         Assert.Equal(FileStorageError.AccessDenied, (await Assert.ThrowsAsync<FileStorageException>(() => storage.GetPropertiesAsync(new("attachments", "file")))).Error);
     }
 
+    /// <summary>
+    /// 验证签名模式保留远程校验值并拒绝上传中切换模式。
+    /// </summary>
     [Fact]
     public async Task SignedMode_RetainsRemoteChecksum_AndRejectsModeSwitch()
     {
@@ -129,6 +165,9 @@ public sealed class QiniuProviderTests
         Assert.Equal(FileStorageError.InvalidChecksum, (await Assert.ThrowsAsync<FileStorageException>(() => multipart.CompleteMultipartAsync(upload, new[] { receipt }))).Error);
     }
 
+    /// <summary>
+    /// 验证共享物理桶中的租户文件相互隔离。
+    /// </summary>
     [Fact]
     public async Task SharedBucket_PreservesTenantIsolation()
     {
@@ -144,6 +183,10 @@ public sealed class QiniuProviderTests
         Assert.Equal(2, client.Objects.Count);
     }
 
+    /// <summary>
+    /// 验证真实 SDK 代理上传发送签名正文且不使用分块传输。
+    /// </summary>
+    /// <param name="empty">是否使用空的输入数据或内容。</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -175,15 +218,40 @@ public sealed class QiniuProviderTests
         Assert.Equal("/qiniu-actual-bucket/tests/h/attachments/wire", capture.Uri!.AbsolutePath);
     }
 
+    /// <summary>
+    /// 为七牛上传测试创建并记录 HTTP 请求的客户端工厂。
+    /// </summary>
     private sealed class CaptureHttpFactory : HttpClientFactory
     {
-        public byte[] Body = Array.Empty<byte>(); public Uri? Uri;
+        /// <summary>
+        /// 保存模拟 HTTP 工厂捕获的请求体。
+        /// </summary>
+        public byte[] Body = Array.Empty<byte>();
+        /// <summary>
+        /// 保存模拟 HTTP 工厂捕获的请求地址。
+        /// </summary>
+        public Uri? Uri;
+        /// <summary>
+        /// 保存模拟 HTTP 工厂捕获的请求头。
+        /// </summary>
         public Dictionary<string, string> Headers = new(StringComparer.OrdinalIgnoreCase);
+        /// <inheritdoc />
         public override HttpClient CreateHttpClient(IClientConfig config) => new(new Handler(this));
+        /// <summary>
+        /// 为QiniuProviderTests测试提供 HTTP 请求处理替身。
+        /// </summary>
         private sealed class Handler : HttpMessageHandler
         {
+            /// <summary>
+            /// 保存捕获处理器所属的模拟 HTTP 工厂。
+            /// </summary>
             private readonly CaptureHttpFactory _owner;
+            /// <summary>
+            /// 初始化一个 <see cref="Handler" /> 类型的实例。
+            /// </summary>
+            /// <param name="owner">拥有当前实例或资源的对象。</param>
             public Handler(CaptureHttpFactory owner) => _owner = owner;
+            /// <inheritdoc />
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
             {
                 if (request.Method == HttpMethod.Head)
@@ -197,9 +265,17 @@ public sealed class QiniuProviderTests
         }
     }
 
+    /// <summary>
+    /// 包装NonSeek流并提供对应的读取行为。
+    /// </summary>
     private sealed class NonSeekStream : MemoryStream
     {
+        /// <summary>
+        /// 初始化一个 <see cref="NonSeekStream" /> 类型的实例。
+        /// </summary>
+        /// <param name="bytes">当前内容的字节数或字节数据。</param>
         public NonSeekStream(byte[] bytes) : base(bytes) { }
+        /// <inheritdoc />
         public override bool CanSeek => false;
     }
 }

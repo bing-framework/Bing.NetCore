@@ -7,8 +7,16 @@ using Xunit;
 
 namespace Bing.FileStorage.AspNetCore.Tests;
 
+/// <summary>
+/// 覆盖输入在计时外创建；CompareSnapshot始终使用同一个未变旧快照等测试场景。
+/// </summary>
 public sealed class LegacyUploadTests
 {
+    /// <summary>
+    /// 验证旧上传入口按实际写入字节计算 MD5。
+    /// </summary>
+    /// <param name="text">待写入并校验 MD5 的文本内容。</param>
+    /// <param name="expected">预期的断言结果。</param>
     [Theory]
     [InlineData("abc", "900150983CD24FB0D6963F7D28E17F72")]
     [InlineData("", "D41D8CD98F00B204E9800998ECF8427E")]

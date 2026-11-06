@@ -7,8 +7,15 @@ using Xunit;
 
 namespace Bing.FileStorage.Qiniu.Tests;
 
+/// <summary>
+/// 仅在七牛云测试空间配置完整时运行真实服务测试。
+/// </summary>
 public sealed class QiniuLiveAttribute : FactAttribute
 {
+    /// <summary>
+    /// 初始化一个 <see cref="QiniuLiveAttribute" /> 类型的实例。
+    /// </summary>
+    /// <param name="signed">指示是否使用签名访问。</param>
     public QiniuLiveAttribute(bool signed = false)
     {
         var required = new[] { "ENDPOINT", "REGION", "BUCKET", "ACCESS_KEY", "SECRET_KEY" };
@@ -19,10 +26,25 @@ public sealed class QiniuLiveAttribute : FactAttribute
     }
 }
 
-/// <summary>仅操作隔离随机键，不创建空间、不修改 CORS 或空间权限。</summary>
+/// <summary>
+/// 使用隔离对象键的七牛云端协议测试。
+/// </summary>
+/// <remarks>
+/// 仅操作隔离随机键，不创建空间、不修改 CORS 或空间权限。
+/// </remarks>
 public sealed class QiniuLiveTests
 {
+    /// <summary>
+    /// 读取七牛实机测试的环境配置。
+    /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
+    /// <returns>对应环境变量的值；未设置该变量时返回 null。</returns>
     internal static string? Env(string key) => Environment.GetEnvironmentVariable("BING_FILE_STORAGE_QINIU_" + key);
+    /// <summary>
+    /// 创建指定上传模式的七牛实机测试容器。
+    /// </summary>
+    /// <param name="mode">分片上传模式。</param>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider Services(S3UploadMode mode)
     {
         var services = new ServiceCollection(); services.AddBingFileStorage(o => o.DefaultStore = "qiniu");
@@ -36,6 +58,9 @@ public sealed class QiniuLiveTests
         return services.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// 验证真实代理分片上传、范围下载及幂等完成。
+    /// </summary>
     [QiniuLive]
     public async Task Proxy_RealMultipartRangeSignedDownloadAndIdempotentCompletion()
     {
@@ -73,6 +98,9 @@ public sealed class QiniuLiveTests
         await storage.DeleteAsync(address); Assert.Null(await storage.GetPropertiesAsync(address));
     }
 
+    /// <summary>
+    /// 验证签名分片校验字节、列出校验和并按期过期。
+    /// </summary>
     [QiniuLive(true)]
     public async Task SignedParts_RejectsWrongBytes_ListsChecksum_AndExpires()
     {
@@ -98,6 +126,9 @@ public sealed class QiniuLiveTests
         finally { await multipart.AbortMultipartAsync(upload); await storage.DeleteAsync(address); }
     }
 
+    /// <summary>
+    /// 验证 SigV4 载荷篡改被拒绝且上传仍可中止。
+    /// </summary>
     [QiniuLive]
     public async Task Proxy_SigV4PayloadTampering_IsRejectedAndUploadCanBeAborted()
     {
@@ -118,18 +149,36 @@ public sealed class QiniuLiveTests
         finally { await multipart.AbortMultipartAsync(upload); await storage.DeleteAsync(address); }
     }
 
+    /// <summary>
+    /// 按签名请求发送带校验和的字节内容。
+    /// </summary>
+    /// <param name="http">用于调用测试端点的 HTTP 客户端。</param>
+    /// <param name="signed">包含地址、方法及请求头的签名请求。</param>
+    /// <param name="bytes">待上传或读取的字节内容。</param>
+    /// <returns>完成 HTTP 请求后收到的响应。</returns>
     private static Task<HttpResponseMessage> Put(HttpClient http, SignedFileRequest signed, byte[] bytes)
     {
         var content = new ByteArrayContent(bytes);
         content.Headers.TryAddWithoutValidation("x-amz-checksum-sha256", signed.Headers["x-amz-checksum-sha256"]);
         return http.PutAsync(signed.Url, content);
     }
+    /// <summary>
+    /// 为篡改上传签名测试创建 HTTP 客户端。
+    /// </summary>
     private sealed class TamperFactory : HttpClientFactory
     {
+        /// <inheritdoc />
         public override HttpClient CreateHttpClient(IClientConfig config) => new(new TamperHandler());
+        /// <summary>
+        /// 为QiniuLiveTests测试提供 HTTP 请求处理替身。
+        /// </summary>
         private sealed class TamperHandler : DelegatingHandler
         {
+            /// <summary>
+            /// 初始化一个 <see cref="TamperHandler" /> 类型的实例。
+            /// </summary>
             public TamperHandler() : base(new HttpClientHandler()) { }
+            /// <inheritdoc />
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
             {
                 if (request.Method == HttpMethod.Put && request.RequestUri!.Query.Contains("uploadId=", StringComparison.Ordinal))
