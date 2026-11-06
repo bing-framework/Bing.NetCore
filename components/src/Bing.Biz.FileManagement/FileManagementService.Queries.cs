@@ -41,14 +41,25 @@ public sealed partial class FileManagementService
         while (true)
         {
             var candidates = await _store.QueryFilesAsync(query, ct);
+            var snapshots = candidates.Count == 0
+                ? null
+                : await ReadAuthorizationBatchAsync(scope.Key, candidates, ct);
             foreach (var file in candidates)
             {
                 ct.ThrowIfCancellationRequested();
-                var entry = await _store.FindAsync(file.Id, ct);
-                if (entry?.File.State != FileState.Ready || entry.File.ScopeKey != scope.Key ||
-                    !entry.Bindings.Any(b => b.BusinessType == businessType && b.BusinessId == businessId)) continue;
+                FileReadSnapshot? snapshot;
+                if (snapshots == null)
+                {
+                    var entry = await _store.FindAsync(file.Id, ct);
+                    snapshot = entry == null ? null : new FileReadSnapshot { File = entry.File, Bindings = entry.Bindings };
+                }
+                else snapshots.TryGetValue(file.Id, out snapshot);
+
+                if (snapshot == null || snapshot.File.State != FileState.Ready || snapshot.File.ScopeKey != scope.Key ||
+                    !snapshot.Bindings.Any(binding => binding.BusinessType == businessType && binding.BusinessId == businessId)) continue;
+                if (snapshot.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal && snapshot.File.CreatorId != _user.UserId) continue;
                 if (remaining > 0) { remaining--; continue; }
-                result.Add(FileView.From(entry.File));
+                result.Add(FileView.From(snapshot.File));
                 if (result.Count == take) return result;
             }
             if (candidates.Count < query.Take) return result;

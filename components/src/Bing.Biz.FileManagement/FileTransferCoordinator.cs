@@ -29,6 +29,11 @@ internal sealed class FileTransferCoordinator
         using var stop = new CancellationTokenSource();
         var heartbeat = RenewAsync(lease, work, stop.Token);
         try { await copyAndPublish(attempt, lease, work.Token); }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && work.IsCancellationRequested)
+        {
+            // 内部停止必须进入持久任务的有限重试；外部请求取消仍保留取消语义。
+            throw await heartbeat ?? new FileStorageException(FileStorageError.Conflict, "复制传输租约已变化，请重试。");
+        }
         finally
         {
             stop.Cancel(); await heartbeat;
@@ -37,7 +42,7 @@ internal sealed class FileTransferCoordinator
             await TryCleanupAsync(attempt.Id, attempt.LeaseToken, cleanup.Token);
         }
     }
-    private async Task RenewAsync(FileTransferLease lease, CancellationTokenSource work, CancellationToken stop)
+    private async Task<FileStorageException?> RenewAsync(FileTransferLease lease, CancellationTokenSource work, CancellationToken stop)
     {
         try
         {
@@ -45,11 +50,19 @@ internal sealed class FileTransferCoordinator
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(_options.OperationLease.TotalMilliseconds / 3), stop);
                 if (!await _store.RenewTransferAsync(lease, FileManagementService.Now + (long)_options.OperationLease.TotalMilliseconds, stop))
-                { work.Cancel(); return; }
+                {
+                    work.Cancel();
+                    return new FileStorageException(FileStorageError.Conflict, "复制传输租约已变化，请重试。");
+                }
             }
         }
         catch (OperationCanceledException) when (stop.IsCancellationRequested) { }
-        catch { work.Cancel(); }
+        catch (Exception ex)
+        {
+            work.Cancel();
+            return new FileStorageException(FileStorageError.Unavailable, "复制传输续租暂时不可用。", ex);
+        }
+        return null;
     }
     public async Task CleanupAsync(CancellationToken ct)
     {

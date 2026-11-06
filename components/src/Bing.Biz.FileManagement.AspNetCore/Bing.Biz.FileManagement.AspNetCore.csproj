@@ -5,6 +5,7 @@
     <ProjectReference Include="../Bing.Biz.FileManagement/Bing.Biz.FileManagement.csproj" />
     <ProjectReference Include="../../../framework/src/Bing.FileStorage.AspNetCore/Bing.FileStorage.AspNetCore.csproj" />
     <PackageReference Update="DotNetCore.SourceLink.Environment" PrivateAssets="all" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
   <ItemGroup><EmbeddedResource Include="Console/*"><LogicalName>Bing.Biz.FileManagement.AspNetCore.Console.%(Filename)%(Extension)</LogicalName></EmbeddedResource></ItemGroup>
 </Project>

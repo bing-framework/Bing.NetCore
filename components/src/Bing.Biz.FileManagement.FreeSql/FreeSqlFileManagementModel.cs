@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Bing.Biz.FileManagement;
+using Bing.FileStorage.RemoteDrive;
 using FreeSql;
 
 namespace Bing.Biz.FileManagement.FreeSql;
@@ -31,6 +32,8 @@ internal static class FreeSqlFileManagementModel
             ConfigureIoLease(orm);
             ConfigureOutbox(orm);
             ConfigureGovernance(orm);
+            ConfigureRemoteDrive(orm);
+            ConfigureStorageTargets(orm);
             Configured.Add(orm, new object());
         }
     }
@@ -59,6 +62,7 @@ internal static class FreeSqlFileManagementModel
             table.Property(x => x.ContentPolicyJson).DbType(contentPolicyDbType).IsNullable(false);
             table.Property(x => x.CreatorId).StringLength(200).IsNullable(false);
             table.Property(x => x.Sha256).StringLength(64).IsNullable(true);
+            table.Index("IX_BingFileRecords_ConnectionId", nameof(FileRecord.ConnectionId));
             table.Index("UX_BingFileRecords_RequestKey", nameof(FileRecord.RequestKey), true);
             table.Index("IX_BingFileRecords_Scope_Creator_State_Created", "ScopeKey,CreatorId,State,CreatedAt,RequestKey");
             table.Index("IX_BingFileRecords_Scope_State_Created", "ScopeKey,State,CreatedAt,RequestKey");
@@ -75,6 +79,7 @@ internal static class FreeSqlFileManagementModel
             table.Property(x => x.OwnerId).StringLength(200).IsNullable(false);
             table.Property(x => x.BackendUploadId).StringLength(2048).IsNullable(true);
             table.Property(x => x.BackendMetadataJson).StringLength(4096).IsNullable(false);
+            table.Property(x => x.RequestedStorageTargetId).StringLength(128).IsNullable(true);
             table.Index("UX_BingFileUploadSessions_FileId", nameof(FileUploadSession.FileId), true);
             table.Index("IX_BingFileUploadSessions_State_Expires", "State,ExpiresAt");
             table.Index("IX_BingFileUploadSessions_Owner_Expires", "OwnerId,ExpiresAt,FileId");
@@ -278,6 +283,84 @@ internal static class FreeSqlFileManagementModel
             table.Index("IX_BingFileHistoryArchives_Scope_Kind_Archived", "ScopeKey,Kind,ArchivedAt,Id");
         });
     }
+
+    private static void ConfigureRemoteDrive(IFreeSql orm)
+    {
+        var jsonDbType = orm.Ado.DataType switch
+        {
+            DataType.MySql or DataType.OdbcMySql or DataType.CustomMySql => "mediumtext",
+            DataType.SqlServer or DataType.OdbcSqlServer or DataType.CustomSqlServer => "nvarchar(max)",
+            DataType.Oracle or DataType.OdbcOracle or DataType.CustomOracle => "clob",
+            _ => "text"
+        };
+        var largeJsonDbType = orm.Ado.DataType switch
+        {
+            DataType.MySql or DataType.OdbcMySql or DataType.CustomMySql => "longtext",
+            DataType.SqlServer or DataType.OdbcSqlServer or DataType.CustomSqlServer => "nvarchar(max)",
+            DataType.Oracle or DataType.OdbcOracle or DataType.CustomOracle => "clob",
+            _ => "text"
+        };
+        orm.CodeFirst.ConfigEntity<RemoteDriveConnection>(table =>
+        {
+            table.Name("BingRemoteDriveConnections"); table.Property(x => x.Id).IsPrimary(true);
+            table.Property(x => x.TemplateName).StringLength(64).IsNullable(false); table.Property(x => x.Provider).StringLength(64).IsNullable(false);
+            table.Property(x => x.StoreName).StringLength(128).IsNullable(false); table.Property(x => x.TenantId).StringLength(128).IsNullable(true);
+            table.Property(x => x.ScopeKey).StringLength(80).IsNullable(false); table.Property(x => x.OwnerId).StringLength(200).IsNullable(false);
+            table.Property(x => x.DisplayName).StringLength(100).IsNullable(false); table.Property(x => x.RemoteAccountId).StringLength(200).IsNullable(false);
+            table.Property(x => x.DriveId).StringLength(200).IsNullable(false); table.Property(x => x.RootFolderId).StringLength(512).IsNullable(false);
+            table.Property(x => x.EncryptedCredentials).DbType(jsonDbType).IsNullable(false);
+            table.Property(x => x.EncryptedAuthorization).DbType(jsonDbType).IsNullable(false);
+            table.Property(x => x.LeaseToken).StringLength(64).IsNullable(true);
+            table.Index("UX_BingRemoteDriveConnections_StoreName", nameof(RemoteDriveConnection.StoreName), true);
+            table.Index("IX_BingRemoteDriveConnections_Scope_Owner_State", "ScopeKey,Ownership,OwnerId,State");
+        });
+        orm.CodeFirst.ConfigEntity<RemoteDriveObject>(table =>
+        {
+            table.Name("BingRemoteDriveObjects"); table.Property(x => x.Id).IsPrimary(true).StringLength(64);
+            table.Property(x => x.StoreName).StringLength(128).IsNullable(false); table.Property(x => x.ScopeKey).StringLength(80).IsNullable(false);
+            table.Property(x => x.Container).StringLength(64).IsNullable(false); table.Property(x => x.ObjectKey).StringLength(512).IsNullable(false);
+            table.Property(x => x.RemoteFileJson).DbType(jsonDbType).IsNullable(false); table.Property(x => x.MetadataJson).DbType(jsonDbType).IsNullable(false);
+            table.Property(x => x.ContentType).StringLength(256).IsNullable(false); table.Property(x => x.Sha256).StringLength(128).IsNullable(false);
+            table.Index("IX_BingRemoteDriveObjects_Connection_Deleted", "ConnectionId,Deleted");
+        });
+        orm.CodeFirst.ConfigEntity<RemoteDriveTransfer>(table =>
+        {
+            table.Name("BingRemoteDriveTransfers"); table.Property(x => x.Id).IsPrimary(true);
+            table.Property(x => x.StoreName).StringLength(128).IsNullable(false); table.Property(x => x.ScopeKey).StringLength(80).IsNullable(false);
+            table.Property(x => x.Container).StringLength(64).IsNullable(false); table.Property(x => x.ObjectKey).StringLength(512).IsNullable(false);
+            table.Property(x => x.StageStoreName).StringLength(128).IsNullable(false); table.Property(x => x.StageContainer).StringLength(64).IsNullable(false);
+            table.Property(x => x.StageObjectKey).StringLength(512).IsNullable(false); table.Property(x => x.StageUploadId).StringLength(2048).IsNullable(true);
+            table.Property(x => x.StageMetadataJson).DbType(jsonDbType).IsNullable(false); table.Property(x => x.MetadataJson).DbType(jsonDbType).IsNullable(false);
+            table.Property(x => x.ManifestJson).DbType(largeJsonDbType).IsNullable(false); table.Property(x => x.CheckpointJson).DbType(largeJsonDbType).IsNullable(false);
+            table.Property(x => x.PreviousRemoteFileJson).DbType(jsonDbType).IsNullable(true); table.Property(x => x.ContentType).StringLength(256).IsNullable(false);
+            table.Property(x => x.LeaseToken).StringLength(64).IsNullable(true);
+            table.Index("IX_BingRemoteDriveTransfers_State_Expiry_Lease", "State,ExpiresAt,LeaseUntil");
+            table.Index("IX_BingRemoteDriveTransfers_Connection", nameof(RemoteDriveTransfer.ConnectionId));
+            table.Property(x => x.CleanupErrorCode).StringLength(64).IsNullable(true);
+            table.Index("IX_BingRemoteDriveTransfers_CleanupRetry", "CleanupCompleted,CleanupNextAttemptAt,ExpiresAt,Id");
+        });
+    }
+
+    private static void ConfigureStorageTargets(IFreeSql orm)
+    {
+        orm.CodeFirst.ConfigEntity<FileStoragePreference>(table =>
+        {
+            table.Name("BingFileStoragePreferences"); table.Property(x => x.Id).IsPrimary(true).StringLength(64);
+            table.Property(x => x.ScopeKey).StringLength(80).IsNullable(false); table.Property(x => x.OwnerId).StringLength(200).IsNullable(false);
+            table.Property(x => x.Container).StringLength(64).IsNullable(false); table.Property(x => x.TargetId).StringLength(128).IsNullable(false);
+            table.Index("UX_BingFileStoragePreferences_Scope_Owner_Container", "ScopeKey,OwnerId,Container", true);
+        });
+        orm.CodeFirst.ConfigEntity<FileBindingCopyRequest>(table =>
+        {
+            table.Name("BingFileBindingCopyRequests"); table.Property(x => x.Id).IsPrimary(true);
+            table.Property(x => x.RequestKey).StringLength(64).IsNullable(false); table.Property(x => x.ScopeKey).StringLength(80).IsNullable(false);
+            table.Property(x => x.OwnerId).StringLength(200).IsNullable(false); table.Property(x => x.BusinessType).StringLength(100).IsNullable(false);
+            table.Property(x => x.BusinessId).StringLength(200).IsNullable(false); table.Property(x => x.ErrorCode).StringLength(80).IsNullable(true);
+            table.Index("UX_BingFileBindingCopyRequests_RequestKey", nameof(FileBindingCopyRequest.RequestKey), true);
+            table.Index("UX_BingFileBindingCopyRequests_CopyFileId", nameof(FileBindingCopyRequest.CopyFileId), true);
+            table.Index("IX_BingFileBindingCopyRequests_Scope_Owner_State", "ScopeKey,OwnerId,State,CreatedAt");
+        });
+    }
 }
 
 /// <summary>文件管理 FreeSql 表结构的显式初始化入口。</summary>
@@ -294,7 +377,8 @@ public static class FileManagementFreeSqlSchema
             typeof(FileBinding), typeof(FileOperation), typeof(LegacyFileImport), typeof(FileTransferAttempt),
             typeof(FileOperationAudit), typeof(FileMigrationBatch), typeof(FileMigrationBatchItem), typeof(FileControlLock),
             typeof(FileUploadReservation), typeof(FileIoLease), typeof(FileOutboxEvent), typeof(FileEventDelivery),
-            typeof(FileGovernanceAudit), typeof(FileHistoryArchive)
+            typeof(FileGovernanceAudit), typeof(FileHistoryArchive), typeof(RemoteDriveConnection), typeof(RemoteDriveObject),
+            typeof(RemoteDriveTransfer), typeof(FileStoragePreference), typeof(FileBindingCopyRequest)
         }) ?? "";
     }
 
@@ -313,7 +397,8 @@ public static class FileManagementFreeSqlSchema
             typeof(FileBinding), typeof(FileOperation), typeof(LegacyFileImport), typeof(FileTransferAttempt),
             typeof(FileOperationAudit), typeof(FileMigrationBatch), typeof(FileMigrationBatchItem), typeof(FileControlLock),
             typeof(FileUploadReservation), typeof(FileIoLease), typeof(FileOutboxEvent), typeof(FileEventDelivery),
-            typeof(FileGovernanceAudit), typeof(FileHistoryArchive)
+            typeof(FileGovernanceAudit), typeof(FileHistoryArchive), typeof(RemoteDriveConnection), typeof(RemoteDriveObject),
+            typeof(RemoteDriveTransfer), typeof(FileStoragePreference), typeof(FileBindingCopyRequest)
         });
     }
 }

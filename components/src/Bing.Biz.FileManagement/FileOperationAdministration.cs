@@ -43,6 +43,8 @@ public sealed class FileOperationAdministration
             case FileOperationKind.Complete:
             case FileOperationKind.Inspect:
                 throw new FileManagementException("new_upload_required", "失败上传已进入清理，请重新创建上传会话。");
+            case FileOperationKind.CopyForBinding:
+                throw new FileManagementException("new_copy_required", "失败副本已进入清理，请由所有者重新发起复制并关联，以重新检查业务权限。");
             case FileOperationKind.Delete:
                 if (entry.File.State != FileState.DeletePending || entry.Bindings.Count != 0) throw Conflict();
                 break;
@@ -88,6 +90,11 @@ public sealed class FileOperationAdministration
         CreatedAt = operation.CreatedAt, FinishedAt = operation.FinishedAt, NextAttemptAt = operation.NextAttemptAt, Version = operation.Version,
         ErrorCode = operation.LastError, RecoveryOperationId = operation.RecoveryOperationId,
         RecoveryAction = operation.State != FileOperationState.Failed || operation.RecoveryOperationId != null ? "none" :
-            operation.Kind is FileOperationKind.Initialize or FileOperationKind.Complete or FileOperationKind.Inspect ? "new-upload" : "retry-if-current"
+            operation.Kind switch
+            {
+                FileOperationKind.Initialize or FileOperationKind.Complete or FileOperationKind.Inspect => "new-upload",
+                FileOperationKind.Delete or FileOperationKind.Abort or FileOperationKind.Migrate or FileOperationKind.DeleteReplica => "retry-if-current",
+                _ => "none"
+            }
     };
 }

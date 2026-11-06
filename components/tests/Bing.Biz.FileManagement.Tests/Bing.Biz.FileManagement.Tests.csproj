@@ -6,6 +6,8 @@
     <Compile Include="../../../framework/tests/Bing.FileStorage.Qiniu.Tests/RecordingS3Client.cs" Link="Support/RecordingS3Client.cs" />
     <ProjectReference Include="../../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
     <ProjectReference Include="../../src/Bing.Biz.FileManagement.EntityFrameworkCore/Bing.Biz.FileManagement.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.RemoteDrive/Bing.FileStorage.RemoteDrive.csproj" />
+    <ProjectReference Include="../../../framework/src/Bing.FileStorage.AliyunDrive/Bing.FileStorage.AliyunDrive.csproj" />
     <ProjectReference Include="../../src/Bing.Biz.FileManagement.AspNetCore/Bing.Biz.FileManagement.AspNetCore.csproj" />
     <ProjectReference Include="../../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
     <ProjectReference Include="../../src/Bing.Biz.FileManagement.FreeSql/Bing.Biz.FileManagement.FreeSql.csproj" />

@@ -6,6 +6,11 @@ public sealed partial class FileManagementService
     private async Task AuthorizeReadSnapshotAsync(FileRecord file, IReadOnlyList<FileBinding> bindings, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
+        if (file.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal)
+        {
+            if (file.CreatorId == _user.UserId) return;
+            throw new FileManagementException("forbidden", "个人文件仅供所有者访问。");
+        }
         if (await _permissions.IsGrantedAsync("files.manage", ct)) return;
         if (bindings.Count == 0 && file.CreatorId == _user.UserId) return;
         foreach (var binding in bindings)

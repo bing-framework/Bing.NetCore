@@ -12,6 +12,7 @@ public abstract partial class FileManagementControllerBase
     {
         var context = await _files.GetContextAsync(ct: ct);
         return Ok(new { context, manage = await permissions.IsGrantedAsync("files.manage", ct),
+            manageConnections = await permissions.IsGrantedAsync("files.connections.manage", ct),
             upload = await permissions.IsGrantedAsync("files.upload", ct), containers = _options.Containers.Keys,
             historyRetentionDays = _options.HistoryRetentionDays });
     }

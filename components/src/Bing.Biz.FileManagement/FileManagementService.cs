@@ -14,6 +14,7 @@ public sealed class CreateFileUpload
     public long Length { get; set; }
     public string ContentType { get; set; } = "application/octet-stream";
     public long LastModified { get; set; }
+    public string? StorageTargetId { get; set; }
 }
 public sealed class UploadSessionView
 {
@@ -25,6 +26,8 @@ public sealed class UploadSessionView
     public long LastModified { get; set; }
     public long ExpiresAt { get; set; }
     public bool DirectUpload { get; set; }
+    public string? TransferStage { get; set; }
+    public long RemoteTransferredBytes { get; set; }
     public IReadOnlyList<FilePart> Parts { get; set; } = Array.Empty<FilePart>();
 }
 public sealed class PartUploadRequest
@@ -41,9 +44,11 @@ public sealed class FileView
     public string ContentType { get; set; } = "";
     public FileState State { get; set; }
     public FileVisibility Visibility { get; set; }
+    public bool RequiresBindingCopy { get; set; }
     public long CreatedAt { get; set; }
     public static FileView From(FileRecord f) => new() { Id = f.Id, FileName = f.FileName, Container = f.Container,
-        Length = f.Length, ContentType = f.ContentType, State = f.State, Visibility = f.Visibility, CreatedAt = f.CreatedAt };
+        Length = f.Length, ContentType = f.ContentType, State = f.State, Visibility = f.Visibility, CreatedAt = f.CreatedAt,
+        RequiresBindingCopy = f.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal };
 }
 
 /// <summary>面向当前身份的附件入口；后台任务和迁移使用显式持久位置，不伪造当前用户。</summary>
@@ -56,9 +61,10 @@ public sealed partial class FileManagementService
     private readonly IFilePermissionChecker _permissions;
     private readonly IFileAccessAuthorizer _authorizer;
     private readonly FileManagementOptions _options;
+    private readonly IFileUploadStoreSelector? _selector;
     public FileManagementService(IFileManagementStore store, IFileStorageFactory storage, ICurrentUser user, ICurrentTenant tenant,
-        IFilePermissionChecker permissions, IFileAccessAuthorizer authorizer, FileManagementOptions options)
-    { _store = store; _storage = storage; _user = user; _tenant = tenant; _permissions = permissions; _authorizer = authorizer; _options = options; }
+        IFilePermissionChecker permissions, IFileAccessAuthorizer authorizer, FileManagementOptions options, IFileUploadStoreSelector? selector = null)
+    { _store = store; _storage = storage; _user = user; _tenant = tenant; _permissions = permissions; _authorizer = authorizer; _options = options; _selector = selector; }
     internal static long Now => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     internal static string HashKey(string value) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLowerInvariant();
     private void Identity()
@@ -82,6 +88,8 @@ public sealed partial class FileManagementService
         var scope = await ScopeAsync(ct);
         var entry = await _store.FindAsync(fileId, ct);
         if (entry == null || entry.File.ScopeKey != scope.Key) throw new FileManagementException("not_found", "文件不存在。");
+        if (entry.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal && entry.File.CreatorId != _user.UserId)
+            throw new FileManagementException("forbidden", "个人文件仅供所有者操作。");
         return entry;
     }
     private async Task<FileEntry> OwnedSessionAsync(Guid sessionId, bool uploading, CancellationToken ct)
@@ -108,20 +116,28 @@ public sealed partial class FileManagementService
         var key = HashKey(scope.Key + "\n" + _user.UserId + "\n" + request.RequestId.ToString("N"));
         var existing = await _store.FindRequestAsync(key, ct);
         if (existing != null) return MatchRequest(existing, request);
-        var backend = _storage.GetStorage(_storage.DefaultStore, scope);
+        if (request.StorageTargetId?.Length > 64) throw new FileManagementException("invalid", "上传目标标识过长。");
+        var selected = _selector == null ? new FileUploadStoreSelection { StoreName = _storage.DefaultStore }
+            : await _selector.SelectAsync(scope, _user.UserId, request.Container, request.StorageTargetId, ct: ct);
+        if (_selector == null && request.StorageTargetId != null) throw new FileManagementException("configuration", "未启用上传目标选择。");
+        var backend = _storage.GetStorage(selected.StoreName, scope);
+        var limits = backend is IFileStorageLimitProvider provider ? await provider.GetLimitsAsync(ct) : null;
+        if (limits != null && (request.Length > limits.MaximumFileLength || limits.PrivateContainersOnly && policy.Visibility != FileVisibility.Private))
+            throw new FileManagementException("invalid", "所选存储不支持该容器或文件长度。");
         if (!backend.Capabilities.HasFlag(FileStorageCapabilities.Multipart)) throw new FileManagementException("configuration", "默认存储不支持分片。");
         var now = Now; var id = Guid.NewGuid();
         var entry = new FileEntry
         {
             File = new FileRecord { Id = id, RequestKey = key, ScopeKind = scope.Kind, TenantId = scope.TenantId, ScopeKey = scope.Key,
-                StoreName = backend.Name, Container = request.Container, ObjectKey = id.ToString("N"), FileName = request.FileName,
+                StoreName = backend.Name, ConnectionId = selected.ConnectionId, Ownership = selected.Ownership,
+                Container = request.Container, ObjectKey = id.ToString("N"), FileName = request.FileName,
                 Length = request.Length, ContentType = new FileWriteRequest(new FileAddress(request.Container, id.ToString("N")), request.Length,
                     FileWriteMode.Overwrite, request.ContentType).ContentType, Visibility = policy.Visibility,
                 CreatorId = _user.UserId, CreatedAt = now, State = FileState.Pending, Version = 1,
                 ContentPolicyJson = System.Text.Json.JsonSerializer.Serialize(policy) },
             Session = new FileUploadSession { Id = Guid.NewGuid(), FileId = id, OwnerId = _user.UserId, TotalLength = request.Length,
                 PartSize = _options.PartSize, State = FileState.Pending, WriteMode = backend.Capabilities.HasFlag(FileStorageCapabilities.CreateOnly) ? FileWriteMode.CreateOnly : FileWriteMode.Overwrite,
-                LastActivityAt = now, ClientLastModified = request.LastModified, ExpiresAt = now + (long)_options.SessionIdleTimeout.TotalMilliseconds,
+                RequestedStorageTargetId = request.StorageTargetId, LastActivityAt = now, ClientLastModified = request.LastModified, ExpiresAt = now + (long)_options.SessionIdleTimeout.TotalMilliseconds,
                 AbsoluteExpiresAt = now + (long)_options.SessionMaxLifetime.TotalMilliseconds, Version = 1 },
             Admission = _options.Admission
         };
@@ -135,7 +151,8 @@ public sealed partial class FileManagementService
     private UploadSessionView MatchRequest(FileEntry entry, CreateFileUpload request)
     {
         if (entry.Session == null || entry.File.Length != request.Length || entry.File.FileName != request.FileName ||
-            entry.File.Container != request.Container || entry.File.ContentType != request.ContentType || entry.Session.ClientLastModified != request.LastModified)
+            entry.File.Container != request.Container || entry.File.ContentType != request.ContentType || entry.Session.ClientLastModified != request.LastModified
+            || entry.Session.RequestedStorageTargetId != request.StorageTargetId)
             throw new FileManagementException("conflict", "同一个请求标识不能用于不同文件。");
         return View(entry);
     }
@@ -153,7 +170,24 @@ public sealed partial class FileManagementService
     public async Task<UploadSessionView> GetSessionAsync(Guid id, bool includeParts, CancellationToken ct = default)
     {
         var entry = await OwnedSessionAsync(id, false, ct);
-        if (!includeParts) return View(entry);
+        if (!includeParts)
+        {
+            var view = View(entry);
+            if (entry.File.ConnectionId != null && _store is Bing.FileStorage.RemoteDrive.IRemoteDriveStateStore remote
+                && Guid.TryParseExact(entry.Session!.BackendUploadId, "N", out var transferId))
+            {
+                var transfer = await remote.FindTransferAsync(transferId, ct);
+                if (transfer != null && transfer.ConnectionId == entry.File.ConnectionId && transfer.ScopeKey == entry.File.ScopeKey)
+                {
+                    var checkpoint = System.Text.Json.JsonSerializer.Deserialize<Bing.FileStorage.RemoteDrive.RemoteDriveCheckpoint>(transfer.CheckpointJson)!;
+                    view.TransferStage = transfer.State.ToString();
+                    view.RemoteTransferredBytes = Math.Min(entry.File.Length, checkpoint.Parts.Count * checkpoint.PartSize);
+                    if (transfer.State is Bing.FileStorage.RemoteDrive.RemoteDriveTransferState.Verified or Bing.FileStorage.RemoteDrive.RemoteDriveTransferState.Completed)
+                        view.RemoteTransferredBytes = entry.File.Length;
+                }
+            }
+            return view;
+        }
         if (entry.File.State == FileState.Uploading && entry.File.Length != 0)
         {
             var backend = Storage(entry);
@@ -286,7 +320,8 @@ public sealed partial class FileManagementService
     public async Task<FileEntry> AuthorizeReadAsync(Guid id, bool publicAccess = false, CancellationToken ct = default)
     {
         var entry = publicAccess ? await _store.FindAsync(id, ct) : await ScopedAsync(id, ct);
-        if (entry == null || entry.File.State != FileState.Ready || (publicAccess && entry.File.Visibility != FileVisibility.Public))
+        if (entry == null || entry.File.State != FileState.Ready || (publicAccess && (entry.File.Visibility != FileVisibility.Public
+            || entry.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal)))
             throw new FileManagementException("not_found", "文件不可访问。");
         if (publicAccess) return entry;
         await AuthorizeReadSnapshotAsync(entry.File, entry.Bindings, ct);
@@ -334,6 +369,8 @@ public sealed partial class FileManagementService
         for (var attempt = 0; attempt < 8; attempt++)
         {
             var entry = await AuthorizeReadAsync(id, ct: ct);
+            if (entry.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal)
+                throw new FileManagementException("requires_copy", "个人网盘文件必须先复制到公共存储再关联。");
             if (!await _authorizer.AuthorizeAsync(businessType, businessId, FileBusinessAccess.Bind, ct))
                 throw new FileManagementException("forbidden", "无目标业务关联权限。");
             var old = entry.Bindings.FirstOrDefault(b => b.BusinessType == businessType && b.BusinessId == businessId);
@@ -365,6 +402,8 @@ public sealed partial class FileManagementService
         for (var attempt = 0; attempt < 8; attempt++)
         {
             var entry = await ScopedAsync(id, ct);
+            if (entry.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal && entry.File.CreatorId != _user.UserId)
+                throw new FileManagementException("forbidden", "个人文件仅供所有者操作。");
             if (entry.File.CreatorId != _user.UserId && !await _permissions.IsGrantedAsync("files.manage", ct))
                 throw new FileManagementException("forbidden", "无删除权限。");
             if (entry.Bindings.Count != 0) throw new FileManagementException("bound", "仍有关联，不能删除文件。");

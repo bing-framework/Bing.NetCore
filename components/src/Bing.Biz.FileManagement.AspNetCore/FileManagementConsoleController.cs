@@ -22,7 +22,7 @@ public sealed class FileManagementConsoleController : ControllerBase
         if (HttpContext.RequestServices.GetService<FileManagementConsoleOptions>()?.Enabled != true) return NotFound();
         asset ??= "index.html";
         var type = asset switch { "index.html" => "text/html; charset=utf-8", "console.css" => "text/css; charset=utf-8",
-            "console.js" or "uploader.js" => "text/javascript; charset=utf-8", _ => null };
+            "console.js" or "uploader.js" or "remote-drives.js" => "text/javascript; charset=utf-8", _ => null };
         if (type == null) return NotFound();
         Response.Headers["X-Content-Type-Options"] = "nosniff";
         Response.Headers["Cache-Control"] = "no-store";

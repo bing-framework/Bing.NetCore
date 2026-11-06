@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Data;
 using System.Reflection;
 using Bing.Biz.FileManagement;
 using FreeSql;
@@ -325,8 +326,8 @@ public sealed partial class FreeSqlFileManagementStore : IFileManagementStore
                 .Where(x => (x.State == FileOperationState.Pending && x.NextAttemptAt <= now) ||
                             (x.State == FileOperationState.Running && x.LeaseUntil <= now));
             query = queue == FileOperationQueue.Long
-                ? query.Where(x => x.Kind == FileOperationKind.Complete || x.Kind == FileOperationKind.Migrate || x.Kind == FileOperationKind.Inspect)
-                : query.Where(x => x.Kind != FileOperationKind.Complete && x.Kind != FileOperationKind.Migrate && x.Kind != FileOperationKind.Inspect);
+                ? query.Where(x => x.Kind == FileOperationKind.Complete || x.Kind == FileOperationKind.Migrate || x.Kind == FileOperationKind.Inspect || x.Kind == FileOperationKind.CopyForBinding)
+                : query.Where(x => x.Kind != FileOperationKind.Complete && x.Kind != FileOperationKind.Migrate && x.Kind != FileOperationKind.Inspect && x.Kind != FileOperationKind.CopyForBinding);
             return await query.OrderBy(x => x.NextAttemptAt).OrderBy(x => x.Id)
                 .Limit(take)
                 .ToListAsync(token)
@@ -431,6 +432,8 @@ public sealed partial class FreeSqlFileManagementStore : IFileManagementStore
                             State = FileOperationState.Pending, NextAttemptAt = now, Version = 1, CreatedAt = now }).WithTransaction(transaction).ExecuteAffrowsAsync(cancellationToken);
                     }
                 }
+                else if (operation.Kind == FileOperationKind.CopyForBinding)
+                    await FailCopyOperationAsync(orm, transaction, operation, operation.LastError, now, cancellationToken).ConfigureAwait(false);
             }
             return true;
         }, ct).ConfigureAwait(false); }
@@ -536,10 +539,12 @@ public sealed partial class FreeSqlFileManagementStore : IFileManagementStore
                 .ConfigureAwait(false), ct).ConfigureAwait(false);
 
     private async Task<TResult> InTransactionAsync<TResult>(
-        Func<IFreeSql, DbTransaction, CancellationToken, Task<TResult>> action, CancellationToken ct)
+        Func<IFreeSql, DbTransaction, CancellationToken, Task<TResult>> action, CancellationToken ct,
+        IsolationLevel? isolationLevel = null)
     {
         ct.ThrowIfCancellationRequested();
         using var unitOfWork = _orm.CreateUnitOfWork();
+        unitOfWork.IsolationLevel = isolationLevel;
         var transaction = unitOfWork.GetOrBeginTransaction();
         try
         {

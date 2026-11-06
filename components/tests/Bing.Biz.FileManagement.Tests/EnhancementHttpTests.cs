@@ -81,6 +81,33 @@ public sealed class EnhancementHttpTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public async Task FailedBindingCopy_HidesRetryAndRequiresANewOwnerRequestThroughHttp(bool freeSql)
+    {
+        await using var app = await Harness.CreateAsync(freeSql);
+        app.SignIn();
+        var fileId = await app.EmptyFileAsync("failed-copy.txt");
+        var store = app.Services.GetRequiredService<IFileManagementStore>();
+        var file = (await store.FindAsync(fileId))!;
+        var operation = new FileOperation { Id = Guid.NewGuid(), FileId = fileId, Kind = FileOperationKind.CopyForBinding,
+            State = FileOperationState.Failed, Version = 1, LastError = "copy_error", Payload = "private-copy-request", CreatedAt = 1 };
+        Assert.True(await store.TryUpdateAsync(file, file.File.Version, operations: new[] { operation }));
+        var url = $"/api/files/operations/{operation.Id}";
+        Assert.Equal(HttpStatusCode.Forbidden, (await app.Client.GetAsync(url)).StatusCode);
+        app.Env.Identity.Permissions.Add("files.manage");
+        var view = (await app.Client.GetFromJsonAsync<FileOperationView>(url))!;
+        Assert.Equal("none", view.RecoveryAction);
+        var response = await app.Client.PostAsJsonAsync(url + "/retry", new RecoverFileOperation
+        { RequestId = Guid.NewGuid(), ExpectedVersion = view.Version, Reason = "owner must create a new copy" });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Contains("new_copy_required", await response.Content.ReadAsStringAsync());
+        Assert.Null((await store.FindOperationAsync(operation.Id, file.File.ScopeKey))!.RecoveryOperationId);
+        app.Env.Identity.Tenant = "other";
+        Assert.Equal(HttpStatusCode.NotFound, (await app.Client.GetAsync(url)).StatusCode);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public async Task PausedMigrationBatch_ReportsCompletedItemsThroughHttp(bool freeSql)
     {
         await using var app = await Harness.CreateAsync(freeSql); app.SignIn();

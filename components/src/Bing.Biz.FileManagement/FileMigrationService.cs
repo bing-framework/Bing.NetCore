@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Bing.FileStorage;
+using Bing.FileStorage.RemoteDrive;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -27,9 +28,12 @@ public sealed class FileMigrationService
     public async Task<Guid> QueueMigrationAsync(Guid fileId, string targetStore, CancellationToken ct = default)
     {
         var entry = await _store.FindAsync(fileId, ct) ?? throw new FileManagementException("not_found", "文件不存在。");
+        if (entry.File.Ownership == RemoteDriveOwnership.Personal) throw new FileManagementException("forbidden", "个人文件只能由本人通过复制发布流程转移。");
+        await ValidatePublicTargetAsync(_store, targetStore, entry.File.ScopeKey, ct);
         if (entry.File.State != FileState.Ready) throw new FileManagementException("conflict", "只能迁移 Ready 文件。");
-        _storage.GetStorage(targetStore, entry.File.Scope());
+        var backend = _storage.GetStorage(targetStore, entry.File.Scope());
         if (entry.File.StoreName == targetStore) throw new FileManagementException("invalid", "来源与目标相同。");
+        await ValidateTargetLimitsAsync(entry.File, backend, ct);
         var operation = FileManagementService.Operation(fileId, FileOperationKind.Migrate, JsonSerializer.Serialize(new Replica
         { StoreName = targetStore, Container = entry.File.Container, ExpectedVersion = entry.File.Version + 1 }));
         if (!await _store.TryUpdateAsync(entry, entry.File.Version, operations: new[] { operation }, ct: ct))
@@ -41,8 +45,12 @@ public sealed class FileMigrationService
         var target = JsonSerializer.Deserialize<Replica>(operation.Payload) ?? throw new InvalidOperationException("迁移参数损坏。");
         var entry = await _store.FindAsync(operation.FileId, ct) ?? throw new FileManagementException("not_found", "文件不存在。");
         if (entry.File.State != FileState.Ready || entry.File.Version != target.ExpectedVersion) return;
+        if (entry.File.Ownership == RemoteDriveOwnership.Personal) throw new FileManagementException("forbidden", "不能通过管理迁移读取个人文件。");
+        var targetConnection = await ValidatePublicTargetAsync(_store, target.StoreName, entry.File.ScopeKey, ct);
         var source = _storage.GetStorage(entry.File.StoreName, entry.File.Scope());
         var backend = _storage.GetStorage(target.StoreName, entry.File.Scope());
+        // 任务可能在排队后才执行；复制前重新检查，亦覆盖批量迁移和恢复任务。
+        await ValidateTargetLimitsAsync(entry.File, backend, ct);
         await _transfers.RunAsync(entry.File, target.StoreName, target.Container, async (attempt, transfer, token) =>
         {
             var address = new FileAddress(attempt.Container, attempt.ObjectKey);
@@ -60,13 +68,23 @@ public sealed class FileMigrationService
             if (properties?.Length != entry.File.Length || sourceHash != targetHash)
                 throw new FileStorageException(FileStorageError.InvalidChecksum, "迁移复制校验失败。");
             var old = new Replica { StoreName = entry.File.StoreName, Container = entry.File.Container, ObjectKey = entry.File.ObjectKey };
-            entry.File.StoreName = attempt.StoreName; entry.File.Container = attempt.Container; entry.File.ObjectKey = attempt.ObjectKey; entry.File.Sha256 = targetHash;
+            entry.File.StoreName = attempt.StoreName; entry.File.ConnectionId = targetConnection;
+            entry.File.Container = attempt.Container; entry.File.ObjectKey = attempt.ObjectKey; entry.File.Sha256 = targetHash;
             var cleanup = FileManagementService.Operation(entry.File.Id, FileOperationKind.DeleteReplica, JsonSerializer.Serialize(old),
                 FileManagementService.Now + (long)_options.ReplicaRetention.TotalMilliseconds);
             // 租约、目标发布与业务位置在同一事务提交；失去租约的副本只能退休，不能改写胜者目标。
             if (!await _store.TryUpdateAsync(entry, target.ExpectedVersion, operations: new[] { cleanup }, ct: token, lease: operationLease, transfer: transfer))
                 throw new FileManagementException("conflict", "迁移版本或租约变化。");
         }, ct);
+    }
+    /// <summary>按源文件保存的可见性和长度验证目标准入，拒绝时不创建传输或改写源文件。</summary>
+    private static async Task ValidateTargetLimitsAsync(FileRecord file, IFileStorage backend, CancellationToken ct)
+    {
+        if (backend is not IFileStorageLimitProvider provider) return;
+        var limits = await provider.GetLimitsAsync(ct);
+        if (limits != null && (file.Length > limits.MaximumFileLength ||
+            limits.PrivateContainersOnly && file.Visibility != FileVisibility.Private))
+            throw new FileManagementException("invalid", "目标存储不支持该文件的可见性或长度。");
     }
     internal async Task DeleteReplicaAsync(FileOperation operation, CancellationToken ct)
     {
@@ -85,6 +103,17 @@ public sealed class FileMigrationService
             result = Convert.ToBase64String(await hash.ComputeHashAsync(input, token));
         }, ct);
         return result;
+    }
+    internal static async Task<Guid?> ValidatePublicTargetAsync(IFileManagementStore store, string targetStore, string scopeKey, CancellationToken ct)
+    {
+        var marker = targetStore.LastIndexOf("-c-", StringComparison.Ordinal);
+        if (marker < 0 || !Guid.TryParseExact(targetStore[(marker + 3)..], "N", out var id)) return null;
+        if (store is not IRemoteDriveStateStore connections)
+            throw new FileManagementException("invalid", "网盘迁移目标无效。");
+        var c = await connections.FindConnectionAsync(id, ct);
+        if (c == null || c.ScopeKey != scopeKey || c.StoreName != targetStore || c.Ownership != RemoteDriveOwnership.Shared || c.State != RemoteDriveConnectionState.Active)
+            throw new FileManagementException("forbidden", "迁移仅允许当前范围的活动公共连接。");
+        return id;
     }
     /// <summary>导入前先预览。每条旧记录必须明确租户/主机归属和根目录内的相对内容路径。</summary>
     public async Task<LegacyFileImport> ImportAsync(LegacyImportRequest request, bool apply, CancellationToken ct = default)
@@ -121,8 +150,9 @@ public sealed class FileMigrationService
             if (existing == null)
             {
                 var backend = _storage.GetStorage(request.StoreName, request.Scope);
+                var connectionId = await ValidatePublicTargetAsync(_store, request.StoreName, request.Scope.Key, ct);
                 var file = new FileRecord { Id = request.LegacyId, RequestKey = requestKey, ScopeKey = request.Scope.Key,
-                    ScopeKind = request.Scope.Kind, TenantId = request.Scope.TenantId, StoreName = request.StoreName, Container = request.Container,
+                    ScopeKind = request.Scope.Kind, TenantId = request.Scope.TenantId, StoreName = request.StoreName, ConnectionId = connectionId, Container = request.Container,
                     FileName = Path.GetFileName(request.FileName), Length = info.Length, ContentType = request.ContentType,
                     Visibility = FileVisibility.Private, State = FileState.Ready, CreatorId = request.OwnerId, CreatedAt = FileManagementService.Now, Version = 1,
                     ContentPolicyJson = JsonSerializer.Serialize(policy) };

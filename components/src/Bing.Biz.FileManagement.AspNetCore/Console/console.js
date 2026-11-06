@@ -1,4 +1,5 @@
 import { api, list } from './uploader.js';
+import { connectDrives, copyAndBind } from './remote-drives.js';
 
 const $ = id => document.getElementById(id);
 const show = (message, error = false) => { $('notice').textContent = message; $('notice').classList.toggle('error', error); };
@@ -80,9 +81,11 @@ async function connect() {
     if (generation !== identityGeneration) return;
     $('identity').textContent = capabilities.context.userId + ' · ' + (capabilities.context.tenantId || '宿主');
     $('container').replaceChildren(...capabilities.containers.map(name => new Option(name, name)));
+    await connectDrives(capabilities.context, capabilities);
     $('retention-days').value = capabilities.historyRetentionDays;
     $('retention-days').min = capabilities.historyRetentionDays;
     document.querySelectorAll('.admin-only').forEach(el => el.hidden = !capabilities.manage);
+    document.querySelectorAll('.connection-manager-only').forEach(el => el.hidden = !capabilities.manageConnections);
     show(capabilities.manage ? '已连接，可管理当前范围的文件与后台任务。' : '已连接，可上传和管理本人有权限的附件。');
 }
 $('connect').onclick = () => { $('token').dispatchEvent(new Event('change')); };
@@ -105,13 +108,15 @@ async function loadBindings() {
 $('bindings-refresh').onclick = () => run(loadBindings);
 $('bind').onclick = () => run(async () => {
     if (!selectedFile) return;
+    if (selectedFile.requiresBindingCopy) { await copyAndBind(selectedFile, $('business-type').value.trim(), $('business-id').value.trim()); return; }
     await post('/' + selectedFile.id + '/bindings', { businessType: $('business-type').value.trim(), businessId: $('business-id').value.trim() });
     await loadBindings(); show('业务关联已添加。');
 }, $('bind'));
 
 const loadOperations = pager('operations', () => '/operations?' + new URLSearchParams($('operation-state').value ? { state: $('operation-state').value } : {}), items =>
     table('operations', ['任务 / 文件', '状态', '尝试 / 错误', '创建时间', '操作'], items.map(item => [item.id + '\n' + item.fileId,
-        operationStates[item.state], item.attempts + ' / ' + (item.errorCode || '—'), date(item.createdAt), [
+        operationStates[item.state], item.attempts + ' / ' + (item.errorCode || '—') +
+            (item.kind === 7 && item.state === 3 ? '\n请由所有者重新复制并关联。' : ''), date(item.createdAt), [
             button('审计', async () => show(JSON.stringify(await api('/operations/' + item.id + '/audit'), null, 2))),
             ...(item.recoveryAction === 'retry-if-current' ? [button('重新排队', async () => {
                 await command('/operations/' + item.id + '/retry', { expectedVersion: item.version, reason: reason() });

@@ -28,12 +28,15 @@ public sealed partial class FileOperationProcessor
     private readonly FileManagementOptions _options;
     private readonly ILogger<FileOperationProcessor> _logger;
     private readonly FileOutboxDispatcher? _outbox;
+    private readonly Bing.FileStorage.RemoteDrive.RemoteDriveMaintenance? _remoteMaintenance;
     public FileOperationProcessor(IFileManagementStore store, IFileStorageFactory storage, FileMigrationService migration,
-        FileManagementOptions options, ILogger<FileOperationProcessor> logger, FileOutboxDispatcher? outbox = null)
+        FileManagementOptions options, ILogger<FileOperationProcessor> logger, FileOutboxDispatcher? outbox = null,
+        Bing.FileStorage.RemoteDrive.RemoteDriveMaintenance? remoteMaintenance = null)
     {
         _store = store; _storage = storage; _migration = migration; _options = options; _logger = logger;
         _transfers = new(store, storage, options, logger);
         _outbox = outbox;
+        _remoteMaintenance = remoteMaintenance;
     }
     /// <summary>顺序执行一批任务，保留 CLI 和诊断入口的计数语义；持续后台服务使用调度器。</summary>
     public async Task<int> RunBatchAsync(CancellationToken ct = default)
@@ -70,6 +73,7 @@ public sealed partial class FileOperationProcessor
         }
         await _migration.CleanupTransfersAsync(ct);
         await ExpireSessionsAsync(ct);
+        if (_remoteMaintenance != null) await _remoteMaintenance.CleanupAsync(ct);
     }
 
     internal async Task RunEnhancementsAsync(CancellationToken ct)
@@ -237,6 +241,8 @@ public sealed partial class FileOperationProcessor
                 return;
             case FileOperationKind.Migrate:
                 await _migration.ExecuteMigrationAsync(operation, lease, ct); return;
+            case FileOperationKind.CopyForBinding:
+                await FileBindingCopyService.ExecuteAsync(_store, _storage, _options, operation, lease, ct); return;
             case FileOperationKind.DeleteReplica:
                 await _migration.DeleteReplicaAsync(operation, ct); return;
             default: throw new InvalidOperationException("未知文件任务。");

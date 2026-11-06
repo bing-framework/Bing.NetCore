@@ -49,6 +49,9 @@ public sealed class EnhancementSchemaUpgradeTests
                 await ExecuteSqlAsync(connection, ReadRepositoryFile(useFreeSql
                     ? "docs/migrations/file-management-governance/freesql-sqlite.sql"
                     : "docs/migrations/file-management-governance/efcore-sqlite.sql"));
+                await ExecuteSqlAsync(connection, ReadRepositoryFile(useFreeSql
+                    ? "docs/migrations/file-management-remote-drives/freesql-sqlite.sql"
+                    : "docs/migrations/file-management-remote-drives/efcore-sqlite.sql"));
                 var reservations = await ReadReservationsAsync(connection);
                 Assert.Equal(new Dictionary<Guid, long>
                 {

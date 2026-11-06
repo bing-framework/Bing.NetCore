@@ -21,12 +21,17 @@ public sealed partial class EfFileManagementStore
     }
     public async Task<bool> RenewTransferAsync(FileTransferLease lease, long leaseUntil, CancellationToken ct = default)
     {
-        await using var db = await _factory.CreateDbContextAsync(ct);
-        var attempt = await db.Set<FileTransferAttempt>().SingleOrDefaultAsync(x => x.Id == lease.Id, ct);
-        var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        if (attempt == null || attempt.LeaseToken != lease.Token || attempt.State != FileTransferState.Active || attempt.LeaseUntil <= now || leaseUntil <= now) return false;
-        attempt.LeaseUntil = attempt.NextCheckAt = leaseUntil; attempt.Version++;
-        return await SaveCasAsync(db, ct);
+        // 写入确认也推进 Version；同一持有者的正常写回不能直接被当作失租。
+        for (var retry = 0; retry < 3; retry++)
+        {
+            await using var db = await _factory.CreateDbContextAsync(ct);
+            var attempt = await db.Set<FileTransferAttempt>().SingleOrDefaultAsync(x => x.Id == lease.Id, ct);
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (attempt == null || attempt.LeaseToken != lease.Token || attempt.State != FileTransferState.Active || attempt.LeaseUntil <= now || leaseUntil <= now) return false;
+            attempt.LeaseUntil = attempt.NextCheckAt = Math.Max(attempt.LeaseUntil, leaseUntil); attempt.Version++;
+            if (await SaveCasAsync(db, ct)) return true;
+        }
+        return false;
     }
     public async Task MarkTransferWrittenAsync(FileTransferLease lease, CancellationToken ct = default)
     {

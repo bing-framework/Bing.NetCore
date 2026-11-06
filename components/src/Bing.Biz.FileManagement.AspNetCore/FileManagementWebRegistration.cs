@@ -1,4 +1,5 @@
 using Bing.FileStorage;
+using Bing.FileStorage.RemoteDrive;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,8 @@ public static class FileManagementWebRegistration
         Action<FileManagementHealthOptions>? configureHealth = null, Action<FileManagementConsoleOptions>? configureConsole = null)
     {
         services.AddDataProtection();
+        services.AddScoped<IRemoteDriveCredentialProtector, RemoteDriveCredentialProtection>();
+        services.AddHostedService<RemoteDriveKeyRingGuard>();
         services.AddScoped<FileManagementExceptionFilter>();
         var console = new FileManagementConsoleOptions();
         configureConsole?.Invoke(console);

@@ -200,8 +200,8 @@ public sealed partial class EfFileManagementStore : IFileManagementStore
         var query = db.Set<FileOperation>().AsNoTracking().Where(x =>
             x.State == FileOperationState.Pending && x.NextAttemptAt <= now || x.State == FileOperationState.Running && x.LeaseUntil <= now);
         query = queue == FileOperationQueue.Long
-            ? query.Where(x => x.Kind == FileOperationKind.Complete || x.Kind == FileOperationKind.Migrate || x.Kind == FileOperationKind.Inspect)
-            : query.Where(x => x.Kind != FileOperationKind.Complete && x.Kind != FileOperationKind.Migrate && x.Kind != FileOperationKind.Inspect);
+            ? query.Where(x => x.Kind == FileOperationKind.Complete || x.Kind == FileOperationKind.Migrate || x.Kind == FileOperationKind.Inspect || x.Kind == FileOperationKind.CopyForBinding)
+            : query.Where(x => x.Kind != FileOperationKind.Complete && x.Kind != FileOperationKind.Migrate && x.Kind != FileOperationKind.Inspect && x.Kind != FileOperationKind.CopyForBinding);
         return await query.OrderBy(x => x.NextAttemptAt).ThenBy(x => x.Id).Take(take).ToListAsync(ct);
     }
     public async Task<bool> TryClaimAsync(Guid operationId, long expectedVersion, string token, long now, long leaseUntil, CancellationToken ct = default)
@@ -237,6 +237,8 @@ public sealed partial class EfFileManagementStore : IFileManagementStore
         try
         {
             await db.SaveChangesAsync(ct); // 锁住任务行；下面任何失败均回滚这次任务终态。
+            if (state == FileOperationState.Failed && operation.Kind == FileOperationKind.CopyForBinding)
+                await FailCopyOperationAsync(db, operation, error, now, ct);
             if (state == FileOperationState.Failed && operation.Kind is FileOperationKind.Initialize or FileOperationKind.Complete or FileOperationKind.Inspect)
             {
                 var file = await db.Set<FileRecord>().SingleAsync(x => x.Id == operation.FileId, ct);

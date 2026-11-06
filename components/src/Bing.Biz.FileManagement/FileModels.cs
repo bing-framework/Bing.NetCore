@@ -5,7 +5,7 @@ namespace Bing.Biz.FileManagement;
 
 public enum FileState { Pending, Uploading, Completing, Ready, DeletePending, Deleted, Aborted, Failed, Quarantined }
 public enum FileVisibility { Private, Public }
-public enum FileOperationKind { Initialize, Complete, Abort, Delete, Migrate, DeleteReplica, Inspect }
+public enum FileOperationKind { Initialize, Complete, Abort, Delete, Migrate, DeleteReplica, Inspect, CopyForBinding }
 /// <summary>调度类别，不持久化；分离可能长时间传输的任务与初始化/删除任务。</summary>
 public enum FileOperationQueue { Short, Long }
 public enum FileOperationState { Pending, Running, Succeeded, Failed }
@@ -19,6 +19,8 @@ public sealed class FileRecord
     public string? TenantId { get; set; }
     public StorageScopeKind ScopeKind { get; set; }
     public string StoreName { get; set; } = "";
+    public Guid? ConnectionId { get; set; }
+    public Bing.FileStorage.RemoteDrive.RemoteDriveOwnership Ownership { get; set; }
     public string Container { get; set; } = "";
     public string ObjectKey { get; set; } = "";
     public string FileName { get; set; } = "";
@@ -50,6 +52,8 @@ public sealed class FileUploadSession
     public Guid Id { get; set; }
     public Guid FileId { get; set; }
     public string OwnerId { get; set; } = "";
+    /// <summary>原始请求显式目标；幂等重放不受偏好改变影响。</summary>
+    public string? RequestedStorageTargetId { get; set; }
     public string? BackendUploadId { get; set; }
     /// <summary>Provider 返回的会话元数据，必须与上传标识一起持久化以便重启对账。</summary>
     public string BackendMetadataJson { get; set; } = "{}";

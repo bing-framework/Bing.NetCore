@@ -19,6 +19,8 @@ public sealed class FileMigrationBatchService
         if (old != null) return Match(old, request);
         // 空批次同样验证实例配置，不能等到第一次复制才暴露拼写错误。
         _storage.GetStorage(request.SourceStore, scope); _storage.GetStorage(request.TargetStore, scope);
+        await FileMigrationService.ValidatePublicTargetAsync(_store, request.SourceStore, scopeKey, ct);
+        await FileMigrationService.ValidatePublicTargetAsync(_store, request.TargetStore, scopeKey, ct);
         var batch = new FileMigrationBatch { Id = Guid.NewGuid(), RequestKey = key, ScopeKey = scopeKey, ActorId = actorId,
             SourceStore = request.SourceStore, TargetStore = request.TargetStore, Container = request.Container,
             CreatedAt = FileManagementService.Now, State = FileMigrationBatchState.Running, Version = 1 };
@@ -32,6 +34,8 @@ public sealed class FileMigrationBatchService
         var scopeKey = scope.Key;
         Validate(scopeKey, "preview", request, false);
         _storage.GetStorage(request.SourceStore, scope); _storage.GetStorage(request.TargetStore, scope);
+        await FileMigrationService.ValidatePublicTargetAsync(_store, request.SourceStore, scopeKey, ct);
+        await FileMigrationService.ValidatePublicTargetAsync(_store, request.TargetStore, scopeKey, ct);
         return await _store.QueryFilesAsync(new() { ScopeKey = scopeKey, StoreName = request.SourceStore,
             Container = request.Container, AfterCreatedAt = position?.CreatedAt, AfterKey = position?.Key, Take = 100 }, ct);
     }

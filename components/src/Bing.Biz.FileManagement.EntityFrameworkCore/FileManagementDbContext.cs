@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Bing.FileStorage.RemoteDrive;
 
 namespace Bing.Biz.FileManagement.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ public sealed class FileManagementDbContext : DbContext
         var file = model.Entity<FileRecord>();
         file.ToTable("BingFileRecords"); file.HasKey(x => x.Id); file.Property(x => x.Id).ValueGeneratedNever();
         file.Property(x => x.Version).IsConcurrencyToken();
+        file.HasIndex(x => x.ConnectionId);
         file.HasIndex(x => x.RequestKey).IsUnique();
         file.HasIndex(x => new { x.ScopeKey, x.CreatorId, x.State, x.CreatedAt, x.RequestKey });
         file.HasIndex(x => new { x.ScopeKey, x.State, x.CreatedAt, x.RequestKey });
@@ -28,6 +30,7 @@ public sealed class FileManagementDbContext : DbContext
         session.HasIndex(x => new { x.OwnerId, x.ExpiresAt, x.FileId });
         session.Property(x => x.OwnerId).HasMaxLength(200).IsRequired(); session.Property(x => x.BackendUploadId).HasMaxLength(2048);
         session.Property(x => x.BackendMetadataJson).HasMaxLength(4096).IsRequired();
+        session.Property(x => x.RequestedStorageTargetId).HasMaxLength(128);
         session.HasOne<FileRecord>().WithOne().HasForeignKey<FileUploadSession>(x => x.FileId).OnDelete(DeleteBehavior.Restrict);
         var part = model.Entity<FileUploadPart>();
         part.ToTable("BingFileUploadParts"); part.HasKey(x => new { x.SessionId, x.Number });
@@ -125,6 +128,64 @@ public sealed class FileManagementDbContext : DbContext
         historyArchive.Property(x => x.ActorId).HasMaxLength(200).IsRequired();
         historyArchive.HasIndex(x => new { x.Kind, x.EntityId }).IsUnique();
         historyArchive.HasIndex(x => new { x.ScopeKey, x.Kind, x.ArchivedAt, x.Id });
+
+        var connection = model.Entity<RemoteDriveConnection>();
+        connection.ToTable("BingRemoteDriveConnections"); connection.HasKey(x => x.Id); connection.Property(x => x.Id).ValueGeneratedNever();
+        connection.Property(x => x.Version).IsConcurrencyToken(); connection.HasIndex(x => x.StoreName).IsUnique();
+        connection.HasIndex(x => new { x.ScopeKey, x.Ownership, x.OwnerId, x.State });
+        connection.Property(x => x.TemplateName).HasMaxLength(64).IsRequired(); connection.Property(x => x.Provider).HasMaxLength(64).IsRequired();
+        connection.Property(x => x.StoreName).HasMaxLength(128).IsRequired(); connection.Property(x => x.ScopeKey).HasMaxLength(80).IsRequired();
+        connection.Property(x => x.TenantId).HasMaxLength(128); connection.Property(x => x.OwnerId).HasMaxLength(200).IsRequired();
+        connection.Property(x => x.DisplayName).HasMaxLength(100).IsRequired(); connection.Property(x => x.RemoteAccountId).HasMaxLength(200).IsRequired();
+        connection.Property(x => x.DriveId).HasMaxLength(200).IsRequired(); connection.Property(x => x.RootFolderId).HasMaxLength(512).IsRequired();
+        connection.Property(x => x.EncryptedCredentials).HasMaxLength(32768).IsRequired(); connection.Property(x => x.EncryptedAuthorization).HasMaxLength(32768).IsRequired();
+        connection.Property(x => x.LeaseToken).HasMaxLength(64);
+
+        var remoteObject = model.Entity<RemoteDriveObject>();
+        remoteObject.ToTable("BingRemoteDriveObjects"); remoteObject.HasKey(x => x.Id);
+        remoteObject.Property(x => x.Id).HasMaxLength(64).ValueGeneratedNever(); remoteObject.Property(x => x.Version).IsConcurrencyToken();
+        remoteObject.HasIndex(x => new { x.ConnectionId, x.Deleted });
+        remoteObject.Property(x => x.StoreName).HasMaxLength(128).IsRequired(); remoteObject.Property(x => x.ScopeKey).HasMaxLength(80).IsRequired();
+        remoteObject.Property(x => x.Container).HasMaxLength(64).IsRequired(); remoteObject.Property(x => x.ObjectKey).HasMaxLength(512).IsRequired();
+        remoteObject.Property(x => x.RemoteFileJson).HasMaxLength(32768).IsRequired(); remoteObject.Property(x => x.MetadataJson).HasMaxLength(32768).IsRequired();
+        remoteObject.Property(x => x.ContentType).HasMaxLength(256).IsRequired(); remoteObject.Property(x => x.Sha256).HasMaxLength(128).IsRequired();
+
+        var remoteTransfer = model.Entity<RemoteDriveTransfer>();
+        remoteTransfer.ToTable("BingRemoteDriveTransfers"); remoteTransfer.HasKey(x => x.Id); remoteTransfer.Property(x => x.Id).ValueGeneratedNever();
+        remoteTransfer.Property(x => x.Version).IsConcurrencyToken(); remoteTransfer.HasIndex(x => new { x.State, x.ExpiresAt, x.LeaseUntil });
+        remoteTransfer.HasIndex(x => x.ConnectionId);
+        remoteTransfer.Property(x => x.CleanupNextAttemptAt).HasDefaultValue(0L);
+        remoteTransfer.Property(x => x.CleanupErrorCode).HasMaxLength(64);
+        remoteTransfer.HasIndex(x => new { x.CleanupCompleted, x.CleanupNextAttemptAt, x.ExpiresAt, x.Id }).HasDatabaseName("IX_BingRemoteDriveTransfers_CleanupRetry");
+        remoteTransfer.Property(x => x.StoreName).HasMaxLength(128).IsRequired(); remoteTransfer.Property(x => x.ScopeKey).HasMaxLength(80).IsRequired();
+        remoteTransfer.Property(x => x.Container).HasMaxLength(64).IsRequired(); remoteTransfer.Property(x => x.ObjectKey).HasMaxLength(512).IsRequired();
+        remoteTransfer.Property(x => x.StageStoreName).HasMaxLength(128).IsRequired(); remoteTransfer.Property(x => x.StageContainer).HasMaxLength(64).IsRequired();
+        remoteTransfer.Property(x => x.StageObjectKey).HasMaxLength(512).IsRequired(); remoteTransfer.Property(x => x.StageUploadId).HasMaxLength(2048);
+        remoteTransfer.Property(x => x.StageMetadataJson).HasMaxLength(32768).IsRequired(); remoteTransfer.Property(x => x.MetadataJson).HasMaxLength(32768).IsRequired();
+        remoteTransfer.Property(x => x.ManifestJson).HasMaxLength(16777216).IsRequired();
+        remoteTransfer.Property(x => x.CheckpointJson).HasMaxLength(16777216).IsRequired();
+        if (Database.ProviderName?.Contains("MySql", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            remoteTransfer.Property(x => x.ManifestJson).HasColumnType("longtext");
+            remoteTransfer.Property(x => x.CheckpointJson).HasColumnType("longtext");
+        }
+        remoteTransfer.Property(x => x.PreviousRemoteFileJson).HasMaxLength(32768); remoteTransfer.Property(x => x.ContentType).HasMaxLength(256).IsRequired();
+        remoteTransfer.Property(x => x.LeaseToken).HasMaxLength(64);
+
+        var preference = model.Entity<FileStoragePreference>();
+        preference.ToTable("BingFileStoragePreferences"); preference.HasKey(x => x.Id);
+        preference.Property(x => x.Id).HasMaxLength(64).ValueGeneratedNever(); preference.Property(x => x.Version).IsConcurrencyToken();
+        preference.HasIndex(x => new { x.ScopeKey, x.OwnerId, x.Container }).IsUnique();
+        preference.Property(x => x.ScopeKey).HasMaxLength(80).IsRequired(); preference.Property(x => x.OwnerId).HasMaxLength(200).IsRequired();
+        preference.Property(x => x.Container).HasMaxLength(64).IsRequired(); preference.Property(x => x.TargetId).HasMaxLength(128).IsRequired();
+
+        var copyRequest = model.Entity<FileBindingCopyRequest>();
+        copyRequest.ToTable("BingFileBindingCopyRequests"); copyRequest.HasKey(x => x.Id); copyRequest.Property(x => x.Id).ValueGeneratedNever();
+        copyRequest.Property(x => x.Version).IsConcurrencyToken(); copyRequest.HasIndex(x => x.RequestKey).IsUnique();
+        copyRequest.HasIndex(x => new { x.ScopeKey, x.OwnerId, x.State, x.CreatedAt }); copyRequest.HasIndex(x => x.CopyFileId).IsUnique();
+        copyRequest.Property(x => x.RequestKey).HasMaxLength(64).IsRequired(); copyRequest.Property(x => x.ScopeKey).HasMaxLength(80).IsRequired();
+        copyRequest.Property(x => x.OwnerId).HasMaxLength(200).IsRequired(); copyRequest.Property(x => x.BusinessType).HasMaxLength(100).IsRequired();
+        copyRequest.Property(x => x.BusinessId).HasMaxLength(200).IsRequired(); copyRequest.Property(x => x.ErrorCode).HasMaxLength(80);
     }
 }
 public static class FileManagementEfRegistration
@@ -133,7 +194,10 @@ public static class FileManagementEfRegistration
     public static IServiceCollection AddBingFileManagementEntityFrameworkCore(this IServiceCollection services, Action<DbContextOptionsBuilder> configure)
     {
         services.AddDbContextFactory<FileManagementDbContext>(configure);
-        services.AddScoped<IFileManagementStore, EfFileManagementStore>();
+        services.AddScoped<EfFileManagementStore>();
+        services.AddScoped<IFileManagementStore>(provider => provider.GetRequiredService<EfFileManagementStore>());
+        services.AddScoped<IRemoteDriveStateStore>(provider => provider.GetRequiredService<EfFileManagementStore>());
+        services.AddScoped<IFileStorageTargetStore>(provider => provider.GetRequiredService<EfFileManagementStore>());
         return services;
     }
 }

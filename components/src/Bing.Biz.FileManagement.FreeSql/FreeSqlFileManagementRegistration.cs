@@ -1,4 +1,5 @@
 using Bing.Biz.FileManagement;
+using Bing.FileStorage.RemoteDrive;
 using FreeSql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,8 +27,11 @@ public static class FreeSqlFileManagementRegistration
         ArgumentNullException.ThrowIfNull(ormFactory);
 
         services.TryAddSingleton(provider => new FreeSqlFileManagementOrm(ormFactory(provider)));
-        services.TryAddScoped<IFileManagementStore>(provider =>
+        services.TryAddScoped<FreeSqlFileManagementStore>(provider =>
             new FreeSqlFileManagementStore(provider.GetRequiredService<FreeSqlFileManagementOrm>().Orm));
+        services.TryAddScoped<IFileManagementStore>(provider => provider.GetRequiredService<FreeSqlFileManagementStore>());
+        services.TryAddScoped<IRemoteDriveStateStore>(provider => provider.GetRequiredService<FreeSqlFileManagementStore>());
+        services.TryAddScoped<IFileStorageTargetStore>(provider => provider.GetRequiredService<FreeSqlFileManagementStore>());
         return services;
     }
 }

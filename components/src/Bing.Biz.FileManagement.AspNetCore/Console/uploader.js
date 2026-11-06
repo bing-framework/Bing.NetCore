@@ -69,6 +69,7 @@ async function waitForState(wanted) {
         if (!running) throw new DOMException('已暂停', 'AbortError');
         if (wanted.includes(session.state)) return session;
         if ([6, 7].includes(session.state)) throw new Error('上传已中止或失败，请创建新会话。');
+        if (session.transferStage) { status('中转接收完成；网盘传输已确认 ' + session.remoteTransferredBytes.toLocaleString() + ' / ' + session.length.toLocaleString() + ' 字节，状态：' + session.transferStage); await sleep(1000); continue; }
         status('服务端正在处理：' + ({ 0: '待初始化', 1: '上传中', 2: '完成中', 3: '已就绪', 8: '内容检查中' }[session.state] || session.state));
         await sleep(1000);
     }
@@ -86,12 +87,12 @@ async function start() {
         if (!saved) {
             const requestId = crypto.randomUUID();
             // 先保存幂等请求号，即使创建响应丢失也不会重复分配附件。
-            saved = { requestId, name: file.name, size: file.size, lastModified: file.lastModified, container: $('container').value, contentType: file.type || 'application/octet-stream' };
+            saved = { requestId, name: file.name, size: file.size, lastModified: file.lastModified, container: $('container').value, storageTargetId: $('storage-target')?.value || null, contentType: file.type || 'application/octet-stream' };
             persist();
         }
         if (!saved.id) {
             const created = await api('/upload-sessions', { method: 'POST', body: JSON.stringify({ requestId: saved.requestId, fileName: saved.name,
-                length: saved.size, lastModified: saved.lastModified, container: saved.container, contentType: saved.contentType || file.type || 'application/octet-stream' }) });
+                length: saved.size, lastModified: saved.lastModified, container: saved.container, storageTargetId: saved.storageTargetId || null, contentType: saved.contentType || file.type || 'application/octet-stream' }) });
             saved.id = created.id; saved.fileId = created.fileId; persist();
         }
         let session = await waitForState([1, 2, 3, 8]);

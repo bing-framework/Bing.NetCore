@@ -9,6 +9,8 @@ public sealed partial class FileContainerPolicy
 {
     public FileVisibility Visibility { get; set; } = FileVisibility.Private;
     public long MaxFileLength { get; set; } = 100L * 1024 * 1024 * 1024;
+    /// <summary>个人附件发布副本使用的公共目标；不参与个人偏好选择。</summary>
+    public string? BusinessStorageTargetId { get; set; }
 }
 public sealed partial class FileManagementOptions
 {
@@ -83,6 +85,9 @@ public static class FileManagementRegistration
         services.TryAddScoped<IFilePermissionChecker, ClaimFilePermissionChecker>();
         services.TryAddScoped<IFileAccessAuthorizer, DenyBusinessAccess>();
         services.AddScoped<FileManagementService>();
+        services.TryAddScoped<IFileUploadStoreSelector, FileUploadStoreSelector>();
+        services.AddScoped<FileStorageConnectionService>();
+        services.AddScoped<FileBindingCopyService>();
         services.AddScoped<FileOperationProcessor>();
         services.AddScoped<FileMigrationService>();
         services.AddScoped<FileMigrationBatchService>();
