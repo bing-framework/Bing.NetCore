@@ -19,8 +19,9 @@ internal sealed class FusionCacheStartupBackplane(IFusionCacheBackplane inner) :
     internal bool IsSubscribed { get; private set; }
 
     /// <summary>
-    /// 获取最近一次订阅失败异常；订阅成功时为 <see langword="null" />。
+    /// 获取最近一次订阅失败异常。
     /// </summary>
+    /// <remarks>订阅成功时为 <see langword="null" />。</remarks>
     internal Exception? SubscriptionError { get; private set; }
 
     /// <summary>

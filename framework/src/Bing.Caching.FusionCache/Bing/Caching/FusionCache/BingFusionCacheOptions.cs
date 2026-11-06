@@ -14,38 +14,45 @@ public sealed class BingFusionCacheOptions
     public string Namespace { get; set; } = string.Empty;
 
     /// <summary>
-    /// 获取或设置是否将此实例注册为无名 <see cref="IHybridCache" />；同一容器最多允许一个。
+    /// 获取或设置是否将此实例注册为无名 <see cref="IHybridCache" />。
     /// </summary>
+    /// <remarks>同一容器最多允许一个。</remarks>
     public bool UseAsDefault { get; set; }
 
     /// <summary>
-    /// 获取或设置单个逻辑键允许的最大 UTF-16 长度，默认 1024。
+    /// 获取或设置单个逻辑键允许的最大 UTF-16 长度。
     /// </summary>
+    /// <remarks>默认 1024。</remarks>
     public int MaxKeyLength { get; set; } = 1024;
 
     /// <summary>
-    /// 获取或设置单个标签允许的最大 UTF-16 长度，默认 256。
+    /// 获取或设置单个标签允许的最大 UTF-16 长度。
     /// </summary>
+    /// <remarks>默认 256。</remarks>
     public int MaxTagLength { get; set; } = 256;
 
     /// <summary>
-    /// 获取或设置每次写入允许关联的标签数上限，默认 32。
+    /// 获取或设置每次写入允许关联的标签数上限。
     /// </summary>
+    /// <remarks>默认 32。</remarks>
     public int MaxTagsPerEntry { get; set; } = 32;
 
     /// <summary>
-    /// 获取或设置可同时执行的回源工厂数量上限，默认 8，必须大于零。
+    /// 获取或设置可同时执行的回源工厂数量上限。
     /// </summary>
+    /// <remarks>默认 8，必须大于零。</remarks>
     public int MaxConcurrentFactories { get; set; } = 8;
 
     /// <summary>
-    /// 获取或设置等待回源许可的工厂数量上限，默认 128；零表示不排队。
+    /// 获取或设置等待回源许可的工厂数量上限。
     /// </summary>
+    /// <remarks>默认 128；零表示不排队。</remarks>
     public int MaxQueuedFactories { get; set; } = 128;
 
     /// <summary>
-    /// 获取或设置等待回源许可的最长时间，默认 30 秒；不包含工厂自身的执行时间。
+    /// 获取或设置等待回源许可的最长时间。
     /// </summary>
+    /// <remarks>默认 30 秒；不包含工厂自身的执行时间。</remarks>
     public TimeSpan FactoryQueueTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
     /// <summary>

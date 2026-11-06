@@ -114,9 +114,10 @@ public class FusionCacheResilienceTest
         /// </summary>
         public bool Disposed { get; private set; }
 
-        /// <summary>
-        /// 标记当前实例已释放。
-        /// </summary>
+        /// <inheritdoc />
+        /// <remarks>
+        /// <para>标记当前实例已释放。</para>
+        /// </remarks>
         public void Dispose() => Disposed = true;
     }
 }

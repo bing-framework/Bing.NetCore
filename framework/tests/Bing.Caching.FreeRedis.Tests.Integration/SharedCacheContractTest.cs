@@ -27,6 +27,9 @@ public sealed class SharedCacheContractTest
     public async Task Provider_SatisfiesSharedContract()
     {
         var configuration = new CacheConfiguration("contract-free-" + Guid.NewGuid().ToString("N"), "free");
-        await CacheContractAssertions.VerifyAsync(new FreeRedisCacheManager(_client, configuration));
+        var cache = new FreeRedisCacheManager(_client, configuration);
+        var peer = new FreeRedisCacheManager(_client, configuration);
+        await CacheContractAssertions.VerifyAtomicTrySetAsync(cache, peer);
+        await CacheContractAssertions.VerifyAsync(cache);
     }
 }

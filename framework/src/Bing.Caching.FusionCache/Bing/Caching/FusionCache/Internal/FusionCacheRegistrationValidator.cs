@@ -26,6 +26,8 @@ internal static class FusionCacheRegistrationValidator
             throw new InvalidOperationException("不得覆盖 Bing FusionCache 的 CacheName、CacheKeyPrefix 或 BackplaneChannelPrefix。");
         if (options.DisableTagging || options.RemoveByTagBehavior != RemoveByTagBehavior.Remove)
             throw new InvalidOperationException("Bing 混合缓存必须启用标签，并使用 Remove 标签失效语义。");
+        if (options.DefaultEntryOptionsProvider != null)
+            throw new InvalidOperationException("Bing 混合缓存不支持 DefaultEntryOptionsProvider；请使用实例默认条目选项或单次 CacheOptions 设置有效期。");
         if (options.EnableAutoRecovery && !(options.AutoRecoveryMaxItems > 0))
             throw new InvalidOperationException("启用自动恢复时必须配置有限且为正的 AutoRecoveryMaxItems。");
         if (!options.WaitForInitialBackplaneSubscribe)

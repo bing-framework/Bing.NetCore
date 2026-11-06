@@ -68,12 +68,12 @@ public abstract class EntityBase<TEntity, TKey> : DomainObjectBase<TEntity>, IEn
     public virtual TKey Id { get; protected set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="EntityBase{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected EntityBase() { }
 
     /// <summary>
-    /// 初始化一个 <see cref="EntityBase{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="EntityBase{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected EntityBase(TKey id) => Id = id;

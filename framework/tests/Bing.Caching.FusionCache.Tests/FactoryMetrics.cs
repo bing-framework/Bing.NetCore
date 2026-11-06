@@ -36,10 +36,14 @@ internal sealed class FactoryMetrics : IDisposable
     internal double WaitDurationMilliseconds;
 
     /// <summary>
-    /// 初始化一个 <see cref="FactoryMetrics" /> 类的新实例。
+    /// 初始化一个 <see cref="FactoryMetrics" /> 类型的实例。
     /// </summary>
     /// <param name="name">只统计该缓存实例名称的指标。</param>
+    ///
     /// <param name="sensitiveValues">不允许出现在维度值中的敏感文本。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="FactoryMetrics" /> 类的新实例。
+    /// </remarks>
     internal FactoryMetrics(string name, params string[] sensitiveValues)
     {
         _sensitiveValues = sensitiveValues;
@@ -125,8 +129,9 @@ internal sealed class FactoryMetrics : IDisposable
         while (Interlocked.CompareExchange(ref peak, value, current) != current);
     }
 
-    /// <summary>
-    /// 停止监听并释放 Meter 订阅。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>停止监听并释放 Meter 订阅。</para>
+    /// </remarks>
     public void Dispose() => _listener.Dispose();
 }

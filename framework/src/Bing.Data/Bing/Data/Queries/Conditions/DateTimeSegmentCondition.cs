@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Bing.Extensions;
 
 namespace Bing.Data.Queries.Conditions;
@@ -11,7 +11,7 @@ namespace Bing.Data.Queries.Conditions;
 public class DateTimeSegmentCondition<TEntity, TProperty> : SegmentConditionBase<TEntity, TProperty, DateTime> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个 <see cref="DateTimeSegmentCondition{TEntity, TProperty}"/> 类型的实例。
+    /// 初始化一个 <see cref="DateTimeSegmentCondition{TEntity,TProperty}" /> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>

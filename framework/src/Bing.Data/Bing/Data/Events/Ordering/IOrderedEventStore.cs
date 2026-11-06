@@ -11,6 +11,10 @@ public interface IOrderedEventStore
     /// <summary>
     /// 分配业务流的下一连续序号。
     /// </summary>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
+    /// <returns>分配给业务流的下一连续序号。</returns>
     Task<long> AllocateSequenceAsync(DbTransaction transaction, OrderedEventStream stream,
         CancellationToken cancellationToken = default);
 
@@ -18,6 +22,11 @@ public interface IOrderedEventStore
     /// 持久化接收事件。
     /// </summary>
     /// <remarks>完全相同的重复事件幂等接受；同一 ID 或序号对应不同内容时拒绝。</remarks>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="message">待接收或处理的有序事件。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
     Task EnqueueAsync(DbTransaction transaction, string consumer, OrderedEventStream stream,
         OrderedEventMessage message, CancellationToken cancellationToken = default);
 
@@ -25,6 +34,12 @@ public interface IOrderedEventStore
     /// 执行下一事件并推进游标。
     /// </summary>
     /// <remarks>回调失败时调用方必须回滚；完成记录和业务修改在同一事务中。</remarks>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="handler">在当前事务内处理事件的异步回调。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
+    /// <returns>下一事件的处理结果。</returns>
     Task<OrderedEventProcessingResult> ProcessNextAsync(DbTransaction transaction, string consumer,
         OrderedEventStream stream, Func<OrderedEventMessage, DbTransaction, CancellationToken, Task> handler,
         CancellationToken cancellationToken = default);
@@ -33,12 +48,22 @@ public interface IOrderedEventStore
     /// 记录下一事件失败并阻止后续处理。
     /// </summary>
     /// <remarks>确认业务修改已回滚后记录；协调器使用保存点保留游标锁，避免另开事务的竞争窗口。错误标识不得包含正文或敏感参数。</remarks>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="failedSequence">失败事件的业务流序号。</param>
+    /// <param name="errorCode">清理失败的错误分类代码。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
     Task RecordFailureAsync(DbTransaction transaction, string consumer, OrderedEventStream stream,
         long failedSequence, string errorCode, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 允许失败的前序事件重试。
     /// </summary>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
     Task RetryAsync(DbTransaction transaction, string consumer, OrderedEventStream stream,
         CancellationToken cancellationToken = default);
 
@@ -46,17 +71,30 @@ public interface IOrderedEventStore
     /// 读取业务流处理状态。
     /// </summary>
     /// <remarks>只读取调用方事务可见的快照，不创建未知流或显式请求写锁；未知流返回空状态。隔离级别和观测超时由调用方决定。</remarks>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
+    /// <returns>业务流当前的处理状态。</returns>
     Task<OrderedEventStreamState> GetStateAsync(DbTransaction transaction, string consumer,
         OrderedEventStream stream, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 分页读取仍有待处理事件的业务流。
     /// </summary>
+    /// <param name="transaction">本次业务操作共用的事务。</param>
+    /// <param name="consumer">稳定的逻辑消费者名称。</param>
+    /// <param name="limit">最多读取的记录数。</param>
+    /// <param name="afterStreamKey">上一页最后一项的流键；为空时从首页开始。</param>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
+    /// <returns>当前页仍有待处理事件的业务流。</returns>
     Task<IReadOnlyList<OrderedEventStream>> GetPendingStreamsAsync(DbTransaction transaction, string consumer,
         int limit, string afterStreamKey = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取业务流的稳定存储键。
     /// </summary>
+    /// <param name="stream">有序事件所属的业务流。</param>
+    /// <returns>业务流的稳定存储键。</returns>
     string GetStreamKey(OrderedEventStream stream);
 }

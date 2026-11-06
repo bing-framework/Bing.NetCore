@@ -1,7 +1,7 @@
 namespace Bing.Caching;
 
 /// <summary>
-/// 表示一次缓存批量读取的结果。
+/// 表示一次缓存单键或批量读取中的条目结果。
 /// </summary>
 /// <typeparam name="T">缓存值类型。</typeparam>
 public readonly struct CacheEntry<T>
@@ -28,7 +28,7 @@ public readonly struct CacheEntry<T>
     /// 获取缓存值。
     /// </summary>
     /// <remarks>
-    /// 未命中时为类型默认值。
+    /// 未命中时为类型默认值；命中时也可能为 null 或类型默认值，应通过 <see cref="Hit" /> 判断是否命中。
     /// </remarks>
     public T Value { get; }
 

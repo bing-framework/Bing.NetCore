@@ -22,16 +22,22 @@ public abstract class AuditedAggregateRootWithUserKey<TEntity, TKey, TUserKey> :
     public virtual TUserKey? LastModifierId { get; set; }
 
     /// <summary>
-    /// 初始化一个使用默认主键的 <see cref="AuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}"/>。
+    /// 初始化一个 <see cref="AuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化一个使用默认主键的 <see cref="AuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}" />。
+    /// </remarks>
     protected AuditedAggregateRootWithUserKey()
     {
     }
 
     /// <summary>
-    /// 使用指定主键初始化创建和修改审计聚合根。
+    /// 初始化一个 <see cref="AuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根主键。</param>
+    /// <remarks>
+    /// 使用指定主键初始化创建和修改审计聚合根。
+    /// </remarks>
     protected AuditedAggregateRootWithUserKey(TKey id) : base(id)
     {
     }

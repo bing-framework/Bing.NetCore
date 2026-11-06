@@ -8,6 +8,9 @@ public sealed class InventoryDeductionResult
     /// <summary>
     /// 初始化一个 <see cref="InventoryDeductionResult" /> 类型的实例。
     /// </summary>
+    /// <param name="status">当前状态或状态读取委托。</param>
+    /// <param name="duplicate">指示当前条目是否为重复项。</param>
+    /// <param name="remainingQuantity">本次扣减后剩余的库存数量。</param>
     public InventoryDeductionResult(InventoryDeductionStatus status, bool duplicate, long? remainingQuantity)
     {
         Status = status;
@@ -16,22 +19,23 @@ public sealed class InventoryDeductionResult
     }
 
     /// <summary>
-    /// 扣减处理状态。
+    /// 获取扣减处理状态。
     /// </summary>
     public InventoryDeductionStatus Status { get; }
 
     /// <summary>
-    /// 是否来自已提交的相同请求。
+    /// 获取是否来自已提交的相同请求。
     /// </summary>
     public bool Duplicate { get; }
 
     /// <summary>
-    /// 扣减后的剩余数量；扣减失败且库存行不存在时为空。
+    /// 获取扣减后的剩余数量。
     /// </summary>
+    /// <remarks>扣减失败且库存行不存在时为空。</remarks>
     public long? RemainingQuantity { get; }
 
     /// <summary>
-    /// 是否成功扣减。
+    /// 获取是否成功扣减。
     /// </summary>
     public bool Applied => Status == InventoryDeductionStatus.Applied;
 }

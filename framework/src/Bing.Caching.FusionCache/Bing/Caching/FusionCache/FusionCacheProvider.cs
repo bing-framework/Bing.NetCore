@@ -14,10 +14,14 @@ internal sealed class FusionCacheProvider : IHybridCacheProvider
     private readonly IReadOnlyDictionary<string, IHybridCache> _caches;
 
     /// <summary>
-    /// 初始化一个 <see cref="FusionCacheProvider" /> 类的新实例。
+    /// 初始化一个 <see cref="FusionCacheProvider" /> 类型的实例。
     /// </summary>
     /// <param name="caches">已构造的命名缓存门面集合。</param>
+    ///
     /// <exception cref="ArgumentException">存在重复的缓存名称时抛出。</exception>
+    /// <remarks>
+    /// 初始化一个 <see cref="FusionCacheProvider" /> 类的新实例。
+    /// </remarks>
     public FusionCacheProvider(IEnumerable<FusionCacheManager> caches) =>
         _caches = caches.ToDictionary(x => x.Name, x => (IHybridCache)x, StringComparer.Ordinal);
 

@@ -156,10 +156,14 @@ public class FusionCacheDiagnosticsTest
         internal long Count(string instrument) => _counts.GetValueOrDefault(instrument);
 
         /// <summary>
-        /// 初始化一个 <see cref="NativeMetricObserver" /> 类的新实例。
+        /// 初始化一个 <see cref="NativeMetricObserver" /> 类型的实例。
         /// </summary>
         /// <param name="cacheName">只统计该原生缓存名称的指标。</param>
+        ///
         /// <param name="sensitiveValues">不允许出现在维度值中的敏感文本。</param>
+        /// <remarks>
+        /// 初始化一个 <see cref="NativeMetricObserver" /> 类的新实例。
+        /// </remarks>
         internal NativeMetricObserver(string cacheName, params string[] sensitiveValues)
         {
             _sensitiveValues = sensitiveValues;
@@ -199,9 +203,10 @@ public class FusionCacheDiagnosticsTest
             }
         }
 
-        /// <summary>
-        /// 停止监听并释放 Meter 订阅。
-        /// </summary>
+        /// <inheritdoc />
+        /// <remarks>
+        /// <para>停止监听并释放 Meter 订阅。</para>
+        /// </remarks>
         public void Dispose() => _listener.Dispose();
     }
 
@@ -226,8 +231,11 @@ public class FusionCacheDiagnosticsTest
         internal IReadOnlyCollection<ActivitySnapshot> Snapshots => _snapshots.ToArray();
 
         /// <summary>
-        /// 初始化一个 <see cref="NativeActivityObserver" /> 类的新实例。
+        /// 初始化一个 <see cref="NativeActivityObserver" /> 类型的实例。
         /// </summary>
+        /// <remarks>
+        /// 初始化一个 <see cref="NativeActivityObserver" /> 类的新实例。
+        /// </remarks>
         internal NativeActivityObserver()
         {
             _listener.ShouldListenTo = source => source.Name == FusionCacheDiagnostics.ActivitySourceName
@@ -238,9 +246,10 @@ public class FusionCacheDiagnosticsTest
             ActivitySource.AddActivityListener(_listener);
         }
 
-        /// <summary>
-        /// 停止监听并移除 Activity 监听器。
-        /// </summary>
+        /// <inheritdoc />
+        /// <remarks>
+        /// <para>停止监听并移除 Activity 监听器。</para>
+        /// </remarks>
         public void Dispose() => _listener.Dispose();
     }
 

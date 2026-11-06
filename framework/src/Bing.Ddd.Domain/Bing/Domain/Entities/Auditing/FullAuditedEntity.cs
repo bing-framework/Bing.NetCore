@@ -58,14 +58,14 @@ public abstract class FullAuditedEntity<TEntity, TKey> : AuditedEntity<TEntity, 
     public virtual TKey DeleterId { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="FullAuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="FullAuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected FullAuditedEntity()
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="FullAuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="FullAuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected FullAuditedEntity(TKey id) : base(id)

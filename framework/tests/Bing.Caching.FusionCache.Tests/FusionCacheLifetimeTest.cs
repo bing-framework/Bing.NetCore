@@ -75,11 +75,10 @@ public class FusionCacheLifetimeTest
         /// </summary>
         public int DisposeCount { get; private set; }
 
-        /// <summary>
-        /// 创建带单位大小的缓存条目。
-        /// </summary>
-        /// <param name="key">缓存键。</param>
-        /// <returns>实际内存缓存创建的条目。</returns>
+        /// <inheritdoc />
+        /// <remarks>
+        /// <para>创建带单位大小的缓存条目。</para>
+        /// </remarks>
         public ICacheEntry CreateEntry(object key)
         {
             var entry = _inner.CreateEntry(key);
@@ -87,23 +86,16 @@ public class FusionCacheLifetimeTest
             return entry;
         }
 
-        /// <summary>
-        /// 移除指定键的缓存条目。
-        /// </summary>
-        /// <param name="key">缓存键。</param>
+        /// <inheritdoc />
         public void Remove(object key) => _inner.Remove(key);
 
-        /// <summary>
-        /// 尝试读取指定键的缓存值。
-        /// </summary>
-        /// <param name="key">缓存键。</param>
-        /// <param name="value">读取到的缓存值。</param>
-        /// <returns>命中时返回 <see langword="true" />；否则返回 <see langword="false" />。</returns>
+        /// <inheritdoc />
         public bool TryGetValue(object key, out object? value) => _inner.TryGetValue(key, out value);
 
-        /// <summary>
-        /// 记录并执行内部缓存释放。
-        /// </summary>
+        /// <inheritdoc />
+        /// <remarks>
+        /// <para>记录并执行内部缓存释放。</para>
+        /// </remarks>
         public void Dispose() { DisposeCount++; _inner.Dispose(); }
     }
 }

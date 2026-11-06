@@ -54,6 +54,18 @@ internal sealed class FusionCacheKeyNormalizer(BingFusionCacheOptions options)
     internal string[]? Tags(IEnumerable<string>? tags)
     {
         if (tags == null) return null;
+        if (tags is string[] array)
+        {
+            if (array.Length == 0) return Array.Empty<string>();
+            var encoded = new string[Math.Min(array.Length, options.MaxTagsPerEntry)];
+            for (var i = 0; i < array.Length; i++)
+            {
+                if (i >= options.MaxTagsPerEntry)
+                    throw new ArgumentOutOfRangeException(nameof(tags), "缓存条目的标签数量超过限制。");
+                encoded[i] = Tag(array[i]);
+            }
+            return encoded;
+        }
         var result = new List<string>();
         foreach (var tag in tags)
         {

@@ -105,7 +105,7 @@ public partial interface ICache
     /// <param name="keys">待读取的键集合。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>按输入顺序对应的值；保留重复项，未命中位置为类型默认值。</returns>
-    /// <remarks>输入集合只枚举一次；空集合不会访问缓存。</remarks>
+    /// <remarks>输入集合只枚举一次；空集合不会访问缓存。默认值可能是命中值；需要区分缺失时使用 GetAllStreamAsync。</remarks>
     Task<List<T>> GetAllAsync<T>(IEnumerable<CacheKey> keys, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -115,7 +115,7 @@ public partial interface ICache
     /// <param name="keys">待读取的键集合。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>按输入顺序对应的值；保留重复项，未命中位置为类型默认值。</returns>
-    /// <remarks>输入集合只枚举一次；空集合不会访问缓存。</remarks>
+    /// <remarks>输入集合只枚举一次；空集合不会访问缓存。默认值可能是命中值；需要区分缺失时使用 GetAllStreamAsync。</remarks>
     Task<List<T>> GetAllAsync<T>(IEnumerable<string> keys, CancellationToken cancellationToken = default);
 
     /// <summary>

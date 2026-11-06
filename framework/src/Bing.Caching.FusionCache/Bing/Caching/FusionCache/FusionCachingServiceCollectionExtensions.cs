@@ -30,6 +30,7 @@ public static class FusionCachingServiceCollectionExtensions
     /// <remarks>
     /// 仅 <see cref="BingFusionCacheOptions.UseAsDefault" /> 为 <see langword="true" /> 时建立无名 <see cref="IHybridCache" /> 别名；
     /// 原生 builder 执行完所有配置回调后会再次校验身份、标签和保留期契约。
+    /// 不支持原生按键默认选项提供程序；请使用实例默认条目选项及单次调用的 <see cref="CacheOptions" />。
     /// </remarks>
     public static IServiceCollection AddBingFusionCache(this IServiceCollection services, string name,
         Action<BingFusionCacheOptions> configure, Action<IFusionCacheBuilder>? configureFusion = null)

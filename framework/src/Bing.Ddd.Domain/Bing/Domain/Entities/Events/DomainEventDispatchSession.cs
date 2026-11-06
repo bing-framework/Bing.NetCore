@@ -23,6 +23,11 @@ public sealed class DomainEventDispatchSession
     private readonly IDomainEventDispatcher _dispatcher;
 
     /// <summary>
+    /// 保存每轮领域事件分发前执行的回调。
+    /// </summary>
+    private readonly Func<Task> _beforeRound;
+
+    /// <summary>
     /// 每个事件源在分发期间已读取的事件序列。
     /// </summary>
     private readonly Dictionary<IHasDomainEvents, List<DomainEvent>> _seenEvents = new(new SourceReferenceComparer());
@@ -45,12 +50,26 @@ public sealed class DomainEventDispatchSession
     }
 
     /// <summary>
+    /// 初始化一个 <see cref="DomainEventDispatchSession" /> 类型的实例。
+    /// </summary>
+    /// <param name="getSources">用于获取待分发领域事件来源的委托。</param>
+    /// <param name="dispatcher">用于分发相应操作或事件的分发器。</param>
+    /// <param name="beforeRound">每轮读取领域事件前执行的异步回调。</param>
+    /// <remarks>创建在每轮事件读取前准备数据库生成键的会话；原构造入口行为不变。</remarks>
+    public DomainEventDispatchSession(Func<IEnumerable<IHasDomainEvents>> getSources,
+        IDomainEventDispatcher dispatcher, Func<Task> beforeRound) : this(getSources, dispatcher)
+    {
+        _beforeRound = beforeRound ?? throw new ArgumentNullException(nameof(beforeRound));
+    }
+
+    /// <summary>
     /// 分发当前事件以及处理器产生的后续事件。
     /// </summary>
     public async Task DispatchAsync()
     {
         for (var round = 0; round < MaxRounds; round++)
         {
+            if (_beforeRound != null) await _beforeRound().ConfigureAwait(false);
             var pending = GetPendingEvents();
             if (pending.Count == 0)
                 return;
@@ -96,8 +115,12 @@ public sealed class DomainEventDispatchSession
     }
 
     /// <summary>
-    /// 获取尚未分发的事件，并记录本轮的读取位置。
+    /// 收集尚未处理的领域事件。
     /// </summary>
+    /// <returns>来源对象及其新领域事件组成的列表。</returns>
+    /// <remarks>
+    /// 同一来源对象仅处理一次；事件源在分发期间必须保留已读取事件的顺序和实例，并仅追加新事件。
+    /// </remarks>
     private List<(IHasDomainEvents Source, DomainEvent Event)> GetPendingEvents()
     {
         var pending = new List<(IHasDomainEvents Source, DomainEvent Event)>();

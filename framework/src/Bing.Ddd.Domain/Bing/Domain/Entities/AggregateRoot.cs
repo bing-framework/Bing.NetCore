@@ -39,12 +39,12 @@ public abstract class AggregateRoot<TEntity, TKey> : BasicAggregateRoot<TEntity,
     where TEntity : class, IAggregateRoot, IVerifyModel<TEntity>
 {
     /// <summary>
-    /// 初始化一个 <see cref="AggregateRoot{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected AggregateRoot() : this(default) { }
 
     /// <summary>
-    /// 初始化一个 <see cref="AggregateRoot{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected AggregateRoot(TKey id) : base(id)

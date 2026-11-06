@@ -53,7 +53,7 @@ public interface IQueryStore<TEntity, in TKey> : IScopedDependency, IDisposable
     #region FindById(通过标识查找)
 
     /// <summary>
-    /// 查找实体
+    /// 按主键查找实体。
     /// </summary>
     /// <param name="id">标识</param>
     /// <returns>指定标识对应的实体；未找到时返回 null。</returns>

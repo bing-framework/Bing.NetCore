@@ -40,14 +40,14 @@ public abstract class AuditedEntity<TEntity, TKey> : CreationAuditedEntity<TEnti
     public virtual TKey LastModifierId { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="AuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected AuditedEntity()
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="AuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected AuditedEntity(TKey id) : base(id)

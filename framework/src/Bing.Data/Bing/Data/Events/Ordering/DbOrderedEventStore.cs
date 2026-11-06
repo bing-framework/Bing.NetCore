@@ -413,6 +413,12 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     /// <summary>
     /// 创建并锁定实体游标。
     /// </summary>
+    /// <param name="transaction">调用方管理的数据库事务。</param>
+    /// <param name="consumer">逻辑消费者名称。</param>
+    /// <param name="stream">目标业务流。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>锁定游标当前保存的最后处理序号。</returns>
+    /// <remarks>写锁覆盖当前事务后续的收件、业务回调和游标推进，在事务结束后释放。</remarks>
     private async Task<long> LockCursorAsync(DbTransaction transaction, string consumer, OrderedEventStream stream,
         CancellationToken cancellationToken)
     {
@@ -435,9 +441,13 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 锁定消费者容量行并返回当前待处理数量。
+    /// 锁定消费者容量行并读取待处理数量。
     /// </summary>
-    /// <remarks>容量行按消费者串行化入箱和消费，缺失行会按现有收件箱数据初始化。</remarks>
+    /// <param name="transaction">调用方管理的数据库事务。</param>
+    /// <param name="consumer">逻辑消费者名称。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当前待处理事件数；未配置容量上限时为 0。</returns>
+    /// <remarks>容量行按消费者串行化入箱与消费，按当前事务可见收件箱重新计算计数。</remarks>
     private async Task<long> LockConsumerCapacityAsync(DbTransaction transaction, string consumer,
         CancellationToken cancellationToken)
     {
@@ -462,8 +472,12 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 按当前事务可见收件箱重新计算消费者容量计数。
+    /// 刷新当前消费者的待处理事件计数。
     /// </summary>
+    /// <param name="transaction">调用方管理的数据库事务。</param>
+    /// <param name="consumerKey">经过编码的消费者存储键。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>当前事务可见且状态尚未完成的事件数量。</returns>
     private async Task<long> RefreshConsumerCapacityAsync(DbTransaction transaction, string consumerKey,
         CancellationToken cancellationToken)
     {
@@ -480,21 +494,33 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 生成只处理指定唯一键冲突的插入语句。
+    /// 构造忽略重复键冲突的插入语句。
     /// </summary>
+    /// <param name="insert">原始插入语句。</param>
+    /// <param name="conflictColumns">SQLite 冲突目标的列列表。</param>
+    /// <param name="unchangedColumn">MySQL 重复键处理时保持原值的列名。</param>
+    /// <returns>附加数据库相应重复键处理子句的插入 SQL。</returns>
+    /// <remarks>MySQL 通过更新指定列为原值处理重复键；SQLite 按指定冲突列执行 DO NOTHING。</remarks>
     private string Upsert(string insert, string conflictColumns, string unchangedColumn) =>
         _database == OrderedEventDatabase.MySql
             ? insert + " ON DUPLICATE KEY UPDATE " + unchangedColumn + " = " + unchangedColumn
             : insert + " ON CONFLICT (" + conflictColumns + ") DO NOTHING";
 
     /// <summary>
-    /// 读取当前锁定版本，避免 MySQL 可重复读快照导致游标回退。
+    /// 为查询应用数据库当前读语法。
     /// </summary>
+    /// <param name="sql">需要应用当前读语法的查询 SQL。</param>
+    /// <returns>MySQL 查询追加 FOR UPDATE，其他数据库返回原 SQL。</returns>
+    /// <remarks>MySQL 使用锁定当前读，避免可重复读快照导致游标回退。</remarks>
     private string CurrentRead(string sql) => _database == OrderedEventDatabase.MySql ? sql + " FOR UPDATE" : sql;
 
     /// <summary>
     /// 创建调用方事务内的参数化命令。
     /// </summary>
+    /// <param name="transaction">调用方管理的数据库事务。</param>
+    /// <param name="sql">需要应用当前读语法的查询 SQL。</param>
+    /// <param name="parameters">数据库参数名称和值的集合。</param>
+    /// <returns>使用指定事务、SQL 和参数的数据库命令；由调用方释放。</returns>
     private static DbCommand Command(DbTransaction transaction, string sql, params (string Name, object Value)[] parameters)
     {
         if (transaction == null)
@@ -514,14 +540,19 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 获取消费者和业务流的精确存储键。
+    /// 获取消费者和业务流的存储键。
     /// </summary>
+    /// <param name="consumer">逻辑消费者名称。</param>
+    /// <param name="stream">目标业务流。</param>
+    /// <returns>消费者存储键与业务流存储键组成的元组。</returns>
     private (string Consumer, string Stream) Keys(string consumer, OrderedEventStream stream) =>
         (ConsumerKey(consumer), GetStreamKey(stream));
 
     /// <summary>
-    /// 验证并编码逻辑消费者。
+    /// 验证并编码逻辑消费者名称。
     /// </summary>
+    /// <param name="consumer">逻辑消费者名称。</param>
+    /// <returns>消费者名称对应的 SHA-256 十六进制存储键。</returns>
     private string ConsumerKey(string consumer)
     {
         if (string.IsNullOrWhiteSpace(consumer) || consumer.Length > 200)
@@ -532,8 +563,9 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 获取当前 UTC 入箱时间的数据库参数值。
+    /// 创建当前 UTC 入箱时间的数据库参数值。
     /// </summary>
+    /// <returns>MySQL 使用 DateTime，其他数据库使用往返格式的 UTC 时间文本。</returns>
     private object CreatedAtUtc()
     {
         var value = DateTime.UtcNow;
@@ -543,8 +575,10 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 生成不受数据库文本排序和尾空格影响的键。
+    /// 生成文本的 SHA-256 存储键。
     /// </summary>
+    /// <param name="value">待按配置编码计算摘要的文本。</param>
+    /// <returns>使用配置编码计算且不含分隔符的 SHA-256 大写十六进制文本。</returns>
     private string Hash(string value)
     {
         using var algorithm = SHA256.Create();
@@ -552,7 +586,9 @@ public sealed class DbOrderedEventStore : IOrderedEventStore, IOrderedEventStore
     }
 
     /// <summary>
-    /// 编码业务流组成部分，避免分隔符歧义。
+    /// 为业务流组成部分添加长度前缀。
     /// </summary>
+    /// <param name="value">需要消除分隔符歧义的业务流组成部分。</param>
+    /// <returns>字符长度、冒号与原始值连接而成的文本。</returns>
     private static string EncodePart(string value) => value.Length.ToString(CultureInfo.InvariantCulture) + ":" + value;
 }

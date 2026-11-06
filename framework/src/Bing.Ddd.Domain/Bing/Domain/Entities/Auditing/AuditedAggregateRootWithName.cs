@@ -46,14 +46,14 @@ public abstract class AuditedAggregateRootWithName<TEntity, TKey> : AuditedAggre
     public virtual string LastModifier { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="AuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected AuditedAggregateRootWithName()
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="AuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="AuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected AuditedAggregateRootWithName(TKey id) : base(id)

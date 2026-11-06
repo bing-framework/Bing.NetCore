@@ -29,7 +29,7 @@ public class TreeCondition<TEntity, TParentId> : ICondition<TEntity>
     where TEntity : IPath, IEnabled
 {
     /// <summary>
-    /// 初始化一个 <see cref="TreeCondition{TEntity, TParentId}"/> 类型的实例。
+    /// 初始化一个 <see cref="TreeCondition{TEntity,TParentId}" /> 类型的实例。
     /// </summary>
     /// <param name="parameter">查询参数</param>
     public TreeCondition(ITreeQueryParameter<TParentId> parameter)

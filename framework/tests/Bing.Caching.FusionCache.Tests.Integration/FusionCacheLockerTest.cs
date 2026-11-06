@@ -152,18 +152,33 @@ public class FusionCacheLockerTest
     /// </summary>
     private sealed class RecordingDistributedLocker : IFusionCacheDistributedLocker
     {
+        /// <summary>
+        /// 保存被包装的分布式锁实现。
+        /// </summary>
         private IFusionCacheDistributedLocker? _inner;
 
+        /// <summary>
+        /// 获取已记录的分布式锁获取结果。
+        /// </summary>
         public ConcurrentQueue<LockObservation> Acquisitions { get; } = new();
 
+        /// <summary>
+        /// 获取已记录的分布式锁释放结果。
+        /// </summary>
         public ConcurrentQueue<LockObservation> Releases { get; } = new();
 
+        /// <summary>
+        /// 包装并记录被测分布式锁实现。
+        /// </summary>
+        /// <param name="inner">需要包装的分布式锁实现。</param>
+        /// <returns>记录了内部实现的当前包装器。</returns>
         public IFusionCacheDistributedLocker Wrap(IFusionCacheDistributedLocker inner)
         {
             _inner = inner;
             return this;
         }
 
+        /// <inheritdoc />
         public async ValueTask<object?> AcquireLockAsync(string cacheName, string cacheInstanceId, string operationId,
             string key, string lockName, TimeSpan timeout, ILogger? logger, CancellationToken token)
         {
@@ -175,6 +190,7 @@ public class FusionCacheLockerTest
             return handle;
         }
 
+        /// <inheritdoc />
         public object? AcquireLock(string cacheName, string cacheInstanceId, string operationId, string key,
             string lockName, TimeSpan timeout, ILogger? logger, CancellationToken token)
         {
@@ -186,6 +202,7 @@ public class FusionCacheLockerTest
             return handle;
         }
 
+        /// <inheritdoc />
         public async ValueTask ReleaseLockAsync(string cacheName, string cacheInstanceId, string operationId,
             string key, string lockName, object? lockObj, ILogger? logger, CancellationToken token)
         {
@@ -195,6 +212,7 @@ public class FusionCacheLockerTest
                 Stopwatch.GetTimestamp()));
         }
 
+        /// <inheritdoc />
         public void ReleaseLock(string cacheName, string cacheInstanceId, string operationId, string key,
             string lockName, object? lockObj, ILogger? logger, CancellationToken token)
         {
@@ -203,10 +221,23 @@ public class FusionCacheLockerTest
                 Stopwatch.GetTimestamp()));
         }
 
+        /// <summary>
+        /// 获取当前包装的内部实例。
+        /// </summary>
         private IFusionCacheDistributedLocker Inner => _inner
             ?? throw new InvalidOperationException("The Redis locker has not been attached.");
     }
 
+    /// <summary>
+    /// 记录分布式锁观测关联的缓存、锁名称和时间戳。
+    /// </summary>
+    /// <param name="CacheName">缓存名称。</param>
+    /// <param name="CacheInstanceId">缓存实例标识。</param>
+    /// <param name="OperationId">缓存操作标识。</param>
+    /// <param name="Key">租户键。</param>
+    /// <param name="LockName">分布式锁名称。</param>
+    /// <param name="Handle">调度任务句柄。</param>
+    /// <param name="Timestamp">锁操作观测时间戳。</param>
     private sealed record LockObservation(string CacheName, string CacheInstanceId, string OperationId, string Key,
         string LockName, object? Handle, long Timestamp);
 }

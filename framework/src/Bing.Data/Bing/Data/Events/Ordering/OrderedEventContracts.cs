@@ -62,15 +62,15 @@ public sealed class OrderedEventStream
     }
 
     /// <summary>
-    /// 租户标识。
+    /// 获取租户标识。
     /// </summary>
     public string TenantId { get; }
     /// <summary>
-    /// 业务流名称。
+    /// 获取业务流名称。
     /// </summary>
     public string Stream { get; }
     /// <summary>
-    /// 实体标识。
+    /// 获取实体标识。
     /// </summary>
     public string EntityKey { get; }
 }
@@ -83,6 +83,10 @@ public sealed class OrderedEventMessage
     /// <summary>
     /// 初始化一个 <see cref="OrderedEventMessage" /> 类型的实例。
     /// </summary>
+    /// <param name="eventId">事件的标识。</param>
+    /// <param name="sequence">当前事件序列号。</param>
+    /// <param name="payload">当前请求、任务或事件携带的负载数据。</param>
+    /// <param name="contractVersion">用于版本化操作契约的版本号。</param>
     public OrderedEventMessage(string eventId, long sequence, string payload, string contractVersion = null)
     {
         if (string.IsNullOrWhiteSpace(eventId) || eventId.Length > 128)
@@ -98,19 +102,19 @@ public sealed class OrderedEventMessage
     }
 
     /// <summary>
-    /// 事件标识。
+    /// 获取事件标识。
     /// </summary>
     public string EventId { get; }
     /// <summary>
-    /// 连续序号。
+    /// 获取连续序号。
     /// </summary>
     public long Sequence { get; }
     /// <summary>
-    /// 序列化事件内容。
+    /// 获取序列化事件内容。
     /// </summary>
     public string Payload { get; }
     /// <summary>
-    /// 契约版本。
+    /// 获取契约版本。
     /// </summary>
     public string ContractVersion { get; }
 }
@@ -123,6 +127,13 @@ public sealed class OrderedEventStreamState
     /// <summary>
     /// 初始化一个 <see cref="OrderedEventStreamState" /> 类型的实例。
     /// </summary>
+    /// <param name="stream">用于读取内容的流。</param>
+    /// <param name="lastSequence">最近已处理的事件序列号。</param>
+    /// <param name="firstPendingSequence">首个待处理事件的序列号；没有待处理事件时为 null。</param>
+    /// <param name="pendingCount">当前待处理事件数。</param>
+    /// <param name="failed">指示当前操作是否失败。</param>
+    /// <param name="attempts">当前操作已进行的尝试次数。</param>
+    /// <param name="lastError">最近一次操作的错误说明。</param>
     public OrderedEventStreamState(OrderedEventStream stream, long lastSequence, long? firstPendingSequence,
         long pendingCount, bool failed, int attempts, string lastError)
     {
@@ -136,31 +147,31 @@ public sealed class OrderedEventStreamState
     }
 
     /// <summary>
-    /// 业务流。
+    /// 获取业务流。
     /// </summary>
     public OrderedEventStream Stream { get; }
     /// <summary>
-    /// 已处理序号。
+    /// 获取已处理序号。
     /// </summary>
     public long LastSequence { get; }
     /// <summary>
-    /// 首个待处理序号。
+    /// 获取首个待处理序号。
     /// </summary>
     public long? FirstPendingSequence { get; }
     /// <summary>
-    /// 待处理数量。
+    /// 获取待处理数量。
     /// </summary>
     public long PendingCount { get; }
     /// <summary>
-    /// 首个待处理事件是否失败。
+    /// 获取首个待处理事件是否失败。
     /// </summary>
     public bool Failed { get; }
     /// <summary>
-    /// 已记录失败次数。
+    /// 获取已记录失败次数。
     /// </summary>
     public int Attempts { get; }
     /// <summary>
-    /// 最近的安全错误标识。
+    /// 获取最近的安全错误标识。
     /// </summary>
     public string LastError { get; }
 }
@@ -172,16 +183,18 @@ public sealed class OrderedEventStreamState
 public interface IOrderedEventTransaction : IAsyncDisposable
 {
     /// <summary>
-    /// 当前数据库事务。
+    /// 获取当前数据库事务。
     /// </summary>
     DbTransaction Transaction { get; }
     /// <summary>
     /// 提交事务。
     /// </summary>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
     Task CommitAsync(CancellationToken cancellationToken = default);
     /// <summary>
     /// 回滚事务。
     /// </summary>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
     Task RollbackAsync(CancellationToken cancellationToken = default);
 }
 
@@ -218,5 +231,7 @@ public interface IOrderedEventTransactionFactory
     /// <summary>
     /// 开启事务。
     /// </summary>
+    /// <param name="cancellationToken">取消操作的令牌。</param>
+    /// <returns>新开启的业务事务。</returns>
     Task<IOrderedEventTransaction> BeginAsync(CancellationToken cancellationToken = default);
 }

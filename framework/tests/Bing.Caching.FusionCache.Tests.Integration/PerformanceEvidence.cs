@@ -194,9 +194,12 @@ internal sealed class PerformanceMeasurement : IDisposable
     private int _completed;
 
     /// <summary>
-    /// 初始化一个 <see cref="PerformanceMeasurement" /> 类的新实例。
+    /// 初始化一个 <see cref="PerformanceMeasurement" /> 类型的实例。
     /// </summary>
     /// <param name="sampleIntervalMilliseconds">工作集采样间隔，单位为毫秒。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="PerformanceMeasurement" /> 类的新实例。
+    /// </remarks>
     private PerformanceMeasurement(int sampleIntervalMilliseconds)
     {
         _sampleIntervalMilliseconds = sampleIntervalMilliseconds;
@@ -272,9 +275,10 @@ internal sealed class PerformanceMeasurement : IDisposable
         while (Interlocked.CompareExchange(ref _workingSetPeak, value, current) != current);
     }
 
-    /// <summary>
-    /// 停止计时器并释放进程句柄。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>停止计时器并释放进程句柄。</para>
+    /// </remarks>
     public void Dispose()
     {
         if (Interlocked.Exchange(ref _completed, 1) == 0) _timer.Dispose();
@@ -322,12 +326,15 @@ internal sealed class NativeCacheEventObserver : IDisposable
     private int _failSafeCount;
 
     /// <summary>
-    /// 初始化一个 <see cref="NativeCacheEventObserver" /> 类的新实例。
+    /// 初始化一个 <see cref="NativeCacheEventObserver" /> 类型的实例。
     /// </summary>
     /// <param name="cache">要观测的原生缓存实例。</param>
+    ///
     /// <remarks>
     /// 构造时登记命中、未命中和 Fail-Safe 激活事件处理器。
-    /// </remarks>
+    /// <para>
+    /// 初始化一个 <see cref="NativeCacheEventObserver" /> 类的新实例。
+    /// </para></remarks>
     internal NativeCacheEventObserver(IFusionCache cache)
     {
         _events = cache.Events;
@@ -388,9 +395,10 @@ internal sealed class NativeCacheEventObserver : IDisposable
     /// <returns>数据条目返回 <see langword="true" />；元数据条目返回 <see langword="false" />。</returns>
     private static bool IsDataKey(string key) => key.Contains(":d:", StringComparison.Ordinal);
 
-    /// <summary>
-    /// 取消事件订阅并释放观测器。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>取消事件订阅并释放观测器。</para>
+    /// </remarks>
     public void Dispose()
     {
         _events.Hit -= OnHit;
@@ -420,12 +428,15 @@ internal sealed class AdmissionObserver : IDisposable
     internal long PeakActive, PeakWaiting;
 
     /// <summary>
-    /// 初始化一个 <see cref="AdmissionObserver" /> 类的新实例。
+    /// 初始化一个 <see cref="AdmissionObserver" /> 类型的实例。
     /// </summary>
     /// <param name="name">只统计该缓存实例名称的指标。</param>
+    ///
     /// <remarks>
     /// 构造时开始监听 Bing 回源准入指标。
-    /// </remarks>
+    /// <para>
+    /// 初始化一个 <see cref="AdmissionObserver" /> 类的新实例。
+    /// </para></remarks>
     internal AdmissionObserver(string name)
     {
         _listener.InstrumentPublished = (instrument, listener) =>
@@ -454,8 +465,9 @@ internal sealed class AdmissionObserver : IDisposable
         while (Interlocked.CompareExchange(ref peak, value, old) != old);
     }
 
-    /// <summary>
-    /// 停止监听并释放 Meter 订阅。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>停止监听并释放 Meter 订阅。</para>
+    /// </remarks>
     public void Dispose() => _listener.Dispose();
 }

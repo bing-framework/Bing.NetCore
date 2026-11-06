@@ -22,16 +22,22 @@ public abstract class CreationAuditedAggregateRootWithUserKey<TEntity, TKey, TUs
     public virtual TUserKey? CreatorId { get; set; }
 
     /// <summary>
-    /// 初始化一个使用默认主键的 <see cref="CreationAuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}"/>。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化一个使用默认主键的 <see cref="CreationAuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}" />。
+    /// </remarks>
     protected CreationAuditedAggregateRootWithUserKey() : this(default)
     {
     }
 
     /// <summary>
-    /// 使用指定主键初始化创建审计聚合根。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根主键。</param>
+    /// <remarks>
+    /// 使用指定主键初始化创建审计聚合根。
+    /// </remarks>
     protected CreationAuditedAggregateRootWithUserKey(TKey id) : base(id)
     {
     }

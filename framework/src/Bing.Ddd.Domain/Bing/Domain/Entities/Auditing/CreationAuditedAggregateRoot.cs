@@ -41,14 +41,14 @@ public abstract class CreationAuditedAggregateRoot<TEntity, TKey> : AggregateRoo
     public virtual TKey CreatorId { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected CreationAuditedAggregateRoot() : this(default)
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected CreationAuditedAggregateRoot(TKey id) : base(id)

@@ -25,16 +25,22 @@ public abstract class FullAuditedAggregateRootWithUserKey<TEntity, TKey, TUserKe
     public virtual TUserKey? DeleterId { get; set; }
 
     /// <summary>
-    /// 初始化一个使用默认主键的 <see cref="FullAuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}"/>。
+    /// 初始化一个 <see cref="FullAuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化一个使用默认主键的 <see cref="FullAuditedAggregateRootWithUserKey{TEntity, TKey, TUserKey}" />。
+    /// </remarks>
     protected FullAuditedAggregateRootWithUserKey()
     {
     }
 
     /// <summary>
-    /// 使用指定主键初始化完整审计聚合根。
+    /// 初始化一个 <see cref="FullAuditedAggregateRootWithUserKey{TEntity,TKey,TUserKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根主键。</param>
+    /// <remarks>
+    /// 使用指定主键初始化完整审计聚合根。
+    /// </remarks>
     protected FullAuditedAggregateRootWithUserKey(TKey id) : base(id)
     {
     }

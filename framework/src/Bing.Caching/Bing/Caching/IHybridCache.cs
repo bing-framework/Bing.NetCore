@@ -38,6 +38,7 @@ public interface IHybridCache
     /// <returns>缓存命中值或回源工厂返回的值。</returns>
     /// <remarks>
     /// 工厂异常不会被转换成缓存的 null；同一实例内不允许同键递归回源。
+    /// 实现可能限制同实例的不同键嵌套冷回源；FusionCache 实现会拒绝该调用，但允许读取已命中的不同键。
     /// </remarks>
     Task<T> GetOrCreateAsync<T>(string key, Func<CancellationToken, Task<T>> factory,
         CacheOptions options = null, IEnumerable<string> tags = null,

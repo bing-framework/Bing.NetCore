@@ -27,6 +27,9 @@ public sealed class SharedCacheContractTest
     public async Task Provider_SatisfiesSharedContract()
     {
         var configuration = new CacheConfiguration("contract-cs-" + Guid.NewGuid().ToString("N"), "cs");
-        await CacheContractAssertions.VerifyAsync(new CSRedisCacheManager(_client, configuration));
+        var cache = new CSRedisCacheManager(_client, configuration);
+        var peer = new CSRedisCacheManager(_client, configuration);
+        await CacheContractAssertions.VerifyAtomicTrySetAsync(cache, peer);
+        await CacheContractAssertions.VerifyAsync(cache);
     }
 }

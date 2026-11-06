@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Bing.Expressions;
 
 namespace Bing.Data.Queries.Conditions;
@@ -39,7 +39,7 @@ public abstract class SegmentConditionBase<TEntity, TProperty, TValue> : ICondit
     private readonly Boundary _boundary;
 
     /// <summary>
-    /// 初始化一个 <see cref="SegmentConditionBase{TEntity, TProperty, TValue}"/> 类型的实例。
+    /// 初始化一个 <see cref="SegmentConditionBase{TEntity,TProperty,TValue}" /> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>

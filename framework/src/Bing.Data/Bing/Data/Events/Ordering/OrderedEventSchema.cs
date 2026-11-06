@@ -7,8 +7,10 @@ namespace Bing.Data.Events.Ordering;
 public static class OrderedEventSchema
 {
     /// <summary>
-    /// 获取建表脚本。
+    /// 获取有序事件存储的建表脚本。
     /// </summary>
+    /// <param name="database">生成脚本所采用的有序事件数据库类型。</param>
+    /// <returns>指定数据库的事件序号、游标、容量、收件箱、归档表和相关索引创建语句。</returns>
     public static IReadOnlyList<string> GetCreateStatements(OrderedEventDatabase database)
     {
         var mysql = database == OrderedEventDatabase.MySql;

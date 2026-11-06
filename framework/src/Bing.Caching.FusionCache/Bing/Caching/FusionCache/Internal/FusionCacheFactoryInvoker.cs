@@ -73,11 +73,16 @@ internal sealed class FusionCacheFactoryInvoker
     private readonly ILogger? _logger;
 
     /// <summary>
-    /// 初始化一个 <see cref="FusionCacheFactoryInvoker" /> 类的新实例。
+    /// 初始化一个 <see cref="FusionCacheFactoryInvoker" /> 类型的实例。
     /// </summary>
     /// <param name="name">缓存实例名称。</param>
+    ///
     /// <param name="options">提供回源并发、排队与超时预算的配置。</param>
+    ///
     /// <param name="logger">记录准入失败的可选日志记录器。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="FusionCacheFactoryInvoker" /> 类的新实例。
+    /// </remarks>
     internal FusionCacheFactoryInvoker(string name, BingFusionCacheOptions options, ILogger? logger)
     {
         _name = name;

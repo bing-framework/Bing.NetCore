@@ -40,14 +40,14 @@ public abstract class CreationAuditedEntity<TEntity, TKey> : EntityBase<TEntity,
     public virtual TKey CreatorId { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected CreationAuditedEntity()
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedEntity{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     protected CreationAuditedEntity(TKey id) : base(id)

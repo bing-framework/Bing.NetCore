@@ -24,7 +24,7 @@ public abstract class SeedDataInitializerBase<TEntity, TKey> : ISeedDataInitiali
     public virtual int Order => 0;
 
     /// <summary>
-    /// 初始化一个 <see cref="SeedDataInitializerBase{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="SeedDataInitializerBase{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="rootProvider">服务提供程序</param>
     protected SeedDataInitializerBase(IServiceProvider rootProvider) => _rootProvider = rootProvider;

@@ -7,6 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../CacheContractAssertions.cs" Link="CacheContractAssertions.cs" />
+    <Compile Include="../HybridCacheContractAssertions.cs" Link="HybridCacheContractAssertions.cs" />
     <Compile Include="../../../samples/Bing.Samples.FusionCache/SampleFactoryLifetime.cs" Link="SampleFactoryLifetime.cs" />
     <Compile Include="../../../samples/Bing.Samples.FusionCache/SampleCacheWarmup.cs" Link="SampleCacheWarmup.cs" />
     <ProjectReference Include="../../src/Bing.Caching.FusionCache/Bing.Caching.FusionCache.csproj" />

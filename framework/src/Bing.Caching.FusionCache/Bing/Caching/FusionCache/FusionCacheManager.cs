@@ -28,9 +28,11 @@ internal sealed class FusionCacheManager : IHybridCache
     private readonly FusionCacheEntryOptionsMapper _options;
 
     /// <summary>
-    /// 只读查询专用的私有快照。FusionCache 2.9 的 TryGet 路径只读取这些选项，
-    /// 不向回源工厂或 Backplane 暴露；禁止与写入、回源操作共享，避免热路径重复复制。
+    /// 只读查询专用的 FusionCache 选项快照。
     /// </summary>
+    /// <remarks>
+    /// TryGet 路径只读取这些选项，不向回源工厂或 Backplane 暴露；禁止与写入、回源操作共享，避免热路径重复复制。
+    /// </remarks>
     private readonly FusionCacheEntryOptions _readOptions;
 
     /// <summary>
@@ -44,13 +46,20 @@ internal sealed class FusionCacheManager : IHybridCache
     private readonly FusionCacheEntryOptions _tagOptions;
 
     /// <summary>
-    /// 初始化一个 <see cref="FusionCacheManager" /> 类的新实例。
+    /// 初始化一个 <see cref="FusionCacheManager" /> 类型的实例。
     /// </summary>
     /// <param name="cache">已配置的官方缓存实例。</param>
+    ///
     /// <param name="options">注册时冻结的 Bing 缓存配置。</param>
+    ///
     /// <param name="tagOptions">标签与清除操作使用的元数据选项。</param>
+    ///
     /// <param name="logger">记录回源准入失败的可选日志记录器。</param>
+    ///
     /// <exception cref="InvalidOperationException">首次 Backplane 订阅失败时抛出。</exception>
+    /// <remarks>
+    /// 初始化一个 <see cref="FusionCacheManager" /> 类的新实例。
+    /// </remarks>
     internal FusionCacheManager(IFusionCache cache, BingFusionCacheOptions options, FusionCacheEntryOptions tagOptions, ILogger? logger)
     {
         _cache = cache;

@@ -24,6 +24,21 @@ public class CacheKey
     public CacheKey(string key, params object[] parameters) => _key = string.Format(key, parameters);
 
     /// <summary>
+    /// 使用固定的区域性规则创建格式化缓存键。
+    /// </summary>
+    /// <param name="format">包含 <see cref="string.Format(string,object[])"/> 占位符的缓存键格式字符串。</param>
+    /// <param name="parameters">用于填充缓存键格式字符串的参数；可格式化参数使用不依赖当前区域性的规则。</param>
+    /// <returns>已格式化且可继续设置前缀的缓存键。</returns>
+    /// <remarks>
+    /// 与构造函数不同，此方法使用固定的格式化规则，适用于需要在不同区域设置下生成相同缓存键的场景。
+    /// </remarks>
+    public static CacheKey CreateInvariant(string format, params object[] parameters)
+    {
+        var formattedKey = string.Format(global::System.Globalization.CultureInfo.InvariantCulture, format, parameters);
+        return new CacheKey { Key = formattedKey };
+    }
+
+    /// <summary>
     /// 获取或设置包含前缀的最终缓存键。
     /// </summary>
     /// <remarks>

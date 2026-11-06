@@ -1,4 +1,4 @@
-﻿using Bing.Domain.Entities.Events;
+using Bing.Domain.Entities.Events;
 using Bing.Validation;
 
 namespace Bing.Domain.Entities;
@@ -46,20 +46,20 @@ public abstract class BasicAggregateRoot<TEntity, TKey> : EntityBase<TEntity, TK
     private List<DomainEvent> _domainEvents;
 
     /// <summary>
-    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}" /> 类型的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <remarks>
-    /// 初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例，并使用默认标识。
+    /// 初始化 <see cref="BasicAggregateRoot{TEntity,TKey}" /> 的实例，并使用默认标识。
     /// </remarks>
     protected BasicAggregateRoot() : this(default)
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity, TKey}" /> 类型的实例。
+    /// 初始化一个 <see cref="BasicAggregateRoot{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <remarks>
-    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity,TKey}"/> 的实例。
+    /// 使用指定标识初始化 <see cref="BasicAggregateRoot{TEntity,TKey}" /> 的实例。
     /// </remarks>
     /// <param name="id">聚合根标识。</param>
     protected BasicAggregateRoot(TKey id) : base(id)

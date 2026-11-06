@@ -58,14 +58,14 @@ public abstract class FullAuditedAggregateRootWithName<TEntity, TKey> : FullAudi
     public virtual string Deleter { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="FullAuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="FullAuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected FullAuditedAggregateRootWithName()
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="FullAuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="FullAuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected FullAuditedAggregateRootWithName(TKey id) : base(id)

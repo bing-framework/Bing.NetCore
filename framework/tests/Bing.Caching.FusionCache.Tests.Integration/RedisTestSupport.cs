@@ -12,11 +12,13 @@ namespace Bing.Caching.FusionCache.Tests.Integration;
 public sealed class RedisFactAttribute : FactAttribute
 {
     /// <summary>
-    /// 初始化一个 <see cref="RedisFactAttribute" /> 类的新实例。
+    /// 初始化一个 <see cref="RedisFactAttribute" /> 类型的实例。
     /// </summary>
     /// <remarks>
     /// 未启用集成测试或未配置可丢弃 Redis 端点时，将测试标记为跳过。
-    /// </remarks>
+    /// <para>
+    /// 初始化一个 <see cref="RedisFactAttribute" /> 类的新实例。
+    /// </para></remarks>
     public RedisFactAttribute()
     {
         if (Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS") != "true" ||
@@ -31,11 +33,13 @@ public sealed class RedisFactAttribute : FactAttribute
 public sealed class RedisContainerFactAttribute : FactAttribute
 {
     /// <summary>
-    /// 初始化一个 <see cref="RedisContainerFactAttribute" /> 类的新实例。
+    /// 初始化一个 <see cref="RedisContainerFactAttribute" /> 类型的实例。
     /// </summary>
     /// <remarks>
     /// 未启用集成测试、容器名称不符合命名约定或端点不是回环地址时，将故障注入测试标记为跳过。
-    /// </remarks>
+    /// <para>
+    /// 初始化一个 <see cref="RedisContainerFactAttribute" /> 类的新实例。
+    /// </para></remarks>
     public RedisContainerFactAttribute()
     {
         if (Environment.GetEnvironmentVariable("RUN_INTEGRATION_TESTS") != "true" ||
@@ -106,9 +110,12 @@ internal sealed class CacheNode : IAsyncDisposable
     private readonly Task<string> _errors;
 
     /// <summary>
-    /// 初始化一个 <see cref="CacheNode" /> 类的新实例。
+    /// 初始化一个 <see cref="CacheNode" /> 类型的实例。
     /// </summary>
     /// <param name="process">已启动的探测子进程。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="CacheNode" /> 类的新实例。
+    /// </remarks>
     private CacheNode(Process process)
     {
         _process = process;
@@ -188,9 +195,10 @@ internal sealed class CacheNode : IAsyncDisposable
         Assert.NotEqual(0, _process.ExitCode);
     }
 
-    /// <summary>
-    /// 发送退出命令并等待探测进程结束，必要时强制终止。
-    /// </summary>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>发送退出命令并等待探测进程结束，必要时强制终止。</para>
+    /// </remarks>
     public async ValueTask DisposeAsync()
     {
         if (!_process.HasExited)

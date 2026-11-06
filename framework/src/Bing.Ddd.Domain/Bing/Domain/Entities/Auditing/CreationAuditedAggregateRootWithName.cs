@@ -34,14 +34,14 @@ public abstract class CreationAuditedAggregateRootWithName<TEntity, TKey> : Crea
     public virtual string Creator { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     protected CreationAuditedAggregateRootWithName() : this(default)
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithName{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="CreationAuditedAggregateRootWithName{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="id">聚合根标识。</param>
     protected CreationAuditedAggregateRootWithName(TKey id) : base(id)

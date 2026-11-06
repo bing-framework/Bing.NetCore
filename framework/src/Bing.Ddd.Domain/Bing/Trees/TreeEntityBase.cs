@@ -1,4 +1,4 @@
-﻿using Bing.Domain.Entities;
+using Bing.Domain.Entities;
 using Bing.Extensions;
 using Bing.Helpers;
 using Bing.Validation;
@@ -53,7 +53,7 @@ public abstract class TreeEntityBase<TEntity, TKey, TParentId> : BasicAggregateR
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// 初始化一个 <see cref="TreeEntityBase{TEntity, TKey, TParentId}"/> 类型的实例。
+    /// 初始化一个 <see cref="TreeEntityBase{TEntity,TKey,TParentId}" /> 类型的实例。
     /// </summary>
     /// <param name="id">实体标识。</param>
     /// <param name="path">实体物化路径。</param>
@@ -76,6 +76,15 @@ public abstract class TreeEntityBase<TEntity, TKey, TParentId> : BasicAggregateR
     /// </remarks>
     public void InitPath(TEntity parent)
     {
+        // 数值主键的默认值不是树节点；Identity 必须先 Flush 再构造路径。
+        if (Id is long longId && longId <= 0 || Id is int intId && intId <= 0)
+            throw new InvalidOperationException("树节点必须取得最终主键后才能构建路径。");
+        if (parent != null && (ReferenceEquals(this, parent) || EqualityComparer<TKey>.Default.Equals(Id, parent.Id)))
+            throw new InvalidOperationException("节点不能成为自身的父节点。");
+        if (parent != null && (parent.Id is long parentLong && (parentLong <= 0 || string.IsNullOrWhiteSpace(parent.Path)) || parent.Id is int parentInt && (parentInt <= 0 || string.IsNullOrWhiteSpace(parent.Path))))
+            throw new InvalidOperationException("父节点必须先取得主键并构建路径。");
+        if (parent != null && (Id is long || Id is int) && parent.Path.Split(',').Contains(Id.ToString()))
+            throw new InvalidOperationException("父路径包含当前节点，不能形成树依赖环。");
         if (Equals(parent, null))
         {
             Level = 1;

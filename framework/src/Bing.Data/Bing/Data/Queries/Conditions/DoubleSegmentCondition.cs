@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Bing.Data.Queries.Conditions;
 
@@ -10,7 +10,7 @@ namespace Bing.Data.Queries.Conditions;
 public class DoubleSegmentCondition<TEntity, TProperty> : SegmentConditionBase<TEntity, TProperty, double> where TEntity : class
 {
     /// <summary>
-    /// 初始化一个 <see cref="DoubleSegmentCondition{TEntity, TProperty}"/> 类型的实例。
+    /// 初始化一个 <see cref="DoubleSegmentCondition{TEntity,TProperty}" /> 类型的实例。
     /// </summary>
     /// <param name="propertyExpression">属性表达式</param>
     /// <param name="min">最小值</param>

@@ -21,7 +21,6 @@ public interface IInventoryOrderProjectionStore
     /// <param name="status">库存整单状态。</param>
     /// <param name="payload">原始事件正文。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示投影写入的异步操作。</returns>
     Task SaveAsync(DbTransaction transaction, string consumer, OrderedEventStream stream,
         OrderedEventMessage message, string status, string payload,
         CancellationToken cancellationToken = default);

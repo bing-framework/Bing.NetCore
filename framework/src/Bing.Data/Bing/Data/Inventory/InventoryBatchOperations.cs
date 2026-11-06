@@ -71,21 +71,12 @@ public static class InventoryBatchOperations
         {
         }
 
-        /// <summary>
-        /// 比较两个库存请求键。
-        /// </summary>
-        /// <param name="x">第一个库存请求键。</param>
-        /// <param name="y">第二个库存请求键。</param>
-        /// <returns>两个字段均按 Ordinal 规则相等时返回 true。</returns>
+        /// <inheritdoc />
         public bool Equals((string TenantId, string RequestId) x, (string TenantId, string RequestId) y) =>
             StringComparer.Ordinal.Equals(x.TenantId, y.TenantId) &&
             StringComparer.Ordinal.Equals(x.RequestId, y.RequestId);
 
-        /// <summary>
-        /// 计算库存请求键的哈希值。
-        /// </summary>
-        /// <param name="obj">需要计算哈希值的库存请求键。</param>
-        /// <returns>基于租户和请求标识的哈希值。</returns>
+        /// <inheritdoc />
         public int GetHashCode((string TenantId, string RequestId) obj)
         {
             unchecked
