@@ -5,6 +5,9 @@ using Bing.Biz.FileManagement.EntityFrameworkCore;
 using Bing.Biz.FileManagement.FreeSql;
 using Bing.FileStorage;
 using Bing.FileStorage.FileSystem;
+using Bing.FileStorage.AliyunDrive;
+using Bing.FileStorage.Pan115;
+using Bing.Biz.FileManagement.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +36,16 @@ foreach (var store in section.GetSection("Stores").GetChildren())
     if (store["Provider"] == "FileSystem") services.AddBingFileSystemStorage(store.Key, o => store.Bind(o));
     else if (store["Provider"] == "Minio") services.AddBingMinioStorage(store.Key, o => store.Bind(o));
     else if (store["Provider"] == "Qiniu") services.AddBingQiniuStorage(store.Key, o => store.Bind(o));
+    else if (store["Provider"] == "AliyunOss") services.AddBingAliyunOssStorage(store.Key, o => store.Bind(o));
     else throw new ArgumentException("未知存储 Provider。");
+}
+if (command is not ("schema" or "local-cleanup") && section.GetSection("RemoteDrives").GetChildren().Any())
+{
+    services.AddBingRemoteDriveCredentialProtection(section["KeyRingPath"] ?? throw new ArgumentException("需要 KeyRingPath。"), section["KeyRingApplicationName"] ?? "Bing.FileManagement");
+    foreach (var template in section.GetSection("RemoteDrives").GetChildren())
+        if (template["Provider"] == "AliyunDrive") services.AddBingAliyunDriveStorage(template.Key, o => template.Bind(o));
+        else if (template["Provider"] == "Pan115") services.AddBingPan115Storage(template.Key, o => template.Bind(o));
+        else throw new ArgumentException("未知网盘 Provider。");
 }
 services.AddBingFileManagement(o => section.Bind(o));
 if (isFreeSql)
@@ -89,6 +101,8 @@ switch (command)
         break;
     case "verify":
         var verifyEntry = await storeService.FindAsync(Guid.Parse(options["--file-id"]), deadline.Token) ?? throw new ArgumentException("文件不存在。");
+        if (verifyEntry.File.Ownership == Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal)
+            throw new ArgumentException("管理工具不能读取个人文件；请由所有者通过应用验证或复制发布。");
         var verifyBackend = provider.GetRequiredService<IFileStorageFactory>().GetStorage(verifyEntry.File.StoreName, verifyEntry.File.Scope());
         var properties = await verifyBackend.GetPropertiesAsync(verifyEntry.File.Address(), deadline.Token);
         var digest = await FileMigrationService.HashAsync(verifyBackend, verifyEntry.File.Address(), deadline.Token);

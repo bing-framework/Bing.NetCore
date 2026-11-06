@@ -9,6 +9,8 @@ using Bing.Biz.FileManagement.AspNetCore;
 using Bing.Biz.FileManagement.EntityFrameworkCore;
 using Bing.FileStorage;
 using Bing.FileStorage.FileSystem;
+using Bing.FileStorage.AliyunDrive;
+using Bing.FileStorage.Pan115;
 using Bing.MultiTenancy;
 using Bing.Users;
 using Microsoft.AspNetCore.Authentication;
@@ -23,7 +25,7 @@ builder.WebHost.UseUrls("http://127.0.0.1:" + (builder.Configuration["FileDemo:P
 var data = Path.GetFullPath(builder.Configuration["FileDemo:DataRoot"] ?? Path.Combine(AppContext.BaseDirectory, "demo-data"));
 Directory.CreateDirectory(data);
 var backend = builder.Configuration["FileDemo:Provider"] ?? "local";
-if (backend is not ("local" or "minio" or "qiniu")) throw new InvalidOperationException("FileDemo:Provider 仅支持 local、minio 或 qiniu。");
+if (backend is not ("local" or "minio" or "qiniu" or "oss")) throw new InvalidOperationException("FileDemo:Provider 仅支持 local、minio、qiniu 或 oss；网盘通过 RemoteDrives 连接。");
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DemoIdentity>();
 builder.Services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<DemoIdentity>());
@@ -32,7 +34,7 @@ builder.Services.AddScoped<IFileAccessAuthorizer, DemoBusinessAuthorizer>();
 builder.Services.AddAuthentication("demo").AddScheme<AuthenticationSchemeOptions, DemoAuthenticationHandler>("demo", _ => { });
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
-var defaultStore = backend switch { "minio" => "minio-v1", "qiniu" => "qiniu-v1", _ => "local-v1" };
+var defaultStore = backend switch { "minio" => "minio-v1", "qiniu" => "qiniu-v1", "oss" => "oss-v1", _ => "local-v1" };
 builder.Services.AddBingFileStorage(o => o.DefaultStore = defaultStore);
 builder.Services.AddBingFileSystemStorage("local-v1", o => o.RootPath = Path.Combine(data, "objects"));
 if (backend == "minio")
@@ -54,6 +56,11 @@ else if (backend == "qiniu")
 {
     builder.Services.AddBingQiniuStorage("qiniu-v1", o => builder.Configuration.GetSection("FileDemo:Qiniu").Bind(o));
 }
+else if (backend == "oss") builder.Services.AddBingAliyunOssStorage("oss-v1", o => builder.Configuration.GetSection("FileDemo:Oss").Bind(o));
+foreach (var template in builder.Configuration.GetSection("FileDemo:RemoteDrives").GetChildren())
+    if (template["Provider"] == "AliyunDrive") builder.Services.AddBingAliyunDriveStorage(template.Key, o => template.Bind(o));
+    else if (template["Provider"] == "Pan115") builder.Services.AddBingPan115Storage(template.Key, o => template.Bind(o));
+    else throw new InvalidOperationException("未知网盘 Provider。");
 builder.Services.AddBingFileManagement(o => { o.CleanupInterval = TimeSpan.FromSeconds(1); o.Containers["public"] = new() { Visibility = FileVisibility.Public }; });
 builder.Services.AddSingleton<IFileLifecycleEventHandler>(new DemoFileEventHandler(Path.Combine(data, "events")));
 var freeSql = builder.Configuration["FileDemo:Orm"] == "FreeSql";
@@ -89,7 +96,7 @@ public sealed class DemoAuthenticationHandler : AuthenticationHandler<Authentica
         if (!manager && Request.Headers.Authorization != "Bearer demo-upload-token") return Task.FromResult(AuthenticateResult.NoResult());
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, "demo-user"), new("tenant", "demo-tenant"),
             new("permission", "files.upload"), new("permission", "files.publish") };
-        if (manager) claims.Add(new Claim("permission", "files.manage"));
+        if (manager) { claims.Add(new Claim("permission", "files.manage")); claims.Add(new Claim("permission", "files.connections.manage")); }
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name)), Scheme.Name)));
     }
 }

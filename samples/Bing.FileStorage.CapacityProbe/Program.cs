@@ -7,6 +7,9 @@ using Amazon.S3.Model;
 using Bing.FileStorage;
 using Bing.FileStorage.CapacityProbe;
 using Bing.FileStorage.FileSystem;
+using Bing.FileStorage.AliyunDrive;
+using Bing.FileStorage.Pan115;
+using Bing.FileStorage.RemoteDrive;
 using Microsoft.Extensions.DependencyInjection;
 
 Console.InputEncoding = new UTF8Encoding(false);
@@ -15,7 +18,9 @@ var arguments = args.Chunk(2).ToDictionary(x => x[0], x => x.Length == 2 ? x[1] 
 var backendName = arguments.GetValueOrDefault("--backend", "local");
 var gib = int.Parse(arguments.GetValueOrDefault("--gib", "1"));
 var allowQiniu = arguments.GetValueOrDefault("--allow-qiniu") == "true";
-if (gib is not (1 or 100) || backendName is not ("local" or "minio" or "qiniu")) throw new ArgumentException("只支持 local/minio/qiniu 与 1/100 GiB。");
+if (gib is not (1 or 100) || backendName is not ("local" or "minio" or "qiniu" or "oss" or "aliyundrive" or "pan115")) throw new ArgumentException("不支持的后端或容量，只接受 1/100 GiB。");
+var driveProbe = backendName is "aliyundrive" or "pan115";
+if ((driveProbe || backendName == "oss") && arguments.GetValueOrDefault("--allow-cloud") != "true") throw new ArgumentException("云端容量测试需要 --allow-cloud true 与专用测试空间。");
 if (backendName == "qiniu" && !allowQiniu) throw new ArgumentException("七牛容量测试会产生真实流量与存储费用；需显式传入 --allow-qiniu true。");
 var parent = Path.GetFullPath(arguments.GetValueOrDefault("--root", "H:/temp/Bing.FileStorage.Capacity"));
 var evidence = Path.GetFullPath(arguments.GetValueOrDefault("--evidence", Path.Combine(parent, backendName + "-" + gib + "gib.json")));
@@ -33,7 +38,7 @@ var runId = Guid.NewGuid().ToString("N");
 var runRoot = Path.Combine(parent, runId);
 var container = "bing-capacity-" + runId;
 var services = new ServiceCollection();
-services.AddBingFileStorage(o => { o.DefaultStore = backendName; o.Containers.Clear(); o.Containers.Add(container); });
+services.AddBingFileStorage(o => { o.DefaultStore = driveProbe ? "capacity-stage" : backendName; o.Containers.Clear(); o.Containers.Add(container); o.Containers.Add("attachments"); });
 IAmazonS3? admin = null;
 if (backendName == "local") services.AddBingFileSystemStorage("local", o => o.RootPath = runRoot);
 else if (backendName == "minio")
@@ -46,7 +51,7 @@ else if (backendName == "minio")
     admin = new AmazonS3Client(new BasicAWSCredentials(access, secret), new AmazonS3Config { ServiceURL = endpoint, ForcePathStyle = true, AuthenticationRegion = "us-east-1" });
     await admin.PutBucketAsync(new PutBucketRequest { BucketName = container });
 }
-else
+else if (backendName == "qiniu")
 {
     var endpoint = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_QINIU_ENDPOINT");
     if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var endpointUri) || endpointUri.Scheme != Uri.UriSchemeHttps)
@@ -71,8 +76,22 @@ else
         o.ContainerBuckets[container] = bucket;
     });
 }
+else if (backendName == "oss")
+{
+    services.AddBingAliyunOssStorage("oss", o =>
+    {
+        o.Endpoint = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_OSS_ENDPOINT");
+        o.Region = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_OSS_REGION") ?? throw new ArgumentException("需要 OSS REGION。");
+        o.AccessKeyId = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_OSS_ACCESS_KEY_ID");
+        o.AccessKeySecret = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_OSS_ACCESS_KEY_SECRET");
+        o.StorageNamespace = "bing-capacity-probe";
+        o.ContainerBuckets[container] = Environment.GetEnvironmentVariable("BING_FILE_STORAGE_OSS_BUCKET") ?? throw new ArgumentException("需要 OSS 测试 Bucket。");
+    });
+}
+else RemoteDriveCapacitySetup.Register(services, arguments, runRoot, backendName);
 using var provider = services.BuildServiceProvider();
-var storage = provider.GetRequiredService<IFileStorageFactory>().GetStorage(backendName, StorageScope.ForTenant("capacity-probe"));
+var storage = driveProbe ? await RemoteDriveCapacitySetup.ResolveAsync(provider, arguments, backendName)
+    : provider.GetRequiredService<IFileStorageFactory>().GetStorage(backendName, StorageScope.ForTenant("capacity-probe"));
 var multipart = (IMultipartFileStorage)storage;
 using var deadline = new CancellationTokenSource(TimeSpan.FromHours(2));
 Console.CancelKeyPress += (_, e) => { e.Cancel = true; deadline.Cancel(); };
@@ -170,9 +189,10 @@ finally
         os = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
         providerAssemblySha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(await File.ReadAllBytesAsync(
             backendName == "minio" ? typeof(BingS3StorageOptions).Assembly.Location :
-            backendName == "qiniu" ? typeof(BingQiniuStorageOptions).Assembly.Location : typeof(FileSystemStorageBackend).Assembly.Location))),
-        s3ProviderAssemblyFullName = backendName == "local" ? null : typeof(BingS3StorageOptions).Assembly.FullName,
-        s3ProviderAssemblySha256 = backendName == "local" ? null : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            backendName == "qiniu" ? typeof(BingQiniuStorageOptions).Assembly.Location : backendName == "oss" ? typeof(BingAliyunOssStorageOptions).Assembly.Location :
+            backendName == "aliyundrive" ? typeof(AliyunDriveClient).Assembly.Location : backendName == "pan115" ? typeof(Pan115Client).Assembly.Location : typeof(FileSystemStorageBackend).Assembly.Location))),
+        s3ProviderAssemblyFullName = backendName is not ("minio" or "qiniu") ? null : typeof(BingS3StorageOptions).Assembly.FullName,
+        s3ProviderAssemblySha256 = backendName is not ("minio" or "qiniu") ? null : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
             await File.ReadAllBytesAsync(typeof(BingS3StorageOptions).Assembly.Location))),
         qiniuFacadeType = backendName == "qiniu" ? typeof(BingQiniuStorageOptions).FullName : null,
         qiniuFacadeAssemblyFullName = backendName == "qiniu" ? typeof(BingQiniuStorageOptions).Assembly.FullName : null,

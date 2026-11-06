@@ -39,8 +39,8 @@ internal static class CapacityProbeDiskSpace
         if (partSize <= 0) throw new ArgumentOutOfRangeException(nameof(partSize));
         if (maxActualParallelism <= 0) throw new ArgumentOutOfRangeException(nameof(maxActualParallelism));
 
-        var isLocal = string.Equals(backendName, "local", StringComparison.Ordinal);
-        if (!isLocal && backendName is not ("minio" or "qiniu"))
+        var isLocal = backendName is "local" or "aliyundrive" or "pan115";
+        if (!isLocal && backendName is not ("minio" or "qiniu" or "oss"))
             throw new ArgumentException("不支持的容量探针 Backend。", nameof(backendName));
 
         var directory = Path.GetFullPath(isLocal ? rootDirectory : tempDirectory);

@@ -6,6 +6,9 @@
     <ProjectReference Include="../../framework/src/Bing.FileStorage.FileSystem/Bing.FileStorage.FileSystem.csproj" />
     <ProjectReference Include="../../framework/src/Bing.FileStorage.Minio/Bing.FileStorage.Minio.csproj" />
     <ProjectReference Include="../../framework/src/Bing.FileStorage.Qiniu/Bing.FileStorage.Qiniu.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.AliyunOss/Bing.FileStorage.AliyunOss.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.AliyunDrive/Bing.FileStorage.AliyunDrive.csproj" />
+    <ProjectReference Include="../../framework/src/Bing.FileStorage.Pan115/Bing.FileStorage.Pan115.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.36" />
   </ItemGroup>
   <ItemGroup>
