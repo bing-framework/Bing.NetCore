@@ -2,6 +2,7 @@
 
 using System;
 using System.Data;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -73,6 +74,39 @@ public sealed class AdminFilePermissionInitializationTests
         }
     }
 
+    [Fact]
+    public async Task ResourceQueries_PreserveMappedIds_ForAllAndRoleFilteredProjections()
+    {
+        await using var environment = new AdminFilePermissionInitializationTestEnvironment();
+        var startupProbe = new StartupProbe();
+        using var host = environment.BuildHost(startupProbe);
+        await environment.InitializeDatabaseAsync(host.Services);
+        var applicationId = await environment.SeedAdminApplicationAsync(host.Services);
+        await AdminFileDeployment.TryRunAsync(new[] { "files", "initialize-permissions", "--apply" },
+            _ => environment.BuildHost(startupProbe));
+        using var scope = host.Services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IResourcePoStore>();
+        var modules = await store.GetModulesAsync(applicationId);
+        var module = Assert.Single(modules);
+        Assert.NotEqual(Guid.Empty, module.Id);
+        var operations = await store.GetOperationsAsync(applicationId);
+        Assert.All(operations, operation => Assert.NotEqual(Guid.Empty, operation.Id));
+        Assert.Equal(module.Id, Assert.Single(await store.GetChildrenModuleAsync(applicationId, null)).Id);
+        var roleId = Guid.NewGuid();
+        var permissions = scope.ServiceProvider.GetRequiredService<IPermissionRepository>();
+        foreach (var resource in modules.Concat(operations))
+            await permissions.AddAsync(new Permission(Guid.NewGuid())
+            {
+                RoleId = roleId, ResourceId = resource.Id, IsDeny = false
+            });
+        await scope.ServiceProvider.GetRequiredService<IAdminUnitOfWork>().CommitAsync();
+        Assert.Equal(module.Id, Assert.Single(await store.GetModulesAsync(applicationId, new List<Guid> { roleId })).Id);
+        Assert.Equal(operations.Select(x => x.Id).OrderBy(x => x),
+            (await store.GetOperationsAsync(applicationId, new List<Guid> { roleId })).Select(x => x.Id).OrderBy(x => x));
+        Assert.Empty(await store.GetModulesAsync(applicationId, new List<Guid> { Guid.NewGuid() }));
+        Assert.Empty(await store.GetOperationsAsync(applicationId, new List<Guid> { Guid.NewGuid() }));
+    }
+
     private static async Task AssertResourcesPersistedAsync(IServiceProvider services,
         AdminFilePermissionInitializationTestEnvironment environment, Guid applicationId)
     {
@@ -84,6 +118,7 @@ public sealed class AdminFilePermissionInitializationTests
         Assert.Equal(applicationId, (await applications.GetByCodeAsync(ApplicationCode.Admin))!.Id);
         var persistedModules = await modules.GetModulesAsync(applicationId);
         var module = Assert.Single(persistedModules);
+        Assert.NotEqual(Guid.Empty, module.Id);
         Assert.Equal(AdminFilePermissionCatalog.ModuleUri, module.Url);
         Assert.Equal<Guid?>(applicationId, module.ApplicationId);
 
@@ -95,13 +130,18 @@ public sealed class AdminFilePermissionInitializationTests
             AdminFilePermissionCatalog.Publish,
             AdminFilePermissionCatalog.Manage,
             AdminFilePermissionCatalog.Host,
-            AdminFilePermissionCatalog.ManageUserInfoAttachments
+            AdminFilePermissionCatalog.ManageUserInfoAttachments,
+            AdminFilePermissionCatalog.ManageConnections
         }.OrderBy(code => code, StringComparer.Ordinal).ToArray();
         Assert.Equal(expectedCodes,
             definitions.Select(definition => definition.Code).OrderBy(code => code, StringComparer.Ordinal).ToArray());
         Assert.Equal(expectedCodes,
             operations.Select(operation => operation.Code).OrderBy(code => code, StringComparer.Ordinal).ToArray());
-        Assert.All(operations, operation => Assert.Equal(module.Id, operation.ModuleId));
+        Assert.All(operations, operation =>
+        {
+            Assert.NotEqual(Guid.Empty, operation.Id);
+            Assert.Equal(module.Id, operation.ModuleId);
+        });
         Assert.Equal(0L, await environment.CountPermissionRecordsAsync(services));
     }
 
@@ -197,6 +237,7 @@ public sealed class AdminFilePermissionInitializationTests
             services.AddScoped<IApplicationRepository, Bing.Admin.Data.Repositories.Systems.ApplicationRepository>();
             services.AddScoped<IModuleRepository, Bing.Admin.Data.Repositories.Systems.ModuleRepository>();
             services.AddScoped<IOperationRepository, Bing.Admin.Data.Repositories.Systems.OperationRepository>();
+            services.AddScoped<IPermissionRepository, Bing.Admin.Data.Repositories.Systems.PermissionRepository>();
             services.AddBingAdminFileStoragePermissions();
             services.AddSingleton<IHostedService>(startupProbe);
         }
@@ -220,7 +261,7 @@ public sealed class AdminFilePermissionInitializationTests
             _orm.CodeFirst.Entity<ResourcePo>(entity =>
             {
                 entity.ToTable("AdminTestResources");
-                entity.Property(resource => resource.Id).HasColumnName("Id");
+                entity.Property(resource => resource.Id).HasColumnName("ResourceId");
                 entity.Property(resource => resource.Path).HasColumnName("Path");
                 entity.Property(resource => resource.Level).HasColumnName("Level");
             });
@@ -331,7 +372,7 @@ public sealed class AdminFilePermissionInitializationTests
                 {
                     entity.ToTable("AdminTestResources");
                     entity.HasKey(resource => resource.Id);
-                    entity.Property(resource => resource.Id).HasColumnName("Id");
+                    entity.Property(resource => resource.Id).HasColumnName("ResourceId");
                     entity.Property(resource => resource.Path).HasColumnName("Path");
                     entity.Property(resource => resource.Level).HasColumnName("Level");
                     entity.HasQueryFilter(resource => !resource.IsDeleted);
@@ -359,7 +400,7 @@ public sealed class AdminFilePermissionInitializationTests
                 modelBuilder.Entity<ResourcePo>(entity =>
                 {
                     entity.ToTable("AdminTestResources");
-                    entity.Property(resource => resource.Id).HasColumnName("Id");
+                    entity.Property(resource => resource.Id).HasColumnName("ResourceId");
                     entity.Property(resource => resource.Path).HasColumnName("Path");
                     entity.Property(resource => resource.Level).HasColumnName("Level");
                 });

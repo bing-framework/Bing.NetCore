@@ -11,6 +11,8 @@ using Bing.MultiTenancy;
 using Bing.Core.Modularity;
 using Bing.FileStorage;
 using Bing.FileStorage.FileSystem;
+using Bing.FileStorage.AliyunDrive;
+using Bing.FileStorage.Pan115;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Configuration;
@@ -51,11 +53,28 @@ public partial class FileStorageModule : BingModule
                 services.AddBingMinioStorage(store.Key, options => store.Bind(options));
             else if (string.Equals(store["Provider"], "Qiniu", StringComparison.OrdinalIgnoreCase))
                 services.AddBingQiniuStorage(store.Key, options => store.Bind(options));
+            else if (string.Equals(store["Provider"], "AliyunOss", StringComparison.OrdinalIgnoreCase))
+                services.AddBingAliyunOssStorage(store.Key, options => store.Bind(options));
             else if (string.Equals(store["Provider"], "FileSystem", StringComparison.OrdinalIgnoreCase))
                 services.AddBingFileSystemStorage(store.Key, options => store.Bind(options));
             else throw new InvalidOperationException("未知文件存储 Provider：" + store["Provider"]);
         }
         if (count == 0) throw new InvalidOperationException("启用文件管理必须显式配置 FileManagement:Stores 持久存储。");
+        var templates = section.GetSection("RemoteDrives").GetChildren().ToArray();
+        var keyRingPath = section["KeyRingPath"];
+        // 普通存储的查询游标和应用下载授权也依赖密钥，显式配置不能只在网盘模式生效。
+        if (templates.Length != 0 || !string.IsNullOrWhiteSpace(keyRingPath))
+            services.AddBingRemoteDriveCredentialProtection(keyRingPath ?? throw new InvalidOperationException("网盘需要 FileManagement:KeyRingPath。"),
+                section["KeyRingApplicationName"] ?? "Bing.FileManagement");
+        if (templates.Length != 0)
+        {
+            foreach (var template in templates)
+                if (string.Equals(template["Provider"], "AliyunDrive", StringComparison.OrdinalIgnoreCase))
+                    services.AddBingAliyunDriveStorage(template.Key, options => template.Bind(options));
+                else if (string.Equals(template["Provider"], "Pan115", StringComparison.OrdinalIgnoreCase))
+                    services.AddBingPan115Storage(template.Key, options => template.Bind(options));
+                else throw new InvalidOperationException("未知网盘模板 Provider。");
+        }
         services.AddBingFileManagement(options =>
         {
             section.Bind(options);

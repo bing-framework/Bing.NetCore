@@ -129,6 +129,7 @@ namespace Bing.Admin.Modules
             Web.HttpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
             app.UseAuthentication();
             app.UseRouting();
+            app.UseAuthorization();
             app.UseBingHttpAuditing();
             if (rateLimiting.GetValue<bool>("Enabled"))
                 app.UseBingRateLimiting();

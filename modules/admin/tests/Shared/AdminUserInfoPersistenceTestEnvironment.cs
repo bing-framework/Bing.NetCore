@@ -35,11 +35,11 @@ using FreeSql;
 namespace Bing.Admin.FreeSQL.Tests;
 #endif
 
-/// <summary>通过真实 SQLite UserInfo 仓储验证资料附件授权。</summary>
+/// <summary>通过真实 SQLite 或隔离 MySQL UserInfo 仓储验证资料附件授权。</summary>
 internal sealed class AdminUserInfoPersistenceTestEnvironment : IAsyncDisposable
 {
 #if BING_ADMIN_EFCORE_TESTS
-    private readonly SqliteConnection _connection;
+    private readonly SqliteConnection? _connection;
     private readonly DbContextOptions<AdminUnitOfWork> _options;
 #else
     private readonly IFreeSql _orm;
@@ -47,17 +47,25 @@ internal sealed class AdminUserInfoPersistenceTestEnvironment : IAsyncDisposable
 #endif
     private readonly ServiceProvider _serviceProvider;
     private readonly AdminUserInfoTestUnitOfWork _unitOfWork;
+    private readonly bool _mysql;
 
-    public AdminUserInfoPersistenceTestEnvironment()
+    public AdminUserInfoPersistenceTestEnvironment(string? mysqlConnectionString = null)
     {
+        _mysql = mysqlConnectionString != null;
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddScoped<ILazyServiceProvider, LazyServiceProvider>();
         services.AddScoped<ITransactionActionManager, TransactionActionManager>();
 #if BING_ADMIN_EFCORE_TESTS
-        _connection = new SqliteConnection("Data Source=:memory:");
-        _connection.Open();
-        _options = new DbContextOptionsBuilder<AdminUnitOfWork>().UseSqlite(_connection).Options;
+        var options = new DbContextOptionsBuilder<AdminUnitOfWork>();
+        if (mysqlConnectionString == null)
+        {
+            _connection = new SqliteConnection("Data Source=:memory:");
+            _connection.Open();
+            options.UseSqlite(_connection);
+        }
+        else options.UseMySql(mysqlConnectionString, new MySqlServerVersion(new Version(8, 0, 40)));
+        _options = options.Options;
         services.AddTransient<IAuditPropertySetter, AuditPropertySetter>();
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton(NullCurrentUser.Instance);
@@ -70,7 +78,8 @@ internal sealed class AdminUserInfoPersistenceTestEnvironment : IAsyncDisposable
 #else
         services.AddSqlCore();
         _orm = new FreeSqlBuilder()
-            .UseConnectionString(DataType.Sqlite, "Data Source=:memory:")
+            .UseConnectionString(_mysql ? DataType.MySql : DataType.Sqlite,
+                mysqlConnectionString ?? "Data Source=:memory:")
             .Build();
         _wrapper = new FreeSqlWrapper { Orm = _orm };
         services.AddSingleton(_orm);
@@ -107,7 +116,12 @@ internal sealed class AdminUserInfoPersistenceTestEnvironment : IAsyncDisposable
     public async Task InitializeAsync(IEnumerable<UserInfo> userInfos)
     {
 #if BING_ADMIN_EFCORE_TESTS
-        await _unitOfWork.Database.EnsureCreatedAsync();
+        // 同一隔离库已包含文件表；EnsureCreated 会因已有表跳过 UserInfo，显式创建此测试模型。
+        if (_mysql)
+            await Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions
+                .GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>(_unitOfWork.Database)
+                .CreateTablesAsync();
+        else await _unitOfWork.Database.EnsureCreatedAsync();
         await _unitOfWork.Set<UserInfo>().AddRangeAsync(userInfos);
         await _unitOfWork.SaveChangesAsync();
 #else
@@ -122,7 +136,7 @@ internal sealed class AdminUserInfoPersistenceTestEnvironment : IAsyncDisposable
         _unitOfWork.Dispose();
         _serviceProvider.Dispose();
 #if BING_ADMIN_EFCORE_TESTS
-        _connection.Dispose();
+        _connection?.Dispose();
 #else
         _orm.Dispose();
 #endif

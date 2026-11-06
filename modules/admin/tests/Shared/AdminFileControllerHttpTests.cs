@@ -10,6 +10,7 @@ using Bing.Biz.FileManagement;
 using Bing.Biz.FileManagement.AspNetCore;
 using Bing.FileStorage;
 using Bing.FileStorage.FileSystem;
+using Bing.FileStorage.RemoteDrive;
 using Bing.MultiTenancy;
 using Bing.Users;
 using Microsoft.AspNetCore.Authentication;
@@ -35,6 +36,174 @@ namespace Bing.Admin.FreeSQL.Tests;
 /// <summary>通过 TestServer 验证实际 Admin 文件控制器与 SQLite、本地存储的 HTTP 闭环。</summary>
 public sealed class AdminFileControllerHttpTests
 {
+    [Fact]
+    public Task RemoteDriveManagement_UsesDedicatedPermissionAndScopeDefaultsOnlyAffectNewUploads()
+        => RunRemoteDriveManagementAsync(mysqlConnectionString: null);
+
+    [AdminFileManagementMySqlFact]
+    public async Task RemoteDriveManagement_MySql_UsesDedicatedPermissionAndScopeDefaultsOnlyAffectNewUploads()
+    {
+        var serverConnectionString = Environment.GetEnvironmentVariable("BING_FILE_MANAGEMENT_MYSQL_TEST_CONNECTION")!;
+        await using var database = await AdminFileMySqlTestDatabase.CreateAsync(serverConnectionString);
+        await RunRemoteDriveManagementAsync(database.DatabaseConnectionString);
+    }
+
+    private async Task RunRemoteDriveManagementAsync(string? mysqlConnectionString)
+    {
+        await using var environment = new AdminFileHttpEnvironment(mysqlConnectionString);
+        using var server = new TestServer(new WebHostBuilder().ConfigureServices(environment.Configure).Configure(app =>
+        { app.UseRouting(); app.UseAuthentication(); app.UseAuthorization(); app.UseEndpoints(endpoints => endpoints.MapControllers()); }));
+        await environment.InitializeDatabaseAsync(server.Services);
+
+        var otherConnectionId = Guid.NewGuid();
+        var ownConnectionId = Guid.NewGuid();
+        var sharedConnectionId = Guid.NewGuid();
+        using (var scope = server.Services.CreateScope())
+        {
+            var state = scope.ServiceProvider.GetRequiredService<IRemoteDriveStateStore>();
+            var storageScope = StorageScope.ForTenant(environment.Identity.Tenant);
+            Assert.True(await state.TryCreateConnectionAsync(NewConnection(otherConnectionId, "another-user", storageScope,
+                RemoteDriveOwnership.Personal)));
+            Assert.True(await state.TryCreateConnectionAsync(NewConnection(ownConnectionId, environment.Identity.UserId,
+                storageScope, RemoteDriveOwnership.Personal)));
+            Assert.True(await state.TryCreateConnectionAsync(NewConnection(sharedConnectionId, "another-user", storageScope,
+                RemoteDriveOwnership.Shared)));
+        }
+
+        using var client = server.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", "admin-file-test");
+        var ordinaryCapabilities = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/files/capabilities");
+        Assert.False(ordinaryCapabilities.GetProperty("manage").GetBoolean());
+        Assert.False(ordinaryCapabilities.GetProperty("manageConnections").GetBoolean());
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/api/files/storage-connections?manage=true")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PostAsJsonAsync($"/api/files/storage-connections/{otherConnectionId}/authorize", new { state = "x" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PostAsJsonAsync($"/api/files/storage-connections/{sharedConnectionId}/authorize", new { state = "x" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.DeleteAsync($"/api/files/storage-connections/{otherConnectionId}")).StatusCode);
+        var targetPage = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/files/storage-targets?take=100");
+        var targetIds = targetPage.GetProperty("connections").EnumerateArray()
+            .Select(connection => connection.GetProperty("id").GetGuid()).ToArray();
+        Assert.Contains(sharedConnectionId, targetIds);
+        Assert.DoesNotContain(otherConnectionId, targetIds);
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PutAsJsonAsync("/api/files/storage-preference", new
+            { container = "attachments", targetId = "admin-test-target", scopeDefault = true })).StatusCode);
+
+        var firstRequest = new CreateFileUpload
+        { RequestId = Guid.NewGuid(), FileName = "before-default.txt", Length = 0, Container = "attachments" };
+        Assert.Equal(HttpStatusCode.Accepted, (await client.PostAsJsonAsync("/api/files/upload-sessions", firstRequest)).StatusCode);
+        var firstEntry = await FindRequestFileAsync(server.Services, firstRequest.RequestId);
+        Assert.Equal("admin-test-local", firstEntry.StoreName);
+
+        environment.Identity.ManageConnections = true;
+        var managerCapabilities = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/files/capabilities");
+        Assert.False(managerCapabilities.GetProperty("manage").GetBoolean());
+        Assert.True(managerCapabilities.GetProperty("manageConnections").GetBoolean());
+        var owned = await client.GetFromJsonAsync<RemoteDriveConnectionView[]>("/api/files/storage-connections");
+        Assert.DoesNotContain(owned!, connection => connection.Id == otherConnectionId);
+        var managedResponse = await client.GetAsync("/api/files/storage-connections?manage=true");
+        Assert.Equal(HttpStatusCode.OK, managedResponse.StatusCode);
+        var managedJson = await managedResponse.Content.ReadAsStringAsync();
+        Assert.Contains(otherConnectionId.ToString(), managedJson);
+        Assert.False(managedJson.Contains("EncryptedCredentials", StringComparison.OrdinalIgnoreCase));
+        Assert.False(managedJson.Contains("EncryptedAuthorization", StringComparison.OrdinalIgnoreCase));
+
+        // 连接管理权限不能替代所有者身份去重新授权他人的个人连接。
+        Assert.Equal(HttpStatusCode.Forbidden,
+            (await client.PostAsJsonAsync($"/api/files/storage-connections/{otherConnectionId}/authorize", new { state = "x" })).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await client.DeleteAsync($"/api/files/storage-connections/{otherConnectionId}")).StatusCode);
+        using (var scope = server.Services.CreateScope())
+        {
+            var state = scope.ServiceProvider.GetRequiredService<IRemoteDriveStateStore>();
+            Assert.Equal(RemoteDriveConnectionState.Disabled, (await state.FindConnectionAsync(otherConnectionId))!.State);
+        }
+
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await client.PutAsJsonAsync("/api/files/storage-preference", new
+            { container = "attachments", targetId = ownConnectionId.ToString("N"), scopeDefault = true })).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await client.PutAsJsonAsync("/api/files/storage-preference", new
+            { container = "attachments", targetId = "admin-test-target", scopeDefault = true })).StatusCode);
+
+        var secondRequest = new CreateFileUpload
+        { RequestId = Guid.NewGuid(), FileName = "after-default.txt", Length = 0, Container = "attachments" };
+        Assert.Equal(HttpStatusCode.Accepted, (await client.PostAsJsonAsync("/api/files/upload-sessions", secondRequest)).StatusCode);
+        Assert.Equal("admin-test-local", (await FindRequestFileAsync(server.Services, firstRequest.RequestId)).StoreName);
+        Assert.Equal("admin-test-target", (await FindRequestFileAsync(server.Services, secondRequest.RequestId)).StoreName);
+    }
+
+    private static RemoteDriveConnection NewConnection(Guid id, string ownerId, StorageScope scope, RemoteDriveOwnership ownership)
+        => new()
+        {
+            Id = id, TemplateName = "test-drive", Provider = "test", StoreName = "test-drive-c-" + id.ToString("N"),
+            ScopeKind = scope.Kind, TenantId = scope.TenantId, ScopeKey = scope.Key, Ownership = ownership,
+            OwnerId = ownerId, DisplayName = "Test connection", EncryptedCredentials = "ciphertext",
+            EncryptedAuthorization = "authorization-ciphertext", State = RemoteDriveConnectionState.Active, Version = 1
+        };
+
+    private static async Task<FileRecord> FindRequestFileAsync(IServiceProvider services, Guid requestId)
+    {
+        using var scope = services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IFileManagementStore>();
+        var requestKey = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(
+            StorageScope.ForTenant("tenant-a").Key + "\nadmin-file-user\n" + requestId.ToString("N")))).ToLowerInvariant();
+        var entry = await store.FindRequestAsync(requestKey);
+        return Assert.IsType<FileEntry>(entry).File;
+    }
+
+    [Fact]
+    public async Task RealAdminController_PersonalCopyRoutesPublishNewIdAndPreserveSource()
+        => await RunPersonalCopyCycleAsync(mysqlConnectionString: null);
+
+    [AdminFileManagementMySqlFact]
+    public async Task RealAdminController_MySql_PersonalCopyRoutesPublishNewIdAndPreserveSource()
+    {
+        var serverConnectionString = Environment.GetEnvironmentVariable("BING_FILE_MANAGEMENT_MYSQL_TEST_CONNECTION")!;
+        await using var database = await AdminFileMySqlTestDatabase.CreateAsync(serverConnectionString);
+        await RunPersonalCopyCycleAsync(database.DatabaseConnectionString);
+    }
+
+    private async Task RunPersonalCopyCycleAsync(string? mysqlConnectionString)
+    {
+        await using var environment = new AdminFileHttpEnvironment(mysqlConnectionString);
+        using var server = new TestServer(new WebHostBuilder().ConfigureServices(environment.Configure).Configure(app =>
+        { app.UseRouting(); app.UseAuthentication(); app.UseAuthorization(); app.UseEndpoints(endpoints => endpoints.MapControllers()); }));
+        await environment.InitializeDatabaseAsync(server.Services);
+        using var scope = server.Services.CreateScope();
+        var files = scope.ServiceProvider.GetRequiredService<FileManagementService>();
+        var store = scope.ServiceProvider.GetRequiredService<IFileManagementStore>();
+        var upload = await files.CreateUploadAsync(new() { RequestId = Guid.NewGuid(), FileName = "个人源.txt", Length = 0 });
+        await environment.RunOperationsAsync(server.Services); await files.CompleteUploadAsync(upload.Id); await environment.RunOperationsAsync(server.Services);
+        var source = (await store.FindAsync(upload.FileId))!;
+        source.File.Ownership = Bing.FileStorage.RemoteDrive.RemoteDriveOwnership.Personal;
+        Assert.True(await store.TryUpdateAsync(source, source.File.Version));
+        using var client = server.CreateClient(); client.DefaultRequestHeaders.Authorization = new("Bearer", "admin-file-test");
+        var body = new { requestId = Guid.NewGuid(), businessType = "orders", businessId = "order-42" };
+        var created = await client.PostAsJsonAsync($"/api/files/{upload.FileId}/binding-copies", body);
+        Assert.Equal(HttpStatusCode.Accepted, created.StatusCode);
+        var copy = (await created.Content.ReadFromJsonAsync<FileBindingCopyRequest>())!;
+        var repeated = await client.PostAsJsonAsync($"/api/files/{upload.FileId}/binding-copies", body);
+        Assert.Equal(copy.Id, (await repeated.Content.ReadFromJsonAsync<FileBindingCopyRequest>())!.Id);
+        environment.Identity.Tenant = "other-tenant";
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/files/binding-copies/{copy.Id}")).StatusCode);
+        environment.Identity.Tenant = "tenant-a";
+        await environment.RunOperationsAsync(server.Services);
+        Assert.Equal(FileBindingCopyState.Copied, (await client.GetFromJsonAsync<FileBindingCopyRequest>($"/api/files/binding-copies/{copy.Id}"))!.State);
+        var bound = await client.PostAsync($"/api/files/binding-copies/{copy.Id}/bind", null); Assert.Equal(HttpStatusCode.OK, bound.StatusCode);
+        var json = await bound.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(); Assert.Equal(copy.CopyFileId, json.GetProperty("fileId").GetGuid());
+        Assert.NotEqual(upload.FileId, copy.CopyFileId);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync($"/api/files/{copy.CopyFileId}/content")).StatusCode);
+        Assert.Equal(FileState.Ready, (await store.FindAsync(upload.FileId))!.File.State); Assert.Empty((await store.FindAsync(upload.FileId))!.Bindings);
+        var cancelled = await client.PostAsJsonAsync($"/api/files/{upload.FileId}/binding-copies", new { requestId = Guid.NewGuid(), businessType = "orders", businessId = "order-42" });
+        var cancelCopy = (await cancelled.Content.ReadFromJsonAsync<FileBindingCopyRequest>())!;
+        Assert.Equal(HttpStatusCode.Accepted, (await client.DeleteAsync($"/api/files/binding-copies/{cancelCopy.Id}")).StatusCode);
+        await environment.RunOperationsAsync(server.Services);
+        Assert.Equal(FileState.Deleted, (await store.FindAsync(cancelCopy.CopyFileId))!.File.State);
+    }
+
     [Fact]
     public Task RealAdminController_Upload_Bind_Download_Range_TenantIsolation_AndDelete()
         => RunHttpCycleAsync(mysqlConnectionString: null, verifyMySqlCasAndClaim: false);
@@ -243,7 +412,7 @@ internal sealed class AdminFileHttpEnvironment : IAsyncDisposable
             if (_mysqlConnectionString == null)
                 options.UseSqlite($"Data Source={Path.Combine(Root, "files.db")}");
             else
-                options.UseMySql(_mysqlConnectionString, new MySqlServerVersion(new Version(8, 4, 0)));
+                options.UseMySql(_mysqlConnectionString, new MySqlServerVersion(new Version(8, 0, 40)));
         });
 #else
         services.AddSingleton<IFreeSql>(_ => new FreeSqlBuilder()
@@ -424,6 +593,7 @@ internal sealed class AdminFileTestIdentity : ICurrentUser, ICurrentTenant
     };
 
     public string Tenant { get; set; } = "tenant-a";
+    public bool ManageConnections { get; set; }
     public bool IsAuthenticated => true;
     public string UserId => "admin-file-user";
     public string UserName => UserId;
@@ -437,7 +607,12 @@ internal sealed class AdminFileTestIdentity : ICurrentUser, ICurrentTenant
     public string? Id => Tenant;
     public string? Name => Tenant;
     public Claim FindClaim(string claimType) => FindClaims(claimType).FirstOrDefault()!;
-    public Claim[] FindClaims(string claimType) => Permissions.Where(claim => claim.Type == claimType).ToArray();
+    public Claim[] FindClaims(string claimType)
+        => Permissions.Where(claim => claim.Type == claimType)
+            .Concat(ManageConnections && claimType == "permission"
+                ? new[] { new Claim("permission", "files.connections.manage") }
+                : Array.Empty<Claim>())
+            .ToArray();
     public Claim[] GetAllClaims() => Permissions.ToArray();
     public bool IsInRole(string roleName) => false;
     public IDisposable Change(string id, string? name = null)

@@ -150,6 +150,7 @@ namespace Bing.Admin.Modules
             app.UseAuthentication();
             app.UseBingSerilogEnrichers();
             app.UseRouting();
+            app.UseAuthorization();
             app.UseBingHttpAuditing();
             if (rateLimiting.GetValue<bool>("Enabled"))
                 app.UseBingRateLimiting();

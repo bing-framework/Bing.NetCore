@@ -24,6 +24,8 @@ public static class AdminFilePermissionCatalog
 
     /// <summary>管理其他用户资料附件；不等同于通用文件管理权限。</summary>
     public const string ManageUserInfoAttachments = "files.user-info.manage";
+    /// <summary>管理公共连接或停用个人连接，不授予个人文件读取权。</summary>
+    public const string ManageConnections = "files.connections.manage";
 
     /// <summary>由服务端维护的权限码列表。</summary>
     public static IReadOnlyList<(string Code, string Name)> Operations { get; } = new[]
@@ -32,7 +34,8 @@ public static class AdminFilePermissionCatalog
         (Publish, "发布公开文件"),
         (Manage, "管理文件"),
         (Host, "访问宿主文件"),
-        (ManageUserInfoAttachments, "管理用户资料附件")
+        (ManageUserInfoAttachments, "管理用户资料附件"),
+        (ManageConnections, "管理文件存储连接")
     };
 
     /// <summary>检查权限码是否属于文件管理权限目录。</summary>

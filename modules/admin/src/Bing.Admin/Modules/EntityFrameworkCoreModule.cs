@@ -6,6 +6,7 @@ using Bing.Data.Sql;
 using Bing.Dapper;
 using Bing.Dapper.MySql;
 using Bing.Datas.EntityFramework.MySql;
+using Bing.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,6 +43,8 @@ namespace Bing.Admin.Modules
             //services.AddMySqlUnitOfWork<IAdminReadonlyUnitOfWork, Bing.Admin.Data.UnitOfWorks.MySql.AdminReadonlyUnitOfWork>(connectionStr, DataLogLevel.All);
             services.AddMySqlProvider();
             services.AddSqlDataSource("default", DatabaseType.MySql, connectionStr);
+            // 权限等仓储通过工作单元创建 SQL 查询，需要显式注册 EF Core 查询工厂。
+            services.AddEfCoreSqlQueryFactory();
             return services;
         }
     }

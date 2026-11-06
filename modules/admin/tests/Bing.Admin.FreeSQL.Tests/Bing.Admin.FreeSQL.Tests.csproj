@@ -16,7 +16,9 @@
     <ProjectReference Include="../../../../framework/src/Bing.Dapper.Sqlite/Bing.Dapper.Sqlite.csproj" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.36" />
     <Compile Include="..\Shared\AdminFileControllerHttpTests.cs" Link="AdminFileControllerHttpTests.cs" />
+    <Compile Include="..\Shared\AdminRemoteDriveMySqlIntegrationTests.cs" Link="AdminRemoteDriveMySqlIntegrationTests.cs" />
     <Compile Include="..\Shared\AdminFileHostIntegrationTests.cs" Link="AdminFileHostIntegrationTests.cs" />
+    <Compile Include="..\Shared\AdminRemoteStorageRegistrationTests.cs" Link="AdminRemoteStorageRegistrationTests.cs" />
     <Compile Include="..\Shared\AdminQiniuStorageRegistrationTests.cs" Link="AdminQiniuStorageRegistrationTests.cs" />
     <Compile Include="..\Shared\AdminFilePermissionInitializationTests.cs" Link="AdminFilePermissionInitializationTests.cs" />
     <Compile Include="..\Shared\AdminUserInfoFileAuthorizationTests.cs" Link="AdminUserInfoFileAuthorizationTests.cs" />
@@ -44,6 +46,7 @@
     <Compile Include="..\Shared\AdminInventoryOrderedEventPublishingTest.cs" Link="AdminInventoryOrderedEventPublishingTest.cs" />
     <Compile Include="..\Shared\AdminLogConfigurationTest.cs" Link="AdminLogConfigurationTest.cs" />
     <Compile Include="..\Shared\AdminRateLimitingHttpPipelineTest.cs" Link="AdminRateLimitingHttpPipelineTest.cs" />
+    <Compile Include="..\Shared\AdminFileModuleHttpPipelineTests.cs" Link="AdminFileModuleHttpPipelineTests.cs" />
     <ProjectReference Include="..\Bing.Admin.FreeSQL.InventoryProbe\Bing.Admin.FreeSQL.InventoryProbe.csproj"
                       ReferenceOutputAssembly="false" BuildReference="true"
                       SetConfiguration="Configuration=$(Configuration)" />
