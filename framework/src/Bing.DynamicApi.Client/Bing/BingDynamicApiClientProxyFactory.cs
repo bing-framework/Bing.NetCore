@@ -152,7 +152,20 @@ internal sealed class BingDynamicApiClientProxyFactory
         }
     }
 
-    /// <summary>使用同一预算令牌完成描述等待、发送和响应体读取。</summary>
+    /// <summary>
+    /// 根据远程定义执行动态 API 方法。
+    /// </summary>
+    /// <param name="serviceType">本地代理声明的服务接口类型。</param>
+    /// <param name="remoteName">目标远程服务名称。</param>
+    /// <param name="targetMethod">代理调用对应的本地接口方法。</param>
+    /// <param name="args">传给目标接口方法的实参。</param>
+    /// <param name="resultType">接口方法声明的结果类型。</param>
+    /// <param name="remoteOptions">远程服务地址、版本和请求配置。</param>
+    /// <param name="cancellationToken">用于取消定义读取和远程请求的令牌。</param>
+    /// <returns>远程响应按 resultType 反序列化得到的对象；void、无响应内容或流结果按方法类型返回相应值。</returns>
+    /// <remarks>
+    /// 流响应返回持有 HTTP 响应的 RemoteStreamContent；调用方释放流内容时一并释放响应。
+    /// </remarks>
     private async Task<object> ExecuteCoreAsync(Type serviceType, string remoteName, MethodInfo targetMethod, object[] args,
         Type resultType, BingDynamicApiRemoteOptions remoteOptions, CancellationToken cancellationToken)
     {

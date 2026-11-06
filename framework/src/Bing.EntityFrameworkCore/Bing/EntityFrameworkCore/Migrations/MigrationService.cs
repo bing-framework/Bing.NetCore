@@ -21,10 +21,12 @@ public class MigrationService : IMigrationService
     private readonly IMigrationFileService _migrationFileService;
 
     /// <summary>
-    /// 初始化一个<see cref="MigrationService"/>类型的实例
+    /// 初始化一个 <see cref="MigrationService" /> 类型的实例。
     /// </summary>
     /// <param name="logger">日志</param>
+    ///
     /// <param name="migrationFileService">迁移文件服务</param>
+    ///
     /// <exception cref="ArgumentNullException">迁移文件服务为空时抛出。</exception>
     public MigrationService(ILogger<MigrationService> logger, IMigrationFileService migrationFileService)
     {

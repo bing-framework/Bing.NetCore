@@ -43,10 +43,14 @@ public class BingBuilder : IBingBuilder
     private bool _configuring;
 
     /// <summary>
-    /// 初始化兼容模式模块构建器。
+    /// 初始化一个 <see cref="BingBuilder" /> 类型的实例。
     /// </summary>
     /// <param name="services">服务集合。</param>
-    /// <exception cref="ArgumentNullException"><paramref name="services"/> 为空时抛出。</exception>
+    ///
+    /// <exception cref="ArgumentNullException"><paramref name="services" /> 为空时抛出。</exception>
+    /// <remarks>
+    /// 初始化兼容模式模块构建器。
+    /// </remarks>
     public BingBuilder(IServiceCollection services)
     {
         Services = services ?? throw new ArgumentNullException(nameof(services));

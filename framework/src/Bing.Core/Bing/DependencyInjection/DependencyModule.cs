@@ -40,6 +40,7 @@ public class DependencyModule : BingModule
     /// <summary>
     /// 注册选中模块程序集中的约定服务。
     /// </summary>
+    /// <param name="services">依赖注入服务集合。</param>
     internal void RegisterConventionServices(IServiceCollection services)
     {
         var registration = BingModuleRegistration.Get(services);
@@ -208,6 +209,10 @@ public class DependencyModule : BingModule
     /// <summary>
     /// 判断开放泛型注册是否会生成容器不支持的工厂转发描述符。
     /// </summary>
+    /// <param name="services">依赖注入服务集合。</param>
+    /// <param name="serviceTypes">待注册的服务类型序列。</param>
+    /// <param name="dependencyAttribute">控制约定注册行为的依赖特性。</param>
+    /// <returns>预演注册需要开放泛型工厂转发时为 true，否则为 false。</returns>
     private static bool RequiresOpenGenericFactory(IServiceCollection services, Type[] serviceTypes,
         DependencyAttribute dependencyAttribute)
     {

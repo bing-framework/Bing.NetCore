@@ -43,7 +43,7 @@ public interface ICrudAppService<TDto, in TCreateRequest, in TUpdateRequest, in 
     where TQueryParameter : IQueryParameter
 {
     /// <summary>
-    /// 创建
+    /// 创建实体并返回新实体标识。
     /// </summary>
     /// <param name="request">请求参数</param>
     /// <returns>表示创建结果的异步操作，结果为新实体标识字符串。</returns>
@@ -51,7 +51,7 @@ public interface ICrudAppService<TDto, in TCreateRequest, in TUpdateRequest, in 
     Task<string> CreateAsync([Valid] TCreateRequest request);
 
     /// <summary>
-    /// 修改
+    /// 更新实体并完成保存。
     /// </summary>
     /// <param name="request">请求参数</param>
     [UnitOfWork]

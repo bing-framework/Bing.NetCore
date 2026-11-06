@@ -31,7 +31,7 @@ public static class AssemblyManager
     private static Type[] _allTypes;
 
     /// <summary>
-    /// 静态构造函数
+    /// 初始化程序集筛选规则。
     /// </summary>
     static AssemblyManager()
     {
@@ -42,7 +42,7 @@ public static class AssemblyManager
     }
 
     /// <summary>
-    /// 获取或设置程序集过滤函数
+    /// 设置程序集过滤函数。
     /// </summary>
     public static Func<AssemblyName, bool> AssemblyFilterFunc { private get; set; }
 

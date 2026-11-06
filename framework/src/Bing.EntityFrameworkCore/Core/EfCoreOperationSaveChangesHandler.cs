@@ -7,8 +7,15 @@ namespace Bing.Datas.EntityFramework.Core;
 /// </summary>
 internal sealed class EfCoreOperationSaveChangesHandler : IUnitOfWorkSaveChangesHandler
 {
+    /// <summary>
+    /// 保存已解析的 EF Core 工作单元注册表。
+    /// </summary>
     private readonly ResolvedEfCoreUnitOfWorkRegistry _registry;
 
+    /// <summary>
+    /// 初始化一个 <see cref="EfCoreOperationSaveChangesHandler" /> 类型的实例。
+    /// </summary>
+    /// <param name="registry">用于注册或查找对应任务、服务或策略的注册表。</param>
     public EfCoreOperationSaveChangesHandler(ResolvedEfCoreUnitOfWorkRegistry registry)
     {
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
@@ -50,6 +57,11 @@ internal sealed class EfCoreOperationSaveChangesHandler : IUnitOfWorkSaveChanges
         RejectLatePendingChanges(scope, _registry.Snapshot());
     }
 
+    /// <summary>
+    /// 检查操作根是否复用了不允许共享的上下文。
+    /// </summary>
+    /// <param name="scope">当前业务工作单元作用域。</param>
+    /// <param name="resolvedContexts">已解析的 EF Core 工作单元上下文集合。</param>
     private void RejectRequiresNewContextReuse(IUnitOfWorkScope scope,
         IEnumerable<UnitOfWorkBase> resolvedContexts)
     {
@@ -57,6 +69,12 @@ internal sealed class EfCoreOperationSaveChangesHandler : IUnitOfWorkSaveChanges
             context.EnsureOperationRootMayUseContext(scope);
     }
 
+    /// <summary>
+    /// 拒绝最终保存后仍有待处理变更的上下文。
+    /// </summary>
+    /// <param name="scope">当前业务工作单元作用域。</param>
+    /// <param name="resolvedContexts">已解析的 EF Core 工作单元上下文集合。</param>
+    /// <remarks>发现待处理变更时将作用域标记为仅回滚，并拒绝继续完成操作。</remarks>
     private static void RejectLatePendingChanges(IUnitOfWorkScope scope,
         IEnumerable<UnitOfWorkBase> resolvedContexts)
     {

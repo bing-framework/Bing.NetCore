@@ -27,7 +27,7 @@ public class AutoMapperObjectMapper : Bing.ObjectMapping.IObjectMapper
     private static readonly object Sync = new();
 
     /// <summary>
-    /// 配置提供程序
+    /// 提供映射配置访问的 AutoMapper 配置提供程序。
     /// </summary>
     private IConfigurationProvider _configuration;
 

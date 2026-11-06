@@ -3,8 +3,11 @@ using System.Collections.ObjectModel;
 namespace Bing.Core.Modularity;
 
 /// <summary>
-/// 模块依赖关系图。图中的类型按根节点首次 DFS 访问顺序保存。
+/// 模块依赖关系图。
 /// </summary>
+/// <remarks>
+/// 图中的类型按根节点首次 DFS 访问顺序保存。
+/// </remarks>
 internal sealed class ModuleDependencyGraph
 {
     /// <summary>
@@ -13,10 +16,14 @@ internal sealed class ModuleDependencyGraph
     private const string DependencyPathDataKey = "Bing.ModuleDependencyPath";
 
     /// <summary>
-    /// 初始化模块依赖图。
+    /// 初始化一个 <see cref="ModuleDependencyGraph" /> 类型的实例。
     /// </summary>
     /// <param name="types">按首次访问顺序排列的模块类型。</param>
+    ///
     /// <param name="dependencies">模块到直接依赖类型的映射。</param>
+    /// <remarks>
+    /// 初始化模块依赖图。
+    /// </remarks>
     private ModuleDependencyGraph(IReadOnlyList<Type> types, IReadOnlyDictionary<Type, Type[]> dependencies)
     {
         Types = types;
@@ -264,9 +271,12 @@ internal sealed class ModuleDependencyGraph
     private sealed class VisitFrame
     {
         /// <summary>
-        /// 初始化遍历帧。
+        /// 初始化一个 <see cref="VisitFrame" /> 类型的实例。
         /// </summary>
         /// <param name="type">当前模块类型。</param>
+        /// <remarks>
+        /// 初始化遍历帧。
+        /// </remarks>
         public VisitFrame(Type type) => Type = type;
 
         /// <summary>

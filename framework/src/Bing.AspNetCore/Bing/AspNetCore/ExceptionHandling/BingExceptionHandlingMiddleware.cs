@@ -27,7 +27,7 @@ public class BingExceptionHandlingMiddleware : IMiddleware
     private readonly ILogger<BingExceptionHandlingMiddleware> _logger;
 
     /// <summary>
-    /// 清空缓存头委托
+    /// 清除响应的缓存相关请求头。
     /// </summary>
     private readonly Func<object, Task> _clearCacheHeaderDelegate;
 

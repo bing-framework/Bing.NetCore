@@ -80,6 +80,9 @@ public sealed class AuditingManager : IAuditingManager
         /// <summary>
         /// 初始化一个 <see cref="AuditHandle" /> 类型的实例。
         /// </summary>
+        /// <param name="manager">记录当前测试工作单元操作的管理器。</param>
+        /// <param name="parent">当前节点的父对象。</param>
+        /// <param name="store">用于读取或保存实例数据的存储实现。</param>
         internal AuditHandle(AuditingManager manager, AuditHandle parent, IAuditingStore store)
         {
             _manager = manager;
@@ -89,7 +92,7 @@ public sealed class AuditingManager : IAuditingManager
         }
 
         /// <summary>
-        /// 当前审计日志作用域。
+        /// 获取当前审计日志作用域。
         /// </summary>
         internal AuditLogScope Scope { get; }
 
@@ -106,8 +109,10 @@ public sealed class AuditingManager : IAuditingManager
         }
 
         /// <summary>
-        /// 使用指定取消令牌开始或复用当前保存任务。
+        /// 开始或复用当前审计保存任务。
         /// </summary>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <remarks>首次保存使用指定取消令牌；后续调用复用已创建的保存任务。</remarks>
         private Task SaveCore(CancellationToken cancellationToken)
         {
             lock (_gate)

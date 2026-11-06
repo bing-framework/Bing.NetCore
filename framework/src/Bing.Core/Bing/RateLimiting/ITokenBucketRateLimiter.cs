@@ -1,8 +1,11 @@
 namespace Bing.RateLimiting;
 
 /// <summary>
-/// 按键消耗令牌的限流器。调用立即返回，不等待令牌补充。
+/// 按键消耗令牌的限流器。
 /// </summary>
+/// <remarks>
+/// 调用立即返回，不等待令牌补充。
+/// </remarks>
 public interface ITokenBucketRateLimiter
 {
     /// <summary>

@@ -67,6 +67,7 @@ public sealed class EfCoreOrderedEventTransactionFactory<TContext> : IOrderedEve
         /// <summary>
         /// 初始化一个 <see cref="TransactionScope" /> 类型的实例。
         /// </summary>
+        /// <param name="transaction">由当前操作使用的数据库事务。</param>
         internal TransactionScope(IDbContextTransaction transaction) : this(null, transaction)
         {
         }

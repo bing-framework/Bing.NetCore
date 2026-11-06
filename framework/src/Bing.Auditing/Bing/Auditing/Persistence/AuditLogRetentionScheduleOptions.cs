@@ -8,47 +8,53 @@ namespace Bing.Auditing.Persistence;
 public sealed class AuditLogRetentionScheduleOptions
 {
     /// <summary>
-    /// 是否启用后台清理。
+    /// 获取或设置是否启用后台清理。
     /// </summary>
+    /// <remarks>默认值为 false。</remarks>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// 两次清理尝试之间的间隔。
+    /// 获取或设置两次清理尝试之间的间隔。
     /// </summary>
     public TimeSpan Interval { get; set; } = TimeSpan.FromHours(1);
 
     /// <summary>
-    /// 普通审计日志的保留时长。
+    /// 获取或设置普通审计日志的保留时长。
     /// </summary>
+    /// <remarks>默认值为 30 天。</remarks>
     public TimeSpan RetentionPeriod { get; set; } = TimeSpan.FromDays(30);
 
     /// <summary>
-    /// 每次清理最多删除的记录数。
+    /// 获取或设置每次清理最多删除的记录数。
     /// </summary>
+    /// <remarks>默认值为 500。</remarks>
     public int BatchSize { get; set; } = 500;
 
     /// <summary>
-    /// 启动后是否立即执行一次清理。
+    /// 获取或设置启动后是否立即执行一次清理。
     /// </summary>
+    /// <remarks>默认值为 false。</remarks>
     public bool RunImmediately { get; set; }
 
     /// <summary>
-    /// 是否使用协调租约避免多个节点同时清理。
+    /// 获取或设置是否使用协调租约避免多个节点同时清理。
     /// </summary>
+    /// <remarks>默认值为 false。</remarks>
     public bool UseCoordinationLease { get; set; }
 
     /// <summary>
-    /// 清理协调租约的锁键。
+    /// 获取或设置清理协调租约的锁键。
     /// </summary>
+    /// <remarks>默认值为 <c>&quot;bing:audit-retention&quot;</c>。</remarks>
     public string CoordinationKey { get; set; } = "bing:audit-retention";
 
     /// <summary>
-    /// 获取协调租约时的最长等待时间。
+    /// 获取或设置协调租约时的最长等待时间。
     /// </summary>
     public TimeSpan CoordinationWaitTimeout { get; set; } = TimeSpan.Zero;
 
     /// <summary>
-    /// 协调租约的有效时长。
+    /// 获取或设置协调租约的有效时长。
     /// </summary>
     /// <remarks>
     /// 留空时使用锁提供程序的默认租期。本地锁提供程序应保持留空，

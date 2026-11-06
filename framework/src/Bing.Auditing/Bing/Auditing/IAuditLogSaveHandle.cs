@@ -6,7 +6,7 @@
 public interface IAuditLogSaveHandle : IDisposable
 {
     /// <summary>
-    /// 保存
+    /// 保存当前作用域收集的审计日志。
     /// </summary>
     Task SaveAsync();
 }
@@ -20,6 +20,5 @@ public interface ICancellableAuditLogSaveHandle : IAuditLogSaveHandle
     /// 使用调用方取消令牌保存审计日志。
     /// </summary>
     /// <param name="cancellationToken">调用方取消令牌。</param>
-    /// <returns>异步保存任务。</returns>
     Task SaveAsync(CancellationToken cancellationToken);
 }

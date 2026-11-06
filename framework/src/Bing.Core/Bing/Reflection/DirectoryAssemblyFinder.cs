@@ -18,7 +18,7 @@ public class DirectoryAssemblyFinder : IAssemblyFinder
     private readonly string _path;
 
     /// <summary>
-    /// 静态构造函数
+    /// 初始化程序集查找缓存。
     /// </summary>
     static DirectoryAssemblyFinder() => _assemblyCacheDict = new ConcurrentDictionary<string, Assembly[]>();
 

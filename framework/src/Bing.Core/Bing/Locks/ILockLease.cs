@@ -6,12 +6,12 @@ namespace Bing.Locks;
 public interface ILockLease : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// 锁键。
+    /// 获取锁键。
     /// </summary>
     string Key { get; }
 
     /// <summary>
-    /// 本次获取的唯一持有者标识。
+    /// 获取本次获取的唯一持有者标识。
     /// </summary>
     string Owner { get; }
 

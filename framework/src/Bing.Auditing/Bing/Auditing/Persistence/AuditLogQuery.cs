@@ -6,8 +6,9 @@ namespace Bing.Auditing.Persistence;
 public sealed class AuditLogQuery
 {
     /// <summary>
-    /// 获取或设置租户标识；空字符串表示非租户审计。
+    /// 获取或设置租户标识。
     /// </summary>
+    /// <remarks>空字符串表示非租户审计。</remarks>
     public string TenantId { get; set; }
 
     /// <summary>
@@ -26,13 +27,15 @@ public sealed class AuditLogQuery
     public string CorrelationId { get; set; }
 
     /// <summary>
-    /// 获取或设置最早执行时间，包含该时间点。
+    /// 获取或设置最早执行时间。
     /// </summary>
+    /// <remarks>包含该时间点。</remarks>
     public DateTime? FromUtc { get; set; }
 
     /// <summary>
-    /// 获取或设置最晚执行时间，不包含该时间点。
+    /// 获取或设置最晚执行时间。
     /// </summary>
+    /// <remarks>不包含该时间点。</remarks>
     public DateTime? ToUtc { get; set; }
 
     /// <summary>

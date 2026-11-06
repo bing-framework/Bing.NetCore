@@ -118,8 +118,9 @@ internal static partial class BingPluginLoader
         /// </summary>
         public VersionRange VersionRange { get; }
         /// <summary>
-        /// 获取精确依赖版本；区间依赖返回 null。
+        /// 获取精确依赖版本。
         /// </summary>
+        /// <remarks>区间依赖返回 null。</remarks>
         public NuGetVersion ExactVersion => VersionRange.MinVersion != null &&
             VersionRange.MaxVersion != null && VersionRange.IsMinInclusive && VersionRange.IsMaxInclusive &&
             Equals(VersionRange.MinVersion, VersionRange.MaxVersion) ? VersionRange.MinVersion : null;

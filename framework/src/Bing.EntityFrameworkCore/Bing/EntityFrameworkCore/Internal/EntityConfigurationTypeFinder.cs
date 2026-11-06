@@ -34,7 +34,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     private readonly IAllAssemblyFinder _allAssemblyFinder;
 
     /// <summary>
-    /// 静态构造函数
+    /// 初始化实体配置类型查找所用的缓存。
     /// </summary>
     static EntityConfigurationTypeFinder()
     {

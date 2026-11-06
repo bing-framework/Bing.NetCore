@@ -62,11 +62,16 @@ internal sealed class BingModuleRegistration : IBingModuleContainer
     private readonly BingPluginContainer _pluginContainer = new();
 
     /// <summary>
-    /// 初始化一个 <see cref="BingModuleRegistration" /> 类的新实例。
+    /// 初始化一个 <see cref="BingModuleRegistration" /> 类型的实例。
     /// </summary>
     /// <param name="services">应用服务集合。</param>
+    ///
     /// <param name="legacy">是否使用旧兼容注册入口。</param>
+    ///
     /// <param name="autoRegisterServices">是否启用约定服务自动注册。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="BingModuleRegistration" /> 类的新实例。
+    /// </remarks>
     internal BingModuleRegistration(IServiceCollection services, bool legacy, bool autoRegisterServices = true)
     {
         Services = services;

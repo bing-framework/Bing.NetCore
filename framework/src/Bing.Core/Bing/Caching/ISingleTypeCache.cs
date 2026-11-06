@@ -49,7 +49,7 @@ public interface ISingleTypeCache<TKey, TValue> : IGetable<TKey, TValue>, IReade
     /// 移除缓存项。
     /// </summary>
     /// <param name="keys">要移除的键数组。</param>
-    /// <returns>实现定义的批量移除结果。</returns>
+    /// <returns>返回值由实现定义：<c>true</c> 与 <c>false</c> 的具体含义取决于批量移除实现。</returns>
     bool Remove(TKey[] keys);
 
     /// <summary>

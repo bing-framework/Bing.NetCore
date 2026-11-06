@@ -8,7 +8,7 @@ namespace Bing.Logging;
 public interface IExceptionWithSelfLogging
 {
     /// <summary>
-    /// 记录
+    /// 将异常自身写入指定日志器。
     /// </summary>
     /// <param name="logger">日志</param>
     void Log(ILogger logger);

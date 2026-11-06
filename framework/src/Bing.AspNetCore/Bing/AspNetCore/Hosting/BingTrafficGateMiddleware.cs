@@ -26,6 +26,9 @@ public sealed class BingTrafficGateMiddleware
     /// <summary>
     /// 初始化一个 <see cref="BingTrafficGateMiddleware" /> 类型的实例。
     /// </summary>
+    /// <param name="next">后续 HTTP 请求处理委托。</param>
+    /// <param name="gate">用于判定 HTTP 请求是否可通过的流量闸门。</param>
+    /// <param name="options">用于初始化实例的配置选项。</param>
     public BingTrafficGateMiddleware(RequestDelegate next, IBingTrafficGate gate,
         IOptions<BingTrafficGateOptions> options)
     {
@@ -43,6 +46,8 @@ public sealed class BingTrafficGateMiddleware
     /// <summary>
     /// 处理就绪探针或登记在途请求。
     /// </summary>
+    /// <param name="context">当前 HTTP 请求上下文。</param>
+    /// <remarks>就绪探针根据闸门状态返回成功或配置的不可用状态码；其他请求在闸门关闭时返回不可用状态，并设置一秒重试间隔。</remarks>
     public async Task InvokeAsync(HttpContext context)
     {
         if (string.Equals(context.Request.Path.Value, _options.ReadinessPath,

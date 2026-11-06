@@ -9,10 +9,29 @@ using Microsoft.Extensions.Http;
 
 namespace Bing.DynamicApi.Client.Resilience;
 
+/// <summary>
+/// 远程服务的描述恢复注册信息。
+/// </summary>
+/// <param name="RemoteName">动态 API 远程服务名称。</param>
+/// <param name="TransportName">描述下载的具名传输客户端名称。</param>
+/// <param name="Options">注册时保存的配置。</param>
+/// <param name="Timeout">操作允许使用的时限。</param>
 internal sealed record DefinitionRecoveryRegistration(string RemoteName, string TransportName,
     BingDynamicApiDefinitionRecoveryOptions Options, TimeSpan Timeout);
+/// <summary>
+/// 提供动态 API 定义恢复服务的注册扩展。
+/// </summary>
 internal static class DefinitionRecoveryRegistrationExtensions
 {
+    /// <summary>
+    /// 根据动态 API 定义恢复选项注册下载管线及远程描述源。
+    /// </summary>
+    /// <param name="services">接收恢复服务注册的容器。</param>
+    /// <param name="remoteName">远程服务注册名称。</param>
+    /// <param name="options">动态 API 客户端弹性配置。</param>
+    /// <remarks>
+    /// 未启用定义恢复、对冲、清单候选和服务发现引导时不添加相关服务。
+    /// </remarks>
     internal static void Register(IServiceCollection services, string remoteName, BingDynamicApiClientResilienceOptions options)
     {
         var configured = options.Definition;
@@ -54,8 +73,13 @@ internal static class DefinitionRecoveryRegistrationExtensions
             frozen.UseManifestCandidates ? sp.GetRequiredService<IEndpointManifestSource>() : null));
     }
 }
+/// <summary>
+/// 在 HTTP 客户端处理器管线中接入定义恢复传输。
+/// </summary>
+/// <param name="registrations">已注册的处理器或策略。</param>
 internal sealed class DefinitionTransportFilter(IEnumerable<DefinitionRecoveryRegistration> registrations) : IHttpMessageHandlerBuilderFilter
 {
+    /// <inheritdoc />
     public Action<HttpMessageHandlerBuilder> Configure(Action<HttpMessageHandlerBuilder> next) => builder =>
     {
         next(builder);
@@ -73,9 +97,16 @@ internal sealed class DefinitionTransportFilter(IEnumerable<DefinitionRecoveryRe
         if (!valid) throw new ResilienceConfigurationException("描述 transport 必须关闭重定向、共享 Cookie 和自动解压；解压由有界读取器负责。");
     };
 }
+/// <summary>
+/// 在宿主启动时校验已注册的动态 API 定义来源。
+/// </summary>
+/// <param name="registrations">已注册的处理器或策略。</param>
+/// <param name="sources">用于初始化当前实例的sources值。</param>
+/// <param name="clients">用于初始化当前实例的clients值。</param>
 internal sealed class DefinitionSourceStartupValidator(IEnumerable<DefinitionRecoveryRegistration> registrations,
     IEnumerable<IBingDynamicApiDefinitionSource> sources, IHttpClientFactory clients) : IHostedService
 {
+    /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
         foreach (var registration in registrations)
@@ -87,5 +118,6 @@ internal sealed class DefinitionSourceStartupValidator(IEnumerable<DefinitionRec
         }
         return Task.CompletedTask;
     }
+    /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

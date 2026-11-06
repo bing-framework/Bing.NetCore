@@ -9,7 +9,7 @@ namespace Bing.AspNetCore.ExceptionHandling;
 public interface IBingAuthorizationExceptionHandler
 {
     /// <summary>
-    /// 处理
+    /// 处理授权异常并写入 HTTP 响应。
     /// </summary>
     /// <param name="exception">授权异常</param>
     /// <param name="httpContext">Http上下文</param>

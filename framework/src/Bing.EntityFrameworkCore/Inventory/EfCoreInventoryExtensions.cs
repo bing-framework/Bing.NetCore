@@ -30,8 +30,13 @@ public static class EfCoreInventoryExtensions
     }
 
     /// <summary>
-    /// 在当前 EFCore 事务内按稳定顺序扣减多项库存。
+    /// 在当前 EF Core 事务内批量扣减库存。
     /// </summary>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="store">执行库存扣减的存储服务。</param>
+    /// <param name="requests">待执行的库存扣减请求集合。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>批量扣减操作产生的各项结果。</returns>
     public static Task<IReadOnlyList<InventoryDeductionResult>> DeductInventoryBatchAsync(this DbContext context,
         IInventoryStore store, IEnumerable<InventoryDeductionRequest> requests,
         CancellationToken cancellationToken = default)

@@ -6,17 +6,44 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bing.Data.Sql;
 
 /// <summary>
-/// Shares mapped ORM resources and creates the default Dapper resource for a SQL source.
+/// 复用 ORM 映射资源或创建 Dapper 工作单元资源的访问器。
 /// </summary>
 internal sealed class SqlUnitOfWorkResourceAccessor : ISqlUnitOfWorkResourceAccessor
 {
+    /// <summary>
+    /// 用于解析工作单元资源构建所需的依赖服务。
+    /// </summary>
     private readonly IServiceProvider _serviceProvider;
+    /// <summary>
+    /// 解析工作单元使用的数据源描述。
+    /// </summary>
     private readonly ISqlDataSourceResolver _dataSourceResolver;
+    /// <summary>
+    /// 解析数据源对应的连接字符串。
+    /// </summary>
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
+    /// <summary>
+    /// 解析数据库类型对应的 SQL 提供程序。
+    /// </summary>
     private readonly ISqlProviderResolver _providerResolver;
+    /// <summary>
+    /// 解析用于创建数据库连接的工厂。
+    /// </summary>
     private readonly ISqlDbConnectionFactoryResolver _connectionFactoryResolver;
+    /// <summary>
+    /// 解析连接对应的数据库标识。
+    /// </summary>
     private readonly ISqlDatabaseIdentityResolver _databaseIdentityResolver;
 
+    /// <summary>
+    /// 初始化一个 <see cref="SqlUnitOfWorkResourceAccessor" /> 类型的实例。
+    /// </summary>
+    /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
+    /// <param name="dataSourceResolver">用于解析 SQL 数据源配置的解析器。</param>
+    /// <param name="connectionStringResolver">用于解析数据库连接字符串的解析器。</param>
+    /// <param name="providerResolver">用于解析 SQL 提供程序的解析器。</param>
+    /// <param name="connectionFactoryResolver">用于解析数据库连接工厂的解析器。</param>
+    /// <param name="databaseIdentityResolver">用于解析数据库身份的解析器。</param>
     public SqlUnitOfWorkResourceAccessor(IServiceProvider serviceProvider,
         ISqlDataSourceResolver dataSourceResolver,
         ISqlConnectionStringResolver connectionStringResolver,
@@ -32,6 +59,7 @@ internal sealed class SqlUnitOfWorkResourceAccessor : ISqlUnitOfWorkResourceAcce
         _databaseIdentityResolver = databaseIdentityResolver ?? throw new ArgumentNullException(nameof(databaseIdentityResolver));
     }
 
+    /// <inheritdoc />
     public IUnitOfWorkConnectionResource GetResource(IUnitOfWorkScope scope, DatabaseContext context,
         string connectionStringOverride = null, bool createDapperResource = true,
         bool requireComparableIdentity = false)
@@ -98,6 +126,11 @@ internal sealed class SqlUnitOfWorkResourceAccessor : ISqlUnitOfWorkResourceAcce
             transactionCapabilities));
     }
 
+    /// <summary>
+    /// 解析当前 SQL 上下文的数据源。
+    /// </summary>
+    /// <param name="context">当前 SQL 数据库上下文。</param>
+    /// <returns>按上下文及主库读取策略解析的数据源描述信息。</returns>
     private SqlDataSourceDescriptor ResolveDataSource(DatabaseContext context)
     {
         var dataSource = context.DataSource ?? _dataSourceResolver.Resolve(context.DbKey,
@@ -118,6 +151,12 @@ internal sealed class SqlUnitOfWorkResourceAccessor : ISqlUnitOfWorkResourceAcce
         });
     }
 
+    /// <summary>
+    /// 尝试解析数据库的物理身份。
+    /// </summary>
+    /// <param name="databaseType">连接所使用的数据库类型。</param>
+    /// <param name="connectionString">待解析物理数据库身份的连接字符串。</param>
+    /// <returns>解析器返回的数据库身份；解析失败时为 null。</returns>
     private SqlDatabaseIdentity ResolveIdentity(DatabaseType databaseType, string connectionString)
     {
         try

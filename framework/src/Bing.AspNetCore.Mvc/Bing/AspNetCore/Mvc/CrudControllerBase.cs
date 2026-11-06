@@ -16,7 +16,7 @@ public abstract class CrudControllerBase<TDto, TQuery> : CrudControllerBase<TDto
     where TDto : IDto, new()
 {
     /// <summary>
-    /// 初始化一个 <see cref="CrudControllerBase{TDto, TQuery}"/> 类型的实例。
+    /// 初始化一个 <see cref="CrudControllerBase{TDto,TQuery}" /> 类型的实例。
     /// </summary>
     /// <param name="service">Crud服务</param>
     protected CrudControllerBase(ICrudAppService<TDto, TQuery> service) : base(service)
@@ -36,7 +36,7 @@ public abstract class CrudControllerBase<TDto, TRequest, TQuery> : CrudControlle
     where TDto : IResponse, new()
 {
     /// <summary>
-    /// 初始化一个 <see cref="CrudControllerBase{TDto, TRequest, TQuery}"/> 类型的实例。
+    /// 初始化一个 <see cref="CrudControllerBase{TDto,TRequest,TQuery}" /> 类型的实例。
     /// </summary>
     /// <param name="service">Crud服务</param>
     protected CrudControllerBase(ICrudAppService<TDto, TRequest, TQuery> service) : base(service)
@@ -63,7 +63,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     private readonly ICrudAppService<TDto, TUpdateRequest, TCreateRequest, TUpdateRequest, TQuery> _service;
 
     /// <summary>
-    /// 初始化一个 <see cref="CrudControllerBase{TDto, TCreateRequest, TUpdateRequest, TQuery}"/> 类型的实例。
+    /// 初始化一个 <see cref="CrudControllerBase{TDto,TCreateRequest,TUpdateRequest,TQuery}" /> 类型的实例。
     /// </summary>
     /// <param name="service">Crud服务</param>
     protected CrudControllerBase(ICrudAppService<TDto, TUpdateRequest, TCreateRequest, TUpdateRequest, TQuery> service) : base(service)
@@ -72,7 +72,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     }
 
     /// <summary>
-    /// 创建
+    /// 创建新实体并返回创建结果。
     /// </summary>
     /// <remarks>
     /// 调用范例：
@@ -99,7 +99,7 @@ public abstract class CrudControllerBase<TDto, TCreateRequest, TUpdateRequest, T
     protected virtual void CreateBefore(TCreateRequest dto) { }
 
     /// <summary>
-    /// 修改
+    /// 更新实体并返回更新结果。
     /// </summary>
     /// <remarks>
     /// 调用范例：

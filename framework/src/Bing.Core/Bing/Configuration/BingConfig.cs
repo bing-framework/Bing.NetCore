@@ -11,7 +11,7 @@ public class BingConfig
     private static BingConfig _instance;
 
     /// <summary>
-    /// 对象锁
+    /// 同步框架配置实例的创建和替换。
     /// </summary>
     private static object _lockObj = new object();
 

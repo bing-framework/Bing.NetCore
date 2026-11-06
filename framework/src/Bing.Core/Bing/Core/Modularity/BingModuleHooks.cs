@@ -175,6 +175,11 @@ internal static class BingModuleHooks
     /// <summary>
     /// 执行服务配置阶段。
     /// </summary>
+    /// <param name="module">需要执行生命周期钩子的模块。</param>
+    /// <param name="services">依赖注入服务集合。</param>
+    /// <param name="phase">需要执行的生命周期阶段名称。</param>
+    /// <param name="asynchronous">允许优先执行异步钩子时为 true，否则执行同步钩子。</param>
+    /// <param name="token">取消令牌。</param>
     internal static Task ConfigureAsync(BingModule module, IServiceCollection services, string phase,
         bool asynchronous, CancellationToken token)
     {
@@ -225,6 +230,11 @@ internal static class BingModuleHooks
     /// <summary>
     /// 执行应用初始化阶段。
     /// </summary>
+    /// <param name="module">需要执行生命周期钩子的模块。</param>
+    /// <param name="context">应用初始化上下文。</param>
+    /// <param name="phase">需要执行的生命周期阶段名称。</param>
+    /// <param name="asynchronous">允许优先执行异步钩子时为 true，否则执行同步钩子。</param>
+    /// <param name="token">取消令牌。</param>
     internal static Task InitializeAsync(BingModule module, BingModuleInitializationContext context,
         string phase, bool asynchronous, CancellationToken token)
     {
@@ -273,6 +283,10 @@ internal static class BingModuleHooks
     /// <summary>
     /// 执行应用关闭阶段。
     /// </summary>
+    /// <param name="module">需要执行生命周期钩子的模块。</param>
+    /// <param name="context">应用关闭上下文。</param>
+    /// <param name="asynchronous">允许优先执行异步钩子时为 true，否则执行同步钩子。</param>
+    /// <param name="token">取消令牌。</param>
     internal static Task ShutdownAsync(BingModule module, BingModuleShutdownContext context,
         bool asynchronous, CancellationToken token)
     {

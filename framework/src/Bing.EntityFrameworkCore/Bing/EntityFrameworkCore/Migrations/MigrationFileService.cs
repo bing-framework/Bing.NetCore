@@ -26,12 +26,12 @@ public class MigrationFileService : IMigrationFileService
     private string _migrationName;
 
     /// <summary>
-    /// 是否移除所有外键
+    /// 指示生成迁移文件时是否移除所有外键定义。
     /// </summary>
     private bool _isRemoveForeignKeys;
 
     /// <summary>
-    /// 初始化一个<see cref="MigrationFileService"/>类型的实例
+    /// 初始化一个 <see cref="MigrationFileService" /> 类型的实例。
     /// </summary>
     /// <param name="logger">日志</param>
     public MigrationFileService(ILogger<MigrationFileService> logger)

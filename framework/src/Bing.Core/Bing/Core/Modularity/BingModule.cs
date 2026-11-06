@@ -77,10 +77,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
     /// <remarks>默认实现不注册额外服务，直接返回 <paramref name="services"/>。</remarks>
     public virtual IServiceCollection AddServices(IServiceCollection services) => services;
 
-    /// <summary>
-    /// 在所有模块注册服务前配置当前模块。
-    /// </summary>
-    /// <param name="services">当前应用的服务集合。</param>
+    /// <inheritdoc />
     public virtual void PreConfigureServices(IServiceCollection services)
     {
         if (_bridgingPreConfiguration) return;
@@ -99,11 +96,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         finally { _bridgingPreConfiguration = false; }
     }
 
-    /// <summary>
-    /// 在所有模块注册服务前配置当前模块。
-    /// </summary>
-    /// <param name="services">当前应用的服务集合。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
+    /// <inheritdoc />
     public virtual async Task PreConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
     {
         if (_bridgingAsyncPreConfiguration) return;
@@ -137,10 +130,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// 在所有模块注册服务后配置当前模块。
-    /// </summary>
-    /// <param name="services">当前应用的服务集合。</param>
+    /// <inheritdoc />
     public virtual void PostConfigureServices(IServiceCollection services)
     {
         if (_bridgingPostConfiguration) return;
@@ -159,11 +149,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         finally { _bridgingPostConfiguration = false; }
     }
 
-    /// <summary>
-    /// 在所有模块注册服务后配置当前模块。
-    /// </summary>
-    /// <param name="services">当前应用的服务集合。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
+    /// <inheritdoc />
     public virtual async Task PostConfigureServicesAsync(IServiceCollection services, CancellationToken cancellationToken)
     {
         if (_bridgingAsyncPostConfiguration) return;
@@ -184,10 +170,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
     /// <remarks>默认实现仅将 <see cref="Enabled"/> 标记为 <c>true</c>。</remarks>
     public virtual void UseModule(IServiceProvider provider) => Enabled = true;
 
-    /// <summary>
-    /// 在应用主初始化前初始化当前模块。
-    /// </summary>
-    /// <param name="context">本轮应用初始化上下文。</param>
+    /// <inheritdoc />
     public virtual void OnPreApplicationInitialization(BingModuleInitializationContext context)
     {
         if (_bridgingPreInitialization || this is not IOnPreApplicationInitialization initializer ||
@@ -199,11 +182,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         finally { _bridgingPreInitialization = false; }
     }
 
-    /// <summary>
-    /// 在应用主初始化前初始化当前模块。
-    /// </summary>
-    /// <param name="context">本轮应用初始化上下文。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
+    /// <inheritdoc />
     public virtual async Task OnPreApplicationInitializationAsync(BingModuleInitializationContext context,
         CancellationToken cancellationToken)
     {
@@ -252,10 +231,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         else OnApplicationInitialization(context);
     }
 
-    /// <summary>
-    /// 在应用主初始化后初始化当前模块。
-    /// </summary>
-    /// <param name="context">本轮应用初始化上下文。</param>
+    /// <inheritdoc />
     public virtual void OnPostApplicationInitialization(BingModuleInitializationContext context)
     {
         if (_bridgingPostInitialization || this is not IOnPostApplicationInitialization initializer ||
@@ -267,11 +243,7 @@ public abstract class BingModule : IBingModule, IPreConfigureServices, IPostConf
         finally { _bridgingPostInitialization = false; }
     }
 
-    /// <summary>
-    /// 在应用主初始化后初始化当前模块。
-    /// </summary>
-    /// <param name="context">本轮应用初始化上下文。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
+    /// <inheritdoc />
     public virtual async Task OnPostApplicationInitializationAsync(BingModuleInitializationContext context,
         CancellationToken cancellationToken)
     {

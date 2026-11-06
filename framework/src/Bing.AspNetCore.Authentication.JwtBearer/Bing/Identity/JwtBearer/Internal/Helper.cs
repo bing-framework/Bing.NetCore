@@ -48,17 +48,17 @@ internal static class Helper
 }
 
 /// <summary>
-/// Jwt令牌类型
+/// 标识 Bearer 认证流程中 JWT 的用途。
 /// </summary>
 internal enum JsonWebTokenType
 {
     /// <summary>
-    /// 访问令牌
+    /// 用于访问受保护资源的访问令牌。
     /// </summary>
     AccessToken,
 
     /// <summary>
-    /// 刷新令牌
+    /// 用于申请新访问令牌的刷新令牌。
     /// </summary>
     RefreshToken
 }

@@ -1,5 +1,7 @@
 # Bing.DynamicApi.Client.Resilience
 
+[![NuGet](https://img.shields.io/nuget/v/Bing.DynamicApi.Client.Resilience.svg)](https://www.nuget.org/packages/Bing.DynamicApi.Client.Resilience/)
+
 运行时动态 API 客户端的可选恢复适配包，面向 net6.0/net8.0。宿主需安装并注册独立 Provider；切换 Polly 时改为 AddPollyProvider，客户端调用不变。
 
 ```csharp

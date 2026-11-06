@@ -120,8 +120,11 @@ public class RealIpMiddleware : IMiddleware
     }
 
     /// <summary>
-    /// 解析可信代理地址配置。
+    /// 解析并去重可信代理地址配置。
     /// </summary>
+    /// <param name="values">可信代理 IP 地址文本集合。</param>
+    /// <returns>解析后的唯一代理地址列表；输入为 null 时返回空列表。</returns>
+    /// <exception cref="ArgumentException">任一配置值为空或不是有效 IP 地址时抛出。</exception>
     private static IReadOnlyList<IPAddress> ParseTrustedProxies(IEnumerable<string> values)
     {
         if (values == null)
@@ -139,8 +142,11 @@ public class RealIpMiddleware : IMiddleware
     }
 
     /// <summary>
-    /// 比较 IPv4 与 IPv4 映射 IPv6 地址。
+    /// 比较两个 IP 地址是否相同或属于 IPv4 映射关系。
     /// </summary>
+    /// <param name="left">参与比较的第一个 IP 地址。</param>
+    /// <param name="right">参与比较的第二个 IP 地址。</param>
+    /// <returns>两个地址相同或为 IPv4 与其映射 IPv6 地址时为 true；任一地址为 null 时为 false。</returns>
     private static bool AreSameAddress(IPAddress left, IPAddress right)
     {
         if (left == null || right == null)
@@ -167,7 +173,7 @@ public class RealIpOptions
     public string HeaderKey { get; set; } = "X-Forwarded-For";
 
     /// <summary>
-    /// 允许提交真实 IP 请求头的代理地址。
+    /// 获取允许提交真实 IP 请求头的代理地址。
     /// </summary>
     /// <remarks>为空时不信任任何转发头；地址比较支持 IPv4 与 IPv4 映射 IPv6。</remarks>
     public IList<string> TrustedProxies { get; } = new List<string>();

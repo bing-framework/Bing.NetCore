@@ -20,12 +20,12 @@ public readonly struct RateLimitResult
     }
 
     /// <summary>
-    /// 是否取得令牌。
+    /// 获取是否取得令牌。
     /// </summary>
     public bool IsAllowed { get; }
 
     /// <summary>
-    /// 拒绝后建议等待的时长。
+    /// 获取拒绝后建议等待的时长。
     /// </summary>
     public TimeSpan RetryAfter { get; }
 }

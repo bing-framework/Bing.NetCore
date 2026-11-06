@@ -35,6 +35,7 @@ public static partial class Extensions
     /// <summary>
     /// 在当前锁实现明确支持租约时注册租约服务。
     /// </summary>
+    /// <param name="services">依赖注入服务集合。</param>
     private static void TryAddLeaseProvider(IServiceCollection services)
     {
         var descriptor = services.LastOrDefault(item => item.ServiceType == typeof(ILock));

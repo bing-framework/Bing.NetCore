@@ -158,6 +158,7 @@ public static class AuditingPersistenceExtensions
     /// <param name="database">数据库语法。</param>
     /// <param name="connectionFactory">每次返回新建未打开连接的工厂。</param>
     /// <param name="configure">安全持久化规则。</param>
+    /// <returns>已注册数据库审计存储的服务集合。</returns>
     /// <remarks>显式替换日志存储；不自动建表，不创建第二套工作单元，普通审计仍独立提交。</remarks>
     public static IServiceCollection AddBingDatabaseAuditing(this IServiceCollection services,
         AuditLogDatabase database, Func<DbConnection> connectionFactory,

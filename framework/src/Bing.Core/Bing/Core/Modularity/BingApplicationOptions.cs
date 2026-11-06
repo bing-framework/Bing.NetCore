@@ -20,7 +20,7 @@ public sealed class BingApplicationOptions
     /// </summary>
     public BingServiceRegistrationMode ServiceRegistrationMode { get; set; } = BingServiceRegistrationMode.Compatible;
     /// <summary>
-    /// 动态运行库为本次注册指定的插件加载上下文。
+    /// 获取或设置动态运行库为本次注册指定的插件加载上下文。
     /// </summary>
     internal AssemblyLoadContext PluginLoadContext { get; set; }
 

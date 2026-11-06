@@ -4,24 +4,51 @@ using Microsoft.Extensions.Options;
 
 namespace Bing.DynamicApi.Client.Resilience;
 
-/// <summary>运行时动态 API 客户端的恢复及完整调用预算。</summary>
+/// <summary>
+/// 动态 API 客户端的恢复与超时配置。
+/// </summary>
 public sealed class BingDynamicApiClientResilienceOptions
 {
-    /// <summary>HTTP 发送恢复配置；业务调用仍需明确的 CanRetryRequest 许可。</summary>
+    /// <summary>
+    /// 获取HTTP 发送恢复配置。
+    /// </summary>
+    /// <remarks>业务调用仍需明确的 CanRetryRequest 许可。</remarks>
     public BingHttpResilienceOptions Http { get; } = new();
-    /// <summary>独立描述恢复；默认保留旧顺序下载路径。</summary>
+    /// <summary>
+    /// 获取独立描述恢复。
+    /// </summary>
+    /// <remarks>默认保留旧顺序下载路径。</remarks>
     public BingDynamicApiDefinitionRecoveryOptions Definition { get; } = new();
-    /// <summary>完整业务调用预算，覆盖描述等待、发送和内容读取；流只覆盖取得流。</summary>
+    /// <summary>
+    /// 获取或设置完整业务调用预算，覆盖描述等待、发送和内容读取。
+    /// </summary>
+    /// <remarks>流只覆盖取得流。默认值为 10 秒。</remarks>
     public TimeSpan OperationTimeout { get; set; } = TimeSpan.FromSeconds(10);
-    /// <summary>共享描述下载预算，独立于任意等待者。</summary>
+    /// <summary>
+    /// 获取或设置共享描述下载预算，独立于任意等待者。
+    /// </summary>
+    /// <remarks>默认值为 5 秒。</remarks>
     public TimeSpan DefinitionTimeout { get; set; } = TimeSpan.FromSeconds(5);
 }
 
-/// <summary>将运行时动态客户端绑定到共享 HTTP 恢复管线。</summary>
+/// <summary>
+/// 动态 API 客户端恢复管线注册扩展。
+/// </summary>
+/// <remarks>
+/// 将运行时动态客户端绑定到共享 HTTP 恢复管线。
+/// </remarks>
 public static class BingDynamicApiClientResilienceExtensions
 {
-    /// <summary>绑定远程服务，启用 HttpPipeline 并返回实际具名 builder。</summary>
-    /// <remarks>远程服务必须已通过 AddRemoteService 配置；旧 MaxRetries 必须为零。</remarks>
+    /// <summary>
+    /// 为动态 API 远程服务注册 HTTP 韧性客户端。
+    /// </summary>
+    /// <param name="services">接收 HTTP 客户端和韧性服务的依赖注入集合。</param>
+    /// <param name="remoteName">要绑定韧性配置的远程服务名称。</param>
+    /// <param name="configure">可选的 HTTP 重试、对冲和超时配置委托。</param>
+    /// <returns>已注册远程服务 HTTP 客户端的构建器。</returns>
+    /// <remarks>
+    /// 重试和对冲仅对满足请求元数据、可重放性、HTTP 方法及流结果限制的调用开放。
+    /// </remarks>
     public static IHttpClientBuilder AddBingDynamicApiClientResilience(this IServiceCollection services,
         string remoteName, Action<BingDynamicApiClientResilienceOptions>? configure = null)
     {

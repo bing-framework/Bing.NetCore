@@ -27,8 +27,9 @@ public sealed class BingPluginDependencyDescriptor
     public string Id { get; }
 
     /// <summary>
-    /// 获取精确依赖版本；区间约束时为空。
+    /// 获取精确依赖版本。
     /// </summary>
+    /// <remarks>区间约束时为空。</remarks>
     public Version Version { get; }
 
     /// <summary>

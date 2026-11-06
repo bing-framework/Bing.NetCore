@@ -6,7 +6,7 @@
 public interface IJsonWebTokenValidator
 {
     /// <summary>
-    /// 校验
+    /// 校验令牌及负载是否有效。
     /// </summary>
     /// <param name="encodeJwt">加密后的Jwt令牌</param>
     /// <param name="options">Jwt选项配置</param>

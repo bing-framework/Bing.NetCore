@@ -19,21 +19,30 @@ public class EventHandlerDisposeWrapper : IEventHandlerDisposeWrapper, IAsyncDis
     public IEventHandler EventHandler { get; }
 
     /// <summary>
-    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类的新实例。
+    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类型的实例。
     /// </summary>
     /// <param name="eventHandler">要包装的事件处理器。</param>
+    ///
     /// <param name="disposeAction">释放包装器时执行的可选资源释放操作。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类的新实例。
+    /// </remarks>
     public EventHandlerDisposeWrapper(IEventHandler eventHandler, Action disposeAction = null)
         : this(eventHandler, disposeAction, null)
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类的新实例。
+    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类型的实例。
     /// </summary>
     /// <param name="eventHandler">要包装的事件处理器。</param>
+    ///
     /// <param name="disposeAction">同步释放包装器时执行的可选资源释放操作。</param>
+    ///
     /// <param name="disposeAsyncAction">异步释放包装器时执行的可选资源释放操作。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="EventHandlerDisposeWrapper" /> 类的新实例。
+    /// </remarks>
     public EventHandlerDisposeWrapper(IEventHandler eventHandler, Action disposeAction,
         Func<ValueTask> disposeAsyncAction)
     {

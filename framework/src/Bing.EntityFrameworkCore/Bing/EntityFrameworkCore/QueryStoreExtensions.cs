@@ -12,7 +12,7 @@ namespace Bing.EntityFrameworkCore;
 public static class QueryStoreExtensions
 {
     /// <summary>
-    /// 查询
+    /// 按查询条件获取实体查询结果。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">键类型</typeparam>
@@ -68,7 +68,7 @@ public static class QueryStoreExtensions
     }
 
     /// <summary>
-    /// 查询
+    /// 按查询对象异步查询实体列表。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">键类型</typeparam>
@@ -132,7 +132,7 @@ public static class QueryStoreExtensions
     }
 
     /// <summary>
-    /// 获取查询结果
+    /// 按查询条件获取实体查询结果。
     /// </summary>
     /// <typeparam name="TEntity">实体类型</typeparam>
     /// <typeparam name="TKey">键类型</typeparam>

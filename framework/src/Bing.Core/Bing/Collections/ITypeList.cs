@@ -14,7 +14,7 @@ public interface ITypeList : ITypeList<object>
 public interface ITypeList<in TBaseType> : IList<Type>
 {
     /// <summary>
-    /// 添加
+    /// 向类型列表添加指定类型。
     /// </summary>
     /// <typeparam name="T">泛型类型</typeparam>
     void Add<T>() where T : TBaseType;
@@ -27,14 +27,14 @@ public interface ITypeList<in TBaseType> : IList<Type>
     bool TryAdd<T>() where T : TBaseType;
 
     /// <summary>
-    /// 包含
+    /// 判断类型列表是否包含指定类型。
     /// </summary>
     /// <typeparam name="T">泛型类型</typeparam>
     /// <returns>列表包含指定类型时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     bool Contains<T>() where T : TBaseType;
 
     /// <summary>
-    /// 移除
+    /// 从类型列表移除指定类型。
     /// </summary>
     /// <typeparam name="T">泛型类型</typeparam>
     void Remove<T>() where T : TBaseType;

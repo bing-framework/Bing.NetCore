@@ -15,13 +15,24 @@ namespace Bing.Datas.EntityFramework.Core;
 /// </summary>
 internal sealed class EfCoreSqlUnitOfWorkMapping
 {
+    /// <summary>
+    /// 初始化一个 <see cref="EfCoreSqlUnitOfWorkMapping" /> 类型的实例。
+    /// </summary>
+    /// <param name="contextType">当前 EF Core 工作单元上下文的 CLR 类型。</param>
+    /// <param name="dataSourceKey">用于选择数据库连接配置的数据源键。</param>
     public EfCoreSqlUnitOfWorkMapping(Type contextType, string dataSourceKey)
     {
         ContextType = contextType ?? throw new ArgumentNullException(nameof(contextType));
         DataSourceKey = dataSourceKey ?? throw new ArgumentNullException(nameof(dataSourceKey));
     }
 
+    /// <summary>
+    /// 获取绑定的 EF Core 工作单元上下文类型。
+    /// </summary>
     public Type ContextType { get; }
+    /// <summary>
+    /// 获取数据源在当前宿主的稳定键。
+    /// </summary>
     public string DataSourceKey { get; }
 }
 
@@ -31,13 +42,40 @@ internal sealed class EfCoreSqlUnitOfWorkMapping
 internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnectionProvider,
     IEfCoreSqlUnitOfWorkConnectionProvider
 {
+    /// <summary>
+    /// 用于解析 EF Core 工作单元上下文及相关服务。
+    /// </summary>
     private readonly IServiceProvider _serviceProvider;
+    /// <summary>
+    /// 保存 EF Core 上下文的 SQL 工作单元映射。
+    /// </summary>
     private readonly IReadOnlyList<EfCoreSqlUnitOfWorkMapping> _mappings;
+    /// <summary>
+    /// 解析 EF Core 映射使用的数据源描述。
+    /// </summary>
     private readonly ISqlDataSourceResolver _dataSourceResolver;
+    /// <summary>
+    /// 解析数据源对应的连接字符串。
+    /// </summary>
     private readonly ISqlConnectionStringResolver _connectionStringResolver;
+    /// <summary>
+    /// 解析连接对应的数据库标识。
+    /// </summary>
     private readonly ISqlDatabaseIdentityResolver _databaseIdentityResolver;
+    /// <summary>
+    /// 提供当前操作上下文的数据库上下文访问器。
+    /// </summary>
     private readonly IDatabaseContextAccessor _databaseContextAccessor;
 
+    /// <summary>
+    /// 初始化一个 <see cref="EfCoreSqlUnitOfWorkConnectionProvider" /> 类型的实例。
+    /// </summary>
+    /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
+    /// <param name="mappings">EF Core 工作单元的数据源映射配置集合。</param>
+    /// <param name="dataSourceResolver">用于解析 SQL 数据源配置的解析器。</param>
+    /// <param name="connectionStringResolver">用于解析数据库连接字符串的解析器。</param>
+    /// <param name="databaseContextAccessor">用于访问当前数据库上下文的访问器。</param>
+    /// <param name="databaseIdentityResolver">用于解析数据库身份的解析器。</param>
     public EfCoreSqlUnitOfWorkConnectionProvider(IServiceProvider serviceProvider,
         IEnumerable<EfCoreSqlUnitOfWorkMapping> mappings, ISqlDataSourceResolver dataSourceResolver = null,
         ISqlConnectionStringResolver connectionStringResolver = null,
@@ -92,9 +130,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
             throw new InvalidOperationException($"SQL 数据源 {dataSourceKey} 映射的 EF Core context 与 Shared Query context 不是同一实例。");
     }
 
+    /// <inheritdoc />
     public bool HasMappingForContext(UnitOfWorkBase context) =>
         context != null && _mappings.Any(mapping => mapping.ContextType.IsInstanceOfType(context));
 
+    /// <inheritdoc />
     public void ValidateContextAdmission(IUnitOfWorkScope scope, UnitOfWorkBase context, bool isWrite)
     {
         if (scope == null)
@@ -121,6 +161,7 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
         ValidateSourceAdmission(scope, context, dataSource, connectionString, isWrite);
     }
 
+    /// <inheritdoc />
     public IUnitOfWorkConnectionResource GetResourceForContext(IUnitOfWorkScope scope, UnitOfWorkBase context)
     {
         if (scope == null)
@@ -152,6 +193,15 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
         return CreateResource(scope, mapping, context, dataSource, providerKey, tenantId, connectionString);
     }
 
+    /// <summary>
+    /// 校验 EF Core 上下文加入 SQL 工作单元的条件。
+    /// </summary>
+    /// <param name="scope">当前业务工作单元作用域。</param>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="dataSource">SQL 数据源描述信息。</param>
+    /// <param name="configuredConnectionString">数据源配置的连接字符串。</param>
+    /// <param name="isWrite">执行写操作时为 true，仅用于读取时为 false。</param>
+    /// <remarks>校验事务能力、读写准入、主库策略和物理数据库身份；不在执行阶段重定向数据源。</remarks>
     private void ValidateSourceAdmission(IUnitOfWorkScope scope, UnitOfWorkBase context,
         SqlDataSourceDescriptor dataSource, string configuredConnectionString, bool isWrite)
     {
@@ -206,6 +256,17 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
         throw new InvalidOperationException($"SQL 数据源 {dataSourceKey} 与 EF Core context 指向不同或不可比较的物理数据库。");
     }
 
+    /// <summary>
+    /// 获取或创建当前作用域的 EF Core SQL 连接资源。
+    /// </summary>
+    /// <param name="scope">当前业务工作单元作用域。</param>
+    /// <param name="mapping">数据源与 EF Core 上下文的映射。</param>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="dataSource">SQL 数据源描述信息。</param>
+    /// <param name="providerKey">SQL Provider 注册键。</param>
+    /// <param name="tenantId">当前租户标识。</param>
+    /// <param name="connectionString">当前数据源的有效连接字符串。</param>
+    /// <returns>作用域内与资源键匹配的连接资源。</returns>
     private IUnitOfWorkConnectionResource CreateResource(IUnitOfWorkScope scope,
         EfCoreSqlUnitOfWorkMapping mapping, UnitOfWorkBase context, SqlDataSourceDescriptor dataSource,
         string providerKey, string tenantId, string connectionString)
@@ -216,6 +277,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
             () => new EfCoreSqlUnitOfWorkResource(key, scope, context));
     }
 
+    /// <summary>
+    /// 解析数据源映射指定的 EF Core 上下文。
+    /// </summary>
+    /// <param name="mapping">数据源与 EF Core 上下文的映射。</param>
+    /// <returns>当前依赖注入作用域内的上下文实例；未注册时抛出异常。</returns>
     private UnitOfWorkBase ResolveContext(EfCoreSqlUnitOfWorkMapping mapping)
     {
         var context = _serviceProvider.GetService(mapping.ContextType) as UnitOfWorkBase;
@@ -223,6 +289,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
             $"SQL 数据源 {mapping.DataSourceKey} 映射的 EF Core context {mapping.ContextType.FullName} 未注册到当前 DI scope。");
     }
 
+    /// <summary>
+    /// 查找指定数据源的 EF Core 上下文映射。
+    /// </summary>
+    /// <param name="dataSourceKey">SQL 数据源注册键。</param>
+    /// <returns>唯一匹配的映射；没有匹配时为 null，存在多个匹配时抛出异常。</returns>
     private EfCoreSqlUnitOfWorkMapping FindMapping(string dataSourceKey)
     {
         var matches = _mappings.Where(mapping => string.Equals(mapping.DataSourceKey, dataSourceKey,
@@ -232,6 +303,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
         return matches.SingleOrDefault();
     }
 
+    /// <summary>
+    /// 解析当前上下文使用的数据源键。
+    /// </summary>
+    /// <param name="mappings">当前上下文可用的数据源映射集合。</param>
+    /// <returns>环境数据源键、唯一映射键或已映射的默认键；无法确定时为 null。</returns>
     private string ResolveContextDataSourceKey(IReadOnlyList<EfCoreSqlUnitOfWorkMapping> mappings)
     {
         var ambientKey = _databaseContextAccessor?.Current?.DbKey;
@@ -246,6 +322,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
             : null;
     }
 
+    /// <summary>
+    /// 获取数据库类型对应的官方 SQL Provider 键。
+    /// </summary>
+    /// <param name="databaseType">SQL 数据库类型。</param>
+    /// <returns>受支持数据库对应的 Provider 注册键；未支持的类型抛出异常。</returns>
     private static string GetOfficialProviderKey(DatabaseType databaseType) => databaseType switch
     {
         DatabaseType.MySql => "bing.mysql",
@@ -256,6 +337,11 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
         _ => throw new NotSupportedException($"未能为数据库类型 {databaseType} 解析 EF Core SQL Provider。")
     };
 
+    /// <summary>
+    /// 校验 EF Core Provider 与数据源的数据库类型一致。
+    /// </summary>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="dataSourceDatabaseType">数据源声明的数据库类型。</param>
     private static void ValidateDatabaseType(UnitOfWorkBase context, DatabaseType dataSourceDatabaseType)
     {
         var providerName = context.Database.ProviderName;
@@ -278,9 +364,31 @@ internal sealed class EfCoreSqlUnitOfWorkConnectionProvider : IUnitOfWorkConnect
 /// </summary>
 internal interface IEfCoreSqlUnitOfWorkConnectionProvider
 {
+    /// <summary>
+    /// 验证工作单元与数据源映射是否一致。
+    /// </summary>
+    /// <param name="context">本次操作使用的上下文。</param>
+    /// <param name="dataSourceKey">目标数据源映射键。</param>
     void EnsureMappedContextMatches(UnitOfWorkBase context, string dataSourceKey);
+    /// <summary>
+    /// 检查工作单元是否存在数据源映射。
+    /// </summary>
+    /// <param name="context">本次操作使用的上下文。</param>
+    /// <returns>存在适用于该工作单元的映射时为 true，否则为 false。</returns>
     bool HasMappingForContext(UnitOfWorkBase context);
+    /// <summary>
+    /// 验证工作单元能否加入当前操作作用域。
+    /// </summary>
+    /// <param name="scope">操作所属的隔离范围。</param>
+    /// <param name="context">本次操作使用的上下文。</param>
+    /// <param name="isWrite">为 true 时执行写入准入校验，否则校验读取。</param>
     void ValidateContextAdmission(IUnitOfWorkScope scope, UnitOfWorkBase context, bool isWrite);
+    /// <summary>
+    /// 获取作用域内工作单元的连接资源。
+    /// </summary>
+    /// <param name="scope">操作所属的隔离范围。</param>
+    /// <param name="context">本次操作使用的上下文。</param>
+    /// <returns>当前工作单元对应的连接资源。</returns>
     IUnitOfWorkConnectionResource GetResourceForContext(IUnitOfWorkScope scope, UnitOfWorkBase context);
 }
 
@@ -289,14 +397,45 @@ internal interface IEfCoreSqlUnitOfWorkConnectionProvider
 /// </summary>
 internal sealed class EfCoreSqlUnitOfWorkResourceKey : IEquatable<EfCoreSqlUnitOfWorkResourceKey>
 {
+    /// <summary>
+    /// 保存资源键对应的 EF Core 工作单元映射。
+    /// </summary>
     private readonly EfCoreSqlUnitOfWorkMapping _mapping;
+    /// <summary>
+    /// 保存资源键所属的工作单元实例。
+    /// </summary>
     private readonly UnitOfWorkBase _context;
+    /// <summary>
+    /// 保存资源键的数据源键。
+    /// </summary>
     private readonly string _dataSourceKey;
+    /// <summary>
+    /// 保存资源键的数据库类型。
+    /// </summary>
     private readonly DatabaseType _databaseType;
+    /// <summary>
+    /// 保存资源键的提供程序键。
+    /// </summary>
     private readonly string _providerKey;
+    /// <summary>
+    /// 保存资源键的租户标识。
+    /// </summary>
     private readonly string _tenantId;
+    /// <summary>
+    /// 保存资源键的连接字符串。
+    /// </summary>
     private readonly string _connectionString;
 
+    /// <summary>
+    /// 初始化一个 <see cref="EfCoreSqlUnitOfWorkResourceKey" /> 类型的实例。
+    /// </summary>
+    /// <param name="mapping">当前 EF Core 工作单元对应的映射配置。</param>
+    /// <param name="context">当前操作关联的上下文或工作单元。</param>
+    /// <param name="dataSourceKey">用于选择数据库连接配置的数据源键。</param>
+    /// <param name="databaseType">当前连接使用的数据库类型。</param>
+    /// <param name="providerKey">数据库提供程序的规范化键。</param>
+    /// <param name="tenantId">租户标识。</param>
+    /// <param name="connectionString">用于建立数据库连接的连接字符串。</param>
     public EfCoreSqlUnitOfWorkResourceKey(EfCoreSqlUnitOfWorkMapping mapping, UnitOfWorkBase context,
         string dataSourceKey, DatabaseType databaseType, string providerKey, string tenantId,
         string connectionString)
@@ -310,6 +449,7 @@ internal sealed class EfCoreSqlUnitOfWorkResourceKey : IEquatable<EfCoreSqlUnitO
         _connectionString = connectionString;
     }
 
+    /// <inheritdoc />
     public bool Equals(EfCoreSqlUnitOfWorkResourceKey other) => other != null &&
         ReferenceEquals(_mapping, other._mapping) && ReferenceEquals(_context, other._context) &&
         string.Equals(_dataSourceKey, other._dataSourceKey, StringComparison.Ordinal) &&
@@ -318,8 +458,10 @@ internal sealed class EfCoreSqlUnitOfWorkResourceKey : IEquatable<EfCoreSqlUnitO
         string.Equals(_tenantId, other._tenantId, StringComparison.Ordinal) &&
         string.Equals(_connectionString, other._connectionString, StringComparison.Ordinal);
 
+    /// <inheritdoc />
     public override bool Equals(object obj) => Equals(obj as EfCoreSqlUnitOfWorkResourceKey);
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         unchecked
@@ -341,19 +483,61 @@ internal sealed class EfCoreSqlUnitOfWorkResourceKey : IEquatable<EfCoreSqlUnitO
 /// </summary>
 internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResource
 {
+    /// <summary>
+    /// 串行化 EF Core 连接资源的准备、完成和释放。
+    /// </summary>
     private readonly SemaphoreSlim _gate = new(1, 1);
+    /// <summary>
+    /// 保存连接资源所属的工作单元作用域。
+    /// </summary>
     private readonly IUnitOfWorkScope _scope;
+    /// <summary>
+    /// 保存连接资源对应的工作单元实例。
+    /// </summary>
     private readonly UnitOfWorkBase _context;
+    /// <summary>
+    /// 保存连接资源操作的数据库门面。
+    /// </summary>
     private readonly DatabaseFacade _database;
+    /// <summary>
+    /// 保存连接资源当前的数据库事务。
+    /// </summary>
     private IDbContextTransaction _transaction;
+    /// <summary>
+    /// 指示连接资源是否已完成准备。
+    /// </summary>
     private bool _prepared;
+    /// <summary>
+    /// 指示数据库连接是否由本资源打开。
+    /// </summary>
     private bool _openedHere;
+    /// <summary>
+    /// 指示连接资源是否已完成提交或回滚。
+    /// </summary>
     private bool _completed;
+    /// <summary>
+    /// 指示连接资源是否已提交。
+    /// </summary>
     private bool _committed;
+    /// <summary>
+    /// 指示连接资源是否已回滚。
+    /// </summary>
     private bool _rolledBack;
+    /// <summary>
+    /// 指示连接资源是否进入失败状态。
+    /// </summary>
     private bool _failed;
+    /// <summary>
+    /// 指示连接资源是否已释放。
+    /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    /// 初始化一个 <see cref="EfCoreSqlUnitOfWorkResource" /> 类型的实例。
+    /// </summary>
+    /// <param name="resourceKey">用于识别当前工作单元资源的键。</param>
+    /// <param name="scope">实例所属的作用范围。</param>
+    /// <param name="context">当前操作关联的上下文或工作单元。</param>
     public EfCoreSqlUnitOfWorkResource(object resourceKey, IUnitOfWorkScope scope, UnitOfWorkBase context)
     {
         ResourceKey = resourceKey ?? throw new ArgumentNullException(nameof(resourceKey));
@@ -366,10 +550,14 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         _context.OnMappedSqlResourceCreated(scope.Id, resourceKey);
     }
 
+    /// <inheritdoc />
     public object ResourceKey { get; }
+    /// <inheritdoc />
     public IDbConnection Connection { get; }
+    /// <inheritdoc />
     public IDbTransaction Transaction => _transaction?.GetDbTransaction();
 
+    /// <inheritdoc />
     public void EnsureReady()
     {
         _gate.Wait();
@@ -405,6 +593,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         }
     }
 
+    /// <inheritdoc />
     public async Task EnsureReadyAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -453,6 +642,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         }
     }
 
+    /// <inheritdoc />
     public void Commit()
     {
         EnsureNotDisposed();
@@ -464,6 +654,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         _context.OnMappedSqlResourceCompleted(_scope.Id, ResourceKey, committed: true, rolledBack: false);
     }
 
+    /// <inheritdoc />
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
@@ -476,6 +667,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         _context.OnMappedSqlResourceCompleted(_scope.Id, ResourceKey, committed: true, rolledBack: false);
     }
 
+    /// <inheritdoc />
     public void Rollback()
     {
         EnsureNotDisposed();
@@ -487,6 +679,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         _context.OnMappedSqlResourceCompleted(_scope.Id, ResourceKey, committed: false, rolledBack: true);
     }
 
+    /// <inheritdoc />
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
@@ -499,6 +692,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         _context.OnMappedSqlResourceCompleted(_scope.Id, ResourceKey, committed: false, rolledBack: true);
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
@@ -513,6 +707,7 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         ThrowCleanup(errors);
     }
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (_disposed)
@@ -528,6 +723,9 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         ThrowCleanup(errors);
     }
 
+    /// <summary>
+    /// 拒绝上下文已有事务或环境事务的连接映射。
+    /// </summary>
     private void ValidateNoForeignTransaction()
     {
         if (_database.CurrentTransaction != null)
@@ -536,6 +734,11 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
             throw new InvalidOperationException("当前存在环境事务，不能将 EF Core context 映射到新的本地事务资源。");
     }
 
+    /// <summary>
+    /// 清理准备失败的连接资源并传播原始异常。
+    /// </summary>
+    /// <param name="primary">准备过程产生的原始异常。</param>
+    /// <remarks>将作用域标记为仅回滚；清理异常与原始异常一起传播。</remarks>
     private void FailPreparation(Exception primary)
     {
         _failed = true;
@@ -551,6 +754,11 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         ThrowWithPrimary(primary, errors);
     }
 
+    /// <summary>
+    /// 清理准备失败的连接资源并传播原始异常。
+    /// </summary>
+    /// <param name="primary">准备过程产生的原始异常。</param>
+    /// <remarks>将作用域标记为仅回滚；清理异常与原始异常一起传播。</remarks>
     private async Task FailPreparationAsync(Exception primary)
     {
         _failed = true;
@@ -567,24 +775,43 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         ThrowWithPrimary(primary, errors);
     }
 
+    /// <summary>
+    /// 检查连接资源尚未释放。
+    /// </summary>
     private void EnsureNotDisposed()
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(EfCoreSqlUnitOfWorkResource));
     }
 
+    /// <summary>
+    /// 执行清理动作并收集异常。
+    /// </summary>
+    /// <param name="errors">用于收集或传播清理异常的集合。</param>
+    /// <param name="action">待执行的操作。</param>
     private static void Capture(ICollection<Exception> errors, Action action)
     {
         try { action(); }
         catch (Exception exception) { errors.Add(exception); }
     }
 
+    /// <summary>
+    /// 执行清理动作并收集异常。
+    /// </summary>
+    /// <param name="errors">用于收集或传播清理异常的集合。</param>
+    /// <param name="action">待执行的操作。</param>
     private static async Task CaptureAsync(ICollection<Exception> errors, Func<Task> action)
     {
         try { await action().ConfigureAwait(false); }
         catch (Exception exception) { errors.Add(exception); }
     }
 
+    /// <summary>
+    /// 传播原始异常及收集到的清理异常。
+    /// </summary>
+    /// <param name="primary">准备过程产生的原始异常。</param>
+    /// <param name="errors">用于收集或传播清理异常的集合。</param>
+    /// <remarks>没有清理异常时保留原始异常的堆栈；否则将原始异常置于聚合异常首项。</remarks>
     private static void ThrowWithPrimary(Exception primary, ICollection<Exception> errors)
     {
         if (errors.Count == 0)
@@ -594,6 +821,11 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
         throw new AggregateException(all);
     }
 
+    /// <summary>
+    /// 传播收集到的清理异常。
+    /// </summary>
+    /// <param name="errors">用于收集或传播清理异常的集合。</param>
+    /// <remarks>单个异常保留其堆栈，多个异常合并传播，没有异常时直接返回。</remarks>
     private static void ThrowCleanup(ICollection<Exception> errors)
     {
         if (errors.Count == 1)
@@ -608,9 +840,23 @@ internal sealed class EfCoreSqlUnitOfWorkResource : IUnitOfWorkConnectionResourc
 /// </summary>
 internal static class EfCoreSqlUnitOfWorkContextRegistry
 {
+    /// <summary>
+    /// 同步已解析工作单元上下文的登记与快照读取。
+    /// </summary>
     private static readonly object Sync = new();
+    /// <summary>
+    /// 保存工作单元到上下文占用记录的弱引用表。
+    /// </summary>
     private static readonly ConditionalWeakTable<UnitOfWorkBase, Reservation> Reservations = new();
 
+    /// <summary>
+    /// 为工作单元登记上下文资源占用。
+    /// </summary>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="scopeId">占用上下文的工作单元作用域标识。</param>
+    /// <param name="resourceKey">连接资源的标识键。</param>
+    /// <param name="tenantId">当前租户标识。</param>
+    /// <remarks>相同作用域、资源键和租户的重复占用不产生新登记；其他占用冲突抛出异常。</remarks>
     public static void Claim(UnitOfWorkBase context, Guid scopeId, object resourceKey, string tenantId)
     {
         lock (Sync)
@@ -626,6 +872,12 @@ internal static class EfCoreSqlUnitOfWorkContextRegistry
         }
     }
 
+    /// <summary>
+    /// 释放匹配工作单元和资源键的上下文占用。
+    /// </summary>
+    /// <param name="context">参与操作的 EF Core 上下文。</param>
+    /// <param name="scopeId">占用上下文的工作单元作用域标识。</param>
+    /// <param name="resourceKey">连接资源的标识键。</param>
     public static void Release(UnitOfWorkBase context, Guid scopeId, object resourceKey)
     {
         lock (Sync)
@@ -636,8 +888,17 @@ internal static class EfCoreSqlUnitOfWorkContextRegistry
         }
     }
 
+    /// <summary>
+    /// EF Core 数据源绑定的工作单元预留信息。
+    /// </summary>
     private sealed class Reservation
     {
+        /// <summary>
+        /// 初始化一个 <see cref="Reservation" /> 类型的实例。
+        /// </summary>
+        /// <param name="scopeId">当前工作单元范围的标识。</param>
+        /// <param name="resourceKey">用于识别当前工作单元资源的键。</param>
+        /// <param name="tenantId">租户标识。</param>
         public Reservation(Guid scopeId, object resourceKey, string tenantId)
         {
             ScopeId = scopeId;
@@ -645,8 +906,17 @@ internal static class EfCoreSqlUnitOfWorkContextRegistry
             TenantId = tenantId;
         }
 
+        /// <summary>
+        /// 获取工作单元作用域标识。
+        /// </summary>
         public Guid ScopeId { get; }
+        /// <summary>
+        /// 获取数据源资源绑定键。
+        /// </summary>
         public object ResourceKey { get; }
+        /// <summary>
+        /// 获取所属租户标识。
+        /// </summary>
         public string TenantId { get; }
     }
 }

@@ -155,8 +155,11 @@ public sealed class ServiceLocator : Disposable
     #region 构造函数
 
     /// <summary>
-    /// 初始化服务定位器。
+    /// 初始化一个 <see cref="ServiceLocator" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化服务定位器。
+    /// </remarks>
     private ServiceLocator() { }
 
     #endregion

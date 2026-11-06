@@ -22,7 +22,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     private readonly IQueryAppService<TDto, TQuery> _service;
 
     /// <summary>
-    /// 初始化一个 <see cref="QueryControllerBase{TDto, TQuery}"/> 类型的实例。
+    /// 初始化一个 <see cref="QueryControllerBase{TDto,TQuery}" /> 类型的实例。
     /// </summary>
     /// <param name="service">查询服务</param>
     protected QueryControllerBase(IQueryAppService<TDto, TQuery> service)
@@ -81,7 +81,7 @@ public abstract class QueryControllerBase<TDto, TQuery> : ApiControllerBase
     protected virtual dynamic ToPagerQueryResult(PagerList<TDto> result) => result;
 
     /// <summary>
-    /// 查询
+    /// 按查询参数查询实体列表并返回查询结果。
     /// </summary>
     /// <remarks>
     /// 调用范例：

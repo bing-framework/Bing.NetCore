@@ -19,7 +19,7 @@ public abstract partial class SqlQueryBase
     private static readonly DiagnosticListener _diagnosticListener = new(SqlQueryDiagnosticListenerNames.DiagnosticListenerName);
 
     /// <summary>
-    /// 执行前诊断
+    /// 生成 SQL 执行前的诊断消息。
     /// </summary>
     /// <param name="sql">Sql语句</param>
     /// <param name="parameter">Sql参数</param>
@@ -293,6 +293,8 @@ public abstract partial class SqlQueryBase
     {
         if (parameter == null)
             return Array.Empty<SqlParameterDiagnosticInfo>();
+        if (parameter is IEnumerable<SqlParam> sqlParameters)
+            return sqlParameters.Select(CreateSqlParameterDiagnosticInfo).Where(item => item != null).ToList();
         if (parameter is IReadOnlyDictionary<string, object> readOnlyDictionary)
             return CreateParameterDiagnosticItems(readOnlyDictionary);
         if (parameter is IDictionary<string, object> dictionary)
@@ -375,7 +377,7 @@ public abstract partial class SqlQueryBase
     /// 获取事务隔离级别
     /// </summary>
     /// <param name="transaction">数据库事务</param>
-    /// <returns>事务隔离级别</returns>
+    /// <returns>事务隔离级别；事务为 <c>null</c> 或读取隔离级别失败时返回 <c>null</c>。</returns>
     private static IsolationLevel? GetIsolationLevel(IDbTransaction transaction)
     {
         try
@@ -484,7 +486,7 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 执行后诊断
+    /// 发布 SQL 执行后的诊断消息。
     /// </summary>
     /// <param name="message">诊断消息</param>
     protected virtual void ExecuteAfter(DiagnosticsMessage message)

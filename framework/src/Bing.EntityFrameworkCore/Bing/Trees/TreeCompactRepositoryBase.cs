@@ -17,12 +17,12 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo> : TreeCompactRepos
     where TPo : class, IKey<Guid>, IVersion, IPath, IParentId<Guid?>, ISortId
 {
     /// <summary>
-    /// 存储器
+    /// 保存树型仓库读写树节点持久化对象使用的 EF Core 存储实现。
     /// </summary>
     private readonly IStore<TPo, Guid> _store;
 
     /// <summary>
-    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity, TPo}"/> 类型的实例。
+    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity,TPo}" /> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected TreeCompactRepositoryBase(IStore<TPo, Guid> store) : base(store) => _store = store;
@@ -47,12 +47,12 @@ public abstract class TreeCompactRepositoryBase<TEntity, TPo, TKey, TParentId> :
     where TPo : class, IKey<TKey>, IVersion, IPath
 {
     /// <summary>
-    /// 存储器
+    /// 保存树型仓库读写树节点持久化对象使用的 EF Core 存储实现。
     /// </summary>
     private readonly IStore<TPo, TKey> _store;
 
     /// <summary>
-    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity, TPo, TKey, TParentId}"/> 类型的实例。
+    /// 初始化一个 <see cref="TreeCompactRepositoryBase{TEntity,TPo,TKey,TParentId}" /> 类型的实例。
     /// </summary>
     /// <param name="store">存储器</param>
     protected TreeCompactRepositoryBase(IStore<TPo, TKey> store) : base(store) => _store = store;

@@ -29,7 +29,7 @@ public enum BingHostRole
 public static class BingHostRoleExtensions
 {
     /// <summary>
-    /// 宿主角色配置键。
+    /// 定义配置中设置宿主角色的键名。
     /// </summary>
     public const string ConfigurationKey = "BING_HOST_ROLE";
 

@@ -25,14 +25,22 @@ public class DependencyTypeFinder : FinderBase<Type>, IDependencyTypeFinder
     private Type[] _completedTypes;
 
     /// <summary>
-    /// 初始化依赖注入类型查找器。
+    /// 初始化一个 <see cref="DependencyTypeFinder" /> 类型的实例。
     /// </summary>
     /// <param name="allAssemblyFinder">所有程序集查找器。</param>
+    /// <remarks>
+    /// 初始化依赖注入类型查找器。
+    /// </remarks>
     public DependencyTypeFinder(IAllAssemblyFinder allAssemblyFinder) => _allAssemblyFinder = allAssemblyFinder;
 
     /// <summary>
-    /// 初始化带应用级类型筛选器的查找器。
+    /// 初始化一个 <see cref="DependencyTypeFinder" /> 类型的实例。
     /// </summary>
+    /// <param name="allAssemblyFinder">用于查找应用程序全部程序集的查找器。</param>
+    /// <param name="conventionalTypeFilter">用于筛选符合约定注册规则类型的委托。</param>
+    /// <remarks>
+    /// 初始化带应用级类型筛选器的查找器。
+    /// </remarks>
     internal DependencyTypeFinder(IAllAssemblyFinder allAssemblyFinder, Func<Type, bool> conventionalTypeFilter)
     {
         _allAssemblyFinder = allAssemblyFinder;
@@ -40,8 +48,10 @@ public class DependencyTypeFinder : FinderBase<Type>, IDependencyTypeFinder
     }
 
     /// <summary>
-    /// 固定本轮结果并释放只在注册期间使用的筛选器。
+    /// 完成约定扫描并释放注册筛选器。
     /// </summary>
+    /// <param name="successful">本次注册成功时为 true，否则为 false。</param>
+    /// <remarks>注册成功且已找到类型时保留结果快照，否则保留空结果。</remarks>
     internal void CompleteRegistration(bool successful)
     {
         if (_conventionalTypeFilter == null) return;

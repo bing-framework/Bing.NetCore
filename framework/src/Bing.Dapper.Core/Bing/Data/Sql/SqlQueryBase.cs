@@ -709,9 +709,9 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     /// 获取或设置当前实例的非阻塞执行租约。
     /// </summary>
     /// <remarks>
-    /// Query 和 Executor 保存可变的 Builder、连接与事务状态；同一实例只允许一个执行操作。
+    /// <para>Query 和 Executor 保存可变的 Builder、连接与事务状态；同一实例只允许一个执行操作。</para>
+    /// <para>必须在操作结束时释放的执行租约。</para>
     /// </remarks>
-    /// <returns>必须在操作结束时释放的执行租约。</returns>
     internal Func<IDisposable> ExecutionLeaseFactory { get; set; }
 
     /// <summary>
@@ -1138,7 +1138,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
             throw new ArgumentNullException(nameof(plan));
         var snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan, Logger.IsEnabled(LogLevel.Trace));
         return new SqlPreparedCommand(snapshot.Sql, snapshot.Parameters,
-            GetDbParameters(snapshot.Parameters, snapshot.Sql), debugSql: snapshot.DebugSql);
+            plan.IsGeneratedExecution ? snapshot.Parameters : GetDbParameters(snapshot.Parameters, snapshot.Sql), debugSql: snapshot.DebugSql);
     }
 
     /// <summary>
@@ -1496,7 +1496,7 @@ public abstract partial class SqlQueryBase : ISqlQuery, ISqlQueryPlanExecutor, I
     }
 
     /// <summary>
-    /// 清理
+    /// 清空查询构建状态和参数。
     /// </summary>
     protected void Clear()
     {

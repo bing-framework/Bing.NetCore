@@ -23,6 +23,10 @@ internal sealed class LockLease : ILockLease
     /// <summary>
     /// 初始化一个 <see cref="LockLease" /> 类型的实例。
     /// </summary>
+    /// <param name="key">对象在容器内的键。</param>
+    /// <param name="owner">拥有当前实例或资源的对象。</param>
+    /// <param name="release">用于释放当前锁租约的回调。</param>
+    /// <param name="releaseAsync">用于异步释放当前锁租约的回调。</param>
     internal LockLease(string key, string owner, Func<bool> release, Func<Task<bool>> releaseAsync)
     {
         Key = key;

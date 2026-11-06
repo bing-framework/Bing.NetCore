@@ -27,7 +27,7 @@ public abstract class MapBase<TEntity> : IMap where TEntity : class
     }
 
     /// <summary>
-    /// 映射表
+    /// 配置当前实体到数据库表的映射。
     /// </summary>
     /// <param name="builder">实体类型生成器</param>
     protected abstract void MapTable(EntityTypeBuilder<TEntity> builder);

@@ -9,7 +9,7 @@ namespace Bing.Finders;
 public abstract class FinderBase<TItem> : IFinder<TItem>
 {
     /// <summary>
-    /// 对象锁
+    /// 同步查找器缓存的并发初始化。
     /// </summary>
     private readonly object _lockObj = new();
 

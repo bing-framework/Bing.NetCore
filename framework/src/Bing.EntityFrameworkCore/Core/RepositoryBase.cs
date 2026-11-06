@@ -29,7 +29,7 @@ public abstract class RepositoryBase<TEntity, TKey> : StoreBase<TEntity, TKey>, 
     where TEntity : class, IAggregateRoot<TEntity, TKey>
 {
     /// <summary>
-    /// 初始化一个 <see cref="RepositoryBase{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="RepositoryBase{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     protected RepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)

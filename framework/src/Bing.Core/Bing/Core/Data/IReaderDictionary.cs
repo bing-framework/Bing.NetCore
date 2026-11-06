@@ -8,7 +8,7 @@
 public interface IReaderDictionary<in TKey, out TValue>
 {
     /// <summary>
-    /// 读取
+    /// 获取指定键对应的值。
     /// </summary>
     /// <param name="key">键</param>
     /// <returns>与指定键关联的值。</returns>

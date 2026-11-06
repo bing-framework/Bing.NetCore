@@ -6,6 +6,8 @@
 
 ## 安装与注册
 
+完整的 API 用法、场景选择、冷启动及排错技巧见 [FusionCache 使用指南](../../../docs/guides/fusioncache-usage.md)；net8/net10 实测见 [性能报告](../../../ai_docs/tasks/20261024-fusioncache-integration/performance-20261106.md)和[原生接口对照](../../../ai_docs/tasks/20261024-fusioncache-integration/performance-comparison-20261106.md)。以下配置片段包含显式开启的容错选项，库默认仍关闭 Fail-Safe、提前刷新及超时后后台完成。
+
 ```csharp
 using Bing.Caching;
 using Bing.Caching.FusionCache;
@@ -31,6 +33,8 @@ services.AddBingFusionCache(
 ```
 
 默认策略为 TTL 5 分钟、工厂硬超时 2 分钟、最多 8 个活跃工厂和 128 个排队工厂、排队 30 秒、自动恢复队列最多 1000 项。Fail-Safe、提前刷新及超时后后台完成默认关闭；上例展示按业务显式开启这些能力的方式。
+
+原生 `DefaultEntryOptionsProvider` 按键策略不受 Bing 门面支持，配置后会在宿主启动或首次解析时失败；使用 `WithDefaultEntryOptions` 设置实例静态默认值，并使用单次调用的 `CacheOptions.Expiration` 覆盖 TTL。
 
 通过 IHybridCacheProvider.GetCache("catalog") 选择命名实例；只有一个实例配置 UseAsDefault = true 时，才可直接注入无名 IHybridCache。Namespace 必须包含应用和环境等受信身份，不能由请求参数控制。
 

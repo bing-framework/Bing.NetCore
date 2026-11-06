@@ -7,6 +7,8 @@ public static class AuditLogSchema
     /// <summary>
     /// 取得审计日志建表语句。
     /// </summary>
+    /// <param name="database">生成语句所采用的审计数据库类型。</param>
+    /// <returns>指定数据库的审计日志表、归档表及相关索引创建语句。</returns>
     /// <remarks>部署时显式执行；不替代现有表的版本迁移或数据保留策略。</remarks>
     public static IReadOnlyList<string> GetCreateStatements(AuditLogDatabase database)
     {

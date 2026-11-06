@@ -9,7 +9,7 @@ namespace Bing.ExceptionHandling;
 public static class ExceptionNotifierExtensions
 {
     /// <summary>
-    /// 通知
+    /// 向异常通知器发布异常。
     /// </summary>
     /// <param name="exceptionNotifier">异常通知器</param>
     /// <param name="exception">异常对象</param>

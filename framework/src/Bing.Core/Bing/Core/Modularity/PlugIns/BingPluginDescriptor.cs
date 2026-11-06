@@ -42,8 +42,9 @@ public sealed class BingPluginDescriptor
     public string Id { get; }
 
     /// <summary>
-    /// 获取插件数值版本，不包含预发布和构建元数据。
+    /// 获取插件数值版本。
     /// </summary>
+    /// <remarks>不包含预发布和构建元数据。</remarks>
     public Version Version { get; }
 
     /// <summary>

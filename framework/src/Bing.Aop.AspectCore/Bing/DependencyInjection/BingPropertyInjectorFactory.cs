@@ -133,11 +133,14 @@ internal sealed class BingPropertyInjectorFactory : IPropertyInjectorFactory
     }
 
     /// <summary>
-    /// 创建符合指定标记条件的属性描述。
+    /// 创建指定类型的属性注入描述。
     /// </summary>
     /// <param name="type">待分析的实例类型。</param>
     /// <param name="predicate">属性标记筛选条件。</param>
     /// <returns>符合注入条件的属性描述。</returns>
+    /// <remarks>
+    /// 创建符合指定标记条件的属性描述。
+    /// </remarks>
     private static PropertyInjectionDescriptor[] CreateDescriptors(
         Type type,
         Func<PropertyInfo, bool> predicate)

@@ -175,12 +175,12 @@ public class LocalEventBus : EventBusBase, ILocalEventBus
         }
     }
 
-    /// <summary>
-    /// 获取可处理指定事件类型的事件处理器工厂列表快照。
-    /// </summary>
-    /// <param name="eventType">要发布的事件类型。</param>
-    /// <returns>匹配目标事件类型或可赋值基类型/接口订阅的工厂列表快照。</returns>
-    /// <remarks>订阅列表在同一同步区域复制，当前分发不会受后续订阅变更影响。</remarks>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>订阅列表在同一同步区域复制，当前分发不会受后续订阅变更影响。</para>
+    /// <para>获取可处理指定事件类型的事件处理器工厂列表快照。</para>
+    /// <para>返回匹配目标事件类型或可赋值基类型及接口订阅的工厂列表快照。</para>
+    /// </remarks>
     protected override IEnumerable<EventTypeWithEventHandlerFactories> GetHandlerFactories(Type eventType)
     {
         var handlerFactoryList = new List<EventTypeWithEventHandlerFactories>();

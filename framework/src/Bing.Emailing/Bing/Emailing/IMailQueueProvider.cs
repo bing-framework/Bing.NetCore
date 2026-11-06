@@ -16,7 +16,7 @@ public interface IMailQueueProvider
     bool IsEmpty { get; }
 
     /// <summary>
-    /// 入队
+    /// 将邮件加入发送队列。
     /// </summary>
     /// <param name="box">电子邮件</param>
     void Enqueue(EmailBox box);

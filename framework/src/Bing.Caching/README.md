@@ -1,19 +1,21 @@
 # Bing.Caching
 [![NuGet](https://img.shields.io/nuget/v/Bing.Caching.svg)](https://www.nuget.org/packages/Bing.Caching/) [![NuGet Downloads](https://img.shields.io/nuget/dt/Bing.Caching.svg)](https://www.nuget.org/packages/Bing.Caching/) ![TFM](https://img.shields.io/badge/TFM-netstandard2.0-blue.svg)
 
-> 缓存抽象 `ICache`（含 `ILocalCache` / `IRedisCache`）与 `CacheKey`。
+> 框架自有缓存契约 `ICache`（含 `ILocalCache` / `IRedisCache`）、增强契约 `IHybridCache` 与共享键/选项。
 >
 > **目标框架**：`netstandard2.0` ｜ **分层**：L1 地基与核心 ｜ **当前版本**：7.0.0 ｜ **源文件**：35
 >
 > **上游 Bing 包**：`Bing.Core`
 >
-> **三方依赖**：`Microsoft.Extensions.Caching.Memory`
+> **三方依赖**：`Microsoft.Extensions.Caching.Memory`、`Microsoft.Bcl.AsyncInterfaces`
 
 ---
 
 ## 这是什么
 
-定义缓存契约、实例配置和版本化物理键。具体实现位于 `Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis` 和 `Bing.EasyCaching`。
+定义框架拥有的缓存标准、实例配置和版本化物理键。业务依赖 Bing 契约，具体后端由宿主选择；现有 `ICache` 实现位于 `Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis` 和 `Bing.EasyCaching`。`Bing.Caching.FusionCache` 通过 `IHybridCache` 提供可选增强能力。
+
+用户可以自行实现对应契约，为 FreeRedis、CSRedisCore、Memory、Memcached 或其他缓存组件提供适配，并在宿主注册替换。公共契约不暴露这些后端的类型；实际实现及其依赖包由宿主按需引用。`ICache` 持续作为框架标准维护，`IHybridCache` 也是可由用户实现的 Bing 契约，两者按所需能力选择。
 
 ## 安装
 
@@ -25,7 +27,9 @@ dotnet add package Bing.Caching
 
 | 类型 | 命名空间 | 说明 |
 | --- | --- | --- |
-| `ICache` | `Bing.Caching` | 缓存抽象 |
+| `ICache` | `Bing.Caching` | 通用缓存标准及用户自定义 Provider 的实现入口 |
+| `IHybridCache` / `IHybridCacheProvider` | `Bing.Caching` | 异步增强缓存契约与命名实例选择 |
+| `CacheEntry<T>` | `Bing.Caching` | 带逻辑键、值和命中状态的读取结果 |
 | `CacheKey` / `CacheOptions` | `Bing.Caching` | 缓存键与选项 |
 | `CacheConfiguration` / `CacheKeyFormat` | `Bing.Caching` | 命名空间、TTL、拓扑与物理键规则 |
 | `CacheResourceOptions` | `Bing.Caching` | 回源、批量响应、扫描、删除命令及 Hybrid 失效消息资源预算 |
@@ -35,11 +39,15 @@ dotnet add package Bing.Caching
 
 **本包依赖**：`Bing.Core`
 
-**依赖本包**：`Bing.AspNetCore.Authentication.JwtBearer`、`Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis`、`Bing.EasyCaching`
+**依赖本包**：`Bing.AspNetCore.Authentication.JwtBearer`、`Bing.Caching.CSRedis`、`Bing.Caching.FreeRedis`、`Bing.EasyCaching`、`Bing.Caching.FusionCache`
 
-**三方 NuGet**：`Microsoft.Extensions.Caching.Memory`
+**三方 NuGet**：`Microsoft.Extensions.Caching.Memory`、`Microsoft.Bcl.AsyncInterfaces`
 
 ## 注意事项
+
+自定义 Provider 应满足接口声明的行为。当前完整 `ICache` 包含回源、批量、扫描和条件写入等操作，仅实现基础读写不等于完整兼容；需逐项核对 TTL、null/缺失、原子范围、取消和实例清理范围。后端可替换也不表示物理键和序列化载荷可以直接互读。
+
+需要不同区域设置生成相同格式键时，可使用 `CacheKey.CreateInvariant("product:{0}", productId)`；原有 `CacheKey` 构造函数继续使用当前区域性，既有键不会自动迁移。`Key` 的 getter 包含 `Prefix`，setter 写入的是不含前缀的原始键，避免将读回的值直接再次赋值。
 
 Redis 适配器必须提供非空命名空间，且底层客户端不得再配置隐藏前缀。EasyCaching 提供 Memory、Redis 和 Hybrid 显式注册入口；其他适配器仍需注册客户端及缓存实例。
 
@@ -65,6 +73,7 @@ Hybrid 失效总线可通过 `CacheResourceOptions.MaxInvalidationMessageBytes` 
 
 ## 更多文档
 
+- [缓存 Provider 实现指南](../../../docs/guides/cache-provider-implementation.md) —— 框架契约、用户扩展和共享契约测试。
 - [使用文档](https://github.com/bing-framework/Bing.NetCore/blob/master/docs/getting-started/使用文档.md) —— 安装、快速开始、注册入口速查（§3.3）
 - [架构文档](https://github.com/bing-framework/Bing.NetCore/blob/master/docs/architecture/架构文档.md) —— 分层、模块清单（§11）、注册入口完整清单（§12）
 - [横切能力文档](https://github.com/bing-framework/Bing.NetCore/blob/master/docs/guides/横切能力文档.md) —— 邮件 / 模板 / 锁 / 本地化 / 事件总线的详解与选型

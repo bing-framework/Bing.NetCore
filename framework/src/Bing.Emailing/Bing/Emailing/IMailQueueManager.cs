@@ -16,12 +16,12 @@ public interface IMailQueueManager
     int Count { get; }
 
     /// <summary>
-    /// 运行
+    /// 启动邮件队列的后台发送循环。
     /// </summary>
     void Run();
 
     /// <summary>
-    /// 停止
+    /// 停止邮件队列的后台发送循环。
     /// </summary>
     void Stop();
 }

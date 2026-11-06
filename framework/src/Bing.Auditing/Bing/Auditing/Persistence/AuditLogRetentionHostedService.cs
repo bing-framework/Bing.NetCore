@@ -116,6 +116,7 @@ public sealed class AuditLogRetentionHostedService : IHostedService, IDisposable
     /// <summary>
     /// 执行周期清理循环。
     /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task RunAsync(CancellationToken cancellationToken)
     {
         try
@@ -145,6 +146,7 @@ public sealed class AuditLogRetentionHostedService : IHostedService, IDisposable
     /// <summary>
     /// 执行一个有界清理批次。
     /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task RunBatchAsync(CancellationToken cancellationToken)
     {
         var cutoffUtc = DateTime.UtcNow.Subtract(_options.RetentionPeriod);
@@ -190,6 +192,9 @@ public sealed class AuditLogRetentionHostedService : IHostedService, IDisposable
     /// <summary>
     /// 在已完成调度协调后执行一个清理批次。
     /// </summary>
+    /// <param name="serviceProvider">当前清理作用域的服务提供器。</param>
+    /// <param name="cutoffUtc">保留记录的 UTC 截止时间。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
     private async Task ExecuteBatchCoreAsync(IServiceProvider serviceProvider, DateTime cutoffUtc,
         CancellationToken cancellationToken)
     {

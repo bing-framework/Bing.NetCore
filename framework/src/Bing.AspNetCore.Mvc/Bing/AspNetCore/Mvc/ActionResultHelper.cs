@@ -14,7 +14,7 @@ public static class ActionResultHelper
     public static List<Type> ObjectResultTypes { get; }
 
     /// <summary>
-    /// 静态构造函数
+    /// 初始化支持的操作结果类型集合。
     /// </summary>
     static ActionResultHelper()
     {

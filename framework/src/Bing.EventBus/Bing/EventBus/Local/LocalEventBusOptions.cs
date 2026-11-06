@@ -14,7 +14,7 @@ public class LocalEventBusOptions
     public int MaxPublishDepth { get; set; } = 64;
 
     /// <summary>
-    /// 获取本地事件处理器类型列表，默认初始化为空列表。
+    /// 获取本地事件处理器类型列表。
     /// </summary>
     /// <remarks>
     /// 默认初始化为空列表。

@@ -15,6 +15,9 @@ public static class BingTrafficGateExtensions
     /// <summary>
     /// 注册流量闸门。
     /// </summary>
+    /// <param name="services">用于注册流量闸门的服务集合。</param>
+    /// <param name="configure">流量闸门选项配置委托；为 null 时保留默认值。</param>
+    /// <returns>注册后的服务集合。</returns>
     public static IServiceCollection AddBingTrafficGate(this IServiceCollection services,
         Action<BingTrafficGateOptions> configure = null)
     {
@@ -32,12 +35,16 @@ public static class BingTrafficGateExtensions
     /// <summary>
     /// 将流量闸门加入请求管道。
     /// </summary>
+    /// <param name="app">要加入流量闸门中间件的应用构建器。</param>
+    /// <returns>已加入中间件的应用构建器。</returns>
     public static IApplicationBuilder UseBingTrafficGate(this IApplicationBuilder app) =>
         app?.UseMiddleware<BingTrafficGateMiddleware>() ?? throw new ArgumentNullException(nameof(app));
 
     /// <summary>
     /// 标记流量闸门已完成预热。
     /// </summary>
+    /// <param name="provider">用于获取流量闸门服务的服务提供程序。</param>
+    /// <returns>完成标记后的服务提供程序。</returns>
     public static IServiceProvider MarkBingTrafficReady(this IServiceProvider provider)
     {
         provider?.GetRequiredService<IBingTrafficGate>().MarkReady();
@@ -67,6 +74,9 @@ public static class BingTrafficGateExtensions
         /// <summary>
         /// 初始化一个 <see cref="BingTrafficGateHostedService" /> 类型的实例。
         /// </summary>
+        /// <param name="gate">用于判定 HTTP 请求是否可通过的流量闸门。</param>
+        /// <param name="options">用于初始化实例的配置选项。</param>
+        /// <param name="logger">记录实例运行日志的日志记录器。</param>
         public BingTrafficGateHostedService(IBingTrafficGate gate, IOptions<BingTrafficGateOptions> options,
             ILogger<BingTrafficGateHostedService> logger = null)
         {

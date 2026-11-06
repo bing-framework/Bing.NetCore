@@ -38,7 +38,7 @@ public abstract class TreeRepositoryBase<TEntity, TKey, TParentId> : RepositoryB
     where TEntity : class, ITreeEntity<TEntity, TKey, TParentId>
 {
     /// <summary>
-    /// 初始化一个 <see cref="TreeRepositoryBase{TEntity, TKey, TParentId}"/> 类型的实例。
+    /// 初始化一个 <see cref="TreeRepositoryBase{TEntity,TKey,TParentId}" /> 类型的实例。
     /// </summary>
     /// <param name="unitOfWork">工作单元</param>
     protected TreeRepositoryBase(IUnitOfWork unitOfWork) : base(unitOfWork)

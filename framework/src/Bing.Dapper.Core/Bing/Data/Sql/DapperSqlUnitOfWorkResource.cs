@@ -11,19 +11,65 @@ namespace Bing.Data.Sql;
 /// </summary>
 internal sealed class DapperSqlUnitOfWorkResourceKey : IEquatable<DapperSqlUnitOfWorkResourceKey>
 {
+    /// <summary>
+    /// 保存参与资源键相等性比较的数据源键。
+    /// </summary>
     private readonly string _dataSourceKey;
+    /// <summary>
+    /// 保存参与资源键相等性比较的数据库上下文键。
+    /// </summary>
     private readonly string _databaseContextKey;
+    /// <summary>
+    /// 保存参与资源键相等性比较的 SQL 提供程序键。
+    /// </summary>
     private readonly string _providerKey;
+    /// <summary>
+    /// 保存参与资源键相等性比较的数据库类型。
+    /// </summary>
     private readonly DatabaseType _databaseType;
+    /// <summary>
+    /// 保存参与资源键相等性比较的租户标识。
+    /// </summary>
     private readonly string _tenantId;
+    /// <summary>
+    /// 保存参与资源键相等性比较的连接字符串。
+    /// </summary>
     private readonly string _connectionString;
+    /// <summary>
+    /// 保存参与资源键相等性比较的主库读取策略。
+    /// </summary>
     private readonly PrimaryReadStrategy _primaryReadStrategy;
+    /// <summary>
+    /// 保存参与资源键相等性比较的主数据源键。
+    /// </summary>
     private readonly string _primaryDataSourceKey;
+    /// <summary>
+    /// 指示资源键是否来自只读连接请求。
+    /// </summary>
     private readonly bool _isReadOnly;
+    /// <summary>
+    /// 指示资源键关联的连接是否支持事务。
+    /// </summary>
     private readonly bool _supportsTransactions;
+    /// <summary>
+    /// 保存决定连接工厂身份的解析器实例。
+    /// </summary>
     private readonly ISqlDbConnectionFactoryResolver _connectionFactoryResolver;
+    /// <summary>
+    /// 保存资源键可选的不透明标识，用于区分同配置的独立资源。
+    /// </summary>
     private readonly Guid? _opaqueIdentity;
 
+    /// <summary>
+    /// 初始化一个 <see cref="DapperSqlUnitOfWorkResourceKey" /> 类型的实例。
+    /// </summary>
+    /// <param name="context">当前操作关联的上下文或工作单元。</param>
+    /// <param name="dataSource">用于选择数据库连接的数据源描述信息。</param>
+    /// <param name="databaseType">当前连接使用的数据库类型。</param>
+    /// <param name="providerKey">数据库提供程序的规范化键。</param>
+    /// <param name="connectionString">用于建立数据库连接的连接字符串。</param>
+    /// <param name="connectionFactoryResolver">用于解析数据库连接工厂的解析器。</param>
+    /// <param name="canCompareConfiguration">指示是否可以比较数据库连接配置。</param>
     public DapperSqlUnitOfWorkResourceKey(DatabaseContext context, SqlDataSourceDescriptor dataSource,
         DatabaseType databaseType,
         string providerKey, string connectionString, ISqlDbConnectionFactoryResolver connectionFactoryResolver,
@@ -44,6 +90,7 @@ internal sealed class DapperSqlUnitOfWorkResourceKey : IEquatable<DapperSqlUnitO
             _opaqueIdentity = Guid.NewGuid();
     }
 
+    /// <inheritdoc />
     public bool Equals(DapperSqlUnitOfWorkResourceKey other) =>
         other != null &&
         string.Equals(_dataSourceKey, other._dataSourceKey, StringComparison.Ordinal) &&
@@ -59,8 +106,10 @@ internal sealed class DapperSqlUnitOfWorkResourceKey : IEquatable<DapperSqlUnitO
         ReferenceEquals(_connectionFactoryResolver, other._connectionFactoryResolver) &&
         _opaqueIdentity == other._opaqueIdentity;
 
+    /// <inheritdoc />
     public override bool Equals(object obj) => Equals(obj as DapperSqlUnitOfWorkResourceKey);
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         unchecked
@@ -88,17 +137,57 @@ internal sealed class DapperSqlUnitOfWorkResourceKey : IEquatable<DapperSqlUnitO
 /// </summary>
 internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnectionResource
 {
+    /// <summary>
+    /// 同步连接资源准备、完成和释放状态的并发访问。
+    /// </summary>
     private readonly object _sync = new();
+    /// <summary>
+    /// 保存创建该连接资源的工作单元作用域。
+    /// </summary>
     private readonly IUnitOfWorkScope _scope;
+    /// <summary>
+    /// 保存连接资源对应的数据源描述。
+    /// </summary>
     private readonly SqlDataSourceDescriptor _dataSource;
+    /// <summary>
+    /// 指示连接资源是否已开启事务。
+    /// </summary>
     private readonly bool _isTransactional;
+    /// <summary>
+    /// 保存连接资源事务使用的隔离级别。
+    /// </summary>
     private readonly System.Data.IsolationLevel? _isolationLevel;
+    /// <summary>
+    /// 保存连接资源所属提供程序的事务能力。
+    /// </summary>
     private readonly SqlProviderTransactionCapabilities _transactionCapabilities;
+    /// <summary>
+    /// 保存连接资源使用的 SQL 提供程序键。
+    /// </summary>
     private readonly string _providerKey;
+    /// <summary>
+    /// 指示连接资源是否已完成准备。
+    /// </summary>
     private bool _prepared;
+    /// <summary>
+    /// 指示连接资源是否已完成提交或回滚。
+    /// </summary>
     private bool _completed;
+    /// <summary>
+    /// 指示连接资源是否已释放。
+    /// </summary>
     private bool _disposed;
 
+    /// <summary>
+    /// 初始化一个 <see cref="DapperSqlUnitOfWorkConnectionResource" /> 类型的实例。
+    /// </summary>
+    /// <param name="resourceKey">用于识别当前工作单元资源的键。</param>
+    /// <param name="scope">实例所属的作用范围。</param>
+    /// <param name="dataSource">用于选择数据库连接的数据源描述信息。</param>
+    /// <param name="providerKey">数据库提供程序的规范化键。</param>
+    /// <param name="connectionString">用于建立数据库连接的连接字符串。</param>
+    /// <param name="connectionFactoryResolver">用于解析数据库连接工厂的解析器。</param>
+    /// <param name="transactionCapabilities">当前 SQL 提供程序支持的事务能力。</param>
     public DapperSqlUnitOfWorkConnectionResource(object resourceKey, IUnitOfWorkScope scope,
         SqlDataSourceDescriptor dataSource, string providerKey, string connectionString,
         ISqlDbConnectionFactoryResolver connectionFactoryResolver,
@@ -115,12 +204,16 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
                      throw new InvalidOperationException("SQL 连接工厂返回了空连接。");
     }
 
+    /// <inheritdoc />
     public object ResourceKey { get; }
 
+    /// <inheritdoc />
     public IDbConnection Connection { get; }
 
+    /// <inheritdoc />
     public IDbTransaction Transaction { get; private set; }
 
+    /// <inheritdoc />
     public void EnsureReady()
     {
         lock (_sync)
@@ -159,6 +252,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
         }
     }
 
+    /// <inheritdoc />
     public async Task EnsureReadyAsync(CancellationToken cancellationToken = default)
     {
         lock (_sync)
@@ -210,6 +304,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
         }
     }
 
+    /// <inheritdoc />
     public void Commit()
     {
         lock (_sync)
@@ -227,6 +322,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
         }
     }
 
+    /// <inheritdoc />
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         IDbTransaction transaction;
@@ -248,6 +344,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
             _completed = true;
     }
 
+    /// <inheritdoc />
     public void Rollback()
     {
         lock (_sync)
@@ -261,6 +358,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
         }
     }
 
+    /// <inheritdoc />
     public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
         IDbTransaction transaction;
@@ -278,6 +376,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
             _completed = true;
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         lock (_sync)
@@ -296,6 +395,7 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
             throw new AggregateException(errors);
     }
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         lock (_sync)
@@ -314,6 +414,9 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
             throw new AggregateException(errors);
     }
 
+    /// <summary>
+    /// 校验数据源与 Provider 的事务支持条件。
+    /// </summary>
     private void ValidateTransactionSupport()
     {
         if (!_isTransactional)
@@ -337,18 +440,31 @@ internal sealed class DapperSqlUnitOfWorkConnectionResource : IUnitOfWorkConnect
                 $"Provider {_providerKey} 或数据源 {_dataSource?.Key ?? "<default>"} 不支持本地事务。");
     }
 
+    /// <summary>
+    /// 检查 Dapper 工作单元连接资源尚未释放。
+    /// </summary>
     private void EnsureNotDisposed()
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(DapperSqlUnitOfWorkConnectionResource));
     }
 
+    /// <summary>
+    /// 执行清理动作并收集异常。
+    /// </summary>
+    /// <param name="errors">用于收集清理异常的集合。</param>
+    /// <param name="action">待执行的清理动作。</param>
     private static void Capture(ICollection<Exception> errors, Action action)
     {
         try { action(); }
         catch (Exception exception) { errors.Add(exception); }
     }
 
+    /// <summary>
+    /// 执行清理动作并收集异常。
+    /// </summary>
+    /// <param name="errors">用于收集清理异常的集合。</param>
+    /// <param name="action">待执行的清理动作。</param>
     private static async Task CaptureAsync(ICollection<Exception> errors, Func<Task> action)
     {
         try { await action().ConfigureAwait(false); }

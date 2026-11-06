@@ -18,10 +18,14 @@ public class IocEventHandlerFactory : IEventHandlerFactory, IAsyncEventHandlerFa
     protected IServiceScopeFactory ScopeFactory { get; }
 
     /// <summary>
-    /// 初始化一个 <see cref="IocEventHandlerFactory" /> 类的新实例。
+    /// 初始化一个 <see cref="IocEventHandlerFactory" /> 类型的实例。
     /// </summary>
     /// <param name="scopeFactory">创建处理器独立服务作用域的工厂。</param>
+    ///
     /// <param name="handlerType">要从服务容器解析的事件处理器类型。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="IocEventHandlerFactory" /> 类的新实例。
+    /// </remarks>
     public IocEventHandlerFactory(IServiceScopeFactory scopeFactory, Type handlerType)
     {
         ScopeFactory = scopeFactory;

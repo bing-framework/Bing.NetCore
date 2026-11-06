@@ -6,7 +6,7 @@
 public abstract class AuditLogContributor
 {
     /// <summary>
-    /// 构造前
+    /// 在审计日志构造前贡献字段。
     /// </summary>
     /// <param name="context">审计日志构造上下文</param>
     public virtual void PreContribute(AuditLogContributionContext context)
@@ -14,7 +14,7 @@ public abstract class AuditLogContributor
     }
 
     /// <summary>
-    /// 构造后
+    /// 在审计日志构造后贡献字段。
     /// </summary>
     /// <param name="context">审计日志构造上下文</param>
     public virtual void PostContribute(AuditLogContributionContext context)

@@ -34,7 +34,13 @@ internal sealed class BingDynamicApiDefinitionProvider
     /// 在宿主内共享按远程服务与版本隔离的描述缓存。
     /// </summary>
     private readonly BingDynamicApiDefinitionCache _cache;
+    /// <summary>
+    /// 保存动态 API HTTP 管道绑定。
+    /// </summary>
     private readonly IEnumerable<BingDynamicApiHttpPipelineBinding> _bindings;
+    /// <summary>
+    /// 保存动态 API 定义来源。
+    /// </summary>
     private readonly IEnumerable<IBingDynamicApiDefinitionSource> _sources;
 
     /// <summary>
@@ -66,7 +72,18 @@ internal sealed class BingDynamicApiDefinitionProvider
         _sources = Array.Empty<IBingDynamicApiDefinitionSource>();
     }
 
-    /// <summary>支持可选中性描述源，旧构造函数继续保留。</summary>
+    /// <summary>
+    /// 初始化一个 <see cref="BingDynamicApiDefinitionProvider" /> 类型的实例。
+    /// </summary>
+    /// <param name="httpClientFactory">用于创建动态 API HTTP 客户端的工厂。</param>
+    /// <param name="options">用于初始化实例的配置选项。</param>
+    /// <param name="requestContext">用于读取当前动态 API 请求信息的上下文。</param>
+    /// <param name="retryPolicy">用于决定动态 API 请求重试行为的策略。</param>
+    /// <param name="requestHandlers">用于处理动态 API 请求的处理器集合。</param>
+    /// <param name="cache">用于缓存对应服务数据的缓存实现。</param>
+    /// <param name="bindings">动态 API 远端服务与 HTTP 客户端之间的绑定集合。</param>
+    /// <param name="sources">用于发现动态 API 定义的来源集合。</param>
+    /// <remarks>支持可选中性描述源，旧构造函数继续保留。</remarks>
     public BingDynamicApiDefinitionProvider(IHttpClientFactory httpClientFactory, IOptions<BingDynamicApiClientOptions> options,
         IBingDynamicApiRequestContext requestContext, IBingDynamicApiRetryPolicy retryPolicy, IEnumerable<IBingDynamicApiRequestHandler> requestHandlers,
         BingDynamicApiDefinitionCache cache, IEnumerable<BingDynamicApiHttpPipelineBinding> bindings, IEnumerable<IBingDynamicApiDefinitionSource> sources)
@@ -200,7 +217,11 @@ internal sealed class BingDynamicApiDefinitionProvider
         }
     }
 
-    /// <summary>保留注册时 HttpClient 名称的大小写。</summary>
+    /// <summary>
+    /// 根据远程服务名称获取绑定的 HTTP 客户端名称。
+    /// </summary>
+    /// <param name="remoteName">已注册的远程服务名称。</param>
+    /// <returns>与 remoteName 匹配的 HTTP 客户端名称。</returns>
     private string GetClientName(string remoteName) => _bindings.Single(b =>
         string.Equals(b.RemoteName, remoteName, StringComparison.OrdinalIgnoreCase)).HttpClientName;
 

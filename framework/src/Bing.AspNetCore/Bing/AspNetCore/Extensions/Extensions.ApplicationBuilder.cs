@@ -34,12 +34,15 @@ public static class BingApplicationBuilderExtensions
         UseRealIp(hostBuilder, headerKey, null);
 
     /// <summary>
-    /// 注册真实 IP，并配置请求头信任边界。
+    /// 注册真实 IP 转发支持。
     /// </summary>
     /// <param name="hostBuilder">Web主机生成器</param>
     /// <param name="headerKey">请求头键名</param>
     /// <param name="setupAct">真实 IP 选项配置。</param>
     /// <returns>已配置真实 IP 支持的 Web 主机生成器。</returns>
+    /// <remarks>
+    /// 注册真实 IP，并配置请求头信任边界。
+    /// </remarks>
     public static IWebHostBuilder UseRealIp(this IWebHostBuilder hostBuilder, string headerKey,
         Action<RealIpOptions> setupAct)
     {

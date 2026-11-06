@@ -3,8 +3,11 @@ using Bing.Timing;
 namespace Bing.RateLimiting;
 
 /// <summary>
-/// 进程内按键令牌桶。每个实例独立计额，不跨进程共享。
+/// 进程内按键令牌桶。
 /// </summary>
+/// <remarks>
+/// 每个实例独立计额，不跨进程共享。
+/// </remarks>
 public sealed class LocalTokenBucketRateLimiter : ITokenBucketRateLimiter
 {
     /// <summary>
@@ -69,7 +72,7 @@ public sealed class LocalTokenBucketRateLimiter : ITokenBucketRateLimiter
     }
 
     /// <summary>
-    /// 当前保留的键数。
+    /// 获取当前保留的键数。
     /// </summary>
     public int KeyCount
     {
@@ -140,6 +143,7 @@ public sealed class LocalTokenBucketRateLimiter : ITokenBucketRateLimiter
     /// <summary>
     /// 回收已闲置的限流键。
     /// </summary>
+    /// <returns>本次回收的闲置限流键数量。</returns>
     /// <remarks>普通请求也会定期触发回收。</remarks>
     public int PruneIdle()
     {
@@ -184,6 +188,10 @@ public sealed class LocalTokenBucketRateLimiter : ITokenBucketRateLimiter
     /// <summary>
     /// 计算不改变桶状态的当前额度。
     /// </summary>
+    /// <param name="bucket">待计算当前额度的令牌桶。</param>
+    /// <param name="now">计算额度时使用的当前时间。</param>
+    /// <returns>按经过时间补充且不超过桶容量的当前可用令牌数。</returns>
+    /// <remarks>仅计算当前额度，不修改令牌桶状态。</remarks>
     private double AvailableTokens(Bucket bucket, DateTime now)
     {
         var elapsed = now > bucket.LastRefill ? (now - bucket.LastRefill).TotalSeconds : 0;

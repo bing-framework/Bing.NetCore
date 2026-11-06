@@ -68,6 +68,7 @@ public sealed class BingModuleDescriptor
     /// <summary>
     /// 冻结模块的程序集声明。
     /// </summary>
+    /// <param name="assemblies">模块声明的程序集集合。</param>
     internal void SetAssemblies(IEnumerable<Assembly> assemblies) =>
         Assemblies = Array.AsReadOnly(assemblies.ToArray());
 

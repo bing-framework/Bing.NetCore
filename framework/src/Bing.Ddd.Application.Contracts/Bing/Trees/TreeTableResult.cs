@@ -11,7 +11,7 @@ namespace Bing.Trees;
 public class TreeTableResult<TNode> : ITreeTableResult<TNode> where TNode : TreeDto<TNode>
 {
     /// <summary>
-    /// 树型参数列表
+    /// 保存树型表格返回的数据列表。
     /// </summary>
     private readonly IEnumerable<TNode> _data;
 

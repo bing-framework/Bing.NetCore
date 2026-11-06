@@ -6,7 +6,7 @@
 public interface ITokenPayloadStore
 {
     /// <summary>
-    /// 保存
+    /// 保存令牌对应的负载数据及过期时间。
     /// </summary>
     /// <param name="token">令牌</param>
     /// <param name="payload">负载字典</param>
@@ -14,7 +14,7 @@ public interface ITokenPayloadStore
     Task SaveAsync(string token, IDictionary<string, string> payload, DateTime expires);
 
     /// <summary>
-    /// 移除
+    /// 移除指定令牌的负载数据。
     /// </summary>
     /// <param name="token">令牌</param>
     Task RemoveAsync(string token);

@@ -22,9 +22,12 @@ public abstract class EventBusBase : IEventBus
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     /// <summary>
-    /// 初始化一个 <see cref="EventBusBase" /> 类的新实例。
+    /// 初始化一个 <see cref="EventBusBase" /> 类型的实例。
     /// </summary>
     /// <param name="serviceScopeFactory">服务作用域工厂</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="EventBusBase" /> 类的新实例。
+    /// </remarks>
     protected EventBusBase(IServiceScopeFactory serviceScopeFactory)
     {
         ServiceScopeFactory = serviceScopeFactory;
@@ -287,10 +290,14 @@ public abstract class EventBusBase : IEventBus
         public List<IEventHandlerFactory> EventHandlerFactories { get; }
 
         /// <summary>
-        /// 初始化一个 <see cref="EventTypeWithEventHandlerFactories" /> 类的新实例。
+        /// 初始化一个 <see cref="EventTypeWithEventHandlerFactories" /> 类型的实例。
         /// </summary>
         /// <param name="eventType">事件类型。</param>
+        ///
         /// <param name="eventHandlerFactories">该事件类型已登记的处理器工厂列表。</param>
+        /// <remarks>
+        /// 初始化一个 <see cref="EventTypeWithEventHandlerFactories" /> 类的新实例。
+        /// </remarks>
         public EventTypeWithEventHandlerFactories(Type eventType, List<IEventHandlerFactory> eventHandlerFactories)
         {
             EventType = eventType;

@@ -153,6 +153,11 @@ public static class BingApplicationServiceCollectionExtensions
     /// <summary>
     /// 按完整模块序列逐轮配置服务。
     /// </summary>
+    /// <param name="services">依赖注入服务集合。</param>
+    /// <param name="modules">按照依赖顺序排列的模块描述符。</param>
+    /// <param name="registrationMode">约定服务注册与模块配置的衔接模式。</param>
+    /// <param name="asynchronous">允许优先执行异步钩子时为 true，否则执行同步钩子。</param>
+    /// <param name="token">取消令牌。</param>
     private static async Task ConfigureModulesAsync(IServiceCollection services,
         IReadOnlyList<BingModuleDescriptor> modules, BingServiceRegistrationMode registrationMode,
         bool asynchronous, CancellationToken token)
@@ -186,6 +191,8 @@ public static class BingApplicationServiceCollectionExtensions
     /// <summary>
     /// 结束本次注册的约定扫描并清除筛选器引用。
     /// </summary>
+    /// <param name="finder">本次注册使用的约定依赖类型查找器。</param>
+    /// <param name="successful">本次注册成功时为 true，否则为 false。</param>
     private static void CompleteDependencyScan(DependencyTypeFinder finder, bool successful)
     {
         finder?.CompleteRegistration(successful);

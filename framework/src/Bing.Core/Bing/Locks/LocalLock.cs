@@ -67,13 +67,7 @@ public class LocalLock : ILock, ILockLeaseProvider
         }
     }
 
-    /// <summary>
-    /// 获取一个锁（需要自己释放）
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <returns>表示尝试获取锁结果的异步操作；成功获取锁时结果为 <see langword="true"/>，否则为 <see langword="false"/>。</returns>
+    /// <inheritdoc />
     public async Task<bool> LockTakeAsync(string key, string value, TimeSpan expiration)
     {
         Check.NotNull(key, nameof(key));
@@ -162,6 +156,8 @@ public class LocalLock : ILock, ILockLeaseProvider
     /// <summary>
     /// 引用指定键的锁状态。
     /// </summary>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <returns>已增加引用计数的锁状态。</returns>
     private static LockState AddReference(string key)
     {
         lock (_cacheGate)
@@ -179,6 +175,8 @@ public class LocalLock : ILock, ILockLeaseProvider
     /// <summary>
     /// 释放等待者对锁状态的引用。
     /// </summary>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <param name="state">与锁键关联的共享锁状态。</param>
     private static void RemoveReference(string key, LockState state)
     {
         lock (_cacheGate)
@@ -188,6 +186,9 @@ public class LocalLock : ILock, ILockLeaseProvider
     /// <summary>
     /// 在持有缓存锁时回收无引用的锁状态。
     /// </summary>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <param name="state">与锁键关联的共享锁状态。</param>
+    /// <remarks>调用方必须已持有缓存锁；引用数归零时移除缓存项并释放信号量。</remarks>
     private static void RemoveReferenceUnderGate(string key, LockState state)
     {
         if (--state.References != 0)
@@ -196,13 +197,7 @@ public class LocalLock : ILock, ILockLeaseProvider
         state.Semaphore.Dispose();
     }
 
-    /// <summary>
-    /// 使用锁执行一个方法
-    /// </summary>
-    /// <param name="key">锁定标识</param>
-    /// <param name="value">当前占用值</param>
-    /// <param name="expiration">锁定时间间隔</param>
-    /// <param name="executeAction">执行的方法</param>
+    /// <inheritdoc />
     public void ExecuteWithLock(string key, string value, TimeSpan expiration, Action executeAction)
     {
         if (executeAction == null)

@@ -56,7 +56,7 @@ public abstract class JsonWebTokenStoreBase : IJsonWebTokenStore
         await GetAsync<DeviceTokenBindInfo>(GetBindUserDeviceTokenKey(userId, clientType));
 
     /// <summary>
-    /// 添加
+    /// 添加令牌存储项。
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
     /// <param name="key">键名</param>

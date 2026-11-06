@@ -93,13 +93,12 @@ public static partial class BingServiceProviderExtensions
     /// </summary>
     /// <param name="serviceProvider">服务提供程序。</param>
     /// <param name="cancellationToken">关闭取消令牌。</param>
-    /// <returns>表示关闭操作的任务。</returns>
     /// <remarks>调用方应在释放根容器之前等待此任务完成。</remarks>
     public static Task ShutdownBingAsync(this IServiceProvider serviceProvider, CancellationToken cancellationToken = default) =>
         (serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider))).GetRequiredService<IBingModuleManager>().ShutdownAsync(cancellationToken);
 
     /// <summary>
-    /// 获取指定类型的日志对象
+    /// 获取日志对象。
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="serviceProvider">服务提供程序</param>

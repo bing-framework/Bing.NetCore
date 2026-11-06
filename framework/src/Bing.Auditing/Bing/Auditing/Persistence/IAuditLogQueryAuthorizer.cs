@@ -15,6 +15,5 @@ public interface IAuditLogQueryAuthorizer
     /// </summary>
     /// <param name="query">待授权的查询条件。</param>
     /// <param name="cancellationToken">取消令牌。</param>
-    /// <returns>表示授权检查完成的异步操作。</returns>
     Task AuthorizeAsync(AuditLogQuery query, CancellationToken cancellationToken = default);
 }

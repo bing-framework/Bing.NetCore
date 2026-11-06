@@ -15,7 +15,7 @@ public interface ICommandHandler<in TCommand> : ICommandHandler
     where TCommand : ICommand
 {
     /// <summary>
-    /// 处理
+    /// 处理命令并完成命令副作用。
     /// </summary>
     /// <param name="command">命令对象</param>
     /// <param name="cancellationToken">取消令牌</param>
@@ -31,7 +31,7 @@ public interface ICommandHandler<in TCommand, TResult> : ICommandHandler
     where TCommand : ICommand<TResult>
 {
     /// <summary>
-    /// 处理
+    /// 处理命令并返回处理结果。
     /// </summary>
     /// <param name="command">命令对象</param>
     /// <param name="cancellationToken">取消令牌</param>

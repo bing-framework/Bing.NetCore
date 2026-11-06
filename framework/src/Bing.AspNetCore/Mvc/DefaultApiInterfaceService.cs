@@ -12,22 +12,22 @@ namespace Bing.AspNetCore.Mvc;
 internal class DefaultApiInterfaceService : IApiInterfaceService
 {
     /// <summary>
-    /// 控制器描述列表
+    /// 保存已解析的 MVC 控制器描述列表。
     /// </summary>
     private List<ControllerDescriptor> _controllerDescriptors;
 
     /// <summary>
-    /// 操作描述列表
+    /// 保存已解析的 MVC 操作描述列表。
     /// </summary>
     private List<ActionDescriptor> _actionDescriptors;
 
     /// <summary>
-    /// 应用程序部分管理
+    /// 保存用于枚举 MVC 应用部件的应用程序部分管理器。
     /// </summary>
     private readonly ApplicationPartManager _partManager;
 
     /// <summary>
-    /// 对象锁
+    /// 同步控制器和操作描述缓存的并发刷新。
     /// </summary>
     private static readonly object Lock = new object();
 

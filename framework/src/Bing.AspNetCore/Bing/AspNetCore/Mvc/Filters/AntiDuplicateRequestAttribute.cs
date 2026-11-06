@@ -87,7 +87,7 @@ public class AntiDuplicateRequestAttribute : ActionFilterAttribute
     }
 
     /// <summary>
-    /// 创建锁
+    /// 创建用于防重复请求的分布式锁。
     /// </summary>
     /// <param name="context">操作执行上下文</param>
     /// <returns>根据当前请求配置解析出的锁实例。</returns>
@@ -137,18 +137,17 @@ public class AntiDuplicateRequestAttribute : ActionFilterAttribute
 }
 
 /// <summary>
-/// 锁类型
+/// 指定防重复请求锁按用户还是全局互斥。
 /// </summary>
 public enum LockType
 {
     /// <summary>
-    /// 按用户维度限制同一操作的并发请求。
+    /// 为每个用户分别限制同一操作的并发请求。
     /// </summary>
-    /// <remarks>同一用户的多个请求仅执行首个请求，不同用户的请求互不影响。</remarks>
     User = 0,
 
     /// <summary>
-    /// 全局锁，该操作同时只有一个用户请求被执行
+    /// 所有用户共用同一操作锁，同一时刻仅允许一个请求执行。
     /// </summary>
     Global = 1
 }

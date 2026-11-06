@@ -82,8 +82,17 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     }
 
     /// <summary>
-    /// 初始化一个持有操作取消源的多结果集读取结果。
+    /// 初始化一个 <see cref="SqlMultipleQueryResult" /> 类型的实例。
     /// </summary>
+    /// <param name="reader">用于读取数据库查询结果的读取器。</param>
+    /// <param name="executionLease">用于保持多查询执行期间资源有效的租约。</param>
+    /// <param name="complete">操作完成时执行的回调。</param>
+    /// <param name="completeAsync">操作异步完成时执行的回调。</param>
+    /// <param name="operationToken">用于取消当前操作的令牌。</param>
+    /// <param name="operationCancellation">用于登记或释放当前操作取消通知的对象。</param>
+    /// <remarks>
+    /// 初始化一个持有操作取消源的多结果集读取结果。
+    /// </remarks>
     internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
         Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
         CancellationToken operationToken, IDisposable operationCancellation)
@@ -94,8 +103,17 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="SqlMultipleQueryResult"/> 类型的实例。
+    /// 初始化一个 <see cref="SqlMultipleQueryResult" /> 类型的实例。
     /// </summary>
+    /// <param name="reader">用于读取数据库查询结果的读取器。</param>
+    /// <param name="executionLease">用于保持多查询执行期间资源有效的租约。</param>
+    /// <param name="complete">操作完成时执行的回调。</param>
+    /// <param name="completeAsync">操作异步完成时执行的回调。</param>
+    /// <param name="isConsumed">用于判断多结果集读取器是否已消费的回调。</param>
+    /// <param name="disposeReader">释放结果读取器的同步回调。</param>
+    /// <param name="disposeReaderAsync">释放结果读取器的异步回调。</param>
+    /// <param name="operationToken">用于取消当前操作的令牌。</param>
+    /// <param name="operationCancellation">用于登记或释放当前操作取消通知的对象。</param>
     internal SqlMultipleQueryResult(SqlMapper.GridReader reader, IDisposable executionLease,
         Action<bool, Exception> complete, Func<bool, Exception, Task> completeAsync,
         Func<SqlMapper.GridReader, bool> isConsumed,

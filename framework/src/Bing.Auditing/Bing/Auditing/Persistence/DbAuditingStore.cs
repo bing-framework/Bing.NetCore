@@ -151,12 +151,11 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     }
     /// <inheritdoc />
     public Task SaveAsync(AuditLogInfo auditInfo) => SaveAsync(auditInfo, CancellationToken.None);
-    /// <summary>
-    /// 保存普通审计日志。
-    /// </summary>
-    /// <param name="auditInfo">审计信息。</param>
-    /// <param name="cancellationToken">取消令牌。</param>
-    /// <remarks>创建并释放自己的连接与事务；不会复用业务事务。提交确认失败记录 Unknown，不自动重试。</remarks>
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>创建并释放自己的连接与事务；不会复用业务事务。提交确认失败记录 Unknown，不自动重试。</para>
+    /// <para>保存普通审计日志。</para>
+    /// </remarks>
     public async Task SaveAsync(AuditLogInfo auditInfo, CancellationToken cancellationToken)
     {
         if (auditInfo == null)
@@ -303,11 +302,13 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
         DeleteArchivedBeforeCoreAsync(cutoffUtc, batchSize, cancellationToken);
 
     /// <summary>
-    /// 在同一事务内复制并删除一批普通审计日志。
+    /// 批量归档普通审计日志。
     /// </summary>
     /// <param name="cutoffUtc">归档截止时间。</param>
     /// <param name="batchSize">本次最多归档的记录数。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本批次已归档并从普通日志表删除的记录数。</returns>
+    /// <remarks>在同一自有事务内复制到归档表并删除原记录；复制数与删除数必须一致。</remarks>
     private async Task<int> ArchiveBeforeCoreAsync(DateTime cutoffUtc, int batchSize,
         CancellationToken cancellationToken)
     {
@@ -402,11 +403,13 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     }
 
     /// <summary>
-    /// 在自有事务内分批删除归档表中的历史记录。
+    /// 批量删除审计归档历史记录。
     /// </summary>
     /// <param name="cutoffUtc">保留截止时间。</param>
     /// <param name="batchSize">本次最多删除的记录数。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本批次删除的归档历史记录数。</returns>
+    /// <remarks>清理在自有连接与事务内完成。</remarks>
     private async Task<int> DeleteArchivedBeforeCoreAsync(DateTime cutoffUtc, int batchSize,
         CancellationToken cancellationToken)
     {
@@ -483,12 +486,14 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     }
 
     /// <summary>
-    /// 执行全局或租户范围的分批审计清理。
+    /// 批量清理全局或指定租户的审计日志。
     /// </summary>
-    /// <param name="tenantId">租户标识；为 <see langword="null"/> 时清理所有租户。</param>
+    /// <param name="tenantId">租户标识；为 <see langword="null" /> 时清理所有租户。</param>
     /// <param name="cutoffUtc">保留截止时间。</param>
     /// <param name="batchSize">本次最多删除的记录数。</param>
     /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本批次删除的普通审计日志记录数。</returns>
+    /// <remarks>清理在自有连接与事务内完成。</remarks>
     private async Task<int> DeleteBeforeCoreAsync(string tenantId, DateTime cutoffUtc, int batchSize,
         CancellationToken cancellationToken)
     {
@@ -649,6 +654,10 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 添加可选文本查询条件。
     /// </summary>
+    /// <param name="command">接收参数的数据库命令。</param>
+    /// <param name="predicates">用于收集查询条件的集合。</param>
+    /// <param name="column">需要筛选的数据库列名。</param>
+    /// <param name="value">筛选条件的文本值；为 null 时不增加条件。</param>
     private static void AddQueryParameter(DbCommand command, ICollection<string> predicates,
         string column, string value)
     {
@@ -662,6 +671,9 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 读取必需文本列。
     /// </summary>
+    /// <param name="reader">已定位到当前记录的数据读取器。</param>
+    /// <param name="ordinal">从零开始的列序号。</param>
+    /// <returns>列值对应的文本；数据库空值返回空字符串，字节数组按租户编码解码。</returns>
     private static string ReadString(DbDataReader reader, int ordinal)
     {
         if (reader.IsDBNull(ordinal))
@@ -675,6 +687,9 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 读取可空文本列。
     /// </summary>
+    /// <param name="reader">已定位到当前记录的数据读取器。</param>
+    /// <param name="ordinal">从零开始的列序号。</param>
+    /// <returns>列值对应的文本；数据库空值返回 null。</returns>
     private static string ReadNullableString(DbDataReader reader, int ordinal)
     {
         return reader.IsDBNull(ordinal) ? null : Convert.ToString(reader.GetValue(ordinal), CultureInfo.InvariantCulture);
@@ -683,6 +698,9 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 读取可空整数列。
     /// </summary>
+    /// <param name="reader">已定位到当前记录的数据读取器。</param>
+    /// <param name="ordinal">从零开始的列序号。</param>
+    /// <returns>列值对应的整数；数据库空值返回 null。</returns>
     private static int? ReadNullableInt(DbDataReader reader, int ordinal)
     {
         return reader.IsDBNull(ordinal) ? (int?)null : Convert.ToInt32(reader.GetValue(ordinal), CultureInfo.InvariantCulture);
@@ -691,6 +709,9 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 读取 UTC 时间列。
     /// </summary>
+    /// <param name="reader">已定位到当前记录的数据读取器。</param>
+    /// <param name="ordinal">从零开始的列序号。</param>
+    /// <returns>标记为 UTC 的时间；数据库空值抛出异常。</returns>
     private static DateTime ReadUtc(DbDataReader reader, int ordinal)
     {
         if (reader.IsDBNull(ordinal))
@@ -704,8 +725,11 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     }
 
     /// <summary>
-    /// 生成不包含任意对象序列化的安全明细。
+    /// 生成审计日志的持久化明细。
     /// </summary>
+    /// <param name="info">需要生成持久化明细的审计日志。</param>
+    /// <returns>包含操作、实体变更和异常类型的紧凑 JSON 文本。</returns>
+    /// <remarks>仅保存受控字段和异常类型，不序列化任意对象；受字段长度、明细数量和 UTF-8 总字节数限制。</remarks>
     private string CreateDetails(AuditLogInfo info)
     {
         var actions = new JArray();
@@ -760,6 +784,7 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 限制明细总数。
     /// </summary>
+    /// <param name="count">已计入的明细总数；成功调用后增加一。</param>
     private void CountDetail(ref int count)
     {
         if (count >= _maxDetailCount)
@@ -767,8 +792,12 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
         count++;
     }
     /// <summary>
-    /// 限制文本长度并避免拆分 UTF-16 代理对。
+    /// 按长度上限截断文本。
     /// </summary>
+    /// <param name="value">待限制长度的文本；为 null 时直接返回 null。</param>
+    /// <param name="columnLimit">数据库列允许的最大字符数。</param>
+    /// <returns>长度受限且未拆分 UTF-16 代理对的文本；输入为 null 时返回 null。</returns>
+    /// <remarks>实际长度上限取全局字段长度与数据库列限制中的较小值，截断时避免拆分 UTF-16 代理对。</remarks>
     private string Text(string value, int columnLimit = int.MaxValue)
     {
         var limit = Math.Min(_maxFieldLength, columnLimit);
@@ -791,6 +820,10 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 校验需要保持完整的身份文本。
     /// </summary>
+    /// <param name="value">需要校验且不能截断的身份文本。</param>
+    /// <param name="name">异常中使用的身份字段参数名。</param>
+    /// <param name="optional">允许 null 和空字符串时为 true，否则为 false。</param>
+    /// <returns>校验通过的原始身份文本；可选字段输入为 null 时返回 null。</returns>
     private static string Identity(string value, string name, bool optional)
     {
         if (optional && value == null)
@@ -802,6 +835,9 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 添加数据库参数。
     /// </summary>
+    /// <param name="command">接收参数的数据库命令。</param>
+    /// <param name="name">数据库参数名称。</param>
+    /// <param name="value">待写入的参数值；为 null 时转换为 DBNull.Value。</param>
     private static void AddParameter(DbCommand command, string name, object value)
     {
         var parameter = command.CreateParameter();
@@ -812,6 +848,8 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 释放自有资源并收集清理异常。
     /// </summary>
+    /// <param name="resource">由存储拥有的待释放资源；为 null 时不执行操作。</param>
+    /// <param name="errors">用于收集清理异常的集合。</param>
     private static void DisposeResource(IDisposable resource, ICollection<Exception> errors)
     {
         try { resource?.Dispose(); }
@@ -820,6 +858,8 @@ public sealed class DbAuditingStore : ICancellableAuditingStore, ITransactionalA
     /// <summary>
     /// 附加清理异常而不替换原始错误。
     /// </summary>
+    /// <param name="failure">保存或清理过程产生的原始异常。</param>
+    /// <param name="cleanup">需要附加到原始异常的清理异常。</param>
     private static void AddCleanupError(Exception failure, Exception cleanup)
     {
         const string key = "Bing.AuditCleanupErrors";

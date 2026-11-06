@@ -8,6 +8,8 @@ public static class AuditingManagerExtensions
     /// <summary>
     /// 开始支持异步释放的审计作用域。
     /// </summary>
+    /// <param name="manager">提供审计作用域的管理器。</param>
+    /// <returns>支持异步释放的审计作用域保存句柄。</returns>
     public static IAsyncAuditLogSaveHandle BeginAsyncScope(this IAuditingManager manager)
     {
         if (manager == null)
@@ -44,6 +46,7 @@ public static class AuditingManagerExtensions
         /// <summary>
         /// 初始化一个 <see cref="AsyncAuditLogSaveHandleAdapter" /> 类型的实例。
         /// </summary>
+        /// <param name="handle">用于标识或访问当前任务、操作或资源的句柄。</param>
         internal AsyncAuditLogSaveHandleAdapter(IAuditLogSaveHandle handle) =>
             _handle = handle ?? throw new ArgumentNullException(nameof(handle));
 
@@ -60,8 +63,10 @@ public static class AuditingManagerExtensions
         }
 
         /// <summary>
-        /// 使用指定取消令牌开始或复用旧句柄的保存任务。
+        /// 开始或复用适配句柄的审计保存任务。
         /// </summary>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <remarks>首次保存使用指定取消令牌；后续调用复用已创建的保存任务。</remarks>
         private Task SaveCore(CancellationToken cancellationToken)
         {
             lock (_gate)
@@ -114,6 +119,8 @@ public static class AuditingManagerExtensions
         /// <summary>
         /// 等待保存后释放旧作用域。
         /// </summary>
+        /// <param name="handle">需要等待保存并释放的审计句柄。</param>
+        /// <param name="saveTask">已启动的审计保存任务；为 null 时直接释放句柄。</param>
         private static async Task DisposeCoreAsync(IAuditLogSaveHandle handle, Task saveTask)
         {
             try

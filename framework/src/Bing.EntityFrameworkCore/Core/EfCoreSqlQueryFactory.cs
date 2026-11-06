@@ -131,8 +131,10 @@ public sealed class EfCoreSqlQueryFactory : IEfCoreSqlQueryFactory
     }
 
     /// <summary>
-    /// 确认显式数据源映射选中的 context 与 Shared Query 使用同一实例。
+    /// 检查数据源映射是否使用当前上下文实例。
     /// </summary>
+    /// <param name="unitOfWork">执行共享 SQL 查询的 EF Core 上下文。</param>
+    /// <param name="dataSourceKey">SQL 数据源注册键。</param>
     private static void EnsureMappedContextMatches(UnitOfWorkBase unitOfWork, string dataSourceKey)
     {
         var provider = unitOfWork.ServiceProvider.GetServices<IUnitOfWorkConnectionProvider>()

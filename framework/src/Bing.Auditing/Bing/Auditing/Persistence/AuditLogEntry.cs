@@ -9,6 +9,16 @@ public sealed class AuditLogEntry
     /// <summary>
     /// 初始化一个 <see cref="AuditLogEntry" /> 类型的实例。
     /// </summary>
+    /// <param name="tenantId">租户标识。</param>
+    /// <param name="auditId">当前审计记录的标识。</param>
+    /// <param name="applicationName">写入审计记录的应用程序名称。</param>
+    /// <param name="userId">用户标识。</param>
+    /// <param name="executionTimeUtc">本次操作的执行时间（UTC）。</param>
+    /// <param name="executionDuration">本次操作的执行时长，单位为毫秒。</param>
+    /// <param name="httpMethod">本次 HTTP 请求使用的方法。</param>
+    /// <param name="httpStatusCode">本次 HTTP 响应的状态码。</param>
+    /// <param name="correlationId">用于关联同一操作链路的标识。</param>
+    /// <param name="isCritical">指示本次审计操作是否为关键操作。</param>
     internal AuditLogEntry(string tenantId, string auditId, string applicationName, string userId,
         DateTime executionTimeUtc, int executionDuration, string httpMethod, int? httpStatusCode,
         string correlationId, bool isCritical)

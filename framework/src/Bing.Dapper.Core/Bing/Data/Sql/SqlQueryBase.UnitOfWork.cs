@@ -10,10 +10,25 @@ namespace Bing.Data.Sql;
 /// </summary>
 public abstract partial class SqlQueryBase
 {
+    /// <summary>
+    /// 保存查询绑定的工作单元根作用域。
+    /// </summary>
     private IUnitOfWorkScope _unitOfWorkRoot;
+    /// <summary>
+    /// 保存查询绑定的工作单元连接资源。
+    /// </summary>
     private IUnitOfWorkConnectionResource _unitOfWorkResource;
+    /// <summary>
+    /// 指示查询是否已决定是否加入工作单元。
+    /// </summary>
     private bool _unitOfWorkAffinityDecided;
+    /// <summary>
+    /// 指示查询是否被显式要求使用独立连接。
+    /// </summary>
     private bool _unitOfWorkExplicitlyIndependent;
+    /// <summary>
+    /// 指示查询是否处于显式事务作用域模式。
+    /// </summary>
     private bool _explicitTransactionScopeMode;
 
     /// <summary>
@@ -58,6 +73,11 @@ public abstract partial class SqlQueryBase
         return current.AcquireExecutionLease(_unitOfWorkResource.ResourceKey);
     }
 
+    /// <summary>
+    /// 为执行过程关联工作单元连接资源。
+    /// </summary>
+    /// <param name="scope">当前业务工作单元作用域。</param>
+    /// <remarks>资源关联失败且作用域仍活动时，将工作单元标记为仅回滚。</remarks>
     private void AttachUnitOfWorkResourceForExecution(IUnitOfWorkScope scope)
     {
         try
@@ -72,6 +92,11 @@ public abstract partial class SqlQueryBase
         }
     }
 
+    /// <summary>
+    /// 判断当前查询是否显式独立于工作单元。
+    /// </summary>
+    /// <param name="hasCurrentRoot">当前存在工作单元根作用域时为 true，否则为 false。</param>
+    /// <returns>存在独立事务作用域，或显式连接符合独立资源条件时为 true，否则为 false。</returns>
     private bool IsExplicitlyIndependentFromUnitOfWork(bool hasCurrentRoot) =>
         _explicitTransactionScopeMode || _transactionScopeLease != null ||
         (_connection != null && (hasCurrentRoot
@@ -150,8 +175,9 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 确保当前连接资源已同步打开并建立 Uow 本地事务。
+    /// 准备工作单元连接资源并获取事务。
     /// </summary>
+    /// <returns>工作单元资源的当前事务；没有关联资源或事务时为 null。</returns>
     private IDbTransaction EnsureUnitOfWorkTransaction()
     {
         _unitOfWorkResource?.EnsureReady();
@@ -159,8 +185,10 @@ public abstract partial class SqlQueryBase
     }
 
     /// <summary>
-    /// 确保当前连接资源已异步打开并建立 Uow 本地事务。
+    /// 准备工作单元连接资源并获取事务。
     /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>工作单元资源的当前事务；没有关联资源或事务时为 null。</returns>
     private async Task<IDbTransaction> EnsureUnitOfWorkTransactionAsync(CancellationToken cancellationToken)
     {
         if (_unitOfWorkResource == null)
@@ -184,13 +212,22 @@ public abstract partial class SqlQueryBase
         }
     }
 
+    /// <summary>
+    /// 获取是否已创建工作单元资源。
+    /// </summary>
     private protected bool HasUnitOfWorkResource => _unitOfWorkResource != null;
 
+    /// <summary>
+    /// 获取根工作单元是否启用事务。
+    /// </summary>
     private protected bool IsUnitOfWorkRootTransactional => _unitOfWorkRoot?.Options.IsTransactional == true;
 
     /// <summary>
-    /// 将 API 调用方取消令牌与当前业务操作令牌合并，并由调用方持有至 I/O 生命周期结束。
+    /// 合并调用方与工作单元操作的取消令牌。
     /// </summary>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>持有有效取消令牌及所需链接源的租约。</returns>
+    /// <remarks>调用方应持有租约直到 I/O 生命周期结束，并释放可能创建的链接取消源。</remarks>
     private protected OperationCancellationLease CreateOperationCancellationLease(
         CancellationToken cancellationToken)
     {
@@ -209,8 +246,16 @@ public abstract partial class SqlQueryBase
     /// </summary>
     private protected sealed class OperationCancellationLease : IDisposable
     {
+        /// <summary>
+        /// 保存该取消租约对应的取消源。
+        /// </summary>
         private CancellationTokenSource _source;
 
+        /// <summary>
+        /// 初始化一个 <see cref="OperationCancellationLease" /> 类型的实例。
+        /// </summary>
+        /// <param name="token">用于取消操作的令牌。</param>
+        /// <param name="source">当前操作读取内容或状态的数据源。</param>
         internal OperationCancellationLease(CancellationToken token, CancellationTokenSource source)
         {
             Token = token;
@@ -226,6 +271,10 @@ public abstract partial class SqlQueryBase
         public void Dispose() => Interlocked.Exchange(ref _source, null)?.Dispose();
     }
 
+    /// <summary>
+    /// 将当前工作单元标记为执行失败。
+    /// </summary>
+    /// <remarks>通过仅回滚标记阻止失败工作单元继续提交。</remarks>
     private protected void MarkUnitOfWorkExecutionFailure() => MarkUnitOfWorkRollbackOnly();
 
     /// <summary>

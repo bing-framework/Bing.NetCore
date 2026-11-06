@@ -20,11 +20,16 @@ internal sealed class BingModuleAssemblyFinder : IAllAssemblyFinder
     private readonly Type[] _types;
 
     /// <summary>
-    /// 初始化本次注册的扫描快照。
+    /// 初始化一个 <see cref="BingModuleAssemblyFinder" /> 类型的实例。
     /// </summary>
     /// <param name="modules">已选中的模块。</param>
+    ///
     /// <param name="additionalAssemblies">应用级附加程序集。</param>
+    ///
     /// <param name="loadContext">当前插件代的可选加载上下文。</param>
+    /// <remarks>
+    /// 初始化本次注册的扫描快照。
+    /// </remarks>
     internal BingModuleAssemblyFinder(IReadOnlyList<BingModuleDescriptor> modules,
         IEnumerable<Assembly> additionalAssemblies, AssemblyLoadContext loadContext)
     {
@@ -103,6 +108,9 @@ internal sealed class BingModuleAssemblyFinder : IAllAssemblyFinder
     /// <summary>
     /// 拒绝来自其他可回收插件代的程序集。
     /// </summary>
+    /// <param name="assembly">待校验来源的附加程序集。</param>
+    /// <param name="expected">当前插件代所使用的程序集加载上下文。</param>
+    /// <param name="owner">声明该附加程序集的模块名称。</param>
     private static void ValidateContext(Assembly assembly, AssemblyLoadContext expected, string owner)
     {
         var actual = AssemblyLoadContext.GetLoadContext(assembly);

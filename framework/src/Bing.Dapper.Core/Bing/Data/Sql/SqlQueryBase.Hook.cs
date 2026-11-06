@@ -6,13 +6,13 @@
 public partial class SqlQueryBase
 {
     /// <summary>
-    /// 执行前操作。
+    /// 判断是否继续执行当前查询。
     /// </summary>
     /// <returns>允许继续执行时返回 <see langword="true"/>；返回 <see langword="false"/> 时停止执行。</returns>
     protected virtual bool ExecuteBefore() => true;
 
     /// <summary>
-    /// 执行后操作
+    /// 执行查询完成后的状态清理。
     /// </summary>
     /// <param name="result">结果</param>
     protected virtual void ExecuteAfter(object result)

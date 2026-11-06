@@ -25,9 +25,7 @@ public class MessageEvent : Event, IClusterEventMetadata
     /// <inheritdoc />
     public string TraceId { get; set; }
 
-    /// <summary>
-    /// 消息名称
-    /// </summary>
+    /// <inheritdoc />
     public string Name { get; set; }
 
     /// <inheritdoc />

@@ -109,10 +109,14 @@ internal sealed class BingModuleManager : IBingModuleManager, IDisposable, IAsyn
     private volatile bool _providerDisposing;
 
     /// <summary>
-    /// 初始化一个 <see cref="BingModuleManager" /> 类的新实例。
+    /// 初始化一个 <see cref="BingModuleManager" /> 类型的实例。
     /// </summary>
     /// <param name="provider">应用根服务提供程序。</param>
+    ///
     /// <param name="registration">当前应用的模块注册记录。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="BingModuleManager" /> 类的新实例。
+    /// </remarks>
     internal BingModuleManager(IServiceProvider provider, BingModuleRegistration registration)
     {
         registration.Attach(provider);

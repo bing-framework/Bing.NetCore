@@ -10,23 +10,27 @@ namespace Bing.Identity.JwtBearer;
 public class JsonWebToken
 {
     /// <summary>
-    /// 获取或设置访问令牌。用于业务身份认证的令牌
+    /// 获取或设置访问令牌。
     /// </summary>
+    /// <remarks>用于业务身份认证的令牌</remarks>
     public string AccessToken { get; set; }
 
     /// <summary>
-    /// 获取或设置访问令牌有效期。UTC标准
+    /// 获取或设置访问令牌有效期。
     /// </summary>
+    /// <remarks>UTC标准</remarks>
     public long AccessTokenUtcExpires { get; set; }
 
     /// <summary>
-    /// 获取或设置刷新令牌。用于刷新AccessToken的令牌
+    /// 获取或设置刷新令牌。
     /// </summary>
+    /// <remarks>用于刷新AccessToken的令牌</remarks>
     public string RefreshToken { get; set; }
 
     /// <summary>
-    /// 获取或设置刷新令牌有效期。UTC标准
+    /// 获取或设置刷新令牌有效期。
     /// </summary>
+    /// <remarks>UTC标准</remarks>
     public long RefreshUtcExpires { get; set; }
 
     /// <summary>

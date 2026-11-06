@@ -15,7 +15,7 @@ public interface IQueryHandler<in TQuery> : IQueryHandler
     where TQuery : IQuery
 {
     /// <summary>
-    /// 处理
+    /// 执行查询处理流程。
     /// </summary>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>
@@ -31,7 +31,7 @@ public interface IQueryHandler<in TQuery, TResult> : IQueryHandler
     where TQuery : IQuery<TResult>
 {
     /// <summary>
-    /// 处理
+    /// 执行查询并返回处理结果。
     /// </summary>
     /// <param name="query">查询对象</param>
     /// <param name="cancellationToken">取消令牌</param>

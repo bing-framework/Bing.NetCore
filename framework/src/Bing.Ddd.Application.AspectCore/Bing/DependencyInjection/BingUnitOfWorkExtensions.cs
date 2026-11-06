@@ -202,6 +202,11 @@ internal sealed class BingUnitOfWorkInterceptorSelector : IAdditionalInterceptor
         };
     }
 
+    /// <summary>
+    /// 检查指定类型是否为 ValueTask。
+    /// </summary>
+    /// <param name="returnType">要检查的返回类型。</param>
+    /// <returns>类型为 ValueTask 或 ValueTask&lt;T&gt; 时返回 true，否则返回 false。</returns>
     private static bool IsValueTask(Type returnType) =>
         returnType == typeof(ValueTask) ||
         returnType?.IsGenericType == true && returnType.GetGenericTypeDefinition() == typeof(ValueTask<>);
@@ -235,6 +240,9 @@ internal sealed class BingUnitOfWorkInterceptorSelector : IAdditionalInterceptor
 /// </summary>
 internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, IScopeInterceptor
 {
+    /// <summary>
+    /// 按工作单元作用域缓存提交后回调服务集合，避免重复解析。
+    /// </summary>
     private static readonly ConditionalWeakTable<IUnitOfWorkScope, CommitAfterServiceSet> CommitAfterServices = new();
 
     /// <summary>
@@ -270,6 +278,12 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         return InvokeCoreAsync(adaptedContext, next(adaptedContext));
     }
 
+    /// <summary>
+    /// 启动工作单元参与范围调用。
+    /// </summary>
+    /// <param name="context">包含目标调用参数和实现实例的 AspectCore 上下文。</param>
+    /// <param name="next">要调用的下一个 AspectCore 委托。</param>
+    /// <param name="operationManager">管理当前工作单元范围的操作管理器。</param>
     private static Task InvokeParticipant(AspectContext context, AspectDelegate next,
         IUnitOfWorkOperationManager operationManager)
     {
@@ -278,6 +292,16 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         return completion.Task;
     }
 
+    /// <summary>
+    /// 执行并完成工作单元参与范围调用。
+    /// </summary>
+    /// <param name="context">包含目标调用参数和实现实例的 AspectCore 上下文。</param>
+    /// <param name="next">要执行的下一个 AspectCore 委托。</param>
+    /// <param name="operationManager">管理当前工作单元范围的操作管理器。</param>
+    /// <param name="completion">接收调用结果或异常的任务完成源。</param>
+    /// <remarks>
+    /// 要求当前存在活动的根工作单元；调用期间将参数中的取消令牌替换为参与范围令牌，并在结束时恢复。调用失败时回滚活动参与范围并释放资源；清理异常附加到主异常，或单独传递给 completion。
+    /// </remarks>
     private static async Task CompleteParticipantInvocationAsync(AspectContext context, AspectDelegate next,
         IUnitOfWorkOperationManager operationManager, TaskCompletionSource<bool> completion)
     {
@@ -362,6 +386,11 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         }
     }
 
+    /// <summary>
+    /// 启动自动工作单元调用。
+    /// </summary>
+    /// <param name="context">包含目标调用参数和服务提供程序的 AspectCore 上下文。</param>
+    /// <param name="next">要调用的下一个 AspectCore 委托。</param>
     internal static Task InvokeAutomatic(AspectContext context, AspectDelegate next)
     {
         var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -369,6 +398,15 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         return completion.Task;
     }
 
+    /// <summary>
+    /// 执行并完成自动工作单元范围调用。
+    /// </summary>
+    /// <param name="context">包含目标调用参数、实现实例和服务提供程序的 AspectCore 上下文。</param>
+    /// <param name="next">要执行的下一个 AspectCore 委托。</param>
+    /// <param name="completion">接收调用结果或异常的任务完成源。</param>
+    /// <remarks>
+    /// 没有当前工作单元时使用默认选项创建范围；调用期间将参数中的取消令牌替换为范围令牌，并在结束时恢复。调用失败时回滚活动范围并释放资源；清理异常附加到主异常，或单独传递给 completion。
+    /// </remarks>
     private static async Task CompleteAutomaticInvocationAsync(AspectContext context, AspectDelegate next,
         TaskCompletionSource<bool> completion)
     {
@@ -455,6 +493,12 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         }
     }
 
+    /// <summary>
+    /// 从调用参数中获取取消令牌。
+    /// </summary>
+    /// <param name="parameters">AspectCore 调用的参数数组。</param>
+    /// <param name="linkedTokenSource">接收多个令牌对应的链接令牌源；无须链接时为 null。</param>
+    /// <returns>没有令牌时返回 CancellationToken.None；有一个令牌时返回该令牌；有多个令牌时返回其链接令牌。</returns>
     private static CancellationToken GetCallerToken(object[] parameters,
         out CancellationTokenSource linkedTokenSource)
     {
@@ -472,6 +516,15 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         return linkedTokenSource.Token;
     }
 
+    /// <summary>
+    /// 用工作单元操作令牌替换调用参数中的取消令牌。
+    /// </summary>
+    /// <param name="parameters">AspectCore 调用的参数数组。</param>
+    /// <param name="operationToken">工作单元操作使用的取消令牌。</param>
+    /// <param name="originalTokens">接收参数索引和原取消令牌的集合。</param>
+    /// <remarks>
+    /// 每个被替换令牌的索引和值都会加入 originalTokens，以供调用结束后恢复；参数数组为 null 时不执行操作。
+    /// </remarks>
     private static void ReplaceCancellationTokens(object[] parameters, CancellationToken operationToken,
         ICollection<(int Index, CancellationToken Token)> originalTokens)
     {
@@ -486,6 +539,14 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         }
     }
 
+    /// <summary>
+    /// 恢复调用参数中的原取消令牌。
+    /// </summary>
+    /// <param name="parameters">AspectCore 调用的参数数组。</param>
+    /// <param name="originalTokens">要恢复的参数索引和原取消令牌集合。</param>
+    /// <remarks>
+    /// 按逆序恢复仍在参数数组范围内的令牌，并清空 originalTokens；参数数组为 null 时不执行操作。
+    /// </remarks>
     private static void RestoreCancellationTokens(object[] parameters,
         IList<(int Index, CancellationToken Token)> originalTokens)
     {
@@ -500,6 +561,14 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         originalTokens.Clear();
     }
 
+    /// <summary>
+    /// 注册根工作单元完成后的服务回调。
+    /// </summary>
+    /// <param name="root">接收完成回调的根工作单元。</param>
+    /// <param name="service">要在根工作单元完成后调用的服务。</param>
+    /// <remarks>
+    /// 同一根工作单元中的同一服务只注册一次；注册失败时撤销该服务的去重记录。
+    /// </remarks>
     private static void RegisterCommitAfter(IUnitOfWorkScope root, ICommitAfter service)
     {
         var registrations = CommitAfterServices.GetValue(root, static _ => new CommitAfterServiceSet());
@@ -523,6 +592,14 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         }
     }
 
+    /// <summary>
+    /// 将清理异常附加到主异常数据中。
+    /// </summary>
+    /// <param name="primaryException">调用过程中发生的主异常。</param>
+    /// <param name="cleanupExceptions">释放或回滚过程中发生的清理异常。</param>
+    /// <remarks>
+    /// 没有清理异常时不修改主异常；附加信息使用 Bing.Operation.CleanupExceptions 键，附加失败不会替换主异常。
+    /// </remarks>
     private static void AttachCleanupExceptions(Exception primaryException,
         IReadOnlyCollection<Exception> cleanupExceptions)
     {
@@ -538,15 +615,29 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
         }
     }
 
+    /// <summary>
+    /// 记录提交后阶段已经处理的服务实例。
+    /// </summary>
     private sealed class CommitAfterServiceSet
     {
+        /// <summary>
+        /// 获取提交后阶段已处理的服务实例集合。
+        /// </summary>
         public HashSet<object> Services { get; } = new(CommitAfterReferenceComparer.Instance);
     }
 
+    /// <summary>
+    /// 按服务实例引用比较提交后处理状态。
+    /// </summary>
     private sealed class CommitAfterReferenceComparer : IEqualityComparer<object>
     {
+        /// <summary>
+        /// 获取用于引用相等比较的共享比较器。
+        /// </summary>
         public static CommitAfterReferenceComparer Instance { get; } = new();
+        /// <inheritdoc />
         public new bool Equals(object left, object right) => ReferenceEquals(left, right);
+        /// <inheritdoc />
         public int GetHashCode(object value) => RuntimeHelpers.GetHashCode(value);
     }
 
@@ -630,6 +721,10 @@ internal sealed class BingUnitOfWorkInterceptor : AbstractInterceptorAttribute, 
 /// </summary>
 internal sealed class BingAutomaticUnitOfWorkInterceptor : AbstractInterceptorAttribute
 {
+    /// <summary>
+    /// 初始化一个 <see cref="BingAutomaticUnitOfWorkInterceptor" /> 类型的实例。
+    /// </summary>
+    /// <param name="attribute">用于读取工作单元行为配置的特性。</param>
     public BingAutomaticUnitOfWorkInterceptor(UnitOfWorkAttribute attribute)
     {
         if (attribute == null)
@@ -655,9 +750,12 @@ internal sealed class BingAutomaticUnitOfWorkInterceptor : AbstractInterceptorAt
 internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAttribute
 {
     /// <summary>
-    /// 初始化工作单元 ValueTask 结果适配器。
+    /// 初始化一个 <see cref="BingUnitOfWorkValueTaskInterceptor" /> 类型的实例。
     /// </summary>
     /// <param name="attribute">工作单元标记。</param>
+    /// <remarks>
+    /// 初始化工作单元 ValueTask 结果适配器。
+    /// </remarks>
     public BingUnitOfWorkValueTaskInterceptor(UnitOfWorkAttribute attribute)
     {
         if (attribute == null)
@@ -684,9 +782,22 @@ internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAt
         return completion.Task;
     }
 
+    /// <summary>
+    /// 为 ValueTask 调用创建可适配的 AspectCore 上下文。
+    /// </summary>
+    /// <param name="context">原始 AspectCore 上下文。</param>
+    /// <returns>包装原始上下文的 ValueTask 适配上下文。</returns>
     internal static AspectContext AdaptContext(AspectContext context) =>
         new UnitOfWorkValueTaskAspectContext(context);
 
+    /// <summary>
+    /// 等待目标任务并完成调用结果源。
+    /// </summary>
+    /// <param name="nextTask">要等待的目标调用任务。</param>
+    /// <param name="completion">接收调用结果或异常的任务完成源。</param>
+    /// <remarks>
+    /// 目标任务成功时将 completion 标记为成功；目标任务失败时将其异常传递给 completion。
+    /// </remarks>
     private static async Task CompleteInvocationAsync(Task nextTask, TaskCompletionSource<bool> completion)
     {
         try
@@ -706,39 +817,62 @@ internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAt
     /// </summary>
     private sealed class UnitOfWorkValueTaskAspectContext : AspectContext
     {
+        /// <summary>
+        /// 缓存方法反射器，避免在值任务适配路径重复反射。
+        /// </summary>
         private static readonly ConcurrentDictionary<MethodInfo, MethodReflector> Reflectors = new();
+        /// <summary>
+        /// 保存当前方法调用的 AspectCore 上下文。
+        /// </summary>
         private readonly AspectContext _context;
 
+        /// <summary>
+        /// 初始化一个 <see cref="UnitOfWorkValueTaskAspectContext" /> 类型的实例。
+        /// </summary>
+        /// <param name="context">当前操作关联的上下文或工作单元。</param>
         public UnitOfWorkValueTaskAspectContext(AspectContext context) => _context = context;
 
+        /// <inheritdoc />
         public override IDictionary<string, object> AdditionalData => _context.AdditionalData;
 
+        /// <inheritdoc />
         public override object ReturnValue
         {
             get => _context.ReturnValue;
             set => _context.ReturnValue = value;
         }
 
+        /// <inheritdoc />
         public override IServiceProvider ServiceProvider => _context.ServiceProvider;
 
+        /// <inheritdoc />
         public override MethodInfo ServiceMethod => _context.ServiceMethod;
 
+        /// <inheritdoc />
         public override object Implementation => _context.Implementation;
 
+        /// <inheritdoc />
         public override MethodInfo ImplementationMethod => _context.ImplementationMethod;
 
+        /// <inheritdoc />
         public override object[] Parameters => _context.Parameters;
 
+        /// <inheritdoc />
         public override MethodInfo ProxyMethod => _context.ProxyMethod;
 
+        /// <inheritdoc />
         public override MethodInfo PredicateMethod => _context.PredicateMethod;
 
+        /// <inheritdoc />
         public override object Proxy => _context.Proxy;
 
+        /// <inheritdoc />
         public override Task Break() => _context.Break();
 
+        /// <inheritdoc />
         public override Task Invoke(AspectDelegate next) => next(this);
 
+        /// <inheritdoc />
         public override Task Complete()
         {
             var implementationMethod = ImplementationMethod;
@@ -749,6 +883,10 @@ internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAt
             return CompleteValueTaskAsync(implementationMethod);
         }
 
+        /// <summary>
+        /// 创建用于执行并等待 ValueTask 方法的完成任务。
+        /// </summary>
+        /// <param name="implementationMethod">要调用的实现方法。</param>
         private Task CompleteValueTaskAsync(MethodInfo implementationMethod)
         {
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -756,6 +894,14 @@ internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAt
             return completion.Task;
         }
 
+        /// <summary>
+        /// 通过 AspectCore 调用实现方法并等待其 ValueTask 结果。
+        /// </summary>
+        /// <param name="implementationMethod">要调用的实现方法。</param>
+        /// <param name="completion">接收调用结果或异常的任务完成源。</param>
+        /// <remarks>
+        /// 将非泛型或泛型 ValueTask 转换为可等待任务，并更新上下文的 ReturnValue；调用或等待期间发生的异常传递给 completion。
+        /// </remarks>
         private async Task CompleteValueTaskCoreAsync(MethodInfo implementationMethod,
             TaskCompletionSource<bool> completion)
         {
@@ -801,10 +947,20 @@ internal sealed class BingUnitOfWorkValueTaskInterceptor : AbstractInterceptorAt
             }
         }
 
+        /// <summary>
+        /// 检查指定类型是否为 ValueTask。
+        /// </summary>
+        /// <param name="returnType">要检查的返回类型。</param>
+        /// <returns>类型为 ValueTask 或 ValueTask&lt;T&gt; 时返回 true，否则返回 false。</returns>
         private static bool IsValueTask(Type returnType) =>
             returnType == typeof(ValueTask) ||
             returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ValueTask<>);
 
+        /// <summary>
+        /// 判断调用方法是否需要虚分派。
+        /// </summary>
+        /// <param name="method">要检查的实现方法。</param>
+        /// <returns>方法为 private、virtual 且 final，或声明类型不是类时返回 true，否则返回 false。</returns>
         private static bool RequiresVirtualDispatch(MethodInfo method) =>
             method.IsPrivate && method.IsVirtual && method.IsFinal ||
             method.DeclaringType?.IsClass != true;

@@ -40,6 +40,8 @@ public static class LockExtensions
         /// <summary>
         /// 初始化一个 <see cref="OwnerContext" /> 类型的实例。
         /// </summary>
+        ///
+        /// <param name="source">当前操作读取内容或状态的数据源。</param>
         /// <remarks>
         /// 复制已有的租约映射。
         /// </remarks>
@@ -53,6 +55,7 @@ public static class LockExtensions
     /// <summary>
     /// 在异步执行上下文切换到子流时隔离租约映射。
     /// </summary>
+    /// <param name="args">异步租约持有者上下文的变更信息。</param>
     private static void OnOwnerContextChanged(
         System.Threading.AsyncLocalValueChangedArgs<OwnerContext> args)
     {
@@ -70,6 +73,9 @@ public static class LockExtensions
         /// <summary>
         /// 初始化一个 <see cref="LockOwnerKey" /> 类型的实例。
         /// </summary>
+        ///
+        /// <param name="lock">用于保护当前资源或作用域的锁。</param>
+        /// <param name="key">对象在容器内的键。</param>
         /// <remarks>
         /// 初始化锁租约索引。
         /// </remarks>
@@ -80,12 +86,12 @@ public static class LockExtensions
         }
 
         /// <summary>
-        /// 锁实例。
+        /// 获取锁实例。
         /// </summary>
         private ILock Lock { get; }
 
         /// <summary>
-        /// 锁键。
+        /// 获取锁键。
         /// </summary>
         private string Key { get; }
 
@@ -133,6 +139,11 @@ public static class LockExtensions
     /// <summary>
     /// 异步获取锁并记录租约持有者。
     /// </summary>
+    /// <param name="lock">提供租约操作的锁服务。</param>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <param name="expiration">申请锁的租约时长。</param>
+    /// <param name="context">当前异步流的租约持有者上下文。</param>
+    /// <returns>成功获取锁并记录持有者时为 true，未获取到锁时为 false。</returns>
     private static async Task<bool> LockTakAsyncCore(ILock @lock, string key, TimeSpan expiration,
         OwnerContext context)
     {
@@ -245,8 +256,9 @@ public static class LockExtensions
     private static string CreateOwner() => Guid.NewGuid().ToString("N");
 
     /// <summary>
-    /// 记录当前异步流中的租约持有者。
+    /// 获取或创建当前异步流的租约持有者上下文。
     /// </summary>
+    /// <returns>当前异步流使用的租约持有者上下文。</returns>
     private static OwnerContext GetOrCreateOwnerContext()
     {
         if (Owners.Value == null)
@@ -257,6 +269,10 @@ public static class LockExtensions
     /// <summary>
     /// 记录当前异步流中的租约持有者。
     /// </summary>
+    /// <param name="context">当前异步流的租约持有者上下文。</param>
+    /// <param name="lock">提供租约操作的锁服务。</param>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <param name="owner">租约持有者标识。</param>
     private static void SetOwner(OwnerContext context, ILock @lock, string key, string owner)
     {
         if (context == null)
@@ -268,6 +284,11 @@ public static class LockExtensions
     /// <summary>
     /// 读取当前异步上下文中的租约持有者。
     /// </summary>
+    /// <param name="context">当前异步流的租约持有者上下文。</param>
+    /// <param name="lock">提供租约操作的锁服务。</param>
+    /// <param name="key">本地锁的标识键。</param>
+    /// <param name="owner">找到的租约持有者标识；上下文为空或未找到记录时为 null。</param>
+    /// <returns>找到指定锁及键的持有者记录时为 true，否则为 false。</returns>
     private static bool TryGetOwner(OwnerContext context, ILock @lock, string key, out string owner)
     {
         owner = null;
@@ -280,6 +301,9 @@ public static class LockExtensions
     /// <summary>
     /// 移除当前异步上下文中的租约持有者。
     /// </summary>
+    /// <param name="context">当前异步流的租约持有者上下文。</param>
+    /// <param name="lock">提供租约操作的锁服务。</param>
+    /// <param name="key">本地锁的标识键。</param>
     private static void RemoveOwner(OwnerContext context, ILock @lock, string key)
     {
         if (context == null)

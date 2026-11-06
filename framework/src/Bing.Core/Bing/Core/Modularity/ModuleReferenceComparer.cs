@@ -16,8 +16,11 @@ internal sealed class ModuleReferenceComparer : IEqualityComparer<BingModule>
     internal static readonly ModuleReferenceComparer Instance = new();
 
     /// <summary>
-    /// 初始化模块引用比较器。
+    /// 初始化一个 <see cref="ModuleReferenceComparer" /> 类型的实例。
     /// </summary>
+    /// <remarks>
+    /// 初始化模块引用比较器。
+    /// </remarks>
     private ModuleReferenceComparer() { }
 
     /// <inheritdoc />

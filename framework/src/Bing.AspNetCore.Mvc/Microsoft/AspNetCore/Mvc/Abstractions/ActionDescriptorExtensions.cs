@@ -32,7 +32,7 @@ public static class ActionDescriptorExtensions
     public static MethodInfo GetMethodInfo(this ActionDescriptor actionDescriptor) => actionDescriptor.AsControllerActionDescriptor().MethodInfo;
 
     /// <summary>
-    /// 获取指定操作描述符所代表的的方法的返回类型。
+    /// 获取指定操作描述符所代表的方法的返回类型。
     /// </summary>
     /// <param name="actionDescriptor">操作描述符</param>
     /// <returns>操作方法声明的返回类型。</returns>

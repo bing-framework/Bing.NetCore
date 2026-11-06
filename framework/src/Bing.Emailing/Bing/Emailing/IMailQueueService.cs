@@ -6,7 +6,7 @@
 public interface IMailQueueService
 {
     /// <summary>
-    /// 入队
+    /// 将邮件加入发送队列。
     /// </summary>
     /// <param name="box">邮件</param>
     void Enqueue(EmailBox box);

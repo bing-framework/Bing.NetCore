@@ -20,10 +20,14 @@ internal sealed class OptionsTypeRegistration
     private readonly IConfiguration _configuration;
 
     /// <summary>
-    /// 初始化选项类型注册器。
+    /// 初始化一个 <see cref="OptionsTypeRegistration" /> 类型的实例。
     /// </summary>
     /// <param name="configuration">选项配置源。</param>
-    /// <exception cref="ArgumentNullException"><paramref name="configuration"/> 为空时抛出。</exception>
+    ///
+    /// <exception cref="ArgumentNullException"><paramref name="configuration" /> 为空时抛出。</exception>
+    /// <remarks>
+    /// 初始化选项类型注册器。
+    /// </remarks>
     private OptionsTypeRegistration(IConfiguration configuration)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
