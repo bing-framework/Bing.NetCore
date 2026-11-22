@@ -148,18 +148,18 @@ internal sealed class SqlMultipleQueryResult : ISqlMultipleQueryResult
     private Func<SqlMapper.GridReader, Task> DisposeReaderAsync { get; }
 
     /// <inheritdoc />
-    public List<dynamic> Read() => Read(reader => reader.Read().AsList());
+    public List<dynamic> Read() => Read(reader => reader.Read().AsBufferedList());
 
     /// <inheritdoc />
-    public List<TEntity> Read<TEntity>() => Read(reader => reader.Read<TEntity>().AsList());
+    public List<TEntity> Read<TEntity>() => Read(reader => reader.Read<TEntity>().AsBufferedList());
 
     /// <inheritdoc />
     public async Task<List<dynamic>> ReadAsync(CancellationToken cancellationToken) => await ReadAsync(async reader =>
-        (await reader.ReadAsync()).AsList(), cancellationToken);
+        (await reader.ReadAsync()).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     public async Task<List<TEntity>> ReadAsync<TEntity>(CancellationToken cancellationToken) => await ReadAsync(async reader =>
-        (await reader.ReadAsync<TEntity>()).AsList(), cancellationToken);
+        (await reader.ReadAsync<TEntity>()).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     public void Dispose()

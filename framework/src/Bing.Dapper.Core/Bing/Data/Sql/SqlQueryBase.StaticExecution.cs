@@ -78,14 +78,14 @@ public abstract partial class SqlQueryBase
         int? timeout) => InternalQueryPlan(plan,
         (connection, sql, parameters, transaction) => CanExecuteStatically(parameters)
             ? ReadStaticRows(connection, sql, parameters, transaction, timeout, mapper, commandType: plan.CommandType)
-            : SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters, transaction, true, timeout, plan.CommandType).AsList());
+            : SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters, transaction, true, timeout, plan.CommandType).AsBufferedList());
 
     private Task<List<TResult>> QueryStaticRowsAsync<TResult>(SqlQueryPlan plan, SqlStaticResultReader<TResult> mapper,
         int? timeout, CancellationToken token) => InternalQueryPlanAsync(plan,
         async (connection, sql, parameters, transaction, operationToken) => CanExecuteStatically(parameters)
             ? await ReadStaticRowsAsync(connection, sql, parameters, transaction, timeout, mapper, operationToken, commandType: plan.CommandType).ConfigureAwait(false)
             : (await SqlDynamicCommandRunner.QueryAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                true, operationToken, plan.CommandType)).ConfigureAwait(false)).AsList(), token);
+                true, operationToken, plan.CommandType)).ConfigureAwait(false)).AsBufferedList(), token);
 
     private TResult QueryStaticTerminal<TResult>(SqlQueryPlan plan, SqlStaticResultReader<TResult> mapper,
         int? timeout, QueryTerminal terminal) => InternalQueryPlan(plan,

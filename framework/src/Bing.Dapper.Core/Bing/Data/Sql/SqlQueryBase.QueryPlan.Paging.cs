@@ -42,7 +42,7 @@ public abstract partial class SqlQueryBase
                 staticReader != null && CanExecuteStatically(parameters)
                     ? ReadStaticRows(connection, sql, parameters, transaction, timeout, staticReader, commandType: pagePlan.CommandType)
                     : SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters, transaction, buffered: true, commandTimeout: timeout,
-                    commandType: pagePlan.CommandType).AsList(), acquireExecutionLease: false,
+                    commandType: pagePlan.CommandType).AsBufferedList(), acquireExecutionLease: false,
                 completeTransaction: false);
             QueryResourceCleanup.CompleteQueryTransaction();
             if (totalCountCalculated)

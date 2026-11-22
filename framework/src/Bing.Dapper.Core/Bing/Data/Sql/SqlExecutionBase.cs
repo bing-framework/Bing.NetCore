@@ -674,7 +674,7 @@ public abstract partial class SqlExecutionBase : IDisposable, IAsyncDisposable, 
     /// </remarks>
     protected virtual async Task<List<TResult>> ExecuteMaterializedQueryAsync<TResult>(IDbConnection connection,
         CommandDefinition command, CancellationToken cancellationToken) =>
-        (await SqlDynamicCommandRunner.QueryAsync<TResult>(connection, command)).AsList();
+        (await SqlDynamicCommandRunner.QueryAsync<TResult>(connection, command)).AsBufferedList();
 
     /// <summary>
     /// 创建异步查询使用的 Dapper 命令定义。

@@ -69,7 +69,7 @@ public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, 
             WriteTraceLog(preparedCommand);
             var result = staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters)
                 ? ReadStaticRows(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, staticReader)
-                : SqlDynamicCommandRunner.Query<TResult>(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout).AsList();
+                : SqlDynamicCommandRunner.Query<TResult>(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout).AsBufferedList();
             ExecuteAfter(context.Message);
             return result;
         });

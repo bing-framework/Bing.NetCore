@@ -782,3 +782,11 @@
 | `SqlMutationPlanCacheKey.Create` | `Bing.Data.Sql.Tests` | `Create_WhenPhysicalObjectNamesDifferOnlyByCase_ShouldReturnDifferentKey` | Mutation Plan 按物理对象名精确隔离。 |
 | `SqlQueryBase` 映射快照捕获 | `Bing.Dapper.Core.Tests` | `VersionedEntityMappingQueryTest.Query_WhenMappingsArePublished_ShouldKeepCreationTimeSnapshot` | Query 在构造时固定当前映射版本，新 Query 使用后续发布版本。 |
 | `DefaultSqlEntityMutationCommandBuilder` / `SqlMutationPlanCache` | `Bing.Data.Sql.Tests` | `Builder_WhenPhysicalTableNameDiffersOnlyByCase_ShouldRenderIndependentCompleteSql` | Insert、Update、Delete 均按精确物理表名输出完整 SQL 与参数。 |
+
+## Native AOT 缓冲结果与 Windows PostgreSQL 初始化（2026-11-22）
+
+| 生产符号或入口 | 关键行为 | 对应测试 |
+| --- | --- | --- |
+| `SqlBufferedResults.AsBufferedList` | 已缓冲列表保持同一实例；其他序列只枚举一次；保持空结果语义。列表转换不引用 Dapper 静态初始化。 | `Bing.Dapper.Core.Tests.SqlBufferedResultsTest` 的 `AsBufferedList_ShouldReuseExistingList`、`AsBufferedList_ShouldMaterializeEnumerableOnce`、`AsBufferedList_ShouldPreserveNullResult`。 |
+| `SqlExecutionBase`、`SqlExecutorBase`、`SqlMultipleQueryResult` 及 `SqlQueryBase` 的列表终结方法 | 复用缓冲列表且保持分页快照、每次调用结果所有权。CRUD 原生发布保留 IL2070/IL2072 错误门槛。 | SQLite 集成的 `SqliteBufferedResultTest`；`Bing.Data.Sql.Aot.CrudOnly` 的六项原生通过标记，其中包括 `CRUD_ONLY_PACKAGE_NATIVE_PASS`。 |
+| `Start-SqlAotPostgreSql` | 只创建受管父目录，由 `initdb` 自行创建数据目录，避免 Windows 上修改预创建目录权限失败。保留原有初始化失败及清理语义。 | `eng/sql-aot/tests/WindowsPostgreSql.Tests.ps1` 的 `Start_LeavesDataDirectoryForInitdbToCreate` 及其余 11 项生命周期测试。 |

@@ -31,6 +31,7 @@ function New-Scenario {
     $script:calls = [Collections.Generic.List[object]]::new()
     $script:failAt = ''
     $script:failCleanup = $false
+    $script:dataDirectoryExistedAtInitdb = $null
 }
 
 # 在外部工具边界替身；独立的真实进程测试另外覆盖参数、非零和超时。
@@ -39,6 +40,13 @@ function Invoke-SqlAotPgTool([string]$FilePath, [string[]]$Arguments, [string]$L
     $script:calls.Add([pscustomobject]@{ name = $name; arguments = $Arguments; timeout = $TimeoutSeconds })
     [IO.File]::WriteAllText($LogFile, "工具日志 中文`n", $utf8)
     if ($Arguments -contains '--version') { return 'PostgreSQL fixture version' }
+    if ($name -eq 'initdb') {
+        $dataIndex = [array]::IndexOf($Arguments, '-D')
+        if ($dataIndex -lt 0) { throw 'initdb data directory argument is missing' }
+        $dataDirectory = $Arguments[$dataIndex + 1]
+        $script:dataDirectoryExistedAtInitdb = Test-Path -LiteralPath $dataDirectory
+        [IO.Directory]::CreateDirectory($dataDirectory) | Out-Null
+    }
     if ($name -eq 'pg_ctl' -and $Arguments[-1] -eq 'start') {
         [IO.File]::WriteAllText((Join-Path $script:directory 'data/postmaster.pid'), '12345', $utf8)
     }
@@ -64,6 +72,12 @@ Test-Case 'Start_CreatesOwnedUtf8Cluster_AndExportsOnlyTestDatabase' {
     if ($create.arguments[-1] -ne 'bing_sql_aot_test' -or $create.arguments -notcontains '--maintenance-db=postgres') { throw 'Wrong test database' }
     $expectedEnv = "RUN_POSTGRESQL_INTEGRATION_TESTS=true`nConnectionStrings__PostgreSqlConnection=Host=127.0.0.1;Port=$($state.port);Database=bing_sql_aot_test;Username=bing_aot;Pooling=false`n"
     if ([IO.File]::ReadAllText($environmentFile, $utf8) -cne $expectedEnv) { throw 'Environment contract differs' }
+}
+
+Test-Case 'Start_LeavesDataDirectoryForInitdbToCreate' {
+    New-Scenario
+    Start-SqlAotPostgreSql -BinDirectory 'tools' -Directory $directory -EnvironmentFile $environmentFile | Out-Null
+    if ($script:dataDirectoryExistedAtInitdb -ne $false) { throw 'initdb target directory must not exist before initialization' }
 }
 
 Test-Case 'Start_RejectsExistingDirectory_WithoutTouchingExistingCluster' {

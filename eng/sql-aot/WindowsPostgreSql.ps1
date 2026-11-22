@@ -68,7 +68,8 @@ function Start-SqlAotPostgreSql {
     $Directory = [IO.Path]::GetFullPath($Directory)
     if (Test-Path -LiteralPath $Directory) { throw "PostgreSQL fixture directory already exists: $Directory" }
     $data = Join-Path $Directory 'data'
-    [IO.Directory]::CreateDirectory($data) | Out-Null
+    # 让 Windows initdb 自己创建目标目录，避免对预先存在的目录修正 POSIX 权限。
+    [IO.Directory]::CreateDirectory($Directory) | Out-Null
     $stateFile = Join-Path $Directory 'state.json'
     $state = [ordered]@{
         status = 'STARTING'; binDirectory = $BinDirectory; dataDirectory = $data

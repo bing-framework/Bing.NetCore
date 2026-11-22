@@ -9,45 +9,45 @@ public abstract partial class SqlQueryBase
     List<TResult> ISqlQueryPlanExecutor.ToList<TResult>(SqlQueryPlan plan, int? timeout) =>
         TryCreateStaticReader<TResult>(out var reader) ? QueryStaticRows(plan, reader, timeout) :
         InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters,
-            transaction, buffered: true, commandTimeout: timeout, commandType: plan.CommandType).AsList());
+            transaction, buffered: true, commandTimeout: timeout, commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
         (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
         (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
         (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
         (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
         InternalQueryPlan(RequireDynamicQuery(plan), (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters,
             transaction, buffered: true, splitOn: plan.SplitOn, commandTimeout: timeout,
-            commandType: plan.CommandType).AsList());
+            commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
         int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan), (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql,
         map, parameters, transaction, buffered: true, splitOn: plan.SplitOn, commandTimeout: timeout,
-        commandType: plan.CommandType).AsList());
+        commandType: plan.CommandType).AsBufferedList());
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.First<TResult>(SqlQueryPlan plan, int? timeout) =>
@@ -91,49 +91,49 @@ public abstract partial class SqlQueryBase
         TryCreateStaticReader<TResult>(out var reader) ? QueryStaticRowsAsync(plan, reader, timeout, cancellationToken) :
         InternalQueryPlanAsync(plan, async (connection, sql, parameters,
         transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
-            transaction, timeout, buffered: true, operationToken, plan.CommandType))).AsList(), cancellationToken);
+            transaction, timeout, buffered: true, operationToken, plan.CommandType))).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TResult> map, int? timeout, CancellationToken cancellationToken) =>
         InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
             (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout, CancellationToken cancellationToken) =>
         InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
             (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, CancellationToken cancellationToken) =>
         InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
             (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout,
         CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters,
         transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout,
         CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters,
         transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh,
         TResult>(SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
         int? timeout, CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql,
         parameters, transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters,
-            transaction, timeout, buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
+            transaction, timeout, buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsBufferedList(), cancellationToken);
 
     /// <inheritdoc />
     async Task<TResult> ISqlQueryPlanExecutor.FirstAsync<TResult>(SqlQueryPlan plan, int? timeout,
