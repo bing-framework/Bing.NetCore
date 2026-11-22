@@ -2,29 +2,51 @@
 
 # 仅管理本次 CI 创建的数据目录，不启动、停止或修改机器上预装的服务。
 function Invoke-SqlAotPgTool {
-    param([string]$FilePath, [string[]]$Arguments, [string]$LogFile, [int]$TimeoutSeconds = 75)
+    param([string]$FilePath, [string[]]$Arguments, [string]$LogFile, [int]$TimeoutSeconds = 75, [switch]$ServerStart)
 
     $utf8 = [Text.UTF8Encoding]::new($false)
     $info = [Diagnostics.ProcessStartInfo]::new()
     $info.FileName = $FilePath
-    $info.UseShellExecute = $false
-    $info.CreateNoWindow = $true
-    $info.RedirectStandardOutput = $true
-    $info.RedirectStandardError = $true
-    $info.StandardOutputEncoding = $utf8
-    $info.StandardErrorEncoding = $utf8
+    if ($ServerStart) {
+        # 避免 pg_ctl 启动的后台服务继承 CI 的 stdout/stderr 管道。
+        $info.UseShellExecute = $true
+        $info.WindowStyle = [Diagnostics.ProcessWindowStyle]::Hidden
+    }
+    else {
+        $info.UseShellExecute = $false
+        $info.CreateNoWindow = $true
+        $info.RedirectStandardOutput = $true
+        $info.RedirectStandardError = $true
+        $info.StandardOutputEncoding = $utf8
+        $info.StandardErrorEncoding = $utf8
+    }
     foreach ($argument in $Arguments) { $info.ArgumentList.Add($argument) }
     $process = [Diagnostics.Process]::new()
     $process.StartInfo = $info
     try {
         if (!$process.Start()) { throw "Could not start PostgreSQL tool: $FilePath" }
-        $stdout = $process.StandardOutput.ReadToEndAsync()
-        $stderr = $process.StandardError.ReadToEndAsync()
+        if (!$ServerStart) {
+            $stdout = $process.StandardOutput.ReadToEndAsync()
+            $stderr = $process.StandardError.ReadToEndAsync()
+        }
         $timedOut = !$process.WaitForExit($TimeoutSeconds * 1000)
         if ($timedOut) {
             # 只终止本调用启动的进程树，超时仍保留已经输出的诊断。
             if (!$process.HasExited) { $process.Kill($true) }
             if (!$process.WaitForExit(5000)) { throw "PostgreSQL tool did not terminate: $FilePath" }
+        }
+        if ($ServerStart) {
+            $serverLog = ''
+            for ($index = 0; $index -lt $Arguments.Length - 1; $index++) {
+                if ($Arguments[$index] -eq '-l') { $serverLog = $Arguments[$index + 1]; break }
+            }
+            $status = if ($timedOut) { "timed out after $TimeoutSeconds seconds" } else { "exit code $($process.ExitCode)" }
+            $diagnostic = "pg_ctl start $status"
+            if ($serverLog) { $diagnostic += "`nPostgreSQL server log: $serverLog" }
+            [IO.File]::WriteAllText($LogFile, $diagnostic + "`n", $utf8)
+            if ($timedOut) { throw "PostgreSQL tool timed out: $FilePath; $LogFile" }
+            if ($process.ExitCode -ne 0) { throw "PostgreSQL tool exit $($process.ExitCode): $FilePath; $LogFile" }
+            return
         }
         $output = $stdout.GetAwaiter().GetResult()
         $errorOutput = $stderr.GetAwaiter().GetResult()
@@ -88,7 +110,7 @@ function Start-SqlAotPostgreSql {
             -LogFile (Join-Path $Directory 'initdb.log') -TimeoutSeconds 75 | Out-Null
         Invoke-SqlAotPgTool -FilePath (Join-Path $BinDirectory 'pg_ctl.exe') `
             -Arguments @('-D', $data, '-l', (Join-Path $Directory 'server.log'), '-o', "-h 127.0.0.1 -p $($state.port)", '-w', '-t', '60', 'start') `
-            -LogFile (Join-Path $Directory 'start.log') -TimeoutSeconds 75 | Out-Null
+            -LogFile (Join-Path $Directory 'start.log') -TimeoutSeconds 75 -ServerStart | Out-Null
         Invoke-SqlAotPgTool -FilePath (Join-Path $BinDirectory 'createdb.exe') `
             -Arguments @('--host=127.0.0.1', "--port=$($state.port)", '--username=bing_aot', '--maintenance-db=postgres', '-w', 'bing_sql_aot_test') `
             -LogFile (Join-Path $Directory 'createdb.log') -TimeoutSeconds 30 | Out-Null

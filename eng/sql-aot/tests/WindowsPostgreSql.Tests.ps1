@@ -184,6 +184,138 @@ Test-Case 'Tool_RealTimeout_TerminatesOwnedProcessAndRetainsLog' {
     }
 }
 
+Test-Case 'Tool_ServerStart_DoesNotWaitForDescendantInheritedPipes' {
+    $probe = Join-Path $testRoot 'server-start-probe.ps1'
+    $pidFile = Join-Path $testRoot 'server-start-child.pid'
+    $log = Join-Path $testRoot 'server-start.log'
+    $serverLog = Join-Path $testRoot 'server log 中文.log'
+    $probeSource = @'
+param([string]$ToolScript, [string]$NodeExe, [string]$PidFile, [string]$LogFile, [string]$ServerLog)
+$ErrorActionPreference = 'Stop'
+$program = @"
+const { spawn } = require('node:child_process');
+const fs = require('node:fs');
+const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'inherit', windowsHide: true, detached: true });
+child.unref();
+fs.writeFileSync(process.argv[3], String(child.pid), 'utf8');
+console.log('pg_ctl parent exiting while child keeps inherited streams open');
+"@
+$exitCode = 0
+try {
+    . $ToolScript
+    Invoke-SqlAotPgTool -FilePath $NodeExe -Arguments @('-e', $program, '--', '-l', $ServerLog, $PidFile) `
+        -LogFile $LogFile -TimeoutSeconds 5 -ServerStart | Out-Null
+    $childProcessId = [int](Get-Content -LiteralPath $PidFile -Raw -Encoding UTF8)
+    if (!(Get-Process -Id $childProcessId -ErrorAction SilentlyContinue)) { throw 'Detached child exited before cleanup' }
+    [Console]::Out.WriteLine('returned while child alive')
+}
+catch {
+    [Console]::Error.WriteLine($_.Exception.Message)
+    $exitCode = 1
+}
+finally {
+    if (Test-Path -LiteralPath $PidFile) {
+        $childProcessId = [int](Get-Content -LiteralPath $PidFile -Raw -Encoding UTF8)
+        if (Get-Process -Id $childProcessId -ErrorAction SilentlyContinue) {
+            Stop-Process -Id $childProcessId -Force -ErrorAction SilentlyContinue
+            try { Wait-Process -Id $childProcessId -Timeout 2 -ErrorAction SilentlyContinue } catch { }
+        }
+    }
+}
+exit $exitCode
+'@
+    Set-Content -LiteralPath $probe -Value $probeSource -Encoding utf8
+    $info = [Diagnostics.ProcessStartInfo]::new()
+    $info.FileName = (Get-Command pwsh).Source
+    $info.UseShellExecute = $false
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
+    foreach ($argument in @('-NoLogo', '-NoProfile', '-File', $probe, (Join-Path $PSScriptRoot '../WindowsPostgreSql.ps1'), $node, $pidFile, $log, $serverLog)) {
+        $info.ArgumentList.Add($argument)
+    }
+    $process = [Diagnostics.Process]::new()
+    $process.StartInfo = $info
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $childProcessId = 0
+    try {
+        if (!$process.Start()) { throw 'Could not start bounded server-start probe' }
+        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $stderr = $process.StandardError.ReadToEndAsync()
+        $exited = $process.WaitForExit(5000)
+        if (Test-Path -LiteralPath $pidFile) { $childProcessId = [int](Get-Content -LiteralPath $pidFile -Raw -Encoding UTF8) }
+        if (!$exited) {
+            if ($childProcessId -and (Get-Process -Id $childProcessId -ErrorAction SilentlyContinue)) { Stop-Process -Id $childProcessId -Force -ErrorAction SilentlyContinue }
+            if (!$process.HasExited) { $process.Kill($true) }
+            if (!$process.WaitForExit(2000)) { throw 'Server-start probe did not terminate within cleanup bound' }
+        }
+        if ($childProcessId -and (Get-Process -Id $childProcessId -ErrorAction SilentlyContinue)) { Stop-Process -Id $childProcessId -Force -ErrorAction SilentlyContinue }
+        if (!$stdout.Wait(2000) -or !$stderr.Wait(2000)) { throw 'Server-start probe output remained open after cleanup' }
+        $output = $stdout.GetAwaiter().GetResult()
+        $errorOutput = $stderr.GetAwaiter().GetResult()
+        if (!$exited -or $process.ExitCode -ne 0 -or $timer.Elapsed.TotalSeconds -gt 5 -or !$output.Contains('returned while child alive')) {
+            throw "Server-start pipe probe failed within its bound: $errorOutput$($output.Trim())"
+        }
+        $logText = [IO.File]::ReadAllText($log, $utf8)
+        if (!$logText.Contains('exit code 0') -or !$logText.Contains($serverLog)) { throw 'Server-start diagnostic log omitted exit status or server log path' }
+    }
+    finally {
+        if ($childProcessId -and (Get-Process -Id $childProcessId -ErrorAction SilentlyContinue)) { Stop-Process -Id $childProcessId -Force -ErrorAction SilentlyContinue }
+        if (!$process.HasExited) { $process.Kill($true); $null = $process.WaitForExit(2000) }
+        $process.Dispose()
+        Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $pidFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Test-Case 'Tool_ServerStart_NonzeroExit_PreservesExitCode' {
+    $log = Join-Path $testRoot 'server-start-nonzero.log'
+    $serverLog = Join-Path $testRoot 'server nonzero log 中文.log'
+    $message = ''
+    try {
+        Invoke-SqlAotPgTool -FilePath $node -Arguments @('-e', 'process.exitCode=23', '--', '-l', $serverLog) `
+            -LogFile $log -TimeoutSeconds 5 -ServerStart | Out-Null
+    }
+    catch { $message = $_.Exception.Message }
+    $content = [IO.File]::ReadAllText($log, $utf8)
+    if ($message -notmatch 'exit 23' -or !$content.Contains('exit code 23') -or !$content.Contains($serverLog)) {
+        throw 'Server-start nonzero exit was lost'
+    }
+}
+
+Test-Case 'Tool_ServerStart_Timeout_TerminatesOwnedProcessTree' {
+    $log = Join-Path $testRoot 'server-start-timeout.log'
+    $serverLog = Join-Path $testRoot 'server timeout log.log'
+    $pidFile = Join-Path $testRoot 'server-start-timeout-pids.json'
+    $program = 'const fs=require("node:fs"),cp=require("node:child_process");const child=cp.spawn(process.execPath,["-e","setInterval(()=>{},1000)"],{stdio:"ignore",windowsHide:true});fs.writeFileSync(process.argv[1],JSON.stringify([process.pid,child.pid]),"utf8");setInterval(()=>{},1000)'
+    $message = ''
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $processIds = @()
+    $survivingProcessIds = @()
+    try {
+        try {
+            Invoke-SqlAotPgTool -FilePath $node -Arguments @('-e', $program, $pidFile, '--', '-l', $serverLog) `
+                -LogFile $log -TimeoutSeconds 2 -ServerStart | Out-Null
+        }
+        catch { $message = $_.Exception.Message }
+        if (Test-Path -LiteralPath $pidFile) {
+            $processIds = @(Get-Content -LiteralPath $pidFile -Raw -Encoding UTF8 | ConvertFrom-Json)
+            $survivingProcessIds = @($processIds | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
+        }
+    }
+    finally {
+        foreach ($processId in $processIds) {
+            if (Get-Process -Id $processId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+    $content = [IO.File]::ReadAllText($log, $utf8)
+    if ($message -notmatch 'timed out' -or $timer.Elapsed.TotalSeconds -gt 10 -or !$content.Contains('timed out') -or
+        !$content.Contains($serverLog) -or $processIds.Count -ne 2 -or $survivingProcessIds.Count -gt 0) {
+        throw 'Server-start timeout was not bounded or logged'
+    }
+}
+
 $report = [ordered]@{ passed = @($results | Where-Object status -eq 'PASS').Count; failed = @($results | Where-Object status -eq 'FAIL').Count; tests = $results }
 $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $testRoot 'tests.json') -Encoding utf8
 $results | Format-Table -AutoSize | Out-Host
