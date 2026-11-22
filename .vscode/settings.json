@@ -1,0 +1,24 @@
+{
+    "files.watcherExclude": {
+        "**/artifacts/**": true,
+        "**/.artifacts/**": true,
+        "**/ai_docs/tasks/**/evidence/**": true,
+        "**/ai_docs/tasks/**/validation/**": true,
+        "**/ai_docs/tasks/**/test-results/**": true,
+        "**/BenchmarkDotNet.Artifacts/**": true,
+        "**/output/**": true,
+        "**/.codex-build/**": true,
+        "**/.tmp*/**": true
+    },
+    "search.exclude": {
+        "**/artifacts/**": true,
+        "**/.artifacts/**": true,
+        "**/ai_docs/tasks/**/evidence/**": true,
+        "**/ai_docs/tasks/**/validation/**": true,
+        "**/ai_docs/tasks/**/test-results/**": true,
+        "**/BenchmarkDotNet.Artifacts/**": true,
+        "**/output/**": true,
+        "**/.codex-build/**": true,
+        "**/.tmp*/**": true
+    }
+}

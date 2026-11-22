@@ -23,6 +23,7 @@ bld/
 [Ll]og/
 
 # Benchmarks results
+# Benchmark output belongs in artifacts/benchmarks/<suite>/<run>/ (artifacts/ is ignored below).
 BenchmarkDotNet.Artifacts/
 
 # 完整基线源码应放在仓库外统一存储，防止任务目录重复收录。
@@ -31,6 +32,19 @@ BenchmarkDotNet.Artifacts/
 
 # AI 任务的原始报告与 checkpoint 归档到 artifacts/ai-tasks，不入库。
 /ai_docs/tasks/**/*.json
+
+# Historical AI validation output; new runs must use artifacts/validation instead.
+/.artifacts/
+/ai_docs/tasks/**/evidence/
+/ai_docs/tasks/**/validation/
+/ai_docs/tasks/**/test-results/
+
+# AI 调试与测试产生的文本和运行结果。
+/ai_docs/**/*.txt
+/ai_docs/**/*.log
+/ai_docs/**/*.trx
+/ai_docs/**/*.dll
+/ai_docs/**/*.xml
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -292,6 +306,9 @@ modules/admin/src/**/appsettings.Development.json
 .workbuddy/
 
 # Repository-local generated files
+# Validation scratch belongs in artifacts/validation/<task>/<run>/ (artifacts/ is ignored above).
+.codex-build/
+.tmp*/
 /.admin-packages/
 /.dotnet-cli/
 /.dotnet-cli-validation-contracts/
