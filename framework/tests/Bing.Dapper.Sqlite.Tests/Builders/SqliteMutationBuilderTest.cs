@@ -5,6 +5,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Metadata;
 
@@ -82,7 +83,7 @@ public sealed class SqliteMutationBuilderTest
     public void UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new SqliteBuilder()
+        var builder = new SqlUpdateBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -103,7 +104,7 @@ public sealed class SqliteMutationBuilderTest
     public void DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new SqliteBuilder()
+        var builder = new SqlDeleteBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -123,7 +124,7 @@ public sealed class SqliteMutationBuilderTest
     public void Returning_WhenInsertValuesIsConfigured_ShouldRenderSqliteSql()
     {
         // Arrange
-        ISqlBuilder builder = new SqliteBuilder();
+        var builder = new SqlInsertBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
             .Values("Bing")
@@ -143,11 +144,13 @@ public sealed class SqliteMutationBuilderTest
     public void Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery()
     {
         // Arrange
-        ISqlBuilder builder = new SqliteBuilder();
+        var source = new SqliteBuilder()
+            .Select("Name")
+            .From("Orders");
+        var builder = new SqlInsertBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
-            .Select("Name")
-            .From("Orders")
+            .InsertSelect(source)
             .Returning("Id");
 
         // Act
@@ -164,7 +167,7 @@ public sealed class SqliteMutationBuilderTest
     public void Returning_WhenUpdateIsConfigured_ShouldRenderAfterWhere()
     {
         // Arrange
-        ISqlBuilder builder = new SqliteBuilder();
+        var builder = new SqlUpdateBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.Update(new SqlTableReference { TableName = "samples" })
             .Set("Name", "Bing")
             .Where("Id", 1)
@@ -184,7 +187,7 @@ public sealed class SqliteMutationBuilderTest
     public void Returning_WhenDeleteIsConfigured_ShouldRenderAfterWhere()
     {
         // Arrange
-        ISqlBuilder builder = new SqliteBuilder();
+        var builder = new SqlDeleteBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("Id", 1)
             .Returning("Id", "Name");
@@ -203,7 +206,7 @@ public sealed class SqliteMutationBuilderTest
     public void Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases()
     {
         // Arrange
-        ISqlBuilder builder = new SqliteBuilder();
+        var builder = new SqlUpdateBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.Update(new SqlTableReference { TableName = "mapped_samples" })
             .Set("sample_name", "Bing")
             .Where("sample_id", 7)

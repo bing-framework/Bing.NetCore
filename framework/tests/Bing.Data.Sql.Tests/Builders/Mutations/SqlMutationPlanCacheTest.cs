@@ -60,6 +60,180 @@ public sealed class SqlMutationPlanCacheTest
     }
 
     /// <summary>
+    /// 测试目的：首次属性名带空白时，兼容模式与严格生成模式都应使用规范化名称创建 Getter。
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void GetValue_WhenFirstPropertyNameHasWhitespace_ShouldNormalizeBeforeCreatingGetter(bool generatedOnly)
+    {
+        var calls = 0;
+        IEntityModelMetadataProvider models = generatedOnly
+            ? new RegisteredEntityModelMetadataProvider(new EntityModelMetadata(typeof(GetterSource), "rows", null,
+                new[]
+                {
+                    EntityPropertyMetadata.CreateGenerated(nameof(GetterSource.Name), typeof(string), true, true,
+                        generatedGetter: source =>
+                        {
+                            calls++;
+                            return ((GetterSource)source).Name;
+                        })
+                }))
+            : null;
+        var cache = new SqlMutationPlanCache(models: models, generatedOnly: generatedOnly);
+        var source = new GetterSource { Name = "first" };
+
+        var first = cache.GetValue(source, new ColumnMappingMetadata { PropertyName = " Name " });
+        var second = cache.GetValue(source, new ColumnMappingMetadata { PropertyName = "Name" });
+
+        Assert.Equal("first", first);
+        Assert.Equal("first", second);
+        Assert.Equal(1, cache.GetterCacheMissCount);
+        Assert.Equal(1, cache.GetterCacheHitCount);
+        Assert.Equal(1, cache.GetterCount);
+        Assert.Equal(generatedOnly ? 2 : 0, calls);
+    }
+
+    /// <summary>
+    /// 测试目的：属性 Getter 对一个源实例抛错后，缓存中的委托仍可供后续实例复用。
+    /// </summary>
+    [Fact]
+    public void GetValue_WhenPropertyGetterThrows_ShouldKeepGetterForLaterSources()
+    {
+        var cache = new SqlMutationPlanCache();
+        var column = new ColumnMappingMetadata { PropertyName = nameof(ThrowingGetterSource.Name) };
+        var failingSource = new ThrowingGetterSource { NameValue = "unused", ThrowOnGet = true };
+        var successfulSource = new ThrowingGetterSource { NameValue = "recovered" };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => cache.GetValue(failingSource, column));
+        var getterCountAfterFailure = cache.GetterCount;
+        var value = cache.GetValue(successfulSource, column);
+
+        Assert.Equal("getter failed", exception.Message);
+        Assert.Equal("recovered", value);
+        Assert.Equal(1, getterCountAfterFailure);
+        Assert.Equal(1, cache.GetterCount);
+        Assert.Equal(1, cache.GetterCacheMissCount);
+        Assert.Equal(1, cache.GetterCacheHitCount);
+    }
+
+    /// <summary>
+    /// 测试目的：生成 Getter 创建失败时应移除失败项，并允许相同缓存键再次创建。
+    /// </summary>
+    [Fact]
+    public void GetValue_WhenGeneratedGetterCreationFails_ShouldRetryOnNextCall()
+    {
+        var model = new EntityModelMetadata(typeof(GetterSource), "rows", null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(GetterSource.Name), typeof(string), true, true,
+                generatedGetter: source => ((GetterSource)source).Name)
+        });
+        var models = new RetryingGetterMetadataProvider(model);
+        var cache = new SqlMutationPlanCache(models: models, generatedOnly: true);
+        var source = new GetterSource { Name = "retried" };
+        var column = new ColumnMappingMetadata { PropertyName = nameof(GetterSource.Name) };
+
+        Assert.Throws<NotSupportedException>(() => cache.GetValue(source, column));
+        Assert.Equal(0, cache.GetterCount);
+
+        var value = cache.GetValue(source, column);
+
+        Assert.Equal("retried", value);
+        Assert.Equal(2, models.SourceMetadataLookupCount);
+        Assert.Equal(2, cache.GetterCacheMissCount);
+        Assert.Equal(0, cache.GetterCacheHitCount);
+        Assert.Equal(1, cache.GetterCount);
+    }
+
+    /// <summary>
+    /// 测试目的：来源为生成模型登记类型的派生实例时，应继续复用基类生成 Getter。
+    /// </summary>
+    [Fact]
+    public void GetValue_WhenDerivedSourceHasGeneratedBaseModel_ShouldUseGeneratedGetter()
+    {
+        var calls = 0;
+        var model = new EntityModelMetadata(typeof(BaseGeneratedSource), "generated_rows", null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(BaseGeneratedSource.Name), typeof(string), true, true,
+                generatedGetter: source =>
+                {
+                    calls++;
+                    return ((BaseGeneratedSource)source).Name;
+                })
+        });
+        var cache = new SqlMutationPlanCache(
+            models: new RegisteredEntityModelMetadataProvider(model), generatedOnly: true);
+        var source = new DerivedGeneratedSource { Name = "generated" };
+
+        var value = cache.GetValue(source, new ColumnMappingMetadata { PropertyName = nameof(BaseGeneratedSource.Name) });
+
+        Assert.Equal("generated", value);
+        Assert.Equal(1, calls);
+        Assert.Equal(1, cache.GetterCacheMissCount);
+        Assert.Equal(1, cache.GetterCount);
+    }
+
+    /// <summary>
+    /// 测试目的：派生类型已有不带 Getter 的模型时，仍应继续查找可用的基类生成 Getter。
+    /// </summary>
+    [Fact]
+    public void GetValue_WhenDerivedModelLacksGeneratedGetter_ShouldPreferGeneratedBaseGetter()
+    {
+        var calls = 0;
+        var baseModel = new EntityModelMetadata(typeof(BaseGeneratedSource), "generated_rows", null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(BaseGeneratedSource.Name), typeof(string), true, true,
+                generatedGetter: source =>
+                {
+                    calls++;
+                    return ((BaseGeneratedSource)source).Name;
+                })
+        });
+        var derivedModel = new EntityModelMetadata(typeof(DerivedGeneratedSource), "generated_rows", null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(BaseGeneratedSource.Name), typeof(string), true, true)
+        });
+        var cache = new SqlMutationPlanCache(
+            models: new RegisteredEntityModelMetadataProvider(baseModel, derivedModel), generatedOnly: true);
+        var source = new DerivedGeneratedSource { Name = "generated" };
+
+        var value = cache.GetValue(source, new ColumnMappingMetadata { PropertyName = nameof(BaseGeneratedSource.Name) });
+
+        Assert.Equal("generated", value);
+        Assert.Equal(1, calls);
+        Assert.Equal(1, cache.GetterCacheMissCount);
+        Assert.Equal(1, cache.GetterCount);
+    }
+
+    /// <summary>
+    /// 测试目的：仅登记接口生成模型时，派生实例也应复用接口生成 Getter。
+    /// </summary>
+    [Fact]
+    public void GetValue_WhenOnlyInterfaceHasGeneratedModel_ShouldUseInterfaceGeneratedGetter()
+    {
+        var calls = 0;
+        var model = new EntityModelMetadata(typeof(IGeneratedNameSource), "generated_rows", null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(IGeneratedNameSource.Name), typeof(string), true, false,
+                generatedGetter: source =>
+                {
+                    calls++;
+                    return ((IGeneratedNameSource)source).Name;
+                })
+        });
+        var cache = new SqlMutationPlanCache(
+            models: new RegisteredEntityModelMetadataProvider(model), generatedOnly: true);
+        var source = new InterfaceGeneratedSource { Name = "generated-interface" };
+
+        var value = cache.GetValue(source, new ColumnMappingMetadata { PropertyName = nameof(IGeneratedNameSource.Name) });
+
+        Assert.Equal("generated-interface", value);
+        Assert.Equal(1, calls);
+        Assert.Equal(1, cache.GetterCacheMissCount);
+        Assert.Equal(1, cache.GetterCount);
+    }
+
+    /// <summary>
     /// 测试目的：Getter 容量为零时每次访问都应旁路且不保留编译委托。
     /// </summary>
     [Fact]
@@ -340,6 +514,98 @@ public sealed class SqlMutationPlanCacheTest
     /// 第二个 Getter 测试源。
     /// </summary>
     private sealed class OtherGetterSource
+    {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 对指定源实例抛出属性 Getter 异常的测试源。
+    /// </summary>
+    private sealed class ThrowingGetterSource
+    {
+        /// <summary>
+        /// 获取或设置是否抛出异常。
+        /// </summary>
+        public bool ThrowOnGet { get; set; }
+
+        /// <summary>
+        /// 获取或设置正常读取时返回的名称。
+        /// </summary>
+        public string NameValue { get; set; }
+
+        /// <summary>
+        /// 获取名称。
+        /// </summary>
+        public string Name => ThrowOnGet ? throw new InvalidOperationException("getter failed") : NameValue;
+    }
+
+    /// <summary>
+    /// 首次不返回目标模型、后续返回模型的测试元数据提供器。
+    /// </summary>
+    private sealed class RetryingGetterMetadataProvider : IEntityModelMetadataProvider
+    {
+        private readonly EntityModelMetadata _model;
+        private int _sourceMetadataLookupCount;
+
+        /// <summary>
+        /// 初始化一个 <see cref="RetryingGetterMetadataProvider"/> 类型的实例。
+        /// </summary>
+        /// <param name="model">重试时返回的生成模型。</param>
+        public RetryingGetterMetadataProvider(EntityModelMetadata model) => _model = model;
+
+        /// <summary>
+        /// 获取目标源类型的模型查询次数。
+        /// </summary>
+        public int SourceMetadataLookupCount => _sourceMetadataLookupCount;
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata(Type entityType)
+        {
+            if (entityType != typeof(GetterSource))
+                return null;
+            return Interlocked.Increment(ref _sourceMetadataLookupCount) == 1 ? null : _model;
+        }
+
+        /// <inheritdoc />
+        public EntityModelMetadata GetMetadata<TEntity>() => GetMetadata(typeof(TEntity));
+    }
+
+    /// <summary>
+    /// 生成 Getter 基类测试源。
+    /// </summary>
+    private class BaseGeneratedSource
+    {
+        /// <summary>
+        /// 获取或设置名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// 生成 Getter 派生测试源。
+    /// </summary>
+    private sealed class DerivedGeneratedSource : BaseGeneratedSource
+    {
+    }
+
+    /// <summary>
+    /// 生成 Getter 接口测试契约。
+    /// </summary>
+    private interface IGeneratedNameSource
+    {
+        /// <summary>
+        /// 获取名称。
+        /// </summary>
+        string Name { get; }
+    }
+
+    /// <summary>
+    /// 仅通过接口提供生成 Getter 的测试源。
+    /// </summary>
+    private sealed class InterfaceGeneratedSource : IGeneratedNameSource
     {
         /// <summary>
         /// 获取或设置名称。

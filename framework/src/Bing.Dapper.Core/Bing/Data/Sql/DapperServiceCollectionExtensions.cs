@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Enums;
+using System.Diagnostics.CodeAnalysis;
 using Bing.Data.Filters;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
@@ -106,7 +107,8 @@ public static class DapperCoreServiceCollectionExtensions
         services.TryAddSingleton<IEntityModelMetadataProvider>(provider =>
             new CompositeEntityModelMetadataProvider(provider
                 .GetServices<IEntityModelMetadataProviderRegistration>()
-                .Select(registration => registration.Create(provider))));
+                .Select(registration => registration.Create(provider)),
+                provider.GetRequiredService<SqlMetadataOptions>().ExecutionMode == SqlExecutionMode.GeneratedOnly));
         services.TryAddSingleton<ISqlObjectNameFormatter, DefaultSqlObjectNameFormatter>();
         services.TryAddSingleton<ISqlObjectNameCapabilityProvider, DefaultSqlObjectNameCapabilityProvider>();
         services.TryAddSingleton<ISqlTableReferenceValidator, DefaultSqlTableReferenceValidator>();
@@ -343,6 +345,22 @@ public static class DapperCoreServiceCollectionExtensions
     }
 
     /// <summary>
+    /// 注册当前宿主专用的生成模型快照，不使用进程级静态登记表。
+    /// </summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="models">生成上下文的 CreateModels 返回值。</param>
+    /// <returns>当前服务集合。</returns>
+    public static IServiceCollection AddSqlGeneratedModels(this IServiceCollection services,
+        IEnumerable<EntityModelMetadata> models)
+    {
+        if (services == null) throw new ArgumentNullException(nameof(services));
+        if (models == null) throw new ArgumentNullException(nameof(models));
+        var registry = new RegisteredEntityModelMetadataProvider(models.ToArray());
+        services.AddSingleton<IEntityModelMetadataProviderRegistration>(new StaticEntityModelMetadataRegistration(registry));
+        return services;
+    }
+
+    /// <summary>
     /// 注册实体模型元数据提供器。
     /// </summary>
     /// <typeparam name="TInterface">元数据提供器服务契约类型。</typeparam>
@@ -366,11 +384,12 @@ public static class DapperCoreServiceCollectionExtensions
     /// <summary>
     /// 注册指定数据库类型的值转换器。
     /// </summary>
-    /// <typeparam name="TConverter">数据库值转换器实现类型。</typeparam>
+    /// <typeparam name="TConverter">由依赖注入创建的数据库值转换器实现类型，公共构造函数会被保留。</typeparam>
     /// <param name="services">要注册服务的服务集合。</param>
     /// <param name="databaseType">转换器适用的数据库类型。</param>
     /// <returns>当前服务集合，以支持链式注册。</returns>
-    public static IServiceCollection AddDatabaseTypeConverter<TConverter>(this IServiceCollection services,
+    public static IServiceCollection AddDatabaseTypeConverter<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TConverter>(this IServiceCollection services,
         Bing.Data.Enums.DatabaseType databaseType)
         where TConverter : class, Bing.Data.Metadata.ITypeConverter
     {
@@ -473,7 +492,14 @@ public static class DapperCoreServiceCollectionExtensions
             var current = registrations[0];
             if (ReferenceEquals(current, runtime) == false &&
                 (current.QueryType != runtime.QueryType || current.ExecutorType != runtime.ExecutorType ||
-                 current.MultipleQueryExecutorType != runtime.MultipleQueryExecutorType))
+                 current.MultipleQueryExecutorType != runtime.MultipleQueryExecutorType ||
+                 !Equals(current.QueryFactory, runtime.QueryFactory) ||
+                 !Equals(current.ExecutorFactory, runtime.ExecutorFactory) ||
+                 !Equals(current.MultipleFactory, runtime.MultipleFactory) ||
+                 !Equals(current.ServiceOptionsFactory, runtime.ServiceOptionsFactory) ||
+                 !Equals(current.ServiceTemplateFactory, runtime.ServiceTemplateFactory) ||
+                 (current.ServiceOptionsFactory == null && !Equals(current.OptionsFactory, runtime.OptionsFactory)) ||
+                 (current.ServiceTemplateFactory == null && !Equals(current.TemplateFactory, runtime.TemplateFactory))))
                 throw new InvalidOperationException($"SQL Provider Key '{runtime.ProviderKey}' 的运行时服务重复注册且配置不一致。");
             return services;
         }
@@ -494,6 +520,16 @@ internal interface IEntityModelMetadataProviderRegistration
     /// <param name="serviceProvider">当前服务提供器。</param>
     /// <returns>实体模型元数据提供器。</returns>
     IEntityModelMetadataProvider Create(IServiceProvider serviceProvider);
+}
+
+/// <summary>把宿主提供的静态模型注册为组合提供器，不通过反射激活。</summary>
+internal sealed class StaticEntityModelMetadataRegistration : IEntityModelMetadataProviderRegistration
+{
+    private readonly IEntityModelMetadataProvider _provider;
+
+    internal StaticEntityModelMetadataRegistration(IEntityModelMetadataProvider provider) => _provider = provider;
+
+    public IEntityModelMetadataProvider Create(IServiceProvider serviceProvider) => _provider;
 }
 
 /// <summary>

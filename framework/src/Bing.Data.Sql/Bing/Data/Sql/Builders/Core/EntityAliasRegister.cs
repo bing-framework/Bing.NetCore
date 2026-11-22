@@ -81,6 +81,25 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
 
     #region Register(注册实体别名)
 
+    /// <summary>
+    /// 为已登记的实体来源绑定指定别名。
+    /// </summary>
+    /// <param name="entity">实体来源的类型。</param>
+    /// <param name="alias">替换后的来源别名。</param>
+    /// <param name="previousAlias">该来源原有的别名。</param>
+    internal void BindUnspecifiedAlias(Type entity, string alias, string previousAlias)
+    {
+        ValidateReplacementAlias(alias, previousAlias);
+        if (!string.IsNullOrWhiteSpace(previousAlias)) _aliases.Remove(previousAlias);
+        RegisterAlias(alias);
+        var aliases = GetEntityAliases(entity);
+        var index = aliases.FindIndex(value => string.Equals(value, previousAlias, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0) aliases[index] = alias;
+        else aliases.Add(alias);
+        if (!_data.TryGetValue(entity, out var current) || string.Equals(current, previousAlias, StringComparison.OrdinalIgnoreCase))
+            _data[entity] = alias;
+    }
+
     /// <inheritdoc />
     public void Register(Type entity, string alias)
     {

@@ -38,8 +38,9 @@ public sealed class SqlMutationBatchCommand
     public int EntityCount { get; }
 
     /// <summary>
-    /// 获取是否要求在单一事务中执行。即使外层批处理选项禁用事务，执行器也必须尊重该要求。
+    /// 获取是否要求在单一事务中执行。
     /// </summary>
+    /// <remarks>即使外层批处理选项禁用事务，执行器也必须尊重该要求。</remarks>
     public bool RequiresTransaction { get; }
 
     /// <summary>

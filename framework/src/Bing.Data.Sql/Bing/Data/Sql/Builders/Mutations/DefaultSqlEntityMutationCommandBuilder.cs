@@ -4,6 +4,7 @@ using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Builders.Mutations.Builders;
+using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
@@ -36,6 +37,9 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// </summary>
     private readonly SqlMutationPlanCache _planCache;
 
+    /// <summary>仅默认 SQLite 命名、子句及参数服务可复用当前生成器的 SQL 文本。</summary>
+    private readonly bool _useGeneratedSql;
+
     /// <summary>
     /// 初始化一个 <see cref="DefaultSqlEntityMutationCommandBuilder"/> 类型的实例。
     /// </summary>
@@ -46,7 +50,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         _services = services ?? throw new ArgumentNullException(nameof(services));
         _databaseContext = _services.DatabaseContextResolver.Resolve(_services.Options);
-        _planCache = SqlMutationPlanCaches.Get(_services.EntityMappingResolver, _services.MetadataOptions);
+        _planCache = SqlMutationPlanCaches.Get(_services.EntityMappingResolver, _services.MetadataOptions, _services.EntityModelMetadataProvider);
+        _useGeneratedSql = SqlMutationPlan.SupportsGeneratedSql(_provider, _services);
     }
 
     /// <summary>
@@ -76,11 +81,11 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         var parameters = new List<SqlParam>(columns.Count);
         foreach (var column in columns)
         {
-            var parameter = CreateParameter(builder.MutationContext.ParameterManager, entity, column, typeof(TEntity));
+            var parameter = CreateParameter(builder.MutationContext.ParameterManager, entity, column, typeof(TEntity), plan);
             parameters.Add(parameter);
         }
         builder.ValuesClause.AddRow(parameters);
-        return builder.BuildCommand();
+        return WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan);
     }
 
     /// <inheritdoc />
@@ -122,12 +127,12 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             foreach (var column in columns)
             {
                 var parameter = CreateParameter(builder.MutationContext.ParameterManager, entity, column,
-                    typeof(TEntity));
+                    typeof(TEntity), plan);
                 parameters.Add(parameter);
             }
             builder.ValuesClause.AddRow(parameters);
         }
-        return builder.BuildCommand();
+        return WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan, builder.ValuesClause.RowCount)), plan);
     }
 
     /// <inheritdoc />
@@ -146,11 +151,12 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         builder.UpdateClause.UpdateTable(mapping.Table);
         foreach (var column in columns)
         {
-            var parameter = CreateParameter(builder.MutationContext.ParameterManager, entity, column, typeof(TEntity));
+            var parameter = CreateParameter(builder.MutationContext.ParameterManager, entity, column, typeof(TEntity), plan);
             builder.SetClause.Set(column.ColumnName, parameter);
         }
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan), plan,
+            options?.ConcurrencyConflictBehavior);
     }
 
     /// <inheritdoc />
@@ -195,7 +201,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         builder.DataBoundaryOperation = SqlDataBoundaryOperation.Purge;
         builder.DeleteClause.From(mapping.Table);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan), plan,
+            options?.ConcurrencyConflictBehavior);
     }
 
     /// <inheritdoc />
@@ -217,7 +224,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             stateColumn, _databaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
         builder.SetClause.Set(stateColumn.ColumnName, stateParameter);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(), plan), plan,
+            options?.ConcurrencyConflictBehavior);
     }
 
     /// <inheritdoc />
@@ -243,7 +251,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             ConfigureSingleKeyInWhere(builder.WhereClause, plan, entities, builder.MutationContext.ParameterManager);
         else
             ConfigurePairedWhere(builder.WhereClause, plan, entities, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(), plan), plan,
+            options?.ConcurrencyConflictBehavior);
     }
 
     /// <summary>
@@ -269,7 +278,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             stateColumn, _databaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
         builder.SetClause.Set(stateColumn.ColumnName, stateParameter);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(builder.BuildCommand(), plan, options?.ConcurrencyConflictBehavior);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(), plan), plan,
+            options?.ConcurrencyConflictBehavior);
     }
 
 
@@ -312,6 +322,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         return _planCache.GetOrAdd(mapping, _provider.Key, operation, includes, excludes);
     }
 
+    /// <summary>自定义命名或参数服务继续使用其原有渲染路径。</summary>
+    private string GetGeneratedSql(SqlMutationPlan plan, int rowCount = 1) =>
+        _useGeneratedSql ? plan.GetGeneratedSql(_provider.Key, rowCount) : null;
+
     /// <summary>
     /// 验证实体 Mutation 具有主键条件。
     /// </summary>
@@ -336,9 +350,9 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         SqlUpdateOptions options, IParameterManager parameterManager)
     {
         foreach (var key in plan.Keys)
-            whereClause.And(CreateCondition(parameterManager, entity, key, plan.Mapping.EntityType));
+            whereClause.And(CreateCondition(parameterManager, plan, entity, key, plan.Mapping.EntityType));
         foreach (var concurrency in plan.ConcurrencyColumns)
-            whereClause.And(CreateCondition(parameterManager, entity, concurrency, plan.Mapping.EntityType,
+            whereClause.And(CreateCondition(parameterManager, plan, entity, concurrency, plan.Mapping.EntityType,
                 TryGetOriginalValue(options, concurrency.PropertyName, out var value), value));
     }
 
@@ -354,9 +368,9 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         SqlDeleteOptions options, IParameterManager parameterManager)
     {
         foreach (var key in plan.Keys)
-            whereClause.And(CreateCondition(parameterManager, entity, key, plan.Mapping.EntityType));
+            whereClause.And(CreateCondition(parameterManager, plan, entity, key, plan.Mapping.EntityType));
         foreach (var concurrency in plan.ConcurrencyColumns)
-            whereClause.And(CreateCondition(parameterManager, entity, concurrency, plan.Mapping.EntityType,
+            whereClause.And(CreateCondition(parameterManager, plan, entity, concurrency, plan.Mapping.EntityType,
                 TryGetOriginalValue(options, concurrency.PropertyName, out var value), value));
     }
 
@@ -375,13 +389,13 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         var parameterNames = new List<string>();
         foreach (var entity in entities)
         {
-            var value = _planCache.GetValue(entity, key);
+            var value = GetValue(plan, entity, key);
             if (value == null)
                 throw new InvalidOperationException($"实体 {plan.Mapping.EntityType.Name} 的条件列 {key.PropertyName} 不能为空。");
             var parameter = _services.ParameterFactory.Create(parameterManager.GenerateName(), value, key,
                 _databaseContext, plan.Mapping.EntityType, SqlParameterSource.SqlBuilder);
             AddParameter(parameterManager, parameter);
-            parameterNames.Add(_provider.Dialect.GetParamName(parameter.Name));
+            parameterNames.Add(SqlMutationContext.GetParameterPlaceholder(_provider, parameter.Name));
         }
         whereClause.And(new InCondition(_provider.Dialect.SafeName(key.ColumnName), parameterNames));
     }
@@ -402,11 +416,11 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         {
             var conditions = new List<string>();
             foreach (var key in plan.Keys)
-                conditions.Add(CreateCondition(parameterManager, entity, key, plan.Mapping.EntityType).GetCondition());
+                conditions.Add(CreateCondition(parameterManager, plan, entity, key, plan.Mapping.EntityType).GetCondition());
             foreach (var concurrency in plan.ConcurrencyColumns)
             {
                 var hasOriginalValue = TryGetOriginalValue(options, concurrency.PropertyName, out var value);
-                conditions.Add(CreateCondition(parameterManager, entity, concurrency, plan.Mapping.EntityType,
+                conditions.Add(CreateCondition(parameterManager, plan, entity, concurrency, plan.Mapping.EntityType,
                     hasOriginalValue, value).GetCondition());
             }
             whereClause.Or(new SqlCondition($"({string.Join(" And ", conditions)})"));
@@ -417,23 +431,37 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// 创建列等值条件。
     /// </summary>
     /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <param name="plan">当前 Mutation 计划。</param>
     /// <param name="source">属性值来源。</param>
     /// <param name="column">列映射。</param>
     /// <param name="entityType">实体类型。</param>
     /// <param name="hasOriginalValue">是否使用已配置的并发原始值。</param>
     /// <param name="originalValue">已配置的并发原始值。</param>
     /// <returns>参数化等值条件。</returns>
-    private ICondition CreateCondition(IParameterManager parameterManager, object source, ColumnMappingMetadata column,
+    private ICondition CreateCondition(IParameterManager parameterManager, SqlMutationPlan plan, object source,
+        ColumnMappingMetadata column,
         Type entityType, bool hasOriginalValue = false, object originalValue = null)
     {
-        var value = hasOriginalValue ? originalValue : _planCache.GetValue(source, column);
+        var value = hasOriginalValue ? originalValue : GetValue(plan, source, column);
         if (value == null)
             throw new InvalidOperationException($"实体 {entityType.Name} 的条件列 {column.PropertyName} 不能为空。");
         var parameter = _services.ParameterFactory.Create(parameterManager.GenerateName(), value, column,
             _databaseContext, entityType, SqlParameterSource.SqlBuilder);
         AddParameter(parameterManager, parameter);
-        return new SqlCondition($"{_provider.Dialect.SafeName(column.ColumnName)} = {_provider.Dialect.GetParamName(parameter.Name)}");
+        return new SqlCondition(
+            $"{_provider.Dialect.SafeName(column.ColumnName)} = {SqlMutationContext.GetParameterPlaceholder(_provider, parameter.Name)}");
     }
+
+    /// <summary>
+    /// 为具备完整生成 Getter 的 Mutation 计划附加静态参数绑定器。
+    /// </summary>
+    /// <param name="command">已生成的写入命令。</param>
+    /// <param name="plan">当前 Mutation 计划。</param>
+    /// <returns>带有生成式参数绑定器的命令，或原命令。</returns>
+    private static SqlWriteCommand WithGeneratedParameterBinding(SqlWriteCommand command, SqlMutationPlan plan) =>
+        plan?.CanUseGeneratedParameterBinding == true
+            ? command.WithGeneratedParameterBinder(SqlGeneratedParameterBinding.Bind)
+            : command;
 
     /// <summary>
     /// 根据并发策略生成带受影响行数校验的命令快照。
@@ -481,14 +509,25 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// 创建实体属性参数。
     /// </summary>
     /// <param name="parameterManager">当前命令参数管理器。</param>
+    /// <param name="plan">当前 Mutation 计划；为空时使用兼容 Getter 缓存。</param>
     /// <param name="entity">属性值来源。</param>
     /// <param name="column">列映射。</param>
     /// <param name="entityType">实体类型。</param>
     /// <returns>SQL 参数。</returns>
     private SqlParam CreateParameter(IParameterManager parameterManager, object entity, ColumnMappingMetadata column,
-        Type entityType) =>
-        _services.ParameterFactory.Create(parameterManager.GenerateName(), _planCache.GetValue(entity, column), column,
+        Type entityType, SqlMutationPlan plan = null) =>
+        _services.ParameterFactory.Create(parameterManager.GenerateName(), GetValue(plan, entity, column), column,
             _databaseContext, entityType, SqlParameterSource.SqlBuilder);
+
+    /// <summary>
+    /// 优先读取当前 Mutation 计划登记的生成 Getter，未命中时回退到兼容 Getter 缓存。
+    /// </summary>
+    /// <param name="plan">当前 Mutation 计划。</param>
+    /// <param name="source">实体或并发原始值对象。</param>
+    /// <param name="column">待读取的列映射。</param>
+    /// <returns>属性值。</returns>
+    private object GetValue(SqlMutationPlan plan, object source, ColumnMappingMetadata column) =>
+        plan.GetValue(source, column, _planCache);
 
     /// <summary>
     /// 将带元数据参数写入当前管理器。

@@ -2,12 +2,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
-using Moq;
 
 namespace Bing.Data.Sql.Tests.Builders.Mutations;
 
@@ -113,19 +113,17 @@ public sealed class SqlInsertBuilderTest
     {
         // Arrange
         var payload = new byte[] { 1, 2 };
-        var builder = new TestSqlBuilder()
-            .InsertInto("samples")
-            .Columns(nameof(MutationSample.Name))
-            .Values(payload);
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.InsertInto("samples").Columns(nameof(MutationSample.Name)).Values(payload);
 
         // Act
-        var command = ((ISqlBuilder)builder).ToSqlWriteCommand();
+        var command = builder.ToSqlWriteCommand();
         builder.Values("later");
         payload[0] = 9;
 
         // Assert
         Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", command.Sql);
-        Assert.Equal("test.sqlserver", command.ProviderKey);
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
         Assert.Equal(SqlOperationKind.InsertValues, command.OperationKind);
         Assert.Single(command.Parameters);
         Assert.Equal(new byte[] { 1, 2 }, Assert.IsType<byte[]>(Assert.Single(command.Parameters).Value));
@@ -145,10 +143,8 @@ public sealed class SqlInsertBuilderTest
             ["Payload"] = payload,
             ["Values"] = values
         };
-        var builder = new TestSqlBuilder()
-            .InsertInto("samples")
-            .Columns(nameof(MutationSample.Name))
-            .Values(parameter);
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.InsertInto("samples").Columns(nameof(MutationSample.Name)).Values(parameter);
 
         // Act
         var command = builder.ToSqlWriteCommand();
@@ -169,9 +165,8 @@ public sealed class SqlInsertBuilderTest
     public void ToSqlWriteCommand_WhenExposedParameterContainerIsMutated_ShouldPreserveExecutionSnapshot()
     {
         // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("samples")
-            .Columns(nameof(MutationSample.Name))
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.InsertInto("samples").Columns(nameof(MutationSample.Name))
             .Values(new Dictionary<string, object> { ["Payload"] = new byte[] { 1, 2 } });
         var command = builder.ToSqlWriteCommand();
 
@@ -194,37 +189,29 @@ public sealed class SqlInsertBuilderTest
     {
         // Arrange
         var parameterManager = new CountingParameterManager(TestMutationSqlProvider.Instance.Dialect);
-        var builder = new TestSqlBuilder(parameterManager: parameterManager)
-            .InsertInto("samples")
-            .Columns(nameof(MutationSample.Name))
-            .Values("Bing");
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices(), parameterManager);
+        builder.InsertInto("samples").Columns(nameof(MutationSample.Name)).Values("Bing");
 
         // Act
         var command = builder.ToSqlWriteCommand();
 
         // Assert
         Assert.Equal("Insert Into [samples] ([Name]) Values (@_p_0)", command.Sql);
-        Assert.Equal("test.sqlserver", command.ProviderKey);
+        Assert.Equal(TestMutationSqlProvider.Instance.Key, command.ProviderKey);
         Assert.Single(command.Parameters);
-        Assert.Equal(0, parameterManager.GetSqlParamsCallCount);
+        Assert.Equal(1, parameterManager.GetSqlParamsCallCount);
     }
 
     /// <summary>
-    /// 测试目的：第三方 Builder 未提供 Provider 时必须在渲染 SQL 前明确拒绝，避免生成无法验证执行身份的写入命令。
+    /// 测试目的：写入命令扩展收到 null Builder 时应指出调用参数。
     /// </summary>
     [Fact]
-    public void ToSqlWriteCommand_WhenBuilderDoesNotProvideProvider_ShouldRejectBeforeRendering()
+    public void ToSqlWriteCommand_WhenBuilderIsNull_ShouldThrowArgumentNullException()
     {
-        // Arrange
-        var builder = new Mock<ISqlBuilder>();
-        builder.Setup(item => item.Clone()).Returns(builder.Object);
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            SqlWriteCommandExtensions.ToSqlWriteCommand((ISqlInsertBuilder)null));
 
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => builder.Object.ToSqlWriteCommand());
-
-        // Assert
-        Assert.Equal("Mutation Builder 必须提供 SQL Provider。", exception.Message);
-        builder.Verify(item => item.ToSql(), Times.Never);
+        Assert.Equal("builder", exception.ParamName);
     }
 
     /// <summary>
@@ -234,11 +221,9 @@ public sealed class SqlInsertBuilderTest
     public void SqlWriteCommand_WhenParametersArePreparedRepeatedly_ShouldCreateIndependentParameterInstances()
     {
         // Arrange
-        var command = new TestSqlBuilder()
-            .InsertInto("samples")
-            .Columns(nameof(MutationSample.Name))
-            .Values(new byte[] { 1, 2 })
-            .ToSqlWriteCommand();
+        var builder = new SqlInsertBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.InsertInto("samples").Columns(nameof(MutationSample.Name)).Values(new byte[] { 1, 2 });
+        var command = builder.ToSqlWriteCommand();
 
         // Act
         var first = Assert.Single(command.CreateParameters());
@@ -394,6 +379,12 @@ public sealed class SqlInsertBuilderTest
 
         /// <inheritdoc />
         public void Add(SqlParam parameter) => _inner.Add(parameter);
+
+        /// <inheritdoc />
+        public void Restore(SqlParam parameter) => _inner.Restore(parameter);
+
+        /// <inheritdoc />
+        public bool Remove(string name) => _inner.Remove(name);
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();

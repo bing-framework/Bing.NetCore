@@ -25,8 +25,9 @@ public partial class PostgreSqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 限定列 Count 应分别引用表别名和列名。
+    /// 验证限定列计数分别引用表别名及列名。
     /// </summary>
+    /// <param name="column">待校验的数据库列名。</param>
     [Theory]
     [InlineData("u.Id")]
     [InlineData("\"u\".\"Id\"")]
@@ -44,8 +45,9 @@ public partial class PostgreSqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 限定列 Sum 应分别引用表别名和列名。
+    /// 验证限定列求和分别引用表别名及列名。
     /// </summary>
+    /// <param name="column">待校验的数据库列名。</param>
     [Theory]
     [InlineData("u.Amount")]
     [InlineData("\"u\".\"Amount\"")]

@@ -19,8 +19,9 @@ public class SqlUpdateOptions
     public IReadOnlyCollection<string> ExcludeProperties { get; init; }
 
     /// <summary>
-    /// 获取或初始化并发令牌不匹配时的处理方式。默认抛出异常。
+    /// 获取或初始化并发令牌不匹配时的处理方式。
     /// </summary>
+    /// <remarks>默认抛出异常。</remarks>
     public SqlConcurrencyConflictBehavior ConcurrencyConflictBehavior { get; init; } =
         SqlConcurrencyConflictBehavior.Throw;
 

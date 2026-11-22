@@ -8,8 +8,13 @@ namespace Bing.Dapper.Tests.Builders.Core;
 public class MySqlTableNameParserTest
 {
     /// <summary>
-    /// 测试目的：合法字符串表名应解析为 MySQL 原子物理表名。
+    /// 验证合法表名文本解析为 MySQL 原子物理表名。
     /// </summary>
+    /// <param name="table">待统计的测试表名。</param>
+    /// <param name="alias">测试使用的别名。</param>
+    /// <param name="expectedTableName">预期的物理表名。</param>
+    /// <param name="expectedAlias">预期的 SQL 别名。</param>
+    /// <param name="expectedSchema">预期的架构名称。</param>
     [Theory]
     [InlineData("orders", null, "orders", null, null)]
     [InlineData("Merchants.Company", null, "Merchants.Company", null, null)]
@@ -44,8 +49,9 @@ public class MySqlTableNameParserTest
     }
 
     /// <summary>
-    /// 测试目的：非对象名表达式和非法标识符必须在 SQL 生成前被拒绝。
+    /// 验证非对象名表达式及非法标识符在生成 SQL 前被拒绝。
     /// </summary>
+    /// <param name="table">待统计的测试表名。</param>
     [Theory]
     [InlineData(null)]
     [InlineData("")]

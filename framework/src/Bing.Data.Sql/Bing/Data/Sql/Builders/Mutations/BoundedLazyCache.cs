@@ -37,9 +37,9 @@ internal sealed class BoundedLazyCache<TKey, TValue>
     private long _evictionCount;
 
     /// <summary>
-    /// 初始化一个 <see cref="BoundedLazyCache{TKey, TValue}"/> 类型的实例。
+    /// 初始化一个 <see cref="BoundedLazyCache{TKey,TValue}" /> 类型的实例。
     /// </summary>
-    /// <param name="capacity">缓存容量；<see langword="null"/> 表示无上限，<c>0</c> 表示不缓存。</param>
+    /// <param name="capacity">缓存容量；<see langword="null" /> 表示无上限，<c>0</c> 表示不缓存。</param>
     public BoundedLazyCache(int? capacity = null)
     {
         if (capacity.HasValue && capacity.Value < 0)

@@ -679,9 +679,12 @@ public class DapperCoreServiceCollectionExtensionsTest
     private sealed class DirectFactorySingletonConsumer
     {
         /// <summary>
-        /// 初始化 Singleton 消费者。
+        /// 初始化一个 <see cref="DirectFactorySingletonConsumer" /> 类型的实例。
         /// </summary>
         /// <param name="factory">请求作用域 SQL 查询工厂。</param>
+        /// <remarks>
+        /// 初始化 Singleton 消费者。
+        /// </remarks>
         public DirectFactorySingletonConsumer(ISqlQueryFactory factory) => Factory = factory;
 
         /// <summary>
@@ -695,12 +698,18 @@ public class DapperCoreServiceCollectionExtensionsTest
     /// </summary>
     private sealed class ScopedFactoryOperation
     {
+        /// <summary>
+        /// 保存创建依赖注入作用域的作用域工厂。
+        /// </summary>
         private readonly IServiceScopeFactory _scopeFactory;
 
         /// <summary>
-        /// 初始化操作级服务作用域工厂。
+        /// 初始化一个 <see cref="ScopedFactoryOperation" /> 类型的实例。
         /// </summary>
         /// <param name="scopeFactory">DI 服务作用域工厂。</param>
+        /// <remarks>
+        /// 初始化操作级服务作用域工厂。
+        /// </remarks>
         public ScopedFactoryOperation(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
 
         /// <summary>

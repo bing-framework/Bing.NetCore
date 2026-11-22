@@ -21,6 +21,9 @@ public class PostgreSqlBuilder : SqlBuilderBase
         : base(PostgreSqlSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
+    protected override bool SupportsMutationCheckpoint => GetType() == typeof(PostgreSqlBuilder);
+
+    /// <inheritdoc />
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new PostgreSqlBuilder(Services, parameterManager);
 

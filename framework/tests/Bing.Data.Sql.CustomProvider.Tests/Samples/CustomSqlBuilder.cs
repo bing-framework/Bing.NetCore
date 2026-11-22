@@ -317,6 +317,9 @@ internal sealed class CustomFromClause : ISqlMultiSourceFromClause
     public void From(ISqlBuilder builder, string alias) => _inner.From(builder, alias);
 
     /// <inheritdoc />
+    public void From(ISqlQueryFragment fragment, string alias) => _inner.From(fragment, alias);
+
+    /// <inheritdoc />
     public void From(Action<ISqlBuilder> action, string alias) => _inner.From(action, alias);
 
     /// <inheritdoc />

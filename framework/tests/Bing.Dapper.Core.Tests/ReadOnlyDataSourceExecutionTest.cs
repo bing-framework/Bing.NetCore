@@ -1,3 +1,6 @@
+using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Accessors;
 using System.Data;
 using Bing.Data;
 using Bing.Data.Sql;
@@ -101,6 +104,32 @@ public class ReadOnlyDataSourceExecutionTest
 
         // Act
         var exception = Assert.Throws<NotSupportedException>(() => query.Procedure("ReadReport"));
+
+        // Assert
+        Assert.Contains("reporting", exception.Message);
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.DatabaseUnsupported, reason);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
+        connection.Verify(item => item.Open(), Times.Never);
+    }
+
+    /// <summary>
+    /// 测试目的：查询结果 API 承载 Returning Mutation 时也应经过写入资源边界，并在连接创建前拒绝只读数据源。
+    /// </summary>
+    [Fact]
+    public void ValidateReturningMutation_WhenDataSourceIsReadOnly_ShouldRejectBeforeConnectionAccess()
+    {
+        // Arrange
+        var connection = CreateConnection();
+        var query = new ReadOnlyTestQuery(CreateServiceProvider(), CreateOptions(connection.Object));
+        var builder = new Mock<ISqlBuilder>();
+        builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
+        var returning = new Mock<IReturningClause>();
+        returning.SetupGet(item => item.IsEmpty).Returns(false);
+        builder.As<IReturningClauseAccessor>().SetupGet(item => item.ReturningClause).Returns(returning.Object);
+
+        // Act
+        var exception = Assert.Throws<NotSupportedException>(() => query.ValidateBuilder(builder.Object));
 
         // Assert
         Assert.Contains("reporting", exception.Message);
@@ -268,15 +297,15 @@ public class ReadOnlyDataSourceExecutionTest
     /// 创建结构化 Mutation Builder。
     /// </summary>
     /// <returns>返回配置了更新操作的 SQL Builder 测试替身。</returns>
-    private static Mock<ISqlBuilder> CreateMutationBuilder()
+    private static Mock<ISqlUpdateBuilder> CreateMutationBuilder()
     {
-        var builder = new Mock<ISqlBuilder>();
+        var builder = new Mock<ISqlUpdateBuilder>();
         var provider = new Mock<ISqlProvider>();
         provider.SetupGet(item => item.Key).Returns("test.read-only-builder");
-        builder.SetupGet(item => item.Provider).Returns(provider.Object);
-        builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
         builder.Setup(item => item.Clone()).Returns(builder.Object);
         builder.Setup(item => item.ToSql()).Returns("Update samples Set Name = 'updated'");
+        builder.Setup(item => item.BuildCommand()).Returns(() => new SqlWriteCommand(builder.Object.ToSql(), Array.Empty<SqlParam>(),
+            provider.Object, SqlOperationKind.Update));
         return builder;
     }
 
@@ -398,5 +427,11 @@ public class ReadOnlyDataSourceExecutionTest
 
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
+
+        /// <summary>
+        /// 暴露查询结果 API 的 Builder 校验供只读边界测试调用。
+        /// </summary>
+        /// <param name="builder">待校验的 Builder。</param>
+        public void ValidateBuilder(ISqlBuilder builder) => ValidateQueryBuilder(builder);
     }
 }

@@ -15,6 +15,9 @@ namespace Bing.Dapper.Core.Tests;
 /// </summary>
 public class DapperSqlUnitOfWorkResourceTest
 {
+    /// <summary>
+    /// 定义测试使用的事务能力描述。
+    /// </summary>
     private static readonly SqlProviderTransactionCapabilities TransactionCapabilities = new()
     {
         SupportsTransactions = true,
@@ -185,6 +188,13 @@ public class DapperSqlUnitOfWorkResourceTest
         }
     }
 
+    /// <summary>
+    /// 验证冻结数据源不满足事务要求时在打开连接前失败。
+    /// </summary>
+    /// <param name="isReadOnly">数据源是否标记为只读。</param>
+    /// <param name="supportsTransactions">数据源是否支持本地事务。</param>
+    /// <param name="strategy">目标数据源的主库读取策略。</param>
+    /// <param name="primaryKey">测试使用的主键文本。</param>
     [Theory]
     [InlineData(true, true, PrimaryReadStrategy.None, null)]
     [InlineData(false, false, PrimaryReadStrategy.None, null)]
@@ -223,6 +233,9 @@ public class DapperSqlUnitOfWorkResourceTest
         }
     }
 
+    /// <summary>
+    /// 验证非事务作用域使用事务读取策略时在打开连接前失败。
+    /// </summary>
     [Fact]
     public void EnsureReady_NonTransactionalScopeWithTransactionReadStrategy_ShouldFailBeforeOpen()
     {
@@ -251,10 +264,26 @@ public class DapperSqlUnitOfWorkResourceTest
         }
     }
 
+    /// <summary>
+    /// 创建 Dapper 工作单元资源键。
+    /// </summary>
+    /// <param name="context">数据源所属的数据库上下文。</param>
+    /// <param name="source">测试数据源描述。</param>
+    /// <param name="resolver">数据库连接工厂解析器。</param>
+    /// <param name="canCompare">资源键是否支持物理数据库比较。</param>
+    /// <returns>用于定位连接资源的工作单元键。</returns>
     private static DapperSqlUnitOfWorkResourceKey CreateKey(DatabaseContext context,
         SqlDataSourceDescriptor source, ISqlDbConnectionFactoryResolver resolver, bool canCompare = true) =>
         new(context, source, DatabaseType.Sqlite, source.ProviderKey, source.ConnectionString, resolver, canCompare);
 
+    /// <summary>
+    /// 创建指定租户及数据源的数据库上下文。
+    /// </summary>
+    /// <param name="tenantId">测试租户标识。</param>
+    /// <param name="providerKey">SQL 提供程序注册键。</param>
+    /// <param name="connectionString">测试数据库连接字符串。</param>
+    /// <param name="setupSource">修改测试数据源描述的回调。</param>
+    /// <returns>包含指定数据源或映射信息的数据库上下文。</returns>
     private static DatabaseContext CreateContext(string tenantId, string providerKey = "bing.sqlite",
         string connectionString = "Data Source=orders.db",
         Action<SqlDataSourceDescriptor> setupSource = null)
@@ -270,6 +299,10 @@ public class DapperSqlUnitOfWorkResourceTest
         return new DatabaseContext { DbKey = "orders", TenantId = tenantId, DataSource = source };
     }
 
+    /// <summary>
+    /// 创建工作单元测试所需的容器、作用域及管理器。
+    /// </summary>
+    /// <returns>测试容器、服务作用域及工作单元管理器。</returns>
     private static (ServiceProvider Provider, IServiceScope Scope, IUnitOfWorkScopeManager Manager)
         CreateScopeManager()
     {
@@ -280,6 +313,12 @@ public class DapperSqlUnitOfWorkResourceTest
         return (provider, scope, scope.ServiceProvider.GetRequiredService<IUnitOfWorkScopeManager>());
     }
 
+    /// <summary>
+    /// 创建可记录连接状态和事务的连接替身。
+    /// </summary>
+    /// <param name="transaction">执行测试操作的事务。</param>
+    /// <param name="state">记录当前测试执行过程的状态对象。</param>
+    /// <returns>可观测连接及事务行为的连接替身。</returns>
     private static Mock<IDbConnection> CreateConnection(out Mock<IDbTransaction> transaction,
         out ConnectionStateTracker state)
     {
@@ -301,10 +340,22 @@ public class DapperSqlUnitOfWorkResourceTest
         return connection;
     }
 
+    /// <summary>
+    /// 记录数据库连接状态及打开连接、启动事务的次数。
+    /// </summary>
     private sealed class ConnectionStateTracker
     {
+        /// <summary>
+        /// 获取或设置当前数据库连接状态。
+        /// </summary>
         public ConnectionState State { get; set; } = ConnectionState.Closed;
+        /// <summary>
+        /// 获取或设置打开连接的累计次数。
+        /// </summary>
         public int OpenCount { get; set; }
+        /// <summary>
+        /// 获取或设置开启事务的累计次数。
+        /// </summary>
         public int BeginCount { get; set; }
     }
 }

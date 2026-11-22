@@ -2,6 +2,10 @@
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using MySqlConnector;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bing.Data.Sql.Builders;
 
@@ -70,7 +74,13 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
             SupportsTransactions = true,
             SupportsNativeAsyncBegin = true,
             SupportsNativeAsyncCommit = true,
-            SupportsNativeAsyncRollback = true
+            SupportsNativeAsyncRollback = true,
+            BeginAsync = (connection, isolation, token) => connection is MySqlConnection mysql
+                ? BeginTransactionAsync(mysql, isolation, token) : null,
+            CommitAsync = (transaction, token) => transaction is MySqlTransaction mysql
+                ? mysql.CommitAsync(token) : null,
+            RollbackAsync = (transaction, token) => transaction is MySqlTransaction mysql
+                ? mysql.RollbackAsync(token) : null
         },
         Procedure = new SqlProviderProcedureCapabilities
         {
@@ -79,6 +89,11 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
         },
         Limits = new SqlProviderLimits { MaxParameterCount = null }
     };
+
+    private static async Task<IDbTransaction> BeginTransactionAsync(MySqlConnection connection, IsolationLevel? isolation,
+        CancellationToken cancellationToken) => isolation.HasValue
+        ? await connection.BeginTransactionAsync(isolation.Value, cancellationToken).ConfigureAwait(false)
+        : await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
     /// <summary>
     /// 创建使用 MySQL 表引用子句的 Clause 集合。

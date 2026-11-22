@@ -11,6 +11,11 @@
     <ProjectReference Include="..\Bing.Data.Sql\Bing.Data.Sql.csproj" />
     <ProjectReference Include="..\Bing.Uow\Bing.Uow.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Bing.Data.Sql\Bing\Data\Sql\Runtime\SqlRuntimeFeatures.cs" Link="Runtime\SqlRuntimeFeatures.cs" />
+    <Compile Include="..\Bing.Data.Sql\FeatureSwitchDefinitionAttribute.cs" Link="Runtime\FeatureSwitchDefinitionAttribute.cs" />
+    <Compile Include="..\Bing.Data.Sql\Bing\Data\Sql\Builders\Params\EnumValueConverter.cs" Link="Runtime\EnumValueConverter.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.28" />

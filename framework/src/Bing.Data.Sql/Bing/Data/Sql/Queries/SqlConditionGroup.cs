@@ -41,7 +41,7 @@ internal sealed class SqlConditionGroup : ISqlConditionGroup
     }
 
     /// <summary>
-    /// 添加条件。
+    /// 获取当前构建的条件表达式。
     /// </summary>
     internal ICondition Condition => _condition;
 

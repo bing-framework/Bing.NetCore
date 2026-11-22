@@ -6,8 +6,9 @@ namespace Bing.Uow;
 public interface IUnitOfWorkScopeManager
 {
     /// <summary>
-    /// 获取当前 root 工作单元；没有活动或继承的工作单元时返回 <see langword="null"/>。
+    /// 获取当前 root 工作单元。
     /// </summary>
+    /// <remarks>没有活动或继承的工作单元时返回 <see langword="null"/>。</remarks>
     IUnitOfWorkScope Current { get; }
 
     /// <summary>

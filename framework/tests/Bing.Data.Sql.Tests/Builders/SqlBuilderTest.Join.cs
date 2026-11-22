@@ -967,6 +967,12 @@ public partial class SqlBuilderTest
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
 
         /// <inheritdoc />
+        public void Restore(SqlParam parameter) => _inner.Restore(parameter);
+
+        /// <inheritdoc />
+        public bool Remove(string name) => _inner.Remove(name);
+
+        /// <inheritdoc />
         public bool Contains(string name) => _inner.Contains(name);
 
         /// <inheritdoc />
@@ -1056,6 +1062,12 @@ public partial class SqlBuilderTest
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        /// <inheritdoc />
+        public void Restore(SqlParam parameter) => _inner.Restore(parameter);
+
+        /// <inheritdoc />
+        public bool Remove(string name) => _inner.Remove(name);
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, SqlParam> GetSqlParams() => _inner.GetSqlParams();

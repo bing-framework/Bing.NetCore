@@ -1,67 +1,72 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders;
 
 /// <summary>
-/// Insert Select 统一 Builder 测试。
+/// 专用 Insert Builder 的 Insert Select 测试。
 /// </summary>
 public class InsertSelectBuilderTest
 {
+    /// <summary>Insert Select 来源中的嵌套 Builder 应保留两个独立物理参数。</summary>
+    [Fact]
+    public void InsertSelect_WhenNestedSourceKeysDiffer_ShouldKeepBothParameters()
+    {
+        var first = new SqlQueryFragment("select @id as Id", new[] { new SqlParam("id", 7) })
+            .WithParameterKey("id", new SqlParameterKey("first", "id"));
+        var second = new SqlQueryFragment("select @id as Id", new[] { new SqlParam("id", 7) })
+            .WithParameterKey("id", new SqlParameterKey("second", "id"));
+        var child = CreateQueryBuilder().Select("Id").From(second, "leaf");
+        var query = CreateQueryBuilder().Select("one.Id").From(first, "one").Join(child, "two")
+            .AppendOn("[one].[Id]=[two].[Id]");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id").InsertSelect(query);
+
+        var firstCommand = builder.BuildCommand();
+        var secondCommand = builder.BuildCommand();
+        const string expected = "Insert Into [archive_orders] ([Id]) \r\nSelect [one].[Id] \r\nFrom (select @id as Id) As [one] \r\nJoin (Select [Id] \r\nFrom (select @_p_0 as Id) As [leaf]) As [two] On [one].[Id]=[two].[Id]";
+        Assert.Equal(expected, firstCommand.Sql);
+        Assert.Equal(expected, secondCommand.Sql);
+        Assert.Equal(new object[] { 7, 7 }, firstCommand.Parameters.Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { 7, 7 }, secondCommand.Parameters.Select(parameter => parameter.Value));
+    }
+
     /// <summary>
-    /// 测试 - 基本 Insert Select 应按固定 Clause 顺序生成完整 SQL。
+    /// 测试目的：Insert Select 应按固定 Clause 顺序生成完整 SQL。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenBasicQueryIsConfigured_ShouldGenerateExpectedSql()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id", "Code")
-            .Select("Id", "Code")
-            .From("orders");
+        var query = CreateQueryBuilder().Select("Id").AppendSelect("[Code]").From("orders");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id", "Code").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([Id], [Code]) \r\nSelect [Id],[Code] \r\nFrom [orders]", sql);
-        Assert.Equal(SqlOperationKind.InsertSelect, builder.OperationKind);
+        Assert.Equal("Insert Into [archive_orders] ([Id], [Code]) \r\nSelect [Id],[Code] \r\nFrom [orders]", builder.ToSql());
+        Assert.Equal(SqlOperationKind.InsertSelect, builder.BuildCommand().OperationKind);
     }
 
     /// <summary>
-    /// 测试 - Insert Select 查询条件应复用同一个参数管理器。
+    /// 测试目的：Insert Select 应合并来源查询参数并维持其参数值。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenWhereIsConfigured_ShouldGenerateParameterizedSql()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id", "Code")
-            .Select("Id", "Code")
-            .From("orders")
-            .Where("Status", "active");
+        var query = CreateQueryBuilder().Select("Id").AppendSelect("[Code]").From("orders").Where("Status", "active");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id", "Code").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([Id], [Code]) \r\nSelect [Id],[Code] \r\nFrom [orders] \r\nWhere [Status]=@_p_0", sql);
-        Assert.Equal("active", ((ISqlCommonPartAccessor)builder).ParameterManager.GetValue("_p_0"));
+        Assert.Equal("Insert Into [archive_orders] ([Id], [Code]) \r\nSelect [Id],[Code] \r\nFrom [orders] \r\nWhere [Status]=@_p_0", builder.ToSql());
+        Assert.Equal("active", builder.BuildCommand().Parameters.Single().Value);
     }
 
     /// <summary>
-    /// 测试 - Insert Select 应复用 Join、Group By、Having 和 Order By Clause。
+    /// 测试目的：Insert Select 应保留 Join、Group By、Having 和 Order By 查询语义。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenJoinAndGroupAreConfigured_ShouldGenerateExpectedSql()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Status", "Total")
+        var query = CreateQueryBuilder()
             .Select("o.Status")
             .CountColumn("d.Id", "Total")
             .From("orders", "o")
@@ -70,206 +75,161 @@ public class InsertSelectBuilderTest
             .GroupBy("o.Status")
             .HavingRaw("Count(d.Id) > 0")
             .OrderBy("o.Status");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Status", "Total").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([Status], [Total]) \r\nSelect [o].[Status],Count([d].[Id]) As [Total] \r\nFrom [orders] As [o] \r\nJoin [order_details] As [d] On [o].[Id]=[d].[OrderId] \r\nGroup By [o].[Status] Having Count(d.Id) > 0 \r\nOrder By [o].[Status]", sql);
+        Assert.Equal("Insert Into [archive_orders] ([Status], [Total]) \r\nSelect [o].[Status],Count([d].[Id]) As [Total] \r\nFrom [orders] As [o] \r\nJoin [order_details] As [d] On [o].[Id]=[d].[OrderId] \r\nGroup By [o].[Status] Having Count(d.Id) > 0 \r\nOrder By [o].[Status]", builder.ToSql());
     }
 
     /// <summary>
-    /// 测试 - 目标列与已知查询投影数量不一致时应拒绝渲染。
+    /// 测试目的：目标列与已知查询投影数量不一致时应拒绝设置来源。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenProjectionCountDoesNotMatchTarget_ShouldThrow()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id", "Code")
-            .Select("Id")
-            .From("orders");
+        var query = CreateQueryBuilder().Select("Id").From("orders");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id", "Code");
 
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => builder.ToSql());
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.InsertSelect(query));
 
-        // Assert
-        Assert.Equal("Insert Select 的目标列数量与查询输出列数量不一致。", exception.Message);
+        Assert.Equal("Insert 目标列数量与 Select 投影数量不一致。", exception.Message);
+        Assert.Equal("Insert Into [archive_orders] ([Id], [Code]) Values (@_p_0, @_p_1)",
+            builder.Values(1, "A").ToSql());
     }
 
     /// <summary>
-    /// 测试 - 未指定目标列时应允许数据库按目标表字段规则处理。
+    /// 测试目的：未指定目标列时允许数据库按目标表字段规则处理。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenTargetColumnsAreOmitted_ShouldGenerateSql()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Select("Id", "Code")
-            .From("orders");
+        var query = CreateQueryBuilder().Select("Id").AppendSelect("[Code]").From("orders");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] \r\nSelect [Id],[Code] \r\nFrom [orders]", sql);
+        Assert.Equal("Insert Into [archive_orders] \r\nSelect [Id],[Code] \r\nFrom [orders]", builder.ToSql());
     }
 
     /// <summary>
-    /// 测试 - 无法可靠分析的原始投影不应通过字符串逗号误判列数。
+    /// 测试目的：无法可靠分析的原始投影不应通过字符串逗号误判列数。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenProjectionCountIsUnknown_ShouldDeferValidationToDatabase()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("DisplayName")
-            .AppendSelect("Concat([FirstName], [LastName])")
-            .From("orders");
+        var query = CreateQueryBuilder().AppendSelect("Concat([FirstName], [LastName])").From("orders");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("DisplayName").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([DisplayName]) \r\nSelect Concat([FirstName], [LastName]) \r\nFrom [orders]", sql);
-        Assert.Null(builder.SelectClause.ProjectionCount);
+        Assert.Equal("Insert Into [archive_orders] ([DisplayName]) \r\nSelect Concat([FirstName], [LastName]) \r\nFrom [orders]", builder.ToSql());
+        Assert.Null(query.SelectClause.ProjectionCount);
     }
 
     /// <summary>
-    /// 测试目的：Insert Select 包含 CTE 时必须在渲染前明确拒绝，避免输出方言不一致的写入 SQL。
+    /// 测试目的：Insert Select 包含 CTE 时应明确拒绝。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenCteIsConfigured_ShouldRejectRendering()
     {
-        // Arrange
-        var source = new TestSqlBuilder().Select("Id").From("orders");
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id")
-            .With("selected", source)
-            .Select("Id")
-            .From("selected");
+        var cte = CreateQueryBuilder().Select("Id").From("orders");
+        var query = CreateQueryBuilder().With("selected", cte).Select("Id").From("selected");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id");
 
-        // Act
-        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+        var exception = Assert.Throws<NotSupportedException>(() => builder.InsertSelect(query));
 
-        // Assert
-        Assert.Equal("Insert Select 当前不支持 Union 或 CTE。", exception.Message);
+        Assert.Equal("Insert Select 当前不支持 CTE 或 Union 来源查询。", exception.Message);
     }
 
     /// <summary>
-    /// 测试目的：Insert Select 包含集合操作时必须在渲染前明确拒绝，避免生成未定义的写入语义。
+    /// 测试目的：Insert Select 包含集合操作时应明确拒绝。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenUnionIsConfigured_ShouldRejectRendering()
     {
-        // Arrange
-        var union = new TestSqlBuilder().Select("Id").From("archived_orders");
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id")
-            .Select("Id")
-            .From("orders")
-            .Union(union);
+        var union = CreateQueryBuilder().Select("Id").From("archived_orders");
+        var query = CreateQueryBuilder().Select("Id").From("orders").Union(union);
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id");
 
-        // Act
-        var exception = Assert.Throws<NotSupportedException>(() => builder.ToSql());
+        var exception = Assert.Throws<NotSupportedException>(() => builder.InsertSelect(query));
 
-        // Assert
-        Assert.Equal("Insert Select 当前不支持 Union 或 CTE。", exception.Message);
+        Assert.Equal("Insert Select 当前不支持 CTE 或 Union 来源查询。", exception.Message);
     }
 
     /// <summary>
-    /// 测试 - Clone 应保留 Insert Select Clause，并与来源参数状态隔离。
+    /// 测试目的：Clone 应保留独立的 Insert Select 查询快照和参数。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenCloned_ShouldPreserveIndependentState()
     {
-        // Arrange
-        var source = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id")
-            .Select("Id")
-            .From("orders")
-            .Where("Status", "active");
+        var query = CreateQueryBuilder().Select("Id").From("orders").Where("Status", "active");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id").InsertSelect(query);
 
-        // Act
-        var clone = source.Clone();
-        source.Clear().Update(new Bing.Data.Sql.Metadata.SqlTableReference { TableName = "orders" })
-            .Set("Status", "disabled")
-            .AllowAllRows();
+        var clone = builder.Clone();
+        query.Clear().Select("Status").From("disabled_orders");
 
-        // Assert
-        Assert.Equal(SqlOperationKind.InsertSelect, clone.OperationKind);
         Assert.Equal("Insert Into [archive_orders] ([Id]) \r\nSelect [Id] \r\nFrom [orders] \r\nWhere [Status]=@_p_0", clone.ToSql());
-        Assert.Equal(SqlOperationKind.Update, source.OperationKind);
+        Assert.Equal("active", clone.BuildCommand().Parameters.Single().Value);
     }
 
     /// <summary>
-    /// 测试 - Clear 后应可将 Insert Select Builder 重新用于 Insert Values。
+    /// 测试目的：Clear 后专用 Insert Builder 可配置 Values 数据源。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenCleared_ShouldAllowInsertValuesReuse()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id")
-            .Select("Id")
-            .From("orders");
+        var query = CreateQueryBuilder().Select("Id").From("orders");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id").InsertSelect(query);
 
-        // Act
-        builder.Clear().InsertInto("archive_orders").Columns("Id").Values(1);
+        builder.Clear();
 
-        // Assert
-        Assert.Equal(SqlOperationKind.InsertValues, builder.OperationKind);
-        Assert.Equal("Insert Into [archive_orders] ([Id]) Values (@_p_0)", builder.ToSql());
+        Assert.Equal("Insert Into [archive_orders] ([Id]) Values (@_p_0)",
+            builder.InsertInto("archive_orders").Columns("Id").Values(1).ToSql());
     }
 
     /// <summary>
-    /// 测试 - 强类型匿名目标投影应使用实体表和列映射生成 Insert Select。
+    /// 测试目的：强类型目标和来源投影应使用实体表与列映射。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenMappedAnonymousProjectionIsConfigured_ShouldUseMappedNames()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto<MappedArchive>(item => new { item.OrderId, item.DisplayCode })
-            .Select<MappedOrder>(item => new object[] { item.Id, item.Code })
-            .From<MappedOrder>();
+        var query = CreateQueryBuilder().Select<MappedOrder>(item => new object[] { item.Id, item.Code }).From<MappedOrder>();
+        var builder = CreateInsertBuilder().InsertInto<MappedArchive>(item => new { item.OrderId, item.DisplayCode }).InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
-
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([order_id], [display_code]) \r\nSelect [orders].[order_id],[orders].[order_code] \r\nFrom [orders]", sql);
+        Assert.Equal("Insert Into [archive_orders] ([order_id], [display_code]) \r\nSelect [orders].[order_id],[orders].[order_code] \r\nFrom [orders]", builder.ToSql());
     }
 
     /// <summary>
-    /// 测试 - Insert Select 的原始参数与自动参数同名时应生成隔离的新参数名。
+    /// 测试目的：目标与来源参数同名时应重新分配唯一参数名，重复渲染不得累积参数。
     /// </summary>
     [Fact]
     public void InsertSelect_WhenExistingParameterNameConflicts_ShouldGenerateDistinctParameter()
     {
-        // Arrange
-        var builder = new TestSqlBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id")
-            .Select("Id")
-            .From("orders")
-            .AddParam("_p_0", "active")
-            .AppendWhere("[Status]=@_p_0")
-            .Where("Code", "A");
+        var query = CreateQueryBuilder().Select("Id").From("orders").AppendWhere("[Status]=@_p_0").AddParam("_p_0", "active");
+        var builder = CreateInsertBuilder().InsertInto("archive_orders").Columns("Id").InsertSelect(query);
 
-        // Act
-        var sql = builder.ToSql();
+        var firstSql = builder.ToSql();
+        var secondSql = builder.ToSql();
 
-        // Assert
-        Assert.Equal("Insert Into [archive_orders] ([Id]) \r\nSelect [Id] \r\nFrom [orders] \r\nWhere [Status]=@_p_0 And [Code]=@_p_1", sql);
-        Assert.Equal(new[] { "@_p_0", "@_p_1" }, builder.GetParams().Keys);
+        Assert.Equal("Insert Into [archive_orders] ([Id]) \r\nSelect [Id] \r\nFrom [orders] \r\nWhere [Status]=@_p_0", firstSql);
+        Assert.Equal(firstSql, secondSql);
+        Assert.Equal("active", builder.BuildCommand().Parameters.Single().Value);
+    }
+
+    private static SqlInsertBuilder CreateInsertBuilder() =>
+        new(SqlServerSqlProvider.Instance, new SqlBuilderServices());
+
+    private static ProviderQueryBuilder CreateQueryBuilder() =>
+        new(SqlServerSqlProvider.Instance, new SqlBuilderServices());
+
+    /// <summary>
+    /// 使用 Mutation 测试 Provider 的查询来源 Builder。
+    /// </summary>
+    private sealed class ProviderQueryBuilder : SqlBuilderBase
+    {
+        public ProviderQueryBuilder(ISqlProvider provider, SqlBuilderServices services,
+            IParameterManager parameterManager = null)
+            : base(provider, services, parameterManager)
+        {
+        }
+
+        protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
+            new ProviderQueryBuilder(Provider, Services, parameterManager);
     }
 
     /// <summary>
@@ -278,15 +238,9 @@ public class InsertSelectBuilderTest
     [Table("archive_orders")]
     private sealed class MappedArchive
     {
-        /// <summary>
-        /// 获取或设置订单标识。
-        /// </summary>
         [Column("order_id")]
         public int OrderId { get; set; }
 
-        /// <summary>
-        /// 获取或设置展示编码。
-        /// </summary>
         [Column("display_code")]
         public string DisplayCode { get; set; }
     }
@@ -297,15 +251,9 @@ public class InsertSelectBuilderTest
     [Table("orders")]
     private sealed class MappedOrder
     {
-        /// <summary>
-        /// 获取或设置订单标识。
-        /// </summary>
         [Column("order_id")]
         public int Id { get; set; }
 
-        /// <summary>
-        /// 获取或设置订单编码。
-        /// </summary>
         [Column("order_code")]
         public string Code { get; set; }
     }

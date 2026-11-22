@@ -1,4 +1,5 @@
 ﻿using Bing.Data.Sql.Builders.Operations;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
 
@@ -195,7 +196,13 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// 创建当前执行上下文专属的独立 Mutation SQL 生成器。
     /// </summary>
     /// <returns>不与 Root Executor 或其他操作共享可变状态的 SQL 生成器。</returns>
-    ISqlBuilder CreateWriteBuilder();
+    Builders.Mutations.ISqlInsertBuilder CreateInsertBuilder();
+
+    /// <summary>创建与当前执行器使用相同 Provider 和映射快照的更新 Builder。</summary>
+    Builders.Mutations.ISqlUpdateBuilder CreateUpdateBuilder();
+
+    /// <summary>创建与当前执行器使用相同 Provider 和映射快照的删除 Builder。</summary>
+    Builders.Mutations.ISqlDeleteBuilder CreateDeleteBuilder();
 
     /// <summary>
     /// 执行独立写入命令表示的 Insert、Update 或 Delete 操作。
@@ -234,6 +241,30 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// <returns>操作影响的行数</returns>
     Task<int> ExecuteSqlAsync(string sql, object param = null, int? timeout = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 执行带输出参数的 SQL 文本，并快照本次执行的输出值。
+    /// </summary>
+    /// <remarks>
+    /// 使用 <see cref="SqlParam"/> 声明输出方向、类型和可变长度参数的大小。
+    /// Oracle 单行 <c>RETURNING INTO</c> 应先根据受影响行数判断是否产生输出。
+    /// 原生 SQL 不会自动应用结构化全局过滤器。
+    /// </remarks>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="parameters">按命令占位符顺序声明的参数。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>受影响的行数和本次执行的输出参数快照。</returns>
+    (int AffectedRows, ISqlOutputParameterAccessor OutputParameters) ExecuteSqlWithOutput(string sql,
+        IReadOnlyCollection<SqlParam> parameters, int? timeout = null);
+
+    /// <summary>异步执行带输出参数的 SQL 文本，并快照本次执行的输出值。</summary>
+    /// <param name="sql">执行的 SQL 语句。</param>
+    /// <param name="parameters">按命令占位符顺序声明方向、类型和大小的参数。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>受影响的行数和本次执行的输出参数快照。</returns>
+    Task<(int AffectedRows, ISqlOutputParameterAccessor OutputParameters)> ExecuteSqlWithOutputAsync(string sql,
+        IReadOnlyCollection<SqlParam> parameters, int? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 执行存储过程增删改操作

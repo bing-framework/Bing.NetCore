@@ -175,8 +175,10 @@ public class SqlMultipleQueryExecutorTest
     private sealed class SkippingMultipleQueryExecutor : SqlMultipleQueryExecutorBase
     {
         /// <summary>
-        /// 初始化一个 <see cref="SkippingMultipleQueryExecutor"/> 类型的实例。
+        /// 初始化一个 <see cref="SkippingMultipleQueryExecutor" /> 类型的实例。
         /// </summary>
+        /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
+        /// <param name="connection">当前实例使用的连接对象或连接配置。</param>
         public SkippingMultipleQueryExecutor(IServiceProvider serviceProvider, IDbConnection connection)
             : base(serviceProvider, CreateOptions(connection))
         {

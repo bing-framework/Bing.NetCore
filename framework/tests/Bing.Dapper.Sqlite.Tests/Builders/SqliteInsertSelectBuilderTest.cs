@@ -1,5 +1,7 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 
 namespace Bing.Dapper.Tests.Builders;
 
@@ -15,12 +17,14 @@ public class SqliteInsertSelectBuilderTest
     public void InsertSelect_ShouldRenderSqliteSql()
     {
         // Arrange
-        var builder = new SqliteBuilder()
-            .InsertInto("archive_orders")
-            .Columns("Id", "Code")
+        var source = new SqliteBuilder()
             .Select("Id,Code")
             .From("orders")
             .Where("Status", "active");
+        var builder = new SqlInsertBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .InsertInto("archive_orders")
+            .Columns("Id", "Code")
+            .InsertSelect(source);
 
         // Act
         var sql = builder.ToSql();

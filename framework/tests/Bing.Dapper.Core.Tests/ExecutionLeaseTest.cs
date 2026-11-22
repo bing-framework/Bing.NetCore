@@ -189,10 +189,57 @@ public class ExecutionLeaseTest
     /// <param name="value">要写入字段的值。</param>
     private static void SetPrivateField(SqlQueryBase target, string fieldName, object value)
     {
-        var field = typeof(SqlQueryBase).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+        var resourcesField = typeof(SqlExecutionBase).GetField("_resources", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(resourcesField);
+        var resources = resourcesField.GetValue(target);
+        var field = resources.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+        if (field == null)
+        {
+            var coreField = resources.GetType().GetField("_resourceCore",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(coreField);
+            var core = coreField.GetValue(resources);
+            var stateField = core.GetType().GetField(ToCoreStateFieldName(fieldName),
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(stateField);
+            var state = stateField.GetValue(core);
+            field = state.GetType().GetField(ToCoreFieldName(fieldName),
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            field.SetValue(state, value);
+            stateField.SetValue(core, state);
+            coreField.SetValue(resources, core);
+            return;
+        }
         Assert.NotNull(field);
-        field.SetValue(target, value);
+        field.SetValue(resources, value);
     }
+
+    /// <summary>
+    /// 将资源门面中的旧字段名映射到共享核心字段名。
+    /// </summary>
+    /// <param name="fieldName">测试使用的资源字段名。</param>
+    /// <returns>共享核心字段名。</returns>
+    private static string ToCoreFieldName(string fieldName) => fieldName switch
+    {
+        "_connection" => "Connection",
+        "_connectionOwnership" => "ConnectionOwnership",
+        "_transaction" => "Transaction",
+        "_transactionOwnership" => "TransactionOwnership",
+        _ => throw new ArgumentOutOfRangeException(nameof(fieldName), fieldName, "未配置资源核心字段映射。")
+    };
+
+    /// <summary>
+    /// 将资源门面中的旧字段名映射到共享核心状态块。
+    /// </summary>
+    /// <param name="fieldName">测试使用的资源字段名。</param>
+    /// <returns>共享核心状态块字段名。</returns>
+    private static string ToCoreStateFieldName(string fieldName) => fieldName switch
+    {
+        "_connection" or "_connectionOwnership" => "ConnectionState",
+        "_transaction" or "_transactionOwnership" => "TransactionState",
+        _ => throw new ArgumentOutOfRangeException(nameof(fieldName), fieldName, "未配置资源核心状态块映射。")
+    };
 
     /// <summary>
     /// 创建声明过程能力的测试服务容器。

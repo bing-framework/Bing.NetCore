@@ -6,8 +6,9 @@ namespace Bing.Uow;
 public interface IUnitOfWorkScope : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// 获取 root 工作单元标识；参与式嵌套返回相同标识。
+    /// 获取root 工作单元标识。
     /// </summary>
+    /// <remarks>参与式嵌套返回相同标识。</remarks>
     Guid Id { get; }
 
     /// <summary>

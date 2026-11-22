@@ -32,6 +32,28 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 使用冻结查询片段设置公用表表达式（CTE）。
+    /// </summary>
+    /// <typeparam name="T">支持 CTE 的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="name">CTE 名称。</param>
+    /// <param name="fragment">冻结查询片段或模板。</param>
+    /// <returns>追加 CTE 后的源对象。</returns>
+    public static T With<T>(this T source, string name, ISqlQueryFragment fragment) where T : ICte
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (string.IsNullOrWhiteSpace(name) || fragment == null)
+            return source;
+        if (GetOperationBuilder(source) is ICteAccessor accessor)
+        {
+            var item = new BuilderItem(name, fragment.Freeze().Render());
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.CteItems.Add(item));
+        }
+        return source;
+    }
+
+    /// <summary>
     /// 设置公用表表达式（CTE）。
     /// </summary>
     /// <typeparam name="T">支持 CTE 的源类型。</typeparam>

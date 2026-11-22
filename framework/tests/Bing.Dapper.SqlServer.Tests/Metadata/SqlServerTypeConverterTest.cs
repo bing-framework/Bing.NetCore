@@ -7,8 +7,11 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="SqlServerTypeConverter"/> 单元测试。 验证每个 SQL Server 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
+/// <see cref="SqlServerTypeConverter" /> 单元测试。
 /// </summary>
+/// <remarks>
+/// 验证每个 SQL Server 数据类型字符串都能正确映射为 DbType，以及边界和负例行为。
+/// </remarks>
 public class SqlServerTypeConverterTest
 {
     /// <summary>
@@ -158,6 +161,16 @@ public class SqlServerTypeConverterTest
     public void ToDbType_Nchar_ShouldBeStringFixedLength()
     {
         _converter.ToDbType("nchar").ShouldBe(DbType.StringFixedLength);
+    }
+
+    /// <summary>完整 MAX 类型名应保持对应的 ANSI、Unicode 或二进制存储类型。</summary>
+    [Theory]
+    [InlineData("nvarchar(max)", DbType.String)]
+    [InlineData("VARCHAR(MAX)", DbType.AnsiString)]
+    [InlineData("varbinary(max)", DbType.Binary)]
+    public void ToDbType_WhenTypeNameIncludesMax_ShouldMapBaseStorageType(string typeName, DbType expected)
+    {
+        Assert.Equal(expected, _converter.ToDbType(typeName));
     }
 
     // ═══════════════════════════════════════════════════════════

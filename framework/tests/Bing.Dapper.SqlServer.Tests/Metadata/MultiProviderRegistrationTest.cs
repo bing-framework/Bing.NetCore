@@ -22,8 +22,9 @@ namespace Bing.Dapper.Tests.Metadata;
 public class MultiProviderRegistrationTest
 {
     /// <summary>
-    /// 测试目的：正反 Provider 顺序与重复注册均应保持 Scoped 工厂数量、跨作用域边界及具名路由。
+    /// 验证提供程序注册顺序及重复注册保留作用域工厂与路由契约。
     /// </summary>
+    /// <param name="reverseOrder">是否反向注册数据库提供程序。</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -357,11 +358,20 @@ public class MultiProviderRegistrationTest
         }), services);
     }
 
+    /// <summary>
+    /// 用于验证多 Provider 路由的测试实体。
+    /// </summary>
     [Table("multi_provider_route_probe")]
     private sealed class MultiProviderRouteProbe
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置实体或结果名称。
+        /// </summary>
         public string Name { get; set; }
     }
 

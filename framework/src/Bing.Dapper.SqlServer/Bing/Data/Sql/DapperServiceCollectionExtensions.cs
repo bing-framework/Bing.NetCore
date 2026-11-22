@@ -39,8 +39,15 @@ public static class SqlServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, SqlServerDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(SqlServerSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<SqlServerTypeConverter>(DatabaseType.SqlServer);
-        services.AddSqlProviderRuntime(new SqlProviderRuntime(SqlServerSqlProvider.Instance.Key,
-            typeof(SqlServerSqlQuery), typeof(SqlServerSqlExecutor), typeof(SqlServerSqlMultipleQueryExecutor)));
+        services.AddSqlProviderRuntime(SqlProviderRuntime.CreateWithFactories(SqlServerSqlProvider.Instance.Key,
+            typeof(SqlServerSqlQuery), typeof(SqlServerSqlExecutor), typeof(SqlServerSqlMultipleQueryExecutor),
+            (provider, options) => new SqlServerSqlQuery(provider, (SqlOptions<SqlServerSqlQuery>)options),
+            (provider, options) => new SqlServerSqlExecutor(provider, (SqlOptions<SqlServerSqlExecutor>)options),
+            (provider, options) => new SqlServerSqlMultipleQueryExecutor(provider, (SqlOptions<SqlServerSqlMultipleQueryExecutor>)options),
+            serviceType => serviceType == typeof(ISqlQuery) ? new SqlOptions<SqlServerSqlQuery>() :
+                serviceType == typeof(ISqlExecutor) ? new SqlOptions<SqlServerSqlExecutor>() : new SqlOptions<SqlServerSqlMultipleQueryExecutor>(),
+            (provider, serviceType) => serviceType == typeof(ISqlQuery) ? provider.GetService<SqlOptions<SqlServerSqlQuery>>() :
+                serviceType == typeof(ISqlExecutor) ? provider.GetService<SqlOptions<SqlServerSqlExecutor>>() : provider.GetService<SqlOptions<SqlServerSqlMultipleQueryExecutor>>()));
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

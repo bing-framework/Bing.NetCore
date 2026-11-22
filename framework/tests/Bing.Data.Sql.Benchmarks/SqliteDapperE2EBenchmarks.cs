@@ -6,8 +6,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
+using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Dapper;
 using Bing.Dapper.Sqlite;
@@ -32,6 +34,9 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// </summary>
     private ServiceProvider _serviceProvider;
 
+    /// <summary>
+    /// 保存端到端基准使用的服务作用域。
+    /// </summary>
     private IServiceScope _serviceScope;
 
     /// <summary>
@@ -39,6 +44,9 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
     /// </summary>
     private ServiceProvider _traceServiceProvider;
 
+    /// <summary>
+    /// 保存端到端基准跟踪使用的服务作用域。
+    /// </summary>
     private IServiceScope _traceServiceScope;
 
     /// <summary>
@@ -88,6 +96,15 @@ public abstract class SqliteDapperE2EBenchmarkInfrastructure
             .OrderBy("Id")
             .ToList<SqliteBenchmarkRow>()
             .Count;
+    }
+
+    /// <summary>测量包含自动计数、原作用域排序和已有 Take 的分页执行。</summary>
+    protected PagerList<string> ExecuteQueryToPage()
+    {
+        using var query = CreateQuery(_queryFactory);
+        var builder = new SqliteBuilder().Select("Name").From("samples").OrderBy("Id").Take(1);
+        return SqlQueryRuntimeFactory.CreateQuery((ISqlQueryPlanExecutor)query, builder)
+            .ToPage<string>(new Pager(2, 1, "Id"));
     }
 
     /// <summary>
@@ -677,6 +694,43 @@ public abstract class SqliteDapperE2EFixedBenchmarksBase : SqliteDapperE2EBenchm
     /// 释放固定输入 SQLite 测量环境。
     /// </summary>
     protected void CleanupFixed() => CleanupResources();
+}
+
+/// <summary>在固定三行输入上测量原作用域分页的端到端成本。</summary>
+public abstract class SqliteDapperPagingBenchmarksBase : SqliteDapperE2EBenchmarkInfrastructure
+{
+    /// <summary>创建数据并验证总数和目标页。</summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        Initialize(3);
+        var page = ExecuteQueryToPage();
+        Ensure(page.TotalCount, 3, nameof(QueryToPage));
+        if (page.Data.Single() != "row-2")
+            throw new InvalidOperationException("SQLite pagination benchmark returned the wrong row.");
+    }
+
+    /// <summary>释放基准资源。</summary>
+    [GlobalCleanup]
+    public void Cleanup() => CleanupResources();
+
+    /// <summary>返回总数以防止消除分页调用。</summary>
+    [Benchmark]
+    public int QueryToPage() => ExecuteQueryToPage().TotalCount;
+}
+
+/// <summary>分页端到端正式基准。</summary>
+[MemoryDiagnoser]
+[SimpleJob(launchCount: 3, warmupCount: 6, iterationCount: 15, id: "FormalHost")]
+public class SqliteDapperPagingBenchmarks : SqliteDapperPagingBenchmarksBase
+{
+}
+
+/// <summary>分页端到端基准可运行性检查。</summary>
+[MemoryDiagnoser]
+[DryJob]
+public class SqliteDapperPagingSmokeBenchmarks : SqliteDapperPagingBenchmarksBase
+{
 }
 
 /// <summary>

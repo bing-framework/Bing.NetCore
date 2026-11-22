@@ -12,9 +12,10 @@ public abstract partial class SqlQueryBase
     /// <inheritdoc />
     PagerList<TResult> ISqlQueryPlanExecutor.ToPage<TResult>(SqlQueryPlan plan, IPager pager, int? timeout)
     {
+        TryCreateStaticReader<TResult>(out var staticReader);
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
-        var executionLease = AcquireExecutionLease();
+        var executionLease = QueryResources.AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
@@ -29,18 +30,21 @@ public abstract partial class SqlQueryBase
             {
                 var countPlan = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
                 totalCount = InternalQueryPlan(countPlan, (connection, sql, parameters, transaction) =>
-                    Conv.ToInt(connection.ExecuteScalar(sql, parameters, transaction, timeout,
-                        commandType: countPlan.CommandType)), acquireExecutionLease: false, completeTransaction: false);
+                    CanExecuteStatically(parameters)
+                        ? SqlStaticCommandRunner.Execute(connection, sql, parameters, transaction, timeout,
+                            command => ConvertScalar<int>(command.ExecuteScalar()), countPlan.CommandType)
+                        : Conv.ToInt(SqlDynamicCommandRunner.ExecuteScalar(connection, sql, parameters, transaction, timeout,
+                            commandType: countPlan.CommandType)), acquireExecutionLease: false, completeTransaction: false);
                 totalCountCalculated = true;
             }
-            var pagePlan = plan.IsBuilderPlan
-                ? SqlBuilderRuntimeBridge.CreatePagePlan(plan, page)
-                : SqlBuilderRuntimeBridge.CreatePagePlan(plan, page, CreateIndependentSqlBuilder());
-            var items = InternalQueryPlan(pagePlan, (connection, sql, parameters, transaction) => connection
-                .Query<TResult>(sql, parameters, transaction, buffered: true, commandTimeout: timeout,
-                    commandType: pagePlan.CommandType).ToList(), acquireExecutionLease: false,
+            var pagePlan = SqlBuilderRuntimeBridge.CreatePageExecutionPlan(plan, page, this);
+            var items = InternalQueryPlan(pagePlan, (connection, sql, parameters, transaction) =>
+                staticReader != null && CanExecuteStatically(parameters)
+                    ? ReadStaticRows(connection, sql, parameters, transaction, timeout, staticReader, commandType: pagePlan.CommandType)
+                    : SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters, transaction, buffered: true, commandTimeout: timeout,
+                    commandType: pagePlan.CommandType).AsList(), acquireExecutionLease: false,
                 completeTransaction: false);
-            CompleteQueryTransaction();
+            QueryResourceCleanup.CompleteQueryTransaction();
             if (totalCountCalculated)
             {
                 page.TotalCount = totalCount;
@@ -51,7 +55,7 @@ public abstract partial class SqlQueryBase
         catch (Exception exception)
         {
             primaryException = exception;
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, QueryResourceCleanup.RollbackQueryTransaction);
         }
         finally
         {
@@ -67,17 +71,18 @@ public abstract partial class SqlQueryBase
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
-        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        TryCreateStaticReader<TResult>(out var staticReader);
+        using var operationCancellation = QueryResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
         EnsureCancellationSupported(operationToken);
         if (operationToken.IsCancellationRequested)
         {
-            MarkPreCancelledUnitOfWorkExecution();
+            QueryResources.MarkPreCancelledUnitOfWorkExecution();
             operationToken.ThrowIfCancellationRequested();
         }
-        var executionLease = AcquireExecutionLease();
+        var executionLease = QueryResources.AcquireExecutionLease();
         PagerList<TResult> result = null;
         Exception primaryException = null;
         var cleanupExceptions = new List<Exception>();
@@ -93,21 +98,26 @@ public abstract partial class SqlQueryBase
                 var countPlan = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
                 totalCount = await InternalQueryPlanAsync(countPlan, async (connection, sql, parameters, transaction,
                     queryToken) =>
-                    Conv.ToInt(await connection.ExecuteScalarAsync(CreateQueryCommandDefinition(sql, parameters,
-                        transaction, timeout, buffered: true, queryToken, countPlan.CommandType))), operationToken,
+                    CanExecuteStatically(parameters)
+                        ? await SqlStaticCommandRunner.ExecuteAsync(connection, sql, parameters, transaction, timeout,
+                            async (command, token) => ConvertScalar<int>(await command.ExecuteScalarAsync(token).ConfigureAwait(false)),
+                            queryToken, countPlan.CommandType).ConfigureAwait(false)
+                        : Conv.ToInt(await SqlDynamicCommandRunner.ExecuteScalarAsync(connection, CreateQueryCommandDefinition(sql, parameters,
+                            transaction, timeout, buffered: true, queryToken, countPlan.CommandType))), operationToken,
                     acquireExecutionLease: false, completeTransaction: false);
                 totalCountCalculated = true;
             }
-            var pagePlan = plan.IsBuilderPlan
-                ? SqlBuilderRuntimeBridge.CreatePagePlan(plan, page)
-                : SqlBuilderRuntimeBridge.CreatePagePlan(plan, page, CreateIndependentSqlBuilder());
+            var pagePlan = SqlBuilderRuntimeBridge.CreatePageExecutionPlan(plan, page, this);
             var items = await InternalQueryPlanAsync(pagePlan, async (connection, sql, parameters, transaction,
                 queryToken) =>
-                await ExecuteMaterializedQueryAsync<TResult>(connection,
+                staticReader != null && CanExecuteStatically(parameters)
+                    ? await ReadStaticRowsAsync(connection, sql, parameters, transaction, timeout, staticReader, queryToken,
+                        commandType: pagePlan.CommandType).ConfigureAwait(false)
+                    : await ExecuteMaterializedQueryAsync<TResult>(connection,
                     CreateQueryCommandDefinition(sql, parameters, transaction, timeout, buffered: true, queryToken,
                         pagePlan.CommandType), queryToken), operationToken, acquireExecutionLease: false,
                 completeTransaction: false);
-            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            await QueryResourceCleanup.CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             if (totalCountCalculated)
             {
                 page.TotalCount = totalCount;
@@ -118,7 +128,7 @@ public abstract partial class SqlQueryBase
         catch (Exception exception)
         {
             primaryException = exception;
-            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
+            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, QueryResourceCleanup.RollbackQueryTransactionAsync)
                 .ConfigureAwait(false);
         }
         finally

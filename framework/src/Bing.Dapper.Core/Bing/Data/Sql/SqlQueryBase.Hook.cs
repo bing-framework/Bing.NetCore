@@ -9,13 +9,13 @@ public partial class SqlQueryBase
     /// 判断是否继续执行当前查询。
     /// </summary>
     /// <returns>允许继续执行时返回 <see langword="true"/>；返回 <see langword="false"/> 时停止执行。</returns>
-    protected virtual bool ExecuteBefore() => true;
+    protected override bool ExecuteBefore() => base.ExecuteBefore();
 
     /// <summary>
     /// 执行查询完成后的状态清理。
     /// </summary>
     /// <param name="result">结果</param>
-    protected virtual void ExecuteAfter(object result)
+    protected override void ExecuteAfter(object result)
     {
         if (Volatile.Read(ref _queryPlanExecutionDepth) == 0)
             Clear();

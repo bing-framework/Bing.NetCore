@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>obj/generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <Import Project="../../src/Bing.Data.Sql.Generators/buildTransitive/Bing.Data.Sql.Generators.props" Condition="'$(BingSqlGenerationEnabled)' != 'false' and '$(BingSqlGeneratorPackageVersion)' == ''" />
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Data.Sql.Generators/Bing.Data.Sql.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="'$(BingSqlGenerationEnabled)' != 'false' and '$(BingSqlGeneratorPackageVersion)' == ''" />
+    <PackageReference Include="Bing.Data.Sql.Generators" Version="$(BingSqlGeneratorPackageVersion)" PrivateAssets="all" Condition="'$(BingSqlGeneratorPackageVersion)' != ''" />
+    <ProjectReference Include="../../src/Bing.Data.Sql/Bing.Data.Sql.csproj" />
+  </ItemGroup>
+</Project>

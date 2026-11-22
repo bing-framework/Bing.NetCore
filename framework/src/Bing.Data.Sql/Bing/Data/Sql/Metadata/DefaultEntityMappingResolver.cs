@@ -15,7 +15,7 @@ namespace Bing.Data.Sql.Metadata;
 public class DefaultEntityMappingResolver : IEntityMappingResolver
 {
     /// <summary>
-    /// 实体映射缓存
+    /// 缓存按实体类型解析的最终映射，受容量和访问顺序限制。
     /// </summary>
     private readonly ConcurrentDictionary<EntityMappingCacheKey, EntityMappingMetadata> _mappingCache = new();
 
@@ -123,9 +123,10 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         ITypeConverterResolver typeConverterResolver = null,
         IEntityModelMetadataProvider entityModelMetadataProvider = null)
     {
-        _entityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
         _databaseContextAccessor = databaseContextAccessor;
         _options = options ?? new SqlMetadataOptions();
+        _entityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider(
+            null, _options.ExecutionMode == SqlExecutionMode.GeneratedOnly);
         _mappingCacheCapacity = _options.EntityMappingCacheCapacity;
         _mappingCacheEvictionPolicy = _options.EntityMappingCacheEvictionPolicy;
         if (_mappingCacheCapacity.HasValue && _mappingCacheCapacity.Value < 0)
@@ -158,7 +159,8 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         var model = GetModelMetadata(entityType);
         var properties = model.Properties.Values
             .Where(property => property.IsIgnored == false)
-            .Select(property => property.Property)
+            .Select(property => property.Property ?? entityType.GetProperty(property.PropertyName)
+                ?? throw new NotSupportedException("当前类型没有反射描述，请使用生成式查询读取器。"))
             .ToList();
         return new EntityDescriptor
         {
@@ -166,7 +168,8 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             Properties = properties,
             KeyProperties = model.Properties.Values
                 .Where(property => property.IsIgnored == false && property.IsKey)
-                .Select(property => property.Property)
+                .Select(property => property.Property ?? entityType.GetProperty(property.PropertyName)
+                ?? throw new NotSupportedException("当前类型没有反射描述，请使用生成式查询读取器。"))
                 .ToList()
         };
     }
@@ -471,7 +474,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
         var columns = new ReadOnlyDictionary<string, ColumnMappingMetadata>(model.Properties.Values
             .Where(property => property.IsIgnored == false)
             .ToDictionary(property => property.PropertyName,
-            property => CreateColumnMetadata(property, GetColumnMappingOptions(mappingOptions, property.Property), databaseContext),
+            property => CreateColumnMetadata(property, property.Property != null ? GetColumnMappingOptions(mappingOptions, property.Property) : GetGeneratedColumnOptions(mappingOptions, property.PropertyName), databaseContext),
             StringComparer.OrdinalIgnoreCase));
         var tableReference = new SqlTableReference
         {
@@ -582,6 +585,19 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     }
 
     /// <summary>
+    /// 按属性名称解析生成的列映射选项。
+    /// </summary>
+    /// <param name="options">实体映射选项。</param>
+    /// <param name="propertyName">要查找映射选项的属性名称。</param>
+    /// <returns>按字典键或属性名称匹配的列映射选项；未找到时为 null。</returns>
+    private static ColumnMappingOptions GetGeneratedColumnOptions(EntityMappingOptions options, string propertyName)
+    {
+        if (options?.Columns == null) return null;
+        return options.Columns.TryGetValue(propertyName, out var value) ? value : options.Columns.Values.FirstOrDefault(
+            item => string.Equals(item?.PropertyName, propertyName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
     /// 创建列映射元数据
     /// </summary>
     /// <param name="property">实体属性元数据</param>
@@ -620,6 +636,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             IsNullable = property.IsNullable,
             IsKey = property.IsKey,
             IsDatabaseGenerated = property.IsDatabaseGenerated,
+            DatabaseGeneratedOption = property.DatabaseGeneratedOption,
             IsConcurrencyToken = property.IsConcurrencyToken,
             CanInsert = property.CanInsert,
             CanUpdate = property.CanUpdate,
@@ -634,7 +651,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 获取数据库类型
     /// </summary>
     /// <param name="databaseContext">数据库上下文</param>
-    /// <returns>数据库类型</returns>
+    /// <returns>数据库类型；数据库上下文或数据源未提供数据库类型时返回 <c>null</c>。</returns>
     protected virtual DatabaseType? GetDatabaseType(DatabaseContext databaseContext) =>
         databaseContext?.DataSource?.DatabaseType;
 
@@ -649,7 +666,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 获取精度
     /// </summary>
     /// <param name="providerTypeName">Provider 数据类型名称</param>
-    /// <returns>精度</returns>
+    /// <returns>精度；类型名称中没有可解析的精度时返回 <c>null</c>。</returns>
     protected virtual byte? GetPrecision(string providerTypeName)
     {
         var (precision, _) = ParsePrecision(providerTypeName);
@@ -660,7 +677,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 获取小数位
     /// </summary>
     /// <param name="providerTypeName">Provider 数据类型名称</param>
-    /// <returns>小数位</returns>
+    /// <returns>小数位；类型名称中没有可解析的小数位时返回 <c>null</c>。</returns>
     protected virtual byte? GetScale(string providerTypeName)
     {
         var (_, scale) = ParsePrecision(providerTypeName);
@@ -671,7 +688,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// 解析精度与小数位
     /// </summary>
     /// <param name="providerTypeName">Provider 数据类型名称</param>
-    /// <returns>精度与小数位</returns>
+    /// <returns>精度与小数位；类型名称无法解析时两个元素均为 <c>null</c>。</returns>
     protected virtual (byte? Precision, byte? Scale) ParsePrecision(string providerTypeName)
     {
         if (string.IsNullOrWhiteSpace(providerTypeName))
@@ -689,7 +706,7 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// <param name="providerTypeName">Provider 数据类型名称</param>
     /// <param name="length">长度</param>
     /// <param name="databaseType">数据库类型</param>
-    /// <returns>DbType</returns>
+    /// <returns>数据库类型对应的 DbType；数据库类型未提供或 CLR 类型不受支持时返回 <c>null</c>。</returns>
     protected virtual DbType? GetDbType(Type type, string providerTypeName, int? length, DatabaseType? databaseType)
     {
         var dbType = databaseType == null
@@ -762,9 +779,15 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
     /// </summary>
     /// <param name="entityType">实体类型。</param>
     /// <returns>实体模型元数据。</returns>
-    protected virtual EntityModelMetadata GetModelMetadata(Type entityType) =>
-        _entityModelMetadataProvider.GetMetadata(entityType) ??
-        new ConventionEntityModelMetadataProvider().GetMetadata(entityType);
+    protected virtual EntityModelMetadata GetModelMetadata(Type entityType)
+    {
+        var model = _entityModelMetadataProvider.GetMetadata(entityType);
+        if (model != null)
+            return model;
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _options.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+            throw new NotSupportedException($"类型 {entityType.FullName} 未注册生成模型。请使用 SqlModel/SqlResult/SqlParameters 上下文的 CreateModels 注册。");
+        return new ConventionEntityModelMetadataProvider().GetMetadata(entityType);
+    }
 
     /// <summary>
     /// 获取实体模型元数据缓存。

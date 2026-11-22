@@ -9,9 +9,15 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// </summary>
 public sealed class SqlFactoryScopeContractTest
 {
+    /// <summary>
+    /// 定义启用软删除过滤的作用域查询 SQL。
+    /// </summary>
     private const string EnabledSql =
         "Select `scope_probe`.`Id`,`scope_probe`.`IsDeleted` \r\nFrom `scope_probe` \r\nWhere `scope_probe`.`IsDeleted`=@_p_0";
 
+    /// <summary>
+    /// 定义禁用软删除过滤的作用域查询 SQL。
+    /// </summary>
     private const string DisabledSql = "Select `scope_probe`.`Id`,`scope_probe`.`IsDeleted` \r\nFrom `scope_probe`";
 
     /// <summary>
@@ -182,6 +188,10 @@ public sealed class SqlFactoryScopeContractTest
         Assert.Equal(EnabledSql, source.ToSql());
     }
 
+    /// <summary>
+    /// 在禁用软删除过滤器的作用域内模拟异常。
+    /// </summary>
+    /// <param name="filter">控制软删除查询过滤的服务。</param>
     private static void DisableAndThrow(IDataFilter filter)
     {
         using (filter.Disable<ISoftDelete>())
@@ -249,8 +259,9 @@ public sealed class SqlFactoryScopeContractTest
     }
 
     /// <summary>
-    /// 测试 - SQLite 实际查询、Clone、分页及过滤器状态应只影响当前请求作用域。
+    /// 验证 SQLite 查询、克隆及分页的过滤状态限定于当前作用域。
     /// </summary>
+    /// <param name="validateScopes">是否启用容器作用域校验。</param>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -289,8 +300,9 @@ public sealed class SqlFactoryScopeContractTest
     }
 
     /// <summary>
-    /// 测试 - Executor 的软删除 Mutation 使用解析工厂作用域的过滤状态，另一作用域和原始 SQL 保持独立语义。
+    /// 验证执行器变更使用所属作用域过滤状态且隔离原始 SQL。
     /// </summary>
+    /// <param name="validateScopes">是否启用容器作用域校验。</param>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -323,6 +335,12 @@ public sealed class SqlFactoryScopeContractTest
             rawQuery.Sql("Select Name From scope_probe_data Order By Id").ToList<string>());
     }
 
+    /// <summary>
+    /// 创建可校验服务作用域的 SQL 测试容器。
+    /// </summary>
+    /// <param name="validateScopes">是否启用容器作用域校验。</param>
+    /// <param name="connectionString">测试数据库连接字符串。</param>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(bool validateScopes,
         string connectionString = "Data Source=:memory:")
     {
@@ -336,10 +354,17 @@ public sealed class SqlFactoryScopeContractTest
         });
     }
 
+    /// <summary>
+    /// 记录数据库连接解析次数的连接解析器。
+    /// </summary>
     private sealed class CountingConnectionResolver : ISqlDbConnectionFactoryResolver
     {
+        /// <summary>
+        /// 获取调用的累计次数。
+        /// </summary>
         public int CallCount { get; private set; }
 
+        /// <inheritdoc />
         public System.Data.IDbConnection Create(string providerKey, string connectionString)
         {
             CallCount++;
@@ -347,21 +372,38 @@ public sealed class SqlFactoryScopeContractTest
         }
     }
 
+    /// <summary>
+    /// 用于验证 Provider 查询作用域过滤的测试实体。
+    /// </summary>
     [Table("scope_probe")]
     public sealed class SqlFactoryScopeProbeEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
+    /// <summary>
+    /// 提供 SQLite 作用域过滤集成测试的数据实体。
+    /// </summary>
     [Table("scope_probe_data")]
     public sealed class SqlFactoryScopeDataEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置实体或结果名称。
+        /// </summary>
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 }

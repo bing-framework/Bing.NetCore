@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <Compile Include="../tests/CpuAttributionTests.cs" />
+    <Reference Include="Microsoft.Diagnostics.NETCore.Client" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.NETCore.Client.dll" />
+    <Reference Include="Microsoft.Diagnostics.Tracing.TraceEvent" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
+    <Reference Include="Microsoft.Diagnostics.FastSerialization" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.FastSerialization.dll" />
+    <Reference Include="Dia2Lib" HintPath="$(DiagnosticAssemblyDirectory)/Dia2Lib.dll" />
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Extensions.Logging.Abstractions.dll" />
+  </ItemGroup>
+  <Target Name="RequireExistingDiagnostics" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.NETCore.Client.dll')" Text="Set DiagnosticAssemblyDirectory to an existing benchmark output directory; this tool does not restore diagnostic packages." />
+  </Target>
+</Project>

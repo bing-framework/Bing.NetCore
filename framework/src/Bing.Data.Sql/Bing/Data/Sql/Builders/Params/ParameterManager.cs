@@ -56,9 +56,9 @@ public class ParameterManager : IAdvancedParameterManager
         Dialect = parameterManager.Dialect;
         _paramIndex = parameterManager._paramIndex;
         _params = new Dictionary<string, object>(parameterManager._params, StringComparer.OrdinalIgnoreCase);
-        _sqlParams = new Dictionary<string, SqlParam>(StringComparer.OrdinalIgnoreCase);
-        foreach (var parameter in parameterManager._sqlParams)
-            _sqlParams.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
+        // 内部描述符在加入时复制，之后只替换整项；GetSqlParams 仍返回描述符副本。
+        // 各克隆保留独立字典，安全复用内部只读项，避免宽子查询合并逐项复制元数据。
+        _sqlParams = new Dictionary<string, SqlParam>(parameterManager._sqlParams, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -78,6 +78,99 @@ public class ParameterManager : IAdvancedParameterManager
             _sqlParams[parameter.Key] = CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value);
     }
 
+    /// <inheritdoc />
+    public void Restore(SqlParam parameter)
+    {
+        if (parameter == null)
+            return;
+        var name = NormalizeName(parameter.Name);
+        if (!_params.ContainsKey(name))
+            return;
+        _params[name] = parameter.Value;
+        _sqlParams[name] = CloneSqlParam(parameter, name, parameter.Value);
+    }
+
+    /// <summary>写入由同一方言转换过的参数快照，不再重复转换。</summary>
+    internal void AddSnapshot(SqlParam parameter, bool preserveMetadata)
+    {
+        var name = NormalizeName(parameter.Name);
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+        _params[name] = parameter.Value;
+        _sqlParams[name] = preserveMetadata
+            ? CloneSqlParam(parameter, name, parameter.Value)
+            : CreateLegacySqlParam(name, parameter.Value);
+    }
+
+    /// <summary>仅在使用同一方言实例时共享已转换参数。</summary>
+    internal bool SharesDialectWith(ParameterManager other) => ReferenceEquals(Dialect, other.Dialect);
+
+    /// <inheritdoc />
+    public bool Remove(string name)
+    {
+        name = NormalizeName(name);
+        if (!_params.Remove(name))
+            return false;
+        _sqlParams.Remove(name);
+        // 清理分页后重用可用名称，与 Clear 后重建参数的既有行为一致。
+        _paramIndex = 0;
+        return true;
+    }
+
+    /// <summary>
+    /// 仅暂存本次子查询新增的参数，复用当前字典进行冲突检查，避免复制全部历史参数。
+    /// 调用期间目标管理器保持不变；生成名序列只在局部推进，与原 Clone 预检合同一致。
+    /// </summary>
+    internal void PrepareSubqueryMerge(IReadOnlyDictionary<string, object> source,
+        IReadOnlyDictionary<string, SqlParam> metadata, IDictionary<string, string> names,
+        bool useMetadata, int maxCount, string providerKey, ISet<string> distinctNames = null,
+        bool alreadyConverted = false)
+    {
+        var pending = new ParameterManager(Dialect) { _paramIndex = _paramIndex };
+        foreach (var parameter in source)
+        {
+            if (!names.TryGetValue(parameter.Key, out var targetName))
+            {
+                targetName = parameter.Key;
+                var normalized = NormalizeName(targetName);
+                var exists = pending._params.TryGetValue(normalized, out var value) ||
+                    _params.TryGetValue(normalized, out value);
+                var metadataDiffers = exists && useMetadata && metadata != null &&
+                    metadata.TryGetValue(parameter.Key, out var sourceParameter) &&
+                    (pending._sqlParams.TryGetValue(normalized, out var existingParameter) ||
+                     _sqlParams.TryGetValue(normalized, out existingParameter)) &&
+                    (!SqlQueryShapeTemplate.HasSameContract(existingParameter, sourceParameter) ||
+                     !SqlQueryShapeTemplate.HasSameConversionState(existingParameter, sourceParameter));
+                if (exists && (distinctNames?.Contains(parameter.Key) == true ||
+                    !Equals(value, parameter.Value) || metadataDiffers))
+                {
+                    do { targetName = pending.GenerateName(); }
+                    while (_params.ContainsKey(targetName));
+                }
+                names[parameter.Key] = targetName;
+            }
+            var name = NormalizeName(targetName);
+            if (string.IsNullOrWhiteSpace(name) || _params.ContainsKey(name) || pending._params.ContainsKey(name))
+                continue;
+            var count = _params.Count + pending.Count;
+            if (count >= maxCount)
+                throw new InvalidOperationException(
+                    $"SQL Provider '{providerKey}' 的参数数量超出上限。当前参数数量: {count}；尝试添加后数量: {count + 1}；最大参数数量: {maxCount}。");
+            if (alreadyConverted)
+            {
+                var snapshot = metadata != null && metadata.TryGetValue(parameter.Key, out var sourceParameter)
+                    ? CloneSqlParam(sourceParameter, targetName, sourceParameter.Value)
+                    : CreateLegacySqlParam(targetName, parameter.Value);
+                pending.AddSnapshot(snapshot, useMetadata);
+            }
+            // 不同转换上下文和原始片段仍由目标方言处理。
+            else if (useMetadata && metadata != null && metadata.TryGetValue(parameter.Key, out var sqlParameter))
+                pending.Add(CloneSqlParam(sqlParameter, targetName, sqlParameter.Value));
+            else
+                pending.Add(targetName, parameter.Value);
+        }
+    }
+
     #endregion
 
     #region 属性
@@ -86,6 +179,9 @@ public class ParameterManager : IAdvancedParameterManager
     /// 获取Sql方言
     /// </summary>
     protected IDialect Dialect { get; }
+
+    /// <summary>冻结参数派生沿用实际存储方言，不持有可变参数容器。</summary>
+    internal IDialect ParameterDialect => Dialect;
 
     /// <inheritdoc />
     public int Count => _params.Count;
@@ -104,6 +200,22 @@ public class ParameterManager : IAdvancedParameterManager
             _paramIndex += 1;
         } while (_params.ContainsKey(result) || _sqlParams.ContainsKey(result));
         return result;
+    }
+
+    /// <summary>预览缺失的分页名称，已有 offset 不占用新名称，不推进当前容器游标。</summary>
+    internal void PreviewPageNames(out string offset, out string limit, string existingOffset = null)
+    {
+        var index = _paramIndex;
+        string Next()
+        {
+            string name;
+            do { name = Dialect.GenerateName(index++); }
+            while (_params.ContainsKey(name) || _sqlParams.ContainsKey(name));
+            return name;
+        }
+        offset = string.IsNullOrWhiteSpace(existingOffset) ? Next() : existingOffset;
+        do { limit = Next(); }
+        while (string.Equals(limit, offset, StringComparison.OrdinalIgnoreCase));
     }
 
     #endregion
@@ -196,6 +308,7 @@ public class ParameterManager : IAdvancedParameterManager
         {
             EntityType = parameter.EntityType,
             OriginalValue = parameter.OriginalValue,
+            IsProviderValue = parameter.IsProviderValue,
             PropertyName = parameter.PropertyName,
             ColumnName = parameter.ColumnName,
             DatabaseType = parameter.DatabaseType,
@@ -250,6 +363,14 @@ public class ParameterManager : IAdvancedParameterManager
             result.Add(parameter.Key, CloneSqlParam(parameter.Value, parameter.Key, parameter.Value.Value));
         return new ReadOnlyDictionary<string, SqlParam>(result);
     }
+
+    /// <summary>仅供框架内部比较只读参数合同，避免复制整个参数集合。</summary>
+    internal bool TryGetStoredSqlParam(string name, out SqlParam parameter) =>
+        _sqlParams.TryGetValue(NormalizeName(name), out parameter);
+
+    /// <summary>按已规范化的描述符名称检查参数是否仍为同一项。</summary>
+    internal bool ContainsStoredSqlParam(SqlParam parameter) =>
+        _sqlParams.TryGetValue(parameter.Name, out var current) && ReferenceEquals(current, parameter);
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, object> ExportValues() =>

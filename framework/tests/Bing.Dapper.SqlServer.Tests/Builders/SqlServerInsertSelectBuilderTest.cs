@@ -1,5 +1,7 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
@@ -16,12 +18,14 @@ public class SqlServerInsertSelectBuilderTest
     public void InsertSelect_ShouldRenderSqlServerSql()
     {
         // Arrange
-        var builder = new SqlServerBuilder()
-            .InsertInto(new SqlTableReference { Schema = "archive", TableName = "archive_orders" })
-            .Columns("Id", "Code")
+        var source = new SqlServerBuilder()
             .Select("Id,Code")
             .From(new SqlTableReference { Schema = "sales", TableName = "orders" })
             .Where("Status", "active");
+        var builder = new SqlInsertBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .InsertInto(new SqlTableReference { Schema = "archive", TableName = "archive_orders" })
+            .Columns("Id", "Code")
+            .InsertSelect(source);
 
         // Act
         var sql = builder.ToSql();

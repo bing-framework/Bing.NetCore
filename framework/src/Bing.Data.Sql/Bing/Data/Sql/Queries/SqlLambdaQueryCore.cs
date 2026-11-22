@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 
 namespace Bing.Data.Sql;
@@ -7,7 +8,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Lambda 查询描述的内部执行核心。
 /// </summary>
-internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
+internal sealed partial class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
 {
     /// <summary>
     /// 承载当前 Lambda 查询状态和执行逻辑的查询对象。
@@ -32,18 +33,55 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// 克隆当前查询核心及其查询状态。
     /// </summary>
     /// <returns>拥有独立查询状态的查询核心。</returns>
-    internal SqlLambdaQueryCore Clone() => new(_query.Clone());
+    internal SqlLambdaQueryCore Clone() { MaterializeTemplate(); return new(_query.Clone()); }
 
     /// <summary>
     /// 获取当前查询使用的 SQL 生成器。
     /// </summary>
     /// <returns>当前查询的 SQL 生成器。</returns>
-    internal ISqlBuilder GetBuilder() => _query.GetBuilder();
+    internal ISqlBuilder GetBuilder() { MaterializeTemplate(); return _query.GetBuilder(); }
 
     /// <summary>
     /// 获取当前查询计划执行器。
     /// </summary>
     internal ISqlQueryPlanExecutor Executor => _query.Executor;
+    /// <summary>
+    /// 获取当前 Lambda 查询的生成执行计划。
+    /// </summary>
+    /// <param name="forPaging">是否需要在原查询作用域派生分页计划。</param>
+    /// <returns>当前查询对应的 SQL 查询计划。</returns>
+    internal SqlQueryPlan GeneratedPlan(bool forPaging = false) { MaterializeTemplate(); return _query.GetPlan(forPaging); }
+    /// <summary>
+    /// 获取当前查询使用的 SQL 构建器。
+    /// </summary>
+    internal ISqlBuilder ReadBuilder { get { MaterializeTemplate(); return _query.ReadBuilder; } }
+
+    /// <summary>仅完整生成链使用的请求状态，普通查询没有额外状态分配。</summary>
+    internal SqlGeneratedQueryTemplate.State TemplateState { get; set; }
+
+    internal void MaterializeTemplate()
+    {
+        var state = TemplateState;
+        if (state == null) return;
+        // 回放只恢复等价的 Builder 表示，不改变冻结 IR；失败时也保留原延迟状态。
+        var builder = _query.ReadBuilder.Clone();
+        state.Replay(SqlQueryRuntimeFactory.CreateLambdaQuery(_query.Executor, builder));
+        _query.MaterializeGeneratedTemplate(builder);
+        TemplateState = null;
+    }
+
+    internal bool TryGeneratedTemplatePlan(Type resultType, out SqlQueryPlan plan, out Dictionary<string, int>[] ordinals)
+    {
+        plan = null;
+        ordinals = null;
+        if (TemplateState == null || !TemplateState.TryPrepare(resultType, out var snapshot, out ordinals)) return false;
+        plan = _query.GetGeneratedTemplatePlan(snapshot);
+        return true;
+    }
+    /// <summary>
+    /// 获取生成的多映射分割列文本。
+    /// </summary>
+    internal string GeneratedSplitOn => _query.SplitOnValue;
 
     /// <summary>
     /// 获取当前查询上下文标识。
@@ -54,7 +92,12 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// 生成当前查询的 SQL 文本。
     /// </summary>
     /// <returns>当前查询的 SQL 文本。</returns>
-    public string ToSql() => _query.RenderSql();
+    public string ToSql()
+    {
+        if (TemplateState != null && TemplateState.TryPrepare(typeof(void), out var snapshot, out _)) return snapshot.Sql;
+        MaterializeTemplate();
+        return _query.RenderSql();
+    }
 
     /// <summary>
     /// 标记查询结构已成功变更。
@@ -62,12 +105,41 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void Touch() => _query.Touch();
 
     /// <summary>
-    /// 同步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// 以原子操作方式修改查询并返回操作结果。
+    /// </summary>
+    /// <param name="change">执行查询修改并生成结果的函数。</param>
+    /// <typeparam name="TResult">查询修改操作的结果类型。</typeparam>
+    /// <returns>查询修改函数返回的结果。</returns>
+    internal TResult AtomicChange<TResult>(Func<TResult> change) { MaterializeTemplate(); return _query.AtomicChange(change); }
+
+    /// <summary>
+    /// 同步执行 Lambda 查询并物化结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果列表。</returns>
-    public List<TResult> ToList<TResult>(int? timeout = null) => _query.ToList<TResult>(timeout);
+    /// <remarks>
+    /// 同步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// </remarks>
+    public List<TResult> ToList<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToList<TResult>(timeout);
+    }
+
+    /// <summary>
+    /// 根据结果原型生成投影后同步执行列表查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="prototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>最终结果列表。</returns>
+    internal List<TResult> ToList<TResult>(TResult prototype, int? timeout = null) where TResult : class
+    {
+        ApplyPrototypeProjection(prototype);
+        ValidateProjectionResult<TResult>();
+        return _query.ToList<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并返回至多一行结果。
@@ -75,7 +147,37 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询到的实体；没有结果时返回类型默认值。</returns>
-    internal TResult ToEntity<TResult>(int? timeout = null) => _query.ToEntity<TResult>(timeout);
+    internal TResult ToEntity<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntity<TResult>(timeout);
+    }
+
+    /// <summary>
+    /// 根据结果原型生成投影后同步执行单行查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="prototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>唯一结果行或默认值。</returns>
+    internal TResult To<TResult>(TResult prototype, int? timeout = null) where TResult : class
+    {
+        ApplyPrototypeProjection(prototype);
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntity<TResult>(timeout);
+    }
+
+    /// <summary>
+    /// 同步执行当前查询并获取至多一行结果；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果类型。</typeparam>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>唯一结果行或默认值。</returns>
+    internal TResult To<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntity<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并获取指定结果类型的第一行。
@@ -83,7 +185,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行。</returns>
-    public TResult First<TResult>(int? timeout = null) => _query.First<TResult>(timeout);
+    public TResult First<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.First<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。
@@ -91,7 +197,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询结果的第一行；没有结果时返回类型默认值。</returns>
-    public TResult FirstOrDefault<TResult>(int? timeout = null) => _query.FirstOrDefault<TResult>(timeout);
+    public TResult FirstOrDefault<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.FirstOrDefault<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并获取指定结果类型的唯一一行。
@@ -99,7 +209,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询到的唯一结果。</returns>
-    public TResult Single<TResult>(int? timeout = null) => _query.Single<TResult>(timeout);
+    public TResult Single<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.Single<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并获取指定结果类型的首行首列值。
@@ -107,7 +221,12 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">标量结果类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>查询得到的标量值。</returns>
-    public TResult Scalar<TResult>(int? timeout = null) => _query.Scalar<TResult>(timeout);
+    public TResult Scalar<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        ValidateScalarProjectionResult<TResult>();
+        return _query.Scalar<TResult>(timeout);
+    }
 
     /// <summary>
     /// 同步执行当前 Lambda 查询并返回指定结果类型的分页结果。
@@ -116,7 +235,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="pager">分页参数。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含分页数据和分页信息的结果。</returns>
-    public PagerList<TResult> ToPage<TResult>(IPager pager = null, int? timeout = null) => _query.ToPage<TResult>(pager, timeout);
+    public PagerList<TResult> ToPage<TResult>(IPager pager = null, int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToPage<TResult>(pager, timeout);
+    }
 
     /// <summary>
     /// 以同步流方式执行当前 Lambda 查询并映射为指定结果类型。
@@ -124,17 +247,43 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>按需读取查询结果的可枚举序列。</returns>
-    public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null) => _query.AsEnumerable<TResult>(timeout);
+    public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.AsEnumerable<TResult>(timeout);
+    }
 
     /// <summary>
-    /// 异步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// 异步执行 Lambda 查询并物化结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果元素类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果列表的异步任务。</returns>
-    public Task<List<TResult>> ToListAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.ToListAsync<TResult>(timeout, cancellationToken);
+    /// <remarks>
+    /// 异步执行当前 Lambda 查询并完整物化指定结果类型。
+    /// </remarks>
+    public Task<List<TResult>> ToListAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToListAsync<TResult>(timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 根据结果原型生成投影后异步执行列表查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="prototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示最终结果列表的异步操作。</returns>
+    internal Task<List<TResult>> ToListAsync<TResult>(TResult prototype, int? timeout = null,
+        CancellationToken cancellationToken = default) where TResult : class
+    {
+        ApplyPrototypeProjection(prototype);
+        ValidateProjectionResult<TResult>();
+        return _query.ToListAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并返回至多一行结果。
@@ -144,7 +293,41 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询实体的异步任务；没有结果时任务结果为类型默认值。</returns>
     internal Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToEntityAsync<TResult>(timeout, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntityAsync<TResult>(timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 根据结果原型生成投影后异步执行单行查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="prototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
+    internal Task<TResult> ToAsync<TResult>(TResult prototype, int? timeout = null,
+        CancellationToken cancellationToken = default) where TResult : class
+    {
+        ApplyPrototypeProjection(prototype);
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntityAsync<TResult>(timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// 异步执行当前查询并获取至多一行结果；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果类型。</typeparam>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
+    internal Task<TResult> ToAsync<TResult>(int? timeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToEntityAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并获取指定结果类型的第一行。
@@ -153,8 +336,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果第一行的异步任务。</returns>
-    public Task<TResult> FirstAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.FirstAsync<TResult>(timeout, cancellationToken);
+    public Task<TResult> FirstAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.FirstAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并获取指定结果类型的第一行或默认值。
@@ -163,8 +349,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果第一行的异步任务；没有结果时任务结果为类型默认值。</returns>
-    public Task<TResult> FirstOrDefaultAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
+    public Task<TResult> FirstOrDefaultAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.FirstOrDefaultAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并获取指定结果类型的唯一一行。
@@ -173,8 +362,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询唯一结果的异步任务。</returns>
-    public Task<TResult> SingleAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.SingleAsync<TResult>(timeout, cancellationToken);
+    public Task<TResult> SingleAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.SingleAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并获取指定结果类型的首行首列值。
@@ -183,8 +375,12 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询标量值的异步任务。</returns>
-    public Task<TResult> ScalarAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _query.ScalarAsync<TResult>(timeout, cancellationToken);
+    public Task<TResult> ScalarAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        ValidateScalarProjectionResult<TResult>();
+        return _query.ScalarAsync<TResult>(timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 异步执行当前 Lambda 查询并返回指定结果类型的分页结果。
@@ -195,7 +391,11 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含分页数据和分页信息的异步任务。</returns>
     public Task<PagerList<TResult>> ToPageAsync<TResult>(IPager pager = null, int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.ToPageAsync<TResult>(pager, timeout, cancellationToken);
+    }
 
     /// <summary>
     /// 以异步流方式执行当前 Lambda 查询并映射为指定结果类型。
@@ -205,13 +405,25 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>按需读取查询结果的异步可枚举序列。</returns>
     public IAsyncEnumerable<TResult> AsAsyncEnumerable<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        ValidateProjectionResult<TResult>();
+        return _query.AsAsyncEnumerable<TResult>(timeout, cancellationToken);
+    }
 
     /// <inheritdoc />
     ISqlBuilder ISqlQueryBuilderAccessor.GetSqlBuilder() => GetBuilder();
 
     /// <inheritdoc />
     void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
+
+    /// <summary>
+    /// 验证指定泛型标量结果类型与当前投影兼容。
+    /// </summary>
+    /// <typeparam name="TResult">查询的标量结果类型。</typeparam>
+    private void ValidateScalarProjectionResult<TResult>() =>
+        (((ISqlQueryClauseAccessor)_query.ReadBuilder).SelectClause as SelectClause)?
+            .ValidateScalarResult(typeof(TResult));
 
     /// <summary>
     /// 追加查询条件。
@@ -268,7 +480,6 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
             throw new ArgumentNullException(nameof(configure));
         var sourceBuilder = GetBuilder();
         var candidate = sourceBuilder.Clone();
-        candidate.ClearWhere().ClearSqlParams();
         var candidateAccessor = (ISqlQueryClauseAccessor)candidate;
         var group = new SqlConditionGroup((expression, aliases) =>
         {
@@ -279,7 +490,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (group.Condition == null)
             return this;
         candidateAccessor.WhereClause.Where(group.Condition);
-        ((ISqlQueryClauseAccessor)sourceBuilder).WhereClause.And(candidate);
+        _query.AdoptBuilder(candidate);
         Touch();
         return this;
     }
@@ -294,28 +505,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     private static IReadOnlyList<TableSource> ResolveConditionSources(ISqlQueryClauseAccessor accessor,
         LambdaExpression expression, IReadOnlyList<string> aliases)
     {
-        var available = GetBoundSources(accessor).ToList();
-        if (aliases != null && aliases.Count != expression.Parameters.Count)
-            throw new ArgumentException("条件组来源别名数量必须与表达式参数数量一致。", nameof(aliases));
-        var selected = new List<TableSource>(expression.Parameters.Count);
-        for (var index = 0; index < expression.Parameters.Count; index++)
-        {
-            var parameter = expression.Parameters[index];
-            var alias = aliases?[index];
-            var candidates = available.Where(item => item.EntityType == parameter.Type &&
-                selected.Contains(item) == false);
-            if (string.IsNullOrWhiteSpace(alias) == false)
-                candidates = candidates.Where(item => string.Equals(item.Alias, alias,
-                    StringComparison.OrdinalIgnoreCase));
-            var matchingSources = candidates.ToList();
-            if (matchingSources.Count == 0 && string.IsNullOrWhiteSpace(alias))
-                throw new InvalidOperationException($"未找到表达式参数 {parameter.Name} 对应的查询来源。");
-            if (matchingSources.Count != 1)
-                throw new InvalidOperationException($"实体 {parameter.Type.Name} 的查询来源不唯一，请提供有效别名。");
-            var source = matchingSources[0];
-            selected.Add(source);
-        }
-        return selected;
+        return SqlLambdaSourceResolver.Resolve(accessor, expression, aliases);
     }
 
     /// <summary>
@@ -336,12 +526,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <returns>设置投影后的当前查询核心。</returns>
     internal SqlLambdaQueryCore SelectCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
     {
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        ReplaceSelect(string.Join(", ", columns));
-        Touch();
+        ApplyProjection(expression, sources);
         return this;
     }
 
@@ -352,12 +537,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="sources">表达式参数对应的查询表源。</param>
     internal void AppendSelectCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
     {
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        GetSelectClause(accessor).AppendBoundColumns(string.Join(", ", columns));
-        Touch();
+        ApplyProjection(expression, sources, legacyAppend: true);
     }
 
     /// <summary>
@@ -367,14 +547,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="sources">表达式参数对应的查询表源。</param>
     internal void AppendSelectTypedCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
     {
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = expression.Body is MemberInitExpression
-            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources, out _)
-            : GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        GetSelectClause(accessor).AppendBoundColumns(string.Join(", ", columns));
-        Touch();
+        ApplyProjection(expression, sources, legacyAppend: true);
     }
 
     /// <summary>
@@ -393,14 +566,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="sources">表达式参数对应的查询表源。</param>
     internal void SelectTypedCore(LambdaExpression expression, IReadOnlyList<TableSource> sources)
     {
-        if (expression == null)
-            throw new ArgumentNullException(nameof(expression));
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var columns = expression.Body is MemberInitExpression
-            ? GetFromClause(accessor).ResolveMultiSourceDtoColumns(expression, sources, out _)
-            : GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources);
-        ReplaceSelect(string.Join(", ", columns));
-        Touch();
+        ApplyProjection(expression, sources);
     }
 
     /// <summary>
@@ -457,7 +623,10 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        GetGroupByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources));
+        if (accessor.GroupByClause is Bing.Data.Sql.Builders.Clauses.GroupByClause clause)
+            clause.AddLogicalColumns(SqlFunctionProjectionParser.Parse(expression, sources));
+        else
+            GetGroupByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources));
         Touch();
         return this;
     }
@@ -483,7 +652,14 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        GetGroupByClause(accessor).SetBoundHaving(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, sources));
+        if (SqlFunctionProjectionParser.ContainsAggregate(expression))
+        {
+            if (accessor.GroupByClause is not Bing.Data.Sql.Builders.Clauses.GroupByClause clause)
+                throw new NotSupportedException("当前 Provider 不支持结构化聚合条件。");
+            clause.SetFunctionHaving(expression, sources);
+        }
+        else
+            GetGroupByClause(accessor).SetBoundHaving(GetFromClause(accessor).ResolveMultiSourcePredicate(expression, sources));
         Touch();
         return this;
     }
@@ -512,7 +688,10 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
         if (expression == null)
             throw new ArgumentNullException(nameof(expression));
         var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        GetOrderByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources), desc);
+        if (accessor.OrderByClause is Bing.Data.Sql.Builders.Clauses.OrderByClause clause)
+            clause.AddLogicalColumns(SqlFunctionProjectionParser.Parse(expression, sources), desc);
+        else
+            GetOrderByClause(accessor).AppendBoundColumns(GetFromClause(accessor).ResolveMultiSourceColumns(expression, sources), desc);
         Touch();
         return this;
     }
@@ -538,7 +717,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     internal void JoinCore<TJoin>(LambdaExpression predicate, TableSource leftSource, string alias, string schema)
         where TJoin : class
     {
-        JoinAndTouch(() => GetJoinClause().Join<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
+        JoinAndTouch(() => GetJoinClause().Join<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), SqlLambdaSourceResolver.JoinAlias((ISqlQueryClauseAccessor)GetBuilder(), alias, predicate.Parameters[1].Name), schema));
     }
 
     /// <summary>
@@ -551,7 +730,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="schema">连接表架构名。</param>
     internal void LeftJoinCore<TJoin>(LambdaExpression predicate, TableSource leftSource, string alias, string schema)
         where TJoin : class =>
-        JoinAndTouch(() => GetJoinClause().LeftJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
+        JoinAndTouch(() => GetJoinClause().LeftJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), SqlLambdaSourceResolver.JoinAlias((ISqlQueryClauseAccessor)GetBuilder(), alias, predicate.Parameters[1].Name), schema));
 
     /// <summary>
     /// 添加右外连接。
@@ -563,7 +742,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="schema">连接表架构名。</param>
     internal void RightJoinCore<TJoin>(LambdaExpression predicate, TableSource leftSource, string alias, string schema)
         where TJoin : class =>
-        JoinAndTouch(() => GetJoinClause().RightJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
+        JoinAndTouch(() => GetJoinClause().RightJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), SqlLambdaSourceResolver.JoinAlias((ISqlQueryClauseAccessor)GetBuilder(), alias, predicate.Parameters[1].Name), schema));
 
     /// <summary>
     /// 添加全外连接。
@@ -575,7 +754,7 @@ internal sealed class SqlLambdaQueryCore : ISqlQueryBuilderAccessor
     /// <param name="schema">连接表架构名。</param>
     internal void FullJoinCore<TJoin>(LambdaExpression predicate, TableSource leftSource, string alias, string schema)
         where TJoin : class =>
-        JoinAndTouch(() => GetJoinClause().FullJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), alias, schema));
+        JoinAndTouch(() => GetJoinClause().FullJoin<TJoin>(GetFromClause(), ExpandJoinPredicate(predicate, leftSource), SqlLambdaSourceResolver.JoinAlias((ISqlQueryClauseAccessor)GetBuilder(), alias, predicate.Parameters[1].Name), schema));
 
     /// <summary>
     /// 将二元连接表达式扩展为包含当前查询已有来源的参数布局。

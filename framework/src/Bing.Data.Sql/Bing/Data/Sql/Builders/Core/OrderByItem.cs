@@ -76,8 +76,14 @@ public class OrderByItem
     {
         if (Raw)
             return Order;
+        return ToSqlWithPrefix(dialect, GetPrefix(register));
+    }
+
+    /// <summary>按已冻结的前缀格式化，复用普通排序项的方言与方向规则。</summary>
+    internal string ToSqlWithPrefix(IDialect dialect, string prefix)
+    {
         var name = new NameItem(Order);
-        return $"{name.ToSql(dialect, GetPrefix(register))} {(Desc ? "Desc" : null)}".TrimEnd();
+        return $"{name.ToSql(dialect, prefix)} {(Desc ? "Desc" : null)}".TrimEnd();
     }
 
     /// <summary>

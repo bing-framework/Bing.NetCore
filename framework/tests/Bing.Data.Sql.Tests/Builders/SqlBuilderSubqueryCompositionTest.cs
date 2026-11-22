@@ -2,6 +2,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
@@ -16,167 +17,18 @@ namespace Bing.Data.Sql.Tests.Builders;
 public class SqlBuilderSubqueryCompositionTest
 {
     /// <summary>
-    /// 测试目的：子查询 From 在当前 Mutation 状态不允许查询转换时，应在渲染和合并参数前失败。
+    /// 测试目的：查询 Builder 的接口能力与 Insert、Update、Delete 写入能力分离。
     /// </summary>
     [Fact]
-    public void From_WhenBuilderIsMutation_ShouldRejectBeforeMergingSubqueryParameters()
+    public void QueryBuilder_WhenCreated_ShouldExposeOnlyQueryCapability()
     {
-        // Arrange
-        var outer = new TestSqlBuilder()
-            .Update(new SqlTableReference { TableName = "outer" })
-            .Set("Name", "existing");
-        var subquery = new TestSqlBuilder()
-            .Select("*")
-            .From("source")
-            .Where("Id", 1);
+        var builder = new TestSqlBuilder().Select("Id").From("samples");
 
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => outer.From(subquery, "summary"));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", exception.Message);
-        Assert.Equal(SqlOperationKind.Update, outer.OperationKind);
-        Assert.Equal(new object[] { "existing" }, outer.GetParams().Values.ToArray());
-    }
-
-    /// <summary>
-    /// 测试目的：子查询 Join 在当前 Mutation 状态不允许查询转换时，应在渲染和合并参数前失败。
-    /// </summary>
-    [Fact]
-    public void Join_WhenBuilderIsMutation_ShouldRejectBeforeMergingSubqueryParameters()
-    {
-        // Arrange
-        var outer = new TestSqlBuilder()
-            .Update(new SqlTableReference { TableName = "outer" })
-            .Set("Name", "existing");
-        var subquery = new TestSqlBuilder()
-            .Select("*")
-            .From("source")
-            .Where("Id", 1);
-
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => outer.Join(subquery, "summary"));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", exception.Message);
-        Assert.Equal(SqlOperationKind.Update, outer.OperationKind);
-        Assert.Equal(new object[] { "existing" }, outer.GetParams().Values.ToArray());
-    }
-
-    /// <summary>
-    /// 测试目的：Mutation 状态下的委托 From 应在执行委托前拒绝，不能由闭包污染父 Builder。
-    /// </summary>
-    [Fact]
-    public void FromAction_WhenBuilderIsMutation_ShouldRejectBeforeExecutingAction()
-    {
-        // Arrange
-        var outer = CreateUpdateBuilder();
-        var executed = false;
-
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() => outer.From(_ => executed = true, "summary"));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", exception.Message);
-        Assert.False(executed);
-        Assert.Equal(SqlOperationKind.Update, outer.OperationKind);
-        Assert.Equal(new object[] { "existing" }, outer.GetParams().Values.ToArray());
-    }
-
-    /// <summary>
-    /// 测试目的：Mutation 状态下的各类委托 Join 应在执行委托前拒绝，不能由闭包污染父 Builder。
-    /// </summary>
-    [Fact]
-    public void JoinActions_WhenBuilderIsMutation_ShouldRejectBeforeExecutingAction()
-    {
-        // Arrange
-        var join = CreateUpdateBuilder();
-        var leftJoin = CreateUpdateBuilder();
-        var rightJoin = CreateUpdateBuilder();
-        var joinExecuted = false;
-        var leftJoinExecuted = false;
-        var rightJoinExecuted = false;
-
-        // Act
-        var joinException = Assert.Throws<InvalidOperationException>(() =>
-            join.Join(_ => joinExecuted = true, "summary"));
-        var leftJoinException = Assert.Throws<InvalidOperationException>(() =>
-            leftJoin.LeftJoin(_ => leftJoinExecuted = true, "summary"));
-        var rightJoinException = Assert.Throws<InvalidOperationException>(() =>
-            rightJoin.RightJoin(_ => rightJoinExecuted = true, "summary"));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", joinException.Message);
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", leftJoinException.Message);
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", rightJoinException.Message);
-        Assert.False(joinExecuted);
-        Assert.False(leftJoinExecuted);
-        Assert.False(rightJoinExecuted);
-        Assert.Equal(new object[] { "existing" }, join.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { "existing" }, leftJoin.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { "existing" }, rightJoin.GetParams().Values.ToArray());
-    }
-
-    /// <summary>
-    /// 测试目的：Mutation 状态下的委托查询条件应在执行委托前拒绝，不能由闭包污染父 Builder。
-    /// </summary>
-    [Fact]
-    public void WhereAction_WhenBuilderIsMutation_ShouldRejectBeforeExecutingAction()
-    {
-        // Arrange
-        var outer = CreateUpdateBuilder();
-        var executed = false;
-
-        // Act
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            outer.Where("Id", _ => executed = true, Operator.In));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", exception.Message);
-        Assert.False(executed);
-        Assert.Equal(SqlOperationKind.Update, outer.OperationKind);
-        Assert.Equal(new object[] { "existing" }, outer.GetParams().Values.ToArray());
-    }
-
-    /// <summary>
-    /// 测试目的：Mutation 状态下的委托集合和存在性条件应在执行委托前拒绝，不能由闭包污染父 Builder。
-    /// </summary>
-    [Fact]
-    public void SetSubqueryActions_WhenBuilderIsMutation_ShouldRejectBeforeExecutingAction()
-    {
-        // Arrange
-        var inBuilder = CreateUpdateBuilder();
-        var notInBuilder = CreateUpdateBuilder();
-        var existsBuilder = CreateUpdateBuilder();
-        var notExistsBuilder = CreateUpdateBuilder();
-        var inExecuted = false;
-        var notInExecuted = false;
-        var existsExecuted = false;
-        var notExistsExecuted = false;
-
-        // Act
-        var inException = Assert.Throws<InvalidOperationException>(() =>
-            inBuilder.In("Id", _ => inExecuted = true));
-        var notInException = Assert.Throws<InvalidOperationException>(() =>
-            notInBuilder.NotIn("Id", _ => notInExecuted = true));
-        var existsException = Assert.Throws<InvalidOperationException>(() =>
-            existsBuilder.Exists(_ => existsExecuted = true));
-        var notExistsException = Assert.Throws<InvalidOperationException>(() =>
-            notExistsBuilder.NotExists(_ => notExistsExecuted = true));
-
-        // Assert
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", inException.Message);
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", notInException.Message);
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", existsException.Message);
-        Assert.Equal("当前 Builder 已处于 Update 状态，不能调用 Where。", notExistsException.Message);
-        Assert.False(inExecuted);
-        Assert.False(notInExecuted);
-        Assert.False(existsExecuted);
-        Assert.False(notExistsExecuted);
-        Assert.Equal(new object[] { "existing" }, inBuilder.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { "existing" }, notInBuilder.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { "existing" }, existsBuilder.GetParams().Values.ToArray());
-        Assert.Equal(new object[] { "existing" }, notExistsBuilder.GetParams().Values.ToArray());
+        Assert.IsAssignableFrom<ISqlBuilder>(builder);
+        Assert.False(builder is ISqlInsertBuilder);
+        Assert.False(builder is ISqlUpdateBuilder);
+        Assert.False(builder is ISqlDeleteBuilder);
+        Assert.Equal("Select [Id] \r\nFrom [samples]", builder.ToSql());
     }
 
     /// <summary>
@@ -719,14 +571,6 @@ public class SqlBuilderSubqueryCompositionTest
     }
 
     /// <summary>
-    /// 创建已写入一个 Set 参数的 Update Builder。
-    /// </summary>
-    /// <returns>返回包含目标表和一个 Set 参数的 Update Builder。</returns>
-    private static TestSqlBuilder CreateUpdateBuilder() => new TestSqlBuilder()
-        .Update(new SqlTableReference { TableName = "outer" })
-        .Set("Name", "existing");
-
-    /// <summary>
     /// 捕获原子操作失败后必须保持不变的查询状态。
     /// </summary>
     /// <param name="builder">要捕获状态的测试 Builder。</param>
@@ -818,6 +662,12 @@ public class SqlBuilderSubqueryCompositionTest
     /// <summary>
     /// 查询状态快照。
     /// </summary>
+    /// <param name="Sql">SQL 语句文本。</param>
+    /// <param name="Parameters">SQL 语句使用的参数集合。</param>
+    /// <param name="RootSources">根查询使用的数据源集合。</param>
+    /// <param name="JoinSources">关联查询使用的数据源集合。</param>
+    /// <param name="Select">查询选择表达式。</param>
+    /// <param name="Operation">查询操作类型。</param>
     private sealed record QueryState(
         string Sql,
         IReadOnlyList<KeyValuePair<string, object>> Parameters,

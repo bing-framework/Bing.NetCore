@@ -29,6 +29,11 @@ public sealed class BackgroundScopeConsumerTest
         Assert.NotEqual(workerIterationScope, jobScope);
     }
 
+    /// <summary>
+    /// 在新的服务作用域中执行操作并返回作用域标识。
+    /// </summary>
+    /// <param name="rootProvider">用于创建独立服务作用域的根容器。</param>
+    /// <returns>本次操作使用的工作单元作用域标识。</returns>
     private static async Task<Guid> RunInNewScopeAsync(IServiceProvider rootProvider)
     {
         await using var serviceScope = rootProvider.CreateAsyncScope();
@@ -36,12 +41,26 @@ public sealed class BackgroundScopeConsumerTest
         return await operation.ExecuteAsync();
     }
 
+    /// <summary>
+    /// 保存后台作用域测试中待处理的应用服务操作。
+    /// </summary>
     private sealed class ScopedOperation
     {
+        /// <summary>
+        /// 保存作用域操作使用的工作单元作用域管理器。
+        /// </summary>
         private readonly IUnitOfWorkScopeManager _manager;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ScopedOperation" /> 类型的实例。
+        /// </summary>
+        /// <param name="manager">记录当前测试工作单元操作的管理器。</param>
         public ScopedOperation(IUnitOfWorkScopeManager manager) => _manager = manager;
 
+        /// <summary>
+        /// 执行并完成工作单元作用域后返回其标识。
+        /// </summary>
+        /// <returns>本次操作使用的工作单元作用域标识。</returns>
         public async Task<Guid> ExecuteAsync()
         {
             Guid id;

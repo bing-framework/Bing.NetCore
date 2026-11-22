@@ -1,1 +1,3 @@
 
+
+override Bing.Data.Sql.Builders.SqliteBuilder.SupportsMutationCheckpoint.get -> bool

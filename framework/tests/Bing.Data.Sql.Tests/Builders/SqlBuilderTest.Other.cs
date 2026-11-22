@@ -2,6 +2,7 @@
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Filters;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Tests.Samples;
@@ -130,24 +131,24 @@ public partial class SqlBuilderTest
     /// 测试 - 统一 Mutation Builder 冻结写入命令时，软删除边界 SQL 与参数必须来自同一渲染快照。
     /// </summary>
     [Fact]
-    public void ToSqlWriteCommand_WhenUnifiedDeleteUsesSoftDeleteBoundary_ShouldFreezeMatchingSqlAndParameters()
+    public void ToSqlWriteCommand_WhenDeleteUsesSoftDeleteBoundary_ShouldFreezeMatchingSqlAndParameters()
     {
         // 目标 SQL：调用方条件和默认 IsDeleted=false 边界均进入 Delete Where。
         const string expectedSql = "Delete From [Sample5] Where [IntValue]=@_p_0 And [IsDeleted]=@_p_1";
 
         // 目标参数：@_p_0 = 7；@_p_1 = false。
         // 结果语义：动态渲染边界不会造成 SQL token 与冻结参数集合不一致。
-        _builder.DeleteClause.From(new SqlTableReference { EntityType = typeof(Sample5), TableName = "Sample5" });
-        _builder.Where<Sample5, int>(item => item.IntValue, 7);
+        var builder = new SqlDeleteBuilder(TestMutationSqlProvider.Instance, new SqlBuilderServices());
+        builder.DeleteFrom<Sample5>().Where<Sample5, int>(item => item.IntValue, 7);
 
         // Act
-        var command = _builder.ToSqlWriteCommand();
+        var command = builder.ToSqlWriteCommand();
 
         // Assert
-        SqlAssert.Equal(expectedSql, command.Sql, _builder.Provider.Key, command.Parameters);
+        SqlAssert.Equal(expectedSql, command.Sql, TestMutationSqlProvider.Instance.Key, command.Parameters);
         SqlParameterAssert.Equal(command.Parameters, "@_p_0", 7);
         SqlParameterAssert.Equal(command.Parameters, "@_p_1", false);
-        Assert.Single(_builder.GetSqlParams());
+        Assert.Single(builder.GetParameters());
     }
 
     /// <summary>
@@ -315,8 +316,9 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - 多级外连接中，前序 Left Join 来源的软删除谓词必须继续保留在其自身 On 条件，不能落入最终 Where 改变后续 Right Join 的保留语义。
+    /// 验证嵌套外连接的软删除谓词保留在原连接条件。
     /// </summary>
+    /// <remarks>前序 Left Join 来源的谓词不得移入最终 Where，以保留后续 Right Join 的保留侧语义。</remarks>
     [Fact]
     public void IsDeletedFilter_WhenNestedOuterJoinsContainJoinedSoftDeleteSource_ShouldKeepPredicateOnOriginatingJoin()
     {

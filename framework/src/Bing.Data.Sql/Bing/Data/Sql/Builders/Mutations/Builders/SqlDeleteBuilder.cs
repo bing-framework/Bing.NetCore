@@ -65,11 +65,11 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
             {
                 var snapshot = (SqlDeleteBuilder)Clone();
                 snapshot.EnsureDataBoundary();
-                snapshot.AppendCore(builder);
+                snapshot.AppendCore(builder, startIndex);
                 return;
             }
             EnsureDataBoundary();
-            AppendCore(builder);
+            AppendCore(builder, startIndex);
         }
         catch
         {
@@ -82,13 +82,16 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// 在当前状态下渲染 Delete 子句，不追加新的数据边界。
     /// </summary>
     /// <param name="builder">接收 Delete SQL 的字符串构建器。</param>
-    private void AppendCore(StringBuilder builder)
+    /// <param name="startIndex">本次追加前的缓冲区长度。</param>
+    private void AppendCore(StringBuilder builder, int startIndex)
     {
-        Validate();
+        var validationContext = Validate();
         DeleteClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.BeforeSource, startIndex);
         if (DeleteUsingClause.Table != null)
             DeleteUsingClause.AppendTo(builder);
         WhereClause.AppendTo(builder);
+        AppendReturning(builder, validationContext, SqlReturningClausePosition.End, startIndex);
     }
 
     /// <inheritdoc />
@@ -119,6 +122,16 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     public ISqlDeleteBuilder New() => new SqlDeleteBuilder(Provider, MutationContext.Services,
         ParameterManager.CreateEmpty(), ClauseFactory);
 
+    /// <summary>复用默认实体 SQL；存在写入数据边界时仍使用原快照渲染路径。</summary>
+    internal SqlWriteCommand BuildCommand(string generatedSql)
+    {
+        if (generatedSql == null || !ReturningClause.IsEmpty || DeleteUsingClause.Table != null ||
+            ShouldRenderDataBoundarySnapshot())
+            return BuildCommand();
+        Validate();
+        return new SqlWriteCommand(generatedSql, GetParameters(), Provider, SqlOperationKind.Delete);
+    }
+
     /// <inheritdoc />
     public ISqlDeleteBuilder Clone()
     {
@@ -126,6 +139,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         result.DeleteClause = DeleteClause.Clone(result.MutationContext);
         result.DeleteUsingClause = DeleteUsingClause.Clone(result.MutationContext);
         result.WhereClause = WhereClause.Clone(result.MutationContext);
+        result.ReturningClause = ReturningClause.Clone(result.MutationContext);
         result.AllowAllRows = AllowAllRows;
         result._isDataBoundaryApplied = _isDataBoundaryApplied;
         result.DataBoundaryOperation = DataBoundaryOperation;
@@ -138,6 +152,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         DeleteClause.Clear();
         DeleteUsingClause.Clear();
         WhereClause.Clear();
+        ReturningClause.Clear();
         AllowAllRows = false;
         _isDataBoundaryApplied = false;
         ParameterManager.Clear();
@@ -146,7 +161,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// <summary>
     /// 验证 Delete 结构。
     /// </summary>
-    private void Validate()
+    private SqlValidationContext Validate()
     {
         var context = new SqlValidationContext(Provider, ParameterManager.Count, AllowAllRows, SqlExecutionKind.Delete);
         DeleteClause.Validate(context);
@@ -154,6 +169,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
             DeleteUsingClause.Validate(context);
         WhereClause.Validate(context);
         ValidateParameterLimit();
+        return context;
     }
 
     /// <summary>
@@ -178,7 +194,7 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
     /// 渲染当前 Delete 状态。
     /// </summary>
     /// <returns>当前 Delete 状态生成的 SQL 文本。</returns>
-    private string RenderCore() => Render(AppendCore);
+    private string RenderCore() => Render(builder => AppendCore(builder, builder.Length));
 
     /// <summary>
     /// 创建 Delete Using 子句，优先使用 Provider 注册的专用子句工厂。

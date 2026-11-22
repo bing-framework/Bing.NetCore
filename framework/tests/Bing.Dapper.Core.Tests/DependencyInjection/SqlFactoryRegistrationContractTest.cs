@@ -11,6 +11,9 @@ namespace Bing.Dapper.Core.Tests.DependencyInjection;
 /// </summary>
 public sealed class SqlFactoryRegistrationContractTest
 {
+    /// <summary>
+    /// 保存需要注册的查询工厂服务类型。
+    /// </summary>
     private static readonly Type[] FactoryServiceTypes =
     {
         typeof(ISqlQueryFactory),
@@ -54,6 +57,10 @@ public sealed class SqlFactoryRegistrationContractTest
         }
     }
 
+    /// <summary>
+    /// 验证 SQL 工厂扩展保留已有类型注册。
+    /// </summary>
+    /// <param name="serviceType">待检查的服务契约类型。</param>
     private static void AssertTypeRegistrationIsPreserved(Type serviceType)
     {
         IServiceCollection services = new ServiceCollection();
@@ -72,6 +79,10 @@ public sealed class SqlFactoryRegistrationContractTest
         Assert.Same(instanceA, scopeB.ServiceProvider.GetRequiredService(serviceType));
     }
 
+    /// <summary>
+    /// 验证 SQL 工厂扩展保留已有工厂注册。
+    /// </summary>
+    /// <param name="serviceType">待检查的服务契约类型。</param>
     private static void AssertFactoryRegistrationIsPreserved(Type serviceType)
     {
         IServiceCollection services = new ServiceCollection();
@@ -89,6 +100,10 @@ public sealed class SqlFactoryRegistrationContractTest
         Assert.Same(instance, scope.ServiceProvider.GetRequiredService(serviceType));
     }
 
+    /// <summary>
+    /// 验证 SQL 工厂扩展保留已有实例注册。
+    /// </summary>
+    /// <param name="serviceType">待检查的服务契约类型。</param>
     private static void AssertInstanceRegistrationIsPreserved(Type serviceType)
     {
         IServiceCollection services = new ServiceCollection();
@@ -111,26 +126,35 @@ public sealed class SqlFactoryRegistrationContractTest
     public sealed class TestSqlFactories : ISqlQueryFactory, ISqlExecutorFactory,
         ISqlMultipleQueryExecutorFactory, ISqlTransactionScopeFactory
     {
+        /// <inheritdoc />
         ISqlQuery ISqlQueryFactory.Create(string dbKey) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         ISqlExecutor ISqlExecutorFactory.Create(string dbKey) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         ISqlMultipleQueryExecutor ISqlMultipleQueryExecutorFactory.Create(string dbKey) =>
             throw new NotSupportedException();
 
+        /// <inheritdoc />
         public ISqlTransactionScope Begin() => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public ISqlTransactionScope Begin(string dataSourceKey) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public ISqlTransactionScope Begin(string dataSourceKey, IsolationLevel isolationLevel) =>
             throw new NotSupportedException();
 
+        /// <inheritdoc />
         public Task<ISqlTransactionScope> BeginAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
+        /// <inheritdoc />
         public Task<ISqlTransactionScope> BeginAsync(string dataSourceKey,
             CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public Task<ISqlTransactionScope> BeginAsync(string dataSourceKey, IsolationLevel isolationLevel,
             CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }

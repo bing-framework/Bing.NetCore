@@ -16,6 +16,8 @@ public class MySqlTypeConverter : ITypeConverter
         {
             case "char":
                 return length == 36 ? DbType.Guid : DbType.String;
+            case "enum":
+            case "set":
             case "varchar":
             case "tinytext":
             case "mediumtext":
@@ -48,6 +50,8 @@ public class MySqlTypeConverter : ITypeConverter
             case "datetime":
             case "timestamp":
                 return DbType.DateTime;
+            case "binary":
+            case "varbinary":
             case "tinyblob":
             case "mediumblob":
             case "longblob":

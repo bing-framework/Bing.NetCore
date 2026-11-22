@@ -1,5 +1,7 @@
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
@@ -16,12 +18,14 @@ public class OracleInsertSelectBuilderTest
     public void InsertSelect_ShouldRenderOracleSql()
     {
         // Arrange
-        var builder = new OracleBuilder()
-            .InsertInto(new SqlTableReference { Schema = "archive", TableName = "archive_orders" })
-            .Columns("Id", "Code")
+        var source = new OracleBuilder()
             .Select("Id,Code")
             .From(new SqlTableReference { Schema = "sales", TableName = "orders" })
             .Where("Status", "active");
+        var builder = new SqlInsertBuilder(OracleSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .InsertInto(new SqlTableReference { Schema = "archive", TableName = "archive_orders" })
+            .Columns("Id", "Code")
+            .InsertSelect(source);
 
         // Act
         var sql = builder.ToSql();

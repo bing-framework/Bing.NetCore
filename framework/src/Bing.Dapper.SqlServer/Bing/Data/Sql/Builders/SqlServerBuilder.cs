@@ -21,6 +21,9 @@ public class SqlServerBuilder : SqlBuilderBase
         : base(SqlServerSqlProvider.Instance, services ?? SqlBuilderServices.CreateDefault(), parameterManager) { }
 
     /// <inheritdoc />
+    protected override bool SupportsMutationCheckpoint => GetType() == typeof(SqlServerBuilder);
+
+    /// <inheritdoc />
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqlServerBuilder(Services, parameterManager);
 }

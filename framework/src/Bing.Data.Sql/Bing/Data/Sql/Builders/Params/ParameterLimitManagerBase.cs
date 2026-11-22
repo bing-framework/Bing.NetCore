@@ -25,6 +25,32 @@ internal abstract class ParameterLimitManagerBase
     /// </summary>
     protected IParameterManager Inner { get; }
 
+    /// <summary>仅框架参数容器允许由渲染候选整体替换；保留外部容器的可调策略实例。</summary>
+    internal bool UsesFrameworkParameterManager => Inner.GetType() == typeof(ParameterManager) ||
+        Inner is ParameterLimitManagerBase limited && limited.UsesFrameworkParameterManager;
+
+    /// <summary>获取实际参数容器和最严格的嵌套限额；相同限额保留外层 Provider。</summary>
+    /// <param name="maxCount">最严格的参数数量上限。</param>
+    /// <param name="providerKey">该上限对应的 Provider 标识。</param>
+    /// <returns>移除限额包装后的参数容器。</returns>
+    internal IParameterManager GetStorage(out int maxCount, out string providerKey)
+    {
+        var current = Inner;
+        maxCount = MaxParameterCount;
+        providerKey = ProviderKey;
+        while (current is ParameterLimitManagerBase limited)
+        {
+            // 同一上限由外层先报错，保留原包装器的校验顺序和 Provider 信息。
+            if (limited.MaxParameterCount < maxCount)
+            {
+                maxCount = limited.MaxParameterCount;
+                providerKey = limited.ProviderKey;
+            }
+            current = limited.Inner;
+        }
+        return current;
+    }
+
     /// <summary>
     /// 获取当前装饰器允许保存的最大参数数量。
     /// </summary>
@@ -49,6 +75,16 @@ internal abstract class ParameterLimitManagerBase
             return;
         throw new InvalidOperationException(
             $"SQL Provider '{ProviderKey}' 的参数数量超出上限。当前参数数量: {currentCount}；尝试添加后数量: {currentCount + 1}；最大参数数量: {MaxParameterCount}。");
+    }
+
+    /// <summary>通过全部嵌套限额写入同方言参数快照。</summary>
+    internal void AddSnapshot(SqlParam parameter, bool preserveMetadata)
+    {
+        EnsureCanAdd(parameter.Name);
+        if (Inner is ParameterLimitManagerBase limited)
+            limited.AddSnapshot(parameter, preserveMetadata);
+        else
+            ((ParameterManager)Inner).AddSnapshot(parameter, preserveMetadata);
     }
 
     /// <summary>

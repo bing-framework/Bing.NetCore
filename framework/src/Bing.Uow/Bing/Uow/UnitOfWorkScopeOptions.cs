@@ -13,8 +13,9 @@ public sealed class UnitOfWorkScopeOptions
     public bool IsTransactional { get; set; } = true;
 
     /// <summary>
-    /// 获取或设置本地事务隔离级别；未指定时使用 Provider 默认值。
+    /// 获取或设置本地事务隔离级别。
     /// </summary>
+    /// <remarks>未指定时使用 Provider 默认值。</remarks>
     public IsolationLevel? IsolationLevel { get; set; }
 
     /// <summary>

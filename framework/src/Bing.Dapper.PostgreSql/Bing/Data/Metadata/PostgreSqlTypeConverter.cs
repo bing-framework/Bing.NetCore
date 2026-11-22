@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using NpgsqlTypes;
 
 namespace Bing.Data.Metadata;
 
@@ -7,6 +8,22 @@ namespace Bing.Data.Metadata;
 /// </summary>
 public class PostgreSqlTypeConverter : ITypeConverter
 {
+    private static readonly Dictionary<string, NpgsqlDbType> RangeParameterTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["int4range"] = NpgsqlDbType.IntegerRange,
+        ["int4multirange"] = NpgsqlDbType.IntegerMultirange,
+        ["int8range"] = NpgsqlDbType.BigIntRange,
+        ["int8multirange"] = NpgsqlDbType.BigIntMultirange,
+        ["numrange"] = NpgsqlDbType.NumericRange,
+        ["nummultirange"] = NpgsqlDbType.NumericMultirange,
+        ["daterange"] = NpgsqlDbType.DateRange,
+        ["datemultirange"] = NpgsqlDbType.DateMultirange,
+        ["tsrange"] = NpgsqlDbType.TimestampRange,
+        ["tsmultirange"] = NpgsqlDbType.TimestampMultirange,
+        ["tstzrange"] = NpgsqlDbType.TimestampTzRange,
+        ["tstzmultirange"] = NpgsqlDbType.TimestampTzMultirange
+    };
+
     /// <inheritdoc />
     public DbType? ToDbType(string dataType, int? length = null)
     {
@@ -50,7 +67,17 @@ public class PostgreSqlTypeConverter : ITypeConverter
             case "bytea":
                 return DbType.Binary;
         }
+        // DbType 无法表示范围类型，交给 Npgsql 参数定制器绑定。
+        if (RangeParameterTypes.ContainsKey(dataType))
+            return null;
         throw new NotSupportedException(
             $"PostgreSQL 数据类型 '{dataType}' 当前没有映射到 DbType。请扩展 PostgreSqlTypeConverter 映射，或使用已支持的数据类型。");
+    }
+
+    /// <summary>将 PostgreSQL 内置范围列的 SQL 类型名转换为参数类型。</summary>
+    internal static bool TryGetRangeParameterType(string typeName, out NpgsqlDbType type)
+    {
+        type = default;
+        return typeName != null && RangeParameterTypes.TryGetValue(typeName, out type);
     }
 }

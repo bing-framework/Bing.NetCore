@@ -70,6 +70,18 @@ public sealed record SqlClauseContext
     public SqlBuilderServices Services { get; }
 
     /// <summary>
+    /// 获取当前 Builder 固定的自动别名策略。
+    /// </summary>
+    internal bool AutoGenerateTableAlias { get; }
+
+    /// <summary>
+    /// 获取当前子句上下文对应的不可变别名策略。
+    /// </summary>
+    internal SqlAliasPolicy AliasPolicy => AutoGenerateTableAlias
+        ? SqlAliasPolicy.Automatic
+        : SqlAliasPolicy.ExplicitOnly;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlClauseContext"/> 类型的实例。
     /// </summary>
     /// <param name="builder">当前 SQL Builder。</param>
@@ -110,6 +122,8 @@ public sealed record SqlClauseContext
             throw new ArgumentNullException(nameof(parameterManagerState));
         ExecutionContext = executionContext ?? throw new ArgumentNullException(nameof(executionContext));
         Services = services ?? throw new ArgumentNullException(nameof(services));
+        AutoGenerateTableAlias = builder is SqlBuilderBase sqlBuilder
+            ? sqlBuilder.AutoGenerateTableAlias : services.Options?.AutoGenerateTableAlias ?? true;
     }
 
     /// <summary>

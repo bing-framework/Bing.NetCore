@@ -6,8 +6,11 @@ using Xunit;
 namespace Bing.Uow.Tests;
 
 /// <summary>
-/// <see cref="UnitOfWorkManager"/> 单元测试。 Mock IUnitOfWork，验证管理器协调行为，不依赖真实 DB。
+/// <see cref="UnitOfWorkManager" /> 单元测试。
 /// </summary>
+/// <remarks>
+/// Mock IUnitOfWork，验证管理器协调行为，不依赖真实 DB。
+/// </remarks>
 public class UnitOfWorkManagerTest
 {
     /// <summary>

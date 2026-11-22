@@ -202,13 +202,18 @@ public class JoinItem : IJoinOn
     #region Clone(克隆)
 
     /// <summary>
-    /// 克隆
+    /// 克隆 Join 项及其条件和数据源。
     /// </summary>
-    /// <param name="helper">克隆结果使用的辅助操作。</param>
-    /// <returns>当前连接项的独立副本。</returns>
-    internal JoinItem Clone(Helper helper)
+    /// <param name="helper">克隆项使用的 SQL 辅助对象。</param>
+    /// <param name="context">可选的目标 SQL 子句上下文。</param>
+    /// <returns>包含克隆表项、条件及数据源的 Join 项。</returns>
+    /// <remarks>
+    /// 指定上下文时重新绑定条件；未指定时将条件保存为独立 SQL 条件。
+    /// </remarks>
+    internal JoinItem Clone(Helper helper, SqlClauseContext context = null)
     {
-        var condition = Condition == null ? null : new SqlCondition(Condition.GetCondition());
+        var condition = Condition == null ? null : context == null
+            ? new SqlCondition(Condition.GetCondition()) : SqlConditionSnapshot.Rebind(Condition, context);
         var result = Source == null
             ? Create(JoinType, Table?.Clone(), Type, condition)
             : new JoinItem(JoinType, Table?.Clone(), Type, condition, Source.Clone());

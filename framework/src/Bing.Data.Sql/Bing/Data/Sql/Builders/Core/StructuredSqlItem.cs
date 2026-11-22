@@ -104,6 +104,15 @@ public sealed class StructuredSqlItem : SqlItem
         _isCrossDatabaseValidated = true;
     }
 
+    /// <summary>
+    /// 复制表引用并绑定来源别名。
+    /// </summary>
+    /// <param name="alias">副本使用的来源别名。</param>
+    /// <returns>绑定指定别名的结构化 SQL 项副本。</returns>
+    internal StructuredSqlItem WithAlias(string alias) => new(Reference with { Alias = alias },
+        _objectNameFormatter, _databaseContext, _providerDatabaseType, _tableReferenceValidator,
+        _crossDatabaseQueryValidator, _sourceReference);
+
     /// <inheritdoc />
     public override SqlItem Clone() => new StructuredSqlItem(Reference, _objectNameFormatter, _databaseContext,
         _providerDatabaseType, _tableReferenceValidator, _crossDatabaseQueryValidator, _sourceReference);

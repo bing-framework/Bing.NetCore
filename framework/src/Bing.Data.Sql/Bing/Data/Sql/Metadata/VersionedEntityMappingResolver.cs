@@ -101,6 +101,7 @@ public sealed class VersionedEntityMappingResolver : IEntityMappingResolver, IEn
     /// <returns>包含基础选项副本的配置对象。</returns>
     private static SqlMetadataOptions CloneBaseOptions(SqlMetadataOptions source) => new()
     {
+        ExecutionMode = source.ExecutionMode,
         EntityMappingCacheCapacity = source.EntityMappingCacheCapacity,
         EntityMappingCacheEvictionPolicy = source.EntityMappingCacheEvictionPolicy,
         MutationPlanCacheCapacity = source.MutationPlanCacheCapacity,
@@ -120,6 +121,7 @@ public sealed class VersionedEntityMappingResolver : IEntityMappingResolver, IEn
     {
         var options = new SqlMetadataOptions
         {
+            ExecutionMode = _baseOptions.ExecutionMode,
             EntityMappingCacheCapacity = _baseOptions.EntityMappingCacheCapacity,
             EntityMappingCacheEvictionPolicy = _baseOptions.EntityMappingCacheEvictionPolicy,
             MutationPlanCacheCapacity = _baseOptions.MutationPlanCacheCapacity,

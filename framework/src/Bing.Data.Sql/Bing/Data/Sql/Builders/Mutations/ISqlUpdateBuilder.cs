@@ -7,8 +7,8 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// <summary>
 /// 用于构建 Update SQL 的接口。
 /// </summary>
-public interface ISqlUpdateBuilder : ISqlContent, IUpdate, IUpdateClauseAccessor, ISqlMutationContextAccessor,
-    IAllowAllRowsMutationBuilder
+public interface ISqlUpdateBuilder : ISqlContent, IUpdate, IUpdateClauseAccessor, IReturningClauseAccessor,
+    ISqlMutationContextAccessor, IAllowAllRowsMutationBuilder
 {
     /// <summary>
     /// 获取是否显式允许全表更新。

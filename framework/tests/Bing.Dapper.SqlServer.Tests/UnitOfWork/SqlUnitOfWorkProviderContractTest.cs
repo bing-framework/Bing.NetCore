@@ -25,18 +25,33 @@ namespace Bing.Dapper.Tests.UnitOfWork;
 /// </summary>
 public sealed class SqlUnitOfWorkProviderContractTest
 {
+    /// <summary>
+    /// 定义测试的自定义 SQL 提供程序键。
+    /// </summary>
     private const string CustomProviderKey = "test.custom-uow";
 
+    /// <summary>
+    /// 获取参与测试的全部 Provider 注册键。
+    /// </summary>
     public static IEnumerable<object[]> AllProviderKeys => ProviderCases.Select(item => new object[] { item.Key });
 
+    /// <summary>
+    /// 获取支持事务测试的 Provider 注册键集合。
+    /// </summary>
     public static IEnumerable<object[]> TransactionalProviderKeys => ProviderCases
         .Where(item => item.Key != "doris")
         .Select(item => new object[] { item.Key });
 
+    /// <summary>
+    /// 获取不支持原生异步事务 API 的 Provider 集合。
+    /// </summary>
     public static IEnumerable<object[]> ProvidersWithoutNativeAsyncTransactions => ProviderCases
         .Where(item => item.Key is "sqlserver" or "oracle" or "sqlite")
         .Select(item => new object[] { item.Key });
 
+    /// <summary>
+    /// 保存 SQL 提供程序契约的测试用例矩阵。
+    /// </summary>
     private static readonly ProviderCase[] ProviderCases =
     {
         new("mysql", DatabaseType.MySql, MySqlSqlProvider.Instance, "bing.mysql",
@@ -65,6 +80,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
     /// <summary>
     /// 所有具名源必须通过实际 Provider resolver、运行时实现和连接工厂选择对应分支。
     /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [MemberData(nameof(AllProviderKeys))]
     public void ProviderAndDataSourceKey_ShouldSelectExpectedRuntimeAndConnectionFactory(string key)
@@ -94,6 +110,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
     /// <summary>
     /// 受支持的 Provider 必须由 root 资源完成一次真实事务调用，并遵循各自的原生异步能力声明。
     /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [MemberData(nameof(TransactionalProviderKeys))]
     public async Task ProviderUnitOfWorkResource_ShouldCommitAndDisposeOnceUsingDeclaredAsyncMode(string key)
@@ -137,6 +154,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
     /// <summary>
     /// Uow 回滚同样必须调用 Provider 实际声明的异步事务路径并且只释放一次。
     /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [MemberData(nameof(TransactionalProviderKeys))]
     public async Task ProviderUnitOfWorkResource_ShouldRollbackAndDisposeOnceUsingDeclaredAsyncMode(string key)
@@ -171,6 +189,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
     /// <summary>
     /// 事务 Uow 不能在冻结的 replica 上执行；冻结到 primary 的正确上下文仍可准备事务。
     /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [MemberData(nameof(TransactionalProviderKeys))]
     public async Task FrozenReplica_ShouldRejectBeforeOpenAndPrimarySnapshotShouldRecover(string key)
@@ -308,6 +327,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
     /// <summary>
     /// 无原生异步事务声明的 Provider 必须使用同步事务成员完成异步 Uow。
     /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
     [Theory]
     [MemberData(nameof(ProvidersWithoutNativeAsyncTransactions))]
     public async Task ProviderWithoutNativeAsyncTransactions_ShouldUseSynchronousFallback(string key)
@@ -337,6 +357,10 @@ public sealed class SqlUnitOfWorkProviderContractTest
         Assert.Equal(1, observation.ConnectionDisposeCount);
     }
 
+    /// <summary>
+    /// 创建多提供程序工作单元契约测试容器。
+    /// </summary>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider CreateProvider()
     {
         var services = new ServiceCollection();
@@ -360,6 +384,15 @@ public sealed class SqlUnitOfWorkProviderContractTest
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
     }
 
+    /// <summary>
+    /// 向作用域注册 Dapper SQL 连接资源。
+    /// </summary>
+    /// <param name="scope">目标工作单元作用域。</param>
+    /// <param name="source">测试数据源描述。</param>
+    /// <param name="provider">目标 SQL 提供程序。</param>
+    /// <param name="connectionResolver">数据库连接工厂解析器。</param>
+    /// <param name="transactionCapabilities">提供程序支持的事务能力。</param>
+    /// <returns>注册到目标作用域的 SQL 连接资源。</returns>
     private static DapperSqlUnitOfWorkConnectionResource RegisterResource(IUnitOfWorkScope scope,
         SqlDataSourceDescriptor source, ISqlProvider provider, ISqlDbConnectionFactoryResolver connectionResolver,
         SqlProviderTransactionCapabilities transactionCapabilities)
@@ -369,6 +402,12 @@ public sealed class SqlUnitOfWorkProviderContractTest
             provider.Key, source.ConnectionString, connectionResolver, transactionCapabilities));
     }
 
+    /// <summary>
+    /// 解析指定数据源对应的 SQL 提供程序。
+    /// </summary>
+    /// <param name="serviceProvider">解析测试服务的容器。</param>
+    /// <param name="source">测试数据源描述。</param>
+    /// <returns>与目标数据库或数据源匹配的 SQL 提供程序。</returns>
     private static ISqlProvider ResolveProvider(IServiceProvider serviceProvider, SqlDataSourceDescriptor source) =>
         serviceProvider.GetRequiredService<ISqlProviderResolver>().Resolve(new DatabaseContext
         {
@@ -376,10 +415,24 @@ public sealed class SqlUnitOfWorkProviderContractTest
             DataSource = source
         }, databaseType: source.DatabaseType);
 
+    /// <summary>
+    /// 按键读取已注册的数据源描述。
+    /// </summary>
+    /// <param name="serviceProvider">解析测试服务的容器。</param>
+    /// <param name="key">用于关联测试操作的键。</param>
+    /// <returns>测试使用的数据源描述。</returns>
     private static SqlDataSourceDescriptor GetSource(IServiceProvider serviceProvider, string key) =>
         serviceProvider.GetRequiredService<Bing.Data.Sql.Configs.SqlMetadataOptions>()
             .DataSources.DataSources[key];
 
+    /// <summary>
+    /// 创建具有指定主库读取策略的数据源描述。
+    /// </summary>
+    /// <param name="providerCase">数据库提供程序的测试用例。</param>
+    /// <param name="key">用于关联测试操作的键。</param>
+    /// <param name="primaryReadStrategy">主库读取策略。</param>
+    /// <param name="primaryDataSourceKey">数据源关联的主库键。</param>
+    /// <returns>测试使用的数据源描述。</returns>
     private static SqlDataSourceDescriptor CreateSource(ProviderCase providerCase, string key,
         PrimaryReadStrategy primaryReadStrategy, string primaryDataSourceKey) => new()
     {
@@ -392,25 +445,62 @@ public sealed class SqlUnitOfWorkProviderContractTest
         SupportsTransactions = true
     };
 
+    /// <summary>
+    /// 按键查找数据库提供程序测试用例。
+    /// </summary>
+    /// <param name="key">用于关联测试操作的键。</param>
+    /// <returns>与给定键匹配的数据库提供程序用例。</returns>
     private static ProviderCase GetCase(string key) =>
         ProviderCases.Single(item => string.Equals(item.Key, key, StringComparison.Ordinal));
 
+    /// <summary>
+    /// 保存 Provider 契约矩阵测试使用的数据库与执行器配置。
+    /// </summary>
+    /// <param name="Key">用于标识当前对象的名称或键。</param>
+    /// <param name="DatabaseType">用于初始化当前实例的DatabaseType值。</param>
+    /// <param name="Provider">用于初始化当前实例的Provider值。</param>
+    /// <param name="ProviderKey">用于初始化当前实例的ProviderKey值。</param>
+    /// <param name="QueryType">用于初始化当前实例的QueryType值。</param>
+    /// <param name="ExecutorType">用于初始化当前实例的ExecutorType值。</param>
+    /// <param name="MultipleQueryExecutorType">用于初始化当前实例的MultipleQueryExecutorType值。</param>
+    /// <param name="ConnectionType">用于初始化当前实例的ConnectionType值。</param>
+    /// <param name="ConnectionString">用于初始化当前实例的ConnectionString值。</param>
     private sealed record ProviderCase(string Key, DatabaseType DatabaseType, ISqlProvider Provider,
         string ProviderKey, Type QueryType, Type ExecutorType, Type MultipleQueryExecutorType, Type ConnectionType,
         string ConnectionString);
 
+    /// <summary>
+    /// 重复提供指定数据库连接并记录创建次数的解析器。
+    /// </summary>
     private sealed class ControlledConnectionResolver : ISqlDbConnectionFactoryResolver
     {
+        /// <summary>
+        /// 保存受控连接解析器返回的连接。
+        /// </summary>
         private readonly IDbConnection _connection;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ControlledConnectionResolver" /> 类型的实例。
+        /// </summary>
+        /// <param name="connection">当前实例使用的连接对象或连接配置。</param>
         public ControlledConnectionResolver(IDbConnection connection) => _connection = connection;
 
+        /// <summary>
+        /// 获取创建实例的累计次数。
+        /// </summary>
         public int CreateCount { get; private set; }
 
+        /// <summary>
+        /// 获取最近一次操作使用的 Provider 键。
+        /// </summary>
         public string LastProviderKey { get; private set; }
 
+        /// <summary>
+        /// 获取最近观察到的数据库连接字符串。
+        /// </summary>
         public string LastConnectionString { get; private set; }
 
+        /// <inheritdoc />
         public IDbConnection Create(string providerKey, string connectionString)
         {
             CreateCount++;
@@ -420,54 +510,126 @@ public sealed class SqlUnitOfWorkProviderContractTest
         }
     }
 
+    /// <summary>
+    /// 记录连接、事务和资源释放次数的事务观测状态。
+    /// </summary>
     private sealed class TransactionObservation
     {
+        /// <summary>
+        /// 获取或设置打开连接的累计次数。
+        /// </summary>
         public int OpenCount { get; set; }
+        /// <summary>
+        /// 获取或设置关闭连接的累计次数。
+        /// </summary>
         public int CloseCount { get; set; }
+        /// <summary>
+        /// 获取或设置释放连接的累计次数。
+        /// </summary>
         public int ConnectionDisposeCount { get; set; }
+        /// <summary>
+        /// 获取或设置同步事务开启次数。
+        /// </summary>
         public int SyncBeginCount { get; set; }
+        /// <summary>
+        /// 获取或设置原生异步事务开启次数。
+        /// </summary>
         public int NativeBeginCount { get; set; }
+        /// <summary>
+        /// 获取或设置同步事务提交次数。
+        /// </summary>
         public int SyncCommitCount { get; set; }
+        /// <summary>
+        /// 获取或设置原生异步事务提交次数。
+        /// </summary>
         public int NativeCommitCount { get; set; }
+        /// <summary>
+        /// 获取或设置同步事务回滚次数。
+        /// </summary>
         public int SyncRollbackCount { get; set; }
+        /// <summary>
+        /// 获取或设置原生异步事务回滚次数。
+        /// </summary>
         public int NativeRollbackCount { get; set; }
+        /// <summary>
+        /// 获取或设置释放事务的累计次数。
+        /// </summary>
         public int TransactionDisposeCount { get; set; }
+        /// <summary>
+        /// 获取开启事务的累计次数。
+        /// </summary>
         public int BeginCount => SyncBeginCount + NativeBeginCount;
+        /// <summary>
+        /// 获取提交事务的累计次数。
+        /// </summary>
         public int CommitCount => SyncCommitCount + NativeCommitCount;
+        /// <summary>
+        /// 获取回滚事务的累计次数。
+        /// </summary>
         public int RollbackCount => SyncRollbackCount + NativeRollbackCount;
     }
 
+    /// <summary>
+    /// 记录打开、关闭和释放调用的数据库连接测试替身。
+    /// </summary>
     private class ControlledDbConnection : DbConnection
     {
+        /// <summary>
+        /// 保存受控连接的观测记录。
+        /// </summary>
         private readonly TransactionObservation _observation;
+        /// <summary>
+        /// 保存受控连接的当前状态。
+        /// </summary>
         private ConnectionState _state = ConnectionState.Closed;
+        /// <summary>
+        /// 指示受控连接是否已释放。
+        /// </summary>
         private bool _disposed;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ControlledDbConnection" /> 类型的实例。
+        /// </summary>
+        /// <param name="observation">本次测试记录的观察结果。</param>
         protected ControlledDbConnection(TransactionObservation observation) => _observation = observation;
 
+        /// <summary>
+        /// 按事务能力创建受控数据库连接。
+        /// </summary>
+        /// <param name="observation">记录连接及事务生命周期的观测器。</param>
+        /// <param name="capabilities">提供程序支持的事务能力。</param>
+        /// <returns>支持指定原生异步事务能力的受控连接。</returns>
         public static ControlledDbConnection Create(TransactionObservation observation,
             SqlProviderTransactionCapabilities capabilities) => capabilities.SupportsNativeAsyncBegin
             ? new NativeAsyncControlledDbConnection(observation, capabilities)
             : new ControlledDbConnection(observation);
 
+        /// <inheritdoc />
         public override string ConnectionString { get; set; }
 
+        /// <inheritdoc />
         public override string Database => "provider-matrix";
 
+        /// <inheritdoc />
         public override string DataSource => "controlled";
 
+        /// <inheritdoc />
         public override string ServerVersion => "1";
 
+        /// <inheritdoc />
         public override ConnectionState State => _state;
 
+        /// <inheritdoc />
         public override void ChangeDatabase(string databaseName) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public override void Open()
         {
             _observation.OpenCount++;
             _state = ConnectionState.Open;
         }
 
+        /// <inheritdoc />
         public override Task OpenAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -475,6 +637,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public override void Close()
         {
             if (_state == ConnectionState.Open)
@@ -482,24 +645,33 @@ public sealed class SqlUnitOfWorkProviderContractTest
             _state = ConnectionState.Closed;
         }
 
+        /// <inheritdoc />
         protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
             _observation.SyncBeginCount++;
             return CreateTransaction(nativeAsync: false);
         }
 
+        /// <inheritdoc />
         protected override DbCommand CreateDbCommand() => throw new NotSupportedException();
 
+        /// <summary>
+        /// 创建用于观测事务行为的测试事务。
+        /// </summary>
+        /// <param name="nativeAsync">是否创建原生异步事务测试替身；true 使用异步替身，false 使用同步替身。</param>
+        /// <returns>关联当前连接和观测计数器的测试事务。</returns>
         protected virtual DbTransaction CreateTransaction(bool nativeAsync) => nativeAsync
             ? new NativeAsyncControlledDbTransaction(this, _observation)
             : new ControlledDbTransaction(this, _observation, nativeAsync: false);
 
+        /// <inheritdoc />
         public override ValueTask DisposeAsync()
         {
             DisposeOnce();
             return ValueTask.CompletedTask;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -507,6 +679,9 @@ public sealed class SqlUnitOfWorkProviderContractTest
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// 关闭并释放受控连接且只记录一次。
+        /// </summary>
         private void DisposeOnce()
         {
             if (_disposed)
@@ -517,10 +692,21 @@ public sealed class SqlUnitOfWorkProviderContractTest
         }
     }
 
+    /// <summary>
+    /// 可控制异步打开与关闭行为的数据库连接测试替身。
+    /// </summary>
     private sealed class NativeAsyncControlledDbConnection : ControlledDbConnection
     {
+        /// <summary>
+        /// 保存支持原生异步的受控连接观测记录。
+        /// </summary>
         private readonly TransactionObservation _observation;
 
+        /// <summary>
+        /// 初始化一个 <see cref="NativeAsyncControlledDbConnection" /> 类型的实例。
+        /// </summary>
+        /// <param name="observation">本次测试记录的观察结果。</param>
+        /// <param name="capabilities">当前 SQL 提供程序支持的事务能力。</param>
         public NativeAsyncControlledDbConnection(TransactionObservation observation,
             SqlProviderTransactionCapabilities capabilities) : base(observation)
         {
@@ -528,8 +714,12 @@ public sealed class SqlUnitOfWorkProviderContractTest
             Capabilities = capabilities;
         }
 
+        /// <summary>
+        /// 获取当前实现支持的能力集合。
+        /// </summary>
         private SqlProviderTransactionCapabilities Capabilities { get; }
 
+        /// <inheritdoc />
         protected override ValueTask<DbTransaction> BeginDbTransactionAsync(IsolationLevel isolationLevel,
             CancellationToken cancellationToken)
         {
@@ -539,18 +729,40 @@ public sealed class SqlUnitOfWorkProviderContractTest
                 Capabilities.SupportsNativeAsyncRollback));
         }
 
+        /// <inheritdoc />
         protected override DbTransaction CreateTransaction(bool nativeAsync) =>
             nativeAsync ? new NativeAsyncControlledDbTransaction(this, _observation) :
                 new ControlledDbTransaction(this, _observation, nativeAsync: false);
     }
 
+    /// <summary>
+    /// 记录提交、回滚和释放调用的数据库事务测试替身。
+    /// </summary>
     private class ControlledDbTransaction : DbTransaction
     {
+        /// <summary>
+        /// 保存受控事务所属的连接。
+        /// </summary>
         private readonly ControlledDbConnection _connection;
+        /// <summary>
+        /// 保存受控事务的观测记录。
+        /// </summary>
         private readonly TransactionObservation _observation;
+        /// <summary>
+        /// 指示受控事务是否使用原生异步提交。
+        /// </summary>
         private readonly bool _nativeAsync;
+        /// <summary>
+        /// 指示受控事务是否已释放。
+        /// </summary>
         private bool _disposed;
 
+        /// <summary>
+        /// 初始化一个 <see cref="ControlledDbTransaction" /> 类型的实例。
+        /// </summary>
+        /// <param name="connection">当前实例使用的连接对象或连接配置。</param>
+        /// <param name="observation">本次测试记录的观察结果。</param>
+        /// <param name="nativeAsync">指示当前 SQL 提供程序是否支持原生异步操作。</param>
         public ControlledDbTransaction(ControlledDbConnection connection, TransactionObservation observation,
             bool nativeAsync)
         {
@@ -559,26 +771,32 @@ public sealed class SqlUnitOfWorkProviderContractTest
             _nativeAsync = nativeAsync;
         }
 
+        /// <inheritdoc />
         public override IsolationLevel IsolationLevel => IsolationLevel.ReadCommitted;
 
+        /// <inheritdoc />
         protected override DbConnection DbConnection => _connection;
 
+        /// <inheritdoc />
         public override void Commit()
         {
             _observation.SyncCommitCount++;
         }
 
+        /// <inheritdoc />
         public override void Rollback()
         {
             _observation.SyncRollbackCount++;
         }
 
+        /// <inheritdoc />
         public override ValueTask DisposeAsync()
         {
             DisposeOnce();
             return ValueTask.CompletedTask;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -586,6 +804,9 @@ public sealed class SqlUnitOfWorkProviderContractTest
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// 记录受控事务释放且只执行一次。
+        /// </summary>
         protected void DisposeOnce()
         {
             if (_disposed)
@@ -594,18 +815,33 @@ public sealed class SqlUnitOfWorkProviderContractTest
             _observation.TransactionDisposeCount++;
         }
 
+        /// <summary>
+        /// 获取当前 Provider 是否使用原生异步事务 API。
+        /// </summary>
         protected bool UsesNativeAsync => _nativeAsync;
 
+        /// <summary>
+        /// 获取当前事务使用的观测计数对象。
+        /// </summary>
         protected TransactionObservation Observation => _observation;
     }
 
+    /// <summary>
+    /// 可控制异步提交、回滚和释放行为的数据库事务测试替身。
+    /// </summary>
     private sealed class NativeAsyncControlledDbTransaction : ControlledDbTransaction
     {
+        /// <summary>
+        /// 初始化一个 <see cref="NativeAsyncControlledDbTransaction" /> 类型的实例。
+        /// </summary>
+        /// <param name="connection">当前实例使用的连接对象或连接配置。</param>
+        /// <param name="observation">本次测试记录的观察结果。</param>
         public NativeAsyncControlledDbTransaction(ControlledDbConnection connection,
             TransactionObservation observation) : base(connection, observation, nativeAsync: true)
         {
         }
 
+        /// <inheritdoc />
         public override Task CommitAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -613,6 +849,7 @@ public sealed class SqlUnitOfWorkProviderContractTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public override Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -621,18 +858,33 @@ public sealed class SqlUnitOfWorkProviderContractTest
         }
     }
 
+    /// <summary>
+    /// 为 Provider 注册矩阵测试提供自定义 SQL Provider。
+    /// </summary>
     private sealed class MatrixCustomProvider : ISqlProvider, ISqlProviderProfileProvider
     {
+        /// <summary>
+        /// 获取自定义 SQL Provider 的共享实例。
+        /// </summary>
         public static MatrixCustomProvider Instance { get; } = new();
 
+        /// <inheritdoc />
         public string Key => CustomProviderKey;
+        /// <inheritdoc />
         public DatabaseType DatabaseType => DatabaseType.SqlServer;
+        /// <inheritdoc />
         public IDialect Dialect => SqlServerSqlProvider.Instance.Dialect;
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory => SqlServerSqlProvider.Instance.ClauseFactory;
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser => SqlServerSqlProvider.Instance.TableReferenceParser;
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer => SqlServerSqlProvider.Instance.PaginationRenderer;
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory => SqlServerSqlProvider.Instance.ParameterManagerFactory;
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver => SqlServerSqlProvider.Instance.ParamLiteralsResolver;
+        /// <inheritdoc />
         public SqlProviderProfile Profile { get; } = new()
         {
             Transaction = new SqlProviderTransactionCapabilities

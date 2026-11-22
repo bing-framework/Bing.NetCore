@@ -3,6 +3,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
@@ -191,7 +192,7 @@ public class GroupByClauseTest
     }
 
     /// <summary>
-    /// 测试目的：多个类型化分组列的后续解析失败时，不得保留前序分组项或将统一 Builder 切换为查询状态。
+    /// 测试目的：多个类型化分组列的后续解析失败时，不得保留前序分组项；查询 Builder 不提供写入能力。
     /// </summary>
     [Fact]
     public void GroupBy_WhenLaterTypedColumnResolutionFails_ShouldKeepClauseAndBuilderStateUnchanged()
@@ -210,8 +211,10 @@ public class GroupByClauseTest
         Assert.Equal("Group column resolution failed.", exception.Message);
         Assert.False(_clause.IsGroup);
         Assert.Equal(SqlOperationKind.None, builder.OperationKind);
-        builder.DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
-        Assert.Equal(SqlOperationKind.Delete, builder.OperationKind);
+        Assert.False(builder is ISqlInsertBuilder);
+        Assert.False(builder is ISqlUpdateBuilder);
+        Assert.False(builder is ISqlDeleteBuilder);
+        Assert.Equal("Select [Id] \r\nFrom [samples]", builder.Select("Id").From("samples").ToSql());
     }
 
     /// <summary>

@@ -1,14 +1,23 @@
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Operations;
 using Bing.Data.Sql.Mutations;
+using Bing.Data.Sql;
 
 namespace Bing.Data.Sql.Builders.Mutations;
 
 /// <summary>
 /// 用于构建 Insert SQL 的接口。
 /// </summary>
-public interface ISqlInsertBuilder : ISqlContent, IInsert, IInsertClauseAccessor, ISqlMutationContextAccessor
+public interface ISqlInsertBuilder : ISqlContent, IInsert, IInsertClauseAccessor, IReturningClauseAccessor,
+    ISqlMutationContextAccessor
 {
+    /// <summary>
+    /// 使用查询结果作为 Insert 数据源。
+    /// </summary>
+    /// <param name="query">使用相同 Provider 创建的来源查询。</param>
+    /// <returns>当前 Insert Builder。</returns>
+    ISqlInsertBuilder InsertSelect(ISqlBuilder query);
+
     /// <summary>
     /// 创建同配置的空 Insert Builder。
     /// </summary>

@@ -50,10 +50,14 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// 初始化一个 <see cref="UnitOfWorkScopeManager" /> 类的新实例。
+    /// 初始化一个 <see cref="UnitOfWorkScopeManager" /> 类型的实例。
     /// </summary>
     /// <param name="serviceProvider">当前依赖注入作用域的服务提供程序。</param>
+    ///
     /// <exception cref="ArgumentNullException"><paramref name="serviceProvider" /> 为 <see langword="null" /> 时抛出。</exception>
+    /// <remarks>
+    /// 初始化一个 <see cref="UnitOfWorkScopeManager" /> 类的新实例。
+    /// </remarks>
     public UnitOfWorkScopeManager(IServiceProvider serviceProvider) =>
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
@@ -195,8 +199,9 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
     internal UnitOfWorkScopeFrame CurrentFrame => _current.Value;
 
     /// <summary>
-    /// 获取当前 frame 参与者或 root 的取消令牌；无活动范围时返回 <see cref="CancellationToken.None" />。
+    /// 获取当前 frame 参与者或 root 的取消令牌。
     /// </summary>
+    /// <remarks>无活动范围时返回 <see cref="CancellationToken.None" />。</remarks>
     internal CancellationToken CurrentExecutionCancellationToken =>
         GetCurrentExecutionCancellationToken(_current.Value);
 
@@ -336,11 +341,16 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
     private readonly struct RootCancellation
     {
         /// <summary>
-        /// 初始化一个 <see cref="RootCancellation" /> 结构的新实例。
+        /// 初始化一个 <see cref="RootCancellation" /> 类型的实例。
         /// </summary>
         /// <param name="token">root 工作单元使用的取消令牌。</param>
+        ///
         /// <param name="deadlineSource">超时截止时间令牌源，可为 <see langword="null" />。</param>
+        ///
         /// <param name="linkedSource">调用方与截止时间组合的令牌源，可为 <see langword="null" />。</param>
+        /// <remarks>
+        /// 初始化一个 <see cref="RootCancellation" /> 结构的新实例。
+        /// </remarks>
         public RootCancellation(CancellationToken token, CancellationTokenSource deadlineSource,
             CancellationTokenSource linkedSource)
         {
@@ -360,13 +370,15 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
         public CancellationToken Token { get; }
 
         /// <summary>
-        /// 获取超时截止时间令牌源；无超时时为 <see langword="null" />。
+        /// 获取超时截止时间令牌源。
         /// </summary>
+        /// <remarks>无超时时为 <see langword="null" />。</remarks>
         public CancellationTokenSource DeadlineSource { get; }
 
         /// <summary>
-        /// 获取调用方与截止时间组合的令牌源；无需组合时为 <see langword="null" />。
+        /// 获取调用方与截止时间组合的令牌源。
         /// </summary>
+        /// <remarks>无需组合时为 <see langword="null" />。</remarks>
         public CancellationTokenSource LinkedSource { get; }
     }
 
@@ -376,10 +388,14 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
     internal readonly struct ParticipantCancellation
     {
         /// <summary>
-        /// 初始化一个 <see cref="ParticipantCancellation" /> 结构的新实例。
+        /// 初始化一个 <see cref="ParticipantCancellation" /> 类型的实例。
         /// </summary>
         /// <param name="token">参与者使用的取消令牌。</param>
+        ///
         /// <param name="source">需要释放的链接令牌源，可为 <see langword="null" />。</param>
+        /// <remarks>
+        /// 初始化一个 <see cref="ParticipantCancellation" /> 结构的新实例。
+        /// </remarks>
         public ParticipantCancellation(CancellationToken token, CancellationTokenSource source)
         {
             Token = token;
@@ -392,8 +408,9 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
         public CancellationToken Token { get; }
 
         /// <summary>
-        /// 获取需要释放的链接令牌源；未创建链接时为 <see langword="null" />。
+        /// 获取需要释放的链接令牌源。
         /// </summary>
+        /// <remarks>未创建链接时为 <see langword="null" />。</remarks>
         public CancellationTokenSource Source { get; }
     }
 }
@@ -404,11 +421,16 @@ internal sealed class UnitOfWorkScopeManager : IUnitOfWorkOperationManager
 internal sealed class UnitOfWorkScopeFrame
 {
     /// <summary>
-    /// 初始化一个 <see cref="UnitOfWorkScopeFrame" /> 类的新实例。
+    /// 初始化一个 <see cref="UnitOfWorkScopeFrame" /> 类型的实例。
     /// </summary>
     /// <param name="root">当前 frame 所属的 root 工作单元。</param>
+    ///
     /// <param name="parent">上一级 frame，可为 <see langword="null" />。</param>
+    ///
     /// <param name="participant">从父 root 创建的参与者，可为 <see langword="null" /> 表示 root 节点。</param>
+    /// <remarks>
+    /// 初始化一个 <see cref="UnitOfWorkScopeFrame" /> 类的新实例。
+    /// </remarks>
     public UnitOfWorkScopeFrame(UnitOfWorkScope root, UnitOfWorkScopeFrame parent,
         UnitOfWorkScopeParticipant participant = null)
     {
@@ -423,12 +445,14 @@ internal sealed class UnitOfWorkScopeFrame
     public UnitOfWorkScope Root { get; }
 
     /// <summary>
-    /// 获取上一级 frame；根节点为 <see langword="null" />。
+    /// 获取上一级 frame。
     /// </summary>
+    /// <remarks>根节点为 <see langword="null" />。</remarks>
     public UnitOfWorkScopeFrame Parent { get; }
 
     /// <summary>
-    /// 获取当前 frame 的参与者；root 节点为 <see langword="null" />。
+    /// 获取当前 frame 的参与者。
     /// </summary>
+    /// <remarks>root 节点为 <see langword="null" />。</remarks>
     public UnitOfWorkScopeParticipant Participant { get; }
 }

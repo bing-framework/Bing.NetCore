@@ -8,8 +8,11 @@ using Bing.Data.Sql.Builders;
 namespace Bing.Data.Sql.Benchmarks;
 
 /// <summary>
-/// CI 轻量 SQL smoke 基准。该类型只声明 DryJob，不继承完整 FormalHost 参数矩阵。
+/// CI 轻量 SQL smoke 基准。
 /// </summary>
+/// <remarks>
+/// 该类型只声明 DryJob，不继承完整 FormalHost 参数矩阵。
+/// </remarks>
 [MemoryDiagnoser]
 [DryJob]
 public class SqlCiSmokeBenchmarks

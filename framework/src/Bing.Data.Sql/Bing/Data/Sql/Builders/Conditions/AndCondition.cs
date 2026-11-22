@@ -1,19 +1,21 @@
+using Bing.Data.Sql.Builders.Core;
+
 ﻿namespace Bing.Data.Sql.Builders.Conditions;
 
 /// <summary>
 /// And连接条件
 /// </summary>
-public class AndCondition : ICondition
+public class AndCondition : ICondition, ISqlBoundCondition
 {
     /// <summary>
     /// 左操作数
     /// </summary>
-    private readonly string _left;
+    private readonly ICondition _left;
 
     /// <summary>
     /// 右操作数
     /// </summary>
-    private readonly string _right;
+    private readonly ICondition _right;
 
     /// <summary>
     /// 初始化一个 <see cref="AndCondition"/> 类型的实例。
@@ -22,8 +24,8 @@ public class AndCondition : ICondition
     /// <param name="right">右操作数</param>
     public AndCondition(string left, string right)
     {
-        _left = left;
-        _right = right;
+        _left = new SqlCondition(left);
+        _right = new SqlCondition(right);
     }
 
     /// <summary>
@@ -33,17 +35,25 @@ public class AndCondition : ICondition
     /// <param name="right">右操作数</param>
     public AndCondition(ICondition left, ICondition right)
     {
-        _left = left?.GetCondition();
-        _right = right?.GetCondition();
+        _left = SqlConditionSnapshot.Capture(left);
+        _right = SqlConditionSnapshot.Capture(right);
     }
+
+    /// <inheritdoc />
+    IEnumerable<SqlProjectionColumn> ISqlBoundCondition.Columns => SqlConditionSnapshot.Columns(_left).Concat(SqlConditionSnapshot.Columns(_right));
+
+    /// <inheritdoc />
+    ICondition ISqlBoundCondition.Rebind(SqlClauseContext context) => new AndCondition(SqlConditionSnapshot.Rebind(_left, context), SqlConditionSnapshot.Rebind(_right, context));
 
     /// <inheritdoc />
     public string GetCondition()
     {
-        if (string.IsNullOrWhiteSpace(_left))
-            return _right;
-        if (string.IsNullOrWhiteSpace(_right))
-            return _left;
-        return $"{_left} And {_right}";
+        var left = _left?.GetCondition();
+        var right = _right?.GetCondition();
+        if (string.IsNullOrWhiteSpace(left))
+            return right;
+        if (string.IsNullOrWhiteSpace(right))
+            return left;
+        return $"{left} And {right}";
     }
 }

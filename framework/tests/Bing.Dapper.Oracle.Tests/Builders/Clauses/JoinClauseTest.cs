@@ -7,8 +7,11 @@ using Bing.Data.Sql;
 namespace Bing.Dapper.Tests.Builders.Clauses;
 
 /// <summary>
-/// <see cref="OracleJoinClause"/> 单元测试 验证 Oracle 方言下的 Join 子句生成行为（双引号标识符，:p_0 参数格式）
+/// Oracle 连接子句生成测试。
 /// </summary>
+/// <remarks>
+/// <see cref="OracleJoinClause"/> 单元测试 验证 Oracle 方言下的 Join 子句生成行为（双引号标识符，:p_0 参数格式）
+/// </remarks>
 public class OracleJoinClauseTest
 {
     /// <summary>

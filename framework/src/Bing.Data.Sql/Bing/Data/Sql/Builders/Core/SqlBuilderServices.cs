@@ -110,7 +110,8 @@ public sealed class SqlBuilderServices
         MetadataOptions = metadataOptions ?? new SqlMetadataOptions();
         Options = options;
         DatabaseContextAccessor = databaseContextAccessor;
-        EntityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider();
+        EntityModelMetadataProvider = entityModelMetadataProvider ?? new CompositeEntityModelMetadataProvider(
+            null, MetadataOptions.ExecutionMode == SqlExecutionMode.GeneratedOnly);
         Filters = (filters ?? new ISqlFilter[] { new IsDeletedFilter() }).Where(filter => filter != null).ToArray();
         DataFilter = dataFilter;
         DatabaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(

@@ -48,6 +48,7 @@ public class DefaultSqlParameterFactory : ISqlParameterFactory
         return new SqlParam(name, convertedValue, column?.DbType, null, column?.Size, column?.Precision, column?.Scale)
         {
             OriginalValue = value,
+            IsProviderValue = column != null,
             EntityType = entityType,
             PropertyName = column?.PropertyName,
             ColumnName = column?.ColumnName,

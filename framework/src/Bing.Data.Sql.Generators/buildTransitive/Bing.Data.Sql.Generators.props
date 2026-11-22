@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Bing.Data.Sql.Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="BingSqlAotStrict" />
+    <CompilerVisibleProperty Include="PublishAot" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(BingSqlAotStrict)' == 'true'">
+    <RuntimeHostConfigurationOption Include="Bing.Data.Sql.ReflectionFallbackEnabled" Value="false" Trim="true" />
+  </ItemGroup>
+</Project>

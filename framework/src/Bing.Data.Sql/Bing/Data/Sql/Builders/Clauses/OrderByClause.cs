@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Order By子句
 /// </summary>
-public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
+public partial class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -55,8 +55,12 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     }
 
     /// <inheritdoc />
-    public virtual IOrderByClause Clone(SqlClauseContext context) =>
-        CreateClone(context, new List<OrderByItem>(_items));
+    public virtual IOrderByClause Clone(SqlClauseContext context)
+    {
+        var clone = CreateClone(context, new List<OrderByItem>(_items));
+        clone._logicalOrder.AddRange(_logicalOrder);
+        return clone;
+    }
 
     /// <summary>
     /// 创建克隆后的 Order By 子句。
@@ -162,22 +166,41 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     {
         if (isPage == false)
             return;
-        if (_items.Count == 0)
+        if (_items.Count == 0 && _logicalOrder.Count == 0)
             throw new ArgumentException(LibraryResource.OrderIsEmptyForPage);
     }
 
     /// <inheritdoc />
-    public void AppendTo(StringBuilder builder)
+    public void AppendTo(StringBuilder builder) => AppendCore(builder, false);
+
+    /// <summary>在同次输出中冻结排序；自定义别名注册器保留原来的 Builder 派生契约。</summary>
+    internal SqlQueryOrder AppendFrozenTo(StringBuilder builder) =>
+        AppendCore(builder, GetType() == typeof(OrderByClause) && _register.GetType() == typeof(EntityAliasRegister));
+
+    private SqlQueryOrder AppendCore(StringBuilder builder, bool freeze)
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        if (_items.Count == 0)
-            return;
+        if (_items.Count == 0 && _logicalOrder.Count == 0)
+            return freeze ? new SqlQueryOrder(Array.Empty<OrderByItem>(), "", "") : null;
         var startIndex = builder.Length;
         try
         {
             builder.Append("Order By ");
-            builder.Append(_items.Select(t => t.ToSql(_dialect, _register)).Join());
+            if (!freeze)
+            {
+                builder.Append(string.Join(",", _items.Select(t => t.ToSql(_dialect, _register)).Concat(
+                    _logicalOrder.Select(item => item.Column.ToSql(_context) + (item.Desc ? " Desc" : "")))));
+                return null;
+            }
+            var regularSql = string.Join(",", _items.Select(t => t.ToSql(_dialect, _register)));
+            var logicalSql = string.Join(",", _logicalOrder.Select(item =>
+                item.Column.ToSql(_context) + (item.Desc ? " Desc" : "")));
+            builder.Append(regularSql);
+            if (regularSql.Length != 0 && logicalSql.Length != 0)
+                builder.Append(',');
+            builder.Append(logicalSql);
+            return new SqlQueryOrder(_items.ToArray(), regularSql, logicalSql);
         }
         catch
         {
@@ -187,7 +210,16 @@ public class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClause
     }
 
     /// <inheritdoc />
-    public void Clear() => _items.Clear();
+    public void Clear() { _items.Clear(); _logicalOrder.Clear(); }
+
+    /// <summary>冻结普通无前缀排序，供分页识别重复排序；其他排序继续由原子句处理。</summary>
+    internal string GetFrozenPageOrder()
+    {
+        if (_items.Count == 0 || _logicalOrder.Count != 0 ||
+            _items.Any(item => item.Raw || item.Type != null || !string.IsNullOrWhiteSpace(item.Prefix)))
+            return null;
+        return string.Join(",", _items.Select(item => item.Order + (item.Desc ? " Desc" : "")));
+    }
 
     /// <inheritdoc />
     public string ToSql()

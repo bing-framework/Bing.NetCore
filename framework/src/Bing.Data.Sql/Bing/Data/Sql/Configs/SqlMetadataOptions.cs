@@ -6,6 +6,11 @@ namespace Bing.Data.Sql.Configs;
 public class SqlMetadataOptions
 {
     /// <summary>
+    /// 获取或设置 SQL 执行策略。该配置应在创建服务容器及映射快照之前固定。
+    /// </summary>
+    public SqlExecutionMode ExecutionMode { get; set; }
+
+    /// <summary>
     /// 获取 SQL 数据源配置。
     /// </summary>
     public SqlDataSourceOptions DataSources { get; } = new();

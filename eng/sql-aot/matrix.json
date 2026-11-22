@@ -1,0 +1,751 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "sqlite-win-x64-query",
+      "provider": "sqlite",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Smoke/Bing.Data.Sql.Aot.Smoke.csproj",
+      "successMarker": "PASS: generated SQLite query smoke",
+      "coverage": [
+        "generated-lambda-subset",
+        "projection",
+        "count-page",
+        "collection-parameters",
+        "query-cancellation",
+        "query-transaction-rollback"
+      ],
+      "notCovered": [
+        "complete-shared-write-transaction-failure-matrix",
+        "all-lambda-syntax",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-win-x64-raw",
+      "provider": "sqlite",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "raw-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOnly.csproj",
+      "successMarker": "RAW_ONLY_PACKAGE_NATIVE_PASS",
+      "requiredMarkers": [
+        "GENERIC_CONVERTER_NATIVE_PASS"
+      ],
+      "coverage": [
+        "separate-generated-model-assembly",
+        "raw-reader",
+        "parameter-binder",
+        "without-lambda-interception",
+        "generic-converter-constructor-injection"
+      ],
+      "notCovered": [
+        "all-result-layouts",
+        "all-conversions",
+        "transaction-failures"
+      ]
+    },
+    {
+      "id": "sqlite-win-x64-crud",
+      "provider": "sqlite",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "crud-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.CrudOnly/Bing.Data.Sql.Aot.CrudOnly.csproj",
+      "successMarker": "CRUD_ONLY_PACKAGE_NATIVE_PASS",
+      "coverage": [
+        "separate-generated-model-assembly",
+        "entity-insert-update-delete",
+        "generator-emitted-default-sqlite-crud-sql",
+        "composite-key-concurrency-null",
+        "returning-reader",
+        "without-lambda-interception",
+        "generator-emitted-identity-insert-returning-sql",
+        "identity-only-default-values",
+        "identity-static-binder-reader-backfill",
+        "identity-owned-batch-rollback",
+        "identity-shared-transaction",
+        "identity-checked-conversion-rollback",
+        "generated-single-column-insert-update",
+        "generated-default-two-row-insert",
+        "generated-independent-returning-dto-reordered-alias-null-sync-async",
+        "strict-mutation-plan-reader"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-returning-layouts-and-conversions",
+        "complete-write-transaction-failure-matrix"
+      ],
+      "requiredMarkers": [
+        "MUTATION_PLAN_READER_NATIVE_PASS"
+      ]
+    },
+    {
+      "id": "sqlite-win-x64-generated-query",
+      "provider": "sqlite",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "generated-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
+      "successMarker": "GENERATED_SQL_SMOKE_PASS",
+      "requiredMarkers": [
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "automatic-whereif-query-template",
+        "same-shape-sql-reuse",
+        "current-value-rebinding",
+        "disabled-filter",
+        "collection-shapes-0-1-2",
+        "generated-tosql-sync-async"
+      ],
+      "notCovered": [
+        "all-lambda-syntax",
+        "all-query-template-shapes",
+        "all-provider-native",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-linux-x64-query",
+      "provider": "sqlite",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Smoke/Bing.Data.Sql.Aot.Smoke.csproj",
+      "successMarker": "PASS: generated SQLite query smoke",
+      "coverage": [
+        "generated-lambda-subset",
+        "projection",
+        "count-page",
+        "collection-parameters",
+        "query-cancellation",
+        "query-transaction-rollback"
+      ],
+      "notCovered": [
+        "complete-shared-write-transaction-failure-matrix",
+        "all-lambda-syntax",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-linux-x64-raw",
+      "provider": "sqlite",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "raw-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOnly.csproj",
+      "successMarker": "RAW_ONLY_PACKAGE_NATIVE_PASS",
+      "requiredMarkers": [
+        "GENERIC_CONVERTER_NATIVE_PASS"
+      ],
+      "coverage": [
+        "separate-generated-model-assembly",
+        "raw-reader",
+        "parameter-binder",
+        "without-lambda-interception",
+        "generic-converter-constructor-injection"
+      ],
+      "notCovered": [
+        "all-result-layouts",
+        "all-conversions",
+        "transaction-failures"
+      ]
+    },
+    {
+      "id": "sqlite-linux-x64-crud",
+      "provider": "sqlite",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "crud-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.CrudOnly/Bing.Data.Sql.Aot.CrudOnly.csproj",
+      "successMarker": "CRUD_ONLY_PACKAGE_NATIVE_PASS",
+      "coverage": [
+        "separate-generated-model-assembly",
+        "entity-insert-update-delete",
+        "generator-emitted-default-sqlite-crud-sql",
+        "composite-key-concurrency-null",
+        "returning-reader",
+        "without-lambda-interception",
+        "generator-emitted-identity-insert-returning-sql",
+        "identity-only-default-values",
+        "identity-static-binder-reader-backfill",
+        "identity-owned-batch-rollback",
+        "identity-shared-transaction",
+        "identity-checked-conversion-rollback",
+        "generated-single-column-insert-update",
+        "generated-default-two-row-insert",
+        "generated-independent-returning-dto-reordered-alias-null-sync-async",
+        "strict-mutation-plan-reader"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-returning-layouts-and-conversions",
+        "complete-write-transaction-failure-matrix"
+      ],
+      "requiredMarkers": [
+        "MUTATION_PLAN_READER_NATIVE_PASS"
+      ]
+    },
+    {
+      "id": "sqlite-linux-x64-generated-query",
+      "provider": "sqlite",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "generated-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
+      "successMarker": "GENERATED_SQL_SMOKE_PASS",
+      "requiredMarkers": [
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "automatic-whereif-query-template",
+        "same-shape-sql-reuse",
+        "current-value-rebinding",
+        "disabled-filter",
+        "collection-shapes-0-1-2",
+        "generated-tosql-sync-async"
+      ],
+      "notCovered": [
+        "all-lambda-syntax",
+        "all-query-template-shapes",
+        "all-provider-native",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "mysql-linux-x64",
+      "provider": "mysql",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.MySql/Bing.Data.Sql.Aot.MySql.csproj",
+      "successMarker": "MYSQL_GENERATED_NATIVE_PASS",
+      "requiredMarkers": [
+        "MYSQL_GENERATED_CRUD_NATIVE_PASS",
+        "MYSQL_IDENTITY_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-mysql-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-last-insert-id-backfill",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-mysql-types-and-conversions",
+        "all-transaction-failure-paths",
+        "other-mysql-platforms",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "mysql-win-x64",
+      "provider": "mysql",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.MySql/Bing.Data.Sql.Aot.MySql.csproj",
+      "successMarker": "MYSQL_GENERATED_NATIVE_PASS",
+      "requiredMarkers": [
+        "MYSQL_GENERATED_CRUD_NATIVE_PASS",
+        "MYSQL_IDENTITY_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-mysql-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-last-insert-id-backfill",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-mysql-types-and-conversions",
+        "all-transaction-failure-paths",
+        "other-mysql-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "postgresql-linux-x64",
+      "provider": "postgresql",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.PostgreSql/Bing.Data.Sql.Aot.PostgreSql.csproj",
+      "successMarker": "POSTGRESQL_GENERATED_NATIVE_PASS",
+      "requiredMarkers": [
+        "POSTGRESQL_GENERATED_CRUD_NATIVE_PASS",
+        "POSTGRESQL_IDENTITY_RETURNING_NATIVE_PASS",
+        "POSTGRESQL_JSON_TEXT_NATIVE_PASS",
+        "POSTGRESQL_TYPED_JSON_NATIVE_PASS",
+        "POSTGRESQL_BUILT_IN_RANGES_NATIVE_PASS",
+        "POSTGRESQL_EXPLICIT_COMPOSITE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-postgresql-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-insert-returning-backfill",
+        "generated-json-jsonb-text-roundtrip",
+        "generated-json-jsonb-typed-roundtrip",
+        "generated-built-in-ranges-roundtrip",
+        "explicit-composite-sql-roundtrip",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-postgresql-types-and-conversions",
+        "direct-composite-clr-mapping",
+        "all-transaction-failure-paths",
+        "other-postgresql-platforms",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "postgresql-win-x64",
+      "provider": "postgresql",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.PostgreSql/Bing.Data.Sql.Aot.PostgreSql.csproj",
+      "successMarker": "POSTGRESQL_GENERATED_NATIVE_PASS",
+      "requiredMarkers": [
+        "POSTGRESQL_GENERATED_CRUD_NATIVE_PASS",
+        "POSTGRESQL_IDENTITY_RETURNING_NATIVE_PASS",
+        "POSTGRESQL_JSON_TEXT_NATIVE_PASS",
+        "POSTGRESQL_TYPED_JSON_NATIVE_PASS",
+        "POSTGRESQL_BUILT_IN_RANGES_NATIVE_PASS",
+        "POSTGRESQL_EXPLICIT_COMPOSITE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-postgresql-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-insert-returning-backfill",
+        "generated-json-jsonb-text-roundtrip",
+        "generated-json-jsonb-typed-roundtrip",
+        "generated-built-in-ranges-roundtrip",
+        "explicit-composite-sql-roundtrip",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-postgresql-types-and-conversions",
+        "direct-composite-clr-mapping",
+        "all-transaction-failure-paths",
+        "other-postgresql-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "sqlite-osx-arm64-query",
+      "provider": "sqlite",
+      "rid": "osx-arm64",
+      "tfm": "net10.0",
+      "runner": "macos-15",
+      "mode": "query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Smoke/Bing.Data.Sql.Aot.Smoke.csproj",
+      "successMarker": "PASS: generated SQLite query smoke",
+      "coverage": [
+        "generated-lambda-subset",
+        "projection",
+        "count-page",
+        "collection-parameters",
+        "query-cancellation",
+        "query-transaction-rollback"
+      ],
+      "notCovered": [
+        "complete-shared-write-transaction-failure-matrix",
+        "all-lambda-syntax",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-osx-arm64-raw",
+      "provider": "sqlite",
+      "rid": "osx-arm64",
+      "tfm": "net10.0",
+      "runner": "macos-15",
+      "mode": "raw-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOnly.csproj",
+      "successMarker": "RAW_ONLY_PACKAGE_NATIVE_PASS",
+      "requiredMarkers": [
+        "GENERIC_CONVERTER_NATIVE_PASS"
+      ],
+      "coverage": [
+        "separate-generated-model-assembly",
+        "raw-reader",
+        "parameter-binder",
+        "without-lambda-interception",
+        "generic-converter-constructor-injection"
+      ],
+      "notCovered": [
+        "all-result-layouts",
+        "all-conversions",
+        "transaction-failures"
+      ]
+    },
+    {
+      "id": "sqlite-osx-arm64-crud",
+      "provider": "sqlite",
+      "rid": "osx-arm64",
+      "tfm": "net10.0",
+      "runner": "macos-15",
+      "mode": "crud-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.CrudOnly/Bing.Data.Sql.Aot.CrudOnly.csproj",
+      "successMarker": "CRUD_ONLY_PACKAGE_NATIVE_PASS",
+      "coverage": [
+        "separate-generated-model-assembly",
+        "entity-insert-update-delete",
+        "generator-emitted-default-sqlite-crud-sql",
+        "composite-key-concurrency-null",
+        "returning-reader",
+        "without-lambda-interception",
+        "generator-emitted-identity-insert-returning-sql",
+        "identity-only-default-values",
+        "identity-static-binder-reader-backfill",
+        "identity-owned-batch-rollback",
+        "identity-shared-transaction",
+        "identity-checked-conversion-rollback",
+        "generated-single-column-insert-update",
+        "generated-default-two-row-insert",
+        "generated-independent-returning-dto-reordered-alias-null-sync-async",
+        "strict-mutation-plan-reader"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-returning-layouts-and-conversions",
+        "complete-write-transaction-failure-matrix"
+      ],
+      "requiredMarkers": [
+        "MUTATION_PLAN_READER_NATIVE_PASS"
+      ]
+    },
+    {
+      "id": "sqlite-osx-arm64-generated-query",
+      "provider": "sqlite",
+      "rid": "osx-arm64",
+      "tfm": "net10.0",
+      "runner": "macos-15",
+      "mode": "generated-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
+      "successMarker": "GENERATED_SQL_SMOKE_PASS",
+      "requiredMarkers": [
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "automatic-whereif-query-template",
+        "same-shape-sql-reuse",
+        "current-value-rebinding",
+        "disabled-filter",
+        "collection-shapes-0-1-2",
+        "generated-tosql-sync-async"
+      ],
+      "notCovered": [
+        "all-lambda-syntax",
+        "all-query-template-shapes",
+        "all-provider-native",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-win-arm64-query",
+      "provider": "sqlite",
+      "rid": "win-arm64",
+      "tfm": "net10.0",
+      "runner": "windows-11-arm",
+      "mode": "query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Smoke/Bing.Data.Sql.Aot.Smoke.csproj",
+      "successMarker": "PASS: generated SQLite query smoke",
+      "coverage": [
+        "generated-lambda-subset",
+        "projection",
+        "count-page",
+        "collection-parameters",
+        "query-cancellation",
+        "query-transaction-rollback"
+      ],
+      "notCovered": [
+        "complete-shared-write-transaction-failure-matrix",
+        "all-lambda-syntax",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "sqlite-win-arm64-raw",
+      "provider": "sqlite",
+      "rid": "win-arm64",
+      "tfm": "net10.0",
+      "runner": "windows-11-arm",
+      "mode": "raw-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOnly.csproj",
+      "successMarker": "RAW_ONLY_PACKAGE_NATIVE_PASS",
+      "requiredMarkers": [
+        "GENERIC_CONVERTER_NATIVE_PASS"
+      ],
+      "coverage": [
+        "separate-generated-model-assembly",
+        "raw-reader",
+        "parameter-binder",
+        "without-lambda-interception",
+        "generic-converter-constructor-injection"
+      ],
+      "notCovered": [
+        "all-result-layouts",
+        "all-conversions",
+        "transaction-failures"
+      ]
+    },
+    {
+      "id": "sqlite-win-arm64-crud",
+      "provider": "sqlite",
+      "rid": "win-arm64",
+      "tfm": "net10.0",
+      "runner": "windows-11-arm",
+      "mode": "crud-only",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.CrudOnly/Bing.Data.Sql.Aot.CrudOnly.csproj",
+      "successMarker": "CRUD_ONLY_PACKAGE_NATIVE_PASS",
+      "coverage": [
+        "separate-generated-model-assembly",
+        "entity-insert-update-delete",
+        "generator-emitted-default-sqlite-crud-sql",
+        "composite-key-concurrency-null",
+        "returning-reader",
+        "without-lambda-interception",
+        "generator-emitted-identity-insert-returning-sql",
+        "identity-only-default-values",
+        "identity-static-binder-reader-backfill",
+        "identity-owned-batch-rollback",
+        "identity-shared-transaction",
+        "identity-checked-conversion-rollback",
+        "generated-single-column-insert-update",
+        "generated-default-two-row-insert",
+        "generated-independent-returning-dto-reordered-alias-null-sync-async",
+        "strict-mutation-plan-reader"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-returning-layouts-and-conversions",
+        "complete-write-transaction-failure-matrix"
+      ],
+      "requiredMarkers": [
+        "MUTATION_PLAN_READER_NATIVE_PASS"
+      ]
+    },
+    {
+      "id": "sqlite-win-arm64-generated-query",
+      "provider": "sqlite",
+      "rid": "win-arm64",
+      "tfm": "net10.0",
+      "runner": "windows-11-arm",
+      "mode": "generated-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
+      "successMarker": "GENERATED_SQL_SMOKE_PASS",
+      "requiredMarkers": [
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+      ],
+      "coverage": [
+        "automatic-whereif-query-template",
+        "same-shape-sql-reuse",
+        "current-value-rebinding",
+        "disabled-filter",
+        "collection-shapes-0-1-2",
+        "generated-tosql-sync-async"
+      ],
+      "notCovered": [
+        "all-lambda-syntax",
+        "all-query-template-shapes",
+        "all-provider-native",
+        "production-capacity"
+      ]
+    },
+    {
+      "id": "mysql-native",
+      "provider": "mysql",
+      "rid": null,
+      "status": "planned",
+      "reason": "逐项接入驱动、生成式执行和隔离测试数据库后再启用，保留 Provider 环境变量门控。"
+    },
+    {
+      "id": "postgresql-native",
+      "provider": "postgresql",
+      "rid": null,
+      "status": "planned",
+      "reason": "逐项接入驱动、生成式执行和隔离测试数据库后再启用，保留 Provider 环境变量门控。"
+    },
+    {
+      "id": "sqlserver-win-x64",
+      "provider": "sqlserver",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2022",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.SqlServer/Bing.Data.Sql.Aot.SqlServer.csproj",
+      "successMarker": "SQLSERVER_SHARED_ROLLBACK_PASS",
+      "requiredMarkers": [
+        "SQLSERVER_GENERATED_CRUD_PASS",
+        "SQLSERVER_IDENTITY_OUTPUT_PASS",
+        "SQLSERVER_EXTENDED_COLUMNS_NATIVE_PASS",
+        "SQLSERVER_OUTPUT_PROJECTION_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-sqlserver-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-insert-output-backfill",
+        "generated-max-xml-variant-columns",
+        "static-output-dto-and-rollback",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-sqlserver-types-and-authentication",
+        "all-transaction-failure-paths",
+        "other-sqlserver-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "sqlserver-linux-x64",
+      "provider": "sqlserver",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.SqlServer/Bing.Data.Sql.Aot.SqlServer.csproj",
+      "successMarker": "SQLSERVER_SHARED_ROLLBACK_PASS",
+      "requiredMarkers": [
+        "SQLSERVER_GENERATED_CRUD_PASS",
+        "SQLSERVER_IDENTITY_OUTPUT_PASS",
+        "SQLSERVER_EXTENDED_COLUMNS_NATIVE_PASS",
+        "SQLSERVER_OUTPUT_PROJECTION_NATIVE_PASS"
+      ],
+      "coverage": [
+        "generated-sqlserver-crud-sql-binder",
+        "generated-lambda-query",
+        "identity-insert-output-backfill",
+        "generated-max-xml-variant-columns",
+        "static-output-dto-and-rollback",
+        "async-transaction-commit-and-shared-rollback"
+      ],
+      "notCovered": [
+        "all-generated-crud-shapes",
+        "all-lambda-syntax",
+        "all-sqlserver-types-and-authentication",
+        "all-transaction-failure-paths",
+        "other-sqlserver-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "sqlserver-native",
+      "provider": "sqlserver",
+      "rid": null,
+      "status": "planned",
+      "reason": "其他 RID 需在对应原生工具链及独立 SQL Server 数据库中验收。"
+    },
+    {
+      "id": "oracle-win-x64",
+      "provider": "oracle",
+      "rid": "win-x64",
+      "tfm": "net10.0",
+      "runner": "windows-2025",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Oracle/Bing.Data.Sql.Aot.Oracle.csproj",
+      "successMarker": "ORACLE_GENERATED_CRUD_PASS",
+      "requiredMarkers": ["ORACLE_SHARED_ROLLBACK_PASS", "ORACLE_IDENTITY_RETURNING_PASS", "ORACLE_DML_RETURNING_INTO_PASS", "ORACLE_BUILDER_RETURNING_PASS", "ORACLE_BUILDER_BULK_RETURNING_PASS"],
+      "coverage": [
+        "generated-oracle-assigned-key-crud-sql-binder",
+        "generated-numeric-oracle-identity-returning-into-and-rollback",
+        "builder-dml-returning-static-projection",
+        "builder-bulk-update-delete-returning-static-projection",
+        "generated-lambda-query-integer-and-unicode",
+        "async-transaction-shared-rollback"
+      ],
+      "notCovered": [
+        "oracle-bulk-returning-extended-types",
+        "oracle-wallet-kerberos-and-udt",
+        "other-oracle-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "oracle-linux-x64",
+      "provider": "oracle",
+      "rid": "linux-x64",
+      "tfm": "net10.0",
+      "runner": "ubuntu-22.04",
+      "mode": "generated-crud-query",
+      "status": "enabled",
+      "project": "framework/tests/Bing.Data.Sql.Aot.Oracle/Bing.Data.Sql.Aot.Oracle.csproj",
+      "successMarker": "ORACLE_GENERATED_CRUD_PASS",
+      "requiredMarkers": ["ORACLE_SHARED_ROLLBACK_PASS", "ORACLE_IDENTITY_RETURNING_PASS", "ORACLE_DML_RETURNING_INTO_PASS", "ORACLE_BUILDER_RETURNING_PASS", "ORACLE_BUILDER_BULK_RETURNING_PASS"],
+      "coverage": [
+        "generated-oracle-assigned-key-crud-sql-binder",
+        "generated-numeric-oracle-identity-returning-into-and-rollback",
+        "builder-dml-returning-static-projection",
+        "builder-bulk-update-delete-returning-static-projection",
+        "generated-lambda-query-integer-and-unicode",
+        "async-transaction-shared-rollback"
+      ],
+      "notCovered": [
+        "oracle-bulk-returning-extended-types",
+        "oracle-wallet-kerberos-and-udt",
+        "other-oracle-platforms",
+        "production-capacity"
+      ],
+      "ci": true
+    },
+    {
+      "id": "oracle-native",
+      "provider": "oracle",
+      "rid": null,
+      "status": "planned",
+      "reason": "其他 RID 和驱动类型仍需在对应原生工具链与独立 Oracle 测试库中验收。"
+    }
+  ]
+}

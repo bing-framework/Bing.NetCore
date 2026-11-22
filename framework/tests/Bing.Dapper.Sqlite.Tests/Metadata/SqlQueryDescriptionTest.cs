@@ -227,7 +227,7 @@ public class SqlQueryDescriptionTest
             .Where<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId);
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
     }
 
     /// <summary>
@@ -250,7 +250,7 @@ public class SqlQueryDescriptionTest
             });
 
         // Assert
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users` \r\nWhere (`users`.`Id`>@_p_0 Or `users`.`Id`=@_p_1) And `users`.`Id`<@_p_2", query.ToSql());
+        Assert.Equal("Select `user`.`Id` \r\nFrom `users` As `user` \r\nWhere (`user`.`Id`>@_p_0 Or `user`.`Id`=@_p_1) And `user`.`Id`<@_p_2", query.ToSql());
         Assert.Equal(new[] { "@_p_0", "@_p_1", "@_p_2" }, query.GetParams().Keys.ToArray());
         Assert.Equal(new object[] { 1, 2, 10 }, query.GetParams().Values.ToArray());
     }
@@ -272,7 +272,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.Equal(first, second);
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users`", query.ToSql());
+        Assert.Equal("Select `user`.`Id` \r\nFrom `users` As `user`", query.ToSql());
     }
 
     /// <summary>
@@ -320,8 +320,8 @@ public class SqlQueryDescriptionTest
         // Assert
         Assert.IsType<SqlLambdaQuery>(projection);
         Assert.IsType<SqlLambdaQuery>(transition);
-        Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", projection.ToSql());
-        Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", transition.ToSql());
+        Assert.Equal("Select `user`.`Id` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom `users` As `user`, `reviews` As `review`", projection.ToSql());
+        Assert.Equal("Select `user`.`Id` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom `users` As `user`, `reviews` As `review`", transition.ToSql());
     }
 
     /// <summary>
@@ -361,7 +361,7 @@ public class SqlQueryDescriptionTest
             });
 
         // Assert
-        Assert.Equal("Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`", query.ToSql());
+        Assert.Equal("Select `user`.`Id` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom `users` As `user`, `reviews` As `review`", query.ToSql());
     }
 
     /// <summary>
@@ -399,8 +399,8 @@ public class SqlQueryDescriptionTest
             new MultiSourceProjection { OwnerId = user.Id + 1 }));
 
         // Assert
-        Assert.Equal("多表 DTO 投影成员必须引用当前查询的 Lambda 参数。", exception.Message);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews`", query.ToSql());
+        Assert.Equal("投影只支持 Lambda 参数的直接属性和 SQL 聚合函数。", exception.Message);
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review`", query.ToSql());
     }
 
     /// <summary>
@@ -448,8 +448,8 @@ public class SqlQueryDescriptionTest
         // Assert
         Assert.Equal("多表 DTO 投影至少需要一个成员初始化绑定。", singleException.Message);
         Assert.Equal("多表 DTO 投影至少需要一个成员初始化绑定。", multiException.Message);
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0", singleSql);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nWhere `reviews`.`UserId`>@_p_0", multiSql);
+        Assert.Equal("Select `user`.`Id` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0", singleSql);
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nWhere `review`.`UserId`>@_p_0", multiSql);
         Assert.Equal(singleSql, single.ToSql());
         Assert.Equal(multiSql, multi.ToSql());
         Assert.Equal(new object[] { 7 }, single.GetParams().Values.ToArray());
@@ -484,7 +484,7 @@ public class SqlQueryDescriptionTest
         }));
 
         // Assert
-        Assert.Equal("多表 DTO 投影成员必须引用当前查询的 Lambda 参数。", exception.Message);
+        Assert.Equal("投影只支持 Lambda 参数的直接属性和 SQL 聚合函数。", exception.Message);
         Assert.Equal(expectedSql, query.ToSql());
     }
 
@@ -563,8 +563,8 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", whereException.Message);
-        Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", selectException.Message);
-        Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", orderException.Message);
+        Assert.Equal("投影只支持 Lambda 参数的直接属性和 SQL 聚合函数。", selectException.Message);
+        Assert.Equal("投影只支持 Lambda 参数的直接属性和 SQL 聚合函数。", orderException.Message);
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", joinException.Message);
         Assert.Equal(originalSql, derivedRoot.ToSql());
         Assert.Equal(joinedSql, joined.ToSql());
@@ -617,7 +617,7 @@ public class SqlQueryDescriptionTest
             .AppendSelect<MultiSourceProjection>(summary => new object[] { summary.OwnerId }, "summary");
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`summary`.`OwnerId` \r\nFrom `users`, `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId`,`reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`>@_p_0) As `summary` On `users`.`Id`=`summary`.`OwnerId` \r\nWhere `reviews`.`UserId`=`summary`.`ReviewUserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`summary`.`OwnerId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin (Select `user`.`Id` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nWhere `user`.`Id`>@_p_0) As `summary` On `user`.`Id`=`summary`.`OwnerId` \r\nWhere `review`.`UserId`=`summary`.`ReviewUserId`", query.ToSql());
         Assert.Equal(7, query.GetParams().Values.Single());
     }
 
@@ -658,7 +658,7 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceReview, MultiSourceProjection>((review, summary) => new object[] { review.UserId, summary.OwnerId });
 
         // Assert
-        Assert.Equal("Select `reviews`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `summary` On `reviews`.`UserId`=`summary`.`OwnerId`", query.ToSql());
+        Assert.Equal("Select `review`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` As `review` \r\nJoin (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `summary` On `review`.`UserId`=`summary`.`OwnerId`", query.ToSql());
         Assert.Equal(7, query.GetParams().Values.Single());
     }
 
@@ -700,13 +700,14 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceReview, MultiSourceProjection>((review, summary) => new object[] { review.UserId, summary.OwnerId });
 
         // Assert
-        Assert.Equal("Select `reviews`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` \r\nCross Join (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `summary` \r\nWhere `reviews`.`UserId`=`summary`.`OwnerId`", query.ToSql());
+        Assert.Equal("Select `review`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` As `review` \r\nCross Join (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `summary` \r\nWhere `review`.`UserId`=`summary`.`OwnerId`", query.ToSql());
         Assert.Equal(7, query.GetParams().Values.Single());
     }
 
     /// <summary>
-    /// 测试目的：单表实体查询应能以 Cross Join 进入双表 Lambda 链；SQLite 对 Right Join 和 Full Join 须在调用阶段拒绝。
+    /// 验证实体查询绑定双表来源并校验外连接能力。
     /// </summary>
+    /// <remarks>验证 Cross Join 进入双表 Lambda 链，并验证 SQLite 在调用阶段拒绝 Right Join 与 Full Join。</remarks>
     [Fact]
     public void From_WhenSingleSourceTypedEntityOuterJoinsConfigured_ShouldBindSourcesAndEnforceCapabilities()
     {
@@ -738,7 +739,7 @@ public class SqlQueryDescriptionTest
             .Where<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId)
             .Select<MultiSourceUser, MultiSourceReview>((user, review) => new object[] { user.Id, review.UserId });
         // Assert
-        Assert.Equal("Select `users`.`Id`,`review`.`UserId` \r\nFrom `users` \r\nCross Join `reviews` As `review` \r\nWhere `users`.`Id`=`review`.`UserId`", crossJoin.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId` \r\nFrom `users` As `user` \r\nCross Join `reviews` As `review` \r\nWhere `user`.`Id`=`review`.`UserId`", crossJoin.ToSql());
         var rightJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser>()
             .RightJoin<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId, "review"));
         var fullJoinException = Assert.Throws<NotSupportedException>(() => rootQuery.From<MultiSourceUser>()
@@ -1078,7 +1079,7 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceReview, MultiSourceProjection>((review, summary) => new object[] { review.UserId, summary.OwnerId });
 
         // Assert
-        Assert.Equal("Select `reviews`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users`) As `summary` On `reviews`.`UserId`=`summary`.`OwnerId`", query.ToSql());
+        Assert.Equal("Select `review`.`UserId`,`summary`.`OwnerId` \r\nFrom `reviews` As `review` \r\nJoin (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user`) As `summary` On `review`.`UserId`=`summary`.`OwnerId`", query.ToSql());
         Assert.Empty(query.GetParams());
     }
 
@@ -1154,7 +1155,7 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceProjection>(summary => new object[] { summary.OwnerId });
 
         // Assert
-        Assert.Equal("Select `summary`.`OwnerId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users`) As `summary`", query.ToSql());
+        Assert.Equal("Select `summary`.`OwnerId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user`) As `summary`", query.ToSql());
         Assert.True(resolver.CallCount >= 2);
     }
 
@@ -1186,7 +1187,7 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceProjection>(summary => new object[] { summary.OwnerId });
 
         // Assert
-        Assert.Equal("Select `summary`.`OwnerId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `summary` \r\nWhere `summary`.`OwnerId`>@_p_1", query.ToSql());
+        Assert.Equal("Select `summary`.`OwnerId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `summary` \r\nWhere `summary`.`OwnerId`>@_p_1", query.ToSql());
         Assert.Equal(new object[] { 7, 9 }, query.GetParams().Values.ToArray());
     }
 
@@ -1299,7 +1300,7 @@ public class SqlQueryDescriptionTest
         var exception = Assert.Throws<NotSupportedException>(() => query.Where<MultiSourceProjection>(summary => summary.OwnerId > 13));
 
         // Assert
-        Assert.Equal("Select `review`.`ReviewUserId` \r\nFrom (Select `owner`.`OwnerId` As `ReviewUserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nWhere `owner`.`OwnerId`>@_p_1) As `review` \r\nWhere `review`.`ReviewUserId`>@_p_2", expectedSql);
+        Assert.Equal("Select `review`.`ReviewUserId` \r\nFrom (Select `owner`.`OwnerId` As `ReviewUserId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `owner` \r\nWhere `owner`.`OwnerId`>@_p_1) As `review` \r\nWhere `review`.`ReviewUserId`>@_p_2", expectedSql);
         Assert.Equal(new object[] { 7, 9, 11 }, query.GetParams().Values.ToArray());
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", exception.Message);
         Assert.Equal(expectedSql, query.ToSql());
@@ -1352,7 +1353,7 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceProjection>(summary => new object[] { summary.OwnerId, summary.ReviewUserId });
 
         // Assert
-        Assert.Equal("Select `refined`.`OwnerId`,`refined`.`ReviewUserId` \r\nFrom (Select `owner`.`OwnerId` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nLeft Join `reviews` As `review` On `owner`.`OwnerId`=`review`.`UserId` \r\nWhere `owner`.`OwnerId`>@_p_1) As `refined` \r\nWhere `refined`.`OwnerId`>@_p_2",
+        Assert.Equal("Select `refined`.`OwnerId`,`refined`.`ReviewUserId` \r\nFrom (Select `owner`.`OwnerId` As `OwnerId`,`review`.`UserId` As `ReviewUserId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `owner` \r\nLeft Join `reviews` As `review` On `owner`.`OwnerId`=`review`.`UserId` \r\nWhere `owner`.`OwnerId`>@_p_1) As `refined` \r\nWhere `refined`.`OwnerId`>@_p_2",
             query.ToSql());
         Assert.Equal(new object[] { 7, 9, 13 }, query.GetParams().Values.ToArray());
     }
@@ -1413,7 +1414,7 @@ public class SqlQueryDescriptionTest
             .AppendSelect<MultiSourceUser>(lastUser => new object[] { lastUser.Id }, "lastUser");
 
         // Assert
-        Assert.Equal("Select `owner`.`OwnerId`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`lastUser`.`Id` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nJoin `reviews` As `review` On `owner`.`OwnerId`=`review`.`UserId` \r\nCross Join `permissions` As `permission` \r\nLeft Join `users` As `reviewer` On `reviewer`.`Id`=`permission`.`UserId` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nCross Join `permissions` As `permission2` \r\nJoin `users` As `lastUser` On `lastUser`.`Id`=`permission2`.`UserId` \r\nWhere `owner`.`OwnerId`>@_p_1", query.ToSql());
+        Assert.Equal("Select `owner`.`OwnerId`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`lastUser`.`Id` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `owner` \r\nJoin `reviews` As `review` On `owner`.`OwnerId`=`review`.`UserId` \r\nCross Join `permissions` As `permission` \r\nLeft Join `users` As `reviewer` On `reviewer`.`Id`=`permission`.`UserId` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nCross Join `permissions` As `permission2` \r\nJoin `users` As `lastUser` On `lastUser`.`Id`=`permission2`.`UserId` \r\nWhere `owner`.`OwnerId`>@_p_1", query.ToSql());
         Assert.Equal(new object[] { 7, 9 }, query.GetParams().Values.ToArray());
     }
 
@@ -1462,9 +1463,9 @@ public class SqlQueryDescriptionTest
             .Select<MultiSourceProjection, MultiSourceProjection>((owner, review) => new object[] { owner.OwnerId, review.ReviewUserId }, "owner", "review");
 
         // Assert
-        Assert.Equal("Select `owner`.`OwnerId`,`entityReview`.`UserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nCross Join `reviews` As `entityReview` \r\nWhere `owner`.`OwnerId`=`entityReview`.`UserId`", entityCrossJoin.ToSql());
+        Assert.Equal("Select `owner`.`OwnerId`,`entityReview`.`UserId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `owner` \r\nCross Join `reviews` As `entityReview` \r\nWhere `owner`.`OwnerId`=`entityReview`.`UserId`", entityCrossJoin.ToSql());
         Assert.Equal(new object[] { 7 }, entityCrossJoin.GetParams().Values.ToArray());
-        Assert.Equal("Select `owner`.`OwnerId`,`review`.`ReviewUserId` \r\nFrom (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0) As `owner` \r\nCross Join (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `reviews` \r\nWhere `reviews`.`UserId`>@_p_1) As `review` \r\nWhere `owner`.`OwnerId`=`review`.`ReviewUserId`", derivedCrossJoin.ToSql());
+        Assert.Equal("Select `owner`.`OwnerId`,`review`.`ReviewUserId` \r\nFrom (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0) As `owner` \r\nCross Join (Select `item`.`UserId` As `ReviewUserId` \r\nFrom `reviews` As `item` \r\nWhere `item`.`UserId`>@_p_1) As `review` \r\nWhere `owner`.`OwnerId`=`review`.`ReviewUserId`", derivedCrossJoin.ToSql());
         Assert.Equal(new object[] { 7, 11 }, derivedCrossJoin.GetParams().Values.ToArray());
     }
 
@@ -1549,7 +1550,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.Equal("多表派生表只能引用已投影的 DTO 成员。", memberException.Message);
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `users`, `reviews`) As `summary` On `reviews`.`UserId`=`summary`.`ReviewUserId`", query.ToSql());
+        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` As `review` \r\nJoin (Select `review`.`UserId` As `ReviewUserId` \r\nFrom `users` As `user`, `reviews` As `review`) As `summary` On `review`.`UserId`=`summary`.`ReviewUserId`", query.ToSql());
     }
 
     /// <summary>
@@ -1636,7 +1637,7 @@ public class SqlQueryDescriptionTest
             .Join<MultiSourceUser, MultiSourceProjection>(subquery, (user, summary) => user.Id == summary.OwnerId);
 
         // Assert
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users`, `reviews` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users`, `reviews` \r\nWhere `users`.`Id`>@_p_1) As `summary` On `users`.`Id`=`summary`.`OwnerId` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal("Select `user`.`Id` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nWhere `user`.`Id`>@_p_1) As `summary` On `user`.`Id`=`summary`.`OwnerId` \r\nWhere `user`.`Id`>@_p_0", query.ToSql());
         Assert.Equal(new object[] { 3, 7 }, query.GetParams().Values.ToArray());
         Assert.Equal(query.ToSql(), query.ToSql());
     }
@@ -1687,7 +1688,7 @@ public class SqlQueryDescriptionTest
         var secondSql = query.ToSql();
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`audit`.`ReviewUserId`,`owner`.`OwnerId` \r\nFrom `users` \r\nJoin (Select `reviews`.`UserId` As `ReviewUserId` \r\nFrom `reviews` \r\nWhere `reviews`.`UserId`>@_p_1) As `audit` On `users`.`Id`=`audit`.`ReviewUserId` \r\nJoin (Select `users`.`Id` As `OwnerId` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_2) As `owner` On `users`.`Id`=`owner`.`OwnerId` \r\nWhere `users`.`Id`>@_p_0",
+        Assert.Equal("Select `user`.`Id`,`audit`.`ReviewUserId`,`owner`.`OwnerId` \r\nFrom `users` As `user` \r\nJoin (Select `review`.`UserId` As `ReviewUserId` \r\nFrom `reviews` As `review` \r\nWhere `review`.`UserId`>@_p_1) As `audit` On `user`.`Id`=`audit`.`ReviewUserId` \r\nJoin (Select `user`.`Id` As `OwnerId` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_2) As `owner` On `user`.`Id`=`owner`.`OwnerId` \r\nWhere `user`.`Id`>@_p_0",
             firstSql);
         Assert.Equal(firstSql, secondSql);
         Assert.Equal(new object[] { 3, 7, 11 }, query.GetParams().Values.ToArray());
@@ -1868,18 +1869,18 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
+        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>("review")
             .Join<MultiSourceUser, MultiSourceUser>((user, reviewer) => user.Id == reviewer.Id && reviewer.Id > 7,
                 "reviewer")
             .Join<MultiSourceUser, MultiSourcePermission>((reviewer, permission) => reviewer.Id == permission.UserId,
                 new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviewer" })
-            .Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
+            .Where<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId, "user", "review")
+            .Select<MultiSourceUser, MultiSourceReview>((user, review) => new object[] { user.Id, review.UserId }, "user", "review")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission");
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`reviewer`.`Id`,`permission`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `users` As `reviewer` On `users`.`Id`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0 \r\nJoin `permissions` As `permission` On `reviewer`.`Id`=`permission`.`UserId` \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`reviewer`.`Id`,`permission`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `users` As `reviewer` On `user`.`Id`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0 \r\nJoin `permissions` As `permission` On `reviewer`.`Id`=`permission`.`UserId` \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(7, query.GetParams().Values.Single());
     }
 
@@ -1912,14 +1913,14 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
+        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>("review")
             .LeftJoin<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id && reviewer.Id > 3,
                 "reviewer")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
+            .Select<MultiSourceUser, MultiSourceReview>((owner, review) => new object[] { owner.Id, review.UserId }, "owner", "review")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer");
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`reviewer`.`Id` \r\nFrom `users`, `reviews` \r\nLeft Join `users` As `reviewer` On `users`.`Id`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal("Select `owner`.`Id`,`review`.`UserId`,`reviewer`.`Id` \r\nFrom `users` As `owner`, `reviews` As `review` \r\nLeft Join `users` As `reviewer` On `owner`.`Id`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0", query.ToSql());
         Assert.Equal(3, query.GetParams().Values.Single());
     }
 
@@ -1965,7 +1966,7 @@ public class SqlQueryDescriptionTest
             .Where<MultiSourceReview, MultiSourcePermission>((review, permission) => review.UserId == permission.UserId);
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId` \r\nFrom `users`, `reviews` \r\nCross Join `permissions` As `permission` \r\nWhere `reviews`.`UserId`=`permission`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nCross Join `permissions` As `permission` \r\nWhere `review`.`UserId`=`permission`.`UserId`", query.ToSql());
     }
 
     /// <summary>
@@ -2043,16 +2044,16 @@ public class SqlQueryDescriptionTest
         using var rootQuery = provider.GetRequiredService<ISqlQueryFactory>().Create("sqlite");
 
         // Act
-        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>()
+        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>("review")
             .Join<MultiSourceUser, MultiSourceUser>((owner, reviewer) => owner.Id == reviewer.Id, "reviewer")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews")
+            .Select<MultiSourceUser, MultiSourceReview>((owner, review) => new object[] { owner.Id, review.UserId }, "owner", "review")
             .AppendSelect<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .OrderBy<MultiSourceUser>(reviewer => new object[] { reviewer.Id }, "reviewer")
             .Skip(5)
             .Take(10);
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`reviewer`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `users` As `reviewer` On `users`.`Id`=`reviewer`.`Id` \r\nOrder By `reviewer`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", query.ToSql());
+        Assert.Equal("Select `owner`.`Id`,`review`.`UserId`,`reviewer`.`Id` \r\nFrom `users` As `owner`, `reviews` As `review` \r\nJoin `users` As `reviewer` On `owner`.`Id`=`reviewer`.`Id` \r\nOrder By `reviewer`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", query.ToSql());
         Assert.Equal(new object[] { 5, 10 }, query.GetParams().Values.ToArray());
     }
 
@@ -2097,8 +2098,8 @@ public class SqlQueryDescriptionTest
             .Take(11);
 
         // Assert
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `users`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", first.ToSql());
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users`, `reviews` \r\nOrder By `reviews`.`UserId` \r\nLimit @_p_1 OFFSET @_p_0", second.ToSql());
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users` As `users`, `reviews` As `reviews` \r\nOrder By `users`.`Id` \r\nLimit @_p_1 OFFSET @_p_0", first.ToSql());
+        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId` \r\nFrom `users` As `users`, `reviews` As `reviews` \r\nOrder By `reviews`.`UserId` \r\nLimit @_p_1 OFFSET @_p_0", second.ToSql());
     }
 
     /// <summary>
@@ -2117,7 +2118,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id` \r\nFrom `users` \r\nWhere `users`.`Id`>@_p_0", query.ToSql());
+        Assert.Equal("Select `user`.`Id` \r\nFrom `users` As `user` \r\nWhere `user`.`Id`>@_p_0", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 1 }, query.GetParams().Values.ToArray());
     }
@@ -2138,7 +2139,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`review`.`UserId` \r\nFrom `users` \r\nJoin `reviews` As `review` On `users`.`Id`=`review`.`UserId` And `review`.`UserId`>@_p_0", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId` \r\nFrom `users` As `user` \r\nJoin `reviews` As `review` On `user`.`Id`=`review`.`UserId` And `review`.`UserId`>@_p_0", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 2 }, query.GetParams().Values.ToArray());
     }
@@ -2157,7 +2158,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` And `permission`.`UserId`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` And `permission`.`UserId`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 3 }, query.GetParams().Values.ToArray());
     }
@@ -2176,7 +2177,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` And `reviewer`.`Id`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 4 }, query.GetParams().Values.ToArray());
     }
@@ -2195,7 +2196,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` And `review2`.`UserId`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` And `review2`.`UserId`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 5 }, query.GetParams().Values.ToArray());
     }
@@ -2214,7 +2215,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` And `permission2`.`UserId`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` And `permission2`.`UserId`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 6 }, query.GetParams().Values.ToArray());
     }
@@ -2233,7 +2234,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` And `reviewer2`.`Id`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` And `reviewer2`.`Id`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 7 }, query.GetParams().Values.ToArray());
     }
@@ -2252,7 +2253,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` And `review3`.`UserId`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` And `review3`.`UserId`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 8 }, query.GetParams().Values.ToArray());
     }
@@ -2271,7 +2272,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` And `permission3`.`UserId`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` And `permission3`.`UserId`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 9 }, query.GetParams().Values.ToArray());
     }
@@ -2290,7 +2291,7 @@ public class SqlQueryDescriptionTest
 
         // Assert
         Assert.IsType<SqlLambdaQuery>(query);
-        Assert.Equal("Select `users`.`Id`,`reviews`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId`,`reviewer3`.`Id` \r\nFrom `users`, `reviews` \r\nJoin `permissions` As `permission` On `reviews`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` \r\nJoin `users` As `reviewer3` On `permission3`.`UserId`=`reviewer3`.`Id` And `reviewer3`.`Id`>@_p_0 \r\nWhere `users`.`Id`=`reviews`.`UserId`", query.ToSql());
+        Assert.Equal("Select `user`.`Id`,`review`.`UserId`,`permission`.`UserId`,`reviewer`.`Id`,`review2`.`UserId`,`permission2`.`UserId`,`reviewer2`.`Id`,`review3`.`UserId`,`permission3`.`UserId`,`reviewer3`.`Id` \r\nFrom `users` As `user`, `reviews` As `review` \r\nJoin `permissions` As `permission` On `review`.`UserId`=`permission`.`UserId` \r\nJoin `users` As `reviewer` On `permission`.`UserId`=`reviewer`.`Id` \r\nJoin `reviews` As `review2` On `reviewer`.`Id`=`review2`.`UserId` \r\nJoin `permissions` As `permission2` On `review2`.`UserId`=`permission2`.`UserId` \r\nJoin `users` As `reviewer2` On `permission2`.`UserId`=`reviewer2`.`Id` \r\nJoin `reviews` As `review3` On `reviewer2`.`Id`=`review3`.`UserId` \r\nJoin `permissions` As `permission3` On `review3`.`UserId`=`permission3`.`UserId` \r\nJoin `users` As `reviewer3` On `permission3`.`UserId`=`reviewer3`.`Id` And `reviewer3`.`Id`>@_p_0 \r\nWhere `user`.`Id`=`review`.`UserId`", query.ToSql());
         Assert.Equal(new[] { "@_p_0" }, query.GetParams().Keys);
         Assert.Equal(new object[] { 10 }, query.GetParams().Values.ToArray());
     }
@@ -2306,15 +2307,15 @@ public class SqlQueryDescriptionTest
         if (sourceCount < 3 || sourceCount > 10)
             throw new ArgumentOutOfRangeException(nameof(sourceCount));
 
-        var query = rootQuery.From<MultiSourceUser>().From<MultiSourceReview>();
+        var query = rootQuery.From<MultiSourceUser>("user").From<MultiSourceReview>("review");
         if (sourceCount == 3)
             query.Join<MultiSourceReview, MultiSourcePermission>((review, permission) =>
                 review.UserId == permission.UserId && permission.UserId > 3,
-                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviews" });
+                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "review" });
         else
             query.Join<MultiSourceReview, MultiSourcePermission>((review, permission) =>
                 review.UserId == permission.UserId,
-                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "reviews" });
+                new SqlJoinOptions { RightAlias = "permission", LeftAlias = "review" });
 
         if (sourceCount == 4)
             query.Join<MultiSourcePermission, MultiSourceUser>((permission, reviewer) =>
@@ -2369,8 +2370,8 @@ public class SqlQueryDescriptionTest
                 permission3.UserId == reviewer3.Id && reviewer3.Id > 10,
                 new SqlJoinOptions { RightAlias = "reviewer3", LeftAlias = "permission3" });
 
-        query.Where<MultiSourceUser, MultiSourceReview>((users, reviews) => users.Id == reviews.UserId, "users", "reviews")
-            .Select<MultiSourceUser, MultiSourceReview>((users, reviews) => new object[] { users.Id, reviews.UserId }, "users", "reviews");
+        query.Where<MultiSourceUser, MultiSourceReview>((user, review) => user.Id == review.UserId, "user", "review")
+            .Select<MultiSourceUser, MultiSourceReview>((user, review) => new object[] { user.Id, review.UserId }, "user", "review");
         if (sourceCount >= 3)
             query.AppendSelect<MultiSourcePermission>(permission => new object[] { permission.UserId }, "permission");
         if (sourceCount >= 4)
@@ -2541,8 +2542,10 @@ public class SqlQueryDescriptionTest
         private readonly string _secondConnectionString;
 
         /// <summary>
-        /// 初始化一个 <see cref="TenantSqliteDataSourceResolver"/> 类型的实例。
+        /// 初始化一个 <see cref="TenantSqliteDataSourceResolver" /> 类型的实例。
         /// </summary>
+        /// <param name="firstConnectionString">用于第一个数据库连接的连接字符串。</param>
+        /// <param name="secondConnectionString">用于第二个数据库连接的连接字符串。</param>
         public TenantSqliteDataSourceResolver(string firstConnectionString, string secondConnectionString)
         {
             _firstConnectionString = firstConnectionString;

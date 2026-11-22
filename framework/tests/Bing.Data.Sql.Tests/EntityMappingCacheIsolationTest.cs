@@ -11,6 +11,9 @@ namespace Bing.Data.Sql.Tests;
 /// </summary>
 public class EntityMappingCacheIsolationTest
 {
+    /// <summary>
+    /// 定义映射缓存隔离测试的元数据失败消息。
+    /// </summary>
     private const string MetadataFailureMessage = "metadata failed";
 
     /// <summary>

@@ -126,7 +126,7 @@ public sealed class ValuesClause : IValuesClause
                 {
                     if (columnIndex > 0)
                         builder.Append(", ");
-                    builder.Append(_context.Dialect.GetParamName(row[columnIndex]));
+                    builder.Append(SqlMutationContext.GetParameterPlaceholder(_context.Provider, row[columnIndex]));
                 }
                 builder.Append(')');
             }

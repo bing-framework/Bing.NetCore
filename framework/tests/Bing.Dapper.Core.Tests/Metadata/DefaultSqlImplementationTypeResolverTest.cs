@@ -12,6 +12,25 @@ namespace Bing.Dapper.Core.Tests.Metadata;
 /// </summary>
 public class SqlProviderRuntimeRegistrationTest
 {
+    /// <summary>静态工厂的兼容包装闭包不参与幂等比较，实际服务工厂差异必须拒绝。</summary>
+    [Fact]
+    public void AddStaticRuntime_ShouldCompareOriginalFactoriesAndRejectExecutorConflicts()
+    {
+        var services = new ServiceCollection();
+        SqlProviderRuntime Create(bool alternate) => SqlProviderRuntime.CreateWithFactories("static.provider",
+            typeof(QueryService), typeof(ExecutorService), null,
+            static (provider, options) => new QueryService(provider, options),
+            alternate ? static (provider, options) => new AlternateExecutorService(provider, options) :
+                static (provider, options) => new ExecutorService(provider, options), null,
+            static _ => new SqlOptions(), static (_, _) => new SqlOptions());
+
+        services.AddSqlProviderRuntime(Create(false));
+        services.AddSqlProviderRuntime(Create(false));
+
+        Assert.Single(services, item => item.ServiceType == typeof(SqlProviderRuntime));
+        Assert.Throws<InvalidOperationException>(() => services.AddSqlProviderRuntime(Create(true)));
+    }
+
     /// <summary>
     /// 测试 - 不同 Provider 注册应保存各自服务实现，避免相同数据库类型的 Provider 相互覆盖。
     /// </summary>

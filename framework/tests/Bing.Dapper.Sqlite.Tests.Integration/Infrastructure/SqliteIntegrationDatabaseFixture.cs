@@ -29,8 +29,14 @@ public sealed class SqliteIntegrationDatabaseFixture : IAsyncLifetime, IAsyncDis
     /// </summary>
     private ServiceProvider _rootServiceProvider;
 
+    /// <summary>
+    /// 保存 SQLite 集成测试使用的作用域。
+    /// </summary>
     private IServiceScope _serviceScope;
 
+    /// <summary>
+    /// 保存 SQLite 集成测试使用的服务提供程序。
+    /// </summary>
     private IServiceProvider _serviceProvider;
 
     /// <summary>

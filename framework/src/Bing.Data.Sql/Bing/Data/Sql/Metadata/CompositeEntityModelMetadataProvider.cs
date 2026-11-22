@@ -10,6 +10,9 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
     /// </summary>
     private readonly IReadOnlyList<IEntityModelMetadataProvider> _providers;
 
+    /// <summary>显式提供器及兼容模式下全局生成提供器的数量。</summary>
+    private readonly int _registeredProviderCount;
+
     /// <summary>
     /// 初始化一个 <see cref="CompositeEntityModelMetadataProvider"/> 类型的实例。
     /// </summary>
@@ -23,21 +26,48 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
     /// </summary>
     /// <param name="providers">前置自定义提供器集合。</param>
     public CompositeEntityModelMetadataProvider(IEnumerable<IEntityModelMetadataProvider> providers)
+        : this(providers, false)
+    {
+    }
+
+    /// <summary>
+    /// 创建可明确禁止默认反射提供器的模型组合。
+    /// </summary>
+    /// <param name="providers">由宿主注册的提供器，按登记顺序处理。</param>
+    /// <param name="generatedOnly">是否禁止全局注册及默认反射回退。</param>
+    public CompositeEntityModelMetadataProvider(IEnumerable<IEntityModelMetadataProvider> providers, bool generatedOnly)
     {
         var values = new List<IEntityModelMetadataProvider>();
         if (providers != null)
             values.AddRange(providers.Where(provider => provider != null && provider is not CompositeEntityModelMetadataProvider));
-        values.Add(new DataAnnotationsEntityModelMetadataProvider());
-        values.Add(new ConventionEntityModelMetadataProvider());
+        if (SqlRuntimeFeatures.ReflectionFallbackEnabled && !generatedOnly)
+        {
+            values.Add(new GeneratedEntityModelMetadataProvider());
+            _registeredProviderCount = values.Count;
+            values.Add(new DataAnnotationsEntityModelMetadataProvider());
+            values.Add(new ConventionEntityModelMetadataProvider());
+        }
+        else
+        {
+            _registeredProviderCount = values.Count;
+        }
         _providers = values.AsReadOnly();
     }
 
     /// <inheritdoc />
-    public EntityModelMetadata GetMetadata(Type entityType)
+    public EntityModelMetadata GetMetadata(Type entityType) => GetMetadata(entityType, _providers.Count);
+
+    /// <summary>仅查询显式提供器和兼容模式下的全局生成模型，不触发默认反射回退。</summary>
+    /// <param name="entityType">需要查询的实体类型。</param>
+    /// <returns>匹配的元数据；没有登记时为 <see langword="null"/>。</returns>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public EntityModelMetadata GetRegisteredMetadata(Type entityType) => GetMetadata(entityType, _registeredProviderCount);
+
+    private EntityModelMetadata GetMetadata(Type entityType, int count)
     {
-        foreach (var provider in _providers)
+        for (var i = 0; i < count; i++)
         {
-            var metadata = provider.GetMetadata(entityType);
+            var metadata = _providers[i].GetMetadata(entityType);
             if (metadata != null)
                 return metadata;
         }

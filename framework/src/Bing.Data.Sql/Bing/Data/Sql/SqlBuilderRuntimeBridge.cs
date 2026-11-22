@@ -16,6 +16,8 @@ namespace Bing.Data.Sql;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class SqlBuilderRuntimeBridge
 {
+    private static readonly string[] ParameterPrefixes = { "@", ":", "?", "$" };
+
     /// <summary>
     /// 判断 SQL 代码上下文是否包含指定参数标记。
     /// </summary>
@@ -32,6 +34,32 @@ public static class SqlBuilderRuntimeBridge
     /// <returns>动态过滤或数据边界要求快照时返回 <see langword="true"/>。</returns>
     internal static bool RequiresExecutionSnapshot(ISqlBuilder builder) =>
         builder is SqlBuilderBase { RequiresRenderSnapshot: true };
+
+    /// <summary>
+    /// 判断查询派生是否需要保留隔离的规划 Builder。
+    /// </summary>
+    /// <param name="builder">已冻结的查询 Builder。</param>
+    /// <returns>
+    /// 包含 CTE、Union、分组、Distinct 或聚合结构时返回 <see langword="true"/>。
+    /// </returns>
+    /// <remarks>
+    /// 此判断用于决定是否捕获完整渲染结构；创建计划时，已能从冻结结构完成
+    /// Count 和任意排序分页的查询会释放规划来源，其余查询继续保留隔离副本。
+    /// </remarks>
+    internal static bool RequiresPlanningBuilder(ISqlBuilder builder)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        if (builder is ICteAccessor { CteItems.Count: > 0 } ||
+            builder is IUnionAccessor { IsUnion: true })
+            return true;
+        if (builder is not ISqlQueryClauseAccessor accessor)
+            return true;
+        if (accessor.GroupByClause?.IsGroup == true)
+            return true;
+        return accessor.SelectClause is SelectClause selectClause &&
+               (selectClause.IsDistinct || selectClause.HasAggregate);
+    }
 
     /// <summary>
     /// 创建执行快照。
@@ -54,13 +82,62 @@ public static class SqlBuilderRuntimeBridge
         if (builder is SqlBuilderBase sqlBuilder)
         {
             var snapshot = sqlBuilder.CreateRenderSnapshot();
-            return new SqlBuilderExecutionSnapshot(snapshot.Sql, GetParameterSnapshot(snapshot.Builder),
-                includeDebugSql ? snapshot.Builder.ToDebugSql(snapshot.Sql) : null);
+            return CreateExecutionSnapshot(snapshot, includeDebugSql);
         }
         var clone = builder.Clone();
         var sql = clone.ToSql();
         return new SqlBuilderExecutionSnapshot(sql, GetParameterSnapshot(clone),
-            includeDebugSql ? clone.ToDebugSql(sql) : null);
+            includeDebugSql ? clone.ToDebugSql(sql) : null,
+            clone.Provider.ParamLiteralsResolver);
+    }
+
+    /// <summary>同时接收首次渲染的 SQL、参数来源和不可变 Select 边界。</summary>
+    internal static SqlBuilderExecutionSnapshot CreateExecutionSnapshot(SqlBuilderRenderSnapshot snapshot,
+        bool includeDebugSql = false) =>
+        new(snapshot.Sql, GetParameterSnapshot(snapshot.Builder),
+            includeDebugSql ? snapshot.Builder.ToDebugSql(snapshot.Sql) : null,
+            snapshot.Builder.Provider.ParamLiteralsResolver, snapshot.SelectShape,
+            CreatePagination(snapshot.Builder, snapshot.SelectShape));
+
+    /// <summary>
+    /// 使用调用方已经生成的 SQL 文本创建执行快照，避免重复渲染 Builder。
+    /// </summary>
+    /// <param name="builder">提供参数和执行上下文的 Builder。</param>
+    /// <param name="sql">已经生成并与 Builder 形状对应的 SQL 文本。</param>
+    /// <returns>包含给定 SQL 和参数快照的执行快照。</returns>
+    internal static SqlBuilderExecutionSnapshot CreateExecutionSnapshot(ISqlBuilder builder, string sql,
+        SqlQuerySelectShape selectShape = null)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        if (string.IsNullOrWhiteSpace(sql))
+            throw new ArgumentException("SQL 文本不能为空。", nameof(sql));
+        return new SqlBuilderExecutionSnapshot(sql, GetParameterSnapshot(builder), null,
+            builder.Provider.ParamLiteralsResolver, selectShape, CreatePagination(builder, selectShape));
+    }
+
+    /// <summary>只开放框架容器的值转换，外部参数管理器继续使用原派生契约。</summary>
+    private static SqlQueryPagination CreatePagination(ISqlBuilder builder, SqlQuerySelectShape selectShape)
+    {
+        if (selectShape == null || builder is not ISqlCommonPartAccessor accessor)
+            return null;
+        var manager = accessor.ParameterManager;
+        var maximum = int.MaxValue;
+        string provider = null;
+        if (manager is ParameterLimitManagerBase limited)
+            manager = limited.GetStorage(out maximum, out provider);
+        if (manager.GetType() != typeof(ParameterManager))
+            return null;
+        var storage = (ParameterManager)manager;
+        if (selectShape.HasPage)
+            return new SqlQueryPagination(storage.ParameterDialect, builder.Provider.Dialect, null, selectShape.OffsetParameter,
+                selectShape.LimitParameter, maximum, provider);
+        if (!string.IsNullOrWhiteSpace(selectShape.LimitParameter))
+            return null;
+        if (builder is not SqlBuilderBase { FrozenPaginationRenderer: { } renderer })
+            return null;
+        storage.PreviewPageNames(out var offset, out var limit, selectShape.OffsetParameter);
+        return new SqlQueryPagination(storage.ParameterDialect, builder.Provider.Dialect, renderer, offset, limit, maximum, provider);
     }
 
     /// <summary>
@@ -70,6 +147,11 @@ public static class SqlBuilderRuntimeBridge
     /// <returns>查询计划对应的 SQL 与参数快照。</returns>
     public static SqlBuilderExecutionSnapshot CreateExecutionSnapshot(SqlQueryPlan plan)
         => CreateExecutionSnapshot(plan, false);
+
+    /// <summary>判断查询计划是否已经包含冻结的执行快照。</summary>
+    /// <param name="plan">待检查的查询计划。</param>
+    /// <returns>包含冻结快照时返回 true；原生文本计划返回 false。</returns>
+    public static bool HasExecutionSnapshot(SqlQueryPlan plan) => plan?.ExecutionSnapshot != null;
 
     /// <summary>
     /// 创建执行快照。
@@ -81,14 +163,46 @@ public static class SqlBuilderRuntimeBridge
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
+        if (plan.QueryIr != null)
+        {
+            var irSnapshot = plan.QueryIr.Snapshot;
+            if (includeDebugSql == false || irSnapshot.HasDebugSql)
+                return irSnapshot;
+            return irSnapshot.WithDebugSql();
+        }
+        if (plan.ExecutionSnapshot != null)
+        {
+            if (includeDebugSql == false || plan.ExecutionSnapshot.HasDebugSql)
+                return plan.ExecutionSnapshot;
+            return plan.ExecutionSnapshot.WithDebugSql(plan.GetBuilder()?.Provider?.ParamLiteralsResolver);
+        }
+        if (plan.IsBuilderPlan == false)
+        {
+            var parameterSource = plan.Parameters;
+            if (parameterSource is IEnumerable<SqlParam> parameters)
+            {
+                var debugSql = includeDebugSql
+                    ? SqlBuilderBase.CreateDebugSql(plan.CommandText, parameters, ParamLiteralsResolver.Instance)
+                    : null;
+                return new SqlBuilderExecutionSnapshot(plan.CommandText, parameters, debugSql);
+            }
+            if (parameterSource is ISqlParameterMap parameterMap)
+            {
+                var mapParameters = GetParameterSnapshot(parameterMap, plan.CommandText);
+                var debugSql = includeDebugSql
+                    ? SqlBuilderBase.CreateDebugSql(plan.CommandText, mapParameters, ParamLiteralsResolver.Instance, ignoreCase: true)
+                    : null;
+                return new SqlBuilderExecutionSnapshot(plan.CommandText, mapParameters, debugSql);
+            }
+        }
         return CreateExecutionSnapshot(plan.GetBuilder(), includeDebugSql);
     }
 
     /// <summary>
-    /// 校验查询计划是否需要写入数据源权限。
+    /// 校验查询计划只包含查询操作。
     /// </summary>
     /// <param name="plan">待校验的查询计划。</param>
-    /// <returns>计划包含 Returning Mutation 时返回 true。</returns>
+    /// <returns>合法查询返回 false；写入操作必须通过执行器运行。</returns>
     public static bool ValidateQueryPlan(SqlQueryPlan plan)
     {
         if (plan == null)
@@ -97,9 +211,7 @@ public static class SqlBuilderRuntimeBridge
         if (builder == null || builder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
             SqlOperationKind.Update or SqlOperationKind.Delete))
             return false;
-        if (builder is IReturningClauseAccessor { ReturningClause.IsEmpty: false })
-            return true;
-        throw new InvalidOperationException("Mutation 必须配置 Returning 后才能通过查询结果 API 执行。");
+        throw new InvalidOperationException("查询计划不能包含写入操作；请使用专用写入 Builder 和 ISqlExecutor.ExecuteReturning。");
     }
 
     /// <summary>
@@ -112,7 +224,8 @@ public static class SqlBuilderRuntimeBridge
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        return pager ?? (plan.IsBuilderPlan ? plan.GetBuilder().Pager : null) ??
+        return pager ?? plan.QueryIr?.CreateDefaultPagerSnapshot() ??
+            (plan.IsBuilderPlan ? plan.GetBuilder().Pager : null) ??
             throw new InvalidOperationException("分页参数不能为空。");
     }
 
@@ -125,14 +238,35 @@ public static class SqlBuilderRuntimeBridge
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        if (plan.IsBuilderPlan == false)
+        if (plan.QueryIr?.CanDeriveStructuredCount == true)
         {
-            var countPlan = SqlQueryPlan.Create($"Select Count(*) From ({plan.CommandText}) As __bing_raw_count",
-                plan.Parameters, plan.SplitOn, plan.CommandType);
+            var countPlan = SqlQueryPlan.Create(plan.QueryIr.DeriveCount(), plan.SplitOn);
             countPlan.CopyContextFrom(plan, "Count");
             return countPlan;
         }
-        var builder = GetPagingBuilder(plan);
+        // 规划源已经为本次派生创建独立副本，直接消费它，不再包装为计划后重复克隆。
+        var planningBuilder = plan.CreatePlanningBuilder();
+        if (planningBuilder != null || plan.IsBuilderPlan)
+        {
+            var countPlan = CreateBuilderCountPlan(planningBuilder ?? GetPagingBuilder(plan), plan.SplitOn);
+            countPlan.CopyContextFrom(plan, "Count");
+            return countPlan;
+        }
+        if (plan.QueryIr != null)
+        {
+            var countPlan = SqlQueryPlan.Create(plan.QueryIr.DeriveCount(), plan.SplitOn);
+            countPlan.CopyContextFrom(plan, "Count");
+            return countPlan;
+        }
+        var rawCountPlan = SqlQueryPlan.Create($"Select Count(*) From ({plan.CommandText}) As __bing_raw_count",
+            plan.Parameters, plan.SplitOn, plan.CommandType);
+        rawCountPlan.CopyContextFrom(plan, "Count");
+        return rawCountPlan;
+    }
+
+    /// <summary>在一次派生独占的 Builder 上生成计数，结果只保留冻结 SQL 与参数。</summary>
+    private static SqlQueryPlan CreateBuilderCountPlan(ISqlBuilder builder, string splitOn)
+    {
         builder.ClearOrderBy();
         builder.ClearPageParams();
         var hasCte = builder is ICteAccessor { CteItems.Count: > 0 };
@@ -141,24 +275,42 @@ public static class SqlBuilderRuntimeBridge
         var hasDistinct = builder is ISqlQueryClauseAccessor { SelectClause.IsDistinct: true };
         var hasAggregate = builder is ISqlQueryClauseAccessor { SelectClause: SelectClause selectClause } &&
                            selectClause.HasAggregate;
+        if ((hasCte || hasUnion) && builder is SqlBuilderBase)
+        {
+            var source = CreateExecutionSnapshot(builder);
+            if (source.SelectShape != null)
+                return SqlQueryPlan.Create(SqlQueryIr.Create(source, System.Data.CommandType.Text, builder.Pager)
+                    .DeriveCount(), splitOn);
+        }
         if (hasCte && (hasUnion || hasGroup || hasDistinct || hasAggregate))
             throw new NotSupportedException("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。");
         if (hasUnion || hasGroup || hasDistinct || hasAggregate)
         {
-            var countPlan = SqlQueryPlan.Create(builder.New().CountAll().From(builder, "t"));
-            countPlan.CopyContextFrom(plan, "Count");
+            SqlQueryPlan countPlan;
+            if (builder is SqlBuilderBase)
+            {
+                // 内层 SQL 与参数来自同一渲染快照；外层只负责方言包装，不再合并或转换参数。
+                var source = CreateExecutionSnapshot(builder);
+                var countBuilder = builder.New().CountAll().From(new SqlQueryFragment(source.Sql), "t");
+                var snapshot = source.WithSql(countBuilder.ToSql());
+                countPlan = SqlQueryPlan.Create(SqlQueryIr.Create(snapshot, System.Data.CommandType.Text, builder.Pager),
+                    splitOn);
+            }
+            else
+            {
+                var countBuilder = builder.New().CountAll().From(builder, "t");
+                countPlan = CreateFrozenBuilderPlan(countBuilder, splitOn);
+            }
             return countPlan;
         }
         builder.ClearSelect();
-        var simpleCountPlan = SqlQueryPlan.Create(builder.CountAll());
-        simpleCountPlan.CopyContextFrom(plan, "Count");
-        return simpleCountPlan;
+        return CreateFrozenBuilderPlan(builder.CountAll(), splitOn);
     }
 
     /// <summary>
     /// 创建分页查询计划。
     /// </summary>
-    /// <param name="plan">原始结构化查询计划。</param>
+    /// <param name="plan">原始结构化计划，或保留结构规划源的冻结计划。</param>
     /// <param name="pager">本次分页参数。</param>
     /// <returns>应用排序和分页后的数据查询计划。</returns>
     public static SqlQueryPlan CreatePagePlan(SqlQueryPlan plan, IPager pager)
@@ -167,19 +319,92 @@ public static class SqlBuilderRuntimeBridge
             throw new ArgumentNullException(nameof(plan));
         if (pager == null)
             throw new ArgumentNullException(nameof(pager));
-        if (plan.IsBuilderPlan == false)
+        return TryCreateStructuredPagePlan(plan, pager) ??
             throw new ArgumentException("原生 SQL 分页必须通过 Provider Builder 创建分页计划。", nameof(plan));
-        var builder = GetPagingBuilder(plan);
+    }
+
+    /// <summary>
+    /// 为执行器创建分页计划，仅在原生 SQL 包装时请求独立 Provider Builder。
+    /// </summary>
+    /// <param name="plan">原生 SQL、结构化或冻结查询计划。</param>
+    /// <param name="pager">本次分页参数。</param>
+    /// <param name="builderSource">绑定执行器当前数据源与 Provider 的 Builder 来源。</param>
+    /// <returns>用于本次数据页执行的独立计划。</returns>
+    public static SqlQueryPlan CreatePageExecutionPlan(SqlQueryPlan plan, IPager pager,
+        ISqlQueryBuilderSource builderSource)
+    {
+        if (plan == null)
+            throw new ArgumentNullException(nameof(plan));
+        if (pager == null)
+            throw new ArgumentNullException(nameof(pager));
+        if (builderSource == null)
+            throw new ArgumentNullException(nameof(builderSource));
+        return TryCreateStructuredPagePlan(plan, pager) ??
+            CreatePagePlan(plan, pager, builderSource.CreateIndependentSqlBuilder());
+    }
+
+    /// <summary>先消费冻结 IR 或计划自己的规划源，不为结构化派生创建空 Builder。</summary>
+    private static SqlQueryPlan TryCreateStructuredPagePlan(SqlQueryPlan plan, IPager pager)
+    {
+        if (plan.QueryIr?.CanDeriveStructuredPage(pager) == true)
+            return CreateIrPagePlan(plan, pager);
+        var builder = plan.CreatePlanningBuilder();
+        if (builder == null && plan.IsBuilderPlan)
+            builder = GetPagingBuilder(plan);
+        return builder == null ? null : CreateBuilderPagePlan(plan, builder, pager);
+    }
+
+    /// <summary>沿用冻结 SQL 和执行上下文，仅更新两项分页参数。</summary>
+    private static SqlQueryPlan CreateIrPagePlan(SqlQueryPlan plan, IPager pager)
+    {
+        var page = SqlQueryPlan.Create(plan.QueryIr.DerivePage(pager), plan.SplitOn);
+        page.CopyContextFrom(plan, "Data");
+        return page;
+    }
+
+    /// <summary>消费一次派生独占的 Builder，避免为已隔离的规划源再次复制查询树。</summary>
+    private static SqlQueryPlan CreateBuilderPagePlan(SqlQueryPlan plan, ISqlBuilder builder, IPager pager)
+    {
         builder.OrderBy(pager.Order);
-        var pagePlan = SqlQueryPlan.Create(builder.Page(pager), plan.SplitOn);
+        var pageBuilder = builder.Page(pager);
+        var pagePlan = CreateFrozenBuilderPlan(pageBuilder, plan.SplitOn, forPaging: true);
         pagePlan.CopyContextFrom(plan, "Data");
         return pagePlan;
     }
 
     /// <summary>
+    /// 冻结一次派生结果，分页扩展按需保留同次渲染的隔离规划来源。
+    /// </summary>
+    /// <param name="builder">用于生成 SQL 的独立 Builder。</param>
+    /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
+    /// <param name="forPaging">是否允许后续继续按原查询结构派生分页和计数。</param>
+    /// <returns>执行时只消费冻结 SQL 和参数的计划。</returns>
+    private static SqlQueryPlan CreateFrozenBuilderPlan(ISqlBuilder builder, string splitOn, bool forPaging = false)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        SqlBuilderExecutionSnapshot snapshot;
+        if (builder is SqlBuilderBase sqlBuilder)
+        {
+            var rendered = sqlBuilder.CreateRenderSnapshot();
+            snapshot = CreateExecutionSnapshot(rendered);
+            builder = rendered.Builder;
+        }
+        else
+        {
+            // 沿用非基类 Builder 的快照克隆契约，并保留实际渲染的来源。
+            builder = builder.Clone();
+            var sql = builder.ToSql();
+            snapshot = CreateExecutionSnapshot(builder, sql);
+        }
+        var queryIr = SqlQueryIr.Create(snapshot, System.Data.CommandType.Text, builder.Pager);
+        return SqlQueryPlan.Create(queryIr, splitOn, forPaging ? builder : null);
+    }
+
+    /// <summary>
     /// 创建分页查询计划。
     /// </summary>
-    /// <param name="plan">原生 SQL 文本计划。</param>
+    /// <param name="plan">原生 SQL 文本计划、结构化计划或其冻结计划。</param>
     /// <param name="pager">本次分页参数。</param>
     /// <param name="pageBuilder">绑定当前 Provider 的独立 Builder。</param>
     /// <returns>应用安全排序和 Provider 分页语法的分页计划。</returns>
@@ -191,8 +416,9 @@ public static class SqlBuilderRuntimeBridge
             throw new ArgumentNullException(nameof(pager));
         if (pageBuilder == null)
             throw new ArgumentNullException(nameof(pageBuilder));
-        if (plan.IsBuilderPlan)
-            return CreatePagePlan(plan, pager);
+        var structuredPlan = TryCreateStructuredPagePlan(plan, pager);
+        if (structuredPlan != null)
+            return structuredPlan;
         var provider = pageBuilder.Provider;
         var profile = SqlProviderCapabilityResolver.GetProfile(provider);
         var reason = SqlProviderCapabilityResolver.HasProfile(provider) == false
@@ -259,6 +485,55 @@ public static class SqlBuilderRuntimeBridge
                 MetadataLevel = SqlParameterMetadataLevel.Weak
             })
             .ToArray();
+    }
+
+    /// <summary>
+    /// 获取已经解析的原生参数映射快照。
+    /// </summary>
+    /// <param name="map">原生参数映射。</param>
+    /// <param name="sql">当前 SQL 文本。</param>
+    /// <returns>可供执行快照使用的参数集合。</returns>
+    /// <remarks>
+    /// 这里只消费映射项已经解析出的值，不在 RuntimeBridge 中重新引入 POCO 反射绑定。
+    /// </remarks>
+    private static IReadOnlyCollection<SqlParam> GetParameterSnapshot(ISqlParameterMap map, string sql)
+    {
+        var items = map.GetItems() ?? Array.Empty<SqlParameterMapItem>();
+        var parameters = new List<SqlParam>(items.Count);
+        foreach (var item in items)
+        {
+            if (item == null || string.IsNullOrWhiteSpace(item.Name))
+                continue;
+            if (item.ValueResolved == false && item.Direction is not (System.Data.ParameterDirection.Output or
+                System.Data.ParameterDirection.ReturnValue))
+                throw new NotSupportedException($"原生参数映射 '{item.Name}' 尚未解析输入值，不能创建冻结执行快照。");
+            var name = NormalizeMapParameterName(sql, item.Name);
+            parameters.Add(new SqlParam(name, item.Value, item.DbType, item.Direction, item.Size,
+                item.Precision, item.Scale)
+            {
+                EntityType = item.EntityType,
+                PropertyName = item.PropertyName,
+                Source = SqlParameterSource.RawSql,
+                MetadataLevel = SqlParameterMetadataLevel.Weak
+            });
+        }
+        return parameters;
+    }
+
+    /// <summary>
+    /// 根据 SQL 中已有的占位符补全参数前缀。
+    /// </summary>
+    /// <param name="sql">当前 SQL 文本。</param>
+    /// <param name="name">映射项参数名。</param>
+    /// <returns>与 SQL 占位符一致的参数名。</returns>
+    private static string NormalizeMapParameterName(string sql, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name[0] is '@' or ':' or '?' or '$')
+            return name;
+        foreach (var prefix in ParameterPrefixes)
+            if (SqlBuilderBase.ContainsParameterToken(sql, prefix + name, ignoreCase: true))
+                return prefix + name;
+        return name;
     }
 
     /// <summary>

@@ -15,6 +15,11 @@ public sealed class SqlBatchUpdateRenderContext
     private readonly SqlMutationPlanCache _planCache;
 
     /// <summary>
+    /// 当前批量更新使用的生成读取计划。
+    /// </summary>
+    private readonly SqlMutationPlan _mutationPlan;
+
+    /// <summary>
     /// 初始化一个 <see cref="SqlBatchUpdateRenderContext"/> 类型的实例。
     /// </summary>
     /// <param name="provider">当前 SQL Provider。</param>
@@ -40,7 +45,8 @@ public sealed class SqlBatchUpdateRenderContext
         ConcurrencyColumns = concurrencyColumns ?? throw new ArgumentNullException(nameof(concurrencyColumns));
         Entities = entities?.ToArray() ?? throw new ArgumentNullException(nameof(entities));
         Options = options;
-        _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver, Services.MetadataOptions);
+        _planCache = SqlMutationPlanCaches.Get(Services.EntityMappingResolver, Services.MetadataOptions, Services.EntityModelMetadataProvider);
+        _mutationPlan = _planCache.GetOrAdd(Mapping, Provider.Key, SqlMutationOperation.Update, null, null);
     }
 
     /// <summary>
@@ -131,6 +137,6 @@ public sealed class SqlBatchUpdateRenderContext
             throw new ArgumentNullException(nameof(source));
         if (column == null)
             throw new ArgumentNullException(nameof(column));
-        return _planCache.GetValue(source, column);
+        return _mutationPlan.GetValue(source, column, _planCache);
     }
 }

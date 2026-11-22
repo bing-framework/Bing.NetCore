@@ -11,13 +11,15 @@ public sealed record SqlTableReference
     public Type EntityType { get; init; }
 
     /// <summary>
-    /// 获取或初始化数据库名称。主要用于 SQL Server 三段式表名。
+    /// 获取或初始化数据库名称。
     /// </summary>
+    /// <remarks>主要用于 SQL Server 三段式表名。</remarks>
     public string Database { get; init; }
 
     /// <summary>
-    /// 获取或初始化数据库架构。MySQL 和 Doris 中表示数据库名称。
+    /// 获取或初始化数据库架构。
     /// </summary>
+    /// <remarks>MySQL 和 Doris 中表示数据库名称。</remarks>
     public string Schema { get; init; }
 
     /// <summary>

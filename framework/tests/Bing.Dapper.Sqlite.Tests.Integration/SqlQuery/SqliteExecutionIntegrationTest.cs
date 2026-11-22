@@ -7,6 +7,7 @@ using System.Text.Json;
 using Bing.Data.Filters;
 using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Test.Shared;
 using Microsoft.Extensions.DependencyInjection;
@@ -1265,6 +1266,28 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(1, await _fixture.CountAsync());
     }
 
+    /// <summary>释放查询入口不应释放共享事务，写入器和后续查询仍可使用并回滚事务。</summary>
+    [Fact]
+    public async Task TransactionScope_WhenQueryIsDisposed_ShouldKeepSharedTransactionForExecutor()
+    {
+        using (var scope = _fixture.GetTransactionScopeFactory().Begin("first"))
+        using (var executor = scope.CreateExecutor())
+        {
+            executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "first" });
+            using (var query = scope.CreateQuery())
+                Assert.Equal(1, query.Sql("Select Count(*) From samples").Single<int>());
+
+            executor.ExecuteSql("Insert Into samples(Name) Values (@name)", new { name = "second" });
+            using (var query = scope.CreateQuery())
+                Assert.Equal(2, query.Sql("Select Count(*) From samples").Single<int>());
+            scope.Rollback();
+        }
+
+        using var independent = _fixture.CreateQuery();
+        Assert.Equal(0, await independent.Sql("Select Count(*) From samples").SingleAsync<int>());
+        Assert.Empty(await _fixture.ReadNamesAsync());
+    }
+
     /// <summary>
     /// 测试 - SQLite事务开始后切换环境dbKey不应影响当前事务。
     /// </summary>
@@ -1745,6 +1768,102 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Empty(secondResult);
     }
 
+    /// <summary>Fluent 分页允许按未投影的列排序，自动计数忽略既有的行数限制。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SqlQueryPlan_WhenPagedByUnprojectedColumn_ShouldCountBeforeLimit(bool asynchronous)
+    {
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var builder = new SqliteBuilder().Select("Name").From("samples").OrderBy("Id").Take(1);
+        var description = SqlQueryRuntimeFactory.CreateQuery((ISqlQueryPlanExecutor)query, builder);
+        var pager = new Pager(2, 1, "Id");
+
+        var page = asynchronous
+            ? await description.ToPageAsync<string>(pager)
+            : description.ToPage<string>(pager);
+
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new[] { "two" }, page.Data);
+    }
+
+    /// <summary>显式冻结的计划仍应在原始查询作用域内计数和分页。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FrozenSqlQueryPlan_WhenPaged_ShouldPreserveSourceScope(bool asynchronous)
+    {
+        await SeedAsync();
+        using var query = _fixture.CreateQuery();
+        var builder = new SqliteBuilder().Select("Name").From("samples").OrderBy("Id").Take(1);
+        var frozen = SqlQueryPlan.Create(builder).Freeze();
+        builder.Where("Name", "one");
+        var executor = (ISqlQueryPlanExecutor)query;
+        var pager = new Pager(2, 1, "Id");
+
+        var page = asynchronous
+            ? await executor.ToPageAsync<string>(frozen, pager, null, default)
+            : executor.ToPage<string>(frozen, pager, null);
+
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new[] { "two" }, page.Data);
+    }
+
+    /// <summary>冻结后的二进制参数在真实 Count 和数据查询中保持原值。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FrozenSqlQueryPlan_WhenBinaryParameterChanges_ShouldUseFrozenValue(bool asynchronous)
+    {
+        await SeedAsync();
+        var value = Encoding.UTF8.GetBytes("two");
+        var builder = new SqliteBuilder().Select("Name").From("samples")
+            .AppendWhere("Cast(`Name` As Blob)=@payload").AddParam("payload", value).OrderBy("Id");
+        var frozen = SqlQueryPlan.Create(builder).Freeze();
+        value[0] = (byte)'n';
+        using var query = _fixture.CreateQuery();
+        var executor = (ISqlQueryPlanExecutor)query;
+        var pager = new Pager(1, 1, "Id");
+
+        var page = asynchronous
+            ? await executor.ToPageAsync<string>(frozen, pager, null, default)
+            : executor.ToPage<string>(frozen, pager, null);
+
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(new[] { "two" }, page.Data);
+    }
+
+    /// <summary>真实分页和分组计数应使用自定义管理器冻结时已转换的二进制参数。</summary>
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task FrozenSqlQueryPlan_WithCustomParameterManager_ShouldUseConvertedSnapshot(bool grouped, bool asynchronous)
+    {
+        await SeedAsync();
+        var value = Encoding.UTF8.GetBytes("svn");
+        var manager = new IncrementingParameterManager(new ParameterManager(SqliteDialect.Instance));
+        var builder = new SqliteBuilder(parameterManager: manager).Select("Name").From("samples")
+            .AppendWhere("Cast(`Name` As Blob)=@payload").AddParam("payload", value)
+            .OrderBy("Name").Skip(2).Take(2);
+        if (grouped)
+            builder.GroupBy("Name");
+        var frozen = SqlQueryPlan.Create(builder).Freeze();
+        value[0] = (byte)'x';
+        using var query = _fixture.CreateQuery();
+        var executor = (ISqlQueryPlanExecutor)query;
+        var pager = new Pager(1, 1, "Name");
+
+        var page = asynchronous
+            ? await executor.ToPageAsync<string>(frozen, pager, null, default)
+            : executor.ToPage<string>(frozen, pager, null);
+
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(new[] { "two" }, page.Data);
+    }
+
     /// <summary>
     /// 测试目的：结构化 Fluent 查询描述分页时应独立生成计数和数据页 SQL，且不污染可复用描述的排序和分页状态。
     /// </summary>
@@ -2044,10 +2163,10 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// 测试目的：纯 CTE 查询应支持自动分页计数，而 CTE 与 Group 或 Union 组合时应明确拒绝不安全的自动计数。
+    /// 测试目的：普通、分组以及集合 CTE 均支持自动分页计数。
     /// </summary>
     [Fact]
-    public async Task SqlQueryPlan_WhenCtePaged_ShouldSupportSimpleAndRejectComplexAutomaticCount()
+    public async Task SqlQueryPlan_WhenCtePaged_ShouldSupportGroupAndUnionAutomaticCount()
     {
         // Arrange
         await SeedAsync();
@@ -2062,23 +2181,25 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Act
         var syncPage = simpleCte.ToPage<string>(new Pager(1, 1) { Order = "Name" });
         var asyncPage = await simpleCte.ToPageAsync<string>(new Pager(1, 1) { Order = "Name" });
-        var groupException = Assert.Throws<NotSupportedException>(() => groupCte.ToPage<string>(new Pager(1, 1)));
-        var unionException = await Assert.ThrowsAsync<NotSupportedException>(() => unionCte.ToPageAsync<string>(new Pager(1, 1)));
+        var groupPage = groupCte.ToPage<string>(new Pager(1, 1) { Order = "Name" });
+        var unionPage = await unionCte.ToPageAsync<string>(new Pager(1, 1, "Name"));
 
         // Assert
         Assert.Equal(1, syncPage.TotalCount);
         Assert.Equal(new[] { "two" }, syncPage.Data);
         Assert.Equal(1, asyncPage.TotalCount);
         Assert.Equal(new[] { "two" }, asyncPage.Data);
-        Assert.Equal("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。", groupException.Message);
-        Assert.Equal(groupException.Message, unionException.Message);
+        Assert.Equal(1, groupPage.TotalCount);
+        Assert.Equal(new[] { "two" }, groupPage.Data);
+        Assert.Equal(1, unionPage.TotalCount);
+        Assert.Equal(new[] { "two" }, unionPage.Data);
     }
 
     /// <summary>
-    /// 测试目的：包含 CTE 的复杂去重查询无法在所有方言安全重写计数 SQL 时，应拒绝自动分页而非返回错误总数。
+    /// 测试目的：CTE 去重分页按主 Select 的去重结果行数计数。
     /// </summary>
     [Fact]
-    public async Task SqlQueryPlan_WhenCteDistinctPaged_ShouldRejectUnsafeAutomaticCount()
+    public async Task SqlQueryPlan_WhenCteDistinctPaged_ShouldCountDistinctRows()
     {
         // Arrange
         await SeedAsync();
@@ -2087,14 +2208,15 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var description = query.Query().With("selected", source).Distinct().Select("Name").From("selected");
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => description.ToPage<string>(new Pager(1, 1) { Order = "Name" }));
+        var page = description.ToPage<string>(new Pager(1, 1) { Order = "Name" });
 
         // Assert
-        Assert.Equal("包含 CTE 的 Union、Group 或 Distinct 查询暂不支持自动分页计数，请预先设置 TotalCount。", exception.Message);
+        Assert.Equal(3, page.TotalCount);
+        Assert.Equal(new[] { "one" }, page.Data);
     }
 
     /// <summary>
-    /// 测试目的：调用方已明确总数为零时，复杂 CTE 分页不得尝试不安全的自动 Count，仍应执行当前页数据查询。
+    /// 测试目的：调用方已明确总数为零时，CTE 分页跳过自动 Count，仍执行当前页数据查询。
     /// </summary>
     [Fact]
     public async Task SqlQueryPlan_WhenComplexCtePageHasKnownZeroTotal_ShouldSkipAutomaticCount()
@@ -2953,7 +3075,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var result = await description.ToListAsync<string>();
 
         // Assert
-        Assert.Equal("Select `samples`.`Name` \r\nFrom `samples`", description.ToSql());
+        Assert.Equal("Select `sample`.`Name` \r\nFrom `samples` As `sample`", description.ToSql());
         Assert.Equal(new[] { "one", "three", "two" }, result.OrderBy(item => item).ToArray());
     }
 
@@ -2978,31 +3100,35 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         var result = await description.SingleAsync<LambdaMemberInitResult>();
 
         // Assert
-        Assert.Equal("Select `samples`.`Name` As `DisplayName`,`samples`.`Amount` As `OptionalAmount` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0", description.ToSql());
+        Assert.Equal("Select `sample`.`Name` As `DisplayName`,`sample`.`Amount` As `OptionalAmount` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Name`=@_p_0", description.ToSql());
         Assert.Equal("member-init", result.DisplayName);
         Assert.Null(result.OptionalAmount);
     }
 
     /// <summary>
-    /// 测试目的：Lambda 连续 Select 应始终替换前一投影，只有 AppendSelect 才允许显式追加投影列。
+    /// 测试目的：Lambda 连续 Select 应累计不同投影列，ReplaceSelect 替换投影，AppendSelect 保留追加语义。
     /// </summary>
     [Fact]
-    public void Lambda_WhenSelectRepeated_ShouldReplaceAndAppendSelectShouldAppend()
+    public void Lambda_WhenSelectRepeated_ShouldAccumulateReplaceAndAppendAsRequested()
     {
         // Arrange
         using var query = _fixture.CreateQuery();
 
         // Act
-        var replacement = query.From<SqliteStructuredTableSample>()
+        var accumulated = query.From<SqliteStructuredTableSample>()
             .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
-            .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Name });
+            .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Id });
+        var replaced = query.From<SqliteStructuredTableSample>()
+            .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
+            .ReplaceSelect<SqliteStructuredTableSample>(sample => new object[] { sample.Id });
         var appended = query.From<SqliteStructuredTableSample>()
-            .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Name })
-            .AppendSelect<SqliteStructuredTableSample>(sample => new object[] { sample.Id });
+            .Select<SqliteStructuredTableSample>(sample => new object[] { sample.Id })
+            .AppendSelect<SqliteStructuredTableSample>(sample => new object[] { sample.Name });
 
         // Assert
-        Assert.Equal("Select `samples`.`Name` \r\nFrom `samples`", replacement.ToSql());
-        Assert.Equal("Select `samples`.`Name`,`samples`.`Id` \r\nFrom `samples`", appended.ToSql());
+        Assert.Equal("Select `sample`.`Name`,`sample`.`Id` \r\nFrom `samples` As `sample`", accumulated.ToSql());
+        Assert.Equal("Select `sample`.`Id` \r\nFrom `samples` As `sample`", replaced.ToSql());
+        Assert.Equal("Select `sample`.`Id`,`sample`.`Name` \r\nFrom `samples` As `sample`", appended.ToSql());
     }
 
     /// <summary>
@@ -3103,7 +3229,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         // Assert
         Assert.All(new[] { result1, result2, result3, result4, result5, result6, result7, result8, result9, result10 },
             result => Assert.Equal(new[] { 1 }, result.Select(item => item.Id)));
-        Assert.Equal("Select `Arity01`.`Id` As `Id` \r\nFrom `Arity01`, `Arity02`, `Arity03`, `Arity04`, `Arity05`, `Arity06`, `Arity07`, `Arity08`, `Arity09`, `Arity10` \r\nWhere `Arity01`.`Id`=`Arity02`.`Id`", description10.ToSql());
+        Assert.Equal("Select `first`.`Id` As `Id` \r\nFrom `Arity01` As `first`, `Arity02` As `second`, `Arity03`, `Arity04`, `Arity05`, `Arity06`, `Arity07`, `Arity08`, `Arity09`, `Arity10` \r\nWhere `first`.`Id`=`second`.`Id`", description10.ToSql());
     }
 
     /// <summary>
@@ -3159,7 +3285,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-05", item.MiddleName);
         Assert.Equal("chain-10", item.LastName);
         Assert.Equal(
-            "Select `Arity01`.`Name` As `FirstName`,`Arity05`.`Name` As `MiddleName`,`Arity10`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id` \r\nJoin `Arity09` On `Arity08`.`NextId`=`Arity09`.`Id` \r\nJoin `Arity10` On `Arity09`.`NextId`=`Arity10`.`Id`",
+            "Select `first`.`Name` As `FirstName`,`fifth`.`Name` As `MiddleName`,`tenth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id` \r\nJoin `Arity06` As `sixth` On `fifth`.`NextId`=`sixth`.`Id` \r\nJoin `Arity07` As `seventh` On `sixth`.`NextId`=`seventh`.`Id` \r\nJoin `Arity08` As `eighth` On `seventh`.`NextId`=`eighth`.`Id` \r\nJoin `Arity09` As `ninth` On `eighth`.`NextId`=`ninth`.`Id` \r\nJoin `Arity10` As `tenth` On `ninth`.`NextId`=`tenth`.`Id`",
             description.ToSql());
     }
 
@@ -3189,7 +3315,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-01", item.MiddleName);
         Assert.Equal("chain-02", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity01`.`Name` As `MiddleName`,`Arity02`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`first`.`Name` As `MiddleName`,`second`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3224,7 +3350,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-03", item.MiddleName);
         Assert.Equal("chain-05", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity03`.`Name` As `MiddleName`,`Arity05`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`third`.`Name` As `MiddleName`,`fifth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3257,7 +3383,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-02", item.MiddleName);
         Assert.Equal("chain-03", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity02`.`Name` As `MiddleName`,`Arity03`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`second`.`Name` As `MiddleName`,`third`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3291,7 +3417,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-02", item.MiddleName);
         Assert.Equal("chain-04", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity02`.`Name` As `MiddleName`,`Arity04`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`second`.`Name` As `MiddleName`,`fourth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3327,7 +3453,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-03", item.MiddleName);
         Assert.Equal("chain-06", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity03`.`Name` As `MiddleName`,`Arity06`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`third`.`Name` As `MiddleName`,`sixth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id` \r\nJoin `Arity06` As `sixth` On `fifth`.`NextId`=`sixth`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3364,7 +3490,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-04", item.MiddleName);
         Assert.Equal("chain-07", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity04`.`Name` As `MiddleName`,`Arity07`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`fourth`.`Name` As `MiddleName`,`seventh`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id` \r\nJoin `Arity06` As `sixth` On `fifth`.`NextId`=`sixth`.`Id` \r\nJoin `Arity07` As `seventh` On `sixth`.`NextId`=`seventh`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3402,7 +3528,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-04", item.MiddleName);
         Assert.Equal("chain-08", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity04`.`Name` As `MiddleName`,`Arity08`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`fourth`.`Name` As `MiddleName`,`eighth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id` \r\nJoin `Arity06` As `sixth` On `fifth`.`NextId`=`sixth`.`Id` \r\nJoin `Arity07` As `seventh` On `sixth`.`NextId`=`seventh`.`Id` \r\nJoin `Arity08` As `eighth` On `seventh`.`NextId`=`eighth`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3441,7 +3567,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal("chain-01", item.FirstName);
         Assert.Equal("chain-05", item.MiddleName);
         Assert.Equal("chain-09", item.LastName);
-        Assert.Equal("Select `Arity01`.`Name` As `FirstName`,`Arity05`.`Name` As `MiddleName`,`Arity09`.`Name` As `LastName` \r\nFrom `Arity01` \r\nJoin `Arity02` On `Arity01`.`NextId`=`Arity02`.`Id` \r\nJoin `Arity03` On `Arity02`.`NextId`=`Arity03`.`Id` \r\nJoin `Arity04` On `Arity03`.`NextId`=`Arity04`.`Id` \r\nJoin `Arity05` On `Arity04`.`NextId`=`Arity05`.`Id` \r\nJoin `Arity06` On `Arity05`.`NextId`=`Arity06`.`Id` \r\nJoin `Arity07` On `Arity06`.`NextId`=`Arity07`.`Id` \r\nJoin `Arity08` On `Arity07`.`NextId`=`Arity08`.`Id` \r\nJoin `Arity09` On `Arity08`.`NextId`=`Arity09`.`Id`", description.ToSql());
+        Assert.Equal("Select `first`.`Name` As `FirstName`,`fifth`.`Name` As `MiddleName`,`ninth`.`Name` As `LastName` \r\nFrom `Arity01` As `first` \r\nJoin `Arity02` As `second` On `first`.`NextId`=`second`.`Id` \r\nJoin `Arity03` As `third` On `second`.`NextId`=`third`.`Id` \r\nJoin `Arity04` As `fourth` On `third`.`NextId`=`fourth`.`Id` \r\nJoin `Arity05` As `fifth` On `fourth`.`NextId`=`fifth`.`Id` \r\nJoin `Arity06` As `sixth` On `fifth`.`NextId`=`sixth`.`Id` \r\nJoin `Arity07` As `seventh` On `sixth`.`NextId`=`seventh`.`Id` \r\nJoin `Arity08` As `eighth` On `seventh`.`NextId`=`eighth`.`Id` \r\nJoin `Arity09` As `ninth` On `eighth`.`NextId`=`ninth`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3524,7 +3650,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
         Assert.Equal(summaryParentQueryContextId,
             messages.Single(item => item.Operation == SqlQueryDiagnosticListenerNames.BeforeExecute)
                 .ParentQueryContextId);
-        Assert.Equal("Select `samples`.`Name` As `Name`,`summary`.`TenantId` As `TenantId` \r\nFrom `samples` \r\nJoin (Select `samples`.`Id` As `SampleId`,`Orders`.`TenantId` As `TenantId` \r\nFrom `samples`, `Orders` \r\nWhere `samples`.`Id`=`Orders`.`Id` And `Orders`.`TenantId`=@_p_0) As `summary` On `samples`.`Id`=`summary`.`SampleId`", description.ToSql());
+        Assert.Equal("Select `sample`.`Name` As `Name`,`summary`.`TenantId` As `TenantId` \r\nFrom `samples` As `sample` \r\nJoin (Select `sample`.`Id` As `SampleId`,`order`.`TenantId` As `TenantId` \r\nFrom `samples` As `sample`, `Orders` As `order` \r\nWhere `sample`.`Id`=`order`.`Id` And `order`.`TenantId`=@_p_0) As `summary` On `sample`.`Id`=`summary`.`SampleId`", description.ToSql());
     }
 
     /// <summary>
@@ -3560,7 +3686,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
-        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `Orders` \r\nJoin (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` On `Orders`.`Id`=`summary`.`SampleId`", description.ToSql());
+        Assert.Equal("Select `order`.`Name` As `Name`,`order`.`TenantId` As `TenantId` \r\nFrom `Orders` As `order` \r\nJoin (Select `sample`.`Id` As `SampleId` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Name`=@_p_0) As `summary` On `order`.`Id`=`summary`.`SampleId`", description.ToSql());
     }
 
     /// <summary>
@@ -3594,7 +3720,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
-        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `Orders` \r\nCross Join (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `Orders`.`Id`=`summary`.`SampleId`", description.ToSql());
+        Assert.Equal("Select `order`.`Name` As `Name`,`order`.`TenantId` As `TenantId` \r\nFrom `Orders` As `order` \r\nCross Join (Select `item`.`Id` As `SampleId` \r\nFrom `samples` As `item` \r\nWhere `item`.`Name`=@_p_0) As `summary` \r\nWhere `order`.`Id`=`summary`.`SampleId`", description.ToSql());
     }
 
     /// <summary>
@@ -3625,7 +3751,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
-        Assert.Equal("Select `samples`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom `samples` \r\nCross Join `Orders` \r\nWhere `samples`.`Id`=`Orders`.`Id`", description.ToSql());
+        Assert.Equal("Select `item`.`Name` As `Name`,`order`.`TenantId` As `TenantId` \r\nFrom `samples` As `item` \r\nCross Join `Orders` As `order` \r\nWhere `item`.`Id`=`order`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -3651,7 +3777,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { expected.Id }, result.Select(item => item.SampleId).ToArray());
-        Assert.Equal("Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1", description.ToSql());
+        Assert.Equal("Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `sample`.`Id` As `SampleId` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1", description.ToSql());
     }
 
     /// <summary>
@@ -3680,7 +3806,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { expected.Id }, result.Select(item => item.SampleId).ToArray());
-        Assert.Equal("Select `refined`.`SampleId` As `SampleId` \r\nFrom (Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1) As `refined` \r\nWhere `refined`.`SampleId`>@_p_2", description.ToSql());
+        Assert.Equal("Select `refined`.`SampleId` As `SampleId` \r\nFrom (Select `summary`.`SampleId` As `SampleId` \r\nFrom (Select `sample`.`Id` As `SampleId` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Name`=@_p_0) As `summary` \r\nWhere `summary`.`SampleId`>@_p_1) As `refined` \r\nWhere `refined`.`SampleId`>@_p_2", description.ToSql());
     }
 
     /// <summary>
@@ -3724,7 +3850,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
             : $"{item.Id}:");
         Assert.Equal(expected, result.OrderBy(item => item.SampleId)
             .Select(item => $"{item.SampleId}:{item.TenantId}"));
-        Assert.Equal("Select `refined`.`SampleId` As `SampleId`,`refined`.`TenantId` As `TenantId` \r\nFrom (Select `owner`.`SampleId` As `SampleId`,`order`.`TenantId` As `TenantId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Id`>@_p_0) As `owner` \r\nLeft Join `Orders` As `order` On `owner`.`SampleId`=`order`.`Id`) As `refined` \r\nWhere `refined`.`SampleId`>@_p_1", description.ToSql());
+        Assert.Equal("Select `refined`.`SampleId` As `SampleId`,`refined`.`TenantId` As `TenantId` \r\nFrom (Select `owner`.`SampleId` As `SampleId`,`order`.`TenantId` As `TenantId` \r\nFrom (Select `sample`.`Id` As `SampleId` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Id`>@_p_0) As `owner` \r\nLeft Join `Orders` As `order` On `owner`.`SampleId`=`order`.`Id`) As `refined` \r\nWhere `refined`.`SampleId`>@_p_1", description.ToSql());
     }
 
     /// <summary>
@@ -3758,7 +3884,7 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
 
         // Assert
         Assert.Equal(new[] { "order-one:tenant-1" }, result.Select(item => $"{item.Name}:{item.TenantId}"));
-        Assert.Equal("Select `Orders`.`Name` As `Name`,`Orders`.`TenantId` As `TenantId` \r\nFrom (Select `samples`.`Id` As `SampleId` \r\nFrom `samples` \r\nWhere `samples`.`Name`=@_p_0) As `summary` \r\nCross Join `Orders` \r\nWhere `summary`.`SampleId`=`Orders`.`Id`", description.ToSql());
+        Assert.Equal("Select `order`.`Name` As `Name`,`order`.`TenantId` As `TenantId` \r\nFrom (Select `sample`.`Id` As `SampleId` \r\nFrom `samples` As `sample` \r\nWhere `sample`.`Name`=@_p_0) As `summary` \r\nCross Join `Orders` As `order` \r\nWhere `summary`.`SampleId`=`order`.`Id`", description.ToSql());
     }
 
     /// <summary>
@@ -4309,8 +4435,41 @@ public sealed class SqliteExecutionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
-    /// SQLite SQL 诊断观察器。
+    /// 仅用于集成测试的非幂等参数管理器。
     /// </summary>
+    private sealed class IncrementingParameterManager : IParameterManager
+    {
+        private readonly IParameterManager _inner;
+
+        public IncrementingParameterManager(IParameterManager inner) => _inner = inner;
+
+        public int Count => _inner.Count;
+
+        public string GenerateName() => _inner.GenerateName();
+
+        public string NormalizeName(string name) => _inner.NormalizeName(name);
+
+        public void Add(string name, object value, Operator? @operator = null) =>
+            _inner.Add(name, value is byte[] bytes ? bytes.Select(item => (byte)(item + 1)).ToArray() : value, @operator);
+
+        public void Restore(SqlParam parameter) => _inner.Restore(parameter);
+
+        public bool Remove(string name) => _inner.Remove(name);
+
+        public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();
+
+        public bool Contains(string name) => _inner.Contains(name);
+
+        public object GetValue(string name) => _inner.GetValue(name);
+
+        public IParameterManager Clone() => new IncrementingParameterManager(_inner.Clone());
+
+        public IParameterManager CreateEmpty() => new IncrementingParameterManager(_inner.CreateEmpty());
+
+        public void Clear() => _inner.Clear();
+    }
+
+    /// <summary>SQLite SQL 诊断观察器。</summary>
     private sealed class SqliteDiagnosticObserver : IObserver<DiagnosticListener>,
         IObserver<KeyValuePair<string, object>>, IDisposable
     {

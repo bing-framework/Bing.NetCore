@@ -10,6 +10,13 @@ public interface IFromClause : ISqlClause, ISqlClauseCloneable<IFromClause>
 {
 
     /// <summary>
+    /// 设置冻结查询片段作为派生表来源。
+    /// </summary>
+    /// <param name="fragment">冻结查询片段或模板。</param>
+    /// <param name="alias">表别名。</param>
+    void From(ISqlQueryFragment fragment, string alias);
+
+    /// <summary>
     /// 设置查询的 From 来源。
     /// </summary>
     /// <param name="table">表名</param>

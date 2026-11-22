@@ -36,8 +36,9 @@ public interface IUnitOfWorkConnectionResource : IUnitOfWorkResource
     IDbConnection Connection { get; }
 
     /// <summary>
-    /// 获取由该资源拥有的本地事务；非事务资源返回 <see langword="null"/>。
+    /// 获取由该资源拥有的本地事务。
     /// </summary>
+    /// <remarks>非事务资源返回 <see langword="null"/>。</remarks>
     IDbTransaction Transaction { get; }
 
     /// <summary>

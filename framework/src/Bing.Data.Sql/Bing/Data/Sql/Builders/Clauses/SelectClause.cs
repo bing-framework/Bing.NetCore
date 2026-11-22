@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Select子句
 /// </summary>
-public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
+public partial class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -54,7 +54,9 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     private bool _projectionCountKnown = true;
 
     /// <inheritdoc />
-    public int? ProjectionCount => _columns.Count == 0 || _projectionCountKnown == false ? null : _columns.Count;
+    public int? ProjectionCount => ProjectionMode == SqlProjectionMode.AutoAll || _projection.Count != 0
+        ? ProjectionLayout().Count + _columns.Count
+        : _columns.Count == 0 || _projectionCountKnown == false ? null : _columns.Count;
 
     /// <summary>
     /// 获取是否包含结构化聚合投影。
@@ -63,6 +65,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     {
         get
         {
+            if (_projection.Any(column => column.Function.HasValue)) return true;
             for (var index = 0; index < _columns.Count; index++)
             {
                 if (_columns[index].AggregateFunction.HasValue)
@@ -99,6 +102,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     {
         var result = CreateClone(context, _columns.Clone(), _distinct);
         result._projectionCountKnown = _projectionCountKnown;
+        result.CopyProjectionFrom(this);
         return result;
     }
 
@@ -125,6 +129,7 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
             _columns.AddColumn(source._columns[index].Clone());
         _distinct = source._distinct;
         _projectionCountKnown = source._projectionCountKnown;
+        CopyProjectionFrom(source);
     }
 
     /// <inheritdoc />
@@ -505,6 +510,9 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     public void Clear()
     {
         _columns.Clear();
+        _projection.Clear();
+        _exclusions.Clear();
+        ProjectionMode = SqlProjectionMode.DefaultRoot;
         _distinct = false;
         _projectionCountKnown = true;
     }
@@ -527,5 +535,5 @@ public class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     /// 获取列名
     /// </summary>
     /// <returns>当前投影列 SQL；未指定列时返回通配符。</returns>
-    protected virtual string GetColumns() => _columns.Count == 0 ? "*" : _columns.ToSql(_dialect, _register);
+    protected virtual string GetColumns() => RenderProjection();
 }

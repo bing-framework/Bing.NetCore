@@ -48,7 +48,8 @@ public sealed class UnsafeInterpolatedSqlAnalyzer : DiagnosticAnalyzer
     /// <returns>是受支持的普通 SQL 文本入口时返回 <see langword="true"/>。</returns>
     private static bool IsSqlTextEntryPoint(IMethodSymbol method)
     {
-        if (method.Name is not ("Sql" or "ExecuteSql" or "ExecuteSqlAsync"))
+        if (method.Name is not ("Sql" or "ExecuteSql" or "ExecuteSqlAsync" or
+            "ExecuteSqlWithOutput" or "ExecuteSqlWithOutputAsync"))
             return false;
         var extensionMethod = method.ReducedFrom ?? method;
         if (extensionMethod.IsExtensionMethod)

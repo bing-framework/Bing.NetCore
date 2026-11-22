@@ -21,8 +21,10 @@ public class SqlServerTypeConverter : ITypeConverter
             case "nchar":
                 return DbType.StringFixedLength;
             case "varchar":
+            case "varchar(max)":
                 return DbType.AnsiString;
             case "nvarchar":
+            case "nvarchar(max)":
             case "text":
             case "ntext":
                 return DbType.String;

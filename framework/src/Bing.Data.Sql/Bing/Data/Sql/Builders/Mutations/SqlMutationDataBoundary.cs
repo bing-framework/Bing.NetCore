@@ -103,7 +103,10 @@ internal static class SqlMutationDataBoundary
         {
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 返回探测子句的空 SQL 文本。
+        /// </summary>
+        /// <returns>空字符串。</returns>
         public string ToSql() => string.Empty;
 
         /// <inheritdoc />

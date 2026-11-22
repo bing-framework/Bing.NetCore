@@ -94,8 +94,9 @@ public partial class MySqlBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：MySQL Join 必须拒绝 schema 与物理表名混合使用反引号的字符串引用。
+    /// 验证 MySQL 连接拒绝引用结构混合的物理表名。
     /// </summary>
+    /// <param name="table">待统计的测试表名。</param>
     [Theory]
     [InlineData("`archive_db`.orders")]
     [InlineData("archive_db.`orders`")]

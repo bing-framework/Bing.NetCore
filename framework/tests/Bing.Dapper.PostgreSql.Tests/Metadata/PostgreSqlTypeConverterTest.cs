@@ -7,8 +7,11 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="PostgreSqlTypeConverter"/> 单元测试。 验证每个 PostgreSQL 数据类型字符串都能正确映射为 DbType，以及边界/负例行为。
+/// <see cref="PostgreSqlTypeConverter" /> 单元测试。
 /// </summary>
+/// <remarks>
+/// 验证每个 PostgreSQL 数据类型字符串都能正确映射为 DbType，以及边界和负例行为。
+/// </remarks>
 public class PostgreSqlTypeConverterTest
 {
     /// <summary>
@@ -119,8 +122,9 @@ public class PostgreSqlTypeConverterTest
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
-    /// 测试目的：varchar/text/json/jsonb/xml → DbType.String。
+    /// 验证文本、JSON 及 XML 类型映射为字符串数据库类型。
     /// </summary>
+    /// <param name="dataType">待测试的数据库数据类型名称。</param>
     [Theory]
     [InlineData("varchar")]
     [InlineData("text")]
@@ -208,8 +212,9 @@ public class PostgreSqlTypeConverterTest
     }
 
     /// <summary>
-    /// 测试目的：numeric/decimal → DbType.Decimal（精确小数）。
+    /// 验证数值与十进制类型映射为精确小数数据库类型。
     /// </summary>
+    /// <param name="dataType">待测试的数据库数据类型名称。</param>
     [Theory]
     [InlineData("numeric")]
     [InlineData("decimal")]
@@ -232,8 +237,9 @@ public class PostgreSqlTypeConverterTest
     }
 
     /// <summary>
-    /// 测试目的：time/timetz → DbType.Time（含时区与不含时区均映射为 Time）。
+    /// 验证带时区及不带时区的时间类型均映射为时间数据库类型。
     /// </summary>
+    /// <param name="dataType">待测试的数据库数据类型名称。</param>
     [Theory]
     [InlineData("time")]
     [InlineData("timetz")]
@@ -243,8 +249,9 @@ public class PostgreSqlTypeConverterTest
     }
 
     /// <summary>
-    /// 测试目的：timestamp/timestamptz → DbType.DateTime（含时区与不含时区均映射为 DateTime）。
+    /// 验证带时区及不带时区的时间戳均映射为日期时间类型。
     /// </summary>
+    /// <param name="dataType">待测试的数据库数据类型名称。</param>
     [Theory]
     [InlineData("timestamp")]
     [InlineData("timestamptz")]

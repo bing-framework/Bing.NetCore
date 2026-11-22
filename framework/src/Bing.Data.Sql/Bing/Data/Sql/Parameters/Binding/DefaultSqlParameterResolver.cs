@@ -70,6 +70,8 @@ internal sealed class DefaultSqlParameterResolver : ISqlParameterResolver
             return nonGenericDictionary.Cast<DictionaryEntry>()
                 .Where(t => t.Key is string)
                 .Select(t => CreateItem((string)t.Key, t.Value));
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            throw SqlRuntimeFeatures.DynamicExecutionDisabled();
         return source.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
             .Where(t => t.CanRead && t.GetIndexParameters().Length == 0)
             .Select(t => CreateItem(t.Name, t.GetValue(source)));

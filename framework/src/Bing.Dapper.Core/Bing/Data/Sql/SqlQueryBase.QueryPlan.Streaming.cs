@@ -39,24 +39,28 @@ public abstract partial class SqlQueryBase
     {
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
-        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        using var operationCancellation = QueryResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
         var isWrite = SqlBuilderRuntimeBridge.ValidateQueryPlan(plan);
         if (operationToken.IsCancellationRequested)
         {
             EnsureCancellationSupported(operationToken);
-            MarkPreCancelledUnitOfWorkExecution();
+            QueryResources.MarkPreCancelledUnitOfWorkExecution();
             operationToken.ThrowIfCancellationRequested();
         }
         EnsureStreamingSupported();
+        TryCreateStaticReader<TResult>(out var staticReader);
         if (isWrite)
             EnsureWritableDataSource();
         EnsureCancellationSupported(operationToken);
         operationToken.ThrowIfCancellationRequested();
-        var executionLease = AcquireExecutionLease();
+        var executionLease = QueryResources.AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;
         IDataReader reader = null;
+        DbCommand staticCommand = null;
+        IDbConnection staticConnection = null;
+        var closeStaticConnection = false;
         Func<IDataReader, TResult> parser = null;
         IDisposable logScope = null;
         var shouldExecute = false;
@@ -71,16 +75,30 @@ public abstract partial class SqlQueryBase
             {
                 try
                 {
-                    var preparedPlan = PrepareQueryPlan(plan);
-                    var connection = GetExecutionConnection();
-                    var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
-                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                    var preparedCommand = PrepareQueryPlan(plan);
+                    var connection = QueryResources.GetExecutionConnection();
+                    var transaction = await QueryResources.GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
+                    message = CreateExecutionDiagnostics(preparedCommand, connection, plan);
                     logScope = BeginExecutionLogScope(message);
-                    WritePlanTraceLog(preparedPlan);
-                    reader = await connection.ExecuteReaderAsync(CreateQueryCommandDefinition(preparedPlan.Sql,
-                        preparedPlan.DapperParameters, transaction, timeout, buffered: false, operationToken,
-                        plan.CommandType));
-                    parser = reader.GetRowParser<TResult>();
+                    WritePlanTraceLog(preparedCommand);
+                    if (staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters))
+                    {
+                        staticCommand = SqlStaticCommandRunner.CreateCommand(connection, preparedCommand.Sql,
+                            preparedCommand.DapperParameters, transaction, timeout, plan.CommandType);
+                        staticConnection = connection;
+                        closeStaticConnection = connection.State != ConnectionState.Open;
+                        if (closeStaticConnection) await ((DbConnection)connection).OpenAsync(operationToken).ConfigureAwait(false);
+                        reader = await staticCommand.ExecuteReaderAsync(operationToken).ConfigureAwait(false);
+                        var read = staticReader.Bind((DbDataReader)reader);
+                        parser = _ => read();
+                    }
+                    else
+                    {
+                        reader = await SqlDynamicCommandRunner.ExecuteReaderAsync(connection, CreateQueryCommandDefinition(preparedCommand.Sql,
+                            preparedCommand.DapperParameters, transaction, timeout, buffered: false, operationToken,
+                            plan.CommandType));
+                        parser = SqlDynamicCommandRunner.GetRowParser<TResult>(reader);
+                    }
                 }
                 catch (Exception exception)
                 {
@@ -150,7 +168,7 @@ public abstract partial class SqlQueryBase
                     {
                         try
                         {
-                            CompleteQueryTransaction();
+                            QueryResourceCleanup.CompleteQueryTransaction();
                             completed = true;
                         }
                         catch (Exception exception)
@@ -164,7 +182,7 @@ public abstract partial class SqlQueryBase
         finally
         {
             if (primaryException != null || shouldExecute && completed == false)
-                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, QueryResourceCleanup.RollbackQueryTransaction);
             if (primaryException != null)
                 SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
             else
@@ -173,6 +191,9 @@ public abstract partial class SqlQueryBase
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => logScope?.Dispose());
             if (queryExecutionStarted)
                 SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, plan.NotifyExecutionFinished);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => staticCommand?.Dispose());
+            if (closeStaticConnection)
+                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, staticConnection.Close);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, executionLease.Dispose);
             SqlQueryPlanLifecycle.ThrowExceptions(primaryException, cleanupExceptions);
         }
@@ -190,9 +211,10 @@ public abstract partial class SqlQueryBase
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         EnsureStreamingSupported();
+        TryCreateStaticReader<TResult>(out var staticReader);
         if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
             EnsureWritableDataSource();
-        var executionLease = AcquireExecutionLease();
+        var executionLease = QueryResources.AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;
         IEnumerator<TResult> enumerator = null;
@@ -209,14 +231,17 @@ public abstract partial class SqlQueryBase
             {
                 try
                 {
-                    var preparedPlan = PrepareQueryPlan(plan);
-                    var connection = GetExecutionConnection();
-                    var transaction = GetQueryTransaction();
-                    message = CreateExecutionDiagnostics(preparedPlan.Command, connection, plan);
+                    var preparedCommand = PrepareQueryPlan(plan);
+                    var connection = QueryResources.GetExecutionConnection();
+                    var transaction = QueryResources.GetQueryTransaction();
+                    message = CreateExecutionDiagnostics(preparedCommand, connection, plan);
                     logScope = BeginExecutionLogScope(message);
-                    WritePlanTraceLog(preparedPlan);
-                    enumerator = connection.Query<TResult>(preparedPlan.Sql, preparedPlan.DapperParameters, transaction,
-                        buffered: false, commandTimeout: timeout, commandType: plan.CommandType).GetEnumerator();
+                    WritePlanTraceLog(preparedCommand);
+                    enumerator = staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters)
+                        ? StreamStaticRows(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction,
+                            timeout, staticReader, plan.CommandType).GetEnumerator()
+                        : SqlDynamicCommandRunner.Query<TResult>(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction,
+                            buffered: false, commandTimeout: timeout, commandType: plan.CommandType).GetEnumerator();
                 }
                 catch (Exception exception)
                 {
@@ -261,7 +286,7 @@ public abstract partial class SqlQueryBase
                     {
                         try
                         {
-                            CompleteQueryTransaction();
+                            QueryResourceCleanup.CompleteQueryTransaction();
                             completed = true;
                         }
                         catch (Exception exception)
@@ -275,7 +300,7 @@ public abstract partial class SqlQueryBase
         finally
         {
             if (primaryException != null || shouldExecute && completed == false)
-                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+                SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, QueryResourceCleanup.RollbackQueryTransaction);
             if (primaryException != null)
                 SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, () => ExecuteError(message, primaryException));
             else

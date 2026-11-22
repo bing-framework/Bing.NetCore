@@ -31,12 +31,12 @@ public enum FieldValueConverterKind
     BoolToString = 4,
 
     /// <summary>
-    /// 将 <see cref="Guid"/> 写入为字符串，并在读取时尝试解析为 <see cref="Guid"/>。
+    /// 将 Guid 写入为字符串，并在读取时解析为 Guid。
     /// </summary>
     GuidToString = 5,
 
     /// <summary>
-    /// 将 <see cref="Guid"/> 写入为二进制值，并在读取到 16 字节数组时还原为 <see cref="Guid"/>。
+    /// 将 Guid 写入为二进制值，并在读取 16 字节数组时还原为 Guid。
     /// </summary>
     GuidToBinary = 6,
 

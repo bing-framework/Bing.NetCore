@@ -17,7 +17,8 @@ public static class DapperSqlOptionsExtensions
     /// <returns>完成类型处理器注册的 SQL 配置。</returns>
     public static SqlOptions RegisterStringTypeHandler(this SqlOptions options)
     {
-        SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
+        if (SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            SqlMapper.AddTypeHandler(typeof(string), new StringTypeHandler());
         return options;
     }
 
@@ -29,7 +30,8 @@ public static class DapperSqlOptionsExtensions
     public static SqlOptions RegisterGuidTypeHandler(this SqlOptions options)
     {
         if (options.DatabaseType == DatabaseType.Oracle)
-            SqlMapper.AddTypeHandler(new GuidTypeHandler());
+            if (SqlRuntimeFeatures.ReflectionFallbackEnabled)
+                SqlMapper.AddTypeHandler(new GuidTypeHandler());
         return options;
     }
 }

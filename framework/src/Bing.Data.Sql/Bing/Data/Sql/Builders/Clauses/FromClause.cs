@@ -216,6 +216,26 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     internal IReadOnlyList<TableSource> Sources => _sources;
 
     /// <summary>
+    /// 为 From 子句中的指定数据源绑定别名。
+    /// </summary>
+    /// <param name="sourceId">要绑定别名的数据源标识。</param>
+    /// <param name="alias">要绑定的数据源别名。</param>
+    /// <returns>绑定新别名后的实体数据源。</returns>
+    /// <remarks>
+    /// 找不到指定数据源时会抛出异常。
+    /// </remarks>
+    internal TableSource BindSourceAlias(string sourceId, string alias)
+    {
+        var index = _sources.FindIndex(source => source.SourceId == sourceId);
+        if (index < 0) throw new InvalidOperationException("未找到待命名的 From 来源。");
+        var source = _sources[index].WithAlias(alias);
+        ((EntityAliasRegister)Register).BindUnspecifiedAlias(source.EntityType, alias, _sources[index].Alias);
+        _sources[index] = source;
+        Table = _sources.LastOrDefault()?.Item;
+        return source;
+    }
+
+    /// <summary>
     /// 追加结构化根表源。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
@@ -308,7 +328,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
             throw new ArgumentNullException(nameof(parameterManager));
         var existingParameters = parameterManager.GetParams();
         var snapshot = parameterManager.Clone();
-        var condition = new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, snapshot)
+        var condition = new MultiSourcePredicateExpressionResolver(expression, sources, GetSqlColumn, snapshot, _context)
             .Resolve(expression);
         var parameters = snapshot.GetParams()
             .Where(parameter => existingParameters.ContainsKey(parameter.Key) == false)
@@ -428,7 +448,9 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
             throw new ArgumentNullException(nameof(source));
         var member = UnwrapConversion(expression.Body);
         var rawColumn = Resolver.GetColumn(member, source.EntityType);
-        var column = GetSqlColumn(member, source);
+        GetSqlColumn(member, source);
+        if (member is not System.Linq.Expressions.MemberExpression property) throw new NotSupportedException("条件列必须是直接属性。");
+        var column = new SqlBoundOperand(new SqlProjectionColumn(source.SourceId, property.Member.Name, null, property.Type), source, null);
         return new Helper(_context).CreateCondition(rawColumn, column, source.EntityType, value, @operator);
     }
 
@@ -547,6 +569,32 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         ReplaceSources(SqlItem.Raw($"({result}){subqueryAlias}"), alias: alias);
     }
 
+    /// <inheritdoc />
+    public void From(ISqlQueryFragment fragment, string alias)
+    {
+        if (fragment == null)
+            return;
+        if (string.IsNullOrWhiteSpace(alias))
+            throw new ArgumentException("派生表别名不能为空。", nameof(alias));
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        var registerProbe = Register?.Clone();
+        ReleaseSourceAliases(registerProbe);
+        registerProbe?.RegisterAlias(alias);
+        var subqueryAlias = GetSubqueryAlias(alias);
+        var frozen = fragment.Freeze()?.Render();
+        if (frozen == null || string.IsNullOrWhiteSpace(frozen.Sql))
+            return;
+        var result = Builder is SqlBuilderBase sqlBuilder
+            ? sqlBuilder.RenderFragment(frozen)
+            : frozen.Sql;
+        if (Builder is not SqlBuilderBase && frozen.Parameters.Count > 0)
+            throw new NotSupportedException("当前 Builder 不支持带参数的冻结 SQL 片段。请使用 SqlBuilderBase 实现。");
+        _context.UseOperation(SqlOperationAction.QueryClause);
+        ReleaseSourceAliases(Register);
+        Register?.RegisterAlias(alias);
+        ReplaceSources(SqlItem.Raw($"({result}){subqueryAlias}"), alias: alias);
+    }
+
     /// <summary>
     /// 使用保留 DTO 投影成员与来源身份的类型化派生表替换根来源。
     /// </summary>
@@ -618,6 +666,9 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     /// <param name="alias">派生表别名。</param>
     /// <returns>包含前导空格的别名 SQL 文本。</returns>
     protected virtual string GetSubqueryAlias(string alias) => $" As {Dialect.SafeName(alias)}";
+
+    /// <summary>为不可变派生结构冻结当前 Provider 的子查询别名格式。</summary>
+    internal string FormatSubqueryAlias(string alias) => GetSubqueryAlias(alias);
 
     /// <inheritdoc />
     public void From(Action<ISqlBuilder> action, string alias)

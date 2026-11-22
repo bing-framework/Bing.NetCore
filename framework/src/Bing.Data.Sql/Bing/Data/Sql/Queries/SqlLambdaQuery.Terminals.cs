@@ -18,12 +18,42 @@ public partial class SqlLambdaQuery
     public SqlLambdaQuery Clone() => new(_core.Clone());
 
     /// <summary>
-    /// 同步执行当前查询并完整物化指定结果类型。
+    /// 同步执行查询并物化结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>最终结果列表。</returns>
+    /// <remarks>
+    /// 同步执行当前查询并完整物化指定结果类型。
+    /// </remarks>
     public List<TResult> ToList<TResult>(int? timeout = null) => _core.ToList<TResult>(timeout);
+
+    /// <summary>
+    /// 根据结果原型生成投影后同步执行列表查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="projectionPrototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>最终结果列表。</returns>
+    public List<TResult> ToList<TResult>(TResult projectionPrototype, int? timeout = null)
+        where TResult : class => _core.ToList(projectionPrototype, timeout);
+
+    /// <summary>
+    /// 同步执行当前查询并获取至多一行结果；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果类型。</typeparam>
+    /// <returns>唯一结果行或默认值。</returns>
+    public TResult To<TResult>() => _core.To<TResult>(null);
+
+    /// <summary>
+    /// 根据结果原型生成投影后同步执行单行查询；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="projectionPrototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <returns>唯一结果行或默认值。</returns>
+    public TResult To<TResult>(TResult projectionPrototype, int? timeout = null)
+        where TResult : class => _core.To(projectionPrototype, timeout);
 
     /// <summary>
     /// 查询至多一行，零行返回默认值，多行抛出异常。
@@ -84,14 +114,48 @@ public partial class SqlLambdaQuery
     public IEnumerable<TResult> AsEnumerable<TResult>(int? timeout = null) => _core.AsEnumerable<TResult>(timeout);
 
     /// <summary>
-    /// 异步执行当前查询并完整物化指定结果类型。
+    /// 异步执行查询并物化结果列表。
     /// </summary>
     /// <typeparam name="TResult">结果行映射类型。</typeparam>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示最终结果列表的异步操作。</returns>
+    /// <remarks>
+    /// 异步执行当前查询并完整物化指定结果类型。
+    /// </remarks>
     public Task<List<TResult>> ToListAsync<TResult>(int? timeout = null,
         CancellationToken cancellationToken = default) => _core.ToListAsync<TResult>(timeout, cancellationToken);
+
+    /// <summary>
+    /// 根据结果原型生成投影后异步执行列表查询。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="projectionPrototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示最终结果列表的异步操作。</returns>
+    public Task<List<TResult>> ToListAsync<TResult>(TResult projectionPrototype, int? timeout = null,
+        CancellationToken cancellationToken = default) where TResult : class =>
+        _core.ToListAsync(projectionPrototype, timeout, cancellationToken);
+
+    /// <summary>
+    /// 异步执行当前查询并获取至多一行结果；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果类型。</typeparam>
+    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
+    public Task<TResult> ToAsync<TResult>() => _core.ToAsync<TResult>(null, default);
+
+    /// <summary>
+    /// 根据结果原型生成投影后异步执行单行查询；无结果时返回默认值。
+    /// </summary>
+    /// <typeparam name="TResult">结果 DTO 类型。</typeparam>
+    /// <param name="projectionPrototype">仅用于确定投影成员，不读取实例属性值。</param>
+    /// <param name="timeout">执行超时时间，单位为秒。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>表示唯一结果行或默认值的异步操作。</returns>
+    public Task<TResult> ToAsync<TResult>(TResult projectionPrototype, int? timeout = null,
+        CancellationToken cancellationToken = default) where TResult : class =>
+        _core.ToAsync(projectionPrototype, timeout, cancellationToken);
 
     /// <summary>
     /// 异步查询至多一行，零行返回默认值，多行抛出异常。

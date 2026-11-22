@@ -25,6 +25,9 @@ public class SqliteBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    protected override bool SupportsMutationCheckpoint => GetType() == typeof(SqliteBuilder);
+
+    /// <inheritdoc />
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new SqliteBuilder(Services, parameterManager);
 
@@ -42,6 +45,7 @@ public class SqliteBuilder : SqlBuilderBase
     /// </remarks>
     protected override void CreateSqlByUnion(StringBuilder result)
     {
+        var start = result.Length;
         AppendSelect(result);
         AppendFrom(result);
         AppendClause(result, JoinClause);
@@ -50,9 +54,8 @@ public class SqliteBuilder : SqlBuilderBase
         foreach (var operation in UnionItems)
         {
             AppendSql(result, operation.Name);
-            AppendSql(result, RenderSubquery(operation.Builder));
+            AppendSql(result, RenderUnionItem(operation));
         }
-        AppendClause(result, OrderByClause);
-        AppendLimit(result);
+        AppendQueryTail(result, start, start, true);
     }
 }

@@ -209,8 +209,11 @@ public class EqualConditionTest
     private sealed class UnsupportedSqlBuilderCondition : SqlConditionBase
     {
         /// <summary>
-        /// 初始化一个 <see cref="UnsupportedSqlBuilderCondition"/> 类型的实例。
+        /// 初始化一个 <see cref="UnsupportedSqlBuilderCondition" /> 类型的实例。
         /// </summary>
+        /// <param name="parameterManager">用于管理 SQL 参数的管理器。</param>
+        /// <param name="column">当前条件对应的数据库列或列值。</param>
+        /// <param name="value">用于初始化实例的数据值。</param>
         public UnsupportedSqlBuilderCondition(IParameterManager parameterManager, string column, object value)
             : base(parameterManager, column, value, true)
         {

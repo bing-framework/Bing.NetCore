@@ -25,6 +25,15 @@ public class SqlOptions
     public bool IncludeTenantIdInDiagnostics { get; set; }
 
     /// <summary>
+    /// 获取或设置是否根据实体 Lambda 参数名生成表别名。
+    /// </summary>
+    /// <remarks>
+    /// <para>查询创建时固定该值；关闭后仍尊重显式别名并使用物理表引用限定列。</para>
+    /// <para>默认启用。</para>
+    /// </remarks>
+    public bool AutoGenerateTableAlias { get; set; } = true;
+
+    /// <summary>
     /// 获取或设置用于创建数据库连接的连接字符串。
     /// </summary>
     public string ConnectionString { get; set; }

@@ -99,6 +99,22 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 使用冻结查询片段设置派生表来源。
+    /// </summary>
+    /// <typeparam name="T">支持 From 子句的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="fragment">冻结查询片段或模板。</param>
+    /// <param name="alias">表别名。</param>
+    /// <returns>设置子查询 From 子句后的源对象。</returns>
+    public static T From<T>(this T source, ISqlQueryFragment fragment, string alias) where T : IFrom
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        SqlQueryOperationAccessor.Mutate(source, accessor => accessor.FromClause.From(fragment, alias));
+        return source;
+    }
+
+    /// <summary>
     /// 设置查询来源。
     /// </summary>
     /// <typeparam name="T">源类型</typeparam>

@@ -4,6 +4,7 @@ using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Operations;
 using Bing.Data.Sql.Metadata;
@@ -19,33 +20,18 @@ public static class MutationClauseExtensions
     /// 设置 Insert 目标表。
     /// </summary>
     /// <typeparam name="TEntity">目标实体类型。</typeparam>
-    /// <param name="source">统一 SQL Builder。</param>
-    /// <returns>传入的同一个统一 SQL Builder。</returns>
-    public static ISqlBuilder InsertInto<TEntity>(this ISqlBuilder source) where TEntity : class
-    {
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
-        return InsertInto<ISqlBuilder, TEntity>(source);
-    }
-
-    /// <summary>
-    /// 设置 Insert 目标表。
-    /// </summary>
-    /// <typeparam name="TEntity">目标实体类型。</typeparam>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">Insert Builder。</param>
     /// <param name="columns">单个属性或匿名对象属性投影。</param>
-    /// <returns>传入的同一个统一 SQL Builder。</returns>
-    public static ISqlBuilder InsertInto<TEntity>(this ISqlBuilder source,
+    /// <returns>传入的同一个 Insert Builder。</returns>
+    public static ISqlInsertBuilder InsertInto<TEntity>(this ISqlInsertBuilder source,
         Expression<Func<TEntity, object>> columns) where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
         var mappedColumns = GetPropertyNames(columns).Select(propertyName =>
             ResolveWritableColumn<TEntity>(source, propertyName, static item =>
                 item.CanInsert && item.IsKey == false && item.IsDatabaseGenerated == false, "插入").ColumnName).ToArray();
-        InsertInto<ISqlBuilder, TEntity>(source);
+        InsertInto<ISqlInsertBuilder, TEntity>(source);
         source.InsertColumnsClause.AddRange(mappedColumns);
         return source;
     }
@@ -53,14 +39,14 @@ public static class MutationClauseExtensions
     /// <summary>
     /// 设置 Insert 目标表。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">Insert Builder。</param>
     /// <param name="table">可由当前 Provider 解析的目标表文本。</param>
-    /// <returns>传入的同一个统一 SQL Builder。</returns>
-    public static ISqlBuilder InsertInto(this ISqlBuilder source, string table)
+    /// <returns>传入的同一个 Insert Builder。</returns>
+    public static ISqlInsertBuilder InsertInto(this ISqlInsertBuilder source, string table)
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.InsertInto);
+        source.MutationContext.ValidateOperation(SqlOperationAction.InsertInto);
         var parsed = source.MutationContext.Provider.TableReferenceParser.Parse(table);
         source.InsertClause.Into(new SqlTableReference
         {
@@ -550,26 +536,82 @@ public static class MutationClauseExtensions
         WhereMutation(source, condition);
 
     /// <summary>
-    /// 追加筛选条件。
+    /// 追加原始列名筛选条件。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
-    /// <param name="condition">要追加的筛选条件。</param>
-    /// <returns>传入的同一个 Builder。</returns>
-    public static ISqlBuilder Where(this ISqlBuilder source, ICondition condition)
+    /// <param name="source">Update Builder。</param>
+    /// <param name="column">参与比较的列名。</param>
+    /// <param name="value">参数化比较值。</param>
+    /// <param name="operator">比较运算符。</param>
+    /// <returns>传入的同一个 Update Builder。</returns>
+    public static ISqlUpdateBuilder Where(this ISqlUpdateBuilder source, string column, object value,
+        Operator @operator) => WhereMutation(source, column, value, @operator);
+
+    /// <summary>追加参数化的相等筛选条件。</summary>
+    public static ISqlUpdateBuilder Where(this ISqlUpdateBuilder source, string column, object value) =>
+        WhereMutation(source, column, value, Operator.Equal);
+
+    /// <summary>
+    /// 追加原始列名筛选条件。
+    /// </summary>
+    /// <param name="source">Delete Builder。</param>
+    /// <param name="column">参与比较的列名。</param>
+    /// <param name="value">参数化比较值。</param>
+    /// <param name="operator">比较运算符。</param>
+    /// <returns>传入的同一个 Delete Builder。</returns>
+    public static ISqlDeleteBuilder Where(this ISqlDeleteBuilder source, string column, object value,
+        Operator @operator) => WhereMutation(source, column, value, @operator);
+
+    /// <summary>追加参数化的相等筛选条件。</summary>
+    public static ISqlDeleteBuilder Where(this ISqlDeleteBuilder source, string column, object value) =>
+        WhereMutation(source, column, value, Operator.Equal);
+
+    /// <summary>
+    /// 追加原始列名 Mutation 筛选条件。
+    /// </summary>
+    /// <typeparam name="T">支持 Mutation Where 和上下文访问的 Builder 类型。</typeparam>
+    /// <param name="source">Mutation Builder。</param>
+    /// <param name="column">参与比较的列名。</param>
+    /// <param name="value">参数化比较值。</param>
+    /// <param name="operator">比较运算符。</param>
+    /// <returns>传入的同一个 Mutation Builder。</returns>
+    private static T WhereMutation<T>(T source, string column, object value, Operator @operator)
+        where T : IMutationWhereClauseAccessor, ISqlMutationContextAccessor
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source.OperationKind is SqlOperationKind.Update or SqlOperationKind.Delete)
-            ((IMutationWhereClauseAccessor)source).WhereClause.And(condition);
-        else
-            ((ISqlQueryClauseAccessor)source).WhereClause.And(condition);
+        var context = source.MutationContext;
+        var left = context.Dialect.SafeName(column);
+        if (value == null)
+        {
+            source.WhereClause.And(SqlConditionFactory.Create(left, null, @operator));
+            return source;
+        }
+        var parameterName = context.ParameterManager.GenerateName();
+        var condition = SqlConditionFactory.Create(left,
+            SqlMutationContext.GetParameterPlaceholder(context.Provider, parameterName), @operator);
+        context.ParameterManager.Add(parameterName, value);
+        source.WhereClause.And(condition);
         return source;
     }
 
     /// <summary>
     /// 追加筛选条件。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">SQL 查询 Builder。</param>
+    /// <param name="condition">要追加的筛选条件。</param>
+    /// <returns>传入的同一个 Builder。</returns>
+    public static ISqlBuilder Where(this ISqlBuilder source, ICondition condition)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        source.WhereClause.And(condition);
+        return source;
+    }
+
+    /// <summary>
+    /// 追加筛选条件。
+    /// </summary>
+    /// <param name="source">SQL 查询 Builder。</param>
     /// <param name="column">参与比较的列名。</param>
     /// <param name="value">参数化比较值。</param>
     /// <param name="operator">比较运算符。</param>
@@ -579,23 +621,7 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source.OperationKind is not (SqlOperationKind.Update or SqlOperationKind.Delete))
-        {
-            ((ISqlQueryClauseAccessor)source).WhereClause.Where(column, value, @operator);
-            return source;
-        }
-        var context = source.MutationContext;
-        var left = context.Dialect.SafeName(column);
-        if (value == null)
-        {
-            ((IMutationWhereClauseAccessor)source).WhereClause.And(
-                SqlConditionFactory.Create(left, null, @operator));
-            return source;
-        }
-        var parameterName = context.ParameterManager.GenerateName();
-        var condition = SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameterName), @operator);
-        context.ParameterManager.Add(parameterName, value);
-        ((IMutationWhereClauseAccessor)source).WhereClause.And(condition);
+        source.WhereClause.Where(column, value, @operator);
         return source;
     }
 
@@ -632,7 +658,7 @@ public static class MutationClauseExtensions
     /// </summary>
     /// <typeparam name="TEntity">条件所属实体类型。</typeparam>
     /// <typeparam name="TValue">条件属性值类型。</typeparam>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">SQL 查询 Builder。</param>
     /// <param name="column">直接实体属性访问表达式。</param>
     /// <param name="value">条件比较值。</param>
     /// <param name="operator">比较运算符。</param>
@@ -646,16 +672,10 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source.OperationKind is not (SqlOperationKind.Update or SqlOperationKind.Delete))
-        {
-            ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.QueryClause);
-            var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
-                column.Parameters);
-            ((ISqlQueryClauseAccessor)source).WhereClause.Where(selector, value, @operator);
-            return source;
-        }
-        ((ISqlOperationStateManager)source).UseOperation(SqlOperationAction.MutationWhere);
-        return Where<ISqlBuilder, TEntity, TValue>(source, column, value, @operator);
+        var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
+            column.Parameters);
+        source.WhereClause.Where(selector, value, @operator);
+        return source;
     }
 
     /// <summary>
@@ -686,7 +706,8 @@ public static class MutationClauseExtensions
         }
         var parameter = context.Services.ParameterFactory.Create(context.ParameterManager.GenerateName(), value, mapping,
             context.ExecutionContext.DatabaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
-        var condition = SqlConditionFactory.Create(left, context.Dialect.GetParamName(parameter.Name), @operator);
+        var condition = SqlConditionFactory.Create(left,
+            SqlMutationContext.GetParameterPlaceholder(context.Provider, parameter.Name), @operator);
         AddParameter(context.ParameterManager, parameter);
         source.WhereClause.And(condition);
         return source;
@@ -729,22 +750,19 @@ public static class MutationClauseExtensions
     /// <summary>
     /// 追加 Or 筛选条件。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">SQL 查询 Builder。</param>
     /// <param name="condition">要以 Or 方式追加的筛选条件。</param>
     /// <returns>传入的同一个 Builder。</returns>
     public static ISqlBuilder OrWhere(this ISqlBuilder source, ICondition condition)
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        if (source.OperationKind is SqlOperationKind.Update or SqlOperationKind.Delete)
-            ((IMutationWhereClauseAccessor)source).WhereClause.Or(condition);
-        else
-            ((ISqlQueryClauseAccessor)source).WhereClause.Or(condition);
+        source.WhereClause.Or(condition);
         return source;
     }
 
     /// <summary>
-    /// 设置是否允许全表更新。
+    /// 设置是否允许全表数据修改。
     /// </summary>
     /// <typeparam name="T">支持该能力的 Mutation Builder 类型。</typeparam>
     /// <param name="source">Mutation Builder。</param>
@@ -760,7 +778,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 设置是否允许全表更新。
+    /// 设置是否允许全表数据修改。
     /// </summary>
     /// <param name="source">Update Builder。</param>
     /// <param name="allowAllRows">允许时为 true。</param>
@@ -769,7 +787,7 @@ public static class MutationClauseExtensions
         AllowAllRows<ISqlUpdateBuilder>(source, allowAllRows);
 
     /// <summary>
-    /// 设置是否允许全表删除。
+    /// 设置是否允许全表数据修改。
     /// </summary>
     /// <param name="source">Delete Builder。</param>
     /// <param name="allowAllRows">允许时为 true。</param>
@@ -780,22 +798,47 @@ public static class MutationClauseExtensions
     /// <summary>
     /// 添加 Mutation 返回列。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">Insert Builder。</param>
     /// <param name="columns">单段物理列名集合。</param>
-    /// <returns>传入的同一个 Builder。</returns>
-    public static ISqlBuilder Returning(this ISqlBuilder source, params string[] columns)
+    /// <returns>传入的同一个 Insert Builder。</returns>
+    public static ISqlInsertBuilder Returning(this ISqlInsertBuilder source, params string[] columns) =>
+        Returning<ISqlInsertBuilder>(source, columns);
+
+    /// <summary>
+    /// 添加 Mutation 返回列。
+    /// </summary>
+    /// <param name="source">Update Builder。</param>
+    /// <param name="columns">单段物理列名集合。</param>
+    /// <returns>传入的同一个 Update Builder。</returns>
+    public static ISqlUpdateBuilder Returning(this ISqlUpdateBuilder source, params string[] columns) =>
+        Returning<ISqlUpdateBuilder>(source, columns);
+
+    /// <summary>
+    /// 添加 Mutation 返回列。
+    /// </summary>
+    /// <param name="source">Delete Builder。</param>
+    /// <param name="columns">单段物理列名集合。</param>
+    /// <returns>传入的同一个 Delete Builder。</returns>
+    public static ISqlDeleteBuilder Returning(this ISqlDeleteBuilder source, params string[] columns) =>
+        Returning<ISqlDeleteBuilder>(source, columns);
+
+    /// <summary>
+    /// 添加 Mutation 返回列。
+    /// </summary>
+    /// <typeparam name="T">支持 Returning 和 Mutation 上下文访问的 Builder 类型。</typeparam>
+    /// <param name="source">Mutation Builder。</param>
+    /// <param name="columns">单段物理列名集合。</param>
+    /// <returns>传入的同一个 Mutation Builder。</returns>
+    public static T Returning<T>(this T source, params string[] columns)
+        where T : IReturningClauseAccessor, ISqlMutationContextAccessor
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.Returning);
         if (columns == null || columns.Length == 0)
             throw new ArgumentException("Returning 必须包含至少一个返回列。", nameof(columns));
-        var accessor = source as IReturningClauseAccessor ??
-            throw new NotSupportedException("当前 SQL Builder 不支持 Returning 子句。");
         var qualifier = GetReturningQualifier(source);
-        var result = columns.Select(column => new SqlReturningColumn(
-            ValidateSingleIdentifier(column, nameof(columns)), qualifier)).ToArray();
-        accessor.ReturningClause.AddRange(result);
+        source.ReturningClause.AddRange(columns.Select(column => new SqlReturningColumn(
+            ValidateSingleIdentifier(column, nameof(columns)), qualifier)).ToArray());
         return source;
     }
 
@@ -803,36 +846,69 @@ public static class MutationClauseExtensions
     /// 添加 Mutation 返回列。
     /// </summary>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">Insert Builder。</param>
     /// <param name="columns">单个属性或匿名对象属性投影。</param>
-    /// <returns>传入的同一个 Builder。</returns>
-    public static ISqlBuilder Returning<TEntity>(this ISqlBuilder source,
-        Expression<Func<TEntity, object>> columns) where TEntity : class
+    /// <returns>传入的同一个 Insert Builder。</returns>
+    public static ISqlInsertBuilder Returning<TEntity>(this ISqlInsertBuilder source,
+        Expression<Func<TEntity, object>> columns) where TEntity : class =>
+        Returning<ISqlInsertBuilder, TEntity>(source, columns);
+
+    /// <summary>
+    /// 添加实体映射列作为返回列。
+    /// </summary>
+    /// <typeparam name="TEntity">返回实体类型。</typeparam>
+    /// <param name="source">Update Builder。</param>
+    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <returns>传入的同一个 Update Builder。</returns>
+    public static ISqlUpdateBuilder Returning<TEntity>(this ISqlUpdateBuilder source,
+        Expression<Func<TEntity, object>> columns) where TEntity : class =>
+        Returning<ISqlUpdateBuilder, TEntity>(source, columns);
+
+    /// <summary>
+    /// 添加实体映射列作为返回列。
+    /// </summary>
+    /// <typeparam name="TEntity">返回实体类型。</typeparam>
+    /// <param name="source">Delete Builder。</param>
+    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <returns>传入的同一个 Delete Builder。</returns>
+    public static ISqlDeleteBuilder Returning<TEntity>(this ISqlDeleteBuilder source,
+        Expression<Func<TEntity, object>> columns) where TEntity : class =>
+        Returning<ISqlDeleteBuilder, TEntity>(source, columns);
+
+    /// <summary>
+    /// 添加实体映射列作为返回列。
+    /// </summary>
+    /// <typeparam name="T">支持 Returning 和 Mutation 上下文访问的 Builder 类型。</typeparam>
+    /// <typeparam name="TEntity">返回实体类型。</typeparam>
+    /// <param name="source">Mutation Builder。</param>
+    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <returns>传入的同一个 Mutation Builder。</returns>
+    public static T Returning<T, TEntity>(this T source,
+        Expression<Func<TEntity, object>> columns)
+        where T : IReturningClauseAccessor, ISqlMutationContextAccessor
+        where TEntity : class
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
-        ((ISqlOperationStateManager)source).ValidateOperation(SqlOperationAction.Returning);
-        var accessor = source as IReturningClauseAccessor ??
-            throw new NotSupportedException("当前 SQL Builder 不支持 Returning 子句。");
         var qualifier = GetReturningQualifier(source);
         var result = GetPropertyNames(columns).Select(propertyName =>
         {
             var mapping = ResolveMappedColumn<TEntity>(source, propertyName);
             return new SqlReturningColumn(mapping.ColumnName, qualifier, mapping.PropertyName);
         }).ToArray();
-        accessor.ReturningClause.AddRange(result);
+        source.ReturningClause.AddRange(result);
         return source;
     }
 
     /// <summary>
     /// 获取 Returning 投影的默认表别名。
     /// </summary>
-    /// <param name="source">统一 SQL Builder。</param>
+    /// <param name="source">Mutation 上下文访问器。</param>
     /// <returns>Update 或 Delete 目标表别名；Insert 及无目标表时返回 <see langword="null"/>。</returns>
-    private static string GetReturningQualifier(ISqlBuilder source) => source.OperationKind switch
+    private static string GetReturningQualifier(ISqlMutationContextAccessor source) => source switch
     {
-        SqlOperationKind.Update => source.UpdateClause.Table?.Alias,
-        SqlOperationKind.Delete => source.DeleteClause.Table?.Alias,
+        IUpdateClauseAccessor update => update.UpdateClause.Table?.Alias,
+        IDeleteClauseAccessor delete => delete.DeleteClause.Table?.Alias,
         _ => null
     };
 

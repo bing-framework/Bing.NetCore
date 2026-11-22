@@ -5,6 +5,7 @@ using Bing.Data.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MySqlConnector;
@@ -38,10 +39,27 @@ public static class MySqlServiceCollectionExtensions
         multipleQueryOptions.RegisterStringTypeHandler();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, MySqlDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(MySqlSqlProvider.Instance.Key, CreateConnection);
-        services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.MySql);
-        services.AddDatabaseTypeConverter<MySqlTypeConverter>(DatabaseType.Doris);
-        services.AddSqlProviderRuntime(new SqlProviderRuntime(MySqlSqlProvider.Instance.Key, typeof(MySqlQuery),
-            typeof(MySqlExecutor), typeof(MySqlMultipleQueryExecutor)));
+        // 静态创建保留构造函数，同时保持调用方预注册实例的优先级。
+        services.TryAddSingleton(new MySqlTypeConverter());
+        services.AddSingleton<DatabaseTypeConverterRegistration>(provider => new DatabaseTypeConverterRegistration
+        {
+            DatabaseType = DatabaseType.MySql,
+            Converter = provider.GetRequiredService<MySqlTypeConverter>()
+        });
+        services.AddSingleton<DatabaseTypeConverterRegistration>(provider => new DatabaseTypeConverterRegistration
+        {
+            DatabaseType = DatabaseType.Doris,
+            Converter = provider.GetRequiredService<MySqlTypeConverter>()
+        });
+        services.AddSqlProviderRuntime(SqlProviderRuntime.CreateWithFactories(MySqlSqlProvider.Instance.Key,
+            typeof(MySqlQuery), typeof(MySqlExecutor), typeof(MySqlMultipleQueryExecutor),
+            (provider, options) => new MySqlQuery(provider, (SqlOptions<MySqlQuery>)options),
+            (provider, options) => new MySqlExecutor(provider, (SqlOptions<MySqlExecutor>)options),
+            (provider, options) => new MySqlMultipleQueryExecutor(provider, (SqlOptions<MySqlMultipleQueryExecutor>)options),
+            serviceType => serviceType == typeof(ISqlQuery) ? new SqlOptions<MySqlQuery>() :
+                serviceType == typeof(ISqlExecutor) ? new SqlOptions<MySqlExecutor>() : new SqlOptions<MySqlMultipleQueryExecutor>(),
+            (provider, serviceType) => serviceType == typeof(ISqlQuery) ? provider.GetService<SqlOptions<MySqlQuery>>() :
+                serviceType == typeof(ISqlExecutor) ? provider.GetService<SqlOptions<MySqlExecutor>>() : provider.GetService<SqlOptions<MySqlMultipleQueryExecutor>>()));
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         services.TryAddSingleton(multipleQueryOptions);

@@ -150,10 +150,17 @@ public class OracleProviderRegistrationTest
         Assert.Contains(nameof(ISqlMultipleQueryExecutor), exception.Message);
     }
 
+    /// <summary>
+    /// 用于验证 Provider 查询作用域过滤的测试实体。
+    /// </summary>
     [Table("scope_probe")]
     private sealed class OracleScopeProbeEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 }

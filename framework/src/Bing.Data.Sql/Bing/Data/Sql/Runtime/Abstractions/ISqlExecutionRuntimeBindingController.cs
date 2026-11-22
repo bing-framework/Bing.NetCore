@@ -1,0 +1,47 @@
+using System.ComponentModel;
+using System.Data;
+using Bing.Data.Sql.Metadata;
+
+namespace Bing.Data.Sql;
+
+/// <summary>
+/// SQL 执行运行时绑定控制器。
+/// </summary>
+/// <remarks>
+/// 由 SQL 执行实现提供，仅供 <see cref="SqlExecutionRuntimeBinding"/> 调用。
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface ISqlExecutionRuntimeBindingController
+{
+    /// <summary>
+    /// 绑定由查询对象负责释放的连接。
+    /// </summary>
+    /// <param name="connection">要绑定的数据库连接。</param>
+    /// <param name="source">连接来源及所有权信息。</param>
+    void BindOwnedConnection(IDbConnection connection, SqlConnectionSource source);
+
+    /// <summary>
+    /// 绑定由外部调用方负责释放的连接。
+    /// </summary>
+    /// <param name="connection">要绑定的数据库连接。</param>
+    /// <param name="source">连接来源及所有权信息。</param>
+    void BindExternalConnection(IDbConnection connection, SqlConnectionSource source);
+
+    /// <summary>
+    /// 绑定外部事务的延迟解析器。
+    /// </summary>
+    /// <param name="resolver">返回外部事务的延迟解析委托。</param>
+    void BindExternalTransactionResolver(Func<IDbTransaction> resolver);
+
+    /// <summary>
+    /// 绑定查询执行的固定数据库上下文。
+    /// </summary>
+    /// <param name="context">查询使用的数据库上下文。</param>
+    void BindDatabaseContext(DatabaseContext context);
+
+    /// <summary>
+    /// 绑定实体映射解析器。
+    /// </summary>
+    /// <param name="resolver">实体映射解析器。</param>
+    void BindEntityMappingResolver(IEntityMappingResolver resolver);
+}

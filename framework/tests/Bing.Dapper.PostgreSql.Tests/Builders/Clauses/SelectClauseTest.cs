@@ -16,8 +16,9 @@ public class SelectClauseTest
     private readonly SelectClause _clause;
 
     /// <summary>
-    /// 初始化一个 <see cref="SelectClauseTest"/> 类型的实例。
+    /// 初始化一个 <see cref="SelectClauseTest" /> 类型的实例。
     /// </summary>
+    /// <param name="output">用于输出当前测试日志的辅助对象。</param>
     public SelectClauseTest(ITestOutputHelper output)
     {
         _clause = (SelectClause)((ISqlQueryClauseAccessor)new PostgreSqlBuilder()).SelectClause;

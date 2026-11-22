@@ -114,7 +114,12 @@ public class EntityResolver : IEntityResolver
     public string GetColumns<TEntity>(bool propertyAsAlias)
     {
         var type = typeof(TEntity);
-        var names = GetProperties(type).Select(t => t.Name).ToList();
+        var model = GetMapping(type)?.Model;
+        var names = model != null
+            ? model.Properties.Values.Where(property => !property.IsIgnored && property.CanRead).Select(property => property.PropertyName).ToList()
+            : SqlRuntimeFeatures.ReflectionFallbackEnabled && _options.ExecutionMode != SqlExecutionMode.GeneratedOnly
+                ? GetProperties(type).Select(t => t.Name).ToList()
+                : throw new NotSupportedException($"实体 {type.FullName} 缺少生成模型，严格生成模式不枚举 CLR 属性。");
         return GetColumns<TEntity>(names, propertyAsAlias);
     }
 
@@ -291,7 +296,7 @@ public class EntityResolver : IEntityResolver
     /// </summary>
     /// <param name="entityType">实体类型</param>
     /// <returns>实体映射元数据</returns>
-    private EntityMappingMetadata GetMapping(Type entityType)
+    internal EntityMappingMetadata GetMapping(Type entityType)
     {
         if (entityType == null || _entityMappingResolver == null)
             return null;

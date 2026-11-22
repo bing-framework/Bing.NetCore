@@ -195,10 +195,10 @@ public class SqlOperationCompileContractTest
     }
 
     /// <summary>
-    /// 测试目的：统一 Builder 应公开结构化和实体映射 Returning Fluent API。
+    /// 测试目的：查询 Builder 不应公开 Returning 写入 Fluent API。
     /// </summary>
     [Fact]
-    public void ReturningExtensions_WhenSourceIsUnifiedBuilder_ShouldCompile()
+    public void ReturningExtensions_WhenSourceIsUnifiedBuilder_ShouldNotCompile()
     {
         // Arrange
         const string source = """
@@ -215,6 +215,43 @@ public class SqlOperationCompileContractTest
                 {
                     source.Returning("Id");
                     source.Returning<Item>(item => item.Id);
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = Compile(source);
+
+        // Assert
+        AssertCompileFailedForMissingExtension(diagnostics, "Returning");
+    }
+
+    /// <summary>
+    /// 测试目的：专用 Mutation Builder 应公开结构化和实体映射 Returning Fluent API。
+    /// </summary>
+    [Fact]
+    public void ReturningExtensions_WhenSourceIsDedicatedMutationBuilder_ShouldCompile()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            using Bing.Data.Sql.Builders.Mutations;
+
+            sealed class Item
+            {
+                public int Id { get; set; }
+            }
+
+            static class Consumer
+            {
+                static void Use(ISqlInsertBuilder insert, ISqlUpdateBuilder update, ISqlDeleteBuilder delete)
+                {
+                    insert.Returning("Id");
+                    insert.Returning<Item>(item => item.Id);
+                    update.Returning("Id");
+                    update.Returning<Item>(item => item.Id);
+                    delete.Returning("Id");
+                    delete.Returning<Item>(item => item.Id);
                 }
             }
             """;
@@ -577,6 +614,7 @@ public class SqlOperationCompileContractTest
                 public abstract void From<TEntity>(string alias = null, string schema = null)
                     where TEntity : class;
                 public abstract void From(ISqlBuilder builder, string alias);
+                public abstract void From(ISqlQueryFragment fragment, string alias);
                 public abstract void From(Action<ISqlBuilder> action, string alias);
                 public abstract void AppendSql(string sql);
                 public abstract void Validate();
@@ -610,6 +648,7 @@ public class SqlOperationCompileContractTest
                 public override void From(SqlTableReference reference) { }
                 public override void From<TEntity>(string alias = null, string schema = null) { }
                 public override void From(ISqlBuilder builder, string alias) { }
+                public override void From(ISqlQueryFragment fragment, string alias) { }
                 public override void From(Action<ISqlBuilder> action, string alias) { }
                 public override void AppendSql(string sql) { }
                 public override void Validate() { }

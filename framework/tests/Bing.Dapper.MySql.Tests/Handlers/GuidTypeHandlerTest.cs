@@ -7,8 +7,11 @@ using Xunit;
 namespace Bing.Dapper.Tests.Handlers;
 
 /// <summary>
-/// <see cref="GuidTypeHandler" /> 单元测试。 覆盖 MySQL 特有的 Guid 字节序转换逻辑（Data1/Data2/Data3 大端序存储）。
+/// <see cref="GuidTypeHandler" /> 单元测试。
 /// </summary>
+/// <remarks>
+/// 覆盖 MySQL 特有的 Guid 字节序转换逻辑（Data1/Data2/Data3 大端序存储）。
+/// </remarks>
 public class GuidTypeHandlerTest
 {
     /// <summary>

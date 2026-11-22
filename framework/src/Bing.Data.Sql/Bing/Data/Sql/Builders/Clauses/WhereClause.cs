@@ -89,7 +89,7 @@ public class WhereClause : IWhereClause
 
     /// <inheritdoc />
     public virtual IWhereClause Clone(SqlClauseContext context) =>
-        CreateClone(context, new SqlCondition(_condition?.GetCondition()));
+        CreateClone(context, SqlConditionSnapshot.Rebind(_condition, context));
 
     /// <summary>
     /// 创建克隆后的 Where 子句。
@@ -262,6 +262,22 @@ public class WhereClause : IWhereClause
         }
 
         /// <inheritdoc />
+        public void Restore(SqlParam parameter)
+        {
+            var snapshot = CloneSqlParameter(parameter);
+            Probe.Restore(snapshot);
+            _operations.Add(target => target.Restore(CloneSqlParameter(snapshot)));
+        }
+
+        /// <inheritdoc />
+        public bool Remove(string name)
+        {
+            var removed = Probe.Remove(name);
+            _operations.Add(target => target.Remove(name));
+            return removed;
+        }
+
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => Probe.GetParams();
 
         /// <inheritdoc />
@@ -293,6 +309,29 @@ public class WhereClause : IWhereClause
         /// </summary>
         /// <param name="operation">写入操作。</param>
         protected void Record(Action<IParameterManager> operation) => _operations.Add(operation);
+
+        /// <summary>复制参数描述符，避免预检和提交共享可变元数据。</summary>
+        protected static SqlParam CloneSqlParameter(SqlParam parameter)
+        {
+            if (parameter == null)
+                return null;
+            return new SqlParam(parameter.Name, parameter.Value, parameter.DbType, parameter.Direction,
+                parameter.Size, parameter.Precision, parameter.Scale)
+            {
+                OriginalValue = parameter.OriginalValue,
+                IsProviderValue = parameter.IsProviderValue,
+                EntityType = parameter.EntityType,
+                PropertyName = parameter.PropertyName,
+                ColumnName = parameter.ColumnName,
+                DatabaseType = parameter.DatabaseType,
+                ProviderTypeName = parameter.ProviderTypeName,
+                Source = parameter.Source,
+                MetadataLevel = parameter.MetadataLevel,
+                StorageKind = parameter.StorageKind,
+                ConverterKind = parameter.ConverterKind,
+                CustomConverterName = parameter.CustomConverterName
+            };
+        }
     }
 
     /// <summary>
@@ -328,31 +367,6 @@ public class WhereClause : IWhereClause
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> ExportValues() => AdvancedProbe.ExportValues();
 
-        /// <summary>
-        /// 深复制参数容器，避免预检实现修改后影响真实提交。
-        /// </summary>
-        /// <param name="parameter">源参数。</param>
-        /// <returns>独立的参数副本。</returns>
-        private static SqlParam CloneSqlParameter(SqlParam parameter)
-        {
-            if (parameter == null)
-                return null;
-            return new SqlParam(parameter.Name, parameter.Value, parameter.DbType, parameter.Direction,
-                parameter.Size, parameter.Precision, parameter.Scale)
-            {
-                OriginalValue = parameter.OriginalValue,
-                EntityType = parameter.EntityType,
-                PropertyName = parameter.PropertyName,
-                ColumnName = parameter.ColumnName,
-                DatabaseType = parameter.DatabaseType,
-                ProviderTypeName = parameter.ProviderTypeName,
-                Source = parameter.Source,
-                MetadataLevel = parameter.MetadataLevel,
-                StorageKind = parameter.StorageKind,
-                ConverterKind = parameter.ConverterKind,
-                CustomConverterName = parameter.CustomConverterName
-            };
-        }
     }
 
     /// <summary>

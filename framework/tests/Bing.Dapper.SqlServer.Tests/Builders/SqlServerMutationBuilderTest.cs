@@ -2,9 +2,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
-using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Mutations;
-using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
 
 namespace Bing.Dapper.Tests.Builders;
@@ -38,7 +37,7 @@ public sealed class SqlServerMutationBuilderTest
     public void UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new SqlServerBuilder()
+        var builder = new SqlUpdateBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -59,7 +58,7 @@ public sealed class SqlServerMutationBuilderTest
     public void DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new SqlServerBuilder()
+        var builder = new SqlDeleteBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -79,7 +78,7 @@ public sealed class SqlServerMutationBuilderTest
     public void Returning_WhenInsertValuesIsConfigured_ShouldRenderOutputBeforeValues()
     {
         // Arrange
-        var builder = new SqlServerBuilder()
+        var builder = new SqlInsertBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "samples" })
             .Columns("Name")
             .Values("Bing")
@@ -100,11 +99,11 @@ public sealed class SqlServerMutationBuilderTest
     public void Returning_WhenInsertSelectIsConfigured_ShouldRenderOutputBeforeSelect()
     {
         // Arrange
-        ISqlBuilder builder = new SqlServerBuilder();
-        builder.InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
+        var source = new SqlServerBuilder().Select("Id,Name").From("samples");
+        var builder = new SqlInsertBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
             .Columns("Id", "Name")
-            .Select("Id", "Name")
-            .From("samples")
+            .InsertSelect(source)
             .Returning("Id");
 
         // Act
@@ -122,8 +121,8 @@ public sealed class SqlServerMutationBuilderTest
     public void Returning_WhenUpdateIsConfigured_ShouldRenderInsertedOutputBeforeWhere()
     {
         // Arrange
-        ISqlBuilder builder = new SqlServerBuilder();
-        builder.Update(new SqlTableReference { Schema = "dbo", TableName = "samples" })
+        var builder = new SqlUpdateBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .Update(new SqlTableReference { Schema = "dbo", TableName = "samples" })
             .Set("Name", "Bing")
             .Where("Id", 1)
             .Returning("Id", "Name");
@@ -143,8 +142,8 @@ public sealed class SqlServerMutationBuilderTest
     public void Returning_WhenDeleteIsConfigured_ShouldRenderDeletedOutputBeforeWhere()
     {
         // Arrange
-        ISqlBuilder builder = new SqlServerBuilder();
-        builder.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" })
+        var builder = new SqlDeleteBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" })
             .Where("Id", 1)
             .Returning("Id", "Name");
 
@@ -162,8 +161,8 @@ public sealed class SqlServerMutationBuilderTest
     public void Returning_WhenMappedProjectionIsConfigured_ShouldRenderOutputWithClrAliases()
     {
         // Arrange
-        ISqlBuilder builder = new SqlServerBuilder();
-        builder.Update(new SqlTableReference { Schema = "dbo", TableName = "returning_samples" })
+        var builder = new SqlUpdateBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
+            .Update(new SqlTableReference { Schema = "dbo", TableName = "returning_samples" })
             .Set("sample_name", "Bing")
             .Where("sample_id", 7)
             .Returning<ReturningMutationSample>(item => new { item.Id, item.Name });
@@ -185,23 +184,23 @@ public sealed class SqlServerMutationBuilderTest
     public void Output_WhenDeleteBuilderIsClonedAndSourceCleared_ShouldRetainDeletedProjectionOnlyInClone()
     {
         // Arrange
-        var source = new SqlServerBuilder();
-        source.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" })
+        var services = SqlBuilderServices.CreateDefault();
+        var source = new SqlDeleteBuilder(SqlServerSqlProvider.Instance, services)
+            .DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" })
+            .Where("Id", 1)
             .Returning("Id", "Name");
-        ((IMutationWhereClauseAccessor)source).WhereClause.And(new EqualCondition("[Id]", "@_p_0"));
-        ((ISqlCommonPartAccessor)source).ParameterManager.Add("@_p_0", 1);
 
         // Act
         var clone = source.Clone();
         source.Clear();
-        source.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" });
-        ((IMutationWhereClauseAccessor)source).WhereClause.And(new EqualCondition("[Id]", "@_p_0"));
-        ((ISqlCommonPartAccessor)source).ParameterManager.Add("@_p_0", 2);
+        source.DeleteFrom(new SqlTableReference { Schema = "dbo", TableName = "samples" }).Where("Id", 2);
 
         // Assert
         Assert.Equal("Delete From [dbo].[samples] Output [Deleted].[Id], [Deleted].[Name] Where [Id]=@_p_0",
             clone.ToSql());
         Assert.Equal("Delete From [dbo].[samples] Where [Id]=@_p_0", source.ToSql());
+        Assert.Equal(1, clone.BuildCommand().Parameters.Single().Value);
+        Assert.Equal(2, source.BuildCommand().Parameters.Single().Value);
     }
 
     /// <summary>
@@ -211,20 +210,19 @@ public sealed class SqlServerMutationBuilderTest
     public void Output_WhenInsertSelectBuilderIsClearedAndReused_ShouldNotLeakBeforeSourceProjection()
     {
         // Arrange
-        var builder = new SqlServerBuilder()
+        var source = new SqlServerBuilder().Select("Id").From("samples");
+        var builder = new SqlInsertBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
             .Columns("Id")
-            .Select("Id")
-            .From("samples")
+            .InsertSelect(source)
             .Returning("Id");
 
         // Act
         builder.ToSql();
-        builder.Clear()
-            .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
+        builder.Clear();
+        builder.InsertInto(new SqlTableReference { Schema = "dbo", TableName = "archive_samples" })
             .Columns("Id")
-            .Select("Id")
-            .From("samples");
+            .InsertSelect(source);
         var sql = builder.ToSql();
 
         // Assert

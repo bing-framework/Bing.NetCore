@@ -7,71 +7,79 @@ public abstract partial class SqlQueryBase
 {
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.Query<TResult>(sql, parameters,
-            transaction, buffered: true, commandTimeout: timeout, commandType: plan.CommandType).ToList());
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticRows(plan, reader, timeout) :
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query<TResult>(connection, sql, parameters,
+            transaction, buffered: true, commandTimeout: timeout, commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TResult>(SqlQueryPlan plan,
-        Func<TFirst, TSecond, TResult> map, int? timeout) => InternalQueryPlan(plan,
-        (connection, sql, parameters, transaction) => connection.Query(sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).ToList());
+        Func<TFirst, TSecond, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
+        (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TResult>(SqlQueryPlan plan,
-        Func<TFirst, TSecond, TThird, TResult> map, int? timeout) => InternalQueryPlan(plan,
-        (connection, sql, parameters, transaction) => connection.Query(sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).ToList());
+        Func<TFirst, TSecond, TThird, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
+        (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TResult>(SqlQueryPlan plan,
-        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => InternalQueryPlan(plan,
-        (connection, sql, parameters, transaction) => connection.Query(sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).ToList());
+        Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
+        (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(SqlQueryPlan plan,
-        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) => InternalQueryPlan(plan,
-        (connection, sql, parameters, transaction) => connection.Query(sql, map, parameters, transaction, buffered: true,
-            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).ToList());
+        Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan),
+        (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters, transaction, buffered: true,
+            splitOn: plan.SplitOn, commandTimeout: timeout, commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.Query(sql, map, parameters,
+        InternalQueryPlan(RequireDynamicQuery(plan), (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql, map, parameters,
             transaction, buffered: true, splitOn: plan.SplitOn, commandTimeout: timeout,
-            commandType: plan.CommandType).ToList());
+            commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     List<TResult> ISqlQueryPlanExecutor.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
-        int? timeout) => InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.Query(sql,
+        int? timeout) => InternalQueryPlan(RequireDynamicQuery(plan), (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.Query(connection, sql,
         map, parameters, transaction, buffered: true, splitOn: plan.SplitOn, commandTimeout: timeout,
-        commandType: plan.CommandType).ToList());
+        commandType: plan.CommandType).AsList());
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.First<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.QueryFirst<TResult>(sql,
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticTerminal(plan, reader, timeout, QueryTerminal.First) :
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.QueryFirst<TResult>(connection, sql,
             parameters, transaction, commandTimeout: timeout, commandType: plan.CommandType));
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.FirstOrDefault<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.QueryFirstOrDefault<TResult>(sql,
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticTerminal(plan, reader, timeout, QueryTerminal.FirstOrDefault) :
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.QueryFirstOrDefault<TResult>(connection, sql,
             parameters, transaction, commandTimeout: timeout, commandType: plan.CommandType));
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.Single<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.QuerySingle<TResult>(sql,
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticTerminal(plan, reader, timeout, QueryTerminal.Single) :
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.QuerySingle<TResult>(connection, sql,
             parameters, transaction, commandTimeout: timeout, commandType: plan.CommandType));
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.SingleOrDefault<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.QuerySingleOrDefault<TResult>(sql,
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticTerminal(plan, reader, timeout, QueryTerminal.SingleOrDefault) :
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => SqlDynamicCommandRunner.QuerySingleOrDefault<TResult>(connection, sql,
             parameters, transaction, commandTimeout: timeout, commandType: plan.CommandType));
 
     /// <inheritdoc />
     TResult ISqlQueryPlanExecutor.Scalar<TResult>(SqlQueryPlan plan, int? timeout) =>
-        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => connection.ExecuteScalar<TResult>(sql,
-            parameters, transaction, commandTimeout: timeout, commandType: plan.CommandType));
+        InternalQueryPlan(plan, (connection, sql, parameters, transaction) => CanExecuteStatically(parameters)
+            ? SqlStaticCommandRunner.Execute(connection, sql, parameters, transaction, timeout, command =>
+                ConvertScalar<TResult>(command.ExecuteScalar()), plan.CommandType)
+            : SqlDynamicCommandRunner.ExecuteScalar<TResult>(connection, sql, parameters, transaction,
+                commandTimeout: timeout, commandType: plan.CommandType));
 
     /// <inheritdoc />
     IEnumerable<TResult> ISqlQueryPlanExecutor.AsEnumerable<TResult>(SqlQueryPlan plan, int? timeout) =>
@@ -79,81 +87,98 @@ public abstract partial class SqlQueryBase
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => (await connection.QueryAsync<TResult>(CreateQueryCommandDefinition(sql, parameters,
-            transaction, timeout, buffered: true, operationToken, plan.CommandType))).ToList(), cancellationToken);
+        CancellationToken cancellationToken) =>
+        TryCreateStaticReader<TResult>(out var reader) ? QueryStaticRowsAsync(plan, reader, timeout, cancellationToken) :
+        InternalQueryPlanAsync(plan, async (connection, sql, parameters,
+        transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
+            transaction, timeout, buffered: true, operationToken, plan.CommandType))).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TResult> map, int? timeout, CancellationToken cancellationToken) =>
-        InternalQueryPlanAsync(plan, async (connection, sql, parameters, transaction, operationToken) =>
-            (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
+            (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TResult> map, int? timeout, CancellationToken cancellationToken) =>
-        InternalQueryPlanAsync(plan, async (connection, sql, parameters, transaction, operationToken) =>
-            (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
+            (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(SqlQueryPlan plan,
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, CancellationToken cancellationToken) =>
-        InternalQueryPlanAsync(plan, async (connection, sql, parameters, transaction, operationToken) =>
-            (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters, transaction, operationToken) =>
+            (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
+                buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters,
+        transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
+            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
-            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql, parameters,
+        transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters, transaction, timeout,
+            buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
     Task<List<TResult>> ISqlQueryPlanExecutor.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh,
         TResult>(SqlQueryPlan plan, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map,
-        int? timeout, CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql,
-        parameters, transaction, operationToken) => (await connection.QueryAsync(CreateQueryCommandDefinition(sql, parameters,
-            transaction, timeout, buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).ToList(), cancellationToken);
+        int? timeout, CancellationToken cancellationToken) => InternalQueryPlanAsync(RequireDynamicQuery(plan), async (connection, sql,
+        parameters, transaction, operationToken) => (await SqlDynamicCommandRunner.QueryAsync(connection, CreateQueryCommandDefinition(sql, parameters,
+            transaction, timeout, buffered: true, operationToken, plan.CommandType), map, splitOn: plan.SplitOn)).AsList(), cancellationToken);
 
     /// <inheritdoc />
-    Task<TResult> ISqlQueryPlanExecutor.FirstAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => await connection.QueryFirstAsync<TResult>(CreateQueryCommandDefinition(sql, parameters,
+    async Task<TResult> ISqlQueryPlanExecutor.FirstAsync<TResult>(SqlQueryPlan plan, int? timeout,
+        CancellationToken cancellationToken) =>
+        TryCreateStaticReader<TResult>(out var reader)
+            ? await QueryStaticTerminalAsync(plan, reader, timeout, cancellationToken, QueryTerminal.First).ConfigureAwait(false)
+            : await InternalQueryPlanAsync(plan, async (connection, sql, parameters,
+        transaction, operationToken) => await SqlDynamicCommandRunner.QueryFirstAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
             transaction, timeout, buffered: true, operationToken, plan.CommandType)), cancellationToken);
 
     /// <inheritdoc />
-    Task<TResult> ISqlQueryPlanExecutor.FirstOrDefaultAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => await connection.QueryFirstOrDefaultAsync<TResult>(CreateQueryCommandDefinition(sql, parameters,
+    async Task<TResult> ISqlQueryPlanExecutor.FirstOrDefaultAsync<TResult>(SqlQueryPlan plan, int? timeout,
+        CancellationToken cancellationToken) =>
+        TryCreateStaticReader<TResult>(out var reader)
+            ? await QueryStaticTerminalAsync(plan, reader, timeout, cancellationToken, QueryTerminal.FirstOrDefault).ConfigureAwait(false)
+            : await InternalQueryPlanAsync(plan, async (connection, sql, parameters,
+        transaction, operationToken) => await SqlDynamicCommandRunner.QueryFirstOrDefaultAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
             transaction, timeout, buffered: true, operationToken, plan.CommandType)), cancellationToken);
 
     /// <inheritdoc />
-    Task<TResult> ISqlQueryPlanExecutor.SingleAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => await connection.QuerySingleAsync<TResult>(CreateQueryCommandDefinition(sql, parameters,
+    async Task<TResult> ISqlQueryPlanExecutor.SingleAsync<TResult>(SqlQueryPlan plan, int? timeout,
+        CancellationToken cancellationToken) =>
+        TryCreateStaticReader<TResult>(out var reader)
+            ? await QueryStaticTerminalAsync(plan, reader, timeout, cancellationToken, QueryTerminal.Single).ConfigureAwait(false)
+            : await InternalQueryPlanAsync(plan, async (connection, sql, parameters,
+        transaction, operationToken) => await SqlDynamicCommandRunner.QuerySingleAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
             transaction, timeout, buffered: true, operationToken, plan.CommandType)), cancellationToken);
 
     /// <inheritdoc />
-    Task<TResult> ISqlQueryPlanExecutor.SingleOrDefaultAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => await connection.QuerySingleOrDefaultAsync<TResult>(CreateQueryCommandDefinition(sql,
+    async Task<TResult> ISqlQueryPlanExecutor.SingleOrDefaultAsync<TResult>(SqlQueryPlan plan, int? timeout,
+        CancellationToken cancellationToken) =>
+        TryCreateStaticReader<TResult>(out var reader)
+            ? await QueryStaticTerminalAsync(plan, reader, timeout, cancellationToken, QueryTerminal.SingleOrDefault).ConfigureAwait(false)
+            : await InternalQueryPlanAsync(plan, async (connection, sql, parameters,
+        transaction, operationToken) => await SqlDynamicCommandRunner.QuerySingleOrDefaultAsync<TResult>(connection, CreateQueryCommandDefinition(sql,
             parameters, transaction, timeout, buffered: true, operationToken, plan.CommandType)), cancellationToken);
 
     /// <inheritdoc />
     Task<TResult> ISqlQueryPlanExecutor.ScalarAsync<TResult>(SqlQueryPlan plan, int? timeout,
-        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan, async (connection, sql, parameters,
-        transaction, operationToken) => await connection.ExecuteScalarAsync<TResult>(CreateQueryCommandDefinition(sql, parameters,
-            transaction, timeout, buffered: true, operationToken, plan.CommandType)), cancellationToken);
+        CancellationToken cancellationToken) => InternalQueryPlanAsync(plan,
+        (connection, sql, parameters, transaction, token) => CanExecuteStatically(parameters)
+            ? SqlStaticCommandRunner.ExecuteAsync(connection, sql, parameters, transaction, timeout, async (command, cancellation) =>
+                ConvertScalar<TResult>(await command.ExecuteScalarAsync(cancellation).ConfigureAwait(false)), token, plan.CommandType)
+            : SqlDynamicCommandRunner.ExecuteScalarAsync<TResult>(connection, CreateQueryCommandDefinition(sql, parameters,
+                transaction, timeout, buffered: true, token, plan.CommandType)), cancellationToken);
 
     /// <inheritdoc />
     IAsyncEnumerable<TResult> ISqlQueryPlanExecutor.AsAsyncEnumerable<TResult>(SqlQueryPlan plan, int? timeout,

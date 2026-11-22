@@ -49,6 +49,8 @@ internal sealed class DefaultSqlParameterSourceResolver : ISqlParameterSourceRes
             return TryResolve(dictionary, normalizedName, out value);
         if (source is IDictionary nonGenericDictionary)
             return TryResolve(nonGenericDictionary, normalizedName, out value);
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            throw SqlRuntimeFeatures.DynamicExecutionDisabled();
         var property = source.GetType().GetProperty(normalizedName,
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
         if (property == null || property.CanRead == false || property.GetIndexParameters().Length != 0)

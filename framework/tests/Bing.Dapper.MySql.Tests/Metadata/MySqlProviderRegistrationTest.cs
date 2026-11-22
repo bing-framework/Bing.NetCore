@@ -152,17 +152,31 @@ public class MySqlProviderRegistrationTest
         Assert.IsType<MySqlMultipleQueryExecutor>(executor);
     }
 
+    /// <summary>
+    /// 用于验证 Provider 查询作用域过滤的测试实体。
+    /// </summary>
     [Table("scope_probe")]
     private sealed class MySqlScopeProbeEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 
+    /// <summary>
+    /// 记录数据库连接解析次数的连接解析器。
+    /// </summary>
     private sealed class CountingConnectionResolver : ISqlDbConnectionFactoryResolver
     {
+        /// <summary>
+        /// 获取调用的累计次数。
+        /// </summary>
         public int CallCount { get; private set; }
 
+        /// <inheritdoc />
         public System.Data.IDbConnection Create(string providerKey, string connectionString)
         {
             CallCount++;

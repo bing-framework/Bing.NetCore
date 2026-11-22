@@ -213,6 +213,7 @@ public sealed class SqliteMultipleQueryIntegrationTest : IAsyncLifetime
     /// 创建固定的两个结果集命令。
     /// </summary>
     /// <returns>配置为返回两个结果集的 SQL 命令。</returns>
+    /// <param name="executor">执行测试查询或操作的执行器。</param>
     private static SqlMultipleQueryCommand CreateTwoResultCommand(ISqlMultipleQueryExecutor executor) => executor.CreateBatch()
         .Append("Select Name From samples")
         .Append("Select Count(*) From samples")

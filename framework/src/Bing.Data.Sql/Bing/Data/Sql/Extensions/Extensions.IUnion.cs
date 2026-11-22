@@ -80,6 +80,43 @@ public static partial class Extensions
     }
 
     /// <summary>
+    /// 追加冻结查询片段组成的 Union 分支。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="fragments">冻结查询片段或模板。</param>
+    /// <returns>追加 Union 项后的源对象。</returns>
+    public static T Union<T>(this T source, params ISqlQueryFragment[] fragments)
+        where T : IUnion
+    {
+        UnionFragments(source, "Union", fragments);
+        return source;
+    }
+
+    /// <summary>
+    /// 追加冻结查询片段组成的 Union 分支。
+    /// </summary>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="operation">联合操作。</param>
+    /// <param name="fragments">冻结查询片段。</param>
+    private static void UnionFragments<T>(T source, string operation, IEnumerable<ISqlQueryFragment> fragments)
+        where T : IUnion
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+        if (fragments == null)
+            return;
+        if (GetOperationBuilder(source) is not IUnionAccessor accessor)
+            return;
+        var items = fragments.Where(fragment => fragment != null)
+            .Select(fragment => new BuilderItem(operation, fragment.Freeze().Render()))
+            .ToList();
+        if (items.Count == 0)
+            return;
+        SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.UnionItems.AddRange(items));
+    }
+
+    /// <summary>
     /// 执行 Union 集合操作。
     /// </summary>
     /// <typeparam name="T">支持联合操作的源类型。</typeparam>
@@ -124,6 +161,20 @@ public static partial class Extensions
         where T : IUnion
     {
         Union(source, "Union All", builders);
+        return source;
+    }
+
+    /// <summary>
+    /// 追加冻结查询片段组成的 Union All 分支。
+    /// </summary>
+    /// <typeparam name="T">支持联合操作的源类型。</typeparam>
+    /// <param name="source">当前查询源。</param>
+    /// <param name="fragments">冻结查询片段或模板。</param>
+    /// <returns>追加 Union All 项后的源对象。</returns>
+    public static T UnionAll<T>(this T source, params ISqlQueryFragment[] fragments)
+        where T : IUnion
+    {
+        UnionFragments(source, "Union All", fragments);
         return source;
     }
 

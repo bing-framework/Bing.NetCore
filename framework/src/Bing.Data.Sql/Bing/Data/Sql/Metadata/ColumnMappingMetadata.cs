@@ -68,6 +68,12 @@ public sealed class ColumnMappingMetadata
     public bool IsDatabaseGenerated { get; init; }
 
     /// <summary>
+    /// 获取或初始化数据库生成方式。
+    /// </summary>
+    /// <remarks>显式自增键策略要求 Identity，不能将 Computed 用作自增回填。</remarks>
+    public System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption DatabaseGeneratedOption { get; init; }
+
+    /// <summary>
     /// 获取或初始化是否为并发令牌。
     /// </summary>
     public bool IsConcurrencyToken { get; init; }

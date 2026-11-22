@@ -8,6 +8,7 @@ namespace Bing.Data.Sql.Builders.Params;
 /// </summary>
 public class SqlParam
 {
+    private object _value;
     /// <summary>
     /// 初始化一个 <see cref="SqlParam"/> 类型的实例。
     /// </summary>
@@ -37,12 +38,20 @@ public class SqlParam
     /// <summary>
     /// 获取或设置参数值
     /// </summary>
-    public object Value { get; set; }
+    public object Value
+    {
+        get => _value;
+        set { _value = value; IsProviderValue = false; }
+    }
 
     /// <summary>
     /// 获取或设置Provider 转换前的原始参数值
     /// </summary>
     public object OriginalValue { get; set; }
+
+    /// <summary>获取或设置当前值是否已经完成字段到 Provider 的转换，防止执行绑定再次转换。</summary>
+    /// <remarks>仅在改变 Value 或重新指定映射时清除；参数快照和克隆必须保留此标记。</remarks>
+    public bool IsProviderValue { get; set; }
 
     /// <summary>
     /// 获取参数方向

@@ -1,9 +1,11 @@
-﻿using Bing.Data.Sql.Diagnostics;
+using System.Data.Common;
+using Bing.Data.Sql.Diagnostics;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Builders.Mutations.Builders;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Mutations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,8 +14,11 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// Sql执行对象基类
 /// </summary>
-public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
+public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, ISqlKeyInsertExecutor
 {
+    private readonly SqlWriteResourceAccess _writeResources;
+    private protected SqlWriteResourceAccess WriteResources => _writeResources;
+
     /// <summary>
     /// 未指定批量大小时使用的最大实体窗口。
     /// </summary>
@@ -23,7 +28,13 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     private const int DefaultMutationBatchWindowSize = 256;
 
     /// <inheritdoc />
-    public ISqlBuilder CreateWriteBuilder() => CreateIndependentSqlBuilder();
+    public ISqlInsertBuilder CreateInsertBuilder() => new SqlInsertBuilder(GetCurrentProvider(), CreateSqlBuilderServices());
+
+    /// <inheritdoc />
+    public ISqlUpdateBuilder CreateUpdateBuilder() => new SqlUpdateBuilder(GetCurrentProvider(), CreateSqlBuilderServices());
+
+    /// <inheritdoc />
+    public ISqlDeleteBuilder CreateDeleteBuilder() => new SqlDeleteBuilder(GetCurrentProvider(), CreateSqlBuilderServices());
 
     #region 构造函数
 
@@ -35,6 +46,8 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     protected SqlExecutorBase(IServiceProvider serviceProvider, SqlOptions options)
         : base(serviceProvider, options)
     {
+        var owner = CreateWriteResourceOwner();
+        _writeResources = new SqlWriteResourceAccess(owner);
     }
 
     #endregion
@@ -42,20 +55,21 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <inheritdoc />
     public List<TResult> ExecuteReturning<TResult>(SqlWriteCommand command, int? timeout = null)
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         ValidateReturningMutationCommand(command);
+        TryCreateStaticReader<TResult>(out var staticReader);
         return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return new List<TResult>();
             var preparedCommand = PrepareCommand(command);
-            var connection = GetExecutionConnection();
-            var transaction = GetQueryTransaction();
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = WriteResources.GetWriteTransaction();
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
-            var result = connection.Query<TResult>(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout)
-                .ToList();
-            CompleteQueryTransaction();
+            var result = staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters)
+                ? ReadStaticRows(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, staticReader)
+                : SqlDynamicCommandRunner.Query<TResult>(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout).AsList();
             ExecuteAfter(context.Message);
             return result;
         });
@@ -66,21 +80,23 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         ValidateReturningMutationCommand(command);
+        TryCreateStaticReader<TResult>(out var staticReader);
         return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return new List<TResult>();
             var preparedCommand = PrepareCommand(command);
-            var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = await WriteResources.GetWriteTransactionAsync(operationToken).ConfigureAwait(false);
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
-            var result = await ExecuteMaterializedQueryAsync<TResult>(connection,
-                CreateQueryCommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, buffered: true,
-                    operationToken), operationToken);
-            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var result = staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters)
+                ? await ReadStaticRowsAsync(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, staticReader, operationToken).ConfigureAwait(false)
+                : await ExecuteMaterializedQueryAsync<TResult>(connection,
+                    CreateQueryCommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, buffered: true,
+                        operationToken), operationToken);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);
@@ -91,19 +107,20 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <inheritdoc />
     public virtual int ExecuteWrite(SqlWriteCommand command, int? timeout = null)
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         ValidateExecutableMutationCommand(command);
         return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
                 return 0;
             var preparedCommand = PrepareCommand(command);
-            var connection = GetExecutionConnection();
-            var transaction = GetQueryTransaction();
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = WriteResources.GetWriteTransaction();
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
-            var result = connection.Execute(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
-            CompleteQueryTransaction();
+            var result = CanExecuteStatically(preparedCommand.DapperParameters)
+                ? SqlStaticCommandRunner.Execute(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, value => value.ExecuteNonQuery())
+                : SqlDynamicCommandRunner.Execute(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
             ExecuteAfter(context.Message);
             return result;
         });
@@ -114,20 +131,22 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         CancellationToken cancellationToken = default)
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         ValidateExecutableMutationCommand(command);
         return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
                 return 0;
             var preparedCommand = PrepareCommand(command);
-            var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = await WriteResources.GetWriteTransactionAsync(operationToken).ConfigureAwait(false);
             context.Message = CreateExecutionDiagnostics(preparedCommand, connection);
             WriteTraceLog(preparedCommand);
-            var result = await connection.ExecuteAsync(new CommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
-                cancellationToken: operationToken));
-            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var result = CanExecuteStatically(preparedCommand.DapperParameters)
+                ? await SqlStaticCommandRunner.ExecuteAsync(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
+                    (value, token) => value.ExecuteNonQueryAsync(token), operationToken).ConfigureAwait(false)
+                : await SqlDynamicCommandRunner.ExecuteAsync(connection, new CommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
+                    cancellationToken: operationToken));
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);
@@ -218,14 +237,16 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetExecutionConnection();
-            var transaction = GetQueryTransaction();
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = WriteResources.GetWriteTransaction();
             var command = PrepareCommand(sql, param);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
-            var result = connection.Execute(command.Sql, command.DapperParameters, transaction, timeout);
+            var result = !CanExecuteStatically(command.DapperParameters)
+                ? SqlDynamicCommandRunner.Execute(connection, command.Sql, command.DapperParameters, transaction, timeout)
+                : SqlStaticCommandRunner.Execute(connection, command.Sql, command.DapperParameters, transaction,
+                    timeout, static dbCommand => dbCommand.ExecuteNonQuery());
             validateResult?.Invoke(result);
-            CompleteQueryTransaction();
             ExecuteAfter(context.Message);
             return result;
         }, executionLeaseAlreadyHeld);
@@ -257,15 +278,18 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         {
             if (ExecuteBefore() == false)
                 return 0;
-            var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = await WriteResources.GetWriteTransactionAsync(operationToken).ConfigureAwait(false);
             var command = PrepareCommand(sql, param);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
-            var result = await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
-                cancellationToken: operationToken));
+            var result = !CanExecuteStatically(command.DapperParameters)
+                ? await SqlDynamicCommandRunner.ExecuteAsync(connection, new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
+                    cancellationToken: operationToken))
+                : await SqlStaticCommandRunner.ExecuteAsync(connection, command.Sql, command.DapperParameters,
+                    transaction, timeout, static (dbCommand, token) => dbCommand.ExecuteNonQueryAsync(token), operationToken)
+                    .ConfigureAwait(false);
             validateResult?.Invoke(result);
-            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken, executionLeaseAlreadyHeld).ConfigureAwait(false);
@@ -273,64 +297,105 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
     #endregion
 
-    #region ExecuteProcedure(执行存储过程增删改操作)
+    #region 输出参数执行
 
     /// <inheritdoc />
-    public virtual SqlProcedureResult<int> ExecuteProcedure(string procedure, object param = null, int? timeout = null)
+    public virtual (int AffectedRows, ISqlOutputParameterAccessor OutputParameters) ExecuteSqlWithOutput(string sql,
+        IReadOnlyCollection<SqlParam> parameters, int? timeout = null) =>
+        ExecuteWithOutput(sql, parameters, timeout, storedProcedure: false, SnapshotOutput);
+
+    /// <inheritdoc />
+    public virtual Task<(int AffectedRows, ISqlOutputParameterAccessor OutputParameters)> ExecuteSqlWithOutputAsync(string sql,
+        IReadOnlyCollection<SqlParam> parameters, int? timeout = null, CancellationToken cancellationToken = default) =>
+        ExecuteWithOutputAsync(sql, parameters, timeout, storedProcedure: false, SnapshotOutput, cancellationToken);
+
+    /// <inheritdoc />
+    public virtual SqlProcedureResult<int> ExecuteProcedure(string procedure, object param = null, int? timeout = null) =>
+        ExecuteWithOutput(procedure, param, timeout, storedProcedure: true,
+            static (rows, output) => new SqlProcedureResult<int>(rows, output));
+
+    /// <inheritdoc />
+    public virtual Task<SqlProcedureResult<int>> ExecuteProcedureAsync(string procedure, object param = null,
+        int? timeout = null, CancellationToken cancellationToken = default) =>
+        ExecuteWithOutputAsync(procedure, param, timeout, storedProcedure: true,
+            static (rows, output) => new SqlProcedureResult<int>(rows, output), cancellationToken);
+
+    private static (int AffectedRows, ISqlOutputParameterAccessor OutputParameters) SnapshotOutput(int rows,
+        ISqlOutputParameterAccessor output) => (rows, SqlOutputParameterSnapshot.Create(output));
+
+    /// <summary>在写入生命周期内执行带输出参数的文本或过程命令。</summary>
+    protected TResult ExecuteWithOutput<TResult>(string sql, object parameters, int? timeout, bool storedProcedure,
+        Func<int, ISqlOutputParameterAccessor, TResult> createResult, Func<DbCommand, int> executeCommand = null)
     {
-        EnsureWritableDataSource();
-        EnsureStoredProceduresSupported();
-        EnsureOutputParametersSupported(param);
+        WriteResources.EnsureWritableDataSource();
+        if (storedProcedure)
+            EnsureStoredProceduresSupported();
+        EnsureOutputParametersSupported(parameters, storedProcedure);
         return ExecuteDirect(context =>
         {
             if (ExecuteBefore() == false)
-                return new SqlProcedureResult<int>(0, null);
-            var connection = GetExecutionConnection();
-            var transaction = GetQueryTransaction();
-            var command = PrepareProcedureCommand(procedure, param);
+                return createResult(0, null);
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = WriteResources.GetWriteTransaction();
+            var command = PrepareCommandWithOutput(sql, parameters);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
-            var result = connection.Execute(command.Sql, command.DapperParameters, transaction, timeout,
-                GetProcedureCommandType());
-            var procedureResult = new SqlProcedureResult<int>(result,
-                CreateOutputParameterAccessor(command.DapperParameters));
-            CompleteQueryTransaction();
+            var commandType = storedProcedure ? GetProcedureCommandType() : CommandType.Text;
+            var rows = CanExecuteOutputStatically(command.DapperParameters, executeCommand != null)
+                ? SqlStaticCommandRunner.Execute(connection, command.Sql, command.DapperParameters, transaction, timeout,
+                    executeCommand ?? (static dbCommand => dbCommand.ExecuteNonQuery()), commandType)
+                : SqlDynamicCommandRunner.Execute(connection, command.Sql, command.DapperParameters, transaction, timeout,
+                    commandType);
+            var result = createResult(rows, CreateOutputParameterAccessor(command.DapperParameters));
             ExecuteAfter(context.Message);
-            return procedureResult;
+            return result;
         });
     }
 
-    #endregion
-
-    #region ExecuteProcedureAsync(执行存储过程增删改操作)
-
-    /// <inheritdoc />
-    public virtual async Task<SqlProcedureResult<int>> ExecuteProcedureAsync(string procedure, object param = null,
-        int? timeout = null,
-        CancellationToken cancellationToken = default)
+    /// <summary>异步执行带输出参数的文本或过程命令。</summary>
+    protected async Task<TResult> ExecuteWithOutputAsync<TResult>(string sql, object parameters, int? timeout,
+        bool storedProcedure, Func<int, ISqlOutputParameterAccessor, TResult> createResult,
+        CancellationToken cancellationToken, Func<DbCommand, CancellationToken, Task<int>> executeCommand = null)
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
-        EnsureStoredProceduresSupported();
-        EnsureOutputParametersSupported(param);
+        WriteResources.EnsureWritableDataSource();
+        if (storedProcedure)
+            EnsureStoredProceduresSupported();
+        EnsureOutputParametersSupported(parameters, storedProcedure);
         return await ExecuteDirectAsync(async (context, operationToken) =>
         {
             if (ExecuteBefore() == false)
-                return new SqlProcedureResult<int>(0, null);
-            var connection = GetExecutionConnection();
-            var transaction = await GetQueryTransactionAsync(operationToken).ConfigureAwait(false);
-            var command = PrepareProcedureCommand(procedure, param);
+                return createResult(0, null);
+            var connection = WriteResources.GetExecutionConnection();
+            var transaction = await WriteResources.GetWriteTransactionAsync(operationToken).ConfigureAwait(false);
+            var command = PrepareCommandWithOutput(sql, parameters);
             context.Message = CreateExecutionDiagnostics(command, connection);
             WriteTraceLog(command);
-            var result = await connection.ExecuteAsync(new CommandDefinition(command.Sql, command.DapperParameters, transaction, timeout,
-                GetProcedureCommandType(), cancellationToken: operationToken));
-            var procedureResult = new SqlProcedureResult<int>(result,
-                CreateOutputParameterAccessor(command.DapperParameters));
-            await CompleteQueryTransactionAsync(operationToken).ConfigureAwait(false);
+            var commandType = storedProcedure ? GetProcedureCommandType() : CommandType.Text;
+            var rows = CanExecuteOutputStatically(command.DapperParameters, executeCommand != null)
+                ? await SqlStaticCommandRunner.ExecuteAsync(connection, command.Sql, command.DapperParameters,
+                    transaction, timeout, executeCommand ?? (static (dbCommand, token) => dbCommand.ExecuteNonQueryAsync(token)),
+                    operationToken, commandType).ConfigureAwait(false)
+                : await SqlDynamicCommandRunner.ExecuteAsync(connection, new CommandDefinition(command.Sql,
+                    command.DapperParameters, transaction, timeout, commandType, cancellationToken: operationToken))
+                    .ConfigureAwait(false);
+            var result = createResult(rows, CreateOutputParameterAccessor(command.DapperParameters));
             ExecuteAfter(context.Message);
-            return procedureResult;
+            return result;
         }, cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>Provider 需要配置 DbCommand 时直接使用结构化绑定。</summary>
+    private bool CanExecuteOutputStatically(object parameters, bool requiresStaticCommand)
+    {
+        if (!requiresStaticCommand)
+            return CanExecuteStatically(parameters);
+        if (parameters is ISqlStaticParameterSource)
+            return true;
+        throw new NotSupportedException("配置输出命令要求可静态绑定的结构化参数。");
+    }
+
+    #endregion
 
     /// <summary>
     /// 在统一异常聚合语义下执行同步命令入口。
@@ -346,11 +411,11 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     private TResult ExecuteDirect<TResult>(Func<DirectExecutionContext, TResult> operation,
         bool executionLeaseAlreadyHeld = false)
     {
-        var executionLease = executionLeaseAlreadyHeld ? null : AcquireExecutionLease();
+        var executionLease = executionLeaseAlreadyHeld ? null : WriteResources.AcquireExecutionLease();
         var context = new DirectExecutionContext();
         return SqlQueryPlanLifecycle.Execute(() => operation(context), (exception, cleanupExceptions) =>
         {
-            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, RollbackQueryTransaction);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, WriteResources.MarkUnitOfWorkExecutionFailure);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
                 () => ExecuteError(context.Message, exception));
         }, result => ExecuteAfter(result), () => executionLease?.Dispose());
@@ -371,22 +436,22 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         Func<DirectExecutionContext, CancellationToken, Task<TResult>> operation,
         CancellationToken cancellationToken, bool executionLeaseAlreadyHeld = false)
     {
-        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        using var operationCancellation = WriteResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
         EnsureCancellationSupported(operationToken);
         if (operationToken.IsCancellationRequested)
         {
-            MarkPreCancelledUnitOfWorkExecution();
+            WriteResources.MarkPreCancelledUnitOfWorkExecution();
             operationToken.ThrowIfCancellationRequested();
         }
-        var executionLease = executionLeaseAlreadyHeld ? null : AcquireExecutionLease();
+        var executionLease = executionLeaseAlreadyHeld ? null : WriteResources.AcquireExecutionLease();
         var context = new DirectExecutionContext();
-        return await SqlQueryPlanLifecycle.ExecuteAsync(() => operation(context, operationToken), async (exception, cleanupExceptions) =>
+        return await SqlQueryPlanLifecycle.ExecuteAsync(() => operation(context, operationToken), (exception, cleanupExceptions) =>
         {
-            await SqlQueryPlanLifecycle.CaptureCleanupExceptionAsync(cleanupExceptions, RollbackQueryTransactionAsync)
-                .ConfigureAwait(false);
+            SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions, WriteResources.MarkUnitOfWorkExecutionFailure);
             SqlQueryPlanLifecycle.CaptureCleanupException(cleanupExceptions,
                 () => ExecuteError(context.Message, exception));
+            return Task.CompletedTask;
         }, result => ExecuteAfter(result), () => executionLease?.Dispose()).ConfigureAwait(false);
     }
 
@@ -769,7 +834,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     /// <returns>移除单实体受影响行数校验后的命令；无需移除时返回原命令。</returns>
     private static SqlWriteCommand WithoutSingleEntityAffectedRowsValidation(SqlWriteCommand command) =>
         command.ValidateAffectedRows
-            ? new SqlWriteCommand(command.Sql, command.Parameters)
+            ? command.WithValidateAffectedRows(false)
             : command;
 
     /// <summary>
@@ -908,21 +973,21 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         using var enumerator = batches.GetEnumerator();
         if (enumerator.MoveNext() == false)
             return 0;
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
 
-        var executionLease = AcquireExecutionLease();
-        if (HasUnitOfWorkResource)
+        var executionLease = WriteResources.AcquireExecutionLease();
+        if (WriteResources.HasUnitOfWorkResource)
         {
             try
             {
-                if (useTransaction && !IsUnitOfWorkRootTransactional)
+                if (useTransaction && !WriteResources.IsUnitOfWorkRootTransactional)
                     throw new InvalidOperationException("当前业务工作单元未启用事务，无法满足批量写入的事务要求。");
                 return ExecuteMutationCommands(this, orderedBatches, timeout, executionLeaseAlreadyHeld: true);
             }
             catch
             {
-                MarkUnitOfWorkExecutionFailure();
+                WriteResources.MarkUnitOfWorkExecutionFailure();
                 throw;
             }
             finally
@@ -932,7 +997,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         }
         executionLease?.Dispose();
 
-        if (useTransaction == false)
+        if (useTransaction == false || WriteResources.GetExecutionTransaction() != null)
             return ExecuteMutationCommands(this, orderedBatches, timeout);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
@@ -972,29 +1037,29 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
     {
         if (batches == null)
             return 0;
-        using var operationCancellation = CreateOperationCancellationLease(cancellationToken);
+        using var operationCancellation = WriteResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
         EnsureCancellationSupported(operationToken);
         using var enumerator = batches.GetEnumerator();
         if (enumerator.MoveNext() == false)
             return 0;
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         var orderedBatches = EnumerateFirstAndRemaining(enumerator.Current, enumerator);
 
-        var executionLease = AcquireExecutionLease();
-        if (HasUnitOfWorkResource)
+        var executionLease = WriteResources.AcquireExecutionLease();
+        if (WriteResources.HasUnitOfWorkResource)
         {
             try
             {
                 operationToken.ThrowIfCancellationRequested();
-                if (useTransaction && !IsUnitOfWorkRootTransactional)
+                if (useTransaction && !WriteResources.IsUnitOfWorkRootTransactional)
                     throw new InvalidOperationException("当前业务工作单元未启用事务，无法满足批量写入的事务要求。");
                 return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, operationToken,
                     executionLeaseAlreadyHeld: true).ConfigureAwait(false);
             }
             catch
             {
-                MarkUnitOfWorkExecutionFailure();
+                WriteResources.MarkUnitOfWorkExecutionFailure();
                 throw;
             }
             finally
@@ -1006,7 +1071,7 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
 
         operationToken.ThrowIfCancellationRequested();
 
-        if (useTransaction == false)
+        if (useTransaction == false || WriteResources.GetExecutionTransaction() != null)
             return await ExecuteMutationCommandsAsync(this, orderedBatches, timeout, operationToken).ConfigureAwait(false);
         var factory = ServiceProvider.GetService<ISqlTransactionScopeFactory>() ??
             throw new InvalidOperationException("未注册 SQL 事务作用域工厂。");
@@ -1175,6 +1240,4 @@ public abstract partial class SqlExecutorBase : SqlQueryBase, ISqlExecutor
         if (command.ValidateAffectedRows && affectedRows != 1)
             throw new Bing.Exceptions.ConcurrencyException($"实体 Mutation 预期影响 1 行，实际影响 {affectedRows} 行。");
     }
-
-    #endregion
 }

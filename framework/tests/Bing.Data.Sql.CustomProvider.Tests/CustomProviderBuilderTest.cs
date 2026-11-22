@@ -1,4 +1,5 @@
 using System.Data;
+using Bing.Data;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Clauses;
@@ -22,6 +23,47 @@ namespace Bing.Data.Sql.CustomProvider.Tests;
 /// </summary>
 public class CustomProviderBuilderTest
 {
+    /// <summary>外部子句应支持从冻结 SQL 片段构造分组计数。</summary>
+    [Fact]
+    public void Count_WhenGrouped_ShouldUseExternalProviderFromClause()
+    {
+        var builder = new CustomSqlBuilder().Select("Name").From("samples")
+            .Where("Status", 1).GroupBy("Name").OrderBy("Name").Skip(1).Take(2);
+
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(SqlQueryPlan.Create(builder).Freeze());
+
+        Assert.Equal("Select Count(*) \r\nFrom (Select [Name] \r\nFrom [samples] \r\nWhere [Status]=@_p_0 \r\nGroup By [Name]) As [t]", count.CommandText);
+        Assert.Equal(1, Assert.Single(Assert.IsType<SqlParam[]>(count.Parameters)).Value);
+    }
+
+    /// <summary>
+    /// Freeze 后派生分页应保留外部 Provider 子句和分页渲染器，重复分页只重绑页参数。
+    /// </summary>
+    [Fact]
+    public void FrozenPage_WhenDerivedFromExternalProvider_ShouldReuseRendererAndRebindParameters()
+    {
+        var builder = new CustomSqlBuilder().Select("u.Name").From("custom:users", "u")
+            .Where("u.Status", 1).GroupBy("u.Name").OrderBy("u.Name");
+        var source = SqlQueryPlan.Create(builder).Freeze();
+        var sourceSql = source.CommandText;
+
+        var firstPage = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(3, 4));
+        var repeatedPage = SqlBuilderRuntimeBridge.CreatePagePlan(firstPage, new Pager(2, 3));
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(repeatedPage);
+
+        const string sourceCommand = "Select [u].[Name] \r\nFrom [ParsedUsers] As [u] \r\nWhere [u].[Status]=@_p_0 \r\nGroup By [u].[Name] \r\nOrder By [u].[Name]";
+        const string pageCommand = sourceCommand + " \r\nLimit @_p_2 Offset @_p_1";
+        Assert.Equal(sourceCommand, sourceSql);
+        Assert.Equal(pageCommand, firstPage.CommandText);
+        Assert.Equal(pageCommand, repeatedPage.CommandText);
+        Assert.Equal(new object[] { 1, 8, 4 }, Assert.IsType<SqlParam[]>(firstPage.Parameters).Select(parameter => parameter.Value));
+        Assert.Equal(new object[] { 1, 3, 3 }, Assert.IsType<SqlParam[]>(repeatedPage.Parameters).Select(parameter => parameter.Value));
+        Assert.Equal("Select Count(*) \r\nFrom (Select [u].[Name] \r\nFrom [ParsedUsers] As [u] \r\nWhere [u].[Status]=@_p_0 \r\nGroup By [u].[Name]) As [t]", count.CommandText);
+        Assert.Equal(1, Assert.Single(Assert.IsType<SqlParam[]>(count.Parameters)).Value);
+        Assert.Equal(sourceCommand, source.CommandText);
+        Assert.Equal(new object[] { 1 }, Assert.IsType<SqlParam[]>(source.Parameters).Select(parameter => parameter.Value));
+    }
+
     /// <summary>
     /// 外部程序集应只通过公开 Provider Runtime SPI 路由 Builder、Query、Executor 和连接工厂，不依赖友元访问。
     /// </summary>
@@ -82,45 +124,9 @@ public class CustomProviderBuilderTest
     }
 
     /// <summary>
-    /// 统一 Builder 必须通过外部 Provider 的可选 Mutation Clause Factory 创建 Update From、Delete Using 与 Returning 子句。
+    /// 验证专用变更构建器使用提供程序扩展且隔离克隆与清理状态。
     /// </summary>
-    [Fact]
-    public void MutationClauseFactory_WhenUnifiedBuilderUsesOptionalProviderSpi_ShouldCreateCustomClausesAndPreserveCloneState()
-    {
-        // Arrange
-        var update = new CustomSqlBuilder();
-        var delete = new CustomSqlBuilder();
-
-        // Act
-        update.Update(new SqlTableReference { TableName = "samples", Alias = "t" })
-            .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
-            .Set("Status", 1)
-            .SetFrom("Name", "Name")
-            .WhereFrom("Id", "Id")
-            .Returning("Id");
-        delete.DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
-            .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
-            .WhereUsing("Id", "Id")
-            .Returning("Id");
-        var clone = Assert.IsType<CustomSqlBuilder>(update.Clone());
-        update.Clear();
-
-        // Assert
-        Assert.IsType<CustomUpdateFromClause>(((IUpdateFromClauseAccessor)update).UpdateFromClause);
-        Assert.IsType<CustomReturningClause>(((IReturningClauseAccessor)update).ReturningClause);
-        Assert.IsType<CustomDeleteUsingClause>(((IDeleteUsingClauseAccessor)delete).DeleteUsingClause);
-        Assert.IsType<CustomReturningClause>(((IReturningClauseAccessor)delete).ReturningClause);
-        Assert.Equal("Update [samples] As [t] Set [Status] = @_p_0, [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
-            clone.ToSql());
-        Assert.Empty(update.GetParams());
-        Assert.Equal(1, clone.GetParam("@_p_0"));
-        Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
-            delete.ToSql());
-    }
-
-    /// <summary>
-    /// 专用 Update 与 Delete Builder 必须选择外部 Provider 的可选 Mutation 子句，并在 Clone 与 Clear 后保持隔离。
-    /// </summary>
+    /// <remarks>覆盖 Update From、Delete Using、Returning 子句，以及 Clone 与 Clear 后的生命周期隔离。</remarks>
     [Fact]
     public void MutationClauseFactory_WhenDedicatedBuildersUseOptionalProviderSpi_ShouldCreateCustomClausesAndIsolateLifecycle()
     {
@@ -133,10 +139,12 @@ public class CustomProviderBuilderTest
             .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
             .Set("Status", 1)
             .SetFrom("Name", "Name")
-            .WhereFrom("Id", "Id");
+            .WhereFrom("Id", "Id")
+            .Returning("Id");
         delete.DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
-            .WhereUsing("Id", "Id");
+            .WhereUsing("Id", "Id")
+            .Returning("Id");
         var updateClone = update.Clone();
         var deleteClone = delete.Clone();
         update.Clear();
@@ -148,13 +156,17 @@ public class CustomProviderBuilderTest
         // Assert
         Assert.IsType<CustomUpdateFromClause>(update.UpdateFromClause);
         Assert.IsType<CustomDeleteUsingClause>(delete.DeleteUsingClause);
+        Assert.IsType<CustomReturningClause>(update.ReturningClause);
+        Assert.IsType<CustomReturningClause>(delete.ReturningClause);
         Assert.IsType<CustomUpdateFromClause>(updateClone.UpdateFromClause);
         Assert.IsType<CustomDeleteUsingClause>(deleteClone.DeleteUsingClause);
-        Assert.Equal("Update [samples] As [t] Set [Status] = @_p_0, [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id]",
+        Assert.IsType<CustomReturningClause>(updateClone.ReturningClause);
+        Assert.IsType<CustomReturningClause>(deleteClone.ReturningClause);
+        Assert.Equal("Update [samples] As [t] Set [Status] = @_p_0, [Name] = [s].[Name] From [sample_updates] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
             updateClone.ToSql());
         Assert.Equal(1, updateClone.BuildCommand().Parameters.Single().Value);
         Assert.Equal(2, update.BuildCommand().Parameters.Single().Value);
-        Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id]",
+        Assert.Equal("Delete From [samples] As [t] Using [sample_deletes] As [s] Where [t].[Id]=[s].[Id] Returning [t].[Id]",
             deleteClone.ToSql());
         Assert.Null(delete.DeleteUsingClause.Table);
     }
@@ -602,7 +614,7 @@ public class CustomProviderBuilderTest
         Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(accessor.JoinClause);
         Assert.Equal(
             "Select [c].[Id],[o].[Amount] \r\nFrom [CustomCustomer] As [c] \r\nJoin [CustomOrder] As [o] On [c].[Id]=[o].[CustomerId] \r\nGroup By [c].[Id] \r\nOrder By [o].[Amount]",
-            clone.ToSql());
+            query.Clone().ToSql());
     }
 
     /// <summary>
@@ -637,6 +649,23 @@ public class CustomProviderBuilderTest
         Assert.IsAssignableFrom<ISqlMultiSourceGroupByClause>(((ISqlQueryClauseAccessor)builder).GroupByClause);
         Assert.IsAssignableFrom<ISqlMultiSourceOrderByClause>(((ISqlQueryClauseAccessor)builder).OrderByClause);
         Assert.IsAssignableFrom<ISqlMultiSourceJoinClause>(((ISqlQueryClauseAccessor)builder).JoinClause);
+    }
+
+    /// <summary>
+    /// 验证自定义投影在累积、替换、克隆及失败回滚中的状态。
+    /// </summary>
+    [Fact]
+    public void CustomProjection_WhenSelectedRepeatedlyAndCloned_ShouldAccumulateReplaceAndRollback()
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Moq.Mock<ISqlQueryPlanExecutor>().Object, new CustomSqlBuilder())
+            .From<CustomOrder>("o").Select<CustomOrder>(o => new object[] { o.CustomerId }).Distinct();
+        var clone = query.Clone().Select<CustomOrder>(o => new object[] { o.Amount });
+        Assert.Equal("Select Distinct [o].[CustomerId],[o].[Amount] \r\nFrom [CustomOrder] As [o]", clone.ToSql());
+        Assert.Equal("Select Distinct [o].[CustomerId] \r\nFrom [CustomOrder] As [o]", query.ToSql());
+        Assert.Throws<NotSupportedException>(() => clone.ReplaceSelect<CustomOrder>(o => new object[] { o.Amount + 1 }));
+        Assert.Equal("Select Distinct [o].[CustomerId],[o].[Amount] \r\nFrom [CustomOrder] As [o]", clone.ToSql());
+        clone.ReplaceSelect<CustomOrder>(o => new object[] { o.Amount });
+        Assert.Equal("Select Distinct [o].[Amount] \r\nFrom [CustomOrder] As [o]", clone.ToSql());
     }
 
     /// <summary>
@@ -701,6 +730,12 @@ public class CustomProviderBuilderTest
 
         /// <inheritdoc />
         public void Add(string name, object value, Operator? @operator = null) => _inner.Add(name, value, @operator);
+
+        /// <inheritdoc />
+        public void Restore(SqlParam parameter) => _inner.Restore(parameter);
+
+        /// <inheritdoc />
+        public bool Remove(string name) => _inner.Remove(name);
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> GetParams() => _inner.GetParams();

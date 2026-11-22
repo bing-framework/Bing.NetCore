@@ -4,6 +4,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Operations;
 using Bing.Data.Sql.Metadata;
 
@@ -29,7 +30,7 @@ public sealed class OracleMutationBuilderTest
     }
 
     /// <summary>
-    /// 测试目的：Oracle 插入应使用双引号标识符和无前缀的执行参数名称。
+    /// 测试目的：Oracle 插入应使用双引号标识符和带冒号的 SQL 占位符。
     /// </summary>
     [Fact]
     public void Insert_WhenMappedEntityIsProvided_ShouldRenderOracleSql()
@@ -41,7 +42,7 @@ public sealed class OracleMutationBuilderTest
         var command = builder.Insert(new MutationSample { Name = "Bing" });
 
         // Assert
-        Assert.Equal("Insert Into \"samples\" (\"Name\") Values (p_0)", command.Sql);
+        Assert.Equal("Insert Into \"samples\" (\"Name\") Values (:p_0)", command.Sql);
         Assert.Equal(":p_0", Assert.Single(command.Parameters).Name);
     }
 
@@ -95,7 +96,7 @@ public sealed class OracleMutationBuilderTest
     public void UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new OracleBuilder()
+        var builder = new SqlUpdateBuilder(OracleSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -116,7 +117,7 @@ public sealed class OracleMutationBuilderTest
     public void DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new OracleBuilder()
+        var builder = new SqlDeleteBuilder(OracleSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -136,7 +137,7 @@ public sealed class OracleMutationBuilderTest
     public void Returning_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new OracleBuilder()
+        var builder = new SqlInsertBuilder(OracleSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
             .Values("Bing")

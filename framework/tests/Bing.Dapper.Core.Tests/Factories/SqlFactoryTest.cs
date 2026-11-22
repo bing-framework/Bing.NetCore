@@ -219,6 +219,44 @@ public class SqlFactoryTest
         Assert.Equal(0, valueTaskTransaction.RollbackCount);
     }
 
+    /// <summary>静态回调不适用于自定义连接时，保留原有异步成员适配。</summary>
+    [Fact]
+    public async Task TransactionAsyncOperations_WhenStaticCallbackDeclines_ShouldUseExistingNativeMembers()
+    {
+        var connection = new NativeDbConnection();
+        var commitTransaction = new TaskNativeDbTransaction();
+        var rollbackTransaction = new ValueTaskNativeDbTransaction();
+        var capabilities = new SqlProviderTransactionCapabilities
+        {
+            SupportsNativeAsyncBegin = true,
+            SupportsNativeAsyncCommit = true,
+            SupportsNativeAsyncRollback = true,
+            BeginAsync = (_, _, _) => null,
+            CommitAsync = (_, _) => null,
+            RollbackAsync = (_, _) => null
+        };
+
+        var begin = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection, IsolationLevel.ReadCommitted,
+            CancellationToken.None, capabilities, "test.provider");
+        var beginDefault = await SqlTransactionAsyncAdapter.BeginDefaultWithModeAsync(connection,
+            CancellationToken.None, capabilities, "test.provider");
+        var commit = await SqlTransactionAsyncAdapter.CommitWithModeAsync(commitTransaction, CancellationToken.None,
+            capabilities, "test.provider");
+        var rollback = await SqlTransactionAsyncAdapter.RollbackWithModeAsync(rollbackTransaction, CancellationToken.None,
+            capabilities, "test.provider");
+
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, begin.Mode);
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, beginDefault.Mode);
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, commit.Mode);
+        Assert.Equal(SqlTransactionExecutionMode.NativeAsync, rollback.Mode);
+        Assert.Equal(2, connection.AsyncBeginCount);
+        Assert.Equal(0, connection.SyncBeginCount);
+        Assert.Equal(1, commitTransaction.AsyncCommitCount);
+        Assert.Equal(0, commitTransaction.CommitCount);
+        Assert.Equal(1, rollbackTransaction.AsyncRollbackCount);
+        Assert.Equal(0, rollbackTransaction.RollbackCount);
+    }
+
     /// <summary>
     /// 测试目的：缺失异步事务成员时，Commit 和 Rollback 应在取消检查通过后各执行一次同步回退。
     /// </summary>
@@ -1082,7 +1120,11 @@ public class SqlFactoryTest
         /// <inheritdoc />
         public void Rollback() => RollbackCount++;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 记录测试事务的异步回滚调用。
+        /// </summary>
+        /// <param name="cancellationToken">用于取消回滚操作的令牌。</param>
+        /// <remarks>令牌已取消时抛出取消异常；否则递增异步回滚计数。</remarks>
         public ValueTask RollbackAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

@@ -440,6 +440,10 @@ public class UnitOfWorkScopeTest
         }
     }
 
+    /// <summary>
+    /// 创建工作单元测试所需的容器、作用域及管理器。
+    /// </summary>
+    /// <returns>测试容器、服务作用域及工作单元管理器。</returns>
     private static (ServiceProvider Provider, IServiceScope Scope, IUnitOfWorkScopeManager Manager) CreateManager()
     {
         var services = new ServiceCollection();
@@ -449,25 +453,60 @@ public class UnitOfWorkScopeTest
         return (provider, scope, scope.ServiceProvider.GetRequiredService<IUnitOfWorkScopeManager>());
     }
 
+    /// <summary>
+    /// 组织TestResource相关测试场景。
+    /// </summary>
     private sealed class TestResource : IUnitOfWorkResource
     {
+        /// <summary>
+        /// 获取或初始化执行提交时调用的测试回调。
+        /// </summary>
         public Action CommitAction { get; init; }
+        /// <summary>
+        /// 获取或初始化执行回滚时调用的测试回调。
+        /// </summary>
         public Action RollbackAction { get; init; }
+        /// <summary>
+        /// 获取或初始化执行释放时调用的测试回调。
+        /// </summary>
         public Action DisposeAction { get; init; }
+        /// <summary>
+        /// 获取或初始化异步释放时等待完成的任务。
+        /// </summary>
         public Task DisposeAsyncTask { get; init; } = Task.CompletedTask;
+        /// <summary>
+        /// 获取提交事务的累计次数。
+        /// </summary>
         public int CommitCount { get; private set; }
+        /// <summary>
+        /// 获取异步提交事务的累计次数。
+        /// </summary>
         public int CommitAsyncCount { get; private set; }
+        /// <summary>
+        /// 获取回滚事务的累计次数。
+        /// </summary>
         public int RollbackCount { get; private set; }
+        /// <summary>
+        /// 获取释放资源的累计次数。
+        /// </summary>
         public int DisposeCount { get; private set; }
+        /// <summary>
+        /// 获取异步释放资源的累计次数。
+        /// </summary>
         public int DisposeAsyncCount { get; private set; }
+        /// <summary>
+        /// 获取最近一次回滚接收的取消令牌。
+        /// </summary>
         public CancellationToken LastRollbackToken { get; private set; }
 
+        /// <inheritdoc />
         public void Commit()
         {
             CommitCount++;
             CommitAction?.Invoke();
         }
 
+        /// <inheritdoc />
         public Task CommitAsync(CancellationToken cancellationToken = default)
         {
             CommitAsyncCount++;
@@ -476,12 +515,14 @@ public class UnitOfWorkScopeTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Rollback()
         {
             RollbackCount++;
             RollbackAction?.Invoke();
         }
 
+        /// <inheritdoc />
         public Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             LastRollbackToken = cancellationToken;
@@ -489,12 +530,14 @@ public class UnitOfWorkScopeTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             DisposeCount++;
             DisposeAction?.Invoke();
         }
 
+        /// <inheritdoc />
         public async ValueTask DisposeAsync()
         {
             DisposeAsyncCount++;
@@ -502,13 +545,22 @@ public class UnitOfWorkScopeTest
         }
     }
 
+    /// <summary>
+    /// 为工作单元测试提供无数据库副作用的资源。
+    /// </summary>
     private sealed class OtherTestResource : IUnitOfWorkResource
     {
+        /// <inheritdoc />
         public void Commit() { }
+        /// <inheritdoc />
         public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        /// <inheritdoc />
         public void Rollback() { }
+        /// <inheritdoc />
         public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        /// <inheritdoc />
         public void Dispose() { }
+        /// <inheritdoc />
         public ValueTask DisposeAsync() => default;
     }
 }

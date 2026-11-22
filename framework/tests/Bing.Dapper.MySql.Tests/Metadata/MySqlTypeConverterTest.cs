@@ -111,6 +111,28 @@ public class MySqlTypeConverterTest
 
     #endregion
 
+    /// <summary>验证网盘与附件权限使用的 MySQL 枚举、集合列按字符串进行参数绑定。</summary>
+    [Theory]
+    [InlineData("enum")]
+    [InlineData("ENUM")]
+    [InlineData("set")]
+    [InlineData("SET")]
+    public void ToDbType_EnumAndSet_ShouldReturnString(string dataType)
+    {
+        _converter.ToDbType(dataType).ShouldBe(DbType.String);
+    }
+
+    /// <summary>验证 FreeSQL 的版本与内容摘要二进制列使用二进制参数类型。</summary>
+    [Theory]
+    [InlineData("binary")]
+    [InlineData("BINARY")]
+    [InlineData("varbinary")]
+    [InlineData("VARBINARY")]
+    public void ToDbType_BinaryColumns_ShouldReturnBinary(string dataType)
+    {
+        _converter.ToDbType(dataType).ShouldBe(DbType.Binary);
+    }
+
     #region String Types
 
     /// <summary>

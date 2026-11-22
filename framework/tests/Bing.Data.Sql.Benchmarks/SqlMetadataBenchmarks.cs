@@ -492,6 +492,73 @@ internal static class Program
     /// <param name="args">传递给基准程序的命令行参数。</param>
     private static void Main(string[] args)
     {
+        if (args.Length > 0 && args[0] == "--capacity-probe")
+        {
+            Environment.ExitCode = SqlCapacityProbe.RunAsync(args).GetAwaiter().GetResult();
+            return;
+        }
+        if (args.Contains("--generated-query-template-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedQueryTemplateBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-key-insert-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedKeyInsertBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-mutation-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedMutationBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--query-retention-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlQueryRetentionProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-allocation-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedAllocationProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-runtime-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedRuntimeProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-width-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var outputIndex = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            var identityIndex = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--identity-output", StringComparison.OrdinalIgnoreCase));
+            if (outputIndex < 0 || outputIndex + 1 >= args.Length)
+                throw new ArgumentException("--generated-width-probe requires --output <json-path>.");
+            if (identityIndex < 0 || identityIndex + 1 >= args.Length)
+                throw new ArgumentException("--generated-width-probe requires --identity-output <json-path>.");
+            Environment.ExitCode = SqlGeneratedWidthProbe.Run(args[outputIndex + 1], args[identityIndex + 1]);
+            return;
+        }
+        if (args.Contains("--builder-state-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlBuilderStateProbe.Run(args[index + 1]);
+            return;
+        }
         if (args.Contains("--uow-probe", StringComparer.OrdinalIgnoreCase))
         {
             var outputOption = Array.FindIndex(args, argument =>

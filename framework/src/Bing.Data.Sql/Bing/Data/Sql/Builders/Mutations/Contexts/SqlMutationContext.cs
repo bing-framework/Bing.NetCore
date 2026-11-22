@@ -55,6 +55,17 @@ public sealed class SqlMutationContext
     public SqlBuilderExecutionContext ExecutionContext { get; }
 
     /// <summary>
+    /// 获取 SQL 中使用的参数占位符；Oracle 的参数名已包含冒号。
+    /// </summary>
+    /// <param name="provider">当前 SQL Provider。</param>
+    /// <param name="name">参数管理器保存的原始名称。</param>
+    /// <returns>用于 SQL 文本的占位符。</returns>
+    internal static string GetParameterPlaceholder(ISqlProvider provider, string name) =>
+        string.Equals(provider.Key, "bing.oracle", StringComparison.OrdinalIgnoreCase)
+            ? name
+            : provider.Dialect.GetParamName(name);
+
+    /// <summary>
     /// 在修改 Mutation Clause 前验证统一 Builder 的操作状态。
     /// </summary>
     /// <param name="action">当前 Mutation 行为。</param>

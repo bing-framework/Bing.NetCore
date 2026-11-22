@@ -9,6 +9,20 @@ namespace Bing.Dapper.Tests.Builders;
 /// </summary>
 public class OracleBuilderNewCloneLifecycleTest
 {
+    [Fact]
+    public void MutationCheckpoint_WhenAbandoned_ShouldRestoreOracleSqlAndParameters()
+    {
+        var builder = new OracleBuilder();
+        builder.Select("Id").From("Rows").Where("Id", 1);
+        using (var checkpoint = builder.BeginMutationCheckpoint())
+        {
+            Assert.NotNull(checkpoint);
+            builder.Where("Id", 2);
+        }
+        Assert.Equal("Select \"Id\" \r\nFrom \"Rows\" \r\nWhere \"Id\"=:p_0", builder.ToSql());
+        Assert.Equal("1", Assert.Single(builder.GetParams()).Value.ToString());
+    }
+
     /// <summary>
     /// 测试 - New 应保留 Oracle Builder 类型并隔离参数状态。
     /// </summary>

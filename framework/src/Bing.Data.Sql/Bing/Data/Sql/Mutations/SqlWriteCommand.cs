@@ -1,9 +1,11 @@
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Operations;
+using System.Data.Common;
 
 namespace Bing.Data.Sql.Mutations;
 
@@ -12,7 +14,7 @@ namespace Bing.Data.Sql.Mutations;
 /// </summary>
 /// <remarks>
 /// 命令在创建时冻结 SQL 文本和参数，不持有 Builder、连接、事务或根执行器。
-/// 由 <see cref="SqlWriteCommandExtensions.ToSqlWriteCommand"/> 创建的命令还会冻结 Provider 和 Returning 语义，
+/// 由 <see cref="SqlWriteCommandExtensions"/> 创建的命令还会冻结 Provider 和 Returning 语义，
 /// 可交给 <see cref="ISqlExecutor"/> 的独立写入执行入口。
 /// </remarks>
 public sealed class SqlWriteCommand
@@ -40,10 +42,10 @@ public sealed class SqlWriteCommand
     /// <param name="parameters">已生成的参数集合。</param>
     /// <param name="provider">生成 SQL 的 Provider。</param>
     /// <param name="operationKind">写入操作类型。</param>
-    /// <param name="hasReturning">是否包含 Returning 或 Output 子句。</param>
+    /// <param name="hasReturning">写入命令是否通过 Returning 或 Output 返回结果集。</param>
     /// <param name="validateAffectedRows">是否在实际受影响行数不符合预期时抛出并发异常。</param>
-    internal SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
-        SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows = false)
+    public SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
+        SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows)
     {
         if (string.IsNullOrWhiteSpace(sql))
             throw new ArgumentException("SQL 语句不能为空。", nameof(sql));
@@ -60,16 +62,38 @@ public sealed class SqlWriteCommand
         ValidateAffectedRows = validateAffectedRows;
     }
 
+    /// <summary>创建不返回结果集、不验证受影响行数的 Provider 写入命令。</summary>
+    public SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
+        SqlOperationKind operationKind) : this(sql, parameters, provider, operationKind, false, false) { }
+
+    /// <summary>创建指定结果集语义的 Provider 写入命令。</summary>
+    public SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
+        SqlOperationKind operationKind, bool hasReturning) : this(sql, parameters, provider, operationKind, hasReturning, false) { }
+
     /// <summary>
     /// 复制命令并仅更新受影响行数校验语义。
     /// </summary>
     /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
     /// <returns>保留 SQL、参数和 Provider 执行元数据的命令副本。</returns>
-    internal SqlWriteCommand WithValidateAffectedRows(bool validateAffectedRows)
+    public SqlWriteCommand WithValidateAffectedRows(bool validateAffectedRows)
     {
         if (ValidateAffectedRows == validateAffectedRows)
             return this;
         return new SqlWriteCommand(this, validateAffectedRows);
+    }
+
+    /// <summary>
+    /// 为命令附加由源生成代码提供的参数绑定器。
+    /// </summary>
+    /// <param name="binder">直接向数据库命令写入参数的绑定器。</param>
+    /// <returns>携带生成式绑定器的独立命令副本。</returns>
+    public SqlWriteCommand WithGeneratedParameterBinder(Action<DbCommand, IEnumerable<SqlParam>> binder)
+    {
+        if (binder == null)
+            throw new ArgumentNullException(nameof(binder));
+        if (ReferenceEquals(GeneratedParameterBinder, binder))
+            return this;
+        return new SqlWriteCommand(this, ValidateAffectedRows, binder);
     }
 
     /// <summary>
@@ -78,6 +102,18 @@ public sealed class SqlWriteCommand
     /// <param name="command">待复制的冻结命令。</param>
     /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
     private SqlWriteCommand(SqlWriteCommand command, bool validateAffectedRows)
+        : this(command, validateAffectedRows, command.GeneratedParameterBinder)
+    {
+    }
+
+    /// <summary>
+    /// 从已有命令复制 SQL、参数和执行元数据。
+    /// </summary>
+    /// <param name="command">待复制的冻结命令。</param>
+    /// <param name="validateAffectedRows">是否要求受影响行数满足单实体并发约束。</param>
+    /// <param name="generatedParameterBinder">生成式参数绑定器。</param>
+    private SqlWriteCommand(SqlWriteCommand command, bool validateAffectedRows,
+        Action<DbCommand, IEnumerable<SqlParam>> generatedParameterBinder)
     {
         Sql = command.Sql;
         _parameters = command._parameters.Select(SqlParameterSnapshot.CloneSqlParameter).ToArray();
@@ -86,6 +122,7 @@ public sealed class SqlWriteCommand
         OperationKind = command.OperationKind;
         HasReturning = command.HasReturning;
         ValidateAffectedRows = validateAffectedRows;
+        GeneratedParameterBinder = generatedParameterBinder;
     }
 
     /// <summary>
@@ -111,7 +148,7 @@ public sealed class SqlWriteCommand
     public SqlOperationKind OperationKind { get; }
 
     /// <summary>
-    /// 获取是否包含 Returning 或 Output 子句。
+    /// 获取写入命令是否通过 Returning 或 Output 返回结果集。
     /// </summary>
     public bool HasReturning { get; }
 
@@ -124,6 +161,16 @@ public sealed class SqlWriteCommand
     /// 获取生成 SQL 时冻结的 Provider 能力档案。
     /// </summary>
     public SqlProviderProfile ProviderProfile { get; }
+
+    /// <summary>
+    /// 获取是否携带源生成的参数绑定器。
+    /// </summary>
+    public bool IsGeneratedExecution => GeneratedParameterBinder != null;
+
+    /// <summary>
+    /// 获取源生成的参数绑定器；未配置时为 <see langword="null"/>。
+    /// </summary>
+    public Action<DbCommand, IEnumerable<SqlParam>> GeneratedParameterBinder { get; }
 
     /// <summary>
     /// 为一次执行创建独立的参数集合。
@@ -144,22 +191,18 @@ public static class SqlWriteCommandExtensions
     /// </summary>
     /// <param name="builder">已完成 Mutation 构建的 SQL Builder。</param>
     /// <returns>不再依赖该 Builder 状态的写入命令。</returns>
-    public static SqlWriteCommand ToSqlWriteCommand(this ISqlBuilder builder)
-    {
-        if (builder == null)
-            throw new ArgumentNullException(nameof(builder));
-        var provider = builder.Provider ?? throw new InvalidOperationException("Mutation Builder 必须提供 SQL Provider。");
-        if (string.IsNullOrWhiteSpace(provider.Key))
-            throw new InvalidOperationException("Mutation Builder 的 SQL Provider Key 不能为空。");
-        if (builder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
-            SqlOperationKind.Update or SqlOperationKind.Delete))
-            throw new ArgumentException("写入命令必须包含 Insert、Update 或 Delete 操作。", nameof(builder));
-        if (builder is SqlBuilderBase sqlBuilder)
-            return sqlBuilder.CreateWriteCommandSnapshot();
-        var snapshot = builder.Clone();
-        var hasReturning = snapshot is IReturningClauseAccessor { ReturningClause.IsEmpty: false };
-        var sql = snapshot.ToSql();
-        var parameters = snapshot.GetSqlParams();
-        return new SqlWriteCommand(sql, parameters?.Values, provider, builder.OperationKind, hasReturning);
-    }
+    public static SqlWriteCommand ToSqlWriteCommand(this ISqlInsertBuilder builder) =>
+        (builder ?? throw new ArgumentNullException(nameof(builder))).BuildCommand();
+
+    /// <summary>冻结更新 Builder 的 SQL 和参数。</summary>
+    /// <param name="builder">更新 Builder。</param>
+    /// <returns>独立写入命令。</returns>
+    public static SqlWriteCommand ToSqlWriteCommand(this ISqlUpdateBuilder builder) =>
+        (builder ?? throw new ArgumentNullException(nameof(builder))).BuildCommand();
+
+    /// <summary>冻结删除 Builder 的 SQL 和参数。</summary>
+    /// <param name="builder">删除 Builder。</param>
+    /// <returns>独立写入命令。</returns>
+    public static SqlWriteCommand ToSqlWriteCommand(this ISqlDeleteBuilder builder) =>
+        (builder ?? throw new ArgumentNullException(nameof(builder))).BuildCommand();
 }

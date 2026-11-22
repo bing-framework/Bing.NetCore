@@ -14,35 +14,12 @@ namespace Bing.Data.Sql;
 internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
 {
     /// <summary>
-    /// 查询描述的生命周期阶段。
+    /// 草稿期承载查询结构；首次终结成功后替换为隔离副本，供校验、预览及克隆统一读取。
     /// </summary>
-    private enum QueryPhase
-    {
-        /// <summary>
-        /// 可继续修改查询结构的草稿阶段。
-        /// </summary>
-        Draft,
+    private ISqlBuilder _builder;
 
-        /// <summary>
-        /// 已生成执行计划且不能继续修改的冻结阶段。
-        /// </summary>
-        Frozen,
-
-        /// <summary>
-        /// 正在执行查询的阶段。
-        /// </summary>
-        Executing,
-
-        /// <summary>
-        /// 执行已完成的阶段。
-        /// </summary>
-        Completed
-    }
-
-    /// <summary>
-    /// 承载当前查询子句、参数和方言状态的独立 SQL Builder。
-    /// </summary>
-    private readonly ISqlBuilder _builder;
+    /// <summary>静态查询复用冻结 IR；执行标识、回调和租约仍由每次创建的计划承载。</summary>
+    private SqlQueryIr _frozenQueryIr;
 
     /// <summary>
     /// 执行当前查询计划的根查询内部执行器。
@@ -55,9 +32,18 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     private string _splitOn = "Id";
 
     /// <summary>
-    /// 当前查询描述的生命周期阶段。
+    /// 获取多映射查询使用的分割列文本。
     /// </summary>
-    private QueryPhase _phase = QueryPhase.Draft;
+    internal string SplitOnValue => _splitOn;
+    /// <summary>
+    /// 获取当前查询使用的 SQL 构建器。
+    /// </summary>
+    internal ISqlBuilder ReadBuilder => _builder;
+
+    /// <summary>
+    /// 查询结构是否已冻结；活动执行由独立租约保护。
+    /// </summary>
+    private bool _isFrozen;
 
     /// <summary>
     /// 当前查询执行租约标记，用于禁止同一描述并发执行。
@@ -78,6 +64,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// 当前查询结构版本对应的缓存 SQL 文本。
     /// </summary>
     private string _cachedSql;
+
+    /// <summary>与缓存 SQL 一起失效的不可变 Select 渲染边界。</summary>
+    private SqlQuerySelectShape _cachedSelectShape;
 
     /// <summary>
     /// 初始化一个 <see cref="SqlQuery"/> 类型的实例。
@@ -102,7 +91,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>当前查询专属的 SQL Builder。</returns>
     internal ISqlBuilder GetBuilder()
     {
-        if (_phase != QueryPhase.Draft)
+        if (_isFrozen)
             throw new InvalidOperationException("查询已冻结，不能继续修改查询描述。");
         return _builder;
     }
@@ -138,6 +127,66 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     public string ToSql() => RenderSql();
 
     /// <summary>
+    /// 以原子方式修改查询构建器并返回操作结果。
+    /// </summary>
+    /// <param name="change">执行查询修改的函数。</param>
+    /// <typeparam name="TResult">查询修改操作的结果类型。</typeparam>
+    /// <returns>查询修改函数返回的结果。</returns>
+    /// <remarks>
+    /// 外层修改失败时恢复原构建器、投影、版本和缓存状态。
+    /// </remarks>
+    internal TResult AtomicChange<TResult>(Func<TResult> change)
+    {
+        EnsureDraft();
+        if (_mutationDepth != 0)
+            return change();
+        var original = _builder;
+        var legacyProjection = LegacyProjectionColumns;
+        var version = _shapeVersion;
+        var cachedVersion = _cachedVersion;
+        var cachedSql = _cachedSql;
+        var cachedSelectShape = _cachedSelectShape;
+        using var checkpoint = (original as SqlBuilderBase)?.BeginMutationCheckpoint();
+        if (checkpoint == null)
+            _builder = original.Clone();
+        _mutationDepth++;
+        try
+        {
+            var result = change();
+            checkpoint?.Complete();
+            return result;
+        }
+        catch
+        {
+            _builder = original;
+            LegacyProjectionColumns = legacyProjection;
+            _shapeVersion = version;
+            _cachedVersion = cachedVersion;
+            _cachedSql = cachedSql;
+            _cachedSelectShape = cachedSelectShape;
+            throw;
+        }
+        finally { _mutationDepth--; }
+    }
+
+    /// <summary>
+    /// 记录当前查询上嵌套变更操作的深度。
+    /// </summary>
+    private int _mutationDepth;
+
+    // 仅供尚未提供结构化投影能力的外部 Clause SPI 保留累计状态。
+    /// <summary>
+    /// 获取或设置旧投影 API 指定的列集合。
+    /// </summary>
+    internal HashSet<string> LegacyProjectionColumns { get; set; }
+
+    /// <summary>
+    /// 将当前查询构建器替换为指定构建器。
+    /// </summary>
+    /// <param name="builder">要采用的 SQL 构建器。</param>
+    internal void AdoptBuilder(ISqlBuilder builder) => _builder = builder;
+
+    /// <summary>
     /// 标记查询结构已发生变化并使缓存 SQL 失效。
     /// </summary>
     internal void Touch()
@@ -145,6 +194,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         _shapeVersion++;
         _cachedVersion = -1;
         _cachedSql = null;
+        _cachedSelectShape = null;
     }
 
     /// <summary>
@@ -153,11 +203,26 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>当前查询的 SQL 文本。</returns>
     internal string RenderSql()
     {
+        if (_frozenQueryIr != null)
+            return _frozenQueryIr.Snapshot.Sql;
         if (SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(_builder))
             return _builder.ToSql();
+        // 外层没有过滤器时，CTE/Union 后代仍可能读取环境值；预览不能缓存这些值。
+        if (HasDynamicNestedQuery(_builder))
+            return _builder.Clone().ToSql();
         if (_cachedVersion == _shapeVersion && _cachedSql != null)
             return _cachedSql;
-        _cachedSql = _builder.ToSql();
+        if (_builder is SqlBuilderBase sqlBuilder)
+        {
+            var render = sqlBuilder.CreateRenderSnapshot();
+            _cachedSql = render.Sql;
+            _cachedSelectShape = render.SelectShape;
+        }
+        else
+        {
+            _cachedSql = _builder.ToSql();
+            _cachedSelectShape = null;
+        }
         _cachedVersion = _shapeVersion;
         return _cachedSql;
     }
@@ -170,7 +235,8 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     {
         var clone = new SqlQuery(_executor, _builder.Clone(), QueryContextId)
         {
-            _splitOn = _splitOn
+            _splitOn = _splitOn,
+            LegacyProjectionColumns = LegacyProjectionColumns == null ? null : new HashSet<string>(LegacyProjectionColumns)
         };
         return clone;
     }
@@ -338,7 +404,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="timeout">执行超时时间，单位为秒。</param>
     /// <returns>包含分页信息和结果行的集合。</returns>
     public PagerList<TResult> ToPage<TResult>(IPager pager = null, int? timeout = null) =>
-        _executor.ToPage<TResult>(GetPlan(), pager, timeout);
+        _executor.ToPage<TResult>(GetPlan(forPaging: true), pager, timeout);
 
     /// <summary>
     /// 以同步流方式执行当前 Fluent 查询。
@@ -357,7 +423,8 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示最终结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToListAsync<TResult>(GetPlan(), timeout, cancellationToken);
+        CancellationToken cancellationToken = default) =>
+        _executor.ToListAsync<TResult>(GetPlan(cancellationToken), timeout, cancellationToken);
 
     /// <summary>
     /// 异步查询至多一行，零行返回默认值，多行抛出异常。
@@ -367,7 +434,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>包含查询结果的异步任务；没有结果时任务结果为类型默认值。</returns>
     public Task<TResult> ToEntityAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(), timeout,
+        CancellationToken cancellationToken = default) => _executor.SingleOrDefaultAsync<TResult>(GetPlan(cancellationToken), timeout,
         cancellationToken);
 
     /// <summary>
@@ -382,7 +449,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TResult>(Func<TFirst, TSecond, TResult> map,
         int? timeout = null, CancellationToken cancellationToken = default) =>
-        _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
+        _executor.ToListAsync(GetPlan(cancellationToken), map, timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行查询并返回结果集。
@@ -397,7 +464,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TResult>(Func<TFirst, TSecond, TThird, TResult> map,
         int? timeout = null, CancellationToken cancellationToken = default) =>
-        _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
+        _executor.ToListAsync(GetPlan(cancellationToken), map, timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行查询并返回结果集。
@@ -413,7 +480,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(), map, timeout, cancellationToken);
+        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(cancellationToken), map, timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行查询并返回结果集。
@@ -430,7 +497,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(), map, timeout,
+        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(cancellationToken), map, timeout,
         cancellationToken);
 
     /// <summary>
@@ -449,7 +516,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(), map, timeout,
+        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(cancellationToken), map, timeout,
         cancellationToken);
 
     /// <summary>
@@ -469,7 +536,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>表示最终映射结果列表的异步操作。</returns>
     public Task<List<TResult>> ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(
         Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(), map, timeout,
+        CancellationToken cancellationToken = default) => _executor.ToListAsync(GetPlan(cancellationToken), map, timeout,
         cancellationToken);
 
     /// <summary>
@@ -480,7 +547,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示第一行结果的异步操作。</returns>
     public Task<TResult> FirstAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _executor.FirstAsync<TResult>(GetPlan(), timeout, cancellationToken);
+        _executor.FirstAsync<TResult>(GetPlan(cancellationToken), timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取第一行或默认值。
@@ -490,7 +557,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示第一行或默认值的异步操作。</returns>
     public Task<TResult> FirstOrDefaultAsync<TResult>(int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.FirstOrDefaultAsync<TResult>(GetPlan(), timeout,
+        CancellationToken cancellationToken = default) => _executor.FirstOrDefaultAsync<TResult>(GetPlan(cancellationToken), timeout,
         cancellationToken);
 
     /// <summary>
@@ -501,7 +568,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示唯一结果行的异步操作。</returns>
     public Task<TResult> SingleAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _executor.SingleAsync<TResult>(GetPlan(), timeout, cancellationToken);
+        _executor.SingleAsync<TResult>(GetPlan(cancellationToken), timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并获取首行首列值。
@@ -511,7 +578,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示首行首列值的异步操作；无结果时返回默认值。</returns>
     public Task<TResult> ScalarAsync<TResult>(int? timeout = null, CancellationToken cancellationToken = default) =>
-        _executor.ScalarAsync<TResult>(GetPlan(), timeout, cancellationToken);
+        _executor.ScalarAsync<TResult>(GetPlan(cancellationToken), timeout, cancellationToken);
 
     /// <summary>
     /// 异步执行当前 Fluent 查询并返回指定页的数据和总行数。
@@ -522,7 +589,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>表示包含分页信息和结果行集合的异步操作。</returns>
     public Task<PagerList<TResult>> ToPageAsync<TResult>(IPager pager = null, int? timeout = null,
-        CancellationToken cancellationToken = default) => _executor.ToPageAsync<TResult>(GetPlan(), pager, timeout,
+        CancellationToken cancellationToken = default) => _executor.ToPageAsync<TResult>(GetPlan(cancellationToken, forPaging: true), pager, timeout,
         cancellationToken);
 
     /// <summary>
@@ -539,15 +606,125 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <summary>
     /// 获取当前 Fluent SQL Builder 对应的内部执行计划。
     /// </summary>
-    /// <returns>引用当前 Builder 独立快照的查询计划。</returns>
-    private SqlQueryPlan GetPlan()
+    /// <param name="forPaging">是否需要在原始查询作用域派生 Count 和数据页。</param>
+    /// <returns>包含冻结 SQL 和必要分页规划来源的查询计划。</returns>
+    internal SqlQueryPlan GetPlan(bool forPaging = false)
     {
-        if (_phase == QueryPhase.Draft)
-            _phase = QueryPhase.Frozen;
-        var plan = SqlQueryPlan.Create(_builder.Clone(), _splitOn);
+        var snapshot = _isFrozen ? _builder : _builder.Clone();
+        var queryIr = _frozenQueryIr;
+        ISqlBuilder planningBuilder = null;
+        if (queryIr == null || SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(snapshot))
+        {
+            if (((ISqlQueryClauseAccessor)snapshot).SelectClause is Bing.Data.Sql.Builders.Clauses.SelectClause select)
+                select.ValidateStructure();
+            // Builder 在此处只负责生成一次 SQL；执行器后续只消费冻结快照，避免执行阶段重复渲染。
+            SqlBuilderExecutionSnapshot executionSnapshot;
+            var requiresOwnSnapshot = SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(snapshot);
+            var hasDynamicNestedQuery = HasDynamicNestedQuery(snapshot);
+            var requiresExecutionSnapshot = requiresOwnSnapshot || hasDynamicNestedQuery;
+            var requiresPlanning = forPaging || SqlBuilderRuntimeBridge.RequiresPlanningBuilder(snapshot);
+            if ((requiresPlanning || requiresExecutionSnapshot) &&
+                snapshot is SqlBuilderBase sqlBuilder)
+            {
+                // SQL 和派生来源必须取自同一次渲染，以免动态过滤在 Count 与数据页之间发生变化。
+                // 外层没有过滤器时，基类不会自行克隆；先隔离仍需按次取值的后代。
+                if (hasDynamicNestedQuery && !requiresOwnSnapshot)
+                    sqlBuilder = (SqlBuilderBase)sqlBuilder.Clone();
+                var rendered = sqlBuilder.CreateRenderSnapshot();
+                executionSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(rendered);
+                planningBuilder = rendered.Builder;
+            }
+            else
+            {
+                executionSnapshot = !requiresExecutionSnapshot &&
+                                    _cachedVersion == _shapeVersion && _cachedSql != null
+                    ? SqlBuilderRuntimeBridge.CreateExecutionSnapshot(snapshot, _cachedSql, _cachedSelectShape)
+                    : SqlBuilderRuntimeBridge.CreateExecutionSnapshot(snapshot);
+                // 完整 IR 会在计划构造时释放来源；自定义子句、参数管理器或 SQL 尾部仍需原结构。
+                planningBuilder = snapshot;
+            }
+            queryIr = SqlQueryIr.Create(executionSnapshot, System.Data.CommandType.Text, snapshot.Pager);
+            // 必要的第三方回退和动态过滤仍按次渲染；只缓存无需 Builder 即可派生的静态 IR。
+            if (!requiresExecutionSnapshot && executionSnapshot.CanDeriveAnyPage)
+                _frozenQueryIr = queryIr;
+        }
+        var plan = SqlQueryPlan.Create(queryIr, _splitOn, planningBuilder);
+        // 仅成功生成计划后发布结构；失败时保留可编辑草稿，重试重新捕获其最新修改。
+        // 不再同时持有原草稿与冻结副本，所有读入口和 Clone 都使用这一份结构。
+        if (!_isFrozen)
+        {
+            _builder = snapshot;
+            _cachedVersion = -1;
+            _cachedSql = null;
+            _cachedSelectShape = null;
+        }
+        _isFrozen = true;
         plan.SetContext(QueryContextId, _parentQueryContextId ?? (_builder as SqlBuilderBase)?.ParentQueryContextId);
         plan.SetLifecycleCallbacks(BeginExecution, CompleteExecution);
         return plan;
+    }
+
+    /// <summary>生成模板沿用相同的冻结 IR、查询标识及执行租约，不创建第二套执行生命周期。</summary>
+    internal SqlQueryPlan GetGeneratedTemplatePlan(SqlBuilderExecutionSnapshot snapshot)
+    {
+        _frozenQueryIr ??= SqlQueryIr.Create(snapshot, System.Data.CommandType.Text, _builder.Pager);
+        var plan = SqlQueryPlan.Create(_frozenQueryIr, _splitOn, null);
+        _isFrozen = true;
+        plan.SetContext(QueryContextId, _parentQueryContextId ?? (_builder as SqlBuilderBase)?.ParentQueryContextId);
+        plan.SetLifecycleCallbacks(BeginExecution, CompleteExecution);
+        return plan;
+    }
+
+    /// <summary>恢复延迟生成链的等价结构，供读取或克隆使用；冻结查询继续保留原 IR 和租约。</summary>
+    internal void MaterializeGeneratedTemplate(ISqlBuilder builder)
+    {
+        _builder = builder;
+        if (!_isFrozen) Touch();
+    }
+
+    /// <summary>CTE/集合仍在终结时渲染，后代的动态过滤不能随外层静态 IR 缓存。</summary>
+    private static bool HasDynamicNestedQuery(ISqlBuilder builder)
+    {
+        if (builder is ICteAccessor cte)
+            foreach (var item in cte.CteItems)
+                if (item.Builder != null && RequiresFreshNestedQuery(item.Builder))
+                    return true;
+        if (builder is IUnionAccessor union)
+            foreach (var item in union.UnionItems)
+                if (item.Builder != null && RequiresFreshNestedQuery(item.Builder))
+                    return true;
+        return false;
+    }
+
+    /// <summary>第三方非基类子查询没有可验证的动态输入合同，保持原按次渲染行为。</summary>
+    private static bool RequiresFreshNestedQuery(ISqlBuilder builder) => builder is not SqlBuilderBase ||
+        SqlBuilderRuntimeBridge.RequiresExecutionSnapshot(builder) || HasDynamicNestedQuery(builder);
+
+    /// <summary>
+    /// 创建异步执行计划；预取消必须优先于 SQL 结构校验和渲染。
+    /// </summary>
+    /// <param name="cancellationToken">当前异步执行的取消令牌。</param>
+    /// <param name="forPaging">是否需要分页派生来源。</param>
+    /// <returns>已冻结的查询计划。</returns>
+    internal SqlQueryPlan GetPlan(CancellationToken cancellationToken, bool forPaging = false)
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            // 预取消交给执行器处理，以便它标记共享 UnitOfWork 为 rollback-only；
+            // 此处只冻结 Builder 引用，不触发结构校验、SQL 渲染或连接创建。
+            var cancelledSnapshot = _isFrozen ? _builder : _builder.Clone();
+            var cancelledPlan = SqlQueryPlan.Create(cancelledSnapshot, _splitOn);
+            cancelledPlan.SetContext(QueryContextId, _parentQueryContextId ??
+                (cancelledSnapshot as SqlBuilderBase)?.ParentQueryContextId);
+            cancelledPlan.SetLifecycleCallbacks(BeginExecution, CompleteExecution);
+            _builder = cancelledSnapshot;
+            _cachedVersion = -1;
+            _cachedSql = null;
+            _cachedSelectShape = null;
+            _isFrozen = true;
+            return cancelledPlan;
+        }
+        return GetPlan(forPaging);
     }
 
     /// <summary>
@@ -557,24 +734,19 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     {
         if (Interlocked.CompareExchange(ref _executionLease, 1, 0) != 0)
             throw new InvalidOperationException("当前查询正在执行，不能并发执行同一查询描述。");
-        _phase = QueryPhase.Executing;
     }
 
     /// <summary>
-    /// 标记查询执行完成并释放执行租约。
+    /// 释放当前执行租约，查询结构继续保持冻结。
     /// </summary>
-    private void CompleteExecution()
-    {
-        _phase = QueryPhase.Completed;
-        Volatile.Write(ref _executionLease, 0);
-    }
+    private void CompleteExecution() => Volatile.Write(ref _executionLease, 0);
 
     /// <summary>
     /// 确认当前查询仍处于可修改的草稿阶段。
     /// </summary>
     private void EnsureDraft()
     {
-        if (_phase != QueryPhase.Draft)
+        if (_isFrozen)
             throw new InvalidOperationException("查询已冻结，不能继续修改查询描述。");
     }
 }

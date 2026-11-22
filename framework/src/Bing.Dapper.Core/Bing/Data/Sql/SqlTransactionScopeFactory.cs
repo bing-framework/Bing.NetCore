@@ -41,21 +41,20 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// <inheritdoc />
     public ISqlTransactionScope Begin(string dataSourceKey, IsolationLevel isolationLevel)
     {
-        ISqlQuery query = null;
+        IDisposable owner = null;
         try
         {
-            var context = CreateTransactionQuery(dataSourceKey, out query);
-            var transactionCapabilities = EnsureTransactionsSupported(context, query);
-            var connection = GetRuntimeQuery(query).GetExecutionConnection();
+            var context = CreateTransactionResources(dataSourceKey, out owner, out var connection,
+                out var transactionCapabilities, out var providerKey);
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
             var transaction = connection.BeginTransaction(isolationLevel);
-            return CreateScope(context, query, connection, transaction, SqlTransactionExecutionMode.Unknown,
-                transactionCapabilities, GetRuntimeQuery(query).GetCurrentProviderKey());
+            return CreateScope(context, owner, connection, transaction, SqlTransactionExecutionMode.Unknown,
+                transactionCapabilities, providerKey);
         }
         catch (Exception exception)
         {
-            ThrowAfterBeginFailure(exception, query);
+            ThrowAfterBeginFailure(exception, owner);
             throw;
         }
     }
@@ -73,24 +72,22 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ISqlQuery query = null;
+        IDisposable owner = null;
         try
         {
-            var context = CreateTransactionQuery(dataSourceKey, out query);
-            var transactionCapabilities = EnsureTransactionsSupported(context, query);
-            var connection = GetRuntimeQuery(query).GetExecutionConnection();
+            var context = CreateTransactionResources(dataSourceKey, out owner, out var connection,
+                out var transactionCapabilities, out var providerKey);
             if (connection.State == ConnectionState.Closed)
                 await SqlTransactionAsyncAdapter.OpenAsync(connection, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            var providerKey = GetRuntimeQuery(query).GetCurrentProviderKey();
             var transactionResult = await SqlTransactionAsyncAdapter.BeginWithModeAsync(connection, isolationLevel,
                 cancellationToken, transactionCapabilities, providerKey).ConfigureAwait(false);
-            return CreateScope(context, query, connection, transactionResult.Result, transactionResult.Mode,
+            return CreateScope(context, owner, connection, transactionResult.Result, transactionResult.Mode,
                 transactionCapabilities, providerKey);
         }
         catch (Exception exception)
         {
-            await ThrowAfterBeginFailureAsync(exception, query).ConfigureAwait(false);
+            await ThrowAfterBeginFailureAsync(exception, owner).ConfigureAwait(false);
             throw;
         }
     }
@@ -100,7 +97,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     /// <param name="operationException">开始事务时发生的异常。</param>
     /// <param name="query">拥有连接生命周期的查询对象。</param>
-    private static void ThrowAfterBeginFailure(Exception operationException, ISqlQuery query)
+    private static void ThrowAfterBeginFailure(Exception operationException, IDisposable query)
     {
         try
         {
@@ -119,7 +116,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// </summary>
     /// <param name="operationException">开始事务时发生的异常。</param>
     /// <param name="query">拥有连接生命周期的查询对象。</param>
-    private static async Task ThrowAfterBeginFailureAsync(Exception operationException, ISqlQuery query)
+    private static async Task ThrowAfterBeginFailureAsync(Exception operationException, IDisposable query)
     {
         try
         {
@@ -144,7 +141,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     /// <param name="transactionCapabilities">当前 Provider 的事务能力声明。</param>
     /// <param name="providerKey">当前 Provider Key。</param>
     /// <returns>绑定固定上下文和资源的事务作用域。</returns>
-    private SqlTransactionScope CreateScope(DatabaseContext context, ISqlQuery query, IDbConnection connection,
+    private SqlTransactionScope CreateScope(DatabaseContext context, IDisposable query, IDbConnection connection,
         IDbTransaction transaction, SqlTransactionExecutionMode executionMode,
         SqlProviderTransactionCapabilities transactionCapabilities, string providerKey) =>
         new(context, query, connection, _queryFactory, _executorFactory, transaction, executionMode,
@@ -175,26 +172,42 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         return profile;
     }
 
-    /// <summary>
-    /// 创建并解析事务专用 Query，固定其数据库上下文快照。
-    /// </summary>
-    /// <param name="dbKey">目标数据源键；为空时由 Query Factory 使用当前上下文。</param>
-    /// <param name="query">拥有本次事务连接生命周期的查询对象。</param>
-    /// <returns>解析到的固定数据库上下文。</returns>
-    private DatabaseContext CreateTransactionQuery(string dbKey, out ISqlQuery query)
+    /// <summary>默认工厂直接创建资源；第三方旧工厂在兼容边界保留已有连接适配。</summary>
+    private DatabaseContext CreateTransactionResources(string dbKey, out IDisposable owner,
+        out IDbConnection connection, out SqlProviderTransactionCapabilities capabilities, out string providerKey)
     {
         if (_queryFactory is SqlQueryFactory factory)
         {
-            query = factory.CreateForTransaction(dbKey, out var factoryContext);
-            GetRuntimeQuery(query).SetExplicitTransactionScopeMode();
-            return factoryContext;
+            var resource = factory.CreateTransactionConnection(dbKey);
+            owner = resource;
+            connection = resource.Connection;
+            providerKey = resource.Provider.Key;
+            capabilities = ((ISqlProviderProfileProvider)resource.Provider).Profile.Transaction;
+            return resource.Context;
         }
-        query = _queryFactory.Create(dbKey);
-        var runtimeQuery = query as SqlQueryBase;
-        runtimeQuery?.SetExplicitTransactionScopeMode();
-        var context = runtimeQuery?.GetDatabaseContext();
-        if (context == null)
+        // 自定义旧工厂没有连接创建 SPI：先取得 Query，再把连接所有权转交给独立 owner。
+        var query = _queryFactory.Create(dbKey);
+        // 在连接所有权转移完成前，Query 仍然是唯一的清理责任持有者。
+        // 这样上下文解析、Provider 能力校验或连接创建失败时，兼容路径仍会释放 Query。
+        owner = query;
+        var runtime = query as SqlQueryBase;
+        runtime?.SetExplicitTransactionScopeMode();
+        var context = runtime?.GetDatabaseContext() ??
             throw new InvalidOperationException("事务查询对象必须提供固定数据库上下文");
+        capabilities = EnsureTransactionsSupported(context, query);
+        var connectionOwner = GetRuntimeQuery(query).TransferConnectionOwnership();
+        connection = connectionOwner.Connection;
+        providerKey = connectionOwner.Provider.Key;
+        try
+        {
+            query.Dispose();
+        }
+        catch
+        {
+            connectionOwner.Dispose();
+            throw;
+        }
+        owner = connectionOwner;
         return context;
     }
 
@@ -212,9 +225,9 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
     private sealed class SqlTransactionScope : ISqlTransactionScope, ISqlTransactionScopeRuntime
     {
         /// <summary>
-        /// 拥有事务连接生命周期的根查询对象。
+        /// 拥有事务连接生命周期的资源对象；默认路径无需构造查询。
         /// </summary>
-        private readonly ISqlQuery _ownerQuery;
+        private readonly IDisposable _connectionOwner;
 
         /// <summary>
         /// 当前事务使用的数据库连接。
@@ -298,13 +311,13 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// <param name="executionMode">开始事务时的实际异步执行模式。</param>
         /// <param name="transactionCapabilities">当前 Provider 的事务能力声明。</param>
         /// <param name="providerKey">当前 Provider Key。</param>
-        public SqlTransactionScope(DatabaseContext context, ISqlQuery ownerQuery, IDbConnection connection,
+        public SqlTransactionScope(DatabaseContext context, IDisposable ownerQuery, IDbConnection connection,
             ISqlQueryFactory queryFactory, ISqlExecutorFactory executorFactory, IDbTransaction transaction,
             SqlTransactionExecutionMode executionMode, SqlProviderTransactionCapabilities transactionCapabilities,
             string providerKey)
         {
             _context = DatabaseContextSnapshot.Create(context) ?? throw new ArgumentNullException(nameof(context));
-            _ownerQuery = ownerQuery ?? throw new ArgumentNullException(nameof(ownerQuery));
+            _connectionOwner = ownerQuery ?? throw new ArgumentNullException(nameof(ownerQuery));
             _connection = connection ?? throw new InvalidOperationException("SQL 连接不能为空");
             _transaction = transaction ?? throw new InvalidOperationException("SQL 事务不能为空");
             _queryFactory = queryFactory;
@@ -687,7 +700,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
         /// </remarks>
         private void BindTransactionContext(IDisposable resource)
         {
-            if (resource is not SqlQueryBase query)
+            if (resource is not SqlExecutionBase query)
                 throw new InvalidOperationException("SQL 事务作用域仅支持 Dapper SQL 查询实现。");
             query.SetTransactionContext(_context, _connection, _transaction, _lease);
         }
@@ -746,7 +759,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _resourcesReleased = true;
             DisposeChildren(exceptions);
             TryCleanup(_transaction.Dispose, exceptions);
-            TryCleanup(_ownerQuery.Dispose, exceptions);
+            TryCleanup(_connectionOwner.Dispose, exceptions);
             ThrowCollected(exceptions);
         }
 
@@ -766,7 +779,7 @@ public sealed class SqlTransactionScopeFactory : ISqlTransactionScopeFactory
             _resourcesReleased = true;
             await DisposeChildrenAsync(exceptions).ConfigureAwait(false);
             await TryCleanupAsync(() => SqlTransactionAsyncAdapter.DisposeAsync(_transaction), exceptions).ConfigureAwait(false);
-            await TryCleanupAsync(() => SqlTransactionAsyncAdapter.DisposeAsync(_ownerQuery), exceptions).ConfigureAwait(false);
+            await TryCleanupAsync(() => SqlTransactionAsyncAdapter.DisposeAsync(_connectionOwner), exceptions).ConfigureAwait(false);
             ThrowCollected(exceptions);
         }
 
@@ -1003,6 +1016,18 @@ internal static class SqlTransactionAsyncAdapter
         SqlProviderTransactionCapabilities capabilities, string providerKey)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (capabilities?.SupportsNativeAsyncBegin == false)
+            return new SqlTransactionAsyncOperationResult<IDbTransaction>(connection.BeginTransaction(isolationLevel),
+                SqlTransactionExecutionMode.SynchronousFallback);
+        if (capabilities?.SupportsNativeAsyncBegin == true && capabilities.BeginAsync != null)
+        {
+            var operation = capabilities.BeginAsync(connection, isolationLevel, cancellationToken);
+            if (operation != null)
+                return new SqlTransactionAsyncOperationResult<IDbTransaction>(
+                    await operation.ConfigureAwait(false), SqlTransactionExecutionMode.NativeAsync);
+        }
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            throw CreateImplementationGap("Begin", providerKey);
         var hasNativeMember = HasProviderAsyncMember(connection, "BeginTransactionAsync", isolationLevel,
             cancellationToken);
         EnsureProfileMatches(capabilities?.SupportsNativeAsyncBegin == true, hasNativeMember, "Begin", providerKey);
@@ -1040,6 +1065,18 @@ internal static class SqlTransactionAsyncAdapter
         SqlProviderTransactionCapabilities capabilities, string providerKey)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (capabilities?.SupportsNativeAsyncBegin == false)
+            return new SqlTransactionAsyncOperationResult<IDbTransaction>(connection.BeginTransaction(),
+                SqlTransactionExecutionMode.SynchronousFallback);
+        if (capabilities?.SupportsNativeAsyncBegin == true && capabilities.BeginAsync != null)
+        {
+            var operation = capabilities.BeginAsync(connection, null, cancellationToken);
+            if (operation != null)
+                return new SqlTransactionAsyncOperationResult<IDbTransaction>(
+                    await operation.ConfigureAwait(false), SqlTransactionExecutionMode.NativeAsync);
+        }
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            throw CreateImplementationGap("Begin", providerKey);
         var hasDefaultAsyncMember = HasProviderAsyncMember(connection, "BeginTransactionAsync", cancellationToken);
         var hasIsolationAsyncMember = HasProviderAsyncMember(connection, "BeginTransactionAsync",
             IsolationLevel.Unspecified, cancellationToken);
@@ -1064,11 +1101,11 @@ internal static class SqlTransactionAsyncAdapter
     /// 异步关闭连接；未公开异步关闭成员时回退为同步关闭。
     /// </summary>
     /// <param name="connection">待关闭的数据库连接。</param>
-    public static async Task CloseAsync(IDbConnection connection)
+    public static Task CloseAsync(IDbConnection connection)
     {
-        var invocation = await TryInvokeAsync(connection, "CloseAsync").ConfigureAwait(false);
-        if (invocation.IsInvoked == false)
-            connection.Close();
+        // netstandard2.0 没有 CloseAsync 契约；不为清理扫描 Provider 成员。
+        connection.Close();
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -1105,6 +1142,12 @@ internal static class SqlTransactionAsyncAdapter
         SqlProviderTransactionCapabilities capabilities, string providerKey)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (capabilities?.SupportsNativeAsyncCommit == true && capabilities.CommitAsync != null)
+        {
+            var operation = capabilities.CommitAsync(transaction, cancellationToken);
+            if (operation != null)
+                return InvokeStaticAsync(operation);
+        }
         return InvokeOrRunWithModeAsync(transaction, "CommitAsync", transaction.Commit, cancellationToken,
             capabilities?.SupportsNativeAsyncCommit, providerKey);
     }
@@ -1143,8 +1186,21 @@ internal static class SqlTransactionAsyncAdapter
         SqlProviderTransactionCapabilities capabilities, string providerKey)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (capabilities?.SupportsNativeAsyncRollback == true && capabilities.RollbackAsync != null)
+        {
+            var operation = capabilities.RollbackAsync(transaction, cancellationToken);
+            if (operation != null)
+                return InvokeStaticAsync(operation);
+        }
         return InvokeOrRunWithModeAsync(transaction, "RollbackAsync", transaction.Rollback, cancellationToken,
             capabilities?.SupportsNativeAsyncRollback, providerKey);
+    }
+
+    /// <summary>调用 Provider 明确提供的异步事务操作，无须扫描运行时成员。</summary>
+    private static async Task<SqlTransactionAsyncOperationResult<object>> InvokeStaticAsync(Task operation)
+    {
+        await operation.ConfigureAwait(false);
+        return new SqlTransactionAsyncOperationResult<object>(null, SqlTransactionExecutionMode.NativeAsync);
     }
 
     /// <summary>
@@ -1176,6 +1232,14 @@ internal static class SqlTransactionAsyncAdapter
         string methodName, Action fallback, CancellationToken cancellationToken, bool? declaredNative,
         string providerKey)
     {
+        if (declaredNative == false)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            fallback();
+            return new SqlTransactionAsyncOperationResult<object>(null, SqlTransactionExecutionMode.SynchronousFallback);
+        }
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            throw CreateImplementationGap(methodName, providerKey);
         var hasNativeMember = HasProviderAsyncMember(target, methodName, cancellationToken);
         if (declaredNative == true && hasNativeMember == false)
             throw CreateImplementationGap(methodName, providerKey);
@@ -1249,8 +1313,16 @@ internal static class SqlTransactionAsyncAdapter
     /// <param name="methodName">异步成员名称。</param>
     /// <param name="arguments">异步成员参数。</param>
     /// <returns>异步成员是否命中及其完成后的结果。</returns>
-    private static async Task<AsyncInvocationResult> TryInvokeAsync(object target, string methodName,
+    private static Task<AsyncInvocationResult> TryInvokeAsync(object target, string methodName,
         params object[] arguments)
+    {
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled) throw SqlRuntimeFeatures.DynamicExecutionDisabled();
+        return InvokeDynamicAsync(target, methodName, arguments);
+    }
+
+    /// <summary>仅供兼容模式进入的反射异步调用，严格模式在创建状态机之前拒绝。</summary>
+    private static async Task<AsyncInvocationResult> InvokeDynamicAsync(object target, string methodName,
+        object[] arguments)
     {
         var methods = target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
             .Where(method => method.Name == methodName && method.GetParameters().Length == arguments.Length)
@@ -1279,6 +1351,7 @@ internal static class SqlTransactionAsyncAdapter
     /// <returns>由具体 Provider 覆盖实现时返回 true。</returns>
     private static bool IsProviderAsyncMember(object target, string methodName, MethodInfo method)
     {
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled) throw SqlRuntimeFeatures.DynamicExecutionDisabled();
         if (methodName == "BeginTransactionAsync" && target is DbConnection &&
             method.DeclaringType == typeof(DbConnection))
         {
@@ -1313,7 +1386,14 @@ internal static class SqlTransactionAsyncAdapter
     /// </summary>
     /// <param name="result">反射调用返回的异步或同步结果。</param>
     /// <returns>异步操作完成后的结果值；无结果或输入为空时返回 null。</returns>
-    private static async Task<object> AwaitResult(object result)
+    private static Task<object> AwaitResult(object result)
+    {
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled) throw SqlRuntimeFeatures.DynamicExecutionDisabled();
+        return AwaitDynamicResult(result);
+    }
+
+    /// <summary>兼容模式等待任意 Provider 返回的 Task 或 ValueTask。</summary>
+    private static async Task<object> AwaitDynamicResult(object result)
     {
         if (result is Task task)
         {

@@ -2,8 +2,10 @@ using System.Text;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Conditions;
-using Bing.Data.Sql.Builders.Mutations.Accessors;
+using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders;
@@ -134,11 +136,13 @@ public class SqlBuilderAppendToTest
     public void AppendTo_WhenReturningIsUnsupported_ShouldKeepCallerBufferUnchanged()
     {
         // Arrange
-        var builder = new TestSqlBuilder();
-        builder.UpdateClause.UpdateTable(new SqlTableReference { TableName = "samples" });
-        builder.SetClause.Set("Name", "Bing");
-        builder.ParameterManager.Add("@id", 7);
-        ((IMutationWhereClauseAccessor)builder).WhereClause.And(new EqualCondition("[Id]", "@id"));
+        var provider = new TestSqlBuilder().Provider;
+        var parameterManager = new ParameterManager(provider.Dialect);
+        parameterManager.Add("@id", 7);
+        var builder = new SqlUpdateBuilder(provider, new SqlBuilderServices(), parameterManager);
+        builder.Update(new SqlTableReference { TableName = "samples" });
+        builder.Set("Name", "Bing");
+        builder.WhereClause.And(new EqualCondition("[Id]", "@id"));
         builder.Returning("Id");
         var result = new StringBuilder("Prefix:");
 

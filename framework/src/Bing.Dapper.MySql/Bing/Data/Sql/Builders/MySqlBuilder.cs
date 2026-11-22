@@ -24,6 +24,9 @@ public class MySqlBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    protected override bool SupportsMutationCheckpoint => GetType() == typeof(MySqlBuilder);
+
+    /// <inheritdoc />
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new MySqlBuilder(Services, parameterManager);
 

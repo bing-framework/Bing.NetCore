@@ -41,7 +41,10 @@ internal sealed class Helper
     /// <summary>
     /// 获取参数管理器。
     /// </summary>
-    private IParameterManager _parameterManager => _context.ParameterManager;
+    private IParameterManager _parameterManager => _parameterManagerOverride ?? _context.ParameterManager;
+
+    /// <summary>谓词解析时使用的参数副本。</summary>
+    private readonly IParameterManager _parameterManagerOverride;
 
     /// <summary>
     /// 获取实体映射解析器。
@@ -83,6 +86,10 @@ internal sealed class Helper
     /// </summary>
     /// <param name="context">子句运行上下文。</param>
     internal Helper(SqlClauseContext context) => _context = context ?? throw new ArgumentNullException(nameof(context));
+
+    /// <summary>使用指定的参数管理器创建条件，供原子谓词解析使用。</summary>
+    internal Helper(SqlClauseContext context, IParameterManager parameterManager) : this(context) =>
+        _parameterManagerOverride = parameterManager;
 
     /// <summary>
     /// 获取处理后的列名
@@ -190,6 +197,18 @@ internal sealed class Helper
     /// <param name="value">条件值。</param>
     /// <param name="operator">运算符。</param>
     /// <returns>根据指定列信息创建的查询条件。</returns>
+    internal ICondition CreateCondition(string rawColumn, SqlBoundOperand column, Type entityType, object value, Operator @operator) =>
+        CreateConditionInternal(rawColumn, column.Render(_context), value, @operator, entityType, SqlParameterSource.Lambda, column);
+
+    /// <summary>
+    /// 创建查询条件。
+    /// </summary>
+    /// <param name="rawColumn">实体属性的原始列名。</param>
+    /// <param name="column">用于 SQL 条件的列名或表达式。</param>
+    /// <param name="entityType">条件所属实体的类型。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">条件比较运算符。</param>
+    /// <returns>包含对应 SQL 参数的查询条件。</returns>
     internal ICondition CreateCondition(string rawColumn, string column, Type entityType, object value,
         Operator @operator)
     {
@@ -213,32 +232,37 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建查询条件并添加参数
+    /// 根据比较运算符创建并绑定查询条件。
     /// </summary>
-    /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
-    /// <param name="column">已格式化并用于生成 SQL 的列名。</param>
-    /// <param name="value">条件参数值；集合值由 <c>In</c>/<c>NotIn</c> 分支单独展开。</param>
-    /// <param name="operator">条件运算符。</param>
-    /// <param name="entityType">可选的实体类型，用于解析列映射元数据。</param>
-    /// <param name="source">参数元数据来源。</param>
-    /// <returns>根据指定列、值和运算符创建的查询条件。</returns>
+    /// <param name="rawColumn">实体属性的原始列名。</param>
+    /// <param name="column">用于 SQL 条件的列名或表达式。</param>
+    /// <param name="value">条件值。</param>
+    /// <param name="operator">条件比较运算符。</param>
+    /// <param name="entityType">条件所属实体的类型。</param>
+    /// <param name="source">记录参数来源的分类。</param>
+    /// <param name="boundColumn">可选的已绑定查询列。</param>
+    /// <returns>创建并绑定参数后的查询条件。</returns>
+    /// <remarks>
+    /// IN 和 NOT IN 运算符使用集合条件；其他运算符校验比较值并注册查询参数。
+    /// </remarks>
     private ICondition CreateConditionInternal(string rawColumn, string column, object value, Operator @operator,
-        Type entityType, SqlParameterSource source)
+        Type entityType, SqlParameterSource source, SqlBoundOperand boundColumn = null)
     {
         SqlConditionFactory.ValidateSupported(@operator);
         if (IsInCondition(@operator, value))
         {
             ValidateInConditionValue(value);
-            return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, source: source);
+            return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, source: source, boundColumn: boundColumn);
         }
         if (IsNotInCondition(@operator, value))
         {
             ValidateInConditionValue(value);
-            return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, true, source);
+            return CreateInCondition(rawColumn, column, entityType, value as IEnumerable, true, source, boundColumn);
         }
         ValidateComparisonConditionValue(value, @operator);
         var paramName = GenerateParamName(value, @operator);
-        var condition = SqlConditionFactory.Create(column, paramName, @operator);
+        var condition = boundColumn == null ? SqlConditionFactory.Create(column, paramName, @operator) :
+            new SqlBoundCondition(_context, boundColumn, new SqlBoundOperand(null, null, paramName), @operator);
         AddParameter(paramName, value, @operator, entityType, rawColumn, source);
         return condition;
     }
@@ -299,18 +323,24 @@ internal sealed class Helper
     }
 
     /// <summary>
-    /// 创建 <c>In</c> 或 <c>NotIn</c> 条件，并为集合中的每个值生成独立参数。
+    /// 为集合值创建 IN 或 NOT IN 查询条件。
     /// </summary>
-    /// <param name="rawColumn">用于解析映射元数据的原始列名。</param>
-    /// <param name="column">已格式化并用于生成 SQL 的列名。</param>
-    /// <param name="entityType">可选的实体类型，用于解析列映射元数据。</param>
-    /// <param name="values">条件值集合；为空时生成不含参数的空集合条件。</param>
-    /// <param name="notIn">是否生成 <c>NotIn</c> 条件。</param>
-    /// <param name="source">参数元数据来源。</param>
-    /// <returns>包含已生成参数名称的 <c>In</c> 或 <c>NotIn</c> 条件。</returns>
+    /// <param name="rawColumn">实体属性的原始列名。</param>
+    /// <param name="column">用于 SQL 条件的列名或表达式。</param>
+    /// <param name="entityType">条件所属实体的类型。</param>
+    /// <param name="values">用于匹配的集合值。</param>
+    /// <param name="notIn">是否创建 NOT IN 条件。</param>
+    /// <param name="source">记录参数来源的分类。</param>
+    /// <param name="boundColumn">可选的已绑定查询列。</param>
+    /// <returns>包含集合参数的 IN 或 NOT IN 查询条件。</returns>
+    /// <remarks>
+    /// values 为 null 时创建空集合条件；其他值会逐项生成并注册参数。
+    /// </remarks>
     private ICondition CreateInCondition(string rawColumn, string column, Type entityType, IEnumerable values,
-        bool notIn = false, SqlParameterSource source = SqlParameterSource.Unknown)
+        bool notIn = false, SqlParameterSource source = SqlParameterSource.Unknown, SqlBoundOperand boundColumn = null)
     {
+        if (values == null && boundColumn != null)
+            return new SqlBoundInCondition(_context, boundColumn, Array.Empty<string>(), notIn);
         if (values == null)
             return notIn ? new NotInCondition(column, new List<string>()) : new InCondition(column, new List<string>());
         var items = values.Cast<object>().ToList();
@@ -328,6 +358,7 @@ internal sealed class Helper
             var value = items[index];
             AddParameter(name, value, null, entityType, rawColumn, source);
         }
+        if (boundColumn != null) return new SqlBoundInCondition(_context, boundColumn, paramNames, notIn);
         if (notIn)
             return new NotInCondition(column, paramNames);
         return new InCondition(column, paramNames);
@@ -356,7 +387,7 @@ internal sealed class Helper
     /// <param name="entityType">实体类型。</param>
     /// <param name="rawColumn">原始列名。</param>
     /// <param name="source">参数来源。</param>
-    private void AddParameter(IParameterManager parameterManager, string paramName, object value, Operator? @operator,
+    internal void AddParameter(IParameterManager parameterManager, string paramName, object value, Operator? @operator,
         Type entityType, string rawColumn, SqlParameterSource source)
     {
         if (string.IsNullOrWhiteSpace(paramName))

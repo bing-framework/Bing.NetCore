@@ -30,18 +30,6 @@ internal sealed class SqlQueryFactory : SqlFactoryBase, ISqlQueryFactory
     /// <summary>
     /// 创建绑定到事务数据库上下文的查询对象。
     /// </summary>
-    /// <param name="dbKey">数据源标识。</param>
-    /// <param name="context">已解析的事务数据库上下文。</param>
-    /// <returns>查询对象。</returns>
-    internal ISqlQuery CreateForTransaction(string dbKey, out DatabaseContext context)
-    {
-        context = CreateTransactionContext(dbKey);
-        return CreateInstance<ISqlQuery>(context);
-    }
-
-    /// <summary>
-    /// 创建绑定到事务数据库上下文的查询对象。
-    /// </summary>
     /// <param name="context">事务数据库上下文。</param>
     /// <returns>查询对象。</returns>
     internal ISqlQuery CreateForTransaction(DatabaseContext context) =>

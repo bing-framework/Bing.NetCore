@@ -102,9 +102,14 @@ public class UnitOfWorkScopeRegistrationTest
             UnitOfWorkScopeServiceCollectionExtensions.AddUnitOfWorkScopes(null));
     }
 
+    /// <summary>
+    /// 覆盖重置拦截器调用次数等测试场景。
+    /// </summary>
     private sealed class TestScopeManager : IUnitOfWorkScopeManager
     {
+        /// <inheritdoc />
         public IUnitOfWorkScope Current => null;
+        /// <inheritdoc />
         public IUnitOfWorkScope Begin(UnitOfWorkScopeOptions options = null, bool requiresNew = false) => null;
     }
 }

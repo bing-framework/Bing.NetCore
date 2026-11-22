@@ -158,10 +158,81 @@ internal abstract class SqlFactoryBase
     protected TService CreateInstance<TService>(DatabaseContext context) where TService : class
     {
         var providerKey = ResolveProviderKey(context);
+        var runtime = _serviceProvider.GetServices<SqlProviderRuntime>().SingleOrDefault(item =>
+            string.Equals(item.ProviderKey, providerKey, StringComparison.OrdinalIgnoreCase));
+        var hasStaticFactory = runtime != null &&
+            (typeof(TService) == typeof(ISqlQuery) && runtime.QueryFactory != null ||
+             typeof(TService) == typeof(ISqlExecutor) && runtime.ExecutorFactory != null ||
+             typeof(TService) == typeof(ISqlMultipleQueryExecutor) && runtime.MultipleFactory != null);
+        if (hasStaticFactory)
+        {
+            var template = runtime.ServiceTemplateFactory != null
+                ? runtime.ServiceTemplateFactory(_serviceProvider, typeof(TService))
+                : runtime.TemplateFactory(_serviceProvider);
+            var staticOptions = runtime.ServiceOptionsFactory?.Invoke(typeof(TService)) ?? runtime.OptionsFactory();
+            if (template != null)
+            {
+                staticOptions.DatabaseType = template.DatabaseType;
+                staticOptions.IncludeTenantIdInDiagnostics = template.IncludeTenantIdInDiagnostics;
+                staticOptions.AutoGenerateTableAlias = template.AutoGenerateTableAlias;
+                staticOptions.ConnectionString = template.ConnectionString;
+                staticOptions.Connection = template.Connection;
+                staticOptions.QueryCapabilities = CloneQueryCapabilities(template.QueryCapabilities);
+            }
+            ConfigureOptions(staticOptions, template, context);
+            object service = typeof(TService) == typeof(ISqlQuery) ? runtime.QueryFactory(_serviceProvider, staticOptions) :
+                typeof(TService) == typeof(ISqlExecutor) ? runtime.ExecutorFactory(_serviceProvider, staticOptions) :
+                runtime.MultipleFactory(_serviceProvider, staticOptions);
+            return (TService)service;
+        }
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _metadataOptions.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+            throw new NotSupportedException($"Provider {providerKey} 没有为 {typeof(TService).Name} 注册静态工厂。");
         var implementationType = GetImplementationType(typeof(TService), providerKey);
         var options = CreateOptions(implementationType, context);
         return (TService)ActivatorUtilities.CreateInstance(_serviceProvider, implementationType, _serviceProvider,
             options);
+    }
+
+    /// <summary>直接取得显式事务作用域的连接所有者，不实例化根 Query。</summary>
+    internal SqlTransactionConnectionOwner CreateTransactionConnection(string dbKey)
+    {
+        var context = CreateTransactionContext(dbKey);
+        var provider = _providerResolver.Resolve(context, databaseType: context.DataSource.DatabaseType);
+        var profile = (provider as Builders.ISqlProviderProfileProvider)?.Profile?.Transaction ??
+            throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "Transaction",
+                provider.Key, "SQL Provider 未声明事务能力 Profile。[ProviderProfileMissing]");
+        if (context.DataSource.IsReadOnly || !profile.SupportsTransactions ||
+            context.DataSource.SupportsTransactions == false)
+            throw SqlCapabilityFailure.Create(profile.TransactionsFailureReason ??
+                SqlCapabilityFailureReason.DatabaseUnsupported, "Transaction", provider.Key,
+                $"数据源 {context.DataSource.Key ?? context.DbKey} 或 Provider {provider.Key} 不支持本地写入事务。");
+        var runtime = _serviceProvider.GetServices<SqlProviderRuntime>().SingleOrDefault(item =>
+            string.Equals(item.ProviderKey, provider.Key, StringComparison.OrdinalIgnoreCase));
+        SqlOptions options;
+        if (runtime?.OptionsFactory != null)
+        {
+            options = runtime.OptionsFactory();
+            var template = runtime.TemplateFactory(_serviceProvider);
+            options.Connection = template?.Connection;
+            options.ConnectionString = template?.ConnectionString;
+            ConfigureOptions(options, template, context);
+        }
+        else
+        {
+            if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _metadataOptions.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+                throw new NotSupportedException($"Provider {provider.Key} 没有注册静态事务配置工厂。");
+            options = CreateOptions(GetImplementationType(typeof(ISqlQuery), provider.Key), context);
+        }
+        var connection = options.Connection;
+        var ownsConnection = connection == null;
+        if (connection == null)
+        {
+            if (string.IsNullOrWhiteSpace(options.ConnectionString))
+                throw new InvalidOperationException("数据库连接字符串不能为空");
+            connection = _serviceProvider.GetRequiredService<ISqlDbConnectionFactoryResolver>()
+                .Create(provider.Key, options.ConnectionString);
+        }
+        return new SqlTransactionConnectionOwner(context, provider, connection, ownsConnection);
     }
 
     /// <summary>
@@ -191,10 +262,22 @@ internal abstract class SqlFactoryBase
     protected SqlOptions CreateOptions(Type implementationType, DatabaseContext context)
     {
         var template = GetTemplateOptions(implementationType);
-        var dataSource = context?.DataSource ?? _dataSourceResolver.Resolve(context?.DbKey);
         var optionsType = typeof(SqlOptions<>).MakeGenericType(implementationType);
         var options = (SqlOptions)Activator.CreateInstance(optionsType);
         CopyOptions(template, options);
+        ConfigureOptions(options, template, context);
+        return options;
+    }
+
+    /// <summary>
+    /// 根据数据库上下文配置 SQL 选项。
+    /// </summary>
+    /// <param name="options">需要填充的 SQL 选项。</param>
+    /// <param name="template">用于取得连接字符串的 SQL 选项模板。</param>
+    /// <param name="context">当前 SQL 数据库上下文。</param>
+    private void ConfigureOptions(SqlOptions options, SqlOptions template, DatabaseContext context)
+    {
+        var dataSource = context?.DataSource ?? _dataSourceResolver.Resolve(context?.DbKey);
         options.DatabaseType = dataSource.DatabaseType;
         options.SetDatabaseContext(CreateContext(dataSource, context?.TenantId, context?.MappingProfile,
             context?.ReadPreference ?? SqlReadPreference.Default));
@@ -204,7 +287,6 @@ internal abstract class SqlFactoryBase
             options.ConnectionString = connectionString;
             options.Connection = null;
         }
-        return options;
     }
 
     /// <summary>

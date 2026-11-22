@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 
@@ -9,6 +10,8 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// </summary>
 internal sealed class SqlMutationPlanCache
 {
+    private readonly IEntityModelMetadataProvider _models;
+    private readonly bool _generatedOnly;
     /// <summary>
     /// Mutation Plan 缓存。
     /// </summary>
@@ -24,8 +27,13 @@ internal sealed class SqlMutationPlanCache
     /// </summary>
     /// <param name="planCacheCapacity">Mutation Plan 缓存容量。</param>
     /// <param name="getterCacheCapacity">属性 Getter 缓存容量。</param>
-    internal SqlMutationPlanCache(int? planCacheCapacity = null, int? getterCacheCapacity = null)
+    /// <param name="models">生成式模型提供程序。</param>
+    /// <param name="generatedOnly">是否禁止反射访问器。</param>
+    internal SqlMutationPlanCache(int? planCacheCapacity = null, int? getterCacheCapacity = null,
+        IEntityModelMetadataProvider models = null, bool generatedOnly = false)
     {
+        _models = models;
+        _generatedOnly = generatedOnly;
         ValidateCapacity(planCacheCapacity, nameof(SqlMetadataOptions.MutationPlanCacheCapacity));
         ValidateCapacity(getterCacheCapacity, nameof(SqlMetadataOptions.MutationGetterCacheCapacity));
         _plans = new BoundedLazyCache<SqlMutationPlanCacheKey, SqlMutationPlan>(planCacheCapacity);
@@ -137,19 +145,22 @@ internal sealed class SqlMutationPlanCache
         if (column == null)
             throw new ArgumentNullException(nameof(column));
         var sourceType = source.GetType();
+        var propertyName = column.PropertyName?.Trim();
         var key = new SqlMutationGetterCacheKey(sourceType.TypeHandle,
-            column.PropertyName?.Trim().ToUpperInvariant() ?? string.Empty);
+            propertyName?.ToUpperInvariant() ?? string.Empty);
         var lazy = _getters.GetOrAdd(key, () => new Lazy<Func<object, object>>(
-            () => CreateGetter(sourceType, column.PropertyName), LazyThreadSafetyMode.ExecutionAndPublication));
+            () => CreateGetter(sourceType, propertyName), LazyThreadSafetyMode.ExecutionAndPublication));
+        Func<object, object> getter;
         try
         {
-            return lazy.Value(source);
+            getter = lazy.Value;
         }
         catch
         {
             _getters.RemoveIfCurrent(key, lazy);
             throw;
         }
+        return getter(source);
     }
 
     /// <summary>
@@ -158,8 +169,16 @@ internal sealed class SqlMutationPlanCache
     /// <param name="sourceType">源对象运行时类型。</param>
     /// <param name="propertyName">要读取的公共实例属性名称。</param>
     /// <returns>将源对象转换为属性值的已编译委托。</returns>
-    private static Func<object, object> CreateGetter(Type sourceType, string propertyName)
+    private Func<object, object> CreateGetter(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces |
+            DynamicallyAccessedMemberTypes.PublicProperties)] Type sourceType,
+        string propertyName)
     {
+        var member = FindGeneratedProperty(sourceType, propertyName);
+        if (member?.GeneratedGetter != null)
+            return member.GeneratedGetter;
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _generatedOnly)
+            throw new NotSupportedException($"类型 {sourceType.FullName} 的属性 {propertyName} 没有生成的读取器。并发原始值类型也需要显式注册。");
         var property = sourceType.GetProperty(propertyName,
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public |
             System.Reflection.BindingFlags.IgnoreCase);
@@ -168,6 +187,35 @@ internal sealed class SqlMutationPlanCache
         var source = Expression.Parameter(typeof(object), "source");
         var access = Expression.Property(Expression.Convert(source, sourceType), property);
         return Expression.Lambda<Func<object, object>>(Expression.Convert(access, typeof(object)), source).Compile();
+    }
+
+    /// <summary>
+    /// 查找当前运行时类型或其声明基类、接口的生成属性元数据。
+    /// </summary>
+    /// <param name="sourceType">源对象运行时类型。</param>
+    /// <param name="propertyName">属性名称。</param>
+    /// <returns>匹配的生成属性元数据；不存在时返回 <see langword="null"/>。</returns>
+    private EntityPropertyMetadata FindGeneratedProperty(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type sourceType,
+        string propertyName)
+    {
+        if (_models == null)
+            return null;
+        for (var type = sourceType; type != null; type = type.BaseType)
+        {
+            var model = _models.GetMetadata(type);
+            if (model != null && model.Properties.TryGetValue(propertyName, out var member) &&
+                member.GeneratedGetter != null)
+                return member;
+        }
+        foreach (var interfaceType in sourceType.GetInterfaces())
+        {
+            var model = _models.GetMetadata(interfaceType);
+            if (model != null && model.Properties.TryGetValue(propertyName, out var member) &&
+                member.GeneratedGetter != null)
+                return member;
+        }
+        return null;
     }
 
     /// <summary>

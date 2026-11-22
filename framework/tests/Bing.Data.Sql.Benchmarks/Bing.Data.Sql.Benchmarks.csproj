@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- 公共属性会按目标框架加载配置，因此需先确定 TargetFramework。 -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
   <Import Project="..\..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

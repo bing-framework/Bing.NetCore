@@ -35,6 +35,20 @@ public interface IParameterManager
     void Add(string name, object value, Operator? @operator = null);
 
     /// <summary>
+    /// 用已转换的参数快照替换现有同名参数，不再次执行值转换。
+    /// </summary>
+    /// <param name="parameter">已转换的参数快照；增强管理器同时保留其元数据。</param>
+    /// <remarks>参数不存在时不添加；实现应复制参数描述符，参数值沿用快照中的引用。</remarks>
+    void Restore(SqlParam parameter);
+
+    /// <summary>
+    /// 删除指定参数，不改变其他参数及其元数据。
+    /// </summary>
+    /// <param name="name">待删除的参数名称。</param>
+    /// <returns>存在并删除时返回 true；否则返回 false。</returns>
+    bool Remove(string name);
+
+    /// <summary>
     /// 获取当前参数的只读快照。
     /// </summary>
     /// <returns>调用时刻以标准参数名称为键的独立参数值集合；后续写入不会改变返回集合。</returns>

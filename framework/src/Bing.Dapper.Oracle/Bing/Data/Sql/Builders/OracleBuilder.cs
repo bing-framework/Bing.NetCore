@@ -24,6 +24,9 @@ public class OracleBuilder : SqlBuilderBase
     }
 
     /// <inheritdoc />
+    protected override bool SupportsMutationCheckpoint => GetType() == typeof(OracleBuilder);
+
+    /// <inheritdoc />
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) =>
         new OracleBuilder(Services, parameterManager);
 

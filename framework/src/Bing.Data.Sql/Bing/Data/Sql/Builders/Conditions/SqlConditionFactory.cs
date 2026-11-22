@@ -1,6 +1,4 @@
-﻿using Bing.Extensions;
-
-namespace Bing.Data.Sql.Builders.Conditions;
+﻿namespace Bing.Data.Sql.Builders.Conditions;
 
 /// <summary>
 /// Sql查询条件工厂
@@ -28,12 +26,9 @@ public static class SqlConditionFactory
             case Operator.Ends:
                 return;
             default:
-                var description = @operator.Description();
-                var operatorName = string.IsNullOrWhiteSpace(description)
-                    ? $"值 {(int)@operator}"
-                    : $"{description}（值 {(int)@operator}）";
+                // 已声明的运算符均已在上方处理；未知数值无需反射读取枚举描述。
                 throw new NotSupportedException(
-                    $"运算符 {operatorName} 当前条件工厂不支持。请使用已支持的 Equal、NotEqual、Greater、GreaterEqual、Less、LessEqual、In、NotIn、Contains、Starts 或 Ends 运算符。");
+                    $"运算符 值 {(int)@operator} 当前条件工厂不支持。请使用已支持的 Equal、NotEqual、Greater、GreaterEqual、Less、LessEqual、In、NotIn、Contains、Starts 或 Ends 运算符。");
         }
     }
 
@@ -76,6 +71,6 @@ public static class SqlConditionFactory
             case Operator.Ends:
                 return new LikeCondition(left, right);
         }
-        throw new InvalidOperationException($"运算符 {@operator.Description()} 未生成条件。");
+        throw new InvalidOperationException($"运算符 值 {(int)@operator} 未生成条件。");
     }
 }

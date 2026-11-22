@@ -91,12 +91,27 @@ public class OperationApiContractTest
             provider.GetRequiredService<IBingOperationExecutor>());
     }
 
+    /// <summary>
+    /// 按名称、泛型元数及参数类型查找方法。
+    /// </summary>
+    /// <param name="declaringType">声明目标方法的类型。</param>
+    /// <param name="name">需要查找的方法名称。</param>
+    /// <param name="genericArity">目标方法的泛型参数个数。</param>
+    /// <param name="parameterTypes">目标方法的参数类型集合。</param>
+    /// <returns>符合名称、泛型元数及参数条件的唯一方法。</returns>
     private static MethodInfo GetMethod(Type declaringType, string name, int genericArity,
         params Type[] parameterTypes) => declaringType.GetMethods(BindingFlags.Public | BindingFlags.Instance |
             BindingFlags.Static).Single(method => method.Name == name &&
             method.GetGenericArguments().Length == genericArity &&
             method.GetParameters().Select(parameter => parameter.ParameterType).SequenceEqual(parameterTypes));
 
+    /// <summary>
+    /// 按名称及泛型元数查找方法。
+    /// </summary>
+    /// <param name="declaringType">声明目标方法的类型。</param>
+    /// <param name="name">需要查找的方法名称。</param>
+    /// <param name="genericArity">目标方法的泛型参数个数。</param>
+    /// <returns>符合名称、泛型元数及参数条件的唯一方法。</returns>
     private static MethodInfo GetGenericMethod(Type declaringType, string name, int genericArity) =>
         declaringType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).Single(method =>
             method.Name == name && method.GetGenericArguments().Length == genericArity);

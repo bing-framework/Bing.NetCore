@@ -21,27 +21,27 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     #region 字段
 
     /// <summary>
-    /// Join关键字
+    /// 定义内连接使用的 SQL 关键字。
     /// </summary>
     private const string JoinKey = "Join";
 
     /// <summary>
-    /// Left Join关键字
+    /// 定义左外连接使用的 SQL 关键字。
     /// </summary>
     private const string LeftJoinKey = "Left Join";
 
     /// <summary>
-    /// Right Join关键字
+    /// 定义右外连接使用的 SQL 关键字。
     /// </summary>
     private const string RightJoinKey = "Right Join";
 
     /// <summary>
-    /// Full Join 关键字。
+    /// 定义全外连接使用的 SQL 关键字。
     /// </summary>
     private const string FullJoinKey = "Full Join";
 
     /// <summary>
-    /// Cross Join 关键字。
+    /// 定义交叉连接使用的 SQL 关键字。
     /// </summary>
     private const string CrossJoinKey = "Cross Join";
 
@@ -141,6 +141,11 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     /// </summary>
     protected readonly List<JoinItem> _params;
 
+    /// <summary>
+    /// 获取查询是否包含非实体数据源。
+    /// </summary>
+    internal bool HasNonEntitySources => _params.Any(item => item.Source?.EntityType == null);
+
     #endregion
 
     #region 构造函数
@@ -190,7 +195,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     private List<JoinItem> CloneItems(SqlClauseContext context)
     {
         var helper = new Helper(context);
-        return _params.Select(item => item.Clone(helper)).ToList();
+        return _params.Select(item => item.Clone(helper, context)).ToList();
     }
 
     #endregion
@@ -307,6 +312,21 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     /// 验证最后一个连接允许追加 On 条件。
     /// </summary>
     internal void ValidateLastJoinSupportsOn() => GetLastJoinOrThrow();
+
+    /// <summary>
+    /// 使用生成的数据源引用添加 Join。
+    /// </summary>
+    /// <param name="reference">生成的 Join 目标数据源引用。</param>
+    /// <param name="leftJoin">是否添加左连接。</param>
+    internal void JoinGenerated(SqlTableReference reference, bool leftJoin)
+    {
+        var joinType = leftJoin ? LeftJoinKey : JoinKey;
+        _context.ValidateOperation(SqlOperationAction.QueryClause);
+        (_sqlBuilder as SqlBuilderBase)?.ValidateTypedJoinCapability(joinType);
+        var databaseContext = GetCurrentDatabaseContext();
+        PreflightTypedJoin(reference, databaseContext, GetSourceReference(databaseContext));
+        Join(joinType, reference);
+    }
 
     /// <summary>
     /// 添加内连接表源。
@@ -449,6 +469,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         var sqlBuilder = _sqlBuilder as SqlBuilderBase;
         var parameterManagerBefore = _parameterManager;
         var subqueryParameterNamesBefore = sqlBuilder?.CloneSubqueryParameterNames();
+        var parameterKeysBefore = sqlBuilder?.CloneFragmentParameterKeys();
         var aliasBefore = _register?.Clone();
         var operationBefore = sqlBuilder?.OperationKind ?? SqlOperationKind.None;
         JoinItem item = null;
@@ -458,8 +479,10 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         {
             var parameterProbe = parameterManagerBefore.Clone();
             var subqueryParameterNamesProbe = sqlBuilder?.CloneSubqueryParameterNames();
-            var sql = sqlBuilder?.RenderSubquery(subquery.Builder, parameterProbe,
-                subqueryParameterNamesProbe) ?? subquery.Builder.ToSql();
+            var parameterKeysProbe = sqlBuilder?.CloneFragmentParameterKeys();
+            var sql = sqlBuilder != null
+                ? sqlBuilder.RenderSubquery(subquery.Builder, parameterProbe, subqueryParameterNamesProbe, ref parameterKeysProbe)
+                : subquery.Builder.ToSql();
             var table = SqlItem.Raw($"({sql}){subqueryAlias}");
             var source = new TableSource($"join_{_params.Count}", table, typeof(TProjection), subquery.Alias,
                 subquery.ProjectedMembers);
@@ -473,6 +496,7 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
             {
                 sqlBuilder.ReplaceParameterManager(parameterProbe);
                 sqlBuilder.ReplaceSubqueryParameterNames(subqueryParameterNamesProbe);
+                sqlBuilder.ReplaceFragmentParameterKeys(parameterKeysProbe);
             }
             else
                 fromClause.MergeNewParameters(parameterProbe);
@@ -489,7 +513,10 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
             RestoreAliasRegister(aliasBefore, subquery.Alias);
             RestoreParameters(parameterManagerBefore);
             if (sqlBuilder != null)
+            {
                 sqlBuilder.ReplaceSubqueryParameterNames(subqueryParameterNamesBefore);
+                sqlBuilder.ReplaceFragmentParameterKeys(parameterKeysBefore);
+            }
             RestoreOperationState(operationBefore);
             throw;
         }
@@ -764,6 +791,27 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
     /// </summary>
     /// <param name="item">候选连接项。</param>
     internal virtual void CommitJoinItem(JoinItem item) => _params.Add(item);
+
+    /// <summary>
+    /// 为指定 Join 数据源绑定别名。
+    /// </summary>
+    /// <param name="sourceId">要绑定别名的数据源标识。</param>
+    /// <param name="alias">要绑定的数据源别名。</param>
+    /// <returns>更新别名后的数据源。</returns>
+    /// <remarks>
+    /// 找不到指定数据源时会抛出异常。
+    /// </remarks>
+    internal TableSource BindSourceAlias(string sourceId, string alias)
+    {
+        var index = _params.FindIndex(item => item.Source?.SourceId == sourceId);
+        if (index < 0) throw new InvalidOperationException("未找到待命名的 Join 来源。");
+        var current = _params[index];
+        var source = current.Source.WithAlias(alias);
+        ((EntityAliasRegister)_register).BindUnspecifiedAlias(source.EntityType, alias, current.Source.Alias);
+        _params[index] = JoinItem.Create(current.JoinType, source.Item, current.Type, current.Condition);
+        _params[index].Source = source;
+        return source;
+    }
 
     /// <summary>
     /// 提交候选参数状态。

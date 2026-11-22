@@ -3,6 +3,7 @@ using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Operations;
 using Bing.Data.Sql.Metadata;
 
@@ -37,7 +38,7 @@ public sealed class MySqlMutationBuilderTest
     public void UpdateFrom_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new MySqlBuilder()
+        var builder = new SqlUpdateBuilder(MySqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -58,7 +59,7 @@ public sealed class MySqlMutationBuilderTest
     public void DeleteUsing_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new MySqlBuilder()
+        var builder = new SqlDeleteBuilder(MySqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -78,7 +79,7 @@ public sealed class MySqlMutationBuilderTest
     public void Returning_WhenProviderDoesNotSupportIt_ShouldThrowNotSupportedException()
     {
         // Arrange
-        var builder = new MySqlBuilder()
+        var builder = new SqlInsertBuilder(MySqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
             .Values("Bing")

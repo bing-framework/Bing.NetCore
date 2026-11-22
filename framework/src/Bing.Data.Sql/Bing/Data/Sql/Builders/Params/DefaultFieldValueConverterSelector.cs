@@ -14,6 +14,13 @@ public class DefaultFieldValueConverterSelector : IFieldValueConverterSelector
     private readonly IReadOnlyList<IFieldValueConverter> _converters;
 
     /// <summary>
+    /// 获取是否仅使用内置默认转换管线，不包含派生选择器或自定义转换器。
+    /// </summary>
+    /// <remarks>执行器仅可对转换类型为 None 的列采用等价读取策略；其他转换仍须按列执行。</remarks>
+    public bool UsesDefaultConverter => GetType() == typeof(DefaultFieldValueConverterSelector) &&
+        _converters.Count == 1 && _converters[0].GetType() == typeof(DefaultFieldValueConverter);
+
+    /// <summary>
     /// 初始化一个 <see cref="DefaultFieldValueConverterSelector"/> 类型的实例。
     /// </summary>
     /// <param name="converters">字段值转换器集合</param>
@@ -47,6 +54,12 @@ public class DefaultFieldValueConverterSelector : IFieldValueConverterSelector
     /// <param name="column">列映射元数据</param>
     /// <param name="databaseContext">数据库上下文</param>
     /// <returns>字段值转换器</returns>
-    protected virtual IFieldValueConverter GetConverter(ColumnMappingMetadata column, DatabaseContext databaseContext) =>
-        _converters.FirstOrDefault(t => t.CanConvert(column, databaseContext));
+    protected virtual IFieldValueConverter GetConverter(ColumnMappingMetadata column, DatabaseContext databaseContext)
+    {
+        // 每个字段都会经过选择器；避免在逐行读取时为谓词捕获列和上下文创建闭包。
+        for (var index = 0; index < _converters.Count; index++)
+            if (_converters[index].CanConvert(column, databaseContext))
+                return _converters[index];
+        return null;
+    }
 }

@@ -48,6 +48,12 @@ internal sealed class AdvancedParameterLimitManager : ParameterLimitManagerBase,
     }
 
     /// <inheritdoc />
+    public void Restore(SqlParam parameter) => Inner.Restore(parameter);
+
+    /// <inheritdoc />
+    public bool Remove(string name) => Inner.Remove(name);
+
+    /// <inheritdoc />
     public IReadOnlyDictionary<string, object> GetParams() => Inner.GetParams();
 
     /// <inheritdoc />

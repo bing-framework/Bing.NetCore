@@ -1,4 +1,118 @@
+﻿Bing.Data.Sql.ISqlGeneratedSinglePlanExecutor
+Bing.Data.Sql.ISqlGeneratedSinglePlanExecutor.ToGeneratedSingle<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, int? timeout) -> TResult
+Bing.Data.Sql.ISqlGeneratedSinglePlanExecutor.ToGeneratedSingleAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.ISqlGeneratedPlanExecutor
+Bing.Data.Sql.ISqlGeneratedPlanExecutor.ToGeneratedList<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.ISqlGeneratedPlanExecutor.ToGeneratedListAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.CanRead.get -> bool
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.CanWrite.get -> bool
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.HasNonPublicSetter.get -> bool
+Bing.Data.Sql.Metadata.CompositeEntityModelMetadataProvider.GetRegisteredMetadata(System.Type entityType) -> Bing.Data.Sql.Metadata.EntityModelMetadata
+Bing.Data.Sql.Metadata.GeneratedEntityModelMetadataProvider
+Bing.Data.Sql.Metadata.GeneratedEntityModelMetadataProvider.GeneratedEntityModelMetadataProvider() -> void
+Bing.Data.Sql.Metadata.GeneratedEntityModelMetadataProvider.GetMetadata(System.Type entityType) -> Bing.Data.Sql.Metadata.EntityModelMetadata
+Bing.Data.Sql.Metadata.GeneratedEntityModelMetadataProvider.GetMetadata<TEntity>() -> Bing.Data.Sql.Metadata.EntityModelMetadata
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, bool distinct) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias, bool distinct) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.CountAll() -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.CountAll(string columnAlias) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, string columnAlias) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, string columnAlias, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, string columnAlias) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(System.Linq.Expressions.Expression<System.Func<TEntity, string>> column, string columnAlias, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue?>> column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal>> column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, decimal?>> column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double>> column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, double?>> column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int>> column) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int>> column, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int>> column, string columnAlias) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int>> column, string columnAlias, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int?>> column) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int?>> column, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int?>> column, string columnAlias) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, int?>> column, string columnAlias, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long>> column) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long>> column, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long>> column, string columnAlias) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long>> column, string columnAlias, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long?>> column) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long?>> column, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long?>> column, string columnAlias) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(System.Linq.Expressions.Expression<System.Func<TEntity, long?>> column, string columnAlias, bool distinct) -> long?
 Bing.Data.Sql.SqlBuilderExecutionSnapshot
+Bing.Data.Sql.SqlGeneratedColumn
+Bing.Data.Sql.SqlGeneratedColumn.Distinct.get -> bool
+Bing.Data.Sql.SqlGeneratedColumn.Function.get -> Bing.Data.Sql.Builders.SqlAggregateFunction?
+Bing.Data.Sql.SqlGeneratedColumn.MemberName.get -> string
+Bing.Data.Sql.SqlGeneratedColumn.ResultAlias.get -> string
+Bing.Data.Sql.SqlGeneratedColumn.ResultType.get -> System.Type
+Bing.Data.Sql.SqlGeneratedColumn.SourceIndex.get -> int
+Bing.Data.Sql.SqlGeneratedColumn.SqlGeneratedColumn(int sourceIndex, string memberName, string resultAlias, System.Type resultType, Bing.Data.Sql.Builders.SqlAggregateFunction? function = null, bool distinct = false) -> void
+Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.And(Bing.Data.Sql.SqlGeneratedPredicate left, Bing.Data.Sql.SqlGeneratedPredicate right) -> Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.Compare(Bing.Data.Sql.SqlGeneratedColumn left, Bing.Data.Sql.SqlGeneratedColumn right, Bing.Operator comparison, object value) -> Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.CompareParameter(Bing.Data.Sql.SqlGeneratedColumn left, Bing.Operator comparison) -> Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.CompareParameter(Bing.Data.Sql.SqlGeneratedColumn left, Bing.Operator comparison, int parameterIndex) -> Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.Or(Bing.Data.Sql.SqlGeneratedPredicate left, Bing.Data.Sql.SqlGeneratedPredicate right) -> Bing.Data.Sql.SqlGeneratedPredicate
+static Bing.Data.Sql.SqlGeneratedPredicate.Not(Bing.Data.Sql.SqlGeneratedPredicate operand) -> Bing.Data.Sql.SqlGeneratedPredicate
+Bing.Data.Sql.SqlGeneratedExecution
+static Bing.Data.Sql.SqlGeneratedExecution.BindParameters(System.Data.Common.DbCommand command, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters) -> void
+Bing.Data.Sql.SqlGeneratedQueryBridge
+Bing.Data.Sql.SqlGeneratedRow
+Bing.Data.Sql.SqlGeneratedRow.Reader.get -> System.Data.Common.DbDataReader
+Bing.Data.Sql.SqlGeneratedRow.TryGetOrdinal(string memberName, out int ordinal) -> bool
 Bing.Data.Sql.SqlJoinOptions
 Bing.Data.Sql.SqlJoinOptions.SqlJoinOptions() -> void
 Bing.Data.Sql.SqlJoinOptions.RightAlias.get -> string
@@ -7,10 +121,82 @@ Bing.Data.Sql.SqlJoinOptions.LeftAlias.get -> string
 Bing.Data.Sql.SqlJoinOptions.LeftAlias.init -> void
 Bing.Data.Sql.SqlJoinOptions.Schema.get -> string
 Bing.Data.Sql.SqlJoinOptions.Schema.init -> void
+Bing.Data.Sql.SqlLambdaQuery.ExcludeSelect(string column) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ExcludeSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ExcludeSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.GroupBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Having<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> key) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> key, bool desc) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> key, bool desc, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, bool desc = false) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.OrderBy<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> column, bool desc, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity, TProjection>(System.Linq.Expressions.Expression<System.Func<TEntity, TProjection>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>() -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(bool propertyAsAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object[]>> columns, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TFirst, TSecond, TProjection>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, TProjection>> projection, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ReplaceSelect<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, object[]>> columns, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, Bing.Data.Sql.SqlAggregateFunctions<TEntity>, object>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> projection) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Select<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, object>> projection, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.SelectAll() -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.SplitOn(string splitOn) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TResult>(System.Func<TFirst, TSecond, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TFourth, TResult>(System.Func<TFirst, TSecond, TThird, TFourth, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TFirst, TSecond, TThird, TResult>(System.Func<TFirst, TSecond, TThird, TResult> map, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlQueryPlan.GeneratedParameterBinder.get -> System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>>
+Bing.Data.Sql.SqlQueryPlan.IsGeneratedExecution.get -> bool
 Bing.Data.Sql.SqlTextQuery
 Bing.Data.Sql.SqlTextQuery.AsAsyncEnumerable<TResult>(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<TResult>
 static Bing.Data.Sql.Extensions.With<T>(this T source, string name, Bing.Data.Sql.SqlFluentQuery query) -> T
+static Bing.Data.Sql.Extensions.With<T>(this T source, string name, Bing.Data.Sql.ISqlQueryFragment fragment) -> T
 static Bing.Data.Sql.Extensions.From<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
+static Bing.Data.Sql.Extensions.From<T>(this T source, Bing.Data.Sql.ISqlQueryFragment fragment, string alias) -> T
 static Bing.Data.Sql.Extensions.Join<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
 static Bing.Data.Sql.Extensions.LeftJoin<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
 static Bing.Data.Sql.Extensions.RightJoin<T>(this T source, Bing.Data.Sql.SqlFluentQuery query, string alias) -> T
@@ -35,11 +221,32 @@ static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilde
 static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.RightJoin<TEntity>(this Bing.Data.Sql.ISqlBuilder source, string alias, string schema) -> Bing.Data.Sql.ISqlBuilder
 static Bing.Data.Sql.Extensions.Union<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
+static Bing.Data.Sql.Extensions.Union<T>(this T source, params Bing.Data.Sql.ISqlQueryFragment[] fragments) -> T
 static Bing.Data.Sql.Extensions.UnionAll<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
+static Bing.Data.Sql.Extensions.UnionAll<T>(this T source, params Bing.Data.Sql.ISqlQueryFragment[] fragments) -> T
 static Bing.Data.Sql.Extensions.Intersect<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
 static Bing.Data.Sql.Extensions.Except<T>(this T source, params Bing.Data.Sql.SqlFluentQuery[] queries) -> T
+static Bing.Data.Sql.Metadata.EntityPropertyMetadata.CreateGenerated(string propertyName, System.Type clrType, bool canRead, bool canWrite, string columnName = null, bool isIgnored = false, bool isKey = false, System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption databaseGeneratedOption = System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None, bool isConcurrencyToken = false, bool isRequired = false, int? maxLength = null, string providerTypeName = null, System.Func<object, object> generatedGetter = null, System.Action<object, object> generatedSetter = null) -> Bing.Data.Sql.Metadata.EntityPropertyMetadata
+static Bing.Data.Sql.Metadata.EntityPropertyMetadata.CreateGenerated(string propertyName, System.Type clrType, bool canRead, bool canWrite, string columnName, bool isIgnored, bool isKey, System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption databaseGeneratedOption, bool isConcurrencyToken, bool isRequired, int? maxLength, string providerTypeName, System.Func<object, object> generatedGetter, System.Action<object, object> generatedSetter, bool hasNonPublicSetter) -> Bing.Data.Sql.Metadata.EntityPropertyMetadata
+static Bing.Data.Sql.Metadata.GeneratedEntityModelMetadataProvider.Register(Bing.Data.Sql.Metadata.EntityModelMetadata model) -> void
+static Bing.Data.Sql.SqlGeneratedExecution.ToList<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<Bing.Data.Sql.SqlGeneratedRow, TFirst> first, System.Func<Bing.Data.Sql.SqlGeneratedRow, TSecond> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToList<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<Bing.Data.Sql.SqlGeneratedRow, TResult> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToListAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<Bing.Data.Sql.SqlGeneratedRow, TFirst> first, System.Func<Bing.Data.Sql.SqlGeneratedRow, TSecond> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedExecution.ToListAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<Bing.Data.Sql.SqlGeneratedRow, TResult> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Compare(Bing.Data.Sql.SqlLambdaQuery query, bool having, System.Type[] types, string[] names, string[] aliases, Bing.Data.Sql.SqlGeneratedColumn left, Bing.Data.Sql.SqlGeneratedColumn right, Bing.Operator comparison, object value) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.WherePredicate(Bing.Data.Sql.SqlLambdaQuery query, System.Type[] types, string[] names, string[] aliases, Bing.Data.Sql.SqlGeneratedPredicate predicate) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.WherePredicate(Bing.Data.Sql.SqlLambdaQuery query, System.Type[] types, string[] names, string[] aliases, Bing.Data.Sql.SqlGeneratedPredicate predicate, object value) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.OptionalCompare(Bing.Data.Sql.SqlLambdaQuery query, bool condition, bool having, System.Type[] types, string[] names, string[] aliases, Bing.Data.Sql.SqlGeneratedColumn left, Bing.Data.Sql.SqlGeneratedColumn right, Bing.Operator comparison, object value) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.ComparisonValue(System.Linq.Expressions.LambdaExpression expression) -> object
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Join(Bing.Data.Sql.SqlLambdaQuery query, bool leftJoin, System.Type leftType, System.Type rightType, string leftName, string rightName, string leftMember, string rightMember, string alias, string schema) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Project(Bing.Data.Sql.SqlLambdaQuery query, string operation, System.Type[] types, string[] names, string[] aliases, Bing.Data.Sql.SqlGeneratedColumn[] columns, bool descending = false) -> Bing.Data.Sql.SqlLambdaQuery
 static Bing.Data.Sql.WhereClauseExtensions.In<T>(this T source, string column, Bing.Data.Sql.SqlFluentQuery query) -> T
 static Bing.Data.Sql.WhereClauseExtensions.NotIn<T>(this T source, string column, Bing.Data.Sql.SqlFluentQuery query) -> T
+Bing.Data.Sql.Builders.Core.BuilderItem.BuilderItem(string name, Bing.Data.Sql.SqlQueryFragment fragment) -> void
+Bing.Data.Sql.Builders.Core.BuilderItem.Fragment.get -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.Builders.IFromClause.From(Bing.Data.Sql.ISqlQueryFragment fragment, string alias) -> void
+Bing.Data.Sql.Builders.Clauses.FromClause.From(Bing.Data.Sql.ISqlQueryFragment fragment, string alias) -> void
+Bing.Data.Sql.SqlQueryTemplate.Freeze() -> Bing.Data.Sql.SqlQueryFragmentSnapshot
 static Bing.Data.Sql.WhereClauseExtensions.Exists<T>(this T source, Bing.Data.Sql.SqlFluentQuery query) -> T
 static Bing.Data.Sql.WhereClauseExtensions.NotExists<T>(this T source, Bing.Data.Sql.SqlFluentQuery query) -> T
 Bing.Data.Sql.SqlTextQuery.AsEnumerable<TResult>(int? timeout = null) -> System.Collections.Generic.IEnumerable<TResult>
@@ -180,12 +387,14 @@ Bing.Data.Sql.SqlBuilderRuntimeBridge
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.ContainsParameterToken(string sql, string parameterName) -> bool
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateExecutionSnapshot(Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlBuilderExecutionSnapshot
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateExecutionSnapshot(Bing.Data.Sql.ISqlBuilder builder, bool includeDebugSql) -> Bing.Data.Sql.SqlBuilderExecutionSnapshot
+static Bing.Data.Sql.SqlBuilderRuntimeBridge.HasExecutionSnapshot(Bing.Data.Sql.SqlQueryPlan plan) -> bool
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateExecutionSnapshot(Bing.Data.Sql.SqlQueryPlan plan) -> Bing.Data.Sql.SqlBuilderExecutionSnapshot
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateExecutionSnapshot(Bing.Data.Sql.SqlQueryPlan plan, bool includeDebugSql) -> Bing.Data.Sql.SqlBuilderExecutionSnapshot
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.ValidateQueryPlan(Bing.Data.Sql.SqlQueryPlan plan) -> bool
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.GetPlanPager(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager) -> Bing.Data.IPager
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreateCountPlan(Bing.Data.Sql.SqlQueryPlan plan) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreatePagePlan(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlBuilderRuntimeBridge.CreatePageExecutionPlan(Bing.Data.Sql.SqlQueryPlan plan, Bing.Data.IPager pager, Bing.Data.Sql.ISqlQueryBuilderSource builderSource) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.AppendRoot(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.Sql.Metadata.SqlTableReference reference) -> void
 static Bing.Data.Sql.SqlBuilderRuntimeBridge.FromSubquery<TProjection>(Bing.Data.Sql.ISqlBuilder builder, Bing.Data.Sql.SqlSubquery<TProjection> subquery) -> void
 Bing.Data.Sql.SqlMutationRuntimeBridge
@@ -327,8 +536,11 @@ Bing.Data.Sql.SqlQueryPlan.Parameters.get -> object
 Bing.Data.Sql.SqlQueryPlan.SplitOn.get -> string
 Bing.Data.Sql.SqlQueryPlan.CommandType.get -> System.Data.CommandType
 Bing.Data.Sql.SqlQueryPlan.IsBuilderPlan.get -> bool
+Bing.Data.Sql.SqlQueryPlan.Freeze() -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlBuilder builder, string splitOn) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlQueryFragment fragment) -> Bing.Data.Sql.SqlQueryPlan
+static Bing.Data.Sql.SqlQueryPlan.Create(Bing.Data.Sql.ISqlQueryFragment fragment, string splitOn) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters, string splitOn) -> Bing.Data.Sql.SqlQueryPlan
 static Bing.Data.Sql.SqlQueryPlan.Create(string commandText, object parameters, string splitOn, System.Data.CommandType commandType) -> Bing.Data.Sql.SqlQueryPlan
@@ -427,6 +639,10 @@ Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<S
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity>(System.Linq.Expressions.Expression<System.Func<TEntity, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TFirst, TSecond>(System.Linq.Expressions.Expression<System.Func<TFirst, TSecond, bool>> predicate, string firstAlias, string secondAlias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(TValue value, System.Linq.Expressions.Expression<System.Func<TEntity, TValue, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(TValue value, System.Linq.Expressions.Expression<System.Func<TEntity, TValue, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity, TValue>(bool condition, TValue value, System.Linq.Expressions.Expression<System.Func<TEntity, TValue, bool>> predicate) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlLambdaQuery.WhereIf<TEntity, TValue>(bool condition, TValue value, System.Linq.Expressions.Expression<System.Func<TEntity, TValue, bool>> predicate, string alias) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, Bing.Operator operator) -> Bing.Data.Sql.SqlLambdaQuery
 Bing.Data.Sql.SqlLambdaQuery.Where<TEntity, TValue>(System.Linq.Expressions.Expression<System.Func<TEntity, TValue>> column, TValue value, string alias) -> Bing.Data.Sql.SqlLambdaQuery
@@ -534,7 +750,6 @@ Bing.Data.Sql.Configs.SqlMetadataOptions.MutationPlanCacheCapacity.get -> int?
 Bing.Data.Sql.Configs.SqlMetadataOptions.MutationPlanCacheCapacity.set -> void
 Bing.Data.Sql.Configs.SqlMetadataOptions.MutationGetterCacheCapacity.get -> int?
 Bing.Data.Sql.Configs.SqlMetadataOptions.MutationGetterCacheCapacity.set -> void
-Bing.Data.Sql.ISqlExecutor.CreateWriteBuilder() -> Bing.Data.Sql.ISqlBuilder
 Bing.Data.Sql.ISqlExecutor.ExecuteWrite(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> int
 Bing.Data.Sql.ISqlExecutor.ExecuteWriteAsync(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<int>
 Bing.Data.Sql.ISqlExecutor.ExecuteReturning<TResult>(Bing.Data.Sql.Mutations.SqlWriteCommand command, int? timeout = null) -> System.Collections.Generic.List<TResult>
@@ -573,15 +788,18 @@ Bing.Data.Sql.Builders.Mutations.ISqlEntityMutationCommandBuilder.Update<TEntity
 Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder.BuildCommand() -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Mutations.SqlWriteCommand.GeneratedParameterBinder.get -> System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>>
 Bing.Data.Sql.Mutations.SqlWriteCommand.HasReturning.get -> bool
+Bing.Data.Sql.Mutations.SqlWriteCommand.IsGeneratedExecution.get -> bool
 Bing.Data.Sql.Mutations.SqlWriteCommand.OperationKind.get -> Bing.Data.Sql.Builders.SqlOperationKind
 Bing.Data.Sql.Mutations.SqlWriteCommand.Parameters.get -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
 Bing.Data.Sql.Mutations.SqlWriteCommand.ProviderKey.get -> string
 Bing.Data.Sql.Mutations.SqlWriteCommand.Sql.get -> string
 Bing.Data.Sql.Mutations.SqlWriteCommand.SqlWriteCommand(string sql, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam> parameters, bool validateAffectedRows = false) -> void
 Bing.Data.Sql.Mutations.SqlWriteCommand.ValidateAffectedRows.get -> bool
+Bing.Data.Sql.Mutations.SqlWriteCommand.WithGeneratedParameterBinder(System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> binder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Mutations.SqlWriteCommand.WithValidateAffectedRows(bool validateAffectedRows) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Mutations.SqlWriteCommandExtensions
-static Bing.Data.Sql.Mutations.SqlWriteCommandExtensions.ToSqlWriteCommand(this Bing.Data.Sql.ISqlBuilder builder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
 Bing.Data.Sql.Builders.Core.EntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
 Bing.Data.Sql.Builders.IEntityAliasRegister.GetSelfJoinAlias(System.Type entity, bool right) -> string
 Bing.Data.Sql.Builders.SqlValidationContext.Profile.get -> Bing.Data.Sql.Builders.SqlProviderProfile
@@ -651,6 +869,12 @@ Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.get -> Bing.Data.Sql.Build
 Bing.Data.Sql.Builders.SqlProviderProfile.Transaction.init -> void
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SqlProviderTransactionCapabilities() -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.BeginAsync.get -> System.Func<System.Data.IDbConnection, System.Data.IsolationLevel?, System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Data.IDbTransaction>>
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.BeginAsync.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.CommitAsync.get -> System.Func<System.Data.IDbTransaction, System.Threading.CancellationToken, System.Threading.Tasks.Task>
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.CommitAsync.init -> void
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.RollbackAsync.get -> System.Func<System.Data.IDbTransaction, System.Threading.CancellationToken, System.Threading.Tasks.Task>
+Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.RollbackAsync.init -> void
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncBegin.get -> bool
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncBegin.init -> void
 Bing.Data.Sql.Builders.SqlProviderTransactionCapabilities.SupportsNativeAsyncCommit.get -> bool
@@ -728,3 +952,519 @@ Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.PublishMappings(System.Col
 Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.CaptureSnapshot() -> Bing.Data.Sql.Metadata.IEntityMappingResolver
 Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.GetDescriptor(System.Type entityType) -> Bing.Data.Sql.Metadata.EntityDescriptor
 Bing.Data.Sql.Metadata.VersionedEntityMappingResolver.Resolve(System.Type entityType, Bing.Data.Sql.DatabaseContext databaseContext) -> Bing.Data.Sql.Metadata.EntityMappingMetadata
+Bing.Data.Sql.ISqlKeyInsertExecutor
+Bing.Data.Sql.ISqlKeyInsertExecutor.InsertWithKeysAsync<TEntity, TKey>(System.Collections.Generic.IReadOnlyCollection<Bing.Data.KeyGeneration.InsertRow<TEntity>> rows, bool requireNativeBulk = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Bing.Data.KeyGeneration.InsertBatchResult<TKey>>
+Bing.Data.Sql.Mutations.SqlKeyInsertCommandBuilder
+Bing.Data.Sql.Mutations.SqlKeyInsertCommandBuilder.Build<TEntity>(TEntity entity) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Metadata.ColumnMappingMetadata.DatabaseGeneratedOption.get -> System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption
+Bing.Data.Sql.Metadata.ColumnMappingMetadata.DatabaseGeneratedOption.init -> void
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Join(Bing.Data.Sql.SqlLambdaQuery query, bool leftJoin, System.Type leftType, System.Type rightType, string leftName, string rightName, string leftMember, string rightMember, Bing.Data.Sql.SqlJoinOptions options) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal? column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal? column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal? column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(decimal? column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double? column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double? column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double? column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Avg(double? column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(TValue column) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(TValue column, bool distinct) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(TValue column, string columnAlias) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Count<TValue>(TValue column, string columnAlias, bool distinct) -> long
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(string column) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(string column, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(string column, string columnAlias) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max(string column, string columnAlias, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue? column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue? column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue? column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Max<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(string column) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(string column, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(string column, string columnAlias) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min(string column, string columnAlias, bool distinct) -> string
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue? column) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue? column, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue? column, string columnAlias) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Min<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal? column) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal? column, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal? column, string columnAlias) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(decimal? column, string columnAlias, bool distinct) -> decimal?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double? column) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double? column, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double? column, string columnAlias) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(double? column, string columnAlias, bool distinct) -> double?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int column) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int column, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int column, string columnAlias) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int column, string columnAlias, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int? column) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int? column, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int? column, string columnAlias) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(int? column, string columnAlias, bool distinct) -> int?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long column) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long column, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long column, string columnAlias) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long column, string columnAlias, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long? column) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long? column, bool distinct) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long? column, string columnAlias) -> long?
+Bing.Data.Sql.SqlAggregateFunctions<TEntity>.Sum(long? column, string columnAlias, bool distinct) -> long?
+Bing.Data.Sql.SqlFn
+static Bing.Data.Sql.SqlFn.Avg(decimal column) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal? column) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal? column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal? column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(decimal? column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Avg(double column) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double column, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double? column) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double? column, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double? column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlFn.Avg(double? column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Count<TValue>(TValue column) -> long
+static Bing.Data.Sql.SqlFn.Count<TValue>(TValue column, bool distinct) -> long
+static Bing.Data.Sql.SqlFn.Count<TValue>(TValue column, string columnAlias) -> long
+static Bing.Data.Sql.SqlFn.Count<TValue>(TValue column, string columnAlias, bool distinct) -> long
+static Bing.Data.Sql.SqlFn.CountAll() -> long
+static Bing.Data.Sql.SqlFn.CountAll(string columnAlias) -> long
+static Bing.Data.Sql.SqlFn.Max(string column) -> string
+static Bing.Data.Sql.SqlFn.Max(string column, bool distinct) -> string
+static Bing.Data.Sql.SqlFn.Max(string column, string columnAlias) -> string
+static Bing.Data.Sql.SqlFn.Max(string column, string columnAlias, bool distinct) -> string
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue column) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue? column) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue? column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue? column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlFn.Max<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Min(string column) -> string
+static Bing.Data.Sql.SqlFn.Min(string column, bool distinct) -> string
+static Bing.Data.Sql.SqlFn.Min(string column, string columnAlias) -> string
+static Bing.Data.Sql.SqlFn.Min(string column, string columnAlias, bool distinct) -> string
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue column) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue? column) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue? column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue? column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlFn.Min<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlFn.Sum(decimal column) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal? column) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal? column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal? column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(decimal? column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlFn.Sum(double column) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double column, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double? column) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double? column, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double? column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlFn.Sum(double? column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlFn.Sum(int column) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int column, bool distinct) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int column, string columnAlias) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int column, string columnAlias, bool distinct) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int? column) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int? column, bool distinct) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int? column, string columnAlias) -> int?
+static Bing.Data.Sql.SqlFn.Sum(int? column, string columnAlias, bool distinct) -> int?
+static Bing.Data.Sql.SqlFn.Sum(long column) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long column, bool distinct) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long column, string columnAlias) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long column, string columnAlias, bool distinct) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long? column) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long? column, bool distinct) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long? column, string columnAlias) -> long?
+static Bing.Data.Sql.SqlFn.Sum(long? column, string columnAlias, bool distinct) -> long?
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.GeneratedGetter.get -> System.Func<object, object>
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.GeneratedSetter.get -> System.Action<object, object>
+Bing.Data.Sql.Generated.SqlModelAttribute
+Bing.Data.Sql.Generated.SqlModelAttribute.SqlModelAttribute(System.Type modelType) -> void
+Bing.Data.Sql.Generated.SqlModelAttribute.ModelType.get -> System.Type
+Bing.Data.Sql.Generated.SqlResultAttribute
+Bing.Data.Sql.Generated.SqlResultAttribute.SqlResultAttribute(System.Type resultType) -> void
+Bing.Data.Sql.Generated.SqlResultAttribute.ResultType.get -> System.Type
+Bing.Data.Sql.Generated.SqlParametersAttribute
+Bing.Data.Sql.Generated.SqlParametersAttribute.SqlParametersAttribute(System.Type parametersType) -> void
+Bing.Data.Sql.Generated.SqlParametersAttribute.ParametersType.get -> System.Type
+Bing.Data.Sql.Metadata.RegisteredEntityModelMetadataProvider
+Bing.Data.Sql.Configs.SqlExecutionMode.Compatible = 0 -> Bing.Data.Sql.Configs.SqlExecutionMode
+Bing.Data.Sql.Configs.SqlExecutionMode
+Bing.Data.Sql.Configs.SqlExecutionMode.GeneratedPreferred = 1 -> Bing.Data.Sql.Configs.SqlExecutionMode
+Bing.Data.Sql.Configs.SqlExecutionMode.GeneratedOnly = 2 -> Bing.Data.Sql.Configs.SqlExecutionMode
+Bing.Data.Sql.SqlExecutionRuntimeBinding
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController
+Bing.Data.Sql.Configs.SqlMetadataOptions.ExecutionMode.set -> void
+Bing.Data.Sql.Configs.SqlMetadataOptions.ExecutionMode.get -> Bing.Data.Sql.Configs.SqlExecutionMode
+static Bing.Data.Sql.SqlExecutionRuntimeBinding.BindExternalConnection(object query, System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+static Bing.Data.Sql.SqlExecutionRuntimeBinding.BindExternalTransactionResolver(object query, System.Func<System.Data.IDbTransaction> resolver) -> void
+static Bing.Data.Sql.SqlExecutionRuntimeBinding.BindEntityMappingResolver(object query, Bing.Data.Sql.Metadata.IEntityMappingResolver resolver) -> void
+static Bing.Data.Sql.SqlExecutionRuntimeBinding.BindOwnedConnection(object query, System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+static Bing.Data.Sql.SqlExecutionRuntimeBinding.BindDatabaseContext(object query, Bing.Data.Sql.DatabaseContext context) -> void
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController.BindExternalConnection(System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController.BindEntityMappingResolver(Bing.Data.Sql.Metadata.IEntityMappingResolver resolver) -> void
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController.BindExternalTransactionResolver(System.Func<System.Data.IDbTransaction> resolver) -> void
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController.BindDatabaseContext(Bing.Data.Sql.DatabaseContext context) -> void
+Bing.Data.Sql.ISqlExecutionRuntimeBindingController.BindOwnedConnection(System.Data.IDbConnection connection, Bing.Data.Sql.SqlConnectionSource source) -> void
+static Bing.Data.Sql.MutationClauseExtensions.InsertInto<TEntity>(this Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning(this Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder source, params string[] columns) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning(this Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder source, params string[] columns) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning(this Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder source, params string[] columns) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning<T>(this T source, params string[] columns) -> T
+static Bing.Data.Sql.MutationClauseExtensions.Returning<TEntity>(this Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning<TEntity>(this Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning<TEntity>(this Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
+static Bing.Data.Sql.MutationClauseExtensions.InsertInto(this Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder source, string table) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Returning<T, TEntity>(this T source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> T
+Bing.Data.Sql.ISqlExecutor.CreateInsertBuilder() -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+Bing.Data.Sql.ISqlExecutor.CreateUpdateBuilder() -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
+Bing.Data.Sql.ISqlExecutor.CreateDeleteBuilder() -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
+static Bing.Data.Sql.Mutations.SqlWriteCommandExtensions.ToSqlWriteCommand(this Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder builder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder.InsertSelect(Bing.Data.Sql.ISqlBuilder query) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+static Bing.Data.Sql.Mutations.SqlWriteCommandExtensions.ToSqlWriteCommand(this Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder builder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+static Bing.Data.Sql.Mutations.SqlWriteCommandExtensions.ToSqlWriteCommand(this Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder builder) -> Bing.Data.Sql.Mutations.SqlWriteCommand
+Bing.Data.Sql.Metadata.RegisteredEntityModelMetadataProvider.RegisteredEntityModelMetadataProvider(params Bing.Data.Sql.Metadata.EntityModelMetadata[] models) -> void
+Bing.Data.Sql.Metadata.RegisteredEntityModelMetadataProvider.GetMetadata<TEntity>() -> Bing.Data.Sql.Metadata.EntityModelMetadata
+Bing.Data.Sql.Metadata.RegisteredEntityModelMetadataProvider.GetMetadata(System.Type entityType) -> Bing.Data.Sql.Metadata.EntityModelMetadata
+Bing.Data.Sql.Metadata.CompositeEntityModelMetadataProvider.CompositeEntityModelMetadataProvider(System.Collections.Generic.IEnumerable<Bing.Data.Sql.Metadata.IEntityModelMetadataProvider> providers, bool generatedOnly) -> void
+Bing.Data.Sql.Metadata.EntityModelMetadata.EntityModelMetadata(System.Type entityType, string tableName, string schema, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Metadata.EntityPropertyMetadata> properties, System.Func<object> generatedFactory = null) -> void
+Bing.Data.Sql.Metadata.EntityModelMetadata.EntityModelMetadata(System.Type entityType, string tableName, string schema, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Metadata.EntityPropertyMetadata> properties, System.Func<object> generatedFactory, System.Func<object, string, object> generatedValueReader) -> void
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedFactory.get -> System.Func<object>
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedValueReader.get -> System.Func<object, string, object>
+Bing.Data.Sql.Mutations.SqlKeyInsertCommandBuilder.SqlKeyInsertCommandBuilder(Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder builder, Bing.Data.KeyGeneration.EntityKeyPolicy policy) -> void
+Bing.Data.Sql.Builders.Mutations.Builders.SqlMutationBuilderBase.ReturningClause.set -> void
+Bing.Data.Sql.Builders.Mutations.Builders.SqlMutationBuilderBase.ReturningClause.get -> Bing.Data.Sql.Builders.Mutations.IReturningClause
+Bing.Data.Sql.Builders.Mutations.Builders.SqlInsertBuilder.InsertSelect(Bing.Data.Sql.ISqlBuilder query) -> Bing.Data.Sql.Builders.Mutations.ISqlInsertBuilder
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.AllowAllRows.get -> bool
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.DeleteClause.get -> Bing.Data.Sql.Builders.Mutations.IDeleteClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.DeleteUsingClause.get -> Bing.Data.Sql.Builders.Mutations.IDeleteUsingClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.InsertClause.get -> Bing.Data.Sql.Builders.Mutations.IInsertClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.InsertColumnsClause.get -> Bing.Data.Sql.Builders.Mutations.IInsertColumnsClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.MutationContext.get -> Bing.Data.Sql.Builders.Mutations.Contexts.SqlMutationContext
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.ReturningClause.get -> Bing.Data.Sql.Builders.Mutations.IReturningClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.SetAllowAllRows(bool allowAllRows) -> void
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.SetClause.get -> Bing.Data.Sql.Builders.Mutations.ISetClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.UpdateClause.get -> Bing.Data.Sql.Builders.Mutations.IUpdateClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.UpdateFromClause.get -> Bing.Data.Sql.Builders.Mutations.IUpdateFromClause
+*REMOVED*Bing.Data.Sql.Builders.Core.SqlBuilderBase.ValuesClause.get -> Bing.Data.Sql.Builders.Mutations.IValuesClause
+*REMOVED*Bing.Data.Sql.Metadata.EntityModelMetadata.EntityModelMetadata(System.Type entityType, string tableName, string schema, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Metadata.EntityPropertyMetadata> properties) -> void
+*REMOVED*static Bing.Data.Sql.MutationClauseExtensions.InsertInto(this Bing.Data.Sql.ISqlBuilder source, string table) -> Bing.Data.Sql.ISqlBuilder
+*REMOVED*static Bing.Data.Sql.MutationClauseExtensions.InsertInto<TEntity>(this Bing.Data.Sql.ISqlBuilder source) -> Bing.Data.Sql.ISqlBuilder
+*REMOVED*static Bing.Data.Sql.MutationClauseExtensions.InsertInto<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.ISqlBuilder
+*REMOVED*static Bing.Data.Sql.MutationClauseExtensions.Returning(this Bing.Data.Sql.ISqlBuilder source, params string[] columns) -> Bing.Data.Sql.ISqlBuilder
+*REMOVED*static Bing.Data.Sql.MutationClauseExtensions.Returning<TEntity>(this Bing.Data.Sql.ISqlBuilder source, System.Linq.Expressions.Expression<System.Func<TEntity, object>> columns) -> Bing.Data.Sql.ISqlBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Where(this Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder source, string column, object value) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Where(this Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder source, string column, object value, Bing.Operator operator) -> Bing.Data.Sql.Builders.Mutations.ISqlUpdateBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Where(this Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder source, string column, object value) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
+static Bing.Data.Sql.MutationClauseExtensions.Where(this Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder source, string column, object value, Bing.Operator operator) -> Bing.Data.Sql.Builders.Mutations.ISqlDeleteBuilder
+Bing.Data.Sql.Mutations.SqlWriteCommand.SqlWriteCommand(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters, Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows) -> void
+Bing.Data.Sql.Mutations.SqlWriteCommand.SqlWriteCommand(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters, Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.SqlOperationKind operationKind) -> void
+Bing.Data.Sql.Mutations.SqlWriteCommand.SqlWriteCommand(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters, Bing.Data.Sql.Builders.ISqlProvider provider, Bing.Data.Sql.Builders.SqlOperationKind operationKind, bool hasReturning) -> void
+Bing.Data.Sql.Builders.Params.SqlParam.IsProviderValue.get -> bool
+Bing.Data.Sql.Builders.Params.SqlParam.IsProviderValue.set -> void
+
+virtual Bing.Data.Sql.Builders.Core.SqlBuilderBase.SupportsMutationCheckpoint.get -> bool
+Bing.Data.Sql.Builders.Params.DefaultFieldValueConverterSelector.UsesDefaultConverter.get -> bool
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.GeneratedReaderSetter.get -> System.Func<object, System.Data.Common.DbDataReader, int, bool>
+Bing.Data.Sql.Metadata.EntityPropertyMetadata.WithGeneratedReader(System.Func<object, System.Data.Common.DbDataReader, int, bool> readerSetter) -> Bing.Data.Sql.Metadata.EntityPropertyMetadata
+
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundList<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundList<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+Bing.Data.Sql.SqlAggregates
+static Bing.Data.Sql.SqlAggregates.Avg(decimal column) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal? column) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal? column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal? column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(decimal? column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Avg(double column) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double column, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double? column) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double? column, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double? column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlAggregates.Avg(double? column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Count<TValue>(TValue column) -> long
+static Bing.Data.Sql.SqlAggregates.Count<TValue>(TValue column, bool distinct) -> long
+static Bing.Data.Sql.SqlAggregates.Count<TValue>(TValue column, string columnAlias) -> long
+static Bing.Data.Sql.SqlAggregates.Count<TValue>(TValue column, string columnAlias, bool distinct) -> long
+static Bing.Data.Sql.SqlAggregates.CountAll() -> long
+static Bing.Data.Sql.SqlAggregates.CountAll(string columnAlias) -> long
+static Bing.Data.Sql.SqlAggregates.Max(string column) -> string
+static Bing.Data.Sql.SqlAggregates.Max(string column, bool distinct) -> string
+static Bing.Data.Sql.SqlAggregates.Max(string column, string columnAlias) -> string
+static Bing.Data.Sql.SqlAggregates.Max(string column, string columnAlias, bool distinct) -> string
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue column) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue? column) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue? column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue? column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Max<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min(string column) -> string
+static Bing.Data.Sql.SqlAggregates.Min(string column, bool distinct) -> string
+static Bing.Data.Sql.SqlAggregates.Min(string column, string columnAlias) -> string
+static Bing.Data.Sql.SqlAggregates.Min(string column, string columnAlias, bool distinct) -> string
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue column) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue? column) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue? column, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue? column, string columnAlias) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Min<TValue>(TValue? column, string columnAlias, bool distinct) -> TValue?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal column) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal? column) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal? column, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal? column, string columnAlias) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(decimal? column, string columnAlias, bool distinct) -> decimal?
+static Bing.Data.Sql.SqlAggregates.Sum(double column) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double column, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double? column) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double? column, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double? column, string columnAlias) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(double? column, string columnAlias, bool distinct) -> double?
+static Bing.Data.Sql.SqlAggregates.Sum(int column) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int column, bool distinct) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int column, string columnAlias) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int column, string columnAlias, bool distinct) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int? column) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int? column, bool distinct) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int? column, string columnAlias) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(int? column, string columnAlias, bool distinct) -> int?
+static Bing.Data.Sql.SqlAggregates.Sum(long column) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long column, bool distinct) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long column, string columnAlias) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long column, string columnAlias, bool distinct) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long? column) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long? column, bool distinct) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long? column, string columnAlias) -> long?
+static Bing.Data.Sql.SqlAggregates.Sum(long? column, string columnAlias, bool distinct) -> long?
+
+Bing.Data.Sql.SqlLambdaQuery.To<TResult>() -> TResult
+Bing.Data.Sql.SqlLambdaQuery.To<TResult>(TResult projectionPrototype, int? timeout = null) -> TResult
+Bing.Data.Sql.SqlLambdaQuery.ToAsync<TResult>() -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToAsync<TResult>(TResult projectionPrototype, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToList<TResult>(TResult projectionPrototype, int? timeout = null) -> System.Collections.Generic.List<TResult>
+Bing.Data.Sql.SqlLambdaQuery.ToListAsync<TResult>(TResult projectionPrototype, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Prototype(Bing.Data.Sql.SqlLambdaQuery query, System.Type resultType, object prototype) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedQueryBridge.Prototype(Bing.Data.Sql.SqlLambdaQuery query, System.Type resultType, object prototype, string[] projectionMembers) -> Bing.Data.Sql.SqlLambdaQuery
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListPrototype<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, string[] projectionMembers, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListPrototypeAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, string[] projectionMembers, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSingle<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSingleAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSinglePrototype<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, string[] projectionMembers, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSinglePrototypeAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, string[] projectionMembers, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListPrototype<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundListPrototypeAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSinglePrototype<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.ToBoundSinglePrototypeAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, TResult prototype, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+
+Bing.Data.Sql.ISqlGeneratedTerminalPlanExecutor
+Bing.Data.Sql.ISqlGeneratedTerminalPlanExecutor.ToGeneratedTerminal<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, Bing.Data.Sql.SqlGeneratedTerminal terminal, int? timeout) -> TResult
+Bing.Data.Sql.ISqlGeneratedTerminalPlanExecutor.ToGeneratedTerminalAsync<TResult>(Bing.Data.Sql.SqlQueryPlan plan, System.Func<System.Data.Common.DbDataReader, TResult> read, Bing.Data.Sql.SqlGeneratedTerminal terminal, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+Bing.Data.Sql.SqlGeneratedTerminal
+Bing.Data.Sql.SqlGeneratedTerminal.First = 0 -> Bing.Data.Sql.SqlGeneratedTerminal
+Bing.Data.Sql.SqlGeneratedTerminal.FirstOrDefault = 1 -> Bing.Data.Sql.SqlGeneratedTerminal
+Bing.Data.Sql.SqlGeneratedTerminal.Single = 2 -> Bing.Data.Sql.SqlGeneratedTerminal
+Bing.Data.Sql.SqlGeneratedTerminal.SingleOrDefault = 3 -> Bing.Data.Sql.SqlGeneratedTerminal
+Bing.Data.Sql.SqlAliasPolicy
+Bing.Data.Sql.SqlAliasPolicy.ExplicitOnly = 0 -> Bing.Data.Sql.SqlAliasPolicy
+Bing.Data.Sql.SqlAliasPolicy.Automatic = 1 -> Bing.Data.Sql.SqlAliasPolicy
+Bing.Data.Sql.SqlAliasPolicy.GeneratedStable = 2 -> Bing.Data.Sql.SqlAliasPolicy
+Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentKind.Raw = 0 -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentKind.Select = 1 -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentKind.Cte = 2 -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentKind.Union = 3 -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentKind.Predicate = 4 -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryCorrelationKind
+Bing.Data.Sql.SqlQueryCorrelationKind.Independent = 0 -> Bing.Data.Sql.SqlQueryCorrelationKind
+Bing.Data.Sql.SqlQueryCorrelationKind.Correlated = 1 -> Bing.Data.Sql.SqlQueryCorrelationKind
+Bing.Data.Sql.ISqlQueryFragment
+Bing.Data.Sql.ISqlQueryFragment.Freeze() -> Bing.Data.Sql.SqlQueryFragmentSnapshot
+Bing.Data.Sql.SqlQueryFragmentSnapshot
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Correlation.get -> Bing.Data.Sql.SqlQueryCorrelationKind
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Kind.get -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Parameters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Slots.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.SqlParameterKey>
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Sql.get -> string
+Bing.Data.Sql.SqlQueryFragmentSnapshot.Render(Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlCteDefinition
+Bing.Data.Sql.SqlCteDefinition.SqlCteDefinition(string name, Bing.Data.Sql.ISqlQueryFragment fragment) -> void
+Bing.Data.Sql.SqlCteDefinition.Fragment.get -> Bing.Data.Sql.ISqlQueryFragment
+Bing.Data.Sql.SqlCteDefinition.Name.get -> string
+Bing.Data.Sql.SqlCteDefinition.Render(Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.ISqlQueryTemplate
+Bing.Data.Sql.ISqlQueryTemplate.AsCte(string name) -> Bing.Data.Sql.SqlCteDefinition
+Bing.Data.Sql.ISqlQueryTemplate.CreateFragment() -> Bing.Data.Sql.ISqlQueryFragment
+Bing.Data.Sql.SqlQueryScope
+Bing.Data.Sql.SqlQueryScope.SqlQueryScope(string name = "q") -> void
+Bing.Data.Sql.SqlQueryScope.Add(Bing.Data.Sql.SqlCteDefinition cte) -> Bing.Data.Sql.SqlQueryScope
+Bing.Data.Sql.SqlQueryScope.Alias(string name, int index = 0) -> string
+Bing.Data.Sql.SqlQueryScope.CreateChild(string name) -> Bing.Data.Sql.SqlQueryScope
+Bing.Data.Sql.SqlQueryScope.Ctes.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.SqlCteDefinition>
+Bing.Data.Sql.SqlQueryScope.Name.get -> string
+Bing.Data.Sql.SqlQueryScope.ParameterName(string name) -> string
+Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryFragment.SqlQueryFragment(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters = null, Bing.Data.Sql.SqlQueryFragmentKind kind = Bing.Data.Sql.SqlQueryFragmentKind.Raw, Bing.Data.Sql.SqlQueryCorrelationKind correlation = Bing.Data.Sql.SqlQueryCorrelationKind.Independent) -> void
+static Bing.Data.Sql.SqlQueryFragment.Compose(string separator, params Bing.Data.Sql.SqlQueryFragment[] fragments) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryFragment.Correlation.get -> Bing.Data.Sql.SqlQueryCorrelationKind
+Bing.Data.Sql.SqlQueryFragment.Freeze() -> Bing.Data.Sql.SqlQueryFragmentSnapshot
+Bing.Data.Sql.SqlQueryFragment.Kind.get -> Bing.Data.Sql.SqlQueryFragmentKind
+Bing.Data.Sql.SqlQueryFragment.Parameters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.SqlQueryFragment.Render(Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryFragment.Slots.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.SqlParameterKey>
+Bing.Data.Sql.SqlQueryFragment.Sql.get -> string
+Bing.Data.Sql.SqlQueryFragment.WithParameterKey(string name, Bing.Data.Sql.SqlParameterKey key) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryTemplate
+Bing.Data.Sql.SqlQueryTemplate.SqlQueryTemplate(string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters = null) -> void
+Bing.Data.Sql.SqlQueryTemplate.AsCte(string name) -> Bing.Data.Sql.SqlCteDefinition
+static Bing.Data.Sql.SqlQueryTemplate.Compose(string separator, params Bing.Data.Sql.SqlQueryFragment[] fragments) -> Bing.Data.Sql.SqlQueryTemplate
+Bing.Data.Sql.SqlQueryTemplate.CreateFragment() -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryTemplate.Parameters.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.SqlQueryTemplate.Render(Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryTemplate.Slots.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.SqlParameterKey>
+Bing.Data.Sql.SqlQueryTemplate.Sql.get -> string
+Bing.Data.Sql.SqlParameterKey
+Bing.Data.Sql.SqlParameterKey.SqlParameterKey() -> void
+Bing.Data.Sql.SqlParameterKey.SqlParameterKey(string name) -> void
+Bing.Data.Sql.SqlParameterKey.SqlParameterKey(string scope, string name) -> void
+Bing.Data.Sql.SqlParameterKey.Name.get -> string
+Bing.Data.Sql.SqlParameterKey.Scope.get -> string
+Bing.Data.Sql.SqlQueryTemplateExtensions
+static Bing.Data.Sql.SqlQueryTemplateExtensions.ToTemplate(this Bing.Data.Sql.ISqlBuilder builder, Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryTemplate
+static Bing.Data.Sql.SqlGeneratedExecution.First<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.FirstOrDefault<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.Single<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.SingleOrDefault<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.FirstAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.FirstOrDefaultAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.SingleAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.SingleOrDefaultAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TResult>> read, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.First<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.FirstOrDefault<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.Single<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.SingleOrDefault<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.FirstAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.FirstOrDefaultAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.SingleAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.SingleOrDefaultAsync<TFirst, TSecond, TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TFirst>> first, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, int>, System.Func<System.Data.Common.DbDataReader, TSecond>> second, System.Func<TFirst, TSecond, TResult> map, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+
+Bing.Data.Sql.SqlQueryShapeKey
+Bing.Data.Sql.SqlQueryShapeKey.SqlQueryShapeKey() -> void
+Bing.Data.Sql.SqlQueryShapeKey.SqlQueryShapeKey(string queryId, string providerKey, string mappingVersion, string routeKey, int optionalMask, string collectionShape) -> void
+Bing.Data.Sql.SqlQueryShapeKey.QueryId.get -> string
+Bing.Data.Sql.SqlQueryShapeKey.QueryId.init -> void
+Bing.Data.Sql.SqlQueryShapeKey.ProviderKey.get -> string
+Bing.Data.Sql.SqlQueryShapeKey.ProviderKey.init -> void
+Bing.Data.Sql.SqlQueryShapeKey.MappingVersion.get -> string
+Bing.Data.Sql.SqlQueryShapeKey.MappingVersion.init -> void
+Bing.Data.Sql.SqlQueryShapeKey.RouteKey.get -> string
+Bing.Data.Sql.SqlQueryShapeKey.RouteKey.init -> void
+Bing.Data.Sql.SqlQueryShapeKey.OptionalMask.get -> int
+Bing.Data.Sql.SqlQueryShapeKey.OptionalMask.init -> void
+Bing.Data.Sql.SqlQueryShapeKey.CollectionShape.get -> string
+Bing.Data.Sql.SqlQueryShapeKey.CollectionShape.init -> void
+Bing.Data.Sql.SqlQueryOptionalFragment
+Bing.Data.Sql.SqlQueryOptionalFragment.SqlQueryOptionalFragment(int bit, Bing.Data.Sql.SqlQueryFragment fragment) -> void
+Bing.Data.Sql.SqlQueryOptionalFragment.SqlQueryOptionalFragment(int bit, string sql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> parameters) -> void
+Bing.Data.Sql.SqlQueryOptionalFragment.Bit.get -> int
+Bing.Data.Sql.SqlQueryOptionalFragment.Mask.get -> int
+Bing.Data.Sql.SqlQueryOptionalFragment.Fragment.get -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate
+Bing.Data.Sql.SqlQueryShapeTemplate.SqlQueryShapeTemplate(Bing.Data.Sql.SqlQueryFragment required) -> void
+Bing.Data.Sql.SqlQueryShapeTemplate.SqlQueryShapeTemplate(Bing.Data.Sql.SqlQueryFragment required, System.Collections.Generic.IEnumerable<Bing.Data.Sql.SqlQueryOptionalFragment> optional) -> void
+Bing.Data.Sql.SqlQueryShapeTemplate.SqlQueryShapeTemplate(Bing.Data.Sql.SqlQueryFragment required, System.Collections.Generic.IEnumerable<Bing.Data.Sql.SqlQueryOptionalFragment> optional, string separator) -> void
+Bing.Data.Sql.SqlQueryShapeTemplate.SqlQueryShapeTemplate(Bing.Data.Sql.SqlQueryFragment required, System.Collections.Generic.IEnumerable<Bing.Data.Sql.SqlQueryOptionalFragment> optional, string separator, Bing.Data.Sql.SqlQueryFragment suffix) -> void
+Bing.Data.Sql.SqlQueryShapeTemplate.SqlQueryShapeTemplate(string requiredSql, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam> requiredParameters, System.Collections.Generic.IEnumerable<Bing.Data.Sql.SqlQueryOptionalFragment> optional, string separator) -> void
+static Bing.Data.Sql.SqlQueryShapeTemplate.CreateOrdered(Bing.Data.Sql.SqlQueryFragment required, System.Collections.Generic.IEnumerable<(Bing.Data.Sql.SqlQueryFragment Fragment, int? OptionalBit)> fragments, string separator = " ") -> Bing.Data.Sql.SqlQueryShapeTemplate
+Bing.Data.Sql.SqlQueryShapeTemplate.Required.get -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.OptionalFragments.get -> System.Collections.Generic.IReadOnlyList<Bing.Data.Sql.SqlQueryOptionalFragment>
+Bing.Data.Sql.SqlQueryShapeTemplate.SupportedMask.get -> int
+Bing.Data.Sql.SqlQueryShapeTemplate.Separator.get -> string
+Bing.Data.Sql.SqlQueryShapeTemplate.Render() -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.Render(int optionalMask) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.Render(int optionalMask, System.Collections.Generic.IReadOnlyDictionary<string, object> values) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.Render(int optionalMask, System.Collections.Generic.IReadOnlyDictionary<string, object> values, Bing.Data.Sql.SqlQueryScope scope) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.Render(Bing.Data.Sql.SqlQueryShapeKey shape, System.Collections.Generic.IReadOnlyDictionary<string, object> values, Bing.Data.Sql.SqlQueryScope scope) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.RenderWithKeys(int optionalMask, System.Collections.Generic.IReadOnlyDictionary<Bing.Data.Sql.SqlParameterKey, object> values, System.Collections.Generic.IReadOnlyDictionary<string, object> unkeyedValues = null, Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.RenderWithKeys(Bing.Data.Sql.SqlQueryShapeKey shape, System.Collections.Generic.IReadOnlyDictionary<Bing.Data.Sql.SqlParameterKey, object> values, System.Collections.Generic.IReadOnlyDictionary<string, object> unkeyedValues, Bing.Data.Sql.SqlQueryScope scope) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.RenderValues(int optionalMask, System.ReadOnlySpan<object> values) -> Bing.Data.Sql.SqlQueryFragment
+Bing.Data.Sql.SqlQueryShapeTemplate.RenderValues(Bing.Data.Sql.SqlQueryShapeKey shape, System.ReadOnlySpan<object> values, Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlQueryFragment
+static Bing.Data.Sql.Extensions.Sql(this Bing.Data.Sql.ISqlQuery source, Bing.Data.Sql.SqlQueryShapeTemplate template, int optionalMask, System.ReadOnlySpan<object> values) -> Bing.Data.Sql.SqlTextQuery
+static Bing.Data.Sql.Extensions.Sql(this Bing.Data.Sql.ISqlQuery source, Bing.Data.Sql.SqlQueryShapeTemplate template, Bing.Data.Sql.SqlQueryShapeKey shape, System.ReadOnlySpan<object> values, Bing.Data.Sql.SqlQueryScope scope = null) -> Bing.Data.Sql.SqlTextQuery
+static Bing.Data.Sql.SqlGeneratedExecution.Scalar<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> TResult
+static Bing.Data.Sql.SqlGeneratedExecution.ScalarAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToPage<TResult>(Bing.Data.Sql.SqlLambdaQuery query, Bing.Data.IPager pager, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout) -> Bing.Data.PagerList<TResult>
+static Bing.Data.Sql.SqlGeneratedExecution.ToPageAsync<TResult>(Bing.Data.Sql.SqlLambdaQuery query, Bing.Data.IPager pager, System.Action<System.Data.Common.DbCommand, System.Collections.Generic.IEnumerable<Bing.Data.Sql.Builders.Params.SqlParam>> bind, int? timeout, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Bing.Data.PagerList<TResult>>
+Bing.Data.Sql.Builders.Core.SqlBuilderBase.RenderUnionItem(Bing.Data.Sql.Builders.Core.BuilderItem operation) -> string
+Bing.Data.Sql.Builders.Params.IParameterManager.Remove(string name) -> bool
+Bing.Data.Sql.Builders.Params.IParameterManager.Restore(Bing.Data.Sql.Builders.Params.SqlParam parameter) -> void
+Bing.Data.Sql.Builders.Params.ParameterManager.Remove(string name) -> bool
+Bing.Data.Sql.Builders.Params.ParameterManager.Restore(Bing.Data.Sql.Builders.Params.SqlParam parameter) -> void
+Bing.Data.Sql.Builders.Core.SqlBuilderBase.AppendQueryTail(System.Text.StringBuilder result, int start, int fromStart, bool wrapCount) -> void
+
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedMutationSql.get -> System.Func<string, Bing.Data.Sql.Builders.SqlOperationKind, string>
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedMutationSql.init -> void
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedKeyInsertSql.get -> System.Func<string, string>
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedKeyInsertSql.init -> void
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedMutationShapeSql.get -> System.Func<string, Bing.Data.Sql.Builders.SqlOperationKind, string, int, string>
+Bing.Data.Sql.Metadata.EntityModelMetadata.GeneratedMutationShapeSql.init -> void
+
+Bing.Data.Sql.SqlGeneratedQueryTemplate
+Bing.Data.Sql.SqlGeneratedQueryTemplate.Operation
+Bing.Data.Sql.SqlGeneratedQueryTemplate.SqlGeneratedQueryTemplate(Bing.Data.Sql.SqlGeneratedQueryTemplate.Operation[] operations, bool replacesDefaultProjection = false) -> void
+Bing.Data.Sql.SqlGeneratedQueryTemplate.Operation.Operation(System.Action<Bing.Data.Sql.SqlLambdaQuery, object[]> replay, System.Func<object[], object> value = null, System.Func<object[], Bing.Operator> comparison = null, int valueArgument = -1, int conditionArgument = -1) -> void
+static Bing.Data.Sql.SqlGeneratedQueryTemplate.Apply(Bing.Data.Sql.SqlLambdaQuery source, Bing.Data.Sql.SqlGeneratedQueryTemplate template, int operationIndex, object[] arguments) -> Bing.Data.Sql.SqlLambdaQuery
+Bing.Data.Sql.ISqlExecutor.ExecuteSqlWithOutput(string sql, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam> parameters, int? timeout = null) -> (int AffectedRows, Bing.Data.Sql.ISqlOutputParameterAccessor OutputParameters)
+Bing.Data.Sql.ISqlExecutor.ExecuteSqlWithOutputAsync(string sql, System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam> parameters, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<(int AffectedRows, Bing.Data.Sql.ISqlOutputParameterAccessor OutputParameters)>

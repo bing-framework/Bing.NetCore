@@ -12,6 +12,7 @@ namespace Bing.Data.Sql;
 /// </summary>
 internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
 {
+    private readonly IEntityModelMetadataProvider _models;
     /// <summary>
     /// 实体映射解析器
     /// </summary>
@@ -57,18 +58,26 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="databaseContextResolver">SQL 数据库上下文解析器</param>
     /// <param name="parameterResolver">SQL 参数解析器</param>
     /// <param name="dbParameterCustomizers">数据库参数定制器集合</param>
+    /// <param name="models">生成式模型提供程序。</param>
     public DefaultSqlParameterBinder(IEntityMappingResolver entityMappingResolver = null,
         IDatabaseContextAccessor databaseContextAccessor = null,
         ISqlParameterFactory sqlParameterFactory = null, SqlMetadataOptions options = null,
         ISqlDatabaseContextResolver databaseContextResolver = null, ISqlParameterResolver parameterResolver = null,
-        IEnumerable<ISqlDbParameterCustomizer> dbParameterCustomizers = null)
+        IEnumerable<ISqlDbParameterCustomizer> dbParameterCustomizers = null,
+        IEntityModelMetadataProvider models = null)
     {
+        _models = models ?? new GeneratedEntityModelMetadataProvider();
         _options = options ?? new SqlMetadataOptions();
         _databaseContextAccessor = databaseContextAccessor;
         _databaseContextResolver = databaseContextResolver ?? new DefaultSqlDatabaseContextResolver(databaseContextAccessor,
             _options);
+        var mappingModels = _models is CompositeEntityModelMetadataProvider
+            ? _models
+            : new CompositeEntityModelMetadataProvider(new[] { _models },
+                _options.ExecutionMode == SqlExecutionMode.GeneratedOnly);
         _entityMappingResolver = entityMappingResolver ?? new DefaultEntityMappingResolver(
-            databaseContextAccessor: databaseContextAccessor, options: _options);
+            databaseContextAccessor: databaseContextAccessor, options: _options,
+            entityModelMetadataProvider: mappingModels);
         _sqlParameterFactory = sqlParameterFactory ?? new DefaultSqlParameterFactory(
             new DefaultFieldValueConverterSelector(null, _options), databaseContextAccessor, _options);
         _parameterResolver = parameterResolver ?? SqlParameterRuntimeBridge.CreateDefaultResolver();
@@ -90,8 +99,8 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
             return null;
         var parameters = GetSqlParams(builder, options, context);
         if (parameters.Count > 0)
-            return new MetadataDynamicParameters(parameters, _dbParameterCustomizers);
-        return builder.GetParams();
+            return CreateParameters(parameters);
+        return builder.GetParams().Count == 0 ? null : builder.GetParams();
     }
 
     /// <inheritdoc />
@@ -106,14 +115,40 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     {
         if (parameter == null)
             return null;
-        if (parameter is global::Dapper.DynamicParameters dynamicParameters)
+        if (SqlRuntimeFeatures.ReflectionFallbackEnabled && parameter is global::Dapper.DynamicParameters dynamicParameters)
             return new DynamicParametersOutputAccessor(dynamicParameters);
-        if (parameter is SqlMapper.IDynamicParameters)
+        if (SqlRuntimeFeatures.ReflectionFallbackEnabled && parameter is SqlMapper.IDynamicParameters)
             return parameter;
         if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
-            return new MetadataDynamicParameters(GetSqlParams(parameter, options, context), _dbParameterCustomizers);
+            return CreateParameters(GetSqlParams(parameter, options, context));
+        if ((_options.ExecutionMode != SqlExecutionMode.Compatible || !SqlRuntimeFeatures.ReflectionFallbackEnabled) &&
+            TryGetDictionaryParameters(parameter, options, out var dictionaryParameters))
+            return CreateParameters(dictionaryParameters);
+        if (TryGetGeneratedParameters(parameter, options, out var generated))
+            return CreateParameters(generated);
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _options.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+            throw new NotSupportedException($"参数类型 {parameter.GetType().FullName} 没有生成的读取器，请注册 SqlParameters 模型。");
         return parameter;
     }
+
+    /// <summary>发送命令前决定是否需要 Dapper 的列表展开，避免把不支持的容器送入静态执行。</summary>
+    private object CreateParameters(IReadOnlyCollection<SqlParam> parameters)
+    {
+        var list = parameters.FirstOrDefault(NeedsListExpansion);
+        if (list == null)
+            return new StaticMetadataParameters(parameters, _dbParameterCustomizers);
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _options.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+            throw new NotSupportedException($"参数 '{list.Name}' 需要列表展开，严格生成模式暂不支持。请使用 Builder 的 In 参数或 Provider 原生数组。");
+        if (parameters.Any(parameter => NeedsListExpansion(parameter) &&
+                parameter.Direction is not (null or ParameterDirection.Input)))
+            throw new NotSupportedException("列表展开仅支持输入参数。");
+        return new MetadataDynamicParameters(parameters, _dbParameterCustomizers);
+    }
+
+    /// <summary>判断转换后的值；二进制和 PostgreSQL 原生集合始终是一个 Provider 参数。</summary>
+    private static bool NeedsListExpansion(SqlParam parameter) =>
+        parameter?.Value is System.Collections.IEnumerable and not string and not byte[] &&
+        parameter.DatabaseType != DatabaseType.PgSql;
 
     /// <inheritdoc />
     public IReadOnlyCollection<SqlParam> GetSqlParams(ISqlBuilder builder, SqlOptions options)
@@ -138,10 +173,100 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     {
         if (parameter is ISqlParameterMap or IEnumerable<SqlParam>)
         {
-            var result = _parameterResolver.Resolve(CreateBindingContext(parameter, options, context));
-            return result.Items.Select(t => CreateSqlParam(t, options)).Where(t => t != null).ToList();
+            var databaseContext = GetDatabaseContext(options);
+            var result = _parameterResolver.Resolve(CreateBindingContext(parameter, options, context,
+                databaseContext));
+            return result.Items.Select(t => CreateSqlParam(t, options, databaseContext))
+                .Where(t => t != null).ToList();
         }
+        if ((_options.ExecutionMode != SqlExecutionMode.Compatible || !SqlRuntimeFeatures.ReflectionFallbackEnabled) &&
+            TryGetDictionaryParameters(parameter, options, out var dictionaryParameters))
+            return dictionaryParameters;
+        if (parameter != null && TryGetGeneratedParameters(parameter, options, out var generated))
+            return generated;
         return new List<SqlParam>();
+    }
+
+    /// <summary>已知字典容器直接枚举参数，无需实体属性扫描。</summary>
+    private bool TryGetDictionaryParameters(object source, SqlOptions options, out IReadOnlyCollection<SqlParam> parameters)
+    {
+        switch (source)
+        {
+            case IReadOnlyDictionary<string, object> dictionary:
+                parameters = BindDictionaryParameters(dictionary, dictionary.Count, options);
+                return true;
+            case IDictionary<string, object> dictionary:
+                parameters = BindDictionaryParameters(dictionary, dictionary.Count, options);
+                return true;
+            default:
+                parameters = null;
+                return false;
+        }
+    }
+
+    private IReadOnlyCollection<SqlParam> BindDictionaryParameters(
+        IEnumerable<KeyValuePair<string, object>> values, int count, SqlOptions options)
+    {
+        if (count == 0)
+            return Array.Empty<SqlParam>();
+
+        var databaseContext = GetDatabaseContext(options);
+        var parameters = new SqlParam[count];
+        var index = 0;
+        foreach (var item in values)
+        {
+            parameters[index++] = _sqlParameterFactory.Create(item.Key, item.Value, null,
+                databaseContext, source: SqlParameterSource.RawSql);
+        }
+
+        return parameters;
+    }
+
+    /// <summary>通过最终映射和生成访问器读取命名参数，转换只在参数工厂中执行一次。</summary>
+    private bool TryGetGeneratedParameters(object source, SqlOptions options, out IReadOnlyCollection<SqlParam> parameters)
+    {
+        parameters = null;
+        var sourceType = source.GetType();
+        var model = _models is CompositeEntityModelMetadataProvider composite
+            ? composite.GetRegisteredMetadata(sourceType)
+            : _models.GetMetadata(sourceType);
+        if (model == null || model.Properties.Values.Any(member => !member.IsIgnored && member.CanRead && member.GeneratedGetter == null))
+            return false;
+        // Compatible 模式仍允许已登记类型享有生成参数访问，未登记对象交给现有 Dapper 路径。
+        EntityMappingMetadata mapping;
+        var databaseContext = GetDatabaseContext(options);
+        var modelType = model.EntityType;
+        try { mapping = _entityMappingResolver.Resolve(modelType, databaseContext); }
+        catch (NotSupportedException) when (_options.ExecutionMode != SqlExecutionMode.GeneratedOnly) { return false; }
+        var mappedProperties = mapping.Model?.Properties.Values;
+        if (mappedProperties == null)
+            return false;
+
+        var count = 0;
+        foreach (var member in mappedProperties)
+        {
+            if (!member.IsIgnored && member.CanRead)
+            {
+                if (member.GeneratedGetter == null)
+                    return false;
+                count++;
+            }
+        }
+
+        var generated = new SqlParam[count];
+        var index = 0;
+        foreach (var member in mappedProperties)
+        {
+            if (!member.IsIgnored && member.CanRead)
+            {
+                generated[index++] = _sqlParameterFactory.Create(member.PropertyName,
+                    member.GeneratedGetter(source), mapping.Columns[member.PropertyName], databaseContext, modelType,
+                    SqlParameterSource.RawSql);
+            }
+        }
+
+        parameters = generated;
+        return true;
     }
 
     /// <summary>
@@ -150,11 +275,11 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="parameter">参数对象</param>
     /// <param name="options">Sql 配置</param>
     /// <param name="context">调用方提供的执行上下文</param>
+    /// <param name="databaseContext">当前绑定使用的数据库上下文。</param>
     /// <returns>参数绑定上下文</returns>
     private SqlParameterBindingContext CreateBindingContext(object parameter, SqlOptions options,
-        SqlParameterBindingContext context)
+        SqlParameterBindingContext context, DatabaseContext databaseContext)
     {
-        var databaseContext = GetDatabaseContext(options);
         return new SqlParameterBindingContext
         {
             Sql = context?.Sql,
@@ -183,7 +308,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     {
         if (map == null)
             return null;
-        return new MetadataDynamicParameters(GetSqlParams(map, options), _dbParameterCustomizers);
+        return CreateParameters(GetSqlParams(map, options));
     }
 
     /// <summary>
@@ -200,6 +325,17 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>Sql 参数</returns>
     private SqlParam CreateSqlParam(SqlParameterMapItem item, SqlOptions options)
+        => CreateSqlParam(item, options, GetDatabaseContext(options));
+
+    /// <summary>
+    /// 创建增强 SQL 参数，并复用当前绑定已经解析的数据库上下文。
+    /// </summary>
+    /// <param name="item">参数映射项。</param>
+    /// <param name="options">Sql 配置。</param>
+    /// <param name="databaseContext">当前绑定使用的数据库上下文。</param>
+    /// <returns>增强 SQL 参数。</returns>
+    private SqlParam CreateSqlParam(SqlParameterMapItem item, SqlOptions options,
+        DatabaseContext databaseContext)
     {
         if (item == null)
             return null;
@@ -213,8 +349,8 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
                 MetadataLevel = SqlParameterMetadataLevel.Weak
             };
         }
-        var column = ResolveColumnMetadata(item.EntityType, item.PropertyName, options);
-        return _sqlParameterFactory.Create(item.Name, item.Value, column, GetDatabaseContext(options), item.EntityType,
+        var column = ResolveColumnMetadata(item.EntityType, item.PropertyName, options, databaseContext);
+        return _sqlParameterFactory.Create(item.Name, item.Value, column, databaseContext, item.EntityType,
             SqlParameterSource.RawSql);
     }
 
@@ -225,23 +361,38 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <param name="options">Sql 配置</param>
     /// <returns>增强 Sql 参数</returns>
     private SqlParam CreateSqlParam(SqlParameterBindingItem item, SqlOptions options)
+        => CreateSqlParam(item, options, GetDatabaseContext(options));
+
+    /// <summary>
+    /// 创建绑定项参数，并复用当前绑定已经解析的数据库上下文。
+    /// </summary>
+    /// <param name="item">参数绑定项。</param>
+    /// <param name="options">Sql 配置。</param>
+    /// <param name="databaseContext">当前绑定使用的数据库上下文。</param>
+    /// <returns>增强 SQL 参数。</returns>
+    private SqlParam CreateSqlParam(SqlParameterBindingItem item, SqlOptions options,
+        DatabaseContext databaseContext)
     {
         if (item == null)
             return null;
         var metadata = item.Metadata;
+        // Builder/实体命令已经通过字段工厂转换；命令绑定只配置真实 DbParameter。
+        if (metadata?.IsProviderValue == true)
+            return metadata;
         var parameterName = metadata != null &&
                     metadata.Source is not (SqlParameterSource.Unknown or SqlParameterSource.RawSql) &&
                             string.IsNullOrWhiteSpace(metadata.Name) == false
             ? metadata.Name
             : item.Name;
-        var column = ResolveColumnMetadata(metadata?.EntityType, metadata?.PropertyName, options);
-        var converted = _sqlParameterFactory.Create(parameterName, item.Value, column, GetDatabaseContext(options),
+        var column = ResolveColumnMetadata(metadata?.EntityType, metadata?.PropertyName, options, databaseContext);
+        var converted = _sqlParameterFactory.Create(parameterName, item.Value, column, databaseContext,
             metadata?.EntityType, metadata?.Source ?? SqlParameterSource.RawSql);
         return new SqlParam(parameterName, converted.Value, metadata?.DbType ?? converted.DbType,
             metadata?.Direction ?? converted.Direction, metadata?.Size ?? converted.Size,
             metadata?.Precision ?? converted.Precision, metadata?.Scale ?? converted.Scale)
         {
             OriginalValue = item.OriginalValue,
+            IsProviderValue = converted.IsProviderValue,
             EntityType = metadata?.EntityType ?? converted.EntityType,
             PropertyName = metadata?.PropertyName ?? converted.PropertyName,
             ColumnName = metadata?.ColumnName ?? converted.ColumnName,
@@ -275,10 +426,22 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <returns>列映射元数据</returns>
     private ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName,
         SqlOptions options)
+        => ResolveColumnMetadata(entityType, propertyOrColumnName, options, GetDatabaseContext(options));
+
+    /// <summary>
+    /// 使用已解析的数据库上下文查找列映射，避免同一次绑定重复解析上下文。
+    /// </summary>
+    /// <param name="entityType">实体类型。</param>
+    /// <param name="propertyOrColumnName">属性名或列名。</param>
+    /// <param name="options">Sql 配置。</param>
+    /// <param name="databaseContext">当前绑定使用的数据库上下文。</param>
+    /// <returns>匹配的列映射。</returns>
+    private ColumnMappingMetadata ResolveColumnMetadata(Type entityType, string propertyOrColumnName,
+        SqlOptions options, DatabaseContext databaseContext)
     {
         if (entityType == null || string.IsNullOrWhiteSpace(propertyOrColumnName))
             return null;
-        var mapping = _entityMappingResolver.Resolve(entityType, GetDatabaseContext(options));
+        var mapping = _entityMappingResolver.Resolve(entityType, databaseContext);
         if (mapping?.Columns == null || mapping.Columns.Count == 0)
             return null;
         if (mapping.Columns.TryGetValue(propertyOrColumnName, out var column))
@@ -307,7 +470,7 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
     /// <summary>
     /// 元数据参数对象
     /// </summary>
-    private sealed class MetadataDynamicParameters : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
+    private class MetadataDynamicParameters : SqlMapper.IDynamicParameters, ISqlOutputParameterAccessor,
         ISqlOutputParameterSnapshotProvider, IDapperParameterSet
     {
         /// <summary>
@@ -343,11 +506,20 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
 
         /// <inheritdoc />
         public void AddParameters(IDbCommand command, SqlMapper.Identity identity)
+            => BindTo(command);
+
+        /// <inheritdoc />
+        public void BindTo(IDbCommand command)
         {
             if (command == null)
                 return;
             foreach (var parameter in _parameters)
             {
+                if (SqlRuntimeFeatures.ReflectionFallbackEnabled && NeedsListExpansion(parameter))
+                {
+                    SqlDynamicCommandRunner.BindList(command, NormalizeName(parameter.Name), parameter.Value);
+                    continue;
+                }
                 var dbParameter = AddParameter(command, parameter, _customizers);
                 _dbParameters[NormalizeName(parameter.Name)] = dbParameter;
             }
@@ -376,8 +548,13 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
                 dbParameter.Precision = parameter.Precision.Value;
             if (parameter.Scale.HasValue)
                 dbParameter.Scale = parameter.Scale.Value;
-            var customizer = customizers?.FirstOrDefault(t => t.CanHandle(parameter.DatabaseType ?? default));
+            var customizer = customizers?.FirstOrDefault(t => t is not ISqlTypeHandlerParameterAdapter &&
+                t.CanHandle(parameter.DatabaseType ?? default));
             customizer?.Configure(dbParameter, parameter);
+            if (customizers != null)
+                foreach (var adapter in customizers.Where(t => t is ISqlTypeHandlerParameterAdapter &&
+                             t.CanHandle(parameter.DatabaseType ?? default)))
+                    adapter.Configure(dbParameter, parameter);
             command.Parameters.Add(dbParameter);
             return dbParameter;
         }
@@ -457,6 +634,13 @@ internal sealed class DefaultSqlParameterBinder : IDapperParameterBinder
             name = name.Trim();
             return name[0] is '@' or ':' or '?' ? name.Substring(1) : name;
         }
+    }
+
+    /// <summary>只有能力检查通过的单值参数集合才声明可供静态命令使用。</summary>
+    private sealed class StaticMetadataParameters : MetadataDynamicParameters, ISqlStaticParameterSource
+    {
+        internal StaticMetadataParameters(IEnumerable<SqlParam> parameters,
+            IReadOnlyCollection<ISqlDbParameterCustomizer> customizers) : base(parameters, customizers) { }
     }
 }
 

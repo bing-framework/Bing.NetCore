@@ -5,6 +5,7 @@ using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
 using Bing.Data.Sql.Builders.Mutations.Batching;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Metadata;
 
@@ -89,7 +90,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void UpdateFrom_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql()
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlUpdateBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -103,7 +104,7 @@ public sealed class PostgreSqlMutationBuilderTest
         Assert.Equal("Update \"public\".\"samples\" As \"t\" Set \"Name\" = \"s\".\"Name\", \"Version\" = @_p_0 " +
                      "From \"public\".\"sample_updates\" As \"s\" Where \"t\".\"Id\"=\"s\".\"Id\"",
             sql);
-        Assert.Equal(2, builder.GetParams()["@_p_0"]);
+        Assert.Equal(2, Assert.Single(builder.GetParameters()).Value);
         Assert.True(PostgreSqlSqlProvider.Instance.Profile.Mutation.SupportsUpdateFrom);
     }
 
@@ -114,7 +115,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void DeleteUsing_WhenUnifiedBuilderIsConfigured_ShouldRenderPostgreSqlSql()
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlDeleteBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -135,7 +136,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenInsertValuesIsConfigured_ShouldRenderPostgreSqlSql()
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlInsertBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .InsertInto(new SqlTableReference { Schema = "public", TableName = "samples" })
             .Columns("Name")
             .Values("Bing")
@@ -155,11 +156,13 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenInsertSelectIsConfigured_ShouldRenderAfterQuery()
     {
         // Arrange
-        ISqlBuilder builder = new PostgreSqlBuilder();
+        var source = new PostgreSqlBuilder()
+            .Select("Id,Name")
+            .From("samples");
+        var builder = new SqlInsertBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.InsertInto(new SqlTableReference { Schema = "public", TableName = "archive_samples" })
             .Columns("Id", "Name")
-            .Select("Id", "Name")
-            .From("samples")
+            .InsertSelect(source)
             .Returning("Id");
 
         // Act
@@ -177,7 +180,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenUpdateFromIsConfigured_ShouldQualifyTargetColumns()
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlUpdateBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -200,7 +203,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenDeleteUsingIsConfigured_ShouldQualifyTargetColumns()
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlDeleteBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id")
@@ -221,7 +224,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenMappedProjectionIsConfigured_ShouldRenderPhysicalColumnsWithClrAliases()
     {
         // Arrange
-        ISqlBuilder builder = new PostgreSqlBuilder();
+        var builder = new SqlUpdateBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         builder.Update(new SqlTableReference { Schema = "public", TableName = "returning_samples" })
             .Set("sample_name", "Bing")
             .Where("sample_id", 7)
@@ -243,7 +246,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenBuilderIsClonedAndCleared_ShouldKeepInstancesIndependent()
     {
         // Arrange
-        ISqlBuilder source = new PostgreSqlBuilder();
+        var source = new SqlDeleteBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         source.DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples" })
             .Where("Id", 7)
             .Returning("Id");
@@ -251,15 +254,20 @@ public sealed class PostgreSqlMutationBuilderTest
         // Act
         var clone = source.Clone();
         source.Clear();
+        source.DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples" })
+            .Where("Id", 8);
 
         // Assert
         Assert.Equal("Delete From \"public\".\"samples\" Where \"Id\"=@_p_0 Returning \"Id\"", clone.ToSql());
-        Assert.Equal(SqlOperationKind.None, source.OperationKind);
+        Assert.Equal("Delete From \"public\".\"samples\" Where \"Id\"=@_p_0", source.ToSql());
+        Assert.Equal(7, clone.BuildCommand().Parameters.Single().Value);
+        Assert.Equal(8, source.BuildCommand().Parameters.Single().Value);
     }
 
     /// <summary>
-    /// 测试目的：Returning 不接受通配符或表达式，避免扩大返回形状和 Raw SQL 注入面。
+    /// 验证返回子句拒绝通配符及表达式。
     /// </summary>
+    /// <param name="column">待校验的数据库列名。</param>
     [Theory]
     [InlineData("*")]
     [InlineData("Id,Name")]
@@ -267,7 +275,7 @@ public sealed class PostgreSqlMutationBuilderTest
     public void Returning_WhenColumnIsNotSingleIdentifier_ShouldThrowArgumentException(string column)
     {
         // Arrange
-        var builder = new PostgreSqlBuilder()
+        var builder = new SqlDeleteBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples" })
             .AllowAllRows();
 

@@ -31,7 +31,11 @@ public static class SqlParameterExtensions
         source.CheckNull(nameof(source));
         if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor &&
             string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(name)) == false)
-            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Add(name, value));
+            SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+            {
+                accessor.ParameterManager.Add(name, value);
+                (accessor as SqlBuilderBase)?.ForgetFragmentParameterKey(name);
+            });
         return source;
     }
 
@@ -59,11 +63,19 @@ public static class SqlParameterExtensions
             var parameter = CreateSqlParam(source, name, property, value);
             if (parameter != null &&
                 string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(parameter.Name)) == false)
-                SqlQueryOperationAccessor.MutateBuilder(source, _ => advancedParameterManager.Add(parameter));
+                SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+                {
+                    advancedParameterManager.Add(parameter);
+                    (accessor as SqlBuilderBase)?.ForgetFragmentParameterKey(parameter.Name);
+                });
             return source;
         }
         if (string.IsNullOrWhiteSpace(accessor.ParameterManager.NormalizeName(name)) == false)
-            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Add(name, value));
+            SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+            {
+                accessor.ParameterManager.Add(name, value);
+                (accessor as SqlBuilderBase)?.ForgetFragmentParameterKey(name);
+            });
         return source;
     }
 
@@ -154,8 +166,15 @@ public static class SqlParameterExtensions
         where T : ISqlParameter
     {
         source.CheckNull(nameof(source));
-        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor && accessor.ParameterManager.Count > 0)
-            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.ParameterManager.Clear());
+        if (GetSqlBuilder(source) is ISqlCommonPartAccessor accessor &&
+            (accessor.ParameterManager.Count > 0 || accessor is SqlBuilderBase { HasFragmentParameterKeys: true }))
+            SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+            {
+                if (accessor is SqlBuilderBase builder)
+                    builder.ClearSqlParams();
+                else
+                    accessor.ParameterManager.Clear();
+            });
         return source;
     }
 

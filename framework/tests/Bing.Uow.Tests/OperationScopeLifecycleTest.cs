@@ -11,6 +11,9 @@ namespace Bing.Uow.Tests;
 /// </summary>
 public sealed class OperationScopeLifecycleTest
 {
+    /// <summary>
+    /// 验证参与者异常被捕获后拥有者仍不能提交。
+    /// </summary>
     [Fact]
     public async Task ParticipantFailure_WhenCaught_ShouldPreventOwnerCommit()
     {
@@ -39,6 +42,9 @@ public sealed class OperationScopeLifecycleTest
         await root.DisposeAsync();
     }
 
+    /// <summary>
+    /// 验证工作单元先保存变更再提交资源。
+    /// </summary>
     [Fact]
     public async Task Complete_ShouldSaveBeforeCommittingResources()
     {
@@ -59,6 +65,9 @@ public sealed class OperationScopeLifecycleTest
         order.ShouldBe(new[] { "save", "commit" });
     }
 
+    /// <summary>
+    /// 验证部分提交失败只通知已提交资源并保留部分结果。
+    /// </summary>
     [Fact]
     public async Task CommitFailure_ShouldKeepPartialOutcomeAndNotifyOnlyCommittedResource()
     {
@@ -118,6 +127,9 @@ public sealed class OperationScopeLifecycleTest
         Assert.Equal(1, second.DisposeCount);
     }
 
+    /// <summary>
+    /// 验证提交后通知失败不会重试已提交资源。
+    /// </summary>
     [Fact]
     public async Task NotificationFailure_ShouldNotRetryAfterOperationResourcesCommitted()
     {
@@ -148,6 +160,9 @@ public sealed class OperationScopeLifecycleTest
         Assert.Equal(1, resource.DisposeCount);
     }
 
+    /// <summary>
+    /// 验证保存取消保留主异常且只尝试一次不可取消清理。
+    /// </summary>
     [Fact]
     public async Task SaveCancellation_ShouldPreservePrimaryAndAttemptNonCancelableCleanupOnce()
     {
@@ -200,6 +215,10 @@ public sealed class OperationScopeLifecycleTest
         Assert.Equal(1, resource.DisposeCount);
     }
 
+    /// <summary>
+    /// 验证保存处理器标记仅回滚后回滚全部资源且不执行回调。
+    /// </summary>
+    /// <param name="asynchronous">是否使用异步执行路径。</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -243,6 +262,10 @@ public sealed class OperationScopeLifecycleTest
         duringSave.DisposeCount.ShouldBe(1);
     }
 
+    /// <summary>
+    /// 验证捕获写入失败并标记仅回滚后不会提交。
+    /// </summary>
+    /// <param name="asynchronous">是否使用异步执行路径。</param>
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -279,6 +302,11 @@ public sealed class OperationScopeLifecycleTest
         resource.DisposeCount.ShouldBe(1);
     }
 
+    /// <summary>
+    /// 验证保存期间的重入根操作被拒绝并触发回滚。
+    /// </summary>
+    /// <param name="action">重入操作的名称。</param>
+    /// <param name="asynchronous">是否使用异步执行路径。</param>
     [Theory]
     [InlineData("rollback", false)]
     [InlineData("rollback", true)]
@@ -333,6 +361,9 @@ public sealed class OperationScopeLifecycleTest
         resource.DisposeCount.ShouldBe(1);
     }
 
+    /// <summary>
+    /// 验证保存处理器等待时拒绝其他执行流准入。
+    /// </summary>
     [Fact]
     public async Task SavingHandlerPending_ShouldRejectOtherExecutionFlowAdmission()
     {
@@ -381,6 +412,9 @@ public sealed class OperationScopeLifecycleTest
         resource.DisposeCount.ShouldBe(1);
     }
 
+    /// <summary>
+    /// 验证参与者完成参数未取消时仍保留参与者自身取消。
+    /// </summary>
     [Fact]
     public async Task ParticipantCompleteAsync_WithNonCancelledArgument_ShouldPreserveParticipantCancellation()
     {
@@ -404,6 +438,9 @@ public sealed class OperationScopeLifecycleTest
         await root.DisposeAsync();
     }
 
+    /// <summary>
+    /// 验证同步完成拒绝已取消的参与者。
+    /// </summary>
     [Fact]
     public async Task ParticipantComplete_WithCancelledParticipant_ShouldRejectSynchronousCompletion()
     {
@@ -425,6 +462,9 @@ public sealed class OperationScopeLifecycleTest
         await root.DisposeAsync();
     }
 
+    /// <summary>
+    /// 验证嵌套参与者继承父参与者的取消状态。
+    /// </summary>
     [Fact]
     public async Task NestedParticipant_ShouldInheritParentParticipantCancellation()
     {
@@ -449,6 +489,9 @@ public sealed class OperationScopeLifecycleTest
         await root.DisposeAsync();
     }
 
+    /// <summary>
+    /// 验证操作开始时冻结选项并组合参与者取消令牌。
+    /// </summary>
     [Fact]
     public void BeginOperation_ShouldSnapshotOptionsAndComposeParticipantCancellation()
     {
@@ -479,6 +522,9 @@ public sealed class OperationScopeLifecycleTest
         root.Dispose();
     }
 
+    /// <summary>
+    /// 验证超时取消根操作且不延长参与者截止时间。
+    /// </summary>
     [Fact]
     public async Task Timeout_ShouldCancelRootWithoutRenewingParticipantDeadline()
     {
@@ -505,6 +551,10 @@ public sealed class OperationScopeLifecycleTest
         await root.DisposeAsync();
     }
 
+    /// <summary>
+    /// 验证操作作用域拒绝非正数超时时长。
+    /// </summary>
+    /// <param name="milliseconds">时钟推进的毫秒数。</param>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
@@ -522,12 +572,23 @@ public sealed class OperationScopeLifecycleTest
         }));
     }
 
+    /// <summary>
+    /// 为OperationScopeLifecycleTest测试记录并观察相关调用状态。
+    /// </summary>
     private sealed class RecordingSaveChangesHandler : IUnitOfWorkSaveChangesHandler
     {
+        /// <summary>
+        /// 保存记录保存变更处理器调用顺序的列表。
+        /// </summary>
         private readonly List<string> _order;
 
+        /// <summary>
+        /// 初始化一个 <see cref="RecordingSaveChangesHandler" /> 类型的实例。
+        /// </summary>
+        /// <param name="order">用于记录或确定当前操作顺序的值。</param>
         public RecordingSaveChangesHandler(List<string> order) => _order = order;
 
+        /// <inheritdoc />
         public void SaveChanges(IUnitOfWorkScope scope)
         {
             scope.IsActive.ShouldBeTrue();
@@ -535,6 +596,7 @@ public sealed class OperationScopeLifecycleTest
             scope.GetOrAddResource("during-save", () => new OrderedResource(_order));
         }
 
+        /// <inheritdoc />
         public Task SaveChangesAsync(IUnitOfWorkScope scope, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -543,25 +605,43 @@ public sealed class OperationScopeLifecycleTest
         }
     }
 
+    /// <summary>
+    /// 记录工作单元资源的提交、回滚和释放次数。
+    /// </summary>
     private sealed class CountingResource : IUnitOfWorkResource
     {
+        /// <summary>
+        /// 获取提交事务的累计次数。
+        /// </summary>
         public int CommitCount { get; private set; }
+        /// <summary>
+        /// 获取回滚事务的累计次数。
+        /// </summary>
         public int RollbackCount { get; private set; }
+        /// <summary>
+        /// 获取释放资源的累计次数。
+        /// </summary>
         public int DisposeCount { get; private set; }
+        /// <inheritdoc />
         public void Commit() => CommitCount++;
+        /// <inheritdoc />
         public Task CommitAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             CommitCount++;
             return Task.CompletedTask;
         }
+        /// <inheritdoc />
         public void Rollback() => RollbackCount++;
+        /// <inheritdoc />
         public Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             RollbackCount++;
             return Task.CompletedTask;
         }
+        /// <inheritdoc />
         public void Dispose() => DisposeCount++;
+        /// <inheritdoc />
         public ValueTask DisposeAsync()
         {
             DisposeCount++;
@@ -569,11 +649,25 @@ public sealed class OperationScopeLifecycleTest
         }
     }
 
+    /// <summary>
+    /// 将 SaveChanges 调用转发给指定委托的测试处理器。
+    /// </summary>
     private sealed class DelegateSaveChangesHandler : IUnitOfWorkSaveChangesHandler
     {
+        /// <summary>
+        /// 保存委托保存变更处理器的同步保存委托。
+        /// </summary>
         private readonly Action<IUnitOfWorkScope> _save;
+        /// <summary>
+        /// 保存委托保存变更处理器的异步保存委托。
+        /// </summary>
         private readonly Func<IUnitOfWorkScope, CancellationToken, Task> _saveAsync;
 
+        /// <summary>
+        /// 初始化一个 <see cref="DelegateSaveChangesHandler" /> 类型的实例。
+        /// </summary>
+        /// <param name="save">保存工作单元范围时调用的回调。</param>
+        /// <param name="saveAsync">异步保存工作单元范围时调用的委托。</param>
         public DelegateSaveChangesHandler(Action<IUnitOfWorkScope> save = null,
             Func<IUnitOfWorkScope, CancellationToken, Task> saveAsync = null)
         {
@@ -586,22 +680,49 @@ public sealed class OperationScopeLifecycleTest
             });
         }
 
+        /// <inheritdoc />
         public void SaveChanges(IUnitOfWorkScope scope) => _save(scope);
 
+        /// <inheritdoc />
         public Task SaveChangesAsync(IUnitOfWorkScope scope, CancellationToken cancellationToken = default) =>
             _saveAsync(scope, cancellationToken);
     }
 
+    /// <summary>
+    /// 在提交生命周期测试中跟踪故障资源状态。
+    /// </summary>
     private sealed class OperationFaultResource : IUnitOfWorkResource
     {
+        /// <summary>
+        /// 获取或初始化提交阶段应抛出的异常。
+        /// </summary>
         public Exception CommitFailure { get; init; }
+        /// <summary>
+        /// 获取或初始化回滚阶段应抛出的异常。
+        /// </summary>
         public Exception RollbackFailure { get; init; }
+        /// <summary>
+        /// 获取或初始化资源释放阶段应抛出的异常。
+        /// </summary>
         public Exception DisposeFailure { get; init; }
+        /// <summary>
+        /// 获取提交事务的累计次数。
+        /// </summary>
         public int CommitCount { get; private set; }
+        /// <summary>
+        /// 获取回滚事务的累计次数。
+        /// </summary>
         public int RollbackCount { get; private set; }
+        /// <summary>
+        /// 获取释放资源的累计次数。
+        /// </summary>
         public int DisposeCount { get; private set; }
+        /// <summary>
+        /// 获取最近一次回滚接收的取消令牌。
+        /// </summary>
         public CancellationToken LastRollbackToken { get; private set; }
 
+        /// <inheritdoc />
         public void Commit()
         {
             CommitCount++;
@@ -609,6 +730,7 @@ public sealed class OperationScopeLifecycleTest
                 ExceptionDispatchInfo.Capture(CommitFailure).Throw();
         }
 
+        /// <inheritdoc />
         public Task CommitAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -616,6 +738,7 @@ public sealed class OperationScopeLifecycleTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Rollback()
         {
             RollbackCount++;
@@ -623,6 +746,7 @@ public sealed class OperationScopeLifecycleTest
                 ExceptionDispatchInfo.Capture(RollbackFailure).Throw();
         }
 
+        /// <inheritdoc />
         public Task RollbackAsync(CancellationToken cancellationToken = default)
         {
             LastRollbackToken = cancellationToken;
@@ -630,6 +754,7 @@ public sealed class OperationScopeLifecycleTest
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             DisposeCount++;
@@ -637,6 +762,7 @@ public sealed class OperationScopeLifecycleTest
                 ExceptionDispatchInfo.Capture(DisposeFailure).Throw();
         }
 
+        /// <inheritdoc />
         public ValueTask DisposeAsync()
         {
             Dispose();
@@ -644,20 +770,36 @@ public sealed class OperationScopeLifecycleTest
         }
     }
 
+    /// <summary>
+    /// 记录工作单元资源的执行顺序和完成状态。
+    /// </summary>
     private sealed class OrderedResource : IUnitOfWorkResource
     {
+        /// <summary>
+        /// 保存有序资源记录操作顺序的列表。
+        /// </summary>
         private readonly List<string> _order;
+        /// <summary>
+        /// 初始化一个 <see cref="OrderedResource" /> 类型的实例。
+        /// </summary>
+        /// <param name="order">用于记录或确定当前操作顺序的值。</param>
         public OrderedResource(List<string> order) => _order = order;
+        /// <inheritdoc />
         public void Commit() => _order.Add("commit");
+        /// <inheritdoc />
         public Task CommitAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             Commit();
             return Task.CompletedTask;
         }
+        /// <inheritdoc />
         public void Rollback() { }
+        /// <inheritdoc />
         public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        /// <inheritdoc />
         public void Dispose() { }
+        /// <inheritdoc />
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

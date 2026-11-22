@@ -88,7 +88,9 @@ public sealed class SetClause : ISetClause, IColumnSetClause
                 var item = _items[index];
                 builder.Append(_context.Dialect.SafeName(item.Column));
                 builder.Append(" = ");
-                builder.Append(item.IsParameter ? _context.Dialect.GetParamName(item.Value) : item.Value);
+                builder.Append(item.IsParameter
+                    ? SqlMutationContext.GetParameterPlaceholder(_context.Provider, item.Value)
+                    : item.Value);
             }
         }
         catch
@@ -148,5 +150,6 @@ public sealed class SetClause : ISetClause, IColumnSetClause
         /// 获取是否将值解释为参数名称。
         /// </summary>
         public bool IsParameter { get; }
+
     }
 }

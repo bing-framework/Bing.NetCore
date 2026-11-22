@@ -61,11 +61,11 @@ public static class SqlQueryRuntimeBinding
     /// </summary>
     /// <param name="query">目标查询对象。</param>
     /// <returns>运行时绑定控制器。</returns>
-    private static ISqlQueryRuntimeBindingController GetController(ISqlQuery query)
+    private static ISqlExecutionRuntimeBindingController GetController(ISqlQuery query)
     {
         if (query == null)
             throw new ArgumentNullException(nameof(query));
-        return query as ISqlQueryRuntimeBindingController ??
+        return query as ISqlExecutionRuntimeBindingController ??
                throw new InvalidOperationException("当前 SQL 查询对象不支持框架运行时资源绑定。");
     }
 }

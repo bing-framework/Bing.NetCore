@@ -84,8 +84,10 @@ public class SqliteProviderRegistrationTest
     }
 
     /// <summary>
-    /// 测试目的：SQLite 类型转换器应识别标准 affinity，忽略大小写，并为未知或空类型提供稳定回退。
+    /// 验证 SQLite 类型转换识别类型亲和性且保留稳定回退。
     /// </summary>
+    /// <param name="dataType">待测试的数据库数据类型名称。</param>
+    /// <param name="expected">预期的断言结果。</param>
     [Theory]
     [InlineData(null, null)]
     [InlineData("", null)]

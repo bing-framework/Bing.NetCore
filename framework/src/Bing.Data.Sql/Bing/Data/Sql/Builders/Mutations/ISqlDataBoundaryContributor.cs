@@ -144,6 +144,6 @@ public sealed class SqlDataBoundaryContext
             ? _mutationContext.Dialect.SafeName(column.ColumnName)
             : $"{_mutationContext.Dialect.SafeName(Target.Alias)}.{_mutationContext.Dialect.SafeName(column.ColumnName)}";
         _whereClause.And(SqlConditionFactory.Create(left,
-            _mutationContext.Dialect.GetParamName(parameter.Name), Operator.Equal));
+            SqlMutationContext.GetParameterPlaceholder(_mutationContext.Provider, parameter.Name), Operator.Equal));
     }
 }

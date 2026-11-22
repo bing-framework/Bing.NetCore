@@ -1,0 +1,311 @@
+name: sql-aot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'codex/sql-aot-rc'
+  pull_request:
+    paths:
+      - 'eng/sql-aot/**'
+      - 'eng/ci/Invoke-SqlRegressionTests.ps1'
+      - 'eng/ci/tests/Invoke-SqlRegressionTests.Tests.ps1'
+      - 'eng/ci/tests/Invoke-SqlBenchmarkSmoke.Tests.ps1'
+      - 'eng/perf/**'
+      - '.github/workflows/sql-aot.yml'
+      - 'framework/src/Bing.Data*/**'
+      - 'framework/src/Bing.Dapper*/**'
+      - 'framework/src/Bing.Core/**'
+      - 'framework/src/Bing.Security/**'
+      - 'framework/src/Bing.Uow/**'
+      - 'framework/tests/Bing.Data.Sql*/**'
+      - 'framework/tests/Bing.Dapper*/**'
+      - 'framework/tests/Bing.Test.Shared/**'
+      - 'framework/tests/Bing.Uow.Tests/**'
+      - '*.props'
+      - 'asset/props/**'
+      - 'global.json'
+
+jobs:
+  sql-regression:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.4xx
+            8.0.x
+            6.0.x
+          dotnet-quality: 'ga'
+      - name: Regression runner contracts
+        shell: pwsh
+        run: ./eng/ci/tests/Invoke-SqlRegressionTests.Tests.ps1
+      - name: SQL regression tests
+        shell: pwsh
+        run: ./eng/ci/Invoke-SqlRegressionTests.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-regression
+          path: |
+            output/sql-regression/**/*.trx
+            output/sql-regression/**/reports.json
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 14
+
+  benchmark-smoke:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+            8.0.x
+      - name: Windows PostgreSQL lifecycle contracts
+        shell: pwsh
+        run: ./eng/sql-aot/tests/WindowsPostgreSql.Tests.ps1
+      - name: Windows MySQL lifecycle contracts
+        shell: pwsh
+        run: ./eng/sql-aot/tests/WindowsMySql.Tests.ps1
+      - name: Windows SQL Server lifecycle contracts
+        shell: pwsh
+        run: ./eng/sql-aot/tests/WindowsSqlServer.Tests.ps1
+      - name: Benchmark discovery, capacity and diagnostic contracts
+        shell: pwsh
+        run: ./eng/ci/tests/Invoke-SqlBenchmarkSmoke.Tests.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-benchmark-smoke
+          path: |
+            output/sql-benchmark-smoke/**/*.json
+            output/sql-benchmark-smoke/**/*.log
+            output/sql-aot-postgresql-tests/**/*.json
+            output/sql-aot-postgresql-tests/**/*.log
+            output/sql-aot-mysql-tests/**/*.json
+            output/sql-aot-mysql-tests/**/*.log
+            output/sql-aot-sqlserver-tests/**/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  matrix:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      cases: ${{ steps.matrix.outputs.cases }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Matrix and runner contracts
+        run: node --test eng/sql-aot/verify.test.mjs eng/sql-aot/verify-ci.test.mjs
+      - id: matrix
+        name: Select enabled cases
+        shell: bash
+        run: echo "cases=$(node eng/sql-aot/verify.mjs --ci-matrix)" >> "$GITHUB_OUTPUT"
+
+  native:
+    needs: matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.matrix.outputs.cases) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - name: Prepare WSL2 Docker for Oracle
+        if: ${{ matrix.id == 'oracle-win-x64' }}
+        uses: Particular/setup-wsl-action@19b7628eaf38f79a6822e185735f61d99badcfa2 # v1.3.0
+        with:
+          enable-cache: 'false'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          architecture: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
+      - uses: actions/setup-dotnet@v4
+        with:
+          # global.json 使用 latestPatch，因此安装相同 SDK 功能带的正式修补版。
+          dotnet-version: '10.0.4xx'
+          dotnet-quality: 'ga'
+      - name: Start isolated PostgreSQL test database
+        if: ${{ matrix.id == 'postgresql-linux-x64' }}
+        shell: bash
+        run: |
+          docker run -d --rm --name sql-aot-postgresql -p 127.0.0.1::5432 \
+            -e POSTGRES_USER=bing_aot -e POSTGRES_PASSWORD=local_aot_test_password \
+            -e POSTGRES_DB=bing_sql_aot_test postgres:16-alpine
+          ready=false
+          for attempt in {1..30}; do
+            if docker exec sql-aot-postgresql pg_isready -U bing_aot -d bing_sql_aot_test; then ready=true; break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then docker logs sql-aot-postgresql; exit 1; fi
+          binding=$(docker port sql-aot-postgresql 5432/tcp)
+          echo "RUN_POSTGRESQL_INTEGRATION_TESTS=true" >> "$GITHUB_ENV"
+          echo "ConnectionStrings__PostgreSqlConnection=Host=127.0.0.1;Port=${binding##*:};Database=bing_sql_aot_test;Username=bing_aot;Password=local_aot_test_password;Pooling=false" >> "$GITHUB_ENV"
+      - name: Start isolated MySQL test database
+        if: ${{ matrix.id == 'mysql-linux-x64' }}
+        shell: bash
+        run: |
+          docker run -d --rm --name sql-aot-mysql -p 127.0.0.1::3306 \
+            -e MYSQL_ROOT_PASSWORD=local_aot_root_password -e MYSQL_DATABASE=bing_sql_aot_test \
+            -e MYSQL_USER=bing_aot -e MYSQL_PASSWORD=local_aot_test_password mysql:8.0
+          ready=false
+          for attempt in {1..60}; do
+            if docker exec sql-aot-mysql mysqladmin ping -h 127.0.0.1 -u root -plocal_aot_root_password --silent; then ready=true; break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then docker logs sql-aot-mysql; exit 1; fi
+          binding=$(docker port sql-aot-mysql 3306/tcp)
+          echo "RUN_MYSQL_INTEGRATION_TESTS=true" >> "$GITHUB_ENV"
+          echo "ConnectionStrings__MySqlConnection=Server=127.0.0.1;Port=${binding##*:};Database=bing_sql_aot_test;User ID=bing_aot;Password=local_aot_test_password;Pooling=false;SslMode=None;AllowPublicKeyRetrieval=true" >> "$GITHUB_ENV"
+      - name: Start isolated SQL Server test database
+        if: ${{ matrix.id == 'sqlserver-linux-x64' }}
+        shell: bash
+        run: |
+          mkdir -p output/sql-aot-sqlserver
+          export MSSQL_SA_PASSWORD="BingAot1!$(openssl rand -hex 16)"
+          export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"
+          echo "::add-mask::$MSSQL_SA_PASSWORD"
+          id=$(docker run -d --rm -p 127.0.0.1::1433 -e ACCEPT_EULA=Y -e MSSQL_PID=Developer \
+            -e MSSQL_SA_PASSWORD mcr.microsoft.com/mssql/server:2022-latest)
+          echo "$id" > "$RUNNER_TEMP/sql-aot-sqlserver-container"
+          sqlcmd=/opt/mssql-tools18/bin/sqlcmd
+          ready=false
+          for attempt in {1..30}; do
+            if docker exec -e SQLCMDPASSWORD "$id" "$sqlcmd" -S localhost -U sa -C -b -l 2 \
+              -Q "SET NOCOUNT ON; SELECT CONVERT(varchar(50), SERVERPROPERTY('ProductVersion'));" \
+              > output/sql-aot-sqlserver/ready.log 2>&1; then ready=true; break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat output/sql-aot-sqlserver/ready.log; exit 1; fi
+          docker exec -e SQLCMDPASSWORD "$id" "$sqlcmd" -S localhost -U sa -C -b \
+            -Q 'CREATE DATABASE bing_sql_aot_test;' > output/sql-aot-sqlserver/database.log 2>&1
+          binding=$(docker port "$id" 1433/tcp)
+          echo "RUN_SQLSERVER_INTEGRATION_TESTS=true" >> "$GITHUB_ENV"
+          echo "ConnectionStrings__SqlServerConnection=Server=tcp:127.0.0.1,${binding##*:};Database=bing_sql_aot_test;User ID=sa;Password=$MSSQL_SA_PASSWORD;TrustServerCertificate=true;Pooling=false" >> "$GITHUB_ENV"
+      - name: Start isolated Oracle test database
+        if: ${{ matrix.id == 'oracle-linux-x64' || matrix.id == 'oracle-win-x64' }}
+        timeout-minutes: 8
+        shell: bash
+        run: bash eng/sql-aot/Invoke-LinuxOracle.sh start
+      - name: Start isolated Windows PostgreSQL test database
+        if: ${{ matrix.id == 'postgresql-win-x64' }}
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsPostgreSql.ps1 -Action Start
+      - name: Start isolated Windows MySQL test database
+        if: ${{ matrix.id == 'mysql-win-x64' }}
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsMySql.ps1 -Action Start
+      - name: Start isolated Windows SQL Server test database
+        if: ${{ matrix.id == 'sqlserver-win-x64' }}
+        timeout-minutes: 3
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsSqlServer.ps1 -Action Start
+      - name: Publish and execute Native case
+        run: node eng/sql-aot/verify.mjs --case ${{ matrix.id }}
+      - name: Stop isolated Windows PostgreSQL test database
+        if: ${{ always() && matrix.id == 'postgresql-win-x64' }}
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsPostgreSql.ps1 -Action Stop
+      - name: Stop isolated Windows MySQL test database
+        if: ${{ always() && matrix.id == 'mysql-win-x64' }}
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsMySql.ps1 -Action Stop
+      - name: Stop isolated Windows SQL Server test database
+        if: ${{ always() && matrix.id == 'sqlserver-win-x64' }}
+        timeout-minutes: 3
+        shell: pwsh
+        run: ./eng/sql-aot/Invoke-WindowsSqlServer.ps1 -Action Stop
+      - name: Remove isolated SQL Server test database
+        if: ${{ always() && matrix.id == 'sqlserver-linux-x64' }}
+        shell: bash
+        run: |
+          receipt="$RUNNER_TEMP/sql-aot-sqlserver-container"
+          if [ ! -s "$receipt" ]; then exit 0; fi
+          id=$(cat "$receipt")
+          remaining=$(docker ps -aq --filter "id=$id")
+          if [ -n "$remaining" ]; then
+            docker logs "$id" > output/sql-aot-sqlserver/server.log 2>&1 || true
+            docker stop "$id" > output/sql-aot-sqlserver/stop.log
+          fi
+      - name: Remove isolated Oracle test database
+        if: ${{ always() && (matrix.id == 'oracle-linux-x64' || matrix.id == 'oracle-win-x64') }}
+        shell: bash
+        run: bash eng/sql-aot/Invoke-LinuxOracle.sh stop
+      - name: Remove isolated PostgreSQL test database
+        if: ${{ always() && matrix.id == 'postgresql-linux-x64' }}
+        shell: bash
+        run: |
+          id=$(docker ps -aq --filter 'name=^/sql-aot-postgresql$')
+          if [ -n "$id" ]; then docker rm -f "$id"; fi
+      - name: Remove isolated MySQL test database
+        if: ${{ always() && matrix.id == 'mysql-linux-x64' }}
+        shell: bash
+        run: |
+          id=$(docker ps -aq --filter 'name=^/sql-aot-mysql$')
+          if [ -n "$id" ]; then docker rm -f "$id"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-aot-${{ matrix.id }}
+          overwrite: true
+          path: |
+            output/sql-aot/**/*.json
+            output/sql-aot/**/*.log
+            output/sql-aot-postgresql/*.log
+            output/sql-aot-postgresql/state.json
+            output/sql-aot-mysql/*.log
+            output/sql-aot-mysql/state.json
+            output/sql-aot-sqlserver/*.log
+            output/sql-aot-sqlserver/instance.txt
+            output/sql-aot-oracle/*.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  native-summary:
+    needs: [matrix, native, sql-regression]
+    if: ${{ always() }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sql-aot-*
+          path: output/sql-aot-download
+          merge-multiple: false
+      - uses: actions/download-artifact@v4
+        if: always()
+        with:
+          name: sql-regression
+          path: output/sql-aot-download/sql-regression
+      - name: Verify Native receipts and SQL regression
+        if: always()
+        shell: bash
+        env:
+          NATIVE_JOB_RESULT: ${{ needs.native.result }}
+          SQL_REGRESSION_JOB_RESULT: ${{ needs.sql-regression.result }}
+        run: |
+          mkdir -p output
+          status=0
+          node eng/sql-aot/verify.mjs --ci-summary output/sql-aot-download "$NATIVE_JOB_RESULT" "$SQL_REGRESSION_JOB_RESULT" > output/sql-aot-summary.json || status=$?
+          cat output/sql-aot-summary.json
+          exit "$status"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-native-summary
+          path: output/sql-aot-summary.json
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 14

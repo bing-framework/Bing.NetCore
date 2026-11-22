@@ -31,6 +31,9 @@ public static class BingOperationServiceCollectionExtensions
     }
 }
 
+/// <summary>
+/// 标记工作单元运维服务已完成注册。
+/// </summary>
 internal sealed class UnitOfWorkOperationsRegistrationMarker
 {
 }

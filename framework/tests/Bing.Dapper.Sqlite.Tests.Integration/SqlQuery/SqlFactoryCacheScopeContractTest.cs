@@ -14,15 +14,30 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// </summary>
 public sealed class SqlFactoryCacheScopeContractTest
 {
+    /// <summary>
+    /// 定义缓存作用域共享的数据源名称。
+    /// </summary>
     private const string SharedDataSource = "cache-shared";
+    /// <summary>
+    /// 定义缓存作用域隔离的数据源名称。
+    /// </summary>
     private const string IsolatedDataSource = "cache-isolated";
 
+    /// <summary>
+    /// 定义启用软删除过滤的共享数据源查询 SQL。
+    /// </summary>
     private const string SharedEnabledSql =
         "Select `cache_scope_shared`.`Id`,`cache_scope_shared`.`Name`,`cache_scope_shared`.`IsDeleted` \r\nFrom `cache_scope_shared` \r\nWhere `cache_scope_shared`.`IsDeleted`=@_p_0";
 
+    /// <summary>
+    /// 定义禁用软删除过滤的共享数据源查询 SQL。
+    /// </summary>
     private const string SharedDisabledSql =
         "Select `cache_scope_shared`.`Id`,`cache_scope_shared`.`Name`,`cache_scope_shared`.`IsDeleted` \r\nFrom `cache_scope_shared`";
 
+    /// <summary>
+    /// 定义启用软删除过滤的隔离数据源查询 SQL。
+    /// </summary>
     private const string IsolatedEnabledSql =
         "Select `cache_scope_isolated`.`Id`,`cache_scope_isolated`.`Name`,`cache_scope_isolated`.`IsDeleted` \r\nFrom `cache_scope_isolated` \r\nWhere `cache_scope_isolated`.`IsDeleted`=@_p_0";
 
@@ -155,6 +170,12 @@ public sealed class SqlFactoryCacheScopeContractTest
         Assert.Equal(afterIsolatedRoute.EntryCount, afterIsolatedWarmRender.EntryCount);
     }
 
+    /// <summary>
+    /// 验证渲染 SQL 及软删除参数符合预期。
+    /// </summary>
+    /// <param name="source">待渲染的 SQL 查询。</param>
+    /// <param name="expectedSql">预期生成的完整 SQL。</param>
+    /// <param name="expectSoftDeleteParameter">是否预期生成软删除参数。</param>
     private static void AssertRendered(SqlLambdaQuery source, string expectedSql, bool expectSoftDeleteParameter)
     {
         var snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(
@@ -172,6 +193,11 @@ public sealed class SqlFactoryCacheScopeContractTest
             Assert.Empty(snapshot.Parameters);
     }
 
+    /// <summary>
+    /// 创建共享数据源及过滤器的 SQL 测试容器。
+    /// </summary>
+    /// <param name="connectionString">测试数据库连接字符串。</param>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(string connectionString)
     {
         var services = new ServiceCollection();
@@ -205,12 +231,22 @@ public sealed class SqlFactoryCacheScopeContractTest
         });
     }
 
+    /// <summary>
+    /// 用于验证 Provider 查询作用域过滤的测试实体。
+    /// </summary>
     public sealed class SqlFactoryCacheScopeProbeEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置实体或结果名称。
+        /// </summary>
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 }

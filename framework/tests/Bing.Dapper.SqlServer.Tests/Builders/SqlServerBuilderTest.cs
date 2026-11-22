@@ -9,8 +9,11 @@ using Xunit;
 namespace Bing.Dapper.Tests.Builders;
 
 /// <summary>
-/// <see cref="SqlServerBuilder"/> 单元测试 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@_p_N 参数、分页语法。
+/// SQL Server 查询构建器测试。
 /// </summary>
+/// <remarks>
+/// <see cref="SqlServerBuilder"/> 单元测试 验证 SQL Server 方言下 SQL 生成行为：方括号标识符、@_p_N 参数、分页语法。
+/// </remarks>
 public class SqlServerBuilderTest
 {
     /// <summary>

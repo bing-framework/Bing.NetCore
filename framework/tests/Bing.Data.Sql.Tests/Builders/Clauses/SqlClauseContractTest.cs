@@ -229,10 +229,10 @@ public class SqlClauseContractTest
     }
 
     /// <summary>
-    /// 测试目的：完整 SQL Operation 实现必须同时提供查询和三类 Mutation Clause Accessor。
+    /// 测试目的：查询 Builder 只提供查询契约，写入子句由专用 Builder 承担。
     /// </summary>
     [Fact]
-    public void SqlOperationImplementation_ShouldProvideCompleteClauseAccessors()
+    public void QueryBuilder_ShouldExposeQueryClausesWithoutMutationState()
     {
         // Arrange
         var builder = typeof(TestSqlBuilder);
@@ -240,13 +240,14 @@ public class SqlClauseContractTest
         // Act
         var contracts = new[]
         {
-            typeof(ISqlQueryClauseAccessor), typeof(IInsertClauseAccessor), typeof(IUpdateClauseAccessor),
+            typeof(IInsertClauseAccessor), typeof(IUpdateClauseAccessor),
             typeof(IDeleteClauseAccessor), typeof(ISqlMutationContextAccessor)
         };
 
         // Assert
-        Assert.True(typeof(ISqlOperation).IsAssignableFrom(builder));
-        Assert.All(contracts, contract => Assert.True(contract.IsAssignableFrom(builder)));
+        Assert.True(typeof(ISqlQueryClauseAccessor).IsAssignableFrom(builder));
+        Assert.False(typeof(ISqlOperation).IsAssignableFrom(builder));
+        Assert.All(contracts, contract => Assert.False(contract.IsAssignableFrom(builder)));
     }
 
     /// <summary>

@@ -40,8 +40,15 @@ public static class OracleServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISqlDbParameterCustomizer, OracleDbParameterCustomizer>());
         services.AddSqlDbConnectionFactory(OracleSqlProvider.Instance.Key, CreateConnection);
         services.AddDatabaseTypeConverter<OracleTypeConverter>(DatabaseType.Oracle);
-        services.AddSqlProviderRuntime(new SqlProviderRuntime(OracleSqlProvider.Instance.Key, typeof(OracleSqlQuery),
-            typeof(OracleSqlExecutor)));
+        services.AddSqlProviderRuntime(SqlProviderRuntime.CreateWithFactories(OracleSqlProvider.Instance.Key,
+            typeof(OracleSqlQuery), typeof(OracleSqlExecutor), null,
+            (provider, options) => new OracleSqlQuery(provider, (SqlOptions<OracleSqlQuery>)options),
+            (provider, options) => new OracleSqlExecutor(provider, (SqlOptions<OracleSqlExecutor>)options),
+            null,
+            serviceType => serviceType == typeof(ISqlQuery) ? new SqlOptions<OracleSqlQuery>() :
+                new SqlOptions<OracleSqlExecutor>(),
+            (provider, serviceType) => serviceType == typeof(ISqlQuery) ? provider.GetService<SqlOptions<OracleSqlQuery>>() :
+                provider.GetService<SqlOptions<OracleSqlExecutor>>()));
         services.TryAddSingleton(queryOptions);
         services.TryAddSingleton(executorOptions);
         return services;

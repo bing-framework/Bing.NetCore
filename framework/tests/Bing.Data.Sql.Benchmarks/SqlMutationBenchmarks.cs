@@ -5,9 +5,11 @@ using BenchmarkDotNet.Attributes;
 using Bing.Data.Sql.Builders;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations;
+using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
 using Bing.Data.Sql.Metadata;
+using Bing.Data.KeyGeneration;
 
 namespace Bing.Data.Sql.Benchmarks;
 
@@ -75,6 +77,34 @@ public class SqlMutationBenchmarks
     /// <returns>可执行 Insert 命令快照。</returns>
     [Benchmark(Baseline = true)]
     public SqlWriteCommand BuildInsertPlanCacheHit() => _cacheHitBuilder.Insert(_entities[0]);
+
+    /// <summary>
+    /// 测量新生成键单行 INSERT Returning 的元数据校验与完整渲染。
+    /// </summary>
+    /// <returns>包含 SQL、参数及生成键信息的插入命令。</returns>
+    [Benchmark]
+    public SqlWriteCommand BuildIdentityReturningCommand()
+    {
+        var policy = new EntityKeyPolicy(typeof(IdentityBenchmarkEntity),
+            typeof(IdentityBenchmarkEntity).GetProperty(nameof(IdentityBenchmarkEntity.Id)), EntityKeyGenerationKind.DatabaseIdentity);
+        return new SqlKeyInsertCommandBuilder(new Bing.Data.Sql.Builders.Mutations.Builders.SqlInsertBuilder(
+            PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault()), policy).Build(new IdentityBenchmarkEntity { Name = "generated" });
+    }
+    /// <summary>
+    /// 表示 SQL 插入基准中使用数据库自增标识的实体。
+    /// </summary>
+    [Table("identity_benchmark_entities")]
+    private sealed class IdentityBenchmarkEntity
+    {
+        /// <summary>
+        /// 获取或设置数据库生成的实体标识。
+        /// </summary>
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public long Id { get; set; }
+        /// <summary>
+        /// 获取或设置基准实体名称。
+        /// </summary>
+        public string Name { get; set; }
+    }
 
     /// <summary>
     /// 测量单条 Update 命令构建及完整参数快照导出。
@@ -161,7 +191,7 @@ public class SqlUpdateFromBenchmarks
     /// <summary>
     /// 可重复渲染的 UpdateFrom 查询 Builder。
     /// </summary>
-    private ISqlBuilder _builder;
+    private ISqlUpdateBuilder _builder;
 
     /// <summary>
     /// 初始化可重复渲染的 UpdateFrom Builder。
@@ -169,7 +199,7 @@ public class SqlUpdateFromBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _builder = new PostgreSqlBuilder()
+        _builder = new SqlUpdateBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -195,7 +225,7 @@ public class SqlDeleteUsingBenchmarks
     /// <summary>
     /// 可重复渲染的 DeleteUsing 查询 Builder。
     /// </summary>
-    private ISqlBuilder _builder;
+    private ISqlDeleteBuilder _builder;
 
     /// <summary>
     /// 初始化可重复渲染的 DeleteUsing Builder。
@@ -203,7 +233,7 @@ public class SqlDeleteUsingBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _builder = new PostgreSqlBuilder()
+        _builder = new SqlDeleteBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault())
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "sample_deletes", Alias = "s" })
             .WhereUsing("Id", "Id");
@@ -227,7 +257,7 @@ public class SqlReturningBenchmarks
     /// <summary>
     /// 可重复渲染的 Returning 查询 Builder。
     /// </summary>
-    private ISqlBuilder _builder;
+    private ISqlUpdateBuilder _builder;
 
     /// <summary>
     /// 初始化可重复渲染的 UpdateFrom Returning Builder。
@@ -235,7 +265,7 @@ public class SqlReturningBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _builder = new PostgreSqlBuilder();
+        _builder = new SqlUpdateBuilder(PostgreSqlSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         _builder.Update(new SqlTableReference { Schema = "public", TableName = "samples", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "sample_updates", Alias = "s" })
             .SetFrom("Name", "Name")
@@ -261,7 +291,7 @@ public class SqlServerOutputBenchmarks
     /// <summary>
     /// 可重复渲染的 Output 查询 Builder。
     /// </summary>
-    private ISqlBuilder _builder;
+    private ISqlUpdateBuilder _builder;
 
     /// <summary>
     /// 初始化可重复渲染的 Update Output Builder。
@@ -269,7 +299,7 @@ public class SqlServerOutputBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _builder = new SqlServerBuilder();
+        _builder = new SqlUpdateBuilder(SqlServerSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         _builder.Update(new SqlTableReference { Schema = "dbo", TableName = "samples" })
             .Set("Name", "Bing")
             .Where("Id", 1)
@@ -294,7 +324,7 @@ public class SqliteReturningBenchmarks
     /// <summary>
     /// 可重复渲染的 Returning 查询 Builder。
     /// </summary>
-    private ISqlBuilder _builder;
+    private ISqlUpdateBuilder _builder;
 
     /// <summary>
     /// 初始化可重复渲染的 Update Returning Builder。
@@ -302,7 +332,7 @@ public class SqliteReturningBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _builder = new SqliteBuilder();
+        _builder = new SqlUpdateBuilder(SqliteSqlProvider.Instance, SqlBuilderServices.CreateDefault());
         _builder.Update(new SqlTableReference { TableName = "samples" })
             .Set("Name", "Bing")
             .Where("Id", 1)

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Bing.Data.Sql.Builders.Params;
+using System.Diagnostics.CodeAnalysis;
 using Bing.Data.Sql.Diagnostics;
 using Bing.Tracing;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +11,18 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 提供 SQL 查询对象的诊断能力。
 /// </summary>
-public abstract partial class SqlQueryBase
+public abstract partial class SqlExecutionBase
 {
+    /// <summary>诊断载荷为固定 DTO，并显式保留成员以支持现有观察者读取。</summary>
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(DiagnosticsMessage))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SqlParameterDiagnosticSnapshot))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SqlParameterDiagnosticInfo))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SqlConnectionDiagnosticInfo))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SqlTransactionDiagnosticInfo))]
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only the closed DiagnosticsMessage DTO graph is published; its members are explicitly preserved above.")]
+    private static void PublishDiagnostic(string operation, DiagnosticsMessage message) =>
+        _diagnosticListener.Write(operation, message);
+
     /// <summary>
     /// 诊断日志
     /// </summary>
@@ -70,7 +81,7 @@ public abstract partial class SqlQueryBase
             TenantId = Options.IncludeTenantIdInDiagnostics ? context?.TenantId : null,
             Parameters = parameters,
             Connection = connectionInfo,
-            Transaction = CreateTransactionDiagnosticInfo(GetExecutionTransaction()),
+            Transaction = CreateTransactionDiagnosticInfo(_resources.GetExecutionTransaction()),
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Operation = SqlQueryDiagnosticListenerNames.BeforeExecute,
             QueryContextId = _queryContextId,
@@ -82,7 +93,7 @@ public abstract partial class SqlQueryBase
         };
         ApplyPlanDiagnosticContext(message, plan);
         if (_diagnosticListener.IsEnabled(SqlQueryDiagnosticListenerNames.BeforeExecute))
-            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
+            PublishDiagnostic(SqlQueryDiagnosticListenerNames.BeforeExecute, CloneDiagnosticsMessage(message));
         return message;
     }
 
@@ -299,6 +310,8 @@ public abstract partial class SqlQueryBase
             return CreateParameterDiagnosticItems(readOnlyDictionary);
         if (parameter is IDictionary<string, object> dictionary)
             return CreateParameterDiagnosticItems(dictionary);
+        if (!SqlRuntimeFeatures.ReflectionFallbackEnabled)
+            return Array.Empty<SqlParameterDiagnosticInfo>();
         return parameter.GetType()
             .GetProperties(BindingFlags.Instance | BindingFlags.Public)
             .Where(t => t.CanRead && t.GetIndexParameters().Length == 0)
@@ -344,10 +357,10 @@ public abstract partial class SqlQueryBase
             DatabaseType = context?.DataSource?.DatabaseType ?? Options.DatabaseType,
             Source = ConnectionSource != SqlConnectionSource.Unknown
                 ? ConnectionSource
-                : _connectionOwnership == SqlResourceOwnership.External
+                : _resources.ConnectionOwnership == SqlResourceOwnership.External
                 ? SqlConnectionSource.External
                 : SqlConnectionSource.DataSource,
-            Ownership = _connectionOwnership,
+            Ownership = _resources.ConnectionOwnership,
             IsReadOnly = context?.DataSource?.IsReadOnly ?? false,
             ReadPreference = context?.ReadPreference ?? SqlReadPreference.Default
         };
@@ -365,11 +378,11 @@ public abstract partial class SqlQueryBase
         return new SqlTransactionDiagnosticInfo
         {
             HasTransaction = true,
-            TransactionId = _transactionId ?? transaction.GetHashCode().ToString("X"),
+            TransactionId = _resources.TransactionId ?? transaction.GetHashCode().ToString("X"),
             IsolationLevel = GetIsolationLevel(transaction),
-            Ownership = _transaction == null ? SqlResourceOwnership.External : _transactionOwnership,
-            IsPrimaryReadTransaction = _primaryReadTransactionStarted,
-            ExecutionMode = _transactionScopeLease?.ExecutionMode ?? _transactionExecutionMode
+            Ownership = !_resources.HasTransaction ? SqlResourceOwnership.External : _resources.TransactionOwnership,
+            IsPrimaryReadTransaction = IsPrimaryReadTransaction,
+            ExecutionMode = _resources.TransactionExecutionMode
         };
     }
 
@@ -499,7 +512,7 @@ public abstract partial class SqlQueryBase
             var snapshot = CloneDiagnosticsMessage(message);
             snapshot.Operation = SqlQueryDiagnosticListenerNames.AfterExecute;
             snapshot.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - snapshot.Timestamp.Value;
-            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.AfterExecute, snapshot);
+            PublishDiagnostic(SqlQueryDiagnosticListenerNames.AfterExecute, snapshot);
         }
     }
 
@@ -518,7 +531,7 @@ public abstract partial class SqlQueryBase
             snapshot.Operation = SqlQueryDiagnosticListenerNames.ErrorExecute;
             snapshot.ElapsedMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - snapshot.Timestamp.Value;
 
-            _diagnosticListener.Write(SqlQueryDiagnosticListenerNames.ErrorExecute, snapshot);
+            PublishDiagnostic(SqlQueryDiagnosticListenerNames.ErrorExecute, snapshot);
         }
     }
 
@@ -530,7 +543,7 @@ public abstract partial class SqlQueryBase
     {
         if (message?.Transaction == null)
             return;
-        message.Transaction.ExecutionMode = _transactionScopeLease?.ExecutionMode ?? _transactionExecutionMode;
+        message.Transaction.ExecutionMode = _resources.TransactionExecutionMode;
     }
 
     /// <summary>

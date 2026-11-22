@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Clauses;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Tests.Samples;
 
 namespace Bing.Data.Sql.Tests.Builders.Core;
@@ -54,6 +55,62 @@ public class SqlParameterBindingScopeTest
 
         // Assert
         Assert.Equal("[owner].[TestValue]=[reviewer].[TestValue]", condition.GetCondition());
+    }
+
+    /// <summary>多个实体的比较值应分别使用其所属实体和字段的参数映射。</summary>
+    [Fact]
+    public void ResolveMultiSourcePredicate_WhenValuesCompareWithDifferentSources_ShouldUseEachMapping()
+    {
+        var metadata = new TestEntityMetadata();
+        var parameters = new ParameterManager(TestDialect.Instance);
+        var context = TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new EntityResolver(metadata), parameterManager: parameters,
+            builder: new TestSqlBuilder(TestDialect.Instance, metadata),
+            entityMappingResolver: new DefaultEntityMappingResolver(metadata),
+            parameterFactory: new DefaultSqlParameterFactory(new DefaultFieldValueConverterSelector()));
+        var clause = new FromClause(context);
+        clause.From<Sample>("a");
+        clause.AppendRoot<Sample2>("b");
+        Expression<Func<Sample, Sample2, bool>> expression = (a, b) => a.IntValue > 1 && 2 < b.IntValue;
+
+        var condition = clause.ResolveMultiSourcePredicate(expression);
+
+        Assert.Equal("[a].[Sample_IntValue]>@_p_0 And @_p_1<[b].[Sample2_IntValue]", condition.GetCondition());
+        var mapped = parameters.GetSqlParams();
+        Assert.Equal(2, mapped.Count);
+        Assert.Equal(typeof(Sample), mapped["@_p_0"].EntityType);
+        Assert.Equal("Sample_IntValue", mapped["@_p_0"].ColumnName);
+        Assert.Equal(typeof(Sample2), mapped["@_p_1"].EntityType);
+        Assert.Equal("Sample2_IntValue", mapped["@_p_1"].ColumnName);
+    }
+
+    /// <summary>后续字段转换失败时，不得提交前面已转换的参数。</summary>
+    [Fact]
+    public void ResolveMultiSourcePredicate_WhenConverterFails_ShouldKeepExistingParameters()
+    {
+        var metadata = new TestEntityMetadata();
+        var parameters = new ParameterManager(TestDialect.Instance);
+        parameters.Add("existing", 42);
+        var context = TestSqlBuilder.CreateTestClauseContext(
+            entityResolver: new EntityResolver(metadata), parameterManager: parameters,
+            builder: new TestSqlBuilder(TestDialect.Instance, metadata),
+            entityMappingResolver: new DefaultEntityMappingResolver(metadata),
+            parameterFactory: new DefaultSqlParameterFactory(new DefaultFieldValueConverterSelector(new[] { new FailOnTwoConverter() })));
+        var clause = new FromClause(context);
+        clause.From<Sample>("a");
+        Expression<Func<Sample, bool>> expression = a => a.IntValue == 1 && a.IntValue == 2;
+
+        Assert.Throws<InvalidOperationException>(() => clause.ResolveMultiSourcePredicate(expression));
+        Assert.Equal(42, Assert.Single(parameters.GetParams()).Value);
+    }
+
+    private sealed class FailOnTwoConverter : IFieldValueConverter
+    {
+        public bool CanConvert(ColumnMappingMetadata column, DatabaseContext databaseContext) =>
+            column?.PropertyName == nameof(Sample.IntValue);
+        public object ConvertToProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext) =>
+            (int)value == 2 ? throw new InvalidOperationException("conversion failed") : value;
+        public object ConvertFromProvider(object value, ColumnMappingMetadata column, DatabaseContext databaseContext) => value;
     }
 
     /// <summary>

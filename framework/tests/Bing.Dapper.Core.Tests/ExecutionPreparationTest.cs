@@ -1,9 +1,12 @@
+using Bing.Data.Sql.Builders.Mutations;
 using System.Data;
 using Bing.Data;
+using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Mutations.Builders;
 using Bing.Data.Sql.Builders.Params;
+using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql;
 using Bing.Data.Sql.Builders;
@@ -36,7 +39,7 @@ public class ExecutionPreparationTest
 
         // Assert
         Assert.Equal(1, result);
-        builder.Verify(item => item.ToDebugSql(It.IsAny<string>()), Times.Never);
+        builder.Verify(item => item.BuildCommand(), Times.Once);
         Assert.Equal(0, executor.BuilderDiagnosticRequests);
     }
 
@@ -56,7 +59,7 @@ public class ExecutionPreparationTest
 
         // Assert
         Assert.Contains("Async operations require use of a DbConnection", exception.Message);
-        builder.Verify(item => item.ToDebugSql(It.IsAny<string>()), Times.Never);
+        builder.Verify(item => item.BuildCommand(), Times.Once);
         Assert.Equal(0, executor.BuilderDiagnosticRequests);
     }
 
@@ -121,21 +124,106 @@ public class ExecutionPreparationTest
     }
 
     /// <summary>
+    /// 测试目的：生成式写入命令应直接使用生成绑定器，跳过通用参数绑定器。
+    /// </summary>
+    [Fact]
+    public void PrepareGeneratedMutationCommand_ShouldUseGeneratedParameterSource()
+    {
+        // Arrange
+        var callbackCalled = false;
+        var executor = CreateExecutor(parameterBinder: new ThrowingParameterBinder(),
+            executionMode: SqlExecutionMode.GeneratedOnly);
+        var command = new SqlWriteCommand(
+            "Update Users Set Name=@_p_0 Where Id=@_p_1",
+            new[]
+            {
+                new SqlParam("@_p_0", "Ada"),
+                new SqlParam("@_p_1", 7)
+            })
+            .WithGeneratedParameterBinder((_, parameters) =>
+            {
+                callbackCalled = true;
+                Assert.Equal(new[] { "@_p_0", "@_p_1" }, parameters.Select(item => item.Name));
+            });
+
+        // Act
+        var prepared = executor.PrepareGeneratedCommand(command);
+        var staticSource = Assert.IsAssignableFrom<ISqlStaticParameterSource>(prepared.DapperParameters);
+        staticSource.BindTo(null);
+
+        // Assert
+        Assert.True(callbackCalled);
+        Assert.Equal(command.Sql, prepared.Sql);
+        Assert.Equal(command.CreateParameters().Select(item => item.Name),
+            Assert.IsAssignableFrom<IEnumerable<SqlParam>>(prepared.ParameterSource).Select(item => item.Name));
+    }
+
+    /// <summary>
+    /// 测试目的：兼容模式仍应把生成命令交给通用参数绑定器，保证 Dapper 动态执行可以消费参数。
+    /// </summary>
+    [Fact]
+    public void PrepareGeneratedMutationCommand_InCompatibleMode_ShouldUseGenericParameterSource()
+    {
+        // Arrange
+        var expected = new object();
+        var executor = CreateExecutor(parameterBinder: new FixedParameterBinder(expected),
+            executionMode: SqlExecutionMode.Compatible);
+        var command = new SqlWriteCommand("Update Users Set Name=@_p_0 Where Id=@_p_1", new[]
+        {
+            new SqlParam("@_p_0", "Ada"),
+            new SqlParam("@_p_1", 7)
+        }).WithGeneratedParameterBinder((_, _) => throw new Xunit.Sdk.XunitException("兼容模式不应调用静态绑定器。"));
+
+        // Act
+        var prepared = executor.PrepareGeneratedCommand(command);
+
+        // Assert
+        Assert.Same(expected, prepared.DapperParameters);
+        Assert.False(prepared.DapperParameters is ISqlStaticParameterSource);
+    }
+
+    /// <summary>
+    /// 测试目的：离线创建的命令在绑定时应从执行选项补齐缺失的数据库类型，保留显式类型和冻结输入。
+    /// </summary>
+    [Theory]
+    [InlineData(SqlExecutionMode.GeneratedOnly)]
+    [InlineData(SqlExecutionMode.Compatible)]
+    public void PrepareWriteCommand_UsesExecutorTypeOnlyWhenParameterTypeIsMissing(SqlExecutionMode mode)
+    {
+        using var executor = new PreparationTestExecutor(CreateServiceProvider(executionMode: mode),
+            new SqlOptions { DatabaseType = DatabaseType.PgSql });
+        var command = new SqlWriteCommand("Update sample Set p = @p Where id = @id", new[]
+        {
+            new SqlParam("@p", "{}") { ProviderTypeName = "jsonb" },
+            new SqlParam("@id", 1) { DatabaseType = DatabaseType.MySql }
+        }).WithGeneratedParameterBinder(static (_, _) => { });
+
+        var prepared = executor.PrepareGeneratedCommand(command);
+
+        Assert.Collection(Assert.IsAssignableFrom<IEnumerable<SqlParam>>(prepared.ParameterSource),
+            parameter =>
+            {
+                Assert.Equal(DatabaseType.PgSql, parameter.DatabaseType);
+                Assert.Equal("jsonb", parameter.ProviderTypeName);
+            },
+            parameter => Assert.Equal(DatabaseType.MySql, parameter.DatabaseType));
+        Assert.Null(command.CreateParameters().First().DatabaseType);
+    }
+
+    /// <summary>
     /// 创建用于 Direct Builder 执行的测试 Builder。
     /// </summary>
     /// <param name="providerKey">Builder 使用的 Provider 标识。</param>
     /// <returns>返回配置完成的 SQL Builder 测试替身。</returns>
-    private static Mock<ISqlBuilder> CreateBuilder(string providerKey = "bing.sqlserver")
+    private static Mock<ISqlUpdateBuilder> CreateBuilder(string providerKey = "bing.sqlserver")
     {
-        var builder = new Mock<ISqlBuilder>();
+        var builder = new Mock<ISqlUpdateBuilder>();
         var provider = new Mock<ISqlProvider>();
         provider.SetupGet(item => item.Key).Returns(providerKey);
-        builder.SetupGet(item => item.Provider).Returns(provider.Object);
-        builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
         builder.Setup(item => item.Clone()).Returns(builder.Object);
         builder.Setup(item => item.ToSql()).Returns("Update samples Set Name = 'updated'");
-        builder.Setup(item => item.ToDebugSql(It.IsAny<string>()))
-            .Throws(new InvalidOperationException("Trace 关闭时不得生成调试 SQL。"));
+        builder.Setup(item => item.BuildCommand()).Returns(() => new SqlWriteCommand(builder.Object.ToSql(), Array.Empty<SqlParam>(),
+            provider.Object, SqlOperationKind.Update));
         return builder;
     }
 
@@ -144,7 +232,8 @@ public class ExecutionPreparationTest
     /// </summary>
     /// <param name="provider">执行器使用的 SQL Provider；省略时使用默认测试 Provider。</param>
     /// <returns>返回配置了外部连接的测试执行器。</returns>
-    private static PreparationTestExecutor CreateExecutor(ISqlProvider provider = null)
+    private static PreparationTestExecutor CreateExecutor(ISqlProvider provider = null,
+        ISqlParameterBinder parameterBinder = null, SqlExecutionMode? executionMode = null)
     {
         var command = new Mock<IDbCommand>();
         command.SetupGet(item => item.Parameters).Returns(new Mock<IDataParameterCollection>().Object);
@@ -153,7 +242,8 @@ public class ExecutionPreparationTest
         var connection = new Mock<IDbConnection>();
         connection.SetupGet(item => item.State).Returns(ConnectionState.Open);
         connection.Setup(item => item.CreateCommand()).Returns(command.Object);
-        return new PreparationTestExecutor(CreateServiceProvider(provider), new SqlOptions { Connection = connection.Object });
+        return new PreparationTestExecutor(CreateServiceProvider(provider, parameterBinder, executionMode),
+            new SqlOptions { Connection = connection.Object });
     }
 
     /// <summary>
@@ -161,10 +251,15 @@ public class ExecutionPreparationTest
     /// </summary>
     /// <param name="sqlProvider">要注册的 SQL Provider；省略时注册默认测试 Provider。</param>
     /// <returns>返回包含 SQL Core 服务和指定 Provider 的服务容器。</returns>
-    private static IServiceProvider CreateServiceProvider(ISqlProvider sqlProvider = null)
+    private static IServiceProvider CreateServiceProvider(ISqlProvider sqlProvider = null,
+        ISqlParameterBinder parameterBinder = null, SqlExecutionMode? executionMode = null)
     {
         var services = new ServiceCollection();
         services.AddSqlCore();
+        if (executionMode.HasValue)
+            services.AddSingleton(new SqlMetadataOptions { ExecutionMode = executionMode.Value });
+        if (parameterBinder != null)
+            services.AddSingleton(parameterBinder);
         if (sqlProvider == null)
         {
             var provider = new Mock<ISqlProvider>();
@@ -226,6 +321,11 @@ public class ExecutionPreparationTest
         /// </summary>
         public int BuilderDiagnosticRequests { get; private set; }
 
+        /// <summary>
+        /// 暴露写入命令准备入口，验证生成式参数源不会回退到通用绑定器。
+        /// </summary>
+        public SqlPreparedCommand PrepareGeneratedCommand(SqlWriteCommand command) => PrepareCommand(command);
+
         /// <inheritdoc />
         protected override IReadOnlyCollection<SqlParameterDiagnosticInfo> GetSqlParameterDiagnostics(
             ISqlBuilder builder, string sql)
@@ -236,6 +336,30 @@ public class ExecutionPreparationTest
 
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
+    }
+
+    /// <summary>
+    /// 若生成式参数源未被采用则立即失败的通用绑定器替身。
+    /// </summary>
+    private sealed class ThrowingParameterBinder : ISqlParameterBinder
+    {
+        public object Bind(ISqlBuilder builder) => throw new Xunit.Sdk.XunitException("不应调用通用 Builder 参数绑定器。");
+
+        public object Bind(object parameter) => throw new Xunit.Sdk.XunitException("不应调用通用对象参数绑定器。");
+    }
+
+    /// <summary>
+    /// 返回固定对象的参数绑定器替身，用于区分兼容参数路径和静态参数源。
+    /// </summary>
+    private sealed class FixedParameterBinder : ISqlParameterBinder
+    {
+        private readonly object _value;
+
+        public FixedParameterBinder(object value) => _value = value;
+
+        public object Bind(ISqlBuilder builder) => _value;
+
+        public object Bind(object parameter) => _value;
     }
 
 }

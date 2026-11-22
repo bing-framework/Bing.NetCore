@@ -8,7 +8,7 @@ namespace Bing.Data.Sql.Builders.Mutations;
 /// 用于构建 Delete SQL 的接口。
 /// </summary>
 public interface ISqlDeleteBuilder : ISqlContent, IDelete, IDeleteClauseAccessor, IDeleteUsingClauseAccessor,
-    ISqlMutationContextAccessor, IAllowAllRowsMutationBuilder
+    IReturningClauseAccessor, ISqlMutationContextAccessor, IAllowAllRowsMutationBuilder
 {
     /// <summary>
     /// 获取是否显式允许全表删除。

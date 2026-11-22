@@ -1,6 +1,10 @@
 ﻿using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders.Params;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using Npgsql;
 
 namespace Bing.Data.Sql.Builders;
 
@@ -75,7 +79,13 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
             SupportsTransactions = true,
             SupportsNativeAsyncBegin = true,
             SupportsNativeAsyncCommit = true,
-            SupportsNativeAsyncRollback = true
+            SupportsNativeAsyncRollback = true,
+#if NET6_0_OR_GREATER
+            BeginAsync = (connection, isolation, token) => connection is NpgsqlConnection npgsql
+                ? BeginTransactionAsync(npgsql, isolation, token) : null,
+#endif
+            CommitAsync = CommitTransactionAsync,
+            RollbackAsync = RollbackTransactionAsync
         },
         Procedure = new SqlProviderProcedureCapabilities
         {
@@ -86,6 +96,19 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
         },
         Limits = new SqlProviderLimits { MaxParameterCount = null }
     };
+
+#if NET6_0_OR_GREATER
+    private static async Task<IDbTransaction> BeginTransactionAsync(NpgsqlConnection connection, IsolationLevel? isolation,
+        CancellationToken cancellationToken) => isolation.HasValue
+        ? await connection.BeginTransactionAsync(isolation.Value, cancellationToken).ConfigureAwait(false)
+        : await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+#endif
+
+    private static Task CommitTransactionAsync(IDbTransaction transaction, CancellationToken cancellationToken) =>
+        transaction is NpgsqlTransaction npgsql ? npgsql.CommitAsync(cancellationToken) : null;
+
+    private static Task RollbackTransactionAsync(IDbTransaction transaction, CancellationToken cancellationToken) =>
+        transaction is NpgsqlTransaction npgsql ? npgsql.RollbackAsync(cancellationToken) : null;
 }
 
 /// <summary>

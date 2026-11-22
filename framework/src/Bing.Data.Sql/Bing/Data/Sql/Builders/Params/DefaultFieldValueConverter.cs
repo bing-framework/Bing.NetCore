@@ -45,6 +45,8 @@ public class DefaultFieldValueConverter : IFieldValueConverter
             case FieldValueConverterKind.GuidToBinary:
                 return ConvertGuidToBinary(value);
             case FieldValueConverterKind.JsonSerialize:
+                if (!SqlRuntimeFeatures.ReflectionFallbackEnabled || _options.ExecutionMode == SqlExecutionMode.GeneratedOnly)
+                    throw new NotSupportedException("严格生成模式的 JSON 列需要注册使用 JsonSerializerContext 的静态 IFieldValueConverter。");
                 return JsonHelper.ToJson(value);
             case FieldValueConverterKind.DateTimeNormalize:
                 return ConvertDateTime(value, column.DbType);
@@ -64,7 +66,7 @@ public class DefaultFieldValueConverter : IFieldValueConverter
             case FieldValueConverterKind.EnumToName:
                 return targetType.IsEnum ? Enum.Parse(targetType, value.SafeString(), true) : value;
             case FieldValueConverterKind.EnumToValue:
-                return targetType.IsEnum ? Enum.ToObject(targetType, value) : value;
+                return targetType.IsEnum ? EnumValueConverter.ToEnumChecked(targetType, value) : value;
             case FieldValueConverterKind.BoolToNumber:
                 return Convert.ToInt32(value) != 0;
             case FieldValueConverterKind.BoolToString:

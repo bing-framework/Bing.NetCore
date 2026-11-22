@@ -4,6 +4,7 @@ using Bing.Dapper.Tests.Infrastructure;
 using Bing.Data.Sql.Metadata;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Mutations;
+using Bing.Data.Sql.Builders;
 
 namespace Bing.Dapper.Tests.SqlQuery;
 
@@ -255,21 +256,20 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-a", Name = "copied" });
-        var insertSelect = executor.CreateWriteBuilder()
+        var source = new SqliteBuilder().Select("Name").From("Orders").Where("TenantId", "tenant-a");
+        var insertSelect = executor.CreateInsertBuilder()
             .InsertInto("samples")
             .Columns("Name")
-            .Select("Name")
-            .From("Orders")
-            .Where("TenantId", "tenant-a");
+            .InsertSelect(source);
 
         // Act
         var inserted = await executor.ExecuteWriteAsync(insertSelect.ToSqlWriteCommand());
-        var updated = executor.ExecuteWrite(insertSelect.New()
+        var updated = executor.ExecuteWrite(executor.CreateUpdateBuilder()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("SecretText", "v2")
             .Where("Name", "copied")
             .ToSqlWriteCommand());
-        var deleted = await executor.ExecuteWriteAsync(insertSelect.New()
+        var deleted = await executor.ExecuteWriteAsync(executor.CreateDeleteBuilder()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("SecretText", "v2")
             .ToSqlWriteCommand());
@@ -313,7 +313,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
             new object[] { "returning-first", 1m, "v1" },
             new object[] { "returning-second", 2m, "v2" }
         };
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateInsertBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name", "Amount", "SecretText")
             .Values(values)
@@ -337,7 +337,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var command = executor.CreateWriteBuilder()
+        var command = executor.CreateInsertBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name", "Amount", "SecretText")
             .Values("returning-repeat", 1m, "v1")
@@ -367,12 +367,11 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into Orders (Id, TenantId, Name) Values (@Id, @TenantId, @Name)",
             new { Id = 1, TenantId = "tenant-returning", Name = "copied-returning" });
-        var builder = executor.CreateWriteBuilder()
+        var source = new SqliteBuilder().Select("Name").From("Orders").Where("TenantId", "tenant-returning");
+        var builder = executor.CreateInsertBuilder()
             .InsertInto(new SqlTableReference { TableName = "samples" })
             .Columns("Name")
-            .Select("Name")
-            .From("Orders")
-            .Where("TenantId", "tenant-returning")
+            .InsertSelect(source)
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
 
         // Act
@@ -393,7 +392,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("before-update", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateUpdateBuilder()
             .Update(new SqlTableReference { TableName = "samples" })
             .Set("Name", "after-update")
             .Where("Name", "before-update")
@@ -418,7 +417,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
         // Arrange
         await _fixture.InsertSampleAsync("deleted-returning", 1m, "v1");
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateDeleteBuilder()
             .DeleteFrom(new SqlTableReference { TableName = "samples" })
             .Where("Name", "deleted-returning")
             .Returning<SqliteReturningRow>(row => new { row.Id, row.Name });
@@ -441,13 +440,14 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateWriteBuilder().Select("Id").From("samples");
+        var command = new Bing.Data.Sql.Mutations.SqlWriteCommand("SELECT Id FROM samples",
+            Array.Empty<Bing.Data.Sql.Builders.Params.SqlParam>(), SqliteSqlProvider.Instance, SqlOperationKind.Select);
 
         // Act
-        var exception = Assert.Throws<ArgumentException>(() => builder.ToSqlWriteCommand());
+        var exception = Assert.Throws<InvalidOperationException>(() => executor.ExecuteWrite(command));
 
         // Assert
-        Assert.Contains("写入命令必须包含 Insert、Update 或 Delete 操作。", exception.Message);
+        Assert.Equal("ISqlExecutor 不支持执行 Select 状态的写入命令。", exception.Message);
         Assert.Equal(0, await _fixture.CountAsync());
     }
 
@@ -459,7 +459,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateInsertBuilder()
             .InsertInto("samples")
             .Columns("Name")
             .Values("returning")
@@ -482,7 +482,7 @@ public sealed class SqliteMutationExecutionIntegrationTest : IAsyncLifetime
     {
         // Arrange
         using var executor = _fixture.CreateExecutor();
-        var builder = executor.CreateWriteBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
+        var builder = executor.CreateDeleteBuilder().DeleteFrom(new SqlTableReference { TableName = "samples" }).AllowAllRows();
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>

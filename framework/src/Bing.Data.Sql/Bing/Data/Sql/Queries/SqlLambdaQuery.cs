@@ -17,6 +17,10 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// 当前 Lambda 查询的内部执行核心。
     /// </summary>
     private readonly SqlLambdaQueryCore _core;
+    /// <summary>
+    /// 获取生成查询入口使用的查询核心实例。
+    /// </summary>
+    internal SqlLambdaQueryCore GeneratedCore => _core;
 
     /// <summary>
     /// 初始化一个 <see cref="SqlLambdaQuery"/> 类型的实例。
@@ -80,7 +84,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     void ISqlQueryBuilderAccessor.MarkChanged() => Touch();
 
     /// <summary>
-    /// 替换当前查询的投影列。
+    /// 替换当前查询的投影。
     /// </summary>
     /// <param name="columns">新的投影列 SQL 文本。</param>
     private void ReplaceSelect(string columns) => _core.ReplaceSelect(columns);
@@ -337,8 +341,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns)
     {
-        SelectCore(columns, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectCore(columns, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
@@ -350,8 +357,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias)
     {
-        SelectCore(columns, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectCore(columns, ResolveSources(columns, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -363,8 +373,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TEntity, TProjection>(Expression<Func<TEntity, TProjection>> projection)
     {
-        SelectTypedCore(projection, ResolveSources(projection));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectTypedCore(projection, ResolveSources(projection));
+            return this;
+        });
     }
 
     /// <summary>
@@ -378,8 +391,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Select<TEntity, TProjection>(Expression<Func<TEntity, TProjection>> projection,
         string alias)
     {
-        SelectTypedCore(projection, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectTypedCore(projection, ResolveSources(projection, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -391,8 +407,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns)
     {
-        SelectCore(columns, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectCore(columns, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
@@ -407,8 +426,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Select<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
         string firstAlias, string secondAlias)
     {
-        SelectCore(columns, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectCore(columns, ResolveSources(columns, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -422,8 +444,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Select<TFirst, TSecond, TProjection>(
         Expression<Func<TFirst, TSecond, TProjection>> projection)
     {
-        SelectTypedCore(projection, ResolveSources(projection));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectTypedCore(projection, ResolveSources(projection));
+            return this;
+        });
     }
 
     /// <summary>
@@ -439,8 +464,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Select<TFirst, TSecond, TProjection>(
         Expression<Func<TFirst, TSecond, TProjection>> projection, string firstAlias, string secondAlias)
     {
-        SelectTypedCore(projection, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            SelectTypedCore(projection, ResolveSources(projection, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -455,7 +483,10 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, TProjection>> projection, string alias)
         where TProjection : class
     {
-        return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
+        return _core.AtomicChange(() =>
+        {
+            return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
+        });
     }
 
     /// <summary>
@@ -471,7 +502,10 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, TProjection>> projection, string alias, string sourceAlias)
         where TProjection : class
     {
-        return SelectSubqueryCore<TProjection>(projection, alias, new[] { ResolveSource<TEntity>(sourceAlias) });
+        return _core.AtomicChange(() =>
+        {
+            return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection, new[] { sourceAlias }));
+        });
     }
 
     /// <summary>
@@ -487,7 +521,10 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TFirst, TSecond, TProjection>> projection, string alias)
         where TProjection : class
     {
-        return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
+        return _core.AtomicChange(() =>
+        {
+            return SelectSubqueryCore<TProjection>(projection, alias, ResolveSources(projection));
+        });
     }
 
     /// <summary>
@@ -506,8 +543,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string firstAlias, string secondAlias)
         where TProjection : class
     {
-        return SelectSubqueryCore<TProjection>(projection, alias,
-            ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
+        return _core.AtomicChange(() =>
+        {
+            return SelectSubqueryCore<TProjection>(projection, alias,
+                ResolveSources(projection, new[] { firstAlias, secondAlias }));
+        });
     }
 
     /// <summary>
@@ -525,12 +565,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Select<TEntity>(bool propertyAsAlias) where TEntity : class
     {
-        ResolveSource<TEntity>(null);
-        var builder = GetBuilder() as SqlBuilderBase ??
-            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
-        builder.ReplaceSelect(select => select.Select<TEntity>(propertyAsAlias));
-        Touch();
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            _core.ApplyEntityProjection(ResolveSource<TEntity>(null), propertyAsAlias);
+            return this;
+        });
     }
 
     /// <summary>
@@ -553,11 +592,12 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         bool propertyAsAlias)
         where TEntity : class
     {
-        if (columns != null)
-            ResolveSources(columns);
-        GetBuilder().Select(columns, propertyAsAlias);
-        Touch();
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            if (columns == null) return this;
+            _core.ApplyProjection(columns, ResolveSources(columns), legacyAppend: true, propertyAsAlias: propertyAsAlias);
+            return this;
+        });
     }
 
     /// <summary>
@@ -570,8 +610,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery AppendSelect<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias)
         where TEntity : class
     {
-        AppendSelectCore(columns, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            AppendSelectCore(columns, ResolveSources(columns, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -584,8 +627,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery AppendSelect<TEntity, TProjection>(Expression<Func<TEntity, TProjection>> projection)
         where TEntity : class
     {
-        AppendSelectTypedCore(projection, ResolveSources(projection));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            AppendSelectTypedCore(projection, ResolveSources(projection));
+            return this;
+        });
     }
 
     /// <summary>
@@ -600,8 +646,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string alias)
         where TEntity : class
     {
-        AppendSelectTypedCore(projection, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            AppendSelectTypedCore(projection, ResolveSources(projection, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -653,12 +702,16 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, object>> column, string columnAlias, bool distinct)
         where TEntity : class
     {
-        var builder = GetBuilder() as SqlBuilderBase ??
-            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
-        ResolveSource<TEntity>(null);
-        builder.ReplaceSelect(select => select.Aggregate(function, column, columnAlias, distinct));
-        Touch();
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            var builder = GetBuilder() as SqlBuilderBase ??
+                throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
+            var source = ResolveSources(column)[0];
+            builder.ReplaceSelect(select => ((ISqlMultiSourceSelectClause)select).Aggregate(function, column, source.Alias, columnAlias, distinct));
+            _core.MarkExplicitProjection();
+            Touch();
+            return this;
+        });
     }
 
     /// <summary>
@@ -690,13 +743,17 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TEntity, object>> column, string alias, string columnAlias, bool distinct)
         where TEntity : class
     {
-        var builder = GetBuilder() as SqlBuilderBase ??
-            throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
-        var source = ResolveSource<TEntity>(alias);
-        builder.ReplaceSelect(select => ((ISqlMultiSourceSelectClause)select).Aggregate(function, column,
-            source.Alias, columnAlias, distinct));
-        Touch();
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            var builder = GetBuilder() as SqlBuilderBase ??
+                throw new NotSupportedException("当前 SQL Builder 不支持原子投影替换。");
+            var source = ResolveSources(column, new[] { alias })[0];
+            builder.ReplaceSelect(select => ((ISqlMultiSourceSelectClause)select).Aggregate(function, column,
+                source.Alias, columnAlias, distinct));
+            _core.MarkExplicitProjection();
+            Touch();
+            return this;
+        });
     }
 
     /// <summary>
@@ -707,8 +764,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Where<TEntity>(Expression<Func<TEntity, bool>> predicate)
     {
-        WhereCore(predicate, ResolveSources(predicate));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            WhereCore(predicate, ResolveSources(predicate));
+            return this;
+        });
     }
 
     /// <summary>
@@ -720,8 +780,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Where<TEntity>(Expression<Func<TEntity, bool>> predicate, string alias)
     {
-        WhereCore(predicate, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            WhereCore(predicate, ResolveSources(predicate, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -733,8 +796,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery Where<TFirst, TSecond>(Expression<Func<TFirst, TSecond, bool>> predicate)
     {
-        WhereCore(predicate, ResolveSources(predicate));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            WhereCore(predicate, ResolveSources(predicate));
+            return this;
+        });
     }
 
     /// <summary>
@@ -749,8 +815,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery Where<TFirst, TSecond>(Expression<Func<TFirst, TSecond, bool>> predicate,
         string firstAlias, string secondAlias)
     {
-        WhereCore(predicate, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            WhereCore(predicate, ResolveSources(predicate, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -777,10 +846,13 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Operator @operator)
         where TEntity : class
     {
-        var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
-            column.Parameters);
-        WhereValueCore(selector, value, @operator, ResolveSource<TEntity>(null));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
+                column.Parameters);
+            WhereValueCore(selector, value, @operator, ResolveSources(selector)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -810,10 +882,13 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string alias, Operator @operator)
         where TEntity : class
     {
-        var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
-            column.Parameters);
-        WhereValueCore(selector, value, @operator, ResolveSource<TEntity>(alias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            var selector = Expression.Lambda<Func<TEntity, object>>(Expression.Convert(column.Body, typeof(object)),
+                column.Parameters);
+            WhereValueCore(selector, value, @operator, ResolveSources(selector, new[] { alias })[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -869,9 +944,12 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Operator @operator)
         where TEntity : class
     {
-        if (condition)
-            WhereValueCore(column, value, @operator, ResolveSource<TEntity>(null));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            if (condition)
+                WhereValueCore(column, value, @operator, ResolveSources(column)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -913,8 +991,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>追加条件组后的当前查询。</returns>
     public SqlLambdaQuery WhereGroup(Action<ISqlConditionGroup> configure)
     {
-        WhereGroupCore(configure);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            WhereGroupCore(configure);
+            return this;
+        });
     }
 
     /// <summary>
@@ -939,8 +1020,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string rightAlias)
         where TLeft : class where TRight : class
     {
-        JoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            JoinCore<TRight>(predicate, ResolveSources(predicate, entityCount: 1)[0], rightAlias, null);
+            return this;
+        });
     }
 
     /// <summary>
@@ -955,8 +1039,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         SqlJoinOptions options)
         where TLeft : class where TRight : class
     {
-        JoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            JoinCore<TRight>(predicate, ResolveSources(predicate, new[] { options.LeftAlias }, 1)[0], options.RightAlias, options.Schema);
+            return this;
+        });
     }
 
     /// <summary>
@@ -981,8 +1068,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string rightAlias)
         where TLeft : class where TRight : class
     {
-        LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            LeftJoinCore<TRight>(predicate, ResolveSources(predicate, entityCount: 1)[0], rightAlias, null);
+            return this;
+        });
     }
 
     /// <summary>
@@ -997,8 +1087,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         SqlJoinOptions options)
         where TLeft : class where TRight : class
     {
-        LeftJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            LeftJoinCore<TRight>(predicate, ResolveSources(predicate, new[] { options.LeftAlias }, 1)[0], options.RightAlias, options.Schema);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1023,8 +1116,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string rightAlias)
         where TLeft : class where TRight : class
     {
-        RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            RightJoinCore<TRight>(predicate, ResolveSources(predicate, entityCount: 1)[0], rightAlias, null);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1039,8 +1135,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         SqlJoinOptions options)
         where TLeft : class where TRight : class
     {
-        RightJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            RightJoinCore<TRight>(predicate, ResolveSources(predicate, new[] { options.LeftAlias }, 1)[0], options.RightAlias, options.Schema);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1065,8 +1164,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         string rightAlias)
         where TLeft : class where TRight : class
     {
-        FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(null), rightAlias, null);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            FullJoinCore<TRight>(predicate, ResolveSources(predicate, entityCount: 1)[0], rightAlias, null);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1081,8 +1183,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         SqlJoinOptions options)
         where TLeft : class where TRight : class
     {
-        FullJoinCore<TRight>(predicate, ResolveSource<TLeft>(options.LeftAlias), options.RightAlias, options.Schema);
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            FullJoinCore<TRight>(predicate, ResolveSources(predicate, new[] { options.LeftAlias }, 1)[0], options.RightAlias, options.Schema);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1110,8 +1215,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
-        JoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            JoinCore<TLeft, TProjection>(subquery, predicate, ResolveSources(predicate, new[] { leftAlias }, 1)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1139,8 +1247,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
-        LeftJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            LeftJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSources(predicate, new[] { leftAlias }, 1)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1168,8 +1279,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
-        RightJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            RightJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSources(predicate, new[] { leftAlias }, 1)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1197,8 +1311,11 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         Expression<Func<TLeft, TProjection, bool>> predicate, string leftAlias)
         where TLeft : class where TProjection : class
     {
-        FullJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSource<TLeft>(leftAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            FullJoinCore<TLeft, TProjection>(subquery, predicate, ResolveSources(predicate, new[] { leftAlias }, 1)[0]);
+            return this;
+        });
     }
 
     /// <summary>
@@ -1227,7 +1344,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置分组列。
+    /// 设置查询分组。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1235,12 +1352,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery GroupBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns)
     {
-        GroupByCore(columns, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            GroupByCore(columns, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置分组列。
+    /// 设置查询分组。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1251,24 +1371,30 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery GroupBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
         string firstAlias, string secondAlias)
     {
-        GroupByCore(columns, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            GroupByCore(columns, ResolveSources(columns, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置分组列。
+    /// 设置查询分组。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回分组列的表达式。</param>
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery GroupBy<TEntity>(Expression<Func<TEntity, object[]>> columns)
     {
-        GroupByCore(columns, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            GroupByCore(columns, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置分组列。
+    /// 设置查询分组。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回分组列的表达式。</param>
@@ -1276,12 +1402,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery GroupBy<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias)
     {
-        GroupByCore(columns, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            GroupByCore(columns, ResolveSources(columns, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1293,7 +1422,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1303,12 +1432,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
         bool desc)
     {
-        OrderByCore(columns, desc, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            OrderByCore(columns, desc, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1323,7 +1455,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1335,12 +1467,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery OrderBy<TFirst, TSecond>(Expression<Func<TFirst, TSecond, object[]>> columns,
         string firstAlias, string secondAlias, bool desc)
     {
-        OrderByCore(columns, desc, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            OrderByCore(columns, desc, ResolveSources(columns, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
@@ -1351,7 +1486,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
@@ -1359,12 +1494,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <returns>当前查询描述。</returns>
     public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, bool desc)
     {
-        OrderByCore(columns, desc, ResolveSources(columns));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            OrderByCore(columns, desc, ResolveSources(columns));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
@@ -1376,7 +1514,7 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 设置排序列。
+    /// 设置查询排序。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="columns">返回排序列的表达式。</param>
@@ -1386,25 +1524,34 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     public SqlLambdaQuery OrderBy<TEntity>(Expression<Func<TEntity, object[]>> columns, string alias,
         bool desc)
     {
-        OrderByCore(columns, desc, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            OrderByCore(columns, desc, ResolveSources(columns, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置 Having 条件。
+    /// 设置聚合筛选条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的双来源表达式。</param>
     /// <returns>当前查询描述。</returns>
+    /// <remarks>
+    /// 设置 Having 条件。
+    /// </remarks>
     public SqlLambdaQuery Having<TFirst, TSecond>(Expression<Func<TFirst, TSecond, bool>> predicate)
     {
-        HavingCore(predicate, ResolveSources(predicate));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            HavingCore(predicate, ResolveSources(predicate));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置 Having 条件。
+    /// 设置聚合筛选条件。
     /// </summary>
     /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
     /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
@@ -1412,36 +1559,54 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     /// <param name="firstAlias">第一个来源别名。</param>
     /// <param name="secondAlias">第二个来源别名。</param>
     /// <returns>当前查询描述。</returns>
+    /// <remarks>
+    /// 设置 Having 条件。
+    /// </remarks>
     public SqlLambdaQuery Having<TFirst, TSecond>(Expression<Func<TFirst, TSecond, bool>> predicate,
         string firstAlias, string secondAlias)
     {
-        HavingCore(predicate, ResolveTwoSources<TFirst, TSecond>(firstAlias, secondAlias));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            HavingCore(predicate, ResolveSources(predicate, new[] { firstAlias, secondAlias }));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置 Having 条件。
+    /// 设置聚合筛选条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的表达式。</param>
     /// <returns>当前查询描述。</returns>
+    /// <remarks>
+    /// 设置 Having 条件。
+    /// </remarks>
     public SqlLambdaQuery Having<TEntity>(Expression<Func<TEntity, bool>> predicate)
     {
-        HavingCore(predicate, ResolveSources(predicate));
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            HavingCore(predicate, ResolveSources(predicate));
+            return this;
+        });
     }
 
     /// <summary>
-    /// 设置 Having 条件。
+    /// 设置聚合筛选条件。
     /// </summary>
     /// <typeparam name="TEntity">来源实体类型。</typeparam>
     /// <param name="predicate">返回 Having 条件的表达式。</param>
     /// <param name="alias">要绑定的来源别名。</param>
     /// <returns>当前查询描述。</returns>
+    /// <remarks>
+    /// 设置 Having 条件。
+    /// </remarks>
     public SqlLambdaQuery Having<TEntity>(Expression<Func<TEntity, bool>> predicate, string alias)
     {
-        HavingCore(predicate, new[] { ResolveSource<TEntity>(alias) });
-        return this;
+        return _core.AtomicChange(() =>
+        {
+            HavingCore(predicate, ResolveSources(predicate, new[] { alias }));
+            return this;
+        });
     }
 
     /// <summary>
@@ -1467,28 +1632,15 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
     }
 
     /// <summary>
-    /// 解析 Lambda 表达式引用的表源。
+    /// 根据 Lambda 参数解析查询数据源。
     /// </summary>
-    /// <param name="expression">需要解析来源的 Lambda 表达式。</param>
-    /// <returns>与表达式参数顺序一致的表源集合。</returns>
-    /// <exception cref="InvalidOperationException">表达式参数没有可用来源时抛出。</exception>
-    private IReadOnlyList<TableSource> ResolveSources(LambdaExpression expression)
+    /// <param name="expression">Lambda 查询表达式。</param>
+    /// <param name="aliases">可选的数据源别名。</param>
+    /// <param name="entityCount">可选的实体参数数量。</param>
+    /// <returns>按 Lambda 参数顺序解析的数据源列表。</returns>
+    private IReadOnlyList<TableSource> ResolveSources(LambdaExpression expression, IReadOnlyList<string> aliases = null, int? entityCount = null)
     {
-        var accessor = (ISqlQueryClauseAccessor)GetBuilder();
-        var available = GetBoundSources(accessor).ToList();
-        var selected = new List<TableSource>(expression.Parameters.Count);
-        foreach (var parameter in expression.Parameters)
-        {
-            var candidates = available.Where(item => item.EntityType == parameter.Type).ToList();
-            if (candidates.Count != 1)
-                throw new InvalidOperationException($"实体 {parameter.Type.Name} 的查询来源不唯一，请提供有效别名。");
-
-            var source = candidates[0];
-            if (selected.Contains(source))
-                throw new InvalidOperationException($"表达式参数 {parameter.Name} 重复绑定同一查询来源。");
-            selected.Add(source);
-        }
-        return selected;
+        return SqlLambdaSourceResolver.Resolve((ISqlQueryClauseAccessor)GetBuilder(), expression, aliases, entityCount);
     }
 
     /// <summary>
@@ -1519,21 +1671,4 @@ public partial class SqlLambdaQuery : ISqlQueryBuilderAccessor
         return sources[0];
     }
 
-    /// <summary>
-    /// 按两个显式别名解析不同的查询来源。
-    /// </summary>
-    /// <typeparam name="TFirst">第一个来源实体类型。</typeparam>
-    /// <typeparam name="TSecond">第二个来源实体类型。</typeparam>
-    /// <param name="firstAlias">第一个来源别名。</param>
-    /// <param name="secondAlias">第二个来源别名。</param>
-    /// <returns>按表达式参数顺序排列的两个不同表源。</returns>
-    /// <exception cref="InvalidOperationException">来源不存在、不唯一或两个别名指向同一来源时抛出。</exception>
-    private IReadOnlyList<TableSource> ResolveTwoSources<TFirst, TSecond>(string firstAlias, string secondAlias)
-    {
-        var first = ResolveSource<TFirst>(firstAlias);
-        var second = ResolveSource<TSecond>(secondAlias);
-        if (ReferenceEquals(first, second))
-            throw new InvalidOperationException("双来源表达式参数不能绑定同一查询来源。");
-        return new[] { first, second };
-    }
 }

@@ -70,8 +70,23 @@ public sealed class TableSource
     internal SqlTableReference Reference => (Item as StructuredSqlItem)?.Reference;
 
     /// <summary>
-    /// 复制当前表源并保留稳定身份。
+    /// 为实体数据源创建指定别名的副本。
     /// </summary>
-    /// <returns>当前表源的独立副本。</returns>
+    /// <param name="alias">数据源别名。</param>
+    /// <returns>使用新别名及对应表项的实体数据源。</returns>
+    /// <remarks>
+    /// 仅支持结构化实体数据源。
+    /// </remarks>
+    internal TableSource WithAlias(string alias)
+    {
+        if (Item is not StructuredSqlItem item)
+            throw new NotSupportedException("只有结构化实体来源支持推断别名。");
+        return new TableSource(SourceId, item.WithAlias(alias), EntityType, alias, ProjectedMembers);
+    }
+
+    /// <summary>
+    /// 克隆当前实体数据源及其表项。
+    /// </summary>
+    /// <returns>包含克隆表项的实体数据源。</returns>
     internal TableSource Clone() => new(SourceId, Item.Clone(), EntityType, Alias, ProjectedMembers);
 }

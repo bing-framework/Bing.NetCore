@@ -1,1 +1,4 @@
 
+
+override Bing.Data.Sql.Builders.PostgreSqlBuilder.SupportsMutationCheckpoint.get -> bool
+static Bing.Dapper.PostgreSql.PostgreSqlServiceCollectionExtensions.AddPostgreSqlJson<T>(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T> typeInfo) -> Microsoft.Extensions.DependencyInjection.IServiceCollection

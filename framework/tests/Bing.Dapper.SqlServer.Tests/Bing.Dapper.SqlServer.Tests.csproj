@@ -21,7 +21,6 @@
     <PackageReference Include="Npgsql" Version="6.0.11" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.7" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.90" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
   </ItemGroup>
 
 

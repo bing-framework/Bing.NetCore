@@ -6,8 +6,11 @@ using Xunit;
 namespace Bing.Dapper.Tests.Metadata;
 
 /// <summary>
-/// <see cref="OracleTypeConverter"/> 单元测试。 测试常见 Oracle 类型映射与未知类型的明确错误语义。
+/// <see cref="OracleTypeConverter" /> 单元测试。
 /// </summary>
+/// <remarks>
+/// 测试常见 Oracle 类型映射与未知类型的明确错误语义。
+/// </remarks>
 public class OracleTypeConverterTest
 {
     /// <summary>

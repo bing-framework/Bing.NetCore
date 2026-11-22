@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Bing.Data.Enums;
+using Bing.Data.Metadata;
 using Bing.Data.Sql.Builders.Params;
 using Npgsql;
 using NpgsqlTypes;
@@ -17,10 +18,13 @@ public sealed class PostgreSqlDbParameterCustomizer : ISqlDbParameterCustomizer
     /// <inheritdoc />
     public void Configure(IDbDataParameter dbParameter, SqlParam sqlParameter)
     {
-        if (dbParameter is not NpgsqlParameter parameter ||
-            Enum.TryParse<NpgsqlDbType>(GetTypeName(sqlParameter?.ProviderTypeName), true, out var providerType) == false)
+        if (dbParameter is not NpgsqlParameter parameter)
             return;
-        parameter.NpgsqlDbType = providerType;
+
+        var typeName = GetTypeName(sqlParameter?.ProviderTypeName);
+        if (Enum.TryParse<NpgsqlDbType>(typeName, true, out var providerType) ||
+            PostgreSqlTypeConverter.TryGetRangeParameterType(typeName, out providerType))
+            parameter.NpgsqlDbType = providerType;
     }
 
     /// <summary>

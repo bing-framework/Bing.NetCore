@@ -1,3 +1,6 @@
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 using Bing.Data;
 
 namespace Bing.Data.Sql.Builders;
@@ -159,6 +162,15 @@ public sealed class SqlProviderTransactionCapabilities
     /// 获取或初始化是否声明支持原生异步回滚事务。
     /// </summary>
     public bool SupportsNativeAsyncRollback { get; init; }
+
+    /// <summary>获取或初始化 Provider 提供的静态异步事务创建委托；隔离级别为空时使用 Provider 默认值，不适用时返回空任务以继续兼容路径。</summary>
+    public Func<IDbConnection, IsolationLevel?, CancellationToken, Task<IDbTransaction>> BeginAsync { get; init; }
+
+    /// <summary>获取或初始化 Provider 提供的静态异步提交委托；不适用时返回空任务以继续兼容路径。</summary>
+    public Func<IDbTransaction, CancellationToken, Task> CommitAsync { get; init; }
+
+    /// <summary>获取或初始化 Provider 提供的静态异步回滚委托；不适用时返回空任务以继续兼容路径。</summary>
+    public Func<IDbTransaction, CancellationToken, Task> RollbackAsync { get; init; }
 }
 
 /// <summary>
@@ -343,7 +355,10 @@ internal static class SqlProviderCapabilityResolver
                 TransactionsFailureReason = transaction.TransactionsFailureReason,
                 SupportsNativeAsyncBegin = transaction.SupportsNativeAsyncBegin,
                 SupportsNativeAsyncCommit = transaction.SupportsNativeAsyncCommit,
-                SupportsNativeAsyncRollback = transaction.SupportsNativeAsyncRollback
+                SupportsNativeAsyncRollback = transaction.SupportsNativeAsyncRollback,
+                BeginAsync = transaction.BeginAsync,
+                CommitAsync = transaction.CommitAsync,
+                RollbackAsync = transaction.RollbackAsync
             },
             Procedure = new SqlProviderProcedureCapabilities
             {

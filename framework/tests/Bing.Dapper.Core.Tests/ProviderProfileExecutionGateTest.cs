@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Data;
+using System.Data.Common;
 using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql;
@@ -9,9 +10,11 @@ using Bing.Data.Sql.Builders.Mutations.Accessors;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Configs;
 using Bing.Data.Sql.Mutations;
+using Bing.Data.Sql.Metadata;
 using Bing.Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Moq.Protected;
 using Xunit;
 
 namespace Bing.Dapper.Core.Tests;
@@ -273,6 +276,7 @@ public sealed class ProviderProfileExecutionGateTest
     {
         // Arrange
         var command = CreateCommand();
+        command.SetupProperty(item => item.CommandType);
         command.Setup(item => item.ExecuteNonQuery()).Returns(1);
         var connection = CreateConnection(command.Object);
         using var serviceProvider = CreateServiceProvider(new SqlProviderProfile
@@ -292,6 +296,8 @@ public sealed class ProviderProfileExecutionGateTest
 
         // Assert
         Assert.Equal(1, result.Result);
+        Assert.Equal(CommandType.StoredProcedure, command.Object.CommandType);
+        Assert.Same(result, executor.LastCompletionResult);
         command.Verify(item => item.ExecuteNonQuery(), Times.Once);
     }
 
@@ -452,6 +458,100 @@ public sealed class ProviderProfileExecutionGateTest
         connection.Verify(item => item.CreateCommand(), Times.Never);
     }
 
+    /// <summary>文本命令使用输出能力，保留命令类型、参数方向和本次执行的输出快照。</summary>
+    [Theory]
+    [InlineData(false, SqlExecutionMode.GeneratedOnly)]
+    [InlineData(true, SqlExecutionMode.GeneratedOnly)]
+    [InlineData(false, SqlExecutionMode.Compatible)]
+    [InlineData(true, SqlExecutionMode.Compatible)]
+    public async Task ExecuteSqlWithOutput_ShouldBindTextCommandAndSnapshotOutputs(bool asynchronous, SqlExecutionMode mode)
+    {
+        const string sql = "Update reports Set Status = @status Where Id = 1 Returning Status Into @result";
+        var output = new Mock<DbParameter>();
+        output.SetupAllProperties();
+        var input = new Mock<DbParameter>();
+        input.SetupAllProperties();
+        var command = new Mock<DbCommand>();
+        command.SetupAllProperties();
+        command.Protected().SetupGet<DbParameterCollection>("DbParameterCollection")
+            .Returns(new Mock<DbParameterCollection>().Object);
+        command.Protected().SetupSequence<DbParameter>("CreateDbParameter").Returns(input.Object).Returns(output.Object);
+        int Complete()
+        {
+            Assert.Equal(sql, command.Object.CommandText);
+            Assert.Equal(CommandType.Text, command.Object.CommandType);
+            Assert.Equal(12, command.Object.CommandTimeout);
+            Assert.Equal("approved", input.Object.Value);
+            Assert.Equal(ParameterDirection.Output, output.Object.Direction);
+            Assert.Equal(DbType.String, output.Object.DbType);
+            Assert.Equal(32, output.Object.Size);
+            output.Object.Value = "approved";
+            return 1;
+        }
+        command.Setup(item => item.ExecuteNonQuery()).Returns(Complete);
+        command.Setup(item => item.ExecuteNonQueryAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Complete);
+        var connection = new Mock<DbConnection>();
+        connection.SetupGet(item => item.State).Returns(ConnectionState.Open);
+        connection.Protected().Setup<DbCommand>("CreateDbCommand").Returns(command.Object);
+        using var services = CreateServiceProvider(new SqlProviderProfile
+        {
+            Procedure = new SqlProviderProcedureCapabilities { SupportsOutputParameters = true }
+        }, mode);
+        var parameters = new[]
+        {
+            new SqlParam("status", "approved"),
+            new SqlParam("result", null, DbType.String, ParameterDirection.Output, size: 32)
+        };
+        (int AffectedRows, ISqlOutputParameterAccessor OutputParameters) result;
+        using (ISqlExecutor executor = new ProfileGateExecutor(services, CreateOptions(connection.Object)))
+            result = asynchronous ? await executor.ExecuteSqlWithOutputAsync(sql, parameters, 12)
+                : executor.ExecuteSqlWithOutput(sql, parameters, 12);
+
+        output.Object.Value = "later";
+        Assert.Equal(1, result.AffectedRows);
+        Assert.Equal("approved", result.OutputParameters.GetValue<string>("@RESULT"));
+        Assert.False(result.OutputParameters.TryGetValue<string>("status", out _));
+        Assert.Null(parameters[1].Value);
+        command.Verify(item => item.ExecuteNonQuery(), asynchronous ? Times.Never() : Times.Once());
+        command.Verify(item => item.ExecuteNonQueryAsync(It.IsAny<CancellationToken>()),
+            asynchronous ? Times.Once() : Times.Never());
+    }
+
+    /// <summary>当前 Provider 禁用输出参数时，在访问连接之前拒绝文本写入。</summary>
+    [Fact]
+    public void ExecuteSqlWithOutput_WhenProviderDisablesOutput_ShouldRejectBeforeCommandCreation()
+    {
+        var connection = CreateConnection();
+        using var services = CreateServiceProvider(new SqlProviderProfile());
+        using ISqlExecutor executor = new ProfileGateExecutor(services, CreateOptions(connection.Object));
+        var parameters = new[] { new SqlParam("result", null, DbType.Int32, ParameterDirection.Output) };
+
+        var exception = Assert.Throws<NotSupportedException>(() =>
+            executor.ExecuteSqlWithOutput("Delete From reports Where Id = 1 Returning Id Into @result", parameters));
+
+        Assert.True(SqlCapabilityFailure.TryGetReason(exception, out var reason));
+        Assert.Equal(SqlCapabilityFailureReason.ProviderImplementationGap, reason);
+        connection.Verify(item => item.CreateCommand(), Times.Never);
+    }
+
+    /// <summary>预取消先于输出能力验证和命令创建。</summary>
+    [Fact]
+    public async Task ExecuteSqlWithOutputAsync_WhenCancelled_ShouldRejectBeforeCommandCreation()
+    {
+        var connection = CreateConnection();
+        using var services = CreateServiceProvider(new SqlProviderProfile());
+        using ISqlExecutor executor = new ProfileGateExecutor(services, CreateOptions(connection.Object));
+        var parameters = new[] { new SqlParam("result", null, DbType.Int32, ParameterDirection.Output) };
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executor.ExecuteSqlWithOutputAsync(
+            "Delete From reports Where Id = 1 Returning Id Into @result", parameters, cancellationToken: cancellation.Token));
+
+        connection.Verify(item => item.CreateCommand(), Times.Never);
+    }
+
     /// <summary>
     /// 创建 ADO 连接测试替身。
     /// </summary>
@@ -512,11 +612,14 @@ public sealed class ProviderProfileExecutionGateTest
     /// 创建注册指定 Profile Provider 的测试服务容器。
     /// </summary>
     /// <param name="profile">要注册到测试容器的 Provider 能力配置。</param>
+    /// <param name="mode">SQL 执行模式。</param>
     /// <returns>返回注册指定 Profile Provider 的服务容器。</returns>
-    private static ServiceProvider CreateServiceProvider(SqlProviderProfile profile)
+    private static ServiceProvider CreateServiceProvider(SqlProviderProfile profile,
+        SqlExecutionMode mode = SqlExecutionMode.Compatible)
     {
         var services = new ServiceCollection();
         services.AddSqlCore();
+        services.ConfigureSqlMetadata(options => options.ExecutionMode = mode);
         services.AddSingleton<ISqlProvider>(new ProfileGateProvider(profile));
         return services.BuildServiceProvider();
     }
@@ -528,15 +631,8 @@ public sealed class ProviderProfileExecutionGateTest
     /// <returns>包含 Returning 标记的独立写入命令。</returns>
     private static SqlWriteCommand CreateReturningDescription(SqlProviderProfile profile)
     {
-        var builder = new Mock<ISqlBuilder>();
-        builder.SetupGet(item => item.Provider).Returns(new ProfileGateProvider(profile));
-        builder.SetupGet(item => item.OperationKind).Returns(SqlOperationKind.Update);
-        builder.Setup(item => item.ToSql()).Returns("Update reports Set Status = @status Returning Id");
-        var returningClause = new Mock<IReturningClause>();
-        returningClause.SetupGet(item => item.IsEmpty).Returns(false);
-        builder.As<IReturningClauseAccessor>().SetupGet(item => item.ReturningClause).Returns(returningClause.Object);
-        builder.Setup(item => item.Clone()).Returns(builder.Object);
-        return builder.Object.ToSqlWriteCommand();
+        return new SqlWriteCommand("Update reports Set Status = @status Returning Id", Array.Empty<SqlParam>(),
+            new ProfileGateProvider(profile), SqlOperationKind.Update, true);
     }
 
     /// <summary>
@@ -545,8 +641,10 @@ public sealed class ProviderProfileExecutionGateTest
     private sealed class ProfileGateQuery : SqlQueryBase
     {
         /// <summary>
-        /// 初始化一个 <see cref="ProfileGateQuery"/> 类型的实例。
+        /// 初始化一个 <see cref="ProfileGateQuery" /> 类型的实例。
         /// </summary>
+        /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
+        /// <param name="options">用于初始化实例的配置选项。</param>
         public ProfileGateQuery(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options)
         {
         }
@@ -561,8 +659,10 @@ public sealed class ProviderProfileExecutionGateTest
     private sealed class ProfileGateExecutor : SqlExecutorBase
     {
         /// <summary>
-        /// 初始化一个 <see cref="ProfileGateExecutor"/> 类型的实例。
+        /// 初始化一个 <see cref="ProfileGateExecutor" /> 类型的实例。
         /// </summary>
+        /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
+        /// <param name="options">用于初始化实例的配置选项。</param>
         public ProfileGateExecutor(IServiceProvider serviceProvider, SqlOptions options) : base(serviceProvider, options)
         {
         }
@@ -577,12 +677,18 @@ public sealed class ProviderProfileExecutionGateTest
         /// </summary>
         public int ExecuteBeforeCount { get; private set; }
 
+        /// <summary>获取执行完成时交给业务回调的结果。</summary>
+        public object LastCompletionResult { get; private set; }
+
         /// <inheritdoc />
         protected override bool ExecuteBefore()
         {
             ExecuteBeforeCount++;
             return SkipBeforeExecution == false;
         }
+
+        /// <inheritdoc />
+        protected override void ExecuteAfter(object result) => LastCompletionResult = result;
 
         /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
@@ -599,8 +705,9 @@ public sealed class ProviderProfileExecutionGateTest
         public const string ProviderKey = "test.profile-gate";
 
         /// <summary>
-        /// 初始化一个 <see cref="ProfileGateProvider"/> 类型的实例。
+        /// 初始化一个 <see cref="ProfileGateProvider" /> 类型的实例。
         /// </summary>
+        /// <param name="profile">用于测试 SQL 提供程序执行能力的配置档案。</param>
         public ProfileGateProvider(SqlProviderProfile profile) => Profile = profile;
 
         /// <inheritdoc />

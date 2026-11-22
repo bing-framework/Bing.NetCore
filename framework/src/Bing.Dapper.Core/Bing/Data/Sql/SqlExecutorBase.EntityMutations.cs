@@ -11,7 +11,8 @@ public abstract partial class SqlExecutorBase
     /// <inheritdoc />
     public virtual int Insert<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null) where TEntity : class
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
+        PrepareInsertKeys(new[] { entity }).ToArray();
         var command = CreateMutationBuilder().Insert(entity, options);
         return ExecuteSql(command.Sql, command.Parameters, timeout);
     }
@@ -20,7 +21,8 @@ public abstract partial class SqlExecutorBase
     public virtual Task<int> InsertAsync<TEntity>(TEntity entity, SqlInsertOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
+        PrepareInsertKeys(new[] { entity }, cancellationToken).ToArray();
         var command = CreateMutationBuilder().Insert(entity, options);
         return ExecuteSqlAsync(command.Sql, command.Parameters, timeout, cancellationToken);
     }
@@ -34,7 +36,7 @@ public abstract partial class SqlExecutorBase
     /// <inheritdoc />
     public virtual int Update<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null) where TEntity : class
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommand(CreateMutationBuilder().Update(entity, options), timeout);
     }
 
@@ -42,7 +44,7 @@ public abstract partial class SqlExecutorBase
     public virtual Task<int> UpdateAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommandAsync(CreateMutationBuilder().Update(entity, options), timeout, cancellationToken);
     }
 
@@ -55,7 +57,7 @@ public abstract partial class SqlExecutorBase
     /// <inheritdoc />
     public virtual int Delete<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null) where TEntity : class
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommand(CreateMutationBuilder().Delete(entity, options), timeout);
     }
 
@@ -63,14 +65,14 @@ public abstract partial class SqlExecutorBase
     public virtual Task<int> DeleteAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommandAsync(CreateMutationBuilder().Delete(entity, options), timeout, cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual int Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null) where TEntity : class
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommand(CreateMutationBuilder().Purge(entity, options), timeout);
     }
 
@@ -78,14 +80,14 @@ public abstract partial class SqlExecutorBase
     public virtual Task<int> PurgeAsync<TEntity>(TEntity entity, SqlDeleteOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommandAsync(CreateMutationBuilder().Purge(entity, options), timeout, cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual int Restore<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null) where TEntity : class
     {
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommand(CreateMutationBuilder().Restore(entity, options), timeout);
     }
 
@@ -93,7 +95,7 @@ public abstract partial class SqlExecutorBase
     public virtual Task<int> RestoreAsync<TEntity>(TEntity entity, SqlUpdateOptions options = null, int? timeout = null, CancellationToken cancellationToken = default) where TEntity : class
     {
         EnsureCancellationSupported(cancellationToken);
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
         return ExecuteMutationCommandAsync(CreateMutationBuilder().Restore(entity, options), timeout, cancellationToken);
     }
 
@@ -115,7 +117,7 @@ public abstract partial class SqlExecutorBase
     {
         EnsureMutationBatchExecutionAllowed(entities);
         options ??= new SqlBatchInsertOptions();
-        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(entities, options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout);
+        return ExecuteMutationBatch(CreateWindowedMutationBatchCommands(PrepareInsertKeys(entities), options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout);
     }
 
     /// <summary>
@@ -133,7 +135,7 @@ public abstract partial class SqlExecutorBase
         EnsureCancellationSupported(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         options ??= new SqlBatchInsertOptions();
-        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(entities, options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
+        return ExecuteMutationBatchAsync(CreateWindowedMutationBatchCommands(PrepareInsertKeys(entities, cancellationToken), options, items => CreateInsertBatchCommands(items, options)), options.UseTransaction, timeout, cancellationToken);
     }
 
     /// <summary>
@@ -211,7 +213,7 @@ public abstract partial class SqlExecutorBase
     {
         if (entities == null)
             throw new ArgumentNullException(nameof(entities));
-        EnsureWritableDataSource();
+        WriteResources.EnsureWritableDataSource();
     }
 
     /// <summary>

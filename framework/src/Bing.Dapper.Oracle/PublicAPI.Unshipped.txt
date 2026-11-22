@@ -1,1 +1,17 @@
 
+
+override Bing.Data.Sql.Builders.OracleBuilder.SupportsMutationCheckpoint.get -> bool
+Bing.Data.Sql.OracleReturningColumn
+Bing.Data.Sql.OracleReturningColumn.OracleReturningColumn(string column, System.Data.DbType dbType, int? size = null, string name = null) -> void
+Bing.Data.Sql.OracleReturningColumn.Column.get -> string
+Bing.Data.Sql.OracleReturningColumn.DbType.get -> System.Data.DbType
+Bing.Data.Sql.OracleReturningColumn.Size.get -> int?
+Bing.Data.Sql.OracleReturningColumn.Name.get -> string
+Bing.Data.Sql.OracleReturningCommand
+Bing.Data.Sql.OracleReturningCommand.Sql.get -> string
+Bing.Data.Sql.OracleReturningCommand.Parameters.get -> System.Collections.Generic.IReadOnlyCollection<Bing.Data.Sql.Builders.Params.SqlParam>
+Bing.Data.Sql.OracleReturningExtensions
+static Bing.Data.Sql.OracleReturningExtensions.ReturningInto(this Bing.Data.Sql.Mutations.SqlWriteCommand command, params Bing.Data.Sql.OracleReturningColumn[] columns) -> Bing.Data.Sql.OracleReturningCommand
+static Bing.Data.Sql.OracleReturningExtensions.ExecuteReturning<TResult>(this Bing.Data.Sql.ISqlExecutor executor, Bing.Data.Sql.OracleReturningCommand command, System.Func<Bing.Data.Sql.ISqlOutputParameterAccessor, TResult> project, int? timeout = null) -> System.Collections.Generic.List<TResult>
+static Bing.Data.Sql.OracleReturningExtensions.ExecuteReturningAsync<TResult>(this Bing.Data.Sql.ISqlExecutor executor, Bing.Data.Sql.OracleReturningCommand command, System.Func<Bing.Data.Sql.ISqlOutputParameterAccessor, TResult> project, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.List<TResult>>
+static Bing.Data.Sql.OracleReturningExtensions.ReturningManyInto(this Bing.Data.Sql.Mutations.SqlWriteCommand command, int maxRows, params Bing.Data.Sql.OracleReturningColumn[] columns) -> Bing.Data.Sql.OracleReturningCommand

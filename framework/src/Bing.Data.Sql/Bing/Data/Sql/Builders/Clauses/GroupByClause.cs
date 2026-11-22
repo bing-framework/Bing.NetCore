@@ -11,7 +11,7 @@ namespace Bing.Data.Sql.Builders.Clauses;
 /// <summary>
 /// Group By子句
 /// </summary>
-public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
+public partial class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
 {
     /// <summary>
     /// 子句运行上下文。
@@ -42,12 +42,17 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     /// 分组条件
     /// </summary>
     private string _having;
+    /// <summary>
+    /// 保存已绑定参数的分组 HAVING 条件。
+    /// </summary>
+    private ICondition _boundHaving;
 
     /// <inheritdoc />
-    public bool IsGroup => _group.Count > 0;
+    public bool IsGroup => _group.Count > 0 || LogicalColumns.Count > 0;
 
     /// <inheritdoc />
-    public string GroupColumns => _group.Select(t => t.ToSql(_dialect)).Join();
+    public string GroupColumns => string.Join(",", _group.Select(t => t.ToSql(_dialect))
+        .Concat(LogicalColumns.Select(column => column.ToSql(_context))));
 
     /// <summary>
     /// 初始化一个 <see cref="GroupByClause"/> 类型的实例。
@@ -68,8 +73,25 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     }
 
     /// <inheritdoc />
-    public virtual IGroupByClause Clone(SqlClauseContext context) => CreateClone(context,
-        _group.Select(item => item.Clone()).ToList(), _having);
+    public virtual IGroupByClause Clone(SqlClauseContext context)
+    {
+        var clone = CreateClone(context, _group.Select(item => item.Clone()).ToList(), _having);
+        clone.LogicalColumns.AddRange(LogicalColumns);
+        clone.HasFunctionAggregate = HasFunctionAggregate;
+        clone._functionHaving = _functionHaving;
+        clone._boundHaving = SqlConditionSnapshot.Rebind(_boundHaving, context);
+        return clone;
+    }
+
+    /// <summary>
+    /// 获取投影中的逻辑列集合。
+    /// </summary>
+    internal List<SqlProjectionColumn> LogicalColumns { get; } = new();
+    /// <summary>
+    /// 获取或设置查询是否包含函数聚合表达式。
+    /// </summary>
+    internal bool HasFunctionAggregate { get; set; }
+
 
     /// <summary>
     /// 创建克隆后的 Group By 子句。
@@ -151,7 +173,10 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         if (condition == null)
             throw new ArgumentNullException(nameof(condition));
         _context.UseOperation(SqlOperationAction.QueryClause);
-        _having = condition.GetCondition();
+        _having = null;
+        _boundHaving = SqlConditionSnapshot.Capture(condition);
+        _functionHaving = null;
+        HasFunctionAggregate = false;
     }
 
     /// <inheritdoc />
@@ -167,6 +192,9 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
             throw new ArgumentException("Having 条件不能为空。", nameof(sql));
         _context.UseOperation(SqlOperationAction.QueryClause);
         _having = sql;
+        _boundHaving = null;
+        _functionHaving = null;
+        HasFunctionAggregate = false;
     }
 
     /// <inheritdoc />
@@ -178,6 +206,9 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
         sql = Helper.ResolveSql(sql, _dialect);
         _context.UseOperation(SqlOperationAction.QueryClause);
         _having = sql;
+        _boundHaving = null;
+        _functionHaving = null;
+        HasFunctionAggregate = false;
     }
 
     /// <inheritdoc />
@@ -196,17 +227,15 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        if (IsGroup == false)
+        var having = _functionHaving?.Render(_context) ?? _boundHaving?.GetCondition() ?? _having;
+        if (!IsGroup && string.IsNullOrWhiteSpace(having))
             return;
         var startIndex = builder.Length;
         try
         {
-            builder.Append("Group By ");
-            builder.Append(GroupColumns);
-            if (string.IsNullOrWhiteSpace(_having))
-                return;
-            builder.Append(" Having ");
-            builder.Append(_having);
+            if (IsGroup) builder.Append("Group By ").Append(GroupColumns);
+            if (string.IsNullOrWhiteSpace(having)) return;
+            builder.Append(IsGroup ? " Having " : "Having ").Append(having);
         }
         catch
         {
@@ -219,7 +248,11 @@ public class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClause
     public void Clear()
     {
         _group.Clear();
+        LogicalColumns.Clear();
         _having = null;
+        _boundHaving = null;
+        _functionHaving = null;
+        HasFunctionAggregate = false;
     }
 
     /// <inheritdoc />

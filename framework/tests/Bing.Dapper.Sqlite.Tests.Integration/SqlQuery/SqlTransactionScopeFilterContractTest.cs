@@ -14,9 +14,15 @@ namespace Bing.Dapper.Tests.SqlQuery;
 /// </summary>
 public sealed class SqlTransactionScopeFilterContractTest
 {
+    /// <summary>
+    /// 定义启用软删除过滤的事务作用域查询 SQL。
+    /// </summary>
     private const string EnabledSql =
         "Select `scope_probe_data`.`Id`,`scope_probe_data`.`Name`,`scope_probe_data`.`IsDeleted` \r\nFrom `scope_probe_data` \r\nWhere `scope_probe_data`.`IsDeleted`=@_p_0";
 
+    /// <summary>
+    /// 定义禁用软删除过滤的事务作用域查询 SQL。
+    /// </summary>
     private const string DisabledSql =
         "Select `scope_probe_data`.`Id`,`scope_probe_data`.`Name`,`scope_probe_data`.`IsDeleted` \r\nFrom `scope_probe_data`";
 
@@ -181,6 +187,11 @@ public sealed class SqlTransactionScopeFilterContractTest
             .Select(item => item.Name));
     }
 
+    /// <summary>
+    /// 验证过滤状态对应的 SQL 及执行快照。
+    /// </summary>
+    /// <param name="source">待渲染的 SQL 查询。</param>
+    /// <param name="enabled">软删除过滤器是否启用。</param>
     private static void AssertSql(SqlLambdaQuery source, bool enabled)
     {
         var expectedSql = enabled ? EnabledSql : DisabledSql;
@@ -200,9 +211,20 @@ public sealed class SqlTransactionScopeFilterContractTest
         }
     }
 
+    /// <summary>
+    /// 验证过滤状态对应的 SQL 文本。
+    /// </summary>
+    /// <param name="source">待渲染的 SQL 查询。</param>
+    /// <param name="enabled">软删除过滤器是否启用。</param>
     private static void AssertSqlText(SqlLambdaQuery source, bool enabled) =>
         Assert.Equal(enabled ? EnabledSql : DisabledSql, source.ToSql());
 
+    /// <summary>
+    /// 创建双数据源事务过滤测试容器。
+    /// </summary>
+    /// <param name="firstConnectionString">第一个测试数据库的连接字符串。</param>
+    /// <param name="secondConnectionString">第二个测试数据库的连接字符串。</param>
+    /// <returns>注册了当前测试依赖的服务容器。</returns>
     private static ServiceProvider CreateServiceProvider(string firstConnectionString,
         string secondConnectionString)
     {
@@ -217,9 +239,19 @@ public sealed class SqlTransactionScopeFilterContractTest
         });
     }
 
+    /// <summary>
+    /// 创建唯一的共享内存 SQLite 连接字符串。
+    /// </summary>
+    /// <param name="name">注册或构造的测试服务、操作或场景名称。</param>
+    /// <returns>使用唯一名称且启用共享缓存的内存 SQLite 连接字符串。</returns>
     private static string CreateSharedDatabase(string name) =>
         $"Data Source=file:{name}-{Guid.NewGuid():N}?mode=memory&cache=shared";
 
+    /// <summary>
+    /// 打开用于维持共享内存数据库的连接。
+    /// </summary>
+    /// <param name="connectionString">测试数据库连接字符串。</param>
+    /// <returns>测试数据库的 SQLite 连接。</returns>
     private static SqliteConnection OpenKeeper(string connectionString)
     {
         var connection = new SqliteConnection(connectionString);
@@ -227,6 +259,11 @@ public sealed class SqlTransactionScopeFilterContractTest
         return connection;
     }
 
+    /// <summary>
+    /// 创建事务过滤测试表并写入种子数据。
+    /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="dataSourceName">测试数据源名称。</param>
     private static void Seed(SqliteConnection connection, string dataSourceName)
     {
         using var command = connection.CreateCommand();
@@ -237,13 +274,23 @@ public sealed class SqlTransactionScopeFilterContractTest
         command.ExecuteNonQuery();
     }
 
+    /// <summary>
+    /// 提供 SQLite 作用域过滤集成测试的数据实体。
+    /// </summary>
     [Table("scope_probe_data")]
     public sealed class SqlFactoryScopeDataEntity : ISoftDelete
     {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
         public int Id { get; set; }
 
+        /// <summary>
+        /// 获取或设置实体或结果名称。
+        /// </summary>
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public bool IsDeleted { get; set; }
     }
 }

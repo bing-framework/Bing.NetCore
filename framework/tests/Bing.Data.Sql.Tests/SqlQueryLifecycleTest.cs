@@ -16,6 +16,35 @@ namespace Bing.Data.Sql.Tests;
 /// </summary>
 public class SqlQueryLifecycleTest
 {
+    /// <summary>重复终结查询只冻结一次结构，执行计划及执行标识仍按次隔离。</summary>
+    [Fact]
+    public void ExecuteAgain_ShouldReuseFrozenShapeAndKeepPlansIndependent()
+    {
+        var builder = new CountingTestSqlBuilder();
+        var executor = new Mock<ISqlQueryPlanExecutor>();
+        var plans = new List<SqlQueryPlan>();
+        executor.Setup(item => item.ToList<Sample>(It.IsAny<SqlQueryPlan>(), It.IsAny<int?>()))
+            .Returns((SqlQueryPlan plan, int? _) => Execute(plan, () =>
+            {
+                plans.Add(plan);
+                var snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan);
+                Assert.Equal("Select [Id] \r\nFrom [Orders] \r\nWhere [Status]=@_p_0", snapshot.Sql);
+                Assert.Equal(1, Assert.Single(snapshot.Parameters).Value);
+                return new List<Sample>();
+            }));
+        var query = SqlQueryRuntimeFactory.CreateQuery(executor.Object, builder)
+            .Select("Id").From("Orders").Where("Status", 1);
+        var beforeFreeze = builder.Counters.CloneCallCount;
+
+        query.ToList<Sample>();
+        query.ToList<Sample>();
+
+        Assert.Equal(beforeFreeze + 1, builder.Counters.CloneCallCount);
+        Assert.NotSame(plans[0], plans[1]);
+        Assert.NotEqual(plans[0].ExecutionId, plans[1].ExecutionId);
+        Assert.Throws<InvalidOperationException>(() => query.Where("Status", 2));
+    }
+
     /// <summary>
     /// 测试目的：ToSql 只渲染查询快照，不应冻结描述，后续合法修改仍应生效。
     /// </summary>
@@ -1106,7 +1135,23 @@ public class SqlQueryLifecycleTest
         // Assert
         Assert.Contains(cachedFields, field => field.Name == "_cachedSql" && field.FieldType == typeof(string));
         Assert.DoesNotContain(fields, field => field.Name == "_cachedParameterLayout");
-        Assert.DoesNotContain(cachedFields, field => field.FieldType != typeof(string) && field.FieldType != typeof(long));
+        Assert.DoesNotContain(cachedFields, field => field.FieldType != typeof(string) &&
+            field.FieldType != typeof(long) && field.FieldType != typeof(SqlQuerySelectShape));
+        var shapeFields = typeof(SqlQuerySelectShape).GetFields(System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.NonPublic);
+        Assert.All(shapeFields, field =>
+        {
+            Assert.True(field.IsInitOnly);
+            Assert.True(field.FieldType == typeof(string) || field.FieldType == typeof(int) ||
+                field.FieldType == typeof(bool) || field.FieldType == typeof(SqlQueryOrder));
+        });
+        var orderFields = typeof(SqlQueryOrder).GetFields(System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.NonPublic);
+        Assert.All(orderFields, field =>
+        {
+            Assert.True(field.IsInitOnly);
+            Assert.True(field.FieldType == typeof(string) || field.FieldType == typeof(OrderByItem[]));
+        });
         Assert.DoesNotContain(cachedFields, field => field.FieldType.Name.Contains("Builder", StringComparison.Ordinal));
         Assert.DoesNotContain(cachedFields, field => field.FieldType.Name.Contains("Connection", StringComparison.Ordinal));
         Assert.DoesNotContain(cachedFields, field => field.FieldType.Name.Contains("Transaction", StringComparison.Ordinal));
@@ -1191,7 +1236,7 @@ public class SqlQueryLifecycleTest
             defaultSql);
         Assert.Equal("Select [s].[status_reporting] \r\nFrom [as_Sample].[users_reporting] As [s] \r\nWhere [s].[status_reporting]=@_p_0",
             reportingSql);
-        Assert.Equal("Select $$s&&&.$$status_default&&& \r\nFrom $as_Sample&.$users_default& As $s& \r\nWhere $$s&&&.$$status_default&&&=*_p_0",
+        Assert.Equal("Select $s&.$status_default& \r\nFrom $as_Sample&.$users_default& As $s& \r\nWhere $$s&&&.$$status_default&&&=*_p_0",
             alternateDialectSql);
         Assert.NotEqual(defaultSql, reportingSql);
         Assert.NotEqual(defaultSql, alternateDialectSql);
@@ -1266,8 +1311,8 @@ public class SqlQueryLifecycleTest
         executor.Setup(item => item.ToList<Sample>(It.IsAny<SqlQueryPlan>(), It.IsAny<int?>()))
             .Returns((SqlQueryPlan plan, int? _) =>
             {
-                var parameters = ((ISqlCommonPartAccessor)plan.GetBuilder()).ParameterManager.GetParams();
-                values.Add(Assert.IsType<int>(parameters.Values.Single()));
+                var parameters = Assert.IsType<SqlParam[]>(plan.Parameters);
+                values.Add(Assert.IsType<int>(Assert.Single(parameters).Value));
                 return new List<Sample>();
             });
         var source = CreateQuery(executor);
@@ -1304,7 +1349,7 @@ public class SqlQueryLifecycleTest
     }
 
     /// <summary>
-    /// 测试目的：Frozen/Completed 查询应允许重复执行，每次执行都必须获得独立执行回调。
+    /// 测试目的：冻结查询在执行完成后应允许重复执行，每次执行都必须获得独立执行回调。
     /// </summary>
     [Fact]
     public void Terminal_WhenQueryIsExecutedRepeatedly_ShouldReuseFrozenDescription()
@@ -1392,6 +1437,63 @@ public class SqlQueryLifecycleTest
         // Assert
         Assert.Equal("受控查询执行异常。", exception.Message);
         Assert.Empty(result);
+    }
+
+    /// <summary>异步失败或取消只释放执行租约，原查询仍冻结，Clone 则是可修改的新草稿。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Terminal_WhenAsyncExecutionFailsOrCancels_ShouldStayFrozenAndAllowRetry(bool cancel)
+    {
+        var attempts = 0;
+        using var cancellation = new CancellationTokenSource();
+        var executor = new Mock<ISqlQueryPlanExecutor>();
+        executor.Setup(item => item.ToListAsync<Sample>(It.IsAny<SqlQueryPlan>(), It.IsAny<int?>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(async (SqlQueryPlan plan, int? _, CancellationToken token) =>
+            {
+                plan.NotifyExecutionStarted();
+                try
+                {
+                    await Task.Yield();
+                    if (++attempts == 1)
+                    {
+                        if (cancel)
+                        {
+                            cancellation.Cancel();
+                            token.ThrowIfCancellationRequested();
+                        }
+                        throw new InvalidOperationException("受控异步执行异常。");
+                    }
+                    return new List<Sample>();
+                }
+                finally
+                {
+                    plan.NotifyExecutionFinished();
+                }
+            });
+        var query = CreateQuery(executor);
+
+        var failure = query.ToListAsync<Sample>(cancellationToken: cancellation.Token);
+        if (cancel)
+        {
+            var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => failure);
+            Assert.Equal(cancellation.Token, exception.CancellationToken);
+        }
+        else
+        {
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => failure);
+            Assert.Equal("受控异步执行异常。", exception.Message);
+        }
+
+        var frozen = Assert.Throws<InvalidOperationException>(() => query.Where<Sample>(item => item.IntValue == 7));
+        Assert.Equal("查询已冻结，不能继续修改查询描述。", frozen.Message);
+        var clone = query.Clone().Where<Sample>(item => item.IntValue == 7);
+        Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s]", query.ToSql());
+        Assert.Equal("Select [s].[IntValue] \r\nFrom [Sample] As [s] \r\nWhere [s].[IntValue]=@_p_0", clone.ToSql());
+        Assert.Empty(await query.ToListAsync<Sample>());
+        Assert.Empty(await clone.ToListAsync<Sample>());
+        Assert.Equal(3, attempts);
     }
 
     /// <summary>
@@ -1531,6 +1633,42 @@ public class SqlQueryLifecycleTest
         Assert.NotNull(field);
         return (T)field.GetValue(innerQuery);
     }
+
+    /// <summary>
+    /// 验证投影变更仅使当前查询缓存失效。
+    /// </summary>
+    [Fact]
+    public void SelectAll_WhenProjectionChanges_ShouldInvalidateOnlyAffectedQueryCache()
+    {
+        var builder = new CountingTestSqlBuilder();
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object, builder)
+            .From<ProjectionCacheRow>("r").SelectAll();
+        const string original = "Select [r].[Id],[r].[Name] \r\nFrom [ProjectionCacheRow] As [r]";
+        Assert.Equal(original, query.ToSql());
+        Assert.Equal(original, query.ToSql());
+        Assert.Equal(1, builder.Counters.ToSqlCallCount);
+        var clone = query.Clone().ExcludeSelect<ProjectionCacheRow>(r => r.Name);
+        Assert.Equal("Select [r].[Id] \r\nFrom [ProjectionCacheRow] As [r]", clone.ToSql());
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+        Assert.Equal(original, query.ToSql());
+        Assert.Equal(2, builder.Counters.ToSqlCallCount);
+        query.ExcludeSelect<ProjectionCacheRow>(r => r.Id);
+        Assert.Equal("Select [r].[Name] \r\nFrom [ProjectionCacheRow] As [r]", query.ToSql());
+        Assert.Equal(3, builder.Counters.ToSqlCallCount);
+    }
+
+    /// <summary>
+    /// 提供查询生命周期缓存测试使用的查询数据模型。
+    /// </summary>
+    private class ProjectionCacheRow {
+        /// <summary>
+        /// 获取或设置记录标识。
+        /// </summary>
+        public int Id { get; set; }
+        /// <summary>
+        /// 获取或设置实体或结果名称。
+        /// </summary>
+        public string Name { get; set; } }
 
     /// <summary>
     /// 获取 Lambda 查询缓存的结构版本。
@@ -1724,6 +1862,7 @@ public class SqlQueryLifecycleTest
         /// <inheritdoc />
         public override ISqlBuilder Clone()
         {
+            Counters.CloneCallCount++;
             var builder = new CountingTestSqlBuilder(Counters);
             builder.Clone(this);
             return builder;
@@ -1738,6 +1877,8 @@ public class SqlQueryLifecycleTest
             /// 获取或设置 ToSql 调用次数。
             /// </summary>
             public int ToSqlCallCount { get; set; }
+
+            public int CloneCallCount { get; set; }
         }
     }
 

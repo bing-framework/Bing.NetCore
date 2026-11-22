@@ -11,6 +11,9 @@ namespace Bing.Uow.Tests;
 /// </summary>
 public sealed class BingOperationExecutorTest
 {
+    /// <summary>
+    /// 验证执行器在新作用域开始工作单元后解析目标服务。
+    /// </summary>
     [Fact]
     public async Task Execute_ShouldResolveServiceAfterBeginInNewScope()
     {
@@ -37,6 +40,9 @@ public sealed class BingOperationExecutorTest
         callerRoot.Dispose();
     }
 
+    /// <summary>
+    /// 验证预先取消的操作不解析目标服务。
+    /// </summary>
     [Fact]
     public async Task PreCancellation_ShouldNotResolveTarget()
     {
@@ -59,6 +65,9 @@ public sealed class BingOperationExecutorTest
         resolveCount.ShouldBe(0);
     }
 
+    /// <summary>
+    /// 验证解析失败时先释放根工作单元再释放新作用域。
+    /// </summary>
     [Fact]
     public async Task ResolutionFailure_ShouldDisposeNewScopeAfterRoot()
     {
@@ -79,6 +88,9 @@ public sealed class BingOperationExecutorTest
         exception.Message.ShouldBe("service construction failed");
     }
 
+    /// <summary>
+    /// 验证并行操作使用独立作用域与根工作单元。
+    /// </summary>
     [Fact]
     public async Task ParallelOperations_ShouldUseIndependentScopesAndRoots()
     {
@@ -100,6 +112,9 @@ public sealed class BingOperationExecutorTest
         results.Distinct().Count().ShouldBe(2);
     }
 
+    /// <summary>
+    /// 验证构造前复制追踪上下文并在嵌套及并行操作后恢复。
+    /// </summary>
     [Fact]
     public async Task Execute_ShouldCopyTraceBeforeConstructionAndRestoreAfterNestedAndParallelWork()
     {
@@ -185,6 +200,9 @@ public sealed class BingOperationExecutorTest
         }
     }
 
+    /// <summary>
+    /// 验证解析、业务、取消及清理失败后均恢复父追踪上下文。
+    /// </summary>
     [Fact]
     public async Task Execute_ShouldRestoreParentTraceAfterResolutionBusinessCancellationAndCleanupFailures()
     {
@@ -255,8 +273,15 @@ public sealed class BingOperationExecutorTest
         }
     }
 
+    /// <summary>
+    /// 保存BingOperationExecutorTest测试关注的执行观测结果。
+    /// </summary>
     private sealed class OperationProbe
     {
+        /// <summary>
+        /// 初始化一个 <see cref="OperationProbe" /> 类型的实例。
+        /// </summary>
+        /// <param name="manager">记录当前测试工作单元操作的管理器。</param>
         public OperationProbe(IUnitOfWorkScopeManager manager)
         {
             Manager = manager;
@@ -265,26 +290,56 @@ public sealed class BingOperationExecutorTest
             ScopeId = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// 获取测试使用的工作单元管理器。
+        /// </summary>
         public IUnitOfWorkScopeManager Manager { get; }
+        /// <summary>
+        /// 获取当前测试对应的根作用域。
+        /// </summary>
         public IUnitOfWorkScope Root { get; }
+        /// <summary>
+        /// 获取当前操作作用域的唯一标识。
+        /// </summary>
         public Guid ScopeId { get; }
     }
 
+    /// <summary>
+    /// 在工作单元执行测试中模拟服务调用失败。
+    /// </summary>
     private sealed class BrokenService
     {
     }
 
+    /// <summary>
+    /// 保存BingOperationExecutorTest测试关注的执行观测结果。
+    /// </summary>
     private sealed class DisposeProbe : IDisposable
     {
+        /// <summary>
+        /// 保存释放探针使用的工作单元作用域管理器。
+        /// </summary>
         private readonly IUnitOfWorkScopeManager _manager;
 
+        /// <summary>
+        /// 初始化一个 <see cref="DisposeProbe" /> 类型的实例。
+        /// </summary>
+        /// <param name="manager">记录当前测试工作单元操作的管理器。</param>
         public DisposeProbe(IUnitOfWorkScopeManager manager) => _manager = manager;
 
+        /// <inheritdoc />
         public void Dispose() => _manager.Current.ShouldBeNull();
     }
 
+    /// <summary>
+    /// 保存BingOperationExecutorTest测试关注的执行观测结果。
+    /// </summary>
     private sealed class TraceProbe
     {
+        /// <summary>
+        /// 初始化一个 <see cref="TraceProbe" /> 类型的实例。
+        /// </summary>
+        /// <param name="manager">记录当前测试工作单元操作的管理器。</param>
         public TraceProbe(IUnitOfWorkScopeManager manager)
         {
             manager.Current.ShouldNotBeNull();
@@ -292,17 +347,30 @@ public sealed class BingOperationExecutorTest
                 "Trace must be established before resolving the operation service.");
         }
 
+        /// <summary>
+        /// 获取测试使用的调用跟踪记录。
+        /// </summary>
         public TraceIdContext Trace { get; }
     }
 
+    /// <summary>
+    /// 保存BingOperationExecutorTest测试关注的执行观测结果。
+    /// </summary>
     private sealed class BrokenTraceProbe
     {
     }
 
+    /// <summary>
+    /// 保存BingOperationExecutorTest测试关注的执行观测结果。
+    /// </summary>
     private sealed class TraceDisposeProbe : IDisposable
     {
+        /// <summary>
+        /// 初始化一个 <see cref="TraceDisposeProbe" /> 类型的实例。
+        /// </summary>
         public TraceDisposeProbe() => TraceIdContext.Current.ShouldNotBeNull();
 
+        /// <inheritdoc />
         public void Dispose() => throw new InvalidOperationException("trace cleanup failed");
     }
 }

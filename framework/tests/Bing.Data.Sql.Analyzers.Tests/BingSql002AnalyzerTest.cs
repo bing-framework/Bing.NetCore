@@ -223,6 +223,33 @@ public class BingSql002AnalyzerTest
     }
 
     /// <summary>
+    /// 测试目的：带输出参数的同步和异步执行入口接收插值 SQL 时应报告参数化风险。
+    /// </summary>
+    [Fact]
+    public async Task Analyze_WhenInterpolatedSqlPassedToExecutorOutputEntryPoints_ShouldReportDiagnostic()
+    {
+        // Arrange
+        const string source = """
+            using Bing.Data.Sql;
+            public class Test
+            {
+                public void Execute(ISqlExecutor executor, string name)
+                {
+                    executor.ExecuteSqlWithOutput($"Update samples Set Name = '{name}'");
+                    executor.ExecuteSqlWithOutputAsync($"Update samples Set Name = '{name}'");
+                }
+            }
+            """;
+
+        // Act
+        var diagnostics = await AnalyzeAsync(source);
+
+        // Assert
+        Assert.Equal(2, diagnostics.Length);
+        Assert.All(diagnostics, diagnostic => Assert.Equal("BINGSQL002", diagnostic.Id));
+    }
+
+    /// <summary>
     /// 测试目的：ISqlExecutor 的普通文本扩展入口接收插值 SQL 时也应报告风险。
     /// </summary>
     [Fact]
@@ -275,6 +302,9 @@ public class BingSql002AnalyzerTest
     /// <summary>
     /// 使用包含最小 SQL API 替身的编译分析源码。
     /// </summary>
+    /// <param name="source">待生成或分析的 C# 源码。</param>
+    /// <param name="apiStub">用于编译测试的 API 桩源码。</param>
+    /// <returns>分析器对输入源码产生的诊断集合。</returns>
     private static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, string apiStub = SqlApiStub)
     {
         var compilation = CSharpCompilation.Create("BingSql002Tests",
@@ -291,8 +321,13 @@ public class BingSql002AnalyzerTest
     }
 
     /// <summary>
-    /// 断言诊断从实际传入 SQL 入口的表达式起始位置报告，避免定位漂移到调用方法或接收对象。
+    /// 验证 SQL 诊断定位于实际传入的表达式起点。
     /// </summary>
+    /// <param name="diagnostic">待定位的分析器诊断。</param>
+    /// <param name="source">待生成或分析的 C# 源码。</param>
+    /// <param name="line">预期诊断所在的源码行号。</param>
+    /// <param name="expectedToken">预期的凭据或信号令牌。</param>
+    /// <remarks>诊断位置不应漂移到接收对象或调用的方法名。</remarks>
     private static void AssertDiagnosticStartsAtSourceExpression(Diagnostic diagnostic, string source, int line,
         string expectedToken)
     {
@@ -325,12 +360,16 @@ public class BingSql002AnalyzerTest
             {
                 object ExecuteSql(string sql, object parameters = null);
                 object ExecuteSqlAsync(string sql, object parameters = null);
+                object ExecuteSqlWithOutput(string sql, object parameters = null);
+                object ExecuteSqlWithOutputAsync(string sql, object parameters = null);
             }
 
             public sealed class Executor : ISqlExecutor
             {
                 public object ExecuteSql(string sql, object parameters = null) => null;
                 public object ExecuteSqlAsync(string sql, object parameters = null) => null;
+                public object ExecuteSqlWithOutput(string sql, object parameters = null) => null;
+                public object ExecuteSqlWithOutputAsync(string sql, object parameters = null) => null;
             }
         }
         """;

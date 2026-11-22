@@ -11,69 +11,27 @@ public abstract partial class SqlQueryBase
     /// 准备查询计划执行所需的 SQL 和参数。
     /// </summary>
     /// <param name="plan">查询计划。</param>
-    /// <returns>可供本次执行复用的准备结果。</returns>
-    private PreparedQueryPlan PrepareQueryPlan(SqlQueryPlan plan)
+    /// <returns>可供本次执行复用的准备命令。</returns>
+    private SqlPreparedCommand PrepareQueryPlan(SqlQueryPlan plan)
     {
-        var command = plan.IsBuilderPlan
+        // 冻结 IR 仍使用同次渲染的参数和调试 SQL；不能因脱离 Builder 而退回原生文本路径。
+        var command = plan.IsBuilderPlan || plan.IsGeneratedExecution || SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan)
             ? PrepareCommand(plan)
             : PrepareCommand(plan.CommandText, plan.Parameters);
         if (plan.CommandType == System.Data.CommandType.StoredProcedure)
             ConfigureOutputParameterSupport(command);
         plan.NotifyParametersBound(CreateOutputParameterAccessor(command.DapperParameters));
-        return new PreparedQueryPlan(plan, command);
+        return command;
     }
 
     /// <summary>
     /// 写入查询计划的调试跟踪日志。
     /// </summary>
-    /// <param name="preparedPlan">当前已准备的查询计划。</param>
-    private void WritePlanTraceLog(PreparedQueryPlan preparedPlan)
+    /// <param name="command">当前已准备的查询命令。</param>
+    private void WritePlanTraceLog(SqlPreparedCommand command)
     {
         if (Logger.IsEnabled(LogLevel.Trace) == false)
             return;
-        WriteTraceLog(preparedPlan.Command);
-    }
-
-    /// <summary>
-    /// 查询计划单次执行的不可变准备结果。
-    /// </summary>
-    private sealed class PreparedQueryPlan
-    {
-        /// <summary>
-        /// 初始化一个 <see cref="PreparedQueryPlan"/> 类型的实例。
-        /// </summary>
-        /// <param name="plan">原始查询计划。</param>
-        /// <param name="command">本次执行的准备命令。</param>
-        public PreparedQueryPlan(SqlQueryPlan plan, SqlPreparedCommand command)
-        {
-            Plan = plan;
-            Command = command;
-        }
-
-        /// <summary>
-        /// 获取原始查询计划。
-        /// </summary>
-        public SqlQueryPlan Plan { get; }
-
-        /// <summary>
-        /// 获取本次执行的准备命令。
-        /// </summary>
-        public SqlPreparedCommand Command { get; }
-
-        /// <summary>
-        /// 获取最终执行 SQL。
-        /// </summary>
-        public string Sql => Command.Sql;
-
-        /// <summary>
-        /// 获取Dapper 使用的绑定参数。
-        /// </summary>
-        public object DapperParameters => Command.DapperParameters;
-
-        /// <summary>
-        /// 获取Trace 使用的原始参数源。
-        /// </summary>
-        public object ParameterSource => Command.ParameterSource;
-
+        WriteTraceLog(command);
     }
 }

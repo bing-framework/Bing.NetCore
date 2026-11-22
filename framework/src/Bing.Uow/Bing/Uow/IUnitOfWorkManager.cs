@@ -3,30 +3,30 @@
 namespace Bing.Uow;
 
 /// <summary>
-/// 工作单元管理器
+/// 管理当前作用域中登记的工作单元。
 /// </summary>
 public interface IUnitOfWorkManager : IScopedDependency
 {
     /// <summary>
-    /// 提交
+    /// 提交当前管理器中登记的所有工作单元。
     /// </summary>
     void Commit();
 
     /// <summary>
-    /// 提交
+    /// 异步提交当前管理器中登记的所有工作单元。
     /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
+    /// <param name="cancellationToken">取消提交操作的令牌。</param>
     Task CommitAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 注册工作单元
+    /// 将工作单元登记到当前管理器。
     /// </summary>
-    /// <param name="unitOfWork">工作单元</param>
+    /// <param name="unitOfWork">要登记的工作单元。</param>
     void Register(IUnitOfWork unitOfWork);
 
     /// <summary>
-    /// 获取工作单元集合
+    /// 获取当前已登记的工作单元。
     /// </summary>
-    /// <returns>当前已注册的工作单元集合。</returns>
+    /// <returns>当前管理器中的工作单元只读集合。</returns>
     IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks();
 }

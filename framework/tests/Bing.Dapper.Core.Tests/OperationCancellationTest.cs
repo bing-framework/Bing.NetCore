@@ -49,6 +49,9 @@ public sealed class OperationCancellationTest
         }
     }
 
+    /// <summary>
+    /// 验证参与者取消后在访问连接前拒绝多结果查询。
+    /// </summary>
     [Fact]
     public async Task MultipleQuery_WhenParticipantIsCancelled_ShouldRejectBeforeConnectionAccess()
     {
@@ -86,24 +89,33 @@ public sealed class OperationCancellationTest
     /// </summary>
     private sealed class OperationCancellationProvider : ISqlProvider, ISqlProviderProfileProvider
     {
+        /// <inheritdoc />
         public string Key => "test.operation-cancellation";
 
+        /// <inheritdoc />
         public DatabaseType DatabaseType => Bing.Data.Enums.DatabaseType.SqlServer;
 
+        /// <inheritdoc />
         public IDialect Dialect { get; } = new Mock<IDialect>().Object;
 
+        /// <inheritdoc />
         public ISqlClauseFactory ClauseFactory { get; } = new Mock<ISqlClauseFactory>().Object;
 
+        /// <inheritdoc />
         public ISqlTableReferenceParser TableReferenceParser { get; } =
             new Mock<ISqlTableReferenceParser>().Object;
 
+        /// <inheritdoc />
         public ISqlPaginationRenderer PaginationRenderer { get; } = new Mock<ISqlPaginationRenderer>().Object;
 
+        /// <inheritdoc />
         public IParameterManagerFactory ParameterManagerFactory { get; } =
             new Mock<IParameterManagerFactory>().Object;
 
+        /// <inheritdoc />
         public IParamLiteralsResolver ParamLiteralsResolver { get; } = new Mock<IParamLiteralsResolver>().Object;
 
+        /// <inheritdoc />
         public SqlProviderProfile Profile { get; } = new()
         {
             Execution = new SqlProviderExecutionCapabilities
@@ -119,13 +131,22 @@ public sealed class OperationCancellationTest
     /// </summary>
     private sealed class OperationCancellationExecutor : SqlMultipleQueryExecutorBase
     {
+        /// <summary>
+        /// 初始化一个 <see cref="OperationCancellationExecutor" /> 类型的实例。
+        /// </summary>
+        /// <param name="serviceProvider">用于解析当前测试服务的服务提供程序。</param>
         public OperationCancellationExecutor(IServiceProvider serviceProvider)
             : base(serviceProvider, CreateOptions())
         {
         }
 
+        /// <inheritdoc />
         protected override ISqlBuilder CreateSqlBuilder() => null;
 
+        /// <summary>
+        /// 创建带数据库上下文的 SQL 测试选项。
+        /// </summary>
+        /// <returns>测试查询所使用的 SQL 选项。</returns>
         private static SqlOptions CreateOptions()
         {
             var options = new SqlOptions
