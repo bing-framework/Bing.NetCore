@@ -65,12 +65,12 @@ try
         var builder = new SqliteBuilder(builderServices);
         builder.Select("OrderId").From<Order>("o").OrderBy("OrderId");
         var plan = SqlQueryPlan.Create(builder);
-        var sql = "Select `OrderId` \r\nFrom `Orders` As `o` \r\nWhere `o`.`ProductId`=@_p_0 \r\nOrder By `OrderId`";
+        var sql = $"Select `OrderId` {Environment.NewLine}From `Orders` As `o` {Environment.NewLine}Where `o`.`ProductId`=@_p_0 {Environment.NewLine}Order By `OrderId`";
         Check(plan.CommandText == sql && filter.Calls == 1, "过滤工作区首次完整SQL与单次取值");
         var count = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
         var page = SqlBuilderRuntimeBridge.CreatePagePlan(plan, new Pager(2, 1));
-        Check(count.CommandText == "Select Count(*) \r\nFrom `Orders` As `o` \r\nWhere `o`.`ProductId`=@_p_0" &&
-              page.CommandText == sql + " \r\nLimit @_p_2 OFFSET @_p_1", "过滤工作区Count与Page完整SQL");
+        Check(count.CommandText == $"Select Count(*) {Environment.NewLine}From `Orders` As `o` {Environment.NewLine}Where `o`.`ProductId`=@_p_0" &&
+              page.CommandText == sql + $" {Environment.NewLine}Limit @_p_2 OFFSET @_p_1", "过滤工作区Count与Page完整SQL");
         var executor = (ISqlQueryPlanExecutor)query;
         Check(executor.Scalar<long>(count, null) == 2 &&
               executor.ToList<long>(page, null).SequenceEqual(new long[] { 2 }) && filter.Calls == 1,

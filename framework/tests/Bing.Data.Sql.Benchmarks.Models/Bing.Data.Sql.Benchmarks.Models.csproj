@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="../../../common.props" />
+  <Import Project="../../src/Bing.Data.Sql.Generators/buildTransitive/Bing.Data.Sql.Generators.props" />
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bing.Data.Sql/Bing.Data.Sql.csproj" />
+    <ProjectReference Include="../../src/Bing.Data.Sql.Generators/Bing.Data.Sql.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>
