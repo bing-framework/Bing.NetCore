@@ -2,6 +2,7 @@ using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Builders.Core;
 using Bing.Data.Sql.Builders;
 using System.Collections;
+using System.Collections.ObjectModel;
 using Bing.Properties;
 
 namespace Bing.Data.Sql;
@@ -48,8 +49,25 @@ public sealed class SqlBuilderExecutionSnapshot
         _pagination = pagination;
     }
 
+    /// <summary>只接收框架已冻结的参数；派生计划共享不变项，公开读取和执行绑定仍独立复制。</summary>
+    private SqlBuilderExecutionSnapshot(SqlBuilderExecutionSnapshot source, string sql,
+        ReadOnlyCollection<SqlParam> frozenParameters, SqlQuerySelectShape selectShape = null,
+        SqlQueryPagination pagination = null, string debugSql = null, IParamLiteralsResolver paramLiteralsResolver = null)
+    {
+        Sql = sql;
+        HasDebugSql = debugSql != null;
+        DebugSql = debugSql ?? sql;
+        _parameters = frozenParameters;
+        _paramLiteralsResolver = paramLiteralsResolver ?? source._paramLiteralsResolver;
+        SelectShape = selectShape;
+        _pagination = pagination;
+    }
+
     /// <summary>从同一次渲染冻结的 Select 子句边界；原生文本快照不具有该结构。</summary>
     internal SqlQuerySelectShape SelectShape { get; }
+
+    /// <summary>模板重命名时包含尚未绑定的分页槽位。</summary>
+    internal SqlQueryPagination Pagination => _pagination;
 
     /// <summary>
     /// 获取冻结后的 SQL 文本。
@@ -72,6 +90,9 @@ public sealed class SqlBuilderExecutionSnapshot
     public IReadOnlyCollection<SqlParam> Parameters =>
         _parameters.Select(SqlParameterSnapshot.CloneSqlParameter).ToArray();
 
+    /// <summary>仅供内建不可变片段共享；对外读取仍必须克隆参数和值容器。</summary>
+    internal ReadOnlyCollection<SqlParam> FrozenParameters => _parameters;
+
     /// <summary>
     /// 创建供内部执行计划使用的参数副本。
     /// </summary>
@@ -81,16 +102,27 @@ public sealed class SqlBuilderExecutionSnapshot
 
     /// <summary>使用相同的冻结参数生成新的 SQL 执行快照。</summary>
     internal SqlBuilderExecutionSnapshot WithSql(string sql) =>
-        new(sql, _parameters, null, _paramLiteralsResolver);
+        new(this, sql, _parameters);
 
     /// <summary>复用已经渲染的结构，参数仍按每次请求独立冻结。</summary>
     internal SqlBuilderExecutionSnapshot WithParameters(IEnumerable<SqlParam> parameters) =>
         new(Sql, parameters, null, _paramLiteralsResolver, SelectShape, _pagination);
 
+    /// <summary>参数作用域改变 SQL 长度时，同步替换结构位置与分页绑定描述。</summary>
+    internal SqlBuilderExecutionSnapshot WithScope(string sql, List<SqlParam> ownedParameters,
+        IReadOnlyDictionary<string, string> names, int[] boundaries) =>
+        new(this, sql, ownedParameters.AsReadOnly(), SelectShape?.WithScope(boundaries, names),
+            _pagination?.WithScope(names));
+
     /// <summary>从冻结参数中仅移除外层分页参数，避免重跑参数转换。</summary>
-    internal SqlBuilderExecutionSnapshot WithoutPage(string sql, string offsetParameter, string limitParameter) =>
-        new(sql, _parameters.Where(parameter => parameter.Name != offsetParameter && parameter.Name != limitParameter),
-            null, _paramLiteralsResolver);
+    internal SqlBuilderExecutionSnapshot WithoutPage(string sql, string offsetParameter, string limitParameter)
+    {
+        if (string.IsNullOrEmpty(offsetParameter) && string.IsNullOrEmpty(limitParameter))
+            return new SqlBuilderExecutionSnapshot(this, sql, _parameters);
+        var parameters = Array.AsReadOnly(_parameters
+            .Where(parameter => parameter.Name != offsetParameter && parameter.Name != limitParameter).ToArray());
+        return new SqlBuilderExecutionSnapshot(this, sql, parameters);
+    }
 
     /// <summary>参数来自框架容器，且排序可复用或已冻结时，可直接派生分页。</summary>
     internal bool CanDerivePage(string order) => _pagination != null &&
@@ -117,34 +149,39 @@ public sealed class SqlBuilderExecutionSnapshot
         var hasOffset = !string.IsNullOrWhiteSpace(SelectShape.OffsetParameter);
         if (!SelectShape.HasPage)
             _pagination.ValidateAppend(_parameters.Count, hasOffset ? 1 : 2);
-        var offset = _pagination.Dialect.GetParamValue(pager.GetSkipCount());
-        var limit = _pagination.Dialect.GetParamValue(pager.PageSize);
+        // 自定义方言也可能返回可变容器：仅新转换的分页值需要再次冻结。
+        var offset = SqlParameterSnapshot.SnapshotValue(_pagination.Dialect.GetParamValue(pager.GetSkipCount()));
+        var limit = SqlParameterSnapshot.SnapshotValue(_pagination.Dialect.GetParamValue(pager.PageSize));
         if (!SelectShape.HasPage)
         {
             sql += " " + Environment.NewLine +
                 _pagination.Renderer.Render(_pagination.OffsetParameter, _pagination.LimitParameter);
-            // Skip-only 已有 offset：原位替换，避免重复槽位，并保留其后的子查询参数顺序。
-            var appended = hasOffset
-                ? _parameters.Select(parameter => parameter.Name == SelectShape.OffsetParameter
-                    ? CreatePageParameter(parameter.Name, offset) : parameter)
-                    .Append(CreatePageParameter(_pagination.LimitParameter, limit))
-                : _parameters.Concat(new[]
-                {
-                    CreatePageParameter(_pagination.OffsetParameter, offset),
-                    CreatePageParameter(_pagination.LimitParameter, limit)
-                });
-            return new SqlBuilderExecutionSnapshot(sql, appended, null, _paramLiteralsResolver,
-                SelectShape.WithPage(sql.Length, _pagination.OffsetParameter, _pagination.LimitParameter, order, orderEnd), _pagination);
         }
-        var parameters = _parameters.Select(parameter => parameter.Name == SelectShape.OffsetParameter
-            ? CreatePageParameter(parameter.Name, offset)
-            : parameter.Name == SelectShape.LimitParameter
-                ? CreatePageParameter(parameter.Name, limit)
-                : parameter);
-        var shape = ReferenceEquals(order, SelectShape.Order) ? SelectShape :
-            SelectShape.WithPage(sql.Length, SelectShape.OffsetParameter, SelectShape.LimitParameter, order, orderEnd);
-        return new SqlBuilderExecutionSnapshot(sql, parameters, null, _paramLiteralsResolver, shape,
-            _pagination);
+        var appendedCount = SelectShape.HasPage ? 0 : hasOffset ? 1 : 2;
+        var parameters = new SqlParam[_parameters.Count + appendedCount];
+        for (var index = 0; index < _parameters.Count; index++)
+        {
+            var parameter = _parameters[index];
+            parameters[index] = parameter.Name == SelectShape.OffsetParameter
+                ? CreatePageParameter(parameter.Name, offset)
+                : parameter.Name == SelectShape.LimitParameter
+                    ? CreatePageParameter(parameter.Name, limit)
+                    : parameter;
+        }
+        // Skip-only 的 offset 原位替换，保留后续嵌套查询参数的顺序。
+        if (!SelectShape.HasPage)
+        {
+            if (!hasOffset)
+                parameters[_parameters.Count] = CreatePageParameter(_pagination.OffsetParameter, offset);
+            parameters[parameters.Length - 1] = CreatePageParameter(_pagination.LimitParameter, limit);
+        }
+        // 作用域模板的既有参数名可以不带前缀；保持其绑定身份，SQL 占位符由分页描述负责。
+        var offsetName = hasOffset ? SelectShape.OffsetParameter : _pagination.OffsetParameter;
+        var limitName = SelectShape.HasPage ? SelectShape.LimitParameter : _pagination.LimitParameter;
+        var shape = !SelectShape.HasPage || !ReferenceEquals(order, SelectShape.Order)
+            ? SelectShape.WithPage(sql.Length, offsetName, limitName, order, orderEnd)
+            : SelectShape;
+        return new SqlBuilderExecutionSnapshot(this, sql, Array.AsReadOnly(parameters), shape, _pagination);
     }
 
     /// <summary>与 ParameterManager.Add 的普通分页参数契约一致。</summary>
@@ -168,7 +205,7 @@ public sealed class SqlBuilderExecutionSnapshot
         return result?.ToArray() ?? Array.Empty<SqlParam>();
     }
 
-    private readonly IReadOnlyCollection<SqlParam> _parameters;
+    private readonly ReadOnlyCollection<SqlParam> _parameters;
 
     /// <summary>
     /// 获取当前快照使用的参数字面值解析器。
@@ -187,6 +224,6 @@ public sealed class SqlBuilderExecutionSnapshot
             return this;
         var resolver = paramLiteralsResolver ?? _paramLiteralsResolver ?? ParamLiteralsResolver.Instance;
         var debugSql = SqlBuilderBase.CreateDebugSql(Sql, _parameters, resolver);
-        return new SqlBuilderExecutionSnapshot(Sql, _parameters, debugSql, resolver, SelectShape, _pagination);
+        return new SqlBuilderExecutionSnapshot(this, Sql, _parameters, SelectShape, _pagination, debugSql, resolver);
     }
 }

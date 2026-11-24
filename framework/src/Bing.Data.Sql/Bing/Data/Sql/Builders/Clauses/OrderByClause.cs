@@ -44,11 +44,17 @@ public partial class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClaus
     /// <param name="context">子句运行上下文。</param>
     /// <param name="items">排序项列表</param>
     public OrderByClause(SqlClauseContext context, List<OrderByItem> items = null)
+        : this(context, items, ownsItems: false)
+    {
+    }
+
+    /// <summary>克隆路径接收已经复制的容器，公共构造路径自行复制调用方列表。</summary>
+    private OrderByClause(SqlClauseContext context, List<OrderByItem> items, bool ownsItems)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
         _context = context;
-        _items = items ?? new List<OrderByItem>();
+        _items = items == null ? new List<OrderByItem>() : ownsItems ? items : new List<OrderByItem>(items);
         _dialect = context.Dialect;
         _resolver = context.EntityResolver;
         _register = context.AliasRegister;
@@ -69,7 +75,7 @@ public partial class OrderByClause : IOrderByClause, ISqlMultiSourceOrderByClaus
     /// <param name="items">已复制的排序项。</param>
     /// <returns>保留 Provider 子类类型的 Order By 子句。</returns>
     protected virtual OrderByClause CreateClone(SqlClauseContext context, List<OrderByItem> items) =>
-        new OrderByClause(context, items);
+        new OrderByClause(context, items, ownsItems: true);
 
     /// <inheritdoc />
     public void OrderBy(string order, string tableAlias = null)

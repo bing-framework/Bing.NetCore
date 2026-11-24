@@ -45,6 +45,29 @@ public sealed class ProviderGeneratedSqlCommandTest
         Assert.True(update.ValidateAffectedRows);
     }
 
+    /// <summary>替换内置 Provider 的方言后，Insert、Update 和 Delete 必须按目标方言完整渲染。</summary>
+    [Theory, MemberData(nameof(Providers))]
+    public void Mutation_WhenProviderDialectIsCustomized_ShouldRenderCompleteSqlWithCustomDialect(
+        ISqlProvider innerProvider, char open, char close)
+    {
+        var provider = new CustomDialectProvider(innerProvider);
+        var fixture = Create(provider, open, close);
+        var builder = new DefaultSqlEntityMutationCommandBuilder(provider, fixture.Services);
+        var entity = new Row { Id = 9, Name = "value", Version = 7 };
+
+        var insert = builder.Insert(entity);
+        var update = builder.Update(entity, new SqlUpdateOptions<Row>().Original(row => row.Version, 6));
+        var delete = builder.Purge(entity);
+
+        Assert.Equal("Insert Into <rows> (<Name>, <Version>) Values (@_p_0, @_p_1)", insert.Sql);
+        Assert.Equal("Update <rows> Set <Name> = @_p_0, <Version> = @_p_1 " +
+                     "Where <Id> = @_p_2 And <Version> = @_p_3", update.Sql);
+        Assert.Equal("Delete From <rows> Where <Id> = @_p_0 And <Version> = @_p_1", delete.Sql);
+        Assert.NotSame(fixture.Insert, insert.Sql);
+        Assert.NotSame(fixture.Update, update.Sql);
+        Assert.NotSame(fixture.Delete, delete.Sql);
+    }
+
     /// <summary>真实运行时表/列覆盖必须生成新 SQL，不能套用默认常量。</summary>
     [Theory, MemberData(nameof(Providers))]
     public void Mutation_WhenMappingChanges_ShouldRenderActualShape(ISqlProvider provider, char open, char close)
@@ -188,6 +211,27 @@ public sealed class ProviderGeneratedSqlCommandTest
         public string GetKeyword(SqlExecutionKind kind) => "Returning";
         public string GetQualifier(SqlExecutionKind kind, string qualifier) => null;
     }
+
+    private sealed class CustomDialectProvider(ISqlProvider inner) : ISqlProvider, ISqlProviderProfileProvider
+    {
+        public string Key => inner.Key;
+        public Bing.Data.Enums.DatabaseType DatabaseType => inner.DatabaseType;
+        public IDialect Dialect { get; } = AngleDialect.Instance;
+        public ISqlClauseFactory ClauseFactory => inner.ClauseFactory;
+        public ISqlTableReferenceParser TableReferenceParser => inner.TableReferenceParser;
+        public ISqlPaginationRenderer PaginationRenderer => inner.PaginationRenderer;
+        public IParameterManagerFactory ParameterManagerFactory => inner.ParameterManagerFactory;
+        public IParamLiteralsResolver ParamLiteralsResolver => inner.ParamLiteralsResolver;
+        public SqlProviderProfile Profile => ((ISqlProviderProfileProvider)inner).Profile;
+    }
+
+    private sealed class AngleDialect : DialectBase
+    {
+        public static AngleDialect Instance { get; } = new();
+        public override char OpeningIdentifier => '<';
+        public override char ClosingIdentifier => '>';
+    }
+
     private sealed class Row
     {
         public int Id { get; set; }

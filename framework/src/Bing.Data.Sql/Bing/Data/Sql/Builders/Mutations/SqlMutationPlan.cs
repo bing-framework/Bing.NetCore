@@ -39,6 +39,7 @@ internal sealed class SqlMutationPlan
     /// <param name="writeColumns">当前操作应写入的列。</param>
     /// <param name="keys">主键列。</param>
     /// <param name="concurrencyColumns">并发令牌列。</param>
+    /// <param name="operation">计划对应的写入操作。</param>
     private SqlMutationPlan(EntityMappingMetadata mapping, IReadOnlyList<ColumnMappingMetadata> writeColumns,
         IReadOnlyList<ColumnMappingMetadata> keys, IReadOnlyList<ColumnMappingMetadata> concurrencyColumns,
         SqlMutationOperation operation)
@@ -65,6 +66,10 @@ internal sealed class SqlMutationPlan
             mapping.Model?.GeneratedMutationShapeSql != null &&
             (_canUseGeneratedSql || writeColumns.Count == 1 &&
                 HasDefaultSqlShape(mapping, operation, writeColumns, checkWriteColumns: false));
+        if (_canUseGeneratedParameterBinding && operation != SqlMutationOperation.Delete &&
+            mapping.Model?.GeneratedMutationColumnsSql != null &&
+            HasDefaultSqlShape(mapping, operation, writeColumns, checkWriteColumns: false))
+            _generatedWriteProperties = Array.AsReadOnly(writeColumns.Select(column => column.PropertyName).ToArray());
     }
 
     /// <summary>
@@ -94,6 +99,9 @@ internal sealed class SqlMutationPlan
 
     /// <summary>有限形状仍必须核对完整最终映射；判断只在计划创建时执行。</summary>
     private readonly bool _canUseGeneratedShapeSql;
+
+    /// <summary>筛选后的固定属性布局只随计划保存；各次命令仅提供新的实体值。</summary>
+    private readonly IReadOnlyList<string> _generatedWriteProperties;
 
     /// <summary>生成 SQL 对应的单实体操作。</summary>
     private readonly SqlOperationKind _generatedOperation;
@@ -128,16 +136,25 @@ internal sealed class SqlMutationPlan
     /// </summary>
     internal bool CanUseGeneratedParameterBinding => _canUseGeneratedParameterBinding;
 
-    /// <summary>获取当前 Provider 的默认或有限形状 SQL 常量；未覆盖的最终映射、列形状或行数返回空。</summary>
+    /// <summary>整行返回优先复用完整常量，否则由生成片段组成筛选写列的 SQL。</summary>
+    internal string GetGeneratedReturningSql(string providerKey) =>
+        (_canUseGeneratedSql ? Mapping.Model.GeneratedMutationReturningSql?.Invoke(providerKey, _generatedOperation) : null) ??
+        (_generatedWriteProperties != null ? Mapping.Model.GeneratedMutationColumnsSql(providerKey, _generatedOperation,
+            _generatedWriteProperties, 1, true) : null);
+
+    /// <summary>优先获取默认或有限形状 SQL，再按筛选写列拼接生成片段；未覆盖的映射或行数返回空。</summary>
     internal string GetGeneratedSql(string providerKey, int rowCount = 1)
     {
         if (rowCount == 1 && _canUseGeneratedSql &&
             Mapping.Model.GeneratedMutationSql?.Invoke(providerKey, _generatedOperation) is { } sql)
             return sql;
-        return _canUseGeneratedShapeSql
+        var shapeSql = _canUseGeneratedShapeSql
             ? Mapping.Model.GeneratedMutationShapeSql(providerKey, _generatedOperation,
                 _canUseGeneratedSql ? null : WriteColumns[0].PropertyName, rowCount)
             : null;
+        return shapeSql ?? (_generatedWriteProperties != null
+            ? Mapping.Model.GeneratedMutationColumnsSql(providerKey, _generatedOperation, _generatedWriteProperties, rowCount, false)
+            : null);
     }
 
     /// <summary>获取同一映射形状的数据库身份键插入 SQL；其他操作不使用该合同。</summary>
@@ -149,11 +166,17 @@ internal sealed class SqlMutationPlan
         (provider.Key, provider.DatabaseType) is ("bing.sqlite", DatabaseType.Sqlite) or
             ("bing.mysql", DatabaseType.MySql) or ("bing.postgresql", DatabaseType.PgSql) or
             ("bing.sqlserver", DatabaseType.SqlServer) or ("bing.oracle", DatabaseType.Oracle) &&
+        provider is ISqlProviderProfileProvider { Profile.Mutation.GeneratedSqlDialect: { } generatedDialect } &&
+        ReferenceEquals(provider.Dialect, generatedDialect) &&
         provider is not ISqlMutationClauseFactoryProvider &&
         (provider is not ISqlReturningDialect returning || provider.Key == "bing.sqlserver" &&
             returning.Position == SqlReturningClausePosition.BeforeSource &&
             returning.GetKeyword(SqlExecutionKind.Insert) == "Output" &&
-            returning.GetQualifier(SqlExecutionKind.Insert, null) == "Inserted") &&
+             returning.GetQualifier(SqlExecutionKind.Insert, null) == "Inserted" &&
+             returning.GetKeyword(SqlExecutionKind.Update) == "Output" &&
+             returning.GetQualifier(SqlExecutionKind.Update, null) == "Inserted" &&
+             returning.GetKeyword(SqlExecutionKind.Delete) == "Output" &&
+             returning.GetQualifier(SqlExecutionKind.Delete, null) == "Deleted") &&
         provider.ParameterManagerFactory is DefaultParameterManagerFactory &&
         services.ObjectNameFormatter is DefaultSqlObjectNameFormatter &&
         services.ParameterFactory.GetType() == typeof(DefaultSqlParameterFactory);
@@ -244,11 +267,12 @@ internal sealed class SqlMutationPlan
         var model = mapping.Model;
         var table = mapping.Table;
         if (model == null || (model.GeneratedMutationSql == null && model.GeneratedKeyInsertSql == null &&
-                             model.GeneratedMutationShapeSql == null) ||
+                             model.GeneratedMutationShapeSql == null && model.GeneratedMutationReturningSql == null &&
+                             model.GeneratedMutationColumnsSql == null) ||
             table == null || mapping.EntityType != model.EntityType ||
             !string.Equals(table.TableName, model.TableName, StringComparison.Ordinal) ||
-            !string.IsNullOrEmpty(model.Schema) || !string.IsNullOrEmpty(table.Database) ||
-            !string.IsNullOrEmpty(table.Schema) || !string.IsNullOrEmpty(table.Alias))
+            !string.Equals(table.Schema ?? string.Empty, model.Schema ?? string.Empty, StringComparison.Ordinal) ||
+            !string.IsNullOrEmpty(table.Database) || !string.IsNullOrEmpty(table.Alias))
             return false;
 
         using var columns = mapping.Columns.Values.GetEnumerator();

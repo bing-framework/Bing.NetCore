@@ -29,9 +29,27 @@ public sealed class SqlBuilderRuntimeBridgeTest
     public void HasExecutionSnapshot_ShouldDistinguishFrozenBuilderAndRawPlans()
     {
         var plan = SqlQueryPlan.Create(new SqlServerBuilder().Select("Id").From("Users"));
-        Assert.False(SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan));
+        Assert.True(SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan));
         Assert.True(SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan.Freeze()));
         Assert.False(SqlBuilderRuntimeBridge.HasExecutionSnapshot(SqlQueryPlan.Create("select 1", null)));
+    }
+
+    /// <summary>无参数文本使用空快照，仍能生成完整调试 SQL。</summary>
+    [Fact]
+    public void CreateExecutionSnapshot_WhenRawPlanHasNoParameters_ShouldUseEmptySnapshot()
+    {
+        var snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(SqlQueryPlan.Create("Select 1", null), true);
+        Assert.Equal("Select 1", snapshot.Sql);
+        Assert.Equal("Select 1", snapshot.DebugSql);
+        Assert.Empty(snapshot.Parameters);
+    }
+
+    /// <summary>任意对象交给执行器绑定，快照桥接不能恢复为反射或寻找 Builder。</summary>
+    [Fact]
+    public void CreateExecutionSnapshot_WhenRawParametersNeedBinding_ShouldRejectUnresolvedSource()
+    {
+        var plan = SqlQueryPlan.Create("Select @id", new { id = 7 });
+        Assert.Throws<NotSupportedException>(() => SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan));
     }
 
     [Theory]
@@ -39,19 +57,18 @@ public sealed class SqlBuilderRuntimeBridgeTest
     [InlineData(SqlOperationKind.InsertSelect)]
     [InlineData(SqlOperationKind.Update)]
     [InlineData(SqlOperationKind.Delete)]
-    public void ValidateQueryPlan_ShouldRejectThirdPartyWriteBuilder(SqlOperationKind operation)
+    public void CreatePlan_ShouldRejectThirdPartyWriteBuilder(SqlOperationKind operation)
     {
         var builder = new Mock<ISqlBuilder>();
         builder.SetupGet(item => item.OperationKind).Returns(operation);
         builder.Setup(item => item.Clone()).Returns(builder.Object);
-        var plan = SqlQueryPlan.Create(builder.Object);
-        Assert.Throws<InvalidOperationException>(() => SqlBuilderRuntimeBridge.ValidateQueryPlan(plan));
+        Assert.Throws<InvalidOperationException>(() => SqlQueryPlan.Create(builder.Object));
     }
 
     [Fact]
-    public void ValidateQueryPlan_ShouldAllowQueryBuilderAndRawSql()
+    public void CreatePlan_ShouldAllowQueryBuilderAndRawSql()
     {
-        Assert.False(SqlBuilderRuntimeBridge.ValidateQueryPlan(SqlQueryPlan.Create(new SqlServerBuilder().Select("Id").From("rows"))));
-        Assert.False(SqlBuilderRuntimeBridge.ValidateQueryPlan(SqlQueryPlan.Create("select 1", null)));
+        Assert.Equal("Select [Id] \r\nFrom [rows]", SqlQueryPlan.Create(new SqlServerBuilder().Select("Id").From("rows")).CommandText);
+        Assert.Equal("select 1", SqlQueryPlan.Create("select 1", null).CommandText);
     }
 }

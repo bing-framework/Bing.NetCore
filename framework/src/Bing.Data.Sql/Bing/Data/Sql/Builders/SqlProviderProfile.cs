@@ -57,6 +57,13 @@ public sealed class SqlProviderQueryCapabilities
 public sealed class SqlProviderMutationCapabilities
 {
     /// <summary>
+    /// 获取或初始化当前 Provider 的生成 SQL 所对应的标准方言实例。
+    /// </summary>
+    /// <remarks>仅在实际方言仍为此实例时采用生成文本；未声明或替换方言时使用动态渲染。</remarks>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public IDialect GeneratedSqlDialect { get; init; }
+
+    /// <summary>
     /// 获取或初始化是否支持标准多行 Values 插入语法。
     /// </summary>
     public bool SupportsMultiRowValues { get; init; }
@@ -331,6 +338,7 @@ internal static class SqlProviderCapabilityResolver
             },
             Mutation = new SqlProviderMutationCapabilities
             {
+                GeneratedSqlDialect = mutation.GeneratedSqlDialect,
                 SupportsMultiRowValues = mutation.SupportsMultiRowValues,
                 MultiRowValuesFailureReason = mutation.MultiRowValuesFailureReason,
                 SupportsUpdateFrom = mutation.SupportsUpdateFrom,

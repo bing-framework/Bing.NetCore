@@ -108,7 +108,7 @@ public sealed class SqlQueryCountIrTest
         Assert.Equal(first.CommandText, second.CommandText);
         Assert.Equal(0, calls.Clones);
         Assert.Equal(0, calls.Renders);
-        Assert.Null(first.GetBuilder());
+        Assert.NotNull(first.QueryIr);
         Assert.Null(first.PlanningBuilder);
         Assert.Equal(7, Assert.Single(Assert.IsType<SqlParam[]>(first.Parameters)).Value);
     }

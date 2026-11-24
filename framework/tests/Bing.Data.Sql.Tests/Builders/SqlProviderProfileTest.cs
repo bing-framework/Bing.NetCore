@@ -16,6 +16,36 @@ namespace Bing.Data.Sql.Tests.Builders;
 /// </summary>
 public sealed class SqlProviderProfileTest
 {
+    /// <summary>未声明生成方言的第三方能力档案继续使用原渲染器。</summary>
+    [Fact]
+    public void MutationCapabilities_WhenUnconfigured_ShouldNotDeclareGeneratedSqlDialect()
+    {
+        Assert.Null(new SqlProviderMutationCapabilities().GeneratedSqlDialect);
+    }
+
+    /// <summary>能力快照复制声明并保留原方言身份，不能将替换的方言误认为生成目标。</summary>
+    [Theory]
+    [InlineData("sqlite")]
+    [InlineData("mysql")]
+    [InlineData("postgresql")]
+    [InlineData("sqlserver")]
+    public void CreateSnapshot_ShouldPreserveGeneratedSqlDialectIdentity(string providerName)
+    {
+        ISqlProvider provider = providerName switch
+        {
+            "mysql" => MySqlSqlProvider.Instance,
+            "postgresql" => PostgreSqlSqlProvider.Instance,
+            "sqlserver" => SqlServerSqlProvider.Instance,
+            _ => SqliteSqlProvider.Instance
+        };
+        var original = ((ISqlProviderProfileProvider)provider).Profile;
+        var snapshot = SqlProviderCapabilityResolver.CreateSnapshot(provider);
+
+        Assert.Same(provider.Dialect, original.Mutation.GeneratedSqlDialect);
+        Assert.Same(original.Mutation.GeneratedSqlDialect, snapshot.Mutation.GeneratedSqlDialect);
+        Assert.NotSame(original.Mutation, snapshot.Mutation);
+    }
+
     /// <summary>
     /// 验证统一 Provider Profile 保留全部能力域。
     /// </summary>

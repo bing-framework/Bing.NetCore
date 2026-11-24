@@ -246,17 +246,22 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         ? _selectClause.Clone(CreateClauseContext()) : _selectClause ?? CreateSelectClause();
 
     /// <inheritdoc />
-    public IFromClause FromClause => _fromClause = _mutationCheckpoint != null &&
+    public IFromClause FromClause => _activeRenderState?.From != null
+        ? _activeRenderState.From : _fromClause = _mutationCheckpoint != null &&
         ReferenceEquals(_fromClause, _mutationCheckpoint.From) && _fromClause != null
         ? _fromClause.Clone(CreateClauseContext()) : _fromClause ?? CreateFromClause();
 
     /// <inheritdoc />
-    public IJoinClause JoinClause => _joinClause = _mutationCheckpoint != null &&
+    public IJoinClause JoinClause => _activeRenderState?.IsolatedFilters == true
+        ? _activeRenderState.Join ??= _joinClause?.Clone(CreateClauseContext()) ?? CreateJoinClause()
+        : _joinClause = _mutationCheckpoint != null &&
         ReferenceEquals(_joinClause, _mutationCheckpoint.Join) && _joinClause != null
         ? _joinClause.Clone(CreateClauseContext()) : _joinClause ?? CreateJoinClause();
 
     /// <inheritdoc />
-    public IWhereClause WhereClause => _whereClause = _mutationCheckpoint != null &&
+    public IWhereClause WhereClause => _activeRenderState?.IsolatedFilters == true
+        ? _activeRenderState.Where ??= _whereClause?.Clone(CreateClauseContext()) ?? CreateWhereClause()
+        : _whereClause = _mutationCheckpoint != null &&
         ReferenceEquals(_whereClause, _mutationCheckpoint.Where) && _whereClause != null
         ? _whereClause.Clone(CreateClauseContext()) : _whereClause ?? CreateWhereClause();
 
@@ -346,16 +351,25 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     protected bool IsLimit => string.IsNullOrWhiteSpace(LimitParam) == false;
 
     /// <inheritdoc />
-    public bool IsUnion => UnionItems.Count > 0;
+    public bool IsUnion => _unionItems.Count > 0;
 
     /// <inheritdoc />
-    public List<BuilderItem> UnionItems { get; private set; }
+    public IReadOnlyList<BuilderItem> UnionItems => _unionItemsView ??= _unionItems.AsReadOnly();
+
+    private readonly List<BuilderItem> _unionItems = new();
+    private IReadOnlyList<BuilderItem> _unionItemsView;
 
     /// <inheritdoc />
-    /// <remarks>
-    /// 获取或设置公用表表达式CTE集合
-    /// </remarks>
-    public List<BuilderItem> CteItems { get; private set; }
+    public IReadOnlyList<BuilderItem> CteItems => _cteItemsView ??= _cteItems.AsReadOnly();
+
+    private readonly List<BuilderItem> _cteItems = new();
+    private IReadOnlyList<BuilderItem> _cteItemsView;
+
+    /// <inheritdoc />
+    public void AddCte(BuilderItem item) => _cteItems.Add(item ?? throw new ArgumentNullException(nameof(item)));
+
+    /// <inheritdoc />
+    public void AddUnion(BuilderItem item) => _unionItems.Add(item ?? throw new ArgumentNullException(nameof(item)));
 
     /// <summary>
     /// 获取或设置Builder 创建时冻结的查询语法能力。
@@ -401,8 +415,6 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         QueryCapabilities = ResolveQueryCapabilities();
         AliasRegister = new EntityAliasRegister();
         Pager = new Pager();
-        UnionItems = new List<BuilderItem>();
-        CteItems = new List<BuilderItem>();
     }
 
     #endregion
@@ -469,7 +481,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         _joinClause == null && _whereClause == null && _groupByClause == null && _orderByClause == null &&
         _fromClause is FromClause from && (from.GetType().Assembly == typeof(FromClause).Assembly || from.GetType().Assembly == GetType().Assembly) &&
         from.Sources.Count == 1 && from.Sources[0].Reference != null && from.Sources[0].EntityType != null &&
-        ParameterManager.GetParams().Count == 0 && UnionItems.Count == 0 && CteItems.Count == 0 &&
+        ParameterManager.GetParams().Count == 0 && _unionItems.Count == 0 && _cteItems.Count == 0 &&
         OffsetParam == null && LimitParam == null && !RequiresRenderSnapshot &&
         Services.ParameterFactory.GetType() == typeof(DefaultSqlParameterFactory) &&
         Services.ObjectNameFormatter.GetType() == typeof(Bing.Data.Sql.Metadata.DefaultSqlObjectNameFormatter) &&
@@ -605,36 +617,36 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         _parentQueryContextId = sqlBuilder._parentQueryContextId;
 
         // 克隆集合
-        UnionItems = CloneBuilderItems(sqlBuilder.UnionItems, sqlBuilder);
-        CteItems = CloneBuilderItems(sqlBuilder.CteItems, sqlBuilder);
+        _unionItems.Clear();
+        _cteItems.Clear();
+        CloneBuilderItems(_unionItems, sqlBuilder._unionItems, sqlBuilder);
+        CloneBuilderItems(_cteItems, sqlBuilder._cteItems, sqlBuilder);
     }
 
     /// <summary>
     /// 克隆集合操作 Builder，并保留已冻结的子查询参数重命名关系。
     /// </summary>
+    /// <param name="target">当前草稿持有的目标集合。</param>
     /// <param name="items">待克隆的集合操作项。</param>
     /// <param name="source">当前克隆的源 Builder。</param>
-    /// <returns>独立的集合操作项。</returns>
-    private List<BuilderItem> CloneBuilderItems(IEnumerable<BuilderItem> items, SqlBuilderBase source)
+    private void CloneBuilderItems(ICollection<BuilderItem> target, IEnumerable<BuilderItem> items, SqlBuilderBase source)
     {
-        var result = new List<BuilderItem>();
         foreach (var item in items)
         {
             if (item.Fragment != null)
             {
                 var fragment = item.Fragment.Freeze().Render();
-                result.Add(new BuilderItem(item.Name, fragment));
+                target.Add(new BuilderItem(item.Name, fragment));
                 if (source.SubqueryParameterNames.TryGetValue(item.Fragment, out var fragmentNames))
                     SubqueryParameterNames[fragment] = new Dictionary<string, string>(fragmentNames);
                 continue;
             }
             var builder = item.Builder.Clone();
-            result.Add(new BuilderItem(item.Name, builder,
+            target.Add(new BuilderItem(item.Name, builder,
                 isOwnedNestedClone: !ReferenceEquals(item.Builder, builder)));
             if (source.SubqueryParameterNames.TryGetValue(item.Builder, out var names))
                 SubqueryParameterNames[builder] = new Dictionary<string, string>(names);
         }
-        return result;
     }
 
     /// <summary>
@@ -910,13 +922,18 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
 
     /// <summary>冻结时仅导出最终 SQL 仍引用的键，避免旧的重命名参数参与模板绑定。</summary>
     internal IReadOnlyDictionary<string, SqlParameterKey> GetFragmentParameterKeys(string sql)
+        => GetFragmentParameterKeys(sql, ParameterManager, FragmentParameterKeys);
+
+    /// <summary>从同次渲染的参数及逻辑绑定导出模板键，避免动态过滤写回草稿。</summary>
+    internal static IReadOnlyDictionary<string, SqlParameterKey> GetFragmentParameterKeys(string sql,
+        IParameterManager parameters, Dictionary<string, SqlFragmentParameterBinding> keys)
     {
-        if (FragmentParameterKeys == null)
+        if (keys == null)
             return null;
         Dictionary<string, SqlParameterKey> result = null;
-        foreach (var item in FragmentParameterKeys)
+        foreach (var item in keys)
         {
-            if (!item.Value.IsCurrent(ParameterManager, item.Key) || !ParameterManager.Contains(item.Key) ||
+            if (!item.Value.IsCurrent(parameters, item.Key) || !parameters.Contains(item.Key) ||
                 !(ContainsParameterToken(sql, "@" + item.Key, true) ||
                   ContainsParameterToken(sql, ":" + item.Key, true) ||
                   ContainsParameterToken(sql, "?" + item.Key, true)))
@@ -1208,9 +1225,10 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <param name="sql">待处理的 SQL 文本。</param>
     /// <param name="parameterNames">源参数名称与目标参数名称的映射，均包含方言前缀。</param>
     /// <param name="ignoreCase">是否忽略源参数名称的大小写。</param>
+    /// <param name="boundaries">可选的 SQL 结构边界；替换时同步调整位置，边界不能位于参数标记内部。</param>
     /// <returns>仅替换实际参数标记后的 SQL 文本。</returns>
     internal static string ReplaceParameterTokens(string sql, IReadOnlyDictionary<string, string> parameterNames,
-        bool ignoreCase = false)
+        bool ignoreCase = false, int[] boundaries = null)
     {
         if (string.IsNullOrEmpty(sql) || parameterNames == null || parameterNames.Count == 0)
             return sql;
@@ -1267,6 +1285,14 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
                     : replacementTrie.TryGetValue(sql, index, out parameterName, out replacement)) &&
                 IsParameterToken(sql, index, parameterName, ignoreCase))
             {
+                if (boundaries != null)
+                {
+                    var tokenEnd = result.Length + parameterName.Length;
+                    var difference = replacement.Length - parameterName.Length;
+                    for (var boundary = 0; boundary < boundaries.Length; boundary++)
+                        if (boundaries[boundary] >= tokenEnd)
+                            boundaries[boundary] += difference;
+                }
                 result.Append(replacement);
                 index += parameterName.Length;
                 continue;
@@ -1944,18 +1970,18 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <inheritdoc />
     public ISqlBuilder ClearUnionBuilders()
     {
-        foreach (var item in UnionItems)
+        foreach (var item in _unionItems)
             if (item.Fragment != null) SubqueryParameterNames.Remove(item.Fragment);
-        UnionItems = new List<BuilderItem>();
+        _unionItems.Clear();
         return this;
     }
 
     /// <inheritdoc />
     public ISqlBuilder ClearCte()
     {
-        foreach (var item in CteItems)
+        foreach (var item in _cteItems)
             if (item.Fragment != null) SubqueryParameterNames.Remove(item.Fragment);
-        CteItems = new List<BuilderItem>();
+        _cteItems.Clear();
         return this;
     }
 
@@ -1996,7 +2022,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <inheritdoc />
     public virtual string ToSql()
     {
-        if (ShouldRenderFromSnapshot())
+        if (ShouldRenderFromSnapshot() && !CanRenderFiltersLocally())
             // 此处已进入调用方的虚方法链，base 仅生成基础 SQL，由调用方追加自己的扩展。
             return ((SqlBuilderBase)Clone()).RenderSnapshot(includeOverrides: false);
         return ToSqlDirectly();
@@ -2006,24 +2032,51 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 创建查询执行使用的渲染快照，确保 SQL 文本与参数来源来自同一个 Builder。
     /// </summary>
     /// <remarks>
-    /// 仅动态过滤或写入数据边界需要独立副本，普通查询继续复用当前 Builder 的既有参数生命周期。
+    /// 默认查询将动态过滤保存在局部工作区；无法从冻结结构派生的扩展保留独立规划副本。
     /// </remarks>
     /// <returns>当前 SQL 和对应参数 Builder 的渲染快照。</returns>
     internal SqlBuilderRenderSnapshot CreateRenderSnapshot()
     {
-        var builder = ShouldRenderFromSnapshot() ? (SqlBuilderBase)Clone() : this;
+        var builder = ShouldRenderFromSnapshot() && !CanRenderFiltersLocally() ? (SqlBuilderBase)Clone() : this;
         var capture = new SqlBuilderRenderSnapshot(builder);
         var previous = builder._renderCapture;
         builder._renderCapture = capture;
         try
         {
             capture.Complete(ReferenceEquals(builder, this) ? ToSql() : builder.RenderSnapshot());
+            if (capture.FilterState != null && (capture.SelectShape?.Order == null ||
+                !capture.SelectShape.HasPage && !string.IsNullOrWhiteSpace(capture.SelectShape.LimitParameter)))
+            {
+                // 自定义 SQL 或分页形状仍需 Builder 回退；保留同次过滤，派生时不能重新取值。
+                capture.Builder = builder.CreateFilteredPlanningSnapshot(capture.FilterState);
+                capture.FilterState = null;
+            }
             return capture;
         }
         finally
         {
             builder._renderCapture = previous;
         }
+    }
+
+    /// <summary>仅在冻结结构不能完整派生 Count/Page 时，将局部过滤提升为独立规划来源。</summary>
+    private SqlBuilderBase CreateFilteredPlanningSnapshot(SqlQueryRenderState state)
+    {
+        var snapshot = (SqlBuilderBase)Clone();
+        snapshot._parameterManager = state.Parameters;
+        snapshot._parameterManagerState.Current = state.Parameters;
+        var context = snapshot.CreateClauseContext();
+        if (state.From != null)
+            snapshot._fromClause = state.From.Clone(context);
+        snapshot._whereClause = state.Where?.Clone(context);
+        snapshot._joinClause = state.Join?.Clone(context);
+        snapshot._orderByClause = state.OrderBy?.Clone(context);
+        snapshot._offsetParam = state.OffsetParam;
+        snapshot._limitParam = state.LimitParam;
+        snapshot.ReplaceSubqueryParameterNames(state.SubqueryParameterNames);
+        snapshot._draftParameterKeys = state.ParameterKeys;
+        snapshot._executionRenderState = new SqlQueryRenderState(state.Parameters, filtersApplied: true);
+        return snapshot;
     }
 
     /// <summary>
@@ -2044,6 +2097,11 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <returns>需要使用独立快照时返回 true。</returns>
     private bool ShouldRenderFromSnapshot() =>
         ShouldApplyFiltersOnRender();
+
+    /// <summary>默认子句可从冻结结构派生 Count/Page；自定义扩展保留独立规划副本。</summary>
+    private bool CanRenderFiltersLocally() => SupportsMutationCheckpoint && _mutationCheckpoint == null &&
+        UsesFrameworkParameterManager(ParameterManager) && FrozenPaginationRenderer != null &&
+        AliasRegister.GetType() == typeof(EntityAliasRegister);
 
     /// <summary>
     /// 直接从当前 Builder 生成 SQL，不应用独立快照数据边界。
@@ -2084,9 +2142,10 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <returns>需要应用动态过滤器时返回 <see langword="true"/>，否则返回 <see langword="false"/>。</returns>
     private bool ShouldApplyFiltersOnRender()
     {
-        if (_executionRenderState?.FiltersApplied == true || OperationKind != SqlOperationKind.Select)
+        if (_executionRenderState?.FiltersApplied == true || _activeRenderState?.FiltersApplied == true ||
+            OperationKind != SqlOperationKind.Select)
             return false;
-        var activeFilters = Services.Filters.ToList();
+        var activeFilters = Services.Filters;
         if (activeFilters.Any(filter => filter is not IsDeletedFilter))
             return activeFilters.Count > 0;
         if (activeFilters.Any(filter => filter is IsDeletedFilter) == false)
@@ -2182,9 +2241,9 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     private void ValidateQueryCapabilities()
     {
-        if (CteItems.Count > 0)
+        if (_cteItems.Count > 0)
             ValidateQueryCapability(QueryCapabilities.Cte, "CTE");
-        foreach (var item in UnionItems)
+        foreach (var item in _unionItems)
             ValidateQueryCapability(item.Name);
         if (JoinClause is JoinClause joinClause && joinClause.ContainsJoinType("Right Join"))
             ValidateQueryCapability(QueryCapabilities.RightJoin, "Right Join");
@@ -2288,22 +2347,22 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// <param name="result">Sql拼接</param>
     protected virtual void CreateCte(StringBuilder result)
     {
-        if (CteItems.Count == 0)
+        if (_cteItems.Count == 0)
             return;
 
-        var cte = new StringBuilder(CteItems.Count * 100);
+        var cte = new StringBuilder(_cteItems.Count * 100);
         cte.Append($"{GetCteKeyWord()} ");
 
-        for (var i = 0; i < CteItems.Count; i++)
+        for (var i = 0; i < _cteItems.Count; i++)
         {
-            var item = CteItems[i];
+            var item = _cteItems[i];
             cte.AppendLine($"{Dialect.SafeName(item.Name)} ");
             var sql = item.Fragment == null
                 ? RenderSubquery(item.Builder, item.IsOwnedNestedClone)
                 : RenderFragment(item.Fragment, rememberNames: true);
             cte.Append($"As ({sql})");
 
-            if (i < CteItems.Count - 1)
+            if (i < _cteItems.Count - 1)
                 cte.AppendLine(",");
         }
 
@@ -2330,7 +2389,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         AppendClause(result, WhereClause);
         AppendClause(result, GroupByClause);
         AppendSql(result, ")");
-        foreach (var operation in UnionItems)
+        foreach (var operation in _unionItems)
         {
             AppendSql(result, operation.Name);
             var sql = RenderUnionItem(operation);
@@ -2386,7 +2445,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
             AppendClause(result, OrderByClause);
         var orderEnd = _renderCapture == null ? 0 : GetTrimmedLength(result, start);
         AppendLimit(result);
-        if (_renderCapture != null && (start == 0 || CteItems.Count > 0) &&
+        if (_renderCapture != null && (start == 0 || _cteItems.Count > 0) &&
             SelectClause is SelectClause && FromClause is FromClause from)
         {
             var queryEnd = GetTrimmedLength(result, start);
@@ -2460,10 +2519,13 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     protected void EnsureFiltersAdded()
     {
-        if (_executionRenderState?.FiltersApplied == true)
+        if (_executionRenderState?.FiltersApplied == true || _activeRenderState?.FiltersApplied == true)
             return;
 
-        _executionRenderState = new SqlQueryRenderState(ParameterManager, filtersApplied: true);
+        if (_activeRenderState?.IsolatedFilters == true)
+            _activeRenderState.FiltersApplied = true;
+        else
+            _executionRenderState = new SqlQueryRenderState(ParameterManager, filtersApplied: true);
         var context = new SqlFilterContext(Dialect, this, Services, ExecutionContext.DatabaseContext);
         foreach (var filter in Services.Filters)
             filter.Filter(context);
@@ -2481,6 +2543,21 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         foreach (var placement in placements)
         {
             var predicate = placement.Predicate;
+            if (placement.PrefilterSource)
+            {
+                if (FromClause is FromClause from && from.Sources.Any(source => source.SourceId == predicate.SourceId))
+                {
+                    if (_activeRenderState?.IsolatedFilters == true && _activeRenderState.From == null)
+                        _activeRenderState.From = from.Clone(CreateClauseContext());
+                    ((FromClause)FromClause).AddSourceFilter(predicate.SourceId, predicate.Column, predicate.Value,
+                        predicate.Operator);
+                }
+                else if (JoinClause is JoinClause sourceJoin)
+                    sourceJoin.AddSourceFilter(predicate.SourceId, predicate.Column, predicate.Value, predicate.Operator);
+                else
+                    throw new InvalidOperationException($"未找到待预过滤的来源 {predicate.SourceId}。");
+                continue;
+            }
             if (string.IsNullOrWhiteSpace(placement.JoinSourceId))
             {
                 WhereClause.Where(predicate.Column, predicate.Value, predicate.Operator);
@@ -2670,7 +2747,8 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         var startIndex = builder.Length;
         try
         {
-            if (ShouldRenderFromSnapshot())
+            var applyFilters = ShouldRenderFromSnapshot();
+            if (applyFilters && !CanRenderFiltersLocally())
             {
                 var snapshot = (SqlBuilderBase)Clone();
                 if (snapshot.ShouldApplyFiltersOnRender())
@@ -2678,7 +2756,7 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
                 snapshot.AppendToCore(builder);
                 return;
             }
-            AppendToCore(builder);
+            AppendToCore(builder, applyFilters);
         }
         catch
         {
@@ -2691,7 +2769,8 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// 将当前 Builder 的 SQL 追加到缓冲区。
     /// </summary>
     /// <param name="builder">用于接收 SQL 的字符串生成器。</param>
-    private void AppendToCore(StringBuilder builder)
+    /// <param name="isolateFilters">是否将动态过滤仅写入本次渲染的子句副本。</param>
+    private void AppendToCore(StringBuilder builder, bool isolateFilters = false)
     {
         if (!UsesFrameworkParameterManager(ParameterManager))
         {
@@ -2702,14 +2781,24 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
         // 候选参数和名称映射只在渲染成功后发布，异常不需要清空并逐项回放原管理器。
         var state = new SqlQueryRenderState(CloneParameterManager(ParameterManager), _draftParameterNames,
             parameterKeys: _draftParameterKeys)
-        { OffsetParam = OffsetParam, LimitParam = LimitParam };
+        { OffsetParam = OffsetParam, LimitParam = LimitParam, IsolatedFilters = isolateFilters };
         _activeRenderState = state;
         _parameterManagerState.Current = state.Parameters;
         try
         {
             state.OrderBy = _orderByClause?.Clone(CreateClauseContext());
+            if (isolateFilters)
+                EnsureFiltersAdded();
             AppendQuery(builder);
             TrimAppendedWhitespace(builder, startIndex);
+            if (isolateFilters)
+            {
+                if (_renderCapture != null)
+                {
+                    _renderCapture.FilterState = state;
+                }
+                return;
+            }
             _parameterManager = state.Parameters;
             _offsetParam = state.OffsetParam;
             _limitParam = state.LimitParam;
@@ -2820,6 +2909,14 @@ internal sealed class SqlBuilderRenderSnapshot
     /// <summary>本次渲染产生的不可变结构；自定义完整 SQL 输出仍使用原派生路径。</summary>
     internal SqlQuerySelectShape SelectShape { get; set; }
 
+    /// <summary>仅在本次冻结期间保留过滤工作区，以便必要时构造兼容规划来源。</summary>
+    internal SqlQueryRenderState FilterState { get; set; }
+    internal IParameterManager Parameters => FilterState?.Parameters;
+
+    internal IReadOnlyDictionary<string, SqlParameterKey> GetFragmentParameterKeys() => Parameters == null
+        ? (Builder as SqlBuilderBase)?.GetFragmentParameterKeys(Sql)
+        : SqlBuilderBase.GetFragmentParameterKeys(Sql, Parameters, FilterState.ParameterKeys);
+
     /// <summary>边界覆盖本次完整 SQL 时才发布结构，兼容自定义尾部 SQL。</summary>
     internal void Complete(string sql)
     {
@@ -2831,7 +2928,7 @@ internal sealed class SqlBuilderRenderSnapshot
     /// <summary>
     /// 获取与 SQL 对应的参数来源 Builder。
     /// </summary>
-    public ISqlBuilder Builder { get; }
+    public ISqlBuilder Builder { get; internal set; }
 }
 
 /// <summary>

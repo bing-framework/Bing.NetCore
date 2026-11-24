@@ -83,6 +83,8 @@ public sealed class SqlKeyInsertCommandBuilder
             if (!identity) throw new InvalidOperationException("实体没有可插入列。");
             if (generatedSql != null)
             {
+                // 常量路径跳过表名渲染，需要直接验证；回退路径由渲染器验证。
+                services.TableReferenceValidator.Validate(mapping.Table, type);
                 if (returning) _builder.Returning(key.ColumnName);
                 var validation = new SqlValidationContext(provider, _builder.MutationContext.ParameterManager.Count,
                     false, SqlExecutionKind.Insert);
@@ -121,6 +123,8 @@ public sealed class SqlKeyInsertCommandBuilder
         // 空参数管理器也可能已推进名称序列；只有默认起点才能套用编译期占位符。
         if (generatedSql != null && parameters[0].Name != (type == DatabaseType.Oracle ? ":p_0" : "@_p_0"))
             generatedSql = null;
+        if (generatedSql != null)
+            services.TableReferenceValidator.Validate(mapping.Table, type);
         var command = generatedSql != null ? generatedBuilder.BuildCommand(generatedSql, returning) : _builder.ToSqlWriteCommand();
         if (oracleIdentity)
         {

@@ -23,7 +23,11 @@ public class ColumnCollection
     /// 获取列
     /// </summary>
     /// <param name="index">索引</param>
-    public ColumnItem this[int index] => _items[index];
+    public ColumnItem this[int index]
+    {
+        get => _items[index];
+        internal set => _items[index] = value;
+    }
 
     /// <summary>
     /// 获取集合数量
@@ -38,7 +42,8 @@ public class ColumnCollection
     /// 初始化一个 <see cref="ColumnCollection"/> 类型的实例。
     /// </summary>
     /// <param name="items">列集合</param>
-    public ColumnCollection(List<ColumnItem> items = null) => _items = items ?? new List<ColumnItem>();
+    public ColumnCollection(List<ColumnItem> items = null) =>
+        _items = items == null ? new List<ColumnItem>() : new List<ColumnItem>(items);
 
     #endregion
 
@@ -124,8 +129,12 @@ public class ColumnCollection
     {
         if (entityType == null || string.IsNullOrWhiteSpace(tableAlias))
             return;
-        foreach (var item in _items.Where(item => item.TableType == entityType && string.IsNullOrWhiteSpace(item.TableAlias)))
-            item.TableAlias = tableAlias;
+        for (var index = 0; index < _items.Count; index++)
+        {
+            var item = _items[index];
+            if (item.TableType == entityType && string.IsNullOrWhiteSpace(item.TableAlias))
+                _items[index] = item.WithTableAlias(tableAlias);
+        }
     }
 
     /// <summary>
@@ -275,10 +284,10 @@ public class ColumnCollection
     #region Clone(克隆)
 
     /// <summary>
-    /// 克隆
+    /// 克隆容器，共享不可变列描述。
     /// </summary>
     /// <returns>当前列集合的独立副本。</returns>
-    public ColumnCollection Clone() => new ColumnCollection(_items.Select(t => t.Clone()).ToList());
+    public ColumnCollection Clone() => new ColumnCollection(_items);
 
     #endregion
 

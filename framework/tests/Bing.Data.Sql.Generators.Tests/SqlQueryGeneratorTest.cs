@@ -754,9 +754,12 @@ public sealed partial class SqlQueryGeneratorTest
     /// <param name="path">生成器输入源码的文件路径。</param>
     /// <param name="analyzerConfigOptionsProvider">生成器使用的分析器配置选项提供程序。</param>
     /// <param name="enableInterceptors">是否启用生成代码拦截器。</param>
+    /// <param name="metadataReferences">可选运行库引用，用于真实元数据合同兼容性测试。</param>
+    /// <param name="additionalSource">可选的另一源码文件，用于跨文件语义绑定测试。</param>
     /// <returns>生成源码、编译诊断及程序集输出的集合。</returns>
     private static GeneratorResult RunGenerator(string source, string path = "GeneratedConsumer.cs",
-        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider = null, bool enableInterceptors = true)
+        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider = null, bool enableInterceptors = true,
+        ImmutableArray<MetadataReference>? metadataReferences = null, string additionalSource = null)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview)
             .WithFeatures(enableInterceptors ? new[]
@@ -764,10 +767,13 @@ public sealed partial class SqlQueryGeneratorTest
                 new KeyValuePair<string, string>("InterceptorsNamespaces", "Bing.Data.Sql.Generated")
             } : Array.Empty<KeyValuePair<string, string>>());
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions, path);
+        var syntaxTrees = new List<SyntaxTree> { syntaxTree };
+        if (additionalSource != null)
+            syntaxTrees.Add(CSharpSyntaxTree.ParseText(additionalSource, parseOptions, "SharedProjections.cs"));
         var compilation = CSharpCompilation.Create(
             "SqlQueryGeneratorConsumer",
-            new[] { syntaxTree },
-            CreateMetadataReferences(),
+            syntaxTrees,
+            metadataReferences ?? CreateMetadataReferences(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: NullableContextOptions.Disable));
         GeneratorDriver driver = CSharpGeneratorDriver.Create(

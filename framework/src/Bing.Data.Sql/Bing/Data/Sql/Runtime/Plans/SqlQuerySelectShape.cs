@@ -40,6 +40,24 @@ internal sealed class SqlQuerySelectShape
     internal SqlQueryOrder Order { get; }
     internal int OrderEnd { get; }
 
+    /// <summary>供参数重命名扫描一次性调整的文本边界。</summary>
+    internal int[] GetBoundaries() => new[] { QueryStart, FromStart, SourceEnd, QueryEnd, OrderEnd };
+
+    /// <summary>沿用查询结构，只替换文本位置及已经重命名的外层参数身份。</summary>
+    internal SqlQuerySelectShape WithScope(int[] boundaries, IReadOnlyDictionary<string, string> names) =>
+        new(boundaries[0], boundaries[1], boundaries[2], boundaries[3], WrapCount, CountAlias,
+            BindingName(OffsetParameter, names), BindingName(LimitParameter, names), HasPage,
+            PageOrder, HasOrder, Order?.WithScope(names), boundaries[4]);
+
+    private static string BindingName(string name, IReadOnlyDictionary<string, string> names)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+        // 片段的公开参数使用无前缀名称；SQL 占位符仍由分页描述保存方言前缀。
+        var token = "@" + name.TrimStart('@', ':', '?');
+        return names.TryGetValue(token, out var renamed) ? renamed.Substring(1) : name;
+    }
+
     /// <summary>沿用已有排序时，复用或追加分页均不需要重新解析排序列。</summary>
     internal bool CanReusePage(string order) => HasOrder &&
         (string.IsNullOrWhiteSpace(order) ||

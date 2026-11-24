@@ -55,6 +55,7 @@ public sealed class MySqlSqlProvider : ISqlProvider, ISqlProviderProfileProvider
         },
         Mutation = new SqlProviderMutationCapabilities
         {
+            GeneratedSqlDialect = MySqlDialect.Instance,
             SupportsMultiRowValues = true,
             SupportsUpdateFrom = false,
             SupportsDeleteUsing = false,

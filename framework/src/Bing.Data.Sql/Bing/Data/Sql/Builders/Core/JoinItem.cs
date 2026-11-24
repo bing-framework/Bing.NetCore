@@ -16,6 +16,9 @@ public class JoinItem : IJoinOn
     /// </summary>
     private Helper _helper;
 
+    /// <summary>Full Join 来源内部的过滤条件，与 Join On 分开保存。</summary>
+    private ICondition _sourceFilter;
+
     #endregion
 
     #region 属性
@@ -135,6 +138,9 @@ public class JoinItem : IJoinOn
     /// <param name="helper">辅助操作</param>
     internal void SetDependency(Helper helper) => _helper = helper;
 
+    /// <summary>合并来源预过滤条件。</summary>
+    internal void AddSourceFilter(ICondition condition) => _sourceFilter = new AndCondition(_sourceFilter, condition);
+
     #endregion
 
     #region On(设置连接条件)
@@ -217,6 +223,8 @@ public class JoinItem : IJoinOn
         var result = Source == null
             ? Create(JoinType, Table?.Clone(), Type, condition)
             : new JoinItem(JoinType, Table?.Clone(), Type, condition, Source.Clone());
+        result._sourceFilter = _sourceFilter == null ? null : context == null
+            ? new SqlCondition(_sourceFilter.GetCondition()) : SqlConditionSnapshot.Rebind(_sourceFilter, context);
         result.SetDependency(helper);
         return result;
     }
@@ -232,7 +240,7 @@ public class JoinItem : IJoinOn
     /// <returns>按指定 SQL 方言渲染的 Join SQL。</returns>
     public string ToSql(IDialect dialect = null)
     {
-        var table = Table.ToSql(dialect);
+        var table = Table.ToFilteredSql(dialect, Source?.Alias ?? Table.Alias, _sourceFilter);
         return $"{JoinType} {table}{GetOn()}";
     }
 

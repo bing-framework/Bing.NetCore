@@ -48,14 +48,14 @@ public class Query<TEntity, TKey> : IQuery<TEntity, TKey> where TEntity : class
     private readonly OrderByBuilder _orderByBuilder;
 
     /// <summary>
-    /// 初始化一个 <see cref="Query{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="Query{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     public Query() : this(new QueryParameter())
     {
     }
 
     /// <summary>
-    /// 初始化一个 <see cref="Query{TEntity, TKey}"/> 类型的实例。
+    /// 初始化一个 <see cref="Query{TEntity,TKey}" /> 类型的实例。
     /// </summary>
     /// <param name="parameter">查询参数</param>
     public Query(IQueryParameter parameter)

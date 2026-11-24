@@ -17,6 +17,50 @@ public sealed class SqliteReturningProjectionContractTest
 {
     private const string ProjectionSql = "UPDATE returning_projection SET Counter = Counter + 1 WHERE Id = 1 RETURNING 42 AS \"count_alias\", NULL AS \"nullable_alias\", Id AS \"id_alias\", 'projected-name' AS \"display_alias\"";
 
+    /// <summary>Lambda 的匿名别名进入生成式 DTO reader，参数仍按当前命令绑定。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ReturningBuilder_ShouldMapAnonymousAliasesToGeneratedDto(bool asynchronous)
+    {
+        using var host = new TestHost();
+        using var executor = host.CreateExecutor();
+        var command = executor.CreateUpdateBuilder().Update<ProjectionRow>()
+            .Set("Counter", 21).Where("Id", 1)
+            .Returning<ProjectionRow>(row => new { Count = row.Counter, row.Id }).BuildCommand();
+
+        Assert.Equal("Update `returning_projection` Set `Counter` = @_p_0 Where `Id`=@_p_1 Returning `Counter` As `Count`, `Id` As `Id`", command.Sql);
+        Assert.Equal(new object[] { 21, 1 }, command.Parameters.Select(parameter => parameter.Value));
+        var result = asynchronous
+            ? Assert.Single(await executor.ExecuteReturningAsync<ReturningDto>(command))
+            : Assert.Single(executor.ExecuteReturning<ReturningDto>(command));
+
+        Assert.Equal(21, result.Count);
+        Assert.Equal(1, result.Id);
+        Assert.Equal("initial-display", result.DisplayName);
+        Assert.Equal(21, host.ReadCounter());
+    }
+
+    /// <summary>DTO 初始化器只描述返回列；共享事务的提交或回滚由外层负责。</summary>
+    [Fact]
+    public async Task ReturningBuilder_ShouldMapDtoInitializerInSharedTransaction()
+    {
+        using var host = new TestHost();
+        await using var transaction = await host.Services.GetRequiredService<ISqlTransactionScopeFactory>().BeginAsync();
+        using var executor = transaction.CreateExecutor();
+        var command = executor.CreateUpdateBuilder().Update<ProjectionRow>()
+            .Set("Counter", 31).Where("Id", 1)
+            .Returning<ProjectionRow>(row => new ReturningDto { Count = row.Counter, Id = row.Id }).BuildCommand();
+
+        Assert.Equal("Update `returning_projection` Set `Counter` = @_p_0 Where `Id`=@_p_1 Returning `Counter` As `Count`, `Id` As `Id`", command.Sql);
+        var result = Assert.Single(await executor.ExecuteReturningAsync<ReturningDto>(command));
+        Assert.Equal(31, result.Count);
+        Assert.Equal(1, result.Id);
+        await transaction.RollbackAsync();
+
+        Assert.Equal(10, host.ReadCounter());
+    }
+
     /// <summary>返回列按任意顺序和别名绑定，NULL 保留 DTO 的属性初值。</summary>
     [Theory]
     [InlineData(false)]
@@ -153,6 +197,22 @@ public sealed class SqliteReturningProjectionContractTest
         public int Count { get; set; } = -1;
     }
 
+    /// <summary>写入来源模型与返回 DTO 分别注册。</summary>
+    public sealed class ProjectionRow
+    {
+        public int Id { get; set; }
+        public int Counter { get; set; }
+    }
+
+    private static EntityModelMetadata CreateSourceModel() => new(typeof(ProjectionRow), "returning_projection", null,
+        new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(ProjectionRow.Id), typeof(int), true, true, "Id",
+                generatedGetter: static row => ((ProjectionRow)row).Id),
+            EntityPropertyMetadata.CreateGenerated(nameof(ProjectionRow.Counter), typeof(int), true, true, "Counter",
+                generatedGetter: static row => ((ProjectionRow)row).Counter)
+        });
+
     private sealed class TestHost : IDisposable
     {
         private readonly string _path = Path.Combine(Path.GetTempPath(), "bing-returning-projection-" + Guid.NewGuid().ToString("N") + ".db");
@@ -168,7 +228,7 @@ public sealed class SqliteReturningProjectionContractTest
             services.AddLogging();
             services.AddSqlCore();
             services.ConfigureSqlMetadata(options => options.ExecutionMode = SqlExecutionMode.GeneratedOnly);
-            services.AddSqlGeneratedModels(new[] { CreateResultModel() });
+            services.AddSqlGeneratedModels(new[] { CreateResultModel(), CreateSourceModel() });
             services.AddSqlDataSource("default", DatabaseType.Sqlite, _connectionString);
             services.AddSqliteProvider();
             if (overrideDisplayAlias)

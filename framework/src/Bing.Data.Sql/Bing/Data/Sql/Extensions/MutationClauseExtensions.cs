@@ -14,7 +14,7 @@ namespace Bing.Data.Sql;
 /// <summary>
 /// 设置 Insert 目标表。
 /// </summary>
-public static class MutationClauseExtensions
+public static partial class MutationClauseExtensions
 {
     /// <summary>
     /// 设置 Insert 目标表。
@@ -847,7 +847,7 @@ public static class MutationClauseExtensions
     /// </summary>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
     /// <param name="source">Insert Builder。</param>
-    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <param name="columns">单个属性、匿名对象或 DTO 初始化器；支持同类型数值列的四则运算，投影成员名作为结果别名。</param>
     /// <returns>传入的同一个 Insert Builder。</returns>
     public static ISqlInsertBuilder Returning<TEntity>(this ISqlInsertBuilder source,
         Expression<Func<TEntity, object>> columns) where TEntity : class =>
@@ -858,7 +858,7 @@ public static class MutationClauseExtensions
     /// </summary>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
     /// <param name="source">Update Builder。</param>
-    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <param name="columns">单个属性、匿名对象或 DTO 初始化器；投影成员名作为结果别名。</param>
     /// <returns>传入的同一个 Update Builder。</returns>
     public static ISqlUpdateBuilder Returning<TEntity>(this ISqlUpdateBuilder source,
         Expression<Func<TEntity, object>> columns) where TEntity : class =>
@@ -869,7 +869,7 @@ public static class MutationClauseExtensions
     /// </summary>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
     /// <param name="source">Delete Builder。</param>
-    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <param name="columns">单个属性、匿名对象或 DTO 初始化器；投影成员名作为结果别名。</param>
     /// <returns>传入的同一个 Delete Builder。</returns>
     public static ISqlDeleteBuilder Returning<TEntity>(this ISqlDeleteBuilder source,
         Expression<Func<TEntity, object>> columns) where TEntity : class =>
@@ -881,7 +881,7 @@ public static class MutationClauseExtensions
     /// <typeparam name="T">支持 Returning 和 Mutation 上下文访问的 Builder 类型。</typeparam>
     /// <typeparam name="TEntity">返回实体类型。</typeparam>
     /// <param name="source">Mutation Builder。</param>
-    /// <param name="columns">单个属性或匿名对象属性投影。</param>
+    /// <param name="columns">单个属性、匿名对象或 DTO 初始化器；投影成员名作为结果别名。</param>
     /// <returns>传入的同一个 Mutation Builder。</returns>
     public static T Returning<T, TEntity>(this T source,
         Expression<Func<TEntity, object>> columns)
@@ -890,12 +890,42 @@ public static class MutationClauseExtensions
     {
         if (source == null)
             throw new ArgumentNullException(nameof(source));
+        if (columns == null)
+            throw new ArgumentNullException(nameof(columns));
         var qualifier = GetReturningQualifier(source);
-        var result = GetPropertyNames(columns).Select(propertyName =>
+        var context = source.MutationContext;
+        var mapping = context.Services.EntityMappingResolver.Resolve(typeof(TEntity),
+            context.ExecutionContext.DatabaseContext);
+
+        SqlReturningColumn Resolve(Expression value, string alias = null)
         {
-            var mapping = ResolveMappedColumn<TEntity>(source, propertyName);
-            return new SqlReturningColumn(mapping.ColumnName, qualifier, mapping.PropertyName);
-        }).ToArray();
+            // 保留直接列单层转换的既有布局合同；不剥离计算内部或计算结果上的数值转换。
+            if (value is UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked, Method: null } conversion &&
+                (conversion.Type == typeof(object) || conversion.Operand is MemberExpression))
+                value = conversion.Operand;
+            if (value is BinaryExpression or UnaryExpression { NodeType: ExpressionType.Negate or ExpressionType.NegateChecked })
+                return ResolveComputedReturning(value, columns.Parameters[0], mapping, qualifier, alias);
+            if (value is not MemberExpression { Expression: ParameterExpression parameter } member ||
+                parameter != columns.Parameters[0])
+                throw new ArgumentException("Returning 投影仅支持实体属性、同类型数值列的负号和四则运算。", nameof(columns));
+            var column = mapping?.FindColumn(member.Member.Name);
+            if (column == null)
+                throw new InvalidOperationException($"实体 {typeof(TEntity).Name} 的属性 {member.Member.Name} 未映射到数据库列。");
+            return new SqlReturningColumn(column.ColumnName, qualifier, alias ?? column.PropertyName);
+        }
+
+        // 只读取表达式中的成员布局，不构造 DTO，也不编译或执行 Lambda。
+        var result = UnwrapConvert(columns.Body) switch
+        {
+            NewExpression { Members: not null, Arguments.Count: > 0 } creation =>
+                creation.Arguments.Select((value, index) => Resolve(value, creation.Members[index].Name)).ToArray(),
+            MemberInitExpression { NewExpression.Arguments.Count: 0, Bindings.Count: > 0 } initialization =>
+                initialization.Bindings.Select(binding => binding is MemberAssignment assignment
+                    ? Resolve(assignment.Expression, assignment.Member.Name)
+                    : throw new ArgumentException("Returning DTO 仅支持直接属性赋值。", nameof(columns))).ToArray(),
+            var value => new[] { Resolve(value) }
+        };
+        // 全部解析成功后才追加，避免错误投影遗留部分 Returning 列。
         source.ReturningClause.AddRange(result);
         return source;
     }
@@ -999,7 +1029,7 @@ public static class MutationClauseExtensions
     }
 
     /// <summary>
-    /// 获取实体投影中的属性名。
+    /// 获取 Insert 列投影中的源实体属性名。
     /// </summary>
     /// <typeparam name="TEntity">实体类型。</typeparam>
     /// <param name="expression">单个属性或匿名对象属性投影表达式。</param>

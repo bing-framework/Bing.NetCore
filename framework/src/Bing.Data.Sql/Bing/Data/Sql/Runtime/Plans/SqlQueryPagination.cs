@@ -5,6 +5,12 @@ namespace Bing.Data.Sql;
 /// <summary>冻结分页绑定所需的方言、参数槽位与限额，不保留可变 Builder 或参数容器。</summary>
 internal sealed class SqlQueryPagination
 {
+    /// <summary>作用域包含尚未绑定的分页槽位，保留其方言前缀。</summary>
+    internal SqlQueryPagination WithScope(IReadOnlyDictionary<string, string> names) =>
+        new(Dialect, OrderDialect, Renderer,
+            names.TryGetValue(OffsetParameter, out var offset) ? offset : OffsetParameter,
+            names.TryGetValue(LimitParameter, out var limit) ? limit : LimitParameter,
+            MaximumParameterCount, LimitProvider);
     internal SqlQueryPagination(IDialect dialect, IDialect orderDialect, ISqlPaginationRenderer renderer, string offsetParameter,
         string limitParameter, int maximumParameterCount, string limitProvider)
     {

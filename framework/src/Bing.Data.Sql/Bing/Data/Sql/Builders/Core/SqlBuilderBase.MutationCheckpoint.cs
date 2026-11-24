@@ -52,8 +52,8 @@ public abstract partial class SqlBuilderBase
             _owner = owner;
             _parameters = CloneParameterManager(owner.ParameterManager);
             _aliases = owner.AliasRegister.Clone();
-            _unions = owner.UnionItems.ToList();
-            _ctes = owner.CteItems.ToList();
+            _unions = owner._unionItems.ToList();
+            _ctes = owner._cteItems.ToList();
             _names = owner.CloneSubqueryParameterNames();
             _keys = owner.CloneFragmentParameterKeys();
             _pager = new Pager(owner.Pager.Page, owner.Pager.PageSize, owner.Pager.TotalCount,
@@ -86,8 +86,10 @@ public abstract partial class SqlBuilderBase
             _owner._whereClause = Where?.Clone(context);
             _owner._groupByClause = GroupBy?.Clone(context);
             _owner._orderByClause = OrderBy?.Clone(context);
-            _owner.UnionItems = _unions;
-            _owner.CteItems = _ctes;
+            _owner._unionItems.Clear();
+            _owner._unionItems.AddRange(_unions);
+            _owner._cteItems.Clear();
+            _owner._cteItems.AddRange(_ctes);
             _owner.ReplaceSubqueryParameterNames(_names);
             _owner.FragmentParameterKeys = _keys;
             _owner.Pager = _pager;

@@ -15,7 +15,7 @@ public class SqlQueryPlanContextTest
     public void NotifyExecutionStarted_ShouldCreateExecutionContext()
     {
         // Arrange
-        var plan = SqlQueryPlan.Create(new TestSqlBuilder());
+        var plan = SqlQueryPlan.Create(new TestSqlBuilder().Select("Id").From("Users"));
         plan.SetContext("query-1", "parent-1", "Data");
 
         // Act
@@ -59,7 +59,7 @@ public class SqlQueryPlanContextTest
         Assert.Equal("Id", plan.SplitOn);
         Assert.Equal("Id", defaultPlan.SplitOn);
         Assert.False(plan.IsBuilderPlan);
-        Assert.Null(plan.GetBuilder());
+        Assert.Null(plan.QueryIr);
         var frozen = Assert.IsType<SqlParam[]>(plan.Parameters);
         Assert.Equal(7, frozen[0].Value);
         Assert.Equal(new[] { 1, 2 }, Assert.IsType<int[]>(frozen[1].Value));
@@ -109,7 +109,7 @@ public class SqlQueryPlanContextTest
 
         // Assert
         Assert.False(frozen.IsBuilderPlan);
-        Assert.Null(frozen.GetBuilder());
+        Assert.NotNull(frozen.QueryIr);
         Assert.Null(frozen.PlanningBuilder);
         Assert.Equal("Select [Id] \r\nFrom [Users] \r\nWhere [Id]=@_p_0 And [TenantId] In (@_p_1,@_p_2)", frozen.CommandText);
         Assert.Equal("Id", frozen.SplitOn);
@@ -147,7 +147,7 @@ public class SqlQueryPlanContextTest
         var frozen = SqlQueryPlan.Create(builder, "Id").Freeze();
 
         Assert.False(frozen.IsBuilderPlan);
-        Assert.Null(frozen.GetBuilder());
+        Assert.NotNull(frozen.QueryIr);
         Assert.Null(frozen.PlanningBuilder);
         Assert.Equal(
             "With [recent_users] \r\nAs (Select Id From Users)\r\nSelect [Id] \r\nFrom [recent_users]",
@@ -258,7 +258,7 @@ public class SqlQueryPlanContextTest
     }
 
     /// <summary>
-    /// 测试目的：Count 派生计划应共享来源查询上下文，但使用独立阶段和 Builder。
+    /// 测试目的：派生计划共享来源查询上下文，但使用独立阶段和冻结 SQL。
     /// </summary>
     [Fact]
     public void DerivedPlan_ShouldCopyContextWithoutSharingBuilder()
@@ -267,17 +267,19 @@ public class SqlQueryPlanContextTest
         var sourceBuilder = new TestSqlBuilder().Select("Id").From("Users");
         var source = SqlQueryPlan.Create(sourceBuilder);
         source.SetContext("query-1", null, "Data");
-        var derived = SqlQueryPlan.Create(sourceBuilder.Clone());
+        var derivedBuilder = sourceBuilder.Clone().Where("Id", 1);
+        var derived = SqlQueryPlan.Create(derivedBuilder);
 
         // Act
         derived.CopyContextFrom(source, "Count");
-        derived.GetBuilder().Where("Id", 1);
+        derivedBuilder.Where("Status", "changed");
 
         // Assert
         Assert.Equal(source.QueryContextId, derived.QueryContextId);
         Assert.Equal("Count", derived.Phase);
-        Assert.NotSame(source.GetBuilder(), derived.GetBuilder());
-        Assert.DoesNotContain("Where", source.GetBuilder().ToSql());
+        Assert.NotSame(source.QueryIr, derived.QueryIr);
+        Assert.Equal("Select [Id] \r\nFrom [Users]", source.CommandText);
+        Assert.Equal("Select [Id] \r\nFrom [Users] \r\nWhere [Id]=@_p_0", derived.CommandText);
     }
 
     /// <summary>
@@ -289,8 +291,8 @@ public class SqlQueryPlanContextTest
         // Arrange
         var source = SqlQueryPlan.Create(new TestSqlBuilder().Select("Id").From("Users"));
         source.SetContext("query-1", "parent-1", "Data");
-        var count = SqlQueryPlan.Create(source.GetBuilder().Clone());
-        var data = SqlQueryPlan.Create(source.GetBuilder().Clone());
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(source);
+        var data = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(1, 2, "Id"));
         count.CopyContextFrom(source, "Count");
         data.CopyContextFrom(source, "Data");
 
@@ -304,7 +306,7 @@ public class SqlQueryPlanContextTest
         Assert.Equal("Count", count.Phase);
         Assert.Equal("Data", data.Phase);
         Assert.NotEqual(count.ExecutionId, data.ExecutionId);
-        Assert.NotSame(count.GetBuilder(), data.GetBuilder());
+        Assert.NotSame(count.QueryIr, data.QueryIr);
     }
 
     /// <summary>
@@ -441,14 +443,14 @@ public class SqlQueryPlanContextTest
         // Arrange
         var builder = new TestSqlBuilder().Select("Id").From("Users").Where("Id", 7);
         var frozen = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(builder);
-        var plan = SqlQueryPlan.Create(builder, frozen, "Id");
+        var plan = SqlQueryPlan.Create(builder, "Id");
         builder.Clear();
 
         // Act
         var execution = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan);
 
         // Assert
-        Assert.Equal(frozen.Sql, execution.Sql);
+        Assert.Equal("Select [Id] \r\nFrom [Users] \r\nWhere [Id]=@_p_0", execution.Sql);
         Assert.Equal(frozen.Parameters.Select(item => item.Name), execution.Parameters.Select(item => item.Name));
         Assert.Equal(frozen.Parameters.Select(item => item.Value), execution.Parameters.Select(item => item.Value));
     }
@@ -461,8 +463,7 @@ public class SqlQueryPlanContextTest
     {
         // Arrange
         var builder = new TestSqlBuilder().Select("Id").From("Users").Where("Id", 7);
-        var frozen = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(builder);
-        var plan = SqlQueryPlan.Create(builder, frozen, "Id");
+        var plan = SqlQueryPlan.Create(builder, "Id");
         builder.Clear();
 
         // Act
@@ -480,8 +481,7 @@ public class SqlQueryPlanContextTest
     {
         // Arrange
         var sourceBuilder = new TestSqlBuilder().Select("Id").From("Users").Where("Id", 7);
-        var source = SqlQueryPlan.Create(sourceBuilder,
-            SqlBuilderRuntimeBridge.CreateExecutionSnapshot(sourceBuilder), "Id");
+        var source = SqlQueryPlan.Create(sourceBuilder, "Id");
 
         // Act
         var count = SqlBuilderRuntimeBridge.CreateCountPlan(source);
@@ -489,7 +489,7 @@ public class SqlQueryPlanContextTest
 
         // Assert
         Assert.False(count.IsBuilderPlan);
-        Assert.Null(count.GetBuilder());
+        Assert.NotNull(count.QueryIr);
         Assert.Equal("Select Count(*) \r\nFrom [Users] \r\nWhere [Id]=@_p_0", count.CommandText);
         Assert.Equal(frozen.Sql, SqlBuilderRuntimeBridge.CreateExecutionSnapshot(count).Sql);
     }

@@ -53,6 +53,33 @@ try
     using var scope = provider.CreateScope();
     ISqlQuery Query() => scope.ServiceProvider.GetRequiredService<ISqlQueryFactory>().Create();
 
+    // 动态过滤的局部渲染工作区同时冻结 SQL、参数及 Count/Page，直接复用已生成的实体元数据。
+    using (var query = Query())
+    {
+        var filter = new SmokeProductFilter();
+        var builderServices = new SqlBuilderServices(
+            entityMappingResolver: scope.ServiceProvider.GetRequiredService<IEntityMappingResolver>(),
+            metadataOptions: new SqlMetadataOptions { ExecutionMode = SqlExecutionMode.GeneratedOnly },
+            entityModelMetadataProvider: scope.ServiceProvider.GetRequiredService<IEntityModelMetadataProvider>(),
+            filters: new ISqlFilter[] { filter });
+        var builder = new SqliteBuilder(builderServices);
+        builder.Select("OrderId").From<Order>("o").OrderBy("OrderId");
+        var plan = SqlQueryPlan.Create(builder);
+        var sql = "Select `OrderId` \r\nFrom `Orders` As `o` \r\nWhere `o`.`ProductId`=@_p_0 \r\nOrder By `OrderId`";
+        Check(plan.CommandText == sql && filter.Calls == 1, "过滤工作区首次完整SQL与单次取值");
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
+        var page = SqlBuilderRuntimeBridge.CreatePagePlan(plan, new Pager(2, 1));
+        Check(count.CommandText == "Select Count(*) \r\nFrom `Orders` As `o` \r\nWhere `o`.`ProductId`=@_p_0" &&
+              page.CommandText == sql + " \r\nLimit @_p_2 OFFSET @_p_1", "过滤工作区Count与Page完整SQL");
+        var executor = (ISqlQueryPlanExecutor)query;
+        Check(executor.Scalar<long>(count, null) == 2 &&
+              executor.ToList<long>(page, null).SequenceEqual(new long[] { 2 }) && filter.Calls == 1,
+            "过滤工作区Count与Page共享参数");
+        Check(executor.ToList<long>(SqlQueryPlan.Create(builder), null).SequenceEqual(new long[] { 3 }) && filter.Calls == 2 &&
+              builder.GetParams().Count == 0, "过滤工作区重复终结重新取值且不污染草稿");
+        Console.WriteLine("FILTER_RENDER_WORKSPACE_NATIVE_PASS");
+    }
+
     // 默认静态查询重复终结复用冻结结构，每次执行和分页仍保持独立。
     using (var query = Query())
     {
@@ -81,6 +108,65 @@ try
         Check(clone.ToList<long>().SequenceEqual(new long[] { 3 }), "冻结后克隆使用原结构");
         Check((await description.ToListAsync<long>()).SequenceEqual(new long[] { 1, 2, 3, 4 }) && description.ToSql() == sql,
             "冻结后源查询及生成式重复读取不受克隆影响");
+    }
+
+    // 公开计划入口也在创建时冻结，调用方修改 Builder 或公开参数不能影响后续读取与派生。
+    using (var query = Query())
+    {
+        var executor = (ISqlQueryPlanExecutor)query;
+        var builder = new SqliteBuilder().Select("OrderId").From("Orders")
+            .Where("ProductId", 101).OrderBy("OrderId");
+        var source = SqlQueryPlan.Create(builder);
+        var sql = $"Select `OrderId` {Environment.NewLine}From `Orders` {Environment.NewLine}Where `ProductId`=@_p_0 {Environment.NewLine}Order By `OrderId`";
+        Check(!source.IsBuilderPlan && ReferenceEquals(source, source.Freeze()) && source.CommandText == sql,
+            "公开工厂创建时冻结完整SQL");
+        builder.Where("OrderId", 4);
+        ((SqlParam[])source.Parameters)[0].Value = 102;
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(source);
+        var page = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(2, 1, "OrderId"));
+        Check(count.CommandText == $"Select Count(*) {Environment.NewLine}From `Orders` {Environment.NewLine}Where `ProductId`=@_p_0" &&
+            page.CommandText == sql + $" {Environment.NewLine}Limit @_p_2 OFFSET @_p_1", "公开冻结计划Count/Page完整SQL");
+        Check(executor.ToList<long>(source, null).SequenceEqual(new long[] { 1, 2 }) &&
+            (await executor.ToListAsync<long>(source, null, default)).SequenceEqual(new long[] { 1, 2 }),
+            "公开冻结计划同步异步读取");
+        Check(executor.Scalar<long>(count, null) == 2 && executor.ToList<long>(page, null).SequenceEqual(new long[] { 2 }) &&
+            Equals(((SqlParam[])source.Parameters)[0].Value, 101), "公开冻结来源隔离与分页执行");
+    }
+
+    // Builder 模板进入查询计划后保留 CTE 结构、作用域参数和独立分页槽位。
+    using (var query = Query())
+    {
+        var executor = (ISqlQueryPlanExecutor)query;
+        var cte = new SqliteBuilder().Select("OrderId").From("Orders")
+            .Where("ProductId", 101).ToTemplate().AsCte("selected");
+        var template = new SqliteBuilder().Select("OrderId").From("selected")
+            .With(cte.Name, cte.Fragment).OrderBy("OrderId")
+            .ToTemplate(new SqlQueryScope("aot"));
+        var templateSql = template.Sql;
+        var templateParameters = template.Parameters;
+        var source = SqlQueryPlan.Create(template.CreateFragment());
+        var ctePrefix = $"With Recursive `selected` {Environment.NewLine}" +
+            $"As (Select `OrderId` {Environment.NewLine}From `Orders` {Environment.NewLine}" +
+            $"Where `ProductId`=@aot_p_0){Environment.NewLine}";
+        var sourceSql = ctePrefix + $"Select `OrderId` {Environment.NewLine}From `selected` {Environment.NewLine}Order By `OrderId`";
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(source);
+        var page = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(2, 1));
+        var firstPage = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(1, 1));
+        Check(source.CommandText == sourceSql, "模板计划保留作用域 CTE 完整SQL");
+        Check(count.CommandText == ctePrefix + $"Select Count(*) {Environment.NewLine}From `selected`" &&
+            page.CommandText == sourceSql + $" {Environment.NewLine}Limit @aot_p_2 OFFSET @aot_p_1",
+            "模板计划派生Count与Page完整SQL");
+        Check(executor.Scalar<long>(count, null) == 2 && executor.ToList<long>(page, null).SequenceEqual(new long[] { 2 }) &&
+            executor.ToList<long>(firstPage, null).SequenceEqual(new long[] { 1 }),
+            "模板计划Count与不同分页执行");
+        Check((await executor.ToListAsync<long>(page, null, default)).SequenceEqual(new long[] { 2 }),
+            "模板计划异步读取");
+        Check(templateParameters.Select(parameter => parameter.Name).SequenceEqual(new[] { "aot_p_0" }) &&
+            templateParameters.Select(parameter => parameter.Value).SequenceEqual(new object[] { 101 }) &&
+            template.Sql == templateSql && template.Parameters.Select(parameter => parameter.Name)
+                .SequenceEqual(templateParameters.Select(parameter => parameter.Name)) &&
+            template.Parameters.Select(parameter => parameter.Value).SequenceEqual(templateParameters.Select(parameter => parameter.Value)) &&
+            source.CommandText == sourceSql, "模板与来源计划在重复派生后保持不变");
     }
 
     // 第三方 SQL 扩展的回退来源在 Native AOT 中同样支持从页面再分页和自动计数。
@@ -605,7 +691,8 @@ try
         Check(source.CommandText == originalSql && ((SqlParam[])source.Parameters).Select(p => p.Value)
             .SequenceEqual(new object[] { 0, 5 }), "Skip-only冻结源隔离" + ordered);
     }
-    Check(evidence.Executions == 197, "实际执行SQL与参数快照");
+    // 原有 205 次执行，加上过滤工作区的 Count、Page 和下一次取值查询。
+    Check(evidence.Executions == 208, "实际执行SQL与参数快照");
     Console.WriteLine("PASS: generated SQLite query smoke");
 }
 finally
@@ -843,4 +930,17 @@ internal sealed class SmokeTailBuilder : SqliteBuilder
     internal SmokeTailBuilder(IParameterManager parameters = null) : base(parameterManager: parameters) { }
     public override string ToSql() => base.ToSql() + " /* extension */";
     protected override SqlBuilderBase CreateBuilder(IParameterManager parameterManager) => new SmokeTailBuilder(parameterManager);
+}
+
+/// <summary>为 AOT 过滤工作区验证提供交替的商品参数。</summary>
+internal sealed class SmokeProductFilter : ISqlFilter
+{
+    internal int Calls { get; private set; }
+
+    public void Filter(SqlFilterContext context)
+    {
+        var source = context.Sources.Single(item => item.EntityType == typeof(Order));
+        context.AddPredicate(source, context.GetColumn(source, nameof(Order.ProductId)),
+            ++Calls % 2 == 1 ? 101L : 102L);
+    }
 }

@@ -13,7 +13,11 @@ public interface IUnionAccessor
     bool IsUnion { get; }
 
     /// <summary>
-    /// 获取联合操作项集合
+    /// 获取当前草稿的只读集合操作视图。
     /// </summary>
-    List<BuilderItem> UnionItems { get; }
+    IReadOnlyList<BuilderItem> UnionItems { get; }
+
+    /// <summary>追加已准备好的集合分支；普通查询调用者使用 Union 等组合方法。</summary>
+    /// <param name="item">由组合入口完成快照隔离的集合操作项。</param>
+    void AddUnion(BuilderItem item);
 }

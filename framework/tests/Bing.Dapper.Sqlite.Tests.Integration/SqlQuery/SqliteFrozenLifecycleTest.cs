@@ -65,7 +65,9 @@ public sealed class SqliteFrozenLifecycleTest : IAsyncLifetime
         cancellation.Cancel();
 
         var cancelledPlan = query.GetPlan(cancellation.Token);
-        Assert.True(cancelledPlan.IsBuilderPlan);
+        Assert.False(cancelledPlan.IsBuilderPlan);
+        Assert.Null(cancelledPlan.CommandText);
+        Assert.Null(cancelledPlan.Parameters);
         builder.Where("Name", "missing");
 
         const string frozenSql = "Select `Name` \r\nFrom `samples` \r\nWhere `Amount`=@_p_0";

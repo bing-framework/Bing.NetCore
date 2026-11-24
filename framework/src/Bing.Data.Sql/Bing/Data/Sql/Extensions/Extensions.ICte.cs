@@ -26,7 +26,7 @@ public static partial class Extensions
         if (GetOperationBuilder(source) is ICteAccessor accessor)
         {
             var item = new BuilderItem(name, builder.Clone());
-            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.CteItems.Add(item));
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.AddCte(item));
         }
         return source;
     }
@@ -48,7 +48,7 @@ public static partial class Extensions
         if (GetOperationBuilder(source) is ICteAccessor accessor)
         {
             var item = new BuilderItem(name, fragment.Freeze().Render());
-            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.CteItems.Add(item));
+            SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.AddCte(item));
         }
         return source;
     }

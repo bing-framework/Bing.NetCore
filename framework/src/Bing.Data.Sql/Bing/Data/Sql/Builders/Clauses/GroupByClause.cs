@@ -61,6 +61,12 @@ public partial class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClaus
     /// <param name="group">分组字段</param>
     /// <param name="having">分组条件</param>
     public GroupByClause(SqlClauseContext context, List<SqlItem> group = null, string having = null)
+        : this(context, group, having, ownsGroup: false)
+    {
+    }
+
+    /// <summary>克隆路径接收已经复制的容器，公共构造路径自行复制调用方列表。</summary>
+    private GroupByClause(SqlClauseContext context, List<SqlItem> group, string having, bool ownsGroup)
     {
         if (context == null)
             throw new ArgumentNullException(nameof(context));
@@ -68,7 +74,7 @@ public partial class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClaus
         _dialect = context.Dialect;
         _resolver = context.EntityResolver;
         _register = context.AliasRegister;
-        _group = group ?? new List<SqlItem>();
+        _group = group == null ? new List<SqlItem>() : ownsGroup ? group : new List<SqlItem>(group);
         _having = having;
     }
 
@@ -101,7 +107,7 @@ public partial class GroupByClause : IGroupByClause, ISqlMultiSourceGroupByClaus
     /// <param name="having">分组条件。</param>
     /// <returns>保留 Provider 子类类型的 Group By 子句。</returns>
     protected virtual GroupByClause CreateClone(SqlClauseContext context, List<SqlItem> group, string having) =>
-        new GroupByClause(context, group, having);
+        new GroupByClause(context, group, having, ownsGroup: true);
 
     /// <inheritdoc />
     public void GroupBy(string columns)

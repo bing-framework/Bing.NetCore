@@ -59,7 +59,10 @@ public static partial class Extensions
         }
         if (items.Count == 0)
             return;
-        SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.UnionItems.AddRange(items));
+        SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+        {
+            foreach (var item in items) accessor.AddUnion(item);
+        });
     }
 
     /// <summary>
@@ -113,7 +116,10 @@ public static partial class Extensions
             .ToList();
         if (items.Count == 0)
             return;
-        SqlQueryOperationAccessor.MutateBuilder(source, _ => accessor.UnionItems.AddRange(items));
+        SqlQueryOperationAccessor.MutateBuilder(source, _ =>
+        {
+            foreach (var item in items) accessor.AddUnion(item);
+        });
     }
 
     /// <summary>

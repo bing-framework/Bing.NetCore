@@ -24,11 +24,6 @@ public sealed class SqlQueryPlan
     private readonly SqlQueryIr _queryIr;
 
     /// <summary>
-    /// 计划创建阶段冻结的 SQL 与参数快照。
-    /// </summary>
-    private readonly SqlBuilderExecutionSnapshot _executionSnapshot;
-
-    /// <summary>
     /// 原生文本计划创建阶段冻结的参数源。
     /// </summary>
     private readonly object _parameters;
@@ -38,7 +33,7 @@ public sealed class SqlQueryPlan
     /// </summary>
     /// <remarks>
     /// 该字段不属于 <see cref="SqlQueryIr" />，也不参与普通执行；派生计划创建时会先复制它，
-    /// 以便统一 IR 保持纯文本快照语义，同时保留 CTE、Union、Group 和 Provider 分页规则。
+    /// 以便统一 IR 保持纯文本快照语义，同时兼容第三方 Builder 和自定义 SQL 尾部的派生规则。
     /// </remarks>
     private readonly SqlQueryPlanningSource _planningSource;
     /// <summary>
@@ -82,25 +77,13 @@ public sealed class SqlQueryPlan
     private string _phase = "Data";
 
     /// <summary>
-    /// 初始化一个 <see cref="SqlQueryPlan"/> 类型的实例。
+    /// 初始化仅供预取消执行传递生命周期的计划。
     /// </summary>
-    /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
-    /// <exception cref="ArgumentNullException">当 <paramref name="builder"/> 为 null 时抛出。</exception>
-    private SqlQueryPlan(ISqlBuilder builder, string splitOn)
+    private SqlQueryPlan(string splitOn)
     {
-        Builder = builder ?? throw new ArgumentNullException(nameof(builder));
         SplitOn = NormalizeSplitOn(splitOn);
         CommandType = System.Data.CommandType.Text;
-    }
-
-    /// <summary>
-    /// 初始化包含 Builder 派生源和执行快照的查询计划。
-    /// </summary>
-    private SqlQueryPlan(ISqlBuilder builder, SqlBuilderExecutionSnapshot executionSnapshot, string splitOn)
-        : this(builder, splitOn)
-    {
-        _executionSnapshot = executionSnapshot ?? throw new ArgumentNullException(nameof(executionSnapshot));
     }
 
     /// <summary>
@@ -129,39 +112,31 @@ public sealed class SqlQueryPlan
         if (queryIr == null)
             throw new ArgumentNullException(nameof(queryIr));
         _queryIr = queryIr;
-        _executionSnapshot = queryIr.Snapshot;
-        _planningSource = planningBuilder == null || _executionSnapshot.CanDeriveAnyPage
-            ? null : new SqlQueryPlanningSource(planningBuilder, _executionSnapshot);
-        CommandText = _executionSnapshot.Sql;
+        var snapshot = queryIr.Snapshot;
+        _planningSource = planningBuilder == null || snapshot.CanDeriveAnyPage
+            ? null : new SqlQueryPlanningSource(planningBuilder, snapshot);
+        CommandText = snapshot.Sql;
         SplitOn = NormalizeSplitOn(splitOn);
         CommandType = queryIr.CommandType;
     }
 
     /// <summary>
-    /// 获取当前计划使用的 Fluent SQL Builder。
+    /// 获取计划创建时冻结的 SQL 文本。
     /// </summary>
     /// <remarks>
-    /// 原生文本计划为 null。
-    /// </remarks>
-    internal ISqlBuilder Builder { get; }
-
-    /// <summary>
-    /// 获取当前计划使用的原生 SQL 文本。
-    /// </summary>
-    /// <remarks>
-    /// Fluent 计划为 null。
+    /// 仅预取消计划为 null，执行器在读取 SQL 前处理取消。
     /// </remarks>
     public string CommandText { get; }
 
     /// <summary>
-    /// 获取当前原生 SQL 文本计划的参数源。
+    /// 获取当前计划的参数源。
     /// </summary>
     /// <remarks>
-    /// Fluent 计划为 null。对于字典、数组和 <see cref="SqlParam" /> 集合，
+    /// 对于字典、数组和 <see cref="SqlParam" /> 集合，
     /// 每次读取都会返回冻结参数的独立副本，避免调用方通过公开对象修改计划状态。
     /// </remarks>
     public object Parameters => _queryIr != null
-        ? _executionSnapshot.CreateParameterSnapshot()
+        ? _queryIr.Snapshot.CreateParameterSnapshot()
         : SnapshotParameters(_parameters);
 
     /// <summary>
@@ -175,62 +150,25 @@ public sealed class SqlQueryPlan
     public CommandType CommandType { get; }
 
     /// <summary>
-    /// 获取指示当前计划是否使用 Fluent SQL Builder。
+    /// 获取指示当前计划是否依赖可变 Fluent SQL Builder 执行。
     /// </summary>
-    public bool IsBuilderPlan => Builder != null;
+    /// <remarks>计划在创建时已冻结，保留该兼容属性并始终返回 false。</remarks>
+    public bool IsBuilderPlan => false;
 
     /// <summary>
-    /// 将 Fluent Builder 计划冻结为文本执行计划，仅在派生能力未覆盖时保留隔离规划来源。
+    /// 获取已经冻结的当前计划。
     /// </summary>
     /// <remarks>
-    /// 返回计划拥有独立的 SQL、参数和分页规划来源；原计划仍可继续用于创建派生计划。
-    /// 文本计划调用此方法时直接返回自身。
+    /// 所有公开创建入口已冻结 SQL 和结构化参数，该兼容入口直接返回自身。
     /// </remarks>
     /// <returns>可脱离可变 Builder 执行的不可变文本计划。</returns>
-    public SqlQueryPlan Freeze()
-    {
-        if (IsBuilderPlan == false)
-            return this;
-
-        var planningBuilder = Builder.Clone();
-        var snapshot = ExecutionSnapshot;
-        if (snapshot == null && planningBuilder is SqlBuilderBase sqlBuilder)
-        {
-            var rendered = sqlBuilder.CreateRenderSnapshot();
-            planningBuilder = rendered.Builder;
-            snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(rendered);
-        }
-        else if (snapshot == null)
-        {
-            var sql = planningBuilder.ToSql();
-            snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(planningBuilder, sql);
-        }
-        var frozen = Create(SqlQueryIr.Create(snapshot, CommandType, Builder.Pager), SplitOn,
-            planningBuilder);
-        CopyExecutionMetadataTo(frozen);
-        return frozen;
-    }
-
-    /// <summary>
-    /// 将执行上下文和生命周期委托复制到脱离 Builder 的计划。
-    /// </summary>
-    /// <param name="target">目标文本计划。</param>
-    private void CopyExecutionMetadataTo(SqlQueryPlan target)
-    {
-        target.SetContext(QueryContextId, ParentQueryContextId, Phase);
-        target._outputParametersReceiver = _outputParametersReceiver;
-        target._outputParametersCompletion = _outputParametersCompletion;
-        target._executionStarted = _executionStarted;
-        target._executionCompleted = _executionCompleted;
-        target.IsGeneratedExecution = IsGeneratedExecution;
-        target.GeneratedParameterBinder = GeneratedParameterBinder;
-    }
+    public SqlQueryPlan Freeze() => this;
 
     /// <summary>
     /// 获取计划创建时冻结的 Builder 输出。
     /// </summary>
-    /// <remarks>执行器优先使用此快照，Builder 仅保留给派生计划生成逻辑使用。</remarks>
-    internal SqlBuilderExecutionSnapshot ExecutionSnapshot => _executionSnapshot;
+    /// <remarks>快照由统一 IR 持有，计划不再重复保存快照引用。</remarks>
+    internal SqlBuilderExecutionSnapshot ExecutionSnapshot => _queryIr?.Snapshot;
 
     /// <summary>
     /// 获取当前计划的不可变查询 IR。
@@ -260,12 +198,6 @@ public sealed class SqlQueryPlan
     /// 获取本次执行使用的静态生成参数绑定器。
     /// </summary>
     public Action<System.Data.Common.DbCommand, IEnumerable<SqlParam>> GeneratedParameterBinder { get; internal set; }
-
-    /// <summary>
-    /// 获取当前计划的内部 Builder。
-    /// </summary>
-    /// <returns>当前计划使用的 Builder。</returns>
-    internal ISqlBuilder GetBuilder() => Builder;
 
     /// <summary>
     /// 获取当前计划的查询上下文标识。
@@ -378,35 +310,59 @@ public sealed class SqlQueryPlan
     /// </summary>
     /// <param name="fragment">待冻结的 SQL 查询片段。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
-    /// <returns>包含冻结 SQL 和参数的文本查询计划。</returns>
+    /// <returns>包含冻结 SQL、参数及内建片段查询结构的执行计划。</returns>
     public static SqlQueryPlan Create(ISqlQueryFragment fragment, string splitOn)
     {
         if (fragment == null)
             throw new ArgumentNullException(nameof(fragment));
         var snapshot = fragment.Freeze() ?? throw new InvalidOperationException("查询片段冻结结果不能为空。");
-        return new SqlQueryPlan(snapshot.Sql, snapshot.Parameters, splitOn, System.Data.CommandType.Text);
+        return snapshot.QueryIr != null
+            ? Create(snapshot.QueryIr, splitOn)
+            : new SqlQueryPlan(snapshot.Sql, snapshot.Parameters, splitOn, System.Data.CommandType.Text);
     }
 
     /// <summary>
     /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
-    /// <returns>仅包含该 Builder 的查询计划。</returns>
-    public static SqlQueryPlan Create(ISqlBuilder builder) => new(builder, "Id");
+    /// <returns>包含冻结 SQL 和参数的查询计划。</returns>
+    public static SqlQueryPlan Create(ISqlBuilder builder) => Create(builder, "Id");
 
     /// <summary>
     /// 创建 SQL 查询计划。
     /// </summary>
     /// <param name="builder">当前查询专属的 SQL Builder。</param>
     /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
-    /// <returns>仅包含该 Builder 的查询计划。</returns>
-    public static SqlQueryPlan Create(ISqlBuilder builder, string splitOn) => new(builder, splitOn);
+    /// <returns>包含冻结 SQL 和参数的查询计划。</returns>
+    public static SqlQueryPlan Create(ISqlBuilder builder, string splitOn)
+    {
+        if (builder == null)
+            throw new ArgumentNullException(nameof(builder));
+        splitOn = NormalizeSplitOn(splitOn);
+        SqlBuilderRuntimeBridge.ValidateQueryOperation(builder.OperationKind);
+        var planningBuilder = builder.Clone();
+        SqlBuilderExecutionSnapshot snapshot;
+        if (planningBuilder is SqlBuilderBase sqlBuilder)
+        {
+            var rendered = sqlBuilder.CreateRenderSnapshot();
+            planningBuilder = rendered.Builder;
+            snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(rendered);
+        }
+        else
+        {
+            var sql = planningBuilder.ToSql();
+            snapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(planningBuilder, sql);
+        }
+        return Create(SqlQueryIr.Create(snapshot, System.Data.CommandType.Text, builder.Pager), splitOn,
+            planningBuilder);
+    }
 
     /// <summary>
-    /// 创建带执行快照的 Fluent 查询计划。
+    /// 创建不触发结构校验和 SQL 渲染的预取消计划。
     /// </summary>
-    internal static SqlQueryPlan Create(ISqlBuilder builder, SqlBuilderExecutionSnapshot executionSnapshot,
-        string splitOn) => new(builder, executionSnapshot, splitOn);
+    /// <param name="splitOn">Dapper 多映射使用的分段列名称。</param>
+    /// <returns>仅包含执行生命周期元数据的计划。</returns>
+    internal static SqlQueryPlan CreateCancelled(string splitOn) => new(splitOn);
 
     /// <summary>
     /// 从不可变查询 IR 和可选规划来源创建查询计划。

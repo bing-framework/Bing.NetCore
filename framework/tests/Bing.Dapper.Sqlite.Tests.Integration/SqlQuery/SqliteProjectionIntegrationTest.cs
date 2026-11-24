@@ -347,6 +347,26 @@ public sealed partial class SqliteProjectionIntegrationTest : IAsyncLifetime
     }
 
     /// <summary>
+    /// 测试目的：替换克隆草稿的普通投影后，源查询仍保留原投影并可分别执行。
+    /// </summary>
+    [Fact]
+    public async Task Clone_WhenDraftReplacesProjection_ShouldKeepSourceAndDraftExecutableIndependently()
+    {
+        using var root = _fixture.CreateQuery();
+        var source = root.From<Order>("o").Select<Order>(order => order.Id);
+        var draft = source.Clone().ReplaceSelect<Order>(order => order.ProductNo);
+
+        const string sourceSql = "Select `o`.`OrderId` \r\nFrom `sqp_orders` As `o`";
+        const string draftSql = "Select `o`.`ProductNo` \r\nFrom `sqp_orders` As `o`";
+        Assert.Equal(sourceSql, source.ToSql());
+        Assert.Equal(draftSql, draft.ToSql());
+
+        Assert.Equal(new[] { 1, 2, 3, 4 }, await source.ToListAsync<int>());
+        Assert.Equal(new[] { 101, 101, 102, 999 }, await draft.ToListAsync<int>());
+        Assert.Equal(sourceSql, source.ToSql());
+    }
+
+    /// <summary>
     /// 测试目的：从同一投影克隆出的筛选查询应保留各自的参数值。
     /// </summary>
     [Fact]

@@ -93,11 +93,17 @@ public static class SqlBuilderRuntimeBridge
 
     /// <summary>同时接收首次渲染的 SQL、参数来源和不可变 Select 边界。</summary>
     internal static SqlBuilderExecutionSnapshot CreateExecutionSnapshot(SqlBuilderRenderSnapshot snapshot,
-        bool includeDebugSql = false) =>
-        new(snapshot.Sql, GetParameterSnapshot(snapshot.Builder),
-            includeDebugSql ? snapshot.Builder.ToDebugSql(snapshot.Sql) : null,
-            snapshot.Builder.Provider.ParamLiteralsResolver, snapshot.SelectShape,
-            CreatePagination(snapshot.Builder, snapshot.SelectShape));
+        bool includeDebugSql = false)
+    {
+        var parameters = snapshot.Parameters == null
+            ? GetParameterSnapshot(snapshot.Builder) : GetParameterSnapshot(snapshot.Parameters);
+        var resolver = snapshot.Builder.Provider.ParamLiteralsResolver;
+        var debugSql = !includeDebugSql ? null : snapshot.Parameters == null
+            ? snapshot.Builder.ToDebugSql(snapshot.Sql)
+            : SqlBuilderBase.CreateDebugSql(snapshot.Sql, parameters, resolver);
+        return new SqlBuilderExecutionSnapshot(snapshot.Sql, parameters, debugSql,
+            resolver, snapshot.SelectShape, CreatePagination(snapshot.Builder, snapshot.SelectShape, snapshot.Parameters));
+    }
 
     /// <summary>
     /// 使用调用方已经生成的 SQL 文本创建执行快照，避免重复渲染 Builder。
@@ -117,11 +123,12 @@ public static class SqlBuilderRuntimeBridge
     }
 
     /// <summary>只开放框架容器的值转换，外部参数管理器继续使用原派生契约。</summary>
-    private static SqlQueryPagination CreatePagination(ISqlBuilder builder, SqlQuerySelectShape selectShape)
+    private static SqlQueryPagination CreatePagination(ISqlBuilder builder, SqlQuerySelectShape selectShape,
+        IParameterManager renderedParameters = null)
     {
         if (selectShape == null || builder is not ISqlCommonPartAccessor accessor)
             return null;
-        var manager = accessor.ParameterManager;
+        var manager = renderedParameters ?? accessor.ParameterManager;
         var maximum = int.MaxValue;
         string provider = null;
         if (manager is ParameterLimitManagerBase limited)
@@ -170,47 +177,35 @@ public static class SqlBuilderRuntimeBridge
                 return irSnapshot;
             return irSnapshot.WithDebugSql();
         }
-        if (plan.ExecutionSnapshot != null)
+        var parameterSource = plan.Parameters;
+        if (parameterSource == null || parameterSource is IEnumerable<SqlParam>)
         {
-            if (includeDebugSql == false || plan.ExecutionSnapshot.HasDebugSql)
-                return plan.ExecutionSnapshot;
-            return plan.ExecutionSnapshot.WithDebugSql(plan.GetBuilder()?.Provider?.ParamLiteralsResolver);
+            var parameters = parameterSource as IEnumerable<SqlParam> ?? Array.Empty<SqlParam>();
+            var debugSql = includeDebugSql
+                ? SqlBuilderBase.CreateDebugSql(plan.CommandText, parameters, ParamLiteralsResolver.Instance)
+                : null;
+            return new SqlBuilderExecutionSnapshot(plan.CommandText, parameters, debugSql);
         }
-        if (plan.IsBuilderPlan == false)
+        if (parameterSource is ISqlParameterMap parameterMap)
         {
-            var parameterSource = plan.Parameters;
-            if (parameterSource is IEnumerable<SqlParam> parameters)
-            {
-                var debugSql = includeDebugSql
-                    ? SqlBuilderBase.CreateDebugSql(plan.CommandText, parameters, ParamLiteralsResolver.Instance)
-                    : null;
-                return new SqlBuilderExecutionSnapshot(plan.CommandText, parameters, debugSql);
-            }
-            if (parameterSource is ISqlParameterMap parameterMap)
-            {
-                var mapParameters = GetParameterSnapshot(parameterMap, plan.CommandText);
-                var debugSql = includeDebugSql
-                    ? SqlBuilderBase.CreateDebugSql(plan.CommandText, mapParameters, ParamLiteralsResolver.Instance, ignoreCase: true)
-                    : null;
-                return new SqlBuilderExecutionSnapshot(plan.CommandText, mapParameters, debugSql);
-            }
+            var mapParameters = GetParameterSnapshot(parameterMap, plan.CommandText);
+            var debugSql = includeDebugSql
+                ? SqlBuilderBase.CreateDebugSql(plan.CommandText, mapParameters, ParamLiteralsResolver.Instance, ignoreCase: true)
+                : null;
+            return new SqlBuilderExecutionSnapshot(plan.CommandText, mapParameters, debugSql);
         }
-        return CreateExecutionSnapshot(plan.GetBuilder(), includeDebugSql);
+        throw new NotSupportedException("原生参数源尚未绑定，不能创建冻结执行快照；请先提供已解析的参数集合或映射。");
     }
 
     /// <summary>
-    /// 校验查询计划只包含查询操作。
+    /// 在冻结之前校验 Builder 只包含查询操作。
     /// </summary>
-    /// <param name="plan">待校验的查询计划。</param>
-    /// <returns>合法查询返回 false；写入操作必须通过执行器运行。</returns>
-    public static bool ValidateQueryPlan(SqlQueryPlan plan)
+    /// <param name="operation">Builder 当前的操作类型。</param>
+    internal static void ValidateQueryOperation(SqlOperationKind operation)
     {
-        if (plan == null)
-            throw new ArgumentNullException(nameof(plan));
-        var builder = plan.GetBuilder();
-        if (builder == null || builder.OperationKind is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
+        if (operation is not (SqlOperationKind.InsertValues or SqlOperationKind.InsertSelect or
             SqlOperationKind.Update or SqlOperationKind.Delete))
-            return false;
+            return;
         throw new InvalidOperationException("查询计划不能包含写入操作；请使用专用写入 Builder 和 ISqlExecutor.ExecuteReturning。");
     }
 
@@ -225,7 +220,6 @@ public static class SqlBuilderRuntimeBridge
         if (plan == null)
             throw new ArgumentNullException(nameof(plan));
         return pager ?? plan.QueryIr?.CreateDefaultPagerSnapshot() ??
-            (plan.IsBuilderPlan ? plan.GetBuilder().Pager : null) ??
             throw new InvalidOperationException("分页参数不能为空。");
     }
 
@@ -246,9 +240,9 @@ public static class SqlBuilderRuntimeBridge
         }
         // 规划源已经为本次派生创建独立副本，直接消费它，不再包装为计划后重复克隆。
         var planningBuilder = plan.CreatePlanningBuilder();
-        if (planningBuilder != null || plan.IsBuilderPlan)
+        if (planningBuilder != null)
         {
-            var countPlan = CreateBuilderCountPlan(planningBuilder ?? GetPagingBuilder(plan), plan.SplitOn);
+            var countPlan = CreateBuilderCountPlan(planningBuilder, plan.SplitOn);
             countPlan.CopyContextFrom(plan, "Count");
             return countPlan;
         }
@@ -349,8 +343,6 @@ public static class SqlBuilderRuntimeBridge
         if (plan.QueryIr?.CanDeriveStructuredPage(pager) == true)
             return CreateIrPagePlan(plan, pager);
         var builder = plan.CreatePlanningBuilder();
-        if (builder == null && plan.IsBuilderPlan)
-            builder = GetPagingBuilder(plan);
         return builder == null ? null : CreateBuilderPagePlan(plan, builder, pager);
     }
 
@@ -447,24 +439,6 @@ public static class SqlBuilderRuntimeBridge
     }
 
     /// <summary>
-    /// 获取用于分页派生的执行 Builder 副本。
-    /// </summary>
-    /// <param name="plan">原始查询计划。</param>
-    /// <returns>可安全修改且不影响原计划的分页 Builder。</returns>
-    private static ISqlBuilder GetPagingBuilder(SqlQueryPlan plan) =>
-        CloneExecutionBuilder(plan.GetBuilder());
-
-    /// <summary>
-    /// 创建用于执行的 Builder 快照。
-    /// </summary>
-    /// <param name="builder">待复制的 SQL Builder。</param>
-    /// <returns>用于执行的独立 Builder 快照。</returns>
-    private static ISqlBuilder CloneExecutionBuilder(ISqlBuilder builder)
-        => builder is SqlBuilderBase sqlBuilder
-            ? sqlBuilder.CreateExecutionBuilderSnapshot()
-            : builder.Clone();
-
-    /// <summary>
     /// 获取 Builder 当前参数的独立快照。
     /// </summary>
     /// <param name="builder">待读取参数的 SQL Builder。</param>
@@ -473,7 +447,12 @@ public static class SqlBuilderRuntimeBridge
     {
         if (builder is not ISqlCommonPartAccessor accessor)
             return builder.GetParams().Select(item => new SqlParam(item.Key, item.Value)).ToArray();
-        var parameterManager = accessor.ParameterManager;
+        return GetParameterSnapshot(accessor.ParameterManager);
+    }
+
+    /// <summary>冻结实际参与同次渲染的参数，保留集合值及元数据的既有快照合同。</summary>
+    private static IReadOnlyCollection<SqlParam> GetParameterSnapshot(IParameterManager parameterManager)
+    {
         if (parameterManager is IAdvancedParameterManager advanced)
             return advanced.GetSqlParams().Values.Where(parameter => parameter != null)
                 .Select(parameter => SqlParameterSnapshot.CloneSqlParameter(parameter,

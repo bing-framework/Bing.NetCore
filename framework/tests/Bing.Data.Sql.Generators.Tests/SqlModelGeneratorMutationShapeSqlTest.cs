@@ -34,7 +34,7 @@ public sealed partial class SqlModelGeneratorTest
         Assert.Same(factory(provider, operation, property, rows), factory(provider, operation, property, rows));
     }
 
-    /// <summary>未知列、键列更新、未声明行数和 Oracle 多行形状均明确回退。</summary>
+    /// <summary>未知列、键列更新、零行数和 Oracle 多行形状均明确回退。</summary>
     [Theory]
     [InlineData("custom", SqlOperationKind.Update, "Name", 1)]
     [InlineData("bing.sqlite", SqlOperationKind.Update, "Id", 1)]
@@ -44,8 +44,8 @@ public sealed partial class SqlModelGeneratorTest
     [InlineData("bing.sqlserver", SqlOperationKind.Update, "missing", 1)]
     [InlineData("bing.oracle", SqlOperationKind.Update, "missing", 1)]
     [InlineData("bing.sqlite", SqlOperationKind.Update, null, 1)]
-    [InlineData("bing.sqlite", SqlOperationKind.InsertValues, null, 3)]
-    [InlineData("bing.sqlite", SqlOperationKind.InsertValues, "Name", 2)]
+    [InlineData("bing.sqlite", SqlOperationKind.InsertValues, null, 0)]
+    [InlineData("bing.sqlite", SqlOperationKind.InsertValues, "missing", 2)]
     [InlineData("bing.oracle", SqlOperationKind.InsertValues, null, 2)]
     public void Generate_UnsupportedMutationShape_ShouldReturnNull(string provider, SqlOperationKind operation,
         string property, int rows) => Assert.Null(ShapeFactory()(provider, operation, property, rows));
@@ -91,7 +91,7 @@ public sealed partial class SqlModelGeneratorTest
     [InlineData("SqlResult", "rows", null)]
     [InlineData("SqlModel", "bad;table", null)]
     [InlineData("SqlModel", "table.name", null)]
-    [InlineData("SqlModel", "rows", "custom_schema")]
+    [InlineData("SqlModel", "rows", "bad;schema")]
     public void Generate_WhenModelCannotUseStaticMutationSql_ShouldOmitShapeFactory(string role, string table, string schema)
     {
         var result = RunGenerator("using Bing.Data.Sql.Generated; using System.ComponentModel.DataAnnotations.Schema; " +

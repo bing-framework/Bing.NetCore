@@ -15,7 +15,7 @@ public abstract partial class SqlQueryBase
     private SqlPreparedCommand PrepareQueryPlan(SqlQueryPlan plan)
     {
         // 冻结 IR 仍使用同次渲染的参数和调试 SQL；不能因脱离 Builder 而退回原生文本路径。
-        var command = plan.IsBuilderPlan || plan.IsGeneratedExecution || SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan)
+        var command = plan.IsGeneratedExecution || SqlBuilderRuntimeBridge.HasExecutionSnapshot(plan)
             ? PrepareCommand(plan)
             : PrepareCommand(plan.CommandText, plan.Parameters);
         if (plan.CommandType == System.Data.CommandType.StoredProcedure)

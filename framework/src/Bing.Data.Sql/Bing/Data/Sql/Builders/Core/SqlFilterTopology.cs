@@ -178,10 +178,12 @@ internal sealed class SqlFilterPlacement
     /// </summary>
     /// <param name="predicate">待放置谓词。</param>
     /// <param name="joinSourceId">目标 Join 右侧来源；null 表示最终 Where。</param>
-    public SqlFilterPlacement(SqlFilterPredicate predicate, string joinSourceId = null)
+    /// <param name="prefilterSource">是否在来源内部预过滤。</param>
+    public SqlFilterPlacement(SqlFilterPredicate predicate, string joinSourceId = null, bool prefilterSource = false)
     {
         Predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
         JoinSourceId = joinSourceId;
+        PrefilterSource = prefilterSource;
     }
 
     /// <summary>
@@ -196,4 +198,7 @@ internal sealed class SqlFilterPlacement
     /// null 表示最终 Where。
     /// </remarks>
     public string JoinSourceId { get; }
+
+    /// <summary>在来源派生表内过滤，以保留 Full Join 的双方未匹配行。</summary>
+    public bool PrefilterSource { get; }
 }

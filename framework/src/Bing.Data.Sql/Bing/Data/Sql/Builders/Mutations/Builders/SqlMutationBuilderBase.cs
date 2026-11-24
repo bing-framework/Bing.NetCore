@@ -100,11 +100,17 @@ public abstract class SqlMutationBuilderBase : ISqlMutationContextAccessor, IRet
     {
         if (parameterManager == null)
             throw new ArgumentNullException(nameof(parameterManager));
-        var maximum = SqlProviderCapabilityResolver.GetProfile(Provider).Limits?.MaxParameterCount;
+        ValidateParameterLimit(Provider, parameterManager.Count);
+    }
+
+    /// <summary>生成式命令与可变 Builder 共用参数数量限制。</summary>
+    internal static void ValidateParameterLimit(ISqlProvider provider, long parameterCount)
+    {
+        var maximum = SqlProviderCapabilityResolver.GetProfile(provider).Limits?.MaxParameterCount;
         if (maximum == null)
             return;
-        if (parameterManager.Count > maximum.Value)
-            throw new InvalidOperationException($"Provider {Provider.Key} 的参数数量不能超过 {maximum.Value}。");
+        if (parameterCount > maximum.Value)
+            throw new InvalidOperationException($"Provider {provider.Key} 的参数数量不能超过 {maximum.Value}。");
     }
 
     /// <summary>

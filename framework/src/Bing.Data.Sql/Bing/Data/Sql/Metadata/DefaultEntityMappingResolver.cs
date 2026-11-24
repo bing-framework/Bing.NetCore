@@ -490,7 +490,8 @@ public class DefaultEntityMappingResolver : IEntityMappingResolver
             MappingProfile = GetMappingProfile(databaseContext, mappingOptions),
             Table = tableReference,
             TableRouteKey = GetCacheTableRouteKey(mappingOptions),
-            Columns = columns
+            Columns = columns,
+            HasPropertyNameIndex = true
         };
     }
 

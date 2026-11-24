@@ -61,6 +61,7 @@ public sealed class SqliteSqlProvider : ISqlProvider, ISqlProviderProfileProvide
         },
         Mutation = new SqlProviderMutationCapabilities
         {
+            GeneratedSqlDialect = SqliteDialect.Instance,
             SupportsMultiRowValues = true,
             SupportsUpdateFrom = false,
             SupportsDeleteUsing = false,

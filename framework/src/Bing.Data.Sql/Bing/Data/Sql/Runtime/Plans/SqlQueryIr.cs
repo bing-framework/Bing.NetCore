@@ -30,6 +30,9 @@ internal sealed class SqlQueryIr
     /// </summary>
     internal SqlBuilderExecutionSnapshot Snapshot => _snapshot;
 
+    /// <summary>模板只改变参数作用域，默认分页值快照保持共享且不可变。</summary>
+    internal SqlQueryIr WithSnapshot(SqlBuilderExecutionSnapshot snapshot) => new(snapshot, CommandType, _pager);
+
     /// <summary>
     /// 获取当前查询使用的命令类型。
     /// </summary>

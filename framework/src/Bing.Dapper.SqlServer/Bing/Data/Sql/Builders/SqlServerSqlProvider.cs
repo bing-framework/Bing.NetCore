@@ -61,6 +61,7 @@ public sealed class SqlServerSqlProvider : ISqlProvider, ISqlReturningDialect,
         },
         Mutation = new SqlProviderMutationCapabilities
         {
+            GeneratedSqlDialect = SqlServerDialect.Instance,
             SupportsMultiRowValues = true,
             SupportsReturning = true
         },

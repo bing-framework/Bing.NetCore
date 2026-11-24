@@ -54,10 +54,10 @@ public sealed partial class SqlModelGeneratorTest
         Assert.DoesNotContain("GeneratedKeyInsertSql =", result.GeneratedSource, StringComparison.Ordinal);
     }
 
-    /// <summary>复合键、带 schema 或不可静态渲染表名不生成单键 Returning 常量。</summary>
+    /// <summary>复合键、无效 Schema 或不可静态渲染表名不生成单键 Returning 常量。</summary>
     [Theory]
     [InlineData("[Table(\"rows\")]", "[Key] public int Tenant {get;set;}")]
-    [InlineData("[Table(\"rows\", Schema=\"tenant\")]", "")]
+    [InlineData("[Table(\"rows\", Schema=\"bad;schema\")]", "")]
     [InlineData("[Table(\"bad;table\")]", "")]
     public void Generate_KeyInsertSql_ShouldKeepUnsupportedShapesOnRuntimePath(string table, string extraKey)
     {

@@ -41,7 +41,6 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(plan));
         using var operationCancellation = QueryResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
-        var isWrite = SqlBuilderRuntimeBridge.ValidateQueryPlan(plan);
         if (operationToken.IsCancellationRequested)
         {
             EnsureCancellationSupported(operationToken);
@@ -50,8 +49,6 @@ public abstract partial class SqlQueryBase
         }
         EnsureStreamingSupported();
         TryCreateStaticReader<TResult>(out var staticReader);
-        if (isWrite)
-            EnsureWritableDataSource();
         EnsureCancellationSupported(operationToken);
         operationToken.ThrowIfCancellationRequested();
         var executionLease = QueryResources.AcquireExecutionLease();
@@ -212,8 +209,6 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(plan));
         EnsureStreamingSupported();
         TryCreateStaticReader<TResult>(out var staticReader);
-        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
-            EnsureWritableDataSource();
         var executionLease = QueryResources.AcquireExecutionLease();
         DiagnosticsMessage message = default;
         var completed = false;

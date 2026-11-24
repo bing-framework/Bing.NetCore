@@ -61,6 +61,7 @@ public sealed class OracleSqlProvider : ISqlProvider, ISqlProviderProfileProvide
         },
         Mutation = new SqlProviderMutationCapabilities
         {
+            GeneratedSqlDialect = OracleDialect.Instance,
             SupportsMultiRowValues = false,
             MultiRowValuesFailureReason = SqlCapabilityFailureReason.DatabaseUnsupported
         },

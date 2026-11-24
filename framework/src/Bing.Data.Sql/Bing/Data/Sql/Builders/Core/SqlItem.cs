@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using Bing.Data.Sql.Builders.Extensions;
+using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Metadata;
 using Bing.Extensions;
 
@@ -220,6 +221,17 @@ public class SqlItem
         var column = GetColumn(dialect);
         var columnAlias = GetSafeName(dialect, Alias);
         return dialect.GetColumn(column, columnAlias);
+    }
+
+    /// <summary>按方言渲染带来源谓词的派生表，内外层保留同一来源别名。</summary>
+    internal string ToFilteredSql(IDialect dialect, string alias, ICondition condition)
+    {
+        if (condition == null)
+            return ToSql(dialect);
+        if (string.IsNullOrWhiteSpace(alias))
+            throw new InvalidOperationException("来源预过滤需要表别名。");
+        return dialect.GetColumn($"(Select * From {ToSql(dialect)} Where {condition.GetCondition()})",
+            dialect.GetSafeName(alias));
     }
 
     /// <summary>

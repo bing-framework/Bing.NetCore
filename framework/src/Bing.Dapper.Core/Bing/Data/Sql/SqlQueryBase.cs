@@ -120,12 +120,12 @@ public abstract partial class SqlQueryBase : SqlExecutionBase, ISqlQuery, ISqlQu
     /// <summary>
     /// 获取联合操作项集合
     /// </summary>
-    protected List<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
+    protected IReadOnlyList<BuilderItem> UnionItems => ((IUnionAccessor)SqlBuilder).UnionItems;
 
     /// <summary>
     /// 获取公用表表达式CTE集合
     /// </summary>
-    protected List<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
+    protected IReadOnlyList<BuilderItem> CteItems => ((ICteAccessor)SqlBuilder).CteItems;
 
 
 

@@ -10,7 +10,7 @@ internal static class SqlFilterPlacementPlanner
     /// </summary>
     /// <param name="context">收集来源、拓扑和谓词贡献的过滤器上下文。</param>
     /// <returns>按谓词提交顺序排列的放置决定。</returns>
-    /// <exception cref="NotSupportedException">需要预过滤派生表而当前渲染器尚不支持时抛出。</exception>
+    /// <exception cref="NotSupportedException">Right Join 的目标不是结构化来源时抛出。</exception>
     public static IReadOnlyList<SqlFilterPlacement> Plan(SqlFilterContext context)
     {
         if (context == null)
@@ -23,16 +23,17 @@ internal static class SqlFilterPlacementPlanner
     /// </summary>
     /// <param name="joins">按 SQL 顺序排列的 Join 拓扑。</param>
     /// <param name="predicate">待放置谓词。</param>
-    /// <returns>最终 Where 或特定 Join On 的放置决定。</returns>
-    /// <exception cref="NotSupportedException">谓词必须通过派生表预过滤才能保留语义时抛出。</exception>
+    /// <returns>来源预过滤、最终 Where 或特定 Join On 的放置决定。</returns>
+    /// <exception cref="NotSupportedException">Right Join 的目标不是结构化来源时抛出。</exception>
     private static SqlFilterPlacement Plan(IReadOnlyList<SqlFilterJoin> joins, SqlFilterPredicate predicate)
     {
+        // 必须先检查完整拓扑，避免较早的 Left/Inner On 放置跳过后续 Full Join。
+        if (joins.Any(join => join.Kind == SqlFilterJoinKind.Full &&
+            (join.RightSourceId == predicate.SourceId || join.LeftSourceIds.Contains(predicate.SourceId))))
+            return new SqlFilterPlacement(predicate, prefilterSource: true);
+
         foreach (var join in joins)
         {
-            if (join.Kind == SqlFilterJoinKind.Full && (join.RightSourceId == predicate.SourceId ||
-                                                        join.LeftSourceIds.Contains(predicate.SourceId)))
-                throw new NotSupportedException($"无法安全将全局过滤器应用到 Full Join 来源 {predicate.SourceId}。当前 Provider 渲染器不支持预过滤派生表。");
-
             if (join.Kind == SqlFilterJoinKind.Left && join.RightSourceId == predicate.SourceId)
                 return new SqlFilterPlacement(predicate, join.RightSourceId);
 
@@ -46,8 +47,8 @@ internal static class SqlFilterPlacementPlanner
                 return new SqlFilterPlacement(predicate, join.RightSourceId);
             }
 
-            if (join.Kind == SqlFilterJoinKind.Right && join.RightSourceId == predicate.SourceId)
-                throw new NotSupportedException($"无法安全将全局过滤器应用到 Right Join 保留来源 {predicate.SourceId}。当前 Provider 渲染器不支持预过滤派生表。");
+            // Right Join 的右侧是保留输入：继续检查后续连接。
+            // 后续 Right Join 可将它转为非保留输入；始终保留时则在最终 Where 过滤。
         }
         return new SqlFilterPlacement(predicate);
     }

@@ -33,7 +33,7 @@ public sealed class SqlQueryIrTest
 
         Assert.NotNull(captured);
         Assert.False(captured.IsBuilderPlan);
-        Assert.Null(captured.GetBuilder());
+        Assert.NotNull(captured.QueryIr);
         Assert.Null(captured.PlanningBuilder);
         Assert.Equal("Select [Id] \r\nFrom [Users]", captured.CommandText);
     }
@@ -62,7 +62,7 @@ public sealed class SqlQueryIrTest
 
         Assert.NotNull(captured);
         Assert.False(captured.IsBuilderPlan);
-        Assert.Null(captured.GetBuilder());
+        Assert.NotNull(captured.QueryIr);
         Assert.Null(captured.PlanningBuilder);
         Assert.Equal("With [recent_users] \r\nAs (Select Id From Users)\r\nSelect [Id] \r\nFrom [recent_users]",
             captured.CommandText);
@@ -149,7 +149,7 @@ public sealed class SqlQueryIrTest
 
         // Assert
         Assert.False(plan.IsBuilderPlan);
-        Assert.Null(plan.GetBuilder());
+        Assert.NotNull(plan.QueryIr);
         Assert.Equal("Select * From Users Where Id In (@id1,@id2)", plan.CommandText);
         Assert.Equal(CommandType.Text, plan.CommandType);
         Assert.Collection(parameters,
@@ -201,7 +201,7 @@ public sealed class SqlQueryIrTest
 
         // Assert
         Assert.False(count.IsBuilderPlan);
-        Assert.Null(count.GetBuilder());
+        Assert.NotNull(count.QueryIr);
         Assert.Equal(
             "Select Count(*) From (Select Id From Users Where TenantId = @tenantId) As __bing_raw_count",
             count.CommandText);
@@ -219,13 +219,12 @@ public sealed class SqlQueryIrTest
             .Select("Id")
             .From("Users")
             .Where("TenantId", 7);
-        var source = SqlQueryPlan.Create(builder,
-            SqlBuilderRuntimeBridge.CreateExecutionSnapshot(builder), "Id");
+        var source = SqlQueryPlan.Create(builder, "Id");
 
         var count = SqlBuilderRuntimeBridge.CreateCountPlan(source);
 
         Assert.False(count.IsBuilderPlan);
-        Assert.Null(count.GetBuilder());
+        Assert.NotNull(count.QueryIr);
         Assert.Equal("Select Count(*) \r\nFrom [Users] \r\nWhere [TenantId]=@_p_0", count.CommandText);
         Assert.Equal(7, Assert.Single(Assert.IsType<SqlParam[]>(count.Parameters)).Value);
     }

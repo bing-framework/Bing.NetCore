@@ -24,6 +24,9 @@ public sealed class ReturningClause : IReturningClause
     /// </summary>
     private SqlExecutionKind _executionKind;
 
+    /// <summary>完整生成子句的选择器；追加普通列后失效。</summary>
+    private Func<string, SqlExecutionKind, string> _generatedSql;
+
     /// <summary>
     /// 初始化一个 <see cref="ReturningClause"/> 类型的实例。
     /// </summary>
@@ -43,6 +46,24 @@ public sealed class ReturningClause : IReturningClause
             throw new ArgumentException("Returning 必须包含至少一个返回列。", nameof(columns));
         _context.UseOperation(SqlOperationAction.Returning);
         _columns.AddRange(columns);
+        _generatedSql = null;
+    }
+
+    /// <summary>尝试采用生成器提供的完整 Returning 子句，扩展服务或已有投影保留动态路径。</summary>
+    /// <param name="columns">已核对最终映射的不可变返回列。</param>
+    /// <param name="sqlFactory">按 Provider 和操作类型选择完整 SQL 的静态工厂。</param>
+    /// <returns>成功采用生成 SQL 时返回 true；调用方在 false 时继续使用 AddRange。</returns>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public bool TryAddGenerated(IReadOnlyList<SqlReturningColumn> columns,
+        Func<string, SqlExecutionKind, string> sqlFactory)
+    {
+        if (sqlFactory == null)
+            throw new ArgumentNullException(nameof(sqlFactory));
+        if (IsEmpty == false || SqlMutationPlan.SupportsGeneratedSql(_context.Provider, _context.Services) == false)
+            return false;
+        AddRange(columns);
+        _generatedSql = sqlFactory;
+        return true;
     }
 
     /// <inheritdoc />
@@ -53,6 +74,12 @@ public sealed class ReturningClause : IReturningClause
         var startIndex = builder.Length;
         try
         {
+            var generated = _generatedSql?.Invoke(_context.Provider.Key, _executionKind);
+            if (generated != null)
+            {
+                builder.Append(generated);
+                return;
+            }
             var dialect = _context.Provider as ISqlReturningDialect;
             var keyword = dialect?.GetKeyword(_executionKind) ?? "Returning";
             if (string.IsNullOrWhiteSpace(keyword))
@@ -64,11 +91,7 @@ public sealed class ReturningClause : IReturningClause
                     builder.Append(", ");
                 var column = _columns[index];
                 var qualifier = dialect?.GetQualifier(_executionKind, column.Qualifier) ?? column.Qualifier;
-                if (string.IsNullOrWhiteSpace(qualifier) == false)
-                    builder.Append(_context.Dialect.SafeName(qualifier)).Append('.');
-                builder.Append(_context.Dialect.SafeName(column.Column));
-                if (string.IsNullOrWhiteSpace(column.Alias) == false)
-                    builder.Append(" As ").Append(_context.Dialect.SafeName(column.Alias));
+                column.AppendTo(builder, _context.Dialect, qualifier);
             }
         }
         catch
@@ -79,15 +102,23 @@ public sealed class ReturningClause : IReturningClause
     }
 
     /// <inheritdoc />
-    public void Clear() => _columns.Clear();
+    public void Clear()
+    {
+        _columns.Clear();
+        _generatedSql = null;
+    }
 
     /// <inheritdoc />
     public IReturningClause Clone(SqlMutationContext context)
     {
         var result = new ReturningClause(context);
         if (_columns.Count > 0)
-            result.AddRange(_columns.Select(column => new SqlReturningColumn(column.Column, column.Qualifier,
-                column.Alias)).ToArray());
+        {
+            // 列值不可变，仅复制集合，Clear/Add 和验证状态仍由各子句独立维护。
+            result.AddRange(_columns);
+            if (_generatedSql != null && SqlMutationPlan.SupportsGeneratedSql(context.Provider, context.Services))
+                result._generatedSql = _generatedSql;
+        }
         return result;
     }
 
@@ -98,6 +129,13 @@ public sealed class ReturningClause : IReturningClause
             throw new ArgumentNullException(nameof(context));
         if (IsEmpty)
             throw new InvalidOperationException("Returning 未指定返回列。");
+        ValidateProvider(context);
+        _executionKind = context.ExecutionKind;
+    }
+
+    /// <summary>生成式命令与 Returning 子句共用构建期能力校验。</summary>
+    internal static void ValidateProvider(SqlValidationContext context)
+    {
         if (context.IsProfileDeclared == false)
             throw SqlCapabilityFailure.Create(SqlCapabilityFailureReason.ProviderProfileMissing, "Returning",
                 context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Returning。");
@@ -108,6 +146,5 @@ public sealed class ReturningClause : IReturningClause
             throw SqlCapabilityFailure.Create(context.Profile.Mutation.ReturningFailureReason ??
                 SqlCapabilityFailureReason.ProviderImplementationGap, "Returning",
                 context.Provider.Key, $"Provider {context.Provider.Key} 不支持 Returning。");
-        _executionKind = context.ExecutionKind;
     }
 }

@@ -163,13 +163,18 @@ export function selectCase(matrix, id, platform = process.platform, arch = proce
   return cell;
 }
 
-export function buildCommands(cell, { root = repositoryRoot, publishDirectory, configuration = 'Release', noRestore = false }) {
+export function buildCommands(cell, { root = repositoryRoot, publishDirectory, artifactsPath,
+  configuration = 'Release', noRestore = false }) {
   const executable = path.basename(cell.project, '.csproj') + (cell.rid.startsWith('win-') ? '.exe' : '');
+  const buildDirectory = path.resolve(root, artifactsPath ?? path.join(path.dirname(publishDirectory), 'build'));
   return {
     sdk: { file: 'dotnet', args: ['--version'], cwd: root, timeout: 30000 },
     publish: {
       file: 'dotnet',
       args: ['publish', path.resolve(root, cell.project), '-c', configuration, '-f', cell.tfm, '-r', cell.rid,
+        '--artifacts-path', buildDirectory,
+        // common.props 会重设 OutputPath；在所有引用项目中统一覆盖，避免写回共享目录。
+        `-p:CustomBeforeMicrosoftCommonTargets=${path.resolve(root, 'eng/sql-aot/isolated-output.props')}`,
         '-p:BingSqlAotStrict=true', '-p:BingSqlGeneratorPackageVersion=',
         // 保留具体成员告警，避免程序集级 IL2104/IL3053 摘要掩盖待评估路径。
         '-p:TrimmerSingleWarn=false',
@@ -264,14 +269,15 @@ function main(args) {
   for (let index = 0; index < args.length; index++) {
     const option = args[index];
     if (option === '--no-restore') options.noRestore = true;
-    else if (['--case', '--output', '--configuration'].includes(option)) {
+    else if (['--case', '--output', '--configuration', '--artifacts-path'].includes(option)) {
       const value = args[++index];
       if (!value || value.startsWith('--')) throw new Error(`Missing value: ${option}`);
       if (option === '--case') id = value;
+      else if (option === '--artifacts-path') options.artifactsPath = value;
       else options[option.slice(2)] = value;
     } else throw new Error(`Unknown option: ${option}`);
   }
-  if (!id) throw new Error('Usage: node eng/sql-aot/verify.mjs --case <id> [--output <directory>] [--configuration <name>] [--no-restore]\n' +
+  if (!id) throw new Error('Usage: node eng/sql-aot/verify.mjs --case <id> [--output <directory>] [--artifacts-path <directory>] [--configuration <name>] [--no-restore]\n' +
     '       node eng/sql-aot/verify.mjs --ci-summary <artifact-directory> <native-job-result> <sql-regression-job-result>');
   const result = runCase(selectCase(matrix, id), options);
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');

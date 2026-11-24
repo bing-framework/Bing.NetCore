@@ -24,6 +24,14 @@ internal sealed class SqlQueryOrder
     internal string ToSql() => "Order By " + _regularSql +
         (_regularSql.Length != 0 && _logicalSql.Length != 0 ? "," : "") + _logicalSql;
 
+    /// <summary>排序中若含参数，同步替换渲染文本；列身份和方向继续复用。</summary>
+    internal SqlQueryOrder WithScope(IReadOnlyDictionary<string, string> names)
+    {
+        var regular = SqlBuilderBase.ReplaceParameterTokens(_regularSql, names, ignoreCase: true);
+        var logical = SqlBuilderBase.ReplaceParameterTokens(_logicalSql, names, ignoreCase: true);
+        return regular == _regularSql && logical == _logicalSql ? this : new SqlQueryOrder(_items, regular, logical);
+    }
+
     /// <summary>仅在有新列时复制身份集合；原查询和重复派生共享只读排序描述。</summary>
     internal SqlQueryOrder Append(string order, IDialect dialect)
     {

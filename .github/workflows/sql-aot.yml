@@ -83,8 +83,8 @@ jobs:
         with:
           name: sql-benchmark-smoke
           path: |
-            output/sql-benchmark-smoke/**/*.json
-            output/sql-benchmark-smoke/**/*.log
+            artifacts/benchmarks/sql-smoke/**/*.json
+            artifacts/benchmarks/sql-smoke/**/*.log
             output/sql-aot-postgresql-tests/**/*.json
             output/sql-aot-postgresql-tests/**/*.log
             output/sql-aot-mysql-tests/**/*.json

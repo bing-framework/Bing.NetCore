@@ -12,5 +12,8 @@
     <ProjectReference Include="..\..\src\Bing.Data.Sql.Generators\Bing.Data.Sql.Generators.csproj" />
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.Core\Bing.Dapper.Core.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.Sqlite\Bing.Dapper.Sqlite.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.PostgreSql\Bing.Dapper.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />
   </ItemGroup>
 </Project>

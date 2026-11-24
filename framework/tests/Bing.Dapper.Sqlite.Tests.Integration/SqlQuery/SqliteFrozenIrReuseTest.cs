@@ -88,6 +88,40 @@ public sealed class SqliteFrozenIrReuseTest : IAsyncLifetime
         Assert.Equal(4, filter.Calls);
     }
 
+    /// <summary>根查询的过滤工作区按终结取值，Count 与数据页共享同次捕获值。</summary>
+    [Fact]
+    public async Task RootDynamicFilter_ShouldExecuteFreshSnapshotsAndKeepCountAndPageTogether()
+    {
+        using (var writer = _fixture.CreateExecutor())
+            await writer.ExecuteSqlAsync("Insert Into samples(Name, Amount) Values ('one', 1), ('two', 2)");
+        using var root = _fixture.CreateQuery();
+        var filter = new AlternatingFilter();
+        var builder = new SqliteBuilder(new SqlBuilderServices(filters: new[] { filter }));
+        builder.Select("Name").From<FilterRow>("s").OrderBy("Name");
+        var query = new Bing.Data.Sql.SqlQuery((ISqlQueryPlanExecutor)root, builder);
+        const string sql = "Select `Name` \r\nFrom `samples` As `s` \r\nWhere `s`.`Name`=@_p_0 \r\nOrder By `Name`";
+
+        var plan = query.GetPlan();
+        Assert.Equal(sql, plan.CommandText);
+        Assert.Equal(new object[] { "one" }, Values(plan));
+        Assert.Null(plan.PlanningBuilder);
+        var count = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
+        var page = SqlBuilderRuntimeBridge.CreatePagePlan(plan, new Pager(1, 1));
+        Assert.Equal("Select Count(*) \r\nFrom `samples` As `s` \r\nWhere `s`.`Name`=@_p_0", count.CommandText);
+        Assert.Equal(sql + " \r\nLimit @_p_2 OFFSET @_p_1", page.CommandText);
+        var executor = (ISqlQueryPlanExecutor)root;
+        Assert.Equal(1, executor.Scalar<int>(count, null));
+        Assert.Equal(new[] { "one" }, await executor.ToListAsync<string>(page, null, default));
+        Assert.Equal(1, filter.Calls);
+
+        Assert.Equal(new[] { "two" }, await query.ToListAsync<string>());
+        var nextPage = query.ToPage<string>(new Pager(1, 1));
+        Assert.Equal(1, nextPage.TotalCount);
+        Assert.Equal(new[] { "one" }, nextPage.Data);
+        Assert.Equal(3, filter.Calls);
+        Assert.Empty(builder.GetParams());
+    }
+
     public Task InitializeAsync() => _fixture.ResetAsync();
     public Task DisposeAsync() => Task.CompletedTask;
     private static object[] Values(SqlQueryPlan plan) =>

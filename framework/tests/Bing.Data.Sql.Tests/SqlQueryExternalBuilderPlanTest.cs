@@ -11,15 +11,18 @@ namespace Bing.Data.Sql.Tests;
 public sealed class SqlQueryExternalBuilderPlanTest
 {
     /// <summary>重复分页和计数应克隆非基类 Builder、累加排序并保留来源计划。</summary>
-    [Fact]
-    public void FrozenThirdPartyBuilder_WhenPagedRepeatedlyAndCounted_ShouldRebindAndKeepSource()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FrozenThirdPartyBuilder_WhenPagedRepeatedlyAndCounted_ShouldRebindAndKeepSource(bool explicitFreeze)
     {
         var innerBuilder = new TestSqlBuilder();
         innerBuilder.Select("Name").From("samples").Where("Status", 7)
             .OrderBy("Id").Skip(5).Take(2);
         var sourceBuilder = Wrap(innerBuilder);
         Assert.False(sourceBuilder.Object is SqlBuilderBase);
-        var source = SqlQueryPlan.Create(sourceBuilder.Object).Freeze();
+        var source = SqlQueryPlan.Create(sourceBuilder.Object);
+        if (explicitFreeze) Assert.Same(source, source.Freeze());
         var sourceSql = "Select [Name] \r\nFrom [samples] \r\nWhere [Status]=@_p_0 \r\nOrder By [Id] \r\nOffset @_p_1 Rows Fetch Next @_p_2 Rows Only";
 
         var firstPage = SqlBuilderRuntimeBridge.CreatePagePlan(source, new Pager(3, 4, "Name"));

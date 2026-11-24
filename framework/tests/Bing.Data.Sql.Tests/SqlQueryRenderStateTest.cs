@@ -78,7 +78,7 @@ public sealed class SqlQueryRenderStateTest
         root.With("initial", initial);
 
         var late = new CountedChild().Select("Id").From("Late");
-        root.CteItems.Add(new BuilderItem("late", late));
+        root.AddCte(new BuilderItem("late", late));
         const string expected = "With [initial] \r\nAs (Select [Id] \r\nFrom [Initial]),\r\n[late] \r\nAs (Select [Id] \r\nFrom [Late])\r\nSelect [Id] \r\nFrom [Root]";
 
         CountedChild.Clones = 0;
@@ -95,7 +95,7 @@ public sealed class SqlQueryRenderStateTest
             new SqlServerBuilder().Select("Id").From("Initial"));
 
         var clone = (SqlServerBuilder)root.Clone();
-        clone.CteItems.Add(new BuilderItem("late", new SqlServerBuilder().Select("Id").From("Late")));
+        clone.AddCte(new BuilderItem("late", new SqlServerBuilder().Select("Id").From("Late")));
 
         Assert.False(root.CteItems[0].IsOwnedNestedClone);
         Assert.True(clone.CteItems[0].IsOwnedNestedClone);

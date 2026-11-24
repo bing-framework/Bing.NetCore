@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$ResultsDirectory = 'output/round135-tests')
+param([string]$ResultsDirectory = 'artifacts/validation/sql-build-tests')
 
 [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -27,13 +27,20 @@ Write-FixtureFile 'asset/props/test.props' '<Project />'
 Write-FixtureFile 'asset/images/icon.png' 'binary fixture'
 Write-FixtureFile 'framework/src/Sql/Model.cs' '// 中文模型'
 Write-FixtureFile 'framework/src/Sql/Sql.csproj' '<Project />'
+Write-FixtureFile 'framework/src/Generator/Generator.csproj' '<Project />'
+Write-FixtureFile 'framework/src/Generator/Generator.cs' '// analyzer fixture'
 Write-FixtureFile 'framework/src/Sql/Sql.xml' '<doc>old generated documentation</doc>'
 Write-FixtureFile 'framework/src/Sql/bin/Release/old.dll' 'old binary'
 Write-FixtureFile 'framework/src/Sql/obj/project.assets.json' '{}'
 Write-FixtureFile 'framework/src/Sql/.codex-build/old/Sql.dll' 'old diagnostic binary'
 Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks/Program.cs' '// benchmark fixture'
-Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj' '<Project />'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj' '<Project><ItemGroup><ProjectReference Include="../Bing.Data.Sql.Benchmarks.Models/Bing.Data.Sql.Benchmarks.Models.csproj" /></ItemGroup></Project>'
 Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.xml' '<doc>old generated documentation</doc>'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks.Models/Bing.Data.Sql.Benchmarks.Models.csproj' '<Project><ItemGroup><ProjectReference Include="../../src/Sql/Sql.csproj" /><ProjectReference Include="../../src/Generator/Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" /></ItemGroup></Project>'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks.Models/ReturningProjectionContext.cs' '// generated projection fixture'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks.Models/Bing.Data.Sql.Benchmarks.Models.xml' '<doc>old generated model documentation</doc>'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks.Models/bin/Release/old.dll' 'old model binary'
+Write-FixtureFile 'framework/tests/Bing.Data.Sql.Benchmarks.Models/obj/project.assets.json' '{}'
 Write-FixtureFile 'framework/tests/OtherTests/Unexpected.cs' '// unrelated test'
 Write-FixtureFile 'output/old/result.json' '{}'
 
@@ -54,13 +61,57 @@ Test-Case 'Snapshot_ContainsRequiredBuildInputs_AndExcludesArtifactsAndOtherTest
     $manifest = New-SqlBuildSnapshot -SourceRoot $fixture -DestinationRoot $destination
     $actual = @($manifest.inputs.Keys | Sort-Object)
     $expected = @('.editorconfig', 'LICENSE', 'asset/images/icon.png', 'asset/props/test.props', 'common.props',
+        'framework/src/Generator/Generator.cs', 'framework/src/Generator/Generator.csproj',
         'framework/src/Sql/Model.cs', 'framework/src/Sql/Sql.csproj',
+        'framework/tests/Bing.Data.Sql.Benchmarks.Models/Bing.Data.Sql.Benchmarks.Models.csproj',
+        'framework/tests/Bing.Data.Sql.Benchmarks.Models/ReturningProjectionContext.cs',
         'framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj',
         'framework/tests/Bing.Data.Sql.Benchmarks/Program.cs', 'global.json') | Sort-Object
     if (@(Compare-Object $expected $actual).Count -ne 0) { throw 'Snapshot input set differs' }
     if (Get-ChildItem -LiteralPath $destination -Directory -Recurse -Force | Where-Object Name -In @('bin', 'obj', '.codex-build')) {
         throw 'Copied stale build directories'
     }
+}
+
+Test-Case 'Snapshot_ContainsBenchmarkModelAndAnalyzerProjectReferences' {
+    $destination = Join-Path $testRoot 'project-graph'
+    $manifest = New-SqlBuildSnapshot -SourceRoot $fixture -DestinationRoot $destination
+    foreach ($relative in $manifest.inputs.Keys | Where-Object { $_.EndsWith('.csproj') }) {
+        $projectFile = Join-Path $destination $relative
+        $project = [xml][System.IO.File]::ReadAllText($projectFile, $utf8)
+        foreach ($reference in $project.SelectNodes('//ProjectReference')) {
+            $target = [System.IO.Path]::GetFullPath($reference.Include, (Split-Path -Parent $projectFile))
+            if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
+                throw "Missing snapshot project reference: $relative -> $($reference.Include)"
+            }
+        }
+    }
+}
+
+Test-Case 'CleanBuild_KeepsRebuildableSourceOutsideMeasurementReports' {
+    # 在构建前截取快照目标，避免为目录职责测试启动真实恢复或编译。
+    $originalSnapshot = (Get-Item Function:New-SqlBuildSnapshot).ScriptBlock
+    $script:capturedSnapshotRoot = $null
+    try {
+        Set-Item Function:New-SqlBuildSnapshot -Value {
+            param([string]$SourceRoot, [string]$DestinationRoot)
+            $script:capturedSnapshotRoot = $DestinationRoot
+            throw 'Snapshot destination captured before build'
+        }
+        $reports = Join-Path $testRoot 'measurement-reports'
+        $report = Invoke-SqlCleanBuildPeak -ResultsDirectory $reports -TimeoutSeconds 1
+        if ($report.error -ne 'Snapshot destination captured before build') { throw 'Snapshot capture did not run' }
+        $validation = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'artifacts/validation/sql-build'))
+        if (-not $script:capturedSnapshotRoot.StartsWith($validation + [System.IO.Path]::DirectorySeparatorChar,
+                [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Rebuildable source must use artifacts/validation/sql-build'
+        }
+        if ($script:capturedSnapshotRoot.StartsWith($reports + [System.IO.Path]::DirectorySeparatorChar,
+                [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Source snapshot polluted the measurement report directory'
+        }
+    }
+    finally { Set-Item Function:New-SqlBuildSnapshot -Value $originalSnapshot }
 }
 
 Test-Case 'Snapshot_PreservesUtf8BytesAndHashes_AndDoesNotFollowSourceMutation' {

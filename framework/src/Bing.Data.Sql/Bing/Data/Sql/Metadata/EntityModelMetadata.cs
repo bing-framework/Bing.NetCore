@@ -96,11 +96,28 @@ public sealed class EntityModelMetadata
     /// </remarks>
     public Func<string, string> GeneratedKeyInsertSql { get; init; }
 
-    /// <summary>获取有限列筛选及批量形状的完整 SQL 常量；未声明的形状返回空值。</summary>
+    /// <summary>获取有限列筛选及批量形状的生成式 SQL；未声明的形状返回空值。</summary>
     /// <remarks>
     /// 参数依次为 Provider、操作、单个写属性名及行数；属性名为空表示全部默认写列。
-    /// 当前生成器覆盖单列 Insert/Update 和支持多行 Values 的双行默认列 Insert，避免枚举列子集。
+    /// 单列 Insert/Update 和双行默认列 Insert 复用 SQL 常量；更多行的默认列或单列 Insert
+    /// 与批量 Delete 使用生成的固定表列及 Provider 分支追加参数槽位；Delete 根据键及并发列生成 IN 或逐实体配对条件，
+    /// 避免反射、枚举列子集或缓存任意行数。批量 Delete 的属性名为空且行数大于一。
     /// 仅最终映射及默认参数、格式化服务兼容时使用，不保存实体或请求值。
     /// </remarks>
     public Func<string, Builders.SqlOperationKind, string, int, string> GeneratedMutationShapeSql { get; init; }
+
+    /// <summary>获取整行实体 Returning 的完整生成 SQL；未覆盖的 Provider 或操作返回空值。</summary>
+    /// <remarks>
+    /// 返回列按映射顺序排列，并以 CLR 属性名作为别名。仅最终映射和默认写列与生成模型一致时使用；
+    /// 筛选写列可使用 GeneratedMutationColumnsSql；动态映射、数据边界和 Provider 校验仍由运行时处理。
+    /// </remarks>
+    public Func<string, Builders.SqlOperationKind, string> GeneratedMutationReturningSql { get; init; }
+
+    /// <summary>获取按已筛选写列拼接生成片段的 Insert/Update SQL；未覆盖时返回空值。</summary>
+    /// <remarks>
+    /// 参数依次为 Provider、操作、按最终映射顺序排列的 CLR 写属性名、行数，以及是否返回整行。
+    /// Insert 按行分配连续参数槽位，Update 仅支持单行。
+    /// 仅最终完整映射与生成模型一致时使用；不枚举列子集、不缓存请求值，参数绑定仍由运行时负责。
+    /// </remarks>
+    public Func<string, Builders.SqlOperationKind, IReadOnlyList<string>, int, bool, string> GeneratedMutationColumnsSql { get; init; }
 }

@@ -35,7 +35,7 @@ public class SqlGeneratedMutationBenchmarks
     private readonly SqlUpdateOptions _filteredUpdate = new() { IncludeProperties = new[] { "Name" } };
 
     /// <summary>每个 Provider 分别比较自己的渲染与常量路径，不将跨 Provider 结果当作前后对比。</summary>
-    [Params("SQLite", "MySQL", "PostgreSQL", "SqlServer")]
+    [Params("SQLite", "MySQL", "PostgreSQL", "SqlServer", "PostgreSQLSchema")]
     public string Provider { get; set; } = "SQLite";
 
     /// <summary>是否登记完整生成 SQL；其余配置及工作负载保持一致。</summary>
@@ -54,14 +54,17 @@ public class SqlGeneratedMutationBenchmarks
         {
             "SQLite" => SqliteSqlProvider.Instance,
             "MySQL" => MySqlSqlProvider.Instance,
-            "PostgreSQL" => PostgreSqlSqlProvider.Instance,
+            "PostgreSQL" or "PostgreSQLSchema" => PostgreSqlSqlProvider.Instance,
             "SqlServer" => SqlServerSqlProvider.Instance,
             _ => throw new InvalidOperationException("Unknown provider.")
         };
         var open = _provider.Dialect.OpeningIdentifier;
         var close = _provider.Dialect.ClosingIdentifier;
+        var schema = Provider == "PostgreSQLSchema" ? "sales_2026" : null;
         string Quote(string sql)
         {
+            if (schema != null)
+                sql = sql.Replace("`generated_mutation_rows`", "`" + schema + "`.`generated_mutation_rows`", StringComparison.Ordinal);
             var opening = true;
             var text = new StringBuilder(sql.Length);
             foreach (var character in sql)
@@ -76,7 +79,7 @@ public class SqlGeneratedMutationBenchmarks
         _filteredUpdateSql = Quote("Update `generated_mutation_rows` Set `Name` = @_p_0 Where `Id` = @_p_1 And `Version` = @_p_2");
         _doubleInsertSql = Quote(InsertSql + ", (@_p_3, @_p_4, @_p_5)");
         _rows = new[] { _row, new Row { Id = 8, Name = "second", Version = 3 } };
-        var model = new EntityModelMetadata(typeof(Row), "generated_mutation_rows", null, new[]
+        var model = new EntityModelMetadata(typeof(Row), "generated_mutation_rows", schema, new[]
         {
             EntityPropertyMetadata.CreateGenerated("Id", typeof(int), true, true, isKey: true,
                 generatedGetter: source => ((Row)source).Id),

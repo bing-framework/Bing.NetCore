@@ -27,8 +27,6 @@ public abstract partial class SqlQueryBase
             throw new ArgumentNullException(nameof(plan));
         if (operation == null)
             throw new ArgumentNullException(nameof(operation));
-        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
-            EnsureWritableDataSource();
         var executionLease = acquireExecutionLease ? QueryResources.AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;
@@ -90,8 +88,6 @@ public abstract partial class SqlQueryBase
             QueryResources.MarkPreCancelledUnitOfWorkExecution();
             operationToken.ThrowIfCancellationRequested();
         }
-        if (SqlBuilderRuntimeBridge.ValidateQueryPlan(plan))
-            EnsureWritableDataSource();
         var executionLease = acquireExecutionLease ? QueryResources.AcquireExecutionLease() : null;
         TResult result = default;
         DiagnosticsMessage message = default;

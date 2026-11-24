@@ -1,0 +1,8 @@
+<Project>
+  <!-- SDK 隔离 obj；公共构建属性重设的 bin、XML 与生成源码也必须留在本次构建目录。 -->
+  <PropertyGroup>
+    <OutputPath>$(ArtifactsPath)/bin/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)/$(RuntimeIdentifier)/</OutputPath>
+    <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+    <CompilerGeneratedFilesOutputPath Condition="'$(EmitCompilerGeneratedFiles)' == 'true'">$(ArtifactsPath)/generated/$(MSBuildProjectName)/$(Configuration)/$(TargetFramework)/generated-$(RuntimeIdentifier)</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+</Project>

@@ -11,7 +11,9 @@ public abstract partial class SqlBuilderBase
     /// <remarks>
     /// 生成调试 SQL 语句，语句中的参数将被替换为可诊断字面量。
     /// </remarks>
-    public virtual string ToDebugSql() => ToDebugSql(ToSql());
+    public virtual string ToDebugSql() => ShouldRenderFromSnapshot() && CanRenderFiltersLocally()
+        ? SqlBuilderRuntimeBridge.CreateExecutionSnapshot(CreateRenderSnapshot(), includeDebugSql: true).DebugSql
+        : ToDebugSql(ToSql());
 
     /// <inheritdoc />
     /// <remarks>

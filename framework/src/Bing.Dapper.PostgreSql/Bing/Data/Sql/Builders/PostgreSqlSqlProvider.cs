@@ -63,6 +63,7 @@ public sealed class PostgreSqlSqlProvider : ISqlProvider, ISqlProviderProfilePro
         },
         Mutation = new SqlProviderMutationCapabilities
         {
+            GeneratedSqlDialect = PostgreSqlDialect.Instance,
             SupportsMultiRowValues = true,
             SupportsUpdateFrom = true,
             SupportsDeleteUsing = true,

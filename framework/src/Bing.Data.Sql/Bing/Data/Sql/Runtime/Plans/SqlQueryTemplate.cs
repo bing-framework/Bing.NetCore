@@ -46,16 +46,20 @@ public sealed class SqlQueryFragmentSnapshot
 
     internal SqlQueryFragmentSnapshot(string sql, IEnumerable<SqlParam> parameters,
         SqlQueryFragmentKind kind, SqlQueryCorrelationKind correlation,
-        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys = null)
+        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys = null, SqlQueryIr queryIr = null)
     {
         Sql = sql ?? throw new ArgumentNullException(nameof(sql));
-        _parameters = new ReadOnlyCollection<SqlParam>((parameters ?? Array.Empty<SqlParam>())
+        _parameters = queryIr?.Snapshot.FrozenParameters ?? new ReadOnlyCollection<SqlParam>((parameters ?? Array.Empty<SqlParam>())
             .Where(parameter => parameter != null)
             .Select(parameter => SqlQueryFragment.Clone(parameter)).ToList());
         Kind = kind;
         Correlation = correlation;
         _parameterKeys = parameterKeys;
+        QueryIr = queryIr;
     }
+
+    /// <summary>内建 Builder 冻结的结构；外部文本片段不推断结构。</summary>
+    internal SqlQueryIr QueryIr { get; }
 
     /// <summary>获取冻结 SQL。</summary>
     public string Sql { get; }
@@ -75,7 +79,7 @@ public sealed class SqlQueryFragmentSnapshot
 
     /// <summary>将快照渲染到新的参数作用域。</summary>
     public SqlQueryFragment Render(SqlQueryScope scope = null) =>
-        new SqlQueryFragment(Sql, _parameters, Kind, Correlation, _parameterKeys).Render(scope);
+        new SqlQueryFragment(Sql, _parameters, Kind, Correlation, _parameterKeys, QueryIr).Render(scope);
 }
 
 /// <summary>以名称绑定冻结查询片段的 CTE 定义，可在多个查询之间共享。</summary>
@@ -197,10 +201,10 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
 {
     private readonly ReadOnlyCollection<SqlParam> _parameters;
 
-    // 只有显式使用逻辑键的片段需要额外存储；普通片段保持原来的对象大小。
+    // 只有显式使用逻辑键的片段需要额外的键集合包装。
     private sealed class KeyedParameterCollection : ReadOnlyCollection<SqlParam>
     {
-        internal KeyedParameterCollection(List<SqlParam> parameters, IReadOnlyDictionary<string, SqlParameterKey> keys)
+        internal KeyedParameterCollection(IList<SqlParam> parameters, IReadOnlyDictionary<string, SqlParameterKey> keys)
             : base(parameters) => Keys = keys;
 
         internal IReadOnlyDictionary<string, SqlParameterKey> Keys { get; }
@@ -213,6 +217,11 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
         IReadOnlyDictionary<string, SqlParameterKey> keys) => keys == null
         ? new ReadOnlyCollection<SqlParam>(parameters)
         : new KeyedParameterCollection(parameters, keys);
+
+    private static ReadOnlyCollection<SqlParam> ShareParameters(SqlQueryIr ir,
+        IReadOnlyDictionary<string, SqlParameterKey> keys) => keys == null
+        ? ir.Snapshot.FrozenParameters
+        : new KeyedParameterCollection(ir.Snapshot.FrozenParameters, keys);
 
     /// <summary>创建一个 SQL 片段。</summary>
     /// <param name="sql">片段 SQL 文本。</param>
@@ -227,37 +236,44 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
     }
 
     internal SqlQueryFragment(string sql, IEnumerable<SqlParam> parameters, SqlQueryFragmentKind kind,
-        SqlQueryCorrelationKind correlation, IReadOnlyDictionary<string, SqlParameterKey> parameterKeys)
+        SqlQueryCorrelationKind correlation, IReadOnlyDictionary<string, SqlParameterKey> parameterKeys,
+        SqlQueryIr queryIr = null)
     {
         if (string.IsNullOrWhiteSpace(sql))
             throw new ArgumentException("SQL 片段不能为空。", nameof(sql));
         Sql = sql;
-        _parameters = WrapParameters((parameters ?? Array.Empty<SqlParam>())
+        _parameters = queryIr != null ? ShareParameters(queryIr, parameterKeys) : WrapParameters((parameters ?? Array.Empty<SqlParam>())
             .Where(parameter => parameter != null)
             .Select(parameter => Clone(parameter)).ToList(), parameterKeys);
         Kind = kind;
         Correlation = correlation;
+        QueryIr = queryIr;
     }
 
     private SqlQueryFragment(string sql, SqlQueryFragmentKind kind,
         SqlQueryCorrelationKind correlation, List<SqlParam> ownedParameters,
-        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys)
+        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys, SqlQueryIr queryIr)
     {
         if (string.IsNullOrWhiteSpace(sql))
             throw new ArgumentException("SQL 片段不能为空。", nameof(sql));
         Sql = sql;
-        _parameters = WrapParameters(ownedParameters ?? throw new ArgumentNullException(nameof(ownedParameters)), parameterKeys);
+        _parameters = queryIr != null ? ShareParameters(queryIr, parameterKeys) :
+            WrapParameters(ownedParameters ?? throw new ArgumentNullException(nameof(ownedParameters)), parameterKeys);
         Kind = kind;
         Correlation = correlation;
+        QueryIr = queryIr;
     }
 
     /// <summary>接收仅由当前调用创建且已完成深拷贝的参数，调用后不得再修改该列表或其元素。</summary>
     internal static SqlQueryFragment FromOwnedParameters(string sql, List<SqlParam> parameters,
         SqlQueryFragmentKind kind, SqlQueryCorrelationKind correlation,
-        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys = null) =>
-        new(sql, kind, correlation, parameters, parameterKeys);
+        IReadOnlyDictionary<string, SqlParameterKey> parameterKeys = null, SqlQueryIr queryIr = null) =>
+        new(sql, kind, correlation, parameters, parameterKeys, queryIr);
 
-    internal SqlQueryFragment Copy() => new(Sql, _parameters, Kind, Correlation, ParameterKeys);
+    internal SqlQueryFragment Copy() => new(Sql, _parameters, Kind, Correlation, ParameterKeys, QueryIr);
+
+    /// <summary>与片段 SQL、参数一同冻结的查询结构，不引用 Builder。</summary>
+    internal SqlQueryIr QueryIr { get; }
 
     internal SqlQueryFragment CopyAs(string sql, SqlQueryFragmentKind kind) =>
         new(sql, _parameters, kind, Correlation, ParameterKeys);
@@ -312,27 +328,28 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
             foreach (var pair in existingKeys)
                 keys.Add(pair.Key, pair.Value);
         keys[normalized] = key;
-        return new SqlQueryFragment(Sql, _parameters, Kind, Correlation, keys);
+        return new SqlQueryFragment(Sql, _parameters, Kind, Correlation, keys, QueryIr);
     }
 
     /// <inheritdoc />
     public SqlQueryFragmentSnapshot Freeze() =>
-        new(Sql, _parameters, Kind, Correlation, ParameterKeys);
+        new(Sql, _parameters, Kind, Correlation, ParameterKeys, QueryIr);
 
     /// <summary>将片段渲染到指定作用域。</summary>
     /// <param name="scope">参数作用域；为空时保持原始名称。</param>
     /// <returns>带作用域参数名称的独立片段。</returns>
     public SqlQueryFragment Render(SqlQueryScope scope = null)
     {
-        if (scope == null || _parameters.Count == 0)
+        if (scope == null || _parameters.Count == 0 && QueryIr == null)
             return Copy();
         var parameters = new List<SqlParam>(_parameters.Count);
         var parameterNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         Dictionary<string, SqlParameterKey> scopedKeys = null;
-        foreach (var parameter in _parameters)
+
+        string Rename(string name)
         {
-            var normalized = NormalizeName(parameter.Name);
+            var normalized = NormalizeName(name);
             var sourceName = "@" + normalized;
             string renamed;
             if (normalized.Length > 0 && parameterNames.TryGetValue(sourceName, out var existing))
@@ -342,7 +359,7 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
             }
             else
             {
-                var baseName = scope.ParameterName(parameter.Name);
+                var baseName = scope.ParameterName(name);
                 renamed = baseName;
                 var suffix = 0;
                 while (!usedNames.Add(renamed))
@@ -354,6 +371,12 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
                     parameterNames["?" + normalized] = "?" + renamed;
                 }
             }
+            return renamed;
+        }
+
+        foreach (var parameter in _parameters)
+        {
+            var renamed = Rename(parameter.Name);
             parameters.Add(Clone(parameter, renamed));
             if (TryGetParameterKey(parameter.Name, out var key))
             {
@@ -361,8 +384,16 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
                 scopedKeys[renamed] = key;
             }
         }
-        var sql = SqlBuilderBase.ReplaceParameterTokens(Sql, parameterNames, ignoreCase: true);
-        return FromOwnedParameters(sql, parameters, Kind, Correlation, scopedKeys);
+        // 无分页模板也要重命名预留槽位，后续派生才能继续使用同一作用域。
+        if (QueryIr?.Snapshot.Pagination is { } pagination)
+        {
+            Rename(pagination.OffsetParameter);
+            Rename(pagination.LimitParameter);
+        }
+        var boundaries = QueryIr?.Snapshot.SelectShape?.GetBoundaries();
+        var sql = SqlBuilderBase.ReplaceParameterTokens(Sql, parameterNames, ignoreCase: true, boundaries: boundaries);
+        var ir = QueryIr?.WithSnapshot(QueryIr.Snapshot.WithScope(sql, parameters, parameterNames, boundaries));
+        return FromOwnedParameters(sql, parameters, Kind, Correlation, scopedKeys, ir);
     }
 
     /// <summary>按顺序组合多个片段，并为每个片段分配子作用域。</summary>
@@ -429,7 +460,7 @@ public sealed class SqlQueryFragment : ISqlQueryFragment
 /// 已冻结的可复用 SQL 查询模板。
 /// </summary>
 /// <remarks>
-/// 模板只保存 SQL 和参数槽，不持有 Builder、连接或事务；同一模板可以渲染到多个 Query。
+/// 模板保存 SQL、冻结参数及内建 Builder 的查询结构，不持有 Builder、连接或事务；同一模板可以渲染到多个 Query。
 /// 需要继续编辑原结构时先调用 Builder.Clone；冻结后使用 From、With 或 Union 组合。
 /// </remarks>
 public sealed class SqlQueryTemplate
@@ -531,7 +562,7 @@ public static class SqlQueryTemplateExtensions
     /// <summary>
     /// 使用 Builder 独立副本生成模板，调用后原 Builder 状态不被渲染过程改变。
     /// </summary>
-    /// <remarks>SQL 与动态过滤值在调用时捕获；模板不保留草稿或过滤器，需要重新取值时重新冻结。</remarks>
+    /// <remarks>SQL、内建查询结构与动态过滤值在调用时捕获；模板不保留草稿或过滤器，需要重新取值时重新冻结。</remarks>
     /// <param name="builder">待冻结的 Builder。</param>
     /// <param name="scope">可选的模板作用域。</param>
     /// <returns>冻结后的查询模板。</returns>
@@ -543,10 +574,13 @@ public static class SqlQueryTemplateExtensions
         var render = (snapshot as SqlBuilderBase)?.CreateRenderSnapshot();
         var sql = render?.Sql ?? snapshot.ToSql();
         var parameterSource = render?.Builder ?? snapshot;
-        var parameters = ((ISqlParameter)parameterSource).GetSqlParams().Values;
-        var keys = (parameterSource as SqlBuilderBase)?.GetFragmentParameterKeys(sql);
+        var keys = render?.GetFragmentParameterKeys() ??
+                   (parameterSource as SqlBuilderBase)?.GetFragmentParameterKeys(sql);
+        var ir = render?.SelectShape == null ? null : SqlQueryIr.Create(
+            SqlBuilderRuntimeBridge.CreateExecutionSnapshot(render), CommandType.Text, parameterSource.Pager);
+        var parameters = ir == null ? ((ISqlParameter)parameterSource).GetSqlParams().Values : null;
         var fragment = new SqlQueryFragment(sql, parameters, SqlQueryFragmentKind.Raw,
-            SqlQueryCorrelationKind.Independent, keys);
+            SqlQueryCorrelationKind.Independent, keys, ir);
         if (scope != null)
             fragment = fragment.Render(scope);
         return new SqlQueryTemplate(fragment);

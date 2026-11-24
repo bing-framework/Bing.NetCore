@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$ResultsDirectory = 'output/sql-clean-build',
+    [string]$ResultsDirectory = 'artifacts/benchmarks/sql-build',
     [string]$RestoreConfigFile,
     [int]$TimeoutSeconds = 900
 )
@@ -45,7 +45,8 @@ function New-SqlBuildSnapshot {
             Copy-SnapshotInput $file
         }
     }
-    foreach ($relative in @('asset', 'framework/src', 'framework/tests/Bing.Data.Sql.Benchmarks')) {
+    foreach ($relative in @('asset', 'framework/src', 'framework/tests/Bing.Data.Sql.Benchmarks',
+        'framework/tests/Bing.Data.Sql.Benchmarks.Models')) {
         Copy-SnapshotDirectory (Join-Path $SourceRoot $relative)
     }
     return [ordered]@{ inputs = $inputs; count = $inputs.Count }
@@ -69,7 +70,8 @@ function Invoke-SqlCleanBuildPeak {
     if (-not $IsWindows) { throw 'This probe requires Windows Job Objects.' }
     $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
     $parent = if ([System.IO.Path]::IsPathRooted($ResultsDirectory)) { $ResultsDirectory } else { Join-Path $repositoryRoot $ResultsDirectory }
-    $directory = Join-Path $parent ('run-' + [Guid]::NewGuid().ToString('N'))
+    $runId = 'run-' + [Guid]::NewGuid().ToString('N')
+    $directory = Join-Path $parent $runId
     New-Item -ItemType Directory -Path $directory -Force | Out-Null
     $result = [ordered]@{
         status = 'FAIL'; evidenceKind = 'CleanBuildProcessTree'; startedAt = [DateTime]::UtcNow.ToString('o')
@@ -82,7 +84,8 @@ function Invoke-SqlCleanBuildPeak {
             logicalProcessors = [System.Environment]::ProcessorCount }
     }
     try {
-        $snapshot = Join-Path $directory 'source'
+        # 报告与可重建内容分开，避免源码副本混入长期保留的测量证据。
+        $snapshot = Join-Path $repositoryRoot "artifacts/validation/sql-build/$runId/source"
         $manifest = New-SqlBuildSnapshot -SourceRoot $repositoryRoot -DestinationRoot $snapshot
         $manifestFile = Join-Path $directory 'source-manifest.json'
         $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestFile -Encoding utf8

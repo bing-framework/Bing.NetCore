@@ -207,6 +207,10 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// <summary>
     /// 执行独立写入命令表示的 Insert、Update 或 Delete 操作。
     /// </summary>
+    /// <remarks>
+    /// 命令启用 <see cref="SqlWriteCommand.ValidateAffectedRows"/> 时必须恰好影响一行，否则抛出并发异常。
+    /// 校验不会为无事务写入补建事务；需要回滚时应由调用方提供事务。
+    /// </remarks>
     /// <param name="command">已冻结的写入命令。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <returns>操作影响的行数。</returns>
@@ -215,6 +219,10 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// <summary>
     /// 异步执行独立写入命令表示的 Insert、Update 或 Delete 操作。
     /// </summary>
+    /// <remarks>
+    /// 命令启用 <see cref="SqlWriteCommand.ValidateAffectedRows"/> 时必须恰好影响一行，否则抛出并发异常。
+    /// 校验不会为无事务写入补建事务；需要回滚时应由调用方提供事务。
+    /// </remarks>
     /// <param name="command">已冻结的写入命令。</param>
     /// <param name="timeout">执行超时时间。单位：秒。</param>
     /// <param name="cancellationToken">取消令牌。</param>
@@ -289,6 +297,10 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// <summary>
     /// 执行带 Returning 或 Output 的 Mutation，并同步物化返回行。
     /// </summary>
+    /// <remarks>
+    /// 命令启用 <see cref="SqlWriteCommand.ValidateAffectedRows"/> 时必须恰好返回一行，否则抛出并发异常。
+    /// 校验不会为无事务写入补建事务；需要回滚时应由调用方提供事务。
+    /// </remarks>
     /// <typeparam name="TResult">返回行映射类型。</typeparam>
     /// <param name="command">已冻结的带 Returning 写入命令。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>
@@ -298,6 +310,10 @@ public interface ISqlExecutor : IDisposable, IAsyncDisposable
     /// <summary>
     /// 异步执行带 Returning 或 Output 的 Mutation，并物化返回行。
     /// </summary>
+    /// <remarks>
+    /// 命令启用 <see cref="SqlWriteCommand.ValidateAffectedRows"/> 时必须恰好返回一行，否则抛出并发异常。
+    /// 校验不会为无事务写入补建事务；需要回滚时应由调用方提供事务。
+    /// </remarks>
     /// <typeparam name="TResult">返回行映射类型。</typeparam>
     /// <param name="command">已冻结的带 Returning 写入命令。</param>
     /// <param name="timeout">执行超时时间，单位为秒。</param>

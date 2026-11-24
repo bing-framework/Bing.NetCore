@@ -13,6 +13,21 @@ const nativeCase = {
   project: 'framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOnly.csproj',
   successMarker: 'RAW_ONLY_PACKAGE_NATIVE_PASS', coverage: ['raw-reader', 'parameter-binder']
 };
+const sqliteCrudRequiredMarkers = [
+  'MUTATION_PLAN_READER_NATIVE_PASS',
+  'GENERATED_RETURNING_PROJECTION_NATIVE_PASS',
+  'GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS',
+  'GENERATED_MUTATION_SHAPES_NATIVE_PASS',
+  'GENERATED_MULTIROW_INSERT_NATIVE_PASS',
+  'GENERATED_IN_DELETE_NATIVE_PASS',
+  'GENERATED_PAIRED_DELETE_NATIVE_PASS',
+  'GENERATED_KEY_INSERT_SQL_NATIVE_PASS',
+  'GENERATED_CRUD_SQL_NATIVE_PASS',
+  'GENERATED_NEGATED_RETURNING_NATIVE_PASS',
+  'GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS',
+  'GENERATED_QUOTED_RETURNING_NATIVE_PASS',
+  'GENERATED_CACHED_RETURNING_NATIVE_PASS'
+];
 
 test('显式手动格不进入 CI，默认与显式开启格继续调度且手动选择可用', async () => {
   const { ciMatrix, selectCase } = await api();
@@ -114,12 +129,25 @@ test('SQLite RawOnly 矩阵格要求验证泛型转换器依赖注入', async ()
   }
 });
 
-test('SQLite CRUD 矩阵要求严格计划读取并阻止 IL2070 和 IL2072 回归', async () => {
+test('四个 SQLite CRUD 矩阵格要求十三项生成式能力并阻止 IL2070 和 IL2072 回归', async () => {
   const { loadMatrix } = await api();
   const matrix = loadMatrix();
-  for (const id of ['sqlite-win-x64-crud', 'sqlite-linux-x64-crud']) {
+  for (const rid of ['linux-x64', 'win-x64', 'osx-arm64', 'win-arm64']) {
+    const id = `sqlite-${rid}-crud`;
     const cell = matrix.cases.find(candidate => candidate.id === id);
-    assert.ok(cell.requiredMarkers?.includes('MUTATION_PLAN_READER_NATIVE_PASS'));
+    assert.ok(cell, `${id} 必须存在`);
+    assert.equal(cell.successMarker, 'CRUD_ONLY_PACKAGE_NATIVE_PASS');
+    assert.deepEqual([...(cell.requiredMarkers ?? [])].sort(), [...sqliteCrudRequiredMarkers].sort());
+    for (const coverage of [
+      'generated-variable-row-insert',
+      'generated-in-batch-delete',
+      'generated-paired-batch-delete',
+      'generated-entity-returning-sql',
+      'generated-negated-returning-sql',
+      'generated-computed-returning-current-mapping',
+      'generated-quoted-returning-columns',
+      'generated-cached-returning-projection'
+    ]) assert.ok(cell.coverage.includes(coverage), `${id} 缺少覆盖项 ${coverage}`);
     assert.ok(cell.coverage.includes('strict-mutation-plan-reader'));
     const project = fs.readFileSync(path.join(root, cell.project), 'utf8');
     assert.match(project, /<WarningsAsErrors>[^<]*;IL2072<\/WarningsAsErrors>/u);
@@ -486,6 +514,32 @@ for (const scenario of [
   });
 }
 
+test('当前主机 SQLite CRUD 运行器逐项要求十三个精确能力标记', async t => {
+  const { loadMatrix, runCase } = await api();
+  const prefix = { win32: 'win', linux: 'linux', darwin: 'osx' }[process.platform];
+  if (!prefix) return t.skip('当前测试主机不在 SQLite Native 矩阵中');
+  const rid = `${prefix}-${process.arch}`;
+  const matrixCell = loadMatrix().cases.find(candidate => candidate.id === `sqlite-${rid}-crud`);
+  if (!matrixCell) return t.skip('当前测试主机没有 SQLite CRUD 矩阵格');
+
+  const cell = matrixCell;
+  assert.deepEqual(cell.requiredMarkers, sqliteCrudRequiredMarkers);
+  const markers = [cell.successMarker, ...cell.requiredMarkers];
+  const run = marker => runCase(cell, { root, output: fixture(t) }, fakeExecutor({ marker }).execute);
+  const complete = run(markers.join('\n'));
+  assert.equal(complete.status, 'PASS', complete.error);
+
+  for (const missing of sqliteCrudRequiredMarkers) {
+    const result = run(markers.filter(marker => marker !== missing).join('\n'));
+    assert.equal(result.status, 'FAIL', `缺少 ${missing} 时必须失败`);
+    assert.match(result.error, new RegExp(missing, 'u'));
+  }
+
+  const prefixed = run([`prefix-${cell.successMarker}`, ...cell.requiredMarkers].join('\n'));
+  assert.equal(prefixed.status, 'FAIL', '标记子串不能代替完整成功标记');
+  assert.match(prefixed.error, /Native success marker missing:/u);
+});
+
 test('计划格、未知格和主机不匹配不能开始发布', async () => {
   const { loadMatrix, selectCase } = await api();
   const matrix = loadMatrix();
@@ -508,6 +562,43 @@ test('命令显式选择 Native、严格模式及当前源码生成器，参数�
   assert.ok(commands.publish.args.includes('Round120'));
   assert.equal(commands.publish.args[commands.publish.args.indexOf('-o') + 1], path.join(root, 'output/space name'));
   assert.equal(commands.run.file, path.join(root, 'output/space name/Bing.Data.Sql.Aot.RawOnly.exe'));
+});
+
+test('构建参数隔离 artifacts 与 props 路径并保留空格', async t => {
+  const { buildCommands } = await api();
+  const rootWithSpaces = path.join(fixture(t), 'workspace with spaces');
+  const publishDirectories = [
+    path.join(rootWithSpaces, 'output', 'variant one', 'run one'),
+    path.join(rootWithSpaces, 'output', 'variant two', 'run two')
+  ];
+  const commands = publishDirectories.map(publishDirectory =>
+    buildCommands(nativeCase, { root: rootWithSpaces, publishDirectory }));
+  const artifactsPaths = commands.map((command, index) => {
+    const args = command.publish.args;
+    const option = args.indexOf('--artifacts-path');
+    assert.notEqual(option, -1, 'publish 必须设置 --artifacts-path');
+    assert.equal(args[option + 1], path.join(path.dirname(path.resolve(publishDirectories[index])), 'build'));
+    assert.ok(args.includes(`-p:CustomBeforeMicrosoftCommonTargets=${path.resolve(rootWithSpaces, 'eng/sql-aot/isolated-output.props')}`));
+    return args[option + 1];
+  });
+  assert.notEqual(artifactsPaths[0], artifactsPaths[1]);
+});
+
+test('显式 --artifacts-path 接受含空格的绝对目录且保留 --no-restore', async t => {
+  const { buildCommands } = await api();
+  const rootWithSpaces = path.join(fixture(t), 'workspace with spaces');
+  const artifactsPath = path.resolve(rootWithSpaces, 'artifacts with spaces', 'build output');
+  const commands = buildCommands(nativeCase, {
+    root: rootWithSpaces,
+    publishDirectory: path.join(rootWithSpaces, 'output', 'publish'),
+    artifactsPath,
+    noRestore: true
+  });
+  const args = commands.publish.args;
+  const option = args.indexOf('--artifacts-path');
+  assert.notEqual(option, -1, 'publish 必须接受显式 --artifacts-path');
+  assert.equal(args[option + 1], artifactsPath);
+  assert.ok(args.includes('--no-restore'));
 });
 
 test('全部 Native 格展开逐成员裁剪和 AOT 告警，保留严格模式和项目错误门禁', async () => {
@@ -638,6 +729,14 @@ test('CLI 的 CI 矩阵可解析，非法参数返回非零', async () => {
   const invalid = spawnSync(process.execPath, [script, '--cas', nativeCase.id], { encoding: 'utf8' });
   assert.notEqual(invalid.status, 0);
   assert.match(invalid.stderr, /Unknown option/);
+});
+
+test('CLI 识别显式 artifacts 路径后仍在发布前拒绝未知格', t => {
+  const result = spawnSync(process.execPath, [path.join(root, 'eng/sql-aot/verify.mjs'),
+    '--case', 'missing-case', '--artifacts-path', path.join(fixture(t), 'build with spaces'), '--no-restore'],
+  { encoding: 'utf8' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Unknown matrix case: missing-case/u);
 });
 
 test('PublishAot 只在消费工程启用，不能强制所有依赖框架执行 Native 编译', async () => {

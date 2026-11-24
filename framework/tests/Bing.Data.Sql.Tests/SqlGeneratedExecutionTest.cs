@@ -376,7 +376,7 @@ public class SqlGeneratedExecutionTest
             new Row { Id = row.TryGetOrdinal("Id", out var index) ? row.Reader.GetInt32(index) : 0 }, Binder, 13);
         Assert.Equal(0, values[0].Id); // 与普通 Dapper 对未起别名的物理列保持一致。
         Assert.False(captured.IsBuilderPlan);
-        Assert.Null(captured.GetBuilder());
+        Assert.NotNull(captured.QueryIr);
         Assert.Equal("Select [r].[physical_id] \r\nFrom [rows] As [r]", captured.CommandText);
         Assert.True(captured.IsGeneratedExecution);
         Assert.Same(Binder, captured.GeneratedParameterBinder);

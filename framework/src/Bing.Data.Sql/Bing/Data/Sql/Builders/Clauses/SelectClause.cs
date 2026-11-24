@@ -110,7 +110,7 @@ public partial class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
     /// 创建克隆后的 Select 子句。
     /// </summary>
     /// <param name="context">克隆 Builder 的运行上下文。</param>
-    /// <param name="columns">已深复制的列集合。</param>
+    /// <param name="columns">拥有独立容器、共享不可变列描述的列集合。</param>
     /// <param name="distinct">是否保留去重状态。</param>
     /// <returns>保留 Provider 子类类型的 Select 子句。</returns>
     protected virtual SelectClause CreateClone(SqlClauseContext context, ColumnCollection columns, bool distinct) =>
@@ -126,7 +126,7 @@ public partial class SelectClause : ISelectClause, ISqlMultiSourceSelectClause
             return;
         _columns.Clear();
         for (var index = 0; index < source._columns.Count; index++)
-            _columns.AddColumn(source._columns[index].Clone());
+            _columns.AddColumn(source._columns[index]);
         _distinct = source._distinct;
         _projectionCountKnown = source._projectionCountKnown;
         CopyProjectionFrom(source);

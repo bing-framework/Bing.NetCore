@@ -610,6 +610,7 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
     /// <returns>包含冻结 SQL 和必要分页规划来源的查询计划。</returns>
     internal SqlQueryPlan GetPlan(bool forPaging = false)
     {
+        SqlBuilderRuntimeBridge.ValidateQueryOperation(_builder.OperationKind);
         var snapshot = _isFrozen ? _builder : _builder.Clone();
         var queryIr = _frozenQueryIr;
         ISqlBuilder planningBuilder = null;
@@ -711,9 +712,9 @@ internal class SqlQuery : ISqlQueryOperation, ISqlQueryBuilderAccessor
         if (cancellationToken.IsCancellationRequested)
         {
             // 预取消交给执行器处理，以便它标记共享 UnitOfWork 为 rollback-only；
-            // 此处只冻结 Builder 引用，不触发结构校验、SQL 渲染或连接创建。
+            // 查询保留隔离草稿，计划仅传递生命周期，不触发结构校验、SQL 渲染或连接创建。
             var cancelledSnapshot = _isFrozen ? _builder : _builder.Clone();
-            var cancelledPlan = SqlQueryPlan.Create(cancelledSnapshot, _splitOn);
+            var cancelledPlan = SqlQueryPlan.CreateCancelled(_splitOn);
             cancelledPlan.SetContext(QueryContextId, _parentQueryContextId ??
                 (cancelledSnapshot as SqlBuilderBase)?.ParentQueryContextId);
             cancelledPlan.SetLifecycleCallbacks(BeginExecution, CompleteExecution);

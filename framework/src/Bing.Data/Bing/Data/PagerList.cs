@@ -125,7 +125,7 @@ public class PagerList<T> : IPagerBase
     public void AddRange(IEnumerable<T> collection) => Data.AddRange(collection);
 
     /// <summary>
-    /// 清空
+    /// 清空分页列表中的元素。
     /// </summary>
     public void Clear() => Data.Clear();
 

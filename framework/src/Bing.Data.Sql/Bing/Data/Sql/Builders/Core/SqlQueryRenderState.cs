@@ -23,7 +23,12 @@ internal sealed class SqlQueryRenderState
     internal IParameterManager Parameters { get; }
     internal Dictionary<object, Dictionary<string, string>> SubqueryParameterNames { get; }
     internal Dictionary<string, SqlFragmentParameterBinding> ParameterKeys { get; set; }
-    internal bool FiltersApplied { get; }
+    internal bool FiltersApplied { get; set; }
+    /// <summary>过滤器只修改本次渲染的谓词副本，成功后也不写回草稿。</summary>
+    internal bool IsolatedFilters { get; set; }
+    internal IFromClause From { get; set; }
+    internal IWhereClause Where { get; set; }
+    internal IJoinClause Join { get; set; }
     internal string OffsetParam { get; set; }
     internal string LimitParam { get; set; }
     internal IOrderByClause OrderBy { get; set; }

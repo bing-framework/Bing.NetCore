@@ -92,6 +92,7 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         var syntax = (InvocationExpressionSyntax)context.Node;
         if (context.SemanticModel.GetSymbolInfo(syntax).Symbol is not IMethodSymbol method) return null;
         if (method.ContainingNamespace.ToDisplayString() != "Bing.Data.Sql") return null;
+        if (IsReturningCall(method)) return new Call(syntax, method, context.SemanticModel);
         if (method.ContainingType.Name != "SqlLambdaQuery" &&
             !(method.Name == "From" && method.ReturnType.Name == "SqlLambdaQuery")) return null;
         return new Call(syntax, method, context.SemanticModel);
@@ -113,9 +114,25 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         var entities = new Dictionary<string, INamedTypeSymbol>(StringComparer.Ordinal);
         var readers = new Dictionary<string, INamedTypeSymbol>(StringComparer.Ordinal);
         var index = 0;
+        var hasReturning = false;
         foreach (var entry in calls)
         {
             var call = entry!;
+            if (IsReturningCall(call.Method))
+            {
+                try
+                {
+                    methods.AppendLine(GenerateReturning(call, index++));
+                    hasReturning = true;
+                }
+                catch (NotSupportedException error)
+                {
+                    // Returning 允许动态表达式，严格查询模式也保留其已有运行时语义。
+                    output.ReportDiagnostic(Diagnostic.Create(Fallback, call.Syntax.GetLocation(),
+                        call.Method.Name, error.Message));
+                }
+                continue;
+            }
             try
             {
                 var explicitValue = HasExplicitPredicateValue(call.Method);
@@ -149,6 +166,7 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         code.AppendLine("namespace System.Runtime.CompilerServices { [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)] internal sealed class InterceptsLocationAttribute : global::System.Attribute { public InterceptsLocationAttribute(int version, string data) {} } }");
         code.AppendLine("namespace Bing.Data.Sql.Generated { internal static class QueryCalls {");
         code.Append(methods);
+        if (hasReturning) code.AppendLine(CreateReturningHelper(calls.First(call => call != null)!.Model.Compilation));
         code.AppendLine(ParameterBinder);
         code.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer] internal static void RegisterMetadata() {");
         foreach (var entity in entities.Values)
@@ -906,15 +924,20 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
     /// </remarks>
     private static string Interceptor(Call call, int id, string expression)
     {
+        return InterceptionLocation(call) + "\ninternal static " + TypeName(call.Method.ReturnType) + " Call_" + id + "(this " + TypeName(call.Method.ContainingType) + " source" +
+            (call.Method.Parameters.Length == 0 ? "" : ", " + string.Join(", ", call.Method.Parameters.Select(p => TypeName(p.Type) + " @" + p.Name))) + ") => " + expression + ";";
+    }
+
+    /// <summary>获取调用位置；查询与写入生成共用同一编译器配置约束。</summary>
+    private static string InterceptionLocation(Call call)
+    {
 #pragma warning disable RSEXPERIMENTAL002
         if (!call.Model.SyntaxTree.Options.Features.TryGetValue("InterceptorsNamespaces", out var namespaces) ||
             !namespaces.Split(';').Contains("Bing.Data.Sql.Generated"))
             throw new NotSupportedException("消费项目未启用 Bing.Data.Sql.Generated 拦截器命名空间。");
         var location = call.Model.GetInterceptableLocation(call.Syntax) ?? throw new NotSupportedException("编译器未提供调用点位置。");
-        var attribute = location.GetInterceptsLocationAttributeSyntax();
+        return location.GetInterceptsLocationAttributeSyntax();
 #pragma warning restore RSEXPERIMENTAL002
-        return attribute + "\ninternal static " + TypeName(call.Method.ReturnType) + " Call_" + id + "(this " + TypeName(call.Method.ContainingType) + " source" +
-            (call.Method.Parameters.Length == 0 ? "" : ", " + string.Join(", ", call.Method.Parameters.Select(p => TypeName(p.Type) + " @" + p.Name))) + ") => " + expression + ";";
     }
 
     /// <summary>

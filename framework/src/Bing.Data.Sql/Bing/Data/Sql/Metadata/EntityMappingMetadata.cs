@@ -34,4 +34,29 @@ public sealed class EntityMappingMetadata
     /// 获取或初始化列映射集合。
     /// </summary>
     public IReadOnlyDictionary<string, ColumnMappingMetadata> Columns { get; init; }
+
+    /// <summary>
+    /// 标识默认解析器创建的属性名索引，避免对自定义映射键作出假设。
+    /// </summary>
+    internal bool HasPropertyNameIndex { get; init; }
+
+    /// <summary>
+    /// 按区分大小写的 CLR 属性名查找列映射；自定义映射保留首个匹配项。
+    /// </summary>
+    /// <param name="propertyName">CLR 属性名。</param>
+    /// <returns>匹配的列映射；不存在时返回 <see langword="null"/>。</returns>
+    public ColumnMappingMetadata FindColumn(string propertyName)
+    {
+        if (Columns == null || propertyName == null)
+            return null;
+        if (HasPropertyNameIndex)
+            return Columns.TryGetValue(propertyName, out var column) &&
+                   string.Equals(column.PropertyName, propertyName, StringComparison.Ordinal)
+                ? column
+                : null;
+        foreach (var column in Columns.Values)
+            if (string.Equals(column.PropertyName, propertyName, StringComparison.Ordinal))
+                return column;
+        return null;
+    }
 }

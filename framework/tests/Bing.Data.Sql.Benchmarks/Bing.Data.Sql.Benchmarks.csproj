@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
+    <ProjectReference Include="..\Bing.Data.Sql.Benchmarks.Models\Bing.Data.Sql.Benchmarks.Models.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.MySql\Bing.Dapper.MySql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.PostgreSql\Bing.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\..\src\Bing.Dapper.SqlServer\Bing.Dapper.SqlServer.csproj" />

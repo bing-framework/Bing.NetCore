@@ -10,25 +10,26 @@ namespace Bing.Data.Sql.Tests;
 /// <summary>验证冻结计划派生时的隔离、动态过滤一致性与 Builder 复制预算。</summary>
 public sealed class SqlFrozenPlanDerivationTest
 {
-    /// <summary>未冻结 Count 只用一个工作副本；冻结后直接按 IR 派生，不再复制 Builder。</summary>
+    /// <summary>公开工厂已冻结计划，Count 派生不因是否显式 Freeze 而复制 Builder。</summary>
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
     [InlineData(true, false)]
     [InlineData(true, true)]
-    public void Count_ShouldUseIndependentDraftOrFrozenIr(bool frozen, bool grouped)
+    public void Count_ShouldDeriveFromFrozenIrWithoutCloning(bool explicitFreeze, bool grouped)
     {
         var counter = new CloneCounter();
         var builder = CreateBuilder(counter, grouped);
         var plan = SqlQueryPlan.Create(builder);
-        if (frozen)
-            plan = plan.Freeze();
+        Assert.Equal(1, counter.Calls);
+        if (explicitFreeze)
+            Assert.Same(plan, plan.Freeze());
         var originalSql = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan).Sql;
         counter.Calls = 0;
 
         var count = SqlBuilderRuntimeBridge.CreateCountPlan(plan);
 
-        Assert.Equal(frozen ? 0 : 1, counter.Calls);
+        Assert.Equal(0, counter.Calls);
         Assert.False(count.IsBuilderPlan);
         Assert.Null(count.PlanningBuilder);
         Assert.Equal(grouped
@@ -40,7 +41,7 @@ public sealed class SqlFrozenPlanDerivationTest
         Assert.Equal(originalSql, SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan).Sql);
     }
 
-    /// <summary>未冻结页面使用独立草稿，冻结页面沿用既有排序和 SQL，不再复制 Builder。</summary>
+    /// <summary>公开工厂已冻结计划，页面沿用既有排序和 SQL，不再复制 Builder。</summary>
     [Theory]
     [InlineData(false, false, false)]
     [InlineData(false, false, true)]
@@ -50,12 +51,13 @@ public sealed class SqlFrozenPlanDerivationTest
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
     [InlineData(true, true, true)]
-    public void Page_ShouldUseIndependentDraftOrFrozenIr(bool frozen, bool grouped, bool providerOverload)
+    public void Page_ShouldDeriveFromFrozenIrWithoutCloning(bool explicitFreeze, bool grouped, bool providerOverload)
     {
         var counter = new CloneCounter();
         var plan = SqlQueryPlan.Create(CreateBuilder(counter, grouped));
-        if (frozen)
-            plan = plan.Freeze();
+        Assert.Equal(1, counter.Calls);
+        if (explicitFreeze)
+            Assert.Same(plan, plan.Freeze());
         var originalSql = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(plan).Sql;
         counter.Calls = 0;
         var pager = new Pager(2, 3, "Name");
@@ -64,7 +66,7 @@ public sealed class SqlFrozenPlanDerivationTest
             ? SqlBuilderRuntimeBridge.CreatePagePlan(plan, pager, new TestSqlBuilder())
             : SqlBuilderRuntimeBridge.CreatePagePlan(plan, pager);
 
-        Assert.Equal(frozen ? 0 : 1, counter.Calls);
+        Assert.Equal(0, counter.Calls);
         Assert.False(page.IsBuilderPlan);
         Assert.Null(page.PlanningBuilder);
         Assert.Equal("Select [Name] \r\nFrom [samples] \r\nWhere [Status]=@_p_0" +

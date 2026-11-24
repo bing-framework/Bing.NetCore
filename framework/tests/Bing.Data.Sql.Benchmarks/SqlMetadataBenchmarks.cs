@@ -518,11 +518,52 @@ internal static class Program
             Environment.ExitCode = SqlGeneratedMutationBenchmarks.RunAllocationProbe(args[index + 1]);
             return;
         }
+        if (args.Contains("--generated-mutation-columns-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedMutationColumnsBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--generated-mutation-rows-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlGeneratedMutationRowsBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
         if (args.Contains("--query-retention-probe", StringComparer.OrdinalIgnoreCase))
         {
             var index = Array.IndexOf(args, "--output");
             if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
             Environment.ExitCode = SqlQueryRetentionProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--query-plan-freeze-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            if (index < 0 || index + 1 >= args.Length)
+                throw new ArgumentException("--query-plan-freeze-probe requires --output <json-path>.");
+            Environment.ExitCode = SqlQueryPlanReuseBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--query-template-ir-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            if (index < 0 || index + 1 >= args.Length)
+                throw new ArgumentException("--query-template-ir-probe requires --output <json-path>.");
+            Environment.ExitCode = SqlQueryTemplateIrBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--returning-projection-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var outputIndex = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            if (outputIndex < 0 || outputIndex + 1 >= args.Length)
+                throw new ArgumentException("--returning-projection-probe requires --output <json-path>.");
+            Environment.ExitCode = SqlReturningProjectionProbe.Run(args[outputIndex + 1]);
             return;
         }
         if (args.Contains("--generated-allocation-probe", StringComparer.OrdinalIgnoreCase))
@@ -557,6 +598,15 @@ internal static class Program
             var index = Array.IndexOf(args, "--output");
             if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
             Environment.ExitCode = SqlBuilderStateProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--column-clone-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.FindIndex(args, argument =>
+                string.Equals(argument, "--output", StringComparison.OrdinalIgnoreCase));
+            if (index < 0 || index + 1 >= args.Length)
+                throw new ArgumentException("--column-clone-probe requires --output <json-path>.");
+            Environment.ExitCode = SqlColumnCloneAllocationProbe.Run(args[index + 1]);
             return;
         }
         if (args.Contains("--uow-probe", StringComparer.OrdinalIgnoreCase))

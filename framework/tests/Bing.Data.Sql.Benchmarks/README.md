@@ -1,5 +1,328 @@
 # SQL 元数据与执行资源测量
 
+## Right Join 保留侧过滤的测量边界（2026-11-24）
+
+本次复用 `SqlFilterPlacementPlanner` 的来源扫描、谓词和参数路径，移除保留侧的提前拒绝，并继续检查后续连接。没有修改映射缓存、格式化热路径或 Builder 克隆，没有新增请求容器、缓存和公共 API。旧版本在该输入上抛出异常，因此相同成功查询的 before/after 为 NOT_APPLICABLE；本次以完整 SQL、冻结 Count/Page 和 SQLite 结果集回归验收，不新增伪造的历史基准，也不宣称 CPU、分配或吞吐提升。现有基准场景不受此新增成功路径影响，未重新运行重型性能矩阵。
+
+## Returning 静态只读投影复用（2026-11-24）
+
+`SqlReturningProjectionBenchmarks` 新增 `BuildGeneratedCachedProjection` 和 `BuildGeneratedCachedComputedProjection`。Models 项目使用同一个 `static readonly Expression` 字段，生成器识别声明处的直接 Lambda；Setup 与探针逐项校验完整 SQL。正式方法发现为 15 项，本次只运行固定分配探针，不运行方法 CPU 或生产容量作业。
+
+`SqlReturningProjectionProbe-v5`：.NET 8.0.30/Windows x64、`DOTNET_TieredCompilation=0`，每场景 2,048 次预热、7×5,000 次采样。先用未修改的生成器编译并保存 Models DLL，最终在同一个宿主中仅替换前后 Models DLL；实际宿主逐文件哈希已核对，只有该文件不同。
+
+| 场景 | 修改前 B/次（中位数） | 修改后 B/次（中位数） | 减少 |
+| --- | ---: | ---: | ---: |
+| generated-cached-columns | 8,344 | 6,440 | 1,904 B，22.82% |
+| generated-cached-arithmetic | 8,608 | 6,440 | 2,168 B，25.19% |
+| 原有 13 场景 | 各自原值 | 各自原值 | 0 B |
+
+上述前后比较都使用复用字段；收益来自字段调用也能采用生成布局和 SQL，不再回退到运行时解析。相同最终宿主的内联生成场景分别为 7,784.064 和 7,864.064 B/次，字段复用还避免了逐次 Expression 构造。Models 程序集从 80,896 B 增为 81,920 B，生成布局和 SQL 常量增加了 1,024 B 的代码体积。字段在预热前初始化一次；初始化分配与可能的裁剪警告仍存在，不代表进程零分配或所有 Lambda 零反射。测量包含 Builder、参数快照和命令构造，不含数据库 I/O、并发、保留堆、方法 CPU 或容量验收。
+
+原始 `probe-before.json`、`probe-after.json` 和 `comparison.json` 保留在 `artifacts/benchmarks/returning-cache/b1/`。初始未固定分层编译配置的 `initial-before.json` 仅作诊断，不参与结论。宿主身份、命令、前后 Models 和源代码见 [verification.json](../../../artifacts/ai-tasks/returning-cache/verification.json)。可重建输出限定 `artifacts/validation/returning-cache/b1/`，归档后清理。
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --returning-projection-probe --output artifacts/benchmarks/returning-cache/b1/probe-after.json
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --filter '*SqlReturningProjectionBenchmarks*' --artifacts artifacts/benchmarks/returning-cache/b1/formal
+```
+
+## Returning 固定物理名的预生成（2026-11-24）
+
+`SqlReturningProjectionBenchmarks` 新增 `BuildGeneratedQuotedProjection` 和 `BuildGeneratedQuotedComputedProjection`，物理列名含空格或内部反引号；Setup 校验完整 SQL。正式 13 个方法的发现通过，本次没有运行正式 CPU 或吞吐基准。
+
+`SqlReturningProjectionProbe-v4` 包含原 11 场景和上述 2 场景；.NET 8.0.30/Windows x64、`DOTNET_TieredCompilation=0`、2,048 预热、7×5,000 次，包含原 API 的调用点 Expression 构造。修改前先编译并保存 Models DLL；最终配对固定同一编译宿主及全部其他依赖，只替换前后 Models DLL。原始结果为 `artifacts/benchmarks/returning-names/b1/paired-before.json`、`paired-after.json`。
+
+| 场景 | 修改前 B/次（中位数） | 修改后 B/次（中位数） | 少分配 |
+| --- | ---: | ---: | ---: |
+| generated-quoted-columns | 9,432.064 | 7,784.064 | 1,648 B，17.47% |
+| generated-quoted-arithmetic | 10,768.192 | 8,080.128 | 2,688.064 B，24.96% |
+| 其余原 11 场景 | 各自原值 | 各自原值 | 0 B |
+
+两项减少来自提前复用 SQL 文本及静态列布局。Models 程序集从 77,824 B 增为 79,872 B，保留了生成常量带来的代码体积代价。无数据库 IO、并发请求、保留堆、方法 CPU、干净构建峰值或生产容量结论；原始耗时有升有降，不据此宣称统一加速。
+
+最初 `before.json`/`after.json` 的宿主重新编译后哈希不同，因此原始结果保留作诊断，最终使用固定宿主的配对。`paired-before.json` 使用保存的真实修改前 Models DLL；`paired-after.json` 复用已用完全相同最终宿主测量的 `after.json`，没有重复挑选候选样本。全部身份、两组比较、日志及重放命令见 [verification.json](../../../artifacts/ai-tasks/returning-names/verification.json)。隔离构建根为 `artifacts/validation/returning-names/b1/`，可重建输出在证据归档后清理。
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --returning-projection-probe --output artifacts/benchmarks/returning-names/b1/paired-after.json
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --filter '*SqlReturningProjectionBenchmarks*' --artifacts artifacts/benchmarks/returning-names/b1/formal
+```
+
+## Returning 一元运算与既有场景分配
+
+2026-11-24 增加 `SqlReturningArithmeticBenchmarks` 三个正式场景：`CreateBinaryComputed`、`CreateUnaryArithmetic`、`AppendMappedArithmetic`。Setup 对二元、一元及 SQL Server 物理映射后投影断言完整 SQL；输入片段和复用缓冲区在测量前建立，构造与渲染分开测量。三项发现通过，本轮没有执行 FormalHost 计时作业。
+
+复用 `SqlReturningProjectionProbe-v3` 的 11 个端到端构建场景，两个进程使用同一编译 harness 和依赖，仅替换真实修改前/后 SQL 程序集；.NET 8.0.30/Windows x64，`DOTNET_TieredCompilation=0`，每场景预热 2,048，7×5,000 次。11 项托管分配中位数全部相同（B/次）：cached anonymous 8,344，cached DTO 8,232，runtime inline anonymous 9,744.096，runtime inline DTO 9,544，generated anonymous 7,784.064，generated DTO 7,696，cached computed 8,608，runtime inline computed 10,088.096，generated computed 7,864.064，cached remapped computed 8,672，generated remapped computed 9,592.096。该对照验证新算术校验没有增加既有场景分配，不能用它声称新增负号已降低 CPU 或提高生产吞吐。新增负号正式基准仍供目标主机测量。
+
+原始配对样本保留在 `artifacts/benchmarks/returning-unary/b1/before.json`、`after.json`，完整身份及日志见 [verification.json](../../../artifacts/ai-tasks/returning-unary/verification.json)。构建输出限定 `artifacts/validation/returning-unary/b1/`；运行示例（从仓库根目录，程序集使用隔离输出）：
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --returning-projection-probe --output artifacts/benchmarks/returning-unary/b1/after.json
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --filter '*SqlReturningArithmeticBenchmarks*' --artifacts artifacts/benchmarks/returning-unary/b1/formal
+```
+
+本轮没有运行方法级 CPU、完整干净构建进程峰值或生产容量验证；这些需要在对应目标环境单独验收。
+
+## 不可变列值与克隆
+
+2026-11-24 新增 `SqlColumnCloneBenchmarks`：1/32/128 列的 `CloneColumnCollection` 与 `CloneSqliteBuilder`。Setup 断言完整列 SQL 和完整 Builder SQL、聚合与别名保留，以及修改克隆后源对象不变。
+
+固定分配探针使用同一编译 harness 及其余依赖，仅替换真实修改前/后的 `Bing.Data.Sql.dll`；.NET 8.0.30 / Windows x64，`DOTNET_TieredCompilation=0`，每格预热 2,048 次，采样 5×2,000 次。中位数如下（B/次，四舍五入；每个样本另含固定计时器分配 40 B）：
+
+| 操作 | 1 列 before→after | 32 列 before→after | 128 列 before→after |
+| --- | --- | --- | --- |
+| ColumnCollection.Clone | 224→88 | 2,456→336 | 9,368→1,104 |
+| SqliteBuilder.Clone | 3,896→3,768 | 6,128→4,016 | 13,040→4,784 |
+
+128 列时分别减少约 88.2% 和 63.3% 托管分配。`ColumnItem` 不可变后可共享值，每次克隆仅复制列容器；它没有改变其他 Clause 的可变草稿合同。分配探针入口：
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --column-clone-probe --output artifacts/benchmarks/clause-values/b1/after.json
+```
+
+先创建输出父目录，构建产物必须放在 `artifacts/validation/`，不可使用默认 `dotnet run` 在源码目录产生输出。正式 BenchmarkDotNet 运行应显式传 `--filter '*SqlColumnCloneBenchmarks*' --artifacts artifacts/benchmarks/<任务>/<批次>`。本次执行了两个正式方法的发现和固定分配探针，没有执行计时基准、方法 CPU 或生产容量测量。原始样本：`artifacts/benchmarks/clause-values/b1/before.json`、`after.json`；源码、程序集身份与验证记录见 [验收证据](../../../artifacts/ai-tasks/clause-values/verification.json)。
+
+## 动态过滤局部渲染工作区
+
+2026-11-24 在 `SqlQueryTemplateIrBenchmarks` 增加 `FreezeFilteredSnapshot` 和 `FreezeFilteredPlan`，分别覆盖直接冻结动态过滤和 SqlQuery 隔离草稿后的完整计划创建。过滤器与业务条件共享一次参数快照；Setup 断言完整 SQL、参数名称和值。正式基准共七个方法，`SqlQueryTemplateIrAllocation-v2` 覆盖 1/8 条件共十四格。
+
+配对使用同一份修改前编译的 harness（SHA256=812a423a3e452e9c02e0a6869ba65c1649607864f0fea3c880c6137864596983）及全部依赖，仅替换真实的 `Bing.Data.Sql.dll`；.NET 8.0.30/Windows x64，`DOTNET_TieredCompilation=0`，2,048 次预热，每格 5×2,000 次采样。托管分配中位数如下（B/次）：
+
+| 操作 | 1 条件：修改前 → 后 | 8 条件：修改前 → 后 |
+| --- | ---: | ---: |
+| CreateTemplate | 11,016 → 10,800 | 17,960 → 17,744 |
+| RenderScopedTemplate | 4,240 → 4,240 | 12,400 → 12,400 |
+| CreatePlan | 192 → 192 | 192 → 192 |
+| FreezeFilteredSnapshot | 18,608.496 → 13,992.248 | 26,192.744 → 21,128.496 |
+| FreezeFilteredPlan | 23,224.496 → 18,840.496 | 31,816.744 → 26,984.744 |
+| DeriveCount | 520 → 520 | 1,080 → 1,080 |
+| DerivePage | 2,552 → 2,552 | 3,168 → 3,168 |
+
+动态过滤快照减少约 24.81%/19.33%，完整计划减少约 18.88%/15.19%。默认路径只复制需要修改的 Where/Join/参数/排序工作区；自定义 SQL 尾部、原生排序及未被冻结结构覆盖的分页路径，仍将同次过滤状态提升为独立规划副本。过滤器的冻结集合直接读取，消除每次重复的 `ToList`。没有增加公共 API、请求值缓存或参数池。
+
+原始配对数据为 `artifacts/benchmarks/filter-render/b1/before.json` 与 `after.json`；中间诊断数据单独保留，不参与最终表。正式基准发现七个方法通过，本次只执行托管分配探针，未执行计时 ShortRun、方法 CPU 或生产并发容量测量。[TDD、程序集身份与原始证据](../../../artifacts/ai-tasks/filter-render/verification.json)
+
+## 冻结参数派生复用与组合只读视图
+
+2026-11-24 沿用 `SqlQueryTemplateIrBenchmarks` 的五个正式场景和原有 Setup，测量 Count/Page 不再深拷贝未变业务参数的效果。组合只读视图按访问延迟创建，内部渲染/Clone 直接访问私有列表；已有 `MySqlBuilderCloneBenchmarks` 覆盖 Builder 克隆，`SqlBuilderCteAndParameterTokenBenchmarks.ConfigureCteSnapshotAndRender` 覆盖 CTE 快照及渲染；组合正确性由直接单元和 SQLite 用例校验，本次不新增重复基准。此次更新测量说明，未修改 harness 源码。
+
+同一份修改前编译的 harness（SHA256=b5fbb0808170cdf30d8c04a27c37bdf9375229490e8ba872cf853bc9ac587ac2），分别加载修改前、后的运行库；.NET 8.0.30/Windows x64，2,048 预热，每格 5×2,000，托管分配中位数如下（B/次）：
+
+| 操作 | 1 条件：修改前 → 后 | 8 条件：修改前 → 后 |
+| --- | ---: | ---: |
+| CreateTemplate | 11,192 → 11,144 | 18,136 → 18,088 |
+| RenderScopedTemplate | 4,240 → 4,240 | 12,400 → 12,400 |
+| CreatePlan | 192 → 192 | 192 → 192 |
+| DeriveCount | 1,136 → 520 | 2,704 → 1,080 |
+| DerivePage | 3,400 → 2,616 | 5,144 → 3,232 |
+
+Count 少约 54.2%/60.1%，Page 少约 23.1%/37.2%。公开参数与执行绑定仍隔离复制，第一次输入和作用域转换仍需冻结；优化只共享框架内部已经冻结的参数，没有引入参数池、缓存或反射。构建和五方法发现通过；这里只执行分配探针，没有运行计时 Benchmark 或生产并发容量测量。
+
+原始样本位于 `artifacts/benchmarks/query-state/b1/before.json` 和 `after-same-harness.json`；新编译 harness 的辅助样本另存 `after.json`，不混入上述配对表。源码、实际程序集、命令和留档副本见 [验收记录](../../../artifacts/ai-tasks/query-state/verification.json)。
+
+## 查询模板保留 IR
+
+`SqlQueryTemplateIrBenchmarks` 覆盖 1/8 个条件下的 CreateTemplate、RenderScopedTemplate、CreatePlan、DeriveCount、DerivePage。Setup 核对全部 SQL、参数名称和值；正式构建及五方法发现通过。分配探针使用相同 harness，仅更换本次功能 RED 时冻结的旧运行库与最终运行库。
+
+```powershell
+dotnet $benchmarkDll --query-template-ir-probe --output artifacts/benchmarks/template-ir/current/allocation.json
+dotnet $benchmarkDll --filter '*SqlQueryTemplateIrBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/template-ir/short
+```
+
+.NET 8.0.30/Windows x64，2,048 次预热，每格 5×2,000 次采样，全部样本稳定为下列 B/次：
+
+| 操作 | 1 条件：修改前 → 后 | 8 条件：修改前 → 后 |
+| --- | ---: | ---: |
+| 创建模板 | 10,424 → 11,192 | 15,888 → 18,136 |
+| 渲染参数作用域 | 1,920 → 4,240 | 10,856 → 12,400 |
+| 从共享模板创建计划 | 1,248 → 192 | 4,360 → 192 |
+| 从模板 IR 派生 Count | 不支持 → 1,136 | 不支持 → 2,704 |
+| 从模板 IR 派生 Page | 不支持 → 3,400 | 不支持 → 5,144 |
+
+共享模板创建计划少分配约 84.6%/95.6%；模板创建和作用域重命名增加结构、位置与预留分页槽位的成本，尤其少参数场景应按实际调用组合评估。模板适合在结构和值稳定时复用，独立计划无需每次更换参数作用域。IR 与片段内部共享冻结参数，作用域渲染只深拷贝一次，公开读取继续隔离；独立复核消除的第二次参数克隆使当前作用域路径比初稿再少 320/1,384 B。
+
+历史运行库不提供模板 IR，Count/Page 在 before 报告中明确为 unsupported，不进行语义不同的历史对比。这是托管分配探针，未运行计时 ShortRun，不用于 CPU、数据库吞吐、P99 或容量判断。初稿与最终原始样本保存在 `artifacts/benchmarks/template-ir/b1/`；源码、程序集身份及全部验证见 [模板 IR 证据](../../../artifacts/ai-tasks/template-ir/verification.json)。
+
+## Returning 投影生成 SQL
+
+`SqlReturningProjectionBenchmarks` 使用相同 SQLite 模型、Update/Where、参数和完整 SQL 比较十一个场景：缓存表达式、每次创建表达式的运行时调用，以及独立 Models 程序集中的真实生成式调用，各含匿名对象、DTO 初始化和列运算；另有运行时映射变化时的缓存表达式与生成调用。列运算固定为 `(Id + Id) * Id`。Setup 分别验证直接投影、计算投影和重映射投影的完整 SQL 及参数。生成场景仍计入调用时 Expression 树的构造；运行时场景放在未开启查询拦截的程序集，避免比较的两端实际走同一生成路径。
+
+```powershell
+# benchmarkDll 指向 artifacts/validation/ 下隔离构建的正式基准程序集。
+dotnet $benchmarkDll --returning-projection-probe --output artifacts/benchmarks/returning-bind/current/allocation.json
+dotnet $benchmarkDll --filter '*SqlReturningProjectionBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/returning-bind/short
+```
+
+此前列运算扩展的本机 .NET 8.0.30/Windows x64 样本，2,048 次预热，每格 7×5,000 次采样，分配中位数如下（B/次）：
+
+| 投影 | 缓存表达式 | 运行时内联表达式 | 生成式内联表达式 |
+| --- | ---: | ---: | ---: |
+| 匿名对象 | 8,856 | 10,256.096 | 8,040.064 |
+| DTO 初始化 | 8,744 | 10,056 | 7,760 |
+| 列运算 | 8,672 | 10,088.096 | 7,864.064 |
+
+对应内联路径少分配约 21.6% / 22.8% / 22.0%。匿名生成场景的七个样本为 7,848.064～8,040.096 B/次，缓存列运算为 8,608～8,672 B/次，保留这些波动；DTO 生成场景稳定为 7,760 B/次。这是同一候选中可选路径的比较，既有生成布局也参与结果，不能把全部差值归因于本次列运算扩展，也不是历史版本前后对照。新列运算没有等价历史基线；探针版本为 `SqlReturningProjectionProbe-v2`。
+
+测量包含 Builder、表达式树、冻结命令与参数快照构造，不含数据库 I/O。每个生成调用点使用静态列布局、Provider SQL 常量和工厂；计算列保存一次复制的不可变片段，普通列没有新增引用字段，没有新增请求值缓存或共享可变 Builder。此前完成分配探针、正式基准构建和九方法发现，ShortRun 只提供复现命令；原始耗时不作为 CPU、吞吐、P99 或生产容量结论。[列运算证据与源码/程序集身份](../../../artifacts/ai-tasks/returning-math/verification.json) · [先前直接列证据](../../../artifacts/ai-tasks/returning-sql/verification.json)
+
+2026-11-24 增加 `BuildCachedRemappedComputedProjection` 与 `BuildGeneratedRemappedComputedProjection`，探针升级为 `SqlReturningProjectionProbe-v3`。映射把 `row_id/display_name` 改为 `tenant_id/tenant_name`，生成器输出当前列布局的绑定代码，避免已识别计算投影再次解析 Expression。正式基准构建和十一个方法发现通过。
+
+配对测量使用同一份修改前编译的基准程序及全部运行库，只替换由前后两个生成器产生的 Models 程序集；关闭分层 JIT（`DOTNET_TieredCompilation=0`），保留相同的 2,048 预热和 7×5,000 采样。重映射生成场景中位数从 10,192.096 降为 9,592.096 B/次，减少 600 B（约 5.9%），其余十个场景分配中位数未变；映射解析次数另由单元测试断言一次。开启分层 JIT 的辅助样本不参与这一结论。原始配对样本在 `artifacts/benchmarks/returning-bind/b1/stable-before.json` 与 `stable-after.json`，程序集身份和复现条件见 [本次证据](../../../artifacts/ai-tasks/returning-bind/verification.json)。没有据此宣称 CPU 或生产容量改善。
+
+## 公开计划工厂与冻结复用
+
+`SqlQueryPlanReuseBenchmarks.PublicFactoryFreeze` 对同一个稳定 Builder 调用 `SqlQueryPlan.Create(builder).Freeze()`，前后语义一致；`FrozenPlanFreeze` 只复用已冻结计划。Setup 验证完整 SQL/参数及 Freeze 的同一性，不要求旧版公开 Create 已冻结。原 FirstTerminal、RepeatedTerminal 和保留查询场景继续存在。
+
+```powershell
+# benchmarkDll 指向 artifacts/validation/ 下隔离构建的正式基准程序集。
+dotnet $benchmarkDll --query-plan-freeze-probe --output artifacts/benchmarks/plan-entry/current/allocation.json
+dotnet $benchmarkDll --filter '*SqlQueryPlanReuseBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/plan-entry/short
+```
+
+Windows x64/.NET 8.0.30，同一最终 harness，2,048 次预热、每格 5×5,000 次采样，前后均构建真实运行库。公开工厂 1/8 条件的中位数分别为 11,424→11,256 / 18,368→18,200 B/次，均减少 168 B（1.47% / 0.91%）；已冻结计划重复 Freeze 前后均为 0 B/次。五个正式基准方法均发现，当前只执行分配探针，Short 命令是后续复现入口；不推导 CPU、吞吐、P99 或驻留堆。[原始样本、命令与二进制身份](../../../artifacts/ai-tasks/plan-entry/verification.json)
+
+## 多行多列筛选 InsertCombined
+
+`SqlGeneratedMutationRowsBenchmarks` 覆盖 SQLite 3/12 行、Include/Exclude 共四种负载、八格路径。使用独立模型项目的真实源生成代码；对照模型仅禁用 `GeneratedMutationColumnsSql`，保留相同映射、Getter 和静态 binder。Setup 核对完整 SQL、行优先参数名称和值、实际工厂命中，以及两条路径相同的 binder；计数器不进入正式测量。
+
+```powershell
+# $benchmarkDll 指向 artifacts/validation/ 下隔离构建的入口程序集。
+dotnet $benchmarkDll --generated-mutation-rows-probe --output artifacts/benchmarks/selected-rows/current/allocation.json
+dotnet $benchmarkDll --filter '*SqlGeneratedMutationRowsBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/selected-rows/short
+```
+
+本机 .NET 8.0.30/Windows x64，2,048 次预热、每格 5×5,000 次采样，中位数如下（B/次）。两条路径来自同一候选；默认/单列形状工厂保持启用，测量的三列子集只能由本轮选列工厂接管。
+
+| 行数 | Include：Builder → 生成 | Exclude：Builder → 生成 | 减少 |
+| --- | ---: | ---: | ---: |
+| 3 | 22,752 → 12,568 | 22,568 → 12,448 | 44.76% / 44.84% |
+| 12 | 82,840 → 36,176 | 82,784 → 36,120 | 56.33% / 56.37% |
+
+减少比例按 Include / Exclude 顺序列出。只测量托管命令构造分配，不含数据库 I/O，不推导 CPU、吞吐、P99 或生产容量。完整 SQL 有四 Provider 直接单元覆盖，本基准仅测 SQLite。当前执行分配探针与基准发现，Short 命令仅为复现入口，未声称计时基准已运行。[本轮命令、原始数据与源码身份](../../../artifacts/ai-tasks/selected-rows/verification.json)
+
+## 单行多列筛选 Insert/Update
+
+`SqlGeneratedMutationColumnsBenchmarks` 比较同一 SQLite 模型、静态 Getter/binder 和输入下的生成片段与 Builder 回退。正式夹具在独立 `Bing.Data.Sql.Benchmarks.Models` 项目编译时生成，避免把查询拦截器加到已有运行时 Lambda 基准。覆盖 Insert/Update × Include/Exclude × 普通/整行 Returning 共八种负载、十六格路径。Setup 验证完整 SQL、参数名及值、Returning/生成标记和相同静态 binder，确认多列工厂确实命中，不用预制 SQL 常量代替生成算法。
+
+```powershell
+# $benchmarkDll 指向 artifacts/validation/ 下隔离构建的入口程序集。
+dotnet $benchmarkDll --generated-mutation-columns-probe --output artifacts/benchmarks/selected-columns/current/allocation.json
+dotnet $benchmarkDll --filter '*SqlGeneratedMutationColumnsBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/selected-columns/short
+```
+
+本机 .NET 8.0.30/Windows x64，2,048 次预热、每格 5×5,000 次采样，中位数如下（B/次）。两条路径来自同一候选，通过将模型的可选列 SQL 工厂置空选择 Builder；此表不是历史版本前后测量。
+
+| 操作 | Include：Builder → 生成 | Exclude：Builder → 生成 |
+| --- | ---: | ---: |
+| Insert | 11,104 → 5,928 | 10,664 → 5,808 |
+| InsertReturning | 18,848 → 6,720 | 17,512 → 6,600 |
+| Update | 14,104 → 8,464 | 14,048 → 8,408 |
+| UpdateReturning | 20,952 → 9,528 | 20,896 → 9,472 |
+
+八组命令构造分配减少约 40%～65%。只验证 SQLite 托管分配；其他 Provider 有完整 SQL 单元覆盖，没有在本基准测量。测量不含数据库 I/O，不推导 CPU、吞吐、P99 或生产容量。原始 JSON、日志、命令及程序集/源码身份见 [筛选列证据](../../../artifacts/ai-tasks/selected-columns/verification.json)。ShortRun 命令为复现入口，本次仅执行分配探针与基准发现，不将其写成已运行的计时基准。
+
+新增运行的报告、日志和探针输出统一放在仓库根目录的 `artifacts/benchmarks/sql/<运行批次>/`，临时构建和源码副本放在 `artifacts/validation/`。下文命令从仓库根目录运行，BenchmarkDotNet 必须显式指定 `--artifacts`；重复测量使用新的批次目录。历史任务路径仅表示当时的留档位置，新复现使用上述统一目录。
+
+## 复合键与并发列的批量 Delete 命令
+
+`SqlGeneratedPairedDeleteBenchmarks` 覆盖 SQLite/MySQL/PostgreSQL/SQL Server、3/12 行和 SQL 生成开关，共 16 格。每行包含两个键和一个版本列；两条路径使用相同的静态 Getter、映射及参数绑定。Setup 比较完整 SQL、参数元数据和并发标记，生成式委托每次按实际行数展开参数槽位及原 Builder 的逐层 OR 括号；不复用预制 SQL，也不在请求中格式化列名。测量包含冻结命令构造，不含数据库 IO。
+
+```powershell
+# $benchmarkDll 指向 artifacts/validation/ 下隔离构建的基准程序集。
+dotnet $benchmarkDll --filter '*SqlGeneratedPairedDeleteBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/paired-delete/current
+```
+
+本机 .NET 8.0.30/Windows x64 的 2,048 次预热、5×5,000 次采样，正式 corrected pair 得到下列中位数（B/次）。生成路径八格均命中；before 使用功能 RED 构建时冻结的运行库。
+
+| Provider | 3 行：修改前 → 后 | 减少 | 12 行：修改前 → 后 | 减少 |
+| --- | ---: | ---: | ---: | ---: |
+| SQLite | 23,264 → 11,920 | 48.8% | 93,472 → 37,744 | 59.6% |
+| MySQL | 23,136 → 11,856 | 48.8% | 93,472 → 37,744 | 59.6% |
+| PostgreSQL | 23,200 → 11,864 | 48.9% | 93,536 → 37,752 | 59.6% |
+| SQL Server | 23,144 → 11,864 | 48.7% | 93,480 → 37,752 | 59.6% |
+
+动态回退对照各格增加 32 B/次，约 0.03%～0.14%，完整数值保留。只报告托管分配，不推导 CPU、数据库吞吐、P99 或生产容量。正式基准项目隔离构建和基准发现通过。
+
+正式分配对照要求 before/after 使用同一最终 harness 源码 SHA，before 仅引用修改前冻结程序集。三行及以上的完整 SQL 比较曾发现生成路径平铺 OR 与旧 Builder 逐层括号不一致，已补入生成器回归并修正；首次 after 失败及旧 harness 的 before 记录只保留为过程证据。原始报告、命令和源码/程序集摘要归档于 [paired-delete](../../../artifacts/ai-tasks/paired-delete/verification.json)。Oracle 有完整生成 SQL 单元覆盖，本基准未新增 Oracle 依赖。
+
+## 单主键批量 Delete 命令
+
+`SqlGeneratedBatchDeleteBenchmarks` 覆盖 SQLite/MySQL/PostgreSQL/SQL Server、3/12 行和 SQL 生成开关，共 16 格。两条路径使用相同模型、生成 Getter、参数绑定及输入；Setup 逐项核对完整 SQL、执行标记和 `SqlParam` 元数据。生成委托每次都执行与生成代码相同的 `StringBuilder` 和 IN 参数槽位展开，不复用预制 SQL 字符串。命令构造包含冻结参数快照，不含数据库 IO。
+
+```powershell
+# $benchmarkDll 指向 artifacts/validation/ 下隔离构建的基准程序集。
+dotnet $benchmarkDll --filter '*SqlGeneratedBatchDeleteBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/batch-delete/current
+```
+
+本机 .NET 8.0.30/Windows x64 的同源码探针，以 2,048 次预热、5×5,000 次采样比较修改前冻结库与当前库。下表是登记生成式 SQL 的相同输入在前后两版的分配中位数（B/次）；旧版尚未调用批量 Delete 形状委托，新版八个生成格均命中。
+
+| Provider | 3 行：修改前 → 后 | 减少 | 12 行：修改前 → 后 | 减少 |
+| --- | ---: | ---: | ---: | ---: |
+| SQLite | 8,688 → 4,944 | 43.1% | 约 19,767.44 → 13,712 | 30.6% |
+| MySQL | 8,432 → 4,880 | 42.1% | 19,640 → 13,712 | 30.2% |
+| PostgreSQL | 8,496 → 4,888 | 42.5% | 19,704 → 13,720 | 30.4% |
+| SQL Server | 8,440 → 4,888 | 42.1% | 19,648 → 13,720 | 30.2% |
+
+动态渲染对照保留：SQLite 的 3/12 行分别为 8,688→8,720、19,768→19,928；MySQL 为 8,432→8,592、19,640→19,672；PostgreSQL 为 8,496→8,528、19,704→19,736；SQL Server 为 8,440→8,472、19,648→19,680 B/次。未将这组小幅增量写成完全不变，也未用分配结果推导 CPU、数据库吞吐、P99 或生产容量。
+
+首轮形状委托遗漏运行时槽位展开，已标记为 stale，不能用于性能结论。正式 corrected pair 使用同一最终基准源码 SHA；before 仅引用编辑前冻结程序集，不重建旧业务源码。原始 corrected JSON、初始无效证据及命令/源码/二进制摘要最终归档于 [batch-delete](../../../artifacts/ai-tasks/batch-delete/verification.json)，可重建的临时构建与采样输出按仓库规则清理。Oracle 有生成器完整 SQL 覆盖，本基准未纳入该 Provider。
+
+## 实体整行 Returning 命令
+
+`SqlGeneratedReturningBenchmarks` 比较同一 SQLite 模型、生成 Getter、静态参数绑定和并发配置下，`InsertReturning` / `UpdateReturning` / `DeleteReturning` 的动态渲染与完整 SQL 常量路径。`UseGeneratedSql` 只切换模型的 SQL 工厂；每格 Setup 校验完整 SQL、返回标记、绑定器，生成路径还校验常量引用。测量包含命令和参数快照构造，不包含数据库 IO、读取或网络，也不代表历史版本前后对比。
+
+```powershell
+# benchmarkDll 指向使用 artifacts/validation/ 隔离构建得到的程序集。
+dotnet $benchmarkDll --filter '*SqlGeneratedReturningBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/crud-returning/current
+```
+
+原始报告统一位于 `artifacts/benchmarks/crud-returning/current/`；最终命令、源码身份和结果见 [验证清单](../../../artifacts/ai-tasks/crud-returning/verification.json)。首次 API 验证没有等价历史版本，故其 before 归类为 `NOT_APPLICABLE`；本次后续命令直通优化的同候选 before/after 见下文。这里的分支测量不替代其他 Provider 性能、方法 CPU 或生产容量验收。
+
+本机 .NET 8.0.30/Windows x64 的六项 InProcess ShortRun（3 次预热、3 次测量）完成：Insert 12.21→7.23 KB/次，Update 13.94→9.16 KB/次，Delete 10.36→6.42 KB/次，约少 34%～41%。报告保留在 `artifacts/benchmarks/crud-returning/current/`；仅比较同候选命令构建分配，不代表数据库吞吐、方法 CPU 或生产容量。
+
+### 生成式命令直通前后
+
+本次比较复用上方六格中的 `UseGeneratedSql=True` 作为优化前数据；基准源码、项目文件、模型、输入、生成 Getter、静态 Binder 和 ShortRun/InProcess 配置均未变。优化后渲染路径分配保持不变，生成路径的命令构造分配如下：
+
+| 操作 | 优化前生成路径 | 优化后生成路径 | 分配减少 |
+| --- | ---: | ---: | ---: |
+| Insert | 7.23 KB/次 | 4.18 KB/次 | 3.05 KB（42.2%） |
+| Update | 9.16 KB/次 | 5.47 KB/次 | 3.69 KB（40.3%） |
+| Delete | 6.42 KB/次 | 3.56 KB/次 | 2.86 KB（44.5%） |
+
+优化后的渲染路径仍为 Insert 12.21、Update 13.94、Delete 10.36 KB/次。复现命令：
+
+```powershell
+dotnet $benchmarkDll --filter '*SqlGeneratedReturningBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/crud-direct/after
+```
+
+`$benchmarkDll` 指向 `artifacts/validation/crud-direct/perf/after/managed/bin/Bing.Data.Sql.Benchmarks/Release/net8.0/Bing.Data.Sql.Benchmarks.dll`。原始 before/after 报告分别保留在 `artifacts/benchmarks/crud-returning/current/` 和 `artifacts/benchmarks/crud-direct/after/`；命令、输入与二进制 SHA256 见后者的 `after-evidence.json`。两次都是六格本地命令构造测量，不含数据库 I/O；after 报告未识别 CPU 型号，故只报告分配变化，不解读耗时差异，也不推导方法 CPU、吞吐或生产容量。
+
+## Returning 子句克隆与映射查找
+
+`SqlReturningClauseCloneBenchmarks` 对同一现有子句执行 `Clone`，覆盖 4、32、128 列；Setup 核对来源与克隆的完整 SQL。新旧实现使用相同基准源码、Windows x64、.NET 8.0.30、BenchmarkDotNet 0.14.0、InProcess/ShortRun（3 次预热、3 次测量）。克隆仍复制独立列表，复用不可变的 `SqlReturningColumn`；不重建每列对象和 LINQ 中间数组。
+
+| 列数 | 修改前分配/次 | 修改后分配/次 |
+| --- | ---: | ---: |
+| 4 | 416 B | 128 B |
+| 32 | 1,984 B | 352 B |
+| 128 | 7,360 B | 1,120 B |
+
+```powershell
+dotnet $benchmarkDll --filter '*SqlReturningClauseCloneBenchmarks*' --job Short --inProcess --artifacts artifacts/benchmarks/returning-alloc/after
+```
+
+原始配对报告位于 `artifacts/benchmarks/returning-alloc/before/` 和 `after/`，命令、相关源码及程序集摘要见 [验证清单](../../../artifacts/ai-tasks/returning-alloc/verification.json)。ShortRun 的耗时只作为局部观测，不外推请求吞吐或生产容量。既有 `SqlReturningProjectionBenchmarks` 的两项匿名/DTO 构建场景另以 Dry 冒烟通过；映射查找改动由计数测试确认默认映射逐列一次字典查找、零集合扫描，自定义映射仍保留首项扫描语义，不将 Dry 数值解释为映射加速比例。
+
+## 静态 Schema 完整生成 SQL
+
+`SqlGeneratedMutationBenchmarks` 增加 `PostgreSQLSchema`，比较相同 `sales_2026` 模型下的渲染与常量路径，沿用六种操作和完整 SQL、静态 Binder、常量身份的 Setup 检查。已有四 Provider 分配探针的负载不变；Schema 场景通过 BenchmarkDotNet 参数选择。本次 12 格 InProcess/Dry 冒烟执行通过，只证明基准路径可运行，`performanceVerified=false`；不将 Dry 数值当作性能提升或生产容量结论。
+
+```powershell
+# $benchmarkDll 指向统一 artifacts/validation 目录中已构建的入口程序集。
+dotnet $benchmarkDll --filter '*SqlGeneratedMutationBenchmarks*PostgreSQLSchema*' --job Dry --inProcess --artifacts artifacts/benchmarks/schema-sql/current
+```
+
+原始报告位于 `artifacts/benchmarks/schema-sql/current/`；构建命令、输出隔离属性及最终验证清单归档于 [schema-sql](../../../artifacts/ai-tasks/schema-sql/verification.json)。Schema 匹配检查在映射计划创建阶段完成，不新增每请求形状缓存。Oracle 本次有完整 SQL 和命令合同测试，没有纳入此基准。
+
 ## PostgreSQL 并发读（Round155）
 
 `--capacity-probe` 通过真实 PostgreSQL 比较运行时 Builder 和共享查询模板。按 1、16、64、256 并发采集成功吞吐、延迟分位、失败数、客户端 CPU、分配与 GC。运行方法、报告口径和已验证范围见 [容量工具说明](../../../eng/perf/README.md#postgresql-并发读验证)。
@@ -38,7 +361,7 @@ SqlGeneratedKeyInsertBenchmarks 使用同一生成模型、键策略、静态参
 
 ~~~powershell
 dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj --no-restore -c Round122Perf -p:ImplicitUsings=enable -p:UseSharedCompilation=false -p:Optimize=true -m:1 -nr:false
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round122Perf/net8.0/Bing.Data.Sql.Benchmarks.dll --generated-key-insert-probe --output output/round122-key-allocation.json
+dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round122Perf/net8.0/Bing.Data.Sql.Benchmarks.dll --generated-key-insert-probe --output artifacts/benchmarks/sql/round122/key-allocation.json
 ~~~
 
 .NET 8.0.30 Windows x64，预热 2048 次，每格 5×10000 次：普通写列 8056→5520 B/次；DEFAULT VALUES 3664→2440 B/次。探针先验证完整 SQL、常量引用、Returning 和静态绑定。是同候选分支比较，不覆盖固定历史 baseline，非正式 BenchmarkDotNet 门禁。原始样本及二进制身份见任务 Round122 收据。数据与包装器收据应使用不同文件名，避免互相覆盖。
@@ -49,7 +372,7 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round122Perf/net8.0/Bing.Dat
 
 ```powershell
 dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj --no-restore -c Round121Perf -p:ImplicitUsings=enable -p:UseSharedCompilation=false -m:1 -nr:false
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round121Perf/net8.0/Bing.Data.Sql.Benchmarks.dll --generated-mutation-probe --output output/round121-allocation.json
+dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round121Perf/net8.0/Bing.Data.Sql.Benchmarks.dll --generated-mutation-probe --output artifacts/benchmarks/sql/round121/allocation.json
 ```
 
 探针先检查完整 SQL、常量引用复用及静态绑定器，再预热 2048 次，每格 5 个样本、每样本 10000 次操作，记录当前线程托管分配。生成 SQL 关闭/开启分别为 Insert 10120/7040 B、Update 11984/9176 B、Delete 8192/6368 B；这是 .NET 8.0.30 Windows x64 本机诊断，原始样本和二进制身份见任务 Round121 收据。`ImplicitUsings=enable` 沿用现有 Benchmark 构建方式，项目已有其他文件依赖该开关。没有执行正式 BenchmarkDotNet Job，不宣称 CPU、并发吞吐、进程峰值或容量门槛通过。
@@ -83,7 +406,7 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/bin/Round121Perf/net8.0/Bing.Dat
 从仓库根目录运行。输出目录的父目录必须已存在，输出目录本身必须为空或尚不存在，并且需位于两个候选目录之外：
 
 ```powershell
-node framework/tests/Bing.Data.Sql.Benchmarks/paired-probe.mjs --before-dir ai_docs/tasks/20261107-sqlquery-command-aot-design/artifacts/fix-round-5/before --after-dir ai_docs/tasks/20261107-sqlquery-command-aot-design/artifacts/fix-round-5/after --output-dir ai_docs/tasks/20261107-sqlquery-command-aot-design/artifacts/fix-round-5/paired-run
+node framework/tests/Bing.Data.Sql.Benchmarks/paired-probe.mjs --before-dir artifacts/validation/sql-paired/before --after-dir artifacts/validation/sql-paired/after --output-dir artifacts/benchmarks/sql/paired/run-01
 ```
 
 每种探针固定执行两对独立进程：`before → after`，随后 `after → before`；不会追加第三次运行。Builder 每进程沿用 2 次预热、5 个样本、32 次草稿操作和 100 次重复渲染；width 每进程沿用 32 次预热和 5 个样本。每种探针的每个形状/操作/模式每个候选汇集 10 个原始样本。报告包含 median、min、max、按 `(n - 1) * 0.95` 线性插值得到的 p95、逐进程原始 JSON、日志、PID、命令、.NET FrameworkDescription、候选程序集与依赖哈希、机器/CPU、Windows 当前电源计划，以及已发现的 CPU profiler 命令（仅盘点、不运行）。width 探针另保留其自身的程序集身份文件。
@@ -116,9 +439,9 @@ Builder基线样本直接复用Round 5 after；当前单次诊断不替代交替
 `ScopedShape` 另行测量固定形状在指定作用域下的 SQL 参数改名及请求快照；它只覆盖普通参数名和单线程渲染。Round 23 的工作负载与分配收据见任务 `performance.md`。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round17-final4-benchmark/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round17-final4-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round17-shape-repro
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round17-final4-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapePayloadBenchmarks*' --inProcess --warmupCount 2 --iterationCount 5 --invocationCount 256 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round17-payload-repro
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round17-shape-repro
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapePayloadBenchmarks*' --inProcess --warmupCount 2 --iterationCount 5 --invocationCount 256 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round17-payload-repro
 ```
 
 本机结果和限制见任务 `performance.md`。二进制用例迭代时间不足，分配量可用于诊断，耗时不可作为性能门槛；所有结果均不能代表并发吞吐或生产容量。
@@ -128,8 +451,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round17-final4-
 `SqlGeneratedConstantBenchmarks` 隔离测量预构造表达式的常量读取、数值逐次装箱和只读字段复用。该用例不测表达式树创建，也不测完整查询与数据库；只读字段有每个生成调用点的常驻成本。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round18-final5-benchmark/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round18-final5-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlGeneratedConstantBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round18-constant-repro
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlGeneratedConstantBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round18-constant-repro
 ```
 
 本机迭代时间不足，分配结果可用于局部诊断，计时不可作为性能门槛。
@@ -139,8 +462,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round18-final5-
 `SqlGeneratedDescriptorBenchmarks` 只模拟单列比较的固定类型数组、来源名数组和列描述逐次创建与静态复用，不包含表达式树、SQL 构造、数据库或并发，也不测静态描述的常驻内存。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round19-benchmark/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round19-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlGeneratedDescriptorBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round19-descriptor-repro
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlGeneratedDescriptorBenchmarks*' --inProcess --warmupCount 3 --iterationCount 7 --invocationCount 1048576 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round19-descriptor-repro
 ```
 
 本机迭代时间不足，分配结果仅用于局部诊断，计时和比值不作为性能门槛。详见任务 `performance.md`。
@@ -153,8 +476,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round19-benchma
 这些场景不覆盖冷形状编译、数据库执行、并发或大默认值比较。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round24-repro/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round24-repro/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.SharedSlot*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 131072 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round24-shared-repro
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.SharedSlot*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 131072 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round24-shared-repro
 ```
 
 本轮前后对照、环境及限制见任务 `performance.md`；短迭代计时不作为性能结论。
@@ -166,8 +489,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round24-repro/B
 二者包含一个或四个可选条件以及独立的尾部参数，只测模板渲染，不包含数据库和并发。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round31-benchmark/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round31-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.Suffix*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round31-shape-suffix-final
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.Suffix*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round31-shape-suffix-final
 ```
 
 分配数据及其限制见任务 `performance.md`；该短时探测不能用于判断吞吐或生产容量。
@@ -179,8 +502,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round31-benchma
 结果不包含模板构造、数据库和并发；新增 API 在旧版本没有等价工作负载。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round35-after/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round35-after/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.Suffix*' '*SqlQueryShapeBenchmarks.Ordered*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round35-after-results
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlQueryShapeBenchmarks.Suffix*' '*SqlQueryShapeBenchmarks.Ordered*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round35-after-results
 ```
 
 分配数据和限制见任务 `performance.md`。短迭代结果不用于判断延迟、吞吐或生产容量。
@@ -195,8 +518,8 @@ dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round35-after/B
 与同候选 `GeneratedPlanGetterWarm` 对照；二者仍返回 object，整数结果仍会装箱。
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round46-benchmark/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round46-benchmark/Bing.Data.Sql.Benchmarks.dll --filter '*SqlIntegerReaderBenchmarks*' '*SqlGeneratedAccessBenchmarks.GeneratedPlan*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 1048576 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round46-reader-results
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlIntegerReaderBenchmarks*' '*SqlGeneratedAccessBenchmarks.GeneratedPlan*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 1048576 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round46-reader-results
 ```
 
 分配结果仅用于局部诊断，不能推导完整查询的延迟、吞吐或生产容量。映射缓存键、SQL 格式化及
@@ -209,8 +532,8 @@ Builder 克隆没有变化，不重复它们的历史基准。
 Getter 的值类型装箱属于工作负载本身。候选运行：
 
 ```powershell
-dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false /p:OutputPath=.codex-build/bin/round48-after/
-dotnet framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/bin/round48-after/Bing.Data.Sql.Benchmarks.dll --filter '*SqlModelParameterBindingBenchmarks*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts framework/tests/Bing.Data.Sql.Benchmarks/.codex-build/round48-after-results
+dotnet build framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Release --no-restore -m:1 -nr:false /p:UseSharedCompilation=false
+dotnet output/release/net8.0/Bing.Data.Sql.Benchmarks.dll --filter '*SqlModelParameterBindingBenchmarks*' --inProcess --warmupCount 2 --iterationCount 3 --invocationCount 16384 --unrollFactor 16 --artifacts artifacts/benchmarks/sql/round48-after-results
 ```
 
 本轮修改使生成模型每次绑定少一次数据库上下文解析，并去掉临时属性数组；字典非空绑定预分配最终参数数组并复用一次上下文，空字典不解析上下文。结果仅用于局部分配诊断：短迭代低于 100 ms，不能据此推断吞吐、CPU 归因、进程峰值或生产容量。前后明细与 SHA-256 见任务 `performance.md` 的 Round 48。
@@ -425,9 +748,32 @@ SqlGeneratedMutationBenchmarks 的 Provider 参数为 SQLite/MySQL/PostgreSQL/Sq
 复现：
 
 ```powershell
-dotnet run --project framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Round123Perf --no-restore -p:ImplicitUsings=enable -- --generated-mutation-probe --output output/round123-mutation-allocation-confirmed-data.json
+dotnet run --project framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj -c Round123Perf --no-restore -p:ImplicitUsings=enable -- --generated-mutation-probe --output artifacts/benchmarks/sql/round123/mutation-allocation-confirmed-data.json
 ```
 
 最终原始样本 output/round123-mutation-allocation-confirmed-data.json，收据 output/round123-allocation-confirmed.json，源码与 Harness 身份 output/round123-results.json。每格 2048 预热、5×10000 次，.NET 8.0.30/Windows x64；12 组操作的生成 SQL 路径少分配 1824～3080 B/次。完整数值见任务 round123.md。
 
 这是同候选分支比较，不是历史版本 before/after，也不包含数据库 IO、方法 CPU、真实并发、保留堆或容量。固定 Provider 分支增加生成代码/静态 SQL 体积，无每请求形状缓存。初次及 allocation-final 早于 Oracle 自定义方言兼容修正，最终采用 confirmed 候选；没有重建固定性能基线或自设门槛。
+
+## InsertCombined：双行插入分配前后
+
+本次用 `SqlGeneratedMutationBenchmarks.DoubleInsert` 对比 `InsertCombined` 的运行时 SQL 渲染与完整生成 SQL 路径。固定同一模型、输入、生成 Getter 和静态 Binder；每个 Provider 的 Setup 都核对完整 SQL 与生成执行标记，完整生成 SQL 另核对常量引用。两行 workload 的命令构造中位分配如下：
+
+| Provider | 运行时渲染 SQL（before → after） | 完整生成 SQL（before → after） |
+| --- | ---: | ---: |
+| SQLite | 15,312 → 15,312 B/op | 12,184 → 7,152 B/op |
+| MySQL | 15,184 → 15,072 B/op | 12,120 → 7,088 B/op |
+| PostgreSQL | 14,936 → 14,936 B/op | 12,128 → 7,096 B/op |
+| SQL Server | 14,936 → 14,936 B/op | 12,128 → 7,096 B/op |
+
+四个完整生成 SQL 场景均减少约 5,032 B/op（基线的 41.30%～41.52%）。动态 MySQL 的中位数相差约 112 B/op；保留原始样本，不把小幅差异解释为收益。每格预热 2,048 次，随后 5 组、每组 10,000 次，指标为当前线程分配字节；环境为 .NET 8.0.30、Windows x64。计时样本只保留原始值，没有在共享宿主负载下用作 CPU 或吞吐结论。
+
+本次测量时的构建与运行命令如下。临时探针和二进制在归档后清理；需要重测时，先从 `artifacts/ai-tasks/batch-sql/probe-source/` 与归档的构建属性恢复到统一验证目录。下列路径记录原始测量过程，不表示当前工作区仍保留前态二进制：
+
+```powershell
+dotnet build artifacts/validation/batch-sql/probe/InsertCombinedProbe.csproj -c Release -f net8.0 --artifacts-path artifacts/validation/batch-sql/probe/after -p:CustomBeforeMicrosoftCommonTargets=H:/Bing_Framework/Bing.NetCore/artifacts/validation/batch-sql/current/isolated-output.props -p:ImplicitUsings=enable -p:NuGetAudit=false -p:RestoreIgnoreFailedSources=true -p:UseSharedCompilation=false -p:Optimize=true -m:1 -nr:false
+dotnet artifacts/validation/batch-sql/probe/before/bin/InsertCombinedProbe/release/InsertCombinedProbe.dll artifacts/benchmarks/batch-sql/before/double-insert-before.json H:/Bing_Framework/Bing.NetCore
+dotnet artifacts/validation/batch-sql/probe/after/bin/InsertCombinedProbe/Release/net8.0/InsertCombinedProbe.dll artifacts/benchmarks/batch-sql/after/double-insert-after.json H:/Bing_Framework/Bing.NetCore
+```
+
+before / after 的八格原始样本及完整 SQL 分别保存在 `artifacts/benchmarks/batch-sql/before/double-insert-before.json` 和 `artifacts/benchmarks/batch-sql/after/double-insert-after.json`；前态源码身份来自采样前的独立 manifest，构建命令、两侧程序集与源码哈希、输出路径副作用及限制见 [归档收据](../../../artifacts/ai-tasks/batch-sql/probe-receipt.json)。此证据只覆盖运行时两行 `InsertCombined` 命令构造，不覆盖数据库 IO、源生成器启动、三行及以上输入、稳态 CPU、生产并发或容量。

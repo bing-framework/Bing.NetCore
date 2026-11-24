@@ -9,6 +9,7 @@ namespace Bing.Data.Sql.Aot.PackageModels;
 [SqlModel(typeof(VersionedCrudRow))]
 [SqlModel(typeof(IdentityCrudRow))]
 [SqlModel(typeof(IdentityOnlyCrudRow))]
+[SqlModel(typeof(SelectedCrudRow))]
 [SqlResult(typeof(RawRow))]
 [SqlResult(typeof(ReturningProjectionDto))]
 [SqlParameters(typeof(RawFilter))]
@@ -43,6 +44,16 @@ public sealed class IdentityCrudRow
 public sealed class IdentityOnlyCrudRow
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public long Id { get; set; }
+}
+
+/// <summary>验证任意多列写入和整行返回共用生成的片段与静态绑定。</summary>
+[Table("selected_crud_rows")]
+public sealed class SelectedCrudRow
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { get; set; }
+    public string Name { get; set; }
+    public int Quantity { get; set; }
+    [ConcurrencyCheck] public int Version { get; set; }
 }
 public sealed class RawRow { public int Id { get; set; } public string Name { get; set; } }
 public sealed class RawFilter { public int Minimum { get; set; } }

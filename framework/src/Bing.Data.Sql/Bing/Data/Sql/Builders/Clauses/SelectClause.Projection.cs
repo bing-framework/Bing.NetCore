@@ -113,7 +113,7 @@ public partial class SelectClause
         {
             var column = _columns[index];
             if (column.TableType == entityType && string.Equals(column.TableAlias, previousAlias, StringComparison.OrdinalIgnoreCase))
-                column.TableAlias = alias;
+                _columns[index] = column.WithTableAlias(alias);
         }
     }
 

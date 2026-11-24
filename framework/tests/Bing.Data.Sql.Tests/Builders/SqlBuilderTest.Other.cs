@@ -298,10 +298,10 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - Right Join 的保留右侧实现软删除时，必须在渲染前拒绝，避免将条件错误放入最终 Where。
+    /// 测试 - Right Join 的保留右侧实现软删除时，在最终 Where 过滤右侧、在 On 过滤左侧。
     /// </summary>
     [Fact]
-    public void IsDeletedFilter_WhenRightJoinPreservedSourceRequiresFiltering_ShouldRejectBeforeRenderingSql()
+    public void IsDeletedFilter_WhenRightJoinPreservedSourceRequiresFiltering_ShouldFilterPreservedSourceInWhere()
     {
         // Arrange
         _builder.Select<Sample5>(item => item.StringValue)
@@ -309,10 +309,11 @@ public partial class SqlBuilderTest
             .RightJoin<Sample8>("s8").On<Sample5, Sample8>((left, right) => left.IntValue == right.IntValue);
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => _builder.ToSql());
+        var sql = _builder.ToSql();
 
         // Assert
-        Assert.Contains("Right Join 保留来源", exception.Message, StringComparison.Ordinal);
+        const string expectedSql = "Select [s5].[StringValue] \r\nFrom [Sample5] As [s5] \r\nRight Join [Sample8] As [s8] On [s5].[IntValue]=[s8].[IntValue] And [s5].[IsDeleted]=@_p_0 \r\nWhere [s8].[IsDeleted]=@_p_1";
+        SqlAssert.Equal(expectedSql, sql, _builder.Provider.Key);
     }
 
     /// <summary>
@@ -339,21 +340,23 @@ public partial class SqlBuilderTest
     }
 
     /// <summary>
-    /// 测试 - Full Join 任一结构化来源要求过滤时，当前渲染器必须在输出 SQL 前拒绝，避免将条件错误下推到 On 或 Where。
+    /// 测试 - Full Join 的软删除过滤应在来源派生表内应用。
     /// </summary>
     [Fact]
-    public void IsDeletedFilter_WhenFullJoinSourceRequiresFiltering_ShouldRejectBeforeRenderingSql()
+    public void IsDeletedFilter_WhenFullJoinSourceRequiresFiltering_ShouldPrefilterSource()
     {
+        var builder = new SqlServerBuilder(_builder.SharedServices);
         // Arrange
-        _builder.Select<Sample5>(item => item.StringValue)
+        builder.Select<Sample5>(item => item.StringValue)
             .From<Sample5>("s5")
             .FullJoin<Sample2>("s2").On<Sample5, Sample2>((left, right) => left.IntValue == right.IntValue);
 
         // Act
-        var exception = Assert.Throws<NotSupportedException>(() => _builder.ToSql());
+        var sql = builder.ToSql();
 
         // Assert
-        Assert.Equal("无法安全将全局过滤器应用到 Full Join 来源 source_0。当前 Provider 渲染器不支持预过滤派生表。", exception.Message);
+        const string expected = "Select [s5].[StringValue] \r\nFrom (Select * From [Sample5] As [s5] Where [s5].[IsDeleted]=@_p_0) As [s5] \r\nFull Join [Sample2] As [s2] On [s5].[IntValue]=[s2].[IntValue]";
+        Assert.Equal(expected, sql);
     }
 
     #endregion

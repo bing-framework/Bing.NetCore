@@ -123,13 +123,15 @@ public sealed class SqlDeleteBuilder : SqlMutationBuilderBase, ISqlDeleteBuilder
         ParameterManager.CreateEmpty(), ClauseFactory);
 
     /// <summary>复用默认实体 SQL；存在写入数据边界时仍使用原快照渲染路径。</summary>
-    internal SqlWriteCommand BuildCommand(string generatedSql)
+    internal SqlWriteCommand BuildCommand(string generatedSql, bool hasReturning = false)
     {
-        if (generatedSql == null || !ReturningClause.IsEmpty || DeleteUsingClause.Table != null ||
+        if (generatedSql == null || hasReturning != !ReturningClause.IsEmpty || DeleteUsingClause.Table != null ||
             ShouldRenderDataBoundarySnapshot())
             return BuildCommand();
-        Validate();
-        return new SqlWriteCommand(generatedSql, GetParameters(), Provider, SqlOperationKind.Delete);
+        var context = Validate();
+        if (hasReturning)
+            ReturningClause.Validate(context);
+        return new SqlWriteCommand(generatedSql, GetParameters(), Provider, SqlOperationKind.Delete, hasReturning);
     }
 
     /// <inheritdoc />

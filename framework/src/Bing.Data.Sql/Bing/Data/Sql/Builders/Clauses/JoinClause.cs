@@ -261,6 +261,15 @@ public class JoinClause : IJoinClause, ISqlMultiSourceJoinClause
         return result;
     }
 
+    /// <summary>将过滤谓词应用到连接来源内部。</summary>
+    internal void AddSourceFilter(string sourceId, string column, object value, Operator @operator)
+    {
+        var item = _params.FirstOrDefault(candidate => candidate.Source?.SourceId == sourceId);
+        if (item == null)
+            throw new InvalidOperationException($"未找到过滤器来源 {sourceId} 对应的 Join。");
+        item.AddSourceFilter(_helper.CreateCondition(column, value, @operator));
+    }
+
     /// <summary>
     /// 将已规划的过滤谓词追加到指定 Join 的 On 条件。
     /// </summary>

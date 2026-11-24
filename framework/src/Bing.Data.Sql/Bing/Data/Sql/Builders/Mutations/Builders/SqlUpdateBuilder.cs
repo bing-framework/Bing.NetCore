@@ -128,13 +128,15 @@ public sealed class SqlUpdateBuilder : SqlMutationBuilderBase, ISqlUpdateBuilder
         ParameterManager.CreateEmpty(), ClauseFactory);
 
     /// <summary>复用默认实体 SQL；存在写入数据边界时仍使用原快照渲染路径。</summary>
-    internal SqlWriteCommand BuildCommand(string generatedSql)
+    internal SqlWriteCommand BuildCommand(string generatedSql, bool hasReturning = false)
     {
-        if (generatedSql == null || !ReturningClause.IsEmpty || UpdateFromClause.Table != null ||
+        if (generatedSql == null || hasReturning != !ReturningClause.IsEmpty || UpdateFromClause.Table != null ||
             ShouldRenderDataBoundarySnapshot())
             return BuildCommand();
-        Validate();
-        return new SqlWriteCommand(generatedSql, GetParameters(), Provider, SqlOperationKind.Update);
+        var context = Validate();
+        if (hasReturning)
+            ReturningClause.Validate(context);
+        return new SqlWriteCommand(generatedSql, GetParameters(), Provider, SqlOperationKind.Update, hasReturning);
     }
 
     /// <inheritdoc />

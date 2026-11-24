@@ -57,7 +57,7 @@ public class Pager : IPager
     private StringBuilder _description;
 
     /// <summary>
-    /// 总行数。
+    /// 记录分页查询结果的总行数。
     /// </summary>
     private int _totalCount;
 

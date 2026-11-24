@@ -13,6 +13,28 @@ const expected = {
   mode: 'query', status: 'enabled', ci: true, runner: 'ubuntu-22.04',
   successMarker: 'SQLITE_QUERY_NATIVE_PASS', requiredMarkers: ['SQLITE_QUERY_BINDING_PASS']
 };
+const sqliteCrudLegacyRequiredMarkers = [
+  'MUTATION_PLAN_READER_NATIVE_PASS',
+  'GENERATED_RETURNING_PROJECTION_NATIVE_PASS',
+  'GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS',
+  'GENERATED_MUTATION_SHAPES_NATIVE_PASS',
+  'GENERATED_MULTIROW_INSERT_NATIVE_PASS',
+  'GENERATED_IN_DELETE_NATIVE_PASS',
+  'GENERATED_PAIRED_DELETE_NATIVE_PASS',
+  'GENERATED_KEY_INSERT_SQL_NATIVE_PASS',
+  'GENERATED_CRUD_SQL_NATIVE_PASS'
+];
+const sqliteCrudReturningMarkers = [
+  'GENERATED_NEGATED_RETURNING_NATIVE_PASS',
+  'GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS',
+  'GENERATED_QUOTED_RETURNING_NATIVE_PASS',
+  'GENERATED_CACHED_RETURNING_NATIVE_PASS'
+];
+const sqliteCrudRequiredMarkers = [
+  ...sqliteCrudLegacyRequiredMarkers,
+  ...sqliteCrudReturningMarkers
+];
+const sqliteCrudRids = ['win-x64', 'linux-x64', 'osx-arm64', 'win-arm64'];
 
 const oracleFixtureMarkers = {
   'ready.log': 'ORACLE_FIXTURE_READY_PASS',
@@ -80,6 +102,14 @@ async function summarize(fixtureData, nativeJobResult = 'success', regressionJob
   assert.equal(typeof summarizeCiReceipts, 'function',
     'verify.mjs must export summarizeCiReceipts before CI receipt contracts can run');
   return summarizeCiReceipts(fixtureData.matrix, fixtureData.directory, workflow, nativeJobResult, regressionJobResult);
+}
+
+async function currentSqliteCrudCell() {
+  const platform = { win32: 'win', linux: 'linux', darwin: 'osx' }[process.platform];
+  if (!platform) return null;
+  const rid = `${platform}-${process.arch}`;
+  const { loadMatrix } = await import('./verify.mjs');
+  return loadMatrix().cases.find(cell => cell.id === `sqlite-${rid}-crud`);
 }
 
 test('CI 摘要只统计自动调度的 enabled 格', async t => {
@@ -187,6 +217,116 @@ test('运行日志缺少所需标记时不能按 PASS 汇总', async t => {
 
   assert.equal(result.status, 'FAIL');
   assert.notEqual(result.cases[0].status, 'PASS');
+});
+
+for (const missing of sqliteCrudRequiredMarkers) {
+  test(`SQLite CRUD CI 拒绝缺少 ${missing} 的 PASS 收据`, async t => {
+    const cell = await currentSqliteCrudCell();
+    if (!cell) return t.skip('当前测试主机没有 SQLite CRUD 矩阵格');
+    const data = fixture(t, [cell]);
+    const markers = [cell.successMarker, ...(cell.requiredMarkers ?? [])]
+      .filter(marker => marker !== missing);
+    data.add(cell, {}, workflow.attempt, markers.join('\n'));
+    const result = await summarize(data);
+
+    assert.equal(result.status, 'FAIL');
+    assert.equal(result.cases[0].status, 'INVALID', `缺少 ${missing} 的收据不能有效`);
+    assert.equal(result.cases[0].error, `Native success marker missing: ${missing}`);
+  });
+}
+
+test('SQLite CRUD CI 接受完整十四项能力收据并单独保留 SQL 回归作业结果', async t => {
+  const cell = await currentSqliteCrudCell();
+  if (!cell) return t.skip('当前测试主机没有 SQLite CRUD 矩阵格');
+  assert.equal(cell.successMarker, 'CRUD_ONLY_PACKAGE_NATIVE_PASS');
+  assert.deepEqual([...(cell.requiredMarkers ?? [])].sort(), [...sqliteCrudRequiredMarkers].sort());
+  assert.equal([cell.successMarker, ...(cell.requiredMarkers ?? [])].length, 14);
+  const data = fixture(t, [cell]);
+  data.add(cell);
+  const result = await summarize(data, 'success', 'skipped');
+
+  assert.equal(result.status, 'FAIL');
+  assert.equal(result.cases.length, 1);
+  assert.equal(result.cases[0].status, 'PASS');
+  assert.equal(result.passed, 1);
+  assert.equal(result.regressionJobResult, 'skipped');
+});
+
+for (const rid of sqliteCrudRids) {
+  test(`SQLite CRUD CI ${rid} 校验完整 Returning 标记和运行日志`, async t => {
+    const { loadMatrix } = await import('./verify.mjs');
+    const cell = loadMatrix().cases.find(candidate => candidate.id === `sqlite-${rid}-crud`);
+    assert.ok(cell, `必须存在 sqlite-${rid}-crud 矩阵格`);
+    assert.equal(cell.successMarker, 'CRUD_ONLY_PACKAGE_NATIVE_PASS');
+    const markers = [cell.successMarker, ...(cell.requiredMarkers ?? [])];
+    const expectedMarkers = ['CRUD_ONLY_PACKAGE_NATIVE_PASS', ...sqliteCrudRequiredMarkers];
+    assert.equal(markers.length, 14);
+    assert.deepEqual([...markers].sort(), [...expectedMarkers].sort());
+
+    await t.test('完整收据、日志和 SQL 回归通过', async t => {
+      const data = fixture(t, [cell]);
+      data.add(cell, {}, workflow.attempt, markers.join('\n'));
+      const result = await summarize(data);
+
+      assert.equal(result.status, 'PASS');
+      assert.equal(result.cases[0].status, 'PASS');
+      assert.equal(result.regression.status, 'PASS');
+    });
+
+    for (const marker of sqliteCrudReturningMarkers) {
+      await t.test(`日志缺少 ${marker} 时拒绝`, async t => {
+        const data = fixture(t, [cell]);
+        const output = markers.filter(candidate => candidate !== marker).join('\n');
+        data.add(cell, {}, workflow.attempt, output);
+        const result = await summarize(data);
+
+        assert.equal(result.status, 'FAIL');
+        assert.equal(result.cases[0].status, 'INVALID');
+        assert.equal(result.cases[0].error, `Native success marker missing: ${marker}`);
+      });
+
+      await t.test(`日志仅含 ${marker} 的前缀时拒绝`, async t => {
+        const data = fixture(t, [cell]);
+        const output = [...markers.filter(candidate => candidate !== marker), `prefix-${marker}`].join('\n');
+        data.add(cell, {}, workflow.attempt, output);
+        const result = await summarize(data);
+
+        assert.equal(result.status, 'FAIL');
+        assert.equal(result.cases[0].status, 'INVALID');
+        assert.equal(result.cases[0].error, `Native success marker missing: ${marker}`);
+      });
+    }
+  });
+
+  test(`SQLite CRUD CI ${rid} 拒绝旧十项标记声明，即使日志包含全部十四项`, async t => {
+    const { loadMatrix } = await import('./verify.mjs');
+    const cell = loadMatrix().cases.find(candidate => candidate.id === `sqlite-${rid}-crud`);
+    assert.ok(cell, `必须存在 sqlite-${rid}-crud 矩阵格`);
+    const markers = [cell.successMarker, ...(cell.requiredMarkers ?? [])];
+    const oldMarkers = [cell.successMarker, ...sqliteCrudLegacyRequiredMarkers];
+    assert.equal(markers.length, 14);
+    assert.equal(oldMarkers.length, 10);
+
+    const data = fixture(t, [cell]);
+    data.add(cell, { successMarkers: oldMarkers }, workflow.attempt, markers.join('\n'));
+    const result = await summarize(data);
+
+    assert.equal(result.status, 'FAIL');
+    assert.equal(result.cases[0].status, 'INVALID');
+    assert.equal(result.cases[0].error, 'Native receipt does not declare the required success markers.');
+  });
+}
+
+test('SQLite CRUD CI 拒绝只声明旧两个标记的 PASS 收据', async t => {
+  const cell = await currentSqliteCrudCell();
+  if (!cell) return t.skip('当前测试主机没有 SQLite CRUD 矩阵格');
+  const data = fixture(t, [cell]);
+  const oldMarkers = ['CRUD_ONLY_PACKAGE_NATIVE_PASS', 'MUTATION_PLAN_READER_NATIVE_PASS'];
+  data.add(cell, { successMarkers: oldMarkers }, workflow.attempt, oldMarkers.join('\n'));
+  const result = await summarize(data);
+
+  assert.equal(result.status, 'FAIL');
+  assert.equal(result.cases[0].status, 'INVALID');
 });
 
 for (const rid of ['linux-x64', 'win-x64']) {

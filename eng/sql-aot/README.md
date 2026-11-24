@@ -2,18 +2,20 @@
 
 该入口维护 Provider、RID、TFM、生成模式与实际能力的组合，直接发布并运行现有消费工程。`enabled` 表示 CLI 可在匹配的本机 RID 上选择该格；只有 `ci` 缺省或为 `true` 的格才进入托管 CI，`ci:false` 保持可手动运行但不自动调度。当前 24 个格可运行，全部进入自动 CI。单格是否通过取决于本次运行收据。`planned` 保留原因，不可运行、不计入上述数量，也不承诺该组合已经受支持。
 
+2026-11-22：候选 `01f07c206b2e8aa8adade9e36c1f66b807d6411e` 的运行 `44996103087`、attempt 1 全部 28 个作业通过。24/24 个 Native 格包含 8 格 ARM64 原生执行以及 Windows/Linux 的四类数据库 Provider；同一次运行的 22/22 份 SQL TRX 复核通过，共 9,526 项通过、0 失败和 2 项既有 SQLite 证据导出门控跳过。数据库就绪和清理日志随工件保存，原始收据与独立复核归档在 `artifacts/ai-tasks/sql-aot-publish-20261122`。基准冒烟属于 `BuildAndDiscovery`，没有完成生产容量测量。该结果只覆盖矩阵的 `coverage`，`notCovered` 和驱动裁剪告警继续有效。
+
 | Provider / 平台 | 消费模式 | 当前接入范围 |
 | --- | --- | --- |
 | SQLite / win-x64 / net10.0 | query | 既有生成 Lambda 子集、投影、Count/Page、集合、取消、查询事务回滚 |
 | SQLite / win-x64 / net10.0 | raw-only | 独立生成模型程序集、Raw reader/binder、泛型转换器的构造函数注入，无 Lambda 调用点 |
-| SQLite / win-x64 / net10.0 | crud-only | 生成器完整默认单实体 CRUD SQL、复合键/并发/NULL、列筛选回退、Identity/DEFAULT VALUES 生成 SQL、静态 binder/reader/回填及事务失败，无 Lambda 调用点 |
+| SQLite / win-x64 / net10.0 | crud-only | 默认单实体及整行 Returning SQL、默认/单列多行 Insert、单键 IN 与复合键/并发配对 Delete、Identity/DEFAULT VALUES SQL、静态 binder/reader/回填；Returning 投影含生成调用点，不验证查询 Lambda |
 | SQLite / win-x64 / net10.0 | generated-query | GeneratedSmoke：自动 WhereIf 查询模板、同形状 SQL 复用、当前值重绑、关闭条件、IN 0/1/2、ToSql 与同步/异步查询 |
 | SQLite / linux-x64 / net10.0 | query、raw-only、crud-only、generated-query | 与上述 Windows 各模式使用同一消费工程、标记和覆盖声明；本地 Linux 容器内真实 Native 发布及运行通过 |
-| SQLite / osx-arm64、win-arm64 / net10.0 | query、raw-only、crud-only、generated-query | 复用相同的四个消费工程和成功标记。Windows ARM64 四个程序已交叉发布，两平台的原生运行收据待验收。 |
+| SQLite / osx-arm64、win-arm64 / net10.0 | query、raw-only、crud-only、generated-query | 复用相同的四个消费工程和成功标记。运行 `44996103087` 已取得两平台共 8 格真实 Native 发布和执行收据。 |
 | PostgreSQL / linux-x64 / net10.0 | generated-crud-query | 隔离测试库：默认生成式单实体 CRUD、Lambda 查询、Identity/RETURNING、异步事务提交/共享回滚及生成式 `json` / `jsonb` 文本、对象、六组内置范围/多范围和显式复合列读写 |
-| PostgreSQL / win-x64 / net10.0 | generated-crud-query，自动 CI | 复用 PostgreSQL Linux 消费工程；覆盖相同的读写场景，包括六组范围与多范围和显式复合列。Round138 已接入托管 Windows 的独立集群准备与清理，远端执行待收据 |
+| PostgreSQL / win-x64 / net10.0 | generated-crud-query，自动 CI | 复用 PostgreSQL Linux 消费工程；覆盖相同的读写场景，包括六组范围与多范围和显式复合列。运行 `44996103087` 的独立集群准备、Native 执行和清理通过。 |
 | MySQL / linux-x64 / net10.0 | generated-crud-query | 隔离测试库：默认生成式单实体 CRUD、Lambda 查询、Identity/LAST_INSERT_ID 回填和异步事务提交/共享回滚 |
-| MySQL / win-x64 / net10.0 | generated-crud-query，自动 CI | 复用 MySQL Linux 消费工程；Round134 在独占 MySQL 8.0.16 测试库真实 Native 发布、运行通过；Round139 接入托管 Windows 的独立实例准备与清理，远端运行待验收 |
+| MySQL / win-x64 / net10.0 | generated-crud-query，自动 CI | 复用 MySQL Linux 消费工程；Round134 在独占 MySQL 8.0.16 测试库真实 Native 发布、运行通过；运行 `44996103087` 的托管 Windows 独立实例准备、Native 执行和清理通过。 |
 | SQL Server / win-x64、linux-x64 / net10.0 | generated-crud-query | SQL Server 2022 独立测试库已通过两个 Native 格。生成式 CRUD、Lambda、Identity OUTPUT 回填、异步提交及共享回滚。两格均自动调度。Windows 另通过本机 LocalDB 验收。 |
 | Oracle / win-x64、linux-x64 / net10.0 | generated-crud-query | Oracle Free 独占 schema，生成式显式键 CRUD、数值自增键、Unicode Lambda 查询、单行及限量多行回传和共享事务回滚。Linux 与 Windows 均进入自动 CI。 |
 | PostgreSQL、MySQL、SQL Server、Oracle 其他平台 | planned | 驱动、原生工具链与隔离测试数据库逐项接入，尚未取得对应真实运行收据 |
@@ -22,13 +24,33 @@
 
 Round134 的 Windows PostgreSQL/MySQL 当前源码 Native 收据及二进制摘要见 [执行记录](../../ai_docs/tasks/20261107-sqlquery-command-aot-design/round134.md)。仅验收各格声明的类型、默认生成式 CRUD、查询、主键回填与提交/共享回滚子集；驱动裁剪告警仍保留，不据此扩展为全 Provider 支持。
 
-每个已接入格在 [matrix.json](matrix.json) 中同时列出 `coverage` 与 `notCovered`。CRUD 格覆盖生成器输出的 SQLite 默认单实体 Insert/Update/Delete SQL 常量和现有静态绑定链；映射覆盖、列筛选、自定义服务及数据边界仍可回退运行时渲染。已接入单 Identity 键完整生成 SQL、静态读取/回填、自有批次回滚、共享事务与溢出回滚，以及有限单列/默认双行命令、独立 Returning DTO 的重排列/别名/NULL 与同步/异步读取；所有写入形状、所有 Returning DTO 布局及转换尚未覆盖；查询事务回滚也不代表共享写入事务的全部失败语义已经得到 Native 验证。
+每个已接入格在 [matrix.json](matrix.json) 中同时列出 `coverage` 与 `notCovered`。CRUD 格覆盖生成器输出的 SQLite 默认单实体 Insert/Update/Delete、整行 Returning SQL 和静态绑定链；默认/单列多行 Insert、单键 IN Delete 以及复合键/并发配对 Delete 按实际行数追加槽位。同步/异步配对删除还验证交叉数据保留。单 Identity 键覆盖完整生成 SQL、静态读取/回填、自有批次回滚、共享事务与溢出回滚；独立 Returning DTO 覆盖重排列、别名、NULL 与同步/异步读取。映射覆盖、自定义服务、数据边界及未生成形状保留运行时渲染；所有写入形状、所有 Returning 布局与转换、共享写入事务的完整失败矩阵尚未覆盖。
 
 `generated-query` 使用现有 GeneratedSmoke 工程验证可分析的完整独占单来源链。模板冷形状沿用运行时渲染器，热形状复用 SQL/绑定布局；复杂或共享链保留兼容路径，不承诺全部 Lambda 或全部 SQL 编译期生成。该格同时要求 `GENERATED_SQL_SMOKE_PASS` 和 `AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS` 两个完整行标记，防止旧冒烟标记掩盖自动模板漏验。
 
 `raw-only` 同时要求 `RAW_ONLY_PACKAGE_NATIVE_PASS` 和 `GENERIC_CONVERTER_NATIVE_PASS`，后者验证通过泛型入口注册的转换器在 Native AOT 裁剪后仍能注入构造函数依赖。注册入口保留转换器的公共构造函数，DI 创建时仍使用构造函数元数据；上层泛型封装也应传播相同的裁剪注解。SQL Server 和 Oracle 的数据库验证分别由自己的消费工程负责。
 
-`crud-only` 同时要求 `CRUD_ONLY_PACKAGE_NATIVE_PASS` 和 `MUTATION_PLAN_READER_NATIVE_PASS`。后者验证批量写入只读取当前映射的生成计划，并拒绝另一已登记模型替代当前来源。消费工程把 IL2070 和 IL2072 提升为错误，分别防止重新引入条件工厂的枚举描述反射链、普通 CRUD/批量 Update/带键 Insert 的运行时 Getter 缓存链。Round133 两平台干净源码实际发布运行通过；Round137 修复条件工厂后，Windows 当前源码发布与运行通过，IL2070/IL2072 门禁通过，仍保留两条 DI IL3050，不表示全部路径零反射。
+四个 `crud-only` 格同时要求总标记 `CRUD_ONLY_PACKAGE_NATIVE_PASS` 和下列十三项完整行标记，共十四项。任意一项缺失都拒绝单格和 CI 汇总；仅包含标记前缀的日志无效。只声明旧双标记或旧十项标记的成功收据也会被拒绝，即使日志包含全部十四项。
+
+| 必需能力标记 | 已执行的断言 |
+| --- | --- |
+| `MUTATION_PLAN_READER_NATIVE_PASS` | 只读取当前映射的生成计划，拒绝另一已登记模型 |
+| `GENERATED_RETURNING_PROJECTION_NATIVE_PASS` | 独立 DTO、匿名投影、初始化值、重排列、NULL 与同步/异步读取 |
+| `GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS` | Insert/Update/Delete 整行 Returning 的完整 SQL、生成链和结果 |
+| `GENERATED_MUTATION_SHAPES_NATIVE_PASS` | 默认及单列写入、复合键、并发和 NULL |
+| `GENERATED_MULTIROW_INSERT_NATIVE_PASS` | 默认双行/三行及单列多行 Insert 的完整 SQL和写入行数 |
+| `GENERATED_IN_DELETE_NATIVE_PASS` | 单键双行/三行 IN Delete 的完整 SQL 和删除行数 |
+| `GENERATED_PAIRED_DELETE_NATIVE_PASS` | 复合键/并发条件、同步/异步删除及交叉数据保留 |
+| `GENERATED_KEY_INSERT_SQL_NATIVE_PASS` | Identity/DEFAULT VALUES SQL、回填、共享事务及溢出回滚 |
+| `GENERATED_CRUD_SQL_NATIVE_PASS` | 前述生成 CRUD SQL 消费流程完成 |
+| `GENERATED_NEGATED_RETURNING_NATIVE_PASS` | 负号及嵌套计算 Returning 的同步/异步读取与 NULL |
+| `GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS` | 计算投影使用当前映射，不沿用编译期物理列 |
+| `GENERATED_QUOTED_RETURNING_NATIVE_PASS` | 转义物理列名的生成 SQL 和同步/异步 DTO 读取 |
+| `GENERATED_CACHED_RETURNING_NATIVE_PASS` | 静态只读表达式复用直接列和计算投影的生成路径 |
+
+2026-11-24：四个平台的矩阵合同已补齐上述 Returning 标记。运行器与 CI 汇总职责测试共 169 项通过，包含四个平台各 10 个完整、缺失、前缀和旧声明场景。该计数来自验收脚本的单元/合同测试，夹具中的 SQL 报告不能当作本轮真实 SQL 回归。此前本机严格 SQLite/net10/win-x64 的源码身份、原生文件摘要及十四项日志已核对后复用，见 [验收证据](../../artifacts/ai-tasks/returning-gate/verification.json)；本次没有重新发布 Native，也不代表其他三个平台已执行当前合同。
+
+消费工程继续把 IL2070 和 IL2072 提升为错误，分别防止重新引入条件工厂的枚举描述反射链、普通 CRUD/批量 Update/带键 Insert 的运行时 Getter 缓存链；既有 Expression IL2026 和 DI IL3050 不抑制，不据此宣称零反射。2026-11-22 的 24 格收据对应旧候选和旧标记合同，当前合同仍须在各目标主机重新运行。
 
 所有发布默认使用 `TrimmerSingleWarn=false`，逐成员诊断原样保存在 `publish.log`；不再只凭程序集级 IL2104/IL3053 摘要分类。Round137 的 MySqlConnector 仍有 IL2046/IL2093；Npgsql 还涉及 JSON/composite/range/multirange 等路径，包括执行相关递归泛型路径时会抛异常的 IL3054。Round137 两种驱动仅诊断发布，Round138/139 也没有重跑数据库；这些告警不能扩展为全类型 Native 支持，具体成员、既有运行边界及后续适配任务见 [Round137](../../ai_docs/tasks/20261107-sqlquery-command-aot-design/round137.md)。
 
@@ -70,7 +92,11 @@ $env:ConnectionStrings__MySqlConnection = 'Server=127.0.0.1;Database=bing_sql_ao
 node eng/sql-aot/verify.mjs --case mysql-win-x64
 ```
 
-可用 `--output <目录>`、`--configuration <名称>`；只有已按相同项目图/RID 恢复过依赖时才使用 `--no-restore`。默认输出 `output/sql-aot/<case>/run-<随机标识>/`，包含 SDK、publish、run 日志以及最终收据。收据的 `successMarkers` 记录该格要求的 `successMarker` 及可选 `requiredMarkers`，所有标记都必须完整行匹配。发布后从 PE、ELF 或 Mach-O 文件头核对目标平台及 CPU 架构，并在收据的 `binary.rid` 记录检测结果。发布失败、缺少二进制、架构不匹配或出现托管入口 DLL 时结束该格。运行失败或缺少任一标记同样记失败。单次发布上限 20 分钟，Native 执行上限 2 分钟。
+可用 `--output <目录>`、`--configuration <名称>` 和 `--artifacts-path <目录>`。既有 CI 默认输出 `output/sql-aot/<case>/run-<随机标识>/`，包含 SDK、publish、run 日志及最终收据；手动验证应显式指定 `--output artifacts/validation/<任务>/<批次>`。发布文件放在本次 `native/`，默认构建中间产物放在同级 `build/`：SDK 隔离各项目、配置、TFM 和 RID 的 obj，`isolated-output.props` 将公共构建属性重设的 bin、XML 和生成源码一并留在该目录。
+
+`--artifacts-path` 用于显式复用已有构建目录；相对路径按仓库根目录解析，含空格路径作为独立参数传入。只有已用相同项目图、配置、TFM、RID、属性及该目录恢复过依赖时，才同时使用 `--no-restore`。先前项目目录或另一随机批次的 obj 不能充当当前恢复结果；默认新目录需要正常恢复。显式复用目录时由调用方保证没有其他构建同时写入。
+
+收据的 `successMarkers` 记录该格要求的 `successMarker` 及可选 `requiredMarkers`，所有标记都必须完整行匹配。发布后从 PE、ELF 或 Mach-O 文件头核对目标平台及 CPU 架构，并在收据的 `binary.rid` 记录检测结果。发布失败、缺少二进制、架构不匹配或出现托管入口 DLL 时结束该格。运行失败或缺少任一标记同样记失败。单次发布上限 20 分钟，Native 执行上限 2 分钟。
 
 运行器始终验证当前源码生成器，通过独立参数数组启动进程；不将 `PublishAot` 作为全局属性传播给 netstandard 依赖，而由现有入口工程声明。CLI 会拒绝未知格、planned 格及与当前主机不同的 RID。成功标记中的 `PACKAGE` 是既有程序名称，不表示本轮进行了 NuGet 包发布/消费测试。
 
@@ -109,7 +135,7 @@ node eng/sql-aot/verify.mjs --case sqlserver-win-x64
 node eng/sql-aot/verify.mjs --case sqlserver-linux-x64
 ```
 
-两格共同要求 `SQLSERVER_GENERATED_CRUD_PASS`、`SQLSERVER_IDENTITY_OUTPUT_PASS`、`SQLSERVER_SHARED_ROLLBACK_PASS`、`SQLSERVER_EXTENDED_COLUMNS_NATIVE_PASS` 和 `SQLSERVER_OUTPUT_PROJECTION_NATIVE_PASS`。扩展列合同覆盖三种 `MAX`、XML 和 `sql_variant` 的生成式写入与静态读取。`OUTPUT` 合同覆盖 Insert、Update 和 Delete 的多列别名、DTO 初始化值、空结果与事务回滚。SQL Server 2022 的本地双平台原生运行及 Windows LocalDB 结果见 [Round148](../../ai_docs/tasks/20261107-sqlquery-command-aot-design/round148.md)。两格均待托管 CI 收据。
+两格共同要求 `SQLSERVER_GENERATED_CRUD_PASS`、`SQLSERVER_IDENTITY_OUTPUT_PASS`、`SQLSERVER_SHARED_ROLLBACK_PASS`、`SQLSERVER_EXTENDED_COLUMNS_NATIVE_PASS` 和 `SQLSERVER_OUTPUT_PROJECTION_NATIVE_PASS`。扩展列合同覆盖三种 `MAX`、XML 和 `sql_variant` 的生成式写入与静态读取。`OUTPUT` 合同覆盖 Insert、Update 和 Delete 的多列别名、DTO 初始化值、空结果与事务回滚。SQL Server 2022 的本地双平台原生运行及 Windows LocalDB 结果见 [Round148](../../ai_docs/tasks/20261107-sqlquery-command-aot-design/round148.md)。运行 `44996103087` 已取得两格托管 CI 成功收据。
 
 Windows 生命周期入口为 [Invoke-WindowsSqlServer.ps1](Invoke-WindowsSqlServer.ps1)。Start 在指定的新目录创建测试库文件，建库成功后才写入 `GITHUB_ENV`。Stop 根据实例记录清理本轮实例和数据库文件，保留诊断日志。工作流通过 `always()` 调用 Stop，覆盖成功与失败路径。手动复用脚本时提供 `-Directory` 和 `-EnvironmentFile`，并将该文件的两个变量加载到 Native 进程环境。生命周期测试不依赖数据库工具，可用 `pwsh -NoProfile -File eng/sql-aot/tests/WindowsSqlServer.Tests.ps1` 执行。
 
@@ -189,7 +215,7 @@ Round139：MySQL 13 PASS（含 4 项真实进程边界测试）、PostgreSQL 回
 
 接入下一格时，在对应平台准备能自检的消费工程和完整成功标记，声明覆盖范围及缺口，再将 `planned` 改为 `enabled` 并设置 project、runner、tfm、mode 等字段。`ci:false` 用于可手动执行、暂不自动调度的格；省略 `ci` 或设为 `true` 才会由 `ciMatrix` 自动调度。外部数据库继续通过 `RUN_INTEGRATION_TESTS` 或 Provider 专用环境变量门控，仅允许使用独占测试数据库；没有配置时不应把该格计为通过。
 
-MySQL 既有本地 Native 收据使用 8.0.16 独占容器；Linux CI 使用 mysql:8.0，Windows CI 使用镜像工具创建的新实例，两者远端执行尚待验证。MySqlConnector 2.1.2 发布报告 trimming 警告，不能据单次成功推断所有类型、事务失败路径及平台均受支持。
+MySQL 既有本地 Native 收据使用 8.0.16 独占容器；Linux CI 使用 mysql:8.0，Windows CI 使用镜像工具创建的新实例，两者在运行 `44996103087` 中发布和执行通过。MySqlConnector 2.1.2 发布报告 trimming 警告，不能据单次成功推断所有类型、事务失败路径及平台均受支持。
 
 PostgreSQL 的 `string` 属性通过 `[Column(TypeName = "json")]` 或 `[Column(TypeName = "jsonb")]` 映射原始文本。对象属性使用相同的列类型，通过 `services.AddPostgreSqlJson(AppJsonContext.Default.JsonProfile)` 注册源生成的序列化和反序列化元数据。将实体加入 SQL 模型生成上下文并注册 `CreateModels()`。在 `GeneratedOnly` 模式下通过显式投影读取对象列。
 

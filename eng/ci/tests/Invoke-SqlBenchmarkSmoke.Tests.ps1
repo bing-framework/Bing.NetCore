@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = "Release",
-    [string]$ResultsDirectory = "output/sql-benchmark-smoke",
+    [string]$ResultsDirectory = "artifacts/benchmarks/sql-smoke",
     [switch]$NoRestore
 )
 

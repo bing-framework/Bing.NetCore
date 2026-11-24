@@ -46,6 +46,14 @@ public sealed class SqlWriteCommand
     /// <param name="validateAffectedRows">是否在实际受影响行数不符合预期时抛出并发异常。</param>
     public SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
         SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows)
+        : this(sql, parameters, provider, operationKind, hasReturning, validateAffectedRows, null)
+    {
+    }
+
+    /// <summary>生成式命令一次冻结参数及执行语义，避免附加绑定器和并发标记时重复复制。</summary>
+    internal SqlWriteCommand(string sql, IEnumerable<SqlParam> parameters, ISqlProvider provider,
+        SqlOperationKind operationKind, bool hasReturning, bool validateAffectedRows,
+        Action<DbCommand, IEnumerable<SqlParam>> generatedParameterBinder)
     {
         if (string.IsNullOrWhiteSpace(sql))
             throw new ArgumentException("SQL 语句不能为空。", nameof(sql));
@@ -60,6 +68,7 @@ public sealed class SqlWriteCommand
         OperationKind = operationKind;
         HasReturning = hasReturning;
         ValidateAffectedRows = validateAffectedRows;
+        GeneratedParameterBinder = generatedParameterBinder;
     }
 
     /// <summary>创建不返回结果集、不验证受影响行数的 Provider 写入命令。</summary>

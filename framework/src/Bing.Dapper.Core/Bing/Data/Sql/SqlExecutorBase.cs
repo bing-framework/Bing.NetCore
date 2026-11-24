@@ -70,6 +70,7 @@ public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, 
             var result = staticReader != null && CanExecuteStatically(preparedCommand.DapperParameters)
                 ? ReadStaticRows(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, staticReader)
                 : SqlDynamicCommandRunner.Query<TResult>(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, true, timeout).AsBufferedList();
+            ValidateAffectedRows(command, result.Count);
             ExecuteAfter(context.Message);
             return result;
         });
@@ -97,6 +98,7 @@ public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, 
                 : await ExecuteMaterializedQueryAsync<TResult>(connection,
                     CreateQueryCommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, buffered: true,
                         operationToken), operationToken);
+            ValidateAffectedRows(command, result.Count);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);
@@ -121,6 +123,7 @@ public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, 
             var result = CanExecuteStatically(preparedCommand.DapperParameters)
                 ? SqlStaticCommandRunner.Execute(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout, value => value.ExecuteNonQuery())
                 : SqlDynamicCommandRunner.Execute(connection, preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout);
+            ValidateAffectedRows(command, result);
             ExecuteAfter(context.Message);
             return result;
         });
@@ -147,6 +150,7 @@ public abstract partial class SqlExecutorBase : SqlExecutionBase, ISqlExecutor, 
                     (value, token) => value.ExecuteNonQueryAsync(token), operationToken).ConfigureAwait(false)
                 : await SqlDynamicCommandRunner.ExecuteAsync(connection, new CommandDefinition(preparedCommand.Sql, preparedCommand.DapperParameters, transaction, timeout,
                     cancellationToken: operationToken));
+            ValidateAffectedRows(command, result);
             ExecuteAfter(context.Message);
             return result;
         }, cancellationToken).ConfigureAwait(false);

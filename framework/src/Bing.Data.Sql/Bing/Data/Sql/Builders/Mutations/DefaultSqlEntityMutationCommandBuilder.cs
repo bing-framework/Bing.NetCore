@@ -2,8 +2,10 @@ using Bing.Data;
 using Bing.Data.Enums;
 using Bing.Data.Sql.Builders.Conditions;
 using Bing.Data.Sql.Builders.Core;
+using Bing.Data.Sql.Builders.Filters;
 using Bing.Data.Sql.Builders.Mutations.Batching;
 using Bing.Data.Sql.Builders.Mutations.Builders;
+using Bing.Data.Sql.Builders.Mutations.Clauses;
 using Bing.Data.Sql.Builders.Mutations.Contexts;
 using Bing.Data.Sql.Builders.Params;
 using Bing.Data.Sql.Metadata;
@@ -37,7 +39,7 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// </summary>
     private readonly SqlMutationPlanCache _planCache;
 
-    /// <summary>仅默认 SQLite 命名、子句及参数服务可复用当前生成器的 SQL 文本。</summary>
+    /// <summary>仅默认 Provider 命名、子句及参数服务可复用当前生成器的 SQL 文本。</summary>
     private readonly bool _useGeneratedSql;
 
     /// <summary>
@@ -65,7 +67,15 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     internal int GetterCacheCount => _planCache.GetterCount;
 
     /// <inheritdoc />
-    public SqlWriteCommand Insert<TEntity>(TEntity entity, SqlInsertOptions options = null) where TEntity : class
+    public SqlWriteCommand Insert<TEntity>(TEntity entity, SqlInsertOptions options = null) where TEntity : class =>
+        InsertCore(entity, options, false);
+
+    /// <inheritdoc />
+    public SqlWriteCommand InsertReturning<TEntity>(TEntity entity, SqlInsertOptions options = null) where TEntity : class =>
+        InsertCore(entity, options, true);
+
+    /// <summary>共用实体插入计划，按需追加整行返回列。</summary>
+    private SqlWriteCommand InsertCore<TEntity>(TEntity entity, SqlInsertOptions options, bool returning) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
@@ -75,6 +85,9 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         var columns = plan.WriteColumns;
         if (columns.Count == 0)
             throw new InvalidOperationException($"实体 {typeof(TEntity).Name} 没有可插入列。");
+        var generatedSql = GetGeneratedSql(plan, returning: returning);
+        if (generatedSql != null)
+            return BuildGeneratedCommand(generatedSql, entity, plan, SqlOperationKind.InsertValues, returning);
         var builder = new SqlInsertBuilder(_provider, _services);
         builder.InsertClause.Into(mapping.Table);
         builder.InsertColumnsClause.AddRange(columns.Select(column => column.ColumnName));
@@ -85,7 +98,9 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             parameters.Add(parameter);
         }
         builder.ValuesClause.AddRow(parameters);
-        return WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan);
+        if (returning)
+            ConfigureReturning(builder, plan);
+        return WithGeneratedParameterBinding(builder.BuildCommand(generatedSql, returning), plan);
     }
 
     /// <inheritdoc />
@@ -118,6 +133,20 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         var columns = plan.WriteColumns;
         if (columns.Count == 0)
             throw new InvalidOperationException($"实体 {typeof(TEntity).Name} 没有可插入列。");
+        // 默认参数服务每列生成一个参数，先拒绝超限批次，避免构造无效 SQL 和读取全部实体值。
+        if (_useGeneratedSql)
+            SqlMutationBuilderBase.ValidateParameterLimit(_provider, (long)entities.Count * columns.Count);
+        var generatedSql = GetGeneratedSql(plan, entities.Count);
+        if (generatedSql != null)
+        {
+            var parameters = _provider.ParameterManagerFactory.Create(_provider.Dialect);
+            foreach (var entity in entities)
+                foreach (var column in columns)
+                    AddParameter(parameters, CreateParameter(parameters, entity, column, typeof(TEntity), plan));
+            return new SqlWriteCommand(generatedSql, ((IAdvancedParameterManager)parameters).GetSqlParams().Values,
+                _provider, SqlOperationKind.InsertValues, false, false,
+                plan.CanUseGeneratedParameterBinding ? SqlGeneratedParameterBinding.Bind : null);
+        }
         var builder = new SqlInsertBuilder(_provider, _services);
         builder.InsertClause.Into(mapping.Table);
         builder.InsertColumnsClause.AddRange(columns.Select(column => column.ColumnName));
@@ -132,11 +161,19 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             }
             builder.ValuesClause.AddRow(parameters);
         }
-        return WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan, builder.ValuesClause.RowCount)), plan);
+        return WithGeneratedParameterBinding(builder.BuildCommand(generatedSql), plan);
     }
 
     /// <inheritdoc />
-    public SqlWriteCommand Update<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class
+    public SqlWriteCommand Update<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class =>
+        UpdateCore(entity, options, false);
+
+    /// <inheritdoc />
+    public SqlWriteCommand UpdateReturning<TEntity>(TEntity entity, SqlUpdateOptions options = null) where TEntity : class =>
+        UpdateCore(entity, options, true);
+
+    /// <summary>共用实体更新计划，保留原始值和并发校验。</summary>
+    private SqlWriteCommand UpdateCore<TEntity>(TEntity entity, SqlUpdateOptions options, bool returning) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
@@ -147,6 +184,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         if (columns.Count == 0)
             throw new InvalidOperationException($"实体 {typeof(TEntity).Name} 没有可更新列。");
         EnsureKeys(plan, typeof(TEntity), "更新");
+        var generatedSql = RequiresDataBoundaryBuilder(plan, SqlOperationKind.Update)
+            ? null : GetGeneratedSql(plan, returning: returning);
+        if (generatedSql != null)
+            return BuildGeneratedCommand(generatedSql, entity, plan, SqlOperationKind.Update, returning, update: options);
         var builder = new SqlUpdateBuilder(_provider, _services);
         builder.UpdateClause.UpdateTable(mapping.Table);
         foreach (var column in columns)
@@ -155,7 +196,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             builder.SetClause.Set(column.ColumnName, parameter);
         }
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan), plan,
+        if (returning)
+            ConfigureReturning(builder, plan);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(
+            builder.BuildCommand(generatedSql, returning), plan), plan,
             options?.ConcurrencyConflictBehavior);
     }
 
@@ -190,18 +234,38 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <inheritdoc />
-    public SqlWriteCommand Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class
+    public SqlWriteCommand DeleteReturning<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+        return typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity))
+            ? SetSoftDeleteState(entity, true, options, returning: true)
+            : PurgeCore(entity, options, true);
+    }
+
+    /// <inheritdoc />
+    public SqlWriteCommand Purge<TEntity>(TEntity entity, SqlDeleteOptions options = null) where TEntity : class =>
+        PurgeCore(entity, options, false);
+
+    /// <summary>共用物理删除计划，返回列读取删除前的行。</summary>
+    private SqlWriteCommand PurgeCore<TEntity>(TEntity entity, SqlDeleteOptions options, bool returning) where TEntity : class
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Delete, null, null);
         EnsureKeys(plan, typeof(TEntity), "物理清除");
+        var generatedSql = GetGeneratedSql(plan, returning: returning);
+        if (generatedSql != null && !RequiresDataBoundaryBuilder(plan, SqlOperationKind.Delete))
+            return BuildGeneratedCommand(generatedSql, entity, plan, SqlOperationKind.Delete, returning, delete: options);
         var mapping = plan.Mapping;
         var builder = new SqlDeleteBuilder(_provider, _services);
         builder.DataBoundaryOperation = SqlDataBoundaryOperation.Purge;
         builder.DeleteClause.From(mapping.Table);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
-        return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(GetGeneratedSql(plan)), plan), plan,
+        if (returning)
+            ConfigureReturning(builder, plan);
+        return WithConcurrencyValidation(WithGeneratedParameterBinding(
+            builder.BuildCommand(generatedSql, returning), plan), plan,
             options?.ConcurrencyConflictBehavior);
     }
 
@@ -242,11 +306,39 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             throw new NotSupportedException("逻辑删除实体不支持组合物理 Delete，请逐实体调用 Delete 或显式调用 Purge。");
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Delete, null, null);
         EnsureKeys(plan, typeof(TEntity), "批量 Delete");
-        var builder = new SqlDeleteBuilder(_provider, _services);
-        builder.DeleteClause.From(plan.Mapping.Table);
         var canUseInPredicate = plan.Keys.Count == 1 && plan.ConcurrencyColumns.Count == 0;
         if (strategy == SqlBatchDeleteStrategy.InPredicate && canUseInPredicate == false)
             throw new NotSupportedException("InPredicate 策略仅支持不带并发令牌的单主键实体。");
+        if ((!canUseInPredicate || strategy != SqlBatchDeleteStrategy.CompositePredicate) && entities.Count > 1 &&
+            _useGeneratedSql && !RequiresDataBoundaryBuilder(plan, SqlOperationKind.Delete))
+        {
+            // 配对删除每行包含全部键及令牌，先拒绝超限批次，再展开 SQL 或读取实体。
+            SqlMutationBuilderBase.ValidateParameterLimit(_provider,
+                checked(entities.Count * (plan.Keys.Count + plan.ConcurrencyColumns.Count)));
+            var generatedSql = GetGeneratedSql(plan, entities.Count);
+            if (generatedSql != null)
+            {
+                var parameters = _provider.ParameterManagerFactory.Create(_provider.Dialect);
+                foreach (var entity in entities)
+                {
+                    for (var index = 0; index < plan.Keys.Count; index++)
+                        CreateConditionParameter(parameters, plan, entity, plan.Keys[index], typeof(TEntity));
+                    for (var index = 0; index < plan.ConcurrencyColumns.Count; index++)
+                    {
+                        var column = plan.ConcurrencyColumns[index];
+                        var hasOriginalValue = TryGetOriginalValue(options, column.PropertyName, out var value);
+                        CreateConditionParameter(parameters, plan, entity, column, typeof(TEntity), hasOriginalValue, value);
+                    }
+                }
+                var validateAffectedRows = plan.ConcurrencyColumns.Count > 0 &&
+                    (options?.ConcurrencyConflictBehavior ?? SqlConcurrencyConflictBehavior.Throw) == SqlConcurrencyConflictBehavior.Throw;
+                return new SqlWriteCommand(generatedSql, ((IAdvancedParameterManager)parameters).GetSqlParams().Values,
+                    _provider, SqlOperationKind.Delete, false, validateAffectedRows,
+                    plan.CanUseGeneratedParameterBinding ? SqlGeneratedParameterBinding.Bind : null);
+            }
+        }
+        var builder = new SqlDeleteBuilder(_provider, _services);
+        builder.DeleteClause.From(plan.Mapping.Table);
         if (canUseInPredicate && strategy != SqlBatchDeleteStrategy.CompositePredicate)
             ConfigureSingleKeyInWhere(builder.WhereClause, plan, entities, builder.MutationContext.ParameterManager);
         else
@@ -262,8 +354,10 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     /// <param name="entity">包含主键和并发属性值的实体。</param>
     /// <param name="isDeleted">目标逻辑删除状态。</param>
     /// <param name="options">可选的 Delete 原始值和并发配置。</param>
+    /// <param name="returning">是否返回更新后的完整行。</param>
     /// <returns>带参数和并发校验信息的可执行 Update 命令。</returns>
-    private SqlWriteCommand SetSoftDeleteState<TEntity>(TEntity entity, bool isDeleted, SqlDeleteOptions options)
+    private SqlWriteCommand SetSoftDeleteState<TEntity>(TEntity entity, bool isDeleted, SqlDeleteOptions options,
+        bool returning = false)
         where TEntity : class
     {
         var plan = ResolvePlan(typeof(TEntity), SqlMutationOperation.Update, null, null);
@@ -278,6 +372,8 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
             stateColumn, _databaseContext, typeof(TEntity), SqlParameterSource.SqlBuilder);
         builder.SetClause.Set(stateColumn.ColumnName, stateParameter);
         ConfigureWhere(builder.WhereClause, plan, entity, options, builder.MutationContext.ParameterManager);
+        if (returning)
+            ConfigureReturning(builder, plan);
         return WithConcurrencyValidation(WithGeneratedParameterBinding(builder.BuildCommand(), plan), plan,
             options?.ConcurrencyConflictBehavior);
     }
@@ -323,8 +419,69 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
     }
 
     /// <summary>自定义命名或参数服务继续使用其原有渲染路径。</summary>
-    private string GetGeneratedSql(SqlMutationPlan plan, int rowCount = 1) =>
-        _useGeneratedSql ? plan.GetGeneratedSql(_provider.Key, rowCount) : null;
+    private string GetGeneratedSql(SqlMutationPlan plan, int rowCount = 1, bool returning = false) =>
+        !_useGeneratedSql ? null : returning
+            ? plan.GetGeneratedReturningSql(_provider.Key)
+            : plan.GetGeneratedSql(_provider.Key, rowCount);
+
+    /// <summary>自定义数据边界继续由 Builder 应用；内置逻辑删除过滤器仅在适用实体的 Update 上需要它。</summary>
+    private bool RequiresDataBoundaryBuilder(SqlMutationPlan plan, SqlOperationKind operation)
+    {
+        foreach (var filter in _services.Filters)
+        {
+            if (filter is not ISqlDataBoundaryContributor)
+                continue;
+            if (filter.GetType() == typeof(IsDeletedFilter) &&
+                (operation == SqlOperationKind.Delete || !typeof(ISoftDelete).IsAssignableFrom(plan.Mapping.EntityType)))
+                continue;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>完整 SQL 已生成时只创建参数和冻结命令，不再分配可变子句或格式化条件。</summary>
+    private SqlWriteCommand BuildGeneratedCommand(string sql, object entity, SqlMutationPlan plan,
+        SqlOperationKind operation, bool returning, SqlUpdateOptions update = null, SqlDeleteOptions delete = null)
+    {
+        // 保留默认参数管理器的名称规范化及方言值转换；不可直接跳过这一步绑定实体原值。
+        var parameters = _provider.ParameterManagerFactory.Create(_provider.Dialect);
+        if (operation != SqlOperationKind.Delete)
+            foreach (var column in plan.WriteColumns)
+                AddParameter(parameters, CreateParameter(parameters, entity, column, plan.Mapping.EntityType, plan));
+        if (operation != SqlOperationKind.InsertValues)
+        {
+            foreach (var key in plan.Keys)
+                CreateConditionParameter(parameters, plan, entity, key, plan.Mapping.EntityType);
+            foreach (var column in plan.ConcurrencyColumns)
+            {
+                object value;
+                var hasOriginal = operation == SqlOperationKind.Update
+                    ? TryGetOriginalValue(update, column.PropertyName, out value)
+                    : TryGetOriginalValue(delete, column.PropertyName, out value);
+                CreateConditionParameter(parameters, plan, entity, column, plan.Mapping.EntityType, hasOriginal, value);
+            }
+        }
+        SqlMutationBuilderBase.ValidateParameterLimit(_provider, parameters.Count);
+        if (returning)
+            ReturningClause.ValidateProvider(new SqlValidationContext(_provider, parameters.Count, false,
+                operation switch
+                {
+                    SqlOperationKind.InsertValues => SqlExecutionKind.Insert,
+                    SqlOperationKind.Update => SqlExecutionKind.Update,
+                    _ => SqlExecutionKind.Delete
+                }));
+        var behavior = update?.ConcurrencyConflictBehavior ?? delete?.ConcurrencyConflictBehavior;
+        var validateAffectedRows = operation != SqlOperationKind.InsertValues && plan.ConcurrencyColumns.Count > 0 &&
+            (behavior ?? SqlConcurrencyConflictBehavior.Throw) == SqlConcurrencyConflictBehavior.Throw;
+        return new SqlWriteCommand(sql, ((IAdvancedParameterManager)parameters).GetSqlParams().Values, _provider,
+            operation, returning, validateAffectedRows,
+            plan.CanUseGeneratedParameterBinding ? SqlGeneratedParameterBinding.Bind : null);
+    }
+
+    /// <summary>返回所有最终映射列，并用 CLR 属性名连接已有实体读取器。</summary>
+    private static void ConfigureReturning(SqlMutationBuilderBase builder, SqlMutationPlan plan) =>
+        builder.ReturningClause.AddRange(plan.Mapping.Columns.Values
+            .Select(column => new SqlReturningColumn(column.ColumnName, alias: column.PropertyName)).ToArray());
 
     /// <summary>
     /// 验证实体 Mutation 具有主键条件。
@@ -442,14 +599,23 @@ public sealed class DefaultSqlEntityMutationCommandBuilder : ISqlEntityMutationC
         ColumnMappingMetadata column,
         Type entityType, bool hasOriginalValue = false, object originalValue = null)
     {
+        var parameter = CreateConditionParameter(parameterManager, plan, source, column, entityType,
+            hasOriginalValue, originalValue);
+        return new SqlCondition(
+            $"{_provider.Dialect.SafeName(column.ColumnName)} = {SqlMutationContext.GetParameterPlaceholder(_provider, parameter.Name)}");
+    }
+
+    /// <summary>生成 SQL 和动态条件共用非空检查、并发原值读取和参数转换。</summary>
+    private SqlParam CreateConditionParameter(IParameterManager parameterManager, SqlMutationPlan plan, object source,
+        ColumnMappingMetadata column, Type entityType, bool hasOriginalValue = false, object originalValue = null)
+    {
         var value = hasOriginalValue ? originalValue : GetValue(plan, source, column);
         if (value == null)
             throw new InvalidOperationException($"实体 {entityType.Name} 的条件列 {column.PropertyName} 不能为空。");
         var parameter = _services.ParameterFactory.Create(parameterManager.GenerateName(), value, column,
             _databaseContext, entityType, SqlParameterSource.SqlBuilder);
         AddParameter(parameterManager, parameter);
-        return new SqlCondition(
-            $"{_provider.Dialect.SafeName(column.ColumnName)} = {SqlMutationContext.GetParameterPlaceholder(_provider, parameter.Name)}");
+        return parameter;
     }
 
     /// <summary>

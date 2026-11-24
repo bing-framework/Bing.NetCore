@@ -25,6 +25,12 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     /// </summary>
     private readonly List<TableSource> _sources;
 
+    /// <summary>按需创建的只读实时视图，外部只能通过子句操作修改来源。</summary>
+    private IReadOnlyList<TableSource> _sourceView;
+
+    /// <summary>仅在来源预过滤时创建，普通查询不分配此集合。</summary>
+    private Dictionary<string, ICondition> _sourceFilters;
+
     /// <summary>
     /// 子句运行上下文。
     /// </summary>
@@ -104,6 +110,9 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
         var sources = _sources.Select(source => source.Clone()).ToList();
         var clone = CreateClone(context, sources.LastOrDefault()?.Item);
         clone.SetSources(sources);
+        if (_sourceFilters != null)
+            clone._sourceFilters = _sourceFilters.ToDictionary(item => item.Key,
+                item => SqlConditionSnapshot.Rebind(item.Value, context));
         return clone;
     }
 
@@ -213,7 +222,16 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     /// <summary>
     /// 获取当前根表源集合。
     /// </summary>
-    internal IReadOnlyList<TableSource> Sources => _sources;
+    internal IReadOnlyList<TableSource> Sources => _sourceView ??= _sources.AsReadOnly();
+
+    /// <summary>将谓词绑定到根来源，而非外层 Where。</summary>
+    internal void AddSourceFilter(string sourceId, string column, object value, Operator @operator)
+    {
+        _sourceFilters ??= new Dictionary<string, ICondition>();
+        _sourceFilters.TryGetValue(sourceId, out var previous);
+        var condition = new Helper(_context).CreateCondition(column, value, @operator);
+        _sourceFilters[sourceId] = new AndCondition(previous, condition);
+    }
 
     /// <summary>
     /// 为 From 子句中的指定数据源绑定别名。
@@ -709,7 +727,9 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
     {
         if (builder == null)
             throw new ArgumentNullException(nameof(builder));
-        var tables = _sources.Select(source => source.Item.ToSql(Dialect))
+        var tables = _sources.Select(source => _sourceFilters != null &&
+                _sourceFilters.TryGetValue(source.SourceId, out var filter)
+                ? source.Item.ToFilteredSql(Dialect, source.Alias, filter) : source.Item.ToSql(Dialect))
             .Where(table => string.IsNullOrWhiteSpace(table) == false).ToList();
         if (tables.Count == 0)
             return;
@@ -725,6 +745,7 @@ public class FromClause : IFromClause, ISqlMultiSourceFromClause
             Register.FromType = null;
         Table = null;
         _sources.Clear();
+        _sourceFilters = null;
     }
 
     /// <summary>

@@ -67,7 +67,7 @@
         "generator-emitted-default-sqlite-crud-sql",
         "composite-key-concurrency-null",
         "returning-reader",
-        "without-lambda-interception",
+        "without-query-lambda-interception",
         "generator-emitted-identity-insert-returning-sql",
         "identity-only-default-values",
         "identity-static-binder-reader-backfill",
@@ -76,8 +76,16 @@
         "identity-checked-conversion-rollback",
         "generated-single-column-insert-update",
         "generated-default-two-row-insert",
+        "generated-variable-row-insert",
+        "generated-in-batch-delete",
+        "generated-paired-batch-delete",
+        "generated-entity-returning-sql",
         "generated-independent-returning-dto-reordered-alias-null-sync-async",
-        "strict-mutation-plan-reader"
+        "strict-mutation-plan-reader",
+        "generated-negated-returning-sql",
+        "generated-computed-returning-current-mapping",
+        "generated-quoted-returning-columns",
+        "generated-cached-returning-projection"
       ],
       "notCovered": [
         "all-generated-crud-shapes",
@@ -85,7 +93,19 @@
         "complete-write-transaction-failure-matrix"
       ],
       "requiredMarkers": [
-        "MUTATION_PLAN_READER_NATIVE_PASS"
+        "MUTATION_PLAN_READER_NATIVE_PASS",
+        "GENERATED_RETURNING_PROJECTION_NATIVE_PASS",
+        "GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS",
+        "GENERATED_MUTATION_SHAPES_NATIVE_PASS",
+        "GENERATED_MULTIROW_INSERT_NATIVE_PASS",
+        "GENERATED_IN_DELETE_NATIVE_PASS",
+        "GENERATED_PAIRED_DELETE_NATIVE_PASS",
+        "GENERATED_KEY_INSERT_SQL_NATIVE_PASS",
+        "GENERATED_CRUD_SQL_NATIVE_PASS",
+        "GENERATED_NEGATED_RETURNING_NATIVE_PASS",
+        "GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS",
+        "GENERATED_QUOTED_RETURNING_NATIVE_PASS",
+        "GENERATED_CACHED_RETURNING_NATIVE_PASS"
       ]
     },
     {
@@ -182,7 +202,7 @@
         "generator-emitted-default-sqlite-crud-sql",
         "composite-key-concurrency-null",
         "returning-reader",
-        "without-lambda-interception",
+        "without-query-lambda-interception",
         "generator-emitted-identity-insert-returning-sql",
         "identity-only-default-values",
         "identity-static-binder-reader-backfill",
@@ -191,8 +211,16 @@
         "identity-checked-conversion-rollback",
         "generated-single-column-insert-update",
         "generated-default-two-row-insert",
+        "generated-variable-row-insert",
+        "generated-in-batch-delete",
+        "generated-paired-batch-delete",
+        "generated-entity-returning-sql",
         "generated-independent-returning-dto-reordered-alias-null-sync-async",
-        "strict-mutation-plan-reader"
+        "strict-mutation-plan-reader",
+        "generated-negated-returning-sql",
+        "generated-computed-returning-current-mapping",
+        "generated-quoted-returning-columns",
+        "generated-cached-returning-projection"
       ],
       "notCovered": [
         "all-generated-crud-shapes",
@@ -200,7 +228,19 @@
         "complete-write-transaction-failure-matrix"
       ],
       "requiredMarkers": [
-        "MUTATION_PLAN_READER_NATIVE_PASS"
+        "MUTATION_PLAN_READER_NATIVE_PASS",
+        "GENERATED_RETURNING_PROJECTION_NATIVE_PASS",
+        "GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS",
+        "GENERATED_MUTATION_SHAPES_NATIVE_PASS",
+        "GENERATED_MULTIROW_INSERT_NATIVE_PASS",
+        "GENERATED_IN_DELETE_NATIVE_PASS",
+        "GENERATED_PAIRED_DELETE_NATIVE_PASS",
+        "GENERATED_KEY_INSERT_SQL_NATIVE_PASS",
+        "GENERATED_CRUD_SQL_NATIVE_PASS",
+        "GENERATED_NEGATED_RETURNING_NATIVE_PASS",
+        "GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS",
+        "GENERATED_QUOTED_RETURNING_NATIVE_PASS",
+        "GENERATED_CACHED_RETURNING_NATIVE_PASS"
       ]
     },
     {
@@ -433,7 +473,7 @@
         "generator-emitted-default-sqlite-crud-sql",
         "composite-key-concurrency-null",
         "returning-reader",
-        "without-lambda-interception",
+        "without-query-lambda-interception",
         "generator-emitted-identity-insert-returning-sql",
         "identity-only-default-values",
         "identity-static-binder-reader-backfill",
@@ -442,8 +482,16 @@
         "identity-checked-conversion-rollback",
         "generated-single-column-insert-update",
         "generated-default-two-row-insert",
+        "generated-variable-row-insert",
+        "generated-in-batch-delete",
+        "generated-paired-batch-delete",
+        "generated-entity-returning-sql",
         "generated-independent-returning-dto-reordered-alias-null-sync-async",
-        "strict-mutation-plan-reader"
+        "strict-mutation-plan-reader",
+        "generated-negated-returning-sql",
+        "generated-computed-returning-current-mapping",
+        "generated-quoted-returning-columns",
+        "generated-cached-returning-projection"
       ],
       "notCovered": [
         "all-generated-crud-shapes",
@@ -451,7 +499,19 @@
         "complete-write-transaction-failure-matrix"
       ],
       "requiredMarkers": [
-        "MUTATION_PLAN_READER_NATIVE_PASS"
+        "MUTATION_PLAN_READER_NATIVE_PASS",
+        "GENERATED_RETURNING_PROJECTION_NATIVE_PASS",
+        "GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS",
+        "GENERATED_MUTATION_SHAPES_NATIVE_PASS",
+        "GENERATED_MULTIROW_INSERT_NATIVE_PASS",
+        "GENERATED_IN_DELETE_NATIVE_PASS",
+        "GENERATED_PAIRED_DELETE_NATIVE_PASS",
+        "GENERATED_KEY_INSERT_SQL_NATIVE_PASS",
+        "GENERATED_CRUD_SQL_NATIVE_PASS",
+        "GENERATED_NEGATED_RETURNING_NATIVE_PASS",
+        "GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS",
+        "GENERATED_QUOTED_RETURNING_NATIVE_PASS",
+        "GENERATED_CACHED_RETURNING_NATIVE_PASS"
       ]
     },
     {
@@ -548,7 +608,7 @@
         "generator-emitted-default-sqlite-crud-sql",
         "composite-key-concurrency-null",
         "returning-reader",
-        "without-lambda-interception",
+        "without-query-lambda-interception",
         "generator-emitted-identity-insert-returning-sql",
         "identity-only-default-values",
         "identity-static-binder-reader-backfill",
@@ -557,8 +617,16 @@
         "identity-checked-conversion-rollback",
         "generated-single-column-insert-update",
         "generated-default-two-row-insert",
+        "generated-variable-row-insert",
+        "generated-in-batch-delete",
+        "generated-paired-batch-delete",
+        "generated-entity-returning-sql",
         "generated-independent-returning-dto-reordered-alias-null-sync-async",
-        "strict-mutation-plan-reader"
+        "strict-mutation-plan-reader",
+        "generated-negated-returning-sql",
+        "generated-computed-returning-current-mapping",
+        "generated-quoted-returning-columns",
+        "generated-cached-returning-projection"
       ],
       "notCovered": [
         "all-generated-crud-shapes",
@@ -566,7 +634,19 @@
         "complete-write-transaction-failure-matrix"
       ],
       "requiredMarkers": [
-        "MUTATION_PLAN_READER_NATIVE_PASS"
+        "MUTATION_PLAN_READER_NATIVE_PASS",
+        "GENERATED_RETURNING_PROJECTION_NATIVE_PASS",
+        "GENERATED_ENTITY_RETURNING_SQL_NATIVE_PASS",
+        "GENERATED_MUTATION_SHAPES_NATIVE_PASS",
+        "GENERATED_MULTIROW_INSERT_NATIVE_PASS",
+        "GENERATED_IN_DELETE_NATIVE_PASS",
+        "GENERATED_PAIRED_DELETE_NATIVE_PASS",
+        "GENERATED_KEY_INSERT_SQL_NATIVE_PASS",
+        "GENERATED_CRUD_SQL_NATIVE_PASS",
+        "GENERATED_NEGATED_RETURNING_NATIVE_PASS",
+        "GENERATED_COMPUTED_RETURNING_MAPPING_NATIVE_PASS",
+        "GENERATED_QUOTED_RETURNING_NATIVE_PASS",
+        "GENERATED_CACHED_RETURNING_NATIVE_PASS"
       ]
     },
     {
@@ -696,7 +776,13 @@
       "status": "enabled",
       "project": "framework/tests/Bing.Data.Sql.Aot.Oracle/Bing.Data.Sql.Aot.Oracle.csproj",
       "successMarker": "ORACLE_GENERATED_CRUD_PASS",
-      "requiredMarkers": ["ORACLE_SHARED_ROLLBACK_PASS", "ORACLE_IDENTITY_RETURNING_PASS", "ORACLE_DML_RETURNING_INTO_PASS", "ORACLE_BUILDER_RETURNING_PASS", "ORACLE_BUILDER_BULK_RETURNING_PASS"],
+      "requiredMarkers": [
+        "ORACLE_SHARED_ROLLBACK_PASS",
+        "ORACLE_IDENTITY_RETURNING_PASS",
+        "ORACLE_DML_RETURNING_INTO_PASS",
+        "ORACLE_BUILDER_RETURNING_PASS",
+        "ORACLE_BUILDER_BULK_RETURNING_PASS"
+      ],
       "coverage": [
         "generated-oracle-assigned-key-crud-sql-binder",
         "generated-numeric-oracle-identity-returning-into-and-rollback",
@@ -723,7 +809,13 @@
       "status": "enabled",
       "project": "framework/tests/Bing.Data.Sql.Aot.Oracle/Bing.Data.Sql.Aot.Oracle.csproj",
       "successMarker": "ORACLE_GENERATED_CRUD_PASS",
-      "requiredMarkers": ["ORACLE_SHARED_ROLLBACK_PASS", "ORACLE_IDENTITY_RETURNING_PASS", "ORACLE_DML_RETURNING_INTO_PASS", "ORACLE_BUILDER_RETURNING_PASS", "ORACLE_BUILDER_BULK_RETURNING_PASS"],
+      "requiredMarkers": [
+        "ORACLE_SHARED_ROLLBACK_PASS",
+        "ORACLE_IDENTITY_RETURNING_PASS",
+        "ORACLE_DML_RETURNING_INTO_PASS",
+        "ORACLE_BUILDER_RETURNING_PASS",
+        "ORACLE_BUILDER_BULK_RETURNING_PASS"
+      ],
       "coverage": [
         "generated-oracle-assigned-key-crud-sql-binder",
         "generated-numeric-oracle-identity-returning-into-and-rollback",

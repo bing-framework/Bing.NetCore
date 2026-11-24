@@ -3,9 +3,9 @@
 namespace Bing.Data.Sql.Builders.Core;
 
 /// <summary>
-/// 列
+/// 可在不同查询草稿之间安全共享的不可变列描述。
 /// </summary>
-public class ColumnItem
+public sealed class ColumnItem
 {
     /// <summary>
     /// 结构化聚合描述。
@@ -13,19 +13,19 @@ public class ColumnItem
     private readonly SqlAggregateDescriptor _aggregate;
 
     /// <summary>
-    /// 获取或设置列名
+    /// 获取列名。
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; }
 
     /// <summary>
-    /// 获取或设置表别名
+    /// 获取表别名。
     /// </summary>
-    public string TableAlias { get; set; }
+    public string TableAlias { get; }
 
     /// <summary>
-    /// 获取或设置列别名
+    /// 获取列别名。
     /// </summary>
-    public string ColumnAlias { get; set; }
+    public string ColumnAlias { get; }
 
     /// <summary>
     /// 获取是否使用原始值
@@ -228,11 +228,32 @@ public class ColumnItem
         : register != null && register.Contains(TableType) ? register.GetAlias(TableType) : null;
 
     /// <summary>
-    /// 克隆
+    /// 使用指定列名创建列描述，其他配置保持不变。
     /// </summary>
-    /// <returns>当前列项的独立副本。</returns>
-    public ColumnItem Clone()
-    {
-        return new ColumnItem(Name, TableAlias, ColumnAlias, TableType, Raw, _aggregate);
-    }
+    /// <param name="name">列名或聚合参数。</param>
+    /// <returns>更新后的不可变列描述；名称相同时复用当前实例。</returns>
+    public ColumnItem WithName(string name) => Name == name
+        ? this : new ColumnItem(name, TableAlias, ColumnAlias, TableType, Raw, _aggregate);
+
+    /// <summary>
+    /// 使用指定表别名创建列描述，其他配置保持不变。
+    /// </summary>
+    /// <param name="tableAlias">表别名；传入空值可移除显式别名。</param>
+    /// <returns>更新后的不可变列描述；别名相同时复用当前实例。</returns>
+    public ColumnItem WithTableAlias(string tableAlias) => TableAlias == tableAlias
+        ? this : new ColumnItem(Name, tableAlias, ColumnAlias, TableType, Raw, _aggregate);
+
+    /// <summary>
+    /// 使用指定结果别名创建列描述，其他配置保持不变。
+    /// </summary>
+    /// <param name="columnAlias">结果列别名；传入空值可移除别名。</param>
+    /// <returns>更新后的不可变列描述；别名相同时复用当前实例。</returns>
+    public ColumnItem WithColumnAlias(string columnAlias) => ColumnAlias == columnAlias
+        ? this : new ColumnItem(Name, TableAlias, columnAlias, TableType, Raw, _aggregate);
+
+    /// <summary>
+    /// 复用当前不可变列描述。
+    /// </summary>
+    /// <returns>当前实例。集合克隆只需要复制其容器。</returns>
+    public ColumnItem Clone() => this;
 }
