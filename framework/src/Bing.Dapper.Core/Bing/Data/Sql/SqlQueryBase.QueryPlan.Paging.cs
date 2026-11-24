@@ -71,12 +71,12 @@ public abstract partial class SqlQueryBase
     async Task<PagerList<TResult>> ISqlQueryPlanExecutor.ToPageAsync<TResult>(SqlQueryPlan plan, IPager pager,
         int? timeout, CancellationToken cancellationToken)
     {
-        TryCreateStaticReader<TResult>(out var staticReader);
         using var operationCancellation = QueryResources.CreateOperationCancellationLease(cancellationToken);
         var operationToken = operationCancellation.Token;
+        EnsureCancellationSupported(operationToken);
+        TryCreateStaticReader<TResult>(out var staticReader);
         var sourcePager = SqlBuilderRuntimeBridge.GetPlanPager(plan, pager);
         var page = CreatePlanPagerSnapshot(sourcePager);
-        EnsureCancellationSupported(operationToken);
         if (operationToken.IsCancellationRequested)
         {
             QueryResources.MarkPreCancelledUnitOfWorkExecution();
