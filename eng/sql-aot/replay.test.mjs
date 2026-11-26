@@ -369,7 +369,14 @@ test('Native 矩阵对 SQLite 执行工件合同测试及上传、下载、重�
   assert.match(steps[upload], /include-hidden-files:\s*true/u,
     'SQLite payload upload must explicitly retain nested hidden dependencies');
   assert.match(steps[download], /actions\/download-artifact@v4/u);
-  assert.match(steps[replay], /--replay\s+\$\{\{\s*matrix\.id\s*\}\}/u);
+  assert.match(nativeJob, /^    permissions:\s*\n(?:      [^\n]*\n)*?      actions:\s*read\s*$/mu,
+    'REST artifact download requires actions: read');
+  assert.match(steps[download], /name:\s*sql-native-payload-\$\{\{\s*matrix\.id\s*\}\}/u);
+  assert.match(steps[download], /path:\s*output\/sql-aot-replay\/download\s*$/mu);
+  assert.match(steps[download], /github-token:\s*\$\{\{\s*github\.token\s*\}\}/u);
+  assert.match(steps[download], /repository:\s*\$\{\{\s*github\.repository\s*\}\}/u);
+  assert.match(steps[download], /run-id:\s*\$\{\{\s*github\.run_id\s*\}\}/u);
+  assert.match(steps[replay], /--replay\s+\$\{\{\s*matrix\.id\s*\}\}\s+output\/sql-aot-replay\/download/u);
 
   const summaryJob = workflowText.split(/^  native-summary:/mu)[1] ?? '';
   assert.match(summaryJob, /sql-native-payload-\*/u,

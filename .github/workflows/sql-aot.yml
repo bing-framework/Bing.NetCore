@@ -119,6 +119,9 @@ jobs:
 
   native:
     needs: matrix
+    permissions:
+      contents: read
+      actions: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.matrix.outputs.cases) }}
@@ -236,6 +239,9 @@ jobs:
         with:
           name: sql-native-payload-${{ matrix.id }}
           path: output/sql-aot-replay/download
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
       - name: Replay downloaded SQLite payload
         if: ${{ startsWith(matrix.id, 'sqlite-') }}
         run: node eng/sql-aot/verify.mjs --replay ${{ matrix.id }} output/sql-aot-replay/download

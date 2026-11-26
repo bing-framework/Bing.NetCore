@@ -10,6 +10,7 @@ param(
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $ErrorActionPreference = "Stop"
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
+. (Join-Path $repositoryRoot 'eng/ci/SqlSmokeDiagnostics.ps1')
 $project = Join-Path $repositoryRoot "framework/tests/Bing.Data.Sql.Benchmarks/Bing.Data.Sql.Benchmarks.csproj"
 $parent = if ([System.IO.Path]::IsPathRooted($ResultsDirectory)) { $ResultsDirectory } else { Join-Path $repositoryRoot $ResultsDirectory }
 $directory = Join-Path $parent ("run-" + [Guid]::NewGuid().ToString("N"))
@@ -118,14 +119,43 @@ try {
         if ($contractCode -ne 0) { throw "$contract tests failed: $contractOutput" }
     }
 
+    $diagnosticTestOutput = Join-Path $directory 'diagnostics-contract'
+    & (Get-Command pwsh).Source -NoProfile -File (Join-Path $repositoryRoot 'eng/ci/tests/SqlSmokeDiagnostics.Tests.ps1') -ResultsDirectory $diagnosticTestOutput | Out-Null
+    $diagnosticTestCode = $LASTEXITCODE
+    $result.steps += [ordered]@{ name = 'VerifySmokeDiagnostics'; exitCode = $diagnosticTestCode; results = $diagnosticTestOutput }
+    if ($diagnosticTestCode -ne 0) { throw "Smoke diagnostics tests failed: $diagnosticTestOutput" }
+
     $collector = Join-Path $repositoryRoot 'eng/perf/SqlCpuTrace/SqlCpuTrace.csproj'
     $cpuBuild = Join-Path $repositoryRoot 'artifacts/validation/sql-smoke/cpu-build'
     $cpuArguments = @('run', '--project', $collector, '-c', $Configuration, '--artifacts-path', $cpuBuild,
         "-p:DiagnosticAssemblyDirectory=$(Split-Path -Parent $binary)", '-p:UseSharedCompilation=false')
     if ($NoRestore) { $cpuArguments += '--no-restore' }
     $cpuLog = Join-Path $directory 'cpu-attribution-tests.log'
-    & dotnet @cpuArguments -- --self-test 2>&1 | Out-File -LiteralPath $cpuLog -Encoding utf8
-    $cpuCode = $LASTEXITCODE
+    $cpuProgress = Join-Path $directory 'cpu-attribution-progress.jsonl'
+    $cpuMonitor = Start-SqlSmokeCpuMonitor -Path $cpuProgress -OwnerProcessId $PID -Arguments ($cpuArguments + @('--', '--self-test'))
+    $cpuCode = -1
+    $cpuClock = $null
+    try {
+        $cpuTimingPath = Join-Path $directory 'cpu-attribution-command.json'
+        $cpuTiming = [ordered]@{ status = 'RUNNING'; startedAt = [DateTime]::UtcNow.ToString('o') }
+        $cpuTiming | ConvertTo-Json | Set-Content -LiteralPath $cpuTimingPath -Encoding utf8
+        $cpuClock = [Diagnostics.Stopwatch]::StartNew()
+        & dotnet @cpuArguments -- --self-test 2>&1 | Out-File -LiteralPath $cpuLog -Encoding utf8
+        $cpuCode = $LASTEXITCODE
+    } finally {
+        try {
+            if ($cpuClock) {
+                $cpuClock.Stop()
+                $cpuTiming.status = 'FINISHED'
+                $cpuTiming.finishedAt = [DateTime]::UtcNow.ToString('o')
+                $cpuTiming.elapsedMilliseconds = $cpuClock.Elapsed.TotalMilliseconds
+                $cpuTiming.exitCode = $cpuCode
+                $cpuTiming | ConvertTo-Json | Set-Content -LiteralPath $cpuTimingPath -Encoding utf8
+            }
+        } finally {
+            Stop-SqlSmokeCpuMonitor -Monitor $cpuMonitor -ExitCode $cpuCode
+        }
+    }
     $result.steps += [ordered]@{ name = 'VerifyCpuAttribution'; exitCode = $cpuCode; log = $cpuLog }
     if ($cpuCode -ne 0) { throw "CPU attribution tests failed: $cpuLog" }
 
