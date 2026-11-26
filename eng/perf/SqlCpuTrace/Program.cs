@@ -13,6 +13,7 @@ Console.OutputEncoding = Encoding.UTF8;
 try
 {
     if (args is ["--self-test"]) return AttributionTests.Run();
+    if (args is ["--self-test-child", var childMode]) return AttributionTests.RunChild(childMode);
     if (args is ["capture", var binary, var parent, var timeoutText])
         return await SqlCpuTrace.Capture(Path.GetFullPath(binary), Path.GetFullPath(parent), int.Parse(timeoutText));
     if (args.Length >= 6 && args[0] == "capture-workload" && args[4] == "--")

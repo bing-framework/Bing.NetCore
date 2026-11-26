@@ -4,6 +4,53 @@ using Microsoft.Diagnostics.Tracing.EventPipe;
 
 internal static class AttributionTests
 {
+    // 自测夹具由当前程序启动，避免依赖机器上的 SDK 输出量或 shell。
+    internal static int RunChild(string mode)
+    {
+        if (mode == "large") { Console.Out.Write(new string('x', 256 * 1024)); return 0; }
+        if (mode == "nonzero") { Console.Write("controlled failure"); return 23; }
+        if (mode == "tree")
+        {
+            using var child = StartChild("hang");
+            Console.WriteLine(child.Id);
+            Console.Out.Flush();
+            Thread.Sleep(Timeout.Infinite);
+        }
+        if (mode == "hang") { Thread.Sleep(Timeout.Infinite); }
+        return 2;
+    }
+
+    private static Process StartChild(string mode)
+    {
+        var executable = Environment.ProcessPath ?? throw new Exception("Missing process path");
+        var start = new ProcessStartInfo(executable) { UseShellExecute = false, RedirectStandardOutput = true };
+        if (Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+            start.ArgumentList.Add(typeof(AttributionTests).Assembly.Location);
+        start.ArgumentList.Add("--self-test-child");
+        start.ArgumentList.Add(mode);
+        return Process.Start(start) ?? throw new Exception("Could not start controlled child process");
+    }
+
+    private static int WaitForChild(Process process, int timeoutMilliseconds)
+    {
+        try
+        {
+            // 子进程可能写满管道；必须在等待退出的同时持续消费 stdout。
+            var drain = process.StandardOutput.BaseStream.CopyToAsync(Stream.Null);
+            if (!process.WaitForExit(timeoutMilliseconds)) throw new TimeoutException("Child process timed out");
+            if (!drain.Wait(5000)) throw new TimeoutException("Child output drain timed out");
+            return process.ExitCode;
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+                if (!process.WaitForExit(5000)) throw new Exception("Child process cleanup timed out");
+            }
+        }
+    }
+
     internal static int Run()
     {
         var cases = new List<object>();
@@ -70,9 +117,69 @@ internal static class AttributionTests
                 RedirectStandardOutput = true,
                 ArgumentList = { "--info" }
             }) ?? throw new Exception("Could not start dotnet child process");
-            process.WaitForExit();
+            Equal(WaitForChild(process, 15000), 0);
             var cpuSeconds = SqlCpuTrace.ReadProcessCpuSeconds(process);
             if (OperatingSystem.IsLinux()) Equal(cpuSeconds, (double?)null);
+        });
+        Test("ChildProcess_LargeRedirectedOutputCompletes", () =>
+        {
+            using var process = StartChild("large");
+            Equal(WaitForChild(process, 15000), 0);
+            Equal(process.HasExited, true);
+        });
+        Test("ChildProcess_NonzeroExitIsPreserved", () =>
+        {
+            using var process = StartChild("nonzero");
+            Equal(WaitForChild(process, 15000), 23);
+            Equal(process.HasExited, true);
+        });
+        Test("ChildProcess_TimeoutKillsAndReaps", () =>
+        {
+            using var process = StartChild("hang");
+            var timedOut = false;
+            try { WaitForChild(process, 1000); }
+            catch (TimeoutException) { timedOut = true; }
+            Equal(timedOut, true);
+            Equal(process.HasExited, true);
+        });
+        Test("ChildProcess_OutputReadFailureKillsAndReaps", () =>
+        {
+            using var process = StartChild("hang");
+            process.StandardOutput.Dispose();
+            var failed = false;
+            try { WaitForChild(process, 1000); }
+            catch (ObjectDisposedException) { failed = true; }
+            Equal(failed, true);
+            Equal(process.HasExited, true);
+        });
+        Test("ChildProcess_TimeoutKillsDescendant", () =>
+        {
+            using var process = StartChild("tree");
+            try
+            {
+                var line = process.StandardOutput.ReadLineAsync();
+                if (!line.Wait(10000)) throw new TimeoutException("Child tree did not start");
+                var childId = int.Parse(line.GetAwaiter().GetResult() ?? throw new Exception("Missing child PID"));
+                var timedOut = false;
+                try { WaitForChild(process, 1000); }
+                catch (TimeoutException) { timedOut = true; }
+                Equal(timedOut, true);
+                Equal(process.HasExited, true);
+                try
+                {
+                    using var descendant = Process.GetProcessById(childId);
+                    if (!descendant.WaitForExit(5000)) throw new Exception("Descendant survived timeout cleanup");
+                }
+                catch (ArgumentException) { /* 已回收的 PID 不再存在。 */ }
+            }
+            finally
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                    if (!process.WaitForExit(5000)) throw new Exception("Child tree cleanup timed out");
+                }
+            }
         });
         Test("Attribution_FiltersTargetPid_AndSeparatesExternalSamples", () =>
         {
