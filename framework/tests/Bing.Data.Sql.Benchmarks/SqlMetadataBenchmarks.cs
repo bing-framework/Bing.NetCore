@@ -497,11 +497,30 @@ internal static class Program
             Environment.ExitCode = SqlCapacityProbe.RunAsync(args).GetAwaiter().GetResult();
             return;
         }
+        if (args.Length > 0 && args[0] is "--mixed-capacity-probe" or "--mixed-stage-probe")
+        {
+            Environment.ExitCode = SqlMixedCapacityProbe.RunAsync(args).GetAwaiter().GetResult();
+            return;
+        }
         if (args.Contains("--generated-query-template-probe", StringComparer.OrdinalIgnoreCase))
         {
             var index = Array.IndexOf(args, "--output");
             if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
             Environment.ExitCode = SqlGeneratedQueryTemplateBenchmarks.RunAllocationProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--excluded-template-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlCachedPredicateBenchmarks.RunExcludedProbe(args[index + 1]);
+            return;
+        }
+        if (args.Contains("--cached-predicate-probe", StringComparer.OrdinalIgnoreCase))
+        {
+            var index = Array.IndexOf(args, "--output");
+            if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
+            Environment.ExitCode = SqlCachedPredicateBenchmarks.RunAllocationProbe(args[index + 1]);
             return;
         }
         if (args.Contains("--generated-key-insert-probe", StringComparer.OrdinalIgnoreCase))
@@ -598,6 +617,11 @@ internal static class Program
             var index = Array.IndexOf(args, "--output");
             if (index < 0 || index + 1 >= args.Length) throw new ArgumentException("--output <json-path> is required.");
             Environment.ExitCode = SqlBuilderStateProbe.Run(args[index + 1]);
+            return;
+        }
+        if (args.Length == 3 && args[0] == "--planning-hot-path-probe" && args[1] == "--output")
+        {
+            Environment.ExitCode = SqlPlanningHotPathBenchmarks.Run(args[2]);
             return;
         }
         if (args.Contains("--column-clone-probe", StringComparer.OrdinalIgnoreCase))

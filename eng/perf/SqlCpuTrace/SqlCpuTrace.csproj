@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="../tests/CpuAttributionTests.cs" />
+    <Compile Include="../tests/CpuComponentAttributionTests.cs" />
     <Reference Include="Microsoft.Diagnostics.NETCore.Client" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.NETCore.Client.dll" />
     <Reference Include="Microsoft.Diagnostics.Tracing.TraceEvent" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
     <Reference Include="Microsoft.Diagnostics.FastSerialization" HintPath="$(DiagnosticAssemblyDirectory)/Microsoft.Diagnostics.FastSerialization.dll" />

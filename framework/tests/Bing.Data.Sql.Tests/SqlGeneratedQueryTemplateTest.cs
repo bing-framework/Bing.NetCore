@@ -20,6 +20,8 @@ public sealed class SqlGeneratedQueryTemplateTest
     private static readonly SqlGeneratedColumn Id = new(0, "Id", null, typeof(int));
     private static readonly SqlGeneratedColumn Name = new(0, "Name", null, typeof(string));
     private static readonly SqlGeneratedColumn[] Columns = { Id, Name };
+    private static readonly SqlGeneratedColumn[] AggregateColumns =
+        { new(0, "Id", "Total", typeof(long), SqlAggregateFunction.Count) };
 
     private static SqlGeneratedQueryTemplate Template(Action replayed = null) => new(new[]
     {
@@ -47,6 +49,247 @@ public sealed class SqlGeneratedQueryTemplateTest
     private static string Sql(string predicate, string alias = "r", bool descending = false) =>
         $"Select `{alias}`.`Id`,`{alias}`.`Name` \r\nFrom `AutoRows` As `{alias}` \r\nWhere `{alias}`.`Id`>=@_p_0" + predicate +
         $" \r\nOrder By `{alias}`.`Id`" + (descending ? " Desc" : "");
+
+    private static SqlGeneratedQueryTemplate AggregateTemplate(Action replayed = null) => new(new[]
+    {
+        new SqlGeneratedQueryTemplate.Operation((q, a) => { replayed?.Invoke(); SqlGeneratedQueryBridge.OptionalCompare(q, (bool)a[0], false,
+            Types, Names, null, Id, null, Operator.GreaterEqual, a[1]); }, a => a[1], _ => Operator.GreaterEqual, 1, 0),
+        new SqlGeneratedQueryTemplate.Operation((q, a) => { replayed?.Invoke(); SqlGeneratedQueryBridge.Project(q, "Select", Types, Names, null, AggregateColumns); })
+    });
+
+    private static SqlLambdaQuery AggregateQuery(SqlGeneratedQueryTemplate template, SqlBuilderServices services, int minimum)
+    {
+        var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+            new SqliteBuilder(services)).From<Row>("r");
+        SqlGeneratedQueryTemplate.Apply(query, template, 0, new object[] { true, minimum });
+        SqlGeneratedQueryTemplate.Apply(query, template, 1, Array.Empty<object>());
+        return query;
+    }
+
+    private static EntityModelMetadata SummaryMetadata(bool writable = true, bool ignored = false, Type propertyType = null) =>
+        new(typeof(Summary), null, null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(Summary.Total), propertyType ?? typeof(long), true, writable, isIgnored: ignored)
+        });
+
+    private static IEntityModelMetadataProvider SummaryProvider(Func<EntityModelMetadata> metadata,
+        Func<EntityModelMetadata> sourceMetadata = null)
+    {
+        var row = SqlBuilderServices.CreateDefault().EntityModelMetadataProvider.GetMetadata(typeof(Row));
+        var provider = new Mock<IEntityModelMetadataProvider>();
+        provider.Setup(value => value.GetMetadata(typeof(Row))).Returns(() => sourceMetadata == null ? row : sourceMetadata());
+        provider.Setup(value => value.GetMetadata(typeof(Summary))).Returns(metadata);
+        return provider.Object;
+    }
+
+    /// <summary>共享查询结构不能绕过本次结果模型的聚合列校验。</summary>
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("empty")]
+    [InlineData("ignored")]
+    [InlineData("readonly")]
+    [InlineData("type")]
+    public void AggregateShape_WhenResultMetadataDiffers_ShouldValidateCurrentProvider(string scenario)
+    {
+        var replayed = 0;
+        var template = AggregateTemplate(() => replayed++);
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        var valid = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata()));
+        var first = AggregateQuery(template, valid, 1);
+        Assert.True(first.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out var plan, out _));
+        Assert.Equal("Select Count(`r`.`Id`) As `Total` \r\nFrom `AutoRows` As `r` \r\nWhere `r`.`Id`>=@_p_0", plan.CommandText);
+
+        EntityModelMetadata Invalid() => scenario switch
+        {
+            "missing" => null,
+            "empty" => new EntityModelMetadata(typeof(Summary), null, null, Array.Empty<EntityPropertyMetadata>()),
+            "ignored" => SummaryMetadata(ignored: true),
+            "readonly" => SummaryMetadata(writable: false),
+            _ => SummaryMetadata(propertyType: typeof(string))
+        };
+        var invalid = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(Invalid));
+        var second = AggregateQuery(template, invalid, 2);
+        if (scenario == "missing")
+            Assert.Throws<NotSupportedException>(() => second.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+        else
+            Assert.Throws<InvalidOperationException>(() => second.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+
+        var third = AggregateQuery(template, valid, 3);
+        Assert.True(third.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out var reused, out _));
+        Assert.Same(plan.CommandText, reused.CommandText);
+        Assert.True(third.GeneratedCore.TemplateState.TryPrepare(typeof(Summary), out var snapshot, out _));
+        Assert.Equal(3, Assert.Single(snapshot.Parameters).Value);
+        Assert.Equal(2, replayed);
+    }
+
+    /// <summary>同一查询再次使用缓存时，仍以当前模型配置校验聚合目标。</summary>
+    [Fact]
+    public void AggregateShape_WhenProviderChangesForSameQuery_ShouldValidateAgain()
+    {
+        var metadata = SummaryMetadata();
+        var services = new SqlBuilderServices(entityModelMetadataProvider: SummaryProvider(() => metadata));
+        var query = AggregateQuery(AggregateTemplate(), services, 1);
+        Assert.True(query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+        metadata = SummaryMetadata(writable: false);
+        Assert.Throws<InvalidOperationException>(() => query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+        metadata = SummaryMetadata();
+        Assert.True(query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+    }
+
+    /// <summary>结果缓存和仅渲染 SQL 都要使用当前来源元数据校验聚合参数。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AggregateShape_WhenSourceMemberIsUnreadable_ShouldRejectWarmShape(bool renderOnly)
+    {
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        var template = AggregateTemplate();
+        var valid = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata()));
+        var first = AggregateQuery(template, valid, 1);
+        var resultType = renderOnly ? typeof(void) : typeof(Summary);
+        Assert.True(first.GeneratedCore.TryGeneratedTemplatePlan(resultType, out _, out _));
+        var unreadable = new EntityModelMetadata(typeof(Row), null, null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(Row.Id), typeof(int), false, true)
+        });
+        var invalid = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata(), () => unreadable));
+        var second = AggregateQuery(template, invalid, 2);
+        Assert.Throws<NotSupportedException>(() => second.GeneratedCore.TryGeneratedTemplatePlan(resultType, out _, out _));
+    }
+
+    /// <summary>即使后续替换投影，缓存也不能跳过之前的聚合参数校验。</summary>
+    [Fact]
+    public void AggregateShape_WhenProjectionWasReplaced_ShouldStillValidateSource()
+    {
+        var template = new SqlGeneratedQueryTemplate(new[]
+        {
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.OptionalCompare(q, true, false,
+                Types, Names, null, Id, null, Operator.GreaterEqual, a[0]), a => a[0], _ => Operator.GreaterEqual, 0),
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.Project(q, "Select", Types, Names, null, AggregateColumns)),
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.Project(q, "ReplaceSelect", Types, Names, null, new[] { Id }))
+        });
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        SqlLambdaQuery QueryWith(IEntityModelMetadataProvider provider)
+        {
+            var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new SqliteBuilder(new SqlBuilderServices(entityMappingResolver: resolver, entityModelMetadataProvider: provider))).From<Row>("r");
+            SqlGeneratedQueryTemplate.Apply(query, template, 0, new object[] { 1 });
+            SqlGeneratedQueryTemplate.Apply(query, template, 1, Array.Empty<object>());
+            SqlGeneratedQueryTemplate.Apply(query, template, 2, Array.Empty<object>());
+            return query;
+        }
+        var valid = QueryWith(SummaryProvider(() => SummaryMetadata()));
+        Assert.Equal("Select `r`.`Id` \r\nFrom `AutoRows` As `r` \r\nWhere `r`.`Id`>=@_p_0", valid.ToSql());
+        var unreadable = new EntityModelMetadata(typeof(Row), null, null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(Row.Id), typeof(int), false, true)
+        });
+        var invalid = QueryWith(SummaryProvider(() => SummaryMetadata(), () => unreadable));
+        Assert.Throws<NotSupportedException>(() => invalid.ToSql());
+    }
+
+    /// <summary>仅排序子句使用聚合源成员时，也要校验当前来源模型。</summary>
+    [Fact]
+    public void AggregateShape_WhenOrderUsesAggregate_ShouldValidateSource()
+    {
+        var template = new SqlGeneratedQueryTemplate(new[]
+        {
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.OptionalCompare(q, true, false,
+                Types, Names, null, Id, null, Operator.GreaterEqual, a[0]), a => a[0], _ => Operator.GreaterEqual, 0),
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.Project(q, "Select", Types, Names, null,
+                new[] { new SqlGeneratedColumn(0, null, "Total", typeof(long), SqlAggregateFunction.Count) })),
+            new SqlGeneratedQueryTemplate.Operation((q, a) => SqlGeneratedQueryBridge.Project(q, "OrderBy", Types, Names, null,
+                new[] { new SqlGeneratedColumn(0, "Id", null, typeof(long), SqlAggregateFunction.Count) }))
+        });
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        SqlLambdaQuery QueryWith(IEntityModelMetadataProvider provider)
+        {
+            var query = SqlQueryRuntimeFactory.CreateLambdaQuery(new Mock<ISqlQueryPlanExecutor>().Object,
+                new SqliteBuilder(new SqlBuilderServices(entityMappingResolver: resolver, entityModelMetadataProvider: provider))).From<Row>("r");
+            SqlGeneratedQueryTemplate.Apply(query, template, 0, new object[] { 1 });
+            SqlGeneratedQueryTemplate.Apply(query, template, 1, Array.Empty<object>());
+            SqlGeneratedQueryTemplate.Apply(query, template, 2, Array.Empty<object>());
+            return query;
+        }
+        var valid = QueryWith(SummaryProvider(() => SummaryMetadata()));
+        Assert.Equal("Select Count(*) As `Total` \r\nFrom `AutoRows` As `r` \r\nWhere `r`.`Id`>=@_p_0 \r\nOrder By Count(`r`.`Id`)", valid.ToSql());
+        var unreadable = new EntityModelMetadata(typeof(Row), null, null, new[]
+        {
+            EntityPropertyMetadata.CreateGenerated(nameof(Row.Id), typeof(int), false, true)
+        });
+        var invalid = QueryWith(SummaryProvider(() => SummaryMetadata(), () => unreadable));
+        Assert.Throws<NotSupportedException>(() => invalid.ToSql());
+    }
+
+    /// <summary>来源模型未注册时，冷编译和热复用均返回明确的聚合参数错误。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AggregateShape_WhenSourceMetadataMissing_ShouldRejectColdAndWarm(bool warm)
+    {
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        var template = AggregateTemplate();
+        if (warm)
+        {
+            var valid = new SqlBuilderServices(entityMappingResolver: resolver,
+                entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata()));
+            Assert.True(AggregateQuery(template, valid, 1).GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+        }
+        var invalid = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata(), () => null));
+        var query = AggregateQuery(template, invalid, 2);
+        Assert.Throws<NotSupportedException>(() => query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+    }
+
+    /// <summary>普通投影命中模板时不额外读取模型元数据。</summary>
+    [Fact]
+    public void NonAggregateShape_WhenWarm_ShouldNotReadSourceOrResultMetadata()
+    {
+        var sourceReads = 0;
+        var resultReads = 0;
+        var row = SqlBuilderServices.CreateDefault().EntityModelMetadataProvider.GetMetadata(typeof(Row));
+        var provider = SummaryProvider(() => { resultReads++; return SummaryMetadata(); },
+            () => { sourceReads++; return row; });
+        var services = new SqlBuilderServices(entityModelMetadataProvider: provider);
+        var template = Template();
+        Assert.Equal(Sql(""), Query(template, services, 1, false, null).ToSql());
+        sourceReads = resultReads = 0;
+        Assert.Equal(Sql(""), Query(template, services, 2, false, null).ToSql());
+        Assert.Equal(0, sourceReads);
+        Assert.Equal(0, resultReads);
+    }
+
+    /// <summary>并发请求共享聚合 SQL 时，分别校验当前服务并绑定各自参数。</summary>
+    [Fact]
+    public async Task AggregateShape_WhenRequestsAreConcurrent_ShouldIsolateMetadataAndValues()
+    {
+        var replayed = 0;
+        var template = AggregateTemplate(() => Interlocked.Increment(ref replayed));
+        var resolver = SqlBuilderServices.CreateDefault().EntityMappingResolver;
+        var good = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata()));
+        var bad = new SqlBuilderServices(entityMappingResolver: resolver,
+            entityModelMetadataProvider: SummaryProvider(() => SummaryMetadata(writable: false)));
+        Assert.True(AggregateQuery(template, good, 0).GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out var first, out _));
+        await Task.WhenAll(Enumerable.Range(1, 32).Select(value => Task.Run(() =>
+        {
+            var query = AggregateQuery(template, value % 2 == 0 ? good : bad, value);
+            if (value % 2 != 0)
+            {
+                Assert.Throws<InvalidOperationException>(() => query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out _, out _));
+                return;
+            }
+            Assert.True(query.GeneratedCore.TryGeneratedTemplatePlan(typeof(Summary), out var plan, out _));
+            Assert.Same(first.CommandText, plan.CommandText);
+            Assert.True(query.GeneratedCore.TemplateState.TryPrepare(typeof(Summary), out var snapshot, out _));
+            Assert.Equal(value, Assert.Single(snapshot.Parameters).Value);
+        })));
+        Assert.Equal(2, replayed);
+    }
 
     /// <summary>同形状改变值只绑定参数，不再重放子句或重新渲染 SQL。</summary>
     [Fact]
@@ -200,6 +443,58 @@ public sealed class SqlGeneratedQueryTemplateTest
         Assert.Throws<NotSupportedException>(() => Query(template, services, 1, false, null).ToSql());
     }
 
+    /// <summary>同一查询复用自身快照时，也必须检查当前表名称能力。</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SameQuerySnapshot_WhenTableCapabilitiesChange_ShouldValidateAgain(bool renderOnly)
+    {
+        var original = SqlBuilderServices.CreateDefault().EntityMappingResolver.Resolve(typeof(Row), null);
+        var mapping = new EntityMappingMetadata { EntityType = typeof(Row), Model = original.Model,
+            Table = original.Table with { Schema = "sales" }, Columns = original.Columns };
+        var resolver = new Mock<IEntityMappingResolver>();
+        resolver.Setup(value => value.Resolve(typeof(Row), It.IsAny<DatabaseContext>())).Returns(mapping);
+        var capabilities = new SqlObjectNameCapabilities { SupportsSchema = true, MaximumNameParts = 2 };
+        var provider = new Mock<ISqlObjectNameCapabilityProvider>();
+        provider.Setup(value => value.GetCapabilities(It.IsAny<DatabaseType?>())).Returns(() => capabilities);
+        var services = new SqlBuilderServices(entityMappingResolver: resolver.Object,
+            tableReferenceValidator: new DefaultSqlTableReferenceValidator(provider.Object));
+        var replayed = 0;
+          var template = Template(() => replayed++);
+          var query = Query(template, services, 7, false, null,
+            builder: new SqlServerBuilder(services));
+        var resultType = renderOnly ? typeof(void) : typeof(Row);
+          string Prepare(SqlLambdaQuery current)
+          {
+              if (renderOnly) return current.ToSql();
+              Assert.True(current.GeneratedCore.TryGeneratedTemplatePlan(resultType, out var plan, out _));
+              return plan.CommandText;
+          }
+
+          var first = Prepare(query);
+        Assert.Equal("Select [r].[Id],[r].[Name] \r\nFrom [sales].[AutoRows] As [r] \r\nWhere [r].[Id]>=@_p_0 \r\nOrder By [r].[Id]",
+              first);
+          var second = Query(template, services, 8, false, null, builder: new SqlServerBuilder(services));
+          Assert.Same(first, Prepare(second));
+        capabilities = new SqlObjectNameCapabilities { MaximumNameParts = 1 };
+          Assert.Throws<NotSupportedException>(() => { Prepare(query); });
+          Assert.Throws<NotSupportedException>(() => { Prepare(second); });
+          var third = Query(template, services, 9, false, null, builder: new SqlServerBuilder(services));
+          Assert.Throws<NotSupportedException>(() => { Prepare(third); });
+
+        capabilities = new SqlObjectNameCapabilities { SupportsSchema = true, MaximumNameParts = 2 };
+          Assert.Same(first, Prepare(query));
+          Assert.Same(first, Prepare(second));
+          Assert.Same(first, Prepare(third));
+        Assert.True(query.GeneratedCore.TemplateState.TryPrepare(resultType, out var snapshot, out _));
+        Assert.Equal(7, Assert.Single(snapshot.Parameters).Value);
+          Assert.True(second.GeneratedCore.TemplateState.TryPrepare(resultType, out snapshot, out _));
+          Assert.Equal(8, Assert.Single(snapshot.Parameters).Value);
+          Assert.True(third.GeneratedCore.TemplateState.TryPrepare(resultType, out snapshot, out _));
+          Assert.Equal(9, Assert.Single(snapshot.Parameters).Value);
+        Assert.Equal(4, replayed);
+    }
+
     /// <summary>自定义跨库策略保留原桥接路径，不假设扩展策略具有可缓存语义。</summary>
     [Fact]
     public void CustomCrossDatabaseValidator_ShouldRemainOnExistingPath()
@@ -327,6 +622,7 @@ public sealed class SqlGeneratedQueryTemplateTest
 
     [Table("AutoRows")]
     public sealed class Row { public int Id { get; set; } public string Name { get; set; } }
+    public sealed class Summary { public long Total { get; set; } }
     private sealed class ThrowingEnumerable : IEnumerable { public IEnumerator GetEnumerator() => throw new InvalidOperationException("disabled"); }
     private sealed class CountingEnumerable : IEnumerable
     {

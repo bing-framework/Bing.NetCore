@@ -60,6 +60,10 @@ public sealed partial class PostgreSqlQueryTest
     /// <summary>
     /// 写入 PostgreSQL 产品项测试数据。
     /// </summary>
+    /// <param name="itemId">测试业务项标识。</param>
+    /// <param name="productId">测试商品标识。</param>
+    /// <param name="sku">测试商品的库存单位编码。</param>
+    /// <param name="quantity">测试商品或订单数量。</param>
     private async Task InsertProductItemAsync(Guid itemId, Guid productId, string sku, int quantity)
     {
         using var executor = _fixture.CreateExecutor();

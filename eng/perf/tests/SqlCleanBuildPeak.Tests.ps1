@@ -155,6 +155,56 @@ Test-Case 'BuildOutput_SelectsFinalAssembly_AndIgnoresObjAndReferenceCopies' {
     if ($binary.FullName -ne $expected) { throw 'Selected an intermediate assembly instead of the final output' }
 }
 
+Test-Case 'RuntimeManifest_ContainsAllFilesInFinalOutputDirectory' {
+    $runtimeRoot = Join-Path $testRoot 'runtime-manifest-complete'
+    $runtimeFiles = [ordered]@{
+        'Bing.Data.Sql.Benchmarks.dll' = 'entry assembly'
+        'Bing.Data.Sql.Benchmarks.deps.json' = '{"runtimeTarget":{"name":".NETCoreApp,Version=v8.0"}}'
+        'Bing.Data.Sql.Benchmarks.runtimeconfig.json' = '{"runtimeOptions":{"tfm":"net8.0"}}'
+        'Bing.Data.Sql.dll' = 'dependency assembly'
+        'runtimes/win-x64/native/sqlnative.dll' = 'native dependency'
+    }
+    foreach ($relative in $runtimeFiles.Keys) {
+        $file = Join-Path $runtimeRoot $relative
+        New-Item -ItemType Directory -Path (Split-Path -Parent $file) -Force | Out-Null
+        [System.IO.File]::WriteAllText($file, $runtimeFiles[$relative], $utf8)
+    }
+
+    $binary = Get-Item -LiteralPath (Join-Path $runtimeRoot 'Bing.Data.Sql.Benchmarks.dll')
+    $manifest = Get-SqlBenchmarkRuntimeManifest -BinaryFile $binary
+    $expected = @($runtimeFiles.Keys | Sort-Object)
+    $actual = @($manifest.files.Keys | Sort-Object)
+    if (@(Compare-Object $expected $actual).Count -ne 0) { throw 'Runtime manifest file set differs' }
+    if ($manifest.count -ne $expected.Count) { throw 'Runtime manifest count differs' }
+    if ([System.IO.Path]::GetFullPath($manifest.root) -ne [System.IO.Path]::GetFullPath($runtimeRoot)) {
+        throw 'Runtime manifest root differs from final output directory'
+    }
+    foreach ($relative in $expected) {
+        $expectedHash = (Get-FileHash -LiteralPath (Join-Path $runtimeRoot $relative) -Algorithm SHA256).Hash
+        if ($manifest.files[$relative] -ine $expectedHash) { throw "Runtime manifest hash differs: $relative" }
+    }
+}
+
+Test-Case 'RuntimeManifest_ChangesDependencyHashWhenEntryAssemblyIsUnchanged' {
+    $runtimeRoot = Join-Path $testRoot 'runtime-manifest-dependency-change'
+    New-Item -ItemType Directory -Path $runtimeRoot -Force | Out-Null
+    $binaryFile = Join-Path $runtimeRoot 'Bing.Data.Sql.Benchmarks.dll'
+    $dependencyFile = Join-Path $runtimeRoot 'Bing.Data.Sql.dll'
+    [System.IO.File]::WriteAllText($binaryFile, 'stable entry assembly', $utf8)
+    [System.IO.File]::WriteAllText($dependencyFile, 'dependency version one', $utf8)
+
+    $binary = Get-Item -LiteralPath $binaryFile
+    $first = Get-SqlBenchmarkRuntimeManifest -BinaryFile $binary
+    [System.IO.File]::WriteAllText($dependencyFile, 'dependency version two', $utf8)
+    $second = Get-SqlBenchmarkRuntimeManifest -BinaryFile $binary
+    if ($first.files['Bing.Data.Sql.Benchmarks.dll'] -ine $second.files['Bing.Data.Sql.Benchmarks.dll']) {
+        throw 'Entry assembly hash changed unexpectedly'
+    }
+    if ($first.files['Bing.Data.Sql.dll'] -ieq $second.files['Bing.Data.Sql.dll']) {
+        throw 'Dependency content change did not change its manifest hash'
+    }
+}
+
 $results | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $resultRoot 'snapshot-tests.json') -Encoding utf8
 $results | Format-Table name, status -AutoSize
 if (@($results | Where-Object status -EQ 'FAIL').Count -gt 0) { exit 1 }

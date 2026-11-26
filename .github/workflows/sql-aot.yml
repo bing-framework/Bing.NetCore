@@ -85,6 +85,10 @@ jobs:
           path: |
             artifacts/benchmarks/sql-smoke/**/*.json
             artifacts/benchmarks/sql-smoke/**/*.log
+            artifacts/benchmarks/sql-smoke/**/*.nettrace
+            artifacts/benchmarks/sql-smoke/**/*.jsonl
+            artifacts/benchmarks/sql-smoke/**/*.csv
+            artifacts/benchmarks/sql-smoke/**/*.stderr
             output/sql-aot-postgresql-tests/**/*.json
             output/sql-aot-postgresql-tests/**/*.log
             output/sql-aot-mysql-tests/**/*.json
@@ -104,7 +108,10 @@ jobs:
         with:
           node-version: '22'
       - name: Matrix and runner contracts
-        run: node --test eng/sql-aot/verify.test.mjs eng/sql-aot/verify-ci.test.mjs
+        run: |
+          mkdir -p artifacts/validation/sql-aot/matrix/tmp
+          export TMPDIR="$GITHUB_WORKSPACE/artifacts/validation/sql-aot/matrix/tmp"
+          node --test eng/sql-aot/verify.test.mjs eng/sql-aot/verify-ci.test.mjs eng/sql-aot/replay.test.mjs
       - id: matrix
         name: Select enabled cases
         shell: bash
@@ -210,6 +217,28 @@ jobs:
         run: ./eng/sql-aot/Invoke-WindowsSqlServer.ps1 -Action Start
       - name: Publish and execute Native case
         run: node eng/sql-aot/verify.mjs --case ${{ matrix.id }}
+      - name: Stage SQLite replay payload
+        if: ${{ startsWith(matrix.id, 'sqlite-') }}
+        run: node eng/sql-aot/verify.mjs --stage-replay ${{ matrix.id }} output/sql-aot-replay/source
+      - name: Upload SQLite replay payload
+        if: ${{ startsWith(matrix.id, 'sqlite-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-native-payload-${{ matrix.id }}
+          path: output/sql-aot-replay/source/
+          include-hidden-files: true
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 14
+      - name: Download SQLite replay payload
+        if: ${{ startsWith(matrix.id, 'sqlite-') }}
+        uses: actions/download-artifact@v4
+        with:
+          name: sql-native-payload-${{ matrix.id }}
+          path: output/sql-aot-replay/download
+      - name: Replay downloaded SQLite payload
+        if: ${{ startsWith(matrix.id, 'sqlite-') }}
+        run: node eng/sql-aot/verify.mjs --replay ${{ matrix.id }} output/sql-aot-replay/download
       - name: Stop isolated Windows PostgreSQL test database
         if: ${{ always() && matrix.id == 'postgresql-win-x64' }}
         shell: pwsh
@@ -282,6 +311,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           pattern: sql-aot-*
+          path: output/sql-aot-download
+          merge-multiple: false
+      - uses: actions/download-artifact@v4
+        if: always()
+        with:
+          pattern: sql-native-payload-*
           path: output/sql-aot-download
           merge-multiple: false
       - uses: actions/download-artifact@v4

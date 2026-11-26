@@ -109,4 +109,33 @@ public class SqlTableReferenceValidatorTest
         // Assert
         Assert.Throws<ArgumentException>(action);
     }
+
+    /// <summary>数据库、架构、表名及别名的每种非法字符都必须拒绝。</summary>
+    [Theory]
+    [InlineData("database", '\r')]
+    [InlineData("database", '\n')]
+    [InlineData("database", ';')]
+    [InlineData("schema", '\r')]
+    [InlineData("schema", '\n')]
+    [InlineData("schema", ';')]
+    [InlineData("table", '\r')]
+    [InlineData("table", '\n')]
+    [InlineData("table", ';')]
+    [InlineData("alias", '\r')]
+    [InlineData("alias", '\n')]
+    [InlineData("alias", ';')]
+    public void Validate_WhenAnyNamePartContainsInvalidCharacter_ShouldThrow(string part, char invalid)
+    {
+        var value = $"name{invalid}suffix";
+        var reference = new SqlTableReference
+        {
+            Database = part == "database" ? value : "db",
+            Schema = part == "schema" ? value : "dbo",
+            TableName = part == "table" ? value : "orders",
+            Alias = part == "alias" ? value : "o"
+        };
+
+        var validator = new DefaultSqlTableReferenceValidator();
+        Assert.Throws<ArgumentException>(() => validator.Validate(reference, DatabaseType.SqlServer));
+    }
 }

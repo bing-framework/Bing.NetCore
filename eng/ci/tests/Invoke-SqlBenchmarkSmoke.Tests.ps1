@@ -59,11 +59,13 @@ try {
         "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.StaticBridgeToSql",
         "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.TemplateApplyToSql",
         "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.StaticBridgeBoundSnapshot",
-        "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.TemplateApplyBoundSnapshot"
+        "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.TemplateApplyBoundSnapshot",
+        "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.TemplateAggregateBoundSnapshot",
+        "Bing.Data.Sql.Benchmarks.SqlGeneratedQueryTemplateBenchmarks.TemplateSameQueryBoundSnapshot"
     )
     $actual = @(Get-Content -LiteralPath $discoveryLog -Encoding utf8 | Where-Object { $_ -match '^Bing\.Data\.Sql\.Benchmarks\.' })
     if (@(Compare-Object -ReferenceObject $expected -DifferenceObject $actual).Count -ne 0) {
-        throw "Benchmark discovery differs from the seven expected methods: $discoveryLog"
+        throw "Benchmark discovery differs from the nine expected methods: $discoveryLog"
     }
     $result.benchmarks = $actual
     $result.binary = [ordered]@{ file = $binary; sha256 = (Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash }
@@ -76,6 +78,18 @@ try {
     $loadCode = $LASTEXITCODE
     $result.steps += [ordered]@{ name = "VerifyCapacityLoad"; command = @("dotnet") + $loadArguments; exitCode = $loadCode; log = $loadLog }
     if ($loadCode -ne 0) { throw "Capacity load tests failed: $loadLog" }
+
+    $mixedLoadTests = Join-Path $repositoryRoot 'eng/perf/tests/SqlMixedCapacity.Tests/SqlMixedCapacity.Tests.csproj'
+    # 固定独立工程的恢复位置，便于 -NoRestore 调用方事先准备相同的 assets。
+    $mixedBuild = Join-Path $repositoryRoot 'artifacts/validation/sql-smoke/mixed-build'
+    $mixedArguments = @('run', '--project', $mixedLoadTests, '-c', $Configuration,
+        '--artifacts-path', $mixedBuild, '-p:UseSharedCompilation=false')
+    if ($NoRestore) { $mixedArguments += '--no-restore' }
+    $mixedLog = Join-Path $directory 'mixed-capacity-load-tests.log'
+    & dotnet @mixedArguments -- (Join-Path (Split-Path -Parent $binary) 'Npgsql.dll') 2>&1 | Out-File -LiteralPath $mixedLog -Encoding utf8
+    $mixedCode = $LASTEXITCODE
+    $result.steps += [ordered]@{ name = 'VerifyMixedCapacityLoad'; command = @('dotnet') + $mixedArguments; exitCode = $mixedCode; log = $mixedLog }
+    if ($mixedCode -ne 0) { throw "Mixed capacity load tests failed: $mixedLog" }
 
     $capacityTests = Join-Path $repositoryRoot "eng/perf/tests/SqlCapacityProbe.Tests.ps1"
     $capacityOutput = Join-Path $directory "capacity-contracts"
@@ -90,8 +104,23 @@ try {
     $result.steps += [ordered]@{ name = "VerifyCapacityThresholdGate"; exitCode = $gateCode; results = $gateOutput }
     if ($gateCode -ne 0) { throw "Capacity threshold tests failed: $gateOutput" }
 
+    $matrixOutput = Join-Path $directory 'capacity-matrix'
+    & (Join-Path $repositoryRoot 'eng/perf/tests/SqlCapacityMatrix.Tests.ps1') -ResultsDirectory $matrixOutput | Out-Null
+    $result.steps += [ordered]@{ name = 'VerifyCapacityMatrix'; exitCode = $LASTEXITCODE; results = $matrixOutput }
+    if ($LASTEXITCODE -ne 0) { throw "Capacity matrix tests failed: $matrixOutput" }
+
+    foreach ($contract in @('SqlCapacityEnvironment', 'SqlCleanBuildBudgetGate', 'SqlMixedCapacityGate', 'SqlLocalCapacity', 'SqlMixedStageDiagnostic', 'SqlContainerResources', 'SqlWalSyncOutput', 'SqlWalSyncProbe')) {
+        $contractOutput = Join-Path $directory $contract
+        # 在独立进程中读取测试脚本的退出码，避免脚本内预期失败的子命令污染调用方的 LASTEXITCODE。
+        & (Get-Command pwsh).Source -NoProfile -File (Join-Path $repositoryRoot "eng/perf/tests/$contract.Tests.ps1") -ResultsDirectory $contractOutput | Out-Null
+        $contractCode = $LASTEXITCODE
+        $result.steps += [ordered]@{ name = "Verify$contract"; exitCode = $contractCode; results = $contractOutput }
+        if ($contractCode -ne 0) { throw "$contract tests failed: $contractOutput" }
+    }
+
     $collector = Join-Path $repositoryRoot 'eng/perf/SqlCpuTrace/SqlCpuTrace.csproj'
-    $cpuArguments = @('run', '--project', $collector, '-c', $Configuration,
+    $cpuBuild = Join-Path $repositoryRoot 'artifacts/validation/sql-smoke/cpu-build'
+    $cpuArguments = @('run', '--project', $collector, '-c', $Configuration, '--artifacts-path', $cpuBuild,
         "-p:DiagnosticAssemblyDirectory=$(Split-Path -Parent $binary)", '-p:UseSharedCompilation=false')
     if ($NoRestore) { $cpuArguments += '--no-restore' }
     $cpuLog = Join-Path $directory 'cpu-attribution-tests.log'
@@ -99,6 +128,28 @@ try {
     $cpuCode = $LASTEXITCODE
     $result.steps += [ordered]@{ name = 'VerifyCpuAttribution'; exitCode = $cpuCode; log = $cpuLog }
     if ($cpuCode -ne 0) { throw "CPU attribution tests failed: $cpuLog" }
+
+    $fixtureProject = Join-Path $repositoryRoot 'eng/perf/tests/SqlCpuTraceFixture/SqlCpuTraceFixture.csproj'
+    $fixtureBuild = Join-Path $repositoryRoot 'artifacts/validation/sql-smoke/cpu-fixture'
+    $fixtureArguments = @('build', $fixtureProject, '-c', $Configuration, '--artifacts-path', $fixtureBuild,
+        '-p:UseSharedCompilation=false', '-m:1', '-nr:false')
+    if ($NoRestore) { $fixtureArguments += '--no-restore' }
+    $fixtureLog = Join-Path $directory 'cpu-fixture-build.log'
+    & dotnet @fixtureArguments 2>&1 | Out-File -LiteralPath $fixtureLog -Encoding utf8
+    $fixtureCode = $LASTEXITCODE
+    $result.steps += [ordered]@{ name = 'BuildCpuWindowFixture'; command = @('dotnet') + $fixtureArguments; exitCode = $fixtureCode; log = $fixtureLog }
+    if ($fixtureCode -ne 0) { throw "CPU fixture build failed: $fixtureLog" }
+
+    $collectorBinary = Join-Path $cpuBuild "bin/SqlCpuTrace/$($Configuration.ToLowerInvariant())/SqlCpuTrace.dll"
+    $fixtureBinary = Join-Path $fixtureBuild "bin/SqlCpuTraceFixture/$($Configuration.ToLowerInvariant())/SqlCpuTraceFixture.dll"
+    $windowOutput = Join-Path $directory 'cpu-window'
+    $windowLog = Join-Path $directory 'cpu-window-tests.log'
+    & (Join-Path $repositoryRoot 'eng/perf/tests/SqlCpuWindow.ExitCode.Tests.ps1') `
+        -Collector $collectorBinary -Fixture $fixtureBinary -ResultsDirectory $windowOutput 2>&1 |
+        Out-File -LiteralPath $windowLog -Encoding utf8
+    $windowCode = $LASTEXITCODE
+    $result.steps += [ordered]@{ name = 'VerifyCpuWindowIntegration'; exitCode = $windowCode; log = $windowLog; results = $windowOutput }
+    if ($windowCode -ne 0) { throw "CPU window integration failed: $windowLog" }
 
     # 快照职责测试使用临时源码树，Windows Job 测试启动真实子进程。
     $snapshotOutput = Join-Path $directory 'clean-build'

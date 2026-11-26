@@ -7,6 +7,8 @@ namespace Bing.Data.Sql.Metadata;
 /// </summary>
 public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValidator
 {
+    private static readonly char[] InvalidIdentifierCharacters = { '\r', '\n', ';' };
+
     /// <summary>
     /// SQL 对象名称能力提供器。
     /// </summary>
@@ -83,7 +85,7 @@ public sealed class DefaultSqlTableReferenceValidator : ISqlTableReferenceValida
     /// <param name="identifier">标识符。</param>
     private static void ValidateIdentifier(string identifier)
     {
-        if (HasValue(identifier) && identifier.IndexOfAny(new[] { '\r', '\n', ';' }) >= 0)
+        if (HasValue(identifier) && identifier.IndexOfAny(InvalidIdentifierCharacters) >= 0)
             throw new ArgumentException("表引用包含无效标识符字符。", nameof(identifier));
     }
 

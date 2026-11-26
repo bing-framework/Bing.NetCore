@@ -64,6 +64,54 @@ GeneratedPreferred 将对象交给兼容参数绑定路径，以保留完整参�
 
 严格 Lambda 值条件使用 `Where<TEntity, TValue>(row => row.Id, value, Operator.Equal)`。常量和列对列比较可生成，闭包比较在严格模式报告 BINGSQLG001，并建议显式值重载或参数化 Raw SQL；JIT 保留原路径。严格单类型列表使用统一静态结果映射，包含运行时配置及转换器。
 
+可复用的查询条件也可以直接使用原有 `Where` / `WhereIf`：
+
+```csharp
+private static readonly Expression<Func<Order, long, bool>> ByCustomer =
+    (order, customerId) => order.CustomerId == customerId;
+
+var orders = query.From<Order>("o")
+    .WhereIf<Order, long>(filterByCustomer, customerId, ByCustomer, "o")
+    .ToList<Order>();
+```
+
+生成器在同一编译中识别非泛型类型的静态只读 Lambda 字段，生成支持范围内的查询条件；允许声明与调用位于不同文件。字段所在类型不能有显式静态构造函数，避免用声明处表达式覆盖之后改写的值。字段在类型初始化时可能暂为 null，仍按原调用处理。显式值每次调用重新绑定，关闭条件时不绑定该条件；字段本身仍按 C# 实参求值规则读取。完整、独占的单来源链只需包含可分析的 `Where` 或 `WhereIf`，即可将支持的单参数条件、双参数中单列与原样显式值的直接比较，以及显式集合的单列 `Contains` 接入查询模板。共享查询、未知操作、数值提升及复合条件仍沿用既有桥接或兼容路径。
+
+只有必选条件时也可以沿用相同 API：
+
+```csharp
+var orders = query.From<Order>("o")
+    .Where<Order, long>(customerId, ByCustomer, "o")
+    .ToList<Order>();
+```
+
+单实体的 `Select`、`ReplaceSelect`、`ExcludeSelect`、`GroupBy` 和 `OrderBy` 也可复用同样满足上述条件的静态只读列表达式。`Select<TEntity, TResult>` 和 `ReplaceSelect<TEntity, TResult>` 支持单来源具名结果类型；多来源表达式仍按原有诊断和回退规则处理。聚合可通过静态导入直接书写：
+
+```csharp
+using System.Linq.Expressions;
+using static Bing.Data.Sql.SqlFn;
+
+private static readonly Expression<Func<Order, object>> OrderCount =
+    order => new { Total = Count(order.Id) };
+
+var result = query.From<Order>("o")
+    .WhereIf<Order, long>(filterByCustomer, customerId, ByCustomer, "o")
+    .Select<Order>(OrderCount, "o")
+    .ToList<OrderSummary>(); // OrderSummary.Total 为 long
+```
+
+生成器也识别单实体的数组列投影和聚合函数对象投影。符合既有完整链规则、包含 `Where` 或 `WhereIf` 的单来源分组查询以及 `SelectAll().ExcludeSelect(...)` 查询可以复用查询模板，动态条件、别名和排序方向仍参与查询形状，参数值逐次绑定。例如：
+
+```csharp
+var rows = query.From<Order>("o")
+    .WhereIf<Order, long>(filterByCustomer, customerId, ByCustomer, "o")
+    .SelectAll()
+    .ExcludeSelect<Order>(order => order.InternalNote, "o")
+    .ToList<Order>();
+```
+
+不符合完整链规则的形状使用逐调用生成桥接或既有回退。字段的表达式树在类型初始化时构造一次；内联 Lambda 仍由调用方逐次构造表达式树。匿名对象表达式的初始化仍可能产生 IL2026，生成路径不代表整个依赖图零反射。其他表达式字段形式、跨程序集声明和不支持的条件维持既有严格诊断或兼容回退。是否改善端到端吞吐需要在实际负载下测量。
+
 Dapper 全局 TypeHandler 需显式 `SqlTypeHandlerAdapter<T>` 适配；JSON 需静态转换器和生成 JSON 类型信息。NULL/缺列保留属性初始值，不自动开启严格 NULL 规则。完整合同、包消费矩阵与迁移见 [读写分离与 AOT](../../../docs/migrations/sqlquery-command-aot.md)。
 
 启用既有 `Bing.Data.Sql.Generated` 拦截器配置时，`Returning<TEntity>(x => x.Property)`、`Returning<TEntity>(x => new { Alias = x.Property })` 和 `Returning<TEntity>(x => new Result { Alias = x.Property })` 会生成私有静态列布局；列名和别名为普通标识符时，同时生成完整 Returning/Output 子句及静态列对象。也支持同类型数值列之间的 `+ - * /`，例如 `Returning<Order>(x => new { Total = (x.Quantity + x.Quantity) * x.Quantity })`。SQLite、PostgreSQL 和 SQL Server 的 Insert/Update/Delete 使用各自 SQL，SQL Server 按操作选择 Inserted 或 Deleted。顺序、重复源列和目标成员别名保持一致，支持命名参数和静态扩展调用。

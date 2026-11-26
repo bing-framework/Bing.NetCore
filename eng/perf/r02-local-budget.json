@@ -1,0 +1,24 @@
+{
+  "schema": "SqlLocalRegressionBudget-v1",
+  "approvalId": "R02-1C-20261125-01",
+  "approvalStatus": "APPROVED",
+  "approvedBy": "user",
+  "approvedOn": "2026-11-25",
+  "scope": "local Docker shared-host 1C2G regression, not production SLO",
+  "profile": "1C2G",
+  "workloadPath": "eng/perf/r02-workload.json",
+  "capacity": [
+    { "concurrency": 1, "minRequestsPerSecond": 2500, "maxP99Milliseconds": 5 },
+    { "concurrency": 8, "minRequestsPerSecond": 8000, "maxP99Milliseconds": 20 },
+    { "concurrency": 16, "minRequestsPerSecond": 10000, "maxP99Milliseconds": 50 },
+    { "concurrency": 32, "minRequestsPerSecond": 10000, "maxP99Milliseconds": 60 },
+    { "concurrency": 64, "minRequestsPerSecond": 10000, "maxP99Milliseconds": 80 }
+  ],
+  "maxFailureRate": 0,
+  "maxWarmupFailures": 0,
+  "application": { "cpus": 1, "memoryBytes": 2147483648, "swapBytes": 0 },
+  "database": { "cpus": 1, "memoryBytes": 536870912, "swapBytes": 0, "storage": "dedicated temporary Docker volume", "sharedPhysicalHost": true },
+  "build": { "host": "current Windows 10 x64 / 24 logical processors / 31.74 GiB / SDK 10.0.400", "scope": "SQL Benchmark complete project-reference graph", "maxCommittedMiB": 1024, "timeoutSeconds": 900 },
+  "resourceThresholds": "observe only; verify exact limits, no OOM and no unexpected restarts",
+  "productionCapacityVerified": false
+}

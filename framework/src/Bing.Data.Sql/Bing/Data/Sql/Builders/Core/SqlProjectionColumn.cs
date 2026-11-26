@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Bing.Data.Sql.Builders.Extensions;
+using Bing.Data.Sql.Metadata;
 
 namespace Bing.Data.Sql.Builders.Core;
 
@@ -52,9 +53,7 @@ internal sealed record SqlProjectionColumn(string SourceId, string MemberName, s
                 throw new InvalidOperationException($"实体 {source.EntityType.Name} 的成员 {MemberName} 没有可用列映射。");
             if (Function.HasValue)
             {
-                var metadata = context.Services.EntityModelMetadataProvider.GetMetadata(source.EntityType);
-                if (!metadata.Properties.TryGetValue(MemberName, out var property) || !property.CanRead)
-                    throw new NotSupportedException("聚合参数必须可读取。");
+                ValidateAggregateSource(context.Services.EntityModelMetadataProvider, source.EntityType, MemberName);
                 SqlFunctionProjectionParser.ValidateAggregateType(Function.Value, member.ClrType);
             }
             name = member.ColumnName;
@@ -62,6 +61,14 @@ internal sealed record SqlProjectionColumn(string SourceId, string MemberName, s
         return Function.HasValue
             ? ColumnItem.CreateAggregate(Function.Value, name, source.Alias, ResultAlias, Distinct)
             : ColumnItem.CreateColumn(name, source.Alias, ResultAlias);
+    }
+
+    /// <summary>按当前服务的模型元数据校验聚合参数。</summary>
+    internal static void ValidateAggregateSource(IEntityModelMetadataProvider provider, Type sourceType, string memberName)
+    {
+        var metadata = provider.GetMetadata(sourceType);
+        if (metadata == null || !metadata.Properties.TryGetValue(memberName, out var property) || !property.CanRead)
+            throw new NotSupportedException("聚合参数必须可读取。");
     }
 
     /// <summary>

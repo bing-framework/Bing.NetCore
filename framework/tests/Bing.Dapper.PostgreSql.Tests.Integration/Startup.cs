@@ -21,8 +21,9 @@ namespace Bing.Dapper.Tests;
 public class Startup
 {
     /// <summary>
-    /// 配置主机
+    /// 配置 PostgreSQL 测试宿主及外部配置来源。
     /// </summary>
+    /// <param name="hostBuilder">待配置的测试宿主构建器。</param>
     public void ConfigureHost(IHostBuilder hostBuilder)
     {
         hostBuilder
@@ -36,8 +37,10 @@ public class Startup
     }
 
     /// <summary>
-    /// 配置服务
+    /// 注册 PostgreSQL 数据源、框架及测试日志服务。
     /// </summary>
+    /// <param name="services">需要注册测试依赖的服务集合。</param>
+    /// <param name="context">当前模块或宿主的生命周期上下文。</param>
     public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
     {
         var connectionString = ResolveConnectionString(context.Configuration);

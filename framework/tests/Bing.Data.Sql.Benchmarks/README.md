@@ -1,5 +1,55 @@
 # SQL 元数据与执行资源测量
 
+## 缓存条件的生成查询对照（2026-11-26）
+
+`SqlCachedPredicateBenchmarks` 使用由真实源生成器编译的调用点，分别比较内联 Lambda 和 `static readonly Expression`：单参数固定值进入完整查询模板，双参数显式值使用生成桥接；`WhereIf` 的关闭和开启分支各自配对。每次调用创建新 Builder，服务对象复用。测试断言完整 SQL、执行计划或 Builder 中的参数及模板热形状的 SQL 复用，避免把延迟模板尚未回放到原 Builder 的状态当作参数丢失。
+
+Windows 10 x64、.NET 8.0.30、Release、`DOTNET_TieredCompilation=0`；每条路径预热 5,000 次，交替测量 5 组、每组 50,000 次。当前线程分配中位数如下（B/次，四舍五入）：
+
+| 路径 | WhereIf 关闭：内联 → 缓存 | WhereIf 开启：内联 → 缓存 |
+| --- | ---: | ---: |
+| 固定值模板 | 7,296 → 6,720 | 8,776 → 8,200 |
+| 显式值桥接 | 18,064 → 17,488 | 29,601 → 29,024 |
+
+该探针使用同一进程配对，每项约少分配 576 B/次；静态字段的首次初始化在预热阶段，不包含在结果中。显式值与固定值是不同调用路径，不把两行的差异解释为缓存条件收益。记录的 CPU 是包含 GC 等运行时线程的进程 CPU，不是方法级 CPU；经过时间是墙钟时间。样本没有数据库 I/O 或并发负载，不代表容量验收或生产性能。原始样本为 `artifacts/benchmarks/r03-predperf/b1/probe.json`，测试与身份见 `artifacts/ai-tasks/r03-predperf/verification.json`。
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --cached-predicate-probe --output artifacts/benchmarks/r03-predperf/b1/probe.json
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --filter '*SqlCachedPredicateBenchmarks*' --artifacts artifacts/benchmarks/r03-predperf/b1/formal
+```
+
+## 未引用名称解析分配对照（2026-11-25）
+
+`SqlPlanningHotPathBenchmarks.ParseNameSegments` 补充单段、两段、三段名称的独立场景；保留原来的 `SqlItem.Parse`、首次 `GetPlan`、Builder 和别名克隆场景。`NameItem.ResolveBySplit` 直接定位句点并保存名称段，移除 `Split` 数组和 `ToList` 集合，不增加缓存或公共入口。引用名称仍走原解析路径，空段、空白读取和四段及以上的既有行为由直接测试覆盖。
+
+Windows x64/.NET 8.0.30/Release，4096 次预热、5×5000 次当前线程分配；同一 harness 源码在修改前和修改后各运行一次：
+
+| 场景 | 修改前 B/次 | 修改后 B/次 |
+| --- | ---: | ---: |
+| NameItem 单段 | 168 | 40 |
+| NameItem 两段 | 264 | 120 |
+| NameItem 三段 | 320 | 160 |
+| SqlItem.Parse 两段 | 320 | 176 |
+| 首次 GetPlan（输入 Builder 已准备） | 13384 | 13384 |
+| Builder Clone | 3208 | 3208 |
+| 空/自连接别名 Clone | 280 / 792 | 280 / 792 |
+
+各场景五次分配值一致。已准备 Builder 的计划和克隆不重新执行名称解析，因此本次没有降低这两类操作的分配。短时计时原样保留，仅作诊断，不据此声称方法 CPU 或 C1 容量提升。两侧依赖程序集重新编译，完整文件摘要保留，不是仅替换一个 DLL 的实验。
+
+本次新增三类直接名称场景，旧五场景报告没有这些输入，因此为扩展后的同一 harness 保存一次真实前态；没有覆盖 `r02-alias` 的历史基线。原始前后 JSON、比较、红绿 TRX、构建日志、源码及二进制身份见 `artifacts/ai-tasks/r02-name/verification.json`。临时构建使用 `artifacts/validation/r02-name/b1/`，原始测量使用 `artifacts/benchmarks/r02-name/b1/`，归档核验后清理。
+
+## 别名克隆分配对照（2026-11-25）
+
+`SqlPlanningHotPathBenchmarks` 新增 `CloneEmptyAliases` 和 `CloneSelfJoinAliases`；后一场景保留同实体两个自连接别名及一个原始来源别名。原有 `GetPlan`、`CloneBuilder`、`ParseName` 场景仍在Setup断言完整SQL。
+
+移除 `EntityAliasRegister` 私有构造器对Clone已独立创建的HashSet的第二次复制，不共享原注册器状态。Windows x64/.NET8.0.30/Release，4096次预热、5×5000次当前线程分配：空别名344→280 B/op，自连接别名968→792 B/op，普通Builder Clone3272→3208 B/op，首次GetPlan13448→13384 B/op，名称解析320 B/op不变。各5次分配一致；耗时仅作诊断，无数据库IO或并发，不代表C1吞吐预算已经通过。前后依赖程序集会重编译，具体身份与报告见 `artifacts/ai-tasks/r02-alias/verification.json`，不是固定同一宿主仅替换一个DLL的试验。
+
+```powershell
+dotnet <隔离构建输出>/Bing.Data.Sql.Benchmarks.dll --planning-hot-path-probe --output artifacts/benchmarks/<任务>/<批次>/planning.json
+```
+
+原始前后JSON、比较、源码及程序集哈希统一归档于 `artifacts/ai-tasks/r02-alias/`；本次临时构建和Benchmark目录归档核验后清理。该小范围优化不触发无条件反复运行完整容量矩阵。
+
 ## Right Join 保留侧过滤的测量边界（2026-11-24）
 
 本次复用 `SqlFilterPlacementPlanner` 的来源扫描、谓词和参数路径，移除保留侧的提前拒绝，并继续检查后续连接。没有修改映射缓存、格式化热路径或 Builder 克隆，没有新增请求容器、缓存和公共 API。旧版本在该输入上抛出异常，因此相同成功查询的 before/after 为 NOT_APPLICABLE；本次以完整 SQL、冻结 Count/Page 和 SQLite 结果集回归验收，不新增伪造的历史基准，也不宣称 CPU、分配或吞吐提升。现有基准场景不受此新增成功路径影响，未重新运行重型性能矩阵。

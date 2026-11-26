@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlDatabaseWaitSamples.cs" Link="SqlDatabaseWaitSamples.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlDatabaseCommandTimings.cs" Link="SqlDatabaseCommandTimings.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlTimedDbConnection.cs" Link="SqlTimedDbConnection.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlStageTimings.cs" Link="SqlStageTimings.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlMixedCapacityEvents.cs" Link="SqlMixedCapacityEvents.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlMixedCapacityLoad.cs" Link="SqlMixedCapacityLoad.cs" />
+    <Compile Include="../../../../framework/tests/Bing.Data.Sql.Benchmarks/SqlPoolCounterListener.cs" Link="SqlPoolCounterListener.cs" />
+  </ItemGroup>
+</Project>

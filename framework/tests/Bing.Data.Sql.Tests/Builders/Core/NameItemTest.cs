@@ -8,6 +8,44 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 /// </summary>
 public class NameItemTest
 {
+    /// <summary>普通名称只保留最终名称段，不创建拆分数组或集合。</summary>
+    [Theory]
+    [InlineData("samples", "[samples]")]
+    [InlineData("public.samples", "[public].[samples]")]
+    [InlineData("archive.public.samples", "[archive].[public].[samples]")]
+    public void Construct_CompactName_ShouldAvoidSplitCollections(string name, string expectedSql)
+    {
+        for (var i = 0; i < 256; i++) GC.KeepAlive(new NameItem(name));
+        const int iterations = 1000;
+        NameItem last = null;
+        var start = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < iterations; i++) last = new NameItem(name);
+        var bytes = (GC.GetAllocatedBytesForCurrentThread() - start) / iterations;
+        GC.KeepAlive(last);
+        Assert.Equal(expectedSql, last.ToSql(TestDialect.Instance));
+        // 短名称仅需 NameItem 和最多三个名称字符串，不能再携带 Split/ToList 容器。
+        Assert.True(bytes <= 160, $"Allocated {bytes} bytes per name.");
+    }
+
+    /// <summary>未引用名称保留空段及既有空白读取语义，四段及以上仍不解析。</summary>
+    [Theory]
+    [InlineData(".samples", null, "", "samples")]
+    [InlineData("public.", null, "public", "")]
+    [InlineData("archive..samples", "archive", "", "samples")]
+    [InlineData(".public.samples", "", "public", "samples")]
+    [InlineData("..", "", "", "")]
+    [InlineData("a.b.c.d", null, "", "")]
+    [InlineData("a.b.c.", null, "", "")]
+    [InlineData(" public . samples ", null, "public", "samples")]
+    public void Construct_UnquotedSegments_ShouldPreserveExistingValues(
+        string input, string database, string prefix, string name)
+    {
+        var item = new NameItem(input);
+        Assert.Equal(database, item.DatabaseName);
+        Assert.Equal(prefix, item.Prefix);
+        Assert.Equal(name, item.Name);
+    }
+
     /// <summary>
     /// 不带前缀
     /// </summary>

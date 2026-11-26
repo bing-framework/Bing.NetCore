@@ -87,7 +87,7 @@ public sealed class SqlServerQueryAggregateTest : IAsyncLifetime
             new object[] { "output-first", 1m, true },
             new object[] { "output-second", 2m, false }
         };
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateInsertBuilder()
             .InsertInto(new SqlTableReference { Schema = "dbo", TableName = "BingSqlAggregateIntegration" })
             .Columns("UserId", "Amount", "Enabled")
             .Values(values)

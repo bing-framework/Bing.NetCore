@@ -11,6 +11,7 @@ const workflow = { repository: 'team/project', runId: '1234', sha: 'a'.repeat(40
 const expected = {
   id: 'sqlite-linux-x64-query', provider: 'sqlite', rid: 'linux-x64', tfm: 'net10.0',
   mode: 'query', status: 'enabled', ci: true, runner: 'ubuntu-22.04',
+  project: 'framework/tests/Bing.Data.Sql.Aot.Smoke/Bing.Data.Sql.Aot.Smoke.csproj',
   successMarker: 'SQLITE_QUERY_NATIVE_PASS', requiredMarkers: ['SQLITE_QUERY_BINDING_PASS']
 };
 const sqliteCrudLegacyRequiredMarkers = [
@@ -48,6 +49,32 @@ const nativeEnvironments = {
   'osx-arm64': { platform: 'darwin', arch: 'arm64' }
 };
 
+function nativeExecutableHeader(rid) {
+  if (rid === 'win-x64' || rid === 'win-arm64') {
+    const binary = Buffer.alloc(0x86);
+    binary.writeUInt16LE(0x5a4d, 0);
+    binary.writeUInt32LE(0x80, 0x3c);
+    binary.writeUInt32LE(0x4550, 0x80);
+    binary.writeUInt16LE(rid === 'win-arm64' ? 0xaa64 : 0x8664, 0x84);
+    return binary;
+  }
+  if (rid === 'linux-x64') {
+    const binary = Buffer.alloc(64);
+    binary.writeUInt32BE(0x7f454c46, 0);
+    binary[4] = 2;
+    binary[5] = 1;
+    binary.writeUInt16LE(62, 18);
+    return binary;
+  }
+  if (rid === 'osx-arm64') {
+    const binary = Buffer.alloc(8);
+    binary.writeUInt32LE(0xfeedfacf, 0);
+    binary.writeUInt32LE(0x0100000c, 4);
+    return binary;
+  }
+  throw new Error(`Unsupported fixture RID: ${rid}`);
+}
+
 function tempDirectory(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'bing-aot-ci-'));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
@@ -77,12 +104,45 @@ function fixture(t, matrixCases = [expected]) {
       const markers = [cell.successMarker, ...(cell.requiredMarkers ?? [])];
       fs.writeFileSync(path.join(runDirectory, 'run.log'),
         (logText ?? markers.join('\n')) + '\n', 'utf8');
+      let replayFiles;
+      let binary = { sha256: 'b'.repeat(64), bytes: 4096, rid: cell.rid };
+      if (cell.provider === 'sqlite') {
+        const payloadDirectory = path.join(directory, `sql-native-payload-${cell.id}`);
+        fs.mkdirSync(payloadDirectory, { recursive: true });
+        const projectName = path.basename(cell.project, '.csproj');
+        const executable = projectName + (cell.rid.startsWith('win-') ? '.exe' : '');
+        const sidecar = `e_sqlite3${cell.rid.startsWith('win-') ? '.dll' : cell.rid.startsWith('osx-') ? '.dylib' : '.so'}`;
+        const files = [
+          { path: executable, contents: nativeExecutableHeader(cell.rid) },
+          { path: sidecar, contents: Buffer.from(`sqlite native dependency:${cell.id}:${cell.rid}`) }
+        ];
+        replayFiles = files.map(file => {
+          fs.writeFileSync(path.join(payloadDirectory, file.path), file.contents);
+          return {
+            path: file.path,
+            bytes: file.contents.length,
+            sha256: crypto.createHash('sha256').update(file.contents).digest('hex')
+          };
+        });
+        binary = {
+          file: path.join('runner-output', 'native', executable),
+          sha256: replayFiles[0].sha256,
+          bytes: replayFiles[0].bytes,
+          rid: cell.rid
+        };
+        fs.writeFileSync(path.join(runDirectory, 'replay.json'), `${JSON.stringify({
+          status: 'PASS', caseId: cell.id, workflow: { ...workflow, attempt },
+          binarySha256: binary.sha256
+        }, null, 2)}\n`, 'utf8');
+        fs.writeFileSync(path.join(runDirectory, 'replay.log'), `${markers.join('\n')}\n`, 'utf8');
+      }
       const receipt = {
         caseId: cell.id, provider: cell.provider, rid: cell.rid, tfm: cell.tfm, mode: cell.mode,
         generation: 'current-source', workflow: { ...workflow, attempt },
         successMarkers: markers, status: 'PASS',
         environment: nativeEnvironments[cell.rid],
-        binary: { sha256: 'b'.repeat(64), bytes: 4096, rid: cell.rid },
+        binary,
+        ...(replayFiles ? { replayFiles } : {}),
         ...overrides
       };
       fs.writeFileSync(path.join(runDirectory, 'result.json'), `${JSON.stringify(receipt, null, 2)}\n`, 'utf8');
@@ -102,6 +162,95 @@ async function summarize(fixtureData, nativeJobResult = 'success', regressionJob
   assert.equal(typeof summarizeCiReceipts, 'function',
     'verify.mjs must export summarizeCiReceipts before CI receipt contracts can run');
   return summarizeCiReceipts(fixtureData.matrix, fixtureData.directory, workflow, nativeJobResult, regressionJobResult);
+}
+
+test('SQLite CI 汇总接受与下载文件一致的主程序、sidecar 和重放收据', async t => {
+  const data = fixture(t);
+  const runDirectory = data.add();
+  const receipt = JSON.parse(fs.readFileSync(path.join(runDirectory, 'result.json'), 'utf8'));
+  const payloadDirectory = path.join(data.directory, `sql-native-payload-${expected.id}`);
+  const mainProgram = receipt.replayFiles.find(file => path.basename(file.path) === path.basename(receipt.binary.file));
+  assert.ok(mainProgram);
+  assert.equal(mainProgram.sha256, receipt.binary.sha256);
+  assert.equal(mainProgram.bytes, receipt.binary.bytes);
+  for (const file of receipt.replayFiles) {
+    const contents = fs.readFileSync(path.join(payloadDirectory, file.path));
+    assert.equal(contents.length, file.bytes);
+    assert.equal(crypto.createHash('sha256').update(contents).digest('hex'), file.sha256);
+  }
+  const replay = JSON.parse(fs.readFileSync(path.join(runDirectory, 'replay.json'), 'utf8'));
+  assert.equal(replay.status, 'PASS');
+  assert.equal(replay.caseId, receipt.caseId);
+  assert.deepEqual(replay.workflow, receipt.workflow);
+  assert.equal(replay.binarySha256, receipt.binary.sha256);
+
+  const result = await summarize(data);
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.cases[0].status, 'PASS');
+});
+
+for (const scenario of [
+  {
+    name: '主程序缺失',
+    mutate: ({ payloadDirectory, mainProgram }) => fs.unlinkSync(path.join(payloadDirectory, mainProgram.path))
+  },
+  {
+    name: '主程序内容被篡改',
+    mutate: ({ payloadDirectory, mainProgram }) => fs.writeFileSync(path.join(payloadDirectory, mainProgram.path), 'tampered main')
+  },
+  {
+    name: 'sidecar 内容被篡改',
+    mutate: ({ payloadDirectory, sidecar }) => fs.writeFileSync(path.join(payloadDirectory, sidecar.path), 'tampered sidecar')
+  },
+  {
+    name: '重放收据缺失',
+    mutate: ({ runDirectory }) => fs.unlinkSync(path.join(runDirectory, 'replay.json'))
+  },
+  {
+    name: '重放状态失败',
+    mutate: ({ runDirectory }) => {
+      const replayPath = path.join(runDirectory, 'replay.json');
+      const replay = JSON.parse(fs.readFileSync(replayPath, 'utf8'));
+      replay.status = 'FAIL';
+      fs.writeFileSync(replayPath, JSON.stringify(replay), 'utf8');
+    }
+  },
+  {
+    name: '重放来源 attempt 与构建收据不一致',
+    mutate: ({ runDirectory }) => {
+      const replayPath = path.join(runDirectory, 'replay.json');
+      const replay = JSON.parse(fs.readFileSync(replayPath, 'utf8'));
+      replay.workflow.attempt = '1';
+      fs.writeFileSync(replayPath, JSON.stringify(replay), 'utf8');
+    }
+  },
+  {
+    name: '重放二进制摘要与构建收据不一致',
+    mutate: ({ runDirectory }) => {
+      const replayPath = path.join(runDirectory, 'replay.json');
+      const replay = JSON.parse(fs.readFileSync(replayPath, 'utf8'));
+      replay.binarySha256 = 'c'.repeat(64);
+      fs.writeFileSync(replayPath, JSON.stringify(replay), 'utf8');
+    }
+  },
+  {
+    name: '重放日志缺少必需标记',
+    mutate: ({ runDirectory }) => fs.writeFileSync(path.join(runDirectory, 'replay.log'), `${expected.successMarker}\n`, 'utf8')
+  }
+]) {
+  test(`SQLite CI 汇总拒绝${scenario.name}`, async t => {
+    const data = fixture(t);
+    const runDirectory = data.add();
+    const receipt = JSON.parse(fs.readFileSync(path.join(runDirectory, 'result.json'), 'utf8'));
+    const payloadDirectory = path.join(data.directory, `sql-native-payload-${expected.id}`);
+    const mainProgram = receipt.replayFiles.find(file => path.basename(file.path) === path.basename(receipt.binary.file));
+    const sidecar = receipt.replayFiles.find(file => file !== mainProgram);
+    scenario.mutate({ runDirectory, payloadDirectory, mainProgram, sidecar });
+
+    const result = await summarize(data);
+    assert.equal(result.status, 'FAIL');
+    assert.notEqual(result.cases[0].status, 'PASS');
+  });
 }
 
 async function currentSqliteCrudCell() {
@@ -448,6 +597,43 @@ for (const [label, source, accepted] of [
     assert.equal(result.regression.verified, accepted ? 22 : 0);
   });
 }
+
+// 只读取 benchmark-smoke 的上传步骤，避免其他 Job 的相同规则掩盖遗漏。
+function benchmarkSmokeUpload() {
+  const workflowFile = fs.readFileSync(path.join(root, '.github/workflows/sql-aot.yml'), 'utf8');
+  const job = workflowFile.split(/^  benchmark-smoke:\r?\n/mu)[1]?.split(/^  [\w-]+:\r?$/mu)[0];
+  assert.ok(job, 'benchmark-smoke Job 必须存在');
+  const step = job.split(/(?=^      - )/mu)
+    .find(item => item.includes('uses: actions/upload-artifact@') &&
+      /^          name: sql-benchmark-smoke\r?$/mu.test(item));
+  assert.ok(step, 'benchmark-smoke 必须上传自己的工件');
+  const paths = step.match(/^          path: \|\r?\n((?:^            .+\r?\n)+)/mu)?.[1];
+  assert.ok(paths, '需要显式列出工件路径');
+  return { step, paths: paths.trim().split(/\r?\n/u).map(line => line.trim()) };
+}
+
+for (const [extension, evidence] of [
+  ['json', '收据和候选身份'], ['log', '采集与转换日志'],
+  ['nettrace', '可重放的原始 CPU trace'], ['jsonl', '测量窗口样本'],
+  ['csv', '方法归因表'], ['stderr', '子进程标准错误']
+]) {
+  test(`性能 CI 保留${evidence}`, () => {
+    assert.ok(benchmarkSmokeUpload().paths.includes(`artifacts/benchmarks/sql-smoke/**/*.${extension}`),
+      `缺少 ${extension} 上传路径，诊断证据将丢失`);
+  });
+}
+
+test('性能 CI 上传限于诊断证据，不包含可重建的 ETLX 或构建目录', () => {
+  const paths = benchmarkSmokeUpload().paths.filter(item => item.startsWith('artifacts/'));
+  assert.deepEqual([...paths].sort(), ['json', 'log', 'nettrace', 'jsonl', 'csv', 'stderr']
+    .map(extension => `artifacts/benchmarks/sql-smoke/**/*.${extension}`).sort());
+});
+
+test('性能 CI 在测试失败时仍保留诊断工件十四天', () => {
+  const { step } = benchmarkSmokeUpload();
+  assert.match(step, /^        if: always\(\)\r?$/mu);
+  assert.match(step, /^          retention-days: 14\r?$/mu);
+});
 
 test('独立 SQL 验收分支推送直接触发 Native AOT 工作流', () => {
   const workflowFile = fs.readFileSync(path.join(root, '.github/workflows/sql-aot.yml'), 'utf8');

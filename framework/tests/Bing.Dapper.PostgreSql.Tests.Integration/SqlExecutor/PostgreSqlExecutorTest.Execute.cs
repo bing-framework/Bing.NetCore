@@ -116,7 +116,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
             new { id, name = "after" });
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateUpdateBuilder()
             .Update(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
             .UpdateFrom(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
             .SetFrom("name", "name")
@@ -155,7 +155,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
         await executor.ExecuteSqlAsync(
             "Insert Into public.integration_product_updates(id,name) Values(@id,@name)",
             new { id = matchedId, name = "delete" });
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateDeleteBuilder()
             .DeleteFrom(new SqlTableReference { Schema = "public", TableName = "integration_products", Alias = "t" })
             .DeleteUsing(new SqlTableReference { Schema = "public", TableName = "integration_product_updates", Alias = "s" })
             .WhereUsing("id", "id");
@@ -194,7 +194,7 @@ public sealed class PostgreSqlExecutorTest : IAsyncLifetime
             new object[] { firstId, "returning-first", "first", 1m, new DateTime(2026, 7, 30) },
             new object[] { secondId, "returning-second", "second", 2m, new DateTime(2026, 7, 30) }
         };
-        var builder = executor.CreateWriteBuilder()
+        var builder = executor.CreateInsertBuilder()
             .InsertInto(new SqlTableReference { Schema = "public", TableName = "integration_products" })
             .Columns("id", "code", "name", "amount", "occurred_at")
             .Values(values)

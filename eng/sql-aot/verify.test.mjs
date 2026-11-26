@@ -261,7 +261,7 @@ function fakeExecutor({ publishCode = 0, runCode = 0, marker = nativeCase.succes
 }
 
 test('Native 运行器保存当前工作流身份，汇总器可直接读取生成的收据', async t => {
-  const { loadMatrix, runCase, summarizeCiReceipts } = await api();
+  const { loadMatrix, runCase, stageReplay, replayCase, summarizeCiReceipts } = await api();
   const rid = `${{ win32: 'win', linux: 'linux', darwin: 'osx' }[process.platform]}-${process.arch}`;
   const cell = loadMatrix().cases.find(candidate => candidate.id === `sqlite-${rid}-raw`);
   if (!cell) return t.skip('当前测试主机不在 Native 矩阵中');
@@ -282,6 +282,10 @@ test('Native 运行器保存当前工作流身份，汇总器可直接读取生�
 
   const workflow = { repository: 'team/project', runId: '1234', sha: 'a'.repeat(40), attempt: '2' };
   assert.deepEqual(receipt.workflow, workflow);
+  const payload = path.join(directory, `sql-native-payload-${cell.id}`);
+  stageReplay(cell, { root, output, destination: payload });
+  const replay = replayCase(cell, { root, output, source: payload }, fakeExecutor({ marker }).execute);
+  assert.equal(replay.status, 'PASS', replay.error);
   const summary = summarizeCiReceipts({ cases: [cell] }, directory, workflow, 'success', 'success');
   assert.equal(summary.cases[0].status, 'PASS');
   assert.equal(summary.passed, 1);
@@ -446,12 +450,39 @@ test('自动查询模板消费工程进入统一 CI 矩阵并声明准确覆盖�
     id: 'sqlite-win-x64-generated-query', provider: 'sqlite', rid: 'win-x64', tfm: 'net10.0',
     runner: 'windows-2022', mode: 'generated-query', status: 'enabled',
     project: 'framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj',
-    successMarker: 'GENERATED_SQL_SMOKE_PASS', requiredMarkers: ['AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS'],
-    coverage: ['automatic-whereif-query-template', 'same-shape-sql-reuse', 'current-value-rebinding',
+    successMarker: 'GENERATED_SQL_SMOKE_PASS', requiredMarkers: ['AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS', 'CACHED_QUERY_PREDICATE_NATIVE_PASS', 'CACHED_QUERY_PROJECTION_NATIVE_PASS'],
+    coverage: ['automatic-whereif-query-template', 'cached-readonly-predicate', 'cached-readonly-projection', 'same-shape-sql-reuse', 'current-value-rebinding',
       'disabled-filter', 'collection-shapes-0-1-2', 'generated-tosql-sync-async'],
     notCovered: ['all-lambda-syntax', 'all-query-template-shapes', 'all-provider-native', 'production-capacity']
   });
   assert.ok(ciMatrix(matrix).include.some(candidate => candidate.id === cell.id && candidate.runner === cell.runner));
+});
+
+test('四个 SQLite generated-query 矩阵格要求缓存只读谓词覆盖', async () => {
+  const { loadMatrix } = await api();
+  const cells = loadMatrix().cases.filter(candidate => candidate.provider === 'sqlite' && candidate.mode === 'generated-query');
+  const expectedIds = [
+    'sqlite-linux-x64-generated-query',
+    'sqlite-win-x64-generated-query',
+    'sqlite-osx-arm64-generated-query',
+    'sqlite-win-arm64-generated-query'
+  ];
+
+  assert.deepEqual(cells.map(cell => cell.id).sort(), expectedIds.sort());
+  for (const cell of cells) {
+    assert.ok(cell.requiredMarkers.includes('CACHED_QUERY_PREDICATE_NATIVE_PASS'), `${cell.id} 缺少成功标记`);
+    assert.ok(cell.coverage.includes('cached-readonly-predicate'), `${cell.id} 缺少覆盖声明`);
+  }
+});
+
+test('四个 SQLite generated-query 矩阵格要求缓存只读投影覆盖', async () => {
+  const { loadMatrix } = await api();
+  const cells = loadMatrix().cases.filter(cell => cell.provider === 'sqlite' && cell.mode === 'generated-query');
+  assert.equal(cells.length, 4);
+  for (const cell of cells) {
+    assert.ok(cell.requiredMarkers.includes('CACHED_QUERY_PROJECTION_NATIVE_PASS'), `${cell.id} 缺少成功标记`);
+    assert.ok(cell.coverage.includes('cached-readonly-projection'), `${cell.id} 缺少覆盖声明`);
+  }
 });
 
 test('SQLite Linux x64 generated-query 格复用完整 Windows 合同并生成 Linux Native 命令', async () => {

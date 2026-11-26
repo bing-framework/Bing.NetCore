@@ -315,9 +315,17 @@ public partial class SelectClause
             ValidateScalarResult(resultType);
             return;
         }
-        foreach (var column in layout.Where(column => column.Function.HasValue))
+        ValidateAggregateResult(resultType, layout, _context.Services.EntityModelMetadataProvider);
+    }
+
+    /// <summary>按当前服务的结果模型元数据校验聚合投影。</summary>
+    internal static void ValidateAggregateResult(Type resultType, IEnumerable<SqlProjectionColumn> columns,
+        IEntityModelMetadataProvider provider)
+    {
+        foreach (var column in columns)
         {
-            var metadata = _context.Services.EntityModelMetadataProvider.GetMetadata(resultType)
+            if (!column.Function.HasValue) continue;
+            var metadata = provider.GetMetadata(resultType)
                 ?? throw new NotSupportedException($"类型 {resultType.FullName} 未注册模型元数据。请注册结果类型元数据；生成模式可使用 SqlModel/SqlResult 上下文的 CreateModels 注册。");
             // 仅约束实际选中的聚合目标；普通导航仍由显式 map 装配。
             if (!metadata.Properties.TryGetValue(column.ResultAlias ?? string.Empty, out var descriptor) ||

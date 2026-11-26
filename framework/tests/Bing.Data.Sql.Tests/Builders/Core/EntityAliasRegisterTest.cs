@@ -101,6 +101,120 @@ public class EntityAliasRegisterTest
     }
 
     /// <summary>
+    /// 测试目的：克隆后的别名集合应与来源双向隔离，并保留大小写无关的释放语义。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenAliasesAreMutated_ShouldKeepSourceAndCloneIndependent()
+    {
+        // Arrange
+        var source = new EntityAliasRegister();
+        source.Replace(typeof(Sample), "s");
+        source.RegisterAlias("raw_source");
+        var clone = source.Clone();
+
+        // Act
+        clone.Replace(typeof(Sample), "clone_source");
+        ((IEntityAliasRegisterLifecycle)clone).ReleaseAlias("RAW_SOURCE");
+        clone.RegisterAlias("raw_source");
+        source.RegisterAlias("clone_source");
+
+        // Assert
+        Assert.Equal("s", source.GetAlias(typeof(Sample)));
+        Assert.Equal("clone_source", clone.GetAlias(typeof(Sample)));
+        Assert.Throws<InvalidOperationException>(() => source.RegisterAlias("RAW_SOURCE"));
+        Assert.Throws<InvalidOperationException>(() => clone.RegisterAlias("CLONE_SOURCE"));
+
+        source.Replace(typeof(Sample), "updated_source");
+        clone.RegisterAlias("s");
+        Assert.Equal("updated_source", source.GetAlias(typeof(Sample)));
+        Assert.Equal("clone_source", clone.GetAlias(typeof(Sample)));
+    }
+
+    /// <summary>
+    /// 测试目的：从同一空注册器创建的多个克隆应各自维护别名集合。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenCloningSameEmptyRegisterTwice_ShouldKeepAliasesIndependent()
+    {
+        // Arrange
+        var source = new EntityAliasRegister();
+        var first = source.Clone();
+        var second = source.Clone();
+
+        // Act
+        first.RegisterAlias("first");
+        second.RegisterAlias("FIRST");
+        source.RegisterAlias("first");
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(() => first.RegisterAlias("FIRST"));
+        Assert.Throws<InvalidOperationException>(() => second.RegisterAlias("first"));
+        Assert.Throws<InvalidOperationException>(() => source.RegisterAlias("FIRST"));
+    }
+
+    /// <summary>
+    /// 测试目的：克隆应保留 From 类型和自连接别名的注册顺序。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenSelfJoinAliasesExist_ShouldRetainFromTypeAndAliasOrder()
+    {
+        // Arrange
+        var source = new EntityAliasRegister(fromType: typeof(Sample));
+        source.Replace(typeof(Sample), "s");
+        source.Register(typeof(Sample), "p");
+        var clone = source.Clone();
+
+        // Act
+        source.Register(typeof(Sample), "q");
+
+        // Assert
+        Assert.Equal(typeof(Sample), clone.FromType);
+        Assert.Equal("s", clone.GetSelfJoinAlias(typeof(Sample), right: false));
+        Assert.Equal("p", clone.GetSelfJoinAlias(typeof(Sample), right: true));
+        Assert.Equal("p", source.GetSelfJoinAlias(typeof(Sample), right: false));
+        Assert.Equal("q", source.GetSelfJoinAlias(typeof(Sample), right: true));
+    }
+
+    /// <summary>
+    /// 测试目的：克隆单实体别名时不应再次复制已独立创建的别名集合。
+    /// </summary>
+    [Fact]
+    public void Clone_WhenSingleEntityIsRegistered_ShouldAvoidDuplicateAliasSetAllocation()
+    {
+        // Arrange
+        const int warmups = 128;
+        const int iterations = 512;
+        var data = new Dictionary<Type, string> { [typeof(Sample)] = "s" };
+        var source = new EntityAliasRegister(data, typeof(Sample));
+        EntityAliasRegister clone = null;
+        EntityAliasRegister constructed = null;
+        for (var i = 0; i < warmups; i++)
+        {
+            clone = (EntityAliasRegister)source.Clone();
+            constructed = new EntityAliasRegister(data, typeof(Sample));
+        }
+        GC.KeepAlive(clone);
+        GC.KeepAlive(constructed);
+
+        // Act
+        var cloneStart = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < iterations; i++)
+            clone = (EntityAliasRegister)source.Clone();
+        var cloneBytes = GC.GetAllocatedBytesForCurrentThread() - cloneStart;
+        GC.KeepAlive(clone);
+
+        var constructorStart = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < iterations; i++)
+            constructed = new EntityAliasRegister(data, typeof(Sample));
+        var constructorBytes = GC.GetAllocatedBytesForCurrentThread() - constructorStart;
+        GC.KeepAlive(constructed);
+
+        // Assert
+        Assert.True(cloneBytes <= constructorBytes,
+            $"克隆不应额外复制一份别名集合；Clone={cloneBytes / iterations} B/op，构造={constructorBytes / iterations} B/op。");
+    }
+
+    /// <summary>
     /// 测试目的：释放根来源别名时应保留同实体仍在查询图中的 Join 别名。
     /// </summary>
     [Fact]

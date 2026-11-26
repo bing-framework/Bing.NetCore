@@ -157,7 +157,7 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
                     call.Syntax.GetLocation(), call.Method.Name, error.Message));
             }
         }
-        methods.Append(GenerateTemplates(calls, generatedCalls));
+        methods.Append(GenerateTemplates(calls, generatedCalls, ref index));
         foreach (var generated in generatedCalls.Values) methods.AppendLine(generated.Code);
         foreach (var reader in readers)
             if (!Scalar(reader.Value)) entities[reader.Key] = reader.Value;
@@ -188,6 +188,19 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         var valueIndex = parameters.FindIndex(parameter => parameter.Name == "value");
         var expressionIndex = parameters.FindIndex(parameter => parameter.Type is INamedTypeSymbol named && named.Name == "Expression");
         return valueIndex >= 0 && expressionIndex > valueIndex;
+    }
+
+    /// <summary>只复用声明处固定且不会被静态构造器重写的表达式。</summary>
+    private static LambdaExpressionSyntax? FixedExpression(IFieldSymbol field)
+    {
+        if (!field.IsStatic || !field.IsReadOnly ||
+            field.ContainingType.StaticConstructors.Any(constructor => !constructor.IsImplicitlyDeclared))
+            return null;
+        // 泛型宿主的声明类型参数与调用处的构造类型不同，保留原路径。
+        for (var owner = field.ContainingType; owner != null; owner = owner.ContainingType)
+            if (owner.IsGenericType) return null;
+        return field.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is
+            VariableDeclaratorSyntax { Initializer.Value: LambdaExpressionSyntax initializer } ? initializer : null;
     }
 
     /// <summary>
@@ -226,8 +239,31 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         }
         var argument = call.Syntax.ArgumentList.Arguments.FirstOrDefault(a => a.NameColon?.Name.Identifier.ValueText == method.Parameters[parameterIndex].Name)
             ?? call.Syntax.ArgumentList.Arguments.ElementAtOrDefault(parameterIndex);
-        if (argument?.Expression is not LambdaExpressionSyntax lambda)
-            throw new NotSupportedException("要求调用点内联 Lambda；动态表达式使用普通运行时路径。");
+        var invocationCall = call;
+        var lambda = argument?.Expression as LambdaExpressionSyntax;
+        var cached = false;
+        var fixedPredicate = name is "Where" or "WhereIf" &&
+            method.Parameters[parameterIndex].Name == "predicate" &&
+            (method.TypeArguments.Length == 1 || HasExplicitPredicateValue(method));
+        // 具名投影有两个泛型实参，但表达式只接收一个实体；不要将双实体重载误认为单实体。
+        var singleSourceProjection = method.TypeArguments.Length == 2 && (name is "Select" or "ReplaceSelect") &&
+            method.Parameters[parameterIndex].Type is INamedTypeSymbol expressionType &&
+            expressionType.TypeArguments[0] is INamedTypeSymbol functionType &&
+            functionType.DelegateInvokeMethod?.Parameters.Length == 1;
+        var fixedColumns = (name is "Select" or "ReplaceSelect" or "ExcludeSelect" or "GroupBy" or "OrderBy") &&
+            (method.TypeArguments.Length == 1 || singleSourceProjection);
+        if (lambda == null && argument != null && (fixedPredicate || fixedColumns) &&
+            call.Model.GetOperation(argument.Expression) is { } operation &&
+            ReturningOperand(operation) is IFieldReferenceOperation reference &&
+            FixedExpression(reference.Field) is { } initializer)
+        {
+            // 表达式声明和调用可能位于不同文件；调用位置仍使用原语义模型。
+            lambda = initializer;
+            call = new Call(call.Syntax, method, call.Model.Compilation.GetSemanticModel(lambda.SyntaxTree));
+            cached = true;
+        }
+        if (lambda == null)
+            throw new NotSupportedException("要求调用点内联 Lambda 或可分析的静态只读表达式；动态表达式使用普通运行时路径。");
         var parameters = lambda is SimpleLambdaExpressionSyntax simple ? new[] { simple.Parameter } :
             ((ParenthesizedLambdaExpressionSyntax)lambda).ParameterList.Parameters.ToArray();
         var function = parameters.Length == 2 && IsMarkerType(call, ((IParameterSymbol)call.Model.GetDeclaredSymbol(parameters[1])!).Type, "Bing.Data.Sql.SqlAggregateFunctions`1");
@@ -265,7 +301,11 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
         string? constantField = null;
         string GeneratedInterceptor(string expression)
         {
-            var interceptor = Interceptor(call, id, expression);
+            // 字段在类型初始化递归中可能暂时为 null，回到原方法以保留异常和 WhereIf(false) 语义。
+            var fallback = cached ? "if (source == null || @" + method.Parameters[parameterIndex].Name + " == null) return source." +
+                name + "<" + string.Join(", ", method.TypeArguments.Select(TypeName)) + ">(" +
+                string.Join(", ", method.Parameters.Select(parameter => "@" + parameter.Name)) + ");" : null;
+            var interceptor = Interceptor(invocationCall, id, expression, fallback);
             // 每个调用点只保存不可变逻辑元数据，不保存动态别名、参数值或物理 SQL。
             // 显式静态构造函数使 WhereIf(false) 不会触发该调用点的元数据初始化。
             var descriptor = descriptors.Length == 0 ? string.Empty :
@@ -918,14 +958,16 @@ public sealed partial class SqlQueryGenerator : IIncrementalGenerator
     /// <param name="call">已识别的查询调用。</param>
     /// <param name="id">生成代码中的调用序号。</param>
     /// <param name="expression">需在生成方法中执行的表达式源码。</param>
+    /// <param name="fallback">需要保留原方法语义时执行的前置代码。</param>
     /// <returns>包含调用位置属性及生成方法体的拦截器源码。</returns>
     /// <remarks>
     /// 调用方必须先确认 InterceptorsNamespaces 包含生成器命名空间，否则抛出 NotSupportedException。
     /// </remarks>
-    private static string Interceptor(Call call, int id, string expression)
+    private static string Interceptor(Call call, int id, string expression, string? fallback = null)
     {
         return InterceptionLocation(call) + "\ninternal static " + TypeName(call.Method.ReturnType) + " Call_" + id + "(this " + TypeName(call.Method.ContainingType) + " source" +
-            (call.Method.Parameters.Length == 0 ? "" : ", " + string.Join(", ", call.Method.Parameters.Select(p => TypeName(p.Type) + " @" + p.Name))) + ") => " + expression + ";";
+            (call.Method.Parameters.Length == 0 ? "" : ", " + string.Join(", ", call.Method.Parameters.Select(p => TypeName(p.Type) + " @" + p.Name))) + ")" +
+            (fallback == null ? " => " + expression + ";" : " { " + fallback + " return " + expression + "; }");
     }
 
     /// <summary>获取调用位置；查询与写入生成共用同一编译器配置约束。</summary>

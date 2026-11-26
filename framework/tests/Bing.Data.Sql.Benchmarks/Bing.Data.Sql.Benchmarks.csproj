@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SqlMixedCapacity.Integration.Tests" />
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
     <ProjectReference Include="..\..\src\Bing.Data.Sql\Bing.Data.Sql.csproj" />
     <ProjectReference Include="..\Bing.Data.Sql.Benchmarks.Models\Bing.Data.Sql.Benchmarks.Models.csproj" />

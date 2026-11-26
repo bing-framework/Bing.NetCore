@@ -69,6 +69,76 @@ try
         Check(writer.Update(new Row { Id = 1, Name = "updated", Version = 2 },
             new SqlUpdateOptions<Row>().Original(row => row.Version, 1)) == 1, "original concurrency value");
     }
+    var cachedPredicateEnabled = CachedPredicateSmoke.Read(queries, true, 2);
+    Check(cachedPredicateEnabled.Sql == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Version`>=@_p_0 And `r`.`Id`>=@_p_1", "cached predicate enabled SQL");
+    Check(cachedPredicateEnabled.Ids.SequenceEqual(new long[] { 2 }), "cached predicate enabled result");
+    var cachedPredicateDisabled = CachedPredicateSmoke.Read(queries, false, 2);
+    Check(cachedPredicateDisabled.Sql == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Version`>=@_p_0", "cached predicate disabled SQL");
+    Check(cachedPredicateDisabled.Ids.SequenceEqual(new long[] { 1, 2 }), "cached predicate disabled result");
+    var cachedTemplate = CachedPredicateSmoke.TemplateSql(queries, true);
+    Check(cachedTemplate == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Version`>=@_p_0", "cached predicate template SQL");
+    Check(ReferenceEquals(cachedTemplate, CachedPredicateSmoke.TemplateSql(queries, true)), "cached predicate template reuse");
+    Check(CachedPredicateSmoke.TemplateSql(queries, false) ==
+        $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r`", "cached predicate template disabled SQL");
+    var explicitTemplate = CachedPredicateSmoke.ExplicitTemplateSql(queries, true, 1);
+    Check(explicitTemplate == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Id`>=@_p_0", "explicit predicate template SQL");
+    Check(ReferenceEquals(explicitTemplate, CachedPredicateSmoke.ExplicitTemplateSql(queries, true, 2)),
+        "explicit predicate template reuse with new value");
+    Check(CachedPredicateSmoke.ExplicitTemplateSql(queries, false, 2) ==
+        $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r`", "explicit predicate template disabled SQL");
+    Check(CachedPredicateSmoke.ExplicitTemplateIds(queries, true, 1).SequenceEqual(new long[] { 1, 2 }) &&
+        CachedPredicateSmoke.ExplicitTemplateIds(queries, true, 2).SequenceEqual(new long[] { 2 }) &&
+        CachedPredicateSmoke.ExplicitTemplateIds(queries, false, 2).SequenceEqual(new long[] { 1, 2 }),
+        "explicit predicate template execution");
+    var requiredTemplate = CachedPredicateSmoke.RequiredTemplateSql(queries, 1);
+    Check(requiredTemplate == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Id`>=@_p_0" &&
+        ReferenceEquals(requiredTemplate, CachedPredicateSmoke.RequiredTemplateSql(queries, 2)),
+        "required predicate template SQL and reuse");
+    Check(CachedPredicateSmoke.RequiredTemplateIds(queries, 1).SequenceEqual(new long[] { 1, 2 }) &&
+        CachedPredicateSmoke.RequiredTemplateIds(queries, 2).SequenceEqual(new long[] { 2 }),
+        "required predicate template execution");
+    var aggregateTemplateSql = CachedPredicateSmoke.AggregateTemplateSql(queries, 1);
+    Check(aggregateTemplateSql == $"Select Count(`r`.`Id`) As `Count` {Environment.NewLine}" +
+        $"From `GeneratedRows` As `r` {Environment.NewLine}Where `r`.`Id`>=@_p_0" &&
+        ReferenceEquals(aggregateTemplateSql, CachedPredicateSmoke.AggregateTemplateSql(queries, 2)) &&
+        CachedPredicateSmoke.AggregateTemplateCount(queries, 1) == 2 &&
+        CachedPredicateSmoke.AggregateTemplateCount(queries, 2) == 1,
+        "aggregate template validates generated models and binds each value");
+    var groupedSql = CachedPredicateSmoke.GroupedSql(queries, true, 1, false);
+    Check(groupedSql == $"Select `r`.`Version` As `Version`,Count(`r`.`Id`) As `Count` {Environment.NewLine}" +
+        $"From `GeneratedRows` As `r` {Environment.NewLine}Where `r`.`Id`>=@_p_0 {Environment.NewLine}" +
+        $"Group By `r`.`Version` {Environment.NewLine}Order By `r`.`Version`" &&
+        ReferenceEquals(groupedSql, CachedPredicateSmoke.GroupedSql(queries, true, 2, false)),
+        "cached typed grouped SQL and same-shape reuse");
+    var groupedRows = CachedPredicateSmoke.GroupedRows(queries, true, 1, true);
+    var filteredGroupedRows = CachedPredicateSmoke.GroupedRows(queries, true, 2, false);
+    Check(groupedRows.Length == 2 && groupedRows[0].Version == 2 && groupedRows[0].Count == 1 &&
+        groupedRows[1].Version == 1 && groupedRows[1].Count == 1 && filteredGroupedRows.Length == 1 &&
+        filteredGroupedRows[0].Version == 1 && filteredGroupedRows[0].Count == 1,
+        "cached typed grouped query binds current values and direction");
+    var excludedRows = CachedPredicateSmoke.ExcludedRows(queries);
+    Check(excludedRows.Sql == $"Select `r`.`Id`,`r`.`Version` {Environment.NewLine}From `GeneratedRows` As `r`" &&
+        excludedRows.Ids.SequenceEqual(new long[] { 1, 2 }), "cached excluded column query");
+    var excludedTemplateSql = CachedPredicateSmoke.ExcludedTemplateSql(queries, true, 1);
+    Check(excludedTemplateSql == $"Select `r`.`Id`,`r`.`Version` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Id`>=@_p_0" &&
+        ReferenceEquals(excludedTemplateSql, CachedPredicateSmoke.ExcludedTemplateSql(queries, true, 2)),
+        "excluded template SQL and same-shape reuse");
+    Check(CachedPredicateSmoke.ExcludedTemplateSql(queries, false, 2) ==
+        $"Select `r`.`Id`,`r`.`Version` {Environment.NewLine}From `GeneratedRows` As `r`",
+        "excluded template disabled SQL");
+    var excludedTemplateRows = CachedPredicateSmoke.ExcludedTemplateRows(queries, true, 2);
+    Check(excludedTemplateRows.Length == 1 && excludedTemplateRows[0].Id == 2 &&
+        excludedTemplateRows[0].Version == 1 && excludedTemplateRows[0].Name == "initial" &&
+        CachedPredicateSmoke.ExcludedTemplateRows(queries, false, 2).Length == 2,
+        "excluded template execution and column mapping");
+    Console.WriteLine("CACHED_QUERY_PROJECTION_NATIVE_PASS");
+    Console.WriteLine("CACHED_QUERY_PREDICATE_NATIVE_PASS");
     var automaticTemplateSql = AutomaticQueryTemplateProbe.ToSql(queries, "r", 1, true, 1, true, new long[] { 1, 2 });
     Check(automaticTemplateSql == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
         $"Where `r`.`Id`>=@_p_0 And `r`.`Version`>=@_p_1 And `r`.`Id` In (@_p_2,@_p_3) {Environment.NewLine}" +
@@ -87,6 +157,15 @@ try
     Check(automaticTemplateEmptyCollectionSql == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
         $"Where `r`.`Id`>=@_p_0 And `r`.`Version`>=@_p_1 And 1 = 0 {Environment.NewLine}" +
         "Order By `r`.`Id`", "automatic query template empty collection SQL");
+    var collectionTemplateSql = ExplicitCollectionTemplateProbe.ToSql(queries, true, new long[] { 1, 2 });
+    Check(collectionTemplateSql == $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r` {Environment.NewLine}" +
+        "Where `r`.`Id` In (@_p_0,@_p_1)" &&
+        ReferenceEquals(collectionTemplateSql, ExplicitCollectionTemplateProbe.ToSql(queries, true, new long[] { 2, 1 })),
+        "explicit collection predicate template SQL reuse");
+    Check(ExplicitCollectionTemplateProbe.ToSql(queries, false, new long[] { 1 }) ==
+        $"Select `r`.`Id` {Environment.NewLine}From `GeneratedRows` As `r`", "explicit collection predicate disabled");
+    Check(ExplicitCollectionTemplateProbe.ToList(queries, new long[] { 2 }).Select(row => row.Id).SequenceEqual(new long[] { 2 }),
+        "explicit collection predicate template current values");
     Check(AutomaticQueryTemplateProbe.ToList(queries, "r", 1, true, 2, true, new long[] { 1, 2 })
         .Select(row => row.Id).SequenceEqual(new long[] { 1 }), "automatic query template sync result");
     Check((await AutomaticQueryTemplateProbe.ToListAsync(queries, "r", 2, false, 0, true, new long[] { 2 }))
@@ -1317,6 +1396,23 @@ internal static class ExplicitStringPredicateReuseProbe
                 row.Name.Contains(term) || row.Name.StartsWith(term) || row.Name.EndsWith(term), alias)
             .Select<Row>(row => row.Id, alias);
         return (query.ToSql(), query.ToList<Row>().Select(row => row.Id).OrderBy(id => id).ToArray());
+    }
+}
+
+internal static class ExplicitCollectionTemplateProbe
+{
+    internal static string ToSql(ISqlQueryFactory factory, bool enabled, long[] ids)
+    {
+        using var root = factory.Create();
+        return root.From<Row>("r").WhereIf<Row, long[]>(enabled, ids, (row, values) => values.Contains(row.Id), "r")
+            .Select<Row>(row => row.Id, "r").ToSql();
+    }
+
+    internal static List<Row> ToList(ISqlQueryFactory factory, long[] ids)
+    {
+        using var root = factory.Create();
+        return root.From<Row>("r").WhereIf<Row, long[]>(true, ids, (row, values) => values.Contains(row.Id), "r")
+            .Select<Row>(row => row.Id, "r").ToList<Row>();
     }
 }
 

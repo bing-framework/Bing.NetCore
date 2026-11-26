@@ -9,7 +9,7 @@
 | SQLite / win-x64 / net10.0 | query | 既有生成 Lambda 子集、投影、Count/Page、集合、取消、查询事务回滚 |
 | SQLite / win-x64 / net10.0 | raw-only | 独立生成模型程序集、Raw reader/binder、泛型转换器的构造函数注入，无 Lambda 调用点 |
 | SQLite / win-x64 / net10.0 | crud-only | 默认单实体及整行 Returning SQL、默认/单列多行 Insert、单键 IN 与复合键/并发配对 Delete、Identity/DEFAULT VALUES SQL、静态 binder/reader/回填；Returning 投影含生成调用点，不验证查询 Lambda |
-| SQLite / win-x64 / net10.0 | generated-query | GeneratedSmoke：自动 WhereIf 查询模板、同形状 SQL 复用、当前值重绑、关闭条件、IN 0/1/2、ToSql 与同步/异步查询 |
+| SQLite / win-x64 / net10.0 | generated-query | GeneratedSmoke：自动 WhereIf 查询模板、静态只读条件及聚合投影、同形状 SQL 复用、当前值重绑、关闭条件、IN 0/1/2、ToSql 与同步/异步查询 |
 | SQLite / linux-x64 / net10.0 | query、raw-only、crud-only、generated-query | 与上述 Windows 各模式使用同一消费工程、标记和覆盖声明；本地 Linux 容器内真实 Native 发布及运行通过 |
 | SQLite / osx-arm64、win-arm64 / net10.0 | query、raw-only、crud-only、generated-query | 复用相同的四个消费工程和成功标记。运行 `44996103087` 已取得两平台共 8 格真实 Native 发布和执行收据。 |
 | PostgreSQL / linux-x64 / net10.0 | generated-crud-query | 隔离测试库：默认生成式单实体 CRUD、Lambda 查询、Identity/RETURNING、异步事务提交/共享回滚及生成式 `json` / `jsonb` 文本、对象、六组内置范围/多范围和显式复合列读写 |
@@ -26,7 +26,7 @@ Round134 的 Windows PostgreSQL/MySQL 当前源码 Native 收据及二进制摘�
 
 每个已接入格在 [matrix.json](matrix.json) 中同时列出 `coverage` 与 `notCovered`。CRUD 格覆盖生成器输出的 SQLite 默认单实体 Insert/Update/Delete、整行 Returning SQL 和静态绑定链；默认/单列多行 Insert、单键 IN Delete 以及复合键/并发配对 Delete 按实际行数追加槽位。同步/异步配对删除还验证交叉数据保留。单 Identity 键覆盖完整生成 SQL、静态读取/回填、自有批次回滚、共享事务与溢出回滚；独立 Returning DTO 覆盖重排列、别名、NULL 与同步/异步读取。映射覆盖、自定义服务、数据边界及未生成形状保留运行时渲染；所有写入形状、所有 Returning 布局与转换、共享写入事务的完整失败矩阵尚未覆盖。
 
-`generated-query` 使用现有 GeneratedSmoke 工程验证可分析的完整独占单来源链。模板冷形状沿用运行时渲染器，热形状复用 SQL/绑定布局；复杂或共享链保留兼容路径，不承诺全部 Lambda 或全部 SQL 编译期生成。该格同时要求 `GENERATED_SQL_SMOKE_PASS` 和 `AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS` 两个完整行标记，防止旧冒烟标记掩盖自动模板漏验。
+`generated-query` 使用现有 GeneratedSmoke 工程验证可分析的完整独占单来源链。模板冷形状沿用运行时渲染器，热形状复用 SQL/绑定布局；复杂或共享链保留兼容路径，不承诺全部 Lambda 或全部 SQL 编译期生成。该格同时要求 `GENERATED_SQL_SMOKE_PASS`、`AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS`、`CACHED_QUERY_PREDICATE_NATIVE_PASS` 和 `CACHED_QUERY_PROJECTION_NATIVE_PASS` 四个完整行标记；新增投影标记验证静态聚合投影、SQL 复用以及不同值的 SQLite 执行结果。2026-11-26 的当前源码已在本机 win-x64 验证；其他三个平台需要新候选的实际运行收据，旧候选不能证明新增标记或显式值模板。
 
 `raw-only` 同时要求 `RAW_ONLY_PACKAGE_NATIVE_PASS` 和 `GENERIC_CONVERTER_NATIVE_PASS`，后者验证通过泛型入口注册的转换器在 Native AOT 裁剪后仍能注入构造函数依赖。注册入口保留转换器的公共构造函数，DI 创建时仍使用构造函数元数据；上层泛型封装也应传播相同的裁剪注解。SQL Server 和 Oracle 的数据库验证分别由自己的消费工程负责。
 
@@ -117,11 +117,24 @@ dotnet publish framework/tests/Bing.Data.Sql.Aot.RawOnly/Bing.Data.Sql.Aot.RawOn
 [sql-aot.yml](../../.github/workflows/sql-aot.yml) 先运行工具契约测试，再从 `ciMatrix` 动态生成 Native job；自动调度共 24 格。Windows 与 Linux x64 均有四个 SQLite 格及 MySQL、PostgreSQL、SQL Server、Oracle 各一格。macOS ARM64（`macos-15`）和 Windows ARM64（`windows-11-arm`）各运行四个 SQLite 格。Native job 按 runner 架构安装 Node，.NET SDK 使用与 `global.json` 一致的 `10.0.4xx` 功能带正式修补版。Linux 的 PostgreSQL、MySQL、SQL Server、Oracle job 各自启动本地容器和专用测试库。Windows 使用独立实例，Oracle 在 WSL2 内运行 Linux Docker。每格仅导出本 job 的连接信息，并在 `always()` 步骤清理。工作流路径过滤器覆盖这些消费工程；单格失败不会取消其他格，日志和 JSON 始终上传。四个 Windows Provider 生命周期均已接入，本地合同测试通过。托管 runner 执行结果以实际工件为准。
 Windows 上的 `sql-regression` 作业为同一提交运行常规 SQL 回归。10 个测试项目分别运行 .NET 6 和 .NET 8，分析器和生成器各运行一次 .NET 8，共 22 项。SQLite 集成测试使用本地数据库。每份 TRX 必须有实际执行的测试、成功的运行结果和零项失败。22 份全部通过后，运行器在报告目录写入 `reports.json`，记录工作流身份、文件名及各文件的 SHA-256。失败作业仍上传已产生的 TRX，供定位出错的组合。重跑作业时，本次工件替换同名工件。可在仓库根目录运行 `pwsh -File eng/ci/Invoke-SqlRegressionTests.ps1` 执行同一组测试。
 
-最后的 `native-summary` 作业下载同一次运行的 `sql-regression` 和 `sql-aot-*` 工件。它逐份核对实际下载的 TRX 和清单中的 SHA-256，在 `regression.verified` 中报告匹配数量。文件缺失或内容变化时，`regression.error` 给出文件名。清单缺失或来自其他运行也会导致验收失败。
+SQLite 格在发布和首次运行后，将原生程序及运行依赖作为 `sql-native-payload-<case-id>` 上传，再由同一格下载并执行。上传前和重放前均核对完整文件清单、大小、SHA-256 及程序 RID；调试符号不进入工件，其余依赖保留。重放要求与原格相同的全部成功标记，并记录 `replay.json` 和 `replay.log`。下载后执行失败或文件缺失、变化、多出文件时，本格失败。其他 Provider 的重放需要重新准备独占空数据库，目前不纳入自动重放。
 
-对 Native 工件，汇总按自动调度格核对仓库、执行 ID、源码 SHA、矩阵字段、原生二进制记录和完整成功标记。每份成功收据的 `binary.rid` 和 Node 运行平台及架构都必须匹配该格的 RID。重跑失败作业时，可以复用同一次 workflow 中更早 attempt 的成功收据。汇总同时等待 `sql-regression` 和 `native`，并在 JSON 中记录两个作业的结果。22 份 SQL 报告、24 格 Native 收据和两个作业的状态全部通过后，整体验收才通过。缺失、重复、无效或失败的收据都会逐格记录。数据库清理出错会使 Native 作业失败。Oracle 的两格同一工件内还须有 `sql-aot-oracle/ready.log` 和 `sql-aot-oracle/stop.log`。这两份日志分别包含完整行 `ORACLE_FIXTURE_READY_PASS` 和 `ORACLE_FIXTURE_CLEANUP_PASS`。
+最后的 `native-summary` 作业下载同一次运行的 `sql-regression`、`sql-aot-*` 和 SQLite `sql-native-payload-*` 工件。它逐份核对实际下载的 TRX 和清单中的 SHA-256，在 `regression.verified` 中报告匹配数量。文件缺失或内容变化时，`regression.error` 给出文件名。清单缺失或来自其他运行也会导致验收失败。
+
+对 Native 工件，汇总按自动调度格核对仓库、执行 ID、源码 SHA、矩阵字段、原生二进制记录和完整成功标记。每份成功收据的 `binary.rid` 和 Node 运行平台及架构都必须匹配该格的 RID。对 SQLite 还会复核汇总作业实际下载的每个运行文件、重放收据及全部重放标记。SHA-256 用于核对文件一致性，不代表签名证明。重跑失败作业时，可以复用同一次 workflow 中更早 attempt 的成功收据。汇总同时等待 `sql-regression` 和 `native`，并在 JSON 中记录两个作业的结果。22 份 SQL 报告、24 格 Native 收据和两个作业的状态全部通过后，整体验收才通过。缺失、重复、无效或失败的收据都会逐格记录。数据库清理出错会使 Native 作业失败。Oracle 的两格同一工件内还须有 `sql-aot-oracle/ready.log` 和 `sql-aot-oracle/stop.log`。这两份日志分别包含完整行 `ORACLE_FIXTURE_READY_PASS` 和 `ORACLE_FIXTURE_CLEANUP_PASS`。
 
 验收时查看当前 attempt 的 `sql-native-summary` 工件和 `native-summary` 作业状态。单格诊断保留在 `sql-aot-<case-id>` 工件，双框架 TRX 保留在同一次 workflow 的 `sql-regression` 工件。工具合同和本地发布各自记录结果，托管验收使用实际工作流的汇总。
+
+本地可在匹配 RID 的机器上复用单格收据验证相同的打包和重放路径，以下目录应为本次运行的新目录：
+
+```powershell
+node eng/sql-aot/verify.mjs --case sqlite-win-x64-generated-query --output artifacts/validation/sql-aot/local/cases --artifacts-path artifacts/validation/sql-aot/local/build
+node eng/sql-aot/verify.mjs --stage-replay sqlite-win-x64-generated-query artifacts/validation/sql-aot/local/payload --output artifacts/validation/sql-aot/local/cases
+# 将 payload 复制到独立目录 downloaded，模拟工件解包。
+node eng/sql-aot/verify.mjs --replay sqlite-win-x64-generated-query artifacts/validation/sql-aot/local/downloaded --output artifacts/validation/sql-aot/local/cases
+```
+
+本地复制不能代替真实 CI 的工件上传、下载和汇总；当前源码对应的新候选仍需取得远端工作流收据。
 
 ### SQL Server 的原生消费
 

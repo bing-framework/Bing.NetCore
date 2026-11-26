@@ -77,6 +77,11 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     /// </summary>
     private IOrderByClause _orderByClause;
 
+    /// <summary>读取已创建的查询子句，不为模板检查创建新的子句。</summary>
+    internal SelectClause ExistingSelectClause => _selectClause as SelectClause;
+    /// <summary>读取已创建的排序子句，不改变 Builder 状态。</summary>
+    internal OrderByClause ExistingOrderByClause => _orderByClause as OrderByClause;
+
     /// <summary>是否已添加查询内容。</summary>
     private bool _hasQueryContent;
 
@@ -1769,6 +1774,10 @@ public abstract partial class SqlBuilderBase : ISqlBuilder, ISqlCommonPartAccess
     {
         return ExecutionContext.DatabaseType ?? Provider.DatabaseType;
     }
+
+    /// <summary>使用当前服务和执行上下文验证结构化表引用。</summary>
+    internal void ValidateTableReference(SqlTableReference reference) =>
+        Services.TableReferenceValidator.Validate(reference, ResolveProviderDatabaseType());
 
     /// <summary>
     /// 获取当前类型化 From 的结构化表引用。

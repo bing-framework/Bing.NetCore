@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Bing.Data.Sql.Metadata;
 
 /// <summary>
@@ -12,6 +14,9 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
 
     /// <summary>显式提供器及兼容模式下全局生成提供器的数量。</summary>
     private readonly int _registeredProviderCount;
+
+    // 仅缓存内置反射回退；弱键不延长可卸载实体类型的生命周期。
+    private readonly ConditionalWeakTable<Type, EntityModelMetadata> _fallbackMetadata = new();
 
     /// <summary>
     /// 初始化一个 <see cref="CompositeEntityModelMetadataProvider"/> 类型的实例。
@@ -65,11 +70,21 @@ public sealed class CompositeEntityModelMetadataProvider : IEntityModelMetadataP
 
     private EntityModelMetadata GetMetadata(Type entityType, int count)
     {
-        for (var i = 0; i < count; i++)
+        var registeredCount = Math.Min(count, _registeredProviderCount);
+        for (var i = 0; i < registeredCount; i++)
         {
             var metadata = _providers[i].GetMetadata(entityType);
             if (metadata != null)
                 return metadata;
+        }
+
+        if (entityType != null && registeredCount < count && _fallbackMetadata.TryGetValue(entityType, out var cached))
+            return cached;
+        for (var i = registeredCount; i < count; i++)
+        {
+            var metadata = _providers[i].GetMetadata(entityType);
+            if (metadata != null)
+                return entityType == null ? metadata : _fallbackMetadata.GetValue(entityType, _ => metadata);
         }
         return null;
     }

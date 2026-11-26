@@ -13,7 +13,7 @@ public sealed partial class SqlQueryGenerator
 {
     /// <summary>只优化完整且独占的 fluent 链，未知操作保留原来的逐调用生成路径。</summary>
     private static string GenerateTemplates(ImmutableArray<Call?> calls,
-        Dictionary<InvocationExpressionSyntax, (Call Call, string Code)> generated)
+        Dictionary<InvocationExpressionSyntax, (Call Call, string Code)> generated, ref int nextCallId)
     {
         var descriptors = new StringBuilder();
         var id = 0;
@@ -37,16 +37,25 @@ public sealed partial class SqlQueryGenerator
                 chain.Add(previous);
                 cursor = previous.Syntax;
             }
-            if (root == null || !FreshRoot(root) || !chain.Any(call => call.Method.Name == "WhereIf")) continue;
+            if (root == null || !FreshRoot(root) || !chain.Any(call => call.Method.Name is "Where" or "WhereIf")) continue;
             chain.Reverse();
             var operations = new List<string>();
             var replacements = new List<(Call Call, string Code)>();
             var templateName = "Template_" + id++;
             foreach (var call in chain)
             {
-                if (call.Method.Name is not ("Where" or "WhereIf" or "Select" or "ReplaceSelect" or "OrderBy") ||
+                string operation;
+                string replacement;
+                if (call.Method.Name == "SelectAll")
+                {
+                    // 仅对可完整识别的链生成拦截，其他 SelectAll 保持原来的调用路径。
+                    operation = "new " + Prefix + "SqlGeneratedQueryTemplate.Operation(static (source, arguments) => { _ = source.SelectAll(); })";
+                    replacement = Interceptor(call, nextCallId++, Prefix + "SqlGeneratedQueryTemplate.Apply(source, " +
+                        templateName + ", " + operations.Count + ", global::System.Array.Empty<object>())");
+                }
+                else if (call.Method.Name is not ("Where" or "WhereIf" or "Select" or "ReplaceSelect" or "ExcludeSelect" or "GroupBy" or "OrderBy") ||
                     !generated.TryGetValue(call.Syntax, out var item) ||
-                    !TryTemplateOperation(call, item.Code, templateName, operations.Count, out var operation, out var replacement)) break;
+                    !TryTemplateOperation(call, item.Code, templateName, operations.Count, out operation, out replacement)) break;
                 operations.Add(operation);
                 replacements.Add((call, replacement));
             }
@@ -55,7 +64,7 @@ public sealed partial class SqlQueryGenerator
                 .Append(templateName).Append(" = new ").Append(Prefix).Append("SqlGeneratedQueryTemplate(new ")
                 .Append(Prefix).Append("SqlGeneratedQueryTemplate.Operation[]{")
                 .Append(string.Join(",\n", operations)).Append("}, ")
-                .Append(chain.Any(call => call.Method.Name is "Select" or "ReplaceSelect") ? "true" : "false").AppendLine(");");
+                .Append(chain.Any(call => call.Method.Name is "Select" or "ReplaceSelect" or "SelectAll") ? "true" : "false").AppendLine(");");
             foreach (var replacement in replacements) generated[replacement.Call.Syntax] = (replacement.Call, replacement.Code);
         }
         return descriptors.ToString();
@@ -77,8 +86,17 @@ public sealed partial class SqlQueryGenerator
         operation = replacement = string.Empty;
         var tree = CSharpSyntaxTree.ParseText("class C {" + code + "}");
         var method = tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>().SingleOrDefault();
-        if (method?.ExpressionBody == null) return false;
-        var expression = method.ExpressionBody.Expression;
+        if (method == null) return false;
+        ReturnStatementSyntax? generatedReturn = null;
+        ExpressionSyntax? expression = method.ExpressionBody?.Expression;
+        if (expression == null && method.Body is { Statements.Count: 2 } body &&
+            body.Statements[0] is IfStatementSyntax && body.Statements[1] is ReturnStatementSyntax statement)
+        {
+            // 缓存字段可能在类型初始化期间为 null，保留原调用的回退分支。
+            generatedReturn = statement;
+            expression = statement.Expression;
+        }
+        if (expression == null) return false;
         // 闭包取值含嵌套桥接调用，保留原有路径后再识别单个模板操作。
         if (expression.ToString().Contains("ComparisonValue")) return false;
         var bridge = expression.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>()
@@ -86,12 +104,13 @@ public sealed partial class SqlQueryGenerator
                 member.Expression.ToString() == Prefix + "SqlGeneratedQueryBridge");
         if (bridge?.Expression is not MemberAccessExpressionSyntax access) return false;
         var name = access.Name.Identifier.ValueText;
-        if (name is not ("Compare" or "OptionalCompare" or "Project")) return false;
+        if (name is not ("Compare" or "OptionalCompare" or "Project" or "WherePredicate")) return false;
         // 一次调用只涉及一个来源；复杂谓词继续由原生成桥接处理。
         var expressionParameter = call.Method.Parameters.FirstOrDefault(parameter =>
             parameter.Type is INamedTypeSymbol type && type.Name == "Expression");
         if (expressionParameter?.Type is not INamedTypeSymbol expressionType ||
-            expressionType.TypeArguments[0] is not INamedTypeSymbol function || function.TypeArguments.Length != 2) return false;
+            expressionType.TypeArguments[0] is not INamedTypeSymbol function ||
+            function.TypeArguments.Length != (name == "WherePredicate" ? 3 : 2)) return false;
         var arguments = call.Method.Parameters.Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter, expressionParameter)).ToArray();
         var rewriter = new TemplateArguments(arguments);
         var replay = rewriter.Visit(expression)!.ToString();
@@ -99,7 +118,31 @@ public sealed partial class SqlQueryGenerator
         var conditionIndex = Array.FindIndex(arguments, parameter => parameter.Name == "condition");
         var value = "null";
         var comparison = "null";
-        if (name != "Project")
+        if (name == "WherePredicate")
+        {
+            var args = bridge.ArgumentList.Arguments;
+            // 单列的原样显式值和集合 In 使用同一值槽；组合和数值提升保留原桥接。
+            if (valueIndex < 0 || args.Count != 6 ||
+                args[5].Expression is not IdentifierNameSyntax valueName || valueName.Identifier.ValueText != "value" ||
+                args[4].Expression is not MemberAccessExpressionSyntax predicateReference ||
+                predicateReference.Name.Identifier.ValueText != "Predicate" ||
+                predicateReference.Expression is not IdentifierNameSyntax descriptorName) return false;
+            var descriptor = tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .SingleOrDefault(type => type.Identifier.ValueText == descriptorName.Identifier.ValueText);
+            var predicate = descriptor?.DescendantNodes().OfType<VariableDeclaratorSyntax>()
+                .SingleOrDefault(variable => variable.Identifier.ValueText == "Predicate")?.Initializer?.Value;
+            if (predicate is not InvocationExpressionSyntax predicateCall ||
+                predicateCall.Expression is not MemberAccessExpressionSyntax predicateMethod ||
+                predicateMethod.Expression.ToString() != Prefix + "SqlGeneratedPredicate" ||
+                predicateMethod.Name.Identifier.ValueText != "CompareParameter" ||
+                predicateCall.ArgumentList.Arguments.Count != 2 ||
+                predicateCall.ArgumentList.Arguments[1].Expression is not MemberAccessExpressionSyntax comparisonName ||
+                comparisonName.Expression.ToString() != "global::Bing.Operator" ||
+                comparisonName.Name.Identifier.ValueText is not ("Equal" or "NotEqual" or "Greater" or "GreaterEqual" or "Less" or "LessEqual" or "In")) return false;
+            value = "static arguments => (object)(" + rewriter.Visit(args[5].Expression) + ")";
+            comparison = "static arguments => " + comparisonName;
+        }
+        else if (name != "Project")
         {
             var args = bridge.ArgumentList.Arguments;
             // 列比较不创建值槽；标量和集合只读取静态常量或显式传入的值。
@@ -111,7 +154,10 @@ public sealed partial class SqlQueryGenerator
             "; }, " + value + ", " + comparison + ", " + valueIndex + ", " + conditionIndex + ")";
         var apply = Prefix + "SqlGeneratedQueryTemplate.Apply(source, " + templateName + ", " + index +
             ", new object[]{" + string.Join(",", arguments.Select(parameter => "@" + parameter.Name)) + "})";
-        var rewritten = method.WithExpressionBody(method.ExpressionBody.WithExpression(SyntaxFactory.ParseExpression(apply)));
+        var applyExpression = SyntaxFactory.ParseExpression(apply);
+        var rewritten = generatedReturn == null
+            ? method.WithExpressionBody(method.ExpressionBody!.WithExpression(applyExpression))
+            : method.ReplaceNode(generatedReturn, generatedReturn.WithExpression(applyExpression));
         replacement = code.Replace(method.ToString(), rewritten.ToString());
         return true;
     }

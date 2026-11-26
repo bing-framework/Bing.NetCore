@@ -42,14 +42,14 @@ public sealed partial class SqlQueryGeneratorTest
             using Bing.Data.Sql;
             public sealed class AutoRow { public int Id { get; set; } }
             public static class Consumer {
-                public static string Load(SqlLambdaQuery q, bool enabled, int id) =>
-                    q.WhereIf<AutoRow>(enabled, r => r.Id, id).ToSql();
+                public static string Load(SqlLambdaQuery q, int id) =>
+                    q.From<AutoRow>("r").Where<AutoRow, int>(r => r.Id, id).ToSql();
             }
             """;
         var result = RunGenerator(source);
         AssertNoCompilationErrors(result);
         Assert.DoesNotContain("SqlGeneratedQueryTemplate", result.GeneratedSource, StringComparison.Ordinal);
-        Assert.Contains("SqlGeneratedQueryBridge.OptionalCompare", result.GeneratedSource, StringComparison.Ordinal);
+        Assert.Contains("SqlGeneratedQueryBridge.Compare", result.GeneratedSource, StringComparison.Ordinal);
     }
 
     /// <summary>分页配置等未识别操作保留既有生成链，不把部分链误标为完整模板。</summary>
@@ -60,14 +60,34 @@ public sealed partial class SqlQueryGeneratorTest
             using Bing.Data.Sql;
             public sealed class AutoRow { public int Id { get; set; } }
             public static class Consumer {
-                public static string Load(ISqlQuery root, bool enabled, int id) =>
-                    root.From<AutoRow>("r").WhereIf<AutoRow>(enabled, r => r.Id, id).Take(1).ToSql();
+                public static string Load(ISqlQuery root, int id) =>
+                    root.From<AutoRow>("r").Where<AutoRow, int>(r => r.Id, id).Take(1).ToSql();
             }
             """;
         var result = RunGenerator(source);
         AssertNoCompilationErrors(result);
         Assert.DoesNotContain("SqlGeneratedQueryTemplate", result.GeneratedSource, StringComparison.Ordinal);
-        Assert.Contains("SqlGeneratedQueryBridge.OptionalCompare", result.GeneratedSource, StringComparison.Ordinal);
+        Assert.Contains("SqlGeneratedQueryBridge.Compare", result.GeneratedSource, StringComparison.Ordinal);
+    }
+
+    /// <summary>闭包值无法进入静态模板时，必选 Where 继续使用逐调用桥接。</summary>
+    [Fact]
+    public void Generate_AutomaticTemplate_CapturedRequiredWhere_ShouldKeepExistingBridge()
+    {
+        const string source = """
+            using Bing.Data.Sql;
+            public sealed class AutoRow { public int Id { get; set; } }
+            public static class Consumer {
+                public static string Load(ISqlQueryPlanExecutor executor, ISqlBuilder builder, int id) =>
+                    SqlQueryRuntimeFactory.CreateLambdaQuery(executor, builder).From<AutoRow>("r")
+                        .Where<AutoRow>(r => r.Id == id).ToSql();
+            }
+            """;
+        var result = RunGenerator(source);
+
+        AssertNoCompilationErrors(result);
+        Assert.DoesNotContain("SqlGeneratedQueryTemplate", result.GeneratedSource, StringComparison.Ordinal);
+        Assert.Contains("SqlGeneratedQueryBridge.ComparisonValue", result.GeneratedSource, StringComparison.Ordinal);
     }
 
     /// <summary>集合值归一化后交给 object 参数桥接，不能再强转回调用点的具体数组类型。</summary>

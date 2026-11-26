@@ -62,6 +62,19 @@ function Get-SqlBenchmarkBinary {
     return $binaries[0]
 }
 
+function Get-SqlBenchmarkRuntimeManifest {
+    param([System.IO.FileInfo]$BinaryFile)
+
+    # 覆盖完整运行目录，包含托管依赖、运行配置及子目录中的原生库。
+    $root = $BinaryFile.DirectoryName
+    $files = [ordered]@{}
+    foreach ($file in Get-ChildItem -LiteralPath $root -File -Recurse -Force | Sort-Object FullName) {
+        $relative = [System.IO.Path]::GetRelativePath($root, $file.FullName).Replace('\', '/')
+        $files[$relative] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+    }
+    return [ordered]@{ root = $root; files = $files; count = $files.Count }
+}
+
 function Invoke-SqlCleanBuildPeak {
     [CmdletBinding()]
     param([string]$ResultsDirectory, [string]$RestoreConfigFile, [int]$TimeoutSeconds)
@@ -115,6 +128,10 @@ function Invoke-SqlCleanBuildPeak {
         elseif ($result.measurement.ExitCode -eq 0) {
             $binary = Get-SqlBenchmarkBinary -SourceRoot $snapshot
             $result.binary = [ordered]@{ file = $binary.FullName; sha256 = (Get-FileHash -LiteralPath $binary.FullName -Algorithm SHA256).Hash }
+            $runtime = Get-SqlBenchmarkRuntimeManifest -BinaryFile $binary
+            $runtimeFile = Join-Path $directory 'runtime-manifest.json'
+            $runtime | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $runtimeFile -Encoding utf8
+            $result.runtime = [ordered]@{ root = $runtime.root; manifest = $runtimeFile; count = $runtime.count }
             $result.status = 'PASS'
         }
     }

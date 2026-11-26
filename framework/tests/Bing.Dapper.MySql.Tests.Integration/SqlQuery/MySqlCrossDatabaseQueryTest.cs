@@ -343,6 +343,9 @@ public sealed class MySqlCrossDatabaseQueryTest : IAsyncLifetime
     /// 创建结构化跨数据库 LeftJoin 查询。
     /// </summary>
     /// <returns>包含跨数据库 LeftJoin 的 SQL 查询。</returns>
+    /// <param name="query">待执行或构造的测试查询。</param>
+    /// <param name="databaseName">测试数据库名称。</param>
+    /// <param name="companyId">测试公司标识。</param>
     private static SqlFluentQuery CreateStructuredCrossDatabaseJoinQuery(ISqlQuery query,
         string databaseName, Guid companyId)
     {
@@ -362,6 +365,8 @@ public sealed class MySqlCrossDatabaseQueryTest : IAsyncLifetime
     /// <summary>
     /// 创建跨数据库专属公司表。
     /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="tableName">目标物理表名。</param>
     private static async Task CreateCompanyTableAsync(MySqlConnection connection, string tableName)
     {
         await ExecuteAsync(connection, $"Drop Table If Exists {tableName};");
@@ -376,6 +381,8 @@ Create Table {tableName}(
     /// <summary>
     /// 创建跨数据库专属商户表。
     /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="tableName">目标物理表名。</param>
     private static async Task CreateMerchantTableAsync(MySqlConnection connection, string tableName)
     {
         await ExecuteAsync(connection, $"Drop Table If Exists {tableName};");
@@ -389,6 +396,11 @@ Create Table {tableName}(
     /// <summary>
     /// 插入公司测试数据。
     /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="tableName">目标物理表名。</param>
+    /// <param name="companyId">测试公司标识。</param>
+    /// <param name="merchantId">测试商户标识。</param>
+    /// <param name="name">注册或构造的测试服务、操作或场景名称。</param>
     private static async Task InsertCompanyAsync(MySqlConnection connection, string tableName, Guid companyId,
         Guid? merchantId, string name)
     {
@@ -403,6 +415,10 @@ Create Table {tableName}(
     /// <summary>
     /// 插入商户测试数据。
     /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="tableName">目标物理表名。</param>
+    /// <param name="merchantId">测试商户标识。</param>
+    /// <param name="name">注册或构造的测试服务、操作或场景名称。</param>
     private static async Task InsertMerchantAsync(MySqlConnection connection, string tableName, Guid merchantId,
         string name)
     {
@@ -416,6 +432,8 @@ Create Table {tableName}(
     /// <summary>
     /// 删除主测试库中的专属公司数据。
     /// </summary>
+    /// <param name="connection">执行测试命令的数据库连接。</param>
+    /// <param name="companyIds">测试公司标识集合。</param>
     private static async Task DeleteCompaniesAsync(MySqlConnection connection, params Guid[] companyIds)
     {
         var parameterNames = companyIds.Select((_, index) => $"@CompanyId{index}").ToArray();
@@ -430,6 +448,8 @@ Create Table {tableName}(
     /// 获取带反引号的跨数据库专属表名。
     /// </summary>
     /// <returns>包含数据库限定符和反引号的表名。</returns>
+    /// <param name="databaseName">测试数据库名称。</param>
+    /// <param name="tableName">目标物理表名。</param>
     private static string GetQualifiedTableName(string databaseName, string tableName) =>
         $"`{databaseName.Replace("`", "``", StringComparison.Ordinal)}`.`{tableName}`";
 

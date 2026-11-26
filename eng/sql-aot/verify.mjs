@@ -66,6 +66,119 @@ function readNativeRid(binary) {
   return 'unknown';
 }
 
+function executableName(cell) {
+  return path.basename(cell.project, '.csproj') + (cell.rid.startsWith('win-') ? '.exe' : '');
+}
+
+// 调试符号不参与运行；其他发布文件完整纳入重放清单。
+function replayFiles(directory, excludeSymbols = false) {
+  const files = [];
+  function visit(parent, relative = '') {
+    for (const entry of fs.readdirSync(parent, { withFileTypes: true })) {
+      if (excludeSymbols && /\.(?:pdb|dbg|dSYM)$/iu.test(entry.name)) continue;
+      const name = relative ? `${relative}/${entry.name}` : entry.name;
+      const file = path.join(parent, entry.name);
+      if (entry.isDirectory()) visit(file, name);
+      else if (entry.isFile()) {
+        const data = fs.readFileSync(file);
+        files.push({ path: name, bytes: data.length, sha256: crypto.createHash('sha256').update(data).digest('hex') });
+      } else throw new Error(`Unsupported replay file: ${name}`);
+    }
+  }
+  visit(directory);
+  return files.sort((left, right) => left.path < right.path ? -1 : left.path > right.path ? 1 : 0);
+}
+
+function verifyReplayFiles(directory, expected, excludeSymbols = false) {
+  if (!Array.isArray(expected) || expected.length === 0) throw new Error('Replay file manifest is missing.');
+  const normalized = expected.map(({ path: name, bytes, sha256 }) => ({ path: name, bytes, sha256 }))
+    .sort((left, right) => left.path < right.path ? -1 : left.path > right.path ? 1 : 0);
+  if (JSON.stringify(replayFiles(directory, excludeSymbols)) !== JSON.stringify(normalized))
+    throw new Error('Replay files do not match the original manifest.');
+}
+
+function verifyReplayPayload(cell, receipt, directory, excludeSymbols = false) {
+  verifyReplayFiles(directory, receipt.replayFiles, excludeSymbols);
+  const executable = executableName(cell);
+  const entry = receipt.replayFiles.find(file => file.path === executable);
+  if (!entry || entry.bytes !== receipt.binary?.bytes || entry.sha256 !== receipt.binary?.sha256)
+    throw new Error('Replay executable does not match the original binary.');
+  const file = path.join(directory, executable);
+  const rid = readNativeRid(fs.readFileSync(file));
+  if (rid !== cell.rid || receipt.binary?.rid !== cell.rid)
+    throw new Error(`Replay binary RID mismatch: expected ${cell.rid}; actual ${rid}`);
+  return file;
+}
+
+function readReplayReceipt(cell, options) {
+  if (cell.provider !== 'sqlite') throw new Error('Replay currently supports SQLite cases only.');
+  const root = options.root ?? repositoryRoot;
+  const parent = path.resolve(root, options.output ?? 'output/sql-aot', cell.id);
+  const runs = fs.readdirSync(parent, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && entry.name.startsWith('run-'))
+    .map(entry => path.join(parent, entry.name))
+    .filter(directory => fs.existsSync(path.join(directory, 'result.json')));
+  if (runs.length !== 1) throw new Error(`Expected one Native receipt, found ${runs.length}.`);
+  const directory = runs[0];
+  const receipt = JSON.parse(fs.readFileSync(path.join(directory, 'result.json'), 'utf8'));
+  if (receipt.status !== 'PASS' || receipt.caseId !== cell.id || receipt.provider !== cell.provider ||
+      receipt.rid !== cell.rid || receipt.tfm !== cell.tfm || receipt.mode !== cell.mode ||
+      receipt.generation !== 'current-source' ||
+      JSON.stringify(receipt.successMarkers) !== JSON.stringify(expectedMarkers(cell)))
+    throw new Error('Native receipt does not match the successful SQLite matrix case.');
+  const workflow = getWorkflowIdentity();
+  if (workflow && !matchesWorkflow(receipt.workflow, workflow))
+    throw new Error('Native receipt belongs to another workflow run, source revision or attempt.');
+  return { directory, receipt };
+}
+
+/** 将经原始收据校验的 SQLite 运行文件准备为可上传工件。 */
+export function stageReplay(cell, options) {
+  const { directory, receipt } = readReplayReceipt(cell, options);
+  const source = path.join(directory, 'native');
+  verifyReplayPayload(cell, receipt, source, true);
+  const destination = path.resolve(options.root ?? repositoryRoot, options.destination);
+  fs.mkdirSync(destination, { recursive: true });
+  if (fs.readdirSync(destination).length) throw new Error('Replay destination must be empty.');
+  for (const entry of receipt.replayFiles) {
+    const parts = entry.path.split('/');
+    const target = path.join(destination, ...parts);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(path.join(source, ...parts), target);
+  }
+  verifyReplayPayload(cell, receipt, destination);
+}
+
+/** 校验下载内容并实际运行；失败同样保留重放收据。 */
+export function replayCase(cell, options, invoke = execute) {
+  const result = { caseId: cell.id, status: 'FAIL' };
+  let directory;
+  try {
+    const source = readReplayReceipt(cell, options);
+    directory = source.directory;
+    const receipt = source.receipt;
+    if (receipt.workflow) result.workflow = receipt.workflow;
+    const host = hostRid(process.platform, process.arch);
+    if (host !== cell.rid) throw new Error(`Native execution requires matching host: ${cell.rid}; actual ${host}`);
+    const payload = path.resolve(options.root ?? repositoryRoot, options.source);
+    const executable = verifyReplayPayload(cell, receipt, payload);
+    if (process.platform !== 'win32') fs.chmodSync(executable, 0o755);
+    const log = path.join(directory, 'replay.log');
+    const execution = invoke({ file: executable, args: [], cwd: options.root ?? repositoryRoot, timeout: 120000 }, log);
+    if (execution.error) throw execution.error;
+    if (execution.status !== 0)
+      throw new Error(`replay failed: exit ${execution.status}, signal ${execution.signal ?? 'none'}; ${log}`);
+    assertSuccessMarkers(fs.readFileSync(log, 'utf8'), expectedMarkers(cell));
+    result.binarySha256 = receipt.binary.sha256;
+    result.status = 'PASS';
+  } catch (error) {
+    result.error = error.message;
+  }
+  if (directory)
+    fs.writeFileSync(path.join(directory, 'replay.json'), JSON.stringify(result, null, 2) + '\n', 'utf8');
+  return result;
+}
+
 /** 汇总同一工作流的 Native 矩阵收据和 SQL 回归结果。 */
 export function summarizeCiReceipts(matrix, artifactDirectory, workflow, nativeJobResult, regressionJobResult) {
   const cases = automaticCases(matrix).map(cell => summarizeCiCase(cell, artifactDirectory, workflow));
@@ -143,6 +256,14 @@ function summarizeCiCase(cell, artifactDirectory, workflow) {
     if (runner !== cell.rid)
       throw new Error(`Native runner RID mismatch: expected ${cell.rid}; actual ${runner}`);
     assertSuccessMarkers(fs.readFileSync(path.join(path.dirname(file), 'run.log'), 'utf8'), markers);
+    if (cell.provider === 'sqlite') {
+      verifyReplayPayload(cell, receipt, path.join(artifactDirectory, `sql-native-payload-${cell.id}`));
+      const replay = JSON.parse(fs.readFileSync(path.join(path.dirname(file), 'replay.json'), 'utf8'));
+      if (replay.status !== 'PASS' || replay.caseId !== cell.id || replay.binarySha256 !== receipt.binary.sha256 ||
+          !matchesWorkflow(replay.workflow, workflow) || replay.workflow.attempt !== source.attempt)
+        throw new Error('SQLite replay receipt does not match the Native build.');
+      assertSuccessMarkers(fs.readFileSync(path.join(path.dirname(file), 'replay.log'), 'utf8'), markers);
+    }
     if (cell.provider === 'oracle') {
       const fixture = path.join(artifact, 'sql-aot-oracle');
       assertSuccessMarkers(fs.readFileSync(path.join(fixture, 'ready.log'), 'utf8'), ['ORACLE_FIXTURE_READY_PASS']);
@@ -165,7 +286,7 @@ export function selectCase(matrix, id, platform = process.platform, arch = proce
 
 export function buildCommands(cell, { root = repositoryRoot, publishDirectory, artifactsPath,
   configuration = 'Release', noRestore = false }) {
-  const executable = path.basename(cell.project, '.csproj') + (cell.rid.startsWith('win-') ? '.exe' : '');
+  const executable = executableName(cell);
   const buildDirectory = path.resolve(root, artifactsPath ?? path.join(path.dirname(publishDirectory), 'build'));
   return {
     sdk: { file: 'dotnet', args: ['--version'], cwd: root, timeout: 30000 },
@@ -236,6 +357,7 @@ export function runCase(cell, options = {}, invoke = execute) {
     const rid = readNativeRid(binary);
     if (rid !== cell.rid) throw new Error(`Native binary RID mismatch: expected ${cell.rid}; actual ${rid}`);
     result.binary = { file: commands.run.file, rid, bytes: binary.length, sha256: crypto.createHash('sha256').update(binary).digest('hex') };
+    if (cell.provider === 'sqlite') result.replayFiles = replayFiles(path.dirname(commands.run.file), true);
     assertSuccessMarkers(step('run'), result.successMarkers);
     result.status = 'PASS';
   } catch (error) {
@@ -254,6 +376,20 @@ function main(args) {
   }
   if (args.length === 1 && args[0] === '--list') {
     process.stdout.write(JSON.stringify(matrix, null, 2) + '\n');
+    return;
+  }
+  if (args[0] === '--stage-replay' || args[0] === '--replay') {
+    if ((args.length !== 3 && args.length !== 5) || !args[1] || !args[2] ||
+        (args.length === 5 && (args[3] !== '--output' || !args[4] || args[4].startsWith('--'))))
+      throw new Error(`Usage: ${args[0]} <id> <directory> [--output <directory>]`);
+    const options = args.length === 5 ? { output: args[4] } : {};
+    if (args[0] === '--stage-replay') {
+      stageReplay(selectCase(matrix, args[1]), { ...options, destination: args[2] });
+      return;
+    }
+    const result = replayCase(selectCase(matrix, args[1]), { ...options, source: args[2] });
+    process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    if (result.status !== 'PASS') process.exitCode = 1;
     return;
   }
   if (args.length === 4 && args[0] === '--ci-summary') {
@@ -278,6 +414,8 @@ function main(args) {
     } else throw new Error(`Unknown option: ${option}`);
   }
   if (!id) throw new Error('Usage: node eng/sql-aot/verify.mjs --case <id> [--output <directory>] [--artifacts-path <directory>] [--configuration <name>] [--no-restore]\n' +
+    '       node eng/sql-aot/verify.mjs --stage-replay <id> <destination> [--output <directory>]\n' +
+    '       node eng/sql-aot/verify.mjs --replay <id> <downloaded-directory> [--output <directory>]\n' +
     '       node eng/sql-aot/verify.mjs --ci-summary <artifact-directory> <native-job-result> <sql-regression-job-result>');
   const result = runCase(selectCase(matrix, id), options);
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');

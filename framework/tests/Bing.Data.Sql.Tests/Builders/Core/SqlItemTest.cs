@@ -9,6 +9,46 @@ namespace Bing.Data.Sql.Tests.Builders.Core;
 /// </summary>
 public class SqlItemTest
 {
+    /// <summary>解析出的非空前缀优先，空前缀继续使用显式传入值。</summary>
+    [Theory]
+    [InlineData(".name", "[explicit].[name]")]
+    [InlineData("parsed.name", "[parsed].[name]")]
+    [InlineData("archive..name", "[archive].[explicit].[name]")]
+    public void Parse_UnquotedPrefix_ShouldPreserveExplicitFallback(string name, string expectedSql)
+    {
+        Assert.Equal(expectedSql, SqlItem.Parse(name, prefix: "explicit").ToSql(TestDialect.Instance));
+    }
+
+    /// <summary>常见无别名名称避免正则及临时分词集合，完整 SQL 和显式别名保持一致。</summary>
+    [Theory]
+    [InlineData("users", "[users] As [u]")]
+    [InlineData("public.users", "[public].[users] As [u]")]
+    [InlineData("archive.public.users", "[archive].[public].[users] As [u]")]
+    public void Parse_CompactName_ShouldAvoidTokenCollections(string name, string expected)
+    {
+        for (var i = 0; i < 64; i++) SqlItem.Parse(name, alias: "u");
+        const int iterations = 100;
+        SqlItem last = null;
+        var start = GC.GetAllocatedBytesForCurrentThread();
+        for (var i = 0; i < iterations; i++) last = SqlItem.Parse(name, alias: "u");
+        var bytes = GC.GetAllocatedBytesForCurrentThread() - start;
+        Assert.Equal(expected, last.ToSql(TestDialect.Instance));
+        // 含三段标识符的既有 NameItem 解析仍可分配；这里只约束不再创建别名分词集合。
+        Assert.True(bytes / iterations <= 400, $"Allocated {bytes / iterations} bytes per parse.");
+    }
+
+    /// <summary>复杂标识符、空白和 AS 继续使用原有解析语义。</summary>
+    [Theory]
+    [InlineData(" public.users AS u ", "[public].[users] As [u]")]
+    [InlineData("public.users\tAS\tu", "[public].[users] As [u]")]
+    [InlineData("[public].[users]", "[public].[users]")]
+    [InlineData("\"public\".\"users\"", "[public].[users]")]
+    [InlineData("public . users u", "[public].[users] As [u]")]
+    public void Parse_ComplexOrAliasedName_ShouldPreserveSql(string name, string expected)
+    {
+        Assert.Equal(expected, SqlItem.Parse(name).ToSql(TestDialect.Instance));
+    }
+
     /// <summary>
     /// 只设置名称
     /// </summary>

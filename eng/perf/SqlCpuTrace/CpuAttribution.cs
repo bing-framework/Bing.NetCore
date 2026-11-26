@@ -17,6 +17,7 @@ internal sealed class CpuAttribution(int processId)
     internal long UnresolvedStackSamples { get; private set; }
     internal long SqlStackSamples { get; private set; }
     internal Dictionary<string, MethodCount> Methods { get; } = new(StringComparer.Ordinal);
+    internal CpuComponentAttribution Components { get; } = new();
 
     /// <summary>frames 按叶到根排列；递归方法的包含权重在同一样本内只计一次。</summary>
     internal void Add(int sampledProcessId, ClrThreadSampleType kind, string[] frames)
@@ -26,6 +27,7 @@ internal sealed class CpuAttribution(int processId)
         if (kind != ClrThreadSampleType.Managed) { OtherSamples++; return; }
         ManagedSamples++;
         if (frames.Length == 0) { MissingStackSamples++; frames = ["[missing stack]"]; }
+        Components.Add(frames);
         if (frames.Any(x => x.StartsWith("[unresolved", StringComparison.Ordinal))) UnresolvedStackSamples++;
         if (frames.Any(x => x.StartsWith("Bing.Data.Sql.", StringComparison.Ordinal) &&
             !x.StartsWith("Bing.Data.Sql.Benchmarks.", StringComparison.Ordinal))) SqlStackSamples++;

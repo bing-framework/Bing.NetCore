@@ -119,10 +119,14 @@
       "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
       "successMarker": "GENERATED_SQL_SMOKE_PASS",
       "requiredMarkers": [
-        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS",
+        "CACHED_QUERY_PREDICATE_NATIVE_PASS",
+        "CACHED_QUERY_PROJECTION_NATIVE_PASS"
       ],
       "coverage": [
         "automatic-whereif-query-template",
+        "cached-readonly-predicate",
+        "cached-readonly-projection",
         "same-shape-sql-reuse",
         "current-value-rebinding",
         "disabled-filter",
@@ -254,10 +258,14 @@
       "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
       "successMarker": "GENERATED_SQL_SMOKE_PASS",
       "requiredMarkers": [
-        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS",
+        "CACHED_QUERY_PREDICATE_NATIVE_PASS",
+        "CACHED_QUERY_PROJECTION_NATIVE_PASS"
       ],
       "coverage": [
         "automatic-whereif-query-template",
+        "cached-readonly-predicate",
+        "cached-readonly-projection",
         "same-shape-sql-reuse",
         "current-value-rebinding",
         "disabled-filter",
@@ -525,10 +533,14 @@
       "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
       "successMarker": "GENERATED_SQL_SMOKE_PASS",
       "requiredMarkers": [
-        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS",
+        "CACHED_QUERY_PREDICATE_NATIVE_PASS",
+        "CACHED_QUERY_PROJECTION_NATIVE_PASS"
       ],
       "coverage": [
         "automatic-whereif-query-template",
+        "cached-readonly-predicate",
+        "cached-readonly-projection",
         "same-shape-sql-reuse",
         "current-value-rebinding",
         "disabled-filter",
@@ -660,10 +672,14 @@
       "project": "framework/tests/Bing.Data.Sql.Aot.GeneratedSmoke/Bing.Data.Sql.Aot.GeneratedSmoke.csproj",
       "successMarker": "GENERATED_SQL_SMOKE_PASS",
       "requiredMarkers": [
-        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS"
+        "AUTOMATIC_QUERY_TEMPLATE_NATIVE_PASS",
+        "CACHED_QUERY_PREDICATE_NATIVE_PASS",
+        "CACHED_QUERY_PROJECTION_NATIVE_PASS"
       ],
       "coverage": [
         "automatic-whereif-query-template",
+        "cached-readonly-predicate",
+        "cached-readonly-projection",
         "same-shape-sql-reuse",
         "current-value-rebinding",
         "disabled-filter",

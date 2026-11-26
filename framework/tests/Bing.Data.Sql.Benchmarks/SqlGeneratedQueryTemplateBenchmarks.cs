@@ -33,6 +33,8 @@ public class SqlGeneratedQueryTemplateBenchmarks
     private static readonly SqlGeneratedColumn Name = new(0, nameof(Row.Name), null, typeof(string));
     private static readonly SqlGeneratedColumn[] SelectColumns = { Id, Name };
     private static readonly SqlGeneratedColumn[] OrderColumns = { Id };
+    private static readonly SqlGeneratedColumn TotalCount = new(0, nameof(Row.Id), "Total", typeof(long), SqlAggregateFunction.Count);
+    private static readonly SqlGeneratedColumn[] AggregateColumns = { TotalCount };
     private static readonly SqlGeneratedQueryTemplate Template = new(new[]
     {
         new SqlGeneratedQueryTemplate.Operation(
@@ -48,9 +50,20 @@ public class SqlGeneratedQueryTemplateBenchmarks
         new SqlGeneratedQueryTemplate.Operation(
             static (query, _) => SqlGeneratedQueryBridge.Project(query, "OrderBy", Types, Names, null, OrderColumns))
     });
+    private static readonly SqlGeneratedQueryTemplate AggregateTemplate = new(new[]
+    {
+        new SqlGeneratedQueryTemplate.Operation(
+            static (query, arguments) => SqlGeneratedQueryBridge.OptionalCompare(query, (bool)arguments[0], false,
+                Types, Names, null, Id, null, Operator.GreaterEqual, arguments[1]),
+            static arguments => arguments[1], static _ => Operator.GreaterEqual, valueArgument: 1, conditionArgument: 0),
+        new SqlGeneratedQueryTemplate.Operation(
+            static (query, _) => SqlGeneratedQueryBridge.Project(query, "Select", Types, Names, null,
+                AggregateColumns))
+    });
 
     private SqlBuilderServices _services;
     private ISqlQueryPlanExecutor _executor;
+    private SqlLambdaQuery _snapshotReuseQuery;
     private int _requestNumber;
 
     /// <summary>IN 集合大小；各参数值只改变数据，不改变查询形状。</summary>
@@ -70,9 +83,13 @@ public class SqlGeneratedQueryTemplateBenchmarks
         var bridgeSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(bridgeQuery.GetBuilder());
 
         var templateQuery = CreateTemplateQuery(request);
+        _snapshotReuseQuery = templateQuery;
         var templateSql = templateQuery.ToSql();
         if (!templateQuery.GeneratedCore.TemplateState.TryPrepare(typeof(void), out var templateSnapshot, out _))
             throw new InvalidOperationException("查询模板没有生成绑定快照。");
+        if (!_snapshotReuseQuery.GeneratedCore.TemplateState.TryPrepare(typeof(void), out var reusedTemplateSnapshot, out _) ||
+            !ReferenceEquals(templateSnapshot, reusedTemplateSnapshot))
+            throw new InvalidOperationException("同一查询没有复用已生成的绑定快照。");
 
         var expectedSql = CreateExpectedSql();
         if (bridgeSql != expectedSql || templateSql != expectedSql || bridgeSnapshot.Sql != expectedSql ||
@@ -86,6 +103,21 @@ public class SqlGeneratedQueryTemplateBenchmarks
             !nextTemplateQuery.GeneratedCore.TemplateState.TryPrepare(typeof(void), out var nextSnapshot, out _) ||
             !ReferenceEquals(templateSnapshot.Sql, nextSnapshot.Sql))
             throw new InvalidOperationException("相同模板形状没有复用 SQL 文本。");
+
+        var aggregateQuery = CreateAggregateTemplateQuery(41);
+        if (!aggregateQuery.GeneratedCore.TemplateState.TryPrepare(typeof(Summary), out var aggregateSnapshot, out _))
+            throw new InvalidOperationException("聚合查询模板没有生成绑定快照。");
+        const string expectedAggregateSql = "Select Count(`r`.`Id`) As `Total` \r\n" +
+            "From `AutoTemplateRows` As `r` \r\nWhere `r`.`Id`>=@_p_0";
+        if (aggregateSnapshot.Sql != expectedAggregateSql)
+            throw new InvalidOperationException("聚合查询模板生成的 SQL 不一致。");
+        ValidateAggregateParameter(aggregateSnapshot, 41);
+
+        var nextAggregateQuery = CreateAggregateTemplateQuery(73);
+        if (!nextAggregateQuery.GeneratedCore.TemplateState.TryPrepare(typeof(Summary), out var nextAggregateSnapshot, out _) ||
+            !ReferenceEquals(aggregateSnapshot.Sql, nextAggregateSnapshot.Sql))
+            throw new InvalidOperationException("聚合查询模板没有复用相同的 SQL 文本。");
+        ValidateAggregateParameter(nextAggregateSnapshot, 73);
     }
 
     /// <summary>创建并渲染新查询，逐次重放静态查询桥接。</summary>
@@ -111,6 +143,25 @@ public class SqlGeneratedQueryTemplateBenchmarks
         var query = CreateTemplateQuery(NextRequest());
         if (!query.GeneratedCore.TemplateState.TryPrepare(typeof(void), out var snapshot, out _))
             throw new InvalidOperationException("查询模板没有生成绑定快照。");
+        return snapshot;
+    }
+
+    /// <summary>在同一已预热查询上重复取得绑定快照，不创建新查询或参数。</summary>
+    [Benchmark, BenchmarkCategory("SnapshotReuse")]
+    public SqlBuilderExecutionSnapshot TemplateSameQueryBoundSnapshot()
+    {
+        if (!_snapshotReuseQuery.GeneratedCore.TemplateState.TryPrepare(typeof(void), out var snapshot, out _))
+            throw new InvalidOperationException("查询模板没有生成绑定快照。");
+        return snapshot;
+    }
+
+    /// <summary>创建热聚合查询模板并绑定本次标量条件。</summary>
+    [Benchmark, BenchmarkCategory("AggregateBoundSnapshot")]
+    public SqlBuilderExecutionSnapshot TemplateAggregateBoundSnapshot()
+    {
+        var query = CreateAggregateTemplateQuery(++_requestNumber);
+        if (!query.GeneratedCore.TemplateState.TryPrepare(typeof(Summary), out var snapshot, out _))
+            throw new InvalidOperationException("聚合查询模板没有生成绑定快照。");
         return snapshot;
     }
 
@@ -150,6 +201,21 @@ public class SqlGeneratedQueryTemplateBenchmarks
                 path = "QueryTemplate",
                 samples = Measure(benchmark.TemplateApplyBoundSnapshot)
             });
+            results.Add(new
+            {
+                collectionLength,
+                operation = "SnapshotReuse",
+                path = "QueryTemplateSameQuery",
+                samples = Measure(benchmark.TemplateSameQueryBoundSnapshot)
+            });
+            if (collectionLength == 1)
+                results.Add(new
+                {
+                    collectionLength,
+                    operation = "AggregateBoundSnapshot",
+                    path = "QueryTemplate",
+                    samples = Measure(benchmark.TemplateAggregateBoundSnapshot)
+                });
         }
 
         var report = new
@@ -216,6 +282,14 @@ public class SqlGeneratedQueryTemplateBenchmarks
         return query;
     }
 
+    private SqlLambdaQuery CreateAggregateTemplateQuery(int minimum)
+    {
+        var query = CreateQuery();
+        SqlGeneratedQueryTemplate.Apply(query, AggregateTemplate, 0, new object[] { true, minimum });
+        SqlGeneratedQueryTemplate.Apply(query, AggregateTemplate, 1, Array.Empty<object>());
+        return query;
+    }
+
     private SqlLambdaQuery CreateQuery() =>
         SqlQueryRuntimeFactory.CreateLambdaQuery(_executor, new SqliteBuilder(_services)).From<Row>("r");
 
@@ -245,6 +319,13 @@ public class SqlGeneratedQueryTemplateBenchmarks
                 throw new InvalidOperationException("绑定快照的集合参数不一致。");
     }
 
+    private static void ValidateAggregateParameter(SqlBuilderExecutionSnapshot snapshot, int minimum)
+    {
+        var parameter = snapshot.Parameters.Single();
+        if (parameter.Name != "@_p_0" || !Equals(parameter.Value, minimum))
+            throw new InvalidOperationException("聚合绑定快照未使用本次标量值。");
+    }
+
     private static ISqlQueryPlanExecutor CreateExecutor() =>
         DispatchProxy.Create<ISqlQueryPlanExecutor, NoOpExecutor>();
 
@@ -259,6 +340,13 @@ public class SqlGeneratedQueryTemplateBenchmarks
 
         /// <summary>行名称。</summary>
         public string Name { get; set; }
+    }
+
+    /// <summary>接收聚合查询结果的 DTO。</summary>
+    public sealed class Summary
+    {
+        /// <summary>满足条件的记录数。</summary>
+        public long Total { get; set; }
     }
 
     private class NoOpExecutor : DispatchProxy

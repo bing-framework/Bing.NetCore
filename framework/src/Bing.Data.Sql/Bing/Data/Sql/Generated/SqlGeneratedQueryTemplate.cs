@@ -83,6 +83,9 @@ public sealed class SqlGeneratedQueryTemplate
         internal SqlBuilderExecutionSnapshot Snapshot { get; init; }
         internal Binding[] Bindings { get; init; }
         internal Dictionary<string, int>[] Ordinals { get; init; }
+        internal Type AggregateSourceType { get; init; }
+        internal string[] AggregateSourceMembers { get; init; }
+        internal SqlProjectionColumn[] AggregateResultColumns { get; init; }
     }
 
     /// <summary>每次查询独占参数和值；缓存只接收去除这些值后的结构。</summary>
@@ -96,6 +99,7 @@ public sealed class SqlGeneratedQueryTemplate
         private SqlBuilderExecutionSnapshot _lastSnapshot;
         private Type _lastResultType;
         private Dictionary<string, int>[] _lastOrdinals;
+        private CompiledShape _lastShape;
 
         internal State(SqlLambdaQuery query, SqlGeneratedQueryTemplate template, SqlBuilderBase builder)
         {
@@ -145,6 +149,10 @@ public sealed class SqlGeneratedQueryTemplate
             if (Count != _arguments.Length) return false;
             if (_lastSnapshot != null && _lastResultType == resultType)
             {
+                // 能力提供器可以动态变化，复用同一查询的快照也须重新校验表引用。
+                var cachedSource = ((FromClause)((ISqlQueryClauseAccessor)_builder).FromClause).Sources[0];
+                _builder.ValidateTableReference(cachedSource.Reference);
+                ValidateAggregates(_lastShape, resultType);
                 snapshot = _lastSnapshot;
                 ordinals = _lastOrdinals;
                 return true;
@@ -159,7 +167,7 @@ public sealed class SqlGeneratedQueryTemplate
                 mapping, source.Reference, source.Alias,
                 context.AutoGenerateTableAlias, resultType, ArgumentShape());
             // 默认验证器也可注入不同能力档案，当前查询仍须执行表引用校验。
-            context.Services.TableReferenceValidator.Validate(source.Reference, _builder.ResolveProviderDatabaseType());
+            _builder.ValidateTableReference(source.Reference);
             var cache = Template._caches.GetValue(context.Services.EntityMappingResolver,
                 static _ => new SqlQueryShapeCache<ShapeKey, CompiledShape>(256));
             SqlBuilderExecutionSnapshot coldSnapshot = null;
@@ -167,6 +175,7 @@ public sealed class SqlGeneratedQueryTemplate
             if (coldSnapshot != null) snapshot = coldSnapshot;
             else
             {
+                ValidateAggregates(shape, resultType);
                 // 使用当前请求的参数工厂和上下文完成转换与限额检查，不复用首个请求的 Provider 值。
                 var parameters = context.ParameterManager.CreateEmpty();
                 var helper = new Helper(context, parameters);
@@ -182,7 +191,19 @@ public sealed class SqlGeneratedQueryTemplate
             _lastResultType = resultType;
             _lastSnapshot = snapshot;
             _lastOrdinals = ordinals;
+            _lastShape = shape;
             return true;
+        }
+
+        private void ValidateAggregates(CompiledShape shape, Type resultType)
+        {
+            if (shape.AggregateSourceMembers == null && shape.AggregateResultColumns == null) return;
+            var provider = _builder.QueryClauseContext.Services.EntityModelMetadataProvider;
+            if (shape.AggregateSourceMembers != null)
+                foreach (var member in shape.AggregateSourceMembers)
+                    SqlProjectionColumn.ValidateAggregateSource(provider, shape.AggregateSourceType, member);
+            if (shape.AggregateResultColumns != null)
+                SelectClause.ValidateAggregateResult(resultType, shape.AggregateResultColumns, provider);
         }
 
         private string ArgumentShape()
@@ -210,11 +231,22 @@ public sealed class SqlGeneratedQueryTemplate
         {
             var query = SqlQueryRuntimeFactory.CreateLambdaQuery(_query.GeneratedCore.Executor, _builder.Clone());
             var bindings = new List<Binding>();
+            HashSet<string> aggregateMembers = null;
+            void CollectAggregates(IEnumerable<SqlProjectionColumn> columns)
+            {
+                foreach (var column in columns)
+                    if (column.Function.HasValue && column.MemberName != null)
+                        (aggregateMembers ??= new HashSet<string>(StringComparer.Ordinal)).Add(column.MemberName);
+            }
             var previousCount = 0;
             for (var index = 0; index < Count; index++)
             {
                 Template._operations[index].Replay(query, _arguments[index]);
-                var parameters = ((IAdvancedParameterManager)((SqlBuilderBase)query.GeneratedCore.ReadBuilder).ParameterManager).GetSqlParams().Values.ToArray();
+                var current = (SqlBuilderBase)query.GeneratedCore.ReadBuilder;
+                if (current.ExistingSelectClause is { ProjectionMode: SqlProjectionMode.Explicit } projection)
+                    CollectAggregates(projection.ProjectionLayout());
+                if (current.ExistingOrderByClause is { } order) CollectAggregates(order.LogicalColumns);
+                var parameters = ((IAdvancedParameterManager)current.ParameterManager).GetSqlParams().Values.ToArray();
                 for (var parameter = previousCount; parameter < parameters.Length; parameter++)
                 {
                     var item = parameters[parameter];
@@ -228,10 +260,13 @@ public sealed class SqlGeneratedQueryTemplate
             var select = (SelectClause)((ISqlQueryClauseAccessor)builder).SelectClause;
             select.ValidateStructure();
             Dictionary<string, int>[] ordinals = null;
+            SqlProjectionColumn[] aggregateResults = null;
             if (resultType != typeof(void))
             {
                 select.ValidateResult(resultType, null, "Id");
                 var layout = select.ProjectionLayout();
+                if (!SqlFunctionProjectionParser.IsScalar(resultType) && layout.Any(column => column.Function.HasValue))
+                    aggregateResults = layout.Where(column => column.Function.HasValue).ToArray();
                 if (layout.Count == 0) layout = select.EntityColumns(((FromClause)((ISqlQueryClauseAccessor)builder).FromClause).Sources.Single(), false);
                 var columns = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 for (var index = 0; index < layout.Count; index++)
@@ -244,7 +279,13 @@ public sealed class SqlGeneratedQueryTemplate
             boundSnapshot = SqlBuilderRuntimeBridge.CreateExecutionSnapshot(builder);
             var slots = boundSnapshot.Parameters.ToArray();
             foreach (var slot in slots) { slot.Value = null; slot.OriginalValue = null; }
-            return new CompiledShape { Snapshot = boundSnapshot.WithParameters(slots), Bindings = bindings.ToArray(), Ordinals = ordinals };
+            return new CompiledShape
+            {
+                Snapshot = boundSnapshot.WithParameters(slots), Bindings = bindings.ToArray(), Ordinals = ordinals,
+                AggregateSourceType = aggregateMembers == null ? null :
+                    ((FromClause)((ISqlQueryClauseAccessor)builder).FromClause).Sources.Single().EntityType,
+                AggregateSourceMembers = aggregateMembers?.ToArray(), AggregateResultColumns = aggregateResults
+            };
         }
     }
 }

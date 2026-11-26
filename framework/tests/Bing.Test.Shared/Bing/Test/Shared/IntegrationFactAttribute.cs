@@ -34,8 +34,11 @@ public sealed class IntegrationFactAttribute : FactAttribute
 }
 
 /// <summary>
-/// 集成测试专用 Theory 特性。 与 <see cref="IntegrationFactAttribute"/> 相同的跳过策略。
+/// 集成测试专用 Theory 特性。
 /// </summary>
+/// <remarks>
+/// 与 <see cref="IntegrationFactAttribute" /> 相同的跳过策略。
+/// </remarks>
 public sealed class IntegrationTheoryAttribute : TheoryAttribute
 {
     /// <summary>

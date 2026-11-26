@@ -151,6 +151,15 @@ public class SqlItem
             _name = name;
             return;
         }
+        // 无空白就没有内联别名或 AS；直接沿用名称段解析，避免正则和别名分词集合。
+        if (!HasWhitespace(name))
+        {
+            if (isSplit)
+                SplitName(name);
+            else
+                _name = name;
+            return;
+        }
         var pattern = @"\s+[aA][sS]\s+";
         name = Regex.Replace(name, pattern, " ");
         if (name.Contains("."))
@@ -169,6 +178,15 @@ public class SqlItem
             return;
         }
         _name = name;
+    }
+
+    /// <summary>空白名称保留原有复杂解析路径，包含制表符和 Unicode 空白。</summary>
+    private static bool HasWhitespace(string name)
+    {
+        foreach (var character in name)
+            if (char.IsWhiteSpace(character))
+                return true;
+        return false;
     }
 
     /// <summary>

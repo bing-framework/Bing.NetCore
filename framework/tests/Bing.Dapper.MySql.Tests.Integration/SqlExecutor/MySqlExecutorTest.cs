@@ -35,8 +35,10 @@ public partial class MySqlExecutorTest : IAsyncLifetime
     private readonly ISqlExecutor _sqlExecutor2;
 
     /// <summary>
-    /// 初始化一个 <see cref="MySqlExecutorTest"/> 类型的实例。
+    /// 初始化一个 <see cref="MySqlExecutorTest" /> 类型的实例。
     /// </summary>
+    /// <param name="output">用于输出当前测试日志的辅助对象。</param>
+    /// <param name="fixture">为集成测试提供数据库及相关资源的测试夹具。</param>
     public MySqlExecutorTest(ITestOutputHelper output, MySqlIntegrationDatabaseFixture fixture)
     {
         _output = output;

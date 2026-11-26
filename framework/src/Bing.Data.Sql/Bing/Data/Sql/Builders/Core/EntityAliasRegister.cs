@@ -65,7 +65,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
     /// </summary>
     /// <param name="data">实体当前别名映射。</param>
     /// <param name="entityAliases">实体别名注册顺序。</param>
-    /// <param name="aliases">查询范围内完整别名集合。</param>
+    /// <param name="aliases">由 Clone 创建并移交所有权的独立别名集合。</param>
     /// <param name="fromType">From 实体类型。</param>
     private EntityAliasRegister(Dictionary<Type, string> data, Dictionary<Type, List<string>> entityAliases,
         HashSet<string> aliases, Type fromType)
@@ -73,7 +73,7 @@ public class EntityAliasRegister : IEntityAliasRegister, IEntityAliasRegisterLif
         _data = data;
         Data = _data;
         _entityAliases = entityAliases;
-        _aliases = new HashSet<string>(aliases, StringComparer.OrdinalIgnoreCase);
+        _aliases = aliases;
         FromType = fromType;
     }
 

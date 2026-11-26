@@ -10,12 +10,18 @@ namespace Bing.Dapper.Tests.Infrastructure;
 [Collection(SqlServerIntegrationDatabaseCollection.Name)]
 public sealed class SqlServerIntegrationDatabaseFixtureTest
 {
+    /// <summary>
+    /// 保存 SQL Server 集成测试数据库夹具。
+    /// </summary>
     private readonly SqlServerIntegrationDatabaseFixture _fixture;
 
     /// <summary>
-    /// 初始化 fixture 合同测试。
+    /// 初始化一个 <see cref="SqlServerIntegrationDatabaseFixtureTest" /> 类型的实例。
     /// </summary>
     /// <param name="fixture">SQL Server 集成数据库 fixture。</param>
+    /// <remarks>
+    /// 初始化 fixture 合同测试。
+    /// </remarks>
     public SqlServerIntegrationDatabaseFixtureTest(SqlServerIntegrationDatabaseFixture fixture) =>
         _fixture = fixture;
 

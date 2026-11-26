@@ -62,7 +62,12 @@ public class NameItem
     {
         if (string.IsNullOrWhiteSpace(name))
             return;
-        var list = IsComplex(name) ? ResolveByPattern(name) : ResolveBySplit(name);
+        if (!IsComplex(name))
+        {
+            ResolveBySplit(name);
+            return;
+        }
+        var list = ResolveByPattern(name);
         if (list.Count == 1)
         {
             Name = list[0];
@@ -92,8 +97,28 @@ public class NameItem
     /// 按句点拆分未引用的名称段。
     /// </summary>
     /// <param name="name">待拆分的名称文本。</param>
-    /// <returns>拆分后的名称段。</returns>
-    private List<string> ResolveBySplit(string name) => name.Split('.').ToList();
+    private void ResolveBySplit(string name)
+    {
+        var first = name.IndexOf('.');
+        if (first < 0)
+        {
+            Name = name;
+            return;
+        }
+        var second = name.IndexOf('.', first + 1);
+        if (second < 0)
+        {
+            Prefix = name.Substring(0, first);
+            Name = name.Substring(first + 1);
+            return;
+        }
+        // 与原拆分行为一致：四段及以上不解析。
+        if (name.IndexOf('.', second + 1) >= 0)
+            return;
+        DatabaseName = name.Substring(0, first);
+        Prefix = name.Substring(first + 1, second - first - 1);
+        Name = name.Substring(second + 1);
+    }
 
     /// <summary>
     /// 通过正则表达式进行解析

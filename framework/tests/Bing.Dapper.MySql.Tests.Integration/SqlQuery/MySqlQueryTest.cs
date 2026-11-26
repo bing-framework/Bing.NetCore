@@ -42,8 +42,9 @@ public partial class MySqlQueryTest : IAsyncLifetime
     private readonly ISqlTransactionScopeFactory _transactionScopeFactory;
 
     /// <summary>
-    /// 初始化一个 <see cref="MySqlQueryTest"/> 类型的实例。
+    /// 初始化一个 <see cref="MySqlQueryTest" /> 类型的实例。
     /// </summary>
+    /// <param name="fixture">为集成测试提供数据库及相关资源的测试夹具。</param>
     public MySqlQueryTest(MySqlIntegrationDatabaseFixture fixture)
     {
         _fixture = fixture;

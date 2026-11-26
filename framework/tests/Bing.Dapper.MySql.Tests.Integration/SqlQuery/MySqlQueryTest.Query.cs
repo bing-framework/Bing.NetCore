@@ -38,8 +38,10 @@ public partial class MySqlQueryTest
     }
 
     /// <summary>
-    /// 初始化数据
+    /// 按指定标识及编码写入产品测试数据。
     /// </summary>
+    /// <param name="id">目标对象或操作的标识。</param>
+    /// <param name="code">测试商品编码。</param>
     private async Task InitProductDataAsync(Guid id, string code)
     {
         var sql = "Insert Product(ProductId,Code) Values(@ProductId,@Code)";
