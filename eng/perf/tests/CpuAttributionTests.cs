@@ -31,14 +31,28 @@ internal static class AttributionTests
         return Process.Start(start) ?? throw new Exception("Could not start controlled child process");
     }
 
-    private static int WaitForChild(Process process, int timeoutMilliseconds)
+    private static int WaitForChild(Process process, int timeoutMilliseconds, Func<Task>? startDrain = null)
     {
         try
         {
             // 子进程可能写满管道；必须在等待退出的同时持续消费 stdout。
-            var drain = process.StandardOutput.BaseStream.CopyToAsync(Stream.Null);
-            if (!process.WaitForExit(timeoutMilliseconds)) throw new TimeoutException("Child process timed out");
-            if (!drain.Wait(5000)) throw new TimeoutException("Child output drain timed out");
+            var drain = startDrain is null ? process.StandardOutput.BaseStream.CopyToAsync(Stream.Null) : startDrain();
+            var exit = process.WaitForExitAsync();
+            var timeout = Task.Delay(timeoutMilliseconds);
+            var completed = Task.WhenAny(exit, drain, timeout).GetAwaiter().GetResult();
+            if (completed == drain)
+            {
+                // 在子进程仍运行时也要立即观察读取故障。
+                drain.GetAwaiter().GetResult();
+                completed = Task.WhenAny(exit, timeout).GetAwaiter().GetResult();
+            }
+            if (completed == timeout)
+            {
+                if (drain.IsFaulted || drain.IsCanceled) drain.GetAwaiter().GetResult();
+                throw new TimeoutException("Child process timed out");
+            }
+            exit.GetAwaiter().GetResult();
+            drain.WaitAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
             return process.ExitCode;
         }
         finally
@@ -66,6 +80,30 @@ internal static class AttributionTests
         void SequenceEqual<T>(IEnumerable<T> actual, IEnumerable<T> expected)
         {
             if (!actual.SequenceEqual(expected)) throw new Exception($"Expected [{string.Join(", ", expected)}], got [{string.Join(", ", actual)}]");
+        }
+        void CheckDrainFailure(string mode, Func<Exception, Task> startDrain, bool alreadyExited = false)
+        {
+            using var process = StartChild(mode);
+            try
+            {
+                if (alreadyExited && !process.WaitForExit(10000)) throw new TimeoutException("Controlled child did not exit");
+                var expected = new InvalidOperationException("controlled read failure");
+                var watch = Stopwatch.StartNew();
+                Exception? actual = null;
+                try { WaitForChild(process, 5000, () => startDrain(expected)); }
+                catch (Exception ex) { actual = ex; }
+                if (!ReferenceEquals(actual, expected)) throw new Exception($"Expected original read failure, got {actual?.GetType().Name ?? "no exception"}");
+                if (watch.ElapsedMilliseconds >= 3000) throw new Exception("Read failure was not reported promptly");
+                Equal(process.HasExited, true);
+            }
+            finally
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                    if (!process.WaitForExit(5000)) throw new Exception("Controlled child cleanup timed out");
+                }
+            }
         }
         Test("CaptureInvocation_FixedProbeKeepsExistingArgumentsAndScope", () =>
         {
@@ -152,6 +190,14 @@ internal static class AttributionTests
             Equal(failed, true);
             Equal(process.HasExited, true);
         });
+        Test("ChildProcess_SynchronousReadFailureKillsAndReaps", () =>
+            CheckDrainFailure("hang", error => throw error));
+        Test("ChildProcess_FaultedReadTaskKillsAndReaps", () =>
+            CheckDrainFailure("hang", error => Task.FromException(error)));
+        Test("ChildProcess_DelayedReadFailureKillsAndReaps", () =>
+            CheckDrainFailure("hang", async error => { await Task.Delay(100); throw error; }));
+        Test("ChildProcess_ExitedChildPreservesReadFailure", () =>
+            CheckDrainFailure("nonzero", error => Task.FromException(error), alreadyExited: true));
         Test("ChildProcess_TimeoutKillsDescendant", () =>
         {
             using var process = StartChild("tree");
